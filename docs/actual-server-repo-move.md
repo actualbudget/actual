@@ -35,14 +35,18 @@ The reasons for this change are as follows:
   ```
   3. Install the required dependencies for the server:
   ```
-  yarn workspaces focus @actual-app/sync-server --production
+  yarn install
   ```
-  4. If you have a [config.json](https://actualbudget.com/docs/config/) file you will need to copy it into the following directory:
+  4. Build the server:
+  ```
+  yarn build:server
+  ```
+  5. If you have a [config.json](https://actualbudget.com/docs/config/) file you will need to copy it into the following directory:
   ```
   packages/sync-server
   ```
-  5. Copy over the data from your `actual-server` directory (`user-files`, `server-files`, and `.migrate`) into the `packages/sync-server` directory.
-  6. Run the server with:
+  6. Copy over the data from your `actual-server` directory (`user-files`, `server-files`, and `.migrate`) into the `packages/sync-server` directory.
+  7. Run the server with:
   ```
   yarn start:server
   ```

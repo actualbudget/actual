@@ -29,12 +29,16 @@ Actual server is used for syncing changes across devices. It comes with the late
     ```
 3. Install all the required dependencies using yarn.
     ```bash
-    yarn workspaces focus @actual-app/sync-server --production
+    yarn install
+    ```
+4. Build the server with
+    ```bash
+    yarn build:server
     ```
 
 ## Running Actual
 
-After the Actual is installed, start the Actual server by running the following command:
+After the Actual is installed and built, start the Actual server by running the following command:
 ```bash
 yarn start:server
 ```
@@ -90,8 +94,9 @@ When accessing Actual for the first time, you may be prompted to provide a URL f
 ## Updating Actual
 
 1. Stop the server if it’s running. You can use the keyboard shortcut <kbd>CTRL-C</kbd> (even on macOS) to stop the server or close the terminal window it’s running from.
-2. Run `git pull` from the directory you cloned the project into. This will download the latest server code.
-3. Run `yarn workspaces focus @actual-app/sync-server --production` from that directory. This will download the latest web client code, along with any updated dependencies for the server.
+2. Run `git pull` from the directory you cloned the project into. This will download the latest code.
+3. Run `yarn install` from that directory. This will download any updated dependencies.
+4. Run `yarn build:server` to build the server from the latest code.
 4. Restart the server by running `yarn start:server`.
 
 Actual is constantly evolving to include new features and improve the user's experience. It is always recommended that your local installation be updated with our [latest releases](https://actualbudget.org/docs/releases).

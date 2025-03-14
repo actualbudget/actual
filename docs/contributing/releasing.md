@@ -1,13 +1,10 @@
 # How to Cut a Release
 
-In the open-source version of Actual, all updates go through NPM. There are two libraries:
+In the open-source version of Actual, all updates go through NPM. There is one npm package:
 
 `@actual-app/api`: The API for the underlying functionality. This includes the entire backend of Actual, meant to be used with Node.
 
-`@actual-app/web`: A web build that will serve the app with a web frontend. This includes both the frontend and backend of Actual. It includes the backend as well because it's built to be used as a Web Worker.
-
-Both the API and web libraries are versioned together. This may change in the future, but because the web library also brings along its own backend it's easier to maintain a single version for now. That makes it clear
-which version the backend is regardless of library.
+Both the API and the main Actual release are versioned together. That makes it clear which version of the API should be used with the version of Actual.
 
 ### Versioning Strategy
 
@@ -23,7 +20,7 @@ For example:
 - `v23.4.0` - first release launched on 9th of April, 2023;
 
 ## Setting up the PRs
-Pull requests will need to be opened in all two repositories - [docs](https://github.com/actualbudget/docs), [actual](https://github.com/actualbudget/actual).
+Pull requests will need to be opened in two repositories - [docs](https://github.com/actualbudget/docs), [actual](https://github.com/actualbudget/actual).
 
 Make sure to name the branch `release/X.Y.Z` where `X.Y.Z` is the version number. This will trigger the release notes tooling, which will comment on your PR with the generated release notes. You can then copy-paste the release notes into the `Release-Notes.md` file in the `docs ` repository.
 
@@ -42,39 +39,13 @@ This automation will also delete all the outdated release note files from the `u
 After the release notes workflows in the actual PR has been run, copy the collated notes into a new blog post using a previous release as a template. The release notes will also need adding to the `docs/releases.md` file.
 
 ## Building and Publishing to NPM
-Once the web PR has been approved, the new version of the API and web packages need to be published to NPM. If you haven't done this before, another maintainer will need to give you access.
+Once the Actual repository PR has been approved, the new version of the API package needs to be published to NPM. If you haven't done this before, another maintainer will need to give you access.
 
 ###  @actual-app/api
 
 ```bash
 cd packages/api
 yarn build
-yarn npm publish --access public
-```
-
-### @actual-app/web
-
-First, pull the latest translations:
-```bash
-cd packages/desktop-client
-! [ -d locale ] && git clone https://github.com/actualbudget/translations.git locale
-cd locale
-git checkout -- .
-git pull
-```
-
-Next, in the root of actual (not just desktop-client), run:
-
-```bash
-yarn build:browser
-```
-
-This will compile both the backend and the frontend into a single directory in `packages/desktop-client/build`. This directory contains all of the files that need to be published.
-
-Now you can publish the package by running:
-
-```bash
-cd packages/desktop-client
 yarn npm publish --access public
 ```
 

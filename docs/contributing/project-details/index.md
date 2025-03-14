@@ -38,26 +38,15 @@ The shared underlying functionality component used by both the web/desktop front
 
 ## Sync Server
 
-The Sync Server, also known as Actual Server, holds all of the code for the synchronization element of the Actual Budget application. Actual server has a dependency of Actual so when you pull Actual Server and deploy it to your hosting method of choice, be that Fly, Local etc. and run `yarn workspaces focus @actual-app/sync-server --production` Actual will be downloaded as a dependency from NPM and installed into the Actual Server deployment.
+The Sync Server, also known as Actual Server, holds all of the code for the synchronization element of the Actual Budget application. Actual server has a dependency of Actual so when you deploy Actual Server to your hosting method of choice, be that Fly, Local etc. and run `yarn build:server` and `yarn install`, the Actual client will be installed as a dependency into the Actual Server deployment.
 
 You can see this in the [package.json](https://github.com/actualbudget/actual/blob/master/packages/sync-server/package.json) file;
 
 ```json
 "dependencies": {
-    "@actual-app/api": "4.1.0",
-    "@actual-app/web": "4.1.0",
-    "bcrypt": "^5.0.1",
-    "better-sqlite3": "^7.5.0",
-    "body-parser": "^1.18.3",
-    "cors": "^2.8.5",
-    "express": "4.17",
-    "express-actuator": "^1.8.1",
-    "express-response-size": "^0.0.3",
-    "node-fetch": "^2.2.0",
-    "uuid": "^3.3.2"
+    "@actual-app/web": "workspace:*",
+    // rest of dependencies...
   },
 ```
 
-So, you might see some changes being made in the Actual repository but those changes are not reflected in your deployment despite you having the latest version pulled, why? Because Actual hasn't been updated in [NPM](https://www.npmjs.com/package/@actual-app/web).
-
-Actual is only updated in NPM when a release is created.
+The workspace reference ensures that changes to @actual-app/web are reflected in your server deployment. If you see any discrepencies it means you need to run `yarn build:server` to compile the latest.
