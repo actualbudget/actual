@@ -59,7 +59,16 @@ function ExpenseCategoryName({
       }}
     >
       {/* Hidden drag button */}
-      <Button slot="drag" style={{ display: 'none' }} aria-hidden="true" />
+      <Button
+        slot="drag"
+        style={{
+          opacity: 0,
+          width: 1,
+          height: 1,
+          position: 'absolute',
+          overflow: 'hidden',
+        }}
+      />
       <Button
         variant="bare"
         style={{
