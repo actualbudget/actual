@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import { loadPrefs } from 'loot-core/client/actions';
 import { setAppState } from 'loot-core/client/app/appSlice';
 import { closeBudgetUI } from 'loot-core/client/budgets/budgetsSlice';
 import {
@@ -11,6 +10,7 @@ import {
   addGenericErrorNotification,
   addNotification,
 } from 'loot-core/client/notifications/notificationsSlice';
+import { loadPrefs } from 'loot-core/client/prefs/prefsSlice';
 import {
   getAccounts,
   getCategories,
