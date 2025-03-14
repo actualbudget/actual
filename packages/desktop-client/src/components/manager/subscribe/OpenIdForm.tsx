@@ -15,7 +15,6 @@ import { View } from '@actual-app/components/view';
 
 import { type OpenIdConfig } from 'loot-core/types/models';
 
-import { useDispatch } from '../../../redux';
 import { Link } from '../../common/Link';
 import { FormField, FormLabel } from '../../forms';
 import { useServerURL } from '../../ServerContext';
