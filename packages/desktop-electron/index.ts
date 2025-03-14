@@ -255,7 +255,7 @@ async function startSyncServer() {
 
     let syncServerStarted = false;
 
-    const syncServerPromise = new Promise<void>(async resolve => {
+    const syncServerPromise = new Promise<void>(resolve => {
       actualServerProcess = utilityProcess.fork(serverPath, [], forkOptions);
 
       actualServerProcess.stdout?.on('data', (chunk: Buffer) => {
@@ -296,7 +296,7 @@ async function startSyncServer() {
       }, SYNC_SERVER_WAIT_TIMEOUT);
     });
 
-    return Promise.race([syncServerPromise, syncServerTimeout]); // Either the server has started or the timeout is reached
+    return await Promise.race([syncServerPromise, syncServerTimeout]); // Either the server has started or the timeout is reached
   } catch (error) {
     logMessage('error', `Sync-Server: Error starting sync server: ${error}`);
   }
