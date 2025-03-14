@@ -1,13 +1,13 @@
-FROM node:18-bookworm as deps
+FROM alpine:3.18 AS deps
 
 # Install required packages
-RUN apt-get update && apt-get install -y openssl
+RUN apk add --no-cache nodejs yarn python3 openssl build-base
 
 WORKDIR /app
 
 # Copy only the files needed for installing dependencies
 COPY .yarn ./.yarn
-COPY yarn.lock package.json .yarnrc.yml tsconfig.json ./
+COPY yarn.lock package.json .yarnrc.yml ./
 COPY packages/api/package.json packages/api/package.json
 COPY packages/component-library/package.json packages/component-library/package.json
 COPY packages/crdt/package.json packages/crdt/package.json
@@ -17,19 +17,17 @@ COPY packages/eslint-plugin-actual/package.json packages/eslint-plugin-actual/pa
 COPY packages/loot-core/package.json packages/loot-core/package.json
 COPY packages/sync-server/package.json packages/sync-server/package.json
 
-COPY ./bin/package-browser ./bin/package-browser
+# Avoiding memory issues with ARMv7
+RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 
-RUN yarn install
+# Focus the workspaces in production mode
+RUN if [ "$(uname -m)" = "armv7l" ]; then npm_config_build_from_source=true yarn workspaces focus @actual-app/sync-server --production; else yarn workspaces focus @actual-app/sync-server --production; fi
 
-FROM deps as builder
+FROM deps AS builder
 
 WORKDIR /app
 
-COPY packages/ ./packages/
-RUN yarn build:browser
-
-# Focus the workspaces in production mode (including @actual-app/web you just built)
-RUN yarn workspaces focus @actual-app/sync-server --production
+COPY packages/sync-server ./packages/sync-server
 
 # Remove symbolic links for @actual-app/web and @actual-app/sync-server
 RUN rm -rf ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
@@ -38,18 +36,17 @@ RUN rm -rf ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
 COPY packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
 COPY packages/desktop-client/build ./node_modules/@actual-app/web/build
 
-FROM node:18-bookworm-slim as prod
+FROM alpine:3.18 AS prod
 
 # Minimal runtime dependencies
-RUN apt-get update && apt-get install -y tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache nodejs tini
 
 # Create a non-root user
 ARG USERNAME=actual
 ARG USER_UID=1001
 ARG USER_GID=$USER_UID
-RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
-    && mkdir /data && chown -R ${USERNAME}:${USERNAME} /data
+RUN addgroup -S ${USERNAME} -g ${USER_GID} && adduser -S ${USERNAME} -G ${USERNAME} -u ${USER_UID}
+RUN mkdir /data && chown -R ${USERNAME}:${USERNAME} /data
 
 WORKDIR /app
 ENV NODE_ENV=production
@@ -60,6 +57,6 @@ COPY --from=builder /app/packages/sync-server/package.json /app/packages/sync-se
 COPY --from=builder /app/packages/sync-server/src ./src
 COPY --from=builder /app/packages/sync-server/migrations ./migrations
 
-ENTRYPOINT ["/usr/bin/tini", "-g", "--"]
+ENTRYPOINT ["/sbin/tini","-g",  "--"]
 EXPOSE 5006
 CMD ["node", "app.js"]

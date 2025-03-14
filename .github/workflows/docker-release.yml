@@ -70,12 +70,19 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Building outside of the docker image allows us to build once and push to multiple platforms
+      # This is faster and avoids yarn memory issues
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Build Web
+        run: ./bin/package-browser
+
       - name: Build and push ubuntu image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          file: packages/sync-server/docker/stable-ubuntu.Dockerfile
+          file: packages/sync-server/docker/ubuntu.Dockerfile
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           tags: ${{ steps.meta.outputs.tags }}
 
@@ -84,6 +91,6 @@ jobs:
         with:
           context: .
           push: true
-          file: packages/sync-server/docker/stable-alpine.Dockerfile
+          file: packages/sync-server/docker/alpine.Dockerfile
           platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
           tags: ${{ steps.alpine-meta.outputs.tags }}
