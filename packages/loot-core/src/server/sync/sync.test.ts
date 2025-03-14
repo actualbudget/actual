@@ -54,8 +54,12 @@ describe('Sync', () => {
     expect(getClock().timestamp.toString()).toEqual(timestamp.toString());
     expect(mockSyncServer.getClock().merkle).toEqual(getClock().merkle);
 
-    expect(await db.all('SELECT * FROM messages_crdt')).toMatchSnapshot();
-    expect(await db.all('SELECT * FROM messages_clock')).toMatchSnapshot();
+    expect(
+      await db.all<db.DbCrdtMessage>('SELECT * FROM messages_crdt'),
+    ).toMatchSnapshot();
+    expect(
+      await db.all<db.DbClockMessage>('SELECT * FROM messages_clock'),
+    ).toMatchSnapshot();
   });
 
   it('should resend old messages to the server', async () => {

@@ -13,8 +13,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type OpenIdConfig } from 'loot-core/types/models/openid';
+import { type OpenIdConfig } from 'loot-core/types/models';
 
+import { useDispatch } from '../../../redux';
 import { Link } from '../../common/Link';
 import { FormField, FormLabel } from '../../forms';
 import { useServerURL } from '../../ServerContext';

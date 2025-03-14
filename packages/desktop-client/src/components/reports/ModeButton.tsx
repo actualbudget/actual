@@ -1,9 +1,8 @@
 import React, { type ReactNode, type CSSProperties } from 'react';
 
 import { Button } from '@actual-app/components/button';
+import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
-
-import { theme } from '../../style';
 
 type ModeButtonProps = {
   selected: boolean;

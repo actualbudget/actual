@@ -18,7 +18,7 @@ import { View } from '@actual-app/components/view';
 import { loggedIn } from 'loot-core/client/actions/user';
 import { send } from 'loot-core/platform/client/fetch';
 import { isElectron } from 'loot-core/shared/environment';
-import { type OpenIdConfig } from 'loot-core/types/models/openid';
+import { type OpenIdConfig } from 'loot-core/types/models';
 
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';

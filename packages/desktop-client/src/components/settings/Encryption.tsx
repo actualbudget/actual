@@ -3,12 +3,12 @@ import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
 import { Link } from '../common/Link';
 import { useServerURL } from '../ServerContext';
 

@@ -23,8 +23,3 @@ export interface UserAvailable {
   haveAccess?: number;
   owner?: number;
 }
-
-export const PossibleRoles = {
-  ADMIN: 'Admin',
-  BASIC: 'Basic',
-};

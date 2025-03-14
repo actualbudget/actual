@@ -5,11 +5,10 @@ import React, {
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgPin } from '@actual-app/components/icons/v1';
+import { SvgArrowButtonLeft1 } from '@actual-app/components/icons/v2';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { SvgPin } from '../../icons/v1';
-import { SvgArrowButtonLeft1 } from '../../icons/v2';
-import { theme } from '../../style';
 
 type ToggleButtonProps = {
   isFloating: boolean;

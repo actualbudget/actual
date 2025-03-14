@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
+import { SvgExpandArrow } from '@actual-app/components/icons/v0';
+import { SvgCheveronRight } from '@actual-app/components/icons/v1';
 import { Label } from '@actual-app/components/label';
 import { type CSSProperties, styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -16,8 +18,6 @@ import * as monthUtils from 'loot-core/shared/months';
 import { type CategoryGroupEntity } from 'loot-core/types/models';
 
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { SvgExpandArrow } from '../../../icons/v0';
-import { SvgCheveronRight } from '../../../icons/v1';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';

@@ -16,6 +16,7 @@ import * as monthUtils from '../shared/months';
 import { q } from '../shared/query';
 import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
+import { CategoryEntity, CategoryGroupEntity } from '../types/models';
 import { OpenIdConfig } from '../types/models/openid';
 
 import { app as accountsApp } from './accounts/app';
@@ -103,9 +104,12 @@ handlers['redo'] = mutator(function () {
 });
 
 handlers['get-categories'] = async function () {
+  // TODO: Force cast to CategoryGroupEntity and CategoryEntity.
+  // This should be updated to AQL queries. The server should not directly return DB models.
   return {
-    grouped: await db.getCategoriesGrouped(),
-    list: await db.getCategories(),
+    grouped:
+      (await db.getCategoriesGrouped()) as unknown as CategoryGroupEntity[],
+    list: (await db.getCategories()) as unknown as CategoryEntity[],
   };
 };
 
@@ -336,7 +340,7 @@ handlers['category-group-delete'] = mutator(async function ({
   transferId,
 }) {
   return withUndo(async () => {
-    const groupCategories = await db.all(
+    const groupCategories = await db.all<Pick<db.DbCategory, 'id'>>(
       'SELECT id FROM categories WHERE cat_group = ? AND tombstone = 0',
       [id],
     );

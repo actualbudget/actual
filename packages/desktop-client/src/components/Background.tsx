@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { theme } from '../style';
+import { theme } from '@actual-app/components/theme';
 
 import { LoadComponent } from './util/LoadComponent';
 

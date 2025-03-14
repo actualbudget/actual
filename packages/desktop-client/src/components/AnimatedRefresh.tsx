@@ -1,10 +1,9 @@
 // @ts-strict-ignore
 import React, { type CSSProperties } from 'react';
 
+import { SvgRefresh } from '@actual-app/components/icons/v1';
 import { View } from '@actual-app/components/view';
 import { keyframes } from '@emotion/css';
-
-import { SvgRefresh } from '../icons/v1';
 
 const spin = keyframes({
   '0%': { transform: 'rotateZ(0deg)' },

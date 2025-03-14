@@ -3,12 +3,12 @@ import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
 
-import { Input } from '../../common/Input';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 
 type HoldMenuProps = {

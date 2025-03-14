@@ -8,11 +8,13 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 
 import * as monthUtils from 'loot-core/shared/months';
-import { type AccountEntity } from 'loot-core/types/models/account';
-import { type CategoryEntity } from 'loot-core/types/models/category';
-import { type CategoryGroupEntity } from 'loot-core/types/models/category-group';
-import { type PayeeEntity } from 'loot-core/types/models/payee';
-import { type CustomReportEntity } from 'loot-core/types/models/reports';
+import {
+  type AccountEntity,
+  type CategoryEntity,
+  type CategoryGroupEntity,
+  type PayeeEntity,
+  type CustomReportEntity,
+} from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { ChooseGraph } from '../ChooseGraph';

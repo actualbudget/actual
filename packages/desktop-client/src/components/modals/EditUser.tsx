@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
@@ -16,14 +17,10 @@ import {
 } from 'loot-core/client/modals/modalsSlice';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
-import {
-  type NewUserEntity,
-  PossibleRoles,
-  type UserEntity,
-} from 'loot-core/types/models/user';
+import { PossibleRoles } from 'loot-core/shared/user';
+import { type NewUserEntity, type UserEntity } from 'loot-core/types/models';
 
 import { useDispatch } from '../../redux';
-import { Input } from '../common/Input';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Checkbox, FormField, FormLabel } from '../forms';
 

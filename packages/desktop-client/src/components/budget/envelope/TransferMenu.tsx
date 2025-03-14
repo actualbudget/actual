@@ -3,6 +3,7 @@ import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
@@ -11,7 +12,6 @@ import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
-import { Input } from '../../common/Input';
 import { addToBeBudgetedGroup, removeCategoriesFromGroups } from '../util';
 
 type TransferMenuProps = {

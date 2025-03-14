@@ -1,9 +1,10 @@
 // @ts-strict-ignore
 import React from 'react';
 
+import { theme } from '@actual-app/components/theme';
+
 import { type CategoryGroupEntity } from 'loot-core/types/models';
 
-import { theme } from '../../style';
 import { Row } from '../table';
 
 import { RenderMonths } from './RenderMonths';
