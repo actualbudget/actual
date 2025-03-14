@@ -18,7 +18,7 @@ export const getUserData = createAppAsyncThunk(
 );
 
 export const loggedIn = createAppAsyncThunk(
-  `${sliceName}/getUserData`,
+  `${sliceName}/loggedIn`,
   async (_, { dispatch }) => {
     await dispatch(getUserData());
 
