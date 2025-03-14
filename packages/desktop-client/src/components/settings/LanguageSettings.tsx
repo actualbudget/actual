@@ -2,15 +2,19 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
+import { Select, type SelectOption } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { type TFunction } from 'i18next';
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { availableLanguages, setI18NextLanguage } from '../../i18n';
 import { Link } from '../common/Link';
-import { Select, type SelectOption } from '../common/Select';
 
 import { Setting } from './UI';
+
+const languageDisplayNameOverride: { [key: string]: string } = {
+  'pt-BR': 'Português (Brasil)',
+};
 
 const languageOptions = (t: TFunction): SelectOption[] =>
   [
@@ -19,9 +23,11 @@ const languageOptions = (t: TFunction): SelectOption[] =>
   ].concat(
     availableLanguages.map(lang => [
       lang,
-      new Intl.DisplayNames([lang], {
-        type: 'language',
-      }).of(lang) || lang,
+      lang in languageDisplayNameOverride
+        ? languageDisplayNameOverride[lang]
+        : new Intl.DisplayNames([lang], {
+            type: 'language',
+          }).of(lang) || lang,
     ]),
   );
 

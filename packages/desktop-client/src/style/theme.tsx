@@ -95,5 +95,3 @@ export function ThemeStyle() {
     .join('\n');
   return <style>{`:root {\n${css}}`}</style>;
 }
-
-export * from '@actual-app/components/theme';

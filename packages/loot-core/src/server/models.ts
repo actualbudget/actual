@@ -1,10 +1,13 @@
-import {
-  AccountEntity,
-  CategoryEntity,
-  CategoryGroupEntity,
-  PayeeEntity,
-} from '../types/models';
+import { PayeeEntity } from '../types/models';
 
+import {
+  convertForInsert,
+  convertForUpdate,
+  convertFromSelect,
+  schema,
+  schemaConfig,
+} from './aql';
+import { DbAccount, DbCategory, DbCategoryGroup, DbPayee } from './db';
 import { ValidationError } from './errors';
 
 export function requiredFields<T extends object, K extends keyof T>(
@@ -50,7 +53,7 @@ export function fromDateRepr(number: number) {
 }
 
 export const accountModel = {
-  validate(account: AccountEntity, { update }: { update?: boolean } = {}) {
+  validate(account: Partial<DbAccount>, { update }: { update?: boolean } = {}) {
     requiredFields(
       'account',
       account,
@@ -58,12 +61,15 @@ export const accountModel = {
       update,
     );
 
-    return account;
+    return account as DbAccount;
   },
 };
 
 export const categoryModel = {
-  validate(category: CategoryEntity, { update }: { update?: boolean } = {}) {
+  validate(
+    category: Partial<DbCategory>,
+    { update }: { update?: boolean } = {},
+  ) {
     requiredFields(
       'category',
       category,
@@ -72,13 +78,13 @@ export const categoryModel = {
     );
 
     const { sort_order, ...rest } = category;
-    return { ...rest, hidden: rest.hidden ? 1 : 0 };
+    return { ...rest, hidden: rest.hidden ? 1 : 0 } as DbCategory;
   },
 };
 
 export const categoryGroupModel = {
   validate(
-    categoryGroup: CategoryGroupEntity,
+    categoryGroup: Partial<DbCategoryGroup>,
     { update }: { update?: boolean } = {},
   ) {
     requiredFields(
@@ -89,13 +95,28 @@ export const categoryGroupModel = {
     );
 
     const { sort_order, ...rest } = categoryGroup;
-    return { ...rest, hidden: rest.hidden ? 1 : 0 };
+    return { ...rest, hidden: rest.hidden ? 1 : 0 } as DbCategoryGroup;
   },
 };
 
 export const payeeModel = {
-  validate(payee: PayeeEntity, { update }: { update?: boolean } = {}) {
-    requiredFields('payee', payee, ['name'], update);
-    return payee;
+  validate(payee: Partial<DbPayee>, { update }: { update?: boolean } = {}) {
+    requiredFields('payee', payee, update ? [] : ['name'], update);
+    return payee as DbPayee;
+  },
+  toDb(payee: PayeeEntity, { update }: { update?: boolean } = {}): DbPayee {
+    return (
+      update
+        ? convertForUpdate(schema, schemaConfig, 'payees', payee)
+        : convertForInsert(schema, schemaConfig, 'payees', payee)
+    ) as DbPayee;
+  },
+  fromDb(payee: DbPayee): PayeeEntity {
+    return convertFromSelect(
+      schema,
+      schemaConfig,
+      'payees',
+      payee,
+    ) as PayeeEntity;
   },
 };

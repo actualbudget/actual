@@ -8,7 +8,9 @@ import {
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { Popover } from '@actual-app/components/popover';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import memoizeOne from 'memoize-one';
 
@@ -23,9 +25,7 @@ import {
   useSelectedDispatch,
   useSelectedItems,
 } from '../../hooks/useSelected';
-import { SvgExpandArrow } from '../../icons/v0';
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
 import { Search } from '../common/Search';
 import { TableHeader, Cell, SelectCell } from '../table';
 
@@ -70,7 +70,7 @@ function PayeeTableHeader() {
 type ManagePayeesProps = {
   payees: PayeeEntity[];
   ruleCounts: ComponentProps<typeof PayeeTable>['ruleCounts'];
-  orphanedPayees: PayeeEntity[];
+  orphanedPayees: Array<Pick<PayeeEntity, 'id'>>;
   initialSelectedIds: string[];
   onBatchChange: (diff: Diff<PayeeEntity>) => void;
   onViewRules: ComponentProps<typeof PayeeTable>['onViewRules'];
@@ -154,16 +154,16 @@ export const ManagePayees = ({
   function onFavorite() {
     const allFavorited = [...selected.items]
       .map(id => payeesById[id].favorite)
-      .every(f => f === 1);
+      .every(f => f);
     if (allFavorited) {
       onBatchChange({
-        updated: [...selected.items].map(id => ({ id, favorite: 0 })),
+        updated: [...selected.items].map(id => ({ id, favorite: false })),
         added: [],
         deleted: [],
       });
     } else {
       onBatchChange({
-        updated: [...selected.items].map(id => ({ id, favorite: 1 })),
+        updated: [...selected.items].map(id => ({ id, favorite: true })),
         added: [],
         deleted: [],
       });
@@ -174,16 +174,22 @@ export const ManagePayees = ({
   function onLearn() {
     const allLearnCategories = [...selected.items]
       .map(id => payeesById[id].learn_categories)
-      .every(f => f === 1);
+      .every(f => f);
     if (allLearnCategories) {
       onBatchChange({
-        updated: [...selected.items].map(id => ({ id, learn_categories: 0 })),
+        updated: [...selected.items].map(id => ({
+          id,
+          learn_categories: false,
+        })),
         added: [],
         deleted: [],
       });
     } else {
       onBatchChange({
-        updated: [...selected.items].map(id => ({ id, learn_categories: 1 })),
+        updated: [...selected.items].map(id => ({
+          id,
+          learn_categories: true,
+        })),
         added: [],
         deleted: [],
       });

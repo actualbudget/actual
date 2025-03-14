@@ -12,13 +12,13 @@ import { Navigate, useParams, useLocation } from 'react-router-dom';
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { debounce } from 'debounce';
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
 import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
-import { addNotification } from 'loot-core/client/actions';
 import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import { useFilters } from 'loot-core/client/data-hooks/filters';
 import {
@@ -30,6 +30,7 @@ import {
   pushModal,
   replaceModal,
 } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import * as queries from 'loot-core/client/queries';
 import {
   createPayee,
@@ -86,7 +87,6 @@ import {
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useTransactionBatchActions } from '../../hooks/useTransactionBatchActions';
 import { useSelector, useDispatch } from '../../redux';
-import { theme } from '../../style';
 import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { TransactionList } from '../transactions/TransactionList';
 import { validateAccountName } from '../util/accountValidation';
@@ -767,8 +767,10 @@ class AccountInternal extends PureComponent<
       console.error('Error applying rules:', error);
       this.props.dispatch(
         addNotification({
-          type: 'error',
-          message: 'Failed to apply rules to transactions',
+          notification: {
+            type: 'error',
+            message: 'Failed to apply rules to transactions',
+          },
         }),
       );
     } finally {

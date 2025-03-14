@@ -1,24 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { SvgExclamationSolid } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { addNotification } from 'loot-core/client/actions';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { calculateHasWarning } from 'loot-core/client/reports';
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
 import * as monthUtils from 'loot-core/shared/months';
-import { type CustomReportEntity } from 'loot-core/types/models/reports';
+import { type CustomReportEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { usePayees } from '../../../hooks/usePayees';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { SvgExclamationSolid } from '../../../icons/v1';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style/theme';
 import { DateRange } from '../DateRange';
 import { ReportCard } from '../ReportCard';
 import { ReportCardName } from '../ReportCardName';
@@ -102,8 +102,10 @@ function CustomReportListCardsInner({
     if (response.error) {
       dispatch(
         addNotification({
-          type: 'error',
-          message: `Failed saving report name: ${response.error.message}`,
+          notification: {
+            type: 'error',
+            message: `Failed saving report name: ${response.error.message}`,
+          },
         }),
       );
       setNameMenuOpen(true);

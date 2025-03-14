@@ -5,6 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Stack } from '@actual-app/components/stack';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { runQuery } from 'loot-core/client/query-helpers';
@@ -14,6 +15,7 @@ import { getRecurringDescription } from 'loot-core/shared/schedules';
 import type { DiscoverScheduleEntity } from 'loot-core/types/models';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { useLocale } from '../../hooks/useLocale';
 import {
   useSelected,
   useSelectedDispatch,
@@ -21,7 +23,6 @@ import {
   SelectedProvider,
 } from '../../hooks/useSelected';
 import { useSendPlatformRequest } from '../../hooks/useSendPlatformRequest';
-import { theme } from '../../style';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import { DisplayId } from '../util/DisplayId';
@@ -42,11 +43,16 @@ function DiscoverSchedulesTable({
   const selectedItems = useSelectedItems();
   const dispatchSelected = useSelectedDispatch();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const locale = useLocale();
 
   function renderItem({ item }: { item: DiscoverScheduleEntity }) {
     const selected = selectedItems.has(item.id);
     const amountOp = item._conditions.find(c => c.field === 'amount').op;
-    const recurDescription = getRecurringDescription(item.date, dateFormat);
+    const recurDescription = getRecurringDescription(
+      item.date,
+      dateFormat,
+      locale,
+    );
 
     return (
       <Row

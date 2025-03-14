@@ -14,13 +14,10 @@ import { BrowserRouter } from 'react-router-dom';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import {
-  addNotification,
-  loadGlobalPrefs,
-  signOut,
-} from 'loot-core/client/actions';
+import { loadGlobalPrefs, signOut } from 'loot-core/client/actions';
 import { setAppState, sync } from 'loot-core/client/app/appSlice';
 import { closeBudget, loadBudget } from 'loot-core/client/budgets/budgetsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import * as Platform from 'loot-core/client/platform';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import { init as initConnection, send } from 'loot-core/platform/client/fetch';
@@ -40,7 +37,6 @@ import { FatalError } from './FatalError';
 import { FinancesApp } from './FinancesApp';
 import { ManagementApp } from './manager/ManagementApp';
 import { Modals } from './Modals';
-import { ResponsiveProvider } from './responsive/ResponsiveProvider';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
 
@@ -139,14 +135,16 @@ function AppInner() {
     if (userData?.tokenExpired) {
       dispatch(
         addNotification({
-          type: 'error',
-          id: 'login-expired',
-          title: t('Login expired'),
-          sticky: true,
-          message: t('Login expired, please log in again.'),
-          button: {
-            title: t('Go to log in'),
-            action: () => dispatch(signOut()),
+          notification: {
+            type: 'error',
+            id: 'login-expired',
+            title: t('Login expired'),
+            sticky: true,
+            message: t('Login expired, please log in again.'),
+            button: {
+              title: t('Go to log in'),
+              action: () => dispatch(signOut()),
+            },
           },
         }),
       );
@@ -208,44 +206,40 @@ export function App() {
     <BrowserRouter>
       <ExposeNavigate />
       <HotkeysProvider initiallyActiveScopes={['*']}>
-        <ResponsiveProvider>
-          <SpreadsheetProvider>
-            <SidebarProvider>
-              <BudgetMonthCountProvider>
-                <DndProvider backend={HTML5Backend}>
+        <SpreadsheetProvider>
+          <SidebarProvider>
+            <BudgetMonthCountProvider>
+              <DndProvider backend={HTML5Backend}>
+                <View
+                  data-theme={theme}
+                  style={{
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
                   <View
-                    data-theme={theme}
+                    key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
                     style={{
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
+                      flexGrow: 1,
+                      overflow: 'hidden',
+                      ...styles.lightScrollbar,
                     }}
                   >
-                    <View
-                      key={
-                        hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'
-                      }
-                      style={{
-                        flexGrow: 1,
-                        overflow: 'hidden',
-                        ...styles.lightScrollbar,
-                      }}
-                    >
-                      <ErrorBoundary FallbackComponent={ErrorFallback}>
-                        {process.env.REACT_APP_REVIEW_ID &&
-                          !Platform.isPlaywright && <DevelopmentTopBar />}
-                        <AppInner />
-                      </ErrorBoundary>
-                      <ThemeStyle />
-                      <Modals />
-                      <UpdateNotification />
-                    </View>
+                    <ErrorBoundary FallbackComponent={ErrorFallback}>
+                      {process.env.REACT_APP_REVIEW_ID &&
+                        !Platform.isPlaywright && <DevelopmentTopBar />}
+                      <AppInner />
+                    </ErrorBoundary>
+                    <ThemeStyle />
+                    <Modals />
+                    <UpdateNotification />
                   </View>
-                </DndProvider>
-              </BudgetMonthCountProvider>
-            </SidebarProvider>
-          </SpreadsheetProvider>
-        </ResponsiveProvider>
+                </View>
+              </DndProvider>
+            </BudgetMonthCountProvider>
+          </SidebarProvider>
+        </SpreadsheetProvider>
       </HotkeysProvider>
     </BrowserRouter>
   );

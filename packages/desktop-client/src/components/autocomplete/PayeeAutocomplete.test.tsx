@@ -8,7 +8,6 @@ import type { AccountEntity, PayeeEntity } from 'loot-core/types/models';
 import { AuthProvider } from '../../auth/AuthProvider';
 import { useCommonPayees } from '../../hooks/usePayees';
 import { TestProvider } from '../../redux/mock';
-import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
 
 import {
   PayeeAutocomplete,
@@ -39,7 +38,7 @@ function makePayee(name: string, options?: { favorite: boolean }): PayeeEntity {
   return {
     id: name.toLowerCase() + '-id',
     name,
-    favorite: options?.favorite ? 1 : 0,
+    favorite: options?.favorite ? true : false,
     transfer_acct: undefined,
   };
 }
@@ -65,17 +64,15 @@ function renderPayeeAutocomplete(
   render(
     <TestProvider>
       <AuthProvider>
-        <ResponsiveProvider>
-          <div data-testid="autocomplete-test">
-            <PayeeAutocomplete
-              {...autocompleteProps}
-              onSelect={vi.fn()}
-              type="single"
-              value={null}
-              embedded={false}
-            />
-          </div>
-        </ResponsiveProvider>
+        <div data-testid="autocomplete-test">
+          <PayeeAutocomplete
+            {...autocompleteProps}
+            onSelect={vi.fn()}
+            type="single"
+            value={null}
+            embedded={false}
+          />
+        </div>
       </AuthProvider>
     </TestProvider>,
   );

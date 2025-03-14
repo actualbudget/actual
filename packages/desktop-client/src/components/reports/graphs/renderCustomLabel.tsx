@@ -1,7 +1,8 @@
 // @ts-strict-ignore
 import React from 'react';
 
-import { theme } from '../../../style';
+import { theme } from '@actual-app/components/theme';
+
 import { PrivacyFilter } from '../../PrivacyFilter';
 
 export const renderCustomLabel = (

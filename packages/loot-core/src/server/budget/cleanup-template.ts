@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { Notification } from '../../client/state-types/notifications';
+import { Notification } from '../../client/notifications/notificationsSlice';
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 
@@ -132,7 +132,7 @@ async function processCleanup(month: string): Promise<Notification> {
   const db_month = parseInt(month.replace('-', ''));
 
   const category_templates = await getCategoryTemplates();
-  const categories = await db.all(
+  const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',
   );
   const sheetName = monthUtils.sheetForMonth(month);
@@ -369,7 +369,7 @@ const TEMPLATE_PREFIX = '#cleanup ';
 async function getCategoryTemplates() {
   const templates = {};
 
-  const notes = await db.all(
+  const notes = await db.all<db.DbNote>(
     `SELECT * FROM notes WHERE lower(note) like '%${TEMPLATE_PREFIX}%'`,
   );
 

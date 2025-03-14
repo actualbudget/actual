@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { sync } from 'loot-core/client/app/appSlice';
@@ -21,11 +23,10 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
 import { useCategories } from '../../../hooks/useCategories';
+import { useLocale } from '../../../hooks/useLocale';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
 import { prewarmMonth } from '../../budget/util';
 import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 import { SyncRefresh } from '../../SyncRefresh';
@@ -37,6 +38,7 @@ function isBudgetType(input?: string): input is 'rollover' | 'report' {
 }
 
 export function Budget() {
+  const locale = useLocale();
   const { list: categories, grouped: categoryGroups } = useCategories();
   const [budgetTypePref] = useSyncedPref('budgetType');
   const budgetType = isBudgetType(budgetTypePref) ? budgetTypePref : 'rollover';
@@ -485,14 +487,14 @@ export function Budget() {
             name: 'notes',
             options: {
               id: `budget-${month}`,
-              name: monthUtils.format(month, 'MMMM ‘yy'),
+              name: monthUtils.format(month, 'MMMM ‘yy', locale),
               onSave: onSaveNotes,
             },
           },
         }),
       );
     },
-    [dispatch, onSaveNotes],
+    [dispatch, onSaveNotes, locale],
   );
 
   const onSwitchBudgetFile = useCallback(() => {

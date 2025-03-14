@@ -7,7 +7,7 @@ import * as transfer from './transfer';
 beforeEach(global.emptyDatabase());
 
 function getAllTransactions() {
-  return db.all(
+  return db.all<db.DbViewTransaction & { payee_name: db.DbPayee['name'] }>(
     `SELECT t.*, p.name as payee_name
        FROM v_transactions t
        LEFT JOIN payees p ON p.id = t.payee

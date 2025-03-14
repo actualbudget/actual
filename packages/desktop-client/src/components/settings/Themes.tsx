@@ -1,7 +1,10 @@
 import React, { type ReactNode } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
+import { theme as themeStyle } from '@actual-app/components/theme';
+import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -10,12 +13,9 @@ import { type DarkTheme, type Theme } from 'loot-core/types/prefs';
 import {
   themeOptions,
   useTheme,
-  theme as themeStyle,
   usePreferredDarkTheme,
   darkThemeOptions,
 } from '../../style';
-import { tokens } from '../../tokens';
-import { Select } from '../common/Select';
 import { useSidebar } from '../sidebar/SidebarProvider';
 
 import { Setting } from './UI';

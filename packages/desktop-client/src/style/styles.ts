@@ -3,8 +3,6 @@ import { styles } from '@actual-app/components/styles';
 
 import * as Platform from 'loot-core/client/platform';
 
-export { type CSSProperties } from '@actual-app/components/styles';
-
 let hiddenScrollbars = false;
 
 // need both styles defined for primary and secondary colors

@@ -13,6 +13,7 @@ import { format, sheetForMonth, prevMonth } from 'loot-core/shared/months';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 
 import { useCategories } from '../../hooks/useCategories';
+import { useLocale } from '../../hooks/useLocale';
 import { useUndo } from '../../hooks/useUndo';
 import { useDispatch } from '../../redux';
 import { ToBudgetAmount } from '../budget/envelope/budgetsummary/ToBudgetAmount';
@@ -32,8 +33,9 @@ export function EnvelopeBudgetSummaryModal({
 }: EnvelopeBudgetSummaryModalProps) {
   const { t } = useTranslation();
 
+  const locale = useLocale();
   const dispatch = useDispatch();
-  const prevMonthName = format(prevMonth(month), 'MMM');
+  const prevMonthName = format(prevMonth(month), 'MMM', locale);
   const sheetValue =
     useEnvelopeSheetValue({
       name: envelopeBudget.toBudget,

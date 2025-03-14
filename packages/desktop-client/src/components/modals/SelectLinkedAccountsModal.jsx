@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -15,7 +16,6 @@ import { closeModal } from 'loot-core/client/modals/modalsSlice';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { PrivacyFilter } from '../PrivacyFilter';
@@ -41,7 +41,12 @@ export function SelectLinkedAccountsModal({
   externalAccounts,
   syncSource = undefined,
 }) {
-  externalAccounts.sort((a, b) => a.name.localeCompare(b.name));
+  const sortedExternalAccounts = useMemo(() => {
+    const toSort = [...externalAccounts];
+    toSort.sort((a, b) => a.name.localeCompare(b.name));
+    return toSort;
+  }, [externalAccounts]);
+
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const localAccounts = useAccounts().filter(a => a.closed === 0);
@@ -68,7 +73,7 @@ export function SelectLinkedAccountsModal({
     // Link new accounts
     Object.entries(chosenAccounts).forEach(
       ([chosenExternalAccountId, chosenLocalAccountId]) => {
-        const externalAccount = externalAccounts.find(
+        const externalAccount = sortedExternalAccounts.find(
           account => account.account_id === chosenExternalAccountId,
         );
         const offBudget = chosenLocalAccountId === addOffBudgetAccountOption.id;
@@ -176,7 +181,7 @@ export function SelectLinkedAccountsModal({
             />
 
             <Table
-              items={externalAccounts}
+              items={sortedExternalAccounts}
               style={{ backgroundColor: theme.tableHeaderBackground }}
               getItemKey={index => index}
               renderItem={({ key, item }) => (

@@ -6,6 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { t } from 'i18next';
 
@@ -27,10 +28,10 @@ import {
 } from 'loot-core/types/models';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
+import { useLocale } from '../../hooks/useLocale';
 import { usePayees } from '../../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
@@ -109,6 +110,7 @@ type ScheduleDetailsProps = Extract<
 >['options'];
 
 export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
 
   const adding = id == null;
@@ -749,7 +751,7 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
                   >
                     {state.upcomingDates.map(date => (
                       <View key={date}>
-                        {monthUtils.format(date, `${dateFormat} EEEE`)}
+                        {monthUtils.format(date, `${dateFormat} EEEE`, locale)}
                       </View>
                     ))}
                   </Stack>

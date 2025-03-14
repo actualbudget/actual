@@ -1,12 +1,12 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { SvgRightArrow2 } from '@actual-app/components/icons/v0';
+import { SvgEquals } from '@actual-app/components/icons/v1';
+import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 
-import { SvgRightArrow2 } from '../../icons/v0';
-import { SvgEquals } from '../../icons/v1';
-import { theme } from '../../style';
-import { Select } from '../common/Select';
 import { Row, Cell, TableHeader } from '../table';
 
 import {

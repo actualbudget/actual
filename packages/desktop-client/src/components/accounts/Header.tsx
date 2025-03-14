@@ -5,15 +5,30 @@ import React, {
   type ReactNode,
   type ComponentProps,
 } from 'react';
+import { DialogTrigger } from 'react-aria-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import {
+  SvgAdd,
+  SvgDotsHorizontalTriple,
+} from '@actual-app/components/icons/v1';
+import {
+  SvgArrowsExpand3,
+  SvgArrowsShrink3,
+  SvgDownloadThickBottom,
+  SvgLockClosed,
+  SvgPencil1,
+} from '@actual-app/components/icons/v2';
 import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Input } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
@@ -25,23 +40,11 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
-import { useGlobalPref } from '../../hooks/useGlobalPref';
+import { useLocale } from '../../hooks/useLocale';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
-import { AnimatedLoading } from '../../icons/AnimatedLoading';
-import { SvgAdd } from '../../icons/v1';
-import {
-  SvgArrowsExpand3,
-  SvgArrowsShrink3,
-  SvgDownloadThickBottom,
-  SvgLockClosed,
-  SvgPencil1,
-} from '../../icons/v2';
-import { theme } from '../../style';
 import { AnimatedRefresh } from '../AnimatedRefresh';
-import { Input } from '../common/Input';
-import { MenuButton } from '../common/MenuButton';
 import { Search } from '../common/Search';
 import { FilterButton } from '../filters/FiltersMenu';
 import { FiltersStack } from '../filters/FiltersStack';
@@ -188,18 +191,17 @@ export function AccountHeader({
   onMakeAsNonSplitTransactions,
 }: AccountHeaderProps) {
   const { t } = useTranslation();
-  const [language] = useGlobalPref('language');
 
-  const [menuOpen, setMenuOpen] = useState(false);
   const [reconcileOpen, setReconcileOpen] = useState(false);
   const searchInput = useRef<HTMLInputElement>(null);
-  const triggerRef = useRef(null);
   const reconcileRef = useRef(null);
   const splitsExpanded = useSplitsExpanded();
   const syncServerStatus = useSyncServerStatus();
   const isUsingServer = syncServerStatus !== 'no-server';
   const isServerOffline = syncServerStatus === 'offline';
   const [_, setExpandSplitsPref] = useLocalPref('expand-splits');
+
+  const locale = useLocale();
 
   let canSync = !!(account?.account_id && isUsingServer);
   if (!account) {
@@ -388,7 +390,7 @@ export function AccountHeader({
                 }}
                 content={
                   account?.last_reconciled
-                    ? `${t('Reconciled')} ${tsToRelativeTime(account.last_reconciled, language || 'en-US')}`
+                    ? `${t('Reconciled')} ${tsToRelativeTime(account.last_reconciled, locale)}`
                     : t('Not yet reconciled')
                 }
                 placement="top"
@@ -432,7 +434,6 @@ export function AccountHeader({
                 ? t('Collapse split transactions')
                 : t('Expand split transactions')
             }
-            isDisabled={search !== '' || filterConditions.length > 0}
             style={{ padding: 6 }}
             onPress={onToggleSplits}
           >
@@ -452,66 +453,59 @@ export function AccountHeader({
           </Button>
           {account ? (
             <View style={{ flex: '0 0 auto' }}>
-              <MenuButton
-                aria-label={t('Account menu')}
-                ref={triggerRef}
-                onPress={() => setMenuOpen(true)}
-              />
+              <DialogTrigger>
+                <Button variant="bare" aria-label={t('Account menu')}>
+                  <SvgDotsHorizontalTriple
+                    width={15}
+                    height={15}
+                    style={{ transform: 'rotateZ(90deg)' }}
+                  />
+                </Button>
 
-              <Popover
-                triggerRef={triggerRef}
-                style={{ width: 275 }}
-                isOpen={menuOpen}
-                onOpenChange={() => setMenuOpen(false)}
-              >
-                <AccountMenu
-                  account={account}
-                  canSync={canSync}
-                  canShowBalances={
-                    canCalculateBalance ? canCalculateBalance() : false
-                  }
-                  isSorted={isSorted}
-                  showBalances={showBalances}
-                  showCleared={showCleared}
-                  showReconciled={showReconciled}
-                  onMenuSelect={item => {
-                    setMenuOpen(false);
-                    onMenuSelect(item);
-                  }}
-                />
-              </Popover>
+                <Popover style={{ width: 275 }}>
+                  <AccountMenu
+                    account={account}
+                    canSync={canSync}
+                    canShowBalances={
+                      canCalculateBalance ? canCalculateBalance() : false
+                    }
+                    isSorted={isSorted}
+                    showBalances={showBalances}
+                    showCleared={showCleared}
+                    showReconciled={showReconciled}
+                    onMenuSelect={onMenuSelect}
+                  />
+                </Popover>
+              </DialogTrigger>
             </View>
           ) : (
             <View style={{ flex: '0 0 auto' }}>
-              <MenuButton
-                aria-label={t('Account menu')}
-                ref={triggerRef}
-                onPress={() => setMenuOpen(true)}
-              />
+              <DialogTrigger>
+                <Button variant="bare" aria-label={t('Account menu')}>
+                  <SvgDotsHorizontalTriple
+                    width={15}
+                    height={15}
+                    style={{ transform: 'rotateZ(90deg)' }}
+                  />
+                </Button>
 
-              <Popover
-                triggerRef={triggerRef}
-                isOpen={menuOpen}
-                onOpenChange={() => setMenuOpen(false)}
-              >
-                <Menu
-                  onMenuSelect={item => {
-                    setMenuOpen(false);
-                    onMenuSelect(item);
-                  }}
-                  items={[
-                    ...(isSorted
-                      ? [
-                          {
-                            name: 'remove-sorting',
-                            text: t('Remove all sorting'),
-                          } as const,
-                        ]
-                      : []),
-                    { name: 'export', text: t('Export') },
-                  ]}
-                />
-              </Popover>
+                <Popover>
+                  <Menu
+                    onMenuSelect={onMenuSelect}
+                    items={[
+                      ...(isSorted
+                        ? [
+                            {
+                              name: 'remove-sorting',
+                              text: t('Remove all sorting'),
+                            } as const,
+                          ]
+                        : []),
+                      { name: 'export', text: t('Export') },
+                    ]}
+                  />
+                </Popover>
+              </DialogTrigger>
             </View>
           )}
         </Stack>

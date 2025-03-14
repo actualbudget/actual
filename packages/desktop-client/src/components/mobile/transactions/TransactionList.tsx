@@ -6,10 +6,18 @@ import React, {
   useState,
   type CSSProperties,
 } from 'react';
-import { ListBox, Section, Header, Collection } from 'react-aria-components';
+import {
+  ListBox,
+  ListBoxSection,
+  Header,
+  Collection,
+} from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import { SvgDelete } from '@actual-app/components/icons/v0';
+import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import {
   Menu,
   type MenuItem,
@@ -18,18 +26,22 @@ import {
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { setNotificationInset } from 'loot-core/client/actions';
+import { setNotificationInset } from 'loot-core/client/notifications/notificationsSlice';
 import { validForTransfer } from 'loot-core/client/transfer';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
-import { type AccountEntity } from 'loot-core/types/models';
-import { type TransactionEntity } from 'loot-core/types/models/transaction';
+import {
+  type AccountEntity,
+  type TransactionEntity,
+} from 'loot-core/types/models';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
+import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
 import {
@@ -38,11 +50,7 @@ import {
 } from '../../../hooks/useSelected';
 import { useTransactionBatchActions } from '../../../hooks/useTransactionBatchActions';
 import { useUndo } from '../../../hooks/useUndo';
-import { AnimatedLoading } from '../../../icons/AnimatedLoading';
-import { SvgDelete } from '../../../icons/v0';
-import { SvgDotsHorizontalTriple } from '../../../icons/v1';
 import { useDispatch } from '../../../redux';
-import { theme } from '../../../style';
 import { useScrollListener } from '../../ScrollProvider';
 import { FloatingActionBar } from '../FloatingActionBar';
 
@@ -89,6 +97,7 @@ export function TransactionList({
   onLoadMore,
   account,
 }: TransactionListProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const sections = useMemo(() => {
     // Group by date. We can assume transactions is ordered
@@ -165,7 +174,7 @@ export function TransactionList({
         items={sections}
       >
         {section => (
-          <Section>
+          <ListBoxSection>
             <Header
               style={{
                 ...styles.smallText,
@@ -181,7 +190,7 @@ export function TransactionList({
                 zIndex: 10,
               }}
             >
-              {monthUtils.format(section.date, 'MMMM dd, yyyy')}
+              {monthUtils.format(section.date, 'MMMM dd, yyyy', locale)}
             </Header>
             <Collection
               items={section.transactions.filter(
@@ -198,7 +207,7 @@ export function TransactionList({
                 />
               )}
             </Collection>
-          </Section>
+          </ListBoxSection>
         )}
       </ListBox>
 
@@ -298,7 +307,9 @@ function SelectedTransactionsFloatingActionBar({
 
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(setNotificationInset({ bottom: NOTIFICATION_BOTTOM_INSET }));
+    dispatch(
+      setNotificationInset({ inset: { bottom: NOTIFICATION_BOTTOM_INSET } }),
+    );
     return () => {
       dispatch(setNotificationInset(null));
     };

@@ -4,6 +4,7 @@ import { useLocation, useParams } from 'react-router-dom';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -15,19 +16,20 @@ import { calculateHasWarning } from 'loot-core/client/reports';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
-import { type CategoryEntity } from 'loot-core/types/models/category';
 import {
+  type CategoryEntity,
   type balanceTypeOpType,
-  type sortByOpType,
   type CustomReportEntity,
   type DataEntity,
-} from 'loot-core/types/models/reports';
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+  type sortByOpType,
+  type RuleConditionEntity,
+} from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
 import { useFilters } from '../../../hooks/useFilters';
+import { useLocale } from '../../../hooks/useLocale';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
@@ -37,7 +39,6 @@ import { AppliedFilters } from '../../filters/AppliedFilters';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
-import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { ChooseGraph } from '../ChooseGraph';
 import {
   defaultsGraphList,
@@ -122,6 +123,7 @@ type CustomReportInnerProps = {
 };
 
 function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const categories = useCategories();
   const { isNarrowWidth } = useResponsive();
@@ -319,6 +321,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
           pretty: monthUtils.format(
             inter,
             ReportOptions.intervalFormat.get(interval) || '',
+            locale,
           ),
         }))
         .reverse();
@@ -345,6 +348,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     onApplyFilter,
     report.conditions,
     includeCurrentInterval,
+    locale,
   ]);
 
   useEffect(() => {

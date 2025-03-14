@@ -3,6 +3,7 @@ import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import {
@@ -18,7 +19,6 @@ import { amountToCurrency } from 'loot-core/shared/util';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { useResizeObserver } from '../../../hooks/useResizeObserver';
-import { theme } from '../../../style';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { chartTheme } from '../chart-theme';
 

@@ -2,9 +2,15 @@
 import { memo, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import {
+  SvgArrowThinRight,
+  SvgBookmark,
+  SvgLightBulb,
+} from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 
 import { type PayeeEntity } from 'loot-core/types/models';
@@ -12,8 +18,6 @@ import { type PayeeEntity } from 'loot-core/types/models';
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useSelectedDispatch } from '../../hooks/useSelected';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { SvgArrowThinRight, SvgBookmark, SvgLightBulb } from '../../icons/v1';
-import { theme } from '../../style';
 import {
   Cell,
   CellButton,
@@ -180,14 +184,10 @@ export const PayeeTableRow = memo(
                   onDelete(id);
                   break;
                 case 'favorite':
-                  onUpdate(id, 'favorite', payee.favorite ? 0 : 1);
+                  onUpdate(id, 'favorite', !payee.favorite);
                   break;
                 case 'learn':
-                  onUpdate(
-                    id,
-                    'learn_categories',
-                    payee.learn_categories ? 0 : 1,
-                  );
+                  onUpdate(id, 'learn_categories', !payee.learn_categories);
                   break;
                 case 'view-rules':
                   onViewRules(id);

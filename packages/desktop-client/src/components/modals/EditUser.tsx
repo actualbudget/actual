@@ -2,28 +2,26 @@ import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { Input } from '@actual-app/components/input';
+import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { addNotification, signOut } from 'loot-core/client/actions';
+import { signOut } from 'loot-core/client/actions';
 import {
   type Modal as ModalType,
   popModal,
 } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
-import {
-  type NewUserEntity,
-  PossibleRoles,
-  type UserEntity,
-} from 'loot-core/types/models/user';
+import { PossibleRoles } from 'loot-core/shared/user';
+import { type NewUserEntity, type UserEntity } from 'loot-core/types/models';
 
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
-import { Input } from '../common/Input';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Select } from '../common/Select';
 import { Checkbox, FormField, FormLabel } from '../forms';
 
 type User = UserEntity;
@@ -89,15 +87,17 @@ function useSaveUser() {
       if (error === 'token-expired') {
         dispatch(
           addNotification({
-            type: 'error',
-            id: 'login-expired',
-            title: t('Login expired'),
-            sticky: true,
-            message: getUserDirectoryErrors(error),
-            button: {
-              title: t('Go to login'),
-              action: () => {
-                dispatch(signOut());
+            notification: {
+              type: 'error',
+              id: 'login-expired',
+              title: t('Login expired'),
+              sticky: true,
+              message: getUserDirectoryErrors(error),
+              button: {
+                title: t('Go to login'),
+                action: () => {
+                  dispatch(signOut());
+                },
               },
             },
           }),

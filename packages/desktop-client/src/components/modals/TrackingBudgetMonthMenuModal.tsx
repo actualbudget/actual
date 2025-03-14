@@ -3,18 +3,22 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { styles } from '@actual-app/components/styles';
+import {
+  SvgCheveronDown,
+  SvgCheveronUp,
+} from '@actual-app/components/icons/v1';
+import { SvgNotesPaper } from '@actual-app/components/icons/v2';
+import { styles, type CSSProperties } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import * as monthUtils from 'loot-core/shared/months';
 
+import { useLocale } from '../../hooks/useLocale';
 import { useNotes } from '../../hooks/useNotes';
 import { useUndo } from '../../hooks/useUndo';
-import { SvgCheveronDown, SvgCheveronUp } from '../../icons/v1';
-import { SvgNotesPaper } from '../../icons/v2';
-import { type CSSProperties, theme } from '../../style';
 import { BudgetMonthMenu } from '../budget/tracking/budgetsummary/BudgetMonthMenu';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Notes } from '../Notes';
@@ -29,6 +33,7 @@ export function TrackingBudgetMonthMenuModal({
   onBudgetAction,
   onEditNotes,
 }: TrackingBudgetMonthMenuModalProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const originalNotes = useNotes(`budget-${month}`);
   const { showUndoNotification } = useUndo();
@@ -58,7 +63,7 @@ export function TrackingBudgetMonthMenuModal({
     setShowMore(!showMore);
   };
 
-  const displayMonth = monthUtils.format(month, 'MMMM ‘yy');
+  const displayMonth = monthUtils.format(month, 'MMMM ‘yy', locale);
 
   return (
     <Modal

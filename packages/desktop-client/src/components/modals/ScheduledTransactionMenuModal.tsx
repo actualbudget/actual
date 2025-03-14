@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Menu } from '@actual-app/components/menu';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
@@ -19,7 +20,7 @@ import {
   extractScheduleConds,
 } from 'loot-core/shared/schedules';
 
-import { theme } from '../../style';
+import { useLocale } from '../../hooks/useLocale';
 import {
   Modal,
   ModalCloseButton,
@@ -38,6 +39,7 @@ export function ScheduledTransactionMenuModal({
   onPost,
   onComplete,
 }: ScheduledTransactionMenuModalProps) {
+  const locale = useLocale();
   const { t } = useTranslation();
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
@@ -83,7 +85,7 @@ export function ScheduledTransactionMenuModal({
               {t('Scheduled date')}
             </Text>
             <Text style={{ fontSize: 17, fontWeight: 700 }}>
-              {format(schedule?.next_date || '', 'MMMM dd, yyyy')}
+              {format(schedule?.next_date || '', 'MMMM dd, yyyy', locale)}
             </Text>
           </View>
           <ScheduledTransactionMenu

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { theme } from '../style';
+import { theme } from '@actual-app/components/theme';
 
 const linesTop = theme.pageBackgroundLineTop; // lines top
 const linesMid = theme.pageBackgroundLineMid; // lines mid

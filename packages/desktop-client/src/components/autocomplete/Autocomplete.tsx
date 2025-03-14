@@ -11,19 +11,18 @@ import React, {
   useState,
 } from 'react';
 
+import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { SvgRemove } from '@actual-app/components/icons/v2';
+import { Input } from '@actual-app/components/input';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 import Downshift, { type StateChangeTypes } from 'downshift';
 
 import { getNormalisedString } from 'loot-core/shared/normalisation';
-
-import { SvgRemove } from '../../icons/v2';
-import { theme } from '../../style';
-import { Button } from '../common/Button';
-import { Input } from '../common/Input';
-import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type CommonAutocompleteProps<T extends Item> = {
   focused?: boolean;
@@ -255,6 +254,7 @@ function SingleAutocomplete<T extends Item>({
   };
 
   const triggerRef = useRef(null);
+  const itemsViewRef = useRef(null);
 
   const { isNarrowWidth } = useResponsive();
   const narrowInputStyle = isNarrowWidth
@@ -465,7 +465,15 @@ function SingleAutocomplete<T extends Item>({
                   e['preventDownshiftDefault'] = true;
                   inputProps.onBlur?.(e);
 
-                  if (!closeOnBlur) return;
+                  if (!closeOnBlur) {
+                    return;
+                  }
+
+                  if (itemsViewRef.current?.contains(e.relatedTarget)) {
+                    // Do not close when the user clicks on any of the items.
+                    e.stopPropagation();
+                    return;
+                  }
 
                   if (clearOnBlur) {
                     if (e.target.value === '') {
@@ -589,12 +597,14 @@ function SingleAutocomplete<T extends Item>({
                 }}
                 data-testid="autocomplete"
               >
-                {renderItems(
-                  filtered,
-                  getItemProps,
-                  highlightedIndex,
-                  inputValue,
-                )}
+                <View ref={itemsViewRef}>
+                  {renderItems(
+                    filtered,
+                    getItemProps,
+                    highlightedIndex,
+                    inputValue,
+                  )}
+                </View>
               </Popover>
             ))}
         </div>
@@ -621,7 +631,7 @@ function MultiItem({ name, onRemove }: MultiItemProps) {
       }}
     >
       {name}
-      <Button type="bare" style={{ marginLeft: 1 }} onClick={onRemove}>
+      <Button variant="bare" style={{ marginLeft: 1 }} onPress={onRemove}>
         <SvgRemove style={{ width: 8, height: 8 }} />
       </Button>
     </View>
@@ -755,7 +765,6 @@ export function AutocompleteFooter({
         flexShrink: 0,
         ...(embedded ? { paddingTop: 5 } : { padding: 5 }),
       }}
-      onMouseDown={e => e.preventDefault()}
     >
       {children}
     </View>

@@ -1,6 +1,7 @@
 import React, { type ComponentProps } from 'react';
 
-import { theme } from '../../../../style';
+import { theme } from '@actual-app/components/theme';
+
 import { type CellValue } from '../../../spreadsheet/CellValue';
 import { useSheetValue } from '../../../spreadsheet/useSheetValue';
 

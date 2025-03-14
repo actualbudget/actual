@@ -91,11 +91,17 @@ export function withUndo<T>(
   );
 }
 
-export function undoable<T extends HandlerFunctions>(func: T) {
+export function undoable<T extends HandlerFunctions>(
+  func: T,
+  metaFunc?: (...metaArgs: Parameters<T>) => unknown,
+) {
   return (...args: Parameters<T>) => {
-    return withUndo<Awaited<ReturnType<T>>>(() => {
-      return func.apply(null, args);
-    });
+    return withUndo<Awaited<ReturnType<T>>>(
+      () => {
+        return func.apply(null, args);
+      },
+      metaFunc ? metaFunc(...args) : undefined,
+    );
   };
 }
 

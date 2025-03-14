@@ -1,12 +1,12 @@
 // @ts-strict-ignore
-import React, { memo, useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { addNotification } from 'loot-core/client/actions';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import {
   applyBudgetAction,
   createCategory,
@@ -49,7 +49,7 @@ type TrackingReportComponents = {
 };
 
 type EnvelopeBudgetComponents = {
-  SummaryComponent: typeof EnvelopeBudgetSummary;
+  SummaryComponent: typeof envelopeBudget.BudgetSummary;
   ExpenseCategoryComponent: typeof envelopeBudget.ExpenseCategoryMonth;
   ExpenseGroupComponent: typeof envelopeBudget.ExpenseGroupMonth;
   IncomeCategoryComponent: typeof envelopeBudget.IncomeCategoryMonth;
@@ -148,11 +148,13 @@ function BudgetInner(props: BudgetInnerProps) {
   const categoryNameAlreadyExistsNotification = name => {
     dispatch(
       addNotification({
-        type: 'error',
-        message: t(
-          'Category “{{name}}” already exists in group (it may be hidden)',
-          { name },
-        ),
+        notification: {
+          type: 'error',
+          message: t(
+            'Category “{{name}}” already exists in group (it may be hidden)',
+            { name },
+          ),
+        },
       }),
     );
   };
@@ -392,12 +394,6 @@ function BudgetInner(props: BudgetInnerProps) {
   );
 }
 
-const EnvelopeBudgetSummary = memo<{ month: string }>(props => {
-  return <envelopeBudget.BudgetSummary {...props} />;
-});
-
-EnvelopeBudgetSummary.displayName = 'EnvelopeBudgetSummary';
-
 export function Budget() {
   const trackingComponents = useMemo<TrackingReportComponents>(
     () => ({
@@ -414,7 +410,7 @@ export function Budget() {
 
   const envelopeComponents = useMemo<EnvelopeBudgetComponents>(
     () => ({
-      SummaryComponent: EnvelopeBudgetSummary,
+      SummaryComponent: envelopeBudget.BudgetSummary,
       ExpenseCategoryComponent: envelopeBudget.ExpenseCategoryMonth,
       ExpenseGroupComponent: envelopeBudget.ExpenseGroupMonth,
       IncomeCategoryComponent: envelopeBudget.IncomeCategoryMonth,

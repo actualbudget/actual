@@ -1,10 +1,13 @@
 import { useCallback } from 'react';
 
-import { addNotification } from 'loot-core/client/actions';
-import { type Notification } from 'loot-core/client/state-types/notifications';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+
+import {
+  addNotification,
+  type Notification,
+} from 'loot-core/client/notifications/notificationsSlice';
 import { redo, undo } from 'loot-core/client/undo';
 
-import { useResponsive } from '../components/responsive/ResponsiveProvider';
 import { useDispatch } from '../redux';
 
 type UndoActions = {
@@ -28,13 +31,15 @@ export function useUndo(): UndoActions {
 
       dispatch(
         addNotification({
-          type: 'message',
-          timeout,
-          button: {
-            title: 'Undo',
-            action: undo,
+          notification: {
+            type: 'message',
+            timeout,
+            button: {
+              title: 'Undo',
+              action: undo,
+            },
+            ...notification,
           },
-          ...notification,
         }),
       );
     },
@@ -49,13 +54,15 @@ export function useUndo(): UndoActions {
 
       dispatch(
         addNotification({
-          type: 'message',
-          timeout,
-          button: {
-            title: 'Redo',
-            action: redo,
+          notification: {
+            type: 'message',
+            timeout,
+            button: {
+              title: 'Redo',
+              action: redo,
+            },
+            ...notification,
           },
-          ...notification,
         }),
       );
     },

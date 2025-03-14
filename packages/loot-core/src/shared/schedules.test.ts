@@ -1,3 +1,5 @@
+import { enUS } from 'date-fns/locale';
+import i18next from 'i18next';
 import MockDate from 'mockdate';
 
 import * as monthUtils from './months';
@@ -6,6 +8,54 @@ import {
   getStatus,
   getUpcomingDays,
 } from './schedules';
+
+i18next.init({
+  lng: 'en',
+  fallbackLng: 'en',
+  resources: {
+    en: {
+      translation: {
+        Every: 'Every',
+        day: 'day',
+        week: 'week',
+        month: 'month',
+        year: 'year',
+        on: 'on',
+        'on the': 'on the',
+        and: 'and',
+        'until {{date}}': 'until {{date}}',
+        once: 'once',
+        times: '{{endOccurrences}} times',
+        weekend: 'weekend',
+        last: 'last',
+        'Next:': 'Next:',
+        'last day': 'last day',
+        '{{interval}} days': '{{interval}} days',
+        '{{interval}} weeks': '{{interval}} weeks',
+        '{{interval}} months': '{{interval}} months',
+        '{{interval}} years': '{{interval}} years',
+
+        Sunday: 'Sunday',
+        Monday: 'Monday',
+        Tuesday: 'Tuesday',
+        Wednesday: 'Wednesday',
+        Thursday: 'Thursday',
+        Friday: 'Friday',
+        Saturday: 'Saturday',
+
+        '{{value}}th day': '{{value}}th day',
+        '{{value}}th': '{{value}}th',
+        '{{value}}th {{dayName}}': '{{value}}th {{dayName}}',
+        'last {{dayName}}': 'last {{dayName}}',
+
+        '({{weekendSolveMode}} weekend)': '({{weekendSolveMode}} weekend)',
+      },
+    },
+  },
+  interpolation: {
+    escapeValue: false,
+  },
+});
 
 describe('schedules', () => {
   const today = new Date(2017, 0, 1); // Global date when testing is set to 2017-01-01 per monthUtils.currentDay()
@@ -70,6 +120,7 @@ describe('schedules', () => {
         getRecurringDescription(
           { start: '2021-05-17', frequency: 'weekly' },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every week on Monday');
 
@@ -81,6 +132,7 @@ describe('schedules', () => {
             interval: 2,
           },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every 2 weeks on Monday');
     });
@@ -90,6 +142,7 @@ describe('schedules', () => {
         getRecurringDescription(
           { start: '2021-04-25', frequency: 'monthly' },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every month on the 25th');
 
@@ -101,6 +154,7 @@ describe('schedules', () => {
             interval: 2,
           },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every 2 months on the 25th');
 
@@ -112,6 +166,7 @@ describe('schedules', () => {
             patterns: [{ type: 'day', value: 25 }],
           },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every month on the 25th');
 
@@ -124,6 +179,7 @@ describe('schedules', () => {
             patterns: [{ type: 'day', value: 25 }],
           },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every 2 months on the 25th');
 
@@ -136,6 +192,7 @@ describe('schedules', () => {
             patterns: [{ type: 'day', value: 31 }],
           },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every month on the 31st');
 
@@ -148,6 +205,7 @@ describe('schedules', () => {
             patterns: [{ type: 'day', value: -1 }],
           },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every month on the last day');
 
@@ -160,6 +218,7 @@ describe('schedules', () => {
             patterns: [{ type: 'FR', value: 2 }],
           },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every month on the 2nd Friday');
 
@@ -171,6 +230,7 @@ describe('schedules', () => {
             patterns: [{ type: 'FR', value: -1 }],
           },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every month on the last Friday');
     });
@@ -189,6 +249,7 @@ describe('schedules', () => {
             ],
           },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every month on the 3rd, 15th, and 20th');
 
@@ -204,6 +265,7 @@ describe('schedules', () => {
             ],
           },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every month on the 3rd, 20th, and last day');
 
@@ -220,6 +282,7 @@ describe('schedules', () => {
             ],
           },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every month on the 2nd Friday, 3rd, and last day');
 
@@ -237,6 +300,7 @@ describe('schedules', () => {
             ],
           },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every month on the 1st Saturday, 3rd Friday, 2nd, and 10th');
     });
@@ -246,6 +310,7 @@ describe('schedules', () => {
         getRecurringDescription(
           { start: '2021-05-17', frequency: 'yearly' },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every year on May 17th');
 
@@ -257,6 +322,7 @@ describe('schedules', () => {
             interval: 2,
           },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every 2 years on May 17th');
     });
@@ -272,6 +338,7 @@ describe('schedules', () => {
             endOccurrences: 2,
           },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every 2 weeks on Monday, 2 times');
 
@@ -285,6 +352,7 @@ describe('schedules', () => {
             endOccurrences: 1,
           },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every 2 weeks on Monday, once');
 
@@ -298,6 +366,7 @@ describe('schedules', () => {
             endOccurrences: 2,
           },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every 2 months on the 17th, 2 times');
 
@@ -311,6 +380,7 @@ describe('schedules', () => {
             endOccurrences: 2,
           },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every 2 years on May 17th, 2 times');
     });
@@ -326,6 +396,7 @@ describe('schedules', () => {
             endDate: '2021-06-01',
           },
           'MM/dd/yyyy',
+          enUS,
         ),
       ).toBe('Every 2 weeks on Monday, until 06/01/2021');
 
@@ -339,6 +410,7 @@ describe('schedules', () => {
             endDate: '2021-06-01',
           },
           'yyyy-MM-dd',
+          enUS,
         ),
       ).toBe('Every 2 months on the 17th, until 2021-06-01');
     });

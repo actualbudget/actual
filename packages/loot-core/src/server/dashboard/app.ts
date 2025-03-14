@@ -5,7 +5,6 @@ import * as fs from '../../platform/server/fs';
 import { DEFAULT_DASHBOARD_STATE } from '../../shared/dashboard';
 import { q } from '../../shared/query';
 import {
-  type CustomReportEntity,
   type ExportImportDashboard,
   type ExportImportDashboardWidget,
   type ExportImportCustomReportWidget,
@@ -178,7 +177,7 @@ async function importDashboard({ filepath }: { filepath: string }) {
 
     exportModel.validate(parsedContent);
 
-    const customReportIds: CustomReportEntity[] = await db.all(
+    const customReportIds = await db.all<Pick<db.DbCustomReport, 'id'>>(
       'SELECT id from custom_reports',
     );
     const customReportIdSet = new Set(customReportIds.map(({ id }) => id));

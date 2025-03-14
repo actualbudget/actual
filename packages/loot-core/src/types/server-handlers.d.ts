@@ -4,12 +4,7 @@ import { Node as SpreadsheetNode } from '../server/spreadsheet/spreadsheet';
 import { Message } from '../server/sync';
 
 import { Budget } from './budget';
-import {
-  CategoryEntity,
-  CategoryGroupEntity,
-  RuleEntity,
-  PayeeEntity,
-} from './models';
+import { CategoryEntity, CategoryGroupEntity } from './models';
 import { OpenIdConfig } from './models/openid';
 // eslint-disable-next-line import/no-unresolved
 import { Query } from './query';
@@ -68,27 +63,6 @@ export interface ServerHandlers {
   'category-group-delete': (arg: { id; transferId }) => Promise<unknown>;
 
   'must-category-transfer': (arg: { id }) => Promise<unknown>;
-
-  'payee-create': (arg: { name }) => Promise<string>;
-
-  'common-payees-get': () => Promise<PayeeEntity[]>;
-
-  'payees-get': () => Promise<PayeeEntity[]>;
-
-  'payees-get-rule-counts': () => Promise<Record<PayeeEntity['id'], number>>;
-
-  'payees-merge': (arg: { targetId; mergeIds }) => Promise<void>;
-
-  'payees-batch-change': (arg: {
-    added?;
-    deleted?;
-    updated?;
-  }) => Promise<unknown>;
-
-  'payees-check-orphaned': (arg: { ids }) => Promise<unknown>;
-  'payees-get-orphaned': () => Promise<PayeeEntity[]>;
-
-  'payees-get-rules': (arg: { id: string }) => Promise<RuleEntity[]>;
 
   'make-filters-from-conditions': (arg: {
     conditions: unknown;

@@ -261,7 +261,9 @@ describe('runQuery', () => {
   it('fetches all data required for $oneof', async () => {
     await insertTransactions();
 
-    const rows = await db.all('SELECT id FROM transactions WHERE amount < -50');
+    const rows = await db.all<Pick<db.DbTransaction, 'id'>>(
+      'SELECT id FROM transactions WHERE amount < -50',
+    );
     const ids = rows.slice(0, 3).map(row => row.id);
     ids.sort();
 

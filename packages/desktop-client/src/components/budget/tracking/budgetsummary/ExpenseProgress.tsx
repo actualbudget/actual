@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { theme } from '../../../../style';
+import { theme } from '@actual-app/components/theme';
+
 import { type Binding } from '../../../spreadsheet';
 import { useTrackingSheetValue } from '../TrackingBudgetComponents';
 

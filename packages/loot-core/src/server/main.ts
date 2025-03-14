@@ -16,6 +16,7 @@ import * as monthUtils from '../shared/months';
 import { q } from '../shared/query';
 import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
+import { CategoryEntity, CategoryGroupEntity } from '../types/models';
 import { OpenIdConfig } from '../types/models/openid';
 
 import { app as accountsApp } from './accounts/app';
@@ -42,6 +43,7 @@ import { handleBudgetImport } from './importers';
 import { app } from './main-app';
 import { mutator, runHandler } from './mutators';
 import { app as notesApp } from './notes/app';
+import { app as payeesApp } from './payees/app';
 import * as Platform from './platform';
 import { get, post } from './post';
 import { app as preferencesApp } from './preferences/app';
@@ -55,18 +57,18 @@ import { resolveName, unresolveName } from './spreadsheet/util';
 import {
   initialFullSync,
   fullSync,
-  batchMessages,
   setSyncingMode,
   makeTestMessage,
   clearFullSyncTimeout,
   resetSync,
   repairSync,
+  batchMessages,
 } from './sync';
 import * as syncMigrations from './sync/migrate';
 import { app as toolsApp } from './tools/app';
 import { app as transactionsApp } from './transactions/app';
 import * as rules from './transactions/transaction-rules';
-import { withUndo, clearUndo, undo, redo } from './undo';
+import { clearUndo, undo, redo, withUndo } from './undo';
 import { updateVersion } from './update';
 import {
   uniqueBudgetName,
@@ -102,9 +104,12 @@ handlers['redo'] = mutator(function () {
 });
 
 handlers['get-categories'] = async function () {
+  // TODO: Force cast to CategoryGroupEntity and CategoryEntity.
+  // This should be updated to AQL queries. The server should not directly return DB models.
   return {
-    grouped: await db.getCategoriesGrouped(),
-    list: await db.getCategories(),
+    grouped:
+      (await db.getCategoriesGrouped()) as unknown as CategoryGroupEntity[],
+    list: (await db.getCategories()) as unknown as CategoryEntity[],
   };
 };
 
@@ -335,7 +340,7 @@ handlers['category-group-delete'] = mutator(async function ({
   transferId,
 }) {
   return withUndo(async () => {
-    const groupCategories = await db.all(
+    const groupCategories = await db.all<Pick<db.DbCategory, 'id'>>(
       'SELECT id FROM categories WHERE cat_group = ? AND tombstone = 0',
       [id],
     );
@@ -375,77 +380,6 @@ handlers['must-category-transfer'] = async function ({ id }) {
 
     return value != null && value !== 0;
   });
-};
-
-handlers['payee-create'] = mutator(async function ({ name }) {
-  return withUndo(async () => {
-    return db.insertPayee({ name });
-  });
-});
-
-handlers['common-payees-get'] = async function () {
-  return db.getCommonPayees();
-};
-
-handlers['payees-get'] = async function () {
-  return db.getPayees();
-};
-
-handlers['payees-get-orphaned'] = async function () {
-  return db.syncGetOrphanedPayees();
-};
-
-handlers['payees-get-rule-counts'] = async function () {
-  const payeeCounts = {};
-
-  rules.iterateIds(rules.getRules(), 'payee', (rule, id) => {
-    if (payeeCounts[id] == null) {
-      payeeCounts[id] = 0;
-    }
-    payeeCounts[id]++;
-  });
-
-  return payeeCounts;
-};
-
-handlers['payees-merge'] = mutator(async function ({ targetId, mergeIds }) {
-  return withUndo(
-    async () => {
-      return db.mergePayees(targetId, mergeIds);
-    },
-    { targetId, mergeIds },
-  );
-});
-
-handlers['payees-batch-change'] = mutator(async function ({
-  added,
-  deleted,
-  updated,
-}) {
-  return withUndo(async () => {
-    return batchMessages(async () => {
-      if (deleted) {
-        await Promise.all(deleted.map(p => db.deletePayee(p)));
-      }
-
-      if (added) {
-        await Promise.all(added.map(p => db.insertPayee(p)));
-      }
-
-      if (updated) {
-        await Promise.all(updated.map(p => db.updatePayee(p)));
-      }
-    });
-  });
-});
-
-handlers['payees-check-orphaned'] = async function ({ ids }) {
-  const orphaned = new Set(await db.getOrphanedPayees());
-  return ids.filter(id => orphaned.has(id));
-};
-
-handlers['payees-get-rules'] = async function ({ id }) {
-  return rules.getRulesForPayee(id).map(rule => rule.serialize());
 };
 
 handlers['make-filters-from-conditions'] = async function ({
@@ -1491,6 +1425,7 @@ app.combine(
   adminApp,
   transactionsApp,
   accountsApp,
+  payeesApp,
 );
 
 export function getDefaultDocumentDir() {
