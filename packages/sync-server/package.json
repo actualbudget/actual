@@ -14,7 +14,6 @@
     "db:test-migrate": "NODE_ENV=test node src/run-migrations.js up",
     "db:test-downgrade": "NODE_ENV=test node src/run-migrations.js down",
     "reset-password": "node src/scripts/reset-password.js",
-    "enable-openid": "node src/scripts/enable-openid.js",
     "disable-openid": "node src/scripts/disable-openid.js",
     "health-check": "node src/scripts/health-check.js"
   },
