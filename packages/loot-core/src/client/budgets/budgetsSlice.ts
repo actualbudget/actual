@@ -7,11 +7,10 @@ import { getDownloadError, getSyncError } from '../../shared/errors';
 import { type Budget } from '../../types/budget';
 import { type File } from '../../types/file';
 import { type Handlers } from '../../types/handlers';
-import { setAppState } from '../app/appSlice';
+import { resetApp, setAppState } from '../app/appSlice';
 import { closeModal, pushModal } from '../modals/modalsSlice';
 import { loadGlobalPrefs, loadPrefs } from '../prefs/prefsSlice';
 import { createAppAsyncThunk } from '../redux';
-import { CLOSE_BUDGET } from '../store';
 import { signOut } from '../users/usersSlice';
 
 const sliceName = 'budgets';
@@ -102,10 +101,7 @@ export const closeBudget = createAppAsyncThunk(
   async (_, { dispatch, getState }) => {
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
-      // This clears out all the app state so the user starts fresh
-      // TODO: Change to use an action once CLOSE_BUDGET is migrated to redux toolkit.
-      await dispatch({ type: CLOSE_BUDGET });
-
+      await dispatch(resetApp());
       await dispatch(setAppState({ loadingText: t('Closing...') }));
       await send('close-budget');
       await dispatch(setAppState({ loadingText: null }));
@@ -121,8 +117,7 @@ export const closeBudgetUI = createAppAsyncThunk(
   async (_, { dispatch, getState }) => {
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
-      // TODO: Change to use an action once CLOSE_BUDGET is migrated to redux toolkit.
-      await dispatch({ type: CLOSE_BUDGET });
+      await dispatch(resetApp());
     }
   },
 );
@@ -451,6 +446,7 @@ const budgetsSlice = createSlice({
     builder.addCase(signOut.fulfilled, state => {
       state.allFiles = null;
     });
+    builder.addCase(resetApp, state => state || initialState);
   },
 });
 

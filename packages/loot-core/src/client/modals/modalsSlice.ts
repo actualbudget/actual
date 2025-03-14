@@ -17,7 +17,7 @@ import {
   type NewUserEntity,
   type NoteEntity,
 } from '../../types/models';
-import { setAppState } from '../app/appSlice';
+import { resetApp, setAppState } from '../app/appSlice';
 import { createAppAsyncThunk } from '../redux';
 import { signOut } from '../users/usersSlice';
 
@@ -626,11 +626,11 @@ const modalsSlice = createSlice({
     },
   },
   extraReducers: builder => {
-    builder
-      .addCase(setAppState, (state, action) => {
-        state.isHidden = action.payload.loadingText !== null;
-      })
-      .addCase(signOut.fulfilled, () => initialState);
+    builder.addCase(setAppState, (state, action) => {
+      state.isHidden = action.payload.loadingText !== null;
+    });
+    builder.addCase(signOut.fulfilled, () => initialState);
+    builder.addCase(resetApp, () => initialState);
   },
 });
 
