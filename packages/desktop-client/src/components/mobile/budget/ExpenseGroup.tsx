@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
@@ -13,7 +13,10 @@ import { AutoTextSize } from 'auto-text-size';
 
 import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
 import * as monthUtils from 'loot-core/shared/months';
-import { type CategoryGroupEntity } from 'loot-core/types/models';
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/types/models';
 
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { PrivacyFilter } from '../../PrivacyFilter';
@@ -59,6 +62,13 @@ export function ExpenseGroup({
     [group.categories, group.id, isCollapsed, showHiddenCategories],
   );
 
+  const shouldHideCategory = useCallback(
+    (category: CategoryEntity) => {
+      return !!(category.hidden || group.hidden);
+    },
+    [group.hidden],
+  );
+
   return (
     <Card
       style={{
@@ -81,7 +91,7 @@ export function ExpenseGroup({
         month={month}
         onEditCategory={onEditCategory}
         onBudgetAction={onBudgetAction}
-        shouldHideCategory={category => !!(category.hidden || group.hidden)}
+        shouldHideCategory={shouldHideCategory}
         show3Columns={show3Columns}
         showBudgetedColumn={showBudgetedColumn}
       />
