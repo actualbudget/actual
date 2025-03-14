@@ -177,7 +177,7 @@ global.Actual = {
   },
 
   setTheme: theme => {
-    window.__actionsForMenu.saveGlobalPrefs({ theme });
+    window.__actionsForMenu.saveGlobalPrefs({ prefs: { theme } });
   },
 
   moveBudgetDirectory: () => {},

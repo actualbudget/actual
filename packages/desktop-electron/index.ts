@@ -673,7 +673,7 @@ ipcMain.on('set-theme', (_event, theme: string) => {
   const obj = { theme };
   if (clientWin) {
     clientWin.webContents.executeJavaScript(
-      `window.__actionsForMenu && window.__actionsForMenu.saveGlobalPrefs(${JSON.stringify(obj)})`,
+      `window.__actionsForMenu && window.__actionsForMenu.saveGlobalPrefs({ prefs: ${JSON.stringify(obj)} })`,
     );
   }
 });
