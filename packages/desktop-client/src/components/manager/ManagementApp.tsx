@@ -23,7 +23,7 @@ import { LoggedInUser } from '../LoggedInUser';
 import { Notifications } from '../Notifications';
 import { useMultiuserEnabled, useServerVersion } from '../ServerContext';
 
-import { BudgetList } from './BudgetList';
+import { BudgetFileSelection } from './BudgetFileSelection';
 import { ConfigServer } from './ConfigServer';
 import { ServerURL } from './ServerURL';
 import { Bootstrap } from './subscribe/Bootstrap';
@@ -134,7 +134,7 @@ export function ManagementApp() {
 
                 <Route path="/change-password" element={<ChangePassword />} />
                 {files && files.length > 0 ? (
-                  <Route path="/" element={<BudgetList />} />
+                  <Route path="/" element={<BudgetFileSelection />} />
                 ) : (
                   <Route path="/" element={<WelcomeScreen />} />
                 )}
