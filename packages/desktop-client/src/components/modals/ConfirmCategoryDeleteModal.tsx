@@ -119,7 +119,7 @@ export function ConfirmCategoryDeleteModal({
                           }))
                   }
                   value={transferCategory}
-                  focused={true}
+                  autoFocus={true}
                   inputProps={{
                     placeholder: t('Select category...'),
                   }}
