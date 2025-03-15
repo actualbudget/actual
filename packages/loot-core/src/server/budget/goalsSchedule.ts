@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import * as d from 'date-fns';
+
 import * as monthUtils from '../../shared/months';
 import {
   getNextDate,
@@ -8,7 +10,6 @@ import {
 import { CategoryEntity } from '../../types/models';
 import * as db from '../db';
 import { getRuleForSchedule } from '../schedules/app';
-import * as d from 'date-fns';
 
 import { isReflectBudget } from './actions';
 import { ScheduleTemplate, Template } from './types/templates';

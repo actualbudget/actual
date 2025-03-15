@@ -7,7 +7,6 @@ import {
   getRecurringDescription,
   getStatus,
   getUpcomingDays,
-  getDateWithSkippedWeekend,
 } from './schedules';
 
 i18next.init({
