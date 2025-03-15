@@ -6,25 +6,36 @@ import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
 import { moveCategory } from 'loot-core/client/queries/queriesSlice';
-import { type CategoryEntity } from 'loot-core/types/models';
+import {
+  type CategoryGroupEntity,
+  type CategoryEntity,
+} from 'loot-core/types/models';
 
 import { useDispatch } from '../../../redux';
 
-import { IncomeCategoryListItem } from './IncomeCategoryListItem';
+import { ExpenseCategoryListItem } from './ExpenseCategoryListItem';
 
-type IncomeCategoryListProps = {
+type ExpenseCategoryListProps = {
+  group: CategoryGroupEntity;
   categories: CategoryEntity[];
+  shouldHideCategory: (category: CategoryEntity) => boolean;
   month: string;
   onEditCategory: (id: string) => void;
   onBudgetAction: (month: string, action: string, args: unknown) => void;
+  show3Columns: boolean;
+  showBudgetedColumn: boolean;
 };
 
-export function IncomeCategoryList({
+export function ExpenseCategoryList({
+  group,
   categories,
   month,
   onEditCategory,
   onBudgetAction,
-}: IncomeCategoryListProps) {
+  show3Columns,
+  showBudgetedColumn,
+  shouldHideCategory,
+}: ExpenseCategoryListProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
@@ -109,17 +120,30 @@ export function IncomeCategoryList({
 
   return (
     <GridList
-      aria-label={t('Income categories')}
+      aria-label={t('{{groupName}} expense group categories', {
+        groupName: group.name,
+      })}
       items={categories}
       dragAndDropHooks={dragAndDropHooks}
+      dependencies={[
+        month,
+        onEditCategory,
+        onBudgetAction,
+        shouldHideCategory,
+        show3Columns,
+        showBudgetedColumn,
+      ]}
     >
       {category => (
-        <IncomeCategoryListItem
+        <ExpenseCategoryListItem
           key={category.id}
           value={category}
           month={month}
           onEdit={onEditCategory}
           onBudgetAction={onBudgetAction}
+          isHidden={shouldHideCategory(category)}
+          show3Columns={show3Columns}
+          showBudgetedColumn={showBudgetedColumn}
         />
       )}
     </GridList>
