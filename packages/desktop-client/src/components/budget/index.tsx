@@ -84,6 +84,7 @@ function BudgetInner(props: BudgetInnerProps) {
   const maxMonths = maxMonthsPref || 1;
   const [initialized, setInitialized] = useState(false);
   const { grouped: categoryGroups } = useCategories();
+  const [hoveredMonth, setHoveredMonth] = useState<string>();
 
   useEffect(() => {
     async function run() {
@@ -364,6 +365,8 @@ function BudgetInner(props: BudgetInnerProps) {
         summaryCollapsed={summaryCollapsed}
         onBudgetAction={onBudgetAction}
         onToggleSummaryCollapse={onToggleCollapse}
+        setHoveredMonth={setHoveredMonth}
+        hoveredMonth={hoveredMonth}
       >
         <DynamicBudgetTable
           type={budgetType}
