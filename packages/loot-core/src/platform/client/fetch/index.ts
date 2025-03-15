@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as undo from '../undo';
 
-import type * as T from '.';
+import type * as T from './index.d';
 
 const replyHandlers = new Map();
 const listeners = new Map();
@@ -145,3 +145,5 @@ export const clearServer: T.ClearServer = async function () {
     return new Promise(closeSocket);
   }
 };
+export const initServer: T.InitServer = async function () {};
+export const serverPush: T.ServerPush = async function () {};

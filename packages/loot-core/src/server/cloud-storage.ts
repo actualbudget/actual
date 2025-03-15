@@ -293,6 +293,7 @@ export async function upload() {
   try {
     res = await fetchJSON(getServer().SYNC_SERVER + '/upload-user-file', {
       method: 'POST',
+      // @ts-expect-error fix me
       headers: {
         'Content-Length': uploadContent.length,
         'Content-Type': 'application/encrypted-file',
