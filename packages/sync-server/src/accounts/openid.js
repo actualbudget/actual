@@ -144,6 +144,9 @@ export async function loginWithOpenIdFinalize(body) {
   if (!body.state) {
     return { error: 'missing-state' };
   }
+  if (!body.iss) {
+    return { error: 'missing-issuer' };
+  }
 
   const accountDb = getAccountDb();
   let configFromDb = accountDb.first(
