@@ -1,4 +1,4 @@
-FROM node:18-bookworm as deps
+FROM node:18-bookworm AS deps
 
 # Install required packages
 RUN apt-get update && apt-get install -y openssl
@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Copy only the files needed for installing dependencies
 COPY .yarn ./.yarn
-COPY yarn.lock package.json .yarnrc.yml tsconfig.json ./
+COPY yarn.lock package.json .yarnrc.yml ./
 COPY packages/api/package.json packages/api/package.json
 COPY packages/component-library/package.json packages/component-library/package.json
 COPY packages/crdt/package.json packages/crdt/package.json
@@ -17,19 +17,17 @@ COPY packages/eslint-plugin-actual/package.json packages/eslint-plugin-actual/pa
 COPY packages/loot-core/package.json packages/loot-core/package.json
 COPY packages/sync-server/package.json packages/sync-server/package.json
 
-COPY ./bin/package-browser ./bin/package-browser
+# Avoiding memory issues with ARMv7
+RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 
-RUN yarn install
+# Focus the workspaces in production mode
+RUN yarn workspaces focus @actual-app/sync-server --production
 
-FROM deps as builder
+FROM deps AS builder
 
 WORKDIR /app
 
-COPY packages/ ./packages/
-RUN yarn build:browser
-
-# Focus the workspaces in production mode (including @actual-app/web you just built)
-RUN yarn workspaces focus @actual-app/sync-server --production
+COPY packages/sync-server ./packages/sync-server
 
 # Remove symbolic links for @actual-app/web and @actual-app/sync-server
 RUN rm -rf ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
@@ -38,10 +36,10 @@ RUN rm -rf ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
 COPY packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
 COPY packages/desktop-client/build ./node_modules/@actual-app/web/build
 
-FROM node:18-bookworm-slim as prod
+FROM node:18-bookworm-slim AS prod
 
 # Minimal runtime dependencies
-RUN apt-get update && apt-get install -y tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user
 ARG USERNAME=actual
@@ -60,6 +58,6 @@ COPY --from=builder /app/packages/sync-server/package.json /app/packages/sync-se
 COPY --from=builder /app/packages/sync-server/src ./src
 COPY --from=builder /app/packages/sync-server/migrations ./migrations
 
-ENTRYPOINT ["/usr/bin/tini", "-g", "--"]
+ENTRYPOINT ["/usr/bin/tini","-g",  "--"]
 EXPOSE 5006
 CMD ["node", "app.js"]

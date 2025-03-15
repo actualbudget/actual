@@ -33,12 +33,16 @@ import {
   addNotification,
 } from '../notifications/notificationsSlice';
 import {
+  name as prefsSliceName,
+  reducer as prefsSliceReducer,
+  getInitialState as getInitialPrefsState,
+} from '../prefs/prefsSlice';
+import {
   name as queriesSliceName,
   reducer as queriesSliceReducer,
   getInitialState as getInitialQueriesState,
 } from '../queries/queriesSlice';
 import { reducers } from '../reducers';
-import { initialState as initialPrefsState } from '../reducers/prefs';
 import { initialState as initialUserState } from '../reducers/user';
 
 const appReducer = combineReducers({
@@ -48,6 +52,7 @@ const appReducer = combineReducers({
   [budgetsSliceName]: budgetsSliceReducer,
   [modalsSliceName]: modalsSliceReducer,
   [notificationsSliceName]: notificationsSliceReducer,
+  [prefsSliceName]: prefsSliceReducer,
   [queriesSliceName]: queriesSliceReducer,
 });
 const rootReducer: typeof appReducer = (state, action) => {
@@ -62,9 +67,8 @@ const rootReducer: typeof appReducer = (state, action) => {
       budgets: state?.budgets || getInitialBudgetsState(),
       user: state?.user || initialUserState,
       prefs: {
-        local: initialPrefsState.local,
-        global: state?.prefs?.global || initialPrefsState.global,
-        synced: initialPrefsState.synced,
+        ...getInitialPrefsState(),
+        global: state?.prefs?.global || getInitialPrefsState().global,
       },
       app: {
         ...getInitialAppState(),
