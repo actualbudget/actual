@@ -392,7 +392,7 @@ export function getUpcomingDays(upcomingLength = '7'): number {
     case 'currentMonth': {
       const day = monthUtils.getDay(today);
       const end = monthUtils.getDay(monthUtils.getMonthEnd(today));
-      return end - day + 1;
+      return end - day;
     }
     case 'oneMonth': {
       return (
