@@ -51,7 +51,7 @@ export function Input({
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             flexShrink: 0,
-            ':focus': {
+            '&:focus': {
               border: '1px solid ' + theme.formInputBorderSelected,
               boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
             },
