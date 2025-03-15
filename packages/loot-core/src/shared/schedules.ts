@@ -425,7 +425,7 @@ export function getUpcomingDays(upcomingLength = '7'): number {
   }
 }
 
-export function scheduleIsRecurring(dateCond: Condition) {
+export function scheduleIsRecurring(dateCond: Condition | null) {
   if (!dateCond) {
     return false;
   }
