@@ -1,4 +1,8 @@
-import { PayeeEntity } from '../types/models';
+import {
+  CategoryEntity,
+  CategoryGroupEntity,
+  PayeeEntity,
+} from '../types/models';
 
 import {
   convertForInsert,
@@ -69,7 +73,7 @@ export const categoryModel = {
   validate(
     category: Partial<DbCategory>,
     { update }: { update?: boolean } = {},
-  ) {
+  ): DbCategory {
     requiredFields(
       'category',
       category,
@@ -78,7 +82,43 @@ export const categoryModel = {
     );
 
     const { sort_order, ...rest } = category;
-    return { ...rest, hidden: rest.hidden ? 1 : 0 } as DbCategory;
+    return { ...rest } as DbCategory;
+  },
+  toDb(
+    category: CategoryEntity,
+    { update }: { update?: boolean } = {},
+  ): DbCategory {
+    const { cat_group: group, ...rest } = category;
+    // TODO: This is a workaround.
+    // Entity model does not match AQL so we rename it here.
+    // It should be updated later to match AQL.
+    const catWithGroupRenamed = {
+      ...rest,
+      group,
+    };
+    return (
+      update
+        ? convertForUpdate(
+            schema,
+            schemaConfig,
+            'categories',
+            catWithGroupRenamed,
+          )
+        : convertForInsert(
+            schema,
+            schemaConfig,
+            'categories',
+            catWithGroupRenamed,
+          )
+    ) as DbCategory;
+  },
+  fromDb(category: DbCategory): CategoryEntity {
+    return convertFromSelect(
+      schema,
+      schemaConfig,
+      'categories',
+      category,
+    ) as CategoryEntity;
   },
 };
 
@@ -86,7 +126,7 @@ export const categoryGroupModel = {
   validate(
     categoryGroup: Partial<DbCategoryGroup>,
     { update }: { update?: boolean } = {},
-  ) {
+  ): DbCategoryGroup {
     requiredFields(
       'categoryGroup',
       categoryGroup,
@@ -95,7 +135,47 @@ export const categoryGroupModel = {
     );
 
     const { sort_order, ...rest } = categoryGroup;
-    return { ...rest, hidden: rest.hidden ? 1 : 0 } as DbCategoryGroup;
+    return { ...rest } as DbCategoryGroup;
+  },
+  toDb(
+    categoryGroup: CategoryGroupEntity,
+    { update }: { update?: boolean } = {},
+  ): DbCategoryGroup {
+    return (
+      update
+        ? convertForUpdate(
+            schema,
+            schemaConfig,
+            'category_groups',
+            categoryGroup,
+          )
+        : convertForInsert(
+            schema,
+            schemaConfig,
+            'category_groups',
+            categoryGroup,
+          )
+    ) as DbCategoryGroup;
+  },
+  fromDb(
+    categoryGroup: DbCategoryGroup & {
+      categories: DbCategory[];
+    },
+  ): CategoryGroupEntity {
+    const { categories, ...rest } = categoryGroup;
+    const categoryGroupEntity = convertFromSelect(
+      schema,
+      schemaConfig,
+      'category_groups',
+      rest,
+    ) as CategoryGroupEntity;
+
+    return {
+      ...categoryGroupEntity,
+      categories: categories
+        .filter(category => category.cat_group === categoryGroup.id)
+        .map(categoryModel.fromDb),
+    };
   },
 };
 
