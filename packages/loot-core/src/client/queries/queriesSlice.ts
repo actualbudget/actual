@@ -12,6 +12,7 @@ import {
   type AccountEntity,
   type PayeeEntity,
 } from '../../types/models';
+import { resetApp } from '../app/appSlice';
 import {
   addGenericErrorNotification,
   addNotification,
@@ -154,6 +155,10 @@ const queriesSlice = createSlice({
       state.payees = action.payload;
       state.payeesLoaded = true;
     });
+
+    // App
+
+    builder.addCase(resetApp, () => initialState);
   },
 });
 

@@ -9,6 +9,7 @@ import {
   type MetadataPrefs,
   type SyncedPrefs,
 } from '../../types/prefs';
+import { resetApp } from '../app/appSlice';
 import { closeModal } from '../modals/modalsSlice';
 import { createAppAsyncThunk } from '../redux';
 
@@ -152,6 +153,12 @@ const prefsSlice = createSlice({
     mergeSyncedPrefs(state, action: PayloadAction<MergeSyncedPrefsPayload>) {
       state.synced = { ...state.synced, ...action.payload };
     },
+  },
+  extraReducers: builder => {
+    builder.addCase(resetApp, state => ({
+      ...initialState,
+      global: state.global || initialState.global,
+    }));
   },
 });
 

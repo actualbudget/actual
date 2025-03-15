@@ -33,7 +33,6 @@ import { tokens } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { getUserData } from 'loot-core/client/actions';
 import {
   closeAndDownloadBudget,
   closeAndLoadBudget,
@@ -43,6 +42,7 @@ import {
   loadBudget,
 } from 'loot-core/client/budgets/budgetsSlice';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import { getUserData } from 'loot-core/client/users/usersSlice';
 import {
   isElectron,
   isNonProductionEnvironment,
