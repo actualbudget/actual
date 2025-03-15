@@ -84,3 +84,5 @@ export const getNumClients: T.GetNumClients = function () {
 export const send: T.Send = function (name, args) {
   process.parentPort.postMessage({ type: 'push', name, args });
 };
+
+export const resetEvents: T.ResetEvents = function () {};
