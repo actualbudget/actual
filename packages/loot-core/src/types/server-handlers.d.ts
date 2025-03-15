@@ -19,18 +19,20 @@ export interface ServerHandlers {
     list: Array<CategoryEntity>;
   }>;
 
+  'get-category-groups': () => Promise<Array<CategoryGroupEntity>>;
+
   'get-earliest-transaction': () => Promise<{ date: string }>;
 
   'get-budget-bounds': () => Promise<{ start: string; end: string }>;
 
-  'envelope-budget-month': (arg: { month }) => Promise<
+  'envelope-budget-month': (arg: { month: string }) => Promise<
     {
       value: string | number | boolean;
       name: string;
     }[]
   >;
 
-  'tracking-budget-month': (arg: { month }) => Promise<
+  'tracking-budget-month': (arg: { month: string }) => Promise<
     {
       value: string | number | boolean;
       name: string;
@@ -38,31 +40,48 @@ export interface ServerHandlers {
   >;
 
   'category-create': (arg: {
-    name;
-    groupId;
-    isIncome?;
-    hidden?: boolean;
-  }) => Promise<string>;
+    name: CategoryEntity['name'];
+    groupId: CategoryGroupEntity['id'];
+    isIncome?: CategoryEntity['is_income'];
+    hidden?: CategoryEntity['hidden'];
+  }) => Promise<CategoryEntity['id']>;
 
-  'category-update': (category) => Promise<unknown>;
+  'category-update': (
+    category: CategoryEntity,
+  ) => Promise<{ error?: { type: 'category-exists' } }>;
 
-  'category-move': (arg: { id; groupId; targetId }) => Promise<unknown>;
+  'category-move': (arg: {
+    id: CategoryEntity['id'];
+    groupId: CategoryGroupEntity['id'];
+    targetId: CategoryEntity['id'];
+  }) => Promise<void>;
 
-  'category-delete': (arg: { id; transferId? }) => Promise<{ error?: string }>;
+  'category-delete': (arg: {
+    id: CategoryEntity['id'];
+    transferId?: CategoryEntity['id'];
+  }) => Promise<{ error?: 'no-categories' | 'category-type' }>;
 
   'category-group-create': (arg: {
-    name;
-    isIncome?: boolean;
-    hidden?: boolean;
-  }) => Promise<string>;
+    name: CategoryGroupEntity['name'];
+    isIncome?: CategoryGroupEntity['is_income'];
+    hidden?: CategoryGroupEntity['hidden'];
+  }) => Promise<CategoryGroupEntity['id']>;
 
-  'category-group-update': (group) => Promise<unknown>;
+  'category-group-update': (group: CategoryGroupEntity) => Promise<unknown>;
 
-  'category-group-move': (arg: { id; targetId }) => Promise<unknown>;
+  'category-group-move': (arg: {
+    id: CategoryGroupEntity['id'];
+    targetId: CategoryGroupEntity['id'];
+  }) => Promise<void>;
 
-  'category-group-delete': (arg: { id; transferId }) => Promise<unknown>;
+  'category-group-delete': (arg: {
+    id: CategoryGroupEntity['id'];
+    transferId: CategoryEntity['id'];
+  }) => Promise<void>;
 
-  'must-category-transfer': (arg: { id }) => Promise<unknown>;
+  'must-category-transfer': (arg: {
+    id: CategoryEntity['id'];
+  }) => Promise<boolean>;
 
   'make-filters-from-conditions': (arg: {
     conditions: unknown;

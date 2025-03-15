@@ -306,7 +306,9 @@ export function updateWithSchema(table, fields) {
 // Data-specific functions. Ideally this would be split up into
 // different files
 
-export async function getCategories(ids?: Array<DbCategory['id']>) {
+export async function getCategories(
+  ids?: Array<DbCategory['id']>,
+): Promise<DbCategory[]> {
   const whereIn = ids ? `c.id IN (${toSqlQueryParameters(ids)}) AND` : '';
   const query = `SELECT c.* FROM categories c WHERE ${whereIn} c.tombstone = 0 ORDER BY c.sort_order, c.id`;
   return ids
@@ -316,7 +318,13 @@ export async function getCategories(ids?: Array<DbCategory['id']>) {
 
 export async function getCategoriesGrouped(
   ids?: Array<DbCategoryGroup['id']>,
-): Promise<Array<DbCategoryGroup & { categories: DbCategory[] }>> {
+): Promise<
+  Array<
+    DbCategoryGroup & {
+      categories: DbCategory[];
+    }
+  >
+> {
   const categoryGroupWhereIn = ids
     ? `cg.id IN (${toSqlQueryParameters(ids)}) AND`
     : '';
@@ -343,7 +351,7 @@ export async function getCategoriesGrouped(
   }));
 }
 
-export async function insertCategoryGroup(group) {
+export async function insertCategoryGroup(group: Partial<DbCategoryGroup>) {
   // Don't allow duplicate group
   const existingGroup = await first<
     Pick<DbCategoryGroup, 'id' | 'name' | 'hidden'>
@@ -369,12 +377,15 @@ export async function insertCategoryGroup(group) {
   return insertWithUUID('category_groups', group);
 }
 
-export function updateCategoryGroup(group) {
+export function updateCategoryGroup(group: Partial<DbCategoryGroup>) {
   group = categoryGroupModel.validate(group, { update: true });
   return update('category_groups', group);
 }
 
-export async function moveCategoryGroup(id, targetId) {
+export async function moveCategoryGroup(
+  id: DbCategoryGroup['id'],
+  targetId: DbCategoryGroup['id'],
+) {
   const groups = await all<Pick<DbCategoryGroup, 'id' | 'sort_order'>>(
     `SELECT id, sort_order FROM category_groups WHERE tombstone = 0 ORDER BY sort_order, id`,
   );
@@ -386,7 +397,10 @@ export async function moveCategoryGroup(id, targetId) {
   await update('category_groups', { id, sort_order });
 }
 
-export async function deleteCategoryGroup(group, transferId?: string) {
+export async function deleteCategoryGroup(
+  group: Pick<DbCategoryGroup, 'id'>,
+  transferId?: DbCategory['id'],
+) {
   const categories = await all<DbCategory>(
     'SELECT * FROM categories WHERE cat_group = ?',
     [group.id],
@@ -398,8 +412,8 @@ export async function deleteCategoryGroup(group, transferId?: string) {
 }
 
 export async function insertCategory(
-  category,
-  { atEnd } = { atEnd: undefined },
+  category: Partial<DbCategory>,
+  { atEnd }: { atEnd?: boolean } = {},
 ) {
   let sort_order;
 
@@ -452,8 +466,10 @@ export async function insertCategory(
   return id_;
 }
 
-export function updateCategory(category) {
+export function updateCategory(category: Partial<DbCategory>) {
   category = categoryModel.validate(category, { update: true });
+  // Change from cat_group to group because category AQL schema named it group.
+  // const { cat_group: group, ...rest } = category;
   return update('categories', category);
 }
 
@@ -491,7 +507,10 @@ export async function deleteCategory(
       [category.id],
     );
     for (const mapping of existingTransfers) {
-      await update('category_mapping', { id: mapping.id, transferId });
+      await update('category_mapping', {
+        id: mapping.id,
+        transferId,
+      });
     }
 
     // Finally, map the category we're about to delete to the new one
