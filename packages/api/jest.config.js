@@ -1,7 +1,5 @@
 module.exports = {
   moduleFileExtensions: [
-    'testing.js',
-    'testing.ts',
     'api.js',
     'api.ts',
     'api.tsx',
@@ -14,7 +12,7 @@ module.exports = {
     'json',
   ],
   testEnvironment: 'node',
-  testPathIgnorePatterns: ['/node_modules/'],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   watchPathIgnorePatterns: ['<rootDir>/mocks/budgets/'],
   setupFilesAfterEnv: ['<rootDir>/../loot-core/src/mocks/setup.ts'],
   transformIgnorePatterns: ['/node_modules/'],

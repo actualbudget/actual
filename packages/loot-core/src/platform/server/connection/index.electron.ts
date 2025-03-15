@@ -3,7 +3,7 @@ import { APIError } from '../../../server/errors';
 import { runHandler, isMutating } from '../../../server/mutators';
 import { captureException } from '../../exceptions';
 
-import type * as T from '.';
+import type * as T from './index.d';
 
 function coerceError(error) {
   if (error.type && error.type === 'APIError') {
@@ -84,3 +84,5 @@ export const getNumClients: T.GetNumClients = function () {
 export const send: T.Send = function (name, args) {
   process.parentPort.postMessage({ type: 'push', name, args });
 };
+
+export const resetEvents: T.ResetEvents = function () {};

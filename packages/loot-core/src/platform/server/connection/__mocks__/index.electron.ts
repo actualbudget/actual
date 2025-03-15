@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import type * as T from '.';
+import type * as T from '../index.d';
 
 let events = [];
 

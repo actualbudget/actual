@@ -21,8 +21,8 @@ import {
   type balanceTypeOpType,
   type CustomReportEntity,
   type DataEntity,
-  type sortByOpType,
   type RuleConditionEntity,
+  type sortByOpType,
 } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 

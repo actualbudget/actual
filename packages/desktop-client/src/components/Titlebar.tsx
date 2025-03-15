@@ -288,9 +288,9 @@ export function Titlebar({ style }: TitlebarProps) {
         '& *': {
           pointerEvents: 'auto',
         },
-        ...(!Platform.isBrowser &&
-          Platform.OS === 'mac' &&
-          floatingSidebar && { paddingLeft: 80 }),
+        ...(!Platform.isBrowser && Platform.OS === 'mac' && floatingSidebar
+          ? { paddingLeft: 80 }
+          : {}),
         ...style,
       }}
     >
