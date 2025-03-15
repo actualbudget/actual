@@ -3,7 +3,7 @@ import { APIError } from '../../../server/errors';
 import { runHandler, isMutating } from '../../../server/mutators';
 import { captureException } from '../../exceptions';
 
-import type * as T from '.';
+import type * as T from './index.d';
 
 function getGlobalObject() {
   const obj =
@@ -135,3 +135,5 @@ export const send: T.Send = function (name, args) {
 export const getNumClients = function () {
   return 1;
 };
+
+export const resetEvents: T.ResetEvents = function () {};

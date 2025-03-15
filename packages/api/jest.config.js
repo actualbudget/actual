@@ -1,7 +1,5 @@
 module.exports = {
   moduleFileExtensions: [
-    'testing.js',
-    'testing.ts',
     'api.js',
     'api.ts',
     'api.tsx',

@@ -5,7 +5,7 @@ import { join } from 'path';
 import { GlobalPrefsJson } from '../../../types/prefs';
 import * as lootFs from '../fs';
 
-import * as T from '.';
+import * as T from './index.d';
 
 const getStorePath = () => join(lootFs.getDataDir(), 'global-store.json');
 let store: GlobalPrefsJson;

@@ -1,7 +1,5 @@
 module.exports = {
   moduleFileExtensions: [
-    'testing.js',
-    'testing.ts',
     'web.js',
     'web.ts',
     'web.tsx',
