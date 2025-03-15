@@ -105,9 +105,16 @@ export function getRecurringDescription(config, dateFormat, locale: Locale) {
     : '';
 
   const weekendSolveSuffix = config.skipWeekend ? weekendSolveModeString : '';
-  const suffix = endModeSuffix
-    ? `, ${endModeSuffix} ${weekendSolveSuffix}`
-    : `${weekendSolveSuffix}`;
+
+  const shiftSuffix = config.shift
+    ? config.shift > 0
+      ? t('shifted {{shift}} days later', { shift: config.shift })
+      : t('shifted {{shift}} days earlier', { shift: Math.abs(config.shift) })
+    : '';
+
+  const suffix = [endModeSuffix, weekendSolveSuffix, shiftSuffix]
+    .filter(Boolean)
+    .join(', ');
 
   let desc = null;
 
@@ -339,6 +346,7 @@ export function getNextDate(
           value.schedule.data.weekendSolve,
         );
       }
+      date = d.addDays(date, value.schedule.data.shift);
       return monthUtils.dayFromDate(date);
     }
   }

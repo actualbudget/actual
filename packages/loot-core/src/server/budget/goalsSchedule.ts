@@ -8,6 +8,7 @@ import {
 import { CategoryEntity } from '../../types/models';
 import * as db from '../db';
 import { getRuleForSchedule } from '../schedules/app';
+import * as d from 'date-fns';
 
 import { isReflectBudget } from './actions';
 import { ScheduleTemplate, Template } from './types/templates';
@@ -109,6 +110,7 @@ async function createScheduleList(
                 ),
               )
             : nextBaseDate;
+          nextDate = d.addDays(nextDate, dateConditions.value.shift);
           while (nextDate < nextMonth) {
             monthlyTarget += -target;
             const currentDate = nextBaseDate;
@@ -126,6 +128,7 @@ async function createScheduleList(
                   ),
                 )
               : nextBaseDate;
+            nextDate = d.addDays(nextDate, dateConditions.value.shift);
             const diffDays = monthUtils.differenceInCalendarDays(
               nextBaseDate,
               currentDate,

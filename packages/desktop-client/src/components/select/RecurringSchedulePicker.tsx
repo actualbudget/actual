@@ -88,6 +88,7 @@ function parseConfig(config: Partial<RecurConfig>): StateConfig {
     endMode: 'never',
     endOccurrences: 1,
     endDate: monthUtils.currentDay(),
+    shift: 0,
     ...config,
   };
 }
@@ -169,7 +170,8 @@ type ReducerAction =
   | { type: 'add-recurrence' }
   | { type: 'remove-recurrence'; recurrence: RecurPattern }
   | { type: 'set-skip-weekend'; skipWeekend: boolean }
-  | { type: 'set-weekend-solve'; value: StateConfig['weekendSolveMode'] };
+  | { type: 'set-weekend-solve'; value: StateConfig['weekendSolveMode'] }
+  | { type: 'set-shift'; value: number };
 
 function reducer(state: ReducerState, action: ReducerAction): ReducerState {
   switch (action.type) {
@@ -230,6 +232,14 @@ function reducer(state: ReducerState, action: ReducerAction): ReducerState {
         config: {
           ...state.config,
           weekendSolveMode: action.value,
+        },
+      };
+    case 'set-shift':
+      return {
+        ...state,
+        config: {
+          ...state.config,
+          shift: action.value,
         },
       };
     default:
@@ -564,6 +574,44 @@ function RecurringScheduleTooltip({
               {{ beforeOrAfter: '' } as TransObjectLiteral} weekend
             </label>
           </Trans>
+        </View>
+
+        <View
+          style={{
+            marginTop: 10,
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            userSelect: 'none',
+          }}
+        >
+          <label
+            htmlFor="form_shift"
+            style={{
+              userSelect: 'none',
+              marginRight: 5,
+            }}
+          >
+            <Trans>Shift dates by</Trans>
+          </label>
+          <Input
+            id="form_shift"
+            style={{ width: 40 }}
+            type="number"
+            onChange={e =>
+              dispatch({
+                type: 'set-shift',
+                value: parseInt(e.target.value) || 0,
+              })
+            }
+            defaultValue={config.shift || 0}
+          />
+          <label
+            htmlFor="form_shift"
+            style={{ userSelect: 'none', marginLeft: 5 }}
+          >
+            <Trans>days</Trans>
+          </label>
         </View>
       </Stack>
       <SchedulePreview previewDates={previewDates} />

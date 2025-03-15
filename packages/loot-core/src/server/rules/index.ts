@@ -178,6 +178,7 @@ function parseRecurDate(desc) {
         data: {
           skipWeekend: desc.skipWeekend,
           weekendSolve: desc.weekendSolveMode,
+          shift: desc.shift,
         },
       }),
     };

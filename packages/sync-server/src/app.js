@@ -75,7 +75,7 @@ app.use((req, res, next) => {
   res.set('Cross-Origin-Embedder-Policy', 'require-corp');
   next();
 });
-if (process.env.NODE_ENV === 'development') {
+if (true) {
   console.log(
     'Running in development mode - Proxying frontend routes to React Dev Server',
   );

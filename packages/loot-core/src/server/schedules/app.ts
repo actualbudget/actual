@@ -350,6 +350,9 @@ async function getUpcomingDates({ config, count }) {
           ? getDateWithSkippedWeekend(date.date, config.weekendSolveMode)
           : date.date,
       )
+      .map(date => {
+        return d.addDays(date, config.shift);
+      })
       .map(date => dayFromDate(date));
   } catch (err) {
     captureBreadcrumb(config);
