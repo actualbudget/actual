@@ -17,6 +17,7 @@ import {
   addNotification,
 } from '../notifications/notificationsSlice';
 import { createAppAsyncThunk } from '../redux';
+import { ad } from '@actual-app/web/build-electron/static/js/index.fhSmPYXv';
 
 const sliceName = 'queries';
 
@@ -455,6 +456,11 @@ type ApplyBudgetActionPayload =
       args: never;
     }
   | {
+      type: 'get-full-template-amount';
+      month: string;
+      args: never;
+    }
+  | {
       type: 'apply-goal-template';
       month: string;
       args: never;
@@ -594,6 +600,15 @@ export const applyBudgetAction = createAppAsyncThunk(
         dispatch(
           addNotification({
             notification: await send('budget/check-templates'),
+          }),
+        );
+        break;
+      case 'get-full-template-amount':
+        dispatch(
+          addNotification({
+            notification: await send('budget/get-full-template-amount', {
+              month,
+            }),
           }),
         );
         break;
