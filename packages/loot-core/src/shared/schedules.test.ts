@@ -422,7 +422,7 @@ describe('schedules', () => {
       ['7', 7],
       ['14', 14],
       ['oneMonth', 32],
-      ['currentMonth', 31],
+      ['currentMonth', 30],
       ['2-day', 2],
       ['5-week', 35],
       ['3-month', 91],
