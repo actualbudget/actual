@@ -418,17 +418,27 @@ describe('schedules', () => {
 
   describe('getUpcomingDays', () => {
     it.each([
-      ['1', 1],
-      ['7', 7],
-      ['14', 14],
-      ['oneMonth', 32],
-      ['currentMonth', 31],
-      ['2-day', 2],
-      ['5-week', 35],
-      ['3-month', 91],
-      ['4-year', 1462],
-    ])('value of %s returns %i days', (value: string, expected: number) => {
-      expect(getUpcomingDays(value)).toEqual(expected);
-    });
+      ['1', 1, '2017-01-01'],
+      ['7', 7, '2017-01-01'],
+      ['14', 14, '2017-01-01'],
+      ['oneMonth', 31, '2017-01-01'],
+      ['oneMonth', 30, '2017-04-01'],
+      ['oneMonth', 30, '2017-04-15'],
+      ['oneMonth', 28, '2017-02-01'],
+      ['oneMonth', 29, '2020-02-01'], // leap-year
+      ['currentMonth', 30, '2017-01-01'],
+      ['currentMonth', 27, '2017-02-01'],
+      ['currentMonth', 20, '2017-02-08'],
+      ['currentMonth', 28, '2020-02-01'], // leap-year
+      ['2-day', 2, '2017-01-01'],
+      ['5-week', 35, '2017-01-01'],
+      ['3-month', 91, '2017-01-01'],
+      ['4-year', 1462, '2017-01-01'],
+    ])(
+      'value of %s on returns %i days on %s',
+      (value: string, expected: number, date: string) => {
+        expect(getUpcomingDays(value, date)).toEqual(expected);
+      },
+    );
   });
 });
