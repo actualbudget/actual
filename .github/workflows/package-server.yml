@@ -1,0 +1,37 @@
+name: Build
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CI: true
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
+jobs:
+  package-server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Build Web
+        run: ./bin/package-browser
+      - name: Install Dependencies
+        run: yarn workspaces focus @actual-app/sync-server --production
+      - name: Upload Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: sync-server
+          path: |
+            packages/sync-server
+            node_modules
