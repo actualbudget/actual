@@ -34,7 +34,8 @@ jobs:
           name: sync-server x64
           path: |
             package.json
-            packages/sync-server/package.json
+            yarn.lock
+            packages/*/package.json
             packages/sync-server/app.js
             packages/sync-server/src
             packages/sync-server/migrations
