@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
@@ -35,6 +36,7 @@ export function GenericInput({
   onChange,
   op = undefined,
 }) {
+  const { t } = useTranslation();
   const { grouped: categoryGroups } = useCategories();
   const { data: savedReports } = useReports();
   const saved = useSelector(state => state.queries.saved);
@@ -63,7 +65,7 @@ export function GenericInput({
           <Input
             inputRef={inputRef}
             defaultValue={value || ''}
-            placeholder="nothing"
+            placeholder={t('nothing')}
             onEnter={e => onChange(e.target.value)}
             onBlur={e => onChange(e.target.value)}
           />
@@ -261,7 +263,7 @@ export function GenericInput({
           <Input
             inputRef={inputRef}
             defaultValue={value || ''}
-            placeholder="nothing"
+            placeholder={t('nothing')}
             onEnter={e => onChange(e.target.value)}
             onBlur={e => onChange(e.target.value)}
           />

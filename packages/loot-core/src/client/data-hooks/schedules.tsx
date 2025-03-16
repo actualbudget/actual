@@ -12,7 +12,11 @@ import React, {
 import { useSyncedPref } from '@actual-app/web/src/hooks/useSyncedPref';
 
 import { q, type Query } from '../../shared/query';
-import { getHasTransactionsQuery, getStatus } from '../../shared/schedules';
+import {
+  getHasTransactionsQuery,
+  getStatus,
+  getStatusLabel,
+} from '../../shared/schedules';
 import {
   type AccountEntity,
   type ScheduleEntity,
@@ -23,6 +27,12 @@ import { type LiveQuery, liveQuery } from '../query-helpers';
 
 export type ScheduleStatusType = ReturnType<typeof getStatus>;
 export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
+
+export type ScheduleStatusLabelType = ReturnType<typeof getStatusLabel>;
+export type ScheduleStatusLabels = Map<
+  ScheduleEntity['id'],
+  ScheduleStatusLabelType
+>;
 
 function loadStatuses(
   schedules: readonly ScheduleEntity[],
@@ -58,6 +68,7 @@ type UseSchedulesProps = {
 type ScheduleData = {
   schedules: readonly ScheduleEntity[];
   statuses: ScheduleStatuses;
+  statusLabels: ScheduleStatusLabels;
 };
 type UseSchedulesResult = ScheduleData & {
   readonly isLoading: boolean;
@@ -72,6 +83,7 @@ export function useSchedules({
   const [data, setData] = useState<ScheduleData>({
     schedules: [],
     statuses: new Map(),
+    statusLabels: new Map(),
   });
   const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
 
@@ -108,7 +120,16 @@ export function useSchedules({
           schedules,
           (statuses: ScheduleStatuses) => {
             if (!isUnmounted) {
-              setData({ schedules, statuses });
+              setData({
+                schedules,
+                statuses,
+                statusLabels: new Map(
+                  [...statuses.keys()].map(key => [
+                    key,
+                    getStatusLabel(statuses.get(key)),
+                  ]),
+                ),
+              });
               setIsLoading(false);
             }
           },

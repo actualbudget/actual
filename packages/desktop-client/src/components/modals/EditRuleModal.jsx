@@ -311,7 +311,7 @@ function ScheduleDescription({ id }) {
   );
   const {
     schedules,
-    statuses: scheduleStatuses,
+    statusLabels,
     isLoading: isSchedulesLoading,
   } = useSchedules({ query: scheduleQuery });
 
@@ -324,7 +324,7 @@ function ScheduleDescription({ id }) {
   }
 
   const [schedule] = schedules;
-  const status = schedule && scheduleStatuses.get(schedule.id);
+  const status = schedule && statusLabels.get(schedule.id);
 
   return (
     <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
