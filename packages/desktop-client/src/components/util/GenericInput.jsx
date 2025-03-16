@@ -97,7 +97,7 @@ export function GenericInput({
               onSelect={onChange}
               inputProps={{
                 inputRef,
-                ...(showPlaceholder ? { placeholder: 'nothing' } : null),
+                ...(showPlaceholder ? { placeholder: t('nothing') } : null),
               }}
             />
           );
@@ -118,7 +118,7 @@ export function GenericInput({
                   onSelect={onChange}
                   inputProps={{
                     inputRef,
-                    ...(showPlaceholder ? { placeholder: 'nothing' } : null),
+                    ...(showPlaceholder ? { placeholder: t('nothing') } : null),
                   }}
                 />
               );
@@ -137,7 +137,7 @@ export function GenericInput({
               showHiddenCategories={false}
               inputProps={{
                 inputRef,
-                ...(showPlaceholder ? { placeholder: 'nothing' } : null),
+                ...(showPlaceholder ? { placeholder: t('nothing') } : null),
               }}
             />
           );
@@ -159,7 +159,7 @@ export function GenericInput({
               onSelect={onChange}
               inputProps={{
                 inputRef,
-                ...(showPlaceholder ? { placeholder: 'nothing' } : null),
+                ...(showPlaceholder ? { placeholder: t('nothing') } : null),
               }}
             />
           );
@@ -174,7 +174,7 @@ export function GenericInput({
               onSelect={onChange}
               inputProps={{
                 inputRef,
-                ...(showPlaceholder ? { placeholder: 'nothing' } : null),
+                ...(showPlaceholder ? { placeholder: t('nothing') } : null),
               }}
             />
           );
