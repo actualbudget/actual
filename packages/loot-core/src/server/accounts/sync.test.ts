@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import { account } from 'loot-core/mocks/arbitrary-schema';
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
