@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { account } from 'loot-core/mocks/arbitrary-schema';
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
@@ -121,6 +122,25 @@ describe('Account sync', () => {
     await expect(reconcileTransactions(acctId, [{}])).rejects.toThrow(
       /`date` is required/,
     );
+  });
+
+  test('reconcile doesnt rematch deleted transactions', async () => {
+    const { id: acctId } = await prepareDatabase();
+
+    await reconcileTransactions(acctId, [
+      { date: '2020-01-01', imported_id: 'finid' },
+    ]);
+
+    const transactions1 = await getAllTransactions();
+    expect(transactions1.length).toBe(1);
+
+    await db.deleteTransaction(transactions1[0]);
+
+    await reconcileTransactions(acctId, [
+      { date: '2020-01-01', imported_id: 'finid' },
+    ]);
+    const transactions2 = await getAllTransactions();
+    expect(transactions2.length).toBe(1);
   });
 
   test('reconcile run rules with inferred payee', async () => {

@@ -649,8 +649,8 @@ export async function matchTransactions(
     // is the highest fidelity match and should always be attempted
     // first.
     if (trans.imported_id) {
-      match = await db.first<db.DbViewTransaction>(
-        'SELECT * FROM v_transactions WHERE imported_id = ? AND account = ?',
+      match = await db.first<db.DbTransaction>(
+        'SELECT * FROM v_transactions_internal WHERE imported_id = ? AND account = ?',
         [trans.imported_id, acctId],
       );
 
