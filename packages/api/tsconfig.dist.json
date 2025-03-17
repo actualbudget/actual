@@ -15,5 +15,5 @@
     }
   },
   "include": ["."],
-  "exclude": ["**/node_modules/*", "dist", "@types"]
+  "exclude": ["**/node_modules/*", "dist", "@types", "*.test.ts"]
 }
