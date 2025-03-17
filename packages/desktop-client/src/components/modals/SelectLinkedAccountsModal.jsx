@@ -258,7 +258,6 @@ function TableRow({
       >
         {focusedField === 'account' ? (
           <Autocomplete
-            autoFocus
             strict
             highlightFirst
             suggestions={availableAccountOptions}

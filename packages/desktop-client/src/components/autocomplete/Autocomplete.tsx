@@ -25,7 +25,6 @@ import Downshift, { type StateChangeTypes } from 'downshift';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 
 type CommonAutocompleteProps<T extends Item> = {
-  autoFocus?: boolean;
   embedded?: boolean;
   containerProps?: HTMLProps<HTMLDivElement>;
   labelProps?: { id?: string };
@@ -210,7 +209,6 @@ type SingleAutocompleteProps<T extends Item> = CommonAutocompleteProps<T> & {
 };
 
 function SingleAutocomplete<T extends Item>({
-  autoFocus,
   embedded = false,
   containerProps,
   labelProps = {},
@@ -452,7 +450,6 @@ function SingleAutocomplete<T extends Item>({
             {renderInput(
               getInputProps({
                 ...inputProps,
-                autoFocus,
                 onFocus: e => {
                   inputProps.onFocus?.(e);
 
