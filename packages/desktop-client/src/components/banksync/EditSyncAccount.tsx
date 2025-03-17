@@ -122,6 +122,9 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
   const [savedImportPending = true, setSavedImportPending] = useSyncedPref(
     `sync-import-pending-${account.id}`,
   );
+  const [savedReimportDeleted = true, setSavedReimportDeleted] = useSyncedPref(
+    `sync-reimport-deleted-${account.id}`,
+  );
 
   const [transactionDirection, setTransactionDirection] =
     useState<TransactionDirection>('payment');
@@ -130,6 +133,9 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
   );
   const [importNotes, setImportNotes] = useState(
     String(savedImportNotes) === 'true',
+  );
+  const [reimportDeleted, setReimportDeleted] = useState(
+    String(savedReimportDeleted) === 'true',
   );
   const [mappings, setMappings] = useState<Mappings>(
     mappingsFromString(savedMappings),
@@ -168,6 +174,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
     setSavedMappings(mappingsStr);
     setSavedImportPending(String(importPending));
     setSavedImportNotes(String(importNotes));
+    setSavedReimportDeleted(String(reimportDeleted));
     close();
   };
 
@@ -224,6 +231,14 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             onChange={() => setImportNotes(!importNotes)}
           >
             <Trans>Import transaction notes</Trans>
+          </CheckboxOption>
+
+          <CheckboxOption
+            id="form_deleted_notes"
+            checked={reimportDeleted}
+            onChange={() => setReimportDeleted(!reimportDeleted)}
+          >
+            <Trans>Reimport deleted notes</Trans>
           </CheckboxOption>
 
           <Stack

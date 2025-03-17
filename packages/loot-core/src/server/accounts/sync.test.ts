@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { saveSyncedPrefs } from 'loot-core/client/prefs/prefsSlice';
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
@@ -7,6 +8,7 @@ import { getServer } from '../server-config';
 import { loadRules, insertRule } from '../transactions/transaction-rules';
 
 import { reconcileTransactions, addTransactions } from './sync';
+import { SyncedPrefs } from 'loot-core/types/prefs';
 
 jest.mock('../../shared/months', () => ({
   ...jest.requireActual('../../shared/months'),
@@ -123,8 +125,11 @@ describe('Account sync', () => {
     );
   });
 
-  test('reconcile doesnt rematch deleted transactions', async () => {
+  test('reconcile doesnt rematch deleted transactions if reimport disabled', async () => {
     const { id: acctId } = await prepareDatabase();
+    const reimportKey =
+      `sync-reimport-deleted-${acctId}` satisfies keyof SyncedPrefs;
+    await db.update('preferences', { id: reimportKey, value: 'false' });
 
     await reconcileTransactions(acctId, [
       { date: '2020-01-01', imported_id: 'finid' },
@@ -140,6 +145,27 @@ describe('Account sync', () => {
     ]);
     const transactions2 = await getAllTransactions();
     expect(transactions2.length).toBe(1);
+    expect(transactions2).toMatchSnapshot();
+  });
+
+  test('reconcile does rematch deleted transactions by default', async () => {
+    const { id: acctId } = await prepareDatabase();
+
+    await reconcileTransactions(acctId, [
+      { date: '2020-01-01', imported_id: 'finid' },
+    ]);
+
+    const transactions1 = await getAllTransactions();
+    expect(transactions1.length).toBe(1);
+
+    await db.deleteTransaction(transactions1[0]);
+
+    await reconcileTransactions(acctId, [
+      { date: '2020-01-01', imported_id: 'finid' },
+    ]);
+    const transactions2 = await getAllTransactions();
+    expect(transactions2.length).toBe(2);
+    expect(transactions2).toMatchSnapshot();
   });
 
   test('reconcile run rules with inferred payee', async () => {

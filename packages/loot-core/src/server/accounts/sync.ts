@@ -618,6 +618,12 @@ export async function matchTransactions(
 ) {
   console.log('Performing transaction reconciliation matching');
 
+  const reimportDeleted = await runQuery(
+    q('preferences')
+      .filter({ id: `sync-reimport-deleted-${acctId}` })
+      .select('value'),
+  ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+
   const hasMatched = new Set();
 
   const transactionNormalization = isBankSyncAccount
@@ -649,8 +655,11 @@ export async function matchTransactions(
     // is the highest fidelity match and should always be attempted
     // first.
     if (trans.imported_id) {
+      const table = reimportDeleted
+        ? 'v_transactions'
+        : 'v_transactions_internal';
       match = await db.first<db.DbTransaction>(
-        'SELECT * FROM v_transactions_internal WHERE imported_id = ? AND account = ?',
+        `SELECT * FROM ${table} WHERE imported_id = ? AND account = ?`,
         [trans.imported_id, acctId],
       );
 
