@@ -1357,7 +1357,6 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
               onBudgetAction(month, 'cover-overbudgeted', {
                 category: categoryId,
               });
-              dispatch(collapseModals({ rootModalName: 'cover' }));
               showUndoNotification({
                 message: t('Covered overbudgeted from {{categoryName}}', {
                   categoryName: categoriesById[categoryId].name,
