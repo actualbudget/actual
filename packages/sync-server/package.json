@@ -15,8 +15,7 @@
     "db:test-downgrade": "NODE_ENV=test node src/run-migrations.js down",
     "reset-password": "node src/scripts/reset-password.js",
     "disable-openid": "node src/scripts/disable-openid.js",
-    "health-check": "node src/scripts/health-check.js",
-    "update-client": "rm -rf web-client && mkdir -p web-client && cp -r ../desktop-client/build ./web-client"
+    "health-check": "node src/scripts/health-check.js"
   },
   "dependencies": {
     "@actual-app/crdt": "2.1.0",
