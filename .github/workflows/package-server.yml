@@ -21,24 +21,33 @@ jobs:
   package-server:
     runs-on: ubuntu-latest
     steps:
+      - name: Create dist folder
+        run: |
+          mkdir -p dist
+          cp -r .yarn dist
+          cp -r .yarnrc.yml dist
       - uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build the server
         run: yarn build:server
-      - name: Create dist folder
-        run: |
-          mkdir -p dist
-          cp -r yarn.lock dist
-          cp -r .yarn dist
-          cp -r .yarnrc.yml dist
-          cp -r packages/sync-server/package.json dist
-          cp -r packages/sync-server/app.js dist
-          cp -r packages/sync-server/src dist
-          cp -r packages/sync-server/migrations dist
-          cp -r packages/sync-server/web-client dist
+      # - name: Copy relevant files to dist
+      #   run: |
+      #     cp -r packages/sync-server/package.json dist
+      #     cp -r packages/sync-server/app.js dist
+      #     cp -r packages/sync-server/src dist
+      #     cp -r packages/sync-server/migrations dist
+      #     cp -r packages/sync-server/web-client dist
       - name: Upload Server with Client Build
         uses: actions/upload-artifact@v4
         with:
           name: sync-server
-          path: dist
+          path: |
+            package.json
+            yarn.lock
+            dist
+            packages/sync-server/package.json
+            packages/sync-server/app.js
+            packages/sync-server/src
+            packages/sync-server/migrations
+            packages/sync-server/web-client
