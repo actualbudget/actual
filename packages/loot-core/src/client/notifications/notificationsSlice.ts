@@ -2,6 +2,8 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
+import { resetApp } from '../app/appSlice';
+
 const sliceName = 'notifications';
 
 export type Notification = {
@@ -89,6 +91,9 @@ const notificationsSlice = createSlice({
     ) {
       state.inset = action.payload?.inset ? action.payload.inset : {};
     },
+  },
+  extraReducers: builder => {
+    builder.addCase(resetApp, () => initialState);
   },
 });
 
