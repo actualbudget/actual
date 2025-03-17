@@ -238,7 +238,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             checked={reimportDeleted}
             onChange={() => setReimportDeleted(!reimportDeleted)}
           >
-            <Trans>Reimport deleted notes</Trans>
+            <Trans>Reimport deleted transactions</Trans>
           </CheckboxOption>
 
           <Stack
