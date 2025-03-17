@@ -145,6 +145,5 @@ export const clearServer: T.ClearServer = async function () {
     return new Promise(closeSocket);
   }
 };
-
 export const initServer: T.InitServer = async function () {};
 export const serverPush: T.ServerPush = async function () {};
