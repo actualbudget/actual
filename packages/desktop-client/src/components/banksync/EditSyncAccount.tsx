@@ -234,7 +234,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
           </CheckboxOption>
 
           <CheckboxOption
-            id="form_deleted_notes"
+            id="form_reimport_deleted"
             checked={reimportDeleted}
             onChange={() => setReimportDeleted(!reimportDeleted)}
           >
