@@ -92,49 +92,48 @@ export function Modals() {
   }, [location]);
 
   const modals = modalStack
-    .map(modal => {
+    .map((modal, idx) => {
       const { name } = modal;
+      const key = `${name}-${idx}`;
       switch (name) {
         case 'goal-templates':
-          return budgetId ? <GoalTemplateModal key={name} /> : null;
+          return budgetId ? <GoalTemplateModal key={key} /> : null;
 
         case 'keyboard-shortcuts':
           // don't show the hotkey help modal when a budget is not open
-          return budgetId ? <KeyboardShortcutModal key={name} /> : null;
+          return budgetId ? <KeyboardShortcutModal key={key} /> : null;
 
         case 'import-transactions':
-          return <ImportTransactionsModal key={name} {...modal.options} />;
+          return <ImportTransactionsModal key={key} {...modal.options} />;
 
         case 'add-account':
-          return <CreateAccountModal key={name} {...modal.options} />;
+          return <CreateAccountModal key={key} {...modal.options} />;
 
         case 'add-local-account':
-          return <CreateLocalAccountModal key={name} />;
+          return <CreateLocalAccountModal key={key} />;
 
         case 'close-account':
-          return <CloseAccountModal key={name} {...modal.options} />;
+          return <CloseAccountModal key={key} {...modal.options} />;
 
         case 'select-linked-accounts':
-          return <SelectLinkedAccountsModal key={name} {...modal.options} />;
+          return <SelectLinkedAccountsModal key={key} {...modal.options} />;
 
         case 'confirm-category-delete':
-          return <ConfirmCategoryDeleteModal key={name} {...modal.options} />;
+          return <ConfirmCategoryDeleteModal key={key} {...modal.options} />;
 
         case 'confirm-unlink-account':
-          return <ConfirmUnlinkAccountModal key={name} {...modal.options} />;
+          return <ConfirmUnlinkAccountModal key={key} {...modal.options} />;
 
         case 'confirm-transaction-edit':
-          return <ConfirmTransactionEditModal key={name} {...modal.options} />;
+          return <ConfirmTransactionEditModal key={key} {...modal.options} />;
 
         case 'confirm-transaction-delete':
-          return (
-            <ConfirmTransactionDeleteModal key={name} {...modal.options} />
-          );
+          return <ConfirmTransactionDeleteModal key={key} {...modal.options} />;
 
         case 'load-backup':
           return (
             <LoadBackupModal
-              key={name}
+              key={key}
               watchUpdates
               {...modal.options}
               backupDisabled={false}
@@ -142,27 +141,27 @@ export function Modals() {
           );
 
         case 'manage-rules':
-          return <ManageRulesModal key={name} {...modal.options} />;
+          return <ManageRulesModal key={key} {...modal.options} />;
 
         case 'edit-rule':
-          return <EditRuleModal key={name} {...modal.options} />;
+          return <EditRuleModal key={key} {...modal.options} />;
 
         case 'merge-unused-payees':
-          return <MergeUnusedPayeesModal key={name} {...modal.options} />;
+          return <MergeUnusedPayeesModal key={key} {...modal.options} />;
 
         case 'gocardless-init':
-          return <GoCardlessInitialiseModal key={name} {...modal.options} />;
+          return <GoCardlessInitialiseModal key={key} {...modal.options} />;
 
         case 'simplefin-init':
-          return <SimpleFinInitialiseModal key={name} {...modal.options} />;
+          return <SimpleFinInitialiseModal key={key} {...modal.options} />;
 
         case 'pluggyai-init':
-          return <PluggyAiInitialiseModal key={name} {...modal.options} />;
+          return <PluggyAiInitialiseModal key={key} {...modal.options} />;
 
         case 'gocardless-external-msg':
           return (
             <GoCardlessExternalMsgModal
-              key={name}
+              key={key}
               {...modal.options}
               onClose={() => {
                 modal.options.onClose?.();
@@ -172,73 +171,73 @@ export function Modals() {
           );
 
         case 'create-encryption-key':
-          return <CreateEncryptionKeyModal key={name} {...modal.options} />;
+          return <CreateEncryptionKeyModal key={key} {...modal.options} />;
 
         case 'fix-encryption-key':
-          return <FixEncryptionKeyModal key={name} {...modal.options} />;
+          return <FixEncryptionKeyModal key={key} {...modal.options} />;
 
         case 'edit-field':
-          return <EditFieldModal key={name} {...modal.options} />;
+          return <EditFieldModal key={key} {...modal.options} />;
 
         case 'category-autocomplete':
-          return <CategoryAutocompleteModal key={name} {...modal.options} />;
+          return <CategoryAutocompleteModal key={key} {...modal.options} />;
 
         case 'account-autocomplete':
-          return <AccountAutocompleteModal key={name} {...modal.options} />;
+          return <AccountAutocompleteModal key={key} {...modal.options} />;
 
         case 'payee-autocomplete':
-          return <PayeeAutocompleteModal key={name} {...modal.options} />;
+          return <PayeeAutocompleteModal key={key} {...modal.options} />;
 
         case 'payee-category-learning':
-          return <CategoryLearning key={name} />;
+          return <CategoryLearning key={key} />;
 
         case 'new-category':
-          return <NewCategoryModal key={name} {...modal.options} />;
+          return <NewCategoryModal key={key} {...modal.options} />;
 
         case 'new-category-group':
-          return <NewCategoryGroupModal key={name} {...modal.options} />;
+          return <NewCategoryGroupModal key={key} {...modal.options} />;
 
         case 'envelope-budget-summary':
           return (
             <NamespaceContext.Provider
-              key={name}
+              key={key}
               value={monthUtils.sheetForMonth(modal.options.month)}
             >
-              <EnvelopeBudgetSummaryModal key={name} {...modal.options} />
+              <EnvelopeBudgetSummaryModal key={key} {...modal.options} />
             </NamespaceContext.Provider>
           );
 
         case 'tracking-budget-summary':
-          return <TrackingBudgetSummaryModal key={name} {...modal.options} />;
+          return <TrackingBudgetSummaryModal key={key} {...modal.options} />;
 
         case 'schedule-edit':
-          return <ScheduleDetails key={name} {...modal.options} />;
+          return <ScheduleDetails key={key} {...modal.options} />;
 
         case 'schedule-link':
-          return <ScheduleLink key={name} {...modal.options} />;
+          return <ScheduleLink key={key} {...modal.options} />;
 
         case 'schedules-discover':
-          return <DiscoverSchedules key={name} />;
+          return <DiscoverSchedules key={key} />;
 
         case 'schedules-upcoming-length':
-          return <UpcomingLength key={name} />;
+          return <UpcomingLength key={key} />;
 
         case 'schedule-posts-offline-notification':
-          return <PostsOfflineNotification key={name} />;
+          return <PostsOfflineNotification key={key} />;
 
         case 'synced-account-edit':
-          return <EditSyncAccount key={name} {...modal.options} />;
+          return <EditSyncAccount key={key} {...modal.options} />;
 
         case 'account-menu':
-          return <AccountMenuModal key={name} {...modal.options} />;
+          return <AccountMenuModal key={key} {...modal.options} />;
 
         case 'category-menu':
-          return <CategoryMenuModal key={name} {...modal.options} />;
+          return <CategoryMenuModal key={key} {...modal.options} />;
 
         case 'envelope-budget-menu':
           return (
             <NamespaceContext.Provider
-              key={name}
+              key={key}
               value={monthUtils.sheetForMonth(modal.options.month)}
             >
               <EnvelopeBudgetMenuModal {...modal.options} />
@@ -248,7 +247,7 @@ export function Modals() {
         case 'tracking-budget-menu':
           return (
             <NamespaceContext.Provider
-              key={name}
+              key={key}
               value={monthUtils.sheetForMonth(modal.options.month)}
             >
               <TrackingBudgetMenuModal {...modal.options} />
@@ -256,15 +255,15 @@ export function Modals() {
           );
 
         case 'category-group-menu':
-          return <CategoryGroupMenuModal key={name} {...modal.options} />;
+          return <CategoryGroupMenuModal key={key} {...modal.options} />;
 
         case 'notes':
-          return <NotesModal key={name} {...modal.options} />;
+          return <NotesModal key={key} {...modal.options} />;
 
         case 'envelope-balance-menu':
           return (
             <NamespaceContext.Provider
-              key={name}
+              key={key}
               value={monthUtils.sheetForMonth(modal.options.month)}
             >
               <EnvelopeBalanceMenuModal {...modal.options} />
@@ -274,7 +273,7 @@ export function Modals() {
         case 'envelope-summary-to-budget-menu':
           return (
             <NamespaceContext.Provider
-              key={name}
+              key={key}
               value={monthUtils.sheetForMonth(modal.options.month)}
             >
               <EnvelopeToBudgetMenuModal {...modal.options} />
@@ -284,7 +283,7 @@ export function Modals() {
         case 'hold-buffer':
           return (
             <NamespaceContext.Provider
-              key={name}
+              key={key}
               value={monthUtils.sheetForMonth(modal.options.month)}
             >
               <HoldBufferModal {...modal.options} />
@@ -294,7 +293,7 @@ export function Modals() {
         case 'tracking-balance-menu':
           return (
             <NamespaceContext.Provider
-              key={name}
+              key={key}
               value={monthUtils.sheetForMonth(modal.options.month)}
             >
               <TrackingBalanceMenuModal {...modal.options} />
@@ -302,23 +301,21 @@ export function Modals() {
           );
 
         case 'transfer':
-          return <TransferModal key={name} {...modal.options} />;
+          return <TransferModal key={key} {...modal.options} />;
 
         case 'cover':
-          return <CoverModal key={name} {...modal.options} />;
+          return <CoverModal key={key} {...modal.options} />;
 
         case 'scheduled-transaction-menu':
-          return (
-            <ScheduledTransactionMenuModal key={name} {...modal.options} />
-          );
+          return <ScheduledTransactionMenuModal key={key} {...modal.options} />;
 
         case 'budget-page-menu':
-          return <BudgetPageMenuModal key={name} {...modal.options} />;
+          return <BudgetPageMenuModal key={key} {...modal.options} />;
 
         case 'envelope-budget-month-menu':
           return (
             <NamespaceContext.Provider
-              key={name}
+              key={key}
               value={monthUtils.sheetForMonth(modal.options.month)}
             >
               <EnvelopeBudgetMonthMenuModal {...modal.options} />
@@ -328,7 +325,7 @@ export function Modals() {
         case 'tracking-budget-month-menu':
           return (
             <NamespaceContext.Provider
-              key={name}
+              key={key}
               value={monthUtils.sheetForMonth(modal.options.month)}
             >
               <TrackingBudgetMonthMenuModal {...modal.options} />
@@ -338,48 +335,48 @@ export function Modals() {
         case 'budget-list':
           return <BudgetFileSelectionModal key={name} />;
         case 'delete-budget':
-          return <DeleteFileModal key={name} {...modal.options} />;
+          return <DeleteFileModal key={key} {...modal.options} />;
         case 'duplicate-budget':
-          return <DuplicateFileModal key={name} {...modal.options} />;
+          return <DuplicateFileModal key={key} {...modal.options} />;
         case 'import':
-          return <ImportModal key={name} />;
+          return <ImportModal key={key} />;
         case 'files-settings':
-          return <FilesSettingsModal key={name} />;
+          return <FilesSettingsModal key={key} />;
         case 'confirm-change-document-dir':
-          return (
-            <ConfirmChangeDocumentDirModal key={name} {...modal.options} />
-          );
+          return <ConfirmChangeDocumentDirModal key={key} {...modal.options} />;
         case 'import-ynab4':
-          return <ImportYNAB4Modal key={name} />;
+          return <ImportYNAB4Modal key={key} />;
         case 'import-ynab5':
-          return <ImportYNAB5Modal key={name} />;
+          return <ImportYNAB5Modal key={key} />;
         case 'import-actual':
-          return <ImportActualModal key={name} />;
+          return <ImportActualModal key={key} />;
 
         case 'out-of-sync-migrations':
-          return <OutOfSyncMigrationsModal key={name} />;
+          return <OutOfSyncMigrationsModal key={key} />;
 
         case 'edit-access':
-          return <EditUserAccess key={name} {...modal.options} />;
+          return <EditUserAccess key={key} {...modal.options} />;
 
         case 'edit-user':
-          return <EditUserFinanceApp key={name} {...modal.options} />;
+          return <EditUserFinanceApp key={key} {...modal.options} />;
 
         case 'transfer-ownership':
-          return <TransferOwnership key={name} {...modal.options} />;
+          return <TransferOwnership key={key} {...modal.options} />;
 
         case 'enable-openid':
-          return <OpenIDEnableModal key={name} {...modal.options} />;
+          return <OpenIDEnableModal key={key} {...modal.options} />;
 
         case 'enable-password-auth':
-          return <PasswordEnableModal key={name} {...modal.options} />;
+          return <PasswordEnableModal key={key} {...modal.options} />;
 
         default:
           throw new Error('Unknown modal');
       }
     })
     .map((modal, idx) => (
-      <React.Fragment key={modalStack[idx].name}>{modal}</React.Fragment>
+      <React.Fragment key={`${modalStack[idx].name}-${idx}`}>
+        {modal}
+      </React.Fragment>
     ));
 
   // fragment needed per TS types

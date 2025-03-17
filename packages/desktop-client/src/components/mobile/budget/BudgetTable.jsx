@@ -1552,14 +1552,17 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
         modal: {
           name: 'category-autocomplete',
           options: {
+            title: t('Cover overspending'),
             month,
             categoryGroups: categoryGroupsToShow,
             onSelect: onOpenCoverCategoryModal,
+            clearOnSelect: true,
+            closeOnSelect: false,
           },
         },
       }),
     );
-  }, [categoryGroupsToShow, dispatch, month, onOpenCoverCategoryModal]);
+  }, [categoryGroupsToShow, dispatch, month, onOpenCoverCategoryModal, t]);
 
   const numberOfOverspentCategories = overspentCategoryIds.length;
   if (numberOfOverspentCategories === 0) {
