@@ -9,11 +9,10 @@ env:
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
-  push:
     branches:
       - master
+    tags:
+      - 'v*.*.*'
   pull_request:
 
 concurrency:
