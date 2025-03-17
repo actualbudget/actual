@@ -3,7 +3,6 @@ import { t } from 'i18next';
 
 import { listen, send } from '../platform/client/fetch';
 
-import { signOut } from './actions';
 import { resetSync, sync } from './app/appSlice';
 import { closeAndDownloadBudget, uploadBudget } from './budgets/budgetsSlice';
 import { pushModal } from './modals/modalsSlice';
@@ -14,6 +13,7 @@ import {
 import { loadPrefs } from './prefs/prefsSlice';
 import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
 import { type AppStore } from './store';
+import { signOut } from './users/usersSlice';
 
 export function listenForSyncEvent(store: AppStore) {
   // TODO: Should this run on mobile too?
@@ -347,7 +347,9 @@ export function listenForSyncEvent(store: AppStore) {
             id: 'login-expired',
             button: {
               title: 'Go to login',
-              action: () => store.dispatch(signOut()),
+              action: () => {
+                store.dispatch(signOut());
+              },
             },
           };
           break;

@@ -384,7 +384,7 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
             .sort()
             .map(([name, text]) => ({
               name,
-              text: titleFirst(text),
+              text: titleFirst(mapField(text)),
             }))}
         />
       </Popover>
