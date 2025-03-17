@@ -44,6 +44,7 @@ jobs:
             packages/sync-server/migrations
             packages/sync-server/web-client
       - name: Download Server with Client Build
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/download-artifact@v4
         with:
           name: sync-server
