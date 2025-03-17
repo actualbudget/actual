@@ -24,8 +24,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup
-      - name: Build Web
-        run: ./bin/package-browser
+      - name: Build the server
+        run: yarn build:server
       - name: Install Dependencies
         run: yarn workspaces focus @actual-app/sync-server --production
       - name: Upload x64 Build
