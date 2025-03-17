@@ -27,7 +27,7 @@ jobs:
       - name: Build Web
         run: ./bin/package-browser
       - name: Install Dependencies
-        run: npm_config_arch=x64 npm_config_build_from_source=true yarn workspaces focus @actual-app/sync-server --production
+        run: yarn workspaces focus @actual-app/sync-server --production
       - name: Upload x64 Build
         uses: actions/upload-artifact@v4
         with:
