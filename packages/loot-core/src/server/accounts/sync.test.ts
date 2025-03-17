@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import { saveSyncedPrefs } from 'loot-core/client/prefs/prefsSlice';
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
