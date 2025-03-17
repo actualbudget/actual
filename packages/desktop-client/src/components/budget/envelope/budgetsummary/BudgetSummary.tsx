@@ -232,6 +232,15 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
                       ),
                     });
                   }}
+                  onGetFullTemplateAmount={() => {
+                    onBudgetAction(month, 'get-full-template-amount');
+                    onMenuClose();
+                    showUndoNotification({
+                      message: t('Showing full amount for {{displayMonth}}', {
+                        displayMonth,
+                      }),
+                    });
+                  }}
                   onEndOfMonthCleanup={() => {
                     onBudgetAction(month, 'cleanup-goal-template');
                     onMenuClose();

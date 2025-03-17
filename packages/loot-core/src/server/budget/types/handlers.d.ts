@@ -19,6 +19,10 @@ export interface BudgetHandlers {
 
   'budget/check-templates': () => Promise<Notification>;
 
+  'budget/get-full-template-amount': (arg: {
+    month: string;
+  }) => Promise<Notification>;
+
   'budget/apply-goal-template': (arg: {
     month: string;
   }) => Promise<Notification>;

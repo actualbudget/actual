@@ -3,10 +3,16 @@ import { Notification } from '../../client/notifications/notificationsSlice';
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 import { batchMessages } from '../sync';
-
+import { integerToAmount } from '../../shared/util';
 import { isReflectBudget, getSheetValue, setGoal, setBudget } from './actions';
 import { CategoryTemplate } from './categoryTemplate';
 import { checkTemplates, storeTemplates } from './template-notes';
+
+export async function runGetFullAmount({ month }): Promise<Notification> {
+  await storeTemplates();
+  const categoryTemplates = await getTemplates(null);
+  return await getFullAmount(month, categoryTemplates);
+}
 
 export async function applyTemplate({ month }): Promise<Notification> {
   await storeTemplates();
@@ -251,5 +257,48 @@ async function processTemplate(
   return {
     type: 'message',
     message: `Successfully applied templates to ${catObjects.length} categories`,
+  };
+}
+
+async function getFullAmount(month, categoryTemplates): Promise<Notification> {
+  let categories = [];
+  const isReflect = isReflectBudget();
+  const categoriesLong = await getCategories();
+  categoriesLong.forEach(c => {
+    if (isReflect || !c.is_income) {
+      categories.push(c);
+    }
+  });
+
+  const catObjs: CategoryTemplate[] = [];
+  const errors = [];
+  for (let i = 0; i < categories.length; i++) {
+    const c = categories[i];
+    const templates = categoryTemplates[c.id];
+
+    if (!templates) continue;
+    try {
+      const obj = await CategoryTemplate.init(templates, c, month, 0);
+      catObjs.push(obj);
+    } catch (e) {
+      errors.push(`${c.name}: ${e.message}`);
+    }
+  }
+  if (errors.length > 0) {
+    return {
+      sticky: true,
+      message: 'There were errors interpreting some templates',
+      pre: errors.join(`\n\n`),
+    };
+  }
+
+  let total = 0;
+  for (let i = 0; i < catObjs.length; i++) {
+    total += await catObjs[i].getTotal();
+  }
+
+  return {
+    type: 'message',
+    message: `The max needed for templates is: $${integerToAmount(total)}`,
   };
 }
