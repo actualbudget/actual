@@ -9,6 +9,9 @@ env:
 
 on:
   push:
+    tags:
+      - 'v*.*.*'
+  push:
     branches:
       - master
   pull_request:
