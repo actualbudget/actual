@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
+import { SyncedPrefs } from '../../types/prefs';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
 import { post } from '../post';
@@ -7,7 +8,6 @@ import { getServer } from '../server-config';
 import { loadRules, insertRule } from '../transactions/transaction-rules';
 
 import { reconcileTransactions, addTransactions } from './sync';
-import { SyncedPrefs } from 'loot-core/types/prefs';
 
 jest.mock('../../shared/months', () => ({
   ...jest.requireActual('../../shared/months'),
