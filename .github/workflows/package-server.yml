@@ -24,14 +24,15 @@ jobs:
       - uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup
+      - name: Build the server
+        run: yarn build:server
       - name: Create dist folder
         run: |
           ls -la
           mkdir -p dist
           cp -r .yarn dist
           cp -r .yarnrc.yml dist
-      - name: Build the server
-        run: yarn build:server
+          ls -la dist
       # - name: Copy relevant files to dist
       #   run: |
       #     cp -r packages/sync-server/package.json dist
