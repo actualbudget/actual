@@ -1,6 +1,6 @@
 // @ts-strict-ignore
-import * as T from '..';
 import { GlobalPrefsJson } from '../../../../types/prefs';
+import * as T from '../index.d';
 
 const store: GlobalPrefsJson = {};
 

@@ -140,11 +140,11 @@ async function closeSocket(onClose) {
   await socketClient.close();
 }
 
-export const initServer: T.InitServer = function () {};
-export const serverPush: T.ServerPush = function () {};
-
 export const clearServer: T.ClearServer = async function () {
   if (socketClient != null) {
     return new Promise(closeSocket);
   }
 };
+
+export const initServer: T.InitServer = async function () {};
+export const serverPush: T.ServerPush = async function () {};

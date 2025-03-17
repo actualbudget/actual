@@ -13,9 +13,6 @@ export function send<K extends keyof ServerEvents>(
 ): void;
 export type Send = typeof send;
 
-export function getEvents(): unknown[];
-export type GetEvents = typeof getEvents;
-
 export function getNumClients(): number;
 export type GetNumClients = typeof getNumClients;
 
