@@ -26,28 +26,18 @@ jobs:
         uses: ./.github/actions/setup
       - name: Build the server
         run: yarn build:server
-      - name: Create dist folder
-        run: |
-          ls -la
-          mkdir -p dist
-          cp -r .yarn dist
-          cp -r .yarnrc.yml dist
-          ls -la dist
-      # - name: Copy relevant files to dist
-      #   run: |
-      #     cp -r packages/sync-server/package.json dist
-      #     cp -r packages/sync-server/app.js dist
-      #     cp -r packages/sync-server/src dist
-      #     cp -r packages/sync-server/migrations dist
-      #     cp -r packages/sync-server/web-client dist
+      - name: List files
+        run: la -la
       - name: Upload Server with Client Build
         uses: actions/upload-artifact@v4
+        include-hidden-files: true
         with:
           name: sync-server
           path: |
             package.json
             yarn.lock
-            dist
+            .yarn
+            .yarnrc.yml
             packages/sync-server/package.json
             packages/sync-server/app.js
             packages/sync-server/src
