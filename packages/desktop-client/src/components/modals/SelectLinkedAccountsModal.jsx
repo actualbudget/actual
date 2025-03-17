@@ -20,7 +20,6 @@ import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { TableHeader, Table, Row, Field } from '../table';
-import { Tooltip } from '../Tooltip';
 
 function useAddBudgetAccountOptions() {
   const { t } = useTranslation();
