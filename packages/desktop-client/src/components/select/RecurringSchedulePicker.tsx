@@ -310,7 +310,7 @@ function MonthlyPatterns({
         >
           <Select
             options={[
-              [-1, 'Last'],
+              [-1, t('Last')],
               Menu.line,
               ...DAY_OF_MONTH_OPTIONS.map(opt => [opt, String(opt)] as const),
             ]}
@@ -327,7 +327,7 @@ function MonthlyPatterns({
           />
           <Select
             options={[
-              ['day', 'Day'],
+              ['day', t('Day')],
               Menu.line,
               ...DAY_OF_WEEK_OPTIONS.map(opt => [opt.id, opt.name] as const),
             ]}
