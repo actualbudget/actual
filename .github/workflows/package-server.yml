@@ -21,14 +21,15 @@ jobs:
   package-server:
     runs-on: ubuntu-latest
     steps:
-      - name: Create dist folder
-        run: |
-          mkdir -p dist
-          cp -r ./.yarn dist
-          cp -r ./.yarnrc.yml dist
       - uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup
+      - name: Create dist folder
+        run: |
+          ls -la
+          mkdir -p dist
+          cp -r .yarn dist
+          cp -r .yarnrc.yml dist
       - name: Build the server
         run: yarn build:server
       # - name: Copy relevant files to dist
