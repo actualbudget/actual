@@ -24,8 +24,8 @@ jobs:
       - name: Create dist folder
         run: |
           mkdir -p dist
-          cp -r .yarn dist
-          cp -r .yarnrc.yml dist
+          cp -r ./.yarn dist
+          cp -r ./.yarnrc.yml dist
       - uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup
