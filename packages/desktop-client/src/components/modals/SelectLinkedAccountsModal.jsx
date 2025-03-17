@@ -43,7 +43,11 @@ export function SelectLinkedAccountsModal({
 }) {
   const sortedExternalAccounts = useMemo(() => {
     const toSort = [...externalAccounts];
-    toSort.sort((a, b) => a.name.localeCompare(b.name));
+    toSort.sort(
+      (a, b) =>
+        a.institution?.localeCompare(b.institution) ||
+        a.name.localeCompare(b.name),
+    );
     return toSort;
   }, [externalAccounts]);
 
@@ -173,7 +177,8 @@ export function SelectLinkedAccountsModal({
           >
             <TableHeader
               headers={[
-                { name: t('Bank Account To Sync'), width: 400 },
+                { name: t('Institution to Sync'), width: 200 },
+                { name: t('Bank Account To Sync'), width: 200 },
                 { name: t('Balance'), width: 80 },
                 { name: t('Account in Actual'), width: '40%' },
                 { name: t('Actions'), width: '20%' },
@@ -247,10 +252,8 @@ function TableRow({
 
   return (
     <Row style={{ backgroundColor: theme.tableBackground }}>
-      <Field width={400}>
-        {externalAccount.institution ? externalAccount.institution + ' - ' : ''}
-        {externalAccount.name}
-      </Field>
+      <Field width={200}>{externalAccount.institution}</Field>
+      <Field width={200}>{externalAccount.name}</Field>
       <Field width={80}>
         <PrivacyFilter>{externalAccount.balance}</PrivacyFilter>
       </Field>
