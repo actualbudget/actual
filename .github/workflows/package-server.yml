@@ -26,13 +26,11 @@ jobs:
         uses: ./.github/actions/setup
       - name: Build the server
         run: yarn build:server
-      - name: List files
-        run: la -la
       - name: Upload Server with Client Build
         uses: actions/upload-artifact@v4
-        include-hidden-files: true
         with:
           name: sync-server
+          include-hidden-files: true
           path: |
             package.json
             yarn.lock
