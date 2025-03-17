@@ -1322,7 +1322,7 @@ function UncategorizedTransactionsBanner(props) {
             justifyContent: 'space-between',
           }}
         >
-          Found {count} uncategorized{' '}
+          You have {count} uncategorized{' '}
           {count === 1 ? 'transaction' : 'transactions'}
           <Button
             onPress={() => navigate('/accounts/uncategorized')}
