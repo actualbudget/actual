@@ -35,7 +35,7 @@ jobs:
           path: |
             package.json
             yarn.lock
-            .yarnrc.yaml
+            .yarnrc.yml
             packages/sync-server/package.json
             packages/sync-server/app.js
             packages/sync-server/src
