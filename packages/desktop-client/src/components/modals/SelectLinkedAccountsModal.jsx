@@ -20,6 +20,7 @@ import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { TableHeader, Table, Row, Field } from '../table';
+import { Tooltip } from '../Tooltip';
 
 function useAddBudgetAccountOptions() {
   const { t } = useTranslation();
@@ -150,7 +151,7 @@ export function SelectLinkedAccountsModal({
   return (
     <Modal
       name="select-linked-accounts"
-      containerProps={{ style: { width: 800 } }}
+      containerProps={{ style: { width: 1000 } }}
     >
       {({ state: { close } }) => (
         <>
@@ -173,10 +174,10 @@ export function SelectLinkedAccountsModal({
           >
             <TableHeader
               headers={[
-                { name: t('Bank Account To Sync'), width: 200 },
+                { name: t('Bank Account To Sync'), width: 400 },
                 { name: t('Balance'), width: 80 },
-                { name: t('Account in Actual'), width: 'flex' },
-                { name: t('Actions'), width: 'flex' },
+                { name: t('Account in Actual'), width: '40%' },
+                { name: t('Actions'), width: '20%' },
               ]}
             />
 
@@ -247,7 +248,10 @@ function TableRow({
 
   return (
     <Row style={{ backgroundColor: theme.tableBackground }}>
-      <Field width={200}>{externalAccount.name}</Field>
+      <Field width={400}>
+        {externalAccount.institution ? externalAccount.institution + ' - ' : ''}
+        {externalAccount.name}
+      </Field>
       <Field width={80}>
         <PrivacyFilter>{externalAccount.balance}</PrivacyFilter>
       </Field>
