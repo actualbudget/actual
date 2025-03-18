@@ -85,6 +85,10 @@ export function MergeUnusedPayeesModal({
 
       if (ruleId) {
         const rule = await send('rule-get', { id: ruleId });
+        if (!rule) {
+          return;
+        }
+
         dispatch(
           replaceModal({ modal: { name: 'edit-rule', options: { rule } } }),
         );

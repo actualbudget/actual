@@ -45,12 +45,12 @@ export const UserAccessRow = memo(
           handleError(error);
         }
       } else {
-        const { someDeletionsFailed } = await send('access-delete-all', {
+        const result = await send('access-delete-all', {
           fileId: cloudFileId as string,
           ids: [access.userId],
         });
 
-        if (someDeletionsFailed) {
+        if ('someDeletionsFailed' in result && result.someDeletionsFailed) {
           dispatch(
             addNotification({
               notification: {
