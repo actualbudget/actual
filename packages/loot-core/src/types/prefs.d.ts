@@ -32,6 +32,7 @@ export type SyncedPrefs = Partial<
     | `csv-has-header-${string}`
     | `custom-sync-mappings-${string}`
     | `sync-import-pending-${string}`
+    | `sync-reimport-deleted-${string}`
     | `sync-import-notes-${string}`
     | `ofx-fallback-missing-payee-${string}`
     | `flip-amount-${string}-${'csv' | 'qif'}`
