@@ -125,7 +125,6 @@
     "./server/budget/types/*": "./src/server/budget/types/*.d.ts",
     "./server/*": "./src/server/*.ts",
     "./shared/*": "./src/shared/*.ts",
-    "./types/models/user": "./src/types/models/user.ts",
     "./types/models": "./src/types/models/index.d.ts",
     "./types/*": "./src/types/*.d.ts"
   }
