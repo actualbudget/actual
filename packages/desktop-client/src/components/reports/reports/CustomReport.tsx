@@ -273,6 +273,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       report.conditions?.forEach((condition: RuleConditionEntity) =>
         onApplyFilter(condition),
       );
+      onConditionsOpChange(report.conditionsOp);
       const trans = await send('get-earliest-transaction');
       setEarliestTransaction(trans ? trans.date : monthUtils.currentDay());
       const fromDate =
