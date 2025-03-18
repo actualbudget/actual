@@ -1305,6 +1305,7 @@ function Banner({ type = 'info', children }) {
 }
 
 function UncategorizedTransactionsBanner(props) {
+  const { t } = useTranslation();
   const count = useSheetValue(uncategorizedCount());
   const navigate = useNavigate();
 
@@ -1323,13 +1324,15 @@ function UncategorizedTransactionsBanner(props) {
             justifyContent: 'space-between',
           }}
         >
-          You have {count} uncategorized{' '}
-          {count === 1 ? 'transaction' : 'transactions'}
+          {t('You have {{count}} uncategorized {{transactionText}}', {
+            count,
+            transactionText: count === 1 ? t('transaction') : t('transactions'),
+          })}
           <Button
             onPress={() => navigate('/accounts/uncategorized')}
             style={PILL_STYLE}
           >
-            <Text>Categorize</Text>
+            <Text>{t('Categorize')}</Text>
           </Button>
         </View>
       </Banner>
@@ -1406,11 +1409,11 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
               }}
             >
               <SvgArrowButtonDown1 style={{ width: 15, height: 15 }} />
-              <Text>You have budgeted more than what you have</Text>
+              <Text>{t('You have budgeted more than what you have')}</Text>
             </View>
           </View>
           <Button onPress={openCoverOverbudgetedModal} style={PILL_STYLE}>
-            Cover
+            {t('Cover')}
           </Button>
         </View>
       </Banner>
@@ -1448,8 +1451,9 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
   const spreadsheet = useSpreadsheet();
 
   useEffect(() => {
+    const unbindList = [];
     for (const [categoryId, carryoverBinding] of categoryCarryoverBindings) {
-      spreadsheet.bind(sheetName, carryoverBinding, result => {
+      const unbind = spreadsheet.bind(sheetName, carryoverBinding, result => {
         const isRolloverEnabled = Boolean(result.value);
         if (isRolloverEnabled) {
           setCarryoverFlagByCategory(prev => ({
@@ -1464,12 +1468,18 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
           });
         }
       });
+      unbindList.push(unbind);
     }
+
+    return () => {
+      unbindList.forEach(unbind => unbind());
+    };
   }, [categoryCarryoverBindings, sheetName, spreadsheet]);
 
   useEffect(() => {
+    const unbindList = [];
     for (const [categoryId, balanceBinding] of categoryBalanceBindings) {
-      spreadsheet.bind(sheetName, balanceBinding, result => {
+      const unbind = spreadsheet.bind(sheetName, balanceBinding, result => {
         if (result.value < 0) {
           setOverspentByCategory(prev => ({
             ...prev,
@@ -1483,7 +1493,12 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
           });
         }
       });
+      unbindList.push(unbind);
     }
+
+    return () => {
+      unbindList.forEach(unbind => unbind());
+    };
   }, [categoryBalanceBindings, sheetName, spreadsheet]);
 
   const dispatch = useDispatch();
@@ -1610,12 +1625,17 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
             }}
           >
             <Text>
-              You have {numberOfOverspentCategories} overspent{' '}
-              {numberOfOverspentCategories === 1 ? 'category' : 'categories'}
+              {t('You have {{count}} overspent {{categoryText}}', {
+                count: numberOfOverspentCategories,
+                categoryText:
+                  numberOfOverspentCategories === 1
+                    ? t('category')
+                    : t('categories'),
+              })}
             </Text>
           </View>
           <Button onPress={onOpenCategorySelectionModal} style={PILL_STYLE}>
-            Cover
+            {t('Cover')}
           </Button>
         </View>
       </Banner>
@@ -1624,6 +1644,7 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
 }
 
 function Banners({ month, onBudgetAction }) {
+  const { t } = useTranslation();
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
 
   // Limit to rollover for now.
@@ -1633,7 +1654,7 @@ function Banners({ month, onBudgetAction }) {
 
   return (
     <GridList
-      aria-label="Banners"
+      aria-label={t('Banners')}
       style={{ backgroundColor: theme.mobilePageBackground }}
     >
       <UncategorizedTransactionsBanner />
