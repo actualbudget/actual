@@ -67,7 +67,12 @@ app.get('/mode', (req, res) => {
   res.send(config.get('mode'));
 });
 
-app.use(actuator()); // Provides /health, /metrics, /info
+app.use(
+  actuator({
+    infoBuildOptions:
+      process.env.NODE_ENV === 'development' ? { version: '.development' } : {},
+  }),
+); // Provides /health, /metrics, /info
 
 // The web frontend
 app.use((req, res, next) => {

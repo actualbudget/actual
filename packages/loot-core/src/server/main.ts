@@ -443,17 +443,17 @@ handlers['get-server-version'] = async function () {
     return { error: 'no-server' };
   }
 
-  let version;
   try {
     const res = await get(getServer().BASE_SERVER + '/info');
 
     const info = JSON.parse(res);
-    version = info.build.version;
+    return {
+      version: info.build.version,
+      commit: info.git?.commit.id,
+    };
   } catch (err) {
     return { error: 'network-failure' };
   }
-
-  return { version };
 };
 
 handlers['get-server-url'] = async function () {

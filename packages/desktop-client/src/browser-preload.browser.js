@@ -22,9 +22,9 @@ const IS_DEV = process.env.NODE_ENV === 'development';
 const ACTUAL_VERSION = Platform.isPlaywright
   ? '99.9.9'
   : isPreviewEnvironment()
-    ? `.preview (${process.env.REACT_APP_COMMIT_REF})`
+    ? `.preview (${process.env.REACT_APP_COMMIT_REF?.substr(0, 7)})`
     : isEdgeEnvironment()
-      ? `.edge (${process.env.REACT_APP_COMMIT_REF})`
+      ? `.edge (${process.env.REACT_APP_COMMIT_REF?.substr(0, 7)})`
       : isDevelopmentEnvironment()
         ? '.development'
         : packageJson.version;

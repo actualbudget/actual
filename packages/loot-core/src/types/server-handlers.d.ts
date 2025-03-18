@@ -164,7 +164,9 @@ export interface ServerHandlers {
 
   'subscribe-set-token': (arg: { token: string }) => Promise<void>;
 
-  'get-server-version': () => Promise<{ error?: string } | { version: string }>;
+  'get-server-version': () => Promise<
+    { error?: string } | { version: string; commit?: string }
+  >;
 
   'get-server-url': () => Promise<string | null>;
 
