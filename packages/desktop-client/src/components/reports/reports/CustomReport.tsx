@@ -347,7 +347,9 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     firstDayOfWeekIdx,
     isDateStatic,
     onApplyFilter,
+    onConditionsOpChange,
     report.conditions,
+    report.conditionsOp,
     includeCurrentInterval,
     locale,
   ]);
