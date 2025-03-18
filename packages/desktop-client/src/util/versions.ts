@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import * as Platform from 'loot-core/client/platform';
+import { isNonProductionEnvironment } from 'loot-core/shared/environment';
 
 function parseSemanticVersion(versionString): [number, number, number] {
   return versionString
@@ -19,7 +20,7 @@ function cmpSemanticVersion(
 }
 
 export async function getLatestVersion(): Promise<string | 'unknown'> {
-  if (Platform.isPlaywright || process.env.REACT_APP_REVIEW_ID) {
+  if (Platform.isPlaywright || isNonProductionEnvironment()) {
     return Promise.resolve('v99.9.9');
   }
 

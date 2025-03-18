@@ -3,6 +3,11 @@ import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-th
 import { registerSW } from 'virtual:pwa-register';
 
 import * as Platform from 'loot-core/client/platform';
+import {
+  isDevelopmentEnvironment,
+  isEdgeEnvironment,
+  isPreviewEnvironment,
+} from 'loot-core/shared/environment';
 
 import packageJson from '../package.json';
 
@@ -16,9 +21,13 @@ const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
 const IS_DEV = process.env.NODE_ENV === 'development';
 const ACTUAL_VERSION = Platform.isPlaywright
   ? '99.9.9'
-  : process.env.REACT_APP_REVIEW_ID
-    ? '.preview'
-    : packageJson.version;
+  : isPreviewEnvironment()
+    ? `.preview (${process.env.REACT_APP_COMMIT_REF})`
+    : isEdgeEnvironment()
+      ? `.edge (${process.env.REACT_APP_COMMIT_REF})`
+      : isDevelopmentEnvironment()
+        ? '.development'
+        : packageJson.version;
 
 // *** Start the backend ***
 let worker;
