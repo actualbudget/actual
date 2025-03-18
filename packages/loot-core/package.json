@@ -36,6 +36,7 @@
     "mitt": "^3.0.1",
     "reselect": "^4.1.8",
     "slash": "3.0.0",
+    "ua-parser-js": "^2.0.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
