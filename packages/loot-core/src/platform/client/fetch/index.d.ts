@@ -51,7 +51,7 @@ export function initServer(handlers: {
     data: any;
     dependencies: string[];
   }>;
-  getCell?: () => { value: number };
+  'get-cell'?: () => { value: number };
   'get-categories'?: () => { grouped: CategoryGroupEntity[] };
 }): void;
 export type InitServer = typeof initServer;
