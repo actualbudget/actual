@@ -2,8 +2,11 @@ import React, { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgQuestion } from '@actual-app/components/icons/v1';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
+import { Tooltip } from '@actual-app/components/tooltip';
+import { View } from '@actual-app/components/view';
 
 import { useTransactions } from 'loot-core/client/data-hooks/transactions';
 import {
@@ -238,7 +241,24 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             checked={reimportDeleted}
             onChange={() => setReimportDeleted(!reimportDeleted)}
           >
-            <Trans>Reimport deleted transactions</Trans>
+            <Tooltip
+              content={t(
+                'By default imported transactions that you delete will be re-imported with the next bank sync operation. To disable this behaviour - untick this box.',
+              )}
+            >
+              <View
+                style={{
+                  display: 'flex',
+                  flexWrap: 'nowrap',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                <Trans>Reimport deleted transactions</Trans>
+                <SvgQuestion height={12} width={12} cursor="pointer" />
+              </View>
+            </Tooltip>
           </CheckboxOption>
 
           <Stack
