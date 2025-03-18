@@ -15,6 +15,7 @@ import * as rules from '../server/transactions/transaction-rules';
 import { updateVersion } from '../server/update';
 import { resetTracer, tracer } from '../shared/test-helpers';
 
+jest.mock('../platform/exceptions');
 jest.mock('../server/post');
 
 // By default, syncing is disabled
