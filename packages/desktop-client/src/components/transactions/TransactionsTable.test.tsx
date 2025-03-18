@@ -239,10 +239,14 @@ function initBasicServer() {
           throw new Error(`queried unknown table: ${query.table}`);
       }
     },
-    'get-cell': () => ({
+    'get-cell': async () => ({
+      name: 'test-cell',
       value: 129_87,
     }),
-    'get-categories': () => ({ grouped: categoryGroups, list: categories }),
+    'get-categories': async () => ({
+      grouped: categoryGroups,
+      list: categories,
+    }),
   });
 }
 
