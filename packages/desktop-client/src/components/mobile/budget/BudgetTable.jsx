@@ -50,6 +50,7 @@ import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useLocale } from '../../../hooks/useLocale';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { usePrevious } from '../../../hooks/usePrevious';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useUndo } from '../../../hooks/useUndo';
 import { useDispatch } from '../../../redux';
@@ -1565,6 +1566,28 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
   }, [categoryGroupsToShow, dispatch, month, onOpenCoverCategoryModal, t]);
 
   const numberOfOverspentCategories = overspentCategoryIds.length;
+  const previousNumberOfOverspentCategories = usePrevious(
+    numberOfOverspentCategories,
+  );
+
+  useEffect(() => {
+    if (numberOfOverspentCategories < previousNumberOfOverspentCategories) {
+      // Re-render the modal when the overspent categories are covered.
+      dispatch(collapseModals({ rootModalName: 'category-autocomplete' }));
+      onOpenCategorySelectionModal();
+
+      // All overspent categories have been covered.
+      if (numberOfOverspentCategories === 0) {
+        dispatch(collapseModals({ rootModalName: 'category-autocomplete' }));
+      }
+    }
+  }, [
+    dispatch,
+    onOpenCategorySelectionModal,
+    numberOfOverspentCategories,
+    previousNumberOfOverspentCategories,
+  ]);
+
   if (numberOfOverspentCategories === 0) {
     return null;
   }
