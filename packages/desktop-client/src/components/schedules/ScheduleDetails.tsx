@@ -534,6 +534,10 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
   async function onEditRule(id: string) {
     const rule = await send('rule-get', { id });
 
+    if (!rule) {
+      return;
+    }
+
     globalDispatch(
       pushModal({
         modal: {
