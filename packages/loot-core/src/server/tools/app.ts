@@ -1,16 +1,28 @@
 // @ts-strict-ignore
 import { q } from '../../shared/query';
+import { TransactionEntity } from '../../types/models';
 import { createApp } from '../app';
 import { runQuery } from '../aql';
 import * as db from '../db';
 import { runMutator } from '../mutators';
 import { batchUpdateTransactions } from '../transactions';
 
-import { ToolsHandlers } from './types/handlers';
+export type ToolsHandlers = {
+  'tools/fix-split-transactions': typeof fixSplitTransactions;
+};
 
 export const app = createApp<ToolsHandlers>();
 
-app.method('tools/fix-split-transactions', async () => {
+app.method('tools/fix-split-transactions', fixSplitTransactions);
+
+async function fixSplitTransactions(): Promise<{
+  numBlankPayees: number;
+  numCleared: number;
+  numDeleted: number;
+  numTransfersFixed: number;
+  numNonParentErrorsFixed: number;
+  mismatchedSplits: TransactionEntity[];
+}> {
   // 1. Check for child transactions that have a blank payee, and set
   //    the payee to whatever the parent has
   const blankPayeeRows = await db.all<
@@ -119,4 +131,4 @@ app.method('tools/fix-split-transactions', async () => {
     numNonParentErrorsFixed: errorRows.length,
     mismatchedSplits,
   };
-});
+}
