@@ -132,11 +132,11 @@ function makeSpreadsheet() {
     }
 
     get(sheetName: string, name: string) {
-      return send('getCell', { sheetName, name });
+      return send('get-cell', { sheetName, name });
     }
 
     getCellNames(sheetName: string) {
-      return send('getCellNamesInSheet', { sheetName });
+      return send('get-cell-names', { sheetName });
     }
 
     createQuery(sheetName: string, name: string, query: Query) {

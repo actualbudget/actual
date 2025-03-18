@@ -50,7 +50,7 @@ import { app as rulesApp } from './rules/app';
 import { app as schedulesApp } from './schedules/app';
 import { getServer, isValidBaseURL, setServer } from './server-config';
 import * as sheet from './sheet';
-import { resolveName, unresolveName } from './spreadsheet/util';
+import { app as spreadsheetApp } from './spreadsheet/app';
 import {
   initialFullSync,
   fullSync,
@@ -104,44 +104,6 @@ handlers['make-filters-from-conditions'] = async function ({
   applySpecialCases,
 }) {
   return rules.conditionsToAQL(conditions, { applySpecialCases });
-};
-
-handlers['getCell'] = async function ({ sheetName, name }) {
-  const node = sheet.get()._getNode(resolveName(sheetName, name));
-  return { name: node.name, value: node.value };
-};
-
-handlers['getCells'] = async function ({ names }) {
-  return names.map(name => {
-    const node = sheet.get()._getNode(name);
-    return { name: node.name, value: node.value };
-  });
-};
-
-handlers['getCellNamesInSheet'] = async function ({ sheetName }) {
-  const names = [];
-  for (const name of sheet.get().getNodes().keys()) {
-    const { sheet: nodeSheet, name: nodeName } = unresolveName(name);
-    if (nodeSheet === sheetName) {
-      names.push(nodeName);
-    }
-  }
-  return names;
-};
-
-handlers['debugCell'] = async function ({ sheetName, name }) {
-  const node = sheet.get().getNode(resolveName(sheetName, name));
-  return {
-    ...node,
-    _run: node._run && node._run.toString(),
-  };
-};
-
-handlers['create-query'] = async function ({ sheetName, name, query }) {
-  // Always run it regardless of cache. We don't know anything has changed
-  // between the cache value being saved and now
-  sheet.get().createQuery(sheetName, name, query);
-  return 'ok';
 };
 
 handlers['query'] = async function (query) {
@@ -1143,6 +1105,7 @@ app.combine(
   transactionsApp,
   accountsApp,
   payeesApp,
+  spreadsheetApp,
 );
 
 export function getDefaultDocumentDir() {
