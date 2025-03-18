@@ -16,7 +16,6 @@ import { app as accountsApp } from './accounts/app';
 import { app as adminApp } from './admin/app';
 import { installAPI } from './api';
 import { runQuery as aqlQuery } from './aql';
-import { getAvailableBackups, loadBackup, makeBackup } from './backups';
 import { app as budgetApp } from './budget/app';
 import { app as budgetFilesApp } from './budgetfiles/app';
 import { app as dashboardApp } from './dashboard/app';
@@ -480,32 +479,6 @@ handlers['get-openid-config'] = async function () {
   } catch (err) {
     return { error: 'config-fetch-failed' };
   }
-};
-
-handlers['backups-get'] = async function ({ id }) {
-  return getAvailableBackups(id);
-};
-
-handlers['backup-load'] = async function ({ id, backupId }) {
-  await loadBackup(id, backupId);
-};
-
-handlers['backup-make'] = async function ({ id }) {
-  await makeBackup(id);
-};
-
-handlers['get-last-opened-backup'] = async function () {
-  const id = await asyncStorage.getItem('lastBudget');
-  if (id && id !== '') {
-    const budgetDir = fs.getBudgetDir(id);
-
-    // We never want to give back a budget that does not exist on the
-    // filesystem anymore, so first check that it exists
-    if (await fs.exists(budgetDir)) {
-      return id;
-    }
-  }
-  return null;
 };
 
 handlers['app-focused'] = async function () {

@@ -9,7 +9,6 @@ import * as fs from '../../platform/server/fs';
 import { logger } from '../../platform/server/log';
 import { Budget } from '../../types/budget';
 import { createApp } from '../app';
-import { startBackupService, stopBackupService } from '../backups';
 import * as budget from '../budget/base';
 import * as cloudStorage from '../cloud-storage';
 import * as db from '../db';
@@ -31,6 +30,14 @@ import {
   uniqueBudgetName,
   validateBudgetName,
 } from '../util/budget-name';
+
+import {
+  getAvailableBackups,
+  makeBackup as _makeBackup,
+  loadBackup as _loadBackup,
+  startBackupService,
+  stopBackupService,
+} from './backups';
 
 const DEMO_BUDGET_ID = '_demo-budget';
 const TEST_BUDGET_ID = '_test-budget';
@@ -54,6 +61,10 @@ export type BudgetFileHandlers = {
   'import-budget': typeof importBudget;
   'export-budget': typeof exportBudget;
   'upload-file-web': typeof uploadFileWeb;
+  'backups-get': typeof getBackups;
+  'backup-load': typeof loadBackup;
+  'backup-make': typeof makeBackup;
+  'get-last-opened-backup': typeof getLastOpenedBackup;
 };
 
 export const app = createApp<BudgetFileHandlers>();
@@ -75,6 +86,10 @@ app.method('create-budget', createBudget);
 app.method('import-budget', importBudget);
 app.method('export-budget', exportBudget);
 app.method('upload-file-web', uploadFileWeb);
+app.method('backups-get', getBackups);
+app.method('backup-load', loadBackup);
+app.method('backup-make', makeBackup);
+app.method('get-last-opened-backup', getLastOpenedBackup);
 
 async function handleValidateBudgetName({ name }: { name: string }) {
   return validateBudgetName(name);
@@ -634,4 +649,30 @@ async function uploadFileWeb({
 
   await fs.writeFile('/uploads/' + filename, contents);
   return {};
+}
+
+async function getBackups({ id }) {
+  return getAvailableBackups(id);
+}
+
+async function loadBackup({ id, backupId }) {
+  await _loadBackup(id, backupId);
+}
+
+async function makeBackup({ id }) {
+  await _makeBackup(id);
+}
+
+async function getLastOpenedBackup() {
+  const id = await asyncStorage.getItem('lastBudget');
+  if (id && id !== '') {
+    const budgetDir = fs.getBudgetDir(id);
+
+    // We never want to give back a budget that does not exist on the
+    // filesystem anymore, so first check that it exists
+    if (await fs.exists(budgetDir)) {
+      return id;
+    }
+  }
+  return null;
 }

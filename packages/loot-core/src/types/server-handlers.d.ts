@@ -1,4 +1,3 @@
-import { Backup } from '../server/backups';
 import { Message } from '../server/sync';
 import { QueryState } from '../shared/query';
 
@@ -7,8 +6,6 @@ import { OpenIdConfig } from './models/openid';
 export interface ServerHandlers {
   undo: () => Promise<void>;
   redo: () => Promise<void>;
-
-  'get-earliest-transaction': () => Promise<{ date: string }>;
 
   'make-filters-from-conditions': (arg: {
     conditions: unknown;
@@ -100,14 +97,6 @@ export interface ServerHandlers {
     | { error: { message: string; reason: string; meta: unknown } }
     | { messages: Message[] }
   >;
-
-  'backups-get': (arg: { id: string }) => Promise<Backup[]>;
-
-  'backup-load': (arg: { id: string; backupId: string }) => Promise<void>;
-
-  'backup-make': (arg: { id: string }) => Promise<void>;
-
-  'get-last-opened-backup': () => Promise<string | null>;
 
   'app-focused': () => Promise<void>;
 
