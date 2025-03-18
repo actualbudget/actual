@@ -592,7 +592,7 @@ async function _loadBudget(id: Budget['id']): Promise<{
   await mappings.loadMappings();
   await rules.loadRules();
   await syncMigrations.listen();
-  await app.startServices();
+  await mainApp.startServices();
 
   clearUndo();
 
