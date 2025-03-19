@@ -3,6 +3,7 @@ import type { AdminHandlers } from '../server/admin/app';
 import type { BudgetHandlers } from '../server/budget/app';
 import type { BudgetFileHandlers } from '../server/budgetfiles/app';
 import type { DashboardHandlers } from '../server/dashboard/app';
+import type { EncryptionHandlers } from '../server/encryption/app';
 import type { FiltersHandlers } from '../server/filters/app';
 import type { NotesHandlers } from '../server/notes/app';
 import type { PayeesHandlers } from '../server/payees/app';
@@ -36,6 +37,7 @@ export interface Handlers
     PayeesHandlers,
     SpreadsheetHandlers,
     SyncHandlers,
-    BudgetFileHandlers {}
+    BudgetFileHandlers,
+    EncryptionHandlers {}
 
 export type HandlerFunctions = Handlers[keyof Handlers];

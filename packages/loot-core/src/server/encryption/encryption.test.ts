@@ -1,4 +1,4 @@
-import * as encryption from './encryption';
+import * as encryption from '.';
 
 afterEach(() => encryption.unloadAllKeys());
 
