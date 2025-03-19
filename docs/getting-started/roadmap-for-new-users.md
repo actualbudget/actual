@@ -35,9 +35,9 @@ However, if you are adventurous or somewhat technical, please go directly to the
 
 Then you are in luck. We have guides for the following systems:
 
-* [Local installation](/docs/install/local)
 * [Docker installation](/docs/install/docker)
 * [Fly.io installation](/docs/install/fly)
+* [Build from source](/docs/install/build-from-source)
 
 There is also an external guide explaining how to install Actual on:
 

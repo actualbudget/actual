@@ -2,7 +2,7 @@
 title: Configuring the Server
 ---
 
-When it starts up, Actual looks for an optional `config.json` file in the same directory as the sync-server's `package.json`. If you are running a [local installation](https://actualbudget.com/docs/install/local) this will be in ```packages/sync-server/```. If present, any keys you define there will override the default values. All values can also be specified as environment variables, which will override the values in the `config.json` file.
+When it starts up, Actual looks for an optional `config.json` file in the same directory as the sync-server's `package.json`. If you are [building from source](https://actualbudget.com/docs/install/build-from-source) this will be in ```packages/sync-server/```. If present, any keys you define there will override the default values. All values can also be specified as environment variables, which will override the values in the `config.json` file.
 
 :::info
 
@@ -30,21 +30,21 @@ You can’t specify this option in `config.json` since it needs to be used to fi
 
 ## `ACTUAL_UPLOAD_FILE_SYNC_SIZE_LIMIT_MB`
 
-Defines the maximum allowed size for sync files (in MB).  
+Defines the maximum allowed size for sync files (in MB).
 
-The default value is `20`.  
+The default value is `20`.
 
 ## `ACTUAL_UPLOAD_SYNC_ENCRYPTED_FILE_SYNC_SIZE_LIMIT_MB`
 
-Defines the maximum allowed size for encrypted sync files (in MB).  
+Defines the maximum allowed size for encrypted sync files (in MB).
 
-The default value is `50`.  
+The default value is `50`.
 
 ## `ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB`
 
-Defines the general maximum file size limit (in MB) for uploads.  
+Defines the general maximum file size limit (in MB) for uploads.
 
-The default value is `20`.  
+The default value is `20`.
 
 ## `https`
 
