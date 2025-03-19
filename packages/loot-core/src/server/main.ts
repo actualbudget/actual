@@ -34,7 +34,6 @@ import { app as reportsApp } from './reports/app';
 import { app as rulesApp } from './rules/app';
 import { app as schedulesApp } from './schedules/app';
 import { getServer, isValidBaseURL, setServer } from './server-config';
-import * as sheet from './sheet';
 import { app as spreadsheetApp } from './spreadsheet/app';
 import {
   fullSync,
