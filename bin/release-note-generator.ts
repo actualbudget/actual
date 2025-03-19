@@ -1,4 +1,4 @@
-import { writeFile } from 'node:fs';
+import { existsSync, writeFile } from 'node:fs';
 import { exit } from 'node:process';
 
 import prompts from 'prompts';
@@ -28,7 +28,7 @@ async function run() {
     },
     {
       name: 'githubUsername',
-      message: 'Comma-separted GitHub username(s)',
+      message: 'Comma-separated GitHub username(s)',
       type: 'text',
     },
   ]);
@@ -48,20 +48,53 @@ async function run() {
     result.oneLineSummary,
   );
 
-  const prNumber = result.pullRequestNumber || (await getNextPrNumber());
+  let prNumber = result.pullRequestNumber || (await getNextPrNumber());
+  // Ensure PR number is a positive integer
+  prNumber = String(parseInt(String(prNumber), 10));
+  if (!/^\d+$/.test(prNumber)) {
+    console.error('Invalid PR number format. Exiting.');
+    exit(1);
+  }
 
-  writeFile(`./upcoming-release-notes/${prNumber}.md`, fileContents, err => {
+  const filepath = `./upcoming-release-notes/${prNumber}.md`;
+  if (existsSync(filepath)) {
+    const { confirm } = await prompts({
+      name: 'confirm',
+      type: 'confirm',
+      message: `This will overwrite the existing release note ${filepath} Are you sure?`,
+    });
+    if (!confirm) {
+      console.log('Exiting');
+      exit(1);
+    }
+  }
+
+  writeFile(filepath, fileContents, err => {
     if (err) {
-      console.error(err);
+      console.error('Failed to write release note file:', err);
+      exit(1);
+    } else {
+      console.log(
+        `Release note generated successfully: ./upcoming-release-notes/${prNumber}.md`,
+      );
     }
   });
 }
 
-async function getNextPrNumber(): Promise<string> {
-  const resp = await fetch(
-    'https://internal.floralily.dev/next-pr-number-api/?owner=actualbudget&name=actual',
-  );
-  return await resp.text();
+async function getNextPrNumber(): Promise<number> {
+  try {
+    const resp = await fetch(
+      'https://internal.floralily.dev/next-pr-number-api/?owner=actualbudget&name=actual',
+    );
+    if (!resp.ok) {
+      throw new Error(`API responded with status: ${resp.status}`);
+    }
+    const prNumberText = await resp.text();
+    return parseInt(prNumberText);
+  } catch (error) {
+    console.error('Failed to fetch next PR number:', error);
+    exit(1);
+  }
 }
 
 function getFileContents(type: string, username: string, summary: string) {
