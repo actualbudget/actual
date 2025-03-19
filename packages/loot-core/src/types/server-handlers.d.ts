@@ -22,10 +22,6 @@ export interface ServerHandlers {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   query: (query: Query) => Promise<{ data: any; dependencies: string[] }>;
 
-  'sync-reset': () => Promise<{ error?: { reason: string; meta?: unknown } }>;
-
-  'sync-repair': () => Promise<unknown>;
-
   'key-make': (arg: {
     password;
   }) => Promise<{ error?: { reason: string; meta?: unknown } }>;
