@@ -1,4 +1,5 @@
 import { writeFile } from 'node:fs';
+import { exit } from 'node:process';
 
 import prompts from 'prompts';
 
@@ -32,6 +33,15 @@ async function run() {
     },
   ]);
 
+  if (
+    !result.githubUsername ||
+    !result.oneLineSummary ||
+    !result.releaseNoteType
+  ) {
+    console.log('All questions must be answered. Exiting');
+    exit(1);
+  }
+
   const fileContents = getFileContents(
     result.releaseNoteType,
     result.githubUsername,
@@ -56,7 +66,7 @@ async function getNextPrNumber(): Promise<string> {
 
 function getFileContents(type: string, username: string, summary: string) {
   return `---
-category: ${type},
+category: ${type}
 authors: [${username}]
 ---
 
