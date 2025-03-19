@@ -48,11 +48,10 @@ async function run() {
     result.oneLineSummary,
   );
 
-  let prNumber = result.pullRequestNumber || (await getNextPrNumber());
-  // Ensure PR number is a positive integer
-  prNumber = String(parseInt(String(prNumber), 10));
-  if (!/^\d+$/.test(prNumber)) {
-    console.error('Invalid PR number format. Exiting.');
+  const prNumber =
+    parseInt(result.pullRequestNumber) || (await getNextPrNumber());
+  if (prNumber <= 0) {
+    console.error('PR number must be a positive integer');
     exit(1);
   }
 
