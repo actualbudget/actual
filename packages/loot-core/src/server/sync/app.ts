@@ -16,12 +16,12 @@ app.method('sync', sync);
 app.method('sync-reset', resetSync);
 app.method('sync-repair', repairSync);
 
-function sync() {
-  return fullSync();
+async function sync() {
+  return await fullSync();
 }
 
-function resetSync() {
-  return _resetSync();
+async function resetSync() {
+  return await _resetSync();
 }
 
 async function repairSync() {
