@@ -8,7 +8,7 @@ import React, {
   useState,
 } from 'react';
 import { GridList, GridListItem } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
@@ -1305,7 +1305,6 @@ function Banner({ type = 'info', children }) {
 }
 
 function UncategorizedTransactionsBanner(props) {
-  const { t } = useTranslation();
   const count = useSheetValue(uncategorizedCount());
   const navigate = useNavigate();
 
@@ -1324,15 +1323,16 @@ function UncategorizedTransactionsBanner(props) {
             justifyContent: 'space-between',
           }}
         >
-          {t('You have {{count}} uncategorized {{transactionText}}', {
-            count,
-            transactionText: count === 1 ? t('transaction') : t('transactions'),
-          })}
+          <Trans count={count}>
+            You have {{ count }} uncategorized transactions
+          </Trans>
           <Button
             onPress={() => navigate('/accounts/uncategorized')}
             style={PILL_STYLE}
           >
-            <Text>{t('Categorize')}</Text>
+            <Text>
+              <Trans>Categorize</Trans>
+            </Text>
           </Button>
         </View>
       </Banner>
@@ -1409,11 +1409,13 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
               }}
             >
               <SvgArrowButtonDown1 style={{ width: 15, height: 15 }} />
-              <Text>{t('You have budgeted more than what you have')}</Text>
+              <Text>
+                <Trans>You have budgeted more than your available funds</Trans>
+              </Text>
             </View>
           </View>
           <Button onPress={openCoverOverbudgetedModal} style={PILL_STYLE}>
-            {t('Cover')}
+            <Trans>Cover</Trans>
           </Button>
         </View>
       </Banner>
@@ -1625,17 +1627,14 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
             }}
           >
             <Text>
-              {t('You have {{count}} overspent {{categoryText}}', {
-                count: numberOfOverspentCategories,
-                categoryText:
-                  numberOfOverspentCategories === 1
-                    ? t('category')
-                    : t('categories'),
-              })}
+              <Trans count={numberOfOverspentCategories}>
+                You have {{ count: numberOfOverspentCategories }} overspent
+                categories
+              </Trans>
             </Text>
           </View>
           <Button onPress={onOpenCategorySelectionModal} style={PILL_STYLE}>
-            {t('Cover')}
+            <Trans>Cover</Trans>
           </Button>
         </View>
       </Banner>
