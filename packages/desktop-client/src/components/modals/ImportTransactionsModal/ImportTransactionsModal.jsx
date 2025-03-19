@@ -876,7 +876,7 @@ export function ImportTransactionsModal({
                 );
               }}
             >
-              {t('Import notes from file')}
+              <Trans>Import notes from file<Trans>
             </CheckboxOption>
           )}
 
