@@ -57,7 +57,7 @@ async function getNextPrNumber(): Promise<string> {
 function getFileContents(type: string, username: string, summary: string) {
   return `---
 category: ${type},
-authors: [${username}],
+authors: [${username}]
 ---
 
 ${summary}
