@@ -401,22 +401,22 @@ export function describeSchedule(schedule, payee) {
   }
 }
 
-export function getUpcomingDays(upcomingLength = '7'): number {
-  const today = monthUtils.currentDay();
+export function getUpcomingDays(
+  upcomingLength = '7',
+  today = monthUtils.currentDay(), // for testability
+): number {
   const month = monthUtils.getMonth(today);
 
   switch (upcomingLength) {
     case 'currentMonth': {
       const day = monthUtils.getDay(today);
       const end = monthUtils.getDay(monthUtils.getMonthEnd(today));
-      return end - day + 1;
+      return end - day;
     }
     case 'oneMonth': {
-      return (
-        monthUtils.differenceInCalendarDays(
-          monthUtils.nextMonth(month),
-          month,
-        ) + 1
+      return monthUtils.differenceInCalendarDays(
+        monthUtils.nextMonth(month),
+        month,
       );
     }
     default:

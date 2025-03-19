@@ -187,15 +187,15 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
           while (day <= upcomingPeriodEnd) {
             const nextDate = getNextDate(dateConditions, day);
 
-            if (parseDate(nextDate) > upcomingPeriodEnd) break;
+            if (d.startOfDay(parseDate(nextDate)) > upcomingPeriodEnd) break;
 
             if (dates.includes(nextDate)) {
-              day = parseDate(addDays(day, 1));
+              day = d.startOfDay(parseDate(addDays(day, 1)));
               continue;
             }
 
             dates.push(nextDate);
-            day = parseDate(addDays(nextDate, 1));
+            day = d.startOfDay(parseDate(addDays(nextDate, 1)));
           }
         }
 
