@@ -34,6 +34,23 @@ export function getStatus(
   }
 }
 
+export function getStatusLabel(status: string) {
+  switch (status) {
+    case 'completed':
+      return t('completed');
+    case 'paid':
+      return t('paid');
+    case 'due':
+      return t('due');
+    case 'upcoming':
+      return t('upcoming');
+    case 'missed':
+      return t('missed');
+    case 'scheduled':
+      return t('scheduled');
+  }
+}
+
 export function getHasTransactionsQuery(schedules) {
   const filters = schedules.map(schedule => {
     const dateCond = schedule._conditions.find(c => c.field === 'date');
@@ -425,7 +442,10 @@ export function getUpcomingDays(upcomingLength = '7'): number {
   }
 }
 
-export function scheduleIsRecurring(dateCond) {
+export function scheduleIsRecurring(dateCond: Condition | null) {
+  if (!dateCond) {
+    return false;
+  }
   const cond = new Condition(dateCond.op, 'date', dateCond.value, null);
   const value = cond.getValue();
 

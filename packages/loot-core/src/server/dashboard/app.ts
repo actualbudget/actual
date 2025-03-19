@@ -21,8 +21,6 @@ import { reportModel } from '../reports/app';
 import { batchMessages } from '../sync';
 import { undoable } from '../undo';
 
-import { DashboardHandlers } from './types/handlers';
-
 function isExportedCustomReportWidget(
   widget: ExportImportDashboardWidget,
 ): widget is ExportImportCustomReportWidget {
@@ -244,6 +242,15 @@ async function importDashboard({ filepath }: { filepath: string }) {
     return { error: 'internal-error' as const };
   }
 }
+
+export type DashboardHandlers = {
+  'dashboard-update': typeof updateDashboard;
+  'dashboard-update-widget': typeof updateDashboardWidget;
+  'dashboard-reset': typeof resetDashboard;
+  'dashboard-add-widget': typeof addDashboardWidget;
+  'dashboard-remove-widget': typeof removeDashboardWidget;
+  'dashboard-import': typeof importDashboard;
+};
 
 export const app = createApp<DashboardHandlers>();
 

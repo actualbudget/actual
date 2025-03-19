@@ -32,6 +32,7 @@ export type SyncedPrefs = Partial<
     | `csv-has-header-${string}`
     | `custom-sync-mappings-${string}`
     | `sync-import-pending-${string}`
+    | `sync-reimport-deleted-${string}`
     | `sync-import-notes-${string}`
     | `ofx-fallback-missing-payee-${string}`
     | `flip-amount-${string}-${'csv' | 'qif'}`
@@ -89,6 +90,15 @@ export type GlobalPrefs = Partial<{
   preferredDarkTheme: DarkTheme;
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
+  syncServerConfig?: {
+    // Electron only
+    autoStart?: boolean;
+    port?: number;
+    ngrokConfig?: {
+      domain?: string;
+      authToken?: string;
+    };
+  };
 }>;
 
 // GlobalPrefsJson represents what's saved in the global-store.json file
@@ -109,6 +119,7 @@ export type GlobalPrefsJson = Partial<{
   theme?: GlobalPrefs['theme'];
   'preferred-dark-theme'?: GlobalPrefs['preferredDarkTheme'];
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
+  syncServerConfig?: GlobalPrefs['syncServerConfig'];
 }>;
 
 export type AuthMethods = 'password' | 'openid';

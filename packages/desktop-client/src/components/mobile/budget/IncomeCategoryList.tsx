@@ -1,4 +1,4 @@
-import { type ComponentPropsWithoutRef, useRef } from 'react';
+import { type ComponentPropsWithoutRef, useCallback, useRef } from 'react';
 import { type DragItem } from 'react-aria';
 import {
   DropIndicator,
@@ -22,14 +22,16 @@ import { moveCategory } from 'loot-core/client/queries/queriesSlice';
 import * as monthUtils from 'loot-core/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models';
 
+import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useDispatch } from '../../../redux';
+import { makeAmountGrey } from '../../budget/util';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
 
 import { BudgetCell } from './BudgetCell';
-import { getColumnWidth } from './BudgetTable';
+import { getColumnWidth, PILL_STYLE } from './BudgetTable';
 
 type IncomeCategoryListProps = {
   categories: CategoryEntity[];
@@ -225,6 +227,11 @@ function IncomeCategoryCells({
       ? trackingBudget.catSumAmount(category.id)
       : envelopeBudget.catSumAmount(category.id);
 
+  const navigate = useNavigate();
+  const onShowActivity = useCallback(() => {
+    navigate(`/categories/${category.id}?month=${month}`);
+  }, [category.id, month, navigate]);
+
   return (
     <View
       style={{
@@ -250,37 +257,52 @@ function IncomeCategoryCells({
           />
         </View>
       )}
-      <CellValue<'envelope-budget' | 'tracking-budget', 'sum-amount'>
-        binding={balance}
-        type="financial"
-        aria-label={t('Balance for {{categoryName}} category', {
-          categoryName: category.name,
-        })} // Translated aria-label
+      <View
+        style={{
+          width: columnWidth,
+          justifyContent: 'center',
+          alignItems: 'flex-end',
+        }}
       >
-        {({ type, value }) => (
-          <View>
-            <PrivacyFilter>
-              <AutoTextSize
-                key={value}
-                as={Text}
-                minFontSizePx={6}
-                maxFontSizePx={12}
-                mode="oneline"
-                style={{
-                  width: columnWidth,
-                  justifyContent: 'center',
-                  alignItems: 'flex-end',
-                  textAlign: 'right',
-                  fontSize: 12,
-                  paddingRight: 5,
-                }}
-              >
-                {format(value, type)}
-              </AutoTextSize>
-            </PrivacyFilter>
-          </View>
-        )}
-      </CellValue>
+        <CellValue<'envelope-budget' | 'tracking-budget', 'sum-amount'>
+          binding={balance}
+          type="financial"
+          aria-label={t('Balance for {{categoryName}} category', {
+            categoryName: category.name,
+          })} // Translated aria-label
+        >
+          {({ type, value }) => (
+            <Button
+              variant="bare"
+              style={{
+                ...PILL_STYLE,
+              }}
+              onPress={onShowActivity}
+              aria-label={t('Show transactions for {{categoryName}} category', {
+                categoryName: category.name,
+              })} // Translated aria-label
+            >
+              <PrivacyFilter>
+                <AutoTextSize
+                  key={value}
+                  as={Text}
+                  minFontSizePx={6}
+                  maxFontSizePx={12}
+                  mode="oneline"
+                  style={{
+                    ...makeAmountGrey(value),
+                    maxWidth: columnWidth,
+                    textAlign: 'right',
+                    fontSize: 12,
+                  }}
+                >
+                  {format(value, type)}
+                </AutoTextSize>
+              </PrivacyFilter>
+            </Button>
+          )}
+        </CellValue>
+      </View>
     </View>
   );
 }

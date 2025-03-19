@@ -7,8 +7,8 @@ import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
-import { loggedIn } from 'loot-core/client/actions';
 import { setAppState } from 'loot-core/client/app/appSlice';
+import { loggedIn } from 'loot-core/client/users/usersSlice';
 
 import { ProtectedRoute } from '../../auth/ProtectedRoute';
 import { Permissions } from '../../auth/types';
