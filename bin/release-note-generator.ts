@@ -14,10 +14,10 @@ async function run() {
       message: 'Release Note Type',
       type: 'select',
       choices: [
-        { title: 'Features' },
-        { title: 'Enhancements' },
-        { title: 'Bugfix' },
-        { title: 'Maintenance' },
+        { title: 'Features', value: 'Features' },
+        { title: 'Enhancements', value: 'Enhancements' },
+        { title: 'Bugfix', value: 'Bugfix' },
+        { title: 'Maintenance', value: 'Maintenance' },
       ],
     },
     {
