@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { Input } from '@actual-app/components/input';
