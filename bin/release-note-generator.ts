@@ -160,7 +160,6 @@ ${summary}
 // simple exec that fails silently and returns an empty string on failure
 async function execAsync(cmd: string, errorLog?: string): Promise<string> {
   return new Promise<string>(res => {
-    // eslint-disable-next-line rulesdir/typography
     exec(cmd, (error, stdout) => {
       if (error) {
         console.log(errorLog);
