@@ -37,14 +37,6 @@ function useAddBudgetAccountOptions() {
   return { addOnBudgetAccountOption, addOffBudgetAccountOption };
 }
 
-function getInstitutionName(externalAccount) {
-  if (typeof externalAccount?.institution === 'string') {
-    return externalAccount.institution;
-  } else {
-    return externalAccount?.instituion?.name;
-  }
-}
-
 export function SelectLinkedAccountsModal({
   requisitionId = undefined,
   externalAccounts,
@@ -241,6 +233,15 @@ export function SelectLinkedAccountsModal({
       )}
     </Modal>
   );
+}
+
+function getInstitutionName(externalAccount) {
+  if (typeof externalAccount?.institution === 'string') {
+    return externalAccount.institution ?? '';
+  } else if (externalAccount?.institution?.name === 'string') {
+    return externalAccount?.instituion?.name ?? '';
+  }
+  return '';
 }
 
 function TableRow({
