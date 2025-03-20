@@ -36,7 +36,7 @@
     "build:desktop": "./bin/package-electron",
     "build:api": "yarn workspace @actual-app/api build",
     "generate:i18n": "yarn workspace @actual-app/web generate:i18n",
-    "generate:release-notes": "npx tsx ./bin/release-note-generator.ts",
+    "generate:release-notes": "ts-node ./bin/release-note-generator.ts",
     "test": "yarn workspaces foreach --all --parallel --verbose run test",
     "test:debug": "yarn workspaces foreach --all --verbose run test",
     "e2e": "yarn workspaces foreach --all --parallel --verbose run e2e",
@@ -72,6 +72,7 @@
     "prettier": "^3.5.3",
     "prompts": "^2.4.2",
     "source-map-support": "^0.5.21",
+    "ts-node": "^10.9.2",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.26.1",
     "typescript-strict-plugin": "^2.4.4"

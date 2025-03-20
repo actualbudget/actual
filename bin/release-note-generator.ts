@@ -100,7 +100,6 @@ async function getActivePrNumber(
     return undefined;
   }
   const branchName = await execAsync('git rev-parse --abbrev-ref HEAD');
-  console.log('branchName', branchName);
   if (!branchName) {
     return undefined;
   }
