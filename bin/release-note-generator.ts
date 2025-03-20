@@ -114,6 +114,7 @@ async function getPrNumberFromHead(head: string): Promise<number | undefined> {
     }
     const ghResponse = await resp.json();
     if (ghResponse?.length === 1) {
+      console.log(`Found PR ${ghResponse[0]?.number}: ${ghResponse[0]?.title}`);
       return ghResponse[0]?.number;
     } else {
       return undefined;
