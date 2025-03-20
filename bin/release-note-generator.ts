@@ -10,8 +10,13 @@ async function run() {
     "gh api user --jq '.login'",
     'To avoid having to enter your username, consider installing the official GitHub CLI (https://github.com/cli/cli) and logging in with `gh auth login`.',
   );
-  const prNumber =
-    (await getActivePrNumber(username)) ?? (await getNextPrNumber());
+  const activePr = await getActivePr(username);
+  if (activePr) {
+    console.log(
+      `Found potentially matching PR ${activePr.number}: ${activePr.title}`,
+    );
+  }
+  const prNumber = activePr?.number ?? (await getNextPrNumber());
 
   const result = await prompts([
     {
@@ -41,6 +46,7 @@ async function run() {
       name: 'oneLineSummary',
       message: 'Brief Summary',
       type: 'text',
+      initial: activePr?.title,
     },
   ]);
 
@@ -85,9 +91,9 @@ async function run() {
 }
 
 // makes an attempt to find an existing open PR from <username>:<branch>
-async function getActivePrNumber(
+async function getActivePr(
   username: string,
-): Promise<number | undefined> {
+): Promise<{ number: number; title: string } | undefined> {
   if (!username) {
     return undefined;
   }
@@ -99,7 +105,9 @@ async function getActivePrNumber(
   return getPrNumberFromHead(forkHead);
 }
 
-async function getPrNumberFromHead(head: string): Promise<number | undefined> {
+async function getPrNumberFromHead(
+  head: string,
+): Promise<{ number: number; title: string } | undefined> {
   try {
     // head is a weird query parameter in this API call. If nothing matches, it
     // will return as if the head query parameter doesn't exist. To get around
@@ -114,8 +122,7 @@ async function getPrNumberFromHead(head: string): Promise<number | undefined> {
     }
     const ghResponse = await resp.json();
     if (ghResponse?.length === 1) {
-      console.log(`Found PR ${ghResponse[0]?.number}: ${ghResponse[0]?.title}`);
-      return ghResponse[0]?.number;
+      return ghResponse[0];
     } else {
       return undefined;
     }
