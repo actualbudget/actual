@@ -18,7 +18,8 @@ async function run() {
       }
     });
   });
-  const prNumber = await getNextPrNumber();
+  const prNumber =
+    (await getActivePrNumber(username)) ?? (await getNextPrNumber());
 
   const result = await prompts([
     {
@@ -91,6 +92,46 @@ async function run() {
   });
 }
 
+// makes an attempt to find an existing open PR from <username>:<branch>
+async function getActivePrNumber(
+  username: string,
+): Promise<number | undefined> {
+  if (!username) {
+    return undefined;
+  }
+  const branchName = await execAsync('git rev-parse --abbrev-ref HEAD');
+  console.log('branchName', branchName);
+  if (!branchName) {
+    return undefined;
+  }
+  const forkHead = `${username}:${branchName}`;
+  return getPrNumberFromHead(forkHead);
+}
+
+async function getPrNumberFromHead(head: string): Promise<number | undefined> {
+  try {
+    // head is a weird query parameter in this API call. If nothing matches, it
+    // will return as if the head query parameter doesn't exist. To get around
+    // this, we make the page size 2 and only return the number if the length.
+    const resp = await fetch(
+      'https://api.github.com/repos/actualbudget/actual/pulls?state=open&per_page=2&head=' +
+        head,
+    );
+    if (!resp.ok) {
+      console.warn('error fetching from github pulls api:', resp.status);
+      return undefined;
+    }
+    const ghResponse = await resp.json();
+    if (ghResponse?.length === 1) {
+      return ghResponse[0]?.number;
+    } else {
+      return undefined;
+    }
+  } catch (e) {
+    console.warn('error fetching from github pulls api:', e);
+  }
+}
+
 async function getNextPrNumber(): Promise<number> {
   try {
     const resp = await fetch(
@@ -123,6 +164,23 @@ authors: [${username}]
 
 ${summary}
 `;
+}
+
+// simple exec that fails silently and returns an empty string on failure
+async function execAsync(cmd: string): Promise<string> {
+  return new Promise<string>(res => {
+    // eslint-disable-next-line rulesdir/typography
+    exec(cmd, (error, stdout) => {
+      if (error) {
+        console.log(
+          'To avoid having to enter your username, consider installing the official GitHub CLI (https://github.com/cli/cli) and logging in with `gh auth login`.',
+        );
+        res('');
+      } else {
+        res(stdout.trim());
+      }
+    });
+  });
 }
 
 run();
