@@ -97,10 +97,6 @@
     "./client/store": "./src/client/store/index.ts",
     "./client/store/mock": "./src/client/store/mock.ts",
     "./client/users/*": "./src/client/users/*.ts",
-    "./client/platform": {
-      "node": "./src/client/platform.electron.ts",
-      "default": "./src/client/platform.web.ts"
-    },
     "./client/queries": "./src/client/queries.ts",
     "./client/query-helpers": "./src/client/query-helpers.ts",
     "./client/query-hooks": "./src/client/query-hooks.ts",
@@ -110,10 +106,6 @@
     "./client/transfer": "./src/client/transfer.ts",
     "./client/undo": "./src/client/undo.ts",
     "./mocks": "./src/mocks/index.ts",
-    "./platform/client/fetch": {
-      "node": "./src/platform/client/fetch/index.ts",
-      "default": "./src/platform/client/fetch/index.browser.ts"
-    },
     "./platform/client/undo": "./src/platform/client/undo/index.ts",
     "./platform/exceptions": "./src/platform/exceptions/index.ts",
     "./platform/server/asyncStorage": "./src/platform/server/asyncStorage/index.ts",
@@ -127,6 +119,7 @@
     "./server/*": "./src/server/*.ts",
     "./shared/*": "./src/shared/*.ts",
     "./types/models": "./src/types/models/index.d.ts",
-    "./types/*": "./src/types/*.d.ts"
+    "./types/*": "./src/types/*.d.ts",
+    "./lib-dist/electron/*": "./lib-dist/electron/*"
   }
 }
