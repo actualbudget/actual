@@ -1,10 +1,31 @@
+import { exec } from 'node:child_process';
 import { existsSync, writeFile } from 'node:fs';
 import { exit } from 'node:process';
 
 import prompts from 'prompts';
 
 async function run() {
+  const username = await new Promise<string>(res => {
+    // eslint-disable-next-line rulesdir/typography
+    exec(`gh api user --jq '.login'`, (error, stdout) => {
+      if (error) {
+        console.log(
+          'To avoid having to enter your username, consider installing the official GitHub CLI (https://github.com/cli/cli) and logging in with `gh auth login`.',
+        );
+        res('');
+      } else {
+        res(stdout.trim());
+      }
+    });
+  });
+
   const result = await prompts([
+    {
+      name: 'githubUsername',
+      message: 'Comma-separated GitHub username(s)',
+      type: 'text',
+      initial: username,
+    },
     {
       name: 'pullRequestNumber',
       message: 'Existing PR number (if applicable)',
@@ -24,11 +45,6 @@ async function run() {
     {
       name: 'oneLineSummary',
       message: 'Brief Summary',
-      type: 'text',
-    },
-    {
-      name: 'githubUsername',
-      message: 'Comma-separated GitHub username(s)',
       type: 'text',
     },
   ]);
@@ -83,13 +99,21 @@ async function run() {
 async function getNextPrNumber(): Promise<number> {
   try {
     const resp = await fetch(
-      'https://internal.floralily.dev/next-pr-number-api/?owner=actualbudget&name=actual',
+      'https://api.github.com/repos/actualbudget/actual/issues?state=all&per_page=1',
     );
     if (!resp.ok) {
       throw new Error(`API responded with status: ${resp.status}`);
     }
-    const prNumberText = await resp.text();
-    return parseInt(prNumberText);
+    const ghResponse = await resp.json();
+    const latestPrNumber = ghResponse?.[0]?.number;
+    if (!latestPrNumber) {
+      console.error(
+        'Could not find latest issue number in GitHub API response',
+        ghResponse,
+      );
+      exit(1);
+    }
+    return latestPrNumber + 1;
   } catch (error) {
     console.error('Failed to fetch next PR number:', error);
     exit(1);

@@ -6185,7 +6185,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/prompts@npm:^2":
+"@types/prompts@npm:^2.4.9":
   version: 2.4.9
   resolution: "@types/prompts@npm:2.4.9"
   dependencies:
@@ -6918,7 +6918,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "actual@workspace:."
   dependencies:
-    "@types/prompts": "npm:^2"
+    "@types/prompts": "npm:^2.4.9"
     "@typescript-eslint/parser": "npm:^8.26.1"
     cross-env: "npm:^7.0.3"
     eslint: "npm:^9.22.0"
