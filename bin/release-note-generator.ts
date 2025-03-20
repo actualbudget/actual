@@ -5,19 +5,11 @@ import { exit } from 'node:process';
 import prompts from 'prompts';
 
 async function run() {
-  const username = await new Promise<string>(res => {
+  const username = await execAsync(
     // eslint-disable-next-line rulesdir/typography
-    exec(`gh api user --jq '.login'`, (error, stdout) => {
-      if (error) {
-        console.log(
-          'To avoid having to enter your username, consider installing the official GitHub CLI (https://github.com/cli/cli) and logging in with `gh auth login`.',
-        );
-        res('');
-      } else {
-        res(stdout.trim());
-      }
-    });
-  });
+    "gh api user --jq '.login'",
+    'To avoid having to enter your username, consider installing the official GitHub CLI (https://github.com/cli/cli) and logging in with `gh auth login`.',
+  );
   const prNumber =
     (await getActivePrNumber(username)) ?? (await getNextPrNumber());
 
@@ -166,14 +158,12 @@ ${summary}
 }
 
 // simple exec that fails silently and returns an empty string on failure
-async function execAsync(cmd: string): Promise<string> {
+async function execAsync(cmd: string, errorLog?: string): Promise<string> {
   return new Promise<string>(res => {
     // eslint-disable-next-line rulesdir/typography
     exec(cmd, (error, stdout) => {
       if (error) {
-        console.log(
-          'To avoid having to enter your username, consider installing the official GitHub CLI (https://github.com/cli/cli) and logging in with `gh auth login`.',
-        );
+        console.log(errorLog);
         res('');
       } else {
         res(stdout.trim());
