@@ -193,9 +193,9 @@ export function BudgetCategories({
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
   const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
-  function onCollapse(value) {
+  const onCollapse = useCallback(value => {
     setCollapsedGroupIdsPref(value);
-  }
+  }, []);
 
   const [isAddingGroup, setIsAddingGroup] = useState(false);
   const [groupOfNewCategory, setGroupOfNewCategory] = useState<
@@ -307,44 +307,56 @@ export function BudgetCategories({
     showHiddenCategories,
   ]);
 
-  function onToggleCollapse(id: CategoryGroupEntity['id']) {
-    if (collapsedGroupIds.includes(id)) {
-      onCollapse(collapsedGroupIds.filter(id_ => id_ !== id));
-    } else {
-      onCollapse([...collapsedGroupIds, id]);
-    }
-  }
+  const onToggleCollapse = useCallback(
+    (id: CategoryGroupEntity['id']) => {
+      if (collapsedGroupIds.includes(id)) {
+        onCollapse(collapsedGroupIds.filter(id_ => id_ !== id));
+      } else {
+        onCollapse([...collapsedGroupIds, id]);
+      }
+    },
+    [collapsedGroupIds, onCollapse],
+  );
 
-  function onAddGroup() {
+  const onAddGroup = useCallback(() => {
     setIsAddingGroup(true);
-  }
+  }, []);
 
-  function onHideNewGroupInput() {
+  const onHideNewGroupInput = useCallback(() => {
     setIsAddingGroup(false);
-  }
+  }, []);
 
-  function onSaveGroupAndClose(group) {
-    onSaveGroup?.(group);
-    if (group.id === 'new') {
-      onHideNewGroupInput();
-    }
-  }
+  const onSaveGroupAndClose = useCallback(
+    (group: CategoryGroupEntity) => {
+      onSaveGroup?.(group);
+      if (group.id === 'new') {
+        onHideNewGroupInput();
+      }
+    },
+    [onHideNewGroupInput, onSaveGroup],
+  );
 
-  function onAddCategory(groupId: CategoryGroupEntity['id']) {
-    onCollapse(collapsedGroupIds.filter(c => c !== groupId));
-    setGroupOfNewCategory(groupId);
-  }
+  const onAddCategory = useCallback(
+    (groupId: CategoryGroupEntity['id']) => {
+      onCollapse(collapsedGroupIds.filter(c => c !== groupId));
+      setGroupOfNewCategory(groupId);
+    },
+    [collapsedGroupIds, onCollapse],
+  );
 
-  function onHideNewCategoryInput() {
+  const onHideNewCategoryInput = useCallback(() => {
     setGroupOfNewCategory(null);
-  }
+  }, []);
 
-  function onSaveCategoryAndClose(category) {
-    onSaveCategory?.(category);
-    if (category.id === 'new') {
-      onHideNewCategoryInput();
-    }
-  }
+  const onSaveCategoryAndClose = useCallback(
+    (category: CategoryEntity) => {
+      onSaveCategory?.(category);
+      if (category.id === 'new') {
+        onHideNewCategoryInput();
+      }
+    },
+    [onHideNewCategoryInput, onSaveCategory],
+  );
 
   const { months } = useContext(MonthsContext);
 
@@ -618,7 +630,7 @@ export function BudgetCategories({
                           onSaveCategoryAndClose({
                             id: 'new',
                             name,
-                            cat_group: groupOfNewCategory,
+                            group: groupOfNewCategory,
                             is_income:
                               groupOfNewCategory ===
                               categoryGroups.find(g => g.is_income).id,
@@ -1986,7 +1998,7 @@ function CategoryNameCell({
             <View style={{ flex: 1 }}>
               <Input
                 defaultValue={category.name}
-                placeholder="Enter category name"
+                placeholder={t('Enter category name')}
                 onBlur={() => setIsRenaming(false)}
                 onUpdate={newName => {
                   if (newName !== category.name) {
