@@ -17,6 +17,7 @@ export interface RecurConfig {
   endOccurrences?: number;
   endDate?: string;
   weekendSolveMode?: 'before' | 'after';
+  shift?: number;
 }
 
 export interface ScheduleEntity {

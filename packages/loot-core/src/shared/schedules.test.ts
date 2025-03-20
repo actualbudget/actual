@@ -414,6 +414,51 @@ describe('schedules', () => {
         ),
       ).toBe('Every 2 months on the 17th, until 2021-06-01');
     });
+
+    it('describes intervals with shift', () => {
+      expect(
+        getRecurringDescription(
+          {
+            start: '2021-05-17',
+            frequency: 'weekly',
+            interval: 2,
+            shift: 1,
+          },
+          'MM/dd/yyyy',
+          enUS,
+        ),
+      ).toBe('Every 2 weeks on Monday, shifted 1 days later');
+
+      expect(
+        getRecurringDescription(
+          {
+            start: '2021-05-17',
+            frequency: 'monthly',
+            interval: 2,
+            shift: -2,
+          },
+          'yyyy-MM-dd',
+          enUS,
+        ),
+      ).toBe('Every 2 months on the 17th, shifted 2 days earlier');
+
+      expect(
+        getRecurringDescription(
+          {
+            start: '2021-05-17',
+            frequency: 'monthly',
+            interval: 2,
+            skipWeekend: true,
+            weekendSolveMode: 'before',
+            shift: 1,
+          },
+          'yyyy-MM-dd',
+          enUS,
+        ),
+      ).toBe(
+        'Every 2 months on the 17th, (before weekend), shifted 1 days later',
+      );
+    });
   });
 
   describe('getUpcomingDays', () => {

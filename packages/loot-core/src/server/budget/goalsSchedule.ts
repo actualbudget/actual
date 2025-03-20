@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import * as d from 'date-fns';
+
 import * as monthUtils from '../../shared/months';
 import {
   getNextDate,
@@ -109,6 +111,7 @@ async function createScheduleList(
                 ),
               )
             : nextBaseDate;
+          nextDate = d.addDays(nextDate, dateConditions.value.shift);
           while (nextDate < nextMonth) {
             monthlyTarget += -target;
             const currentDate = nextBaseDate;
@@ -126,6 +129,7 @@ async function createScheduleList(
                   ),
                 )
               : nextBaseDate;
+            nextDate = d.addDays(nextDate, dateConditions.value.shift);
             const diffDays = monthUtils.differenceInCalendarDays(
               nextBaseDate,
               currentDate,
