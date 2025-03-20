@@ -60,9 +60,20 @@
     "win": {
       "target": [
         {
+          "target": "appx",
+          "arch": [
+            "ia32",
+            "x64",
+            "arm64"
+          ]
+        },
+        {
           "target": "nsis",
           "arch": [
-            "x64"
+            "x64",
+            "ia32",
+            "x64",
+            "arm64"
           ]
         }
       ],
