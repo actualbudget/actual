@@ -37,6 +37,14 @@ function useAddBudgetAccountOptions() {
   return { addOnBudgetAccountOption, addOffBudgetAccountOption };
 }
 
+function getInstitutionName(externalAccount) {
+  if (typeof externalAccount?.institution === 'string') {
+    return externalAccount.institution;
+  } else {
+    return externalAccount?.instituion?.name;
+  }
+}
+
 export function SelectLinkedAccountsModal({
   requisitionId = undefined,
   externalAccounts,
@@ -46,8 +54,9 @@ export function SelectLinkedAccountsModal({
     const toSort = [...externalAccounts];
     toSort.sort(
       (a, b) =>
-        a.institution?.localeCompare(b.institution) ||
-        a.name.localeCompare(b.name),
+        getInstitutionName(a).institution?.localeCompare(
+          getInstitutionName(b),
+        ) || a.name.localeCompare(b.name),
     );
     return toSort;
   }, [externalAccounts]);
@@ -254,7 +263,7 @@ function TableRow({
   return (
     <Row style={{ backgroundColor: theme.tableBackground }}>
       <Field width={175}>
-        <Tooltip content={externalAccount.institution}>
+        <Tooltip content={getInstitutionName(externalAccount)}>
           <View
             style={{
               textOverflow: 'ellipsis',
@@ -262,7 +271,7 @@ function TableRow({
               display: 'block',
             }}
           >
-            {externalAccount.institution}
+            {getInstitutionName(externalAccount.institution)}
           </View>
         </Tooltip>
       </Field>
