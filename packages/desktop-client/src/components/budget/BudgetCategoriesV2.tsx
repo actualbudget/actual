@@ -61,6 +61,8 @@ import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 import { BalanceMenu as EnvelopeBalanceMenu } from './envelope/BalanceMenu';
 import { BudgetMenu as EnvelopeBudgetMenu } from './envelope/BudgetMenu';
+import { CoverMenu } from './envelope/CoverMenu';
+import { TransferMenu } from './envelope/TransferMenu';
 import { MonthsContext } from './MonthsContext';
 import { BalanceMenu as TrackingBalanceMenu } from './tracking/BalanceMenu';
 import { BudgetMenu as TrackingBudgetMenu } from './tracking/BudgetMenu';
@@ -287,44 +289,56 @@ export const BudgetCategories = ({
     showHiddenCategories,
   ]);
 
-  function onToggleCollapse(id: CategoryGroupEntity['id']) {
-    if (collapsedGroupIds.includes(id)) {
-      onCollapse(collapsedGroupIds.filter(id_ => id_ !== id));
-    } else {
-      onCollapse([...collapsedGroupIds, id]);
-    }
-  }
+  const onToggleCollapse = useCallback(
+    (id: CategoryGroupEntity['id']) => {
+      if (collapsedGroupIds.includes(id)) {
+        onCollapse(collapsedGroupIds.filter(id_ => id_ !== id));
+      } else {
+        onCollapse([...collapsedGroupIds, id]);
+      }
+    },
+    [collapsedGroupIds, onCollapse],
+  );
 
-  function onAddGroup() {
+  const onAddGroup = useCallback(() => {
     setIsAddingGroup(true);
-  }
+  }, []);
 
-  function onHideNewGroupInput() {
+  const onHideNewGroupInput = useCallback(() => {
     setIsAddingGroup(false);
-  }
+  }, []);
 
-  function onSaveGroupAndClose(group) {
-    onSaveGroup?.(group);
-    if (group.id === 'new') {
-      onHideNewGroupInput();
-    }
-  }
+  const onSaveGroupAndClose = useCallback(
+    (group: CategoryGroupEntity) => {
+      onSaveGroup?.(group);
+      if (group.id === 'new') {
+        onHideNewGroupInput();
+      }
+    },
+    [onHideNewGroupInput, onSaveGroup],
+  );
 
-  function onAddCategory(groupId: CategoryGroupEntity['id']) {
-    onCollapse(collapsedGroupIds.filter(c => c !== groupId));
-    setGroupOfNewCategory(groupId);
-  }
+  const onAddCategory = useCallback(
+    (groupId: CategoryGroupEntity['id']) => {
+      onCollapse(collapsedGroupIds.filter(c => c !== groupId));
+      setGroupOfNewCategory(groupId);
+    },
+    [collapsedGroupIds, onCollapse],
+  );
 
-  function onHideNewCategoryInput() {
+  const onHideNewCategoryInput = useCallback(() => {
     setGroupOfNewCategory(null);
-  }
+  }, []);
 
-  function onSaveCategoryAndClose(category) {
-    onSaveCategory?.(category);
-    if (category.id === 'new') {
-      onHideNewCategoryInput();
-    }
-  }
+  const onSaveCategoryAndClose = useCallback(
+    (category: CategoryEntity) => {
+      onSaveCategory?.(category);
+      if (category.id === 'new') {
+        onHideNewCategoryInput();
+      }
+    },
+    [onHideNewCategoryInput, onSaveCategory],
+  );
 
   const { months } = useContext(MonthsContext);
 
@@ -819,7 +833,6 @@ function CategoryBalanceCell({
   ...props
 }: CategoryBalanceCellProps) {
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const triggerRef = useRef<HTMLSpanElement | null>(null);
 
   const bindingBudgetType: SheetNames =
@@ -855,6 +868,11 @@ function CategoryBalanceCell({
     typeof categoryBudgetedBinding
   >(categoryBudgetedBinding);
 
+  const balanceValue = useSheetValue<
+    typeof bindingBudgetType,
+    typeof categoryBalanceBinding
+  >(categoryBalanceBinding);
+
   const goalValue = useSheetValue<
     typeof bindingBudgetType,
     typeof categoryGoalBinding
@@ -865,15 +883,19 @@ function CategoryBalanceCell({
     typeof categoryLongGoalBinding
   >(categoryLongGoalBinding);
 
+  const [activeBalanceMenu, setActiveBalanceMenu] = useState<
+    'balance' | 'transfer' | 'cover' | null
+  >(null);
+
   const { pressProps } = usePress({
-    onPress: () => setIsMenuOpen(true),
+    onPress: () => setActiveBalanceMenu('balance'),
   });
 
   const { focusableProps } = useFocusable(
     {
       onKeyUp: e => {
         if (e.key === 'Enter') {
-          setIsMenuOpen(true);
+          setActiveBalanceMenu('balance');
         }
       },
     },
@@ -941,17 +963,58 @@ function CategoryBalanceCell({
         <Popover
           triggerRef={triggerRef}
           placement="bottom end"
-          isOpen={isMenuOpen}
-          onOpenChange={() => setIsMenuOpen(false)}
+          isOpen={activeBalanceMenu !== null}
+          onOpenChange={() => {
+            if (activeBalanceMenu !== 'balance') {
+              setActiveBalanceMenu(null);
+            }
+          }}
           isNonModal
         >
           {budgetType === 'rollover' ? (
-            <EnvelopeBalanceMenu
-              categoryId={category.id}
-              month={month}
-              onBudgetAction={onBudgetAction}
-              onClose={() => setIsMenuOpen(false)}
-            />
+            <>
+              {activeBalanceMenu === 'balance' && (
+                <EnvelopeBalanceMenu
+                  categoryId={category.id}
+                  onCarryover={carryover => {
+                    onBudgetAction(month, 'carryover', {
+                      category: category.id,
+                      flag: carryover,
+                    });
+                    setActiveBalanceMenu(null);
+                  }}
+                  onTransfer={() => setActiveBalanceMenu('transfer')}
+                  onCover={() => setActiveBalanceMenu('cover')}
+                />
+              )}
+              {activeBalanceMenu === 'transfer' && (
+                <TransferMenu
+                  categoryId={category.id}
+                  initialAmount={balanceValue}
+                  showToBeBudgeted={true}
+                  onSubmit={(amount, toCategoryId) => {
+                    onBudgetAction(month, 'transfer-category', {
+                      amount,
+                      from: category.id,
+                      to: toCategoryId,
+                    });
+                  }}
+                  onClose={() => setActiveBalanceMenu(null)}
+                />
+              )}
+              {activeBalanceMenu === 'cover' && (
+                <CoverMenu
+                  categoryId={category.id}
+                  onSubmit={fromCategoryId => {
+                    onBudgetAction(month, 'cover-overspending', {
+                      to: category.id,
+                      from: fromCategoryId,
+                    });
+                  }}
+                  onClose={() => setActiveBalanceMenu(null)}
+                />
+              )}
+            </>
           ) : (
             <TrackingBalanceMenu
               categoryId={category.id}
@@ -960,7 +1023,7 @@ function CategoryBalanceCell({
                   category: category.id,
                   flag: carryover,
                 });
-                setIsMenuOpen(false);
+                setActiveBalanceMenu(null);
               }}
             />
           )}
