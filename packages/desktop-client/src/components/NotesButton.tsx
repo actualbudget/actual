@@ -89,7 +89,9 @@ export function NotesButton({
               ...(isOpen && { color: theme.buttonNormalText }),
               '&:hover': { opacity: 1 },
             }),
-            !hasNotes && !isOpen && !isFocusVisible && !showPlaceholder ? 'hover-visible' : '',
+            !hasNotes && !isOpen && !isFocusVisible && !showPlaceholder
+              ? 'hover-visible'
+              : '',
           )}
           data-placeholder={showPlaceholder}
           onPress={() => {
