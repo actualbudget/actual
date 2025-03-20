@@ -175,9 +175,12 @@ export const BudgetCategories = ({
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
   const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
-  function onCollapse(value) {
-    setCollapsedGroupIdsPref(value);
-  }
+  const onCollapse = useCallback(
+    (value: string[]) => {
+      setCollapsedGroupIdsPref(value);
+    },
+    [setCollapsedGroupIdsPref],
+  );
 
   const [isAddingGroup, setIsAddingGroup] = useState(false);
   const [groupOfNewCategory, setGroupOfNewCategory] = useState<
@@ -371,11 +374,18 @@ export const BudgetCategories = ({
         overflow: 'hidden',
         borderRadius: 4,
       }}
+      onKeyDown={e => {
+        if (e.key === 'Escape' && e.target instanceof HTMLElement) {
+          e.target.blur();
+        }
+      }}
     >
       <ResizableTableContainer
         style={{
           height: '100%',
-          overflow: 'auto',
+          width: '100%',
+          overflowY: 'auto',
+          overflowX: 'hidden',
         }}
       >
         <Table
@@ -1703,7 +1713,6 @@ function CategoryBudgetedCell({
               className={cx(
                 { 'hover-visible': !isMenuOpen && !isFocusVisible },
                 css({
-                  marginLeft: 5,
                   display:
                     shouldHideBudgetMenuButton && !isFocusVisible
                       ? 'none'
@@ -2208,7 +2217,7 @@ type BalanceColumnProps = ComponentPropsWithoutRef<typeof ResizableColumn> & {
   month: string;
 };
 
-function BalanceColumn({ month, ...props }: BalanceColumnProps) {
+function BalanceColumn({ month, style, ...props }: BalanceColumnProps) {
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
   const bindingBudgetType: SheetNames =
     budgetType === 'rollover' ? 'envelope-budget' : 'tracking-budget';
@@ -2219,7 +2228,13 @@ function BalanceColumn({ month, ...props }: BalanceColumnProps) {
       : trackingBudget.totalLeftover;
 
   return (
-    <Column {...props}>
+    <Column
+      style={{
+        flex: 1,
+        ...style,
+      }}
+      {...props}
+    >
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
         <View
           style={{
