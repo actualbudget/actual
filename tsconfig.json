@@ -30,11 +30,8 @@
     // Until/if we build using tsc
     "noEmit": true,
     "paths": {
-      // Electron needs this because it's unable to resolve using "node" in the exports
-      "loot-core/platform/client/fetch": [
-        "./packages/loot-core/src/platform/client/fetch"
-      ],
-      "loot-core/client/platform": ["./packages/loot-core/src/client/platform"]
+      // TEMPORARY: Until we can fix the "exports" in the loot-core package.json
+      "loot-core/*": ["./packages/loot-core/src/*"]
     },
     "plugins": [
       {
