@@ -6185,6 +6185,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/prompts@npm:^2.4.9":
+  version: 2.4.9
+  resolution: "@types/prompts@npm:2.4.9"
+  dependencies:
+    "@types/node": "npm:*"
+    kleur: "npm:^3.0.3"
+  checksum: 10/69b8372f4c790b45fea16a46ff8d1bcc71b14579481776b67bd6263637118a7ecb1f12e1311506c29fadc81bf618dc64f1a91f903cfd5be67a0455a227b3e462
+  languageName: node
+  linkType: hard
+
 "@types/prop-types@npm:*, @types/prop-types@npm:^15.0.0":
   version: 15.7.5
   resolution: "@types/prop-types@npm:15.7.5"
@@ -6908,6 +6918,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "actual@workspace:."
   dependencies:
+    "@types/prompts": "npm:^2.4.9"
     "@typescript-eslint/parser": "npm:^8.26.1"
     cross-env: "npm:^7.0.3"
     eslint: "npm:^9.22.0"
@@ -6925,7 +6936,9 @@ __metadata:
     node-jq: "npm:^4.0.1"
     npm-run-all: "npm:^4.1.5"
     prettier: "npm:^3.5.3"
+    prompts: "npm:^2.4.2"
     source-map-support: "npm:^0.5.21"
+    ts-node: "npm:^10.9.2"
     typescript: "npm:^5.8.2"
     typescript-eslint: "npm:^8.26.1"
     typescript-strict-plugin: "npm:^2.4.4"
@@ -16893,7 +16906,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prompts@npm:^2.0.1":
+"prompts@npm:^2.0.1, prompts@npm:^2.4.2":
   version: 2.4.2
   resolution: "prompts@npm:2.4.2"
   dependencies:
