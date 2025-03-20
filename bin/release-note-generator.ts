@@ -18,6 +18,7 @@ async function run() {
       }
     });
   });
+  const prNumber = await getNextPrNumber();
 
   const result = await prompts([
     {
@@ -28,8 +29,9 @@ async function run() {
     },
     {
       name: 'pullRequestNumber',
-      message: 'Existing PR number (if applicable)',
+      message: 'PR Number',
       type: 'number',
+      initial: prNumber,
     },
     {
       name: 'releaseNoteType',
@@ -63,13 +65,6 @@ async function run() {
     result.githubUsername,
     result.oneLineSummary,
   );
-
-  const prNumber =
-    parseInt(result.pullRequestNumber) || (await getNextPrNumber());
-  if (prNumber <= 0) {
-    console.error('PR number must be a positive integer');
-    exit(1);
-  }
 
   const filepath = `./upcoming-release-notes/${prNumber}.md`;
   if (existsSync(filepath)) {
