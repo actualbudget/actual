@@ -17,8 +17,9 @@
     "appId": "com.actualbudget.actual",
     "files": [
       "build",
+      "node_modules/@actual-app/web/build",
+      "node_modules/@actual-app/web/package.json",
       "!node_modules/better-sqlite3/{benchmark,src,bin,docs,deps,build/Release/obj,build/Release/sqlite3.a,build/Release/test_extension.node}",
-      "node_modules/@actual-app/web/{build,package.json}",
       "!**/*.js.map",
       "!**/stats.json",
       "!build/client-build/sql-wasm.wasm",
