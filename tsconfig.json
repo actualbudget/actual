@@ -29,6 +29,10 @@
     "module": "es2022",
     // Until/if we build using tsc
     "noEmit": true,
+    "paths": {
+      // TEMPORARY: Until we can fix the "exports" in the loot-core package.json
+      "loot-core/*": ["./packages/loot-core/src/*"]
+    },
     "plugins": [
       {
         "name": "typescript-strict-plugin",
