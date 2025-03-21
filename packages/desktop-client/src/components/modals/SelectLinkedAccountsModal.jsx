@@ -236,8 +236,8 @@ export function SelectLinkedAccountsModal({
 
 function getInstitutionName(externalAccount) {
   if (typeof externalAccount?.institution === 'string') {
-    return externalAccount.institution ?? '';
-  } else if (typeof externalAccount?.institution?.name === 'string') {
+    return externalAccount?.institution ?? '';
+  } else if (typeof externalAccount.institution?.name === 'string') {
     return externalAccount?.institution?.name ?? '';
   }
   return '';
