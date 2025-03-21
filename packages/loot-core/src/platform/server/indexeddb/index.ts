@@ -42,7 +42,7 @@ function _openDatabase() {
       };
 
       db.onerror = function (event) {
-        const error = (event.target as IDBOpenDBRequest).error;
+        const error = (event.target as IDBOpenDBRequest)?.error;
         console.log('Database error: ' + error);
 
         if (event.target && error) {
