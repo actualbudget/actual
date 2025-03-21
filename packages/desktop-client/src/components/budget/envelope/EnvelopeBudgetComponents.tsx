@@ -396,7 +396,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             });
           }}
         />
-        {useProgressBars && <ProgressBar month={month} category={category} />}
       </View>
       <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
         <span
@@ -466,6 +465,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             onClose={() => setBalanceMenuOpen(false)}
           />
         </Popover>
+        {useProgressBars && <ProgressBar month={month} category={category} />}
       </Field>
     </View>
   );
