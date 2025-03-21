@@ -46,7 +46,7 @@ export function SelectLinkedAccountsModal({
     const toSort = [...externalAccounts];
     toSort.sort(
       (a, b) =>
-        getInstitutionName(a).institution?.localeCompare(
+        getInstitutionName(a)?.localeCompare(
           getInstitutionName(b),
         ) || a.name.localeCompare(b.name),
     );
