@@ -22,6 +22,7 @@ export function BudgetPageMenuModal({
   onAddCategoryGroup,
   onToggleHiddenCategories,
   onSwitchBudgetFile,
+  onToggleProgressBars,
 }: BudgetPageMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
@@ -43,6 +44,7 @@ export function BudgetPageMenuModal({
             onAddCategoryGroup={onAddCategoryGroup}
             onToggleHiddenCategories={onToggleHiddenCategories}
             onSwitchBudgetFile={onSwitchBudgetFile}
+            onToggleProgressBars={onToggleProgressBars}
           />
         </>
       )}
@@ -57,15 +59,18 @@ type BudgetPageMenuProps = Omit<
   onAddCategoryGroup: () => void;
   onToggleHiddenCategories: () => void;
   onSwitchBudgetFile: () => void;
+  onToggleProgressBars: () => void;
 };
 
 function BudgetPageMenu({
   onAddCategoryGroup,
   onToggleHiddenCategories,
   onSwitchBudgetFile,
+  onToggleProgressBars,
   ...props
 }: BudgetPageMenuProps) {
   const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
+  const [showProgressBars] = useLocalPref('budget.showProgressBars');
 
   const onMenuSelect = (name: string) => {
     switch (name) {
@@ -80,6 +85,9 @@ function BudgetPageMenu({
         break;
       case 'switch-budget-file':
         onSwitchBudgetFile?.();
+        break;
+      case 'toggle-progress-bars':
+        onToggleProgressBars?.();
         break;
       default:
         throw new Error(`Unrecognized menu item: ${name}`);
@@ -103,6 +111,10 @@ function BudgetPageMenu({
         {
           name: 'switch-budget-file',
           text: t('Switch budget file'),
+        },
+        {
+          name: 'toggle-progress-bars',
+          text: `${showProgressBars ? t('Hide progress bars') : t('Show progress bars')}`,
         },
       ]}
     />

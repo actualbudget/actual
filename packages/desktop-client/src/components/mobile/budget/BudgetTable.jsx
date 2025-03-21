@@ -55,6 +55,7 @@ import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useUndo } from '../../../hooks/useUndo';
 import { useDispatch } from '../../../redux';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
+import { ProgressBar } from '../../budget/ProgressBar';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
@@ -317,6 +318,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   const { showUndoNotification } = useUndo();
   const { list: categories } = useCategories();
   const categoriesById = groupById(categories);
+  const [showProgressBars] = useLocalPref('budget.showProgressBars');
 
   const onCarryover = useCallback(
     carryover => {
@@ -664,6 +666,9 @@ const ExpenseCategory = memo(function ExpenseCategory({
               </Button>
             )}
           </BalanceWithCarryover>
+          {showProgressBars && (
+            <ProgressBar category={category} month={month} isMobile={true} />
+          )}
         </View>
       </View>
     </ListItem>
