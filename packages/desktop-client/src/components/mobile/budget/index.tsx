@@ -498,7 +498,7 @@ export function Budget() {
   );
 
   const onSwitchBudgetFile = useCallback(() => {
-    dispatch(pushModal({ modal: { name: 'budget-list' } }));
+    dispatch(pushModal({ modal: { name: 'budget-file-selection' } }));
   }, [dispatch]);
 
   const onOpenBudgetMonthMenu = useCallback(

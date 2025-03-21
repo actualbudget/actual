@@ -419,17 +419,21 @@ function BudgetFileList({
         </Text>
       )}
     >
-      {file => (
-        <BudgetFileListItem
-          key={isLocalFile(file) ? file.id : file.cloudFileId}
-          value={file}
-          currentUserId={currentUserId}
-          quickSwitchMode={quickSwitchMode}
-          onSelect={onSelect}
-          onDelete={onDelete}
-          onDuplicate={onDuplicate}
-        />
-      )}
+      {file => {
+        const id = isLocalFile(file) ? file.id : file.cloudFileId;
+        return (
+          <BudgetFileListItem
+            key={id}
+            id={id}
+            value={file}
+            currentUserId={currentUserId}
+            quickSwitchMode={quickSwitchMode}
+            onSelect={onSelect}
+            onDelete={onDelete}
+            onDuplicate={onDuplicate}
+          />
+        );
+      }}
     </GridList>
   );
 }
