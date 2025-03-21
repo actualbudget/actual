@@ -77,35 +77,36 @@ function getColorBars(
 
     leftBar.category = 'Saved';
     rightBar.category = 'Remaining';
-  } else if (spent * -1 >= budgeted) {
-    // We overspent (or are exactly at budget)
-    const overage = budgeted + spent;
-    const total = budgeted + Math.abs(overage);
-    leftBar.width = bound(Math.round((budgeted / total) * 100), 0, 100);
+  } else if (balance < 0) {
+    // We spent more than or equal to the pre-spending category balance. 
+    // Overspending will be relative to the prior balance plus budgeted amount
+    const available = balance - spent;
+    const total = -spent; // Spending becomes the divisor instead of pre-spending balance 
+    leftBar.width = bound(Math.round((available / total) * 100), 0, 100);
     rightBar.width = 100 - leftBar.width;
 
     leftBar.color = ColorDefOverBudgetSpent;
     rightBar.color = ColorDefOverBudgetOverSpent;
 
-    leftBar.rawValue = integerToCurrency(budgeted);
-    rightBar.rawValue = integerToCurrency(overage);
+    leftBar.rawValue = integerToCurrency(available);
+    rightBar.rawValue = integerToCurrency(balance);
 
-    leftBar.category = 'Budgeted';
+    leftBar.category = 'Available';
     rightBar.category = 'Overspent';
   } else {
-    // We are under budget
-    const remaining = budgeted + spent;
-    leftBar.width = bound(Math.round((remaining / budgeted) * 100), 0, 100);
-    rightBar.width = 100 - leftBar.width;
+    // We are under budget.
+    const total = balance - spent;
+    rightBar.width = bound(Math.round((balance / total) * 100), 0, 100);
+    leftBar.width = 100 - rightBar.width;
 
-    leftBar.color = ColorDefUnderBudgetRemaining;
-    rightBar.color = ColorDefUnderBudgetSpent;
+    rightBar.color = ColorDefUnderBudgetRemaining;
+    leftBar.color = ColorDefUnderBudgetSpent;
 
-    leftBar.rawValue = integerToCurrency(remaining);
-    rightBar.rawValue = integerToCurrency(spent);
+    rightBar.rawValue = integerToCurrency(balance);
+    leftBar.rawValue = integerToCurrency(spent);
 
-    leftBar.category = 'Remaining';
-    rightBar.category = 'Spent';
+    rightBar.category = 'Remaining';
+    leftBar.category = 'Spent';
   }
 
   return [leftBar, rightBar];
