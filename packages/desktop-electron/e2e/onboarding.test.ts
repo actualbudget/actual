@@ -5,6 +5,7 @@ test.describe('Onboarding', () => {
     const electronApp = await _electron.launch({
       args: ['.'],
       env: {
+        ...process.env,
         ACTUAL_DOCUMENT_DIR: 'e2e/data',
         ACTUAL_DATA_DIR: 'e2e/data',
         EXECUTION_CONTEXT: 'playwright',
