@@ -35,12 +35,7 @@ import { app as rulesApp } from './rules/app';
 import { app as schedulesApp } from './schedules/app';
 import { getServer, isValidBaseURL, setServer } from './server-config';
 import { app as spreadsheetApp } from './spreadsheet/app';
-import {
-  fullSync,
-  setSyncingMode,
-  makeTestMessage,
-  resetSync,
-} from './sync';
+import { fullSync, setSyncingMode, makeTestMessage, resetSync } from './sync';
 import { app as syncApp } from './sync/app';
 import { app as toolsApp } from './tools/app';
 import { app as transactionsApp } from './transactions/app';
