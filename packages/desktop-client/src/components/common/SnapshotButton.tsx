@@ -1,10 +1,10 @@
 import React, { type ReactNode, type CSSProperties } from 'react';
 
-import { styles, theme } from '../../style';
-
-import { Button } from './Button2';
-import { Text } from './Text';
-import { Tooltip } from './Tooltip';
+import { Button } from '@actual-app/components/button';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 
 type SnapshotButtonProps = {
   selected?: boolean;

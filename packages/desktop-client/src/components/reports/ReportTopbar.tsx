@@ -1,10 +1,6 @@
 import React, { type ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { toPng } from 'html-to-image';
-
-import * as monthUtils from 'loot-core/shared/months';
-
 import {
   SvgCalculator,
   SvgChart,
@@ -19,12 +15,15 @@ import {
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { toPng } from 'html-to-image';
 
+import * as monthUtils from 'loot-core/shared/months';
 import {
   type CustomReportEntity,
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
+import { SnapshotButton } from '../common/SnapshotButton';
 import { FilterButton } from '../filters/FiltersMenu';
 
 import { GraphButton } from './GraphButton';
