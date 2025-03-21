@@ -12,8 +12,6 @@ export interface ServerHandlers {
   undo: () => Promise<void>;
   redo: () => Promise<void>;
 
-  'get-earliest-transaction': () => Promise<{ date: string }>;
-
   'make-filters-from-conditions': (arg: {
     conditions: unknown;
     applySpecialCases?: boolean;

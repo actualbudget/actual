@@ -14,12 +14,13 @@ import { q } from '../shared/query';
 import type { Handlers } from '../types/handlers';
 import type {
   CategoryGroupEntity,
-  NewCategoryGroupEntity,
   PayeeEntity,
   TransactionEntity,
 } from '../types/models';
 
 import { random } from './random';
+
+import { CategoryGroupDefinition } from '.';
 
 type MockPayeeEntity = Partial<PayeeEntity> & { bill?: boolean };
 
@@ -651,7 +652,7 @@ export async function createTestBudget(handlers: Handlers) {
     }),
   );
 
-  const newCategoryGroups: Array<NewCategoryGroupEntity> = [
+  const newCategoryGroups: Array<CategoryGroupDefinition> = [
     {
       name: 'Usual Expenses',
       categories: [
@@ -710,6 +711,7 @@ export async function createTestBudget(handlers: Handlers) {
         categoryGroups[categoryGroups.length - 1].categories.push({
           ...category,
           id: categoryId,
+          group: groupId,
         });
       }
     }

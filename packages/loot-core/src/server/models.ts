@@ -88,28 +88,10 @@ export const categoryModel = {
     category: CategoryEntity,
     { update }: { update?: boolean } = {},
   ): DbCategory {
-    const { cat_group: group, ...rest } = category;
-    // TODO: This is a workaround.
-    // Entity model does not match AQL so we rename it here.
-    // It should be updated later to match AQL.
-    const catWithGroupRenamed = {
-      ...rest,
-      group,
-    };
     return (
       update
-        ? convertForUpdate(
-            schema,
-            schemaConfig,
-            'categories',
-            catWithGroupRenamed,
-          )
-        : convertForInsert(
-            schema,
-            schemaConfig,
-            'categories',
-            catWithGroupRenamed,
-          )
+        ? convertForUpdate(schema, schemaConfig, 'categories', category)
+        : convertForInsert(schema, schemaConfig, 'categories', category)
     ) as DbCategory;
   },
   fromDb(category: DbCategory): CategoryEntity {

@@ -1,6 +1,8 @@
 import * as monthUtils from '../../shared/months';
+import { q } from '../../shared/query';
 import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
 import { createApp } from '../app';
+import { runQuery as aqlQuery } from '../aql';
 import * as db from '../db';
 import { APIError } from '../errors';
 import { categoryGroupModel, categoryModel } from '../models';
@@ -359,7 +361,9 @@ async function deleteCategory({
 
 // Server must return AQL entities not the raw DB data
 async function getCategoryGroups() {
-  return (await db.getCategoriesGrouped()) as unknown as CategoryGroupEntity[];
+  const { data: categoryGroups }: { data: CategoryGroupEntity[] } =
+    await aqlQuery(q('category_groups').select('*'));
+  return categoryGroups;
 }
 
 async function createCategoryGroup({

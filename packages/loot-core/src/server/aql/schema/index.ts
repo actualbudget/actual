@@ -248,6 +248,10 @@ export const schemaConfig: SchemaConfig = {
             { sort_order: 'desc' },
             'id',
           ];
+        case 'category_groups':
+          return ['is_income', 'sort_order', 'id'];
+        case 'categories':
+          return ['sort_order', 'id'];
         case 'payees':
           return [
             { $condition: { transfer_acct: null }, $dir: 'desc' },
