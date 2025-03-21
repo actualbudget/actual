@@ -85,7 +85,6 @@ export function CategoryAutocompleteModal({
                 value={month ? monthUtils.sheetForMonth(month) : ''}
               >
                 <CategoryAutocomplete
-                  focused={true}
                   embedded={true}
                   closeOnBlur={false}
                   showSplitOption={false}
