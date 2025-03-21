@@ -43,7 +43,7 @@ export function SelectLinkedAccountsModal({
   syncSource = undefined,
 }) {
   const sortedExternalAccounts = useMemo(() => {
-    const toSort = [...externalAccounts];
+    const toSort = externalAccounts ? [...externalAccounts] : [];
     toSort.sort(
       (a, b) =>
         getInstitutionName(a)?.localeCompare(getInstitutionName(b)) ||
