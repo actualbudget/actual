@@ -17,7 +17,7 @@ export function BudgetFileSelectionModal() {
   );
 
   return (
-    <Modal name="budget-list">
+    <Modal name="budget-file-selection">
       {({ state: { close } }) => (
         <>
           <ModalHeader

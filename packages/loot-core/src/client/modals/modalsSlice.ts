@@ -453,7 +453,7 @@ export type Modal =
       };
     }
   | {
-      name: 'budget-list';
+      name: 'budget-file-selection';
     }
   | {
       name: 'confirm-transaction-edit';
