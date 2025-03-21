@@ -272,7 +272,7 @@ function TableRow({
               display: 'block',
             }}
           >
-            {getInstitutionName(externalAccount.institution)}
+            {getInstitutionName(externalAccount)}
           </View>
         </Tooltip>
       </Field>
