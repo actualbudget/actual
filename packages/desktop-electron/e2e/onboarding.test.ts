@@ -9,6 +9,7 @@ test.describe('Onboarding', () => {
         ACTUAL_DOCUMENT_DIR: 'e2e/data',
         ACTUAL_DATA_DIR: 'e2e/data',
         EXECUTION_CONTEXT: 'playwright',
+        NODE_ENV: 'development',
       },
     });
 
