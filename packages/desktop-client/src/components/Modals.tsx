@@ -13,7 +13,7 @@ import { useDispatch } from '../redux';
 import { EditSyncAccount } from './banksync/EditSyncAccount';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
-import { BudgetListModal } from './modals/BudgetListModal';
+import { BudgetFileSelectionModal } from './modals/BudgetFileSelectionModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
@@ -335,8 +335,8 @@ export function Modals() {
             </NamespaceContext.Provider>
           );
 
-        case 'budget-list':
-          return <BudgetListModal key={name} />;
+        case 'budget-file-selection':
+          return <BudgetFileSelectionModal key={name} />;
         case 'delete-budget':
           return <DeleteFileModal key={name} {...modal.options} />;
         case 'duplicate-budget':

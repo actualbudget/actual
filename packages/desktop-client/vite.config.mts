@@ -168,6 +168,7 @@ export default defineConfig(async ({ mode }) => {
               ],
               ignoreURLParametersMatching: [/^v$/],
               navigateFallback: '/index.html',
+              maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
               navigateFallbackDenylist: [
                 /^\/account\/.*$/,
                 /^\/admin\/.*$/,

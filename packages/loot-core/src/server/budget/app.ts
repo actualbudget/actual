@@ -310,7 +310,7 @@ async function deleteCategory({
   transferId,
 }: {
   id: CategoryEntity['id'];
-  transferId: CategoryEntity['id'];
+  transferId?: CategoryEntity['id'];
 }): Promise<{ error?: 'no-categories' | 'category-type' }> {
   let result = {};
   await batchMessages(async () => {

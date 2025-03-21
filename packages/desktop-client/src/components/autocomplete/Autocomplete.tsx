@@ -569,6 +569,7 @@ function SingleAutocomplete<T extends Item>({
             filtered.length > 0 &&
             (embedded ? (
               <View
+                ref={itemsViewRef}
                 style={{ ...styles.darkScrollbar, marginTop: 5 }}
                 data-testid="autocomplete"
               >

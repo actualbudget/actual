@@ -50,7 +50,7 @@ import { app as rulesApp } from './rules/app';
 import { app as schedulesApp } from './schedules/app';
 import { getServer, isValidBaseURL, setServer } from './server-config';
 import * as sheet from './sheet';
-import { resolveName, unresolveName } from './spreadsheet/util';
+import { app as spreadsheetApp } from './spreadsheet/app';
 import {
   initialFullSync,
   fullSync,
@@ -58,8 +58,8 @@ import {
   makeTestMessage,
   clearFullSyncTimeout,
   resetSync,
-  repairSync,
 } from './sync';
+import { app as syncApp } from './sync/app';
 import * as syncMigrations from './sync/migrate';
 import { app as toolsApp } from './tools/app';
 import { app as transactionsApp } from './transactions/app';
@@ -106,58 +106,12 @@ handlers['make-filters-from-conditions'] = async function ({
   return rules.conditionsToAQL(conditions, { applySpecialCases });
 };
 
-handlers['getCell'] = async function ({ sheetName, name }) {
-  const node = sheet.get()._getNode(resolveName(sheetName, name));
-  return { name: node.name, value: node.value };
-};
-
-handlers['getCells'] = async function ({ names }) {
-  return names.map(name => {
-    const node = sheet.get()._getNode(name);
-    return { name: node.name, value: node.value };
-  });
-};
-
-handlers['getCellNamesInSheet'] = async function ({ sheetName }) {
-  const names = [];
-  for (const name of sheet.get().getNodes().keys()) {
-    const { sheet: nodeSheet, name: nodeName } = unresolveName(name);
-    if (nodeSheet === sheetName) {
-      names.push(nodeName);
-    }
-  }
-  return names;
-};
-
-handlers['debugCell'] = async function ({ sheetName, name }) {
-  const node = sheet.get().getNode(resolveName(sheetName, name));
-  return {
-    ...node,
-    _run: node._run && node._run.toString(),
-  };
-};
-
-handlers['create-query'] = async function ({ sheetName, name, query }) {
-  // Always run it regardless of cache. We don't know anything has changed
-  // between the cache value being saved and now
-  sheet.get().createQuery(sheetName, name, query);
-  return 'ok';
-};
-
 handlers['query'] = async function (query) {
   if (query.table == null) {
     throw new Error('query has no table, did you forgot to call `.serialize`?');
   }
 
   return aqlQuery(query);
-};
-
-handlers['sync-reset'] = async function () {
-  return await resetSync();
-};
-
-handlers['sync-repair'] = async function () {
-  await repairSync();
 };
 
 // A user can only enable/change their key with the file loaded. This
@@ -481,10 +435,6 @@ handlers['set-server-url'] = async function ({ url, validate = true }) {
   await asyncStorage.setItem('did-bootstrap', true);
   setServer(url);
   return {};
-};
-
-handlers['sync'] = async function () {
-  return fullSync();
 };
 
 handlers['validate-budget-name'] = async function ({ name }) {
@@ -1143,6 +1093,8 @@ app.combine(
   transactionsApp,
   accountsApp,
   payeesApp,
+  spreadsheetApp,
+  syncApp,
 );
 
 export function getDefaultDocumentDir() {

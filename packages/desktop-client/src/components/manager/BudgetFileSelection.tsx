@@ -4,7 +4,9 @@ import React, {
   useEffect,
   type CSSProperties,
   useCallback,
+  type ComponentPropsWithoutRef,
 } from 'react';
+import { GridList, GridListItem } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -32,6 +34,7 @@ import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { css } from '@emotion/css';
 
 import {
   closeAndDownloadBudget,
@@ -82,15 +85,17 @@ function isLocalFile(file: File): file is LocalFile {
   return file.state === 'local';
 }
 
-function FileMenu({
-  onDelete,
-  onClose,
-  onDuplicate,
-}: {
+type BudgetFileMenuProps = {
   onDelete: () => void;
   onClose: () => void;
   onDuplicate?: () => void;
-}) {
+};
+
+function BudgetFileMenu({
+  onDelete,
+  onClose,
+  onDuplicate,
+}: BudgetFileMenuProps) {
   function onMenuSelect(type: string) {
     onClose();
 
@@ -115,13 +120,15 @@ function FileMenu({
   return <Menu onMenuSelect={onMenuSelect} items={items} />;
 }
 
-function FileMenuButton({
-  onDelete,
-  onDuplicate,
-}: {
+type BudgetFileMenuButtonProps = {
   onDelete: () => void;
   onDuplicate?: () => void;
-}) {
+};
+
+function BudgetFileMenuButton({
+  onDelete,
+  onDuplicate,
+}: BudgetFileMenuButtonProps) {
   const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -143,7 +150,7 @@ function FileMenuButton({
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}
       >
-        <FileMenu
+        <BudgetFileMenu
           onDelete={onDelete}
           onClose={() => setMenuOpen(false)}
           onDuplicate={onDuplicate}
@@ -153,13 +160,12 @@ function FileMenuButton({
   );
 }
 
-function FileState({
-  file,
-  currentUserId,
-}: {
+type BudgetFileStateProps = {
   file: File;
   currentUserId: string;
-}) {
+};
+
+function BudgetFileState({ file, currentUserId }: BudgetFileStateProps) {
   const { t } = useTranslation();
   const multiuserEnabled = useMultiuserEnabled();
 
@@ -263,21 +269,24 @@ function FileState({
   );
 }
 
-function FileItem({
-  file,
-  quickSwitchMode,
-  onSelect,
-  onDelete,
-  onDuplicate,
-  currentUserId,
-}: {
-  file: File;
+type BudgetFileListItemProps = ComponentPropsWithoutRef<
+  typeof GridListItem<File>
+> & {
   quickSwitchMode: boolean;
   onSelect: (file: File) => void;
   onDelete: (file: File) => void;
   onDuplicate: (file: File) => void;
   currentUserId: string;
-}) {
+};
+
+function BudgetFileListItem({
+  quickSwitchMode,
+  onSelect,
+  onDelete,
+  onDuplicate,
+  currentUserId,
+  ...props
+}: BudgetFileListItemProps) {
   const { t } = useTranslation();
   const multiuserEnabled = useMultiuserEnabled();
 
@@ -293,25 +302,33 @@ function FileItem({
     }
   }
 
+  const { value: file } = props;
+
+  if (!file) {
+    return null;
+  }
+
   return (
-    <Button
-      onPress={() => _onSelect(file)}
-      style={{
-        ...styles.shadow,
-        margin: 10,
-        padding: '12px 15px',
-        cursor: 'pointer',
-        borderRadius: 6,
-        borderColor: 'transparent',
-      }}
+    <GridListItem
+      textValue={file.name}
+      onAction={() => _onSelect(file)}
+      {...props}
     >
       <View
-        style={{
+        className={css({
+          ...styles.shadow,
           flexDirection: 'row',
-          flex: 1,
           justifyContent: 'space-between',
           alignItems: 'center',
-        }}
+          margin: '5px 10px',
+          padding: 15,
+          cursor: 'pointer',
+          borderRadius: 6,
+          backgroundColor: theme.buttonNormalBackground,
+          '&:hover': {
+            backgroundColor: theme.buttonNormalBackgroundHover,
+          },
+        })}
       >
         <View
           title={getFileDescription(file, t) || ''}
@@ -327,7 +344,7 @@ function FileItem({
             )}
           </View>
 
-          <FileState file={file} currentUserId={currentUserId} />
+          <BudgetFileState file={file} currentUserId={currentUserId} />
         </View>
 
         <View
@@ -351,45 +368,46 @@ function FileItem({
           )}
 
           {!quickSwitchMode && (
-            <FileMenuButton
+            <BudgetFileMenuButton
               onDelete={() => onDelete(file)}
               onDuplicate={'id' in file ? () => onDuplicate(file) : undefined}
             />
           )}
         </View>
       </View>
-    </Button>
+    </GridListItem>
   );
 }
 
-function BudgetFiles({
-  files,
-  quickSwitchMode,
-  onSelect,
-  onDelete,
-  onDuplicate,
-  currentUserId,
-}: {
+type BudgetFileListProps = {
   files: File[];
   quickSwitchMode: boolean;
   onSelect: (file: File) => void;
   onDelete: (file: File) => void;
   onDuplicate: (file: File) => void;
   currentUserId: string;
-}) {
+};
+
+function BudgetFileList({
+  files,
+  quickSwitchMode,
+  onSelect,
+  onDelete,
+  onDuplicate,
+  currentUserId,
+}: BudgetFileListProps) {
+  const { t } = useTranslation();
   return (
-    <View
+    <GridList
+      aria-label={t('Budget files')}
+      items={files}
       style={{
-        flexGrow: 1,
-        [`@media (min-width: ${tokens.breakpoint_small})`]: {
-          flexGrow: 0,
-        },
-        maxHeight: '100%',
         overflow: 'auto',
-        '& *': { userSelect: 'none' },
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
       }}
-    >
-      {!files || files.length === 0 ? (
+      renderEmptyState={() => (
         <Text
           style={{
             ...styles.mediumText,
@@ -399,30 +417,33 @@ function BudgetFiles({
         >
           <Trans>No budget files</Trans>
         </Text>
-      ) : (
-        files.map(file => (
-          <FileItem
-            key={isLocalFile(file) ? file.id : file.cloudFileId}
-            file={file}
+      )}
+    >
+      {file => {
+        const id = isLocalFile(file) ? file.id : file.cloudFileId;
+        return (
+          <BudgetFileListItem
+            key={id}
+            id={id}
+            value={file}
             currentUserId={currentUserId}
             quickSwitchMode={quickSwitchMode}
             onSelect={onSelect}
             onDelete={onDelete}
             onDuplicate={onDuplicate}
           />
-        ))
-      )}
-    </View>
+        );
+      }}
+    </GridList>
   );
 }
 
-function RefreshButton({
-  style,
-  onRefresh,
-}: {
+type RefreshButtonProps = {
   style?: CSSProperties;
   onRefresh: () => void;
-}) {
+};
+
+function RefreshButton({ style, onRefresh }: RefreshButtonProps) {
   const [loading, setLoading] = useState(false);
 
   async function _onRefresh() {
@@ -445,7 +466,11 @@ function RefreshButton({
   );
 }
 
-function SettingsButton({ onOpenSettings }: { onOpenSettings: () => void }) {
+type SettingsButtonProps = {
+  onOpenSettings: () => void;
+};
+
+function SettingsButton({ onOpenSettings }: SettingsButtonProps) {
   const { t } = useTranslation();
 
   return (
@@ -464,15 +489,17 @@ function SettingsButton({ onOpenSettings }: { onOpenSettings: () => void }) {
   );
 }
 
-function BudgetListHeader({
-  quickSwitchMode,
-  onRefresh,
-  onOpenSettings,
-}: {
+type BudgetFileSelectionHeaderProps = {
   quickSwitchMode: boolean;
   onRefresh: () => void;
   onOpenSettings: () => void;
-}) {
+};
+
+function BudgetFileSelectionHeader({
+  quickSwitchMode,
+  onRefresh,
+  onOpenSettings,
+}: BudgetFileSelectionHeaderProps) {
   return (
     <View
       style={{
@@ -503,7 +530,15 @@ function BudgetListHeader({
   );
 }
 
-export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
+type BudgetFileSelectionProps = {
+  showHeader?: boolean;
+  quickSwitchMode?: boolean;
+};
+
+export function BudgetFileSelection({
+  showHeader = true,
+  quickSwitchMode = false,
+}: BudgetFileSelectionProps) {
   const dispatch = useDispatch();
   const allFiles = useSelector(state => state.budgets.allFiles || []);
   const multiuserEnabled = useMultiuserEnabled();
@@ -595,7 +630,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
       }}
     >
       {showHeader && (
-        <BudgetListHeader
+        <BudgetFileSelectionHeader
           quickSwitchMode={quickSwitchMode}
           onRefresh={refresh}
           onOpenSettings={() =>
@@ -603,7 +638,7 @@ export function BudgetList({ showHeader = true, quickSwitchMode = false }) {
           }
         />
       )}
-      <BudgetFiles
+      <BudgetFileList
         files={files}
         currentUserId={currentUserId}
         quickSwitchMode={quickSwitchMode}
