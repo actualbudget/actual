@@ -58,8 +58,8 @@ import {
   makeTestMessage,
   clearFullSyncTimeout,
   resetSync,
-  repairSync,
 } from './sync';
+import { app as syncApp } from './sync/app';
 import * as syncMigrations from './sync/migrate';
 import { app as toolsApp } from './tools/app';
 import { app as transactionsApp } from './transactions/app';
@@ -112,14 +112,6 @@ handlers['query'] = async function (query) {
   }
 
   return aqlQuery(query);
-};
-
-handlers['sync-reset'] = async function () {
-  return await resetSync();
-};
-
-handlers['sync-repair'] = async function () {
-  await repairSync();
 };
 
 // A user can only enable/change their key with the file loaded. This
@@ -443,10 +435,6 @@ handlers['set-server-url'] = async function ({ url, validate = true }) {
   await asyncStorage.setItem('did-bootstrap', true);
   setServer(url);
   return {};
-};
-
-handlers['sync'] = async function () {
-  return fullSync();
 };
 
 handlers['validate-budget-name'] = async function ({ name }) {
@@ -1106,6 +1094,7 @@ app.combine(
   accountsApp,
   payeesApp,
   spreadsheetApp,
+  syncApp,
 );
 
 export function getDefaultDocumentDir() {
