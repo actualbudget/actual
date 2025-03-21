@@ -52,8 +52,9 @@ yarn workspace desktop-electron update-client
     yarn clean;
 
     if [ $SKIP_EXE_BUILD ]; then
-        echo "Skipping exe build"
+        echo "Building the dist"
         yarn build:dist
+        echo "Skipping exe build"
     else
       if [ "$RELEASE" == "production" ]; then
           if [ -f ../../.secret-tokens ]; then
