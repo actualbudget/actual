@@ -64,7 +64,7 @@ jobs:
         if: always()
         with:
           name: desktop-app-test-results
-          path: packages/desktop-electron/test-results/
+          path: packages/desktop-electron/e2e/test-results/
           retention-days: 30
           overwrite: true
 
