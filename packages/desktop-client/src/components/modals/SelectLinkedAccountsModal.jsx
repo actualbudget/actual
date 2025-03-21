@@ -43,10 +43,10 @@ export function SelectLinkedAccountsModal({
   syncSource = undefined,
 }) {
   const sortedExternalAccounts = useMemo(() => {
-    const toSort = [...externalAccounts];
+    const toSort = externalAccounts ? [...externalAccounts] : [];
     toSort.sort(
       (a, b) =>
-        a.institution?.localeCompare(b.institution) ||
+        getInstitutionName(a)?.localeCompare(getInstitutionName(b)) ||
         a.name.localeCompare(b.name),
     );
     return toSort;
@@ -234,6 +234,15 @@ export function SelectLinkedAccountsModal({
   );
 }
 
+function getInstitutionName(externalAccount) {
+  if (typeof externalAccount?.institution === 'string') {
+    return externalAccount?.institution ?? '';
+  } else if (typeof externalAccount.institution?.name === 'string') {
+    return externalAccount?.institution?.name ?? '';
+  }
+  return '';
+}
+
 function TableRow({
   externalAccount,
   chosenAccount,
@@ -254,7 +263,7 @@ function TableRow({
   return (
     <Row style={{ backgroundColor: theme.tableBackground }}>
       <Field width={175}>
-        <Tooltip content={externalAccount.institution}>
+        <Tooltip content={getInstitutionName(externalAccount)}>
           <View
             style={{
               textOverflow: 'ellipsis',
@@ -262,7 +271,7 @@ function TableRow({
               display: 'block',
             }}
           >
-            {externalAccount.institution}
+            {getInstitutionName(externalAccount)}
           </View>
         </Tooltip>
       </Field>
