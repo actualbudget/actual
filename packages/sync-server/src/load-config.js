@@ -1,4 +1,3 @@
-import { createRequire } from 'module';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -6,7 +5,6 @@ import { fileURLToPath } from 'node:url';
 import convict from 'convict';
 import createDebug from 'debug';
 
-const require = createRequire(import.meta.url);
 const debug = createDebug('actual:config');
 const debugSensitive = createDebug('actual-sensitive:config');
 
@@ -21,10 +19,7 @@ debug(`Project root: '${projectRoot}'`);
 
 export const sqlDir = path.join(projectRoot, 'src', 'sql');
 
-const actualAppWebBuildPath = path.join(
-  path.dirname(require.resolve('@actual-app/web/package.json')),
-  'build',
-);
+const actualAppWebBuildPath = path.join(projectRoot, 'web-client', 'build');
 debug(`Actual web build path: '${actualAppWebBuildPath}'`);
 
 // Custom formats

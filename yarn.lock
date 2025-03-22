@@ -88,7 +88,6 @@ __metadata:
   resolution: "@actual-app/sync-server@workspace:packages/sync-server"
   dependencies:
     "@actual-app/crdt": "npm:2.1.0"
-    "@actual-app/web": "workspace:*"
     "@babel/core": "npm:^7.26.10"
     "@babel/preset-typescript": "npm:^7.20.2"
     "@types/babel__core": "npm:^7"
@@ -129,7 +128,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@actual-app/web@workspace:*, @actual-app/web@workspace:^, @actual-app/web@workspace:packages/desktop-client":
+"@actual-app/web@workspace:^, @actual-app/web@workspace:packages/desktop-client":
   version: 0.0.0-use.local
   resolution: "@actual-app/web@workspace:packages/desktop-client"
   dependencies:
