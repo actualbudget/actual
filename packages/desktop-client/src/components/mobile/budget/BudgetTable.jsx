@@ -1,5 +1,14 @@
-import React, { memo, useCallback, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, {
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { GridList, GridListItem } from 'react-aria-components';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
@@ -12,7 +21,11 @@ import {
   SvgArrowThickRight,
   SvgCheveronRight,
 } from '@actual-app/components/icons/v1';
-import { SvgCalendar, SvgViewShow } from '@actual-app/components/icons/v2';
+import {
+  SvgArrowButtonDown1,
+  SvgCalendar,
+  SvgViewShow,
+} from '@actual-app/components/icons/v2';
 import { Label } from '@actual-app/components/label';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -28,6 +41,7 @@ import {
   trackingBudget,
   uncategorizedCount,
 } from 'loot-core/client/queries';
+import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import * as monthUtils from 'loot-core/shared/months';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 
@@ -36,15 +50,16 @@ import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useLocale } from '../../../hooks/useLocale';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { usePrevious } from '../../../hooks/usePrevious';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useUndo } from '../../../hooks/useUndo';
 import { useDispatch } from '../../../redux';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
-import { Link } from '../../common/Link';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { CellValue } from '../../spreadsheet/CellValue';
+import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 import { useFormat } from '../../spreadsheet/useFormat';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
@@ -112,7 +127,12 @@ function ToBudget({ toBudget, onPress, show3Cols }) {
                     style={{
                       fontSize: 12,
                       fontWeight: '700',
-                      color: amount < 0 ? theme.errorText : theme.formInputText,
+                      color:
+                        amount < 0
+                          ? theme.errorText
+                          : amount > 0
+                            ? theme.noticeText
+                            : theme.formInputText,
                     }}
                   >
                     {format(value, type)}
@@ -1043,38 +1063,6 @@ const ExpenseGroup = memo(function ExpenseGroup({
   );
 });
 
-function UncategorizedButton() {
-  const count = useSheetValue(uncategorizedCount());
-  if (count === null || count <= 0) {
-    return null;
-  }
-
-  return (
-    <View
-      style={{
-        padding: 5,
-        paddingBottom: 2,
-      }}
-    >
-      <Link
-        variant="button"
-        type="button"
-        buttonVariant="primary"
-        to="/accounts/uncategorized"
-        style={{
-          border: 0,
-          justifyContent: 'flex-start',
-          padding: '1.25em',
-        }}
-      >
-        {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
-        <View style={{ flex: 1 }} />
-        <SvgArrowThinRight width="15" height="15" />
-      </Link>
-    </View>
-  );
-}
-
 function BudgetGroups({
   type,
   categoryGroups,
@@ -1251,6 +1239,7 @@ export function BudgetTable({
         />
       }
     >
+      <Banners month={month} onBudgetAction={onBudgetAction} />
       <BudgetTableHeader
         type={type}
         month={month}
@@ -1267,7 +1256,6 @@ export function BudgetTable({
             paddingBottom: MOBILE_NAV_HEIGHT,
           }}
         >
-          <UncategorizedButton />
           <BudgetGroups
             type={type}
             categoryGroups={categoryGroups}
@@ -1291,6 +1279,387 @@ export function BudgetTable({
         </View>
       </PullToRefresh>
     </Page>
+  );
+}
+
+function Banner({ type = 'info', children }) {
+  return (
+    <Card
+      style={{
+        height: 50,
+        marginTop: 10,
+        marginBottom: 10,
+        padding: 10,
+        justifyContent: 'center',
+        backgroundColor:
+          type === 'critical'
+            ? theme.errorBackground
+            : type === 'warning'
+              ? theme.warningBackground
+              : theme.noticeBackground,
+      }}
+    >
+      {children}
+    </Card>
+  );
+}
+
+function UncategorizedTransactionsBanner(props) {
+  const count = useSheetValue(uncategorizedCount());
+  const navigate = useNavigate();
+
+  if (count === null || count <= 0) {
+    return null;
+  }
+
+  return (
+    <GridListItem textValue="Uncategorized transactions banner" {...props}>
+      <Banner type="warning">
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Trans count={count}>
+            You have {{ count }} uncategorized transactions
+          </Trans>
+          <Button
+            onPress={() => navigate('/accounts/uncategorized')}
+            style={PILL_STYLE}
+          >
+            <Text>
+              <Trans>Categorize</Trans>
+            </Text>
+          </Button>
+        </View>
+      </Banner>
+    </GridListItem>
+  );
+}
+
+function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
+  const { t } = useTranslation();
+  const toBudgetAmount = useSheetValue(envelopeBudget.toBudget);
+  const dispatch = useDispatch();
+  const { showUndoNotification } = useUndo();
+  const { list: categories } = useCategories();
+  const categoriesById = groupById(categories);
+
+  const openCoverOverbudgetedModal = useCallback(() => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'cover',
+          options: {
+            title: t('Cover overbudgeted'),
+            month,
+            showToBeBudgeted: false,
+            onSubmit: categoryId => {
+              onBudgetAction(month, 'cover-overbudgeted', {
+                category: categoryId,
+              });
+              showUndoNotification({
+                message: t('Covered overbudgeted from {{categoryName}}', {
+                  categoryName: categoriesById[categoryId].name,
+                }),
+              });
+            },
+          },
+        },
+      }),
+    );
+  }, [
+    categoriesById,
+    dispatch,
+    month,
+    onBudgetAction,
+    showUndoNotification,
+    t,
+  ]);
+
+  if (!toBudgetAmount || toBudgetAmount >= 0) {
+    return null;
+  }
+
+  return (
+    <GridListItem textValue="Overbudgeted banner" {...props}>
+      <Banner type="critical">
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 10,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 10,
+              }}
+            >
+              <SvgArrowButtonDown1 style={{ width: 15, height: 15 }} />
+              <Text>
+                <Trans>You have budgeted more than your available funds</Trans>
+              </Text>
+            </View>
+          </View>
+          <Button onPress={openCoverOverbudgetedModal} style={PILL_STYLE}>
+            <Trans>Cover</Trans>
+          </Button>
+        </View>
+      </Banner>
+    </GridListItem>
+  );
+}
+
+function OverspendingBanner({ month, onBudgetAction, ...props }) {
+  const { t } = useTranslation();
+
+  const { list: categories, grouped: categoryGroups } = useCategories();
+  const categoriesById = groupById(categories);
+
+  const categoryBalanceBindings = useMemo(
+    () =>
+      categories.map(category => [
+        category.id,
+        envelopeBudget.catBalance(category.id),
+      ]),
+    [categories],
+  );
+
+  const categoryCarryoverBindings = useMemo(
+    () =>
+      categories.map(category => [
+        category.id,
+        envelopeBudget.catCarryover(category.id),
+      ]),
+    [categories],
+  );
+
+  const [overspentByCategory, setOverspentByCategory] = useState({});
+  const [carryoverFlagByCategory, setCarryoverFlagByCategory] = useState({});
+  const sheetName = useContext(NamespaceContext);
+  const spreadsheet = useSpreadsheet();
+
+  useEffect(() => {
+    const unbindList = [];
+    for (const [categoryId, carryoverBinding] of categoryCarryoverBindings) {
+      const unbind = spreadsheet.bind(sheetName, carryoverBinding, result => {
+        const isRolloverEnabled = Boolean(result.value);
+        if (isRolloverEnabled) {
+          setCarryoverFlagByCategory(prev => ({
+            ...prev,
+            [categoryId]: result.value,
+          }));
+        } else {
+          // Update to remove covered category.
+          setCarryoverFlagByCategory(prev => {
+            const { [categoryId]: _, ...rest } = prev;
+            return rest;
+          });
+        }
+      });
+      unbindList.push(unbind);
+    }
+
+    return () => {
+      unbindList.forEach(unbind => unbind());
+    };
+  }, [categoryCarryoverBindings, sheetName, spreadsheet]);
+
+  useEffect(() => {
+    const unbindList = [];
+    for (const [categoryId, balanceBinding] of categoryBalanceBindings) {
+      const unbind = spreadsheet.bind(sheetName, balanceBinding, result => {
+        if (result.value < 0) {
+          setOverspentByCategory(prev => ({
+            ...prev,
+            [categoryId]: result.value,
+          }));
+        } else if (result.value === 0) {
+          // Update to remove covered category.
+          setOverspentByCategory(prev => {
+            const { [categoryId]: _, ...rest } = prev;
+            return rest;
+          });
+        }
+      });
+      unbindList.push(unbind);
+    }
+
+    return () => {
+      unbindList.forEach(unbind => unbind());
+    };
+  }, [categoryBalanceBindings, sheetName, spreadsheet]);
+
+  const dispatch = useDispatch();
+
+  // Ignore those that has rollover enabled.
+  const overspentCategoryIds = Object.keys(overspentByCategory).filter(
+    id => !carryoverFlagByCategory[id],
+  );
+
+  const categoryGroupsToShow = useMemo(
+    () =>
+      categoryGroups
+        .filter(g =>
+          g.categories?.some(c => overspentCategoryIds.includes(c.id)),
+        )
+        .map(g => ({
+          ...g,
+          categories:
+            g.categories?.filter(c => overspentCategoryIds.includes(c.id)) ||
+            [],
+        })),
+    [categoryGroups, overspentCategoryIds],
+  );
+
+  const { showUndoNotification } = useUndo();
+
+  const onOpenCoverCategoryModal = useCallback(
+    categoryId => {
+      const category = categoriesById[categoryId];
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'cover',
+            options: {
+              title: category.name,
+              month,
+              categoryId: category.id,
+              onSubmit: fromCategoryId => {
+                onBudgetAction(month, 'cover-overspending', {
+                  to: category.id,
+                  from: fromCategoryId,
+                });
+                showUndoNotification({
+                  message: t(
+                    `Covered {{toCategoryName}} overspending from {{fromCategoryName}}.`,
+                    {
+                      toCategoryName: category.name,
+                      fromCategoryName:
+                        fromCategoryId === 'to-budget'
+                          ? 'To Budget'
+                          : categoriesById[fromCategoryId].name,
+                    },
+                  ),
+                });
+              },
+            },
+          },
+        }),
+      );
+    },
+    [categoriesById, dispatch, month, onBudgetAction, showUndoNotification, t],
+  );
+
+  const onOpenCategorySelectionModal = useCallback(() => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'category-autocomplete',
+          options: {
+            title: t('Cover overspending'),
+            month,
+            categoryGroups: categoryGroupsToShow,
+            onSelect: onOpenCoverCategoryModal,
+            clearOnSelect: true,
+            closeOnSelect: false,
+          },
+        },
+      }),
+    );
+  }, [categoryGroupsToShow, dispatch, month, onOpenCoverCategoryModal, t]);
+
+  const numberOfOverspentCategories = overspentCategoryIds.length;
+  const previousNumberOfOverspentCategories = usePrevious(
+    numberOfOverspentCategories,
+  );
+
+  useEffect(() => {
+    if (numberOfOverspentCategories < previousNumberOfOverspentCategories) {
+      // Re-render the modal when the overspent categories are covered.
+      dispatch(collapseModals({ rootModalName: 'category-autocomplete' }));
+      onOpenCategorySelectionModal();
+
+      // All overspent categories have been covered.
+      if (numberOfOverspentCategories === 0) {
+        dispatch(collapseModals({ rootModalName: 'category-autocomplete' }));
+      }
+    }
+  }, [
+    dispatch,
+    onOpenCategorySelectionModal,
+    numberOfOverspentCategories,
+    previousNumberOfOverspentCategories,
+  ]);
+
+  if (numberOfOverspentCategories === 0) {
+    return null;
+  }
+
+  return (
+    <GridListItem textValue="Overspent banner" {...props}>
+      <Banner type="critical">
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 10,
+            }}
+          >
+            <Text>
+              <Trans count={numberOfOverspentCategories}>
+                You have {{ count: numberOfOverspentCategories }} overspent
+                categories
+              </Trans>
+            </Text>
+          </View>
+          <Button onPress={onOpenCategorySelectionModal} style={PILL_STYLE}>
+            <Trans>Cover</Trans>
+          </Button>
+        </View>
+      </Banner>
+    </GridListItem>
+  );
+}
+
+function Banners({ month, onBudgetAction }) {
+  const { t } = useTranslation();
+  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+
+  // Limit to rollover for now.
+  if (budgetType !== 'rollover') {
+    return null;
+  }
+
+  return (
+    <GridList
+      aria-label={t('Banners')}
+      style={{ backgroundColor: theme.mobilePageBackground }}
+    >
+      <UncategorizedTransactionsBanner />
+      <OverspendingBanner month={month} onBudgetAction={onBudgetAction} />
+      <OverbudgetedBanner month={month} onBudgetAction={onBudgetAction} />
+    </GridList>
   );
 }
 
@@ -1559,7 +1928,7 @@ function MonthSelector({
         }}
         style={{ ...arrowButtonStyle, opacity: prevEnabled ? 1 : 0.6 }}
       >
-        <SvgArrowThinLeft width="15" height="15" style={{ margin: -5 }} />
+        <SvgArrowThinLeft width="15" height="15" />
       </Button>
       <Button
         variant="bare"
@@ -1567,7 +1936,6 @@ function MonthSelector({
           textAlign: 'center',
           fontSize: 16,
           fontWeight: 500,
-          margin: '0 5px',
         }}
         onPress={() => {
           onOpenMonthMenu?.(month);
@@ -1588,7 +1956,7 @@ function MonthSelector({
         }}
         style={{ ...arrowButtonStyle, opacity: nextEnabled ? 1 : 0.6 }}
       >
-        <SvgArrowThinRight width="15" height="15" style={{ margin: -5 }} />
+        <SvgArrowThinRight width="15" height="15" />
       </Button>
     </View>
   );
