@@ -23,12 +23,12 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { SnapshotButton } from '../common/SnapshotButton';
 import { FilterButton } from '../filters/FiltersMenu';
 
 import { GraphButton } from './GraphButton';
 import { SaveReport } from './SaveReport';
 import { setSessionReport } from './setSessionReport';
+import { SnapshotButton } from './SnapshotButton';
 
 type ReportTopbarProps = {
   customReportItems: CustomReportEntity;
