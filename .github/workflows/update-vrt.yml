@@ -14,9 +14,9 @@ jobs:
   update-vrt:
     name: Update VRT
     runs-on: ubuntu-latest
-    if: |
-      github.event.issue.pull_request &&
-      contains(github.event.comment.body, '/update-vrt')
+    # if: |
+    #   github.event.issue.pull_request &&
+    #   contains(github.event.comment.body, '/update-vrt')
     container:
       image: mcr.microsoft.com/playwright:v1.41.1-jammy
     steps:
