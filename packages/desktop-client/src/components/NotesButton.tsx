@@ -5,6 +5,7 @@ import React, {
   type ComponentProps,
   type CSSProperties,
 } from 'react';
+import { useFocusVisible } from 'react-aria';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -13,6 +14,7 @@ import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { cx } from '@emotion/css';
 
 import { send } from 'loot-core/platform/client/fetch';
 
@@ -45,6 +47,8 @@ export function NotesButton({
   const [tempNotes, setTempNotes] = useState<string>(note);
   useEffect(() => setTempNotes(note), [note]);
 
+  const { isFocusVisible } = useFocusVisible();
+
   function onClose() {
     send('notes-save', { id, note: tempNotes });
     setIsOpen(false);
@@ -63,7 +67,9 @@ export function NotesButton({
           ref={triggerRef}
           variant="bare"
           aria-label={t('View notes')}
-          className={!hasNotes && !isOpen ? 'hover-visible' : ''}
+          className={cx({
+            'hover-visible': !hasNotes && !isOpen && !isFocusVisible,
+          })}
           style={{
             color: defaultColor,
             ...style,

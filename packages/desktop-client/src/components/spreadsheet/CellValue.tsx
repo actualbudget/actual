@@ -3,6 +3,7 @@ import React, {
   type ComponentPropsWithoutRef,
   type ReactNode,
   type CSSProperties,
+  Fragment,
 } from 'react';
 
 import { styles } from '@actual-app/components/styles';
@@ -45,10 +46,15 @@ export function CellValue<
   const { fullSheetName } = useSheetName(binding);
   const sheetValue = useSheetValue(binding);
 
+  // Re-render when these value changes.
+  const key = `${fullSheetName}|${sheetValue}`;
   return typeof children === 'function' ? (
-    <>{children({ type, name: fullSheetName, value: sheetValue })}</>
+    <Fragment key={key}>
+      {children({ type, name: fullSheetName, value: sheetValue })}
+    </Fragment>
   ) : (
     <CellValueText
+      key={key}
       type={type}
       name={fullSheetName}
       value={sheetValue}
