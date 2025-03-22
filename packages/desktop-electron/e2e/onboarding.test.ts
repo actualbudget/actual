@@ -14,7 +14,6 @@ test.describe('Onboarding', () => {
     });
 
     const window = await electronApp.firstWindow();
-
     await expect(window).toHaveScreenshot();
     await electronApp.close();
   });

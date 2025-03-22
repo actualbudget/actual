@@ -54,7 +54,6 @@ yarn workspace desktop-electron update-client
     if [ $SKIP_EXE_BUILD ]; then
         echo "Building the dist"
         yarn build:dist
-
         echo "Skipping exe build"
     else
       if [ "$RELEASE" == "production" ]; then
