@@ -7,7 +7,8 @@ export default defineConfig({
   testDir: 'e2e/',
   reporter: undefined,
   outputDir: 'e2e/test-results/',
-  snapshotPathTemplate: '{testDir}/__screenshots__/{testFilePath}/{arg}-{platform}{ext}',
+  snapshotPathTemplate:
+    '{testDir}/__screenshots__/{testFilePath}/{arg}-{platform}{ext}',
   use: {
     userAgent: 'playwright',
     screenshot: 'on',
