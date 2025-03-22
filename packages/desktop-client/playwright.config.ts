@@ -8,7 +8,6 @@ export default defineConfig({
   reporter: !process.env.CI ? [['html', { open: 'never' }]] : undefined,
   use: {
     userAgent: 'playwright',
-    viewport: { width: 1280, height: 720 },
     screenshot: 'on',
     browserName: 'chromium',
     baseURL: process.env.E2E_START_URL ?? 'http://localhost:3001',
