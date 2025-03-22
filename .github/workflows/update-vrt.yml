@@ -1,6 +1,7 @@
 name: /update-vrt
 on:
-  pull_request:
+  issue_comment:
+    types: [created]
 
 permissions:
   pull-requests: read
@@ -14,9 +15,9 @@ jobs:
   update-vrt:
     name: Update VRT
     runs-on: ubuntu-latest
-    # if: |
-    #   github.event.issue.pull_request &&
-    #   contains(github.event.comment.body, '/update-vrt')
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/update-vrt')
     container:
       image: mcr.microsoft.com/playwright:v1.41.1-jammy
     steps:
@@ -40,9 +41,6 @@ jobs:
         run: yarn vrt --update-snapshots
         env:
           E2E_START_URL: ${{ steps.netlify.outputs.url }}
-      - name: Run Desktop app E2E Tests
-        run: |
-          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" -- yarn e2e:desktop --update-snapshots
       - name: Create patch
         run: |
           git config --system --add safe.directory "*"
