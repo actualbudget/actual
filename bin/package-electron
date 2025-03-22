@@ -26,6 +26,7 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
 set -- "${POSITIONAL[@]}"
 
 # Get translations
@@ -51,7 +52,7 @@ yarn workspace desktop-electron update-client
     cd packages/desktop-electron;
     yarn clean;
 
-    if [ $SKIP_EXE_BUILD ]; then
+    if [ $SKIP_EXE_BUILD == true ]; then
         echo "Building the dist"
         yarn build:dist
         echo "Skipping exe build"
