@@ -20,10 +20,10 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.41.1-jammy
     steps:
-      # - name: Get PR branch
-      #   #        Until https://github.com/xt0rted/pull-request-comment-branch/issues/322 is resolved we use the forked version
-      #   uses: gotson/pull-request-comment-branch@head-repo-owner-dist
-      #   id: comment-branch
+      - name: Get PR branch
+        #        Until https://github.com/xt0rted/pull-request-comment-branch/issues/322 is resolved we use the forked version
+        uses: gotson/pull-request-comment-branch@head-repo-owner-dist
+        id: comment-branch
       - uses: actions/checkout@v4
         with:
           repository: ${{ steps.comment-branch.outputs.head_owner }}/${{ steps.comment-branch.outputs.head_repo }}
@@ -69,10 +69,10 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      # - name: Get PR branch
-      #   #        Until https://github.com/xt0rted/pull-request-comment-branch/issues/322 is resolved we use the forked version
-      #   uses: gotson/pull-request-comment-branch@head-repo-owner-dist
-      #   id: comment-branch
+      - name: Get PR branch
+        #        Until https://github.com/xt0rted/pull-request-comment-branch/issues/322 is resolved we use the forked version
+        uses: gotson/pull-request-comment-branch@head-repo-owner-dist
+        id: comment-branch
       - uses: actions/checkout@v4
         with:
           repository: ${{ steps.comment-branch.outputs.head_owner }}/${{ steps.comment-branch.outputs.head_repo }}
