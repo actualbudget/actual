@@ -476,6 +476,7 @@ export type ReconcileTransactionsResult = {
     transaction: TransactionEntity;
     existing?: TransactionEntity;
     ignored?: boolean;
+    tombstone?: boolean;
   }>;
 };
 
@@ -564,6 +565,14 @@ export async function reconcileTransactions(
         for (const child of children) {
           updated.push({ id: child.id, cleared: updates.cleared });
         }
+      }
+    } else if (trans.tombstone) {
+      if (isPreview) {
+        updatedPreview.push({
+          transaction: trans,
+          existing: false,
+          tombstone: true,
+        });
       }
     } else {
       // Insert a new transaction

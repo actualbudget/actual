@@ -1099,7 +1099,8 @@ class AccountInternal extends PureComponent<
 
     // sync the reconciliation transaction
     await send('transactions-batch-update', {
-      added: ruledTransactions,
+      added: ruledTransactions.filter(trans => !trans.tombstone),
+      deleted: ruledTransactions.filter(trans => trans.tombstone),
     });
     await this.refetchTransactions();
   };

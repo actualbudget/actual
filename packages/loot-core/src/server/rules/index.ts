@@ -635,6 +635,7 @@ const ACTION_OPS = [
   'link-schedule',
   'prepend-notes',
   'append-notes',
+  'delete-transaction',
 ] as const;
 type ActionOperator = (typeof ACTION_OPS)[number];
 
@@ -741,6 +742,9 @@ export class Action {
         object[this.field] = object[this.field]
           ? object[this.field] + this.value
           : this.value;
+        break;
+      case 'delete-transaction':
+        object['tombstone'] = 1;
         break;
       default:
     }
