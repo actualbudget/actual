@@ -1,7 +1,15 @@
-import React, { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import { GridList, GridListItem } from 'react-aria-components';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { Card } from '@actual-app/components/card';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgLogo } from '@actual-app/components/icons/logo';
 import {
@@ -22,6 +30,7 @@ import { View } from '@actual-app/components/view';
 import { AutoTextSize } from 'auto-text-size';
 import memoizeOne from 'memoize-one';
 
+import { collapseModals, pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   envelopeBudget,
   trackingBudget,
@@ -29,11 +38,16 @@ import {
 } from 'loot-core/client/queries';
 import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import * as monthUtils from 'loot-core/shared/months';
+import { groupById } from 'loot-core/shared/util';
 
+import { useCategories } from '../../../hooks/useCategories';
 import { useLocale } from '../../../hooks/useLocale';
 import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useNavigate } from '../../../hooks/useNavigate';
+import { usePrevious } from '../../../hooks/usePrevious';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { Link } from '../../common/Link';
+import { useUndo } from '../../../hooks/useUndo';
+import { useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { CellValue } from '../../spreadsheet/CellValue';
@@ -220,38 +234,6 @@ function Saved({ projected, onPress, show3Columns }) {
           height={14}
         />
       </Button>
-    </View>
-  );
-}
-
-function UncategorizedButton() {
-  const count = useSheetValue(uncategorizedCount());
-  if (count === null || count <= 0) {
-    return null;
-  }
-
-  return (
-    <View
-      style={{
-        padding: 5,
-        paddingBottom: 2,
-      }}
-    >
-      <Link
-        variant="button"
-        type="button"
-        buttonVariant="primary"
-        to="/accounts/uncategorized"
-        style={{
-          border: 0,
-          justifyContent: 'flex-start',
-          padding: '1.25em',
-        }}
-      >
-        {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
-        <View style={{ flex: 1 }} />
-        <SvgArrowThinRight width="15" height="15" />
-      </Link>
     </View>
   );
 }
