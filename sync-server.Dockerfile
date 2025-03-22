@@ -35,8 +35,8 @@ RUN yarn workspaces focus @actual-app/sync-server --production
 RUN rm -rf ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
 
 # Copy in the @actual-app/web artifacts manually, so we don't need the entire packages folder
-COPY packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
-COPY packages/desktop-client/build ./node_modules/@actual-app/web/build
+COPY ./packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
+RUN cp -r ./packages/desktop-client/build ./node_modules/@actual-app/web/build
 
 FROM node:18-bookworm-slim as prod
 
