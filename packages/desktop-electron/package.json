@@ -11,8 +11,7 @@
     "build:dist": "tsc --p tsconfig.dist.json && yarn copy-static-assets",
     "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* build",
     "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron .",
-    "e2e": "npx playwright test",
-    "e2e:update": "yarn e2e --update-snapshots"
+    "e2e": "npx playwright test"
   },
   "main": "build/index.js",
   "build": {
