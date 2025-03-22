@@ -1,7 +1,6 @@
 name: /update-vrt
 on:
-  issue_comment:
-    types: [created]
+  pull_request:
 
 permissions:
   pull-requests: read
@@ -15,16 +14,16 @@ jobs:
   update-vrt:
     name: Update VRT
     runs-on: ubuntu-latest
-    if: |
-      github.event.issue.pull_request &&
-      contains(github.event.comment.body, '/update-vrt')
+    # if: |
+    #   github.event.issue.pull_request &&
+    #   contains(github.event.comment.body, '/update-vrt')
     container:
       image: mcr.microsoft.com/playwright:v1.41.1-jammy
     steps:
-      - name: Get PR branch
-        #        Until https://github.com/xt0rted/pull-request-comment-branch/issues/322 is resolved we use the forked version
-        uses: gotson/pull-request-comment-branch@head-repo-owner-dist
-        id: comment-branch
+      # - name: Get PR branch
+      #   #        Until https://github.com/xt0rted/pull-request-comment-branch/issues/322 is resolved we use the forked version
+      #   uses: gotson/pull-request-comment-branch@head-repo-owner-dist
+      #   id: comment-branch
       - uses: actions/checkout@v4
         with:
           repository: ${{ steps.comment-branch.outputs.head_owner }}/${{ steps.comment-branch.outputs.head_repo }}
@@ -70,10 +69,10 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - name: Get PR branch
-        #        Until https://github.com/xt0rted/pull-request-comment-branch/issues/322 is resolved we use the forked version
-        uses: gotson/pull-request-comment-branch@head-repo-owner-dist
-        id: comment-branch
+      # - name: Get PR branch
+      #   #        Until https://github.com/xt0rted/pull-request-comment-branch/issues/322 is resolved we use the forked version
+      #   uses: gotson/pull-request-comment-branch@head-repo-owner-dist
+      #   id: comment-branch
       - uses: actions/checkout@v4
         with:
           repository: ${{ steps.comment-branch.outputs.head_owner }}/${{ steps.comment-branch.outputs.head_repo }}
@@ -96,24 +95,24 @@ jobs:
           fi
           git commit -m "Update VRT"
           git push origin HEAD:${BRANCH_NAME}
-      - name: Add finished reaction
-        uses: dkershner6/reaction-action@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commentId: ${{ github.event.comment.id }}
-          reaction: 'rocket'
+      # - name: Add finished reaction
+      #   uses: dkershner6/reaction-action@v2
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     commentId: ${{ github.event.comment.id }}
+      #     reaction: 'rocket'
 
-  add-starting-reaction:
-    runs-on: ubuntu-latest
-    if: |
-      github.event.issue.pull_request &&
-      contains(github.event.comment.body, '/update-vrt')
-    permissions:
-      pull-requests: write
-    steps:
-      - name: React to comment
-        uses: dkershner6/reaction-action@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commentId: ${{ github.event.comment.id }}
-          reaction: '+1'
+  # add-starting-reaction:
+  #   runs-on: ubuntu-latest
+  #   if: |
+  #     github.event.issue.pull_request &&
+  #     contains(github.event.comment.body, '/update-vrt')
+  #   permissions:
+  #     pull-requests: write
+  #   steps:
+  #     - name: React to comment
+  #       uses: dkershner6/reaction-action@v2
+  #       with:
+  #         token: ${{ secrets.GITHUB_TOKEN }}
+  #         commentId: ${{ github.event.comment.id }}
+  #         reaction: '+1'
