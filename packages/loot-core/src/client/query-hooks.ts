@@ -29,6 +29,7 @@ export function useQuery<Response = unknown>(
     setIsLoading(!!query);
 
     if (!query) {
+      setData(null);
       return;
     }
 

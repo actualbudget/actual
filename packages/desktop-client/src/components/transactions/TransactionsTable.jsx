@@ -97,6 +97,9 @@ import {
 } from '../table';
 
 import { TransactionMenu } from './TransactionMenu';
+import { useQuery } from 'loot-core/client/query-hooks';
+import { transactions } from 'loot-core/client/queries';
+import { Autocomplete } from '../autocomplete/Autocomplete';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -783,6 +786,118 @@ function PayeeIcons({
   );
 }
 
+function NotesCell({
+  accountId,
+  value,
+  valueStyle,
+  exposed,
+  focused,
+  formatter,
+  onExpose,
+  onUpdate,
+  inputProps,
+}) {
+  const [tagSearchString, setTagSearchString] = useState('testing');
+  const query = useQuery(
+    () =>
+      (tagSearchString &&
+        transactions(accountId)
+          .select('notes')
+          .filter({
+            notes: {
+              $like: `%#${tagSearchString}%`,
+            },
+          })
+          .orderBy({
+            date: 'desc',
+          })
+          .limit(50)) ||
+      null,
+    [tagSearchString, accountId],
+  );
+  useEffect(() => console.log(query.data), [query]);
+
+  function getSearchString(value, cursorPosition) {
+    // find nearest hash before
+    let hashIdx = cursorPosition - 1;
+    while (hashIdx >= 0 && value.charAt(hashIdx) !== '#') {
+      if (value.charAt(hashIdx).trim() === '') {
+        hashIdx = -1;
+        break;
+      }
+      hashIdx--;
+    }
+
+    // find nearest whitespace or end of string after
+    let endIdx = cursorPosition + 1;
+    while (endIdx < value.length && value.charAt(endIdx).trim() !== '') {
+      endIdx++;
+    }
+
+    if (hashIdx === -1 || hashIdx === endIdx) {
+      return null;
+    }
+    return value.slice(hashIdx + 1, endIdx);
+  }
+  function onKeyUp(e) {
+    setTagSearchString(
+      getSearchString(e.target.value, e.target.selectionStart),
+    );
+  }
+
+  function onBlur(e) {
+    console.log('closing search');
+  }
+
+  return (
+    <CustomCell
+      name="notes"
+      width="flex"
+      textAlign="flex"
+      value={value}
+      formatter={formatter}
+      exposed={exposed}
+      onExpose={onExpose}
+      valueStyle={valueStyle}
+      onUpdate={onUpdate}
+    >
+      {({
+        onBlur,
+        onKeyDown,
+        onUpdate,
+        onSave,
+        shouldSaveFromKey,
+        inputStyle,
+      }) => (
+        <Autocomplete
+          value={value}
+          focused={true}
+          highlightFirst={true}
+          embedded={true}
+          closeOnBlur={false}
+          shouldSaveFromKey={shouldSaveFromKey}
+          suggestions={['testing']}
+          renderItems={(items, getItemProps, highlightedIndex) => (
+            <View>
+              <View>
+                {items.map((item, idx) => (
+                  <div key={item}>
+                    {item} {idx === highlightedIndex && 'highlighted'}
+                  </div>
+                ))}
+              </View>
+            </View>
+          )}
+          onUpdate={async value => onUpdate('notes', value)}
+          onSelect={async value => onUpdate('notes', value)}
+          formatter={formatter}
+          inputProps={{ onBlur, onKeyDown, style: inputStyle, onKeyUp }}
+        />
+      )}
+    </CustomCell>
+  );
+}
+
 const Transaction = memo(function Transaction({
   allTransactions,
   transaction: originalTransaction,
@@ -823,7 +938,7 @@ const Transaction = memo(function Transaction({
   onNavigateToSchedule,
   onNotesTagClick,
   splitError,
-  listContainerRef,
+  litContainerRef,
   showSelection,
   allowSplitTransaction,
 }) {
@@ -1003,7 +1118,7 @@ const Transaction = memo(function Transaction({
   // Problem: the split-error Popover (which has the buttons to distribute/add split)
   // renders before schedules are added to the table. After schedules finally load
   // the entire table gets pushed down. But the Popover does not re-calculate
-  // its positioning. This is because there is nothing in react-aria that would be
+  // ilts positioning. This is because there is nothing in react-aria that would be
   // watching for the position of the trigger element.
   // Solution: when transactions (this includes schedules) change - we increment
   // a variable (with a small delay in order for the next render cycle to pick up
@@ -1269,14 +1384,12 @@ const Transaction = memo(function Transaction({
         />
       ))()}
 
-      <InputCell
-        width="flex"
-        name="notes"
-        textAlign="flex"
-        exposed={focusedField === 'notes'}
-        focused={focusedField === 'notes'}
+      <NotesCell
+        accountId={accountId}
         value={notes || ''}
         valueStyle={valueStyle}
+        exposed={focusedField === 'notes'}
+        focused={focusedField === 'notes'}
         formatter={value => notesTagFormatter(value, onNotesTagClick)}
         onExpose={name => !isPreview && onEdit(id, name)}
         inputProps={{
@@ -2647,7 +2760,7 @@ export const TransactionTable = forwardRef((props, ref) => {
 TransactionTable.displayName = 'TransactionTable';
 
 function notesTagFormatter(notes, onNotesTagClick) {
-  const words = notes.split(' ');
+  const words = notes?.split(' ') || [];
   return (
     <>
       {words.map((word, i, arr) => {
