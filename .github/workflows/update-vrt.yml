@@ -14,9 +14,9 @@ jobs:
   update-vrt:
     name: Update VRT
     runs-on: ubuntu-latest
-    # if: |
-    #   github.event.issue.pull_request &&
-    #   contains(github.event.comment.body, '/update-vrt')
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/update-vrt')
     container:
       image: mcr.microsoft.com/playwright:v1.41.1-jammy
     steps:
@@ -95,24 +95,24 @@ jobs:
           fi
           git commit -m "Update VRT"
           git push origin HEAD:${BRANCH_NAME}
-      # - name: Add finished reaction
-      #   uses: dkershner6/reaction-action@v2
-      #   with:
-      #     token: ${{ secrets.GITHUB_TOKEN }}
-      #     commentId: ${{ github.event.comment.id }}
-      #     reaction: 'rocket'
+      - name: Add finished reaction
+        uses: dkershner6/reaction-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commentId: ${{ github.event.comment.id }}
+          reaction: 'rocket'
 
-  # add-starting-reaction:
-  #   runs-on: ubuntu-latest
-  #   if: |
-  #     github.event.issue.pull_request &&
-  #     contains(github.event.comment.body, '/update-vrt')
-  #   permissions:
-  #     pull-requests: write
-  #   steps:
-  #     - name: React to comment
-  #       uses: dkershner6/reaction-action@v2
-  #       with:
-  #         token: ${{ secrets.GITHUB_TOKEN }}
-  #         commentId: ${{ github.event.comment.id }}
-  #         reaction: '+1'
+  add-starting-reaction:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/update-vrt')
+    permissions:
+      pull-requests: write
+    steps:
+      - name: React to comment
+        uses: dkershner6/reaction-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commentId: ${{ github.event.comment.id }}
+          reaction: '+1'
