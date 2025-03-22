@@ -40,7 +40,15 @@ export function getUploadError({
   }
 }
 
-export function getDownloadError({ reason, meta, fileName }) {
+export function getDownloadError({
+  reason,
+  meta,
+  fileName,
+}: {
+  reason: string;
+  meta?: unknown;
+  fileName?: string;
+}) {
   switch (reason) {
     case 'network':
     case 'download-failure':
@@ -65,7 +73,10 @@ export function getDownloadError({ reason, meta, fileName }) {
       );
 
     default:
-      const info = meta && meta.fileId ? `, fileId: ${meta.fileId}` : '';
+      const info =
+        meta && typeof meta === 'object' && 'fileId' in meta && meta.fileId
+          ? `, fileId: ${meta.fileId}`
+          : '';
       return t(
         'Something went wrong trying to download that file, sorry! Visit https://actualbudget.org/contact/ for support. reason: {{reason}}{{info}}',
         { reason, info },
