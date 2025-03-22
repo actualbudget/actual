@@ -1,5 +1,9 @@
-export function isPreviewEnvironment() {
+export function isEdgeEnvironment() {
   return String(process.env.REACT_APP_NETLIFY) === 'true';
+}
+
+export function isPreviewEnvironment() {
+  return !!process.env.REACT_APP_REVIEW_ID;
 }
 
 export function isDevelopmentEnvironment() {
@@ -7,7 +11,9 @@ export function isDevelopmentEnvironment() {
 }
 
 export function isNonProductionEnvironment() {
-  return isPreviewEnvironment() || isDevelopmentEnvironment();
+  return (
+    isEdgeEnvironment() || isPreviewEnvironment() || isDevelopmentEnvironment()
+  );
 }
 
 export function isElectron() {

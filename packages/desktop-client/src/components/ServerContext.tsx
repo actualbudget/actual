@@ -71,6 +71,10 @@ export const useAvailableLoginMethods = () =>
 async function getServerVersion() {
   const result = await send('get-server-version');
   if ('version' in result) {
+    if (result.commit) {
+      return `${result.version} (${result.commit})`;
+    }
+
     return result.version;
   }
   return '';

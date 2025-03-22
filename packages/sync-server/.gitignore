@@ -31,3 +31,5 @@ dist
 .idea
 /coverage
 /coverage-e2e
+
+git.properties
