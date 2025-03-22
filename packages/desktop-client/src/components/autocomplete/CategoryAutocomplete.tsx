@@ -393,7 +393,7 @@ function CategoryItem({
     typeof balanceBinding
   >(balanceBinding);
 
-  const isToBeBudgetedItem = item.id === 'to-be-budgeted';
+  const isToBudgetItem = item.id === 'to-budget';
   const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget);
 
   return (
@@ -430,16 +430,13 @@ function CategoryItem({
             display: !showBalances ? 'none' : undefined,
             marginLeft: 5,
             flexShrink: 0,
-            ...makeAmountFullStyle(
-              (isToBeBudgetedItem ? toBudget : balance) || 0,
-              {
-                positiveColor: theme.noticeTextMenu,
-                negativeColor: theme.errorTextMenu,
-              },
-            ),
+            ...makeAmountFullStyle((isToBudgetItem ? toBudget : balance) || 0, {
+              positiveColor: theme.noticeTextMenu,
+              negativeColor: theme.errorTextMenu,
+            }),
           }}
         >
-          {isToBeBudgetedItem
+          {isToBudgetItem
             ? toBudget != null
               ? ` ${integerToCurrency(toBudget || 0)}`
               : null
