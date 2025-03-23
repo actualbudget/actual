@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { getTags } from 'loot-core/client/queries/queriesSlice';
 
@@ -19,4 +19,13 @@ export function useTags() {
   }, [dispatch, isInitialMount, tagsLoaded]);
 
   return useSelector(state => state.queries.tags);
+}
+
+// for use with Autocomplete, needs id and name in return type
+export function useTagOptions(): { id: string; name: string }[] {
+  const tags = useTags();
+  return useMemo(
+    () => tags?.map(t => ({ id: t ?? '', name: t ?? '' })) || [],
+    [tags],
+  );
 }

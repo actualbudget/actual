@@ -407,12 +407,12 @@ function StatusCell({
           ':focus': {
             ...(isPreview
               ? {
-                boxShadow: 'none',
-              }
+                  boxShadow: 'none',
+                }
               : {
-                border: '1px solid ' + theme.formInputBorderSelected,
-                boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
-              }),
+                  border: '1px solid ' + theme.formInputBorderSelected,
+                  boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
+                }),
           },
           cursor: isClearedField ? 'pointer' : 'default',
           ...(isChild && { visibility: 'hidden' }),
@@ -526,8 +526,8 @@ function PayeeCell({
           ':hover': isPreview
             ? {}
             : {
-              border: '1px solid ' + theme.buttonNormalBorder,
-            },
+                border: '1px solid ' + theme.buttonNormalBorder,
+              },
         }}
         disabled={isPreview}
         onSelect={() =>
@@ -785,16 +785,21 @@ function PayeeIcons({
   );
 }
 
-function NotesCell({ value, focused, onUpdate, onClickTag, onExpose }) {
-  const tags = useTags();
-  const options = useMemo(() => tags.map(t => ({ id: t, name: t })), [tags]);
+function NotesCell({
+  value,
+  focused,
+  onUpdate,
+  onClickTag,
+  onExpose,
+  tagOptions,
+}) {
   const [cursorPosition, setCursorPosition] = useState(undefined);
   const [inputValue, setInputValue] = useState(value);
   useEffect(() => setInputValue(value), [value, setInputValue]);
 
   function onSelect(optionId, value, e) {
     const [start, end] = getCurrentWordRange(value, cursorPosition);
-    const option = options.find(o => o.id === optionId);
+    const option = tagOptions.find(o => o.id === optionId);
     if (option && e) {
       const newValue =
         value.slice(0, start) + option.name + value.slice(end + 1);
@@ -868,7 +873,7 @@ function NotesCell({ value, focused, onUpdate, onClickTag, onExpose }) {
             onChange: v => setInputValue(v),
           }}
           getHighlightedIndex={() => 0}
-          suggestions={options}
+          suggestions={tagOptions}
           filterSuggestions={(options, inputValue) => {
             if (inputValue.trim() === '' || !cursorPosition) {
               return [];
@@ -939,6 +944,7 @@ const Transaction = memo(function Transaction({
   focusedField,
   categoryGroups,
   payees,
+  tagOptions,
   accounts,
   balance,
   dateFormat = 'MM/dd/yyyy',
@@ -1409,6 +1415,7 @@ const Transaction = memo(function Transaction({
       <NotesCell
         value={notes || ''}
         focused={focusedField === 'notes'}
+        tagOptions={tagOptions}
         onClickTag={onNotesTagClick}
         onUpdate={value => {
           onUpdate('notes', value?.trim());
@@ -1551,9 +1558,9 @@ const Transaction = memo(function Transaction({
           formatter={value =>
             value
               ? getDisplayValue(
-                getCategoriesById(categoryGroups)[value],
-                'name',
-              )
+                  getCategoriesById(categoryGroups)[value],
+                  'name',
+                )
               : transaction.id
                 ? 'Categorize'
                 : ''
@@ -1563,11 +1570,11 @@ const Transaction = memo(function Transaction({
           valueStyle={
             !categoryId
               ? {
-                // uncategorized transaction
-                fontStyle: 'italic',
-                fontWeight: 300,
-                color: theme.formInputTextHighlight,
-              }
+                  // uncategorized transaction
+                  fontStyle: 'italic',
+                  fontWeight: 300,
+                  color: theme.formInputTextHighlight,
+                }
               : valueStyle
           }
           onUpdate={async value => {
@@ -1785,6 +1792,7 @@ function NewTransaction({
   accounts,
   categoryGroups,
   payees,
+  tagOptions,
   transferAccountsByTransaction,
   editingTransaction,
   focusedField,
@@ -1853,6 +1861,7 @@ function NewTransaction({
           accounts={accounts}
           categoryGroups={categoryGroups}
           payees={payees}
+          tagOptions={tagOptions}
           dateFormat={dateFormat}
           hideFraction={hideFraction}
           expanded={true}
@@ -1988,6 +1997,7 @@ function TransactionTableInner({
       accounts,
       categoryGroups,
       payees,
+      tagOptions,
       showCleared,
       showAccount,
       showCategory,
@@ -2050,6 +2060,7 @@ function TransactionTableInner({
         accounts={accounts}
         categoryGroups={categoryGroups}
         payees={payees}
+        tagOptions={tagOptions}
         dateFormat={dateFormat}
         hideFraction={hideFraction}
         onEdit={tableNavigator.onEdit}
@@ -2127,6 +2138,7 @@ function TransactionTableInner({
               accounts={props.accounts}
               categoryGroups={props.categoryGroups}
               payees={props.payees || []}
+              tagOptions={props.tagOptions || []}
               showAccount={props.showAccount}
               showCategory={props.showCategory}
               showBalance={props.showBalances}
@@ -2401,10 +2413,10 @@ export const TransactionTable = forwardRef((props, ref) => {
     fields = item.is_child
       ? ['select', 'payee', 'notes', 'category', 'debit', 'credit']
       : fields.filter(
-        f =>
-          (props.showAccount || f !== 'account') &&
-          (props.showCategory || f !== 'category'),
-      );
+          f =>
+            (props.showAccount || f !== 'account') &&
+            (props.showCategory || f !== 'category'),
+        );
 
     if (isPreviewId(item.id)) {
       fields = ['select'];
