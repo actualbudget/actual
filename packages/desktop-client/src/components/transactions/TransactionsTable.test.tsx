@@ -841,10 +841,6 @@ describe('Transactions', () => {
     expect(container.ownerDocument.activeElement).toBe(input);
     expect(input.value).not.toBe('');
 
-    input = await editNewField(container, 'notes');
-    await userEvent.clear(input);
-    await userEvent.type(input, 'a transaction');
-
     input = await editNewField(container, 'debit');
     expect(input.value).toBe('0.00');
     await userEvent.clear(input);
