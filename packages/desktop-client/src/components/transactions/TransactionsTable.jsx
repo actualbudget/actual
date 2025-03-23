@@ -75,7 +75,6 @@ import { usePrevious } from '../../hooks/usePrevious';
 import { useProperFocus } from '../../hooks/useProperFocus';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
-import { useTags } from '../../hooks/useTags';
 import { useDispatch } from '../../redux';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { Autocomplete } from '../autocomplete/Autocomplete';
@@ -407,12 +406,12 @@ function StatusCell({
           ':focus': {
             ...(isPreview
               ? {
-                  boxShadow: 'none',
-                }
+                boxShadow: 'none',
+              }
               : {
-                  border: '1px solid ' + theme.formInputBorderSelected,
-                  boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
-                }),
+                border: '1px solid ' + theme.formInputBorderSelected,
+                boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
+              }),
           },
           cursor: isClearedField ? 'pointer' : 'default',
           ...(isChild && { visibility: 'hidden' }),
@@ -526,8 +525,8 @@ function PayeeCell({
           ':hover': isPreview
             ? {}
             : {
-                border: '1px solid ' + theme.buttonNormalBorder,
-              },
+              border: '1px solid ' + theme.buttonNormalBorder,
+            },
         }}
         disabled={isPreview}
         onSelect={() =>
@@ -1558,9 +1557,9 @@ const Transaction = memo(function Transaction({
           formatter={value =>
             value
               ? getDisplayValue(
-                  getCategoriesById(categoryGroups)[value],
-                  'name',
-                )
+                getCategoriesById(categoryGroups)[value],
+                'name',
+              )
               : transaction.id
                 ? 'Categorize'
                 : ''
@@ -1570,11 +1569,11 @@ const Transaction = memo(function Transaction({
           valueStyle={
             !categoryId
               ? {
-                  // uncategorized transaction
-                  fontStyle: 'italic',
-                  fontWeight: 300,
-                  color: theme.formInputTextHighlight,
-                }
+                // uncategorized transaction
+                fontStyle: 'italic',
+                fontWeight: 300,
+                color: theme.formInputTextHighlight,
+              }
               : valueStyle
           }
           onUpdate={async value => {
@@ -2413,10 +2412,10 @@ export const TransactionTable = forwardRef((props, ref) => {
     fields = item.is_child
       ? ['select', 'payee', 'notes', 'category', 'debit', 'credit']
       : fields.filter(
-          f =>
-            (props.showAccount || f !== 'account') &&
-            (props.showCategory || f !== 'category'),
-        );
+        f =>
+          (props.showAccount || f !== 'account') &&
+          (props.showCategory || f !== 'category'),
+      );
 
     if (isPreviewId(item.id)) {
       fields = ['select'];
