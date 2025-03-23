@@ -854,7 +854,9 @@ function NotesCell({ value, focused, onUpdate, onClickTag, onExpose }) {
             if (!currentWord) {
               return [];
             }
-            return options.filter(o => o.id.startsWith(currentWord));
+            return options
+              .filter(o => o.id.startsWith(currentWord))
+              .slice(0, 10);
           }}
         />
       )}
