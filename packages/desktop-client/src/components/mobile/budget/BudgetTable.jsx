@@ -1573,6 +1573,7 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
             title: t('Cover overspending'),
             month,
             categoryGroups: categoryGroupsToShow,
+            showHiddenCategories: true,
             onSelect: onOpenCoverCategoryModal,
             clearOnSelect: true,
             closeOnSelect: false,
