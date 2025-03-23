@@ -791,18 +791,30 @@ function NotesCell({ value, focused, onUpdate, onClickTag, onExpose }) {
   const tags = useTags();
   const options = useMemo(() => tags.map(t => ({ id: t, name: t })), [tags]);
   const [cursorPosition, setCursorPosition] = useState(undefined);
+  const [inputValue, setInputValue] = useState(value);
+  useEffect(() => setInputValue(value), [value, setInputValue]);
 
-  function onSelect(optionId, value) {
+  function onSelect(optionId, value, e) {
     const [start, end] = getCurrentWordRange(value, cursorPosition);
     const option = options.find(o => o.id === optionId);
-    if (!option) {
+    if (option) {
+      // we only stop propagation if we actually have an option to update
+      e?.stopPropagation();
+      const newValue =
+        value.slice(0, start) + option.name + value.slice(end + 1);
+      onUpdate(newValue);
+      setInputValue(newValue + ' ');
+    } else {
       onUpdate(value);
-      return;
     }
-    const afterText =
-      end === value.length - 1 ? '' : ' ' + value.slice(end + 1);
-    const newValue = value.slice(0, start) + option.name + afterText;
-    onUpdate(newValue);
+  }
+
+  function onKeyUp(e) {
+    if (e.target.selectionEnd === e.target.selectionStart) {
+      setCursorPosition(e.target.selectionStart);
+    } else {
+      setCursorPosition(undefined);
+    }
   }
 
   return (
@@ -824,12 +836,15 @@ function NotesCell({ value, focused, onUpdate, onClickTag, onExpose }) {
           shouldSaveFromKey={shouldSaveFromKey}
           clearOnBlur={false}
           closeOnBlur={true}
+          openOnFocus={false}
           onSelect={onSelect}
           inputProps={{
             onBlur,
             onKeyDown,
-            onKeyUp: e => setCursorPosition(e.target.selectionStart),
+            onKeyUp,
             style: inputStyle,
+            value: inputValue,
+            onChange: v => setInputValue(v),
           }}
           getHighlightedIndex={() => 0}
           suggestions={options}
@@ -1373,7 +1388,7 @@ const Transaction = memo(function Transaction({
         focused={focusedField === 'notes'}
         onClickTag={onNotesTagClick}
         onUpdate={value => {
-          onUpdate('notes', value);
+          onUpdate('notes', value?.trim());
         }}
         onExpose={name => onEdit(id, name)}
       />

@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, {
+import {
   type ChangeEvent,
   type ComponentProps,
   type HTMLProps,
@@ -206,7 +206,11 @@ function defaultItemToString<T extends Item>(item?: T) {
 
 type SingleAutocompleteProps<T extends Item> = CommonAutocompleteProps<T> & {
   type?: 'single' | never;
-  onSelect: (id: T['id'], value: string) => void;
+  onSelect: (
+    id: T['id'],
+    value: string,
+    e?: KeyboardEvent<HTMLInputElement>,
+  ) => void;
   value: null | T | T['id'];
 };
 
@@ -519,15 +523,10 @@ function SingleAutocomplete<T extends Item>({
                           e.stopPropagation();
                         } else if (!strict) {
                           const option = filteredSuggestions[highlightedIndex];
-                          if (option) {
-                            // if an option matches, then we use autocomplete handling
-                            // In non strict mode, no match means we treat this
-                            // as just another input
-                            // e.stopPropagation();
-                          }
                           onSelect(
                             option?.id,
                             (e.target as HTMLInputElement).value,
+                            e,
                           );
                         }
                       } else if (!strict) {
