@@ -292,7 +292,6 @@ function SingleAutocomplete<T extends Item>({
   }
 
   function onSelectAfter() {
-    setValue('');
     setSelectedItem(null);
     setHighlightedIndex(null);
     setIsChanged(false);
@@ -514,16 +513,26 @@ function SingleAutocomplete<T extends Item>({
                           // ignore the default behavior of selecting the item. It's too
                           // common to accidentally hover an item and then save it
                           e.preventDefault();
-                        } else {
+                        } else if (strict) {
                           // Otherwise, stop propagation so that the table navigator
                           // doesn't handle it
                           e.stopPropagation();
+                        } else if (!strict) {
+                          const option = filteredSuggestions[highlightedIndex];
+                          if (option) {
+                            // if an option matches, then we use autocomplete handling
+                            // In non strict mode, no match means we treat this
+                            // as just another input
+                            // e.stopPropagation();
+                          }
+                          onSelect(
+                            option?.id,
+                            (e.target as HTMLInputElement).value,
+                          );
                         }
                       } else if (!strict) {
-                        // Handle it ourselves
-                        e.stopPropagation();
                         onSelect(value, (e.target as HTMLInputElement).value);
-                        return onSelectAfter();
+                        onSelectAfter();
                       } else {
                         // No highlighted item, still allow the table to save the item
                         // as `null`, even though we're allowing the table to move

@@ -44,11 +44,13 @@ import {
 import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
+import { transactions } from 'loot-core/client/queries';
 import {
   getAccountsById,
   getPayeesById,
   getCategoriesById,
 } from 'loot-core/client/queries/queriesSlice';
+import { useQuery } from 'loot-core/client/query-hooks';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { currentDay } from 'loot-core/shared/months';
 import * as monthUtils from 'loot-core/shared/months';
@@ -77,6 +79,7 @@ import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
 import { useDispatch } from '../../redux';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
+import { Autocomplete } from '../autocomplete/Autocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { getStatusProps } from '../schedules/StatusBadge';
@@ -97,9 +100,6 @@ import {
 } from '../table';
 
 import { TransactionMenu } from './TransactionMenu';
-import { useQuery } from 'loot-core/client/query-hooks';
-import { transactions } from 'loot-core/client/queries';
-import { Autocomplete } from '../autocomplete/Autocomplete';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -786,116 +786,98 @@ function PayeeIcons({
   );
 }
 
-function NotesCell({
-  accountId,
-  value,
-  valueStyle,
-  exposed,
-  focused,
-  formatter,
-  onExpose,
-  onUpdate,
-  inputProps,
-}) {
-  const [tagSearchString, setTagSearchString] = useState('testing');
-  const query = useQuery(
-    () =>
-      (tagSearchString &&
-        transactions(accountId)
-          .select('notes')
-          .filter({
-            notes: {
-              $like: `%#${tagSearchString}%`,
-            },
-          })
-          .orderBy({
-            date: 'desc',
-          })
-          .limit(50)) ||
-      null,
-    [tagSearchString, accountId],
-  );
-  useEffect(() => console.log(query.data), [query]);
+function NotesCell({ value, focused, onUpdate, onClickTag, onExpose }) {
+  const options = ['#tag', '#newtag'].map(o => ({ id: o, name: o }));
+  const [cursorPosition, setCursorPosition] = useState(undefined);
 
-  function getSearchString(value, cursorPosition) {
-    // find nearest hash before
-    let hashIdx = cursorPosition - 1;
-    while (hashIdx >= 0 && value.charAt(hashIdx) !== '#') {
-      if (value.charAt(hashIdx).trim() === '') {
-        hashIdx = -1;
-        break;
-      }
-      hashIdx--;
+  function onSelect(optionId, value) {
+    const [start, end] = getCurrentWordRange(value, cursorPosition);
+    const option = options.find(o => o.id === optionId);
+    if (!option) {
+      onUpdate(value);
+      return;
     }
-
-    // find nearest whitespace or end of string after
-    let endIdx = cursorPosition + 1;
-    while (endIdx < value.length && value.charAt(endIdx).trim() !== '') {
-      endIdx++;
-    }
-
-    if (hashIdx === -1 || hashIdx === endIdx) {
-      return null;
-    }
-    return value.slice(hashIdx + 1, endIdx);
-  }
-  function onKeyUp(e) {
-    setTagSearchString(
-      getSearchString(e.target.value, e.target.selectionStart),
-    );
-  }
-
-  function onBlur(e) {
-    console.log('closing search');
+    const afterText =
+      end === value.length - 1 ? '' : ' ' + value.slice(end + 1);
+    const newValue = value.slice(0, start) + option.name + afterText;
+    onUpdate(newValue);
   }
 
   return (
     <CustomCell
-      name="notes"
       width="flex"
-      textAlign="flex"
+      name="notes"
       value={value}
-      formatter={formatter}
-      exposed={exposed}
+      formatter={value => notesTagFormatter(value, onClickTag)}
+      focused={focused}
+      exposed={focused}
       onExpose={onExpose}
-      valueStyle={valueStyle}
       onUpdate={onUpdate}
     >
-      {({
-        onBlur,
-        onKeyDown,
-        onUpdate,
-        onSave,
-        shouldSaveFromKey,
-        inputStyle,
-      }) => (
+      {({ inputStyle, onKeyDown, onBlur, shouldSaveFromKey }) => (
         <Autocomplete
+          strict={false}
           value={value}
-          focused={true}
-          highlightFirst={true}
-          embedded={true}
-          closeOnBlur={false}
+          onBlur={onBlur}
           shouldSaveFromKey={shouldSaveFromKey}
-          suggestions={['testing']}
-          renderItems={(items, getItemProps, highlightedIndex) => (
-            <View>
-              <View>
-                {items.map((item, idx) => (
-                  <div key={item}>
-                    {item} {idx === highlightedIndex && 'highlighted'}
-                  </div>
-                ))}
-              </View>
-            </View>
-          )}
-          onUpdate={async value => onUpdate('notes', value)}
-          onSelect={async value => onUpdate('notes', value)}
-          formatter={formatter}
-          inputProps={{ onBlur, onKeyDown, style: inputStyle, onKeyUp }}
+          clearOnBlur={false}
+          closeOnBlur={true}
+          onSelect={onSelect}
+          inputProps={{
+            onBlur,
+            onKeyDown,
+            onKeyUp: e => setCursorPosition(e.target.selectionStart),
+            style: inputStyle,
+          }}
+          getHighlightedIndex={() => 0}
+          suggestions={options}
+          filterSuggestions={(options, inputValue) => {
+            if (inputValue.trim() === '' || !cursorPosition) {
+              return [];
+            }
+            const currentWord = getCurrentWord(inputValue, cursorPosition);
+            if (!currentWord) {
+              return [];
+            }
+            return options.filter(o => o.name.startsWith(currentWord));
+          }}
         />
       )}
     </CustomCell>
   );
+}
+
+function getCurrentWordRange(inputValue, cursorPosition) {
+  if (
+    cursorPosition === undefined ||
+    cursorPosition === null ||
+    inputValue.charAt(cursorPosition - 1).trim() === ''
+  ) {
+    return [0, 0];
+  }
+  cursorPosition = cursorPosition - 1;
+
+  let startIdx = cursorPosition;
+  let endIdx = cursorPosition;
+
+  while (startIdx > 0 && inputValue.charAt(startIdx - 1).trim() !== '') {
+    startIdx--;
+  }
+  while (
+    endIdx < inputValue.length &&
+    inputValue.charAt(endIdx).trim() !== ''
+  ) {
+    endIdx++;
+  }
+  if (startIdx < 0 || endIdx < 0 || startIdx === endIdx) {
+    return [0, 0];
+  }
+  return [startIdx, endIdx];
+}
+
+function getCurrentWord(inputValue, cursorPosition) {
+  const [startIdx, endIdx] = getCurrentWordRange(inputValue, cursorPosition);
+  return inputValue.slice(startIdx, endIdx);
 }
 
 const Transaction = memo(function Transaction({
@@ -1385,17 +1367,13 @@ const Transaction = memo(function Transaction({
       ))()}
 
       <NotesCell
-        accountId={accountId}
         value={notes || ''}
-        valueStyle={valueStyle}
-        exposed={focusedField === 'notes'}
         focused={focusedField === 'notes'}
-        formatter={value => notesTagFormatter(value, onNotesTagClick)}
-        onExpose={name => !isPreview && onEdit(id, name)}
-        inputProps={{
-          value: notes || '',
-          onUpdate: onUpdate.bind(null, 'notes'),
+        onClickTag={onNotesTagClick}
+        onUpdate={value => {
+          onUpdate('notes', value);
         }}
+        onExpose={name => onEdit(id, name)}
       />
 
       {(isPreview && !isChild) || isParent ? (
