@@ -822,6 +822,12 @@ function NotesCell({ value, focused, onUpdate, onClickTag, onExpose }) {
     }
   }
 
+  function onKeyDown(e) {
+    if (e.key === 'Escape') {
+      setInputValue(value);
+    }
+  }
+
   return (
     <CustomCell
       width="flex"
@@ -832,6 +838,7 @@ function NotesCell({ value, focused, onUpdate, onClickTag, onExpose }) {
       exposed={focused}
       onExpose={onExpose}
       onUpdate={onUpdate}
+      onKeyDownCapture={onKeyDown}
     >
       {({ inputStyle, onKeyDown, onBlur, shouldSaveFromKey }) => (
         <Autocomplete
