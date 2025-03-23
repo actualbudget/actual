@@ -878,7 +878,7 @@ function NotesCell({
               return [];
             }
             const currentWord = getCurrentWord(inputValue, cursorPosition);
-            if (!currentWord) {
+            if (!currentWord || !options) {
               return [];
             }
             return options
