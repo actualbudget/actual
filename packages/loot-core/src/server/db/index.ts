@@ -650,6 +650,13 @@ export function getCommonPayees() {
   `);
 }
 
+export function getTaggedTransactionNotes() {
+  return all<Pick<DbTransaction, 'notes'>>(
+    // eslint-disable-next-line rulesdir/typography
+    `SELECT notes FROM v_transactions WHERE notes LIKE '%#%' ORDER BY date DESC`,
+  );
+}
+
 /* eslint-disable rulesdir/typography */
 const orphanedPayeesQuery = `
   SELECT p.id

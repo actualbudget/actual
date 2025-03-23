@@ -61,6 +61,7 @@ import {
 } from './sync';
 import { app as syncApp } from './sync/app';
 import * as syncMigrations from './sync/migrate';
+import { app as tagsApp } from './tags/app';
 import { app as toolsApp } from './tools/app';
 import { app as transactionsApp } from './transactions/app';
 import * as rules from './transactions/transaction-rules';
@@ -1093,6 +1094,7 @@ app.combine(
   transactionsApp,
   accountsApp,
   payeesApp,
+  tagsApp,
   spreadsheetApp,
   syncApp,
 );

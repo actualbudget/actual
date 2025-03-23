@@ -39,6 +39,8 @@ type QueriesState = {
   commonPayees: PayeeEntity[];
   payees: PayeeEntity[];
   payeesLoaded: boolean;
+  tags: string[];
+  tagsLoaded: boolean;
 };
 
 const initialState: QueriesState = {
@@ -57,6 +59,8 @@ const initialState: QueriesState = {
   commonPayeesLoaded: false,
   payees: [],
   payeesLoaded: false,
+  tags: [],
+  tagsLoaded: false,
 };
 
 type SetNewTransactionsPayload = {
@@ -154,6 +158,12 @@ const queriesSlice = createSlice({
     builder.addCase(getPayees.fulfilled, (state, action) => {
       state.payees = action.payload;
       state.payeesLoaded = true;
+    });
+
+    // Tags
+    builder.addCase(getTags.fulfilled, (state, action) => {
+      state.tags = action.payload;
+      state.tagsLoaded = true;
     });
 
     // App
@@ -417,6 +427,10 @@ export const getPayees = createAppAsyncThunk(
     return payees;
   },
 );
+
+export const getTags = createAppAsyncThunk(`${sliceName}/getTags`, async () => {
+  return send('tags-get');
+});
 
 // Budget actions
 

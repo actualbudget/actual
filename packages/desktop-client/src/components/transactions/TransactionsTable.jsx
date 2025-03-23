@@ -77,6 +77,7 @@ import { usePrevious } from '../../hooks/usePrevious';
 import { useProperFocus } from '../../hooks/useProperFocus';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
+import { useTags } from '../../hooks/useTags';
 import { useDispatch } from '../../redux';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { Autocomplete } from '../autocomplete/Autocomplete';
@@ -787,7 +788,8 @@ function PayeeIcons({
 }
 
 function NotesCell({ value, focused, onUpdate, onClickTag, onExpose }) {
-  const options = ['#tag', '#newtag'].map(o => ({ id: o, name: o }));
+  const tags = useTags();
+  const options = useMemo(() => tags.map(t => ({ id: t, name: t })), [tags]);
   const [cursorPosition, setCursorPosition] = useState(undefined);
 
   function onSelect(optionId, value) {
@@ -839,7 +841,7 @@ function NotesCell({ value, focused, onUpdate, onClickTag, onExpose }) {
             if (!currentWord) {
               return [];
             }
-            return options.filter(o => o.name.startsWith(currentWord));
+            return options.filter(o => o.id.startsWith(currentWord));
           }}
         />
       )}
