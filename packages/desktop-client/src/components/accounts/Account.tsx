@@ -267,11 +267,11 @@ function getField(field?: string) {
 
 type AccountInternalProps = {
   accountId?:
-  | AccountEntity['id']
-  | 'onbudget'
-  | 'offbudget'
-  | 'uncategorized'
-  | undefined;
+    | AccountEntity['id']
+    | 'onbudget'
+    | 'offbudget'
+    | 'uncategorized'
+    | undefined;
   filterConditions: RuleConditionEntity[];
   showBalances?: boolean;
   setShowBalances: (newValue: boolean) => void;
@@ -1312,17 +1312,17 @@ class AccountInternal extends PureComponent<
 
     const payeeCondition = ruleTransaction.imported_payee
       ? ({
-        field: 'imported_payee',
-        op: 'is',
-        value: ruleTransaction.imported_payee,
-        type: 'string',
-      } satisfies RuleConditionEntity)
+          field: 'imported_payee',
+          op: 'is',
+          value: ruleTransaction.imported_payee,
+          type: 'string',
+        } satisfies RuleConditionEntity)
       : ({
-        field: 'payee',
-        op: 'is',
-        value: ruleTransaction.payee!,
-        type: 'id',
-      } satisfies RuleConditionEntity);
+          field: 'payee',
+          op: 'is',
+          value: ruleTransaction.payee!,
+          type: 'id',
+        } satisfies RuleConditionEntity);
     const amountCondition = {
       field: 'amount',
       op: 'isapprox',
@@ -1337,16 +1337,16 @@ class AccountInternal extends PureComponent<
       actions: [
         ...(childTransactions.length === 0
           ? [
-            {
-              op: 'set',
-              field: 'category',
-              value: ruleTransaction.category,
-              type: 'id',
-              options: {
-                splitIndex: 0,
-              },
-            } satisfies RuleActionEntity,
-          ]
+              {
+                op: 'set',
+                field: 'category',
+                value: ruleTransaction.category,
+                type: 'id',
+                options: {
+                  splitIndex: 0,
+                },
+              } satisfies RuleActionEntity,
+            ]
           : []),
         ...childTransactions.flatMap((sub, index) => [
           {
@@ -1590,7 +1590,7 @@ class AccountInternal extends PureComponent<
       ? this.state.sort?.prevAscDesc
       : prevAscDesc;
 
-    const sortCurrentQuery = function(
+    const sortCurrentQuery = function (
       that: AccountInternal,
       sortField: string,
       sortAscDesc?: 'asc' | 'desc',
@@ -1606,7 +1606,7 @@ class AccountInternal extends PureComponent<
       });
     };
 
-    const sortRootQuery = function(
+    const sortRootQuery = function (
       that: AccountInternal,
       sortField: string,
       sortAscDesc?: 'asc' | 'desc',
@@ -1626,7 +1626,7 @@ class AccountInternal extends PureComponent<
     };
 
     // sort by previously used sort field, if any
-    const maybeSortByPreviousField = function(
+    const maybeSortByPreviousField = function (
       that: AccountInternal,
       sortPrevField: string,
       sortPrevAscDesc?: 'asc' | 'desc',
@@ -1753,8 +1753,8 @@ class AccountInternal extends PureComponent<
 
     const isNameEditable = accountId
       ? accountId !== 'onbudget' &&
-      accountId !== 'offbudget' &&
-      accountId !== 'uncategorized'
+        accountId !== 'offbudget' &&
+        accountId !== 'uncategorized'
       : false;
 
     const balanceQuery = this.getBalanceQuery(accountId);
