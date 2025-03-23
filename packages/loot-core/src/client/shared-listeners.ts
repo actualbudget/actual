@@ -11,7 +11,12 @@ import {
   type Notification,
 } from './notifications/notificationsSlice';
 import { loadPrefs } from './prefs/prefsSlice';
-import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
+import {
+  getAccounts,
+  getCategories,
+  getPayees,
+  getTags,
+} from './queries/queriesSlice';
 import { type AppStore } from './store';
 import { signOut } from './users/usersSlice';
 
@@ -68,6 +73,10 @@ export function listenForSyncEvent(store: AppStore) {
         tables.includes('category_mapping')
       ) {
         store.dispatch(getCategories());
+      }
+
+      if (tables.includes('transactions')) {
+        store.dispatch(getTags());
       }
 
       if (
@@ -141,11 +150,11 @@ export function listenForSyncEvent(store: AppStore) {
             title: t('Actual has updated the syncing format'),
             message: t(
               'This happens rarely (if ever again). The internal syncing format ' +
-                'has changed and you need to reset sync. This will upload data from ' +
-                'this device and revert all other devices. ' +
-                '[Learn more about what this means](https://actualbudget.org/docs/getting-started/sync/#what-does-resetting-sync-mean).' +
-                '\n\n' +
-                'Old encryption keys are not migrated. If using encryption, [reset encryption here](#makeKey).',
+              'has changed and you need to reset sync. This will upload data from ' +
+              'this device and revert all other devices. ' +
+              '[Learn more about what this means](https://actualbudget.org/docs/getting-started/sync/#what-does-resetting-sync-mean).' +
+              '\n\n' +
+              'Old encryption keys are not migrated. If using encryption, [reset encryption here](#makeKey).',
             ),
             messageActions: {
               makeKey: () =>
@@ -174,7 +183,7 @@ export function listenForSyncEvent(store: AppStore) {
             message:
               t(
                 'Something went wrong when registering your encryption key id. ' +
-                  'You need to recreate your key. ',
+                'You need to recreate your key. ',
               ) + learnMore,
             sticky: true,
             id: 'invalid-key-state',
@@ -198,8 +207,8 @@ export function listenForSyncEvent(store: AppStore) {
             message:
               t(
                 'You need to register it to take advantage ' +
-                  'of syncing which allows you to use it across devices and never worry ' +
-                  'about losing your data.',
+                'of syncing which allows you to use it across devices and never worry ' +
+                'about losing your data.',
               ) +
               ' ' +
               learnMore,
@@ -223,7 +232,7 @@ export function listenForSyncEvent(store: AppStore) {
             message:
               t(
                 'Something went wrong when creating this cloud file. You need ' +
-                  'to upload this file to fix it.',
+                'to upload this file to fix it.',
               ) +
               ' ' +
               learnMore,
@@ -251,8 +260,8 @@ export function listenForSyncEvent(store: AppStore) {
             message:
               t(
                 'You need to revert it to continue syncing. Any unsynced ' +
-                  'data will be lost. If you like, you can instead ' +
-                  '[upload this file](#upload) to be the latest version.',
+                'data will be lost. If you like, you can instead ' +
+                '[upload this file](#upload) to be the latest version.',
               ) +
               ' ' +
               learnMore,
@@ -274,7 +283,7 @@ export function listenForSyncEvent(store: AppStore) {
               title: t('Missing encryption key'),
               message: t(
                 'Unable to encrypt your data because you are missing the key. ' +
-                  'Create your key to sync your data.',
+                'Create your key to sync your data.',
               ),
               sticky: true,
               id: 'encrypt-failure-missing',
@@ -298,8 +307,8 @@ export function listenForSyncEvent(store: AppStore) {
             notif = {
               message: t(
                 'Unable to encrypt your data. You have the correct ' +
-                  'key so this is likely an internal failure. To fix this, ' +
-                  'reset your sync data with a new key.',
+                'key so this is likely an internal failure. To fix this, ' +
+                'reset your sync data with a new key.',
               ),
               sticky: true,
               id: 'encrypt-failure',
@@ -322,7 +331,7 @@ export function listenForSyncEvent(store: AppStore) {
             title: t('Update required'),
             message: t(
               'We couldn’t apply changes from the server. This probably means you ' +
-                'need to update the app to support the latest database.',
+              'need to update the app to support the latest database.',
             ),
             type: 'warning',
           };
