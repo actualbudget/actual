@@ -44,13 +44,11 @@ import {
 import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
-import { transactions } from 'loot-core/client/queries';
 import {
   getAccountsById,
   getPayeesById,
   getCategoriesById,
 } from 'loot-core/client/queries/queriesSlice';
-import { useQuery } from 'loot-core/client/query-hooks';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { currentDay } from 'loot-core/shared/months';
 import * as monthUtils from 'loot-core/shared/months';
@@ -937,7 +935,7 @@ const Transaction = memo(function Transaction({
   onNavigateToSchedule,
   onNotesTagClick,
   splitError,
-  litContainerRef,
+  listContainerRef,
   showSelection,
   allowSplitTransaction,
 }) {
