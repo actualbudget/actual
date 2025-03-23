@@ -795,13 +795,20 @@ function NotesCell({ value, focused, onUpdate, onClickTag, onExpose }) {
   function onSelect(optionId, value, e) {
     const [start, end] = getCurrentWordRange(value, cursorPosition);
     const option = options.find(o => o.id === optionId);
-    if (option) {
-      // we only stop propagation if we actually have an option to update
-      e?.stopPropagation();
+    if (option && e) {
       const newValue =
         value.slice(0, start) + option.name + value.slice(end + 1);
       onUpdate(newValue);
-      setInputValue(newValue + ' ');
+
+      // only stop event propagation (i.e. table navigation) when we want to do
+      // autocomplete things. If we don't choose an option, then we want to treat
+      // this as a regular input field and do table navigation.
+      e?.stopPropagation();
+
+      // setTimeout makes the input value update happen independent of the
+      // onUpdate call, which would otherwise have stripped the trailing
+      // whitespace character.
+      setTimeout(() => setInputValue(newValue + ' '), 0);
     } else {
       onUpdate(value);
     }

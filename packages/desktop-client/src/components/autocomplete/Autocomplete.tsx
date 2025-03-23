@@ -317,7 +317,7 @@ function SingleAutocomplete<T extends Item>({
           close();
         }
 
-        if (onSelect) {
+        if (onSelect && strict) {
           // I AM NOT PROUD OF THIS OK??
           // This WHOLE FILE is a mess anyway
           // OK SIT DOWN AND I WILL EXPLAIN
