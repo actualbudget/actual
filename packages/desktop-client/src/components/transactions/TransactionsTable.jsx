@@ -1413,7 +1413,7 @@ const Transaction = memo(function Transaction({
         onUpdate={value => {
           onUpdate('notes', value?.trim());
         }}
-        onExpose={name => onEdit(id, name)}
+        onExpose={name => !isPreview && onEdit(id, name)}
       />
 
       {(isPreview && !isChild) || isParent ? (
