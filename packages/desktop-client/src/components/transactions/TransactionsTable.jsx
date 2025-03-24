@@ -877,12 +877,15 @@ function NotesCell({
             if (inputValue.trim() === '' || !cursorPosition) {
               return [];
             }
-            const currentWord = getCurrentWord(inputValue, cursorPosition);
+            const currentWord = getCurrentWord(
+              inputValue,
+              cursorPosition,
+            )?.toLowerCase();
             if (!currentWord || !options) {
               return [];
             }
             return options
-              .filter(o => o.id.startsWith(currentWord))
+              .filter(o => o.id.toLowerCase().startsWith(currentWord))
               .slice(0, 10);
           }}
         />
