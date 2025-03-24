@@ -881,11 +881,23 @@ function NotesCell({
               inputValue,
               cursorPosition,
             )?.toLowerCase();
-            if (!currentWord || !options) {
+            if (!currentWord || !options || currentWord.charAt(0) !== '#') {
               return [];
             }
+            const currentWordNoHash = currentWord.slice(1);
             return options
-              .filter(o => o.id.toLowerCase().startsWith(currentWord))
+              .filter(o => o.id.toLowerCase().includes(currentWordNoHash))
+              .sort(({ id: a }, { id: b }) => {
+                const aStarts = a.toLowerCase().startsWith(currentWord);
+                const bStarts = b.toLowerCase().startsWith(currentWord);
+                if (aStarts && !bStarts) {
+                  return 1;
+                } else if (!aStarts && bStarts) {
+                  return -1;
+                }
+                const compare = a.toLowerCase().localeCompare(b.toLowerCase());
+                return compare > 0 ? 1 : compare < 0 ? -1 : 0;
+              })
               .slice(0, 10);
           }}
         />
