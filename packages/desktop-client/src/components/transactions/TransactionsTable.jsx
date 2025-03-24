@@ -809,10 +809,10 @@ function NotesCell({
       // this as a regular input field and do table navigation.
       e?.stopPropagation();
 
-      // setTimeout makes the input value update happen independent of the
+      // requestAnimationFrame makes the input value update happen independent of the
       // onUpdate call, which would otherwise have stripped the trailing
       // whitespace character.
-      setTimeout(() => setInputValue(newValue + ' '), 0);
+      requestAnimationFrame(() => setInputValue(newValue + ' '), 0);
     } else {
       onUpdate(value);
     }
@@ -828,7 +828,7 @@ function NotesCell({
 
   function onKeyDown(e) {
     if (e.key === 'Escape') {
-      // reset to initial vlaue
+      // reset to initial value
       setInputValue(value);
     }
     if (e.key === 'Tab') {
