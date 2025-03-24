@@ -650,10 +650,29 @@ export function getCommonPayees() {
   `);
 }
 
-export function getTaggedTransactionNotes() {
-  return all<Pick<DbTransaction, 'notes'>>(
-    // eslint-disable-next-line rulesdir/typography
-    `SELECT notes FROM v_transactions WHERE notes LIKE '%#%' ORDER BY date DESC`,
+export function getTransactionTags() {
+  return all<{ tag: string }>(
+    /* eslint-disable rulesdir/typography */
+    `
+WITH RECURSIVE cte(x, tag, date) AS (
+	SELECT SUBSTR(notes, INSTR(notes, '#')), -- go to start of first tag
+		   '',
+		   date
+		FROM transactions
+		WHERE notes LIKE '%#%'                 -- at least one tag guaranteed to exist for notes
+	UNION
+	SELECT SUBSTR(x, INSTR(SUBSTR(x, 2) || '#', '#') + 1), -- go to next tag
+		   SUBSTR(x, 1, MIN(INSTR(SUBSTR(x, 2) || '#', '#'), INSTR(x || ' ', ' ') - 1)), -- extract up to the first space or next tag, whichever comes first
+		   date
+		FROM cte
+		WHERE x <> ''
+	ORDER BY date DESC
+)
+SELECT DISTINCT tag
+FROM cte
+WHERE tag <> ''
+`,
+    /* eslint-enable rulesdir/typography */
   );
 }
 
