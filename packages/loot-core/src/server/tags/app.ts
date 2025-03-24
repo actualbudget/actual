@@ -15,15 +15,13 @@ async function getTags(): Promise<Array<string>> {
   for (const taggedNote of taggedNotes) {
     const note = taggedNote?.notes;
     if (!note) continue;
-    for (let i = note.indexOf('#'); i !== -1; i = note.indexOf('#', i + 1)) {
-      // TODO: make this handle other whitespace chars
-      const tagEnd = note.indexOf(' ', i);
-      const tag = note.slice(i, tagEnd === -1 ? note.length : tagEnd);
+    Array.from(note.matchAll(/(#[^\s]+)\s/g)).forEach(matchArr => {
+      const [_, tag] = matchArr;
       if (!tagSet.has(tag)) {
-        tagArr.push(tag);
         tagSet.add(tag);
+        tagArr.push(tag);
       }
-    }
+    });
   }
   return tagArr;
 }
