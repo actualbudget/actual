@@ -88,7 +88,6 @@ if (process.env.NODE_ENV === 'development') {
       target: 'http://localhost:3001',
       changeOrigin: true,
       ws: true,
-      logLevel: 'debug',
     }),
   );
 } else {
@@ -100,7 +99,7 @@ if (process.env.NODE_ENV === 'development') {
   );
 }
 
-function parseHTTPSConfig(value) {
+function parseHTTPSConfig(value: string) {
   if (value.startsWith('-----BEGIN')) {
     return value;
   }
@@ -108,10 +107,11 @@ function parseHTTPSConfig(value) {
 }
 
 export async function run() {
-  if (config.openId) {
+  const openId = config.get('openId');
+  if (openId) {
     console.log('OpenID configuration found. Preparing server to use it');
     try {
-      const { error } = await bootstrap({ openId: config.openId }, true);
+      const { error } = await bootstrap({ openId }, true);
       if (error) {
         console.log(error);
       } else {
@@ -122,21 +122,24 @@ export async function run() {
     }
   }
 
+  const portVal = config.get('port');
+  const port = typeof portVal === 'string' ? parseInt(portVal) : portVal;
+  const hostname = config.get('hostname');
+
   if (config.get('https.key') && config.get('https.cert')) {
     const https = await import('node:https');
     const httpsOptions = {
-      ...config.https,
+      ...config.get('https'),
       key: parseHTTPSConfig(config.get('https.key')),
       cert: parseHTTPSConfig(config.get('https.cert')),
     };
-    https
-      .createServer(httpsOptions, app)
-      .listen(config.get('port'), config.get('hostname'));
+    https.createServer(httpsOptions, app).listen(port, hostname);
   } else {
-    app.listen(config.get('port'), config.get('hostname'));
+    app.listen(port, hostname);
   }
 
   // Signify to any parent process that the server has started. Used in electron desktop app
+  // @ts-ignore electron stuff
   process.parentPort?.postMessage({ type: 'server-started' });
 
   console.log(
