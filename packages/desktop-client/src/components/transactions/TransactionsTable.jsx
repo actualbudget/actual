@@ -802,17 +802,12 @@ function NotesCell({
     if (option && e) {
       const newValue =
         value.slice(0, start) + option.name + value.slice(end + 1);
-      onUpdate(newValue);
+      setInputValue(newValue + ' ');
 
       // only stop event propagation (i.e. table navigation) when we want to do
       // autocomplete things. If we don't choose an option, then we want to treat
       // this as a regular input field and do table navigation.
       e?.stopPropagation();
-
-      // requestAnimationFrame makes the input value update happen independent of the
-      // onUpdate call, which would otherwise have stripped the trailing
-      // whitespace character.
-      requestAnimationFrame(() => setInputValue(newValue + ' '), 0);
     } else {
       onUpdate(value);
     }
