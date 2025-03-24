@@ -894,7 +894,10 @@ export function EditRuleModal({
           } else {
             a[field] = value;
             if (a.options?.template !== undefined) {
-              a.options.template = value;
+              a.options = {
+                ...a.options,
+                template: value,
+              };
             }
 
             if (field === 'field') {
