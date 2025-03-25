@@ -248,7 +248,6 @@ const configSchema = convict({
     default: false,
     env: 'ACTUAL_OPENID_ENFORCE',
   },
-
 });
 
 let configPath = null;
