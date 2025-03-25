@@ -1,6 +1,8 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { t } from 'i18next';
 
+import { isElectron } from 'loot-core/shared/environment';
+
 import { send } from '../../platform/client/fetch';
 import { type RemoteFile } from '../../server/cloud-storage';
 import { getDownloadError, getSyncError } from '../../shared/errors';
@@ -12,7 +14,6 @@ import { closeModal, pushModal } from '../modals/modalsSlice';
 import { loadGlobalPrefs, loadPrefs } from '../prefs/prefsSlice';
 import { createAppAsyncThunk } from '../redux';
 import { signOut } from '../users/usersSlice';
-import { isElectron } from 'loot-core/shared/environment';
 
 const sliceName = 'budgets';
 

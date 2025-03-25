@@ -34,7 +34,6 @@ export function ConfigServer() {
   const [url, setUrl] = useState('');
   const currentUrl = useServerURL();
   const setServerUrl = useSetServerURL();
-  const multiuserEnabled = useMultiuserEnabled();
 
   useEffect(() => {
     setUrl(currentUrl);
@@ -86,7 +85,7 @@ export function ConfigServer() {
       setError(error);
     } else {
       setLoading(false);
-      await dispatch(signOut({openidEnabled: true}));
+      await dispatch(signOut({ openidEnabled: true }));
       navigate('/');
     }
   }

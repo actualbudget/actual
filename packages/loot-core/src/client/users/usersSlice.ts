@@ -6,7 +6,6 @@ import { resetApp } from '../app/appSlice';
 import { closeBudget, loadAllFiles } from '../budgets/budgetsSlice';
 import { loadGlobalPrefs } from '../prefs/prefsSlice';
 import { createAppAsyncThunk } from '../redux';
-import { isElectron } from 'loot-core/shared/environment';
 
 const sliceName = 'user';
 

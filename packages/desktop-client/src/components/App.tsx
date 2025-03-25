@@ -147,7 +147,7 @@ function AppInner() {
             button: {
               title: t('Go to log in'),
               action: () => {
-                dispatch(signOut({openidEnabled: multiuserEnabled}));
+                dispatch(signOut({ openidEnabled: multiuserEnabled }));
               },
             },
           },

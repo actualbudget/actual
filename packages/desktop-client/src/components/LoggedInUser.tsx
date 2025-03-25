@@ -121,7 +121,7 @@ export function LoggedInUser({
         navigate('/');
         break;
       case 'sign-out':
-        dispatch(signOut({openidEnabled: multiuserEnabled}));
+        dispatch(signOut({ openidEnabled: multiuserEnabled }));
         break;
       case 'config-server':
         await onCloseBudget();
