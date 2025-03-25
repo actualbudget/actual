@@ -11,8 +11,16 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
 
 import { Button } from '@actual-app/components/button';
+import { SvgSplit } from '@actual-app/components/icons/v0';
+import {
+  SvgAdd,
+  SvgPiggyBank,
+  SvgTrash,
+} from '@actual-app/components/icons/v1';
+import { SvgPencilWriteAlternate } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import {
@@ -21,9 +29,9 @@ import {
   parseISO,
   isValid as isValidDate,
 } from 'date-fns';
-import { UAParser } from 'ua-parser-js';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import * as Platform from 'loot-core/client/platform';
 import { setLastTransaction } from 'loot-core/client/queries/queriesSlice';
 import { runQuery } from 'loot-core/client/query-helpers';
 import { send } from 'loot-core/platform/client/fetch';
@@ -58,11 +66,7 @@ import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
 } from '../../../hooks/useSingleActiveEditForm';
-import { SvgSplit } from '../../../icons/v0';
-import { SvgAdd, SvgPiggyBank, SvgTrash } from '../../../icons/v1';
-import { SvgPencilWriteAlternate } from '../../../icons/v2';
 import { useSelector, useDispatch } from '../../../redux';
-import { theme } from '../../../style';
 import { MobilePageHeader, Page } from '../../Page';
 import { AmountInput } from '../../util/AmountInput';
 import { MobileBackButton } from '../MobileBackButton';
@@ -70,9 +74,6 @@ import { FieldLabel, TapField, InputField, ToggleField } from '../MobileForms';
 import { getPrettyPayee } from '../utils';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
-
-const agent = UAParser(navigator.userAgent);
-const isIOSAgent = agent.browser.name === 'Mobile Safari';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;
@@ -172,11 +173,11 @@ function Footer({
   onEditField,
 }) {
   const [transaction, ...childTransactions] = transactions;
+  const emptySplitTransaction = childTransactions.find(t => t.amount === 0);
   const onClickRemainingSplit = () => {
     if (childTransactions.length === 0) {
       onSplit(transaction.id);
     } else {
-      const emptySplitTransaction = childTransactions.find(t => t.amount === 0);
       if (!emptySplitTransaction) {
         onAddSplit(transaction.id);
       } else {
@@ -212,11 +213,29 @@ function Footer({
               marginLeft: 6,
             }}
           >
-            Amount left:{' '}
-            {integerToCurrency(
-              transaction.amount > 0
-                ? transaction.error.difference
-                : -transaction.error.difference,
+            {!emptySplitTransaction ? (
+              <Trans>
+                Add new split -{' '}
+                {{
+                  amount: integerToCurrency(
+                    transaction.amount > 0
+                      ? transaction.error.difference
+                      : -transaction.error.difference,
+                  ),
+                }}{' '}
+                left
+              </Trans>
+            ) : (
+              <Trans>
+                Amount left:{' '}
+                {{
+                  amount: integerToCurrency(
+                    transaction.amount > 0
+                      ? transaction.error.difference
+                      : -transaction.error.difference,
+                  ),
+                }}
+              </Trans>
             )}
           </Text>
         </Button>
@@ -268,7 +287,7 @@ function Footer({
               marginLeft: 6,
             }}
           >
-            Save changes
+            <Trans>Save changes</Trans>
           </Text>
         </Button>
       )}
@@ -469,7 +488,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const [totalAmountFocused, setTotalAmountFocused] = useState(
     // iOS does not support automatically opening up the keyboard for the
     // total amount field. Hence we should not focus on it on page render.
-    !isIOSAgent,
+    !Platform.isIOSAgent,
   );
   const childTransactionElementRefMap = useRef({});
   const hasAccountChanged = useRef(false);
@@ -487,7 +506,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const isInitialMount = useInitialMount();
 
   useEffect(() => {
-    if (isInitialMount && isAdding && !isIOSAgent) {
+    if (isInitialMount && isAdding && !Platform.isIOSAgent) {
       onTotalAmountEdit();
     }
   }, [isAdding, isInitialMount, onTotalAmountEdit]);

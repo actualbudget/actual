@@ -5,7 +5,6 @@ import * as fs from '../../platform/server/fs';
 import { DEFAULT_DASHBOARD_STATE } from '../../shared/dashboard';
 import { q } from '../../shared/query';
 import {
-  type CustomReportEntity,
   type ExportImportDashboard,
   type ExportImportDashboardWidget,
   type ExportImportCustomReportWidget,
@@ -21,8 +20,6 @@ import { mutator } from '../mutators';
 import { reportModel } from '../reports/app';
 import { batchMessages } from '../sync';
 import { undoable } from '../undo';
-
-import { DashboardHandlers } from './types/handlers';
 
 function isExportedCustomReportWidget(
   widget: ExportImportDashboardWidget,
@@ -178,7 +175,7 @@ async function importDashboard({ filepath }: { filepath: string }) {
 
     exportModel.validate(parsedContent);
 
-    const customReportIds: CustomReportEntity[] = await db.all(
+    const customReportIds = await db.all<Pick<db.DbCustomReport, 'id'>>(
       'SELECT id from custom_reports',
     );
     const customReportIdSet = new Set(customReportIds.map(({ id }) => id));
@@ -245,6 +242,15 @@ async function importDashboard({ filepath }: { filepath: string }) {
     return { error: 'internal-error' as const };
   }
 }
+
+export type DashboardHandlers = {
+  'dashboard-update': typeof updateDashboard;
+  'dashboard-update-widget': typeof updateDashboardWidget;
+  'dashboard-reset': typeof resetDashboard;
+  'dashboard-add-widget': typeof addDashboardWidget;
+  'dashboard-remove-widget': typeof removeDashboardWidget;
+  'dashboard-import': typeof importDashboard;
+};
 
 export const app = createApp<DashboardHandlers>();
 

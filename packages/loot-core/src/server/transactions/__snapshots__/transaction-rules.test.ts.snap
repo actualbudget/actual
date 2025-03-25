@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Learning categories updates rules correctly even if multiple rules exist 1`] = `
-Array [
+[
   Rule {
-    "actions": Array [
+    "actions": [
       Action {
         "field": "category",
         "handlebarsTemplate": undefined,
@@ -14,7 +14,7 @@ Array [
         "value": "food",
       },
     ],
-    "conditions": Array [
+    "conditions": [
       Condition {
         "field": "payee",
         "op": "is",
@@ -30,7 +30,7 @@ Array [
     "stage": null,
   },
   Rule {
-    "actions": Array [
+    "actions": [
       Action {
         "field": "category",
         "handlebarsTemplate": undefined,
@@ -41,7 +41,7 @@ Array [
         "value": "food",
       },
     ],
-    "conditions": Array [
+    "conditions": [
       Condition {
         "field": "payee",
         "op": "is",
@@ -57,7 +57,7 @@ Array [
     "stage": null,
   },
   Rule {
-    "actions": Array [
+    "actions": [
       Action {
         "field": "category",
         "handlebarsTemplate": undefined,
@@ -68,7 +68,7 @@ Array [
         "value": "beer",
       },
     ],
-    "conditions": Array [
+    "conditions": [
       Condition {
         "field": "payee",
         "op": "is",
@@ -87,9 +87,9 @@ Array [
 `;
 
 exports[`Learning categories updates rules correctly even if multiple rules exist 2`] = `
-Array [
+[
   Rule {
-    "actions": Array [
+    "actions": [
       Action {
         "field": "category",
         "handlebarsTemplate": undefined,
@@ -100,7 +100,7 @@ Array [
         "value": "beer",
       },
     ],
-    "conditions": Array [
+    "conditions": [
       Condition {
         "field": "payee",
         "op": "is",
@@ -116,7 +116,7 @@ Array [
     "stage": null,
   },
   Rule {
-    "actions": Array [
+    "actions": [
       Action {
         "field": "category",
         "handlebarsTemplate": undefined,
@@ -127,7 +127,7 @@ Array [
         "value": "beer",
       },
     ],
-    "conditions": Array [
+    "conditions": [
       Condition {
         "field": "payee",
         "op": "is",
@@ -143,7 +143,7 @@ Array [
     "stage": null,
   },
   Rule {
-    "actions": Array [
+    "actions": [
       Action {
         "field": "category",
         "handlebarsTemplate": undefined,
@@ -154,7 +154,7 @@ Array [
         "value": "beer",
       },
     ],
-    "conditions": Array [
+    "conditions": [
       Condition {
         "field": "payee",
         "op": "is",

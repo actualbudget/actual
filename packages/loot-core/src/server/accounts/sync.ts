@@ -557,7 +557,7 @@ export async function reconcileTransactions(
       }
 
       if (existing.is_parent && existing.cleared !== updates.cleared) {
-        const children = await db.all(
+        const children = await db.all<Pick<db.DbViewTransaction, 'id'>>(
           'SELECT id FROM v_transactions WHERE parent_id = ?',
           [existing.id],
         );
@@ -618,6 +618,12 @@ export async function matchTransactions(
 ) {
   console.log('Performing transaction reconciliation matching');
 
+  const reimportDeleted = await runQuery(
+    q('preferences')
+      .filter({ id: `sync-reimport-deleted-${acctId}` })
+      .select('value'),
+  ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+
   const hasMatched = new Set();
 
   const transactionNormalization = isBankSyncAccount
@@ -649,8 +655,11 @@ export async function matchTransactions(
     // is the highest fidelity match and should always be attempted
     // first.
     if (trans.imported_id) {
-      match = await db.first<db.DbViewTransaction>(
-        'SELECT * FROM v_transactions WHERE imported_id = ? AND account = ?',
+      const table = reimportDeleted
+        ? 'v_transactions'
+        : 'v_transactions_internal';
+      match = await db.first<db.DbTransaction>(
+        `SELECT * FROM ${table} WHERE imported_id = ? AND account = ?`,
         [trans.imported_id, acctId],
       );
 
@@ -670,7 +679,22 @@ export async function matchTransactions(
       // strictIdChecking has the added behaviour of only matching on transactions with no import ID
       // if the transaction being imported has an import ID.
       if (strictIdChecking) {
-        fuzzyDataset = await db.all(
+        fuzzyDataset = await db.all<
+          Pick<
+            db.DbViewTransaction,
+            | 'id'
+            | 'is_parent'
+            | 'date'
+            | 'imported_id'
+            | 'payee'
+            | 'imported_payee'
+            | 'category'
+            | 'notes'
+            | 'reconciled'
+            | 'cleared'
+            | 'amount'
+          >
+        >(
           `SELECT id, is_parent, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
           FROM v_transactions
           WHERE
@@ -687,7 +711,22 @@ export async function matchTransactions(
           ],
         );
       } else {
-        fuzzyDataset = await db.all(
+        fuzzyDataset = await db.all<
+          Pick<
+            db.DbViewTransaction,
+            | 'id'
+            | 'is_parent'
+            | 'date'
+            | 'imported_id'
+            | 'payee'
+            | 'imported_payee'
+            | 'category'
+            | 'notes'
+            | 'reconciled'
+            | 'cleared'
+            | 'amount'
+          >
+        >(
           `SELECT id, is_parent, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
           FROM v_transactions
           WHERE date >= ? AND date <= ? AND amount = ? AND account = ?`,

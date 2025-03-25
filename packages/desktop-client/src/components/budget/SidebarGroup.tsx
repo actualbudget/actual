@@ -4,9 +4,12 @@ import { type ConnectDragSource } from 'react-dnd';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgExpandArrow } from '@actual-app/components/icons/v0';
+import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -16,9 +19,6 @@ import {
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { SvgExpandArrow } from '../../icons/v0';
-import { SvgCheveronDown } from '../../icons/v1';
-import { theme } from '../../style';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 

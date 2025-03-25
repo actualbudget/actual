@@ -14,15 +14,16 @@ import { bindActionCreators } from '@reduxjs/toolkit';
 import { createRoot } from 'react-dom/client';
 
 import * as accountsSlice from 'loot-core/client/accounts/accountsSlice';
-import * as actions from 'loot-core/client/actions';
 import * as appSlice from 'loot-core/client/app/appSlice';
 import * as budgetsSlice from 'loot-core/client/budgets/budgetsSlice';
 import * as modalsSlice from 'loot-core/client/modals/modalsSlice';
 import * as notificationsSlice from 'loot-core/client/notifications/notificationsSlice';
+import * as prefsSlice from 'loot-core/client/prefs/prefsSlice';
 import * as queriesSlice from 'loot-core/client/queries/queriesSlice';
 import { runQuery } from 'loot-core/client/query-helpers';
 import { store } from 'loot-core/client/store';
 import { redo, undo } from 'loot-core/client/undo';
+import * as usersSlice from 'loot-core/client/users/usersSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 
@@ -36,13 +37,14 @@ import 'focus-visible';
 
 const boundActions = bindActionCreators(
   {
-    ...actions,
     ...accountsSlice.actions,
     ...appSlice.actions,
     ...budgetsSlice.actions,
     ...modalsSlice.actions,
     ...notificationsSlice.actions,
+    ...prefsSlice.actions,
     ...queriesSlice.actions,
+    ...usersSlice.actions,
   },
   store.dispatch,
 );

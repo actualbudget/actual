@@ -4,6 +4,7 @@ import { useLocation, useParams } from 'react-router-dom';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -15,14 +16,14 @@ import { calculateHasWarning } from 'loot-core/client/reports';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
-import { type CategoryEntity } from 'loot-core/types/models/category';
 import {
+  type CategoryEntity,
   type balanceTypeOpType,
-  type sortByOpType,
   type CustomReportEntity,
   type DataEntity,
-} from 'loot-core/types/models/reports';
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+  type sortByOpType,
+  type RuleConditionEntity,
+} from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { useAccounts } from '../../../hooks/useAccounts';
@@ -38,7 +39,6 @@ import { AppliedFilters } from '../../filters/AppliedFilters';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
-import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { ChooseGraph } from '../ChooseGraph';
 import {
   defaultsGraphList,
@@ -273,6 +273,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       report.conditions?.forEach((condition: RuleConditionEntity) =>
         onApplyFilter(condition),
       );
+      onConditionsOpChange(report.conditionsOp);
       const trans = await send('get-earliest-transaction');
       setEarliestTransaction(trans ? trans.date : monthUtils.currentDay());
       const fromDate =
@@ -346,7 +347,9 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     firstDayOfWeekIdx,
     isDateStatic,
     onApplyFilter,
+    onConditionsOpChange,
     report.conditions,
+    report.conditionsOp,
     includeCurrentInterval,
     locale,
   ]);

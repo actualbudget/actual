@@ -144,7 +144,7 @@ export class MobileNavigation {
   }
 
   async goToUncategorizedPage() {
-    const button = this.page.getByRole('button', { name: /uncategorized/ });
+    const button = this.page.getByRole('button', { name: 'Categorize' });
     await button.click();
 
     return new MobileAccountPage(this.page);

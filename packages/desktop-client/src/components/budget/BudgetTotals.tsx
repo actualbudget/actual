@@ -2,13 +2,12 @@ import React, { type ComponentProps, memo, useRef, useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { SvgDotsHorizontalTriple } from '../../icons/v1';
-import { theme } from '../../style';
 
 import { RenderMonths } from './RenderMonths';
 import { getScrollbarWidth } from './util';

@@ -12,6 +12,7 @@ import React, {
   type MutableRefObject,
 } from 'react';
 
+import { Input } from '@actual-app/components/input';
 import { Popover } from '@actual-app/components/popover';
 import { styles, type CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -32,7 +33,6 @@ import {
 
 import { useLocale } from '../../hooks/useLocale';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { Input } from '../common/Input';
 
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';

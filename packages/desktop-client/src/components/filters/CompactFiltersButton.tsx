@@ -1,8 +1,7 @@
 import React from 'react';
 
 import { Button } from '@actual-app/components/button';
-
-import { SvgFilter } from '../../icons/v1';
+import { SvgFilter } from '@actual-app/components/icons/v1';
 
 export function CompactFiltersButton({ onPress }: { onPress: () => void }) {
   return (

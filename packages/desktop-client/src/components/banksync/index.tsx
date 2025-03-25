@@ -1,6 +1,7 @@
 import { useMemo, useState, useCallback } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
@@ -15,7 +16,6 @@ import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useDispatch } from '../../redux';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
-import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { AccountsHeader } from './AccountsHeader';
 import { AccountsList } from './AccountsList';

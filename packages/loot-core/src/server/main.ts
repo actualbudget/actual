@@ -12,7 +12,6 @@ import * as connection from '../platform/server/connection';
 import * as fs from '../platform/server/fs';
 import { logger } from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
-import * as monthUtils from '../shared/months';
 import { q } from '../shared/query';
 import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
@@ -36,7 +35,6 @@ import { app as dashboardApp } from './dashboard/app';
 import * as db from './db';
 import * as mappings from './db/mappings';
 import * as encryption from './encryption';
-import { APIError } from './errors';
 import { app as filtersApp } from './filters/app';
 import { handleBudgetImport } from './importers';
 import { app } from './main-app';
@@ -52,7 +50,7 @@ import { app as rulesApp } from './rules/app';
 import { app as schedulesApp } from './schedules/app';
 import { getServer, isValidBaseURL, setServer } from './server-config';
 import * as sheet from './sheet';
-import { resolveName, unresolveName } from './spreadsheet/util';
+import { app as spreadsheetApp } from './spreadsheet/app';
 import {
   initialFullSync,
   fullSync,
@@ -60,14 +58,13 @@ import {
   makeTestMessage,
   clearFullSyncTimeout,
   resetSync,
-  repairSync,
-  batchMessages,
 } from './sync';
+import { app as syncApp } from './sync/app';
 import * as syncMigrations from './sync/migrate';
 import { app as toolsApp } from './tools/app';
 import { app as transactionsApp } from './transactions/app';
 import * as rules from './transactions/transaction-rules';
-import { clearUndo, undo, redo, withUndo } from './undo';
+import { clearUndo, undo, redo } from './undo';
 import { updateVersion } from './update';
 import {
   uniqueBudgetName,
@@ -102,325 +99,11 @@ handlers['redo'] = mutator(function () {
   return redo();
 });
 
-handlers['get-categories'] = async function () {
-  return {
-    grouped: await db.getCategoriesGrouped(),
-    list: await db.getCategories(),
-  };
-};
-
-handlers['get-budget-bounds'] = async function () {
-  return budget.createAllBudgets();
-};
-
-handlers['envelope-budget-month'] = async function ({ month }) {
-  const groups = await db.getCategoriesGrouped();
-  const sheetName = monthUtils.sheetForMonth(month);
-
-  function value(name) {
-    const v = sheet.getCellValue(sheetName, name);
-    return { value: v === '' ? 0 : v, name: resolveName(sheetName, name) };
-  }
-
-  let values = [
-    value('available-funds'),
-    value('last-month-overspent'),
-    value('buffered'),
-    value('total-budgeted'),
-    value('to-budget'),
-
-    value('from-last-month'),
-    value('total-income'),
-    value('total-spent'),
-    value('total-leftover'),
-  ];
-
-  for (const group of groups) {
-    if (group.is_income) {
-      values.push(value('total-income'));
-
-      for (const cat of group.categories) {
-        values.push(value(`sum-amount-${cat.id}`));
-      }
-    } else {
-      values = values.concat([
-        value(`group-budget-${group.id}`),
-        value(`group-sum-amount-${group.id}`),
-        value(`group-leftover-${group.id}`),
-      ]);
-
-      for (const cat of group.categories) {
-        values = values.concat([
-          value(`budget-${cat.id}`),
-          value(`sum-amount-${cat.id}`),
-          value(`leftover-${cat.id}`),
-          value(`carryover-${cat.id}`),
-          value(`goal-${cat.id}`),
-          value(`long-goal-${cat.id}`),
-        ]);
-      }
-    }
-  }
-
-  return values;
-};
-
-handlers['tracking-budget-month'] = async function ({ month }) {
-  const groups = await db.getCategoriesGrouped();
-  const sheetName = monthUtils.sheetForMonth(month);
-
-  function value(name) {
-    const v = sheet.getCellValue(sheetName, name);
-    return { value: v === '' ? 0 : v, name: resolveName(sheetName, name) };
-  }
-
-  let values = [
-    value('total-budgeted'),
-    value('total-budget-income'),
-    value('total-saved'),
-    value('total-income'),
-    value('total-spent'),
-    value('real-saved'),
-    value('total-leftover'),
-  ];
-
-  for (const group of groups) {
-    values = values.concat([
-      value(`group-budget-${group.id}`),
-      value(`group-sum-amount-${group.id}`),
-      value(`group-leftover-${group.id}`),
-    ]);
-
-    for (const cat of group.categories) {
-      values = values.concat([
-        value(`budget-${cat.id}`),
-        value(`sum-amount-${cat.id}`),
-        value(`leftover-${cat.id}`),
-        value(`goal-${cat.id}`),
-        value(`long-goal-${cat.id}`),
-      ]);
-
-      if (!group.is_income) {
-        values.push(value(`carryover-${cat.id}`));
-      }
-    }
-  }
-
-  return values;
-};
-
-handlers['category-create'] = mutator(async function ({
-  name,
-  groupId,
-  isIncome,
-  hidden,
-}) {
-  return withUndo(async () => {
-    if (!groupId) {
-      throw APIError('Creating a category: groupId is required');
-    }
-
-    return db.insertCategory({
-      name: name.trim(),
-      cat_group: groupId,
-      is_income: isIncome ? 1 : 0,
-      hidden: hidden ? 1 : 0,
-    });
-  });
-});
-
-handlers['category-update'] = mutator(async function (category) {
-  return withUndo(async () => {
-    try {
-      await db.updateCategory({
-        ...category,
-        name: category.name.trim(),
-      });
-    } catch (e) {
-      if (e.message.toLowerCase().includes('unique constraint')) {
-        return { error: { type: 'category-exists' } };
-      }
-      throw e;
-    }
-    return {};
-  });
-});
-
-handlers['category-move'] = mutator(async function ({ id, groupId, targetId }) {
-  return withUndo(async () => {
-    await batchMessages(async () => {
-      await db.moveCategory(id, groupId, targetId);
-    });
-    return 'ok';
-  });
-});
-
-handlers['category-delete'] = mutator(async function ({ id, transferId }) {
-  return withUndo(async () => {
-    let result = {};
-    await batchMessages(async () => {
-      const row = await db.first<Pick<db.DbCategory, 'is_income'>>(
-        'SELECT is_income FROM categories WHERE id = ?',
-        [id],
-      );
-      if (!row) {
-        result = { error: 'no-categories' };
-        return;
-      }
-
-      const transfer =
-        transferId &&
-        (await db.first<Pick<db.DbCategory, 'is_income'>>(
-          'SELECT is_income FROM categories WHERE id = ?',
-          [transferId],
-        ));
-
-      if (!row || (transferId && !transfer)) {
-        result = { error: 'no-categories' };
-        return;
-      } else if (transferId && row.is_income !== transfer.is_income) {
-        result = { error: 'category-type' };
-        return;
-      }
-
-      // Update spreadsheet values if it's an expense category
-      // TODO: We should do this for income too if it's a reflect budget
-      if (row.is_income === 0) {
-        if (transferId) {
-          await budget.doTransfer([id], transferId);
-        }
-      }
-
-      await db.deleteCategory({ id }, transferId);
-    });
-
-    return result;
-  });
-});
-
-handlers['get-category-groups'] = async function () {
-  return await db.getCategoriesGrouped();
-};
-
-handlers['category-group-create'] = mutator(async function ({
-  name,
-  isIncome,
-  hidden,
-}) {
-  return withUndo(async () => {
-    return db.insertCategoryGroup({
-      name,
-      is_income: isIncome ? 1 : 0,
-      hidden,
-    });
-  });
-});
-
-handlers['category-group-update'] = mutator(async function (group) {
-  return withUndo(async () => {
-    return db.updateCategoryGroup(group);
-  });
-});
-
-handlers['category-group-move'] = mutator(async function ({ id, targetId }) {
-  return withUndo(async () => {
-    await batchMessages(async () => {
-      await db.moveCategoryGroup(id, targetId);
-    });
-    return 'ok';
-  });
-});
-
-handlers['category-group-delete'] = mutator(async function ({
-  id,
-  transferId,
-}) {
-  return withUndo(async () => {
-    const groupCategories = await db.all(
-      'SELECT id FROM categories WHERE cat_group = ? AND tombstone = 0',
-      [id],
-    );
-
-    return batchMessages(async () => {
-      if (transferId) {
-        await budget.doTransfer(
-          groupCategories.map(c => c.id),
-          transferId,
-        );
-      }
-      await db.deleteCategoryGroup({ id }, transferId);
-    });
-  });
-});
-
-handlers['must-category-transfer'] = async function ({ id }) {
-  const res = await db.runQuery<{ count: number }>(
-    `SELECT count(t.id) as count FROM transactions t
-       LEFT JOIN category_mapping cm ON cm.id = t.category
-       WHERE cm.transferId = ? AND t.tombstone = 0`,
-    [id],
-    true,
-  );
-
-  // If there are transactions with this category, return early since
-  // we already know it needs to be tranferred
-  if (res[0].count !== 0) {
-    return true;
-  }
-
-  // If there are any non-zero budget values, also force the user to
-  // transfer the category.
-  return [...sheet.get().meta().createdMonths].some(month => {
-    const sheetName = monthUtils.sheetForMonth(month);
-    const value = sheet.get().getCellValue(sheetName, 'budget-' + id);
-
-    return value != null && value !== 0;
-  });
-};
-
 handlers['make-filters-from-conditions'] = async function ({
   conditions,
   applySpecialCases,
 }) {
   return rules.conditionsToAQL(conditions, { applySpecialCases });
-};
-
-handlers['getCell'] = async function ({ sheetName, name }) {
-  const node = sheet.get()._getNode(resolveName(sheetName, name));
-  return { name: node.name, value: node.value };
-};
-
-handlers['getCells'] = async function ({ names }) {
-  return names.map(name => {
-    const node = sheet.get()._getNode(name);
-    return { name: node.name, value: node.value };
-  });
-};
-
-handlers['getCellNamesInSheet'] = async function ({ sheetName }) {
-  const names = [];
-  for (const name of sheet.get().getNodes().keys()) {
-    const { sheet: nodeSheet, name: nodeName } = unresolveName(name);
-    if (nodeSheet === sheetName) {
-      names.push(nodeName);
-    }
-  }
-  return names;
-};
-
-handlers['debugCell'] = async function ({ sheetName, name }) {
-  const node = sheet.get().getNode(resolveName(sheetName, name));
-  return {
-    ...node,
-    _run: node._run && node._run.toString(),
-  };
-};
-
-handlers['create-query'] = async function ({ sheetName, name, query }) {
-  // Always run it regardless of cache. We don't know anything has changed
-  // between the cache value being saved and now
-  sheet.get().createQuery(sheetName, name, query);
-  return 'ok';
 };
 
 handlers['query'] = async function (query) {
@@ -429,14 +112,6 @@ handlers['query'] = async function (query) {
   }
 
   return aqlQuery(query);
-};
-
-handlers['sync-reset'] = async function () {
-  return await resetSync();
-};
-
-handlers['sync-repair'] = async function () {
-  await repairSync();
 };
 
 // A user can only enable/change their key with the file loaded. This
@@ -760,10 +435,6 @@ handlers['set-server-url'] = async function ({ url, validate = true }) {
   await asyncStorage.setItem('did-bootstrap', true);
   setServer(url);
   return {};
-};
-
-handlers['sync'] = async function () {
-  return fullSync();
 };
 
 handlers['validate-budget-name'] = async function ({ name }) {
@@ -1422,6 +1093,8 @@ app.combine(
   transactionsApp,
   accountsApp,
   payeesApp,
+  spreadsheetApp,
+  syncApp,
 );
 
 export function getDefaultDocumentDir() {

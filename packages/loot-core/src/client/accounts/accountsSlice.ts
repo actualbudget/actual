@@ -9,6 +9,7 @@ import {
   type SyncServerSimpleFinAccount,
   type SyncServerPluggyAiAccount,
 } from '../../types/models';
+import { resetApp } from '../app/appSlice';
 import { addNotification } from '../notifications/notificationsSlice';
 import {
   getAccounts,
@@ -68,6 +69,9 @@ const accountsSlice = createSlice({
     ) {
       delete state.failedAccounts[action.payload.id];
     },
+  },
+  extraReducers: builder => {
+    builder.addCase(resetApp, () => initialState);
   },
 });
 
@@ -249,7 +253,11 @@ export const syncAccounts = createAppAsyncThunk(
     const { setAccountsSyncing } = accountsSlice.actions;
     dispatch(setAccountsSyncing({ ids: accountIdsToSync }));
 
-    const accountsData: AccountEntity[] = await send('accounts-get');
+    // TODO: Force cast to AccountEntity.
+    // Server is currently returning the DB model it should return the entity model instead.
+    const accountsData = (await send(
+      'accounts-get',
+    )) as unknown as AccountEntity[];
     const simpleFinAccounts = accountsData.filter(
       a => a.account_sync_source === 'simpleFin',
     );

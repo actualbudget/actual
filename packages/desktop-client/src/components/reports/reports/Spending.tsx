@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
@@ -20,8 +21,10 @@ import { addNotification } from 'loot-core/client/notifications/notificationsSli
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
-import { type SpendingWidget } from 'loot-core/types/models';
-import { type RuleConditionEntity } from 'loot-core/types/models/rule';
+import {
+  type SpendingWidget,
+  type RuleConditionEntity,
+} from 'loot-core/types/models';
 
 import { useFilters } from '../../../hooks/useFilters';
 import { useLocale } from '../../../hooks/useLocale';
@@ -33,7 +36,6 @@ import { FilterButton } from '../../filters/FiltersMenu';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
-import { useResponsive } from '../../responsive/ResponsiveProvider';
 import { SpendingGraph } from '../graphs/SpendingGraph';
 import { LegendItem } from '../LegendItem';
 import { LoadingIndicator } from '../LoadingIndicator';

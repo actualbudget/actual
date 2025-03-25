@@ -1,5 +1,7 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
+import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
 
 import { useReports } from 'loot-core/client/data-hooks/reports';
@@ -15,7 +17,6 @@ import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { FilterAutocomplete } from '../autocomplete/FilterAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { ReportAutocomplete } from '../autocomplete/ReportAutocomplete';
-import { Input } from '../common/Input';
 import { Checkbox } from '../forms';
 import { DateSelect } from '../select/DateSelect';
 import { RecurringSchedulePicker } from '../select/RecurringSchedulePicker';
@@ -35,6 +36,7 @@ export function GenericInput({
   onChange,
   op = undefined,
 }) {
+  const { t } = useTranslation();
   const { grouped: categoryGroups } = useCategories();
   const { data: savedReports } = useReports();
   const saved = useSelector(state => state.queries.saved);
@@ -63,7 +65,7 @@ export function GenericInput({
           <Input
             inputRef={inputRef}
             defaultValue={value || ''}
-            placeholder="nothing"
+            placeholder={t('nothing')}
             onEnter={e => onChange(e.target.value)}
             onBlur={e => onChange(e.target.value)}
           />
@@ -95,7 +97,7 @@ export function GenericInput({
               onSelect={onChange}
               inputProps={{
                 inputRef,
-                ...(showPlaceholder ? { placeholder: 'nothing' } : null),
+                ...(showPlaceholder ? { placeholder: t('nothing') } : null),
               }}
             />
           );
@@ -116,7 +118,7 @@ export function GenericInput({
                   onSelect={onChange}
                   inputProps={{
                     inputRef,
-                    ...(showPlaceholder ? { placeholder: 'nothing' } : null),
+                    ...(showPlaceholder ? { placeholder: t('nothing') } : null),
                   }}
                 />
               );
@@ -135,7 +137,7 @@ export function GenericInput({
               showHiddenCategories={false}
               inputProps={{
                 inputRef,
-                ...(showPlaceholder ? { placeholder: 'nothing' } : null),
+                ...(showPlaceholder ? { placeholder: t('nothing') } : null),
               }}
             />
           );
@@ -157,7 +159,7 @@ export function GenericInput({
               onSelect={onChange}
               inputProps={{
                 inputRef,
-                ...(showPlaceholder ? { placeholder: 'nothing' } : null),
+                ...(showPlaceholder ? { placeholder: t('nothing') } : null),
               }}
             />
           );
@@ -172,7 +174,7 @@ export function GenericInput({
               onSelect={onChange}
               inputProps={{
                 inputRef,
-                ...(showPlaceholder ? { placeholder: 'nothing' } : null),
+                ...(showPlaceholder ? { placeholder: t('nothing') } : null),
               }}
             />
           );
@@ -261,7 +263,7 @@ export function GenericInput({
           <Input
             inputRef={inputRef}
             defaultValue={value || ''}
-            placeholder="nothing"
+            placeholder={t('nothing')}
             onEnter={e => onChange(e.target.value)}
             onBlur={e => onChange(e.target.value)}
           />

@@ -1,18 +1,19 @@
 import React, { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
-import { loggedIn } from 'loot-core/client/actions';
 import { setAppState } from 'loot-core/client/app/appSlice';
+import { loggedIn } from 'loot-core/client/users/usersSlice';
 
 import { ProtectedRoute } from '../../auth/ProtectedRoute';
 import { Permissions } from '../../auth/types';
 import { useMetaThemeColor } from '../../hooks/useMetaThemeColor';
 import { useSelector, useDispatch } from '../../redux';
-import { theme } from '../../style';
-import { tokens } from '../../tokens';
 import {
   BackToFileListButton,
   UserDirectoryPage,
@@ -20,10 +21,9 @@ import {
 import { AppBackground } from '../AppBackground';
 import { LoggedInUser } from '../LoggedInUser';
 import { Notifications } from '../Notifications';
-import { useResponsive } from '../responsive/ResponsiveProvider';
 import { useMultiuserEnabled, useServerVersion } from '../ServerContext';
 
-import { BudgetList } from './BudgetList';
+import { BudgetFileSelection } from './BudgetFileSelection';
 import { ConfigServer } from './ConfigServer';
 import { ServerURL } from './ServerURL';
 import { Bootstrap } from './subscribe/Bootstrap';
@@ -134,7 +134,7 @@ export function ManagementApp() {
 
                 <Route path="/change-password" element={<ChangePassword />} />
                 {files && files.length > 0 ? (
-                  <Route path="/" element={<BudgetList />} />
+                  <Route path="/" element={<BudgetFileSelection />} />
                 ) : (
                   <Route path="/" element={<WelcomeScreen />} />
                 )}
