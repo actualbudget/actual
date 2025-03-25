@@ -3,7 +3,7 @@ export default async function runMigration(db) {
     return node.expr != null ? node.expr : node.cachedValue;
   }
 
-  await db.execQuery(`
+  await db.exec(`
 CREATE TABLE zero_budget_months
   (id TEXT PRIMARY KEY,
    buffered BIGINT DEFAULT 0);
@@ -31,10 +31,9 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
 `);
 
   // Migrate budget amounts and carryover
-  const budget = await db.runQuery(
+  const { rows: budget } = await db.query(
+    // eslint-disable-next-line rulesdir/typography
     `SELECT * FROM spreadsheet_cells WHERE name LIKE 'budget%!budget-%'`,
-    [],
-    true,
   );
   await db.transaction(async tx => {
     for (const monthBudget of budget) {
@@ -57,10 +56,9 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
       }
 
       const sheetName = monthBudget.name.split('!')[0];
-      const carryover = await tx.query(
+      const { rows: carryover } = await tx.query(
         'SELECT * FROM spreadsheet_cells WHERE name = $1',
         [`${sheetName}!carryover-${cat}`],
-        true,
       );
 
       const table =
@@ -79,10 +77,9 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
   });
 
   // Migrate buffers
-  const buffers = await db.runQuery(
+  const { rows: buffers } = await db.query(
+    // eslint-disable-next-line rulesdir/typography
     `SELECT * FROM spreadsheet_cells WHERE name LIKE 'budget%!buffered'`,
-    [],
-    true,
   );
   await db.transaction(async tx => {
     for (const buffer of buffers) {
@@ -103,10 +100,9 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
   });
 
   // Migrate notes
-  const notes = await db.runQuery(
+  const { rows: notes } = await db.query(
+    // eslint-disable-next-line rulesdir/typography
     `SELECT * FROM spreadsheet_cells WHERE name LIKE 'notes!%'`,
-    [],
-    true,
   );
 
   const parseNote = str => {
@@ -131,7 +127,7 @@ CREATE TABLE kvcache_key (id INTEGER PRIMARY KEY, key REAL);
     }
   });
 
-  await db.execQuery(`
+  await db.exec(`
     DROP TABLE spreadsheet_cells;
     -- PostgreSQL does this automatically.
     -- ANALYZE;

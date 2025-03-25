@@ -89,7 +89,7 @@ withMigrationsDir(argv.migrationsDir || getMigrationsDir(), async () => {
       );
       if (argv.dbMode === 'pglite') {
         const database = await pglite.openDatabase(argv.db);
-        await pglite.execQuery(database, initSql);
+        await database.exec(initSql);
       } else {
         const database = sqlite.openDatabase(argv.db);
         await sqlite.execQuery(database, initSql);
