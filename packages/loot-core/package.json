@@ -63,6 +63,7 @@
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts"
   },
   "dependencies": {
+    "@electric-sql/pglite": "^0.2.17",
     "@jlongster/sql.js": "^1.6.7",
     "@reduxjs/toolkit": "^2.10.1",
     "@rschedule/core": "^1.5.0",

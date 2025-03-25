@@ -152,6 +152,9 @@ export default defineConfig(async ({ mode }) => {
     resolve: {
       extensions: resolveExtensions,
     },
+    optimizeDeps: {
+      exclude: ['@electric-sql/pglite'],
+    },
     plugins: [
       // electron (desktop) builds do not support PWA
       mode === 'desktop'
