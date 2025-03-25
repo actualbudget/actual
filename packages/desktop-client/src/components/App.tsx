@@ -112,7 +112,7 @@ function AppInner() {
         if (files) {
           const remoteFile = files.find(f => f.fileId === cloudFileId);
           if (remoteFile && remoteFile.deleted) {
-            dispatch(closeBudget());
+            dispatch(closeBudget({}));
           }
         }
 
@@ -147,7 +147,7 @@ function AppInner() {
             button: {
               title: t('Go to log in'),
               action: () => {
-                dispatch(signOut(multiuserEnabled));
+                dispatch(signOut({openidEnabled: multiuserEnabled}));
               },
             },
           },

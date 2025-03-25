@@ -6,6 +6,7 @@ import { resetApp } from '../app/appSlice';
 import { closeBudget, loadAllFiles } from '../budgets/budgetsSlice';
 import { loadGlobalPrefs } from '../prefs/prefsSlice';
 import { createAppAsyncThunk } from '../redux';
+import { isElectron } from 'loot-core/shared/environment';
 
 const sliceName = 'user';
 
@@ -43,12 +44,12 @@ export const loggedIn = createAppAsyncThunk(
 
 export const signOut = createAppAsyncThunk(
   `${sliceName}/signOut`,
-  async (_, { dispatch }) => {
+  async ({ openidEnabled }: { openidEnabled: boolean }, { dispatch }) => {
     await send('subscribe-sign-out');
 
     dispatch(getUserData());
     dispatch(loadGlobalPrefs());
-    dispatch(closeBudget());
+    dispatch(closeBudget({ closeOpenId: openidEnabled }));
     // Handled in budgetSlice
     // dispatch({ type: constants.SIGN_OUT });
   },

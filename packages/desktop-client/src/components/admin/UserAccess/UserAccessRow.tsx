@@ -81,7 +81,7 @@ export const UserAccessRow = memo(
               button: {
                 title: t('Go to login'),
                 action: () => {
-                  dispatch(signOut(true));
+                  dispatch(signOut({openidEnabled: true}));
                 },
               },
             },

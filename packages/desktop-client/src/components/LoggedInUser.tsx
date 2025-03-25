@@ -92,7 +92,7 @@ export function LoggedInUser({
   }, [userData]);
 
   async function onCloseBudget() {
-    await dispatch(closeBudget());
+    await dispatch(closeBudget({}));
   }
 
   async function onChangePassword() {
@@ -121,7 +121,7 @@ export function LoggedInUser({
         navigate('/');
         break;
       case 'sign-out':
-        dispatch(signOut(multiuserEnabled));
+        dispatch(signOut({openidEnabled: multiuserEnabled}));
         break;
       case 'config-server':
         await onCloseBudget();

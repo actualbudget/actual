@@ -86,7 +86,7 @@ export function ConfigServer() {
       setError(error);
     } else {
       setLoading(false);
-      await dispatch(signOut(multiuserEnabled));
+      await dispatch(signOut({openidEnabled: true}));
       navigate('/');
     }
   }

@@ -18,7 +18,7 @@ export function OutOfSyncMigrationsModal() {
   const { t } = useTranslation();
 
   const closeBudgetAndModal = (close: () => void) => {
-    dispatch(closeBudget());
+    dispatch(closeBudget({}));
     close();
   };
 
