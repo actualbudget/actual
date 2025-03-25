@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@electric-sql/pglite": "^0.2.17",
     "@jlongster/sql.js": "^1.6.7",
     "@reduxjs/toolkit": "^2.5.1",
     "@rschedule/core": "^1.5.0",

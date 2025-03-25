@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import md5 from 'md5';
 
+import * as pglite from '../platform/server/pglite';
+
 import { schema, schemaConfig, makeViews } from './aql';
 import * as db from './db';
 import * as migrations from './migrate/migrations';
@@ -9,6 +11,7 @@ import * as migrations from './migrate/migrations';
 
 async function runMigrations() {
   await migrations.migrate(db.getDatabase());
+  await migrations.migratePGlite(await pglite.openDatabase());
 }
 
 async function updateViews() {

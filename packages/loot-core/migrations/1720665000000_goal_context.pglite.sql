@@ -1,0 +1,6 @@
+BEGIN TRANSACTION;
+
+ALTER TABLE zero_budgets ADD COLUMN long_goal BIGINT DEFAULT null;
+ALTER TABLE reflect_budgets ADD COLUMN long_goal BIGINT DEFAULT null;
+
+COMMIT;
