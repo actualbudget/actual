@@ -1,14 +1,10 @@
 export default async function runMigration(db) {
-  const categories = await db.runQuery(
+  const { rows: categories } = await db.query(
     'SELECT id FROM categories WHERE tombstone IS FALSE',
-    [],
-    true,
   );
 
-  const customReports = await db.runQuery(
+  const { rows: customReports } = await db.query(
     'SELECT id, selected_categories, conditions FROM custom_reports WHERE tombstone IS FALSE AND selected_categories IS NOT NULL',
-    [],
-    true,
   );
 
   // Move all `selected_categories` to `conditions` if possible.. otherwise skip
@@ -34,25 +30,22 @@ export default async function runMigration(db) {
     }
 
     // Append a new condition with the selected category IDs
-    await db.runQuery(
-      'UPDATE custom_reports SET conditions = $1 WHERE id = $2',
-      [
-        JSON.stringify([
-          ...conditions,
-          {
-            field: 'category',
-            op: 'oneOf',
-            value: selectedCategoryIds,
-            type: 'id',
-          },
-        ]),
-        report.id,
-      ],
-    );
+    await db.query('UPDATE custom_reports SET conditions = $1 WHERE id = $2', [
+      JSON.stringify([
+        ...conditions,
+        {
+          field: 'category',
+          op: 'oneOf',
+          value: selectedCategoryIds,
+          type: 'id',
+        },
+      ]),
+      report.id,
+    ]);
   }
 
   // Remove all the `selectedCategories` values - we don't need them anymore
-  await db.runQuery(
+  await db.query(
     'UPDATE custom_reports SET selected_categories = NULL WHERE tombstone IS FALSE',
   );
 }
