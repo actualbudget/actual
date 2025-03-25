@@ -17,7 +17,11 @@ import { useHotkeysContext } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import { SvgLogo } from '@actual-app/components/icons/logo';
+import { SvgDelete } from '@actual-app/components/icons/v0';
+import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
@@ -28,11 +32,6 @@ import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
 import { useModalState } from '../../hooks/useModalState';
-import { SvgLogo } from '../../icons/logo';
-import { SvgDelete } from '../../icons/v0';
-import { useResponsive } from '../responsive/ResponsiveProvider';
-
-import { Input } from './Input';
 
 type ModalProps = ComponentPropsWithRef<typeof ReactAriaModal> & {
   name: string;
@@ -97,14 +96,13 @@ export const Modal = ({
       {...props}
     >
       {/* A container for positioning the modal relative to the visual viewport */}
-      <div
+      <View
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           height: 'var(--visual-viewport-height)',
           overflowY: 'auto',
-          transition: 'height .25s',
         }}
       >
         <ReactAriaModal>
@@ -170,7 +168,7 @@ export const Modal = ({
             </Dialog>
           )}
         </ReactAriaModal>
-      </div>
+      </View>
     </ReactAriaModalOverlay>
   );
 };

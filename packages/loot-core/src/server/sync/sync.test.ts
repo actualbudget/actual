@@ -54,8 +54,12 @@ describe('Sync', () => {
     expect(getClock().timestamp.toString()).toEqual(timestamp.toString());
     expect(mockSyncServer.getClock().merkle).toEqual(getClock().merkle);
 
-    expect(await db.all('SELECT * FROM messages_crdt')).toMatchSnapshot();
-    expect(await db.all('SELECT * FROM messages_clock')).toMatchSnapshot();
+    expect(
+      await db.all<db.DbCrdtMessage>('SELECT * FROM messages_crdt'),
+    ).toMatchSnapshot();
+    expect(
+      await db.all<db.DbClockMessage>('SELECT * FROM messages_clock'),
+    ).toMatchSnapshot();
   });
 
   it('should resend old messages to the server', async () => {
@@ -319,7 +323,7 @@ describe('Sync projections', () => {
       groupId = await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
       await db.insertCategoryGroup({ id: 'group2', name: 'group2' });
       fooId = await db.insertCategory({ name: 'foo', cat_group: 'group1' });
-      await db.moveCategory(fooId, 'group2');
+      await db.moveCategory(fooId, 'group2', null);
     });
 
     await sheet.loadSpreadsheet(db);

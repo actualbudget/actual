@@ -136,7 +136,7 @@ describe('Accounts', () => {
       date: '2017-01-01',
     });
     const differ = expectSnapshotWithDiffer(
-      await db.all('SELECT * FROM transactions'),
+      await db.all<db.DbTransaction>('SELECT * FROM transactions'),
     );
 
     let transaction = await db.getTransaction(id);
@@ -145,11 +145,15 @@ describe('Accounts', () => {
       payee: 'transfer-three',
       date: '2017-01-03',
     });
-    differ.expectToMatchDiff(await db.all('SELECT * FROM transactions'));
+    differ.expectToMatchDiff(
+      await db.all<db.DbTransaction>('SELECT * FROM transactions'),
+    );
 
     transaction = await db.getTransaction(id);
     await runHandler(handlers['transaction-delete'], transaction);
-    differ.expectToMatchDiff(await db.all('SELECT * FROM transactions'));
+    differ.expectToMatchDiff(
+      await db.all<db.DbTransaction>('SELECT * FROM transactions'),
+    );
   });
 });
 

@@ -32,7 +32,6 @@ import { AuthProvider } from '../../auth/AuthProvider';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
 import { TestProvider } from '../../redux/mock';
-import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
 
 import { TransactionTable } from './TransactionsTable';
 
@@ -189,38 +188,36 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
   // hook dependencies haven't changed
   return (
     <TestProvider>
-      <ResponsiveProvider>
-        <AuthProvider>
-          <SpreadsheetProvider>
-            <SchedulesProvider>
-              <SelectedProviderWithItems
-                name="transactions"
-                items={transactions}
-                fetchAllIds={() => Promise.resolve(transactions.map(t => t.id))}
-              >
-                <SplitsExpandedProvider>
-                  <TransactionTable
-                    {...props}
-                    // @ts-expect-error this will be auto-patched once TransactionTable is moved to TS
-                    transactions={transactions}
-                    loadMoreTransactions={() => {}}
-                    commonPayees={[]}
-                    payees={payees}
-                    addNotification={console.log}
-                    onSave={onSave}
-                    onSplit={onSplit}
-                    onAdd={onAdd}
-                    onAddSplit={onAddSplit}
-                    onCreatePayee={onCreatePayee}
-                    showSelection={true}
-                    allowSplitTransaction={true}
-                  />
-                </SplitsExpandedProvider>
-              </SelectedProviderWithItems>
-            </SchedulesProvider>
-          </SpreadsheetProvider>
-        </AuthProvider>
-      </ResponsiveProvider>
+      <AuthProvider>
+        <SpreadsheetProvider>
+          <SchedulesProvider>
+            <SelectedProviderWithItems
+              name="transactions"
+              items={transactions}
+              fetchAllIds={() => Promise.resolve(transactions.map(t => t.id))}
+            >
+              <SplitsExpandedProvider>
+                <TransactionTable
+                  {...props}
+                  // @ts-expect-error this will be auto-patched once TransactionTable is moved to TS
+                  transactions={transactions}
+                  loadMoreTransactions={() => {}}
+                  commonPayees={[]}
+                  payees={payees}
+                  addNotification={console.log}
+                  onSave={onSave}
+                  onSplit={onSplit}
+                  onAdd={onAdd}
+                  onAddSplit={onAddSplit}
+                  onCreatePayee={onCreatePayee}
+                  showSelection={true}
+                  allowSplitTransaction={true}
+                />
+              </SplitsExpandedProvider>
+            </SelectedProviderWithItems>
+          </SchedulesProvider>
+        </SpreadsheetProvider>
+      </AuthProvider>
     </TestProvider>
   );
 }
@@ -242,10 +239,14 @@ function initBasicServer() {
           throw new Error(`queried unknown table: ${query.table}`);
       }
     },
-    getCell: () => ({
+    'get-cell': async () => ({
+      name: 'test-cell',
       value: 129_87,
     }),
-    'get-categories': () => ({ grouped: categoryGroups, list: categories }),
+    'get-categories': async () => ({
+      grouped: categoryGroups,
+      list: categories,
+    }),
   });
 }
 

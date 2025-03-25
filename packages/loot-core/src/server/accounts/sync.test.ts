@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
+import { SyncedPrefs } from '../../types/prefs';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
 import { post } from '../post';
@@ -24,7 +25,9 @@ beforeEach(async () => {
 });
 
 function getAllTransactions() {
-  return db.all(
+  return db.all<
+    db.DbViewTransactionInternal & { payee_name: db.DbPayee['name'] }
+  >(
     `SELECT t.*, p.name as payee_name
        FROM v_transactions_internal t
        LEFT JOIN payees p ON p.id = t.payee
@@ -119,6 +122,49 @@ describe('Account sync', () => {
     await expect(reconcileTransactions(acctId, [{}])).rejects.toThrow(
       /`date` is required/,
     );
+  });
+
+  test('reconcile doesnt rematch deleted transactions if reimport disabled', async () => {
+    const { id: acctId } = await prepareDatabase();
+    const reimportKey =
+      `sync-reimport-deleted-${acctId}` satisfies keyof SyncedPrefs;
+    await db.update('preferences', { id: reimportKey, value: 'false' });
+
+    await reconcileTransactions(acctId, [
+      { date: '2020-01-01', imported_id: 'finid' },
+    ]);
+
+    const transactions1 = await getAllTransactions();
+    expect(transactions1.length).toBe(1);
+
+    await db.deleteTransaction(transactions1[0]);
+
+    await reconcileTransactions(acctId, [
+      { date: '2020-01-01', imported_id: 'finid' },
+    ]);
+    const transactions2 = await getAllTransactions();
+    expect(transactions2.length).toBe(1);
+    expect(transactions2).toMatchSnapshot();
+  });
+
+  test('reconcile does rematch deleted transactions by default', async () => {
+    const { id: acctId } = await prepareDatabase();
+
+    await reconcileTransactions(acctId, [
+      { date: '2020-01-01', imported_id: 'finid' },
+    ]);
+
+    const transactions1 = await getAllTransactions();
+    expect(transactions1.length).toBe(1);
+
+    await db.deleteTransaction(transactions1[0]);
+
+    await reconcileTransactions(acctId, [
+      { date: '2020-01-01', imported_id: 'finid' },
+    ]);
+    const transactions2 = await getAllTransactions();
+    expect(transactions2.length).toBe(2);
+    expect(transactions2).toMatchSnapshot();
   });
 
   test('reconcile run rules with inferred payee', async () => {

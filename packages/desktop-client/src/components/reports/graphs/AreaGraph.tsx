@@ -22,7 +22,7 @@ import {
 import {
   type balanceTypeOpType,
   type DataEntity,
-} from 'loot-core/types/models/reports';
+} from 'loot-core/types/models';
 
 import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { Container } from '../Container';

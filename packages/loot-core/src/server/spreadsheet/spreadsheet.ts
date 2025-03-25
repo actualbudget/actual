@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import mitt from 'mitt';
 
+import { QueryState } from '../../shared/query';
 import { compileQuery, runCompiledQuery, schema, schemaConfig } from '../aql';
 
 import { Graph } from './graph-data-structure';
@@ -11,7 +12,7 @@ export type Node = {
   expr: string | number | boolean;
   value: string | number | boolean;
   sheet: unknown;
-  query?: string;
+  query?: QueryState;
   sql?: { sqlPieces: unknown; state: { dependencies: unknown[] } };
   dynamic?: boolean;
   _run?: unknown;
@@ -338,7 +339,7 @@ export class Spreadsheet {
     });
   }
 
-  createQuery(sheetName: string, cellName: string, query: string): void {
+  createQuery(sheetName: string, cellName: string, query: QueryState): void {
     const name = resolveName(sheetName, cellName);
     const node = this._getNode(name);
 

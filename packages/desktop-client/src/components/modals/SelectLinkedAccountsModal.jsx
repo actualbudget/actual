@@ -3,6 +3,8 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import {
@@ -15,7 +17,6 @@ import { closeModal } from 'loot-core/client/modals/modalsSlice';
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { PrivacyFilter } from '../PrivacyFilter';
@@ -42,8 +43,12 @@ export function SelectLinkedAccountsModal({
   syncSource = undefined,
 }) {
   const sortedExternalAccounts = useMemo(() => {
-    const toSort = [...externalAccounts];
-    toSort.sort((a, b) => a.name.localeCompare(b.name));
+    const toSort = externalAccounts ? [...externalAccounts] : [];
+    toSort.sort(
+      (a, b) =>
+        getInstitutionName(a)?.localeCompare(getInstitutionName(b)) ||
+        a.name.localeCompare(b.name),
+    );
     return toSort;
   }, [externalAccounts]);
 
@@ -150,7 +155,7 @@ export function SelectLinkedAccountsModal({
   return (
     <Modal
       name="select-linked-accounts"
-      containerProps={{ style: { width: 800 } }}
+      containerProps={{ style: { width: 1000 } }}
     >
       {({ state: { close } }) => (
         <>
@@ -173,10 +178,11 @@ export function SelectLinkedAccountsModal({
           >
             <TableHeader
               headers={[
-                { name: t('Bank Account To Sync'), width: 200 },
+                { name: t('Institution to Sync'), width: 175 },
+                { name: t('Bank Account To Sync'), width: 175 },
                 { name: t('Balance'), width: 80 },
                 { name: t('Account in Actual'), width: 'flex' },
-                { name: t('Actions'), width: 'flex' },
+                { name: t('Actions'), width: 150 },
               ]}
             />
 
@@ -228,6 +234,15 @@ export function SelectLinkedAccountsModal({
   );
 }
 
+function getInstitutionName(externalAccount) {
+  if (typeof externalAccount?.institution === 'string') {
+    return externalAccount?.institution ?? '';
+  } else if (typeof externalAccount.institution?.name === 'string') {
+    return externalAccount?.institution?.name ?? '';
+  }
+  return '';
+}
+
 function TableRow({
   externalAccount,
   chosenAccount,
@@ -247,12 +262,37 @@ function TableRow({
 
   return (
     <Row style={{ backgroundColor: theme.tableBackground }}>
-      <Field width={200}>{externalAccount.name}</Field>
+      <Field width={175}>
+        <Tooltip content={getInstitutionName(externalAccount)}>
+          <View
+            style={{
+              textOverflow: 'ellipsis',
+              overflow: 'hidden',
+              display: 'block',
+            }}
+          >
+            {getInstitutionName(externalAccount)}
+          </View>
+        </Tooltip>
+      </Field>
+      <Field width={175}>
+        <Tooltip content={externalAccount.name}>
+          <View
+            style={{
+              textOverflow: 'ellipsis',
+              overflow: 'hidden',
+              display: 'block',
+            }}
+          >
+            {externalAccount.name}
+          </View>
+        </Tooltip>
+      </Field>
       <Field width={80}>
         <PrivacyFilter>{externalAccount.balance}</PrivacyFilter>
       </Field>
       <Field
-        width="40%"
+        width="flex"
         truncate={focusedField !== 'account'}
         onClick={() => setFocusedField('account')}
       >
@@ -274,7 +314,7 @@ function TableRow({
           chosenAccount?.name
         )}
       </Field>
-      <Field width="20%">
+      <Field width={150}>
         {chosenAccount ? (
           <Button
             onPress={() => {

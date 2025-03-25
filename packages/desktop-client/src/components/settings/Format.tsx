@@ -5,6 +5,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -13,7 +14,6 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { tokens } from '../../tokens';
 import { Checkbox } from '../forms';
 import { useSidebar } from '../sidebar/SidebarProvider';
 

@@ -4,23 +4,24 @@ import { Form } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { InitialFocus } from '@actual-app/components/initial-focus';
+import { Input } from '@actual-app/components/input';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { loadGlobalPrefs } from 'loot-core/client/actions';
 import { sync } from 'loot-core/client/app/appSlice';
 import { loadAllFiles } from 'loot-core/client/budgets/budgetsSlice';
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
+import { loadGlobalPrefs } from 'loot-core/client/prefs/prefsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getCreateKeyError } from 'loot-core/shared/errors';
 
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
-import { Input } from '../common/Input';
 import { Link } from '../common/Link';
 import {
   Modal,
@@ -28,7 +29,6 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '../common/Modal';
-import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type CreateEncryptionKeyModalProps = Extract<
   ModalType,
@@ -95,7 +95,8 @@ export function CreateEncryptionKeyModal({
                     We will generate a key based on a password and use it to
                     encrypt from now on.{' '}
                     <strong>This requires a sync reset</strong> and all other
-                    devices will have to revert to this version of your data.{' '}
+                    devices will have to revert to this version of your
+                    data.{' '}
                   </Trans>
                   <Link
                     variant="external"

@@ -1,7 +1,10 @@
 import React, { type CSSProperties, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { SvgAdd } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { Resizable } from 're-resizable';
@@ -12,10 +15,7 @@ import * as Platform from 'loot-core/client/platform';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useResizeObserver } from '../../hooks/useResizeObserver';
-import { SvgAdd } from '../../icons/v1';
 import { useDispatch } from '../../redux';
-import { theme } from '../../style';
-import { useResponsive } from '../responsive/ResponsiveProvider';
 
 import { Accounts } from './Accounts';
 import { BudgetName } from './BudgetName';

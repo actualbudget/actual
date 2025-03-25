@@ -3,9 +3,19 @@ import React, { useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import {
+  SvgDotsHorizontalTriple,
+  SvgTrash,
+} from '@actual-app/components/icons/v1';
+import {
+  SvgNotesPaper,
+  SvgViewHide,
+  SvgViewShow,
+} from '@actual-app/components/icons/v2';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
@@ -13,9 +23,6 @@ import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { useCategory } from '../../hooks/useCategory';
 import { useCategoryGroup } from '../../hooks/useCategoryGroup';
 import { useNotes } from '../../hooks/useNotes';
-import { SvgDotsHorizontalTriple, SvgTrash } from '../../icons/v1';
-import { SvgNotesPaper, SvgViewHide, SvgViewShow } from '../../icons/v2';
-import { theme } from '../../style';
 import {
   Modal,
   ModalCloseButton,

@@ -97,7 +97,7 @@ describe('Transaction rules', () => {
       conditions: [],
       actions: [],
     });
-    expect((await db.all('SELECT * FROM rules')).length).toBe(1);
+    expect((await db.all<db.DbRule>('SELECT * FROM rules')).length).toBe(1);
     // Make sure it was projected
     expect(getRules().length).toBe(1);
 
@@ -110,7 +110,7 @@ describe('Transaction rules', () => {
         { op: 'set', field: 'category', value: 'food' },
       ],
     });
-    expect((await db.all('SELECT * FROM rules')).length).toBe(2);
+    expect((await db.all<db.DbRule>('SELECT * FROM rules')).length).toBe(2);
     expect(getRules().length).toBe(2);
 
     const spy = jest.spyOn(console, 'warn').mockImplementation();
@@ -119,7 +119,7 @@ describe('Transaction rules', () => {
     // that will validate the input)
     await db.insertWithUUID('rules', { conditions: '{', actions: '}' });
     // It will be in the database
-    expect((await db.all('SELECT * FROM rules')).length).toBe(3);
+    expect((await db.all<db.DbRule>('SELECT * FROM rules')).length).toBe(3);
     // But it will be ignored
     expect(getRules().length).toBe(2);
 
