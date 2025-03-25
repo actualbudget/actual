@@ -17,7 +17,7 @@ const SYNCED_PREF_KEYS = [
 ];
 
 export default async function runMigration(db, { fs, fileId }) {
-  await db.execQuery(`
+  await db.exec(`
     CREATE TABLE preferences
        (id TEXT PRIMARY KEY,
         value TEXT);
@@ -47,10 +47,10 @@ export default async function runMigration(db, { fs, fileId }) {
         }
 
         // insert the synced prefs in the new table
-        await db.runQuery(
-          'INSERT INTO preferences (id, value) VALUES ($1, $2)',
-          [key, String(prefs[key])],
-        );
+        await db.query('INSERT INTO preferences (id, value) VALUES ($1, $2)', [
+          key,
+          String(prefs[key]),
+        ]);
       }),
     );
   } catch (e) {

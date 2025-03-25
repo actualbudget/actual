@@ -80,10 +80,10 @@ async function patchBadMigrationsPGlite(db: PGlite) {
   const newFiltersMigration = 1688749527273;
   const pgAppliedIds = await getAppliedMigrationsPGlite(db);
   if (pgAppliedIds.includes(badFiltersMigration)) {
-    await pglite.runQuery(db, 'DELETE FROM __migrations__ WHERE id = $1', [
+    await db.query('DELETE FROM __migrations__ WHERE id = $1', [
       badFiltersMigration,
     ]);
-    await pglite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES ($1)', [
+    await db.query('INSERT INTO __migrations__ (id) VALUES ($1)', [
       newFiltersMigration,
     ]);
   }
@@ -102,11 +102,8 @@ export async function getAppliedMigrations(db: Database): Promise<number[]> {
 export async function getAppliedMigrationsPGlite(
   db: PGlite,
 ): Promise<number[]> {
-  const rows = await pglite.runQuery<{ id: number }>(
-    db,
+  const { rows } = await db.query<{ id: number }>(
     'SELECT id FROM __migrations__ ORDER BY id ASC',
-    [],
-    true,
   );
   return rows.map(row => row.id);
 }
@@ -176,19 +173,12 @@ async function applyJavaScript(db: Database, id) {
 }
 
 async function applyJavaScriptPGlite(db: PGlite, id) {
-  const dbInterface = {
-    runQuery: (query, params, fetchAll) =>
-      pglite.runQuery(db, query, params, fetchAll),
-    execQuery: query => pglite.execQuery(db, query),
-    transaction: func => pglite.transaction(db, func),
-  };
-
   if (javascriptMigrationsPGlite[id] == null) {
     throw new Error('Could not find JS migration code to run for ' + id);
   }
 
   const run = javascriptMigrationsPGlite[id];
-  return run(dbInterface, {
+  return run(db, {
     fs,
     fileId: prefs.getPrefs()?.id,
   });
@@ -205,7 +195,7 @@ async function applySql(db: Database, sql: string) {
 
 async function applySqlPGlite(db: PGlite, sql: string) {
   try {
-    await pglite.execQuery(db, sql);
+    await db.exec(sql);
   } catch (e) {
     console.log('Error applying sql:', sql);
     throw e;
@@ -239,7 +229,7 @@ export async function applyMigrationPGlite(
   } else {
     await applySqlPGlite(db, code);
   }
-  await pglite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES ($1)', [
+  await db.query('INSERT INTO __migrations__ (id) VALUES ($1)', [
     getMigrationId(name),
   ]);
 }
