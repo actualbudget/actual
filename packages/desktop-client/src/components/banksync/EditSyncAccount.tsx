@@ -2,8 +2,11 @@ import React, { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgQuestion } from '@actual-app/components/icons/v1';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
+import { Tooltip } from '@actual-app/components/tooltip';
+import { View } from '@actual-app/components/view';
 
 import { useTransactions } from 'loot-core/client/data-hooks/transactions';
 import {
@@ -122,6 +125,9 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
   const [savedImportPending = true, setSavedImportPending] = useSyncedPref(
     `sync-import-pending-${account.id}`,
   );
+  const [savedReimportDeleted = true, setSavedReimportDeleted] = useSyncedPref(
+    `sync-reimport-deleted-${account.id}`,
+  );
 
   const [transactionDirection, setTransactionDirection] =
     useState<TransactionDirection>('payment');
@@ -130,6 +136,9 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
   );
   const [importNotes, setImportNotes] = useState(
     String(savedImportNotes) === 'true',
+  );
+  const [reimportDeleted, setReimportDeleted] = useState(
+    String(savedReimportDeleted) === 'true',
   );
   const [mappings, setMappings] = useState<Mappings>(
     mappingsFromString(savedMappings),
@@ -168,6 +177,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
     setSavedMappings(mappingsStr);
     setSavedImportPending(String(importPending));
     setSavedImportNotes(String(importNotes));
+    setSavedReimportDeleted(String(reimportDeleted));
     close();
   };
 
@@ -224,6 +234,31 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             onChange={() => setImportNotes(!importNotes)}
           >
             <Trans>Import transaction notes</Trans>
+          </CheckboxOption>
+
+          <CheckboxOption
+            id="form_reimport_deleted"
+            checked={reimportDeleted}
+            onChange={() => setReimportDeleted(!reimportDeleted)}
+          >
+            <Tooltip
+              content={t(
+                'By default imported transactions that you delete will be re-imported with the next bank sync operation. To disable this behaviour - untick this box.',
+              )}
+            >
+              <View
+                style={{
+                  display: 'flex',
+                  flexWrap: 'nowrap',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                <Trans>Reimport deleted transactions</Trans>
+                <SvgQuestion height={12} width={12} cursor="pointer" />
+              </View>
+            </Tooltip>
           </CheckboxOption>
 
           <Stack

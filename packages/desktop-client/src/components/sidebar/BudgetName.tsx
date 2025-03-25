@@ -36,10 +36,12 @@ export function BudgetName({ children }: BudgetNameProps) {
         margin: '0 8px 23px 20px',
         userSelect: 'none',
         transition: 'padding .4s',
-        ...(hasWindowButtons && {
-          paddingTop: 20,
-          justifyContent: 'flex-start',
-        }),
+        ...(hasWindowButtons
+          ? {
+              paddingTop: 20,
+              justifyContent: 'flex-start',
+            }
+          : {}),
       }}
     >
       <EditableBudgetName />

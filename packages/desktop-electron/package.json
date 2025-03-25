@@ -17,6 +17,9 @@
     "appId": "com.actualbudget.actual",
     "files": [
       "build",
+      "!node_modules/@actual-app/web",
+      "node_modules/@actual-app/web/build",
+      "node_modules/@actual-app/web/package.json",
       "!node_modules/better-sqlite3/{benchmark,src,bin,docs,deps,build/Release/obj,build/Release/sqlite3.a,build/Release/test_extension.node}",
       "!**/*.js.map",
       "!**/stats.json",
@@ -48,7 +51,7 @@
         "flatpak",
         "AppImage"
       ],
-      "artifactName": "${productName}-linux.${ext}"
+      "artifactName": "${productName}-linux-${arch}.${ext}"
     },
     "flatpak": {
       "runtimeVersion": "23.08",
@@ -85,7 +88,9 @@
     "npmRebuild": false
   },
   "dependencies": {
-    "better-sqlite3": "^11.7.0",
+    "@actual-app/sync-server": "workspace:*",
+    "@ngrok/ngrok": "^1.4.1",
+    "better-sqlite3": "^11.9.1",
     "fs-extra": "^11.3.0",
     "promise-retry": "^2.0.1"
   },

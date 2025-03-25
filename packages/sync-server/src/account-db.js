@@ -62,15 +62,19 @@ export function getLoginMethod(req) {
     return req.body.loginMethod;
   }
 
-  if (config.get('loginMethod')) {
+  //BY-PASS ANY OTHER CONFIGURATION TO ENSURE HEADER AUTH
+  if (
+    config.get('loginMethod') === 'header' &&
+    config.get('allowedLoginMethods').includes('header')
+  ) {
     return config.get('loginMethod');
   }
 
   const activeMethod = getActiveLoginMethod();
-  return activeMethod || 'password';
+  return activeMethod || config.get('loginMethod');
 }
 
-export async function bootstrap(loginSettings) {
+export async function bootstrap(loginSettings, forced = false) {
   if (!loginSettings) {
     return { error: 'invalid-login-settings' };
   }
@@ -87,7 +91,7 @@ export async function bootstrap(loginSettings) {
    WHERE users.user_name <> '' and users.owner = 1`,
       ) || {};
 
-    if (!openIdEnabled || countOfOwner > 0) {
+    if (!forced && (!openIdEnabled || countOfOwner > 0)) {
       if (!needsBootstrap()) {
         accountDb.mutate('ROLLBACK');
         return { error: 'already-bootstrapped' };
@@ -99,7 +103,7 @@ export async function bootstrap(loginSettings) {
       return { error: 'no-auth-method-selected' };
     }
 
-    if (passEnabled && openIdEnabled) {
+    if (passEnabled && openIdEnabled && !forced) {
       accountDb.mutate('ROLLBACK');
       return { error: 'max-one-method-allowed' };
     }
@@ -112,7 +116,7 @@ export async function bootstrap(loginSettings) {
       }
     }
 
-    if (openIdEnabled) {
+    if (openIdEnabled && forced) {
       const { error } = await bootstrapOpenId(loginSettings.openId);
       if (error) {
         accountDb.mutate('ROLLBACK');

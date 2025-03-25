@@ -7,13 +7,13 @@
     "react-dom": ">=18.2"
   },
   "dependencies": {
-    "@emotion/css": "^11.13.4",
-    "react-aria-components": "^1.7.0",
-    "usehooks-ts": "^3.0.1"
+    "@emotion/css": "^11.13.5",
+    "react-aria-components": "^1.7.1",
+    "usehooks-ts": "^3.0.2"
   },
   "devDependencies": {
     "@svgr/cli": "^8.1.0",
-    "@types/react": "^18.2.21",
+    "@types/react": "^18.2.79",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },

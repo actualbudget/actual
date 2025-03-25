@@ -1,12 +1,18 @@
-// @ts-strict-ignore
-import { type HandlerFunctions } from '../types/handlers';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyFunction = (...args: any[]) => any;
 
-export function sequential<T extends HandlerFunctions>(
+export function sequential<T extends AnyFunction>(
   fn: T,
 ): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> {
   const sequenceState: {
     running: Promise<Awaited<ReturnType<T>>> | null;
-    queue: Array<{ args: Parameters<T>; resolve; reject }>;
+    queue: Array<{
+      args: Parameters<T>;
+      resolve: (
+        value: Awaited<ReturnType<T>> | PromiseLike<Awaited<ReturnType<T>>>,
+      ) => void;
+      reject: (reason?: unknown) => void;
+    }>;
   } = {
     running: null,
     queue: [],
@@ -21,33 +27,39 @@ export function sequential<T extends HandlerFunctions>(
     }
   }
 
-  function run(args: Parameters<T>, resolve, reject) {
+  function run(
+    args: Parameters<T>,
+    resolve: (
+      value: Awaited<ReturnType<T>> | PromiseLike<Awaited<ReturnType<T>>>,
+    ) => void,
+    reject: (reason?: unknown) => void,
+  ) {
     sequenceState.running = fn.apply(null, args).then(
-      val => {
+      (val: Awaited<ReturnType<T>> | PromiseLike<Awaited<ReturnType<T>>>) => {
         pump();
         resolve(val);
       },
-      err => {
+      (err: unknown) => {
         pump();
         reject(err);
       },
     );
   }
 
-  return (...args) => {
+  return ((...args: Parameters<T>) => {
     if (!sequenceState.running) {
-      return new Promise((resolve, reject) => {
+      return new Promise<Awaited<ReturnType<T>>>((resolve, reject) => {
         return run(args, resolve, reject);
       });
     } else {
-      return new Promise((resolve, reject) => {
+      return new Promise<Awaited<ReturnType<T>>>((resolve, reject) => {
         sequenceState.queue.push({ resolve, reject, args });
       });
     }
-  };
+  }) as T;
 }
 
-export function once<T extends HandlerFunctions>(
+export function once<T extends AnyFunction>(
   fn: T,
 ): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> | null {
   let promise: Promise<Awaited<ReturnType<T>>> | null = null;

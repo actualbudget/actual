@@ -11,8 +11,6 @@ import { requiredFields } from '../models';
 import { mutator } from '../mutators';
 import { undoable } from '../undo';
 
-import { ReportsHandlers } from './types/handlers';
-
 export const reportModel = {
   validate(
     report: Omit<CustomReportEntity, 'tombstone'>,
@@ -148,9 +146,15 @@ async function updateReport(item: CustomReportEntity) {
   await db.updateWithSchema('custom_reports', reportModel.fromJS(item));
 }
 
-async function deleteReport(id: string) {
+async function deleteReport(id: CustomReportEntity['id']) {
   await db.delete_('custom_reports', id);
 }
+
+export type ReportsHandlers = {
+  'report/create': typeof createReport;
+  'report/update': typeof updateReport;
+  'report/delete': typeof deleteReport;
+};
 
 // Expose functions to the client
 export const app = createApp<ReportsHandlers>();
