@@ -9,6 +9,7 @@ import {
   type SyncServerSimpleFinAccount,
   type SyncServerPluggyAiAccount,
 } from '../../types/models';
+import { resetApp } from '../app/appSlice';
 import { addNotification } from '../notifications/notificationsSlice';
 import {
   getAccounts,
@@ -68,6 +69,9 @@ const accountsSlice = createSlice({
     ) {
       delete state.failedAccounts[action.payload.id];
     },
+  },
+  extraReducers: builder => {
+    builder.addCase(resetApp, () => initialState);
   },
 });
 

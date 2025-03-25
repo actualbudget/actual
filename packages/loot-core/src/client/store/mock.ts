@@ -21,21 +21,29 @@ import {
   reducer as notificationsSliceReducer,
 } from '../notifications/notificationsSlice';
 import {
+  name as prefsSliceName,
+  reducer as prefsSliceReducer,
+} from '../prefs/prefsSlice';
+import {
   name as queriesSliceName,
   reducer as queriesSliceReducer,
 } from '../queries/queriesSlice';
-import { reducers } from '../reducers';
+import {
+  name as usersSliceName,
+  reducer as usersSliceReducer,
+} from '../users/usersSlice';
 
 import { type store as realStore } from './index';
 
 const appReducer = combineReducers({
-  ...reducers,
   [accountsSliceName]: accountsSliceReducer,
   [appSliceName]: appSliceReducer,
   [budgetsSliceName]: budgetsSliceReducer,
   [modalsSliceName]: modalsSliceReducer,
   [notificationsSliceName]: notificationsSliceReducer,
+  [prefsSliceName]: prefsSliceReducer,
   [queriesSliceName]: queriesSliceReducer,
+  [usersSliceName]: usersSliceReducer,
 });
 
 export let mockStore: typeof realStore = configureStore({

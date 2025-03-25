@@ -1,14 +1,13 @@
 // @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
+import { TransactionFilterEntity } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
 import { requiredFields } from '../models';
 import { mutator } from '../mutators';
 import { parseConditionsOrActions } from '../transactions/transaction-rules';
 import { undoable } from '../undo';
-
-import { FiltersHandlers } from './types/handlers';
 
 const filterModel = {
   validate(filter, { update }: { update?: boolean } = {}) {
@@ -110,7 +109,7 @@ function filterOptionsMatch(options1, options2) {
   return keys1.every(key => opt1[key] === opt2[key]);
 }
 
-async function createFilter(filter) {
+async function createFilter(filter): Promise<TransactionFilterEntity['id']> {
   const filterId = uuidv4();
   const item = {
     id: filterId,
@@ -175,9 +174,15 @@ async function updateFilter(filter) {
   await db.updateWithSchema('transaction_filters', filterModel.fromJS(item));
 }
 
-async function deleteFilter(id) {
+async function deleteFilter(id: TransactionFilterEntity['id']) {
   await db.delete_('transaction_filters', id);
 }
+
+export type FiltersHandlers = {
+  'filter-create': typeof createFilter;
+  'filter-update': typeof updateFilter;
+  'filter-delete': typeof deleteFilter;
+};
 
 export const app = createApp<FiltersHandlers>();
 

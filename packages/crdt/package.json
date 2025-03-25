@@ -15,7 +15,7 @@
     "test": "jest -c jest.config.js"
   },
   "dependencies": {
-    "google-protobuf": "^3.12.0-rc.1",
+    "google-protobuf": "^3.12.4",
     "murmurhash": "^2.0.1",
     "uuid": "^9.0.1"
   },

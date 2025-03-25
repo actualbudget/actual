@@ -1,12 +1,16 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import {
+  createAction,
+  createSlice,
+  type PayloadAction,
+} from '@reduxjs/toolkit';
 
 import { send } from '../../platform/client/fetch';
 import { getUploadError } from '../../shared/errors';
 import { type AccountEntity } from '../../types/models';
 import { type AtLeastOne } from '../../types/util';
 import { syncAccounts } from '../accounts/accountsSlice';
-import { loadPrefs } from '../actions';
 import { pushModal } from '../modals/modalsSlice';
+import { loadPrefs } from '../prefs/prefsSlice';
 import { createAppAsyncThunk } from '../redux';
 
 const sliceName = 'app';
@@ -28,6 +32,8 @@ const initialState: AppState = {
   showUpdateNotification: true,
   managerHasInitialized: false,
 };
+
+export const resetApp = createAction(`${sliceName}/resetApp`);
 
 export const updateApp = createAppAsyncThunk(
   `${sliceName}/updateApp`,
@@ -146,12 +152,20 @@ const appSlice = createSlice({
       };
     },
   },
+  extraReducers: builder => {
+    builder.addCase(resetApp, state => ({
+      ...initialState,
+      loadingText: state.loadingText || null,
+      managerHasInitialized: state.managerHasInitialized || false,
+    }));
+  },
 });
 
 export const { name, reducer, getInitialState } = appSlice;
 
 export const actions = {
   ...appSlice.actions,
+  resetApp,
   updateApp,
   resetSync,
   sync,

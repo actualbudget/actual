@@ -1,15 +1,17 @@
 import type { AccountHandlers } from '../server/accounts/app';
-import type { AdminHandlers } from '../server/admin/types/handlers';
-import type { BudgetHandlers } from '../server/budget/types/handlers';
-import type { DashboardHandlers } from '../server/dashboard/types/handlers';
-import type { FiltersHandlers } from '../server/filters/types/handlers';
-import type { NotesHandlers } from '../server/notes/types/handlers';
+import type { AdminHandlers } from '../server/admin/app';
+import type { BudgetHandlers } from '../server/budget/app';
+import type { DashboardHandlers } from '../server/dashboard/app';
+import type { FiltersHandlers } from '../server/filters/app';
+import type { NotesHandlers } from '../server/notes/app';
 import type { PayeesHandlers } from '../server/payees/app';
 import type { PreferencesHandlers } from '../server/preferences/app';
-import type { ReportsHandlers } from '../server/reports/types/handlers';
-import type { RulesHandlers } from '../server/rules/types/handlers';
-import type { SchedulesHandlers } from '../server/schedules/types/handlers';
-import type { ToolsHandlers } from '../server/tools/types/handlers';
+import type { ReportsHandlers } from '../server/reports/app';
+import type { RulesHandlers } from '../server/rules/app';
+import type { SchedulesHandlers } from '../server/schedules/app';
+import type { SpreadsheetHandlers } from '../server/spreadsheet/app';
+import type { SyncHandlers } from '../server/sync/app';
+import type { ToolsHandlers } from '../server/tools/app';
 import type { TransactionHandlers } from '../server/transactions/app';
 
 import type { ApiHandlers } from './api-handlers';
@@ -30,6 +32,8 @@ export interface Handlers
     AdminHandlers,
     ToolsHandlers,
     AccountHandlers,
-    PayeesHandlers {}
+    PayeesHandlers,
+    SpreadsheetHandlers,
+    SyncHandlers {}
 
 export type HandlerFunctions = Handlers[keyof Handlers];

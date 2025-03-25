@@ -304,7 +304,9 @@ export async function upload() {
           ? { 'X-ACTUAL-ENCRYPT-META': JSON.stringify(uploadMeta) }
           : null),
         ...(groupId ? { 'X-ACTUAL-GROUP-ID': groupId } : null),
-      },
+        // TODO: fix me
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
       body: uploadContent,
     });
   } catch (err) {
