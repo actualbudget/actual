@@ -1,4 +1,4 @@
-import { PGlite } from '@electric-sql/pglite';
+import { PGlite, types } from '@electric-sql/pglite';
 
 export async function openDatabase(dataDir?: string): Promise<PGlite> {
   // if (dataDir) {
@@ -14,6 +14,33 @@ export async function openDatabase(dataDir?: string): Promise<PGlite> {
 
   const db = await PGlite.create(dataDir || 'idb://my-pgdata', {
     relaxedDurability: true,
+    // Maintain compatibility with the sqlite schema for now.
+    serializers: {
+      [types.BOOL]: value => {
+        switch (value) {
+          case null:
+          case 0:
+            return 'FALSE';
+          case 1:
+            return 'TRUE';
+          default:
+            return value;
+        }
+      },
+    },
+    parsers: {
+      [types.BOOL]: value => {
+        switch (value) {
+          case null:
+          case 'f':
+            return 0;
+          case 't':
+            return 1;
+          default:
+            return value;
+        }
+      },
+    },
   });
 
   await initIfNecessary(db);
