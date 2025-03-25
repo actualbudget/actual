@@ -3,6 +3,7 @@ import './polyfills';
 
 import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
+import { PGlite } from '@electric-sql/pglite';
 import { v4 as uuidv4 } from 'uuid';
 
 import { createTestBudget } from '../mocks/budget';
@@ -11,6 +12,7 @@ import * as asyncStorage from '../platform/server/asyncStorage';
 import * as connection from '../platform/server/connection';
 import * as fs from '../platform/server/fs';
 import { logger } from '../platform/server/log';
+import * as pglite from '../platform/server/pglite';
 import * as sqlite from '../platform/server/sqlite';
 import { q } from '../shared/query';
 import { type Budget } from '../types/budget';
@@ -1140,6 +1142,156 @@ export async function initApp(isDev, socketName) {
   await sqlite.init();
   await Promise.all([asyncStorage.init(), fs.init()]);
   await setupDocumentsDir();
+
+  const db = await pglite.openDatabase();
+
+  // This should only be called on initial creation of database.
+  // await db.exec(
+  //     `-- __migrations__ definition
+  // CREATE TABLE __migrations__ (
+  //   id BIGINT PRIMARY KEY NOT NULL
+  // );
+
+  // -- accounts definition
+  // CREATE TABLE accounts (
+  //   id VARCHAR(36) PRIMARY KEY,
+  //   account_id VARCHAR(36),
+  //   name TEXT,
+  //   balance_current BIGINT,
+  //   balance_available BIGINT,
+  //   balance_limit BIGINT,
+  //   mask TEXT,
+  //   official_name TEXT,
+  //   type TEXT,
+  //   subtype TEXT,
+  //   bank TEXT,
+  //   offbudget BOOLEAN DEFAULT FALSE,
+  //   closed BOOLEAN DEFAULT FALSE,
+  //   tombstone BOOLEAN DEFAULT FALSE
+  // );
+
+  // -- banks definition
+  // CREATE TABLE banks (
+  //   id VARCHAR(36) PRIMARY KEY,
+  //   bank_id TEXT,
+  //   name TEXT,
+  //   tombstone BOOLEAN DEFAULT FALSE
+  // );
+
+  // -- categories definition
+  // CREATE TABLE categories (
+  //   id VARCHAR(36) PRIMARY KEY,
+  //   name TEXT,
+  //   is_income BOOLEAN DEFAULT FALSE,
+  //   cat_group VARCHAR(36),
+  //   sort_order BIGINT,
+  //   tombstone BOOLEAN DEFAULT FALSE
+  // );
+
+  // -- category_groups definition
+  // CREATE TABLE category_groups (
+  //   id VARCHAR(36) PRIMARY KEY,
+  //   name TEXT UNIQUE,
+  //   is_income BOOLEAN DEFAULT FALSE,
+  //   sort_order BIGINT,
+  //   tombstone BOOLEAN DEFAULT FALSE
+  // );
+
+  // -- category_mapping definition
+  // CREATE TABLE category_mapping (
+  //   id VARCHAR(36) PRIMARY KEY,
+  //   transferId VARCHAR(36)
+  // );
+
+  // -- created_budgets definition
+  // CREATE TABLE created_budgets (
+  //   month TEXT PRIMARY KEY
+  // );
+
+  // -- db_version definition
+  // CREATE TABLE db_version (
+  //   version TEXT PRIMARY KEY
+  // );
+
+  // -- messages_clock definition
+  // CREATE TABLE messages_clock (
+  //   id BIGINT PRIMARY KEY,
+  //   clock TEXT
+  // );
+
+  // -- messages_crdt definition
+  // CREATE TABLE messages_crdt (
+  //   id BIGINT PRIMARY KEY,
+  //   timestamp BIGINT NOT NULL UNIQUE,
+  //   dataset TEXT NOT NULL,
+  //   row TEXT NOT NULL,
+  //   "column" TEXT NOT NULL,
+  //   value BYTEA NOT NULL
+  // );
+
+  // -- spreadsheet_cells definition
+  // CREATE TABLE spreadsheet_cells (
+  //   name TEXT PRIMARY KEY,
+  //   expr TEXT,
+  //   cachedValue TEXT
+  // );
+
+  // -- transactions definition
+  // CREATE TABLE transactions (
+  //   id VARCHAR(36) PRIMARY KEY,
+  //   isParent BOOLEAN DEFAULT FALSE,
+  //   isChild BOOLEAN DEFAULT FALSE,
+  //   acct VARCHAR(36),
+  //   category VARCHAR(36),
+  //   amount BIGINT,
+  //   description TEXT,
+  //   notes TEXT,
+  //   date DATE, -- INTEGER in sqlite
+  //   financial_id TEXT,
+  //   type TEXT,
+  //   location TEXT,
+  //   error TEXT,
+  //   imported_description TEXT,
+  //   starting_balance_flag BOOLEAN DEFAULT FALSE,
+  //   transferred_id VARCHAR(36),
+  //   sort_order BIGINT,  -- Using BIGINT to support large sort numbers
+  //   tombstone BOOLEAN DEFAULT FALSE
+  // );
+
+  // -- pending_transactions definition
+  // CREATE TABLE pending_transactions (
+  //   id VARCHAR(36) PRIMARY KEY,
+  //   acct VARCHAR(36),
+  //   amount BIGINT,
+  //   description TEXT,
+  //   date DATE, -- INTEGER in sqlite
+  //   FOREIGN KEY(acct) REFERENCES accounts(id)
+  // );
+  //   `,
+  //   );
+
+  const results1 = await pglite.runQuery(
+    db,
+    `SELECT schemaname, viewname, definition
+FROM pg_views
+WHERE definition ILIKE '%v_transactions%';
+`,
+    [],
+    true,
+  );
+  console.log('PGlite dependencies:', JSON.stringify(results1));
+
+  const results = await pglite.runQuery(
+    db,
+    `SELECT table_name, column_name, data_type 
+FROM information_schema.columns 
+WHERE table_schema = 'public'
+ORDER BY table_name, ordinal_position;
+`,
+    [],
+    true,
+  );
+  console.log('PGlite columns:', JSON.stringify(results));
 
   const keysStr = await asyncStorage.getItem('encrypt-keys');
   if (keysStr) {

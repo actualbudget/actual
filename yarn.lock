@@ -1640,6 +1640,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@electric-sql/pglite@npm:^0.2.17":
+  version: 0.2.17
+  resolution: "@electric-sql/pglite@npm:0.2.17"
+  checksum: 10/cb04d18614c9a3d985fa63f5ca889104eab55b15a9aa569df264e335ea559f2279ee64c1284aa68d5b92ff516dd37ae553299cf55c226a3e541d6c46416c7160
+  languageName: node
+  linkType: hard
+
 "@electron/asar@npm:^3.2.1":
   version: 3.2.4
   resolution: "@electron/asar@npm:3.2.4"
@@ -14986,6 +14993,7 @@ __metadata:
     "@actual-app/api": "workspace:^"
     "@actual-app/crdt": "workspace:^"
     "@actual-app/web": "workspace:^"
+    "@electric-sql/pglite": "npm:^0.2.17"
     "@jlongster/sql.js": "npm:^1.6.7"
     "@reduxjs/toolkit": "npm:^2.5.1"
     "@rschedule/core": "npm:^1.5.0"
