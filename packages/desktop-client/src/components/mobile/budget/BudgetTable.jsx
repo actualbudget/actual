@@ -1732,6 +1732,7 @@ function BudgetTableHeader({
           flexDirection: 'row',
           justifyContent: 'flex-end',
           alignItems: 'center',
+          gap: "7px",
         }}
       >
         {(show3Cols || !showSpentColumn) && (
@@ -1768,7 +1769,7 @@ function BudgetTableHeader({
                     )}
                     <Label
                       title={t('Budgeted')}
-                      style={{ color: theme.formInputText, paddingRight: 4 }}
+                      style={{ color: theme.formInputText, paddingRight: 4, overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: columnWidth }}
                     />
                   </View>
                   <View>
@@ -1827,7 +1828,7 @@ function BudgetTableHeader({
                     )}
                     <Label
                       title={t('Spent')}
-                      style={{ color: theme.formInputText, paddingRight: 4 }}
+                      style={{ color: theme.formInputText, paddingRight: 4, overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: columnWidth }}
                     />
                   </View>
                   <View>
