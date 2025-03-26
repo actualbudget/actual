@@ -258,7 +258,7 @@ handlers['api/bank-sync'] = async function (args) {
       ids: [args.accountId],
     });
 
-    allErrors.push(errors);
+    allErrors.push(...errors);
   } else {
     const accountsData = await handlers['accounts-get']();
     const accountIdsToSync = accountsData.map(a => a.id);
