@@ -3,7 +3,6 @@ import './polyfills';
 
 import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
-import { v4 as uuidv4 } from 'uuid';
 
 import { createTestBudget } from '../mocks/budget';
 import { captureException, captureBreadcrumb } from '../platform/exceptions';
@@ -35,6 +34,7 @@ import { app as dashboardApp } from './dashboard/app';
 import * as db from './db';
 import * as mappings from './db/mappings';
 import * as encryption from './encryption';
+import { app as encryptionApp } from './encryption/app';
 import { app as filtersApp } from './filters/app';
 import { handleBudgetImport } from './importers';
 import { app } from './main-app';
@@ -55,9 +55,7 @@ import {
   initialFullSync,
   fullSync,
   setSyncingMode,
-  makeTestMessage,
   clearFullSyncTimeout,
-  resetSync,
 } from './sync';
 import { app as syncApp } from './sync/app';
 import * as syncMigrations from './sync/migrate';
@@ -112,95 +110,6 @@ handlers['query'] = async function (query) {
   }
 
   return aqlQuery(query);
-};
-
-// A user can only enable/change their key with the file loaded. This
-// will change in the future: during onboarding the user should be
-// able to enable encryption. (Imagine if they are importing data from
-// another source, they should be able to encrypt first)
-handlers['key-make'] = async function ({ password }) {
-  if (!prefs.getPrefs()) {
-    throw new Error('user-set-key must be called with file loaded');
-  }
-
-  const salt = encryption.randomBytes(32).toString('base64');
-  const id = uuidv4();
-  const key = await encryption.createKey({ id, password, salt });
-
-  // Load the key
-  await encryption.loadKey(key);
-
-  // Make some test data to use if the key is valid or not
-  const testContent = await makeTestMessage(key.getId());
-
-  // Changing your key necessitates a sync reset as well. This will
-  // clear all existing encrypted data from the server so you won't
-  // have a mix of data encrypted with different keys.
-  return await resetSync({
-    key,
-    salt,
-    testContent: JSON.stringify({
-      ...testContent,
-      value: testContent.value.toString('base64'),
-    }),
-  });
-};
-
-// This can be called both while a file is already loaded or not. This
-// will see if a key is valid and if so save it off.
-handlers['key-test'] = async function ({ fileId, password }) {
-  const userToken = await asyncStorage.getItem('user-token');
-
-  if (fileId == null) {
-    fileId = prefs.getPrefs().cloudFileId;
-  }
-
-  let res;
-  try {
-    res = await post(getServer().SYNC_SERVER + '/user-get-key', {
-      token: userToken,
-      fileId,
-    });
-  } catch (e) {
-    console.log(e);
-    return { error: { reason: 'network' } };
-  }
-
-  const { id, salt, test: originalTest } = res;
-
-  let test = originalTest;
-  if (test == null) {
-    return { error: { reason: 'old-key-style' } };
-  }
-
-  test = JSON.parse(test);
-
-  const key = await encryption.createKey({ id, password, salt });
-  encryption.loadKey(key);
-
-  try {
-    await encryption.decrypt(Buffer.from(test.value, 'base64'), test.meta);
-  } catch (e) {
-    console.log(e);
-
-    // Unload the key, it's invalid
-    encryption.unloadKey(key);
-    return { error: { reason: 'decrypt-failure' } };
-  }
-
-  // Persist key in async storage
-  const keys = JSON.parse((await asyncStorage.getItem(`encrypt-keys`)) || '{}');
-  keys[fileId] = key.serialize();
-  await asyncStorage.setItem('encrypt-keys', JSON.stringify(keys));
-
-  // Save the key id in prefs if the are loaded. If they aren't, we
-  // are testing a key to download a file and when the file is
-  // actually downloaded it will update the prefs with the latest key id
-  if (prefs.getPrefs()) {
-    await prefs.savePrefs({ encryptKeyId: key.getId() });
-  }
-
-  return {};
 };
 
 handlers['get-did-bootstrap'] = async function () {
@@ -1095,6 +1004,7 @@ app.combine(
   payeesApp,
   spreadsheetApp,
   syncApp,
+  encryptionApp,
 );
 
 export function getDefaultDocumentDir() {
