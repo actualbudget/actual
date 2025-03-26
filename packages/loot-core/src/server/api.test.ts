@@ -1,7 +1,7 @@
-import { installAPI } from './api';
 import { getBankSyncError } from '../shared/errors';
 import { ServerHandlers } from '../types/server-handlers';
 
+import { installAPI } from './api';
 jest.mock('../shared/errors', () => ({
   getBankSyncError: jest.fn(error => `Bank sync error: ${error}`),
 }));
