@@ -213,6 +213,7 @@ const sidebars = {
             'experimental/oauth-auth',
             'experimental/multi-user',
             'experimental/rule-templating',
+            'experimental/pluggyai',
           ],
         },
         'getting-started/tips-tricks',

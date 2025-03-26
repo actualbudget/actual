@@ -98,3 +98,5 @@ websecure
 WOR
 youngcw
 OIDC
+pluggyai
+Copiar
