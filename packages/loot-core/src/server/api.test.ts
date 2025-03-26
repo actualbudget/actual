@@ -6,8 +6,8 @@ jest.mock('../shared/errors', () => ({
 }));
 
 describe('API handlers', () => {
-  let handlers;
-  let mockServerHandlers;
+  let handlers: Record<string, any>;
+  let mockServerHandlers: Record<string, jest.Mock>;
 
   beforeEach(() => {
     jest.clearAllMocks();
