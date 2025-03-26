@@ -83,7 +83,7 @@ export const size = filepath =>
   });
 
 export const copyFile = (frompath, topath) => {
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     const readStream = fs.createReadStream(frompath);
     const writeStream = fs.createWriteStream(topath);
 
@@ -91,7 +91,7 @@ export const copyFile = (frompath, topath) => {
     writeStream.on('error', reject);
 
     writeStream.on('open', () => readStream.pipe(writeStream));
-    writeStream.once('close', resolve);
+    writeStream.once('close', () => resolve());
   });
 };
 

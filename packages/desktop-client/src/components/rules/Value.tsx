@@ -67,7 +67,7 @@ export function Value<T>({
 
   function formatValue(value) {
     if (value == null || value === '') {
-      return '(nothing)';
+      return t('(nothing)');
     } else if (typeof value === 'boolean') {
       return value ? 'true' : 'false';
     } else {
@@ -104,7 +104,7 @@ export function Value<T>({
             if (item) {
               return describe(item);
             } else {
-              return '(deleted)';
+              return t('(deleted)');
             }
           }
 

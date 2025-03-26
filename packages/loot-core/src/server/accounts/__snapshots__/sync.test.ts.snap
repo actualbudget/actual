@@ -1,5 +1,87 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Account sync reconcile does rematch deleted transactions by default 1`] = `
+[
+  {
+    "account": "one",
+    "amount": 0,
+    "category": null,
+    "cleared": 1,
+    "date": 20200101,
+    "error": null,
+    "id": "id3",
+    "imported_id": "finid",
+    "imported_payee": null,
+    "is_child": 0,
+    "is_parent": 0,
+    "notes": null,
+    "parent_id": null,
+    "payee": null,
+    "payee_name": null,
+    "raw_synced_data": null,
+    "reconciled": 0,
+    "schedule": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": 0,
+    "tombstone": 1,
+    "transfer_id": null,
+  },
+  {
+    "account": "one",
+    "amount": 0,
+    "category": null,
+    "cleared": 1,
+    "date": 20200101,
+    "error": null,
+    "id": "id4",
+    "imported_id": "finid",
+    "imported_payee": null,
+    "is_child": 0,
+    "is_parent": 0,
+    "notes": null,
+    "parent_id": null,
+    "payee": null,
+    "payee_name": null,
+    "raw_synced_data": null,
+    "reconciled": 0,
+    "schedule": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": 0,
+    "tombstone": 0,
+    "transfer_id": null,
+  },
+]
+`;
+
+exports[`Account sync reconcile doesnt rematch deleted transactions if reimport disabled 1`] = `
+[
+  {
+    "account": "one",
+    "amount": 0,
+    "category": null,
+    "cleared": 1,
+    "date": 20200101,
+    "error": null,
+    "id": "id3",
+    "imported_id": "finid",
+    "imported_payee": null,
+    "is_child": 0,
+    "is_parent": 0,
+    "notes": null,
+    "parent_id": null,
+    "payee": null,
+    "payee_name": null,
+    "raw_synced_data": null,
+    "reconciled": 0,
+    "schedule": null,
+    "sort_order": 123456789,
+    "starting_balance_flag": 0,
+    "tombstone": 1,
+    "transfer_id": null,
+  },
+]
+`;
+
 exports[`Account sync reconcile handles transactions with undefined fields 1`] = `
 [
   {

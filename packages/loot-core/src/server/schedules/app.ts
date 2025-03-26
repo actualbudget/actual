@@ -16,6 +16,7 @@ import {
   getStatus,
   recurConfigToRSchedule,
 } from '../../shared/schedules';
+import { ScheduleEntity } from '../../types/models';
 import { addTransactions } from '../accounts/sync';
 import { createApp } from '../app';
 import { runQuery as aqlQuery } from '../aql';
@@ -35,8 +36,6 @@ import { undoable } from '../undo';
 import { Schedule as RSchedule } from '../util/rschedule';
 
 import { findSchedules } from './find-schedules';
-import { SchedulesHandlers } from './types/handlers';
-
 // Utilities
 
 function zip(arr1, arr2) {
@@ -185,7 +184,7 @@ async function checkIfScheduleExists(name, scheduleId) {
 export async function createSchedule({
   schedule = null,
   conditions = [],
-} = {}) {
+} = {}): Promise<ScheduleEntity['id']> {
   const scheduleId = schedule?.id || uuidv4();
 
   const { date: dateCond } = extractScheduleConds(conditions);
@@ -515,6 +514,17 @@ async function advanceSchedulesService(syncSuccess) {
     });
   }
 }
+
+export type SchedulesHandlers = {
+  'schedule/create': typeof createSchedule;
+  'schedule/update': typeof updateSchedule;
+  'schedule/delete': typeof deleteSchedule;
+  'schedule/skip-next-date': typeof skipNextDate;
+  'schedule/post-transaction': typeof postTransactionForSchedule;
+  'schedule/force-run-service': typeof advanceSchedulesService;
+  'schedule/discover': typeof discoverSchedules;
+  'schedule/get-upcoming-dates': typeof getUpcomingDates;
+};
 
 // Expose functions to the client
 export const app = createApp<SchedulesHandlers>();

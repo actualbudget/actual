@@ -22,16 +22,16 @@ import { getValidMonthBounds } from './MonthsContext';
 export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
   return [
     {
-      id: 'to-be-budgeted',
-      name: t('To Be Budgeted'),
+      id: 'to-budget',
+      name: t('To Budget'),
       categories: [
         {
-          id: 'to-be-budgeted',
-          name: t('To Be Budgeted'),
-          cat_group: 'to-be-budgeted',
+          id: 'to-budget',
+          name: t('To Budget'),
+          cat_group: 'to-budget',
           group: {
-            id: 'to-be-budgeted',
-            name: t('To Be Budgeted'),
+            id: 'to-budget',
+            name: t('To Budget'),
           },
         },
       ],

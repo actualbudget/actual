@@ -17,9 +17,9 @@ import {
   type NewUserEntity,
   type NoteEntity,
 } from '../../types/models';
-import { setAppState } from '../app/appSlice';
-import { signOut } from '../budgets/budgetsSlice';
+import { resetApp, setAppState } from '../app/appSlice';
 import { createAppAsyncThunk } from '../redux';
+import { signOut } from '../users/usersSlice';
 
 const sliceName = 'modals';
 
@@ -212,10 +212,13 @@ export type Modal =
   | {
       name: 'category-autocomplete';
       options: {
+        title?: string;
         categoryGroups?: CategoryGroupEntity[];
         onSelect: (categoryId: string, categoryName: string) => void;
         month?: string | undefined;
         showHiddenCategories?: boolean;
+        closeOnSelect?: boolean;
+        clearOnSelect?: boolean;
         onClose?: () => void;
       };
     }
@@ -453,7 +456,7 @@ export type Modal =
       };
     }
   | {
-      name: 'budget-list';
+      name: 'budget-file-selection';
     }
   | {
       name: 'confirm-transaction-edit';
@@ -626,11 +629,11 @@ const modalsSlice = createSlice({
     },
   },
   extraReducers: builder => {
-    builder
-      .addCase(setAppState, (state, action) => {
-        state.isHidden = action.payload.loadingText !== null;
-      })
-      .addCase(signOut, () => initialState);
+    builder.addCase(setAppState, (state, action) => {
+      state.isHidden = action.payload.loadingText !== null;
+    });
+    builder.addCase(signOut.fulfilled, () => initialState);
+    builder.addCase(resetApp, () => initialState);
   },
 });
 

@@ -110,12 +110,19 @@ app.post(
         newTrans.payeeName = getPayeeName(trans);
         newTrans.notes = trans.descriptionRaw || trans.description;
 
+        if (account.type === 'CREDIT') {
+          if (trans.amountInAccountCurrency) {
+            trans.amountInAccountCurrency *= -1;
+          }
+
+          trans.amount *= -1;
+        }
+
         let amountInCurrency = trans.amountInAccountCurrency ?? trans.amount;
         amountInCurrency = Math.round(amountInCurrency * 100) / 100;
 
         newTrans.transactionAmount = {
-          amount:
-            account.type === 'BANK' ? amountInCurrency : -amountInCurrency,
+          amount: amountInCurrency,
           currency: trans.currencyCode,
         };
 
