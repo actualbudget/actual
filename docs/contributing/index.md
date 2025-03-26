@@ -84,6 +84,14 @@ When you open a PR please remember to do the following:
 
 ### Writing Good Release Notes
 
+Before creating your pull request, run the command `yarn generate:release-notes`. This will guide you through the steps necessary for creating a release note for your change. You will be asked the following questions:
+1. Comma-separated GitHub username(s) - your GitHub username, or if multiple people are involved, you can specify them all (e.g. `username1, username2`)
+2. PR Number - Auto-filled with the next available PR number. If you've already created a PR, then fill this in with that PR number.
+3. Release Note Type - this will give you a select field with 4 options from the "Valid categories" section below
+4. Brief Summary - this is a short summary of your changes.
+
+For a better experience with the release note generation script, consider installing [the official GitHub CLI](https://github.com/cli/cli) and running `gh auth login`. This will allow the script to automatically fill in some information like your GitHub username and current PR information if you've already opened one from a fork you created.
+
 Create a Markdown file in the upcoming-release-notes directory of the repository you’re contributing to named after the PR number. The file should contain front matter with a category key (defining which header to put the entry under) and an authors key (defining the author of the entry). The body of the file should contain the changelog entry. Keep it short and clear — ideally one sentence, and also non-technical (unless the category is “Maintenance”). Copy-paste the template below to get started!
 
 ```markdown
