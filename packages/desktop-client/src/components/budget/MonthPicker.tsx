@@ -2,8 +2,11 @@
 import React, { type CSSProperties, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import {
+  SvgCheveronLeft,
+  SvgCheveronRight,
+} from '@actual-app/components/icons/v1';
 import { SvgCalendar } from '@actual-app/components/icons/v2';
-import { SvgCheveronLeft, SvgCheveronRight } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
