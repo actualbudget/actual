@@ -212,10 +212,13 @@ export type Modal =
   | {
       name: 'category-autocomplete';
       options: {
+        title?: string;
         categoryGroups?: CategoryGroupEntity[];
         onSelect: (categoryId: string, categoryName: string) => void;
         month?: string | undefined;
         showHiddenCategories?: boolean;
+        closeOnSelect?: boolean;
+        clearOnSelect?: boolean;
         onClose?: () => void;
       };
     }
@@ -453,7 +456,7 @@ export type Modal =
       };
     }
   | {
-      name: 'budget-list';
+      name: 'budget-file-selection';
     }
   | {
       name: 'confirm-transaction-edit';

@@ -24,10 +24,13 @@ type CategoryAutocompleteModalProps = Extract<
 >['options'];
 
 export function CategoryAutocompleteModal({
+  title,
   month,
   onSelect,
   categoryGroups,
   showHiddenCategories,
+  closeOnSelect,
+  clearOnSelect,
   onClose,
 }: CategoryAutocompleteModalProps) {
   const { t } = useTranslation();
@@ -57,7 +60,7 @@ export function CategoryAutocompleteModal({
             <ModalHeader
               title={
                 <ModalTitle
-                  title={t('Category')}
+                  title={title || t('Category')}
                   getStyle={() => ({ color: theme.menuAutoCompleteText })}
                 />
               }
@@ -87,6 +90,8 @@ export function CategoryAutocompleteModal({
                 <CategoryAutocomplete
                   embedded={true}
                   closeOnBlur={false}
+                  closeOnSelect={closeOnSelect}
+                  clearOnSelect={clearOnSelect}
                   showSplitOption={false}
                   onClose={close}
                   {...defaultAutocompleteProps}

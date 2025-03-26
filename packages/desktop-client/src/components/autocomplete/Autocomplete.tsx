@@ -50,6 +50,7 @@ type CommonAutocompleteProps<T extends Item> = {
   clearOnBlur?: boolean;
   clearOnSelect?: boolean;
   closeOnBlur?: boolean;
+  closeOnSelect?: boolean;
   onClose?: () => void;
 };
 
@@ -228,6 +229,7 @@ function SingleAutocomplete<T extends Item>({
   clearOnBlur = true,
   clearOnSelect = false,
   closeOnBlur = true,
+  closeOnSelect = !clearOnSelect,
   onClose,
   value: initialValue,
 }: SingleAutocompleteProps<T>) {
@@ -304,7 +306,9 @@ function SingleAutocomplete<T extends Item>({
 
         if (clearOnSelect) {
           setValue('');
-        } else {
+        }
+
+        if (closeOnSelect) {
           close();
         }
 
@@ -346,6 +350,7 @@ function SingleAutocomplete<T extends Item>({
             Downshift.stateChangeTypes.controlledPropUpdatedSelectedItem,
             // Do nothing if it is a "touch" selection event
             Downshift.stateChangeTypes.touchEnd,
+            Downshift.stateChangeTypes.mouseUp,
             // @ts-expect-error Types say there is no type
           ].includes(changes.type)
         ) {
@@ -393,7 +398,8 @@ function SingleAutocomplete<T extends Item>({
       onStateChange={changes => {
         if (
           !clearOnBlur &&
-          changes.type === Downshift.stateChangeTypes.mouseUp
+          (changes.type === Downshift.stateChangeTypes.mouseUp ||
+            changes.type === Downshift.stateChangeTypes.touchEnd)
         ) {
           return;
         }
@@ -566,6 +572,7 @@ function SingleAutocomplete<T extends Item>({
             filtered.length > 0 &&
             (embedded ? (
               <View
+                ref={itemsViewRef}
                 style={{ ...styles.darkScrollbar, marginTop: 5 }}
                 data-testid="autocomplete"
               >

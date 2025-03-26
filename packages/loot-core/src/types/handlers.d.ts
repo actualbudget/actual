@@ -9,6 +9,8 @@ import type { PreferencesHandlers } from '../server/preferences/app';
 import type { ReportsHandlers } from '../server/reports/app';
 import type { RulesHandlers } from '../server/rules/app';
 import type { SchedulesHandlers } from '../server/schedules/app';
+import type { SpreadsheetHandlers } from '../server/spreadsheet/app';
+import type { SyncHandlers } from '../server/sync/app';
 import type { ToolsHandlers } from '../server/tools/app';
 import type { TransactionHandlers } from '../server/transactions/app';
 
@@ -30,6 +32,8 @@ export interface Handlers
     AdminHandlers,
     ToolsHandlers,
     AccountHandlers,
-    PayeesHandlers {}
+    PayeesHandlers,
+    SpreadsheetHandlers,
+    SyncHandlers {}
 
 export type HandlerFunctions = Handlers[keyof Handlers];

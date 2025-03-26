@@ -7,9 +7,9 @@ import { View } from '@actual-app/components/view';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useSelector } from '../../redux';
 import { Modal, ModalHeader, ModalCloseButton } from '../common/Modal';
-import { BudgetList } from '../manager/BudgetList';
+import { BudgetFileSelection } from '../manager/BudgetFileSelection';
 
-export function BudgetListModal() {
+export function BudgetFileSelectionModal() {
   const { t } = useTranslation();
   const [id] = useMetadataPref('id');
   const currentFile = useSelector(state =>
@@ -17,7 +17,7 @@ export function BudgetListModal() {
   );
 
   return (
-    <Modal name="budget-list">
+    <Modal name="budget-file-selection">
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -38,7 +38,7 @@ export function BudgetListModal() {
               {currentFile?.name}
             </Text>
           </View>
-          <BudgetList showHeader={false} quickSwitchMode={true} />
+          <BudgetFileSelection showHeader={false} quickSwitchMode={true} />
         </>
       )}
     </Modal>

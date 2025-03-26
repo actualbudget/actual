@@ -29,9 +29,9 @@ import {
   parseISO,
   isValid as isValidDate,
 } from 'date-fns';
-import { UAParser } from 'ua-parser-js';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import * as Platform from 'loot-core/client/platform';
 import { setLastTransaction } from 'loot-core/client/queries/queriesSlice';
 import { runQuery } from 'loot-core/client/query-helpers';
 import { send } from 'loot-core/platform/client/fetch';
@@ -74,9 +74,6 @@ import { FieldLabel, TapField, InputField, ToggleField } from '../MobileForms';
 import { getPrettyPayee } from '../utils';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
-
-const agent = UAParser(navigator.userAgent);
-const isIOSAgent = agent.browser.name === 'Mobile Safari';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;
@@ -491,7 +488,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const [totalAmountFocused, setTotalAmountFocused] = useState(
     // iOS does not support automatically opening up the keyboard for the
     // total amount field. Hence we should not focus on it on page render.
-    !isIOSAgent,
+    !Platform.isIOSAgent,
   );
   const childTransactionElementRefMap = useRef({});
   const hasAccountChanged = useRef(false);
@@ -509,7 +506,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const isInitialMount = useInitialMount();
 
   useEffect(() => {
-    if (isInitialMount && isAdding && !isIOSAgent) {
+    if (isInitialMount && isAdding && !Platform.isIOSAgent) {
       onTotalAmountEdit();
     }
   }, [isAdding, isInitialMount, onTotalAmountEdit]);
