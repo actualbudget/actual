@@ -2,12 +2,15 @@ import React, {
   type InputHTMLAttributes,
   type KeyboardEvent,
   type Ref,
+  useRef,
 } from 'react';
 
 import { css, cx } from '@emotion/css';
 
 import { styles, type CSSProperties } from './styles';
 import { theme } from './theme';
+import { useProperFocus } from '@actual-app/web/src/hooks/useProperFocus';
+import { useMergedRefs } from '@actual-app/web/src/hooks/useMergedRefs';
 
 export const defaultInputStyle = {
   outline: 0,
@@ -38,9 +41,14 @@ export function Input({
   className,
   ...nativeProps
 }: InputProps) {
+  const ref = useRef<HTMLInputElement>(null);
+  useProperFocus(ref, true);
+
+  const mergedRef = useMergedRefs<HTMLInputElement>(ref, inputRef);
+
   return (
     <input
-      ref={inputRef}
+      ref={mergedRef}
       className={cx(
         css(
           defaultInputStyle,
