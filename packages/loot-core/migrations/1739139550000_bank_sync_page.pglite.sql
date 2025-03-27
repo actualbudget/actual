@@ -1,7 +1,0 @@
-BEGIN TRANSACTION;
-
-ALTER TABLE accounts ADD COLUMN last_sync TIMESTAMP;
-
-ALTER TABLE transactions ADD COLUMN raw_synced_data JSONB;
-
-COMMIT;

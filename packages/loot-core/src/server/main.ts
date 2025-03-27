@@ -3,7 +3,6 @@ import './polyfills';
 
 import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
-import { PGlite } from '@electric-sql/pglite';
 import { v4 as uuidv4 } from 'uuid';
 
 import { createTestBudget } from '../mocks/budget';
@@ -1145,7 +1144,7 @@ export async function initApp(isDev, socketName) {
 
   const db = await pglite.openDatabase();
 
-  const results = await db.query(
+  const results = await db.execute(
     `SELECT table_name, column_name, data_type 
       FROM information_schema.columns 
       WHERE table_schema = 'public'

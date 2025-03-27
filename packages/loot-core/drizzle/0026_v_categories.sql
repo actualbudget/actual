@@ -1,0 +1,1 @@
+CREATE VIEW "public"."v_categories" AS (select "id", "name", "is_income", "hidden", "cat_group" as "group", "sort_order", "tombstone" from "categories");
