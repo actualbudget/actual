@@ -80,7 +80,6 @@ export async function getMigrationList(
   const files = await fs.listDir(migrationsDir);
   return files
     .filter(name => name.match(/(\.sql|\.js)$/))
-    .filter(name => !name.includes('pglite'))
     .sort((m1, m2) => {
       const id1 = getMigrationId(m1);
       const id2 = getMigrationId(m2);
