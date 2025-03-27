@@ -5,12 +5,12 @@ import React, {
   useRef,
 } from 'react';
 
+import { useMergedRefs } from '@actual-app/web/src/hooks/useMergedRefs';
+import { useProperFocus } from '@actual-app/web/src/hooks/useProperFocus';
 import { css, cx } from '@emotion/css';
 
 import { styles, type CSSProperties } from './styles';
 import { theme } from './theme';
-import { useProperFocus } from '@actual-app/web/src/hooks/useProperFocus';
-import { useMergedRefs } from '@actual-app/web/src/hooks/useMergedRefs';
 
 export const defaultInputStyle = {
   outline: 0,
