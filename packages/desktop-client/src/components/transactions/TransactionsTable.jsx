@@ -826,6 +826,7 @@ const Transaction = memo(function Transaction({
   listContainerRef,
   showSelection,
   allowSplitTransaction,
+  allowPendingTransaction,
 }) {
   const dispatch = useDispatch();
   const dispatchSelected = useSelectedDispatch();
@@ -1418,14 +1419,25 @@ const Transaction = memo(function Transaction({
           textAlign="flex"
           value={categoryId}
           formatter={value =>
-            value
-              ? getDisplayValue(
-                  getCategoriesById(categoryGroups)[value],
-                  'name',
-                )
-              : transaction.id
-                ? 'Categorize'
-                : ''
+            value === 'Due' ? (
+              <span
+                className={css({
+                  display: 'inline-flex',
+                  padding: '3px 7px',
+                  borderRadius: 3,
+                  userSelect: 'none',
+                  backgroundColor: theme.tableTextInactive,
+                })}
+              >
+                <i>Pending</i>
+              </span>
+            ) : value ? (
+              (getCategoriesById(categoryGroups)[value]?.name ?? '')
+            ) : transaction.id ? (
+              'Categorize'
+            ) : (
+              ''
+            )
           }
           exposed={focusedField === 'category'}
           onExpose={name => !isPreview && onEdit(id, name)}
@@ -1466,6 +1478,9 @@ const Transaction = memo(function Transaction({
                 focused={true}
                 clearOnBlur={false}
                 showSplitOption={!isChild && !isParent && allowSplitTransaction}
+                showPendingOption={
+                  !isChild && !isParent && allowPendingTransaction
+                }
                 shouldSaveFromKey={shouldSaveFromKey}
                 inputProps={{ onBlur, onKeyDown, style: inputStyle }}
                 onUpdate={onUpdate}
@@ -1739,6 +1754,7 @@ function NewTransaction({
           balance={balance}
           showSelection={true}
           allowSplitTransaction={true}
+          allowPendingTransaction={true}
         />
       ))}
       <View
@@ -2207,7 +2223,7 @@ export const TransactionTable = forwardRef((props, ref) => {
         }),
       );
       newNavigator.onEdit('temp', 'account');
-    } else {
+    } else if (shouldAdd.current) {
       const transactions = latestState.current.newTransactions;
       const lastDate = transactions.length > 0 ? transactions[0].date : null;
       setNewTransactions(
@@ -2218,6 +2234,7 @@ export const TransactionTable = forwardRef((props, ref) => {
         ),
       );
       newNavigator.onEdit('temp', 'date');
+      console.log(transactions);
       props.onAdd(transactions);
     }
     shouldAdd.current = false;
