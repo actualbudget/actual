@@ -76,6 +76,7 @@
     "csv-stringify": "^6.6.0",
     "date-fns": "^4.1.0",
     "deep-equal": "^2.2.3",
+    "drizzle-orm": "^0.41.0",
     "handlebars": "^4.7.8",
     "lru-cache": "^11.2.2",
     "md5": "^2.3.0",

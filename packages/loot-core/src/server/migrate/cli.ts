@@ -6,7 +6,6 @@ import * as path from 'path';
 import yargs from 'yargs';
 
 import { logger } from '../../platform/server/log';
-import * as pglite from '../../platform/server/pglite';
 import * as sqlite from '../../platform/server/sqlite';
 
 import {
@@ -17,9 +16,6 @@ import {
   getAppliedMigrations,
   getPending,
   migrate,
-  migratePGlite,
-  getMigrationListPGlite,
-  getAppliedMigrationsPGlite,
 } from './migrations';
 
 const argv = yargs()
@@ -64,19 +60,6 @@ async function list(db) {
   pending.forEach(name => logger.log('  ', name));
 }
 
-async function listPGlite(db) {
-  const migrationsDir = getMigrationsDir();
-  const applied = await getAppliedMigrationsPGlite(db);
-  const all = await getMigrationListPGlite(migrationsDir);
-  const pending = getPending(applied, all);
-
-  console.log('Applied migrations:');
-  applied.forEach(id => console.log('  ', getUpMigration(id, all)));
-
-  console.log('\nPending migrations:');
-  pending.forEach(name => console.log('  ', name));
-}
-
 const cmd = argv._[0];
 
 withMigrationsDir(argv.m || getMigrationsDir(), async () => {
@@ -87,37 +70,19 @@ withMigrationsDir(argv.m || getMigrationsDir(), async () => {
         path.join(__dirname, '../../../src/server/sql/init.sql'),
         'utf8',
       );
-      if (argv.dbMode === 'pglite') {
-        const database = await pglite.openDatabase(argv.db);
-        await database.exec(initSql);
-      } else {
-        const database = sqlite.openDatabase(argv.db);
-        await sqlite.execQuery(database, initSql);
-      }
+      const database = sqlite.openDatabase(argv.db);
+      await sqlite.execQuery(database, initSql);
       break;
     case 'migrate':
-      if (argv.dbMode === 'pglite') {
-        const applied = await migratePGlite(await pglite.openDatabase(argv.db));
-        if (applied.length === 0) {
-          console.log('No pending migrations');
-        } else {
-          console.log('Applied migrations:\n' + applied.join('\n'));
-        }
+      const applied = await migrate(sqlite.openDatabase(argv.db));
+      if (applied.length === 0) {
+        console.log('No pending migrations');
       } else {
-        const applied = await migrate(sqlite.openDatabase(argv.db));
-        if (applied.length === 0) {
-          console.log('No pending migrations');
-        } else {
-          console.log('Applied migrations:\n' + applied.join('\n'));
-        }
+        console.log('Applied migrations:\n' + applied.join('\n'));
       }
       break;
     case 'list':
-      if (argv.dbMode === 'pglite') {
-        await listPGlite(await pglite.openDatabase(argv.db));
-      } else {
-        await list(sqlite.openDatabase(argv.db));
-      }
+      await list(sqlite.openDatabase(argv.db));
       break;
     case 'create':
     default:
