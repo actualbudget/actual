@@ -1,5 +1,0 @@
-BEGIN TRANSACTION;
-
-ALTER TABLE accounts ADD COLUMN account_sync_source TEXT;
-
-COMMIT;

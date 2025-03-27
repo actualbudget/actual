@@ -2,18 +2,16 @@
 // We have to bundle in JS migrations manually to avoid having to `eval`
 // them which doesn't play well with CSP. There isn't great, and eventually
 // we can remove this migration.
-import { PGlite } from '@electric-sql/pglite';
 import { Database } from '@jlongster/sql.js';
+import { sql } from 'drizzle-orm';
 
+import drizzleMigrations from '../../../drizzle/migrations.json';
 import m1632571489012 from '../../../migrations/1632571489012_remove_cache';
-import m1632571489012PGlite from '../../../migrations/1632571489012_remove_cache.pglite';
 import m1722717601000 from '../../../migrations/1722717601000_reports_move_selected_categories';
-import m1722717601000PGlite from '../../../migrations/1722717601000_reports_move_selected_categories.pglite';
 import m1722804019000 from '../../../migrations/1722804019000_create_dashboard_table';
-import m1722804019000PGlite from '../../../migrations/1722804019000_create_dashboard_table.pglite';
 import m1723665565000 from '../../../migrations/1723665565000_prefs';
-import m1723665565000PGlite from '../../../migrations/1723665565000_prefs.pglite';
 import * as fs from '../../platform/server/fs';
+import * as pglite from '../../platform/server/pglite';
 import * as sqlite from '../../platform/server/sqlite';
 import * as prefs from '../prefs';
 
@@ -24,13 +22,6 @@ const javascriptMigrations = {
   1722717601000: m1722717601000,
   1722804019000: m1722804019000,
   1723665565000: m1723665565000,
-};
-
-const javascriptMigrationsPGlite = {
-  1632571489012: m1632571489012PGlite,
-  1722717601000: m1722717601000PGlite,
-  1722804019000: m1722804019000PGlite,
-  1723665565000: m1723665565000PGlite,
 };
 
 export async function withMigrationsDir(
@@ -73,35 +64,12 @@ async function patchBadMigrations(db: Database) {
   }
 }
 
-async function patchBadMigrationsPGlite(db: PGlite) {
-  const badFiltersMigration = 1685375406832;
-  const newFiltersMigration = 1688749527273;
-  const pgAppliedIds = await getAppliedMigrationsPGlite(db);
-  if (pgAppliedIds.includes(badFiltersMigration)) {
-    await db.query('DELETE FROM __migrations__ WHERE id = $1', [
-      badFiltersMigration,
-    ]);
-    await db.query('INSERT INTO __migrations__ (id) VALUES ($1)', [
-      newFiltersMigration,
-    ]);
-  }
-}
-
 export async function getAppliedMigrations(db: Database): Promise<number[]> {
   const rows = await sqlite.runQuery<{ id: number }>(
     db,
     'SELECT * FROM __migrations__ ORDER BY id ASC',
     [],
     true,
-  );
-  return rows.map(row => row.id);
-}
-
-export async function getAppliedMigrationsPGlite(
-  db: PGlite,
-): Promise<number[]> {
-  const { rows } = await db.query<{ id: number }>(
-    'SELECT id FROM __migrations__ ORDER BY id ASC',
   );
   return rows.map(row => row.id);
 }
@@ -113,25 +81,6 @@ export async function getMigrationList(
   return files
     .filter(name => name.match(/(\.sql|\.js)$/))
     .filter(name => !name.includes('pglite'))
-    .sort((m1, m2) => {
-      const id1 = getMigrationId(m1);
-      const id2 = getMigrationId(m2);
-      if (id1 < id2) {
-        return -1;
-      } else if (id1 > id2) {
-        return 1;
-      }
-      return 0;
-    });
-}
-
-export async function getMigrationListPGlite(
-  migrationsDir: string,
-): Promise<string[]> {
-  const files = await fs.listDir(migrationsDir);
-  return files
-    .filter(name => name.match(/(\.sql|\.js)$/))
-    .filter(name => name.includes('pglite'))
     .sort((m1, m2) => {
       const id1 = getMigrationId(m1);
       const id2 = getMigrationId(m2);
@@ -170,30 +119,9 @@ async function applyJavaScript(db: Database, id) {
   });
 }
 
-async function applyJavaScriptPGlite(db: PGlite, id) {
-  if (javascriptMigrationsPGlite[id] == null) {
-    throw new Error('Could not find JS migration code to run for ' + id);
-  }
-
-  const run = javascriptMigrationsPGlite[id];
-  return run(db, {
-    fs,
-    fileId: prefs.getPrefs()?.id,
-  });
-}
-
 async function applySql(db: Database, sql: string) {
   try {
     await sqlite.execQuery(db, sql);
-  } catch (e) {
-    console.log('Error applying sql:', sql);
-    throw e;
-  }
-}
-
-async function applySqlPGlite(db: PGlite, sql: string) {
-  try {
-    await db.exec(sql);
   } catch (e) {
     console.log('Error applying sql:', sql);
     throw e;
@@ -212,22 +140,6 @@ export async function applyMigration(
     await applySql(db, code);
   }
   await sqlite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES (?)', [
-    getMigrationId(name),
-  ]);
-}
-
-export async function applyMigrationPGlite(
-  db: PGlite,
-  name: string,
-  migrationsDir: string,
-): Promise<void> {
-  const code = await fs.readFile(fs.join(migrationsDir, name));
-  if (name.match(/\.js$/)) {
-    await applyJavaScriptPGlite(db, getMigrationId(name));
-  } else {
-    await applySqlPGlite(db, code);
-  }
-  await db.query('INSERT INTO __migrations__ (id) VALUES ($1)', [
     getMigrationId(name),
   ]);
 }
@@ -266,18 +178,70 @@ export async function migrate(db: Database): Promise<string[]> {
   return pending;
 }
 
-export async function migratePGlite(db: PGlite): Promise<string[]> {
-  await patchBadMigrationsPGlite(db);
-  const appliedIds = await getAppliedMigrationsPGlite(db);
-  const available = await getMigrationListPGlite(MIGRATIONS_DIR);
+async function ensureMigrationsTable(db: pglite.PgliteDatabase) {
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS drizzle_migrations (
+      hash TEXT PRIMARY KEY,
+      created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    )
+  `);
+}
 
-  checkDatabaseValidity(appliedIds, available);
+async function getMigratedHashes(db: pglite.PgliteDatabase): Promise<string[]> {
+  const result = await db.execute(`
+    SELECT hash FROM drizzle_migrations ORDER BY created_at ASC
+  `);
+  return result.rows.map(row => row.hash as string);
+}
 
-  const pending = getPending(appliedIds, available);
+async function recordMigration(db: pglite.PgliteDatabase, hash: string) {
+  await db.execute(
+    sql`
+      INSERT INTO drizzle_migrations (hash, created_at)
+      VALUES (${hash}, NOW())
+      ON CONFLICT DO NOTHING
+    `,
+  );
+}
 
-  for (const migration of pending) {
-    await applyMigrationPGlite(db, migration, MIGRATIONS_DIR);
+export async function migratePGlite(db: pglite.PgliteDatabase) {
+  console.log('🚀 Starting pglite migration...');
+
+  // Ensure migrations table exists
+  await ensureMigrationsTable(db);
+
+  // Get already executed migrations
+  const executedHashes = await getMigratedHashes(db);
+
+  // Filter and execute pending migrations
+  const pendingMigrations = drizzleMigrations.filter(
+    migration => !executedHashes.includes(migration.hash),
+  );
+
+  if (pendingMigrations.length === 0) {
+    console.log('✨ No pending migrations found.');
+    return;
   }
 
-  return pending;
+  console.log(`📦 Found ${pendingMigrations.length} pending migrations`);
+
+  // Execute migrations in sequence
+  for (const migration of pendingMigrations) {
+    console.log(`⚡ Executing migration: ${migration.hash}`);
+    try {
+      // Execute each SQL statement in sequence
+      for (const sql of migration.sql) {
+        await db.execute(sql);
+      }
+
+      // Record successful migration
+      await recordMigration(db, migration.hash);
+      console.log(`✅ Successfully completed migration: ${migration.hash}`);
+    } catch (error) {
+      console.error(`❌ Failed to execute migration ${migration.hash}:`, error);
+      throw error;
+    }
+  }
+
+  console.log('🎉 All migrations completed successfully');
 }
