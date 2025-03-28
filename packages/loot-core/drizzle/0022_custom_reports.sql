@@ -23,3 +23,5 @@ CREATE TABLE "custom_reports" (
 	"sort_by" text,
 	"tombstone" boolean DEFAULT false
 );
+--> statement-breakpoint
+CREATE INDEX "custom_reports_tombstone_index" ON "custom_reports" USING btree ("tombstone");

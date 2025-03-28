@@ -1,6 +1,6 @@
 {
-  "id": "990bb519-26b6-40c7-b725-5185863f10a2",
-  "prevId": "d4154c7d-0a4c-4f94-915a-927742b2015e",
+  "id": "8d8c0d44-bd79-47ef-9394-fdb528531d94",
+  "prevId": "55df274d-3b84-438b-ac6f-f09fbf60ea84",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -2436,6 +2436,195 @@
   "roles": {},
   "policies": {},
   "views": {
+    "public.v_categories": {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(36)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_income": {
+          "name": "is_income",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "hidden": {
+          "name": "hidden",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tombstone": {
+          "name": "tombstone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        }
+      },
+      "definition": "select \"id\", \"name\", \"is_income\", \"hidden\", \"cat_group\" as \"group\", \"sort_order\", \"tombstone\" from \"categories\"",
+      "name": "v_categories",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": false
+    },
+    "public.v_payees": {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(36)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "transfer_acct": {
+          "name": "transfer_acct",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "favorite": {
+          "name": "favorite",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "learn_categories": {
+          "name": "learn_categories",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "tombstone": {
+          "name": "tombstone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        }
+      },
+      "definition": "select \"payees\".\"id\", COALESCE(\"accounts\".\"name\", \"payees\".\"name\") as \"name\", \"payees\".\"transfer_acct\", \"payees\".\"favorite\", \"payees\".\"learn_categories\", \"payees\".\"tombstone\" from \"payees\" left join \"accounts\" on (\"payees\".\"transfer_acct\" = \"accounts\".\"id\" and \"accounts\".\"tombstone\" IS FALSE) where (\"payees\".\"transfer_acct\" is null or \"accounts\".\"id\" is not null)",
+      "name": "v_payees",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": false
+    },
+    "public.v_schedules": {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rule": {
+          "name": "rule",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "next_date": {
+          "name": "next_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "completed": {
+          "name": "completed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "posts_transaction": {
+          "name": "posts_transaction",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tombstone": {
+          "name": "tombstone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_payee": {
+          "name": "_payee",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_account": {
+          "name": "_account",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_amount": {
+          "name": "_amount",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_amountOp": {
+          "name": "_amountOp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_date": {
+          "name": "_date",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_conditions": {
+          "name": "_conditions",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_actions": {
+          "name": "_actions",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "\n    WITH parsed_rule_conditions AS (\n      SELECT\n        \"rules\".\"id\" AS rule_id,\n        jsonb_extract_path_text(condition, 'value') AS value,\n        condition ->> 'field' AS field,\n        condition ->> 'op' AS op\n      FROM\n        \"rules\"\n      CROSS JOIN\n        jsonb_array_elements(\"rules\".\"conditions\"::jsonb) AS condition\n    )\n    SELECT\n        \"schedules\".\"id\",\n        \"schedules\".\"name\",\n        \"schedules\".\"rule\",\n        CASE\n            WHEN \"schedules_next_date\".\"local_next_date_ts\" = \"schedules_next_date\".\"base_next_date_ts\" THEN \"schedules_next_date\".\"local_next_date\"\n            ELSE \"schedules_next_date\".\"base_next_date\"\n        END AS next_date,\n        \"schedules\".\"completed\",\n        \"schedules\".\"posts_transaction\",\n        \"schedules\".\"tombstone\",\n        \"payee_mapping\".\"targetId\" AS _payee,\n        account_condition.value AS _account,\n        amount_condition.value AS _amount,\n        amount_condition.op AS _amountOp,\n        date_condition.value AS _date,\n        \"rules\".\"conditions\" AS _conditions,\n        \"rules\".\"actions\" AS _actions\n    FROM\n        \"schedules\"\n    LEFT JOIN\n        \"schedules_next_date\" ON \"schedules_next_date\".\"schedule_id\" = \"schedules\".\"id\"\n    LEFT JOIN\n        \"rules\" ON \"rules\".\"id\" = \"schedules\".\"rule\"\n    LEFT JOIN\n        parsed_rule_conditions payee_condition\n          ON payee_condition.rule_id = \"rules\".\"id\"\n            AND payee_condition.field = 'payee'\n    LEFT JOIN\n        \"payee_mapping\" ON \"payee_mapping\".\"id\" = payee_condition.value\n    LEFT JOIN\n        parsed_rule_conditions account_condition\n          ON account_condition.rule_id = \"rules\".\"id\"\n            AND account_condition.field = 'account'\n    LEFT JOIN\n        parsed_rule_conditions amount_condition\n          ON amount_condition.rule_id = \"rules\".\"id\"\n            AND amount_condition.field = 'amount'\n    LEFT JOIN\n        parsed_rule_conditions date_condition\n          ON date_condition.rule_id = \"rules\".\"id\"\n            AND date_condition.field = 'date'\n  ",
+      "name": "v_schedules",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": false
+    },
     "public.v_transactions_internal": {
       "columns": {
         "id": {
@@ -2690,6 +2879,135 @@
       },
       "definition": "\n    SELECT\n      \"v_transactions_internal\".*\n    FROM\n      \"v_transactions_internal\"\n    LEFT JOIN\n      \"transactions\"\n        ON (\"transactions\".\"isChild\" IS TRUE\n        AND \"transactions\".\"id\" = \"v_transactions_internal\".\"parent_id\")\n    WHERE\n      COALESCE(\"transactions\".\"tombstone\", FALSE) IS FALSE\n      AND (\"v_transactions_internal\".\"is_child\" IS FALSE OR \"transactions\".\"tombstone\" IS FALSE)\n  ",
       "name": "v_transactions_internal_alive",
+      "schema": "public",
+      "isExisting": false,
+      "materialized": false
+    },
+    "public.v_transactions": {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_parent": {
+          "name": "is_parent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_child": {
+          "name": "is_child",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parent_id": {
+          "name": "parent_id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "account": {
+          "name": "account",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "category": {
+          "name": "category",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "amount": {
+          "name": "amount",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payee": {
+          "name": "payee",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "imported_id": {
+          "name": "imported_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "error": {
+          "name": "error",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "imported_payee": {
+          "name": "imported_payee",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "starting_balance_flag": {
+          "name": "starting_balance_flag",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "transfer_id": {
+          "name": "transfer_id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "schedule": {
+          "name": "schedule",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cleared": {
+          "name": "cleared",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reconciled": {
+          "name": "reconciled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tombstone": {
+          "name": "tombstone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sort_order": {
+          "name": "sort_order",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "\n    SELECT\n      \"v_transactions_internal_alive\".\"id\",\n      \"v_transactions_internal_alive\".\"is_parent\",\n      \"v_transactions_internal_alive\".\"is_child\",\n      \"v_transactions_internal_alive\".\"parent_id\",\n      \"accounts\".\"id\" AS account,\n      \"categories\".\"id\" AS category,\n      \"v_transactions_internal_alive\".\"amount\",\n      \"payees\".\"id\" AS payee,\n      \"v_transactions_internal_alive\".\"notes\",\n      \"v_transactions_internal_alive\".\"date\",\n      \"v_transactions_internal_alive\".\"imported_id\",\n      \"v_transactions_internal_alive\".\"error\",\n      \"v_transactions_internal_alive\".\"imported_payee\",\n      \"v_transactions_internal_alive\".\"starting_balance_flag\",\n      \"v_transactions_internal_alive\".\"transfer_id\",\n      \"v_transactions_internal_alive\".\"sort_order\",\n      \"v_transactions_internal_alive\".\"cleared\",\n      \"v_transactions_internal_alive\".\"reconciled\",\n      \"v_transactions_internal_alive\".\"tombstone\",\n      \"v_transactions_internal_alive\".\"schedule\"\n    FROM\n      \"v_transactions_internal_alive\"\n    LEFT JOIN\n      \"payees\"\n        ON (\"payees\".\"id\" = \"v_transactions_internal_alive\".\"payee\"\n        AND \"payees\".\"tombstone\" IS FALSE)\n    LEFT JOIN\n      \"categories\"\n        ON (\"categories\".\"id\" = \"v_transactions_internal_alive\".\"category\"\n        AND \"categories\".\"tombstone\" IS FALSE)\n    LEFT JOIN\n      \"accounts\"\n        ON (\"accounts\".\"id\" = \"v_transactions_internal_alive\".\"account\"\n        AND \"accounts\".\"tombstone\" IS FALSE)\n    ORDER BY\n      \"v_transactions_internal_alive\".\"date\" DESC,\n      \"v_transactions_internal_alive\".\"starting_balance_flag\",\n      \"v_transactions_internal_alive\".\"sort_order\" DESC,\n      \"v_transactions_internal_alive\".\"id\"\n  ",
+      "name": "v_transactions",
       "schema": "public",
       "isExisting": false,
       "materialized": false

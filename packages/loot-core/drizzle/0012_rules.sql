@@ -6,3 +6,5 @@ CREATE TABLE "rules" (
 	"tombstone" boolean DEFAULT false,
 	"conditions_op" text
 );
+--> statement-breakpoint
+CREATE INDEX "rules_tombstone_index" ON "rules" USING btree ("tombstone");

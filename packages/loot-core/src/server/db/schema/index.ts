@@ -6,6 +6,7 @@ import {
   boolean,
   customType,
   date,
+  index,
   integer,
   jsonb,
   PgColumnBuilderBase,
@@ -65,68 +66,108 @@ function isFalse(column: Column) {
 export const banksTable = pgTable<
   'banks',
   Record<keyof DbBank, PgColumnBuilderBase>
->('banks', {
-  id: varchar({ length: 36 }).primaryKey(),
-  name: text(),
-  bank_id: text(),
-  tombstone: boolean().default(false),
-});
+>(
+  'banks',
+  {
+    id: varchar({ length: 36 }).primaryKey(),
+    name: text(),
+    bank_id: text(),
+    tombstone: boolean().default(false),
+  },
+  table => [index().on(table.bank_id), index().on(table.tombstone)],
+);
 
 export const accountsTable = pgTable<
   'accounts',
   Record<keyof DbAccount, PgColumnBuilderBase>
->('accounts', {
-  id: varchar({ length: 36 }).primaryKey(),
-  name: text(),
-  offbudget: boolean().default(false),
-  closed: boolean().default(false),
-  tombstone: boolean().default(false),
-  sort_order: bigint({ mode: 'number' }),
-  account_id: text(),
-  balance_current: bigint({ mode: 'number' }),
-  balance_available: bigint({ mode: 'number' }),
-  balance_limit: bigint({ mode: 'number' }),
-  mask: text(),
-  official_name: text(),
-  type: text(),
-  subtype: text(),
-  bank: varchar({ length: 36 }).references(() => banksTable.id),
-  account_sync_source: text(),
-});
+>(
+  'accounts',
+  {
+    id: varchar({ length: 36 }).primaryKey(),
+    name: text(),
+    offbudget: boolean().default(false),
+    closed: boolean().default(false),
+    sort_order: bigint({ mode: 'number' }),
+    account_id: text(),
+    balance_current: bigint({ mode: 'number' }),
+    balance_available: bigint({ mode: 'number' }),
+    balance_limit: bigint({ mode: 'number' }),
+    mask: text(),
+    official_name: text(),
+    type: text(),
+    subtype: text(),
+    bank: varchar({ length: 36 }).references(() => banksTable.id),
+    account_sync_source: text(),
+    tombstone: boolean().default(false),
+  },
+  table => [
+    index().on(table.bank),
+    index().on(table.account_id),
+    index().on(table.closed),
+    index().on(table.offbudget),
+    index().on(table.sort_order),
+    index().on(table.tombstone),
+  ],
+);
 
 export const categoryGroupsTable = pgTable<
   'category_groups',
   Record<keyof DbCategoryGroup, PgColumnBuilderBase>
->('category_groups', {
-  id: varchar({ length: 36 }).primaryKey(),
-  name: text(),
-  is_income: boolean().default(false),
-  sort_order: bigint({ mode: 'number' }),
-  hidden: boolean().default(false),
-  tombstone: boolean().default(false),
-});
+>(
+  'category_groups',
+  {
+    id: varchar({ length: 36 }).primaryKey(),
+    name: text(),
+    is_income: boolean().default(false),
+    sort_order: bigint({ mode: 'number' }),
+    hidden: boolean().default(false),
+    tombstone: boolean().default(false),
+  },
+  table => [
+    index().on(table.is_income),
+    index().on(table.hidden),
+    index().on(table.sort_order),
+    index().on(table.tombstone),
+  ],
+);
 
 export const categoriesTable = pgTable<
   'categories',
   Record<keyof DbCategory, PgColumnBuilderBase>
->('categories', {
-  id: varchar({ length: 36 }).primaryKey(),
-  name: text(),
-  is_income: boolean().default(false),
-  cat_group: varchar({ length: 36 }).references(() => categoryGroupsTable.id),
-  sort_order: bigint({ mode: 'number' }),
-  hidden: boolean().default(false),
-  goal_def: jsonb(),
-  tombstone: boolean().default(false),
-});
+>(
+  'categories',
+  {
+    id: varchar({ length: 36 }).primaryKey(),
+    name: text(),
+    is_income: boolean().default(false),
+    cat_group: varchar({ length: 36 }).references(() => categoryGroupsTable.id),
+    sort_order: bigint({ mode: 'number' }),
+    hidden: boolean().default(false),
+    goal_def: jsonb(),
+    tombstone: boolean().default(false),
+  },
+  table => [
+    index().on(table.cat_group),
+    index().on(table.is_income),
+    index().on(table.hidden),
+    index().on(table.sort_order),
+    index().on(table.tombstone),
+  ],
+);
 
 export const categoryMappingTable = pgTable<
   'category_mapping',
   Record<keyof DbCategoryMapping, PgColumnBuilderBase>
->('category_mapping', {
-  id: varchar({ length: 36 }).references(() => categoriesTable.id),
-  transferId: varchar({ length: 36 }).references(() => categoriesTable.id),
-});
+>(
+  'category_mapping',
+  {
+    id: varchar({ length: 36 })
+      .primaryKey()
+      .references(() => categoriesTable.id),
+    transferId: varchar({ length: 36 }).references(() => categoriesTable.id),
+  },
+  table => [index().on(table.transferId)],
+);
 
 export const kvCacheTable = pgTable<
   'kv_cache',
@@ -139,30 +180,43 @@ export const kvCacheTable = pgTable<
 export const kvCacheKeyTable = pgTable<
   'kv_cache_key',
   Record<keyof DbKvCacheKey, PgColumnBuilderBase>
->('kv_cache_key', {
-  id: varchar({ length: 36 }).primaryKey(),
-  key: text().references(() => kvCacheTable.key),
-});
+>(
+  'kv_cache_key',
+  {
+    id: varchar({ length: 36 }).primaryKey(),
+    key: text().references(() => kvCacheTable.key),
+  },
+  table => [index().on(table.key)],
+);
 
 export const messagesClockTable = pgTable<
   'messages_clock',
   Record<keyof DbClockMessage, PgColumnBuilderBase>
 >('messages_clock', {
   id: varchar({ length: 36 }).primaryKey(),
-  clock: text(),
+  clock: jsonb(),
 });
 
 export const messagesCrdtTable = pgTable<
   'messages_crdt',
   Record<keyof DbCrdtMessage, PgColumnBuilderBase>
->('messages_crdt', {
-  id: varchar({ length: 36 }).primaryKey(),
-  timestamp: text(),
-  dataset: text(),
-  row: varchar({ length: 36 }),
-  column: text(),
-  value: bytea(),
-});
+>(
+  'messages_crdt',
+  {
+    id: varchar({ length: 36 }).primaryKey(),
+    timestamp: text(),
+    dataset: text(),
+    row: varchar({ length: 36 }),
+    column: text(),
+    value: bytea(),
+  },
+  table => [
+    index().on(table.dataset),
+    index().on(table.row),
+    index().on(table.column),
+    index().on(table.timestamp),
+  ],
+);
 
 export const notesTable = pgTable<
   'notes',
@@ -175,55 +229,86 @@ export const notesTable = pgTable<
 export const payeesTable = pgTable<
   'payees',
   Record<keyof DbPayee, PgColumnBuilderBase>
->('payees', {
-  id: varchar({ length: 36 }).primaryKey(),
-  name: text(),
-  transfer_acct: varchar({ length: 36 }).references(() => accountsTable.id),
-  favorite: boolean().default(false),
-  learn_categories: boolean().default(true),
-  tombstone: boolean().default(false),
-  // Unused in codebase. Can this be removed?
-  category: text(),
-});
+>(
+  'payees',
+  {
+    id: varchar({ length: 36 }).primaryKey(),
+    name: text(),
+    transfer_acct: varchar({ length: 36 }).references(() => accountsTable.id),
+    favorite: boolean().default(false),
+    learn_categories: boolean().default(true),
+    tombstone: boolean().default(false),
+    // Unused in codebase. Can this be removed?
+    category: text(),
+  },
+  table => [
+    index().on(table.transfer_acct),
+    index().on(table.favorite),
+    index().on(table.learn_categories),
+    index().on(table.tombstone),
+  ],
+);
 
 export const payeeMappingTable = pgTable<
   'payee_mapping',
   Record<keyof DbPayeeMapping, PgColumnBuilderBase>
->('payee_mapping', {
-  id: varchar({ length: 36 }).references(() => payeesTable.id),
-  targetId: varchar({ length: 36 }).references(() => payeesTable.id),
-});
+>(
+  'payee_mapping',
+  {
+    id: varchar({ length: 36 })
+      .primaryKey()
+      .references(() => payeesTable.id),
+    targetId: varchar({ length: 36 }).references(() => payeesTable.id),
+  },
+  table => [index().on(table.targetId)],
+);
 
 export const rulesTable = pgTable<
   'rules',
   Record<keyof DbRule, PgColumnBuilderBase>
->('rules', {
-  id: varchar({ length: 36 }).primaryKey(),
-  stage: text({ enum: ['pre', 'post'] }),
-  conditions: jsonb(),
-  actions: jsonb(),
-  tombstone: boolean().default(false),
-  conditions_op: text({ enum: ['and', 'or'] }),
-});
+>(
+  'rules',
+  {
+    id: varchar({ length: 36 }).primaryKey(),
+    stage: text({ enum: ['pre', 'post'] }),
+    // Consider indexing in the future.
+    conditions: jsonb(),
+    // Consider indexing in the future.
+    actions: jsonb(),
+    tombstone: boolean().default(false),
+    conditions_op: text({ enum: ['and', 'or'] }),
+  },
+  table => [index().on(table.tombstone)],
+);
 
 export const schedulesTable = pgTable<
   'schedules',
   Record<keyof DbSchedule, PgColumnBuilderBase>
->('schedules', {
-  id: varchar({ length: 36 }).primaryKey(),
-  name: text(),
-  rule: varchar({ length: 36 }).references(() => rulesTable.id),
-  active: boolean().default(false),
-  completed: boolean().default(false),
-  posts_transaction: boolean().default(false),
-  tombstone: boolean().default(false),
-});
+>(
+  'schedules',
+  {
+    id: varchar({ length: 36 }).primaryKey(),
+    name: text(),
+    rule: varchar({ length: 36 }).references(() => rulesTable.id),
+    active: boolean().default(false),
+    completed: boolean().default(false),
+    posts_transaction: boolean().default(false),
+    tombstone: boolean().default(false),
+  },
+  table => [index().on(table.rule), index().on(table.tombstone)],
+);
 
+/**
+ * This may no longer be needed since postgresql natively
+ * supports querying jsonb columns.
+ */
 export const schedulesJsonPathTable = pgTable<
   'schedules_json_paths',
   Record<keyof DbScheduleJsonPath, PgColumnBuilderBase>
 >('schedules_json_paths', {
-  schedule_id: varchar({ length: 36 }).references(() => schedulesTable.id),
+  schedule_id: varchar({ length: 36 })
+    .primaryKey()
+    .references(() => schedulesTable.id),
   payee: text(),
   account: text(),
   amount: text(),
@@ -233,79 +318,115 @@ export const schedulesJsonPathTable = pgTable<
 export const schedulesNextDateTable = pgTable<
   'schedules_next_date',
   Record<keyof DbScheduleNextDate, PgColumnBuilderBase>
->('schedules_next_date', {
-  id: varchar({ length: 36 }).primaryKey(),
-  schedule_id: varchar({ length: 36 }).references(() => schedulesTable.id),
-  local_next_date: date(),
-  local_next_date_ts: bigint({ mode: 'number' }),
-  base_next_date: date(),
-  base_next_date_ts: bigint({ mode: 'number' }),
-  tombstone: boolean().default(false),
-});
+>(
+  'schedules_next_date',
+  {
+    id: varchar({ length: 36 }).primaryKey(),
+    schedule_id: varchar({ length: 36 })
+      .unique()
+      .references(() => schedulesTable.id),
+    local_next_date: date(),
+    local_next_date_ts: bigint({ mode: 'number' }),
+    base_next_date: date(),
+    base_next_date_ts: bigint({ mode: 'number' }),
+    tombstone: boolean().default(false),
+  },
+  table => [index().on(table.tombstone)],
+);
 
 export const transactionsTable = pgTable<
   'transactions',
   Record<keyof DbTransaction, PgColumnBuilderBase>
->('transactions', {
-  id: varchar({ length: 36 }).primaryKey(),
-  isParent: boolean().default(false),
-  isChild: boolean().default(false),
-  acct: varchar({ length: 36 }).references(() => accountsTable.id),
-  category: varchar({ length: 36 }).references(() => categoriesTable.id),
-  amount: bigint({ mode: 'number' }),
-  description: text(),
-  notes: text(),
-  date: date(),
-  // Need to add AnyPgColumn when self-referencing
-  // https://orm.drizzle.team/docs/indexes-constraints#foreign-key
-  parent_id: varchar({ length: 36 }).references(
-    (): AnyPgColumn => transactionsTable.id,
-  ),
-  financial_id: text(),
-  error: jsonb(),
-  imported_description: text(),
-  // Need to add AnyPgColumn when self-referencing
-  // https://orm.drizzle.team/docs/indexes-constraints#foreign-key
-  transferred_id: varchar({ length: 36 }).references(
-    (): AnyPgColumn => transactionsTable.id,
-  ),
-  schedule: varchar({ length: 36 }).references(() => schedulesTable.id),
-  sort_order: bigint({ mode: 'number' }),
-  starting_balance_flag: boolean().default(false),
-  tombstone: boolean().default(false),
-  cleared: boolean().default(true),
-  reconciled: boolean().default(false),
-  // Unused in codebase. Can this be removed?
-  pending: boolean(),
-  location: text(),
-  type: text(),
-});
+>(
+  'transactions',
+  {
+    id: varchar({ length: 36 }).primaryKey(),
+    isParent: boolean().default(false),
+    isChild: boolean().default(false),
+    acct: varchar({ length: 36 }).references(() => accountsTable.id),
+    category: varchar({ length: 36 }).references(() => categoriesTable.id),
+    amount: bigint({ mode: 'number' }),
+    description: varchar({ length: 36 }),
+    notes: text(),
+    date: date(),
+    // Need to add AnyPgColumn when self-referencing
+    // https://orm.drizzle.team/docs/indexes-constraints#foreign-key
+    parent_id: varchar({ length: 36 }).references(
+      (): AnyPgColumn => transactionsTable.id,
+    ),
+    financial_id: text(),
+    error: jsonb(),
+    imported_description: text(),
+    // Need to add AnyPgColumn when self-referencing
+    // https://orm.drizzle.team/docs/indexes-constraints#foreign-key
+    transferred_id: varchar({ length: 36 }).references(
+      (): AnyPgColumn => transactionsTable.id,
+    ),
+    schedule: varchar({ length: 36 }).references(() => schedulesTable.id),
+    sort_order: bigint({ mode: 'number' }),
+    starting_balance_flag: boolean().default(false),
+    tombstone: boolean().default(false),
+    cleared: boolean().default(true),
+    reconciled: boolean().default(false),
+    // Unused in codebase. Can this be removed?
+    pending: boolean(),
+    location: text(),
+    type: text(),
+  },
+  table => [
+    index().on(table.isParent),
+    index().on(table.isChild),
+    index().on(table.acct),
+    index().on(table.category),
+    index().on(table.amount),
+    index().on(table.description),
+    index().on(table.notes),
+    index().on(table.date),
+    index().on(table.parent_id),
+    index().on(table.financial_id),
+    index().on(table.transferred_id),
+    index().on(table.schedule),
+    index().on(table.sort_order),
+    index().on(table.starting_balance_flag),
+    index().on(table.cleared),
+    index().on(table.reconciled),
+    index().on(table.tombstone),
+  ],
+);
 
 export const reflectBudgetsTable = pgTable<
   'reflect_budgets',
   Record<keyof DbReflectBudget, PgColumnBuilderBase>
->('reflect_budgets', {
-  id: text().primaryKey(),
-  month: date(),
-  category: varchar({ length: 36 }).references(() => categoriesTable.id),
-  amount: bigint({ mode: 'number' }),
-  carryover: boolean().default(false),
-  goal: bigint({ mode: 'number' }),
-  long_goal: bigint({ mode: 'number' }),
-});
+>(
+  'reflect_budgets',
+  {
+    id: text().primaryKey(),
+    month: date(),
+    category: varchar({ length: 36 }).references(() => categoriesTable.id),
+    amount: bigint({ mode: 'number' }),
+    carryover: boolean().default(false),
+    goal: bigint({ mode: 'number' }),
+    long_goal: bigint({ mode: 'number' }),
+  },
+  table => [index().on(table.month), index().on(table.category)],
+);
 
 export const zeroBudgetsTable = pgTable<
   'zero_budgets',
   Record<keyof DbZeroBudget, PgColumnBuilderBase>
->('zero_budgets', {
-  id: text().primaryKey(),
-  month: date(),
-  category: varchar({ length: 36 }).references(() => categoriesTable.id),
-  amount: bigint({ mode: 'number' }),
-  carryover: boolean().default(false),
-  goal: bigint({ mode: 'number' }),
-  long_goal: bigint({ mode: 'number' }),
-});
+>(
+  'zero_budgets',
+  {
+    id: text().primaryKey(),
+    month: date(),
+    category: varchar({ length: 36 }).references(() => categoriesTable.id),
+    amount: bigint({ mode: 'number' }),
+    carryover: boolean().default(false),
+    goal: bigint({ mode: 'number' }),
+    long_goal: bigint({ mode: 'number' }),
+  },
+  table => [index().on(table.month), index().on(table.category)],
+);
 
 export const zeroBudgetMonthsTable = pgTable<
   'zero_budget_months',
@@ -318,13 +439,18 @@ export const zeroBudgetMonthsTable = pgTable<
 export const transactionFiltersTable = pgTable<
   'transaction_filters',
   Record<keyof DbTransactionFilter, PgColumnBuilderBase>
->('transaction_filters', {
-  id: varchar({ length: 36 }).primaryKey(),
-  name: text(),
-  conditions: jsonb(),
-  conditions_op: text({ enum: ['and', 'or'] }),
-  tombstone: boolean().default(false),
-});
+>(
+  'transaction_filters',
+  {
+    id: varchar({ length: 36 }).primaryKey(),
+    name: text(),
+    // Consider indexing in the future.
+    conditions: jsonb(),
+    conditions_op: text({ enum: ['and', 'or'] }),
+    tombstone: boolean().default(false),
+  },
+  table => [index().on(table.tombstone)],
+);
 
 export const preferencesTable = pgTable<
   'preferences',
@@ -337,45 +463,54 @@ export const preferencesTable = pgTable<
 export const customReportsTable = pgTable<
   'custom_reports',
   Record<keyof DbCustomReport, PgColumnBuilderBase>
->('custom_reports', {
-  id: varchar({ length: 36 }).primaryKey(),
-  name: text(),
-  start_date: date(),
-  end_date: date(),
-  date_static: bigint({ mode: 'number' }),
-  date_range: text(),
-  mode: text(),
-  group_by: text(),
-  balance_type: text(),
-  show_empty: boolean().default(false),
-  show_offbudget: boolean().default(false),
-  show_hidden: boolean().default(false),
-  show_uncateogorized: boolean().default(false),
-  selected_categories: text(),
-  graph_type: text(),
-  conditions: jsonb(),
-  conditions_op: text({ enum: ['and', 'or'] }),
-  metadata: jsonb(),
-  interval: text(),
-  color_scheme: text(),
-  include_current: boolean().default(false),
-  sort_by: text(),
-  tombstone: boolean().default(false),
-});
+>(
+  'custom_reports',
+  {
+    id: varchar({ length: 36 }).primaryKey(),
+    name: text(),
+    start_date: date(),
+    end_date: date(),
+    date_static: bigint({ mode: 'number' }),
+    date_range: text(),
+    mode: text(),
+    group_by: text(),
+    balance_type: text(),
+    show_empty: boolean().default(false),
+    show_offbudget: boolean().default(false),
+    show_hidden: boolean().default(false),
+    show_uncateogorized: boolean().default(false),
+    selected_categories: text(),
+    graph_type: text(),
+    // Consider indexing in the future.
+    conditions: jsonb(),
+    conditions_op: text({ enum: ['and', 'or'] }),
+    metadata: jsonb(),
+    interval: text(),
+    color_scheme: text(),
+    include_current: boolean().default(false),
+    sort_by: text(),
+    tombstone: boolean().default(false),
+  },
+  table => [index().on(table.tombstone)],
+);
 
 export const dashboardTable = pgTable<
   'dashboard',
   Record<keyof DbDashboard, PgColumnBuilderBase>
->('dashboard', {
-  id: varchar({ length: 36 }).primaryKey(),
-  type: text(),
-  width: integer(),
-  height: integer(),
-  x: integer(),
-  y: integer(),
-  meta: jsonb(),
-  tombstone: boolean().default(false),
-});
+>(
+  'dashboard',
+  {
+    id: varchar({ length: 36 }).primaryKey(),
+    type: text(),
+    width: integer(),
+    height: integer(),
+    x: integer(),
+    y: integer(),
+    meta: jsonb(),
+    tombstone: boolean().default(false),
+  },
+  table => [index().on(table.tombstone)],
+);
 
 const transactionsInternalViewColumns = {
   id: varchar({ length: 36 }),

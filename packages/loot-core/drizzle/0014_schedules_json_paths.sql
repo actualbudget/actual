@@ -1,5 +1,5 @@
 CREATE TABLE "schedules_json_paths" (
-	"schedule_id" varchar(36),
+	"schedule_id" varchar(36) PRIMARY KEY NOT NULL,
 	"payee" text,
 	"account" text,
 	"amount" text,
