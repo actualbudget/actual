@@ -200,8 +200,8 @@ export async function loginWithOpenIdFinalize(body) {
       userInfo.login ??
       userInfo.email ??
       userInfo.id ??
-      userInfo.name ??
-      'default-username';
+      userInfo.sub;
+
     if (identity == null) {
       return { error: 'openid-grant-failed: no identification was found' };
     }
@@ -213,29 +213,35 @@ export async function loginWithOpenIdFinalize(body) {
           'SELECT count(*) as countUsersWithUserName FROM users WHERE user_name <> ?',
           [''],
         );
-        if (countUsersWithUserName === 0) {
+
+        // Check if user was created by another transaction
+        const existingUser = accountDb.first(
+          'SELECT id FROM users WHERE user_name = ?',
+          [identity],
+        );
+
+        if (
+          !existingUser &&
+          (countUsersWithUserName === 0 ||
+            config.get('userCreationMode') === 'login')
+        ) {
           userId = uuidv4();
-          // Check if user was created by another transaction
-          const existingUser = accountDb.first(
-            'SELECT id FROM users WHERE user_name = ?',
-            [identity],
-          );
-          if (existingUser) {
-            throw new Error('user-already-exists');
-          }
           accountDb.mutate(
-            'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, 1, ?)',
+            'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, ?, ?)',
             [
               userId,
               identity,
               userInfo.name ?? userInfo.email ?? identity,
-              'ADMIN',
+              countUsersWithUserName === 0 ? '1' : '0',
+              countUsersWithUserName === 0 ? 'ADMIN' : 'BASIC',
             ],
           );
 
-          const userFromPasswordMethod = getUserByUsername('');
-          if (userFromPasswordMethod) {
-            transferAllFilesFromUser(userId, userFromPasswordMethod.user_id);
+          if (countUsersWithUserName === 0) {
+            const userFromPasswordMethod = getUserByUsername('');
+            if (userFromPasswordMethod) {
+              transferAllFilesFromUser(userId, userFromPasswordMethod.user_id);
+            }
           }
         } else {
           const { id: userIdFromDb, display_name: displayName } =
