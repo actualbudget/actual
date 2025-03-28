@@ -868,6 +868,23 @@ handlers['get-openid-config'] = async function () {
   }
 };
 
+handlers['enable-openid'] = async function (loginConfig) {
+  try {
+    const userToken = await asyncStorage.getItem('user-token');
+
+    if (!userToken) {
+      return { error: 'unauthorized' };
+    }
+
+    await post(getServer().BASE_SERVER + '/openid/enable', loginConfig, {
+      'X-ACTUAL-TOKEN': userToken,
+    });
+  } catch (err) {
+    return { error: err.reason || 'network-failure' };
+  }
+  return {};
+};
+
 handlers['enable-password'] = async function (loginConfig) {
   try {
     const userToken = await asyncStorage.getItem('user-token');
@@ -885,18 +902,25 @@ handlers['enable-password'] = async function (loginConfig) {
   return {};
 };
 
-handlers['get-openid-config'] = async function () {
+handlers['get-openid-config'] = async function ({ password }) {
   try {
-    const res = await get(getServer().BASE_SERVER + '/openid/config');
+    const userToken = await asyncStorage.getItem('user-token');
+
+    const res = await post(
+      getServer().BASE_SERVER + '/openid/config',
+      { password },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
 
     if (res) {
-      const config = JSON.parse(res) as OpenIdConfig;
-      return { openId: config };
+      return res as { openId: OpenIdConfig };
     }
 
     return null;
   } catch (err) {
-    return { error: 'config-fetch-failed' };
+    return { error: err.reason };
   }
 };
 
