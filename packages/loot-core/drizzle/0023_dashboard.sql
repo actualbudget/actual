@@ -8,3 +8,5 @@ CREATE TABLE "dashboard" (
 	"meta" jsonb,
 	"tombstone" boolean DEFAULT false
 );
+--> statement-breakpoint
+CREATE INDEX "dashboard_tombstone_index" ON "dashboard" USING btree ("tombstone");
