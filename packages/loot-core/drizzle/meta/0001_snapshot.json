@@ -1,6 +1,6 @@
 {
-  "id": "c95f2bcc-d67f-4911-bc7d-1ce712105049",
-  "prevId": "ba7146f0-e6cc-451b-a821-760357fab094",
+  "id": "3d010e0f-4a8a-4a8a-b871-75e65835759a",
+  "prevId": "9fd1c064-ca0b-4378-814c-59762ad514e7",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -109,6 +109,22 @@
         }
       },
       "indexes": {
+        "accounts_name_index": {
+          "name": "accounts_name_index",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"accounts\".\"tombstone\" IS FALSE",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "accounts_bank_index": {
           "name": "accounts_bank_index",
           "columns": [
@@ -120,75 +136,22 @@
             }
           ],
           "isUnique": false,
+          "where": "\"accounts\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
         },
-        "accounts_account_id_index": {
-          "name": "accounts_account_id_index",
-          "columns": [
-            {
-              "expression": "account_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "accounts_closed_index": {
-          "name": "accounts_closed_index",
-          "columns": [
-            {
-              "expression": "closed",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "accounts_offbudget_index": {
-          "name": "accounts_offbudget_index",
-          "columns": [
-            {
-              "expression": "offbudget",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "accounts_sort_order_index": {
-          "name": "accounts_sort_order_index",
+        "accounts_sort_order_name_index": {
+          "name": "accounts_sort_order_name_index",
           "columns": [
             {
               "expression": "sort_order",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "accounts_tombstone_index": {
-          "name": "accounts_tombstone_index",
-          "columns": [
+            },
             {
-              "expression": "tombstone",
+              "expression": "name",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -263,21 +226,7 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "banks_tombstone_index": {
-          "name": "banks_tombstone_index",
-          "columns": [
-            {
-              "expression": "tombstone",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
+          "where": "\"banks\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}

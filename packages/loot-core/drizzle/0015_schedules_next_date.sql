@@ -6,8 +6,7 @@ CREATE TABLE "schedules_next_date" (
 	"base_next_date" date,
 	"base_next_date_ts" bigint,
 	"tombstone" boolean DEFAULT false,
-	CONSTRAINT "schedules_next_date_schedule_id_unique" UNIQUE("schedule_id")
+	CONSTRAINT "schedules_next_date_scheduleId_unique" UNIQUE("schedule_id")
 );
 --> statement-breakpoint
-ALTER TABLE "schedules_next_date" ADD CONSTRAINT "schedules_next_date_schedule_id_schedules_id_fk" FOREIGN KEY ("schedule_id") REFERENCES "public"."schedules"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "schedules_next_date_tombstone_index" ON "schedules_next_date" USING btree ("tombstone");
+ALTER TABLE "schedules_next_date" ADD CONSTRAINT "schedules_next_date_schedule_id_schedules_id_fk" FOREIGN KEY ("schedule_id") REFERENCES "public"."schedules"("id") ON DELETE no action ON UPDATE no action;
