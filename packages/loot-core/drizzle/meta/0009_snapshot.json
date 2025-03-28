@@ -1,6 +1,6 @@
 {
-  "id": "dab7fc0c-ae0a-4bf0-aa42-98e34efc90e8",
-  "prevId": "4ea30ca0-7d35-4f2c-a8ba-bdd7d399c125",
+  "id": "1189d5de-ceeb-4f12-8297-90831c1934b4",
+  "prevId": "8e7b3d86-6d0b-435d-8484-6fc94435b267",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -29,13 +29,6 @@
         },
         "closed": {
           "name": "closed",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "tombstone": {
-          "name": "tombstone",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
@@ -106,9 +99,107 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "tombstone": {
+          "name": "tombstone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "accounts_bank_index": {
+          "name": "accounts_bank_index",
+          "columns": [
+            {
+              "expression": "bank",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "accounts_account_id_index": {
+          "name": "accounts_account_id_index",
+          "columns": [
+            {
+              "expression": "account_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "accounts_closed_index": {
+          "name": "accounts_closed_index",
+          "columns": [
+            {
+              "expression": "closed",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "accounts_offbudget_index": {
+          "name": "accounts_offbudget_index",
+          "columns": [
+            {
+              "expression": "offbudget",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "accounts_sort_order_index": {
+          "name": "accounts_sort_order_index",
+          "columns": [
+            {
+              "expression": "sort_order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "accounts_tombstone_index": {
+          "name": "accounts_tombstone_index",
+          "columns": [
+            {
+              "expression": "tombstone",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "accounts_bank_banks_id_fk": {
           "name": "accounts_bank_banks_id_fk",
@@ -160,7 +251,38 @@
           "default": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "banks_bank_id_index": {
+          "name": "banks_bank_id_index",
+          "columns": [
+            {
+              "expression": "bank_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "banks_tombstone_index": {
+          "name": "banks_tombstone_index",
+          "columns": [
+            {
+              "expression": "tombstone",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -224,7 +346,83 @@
           "default": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "categories_cat_group_index": {
+          "name": "categories_cat_group_index",
+          "columns": [
+            {
+              "expression": "cat_group",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "categories_is_income_index": {
+          "name": "categories_is_income_index",
+          "columns": [
+            {
+              "expression": "is_income",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "categories_hidden_index": {
+          "name": "categories_hidden_index",
+          "columns": [
+            {
+              "expression": "hidden",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "categories_sort_order_index": {
+          "name": "categories_sort_order_index",
+          "columns": [
+            {
+              "expression": "sort_order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "categories_tombstone_index": {
+          "name": "categories_tombstone_index",
+          "columns": [
+            {
+              "expression": "tombstone",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "categories_cat_group_category_groups_id_fk": {
           "name": "categories_cat_group_category_groups_id_fk",
@@ -290,7 +488,68 @@
           "default": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "category_groups_is_income_index": {
+          "name": "category_groups_is_income_index",
+          "columns": [
+            {
+              "expression": "is_income",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "category_groups_hidden_index": {
+          "name": "category_groups_hidden_index",
+          "columns": [
+            {
+              "expression": "hidden",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "category_groups_sort_order_index": {
+          "name": "category_groups_sort_order_index",
+          "columns": [
+            {
+              "expression": "sort_order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "category_groups_tombstone_index": {
+          "name": "category_groups_tombstone_index",
+          "columns": [
+            {
+              "expression": "tombstone",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -305,8 +564,8 @@
         "id": {
           "name": "id",
           "type": "varchar(36)",
-          "primaryKey": false,
-          "notNull": false
+          "primaryKey": true,
+          "notNull": true
         },
         "transferId": {
           "name": "transferId",
@@ -315,7 +574,23 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "category_mapping_transferId_index": {
+          "name": "category_mapping_transferId_index",
+          "columns": [
+            {
+              "expression": "transferId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "category_mapping_id_categories_id_fk": {
           "name": "category_mapping_id_categories_id_fk",
@@ -367,7 +642,23 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "kv_cache_key_key_index": {
+          "name": "kv_cache_key_key_index",
+          "columns": [
+            {
+              "expression": "key",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "kv_cache_key_key_kv_cache_key_fk": {
           "name": "kv_cache_key_key_kv_cache_key_fk",
@@ -426,7 +717,7 @@
         },
         "clock": {
           "name": "clock",
-          "type": "text",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": false
         }
@@ -480,7 +771,68 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "messages_crdt_dataset_index": {
+          "name": "messages_crdt_dataset_index",
+          "columns": [
+            {
+              "expression": "dataset",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "messages_crdt_row_index": {
+          "name": "messages_crdt_row_index",
+          "columns": [
+            {
+              "expression": "row",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "messages_crdt_column_index": {
+          "name": "messages_crdt_column_index",
+          "columns": [
+            {
+              "expression": "column",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "messages_crdt_timestamp_index": {
+          "name": "messages_crdt_timestamp_index",
+          "columns": [
+            {
+              "expression": "timestamp",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -507,78 +859,6 @@
       },
       "indexes": {},
       "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.payees": {
-      "name": "payees",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(36)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "transfer_acct": {
-          "name": "transfer_acct",
-          "type": "varchar(36)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "favorite": {
-          "name": "favorite",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "learn_categories": {
-          "name": "learn_categories",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": true
-        },
-        "tombstone": {
-          "name": "tombstone",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "category": {
-          "name": "category",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "payees_transfer_acct_accounts_id_fk": {
-          "name": "payees_transfer_acct_accounts_id_fk",
-          "tableFrom": "payees",
-          "tableTo": "accounts",
-          "columnsFrom": [
-            "transfer_acct"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
