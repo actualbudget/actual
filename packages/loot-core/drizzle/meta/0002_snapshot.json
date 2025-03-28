@@ -1,6 +1,6 @@
 {
-  "id": "c98bdf3c-0372-47e1-be56-d40f829c4053",
-  "prevId": "957f7425-714d-4ddd-8cf8-efdebacccded",
+  "id": "67c6c3e5-0e96-43f2-a432-ae105844692c",
+  "prevId": "c95f2bcc-d67f-4911-bc7d-1ce712105049",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -29,13 +29,6 @@
         },
         "closed": {
           "name": "closed",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "tombstone": {
-          "name": "tombstone",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false,
@@ -106,9 +99,107 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "tombstone": {
+          "name": "tombstone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "accounts_bank_index": {
+          "name": "accounts_bank_index",
+          "columns": [
+            {
+              "expression": "bank",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "accounts_account_id_index": {
+          "name": "accounts_account_id_index",
+          "columns": [
+            {
+              "expression": "account_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "accounts_closed_index": {
+          "name": "accounts_closed_index",
+          "columns": [
+            {
+              "expression": "closed",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "accounts_offbudget_index": {
+          "name": "accounts_offbudget_index",
+          "columns": [
+            {
+              "expression": "offbudget",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "accounts_sort_order_index": {
+          "name": "accounts_sort_order_index",
+          "columns": [
+            {
+              "expression": "sort_order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "accounts_tombstone_index": {
+          "name": "accounts_tombstone_index",
+          "columns": [
+            {
+              "expression": "tombstone",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "accounts_bank_banks_id_fk": {
           "name": "accounts_bank_banks_id_fk",
@@ -160,7 +251,38 @@
           "default": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "banks_bank_id_index": {
+          "name": "banks_bank_id_index",
+          "columns": [
+            {
+              "expression": "bank_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "banks_tombstone_index": {
+          "name": "banks_tombstone_index",
+          "columns": [
+            {
+              "expression": "tombstone",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -212,7 +334,68 @@
           "default": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "category_groups_is_income_index": {
+          "name": "category_groups_is_income_index",
+          "columns": [
+            {
+              "expression": "is_income",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "category_groups_hidden_index": {
+          "name": "category_groups_hidden_index",
+          "columns": [
+            {
+              "expression": "hidden",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "category_groups_sort_order_index": {
+          "name": "category_groups_sort_order_index",
+          "columns": [
+            {
+              "expression": "sort_order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "category_groups_tombstone_index": {
+          "name": "category_groups_tombstone_index",
+          "columns": [
+            {
+              "expression": "tombstone",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},

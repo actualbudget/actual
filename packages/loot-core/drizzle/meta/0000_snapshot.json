@@ -1,5 +1,5 @@
 {
-  "id": "b5d65e39-8f8f-443c-9b08-429a9dbe10ca",
+  "id": "ba7146f0-e6cc-451b-a821-760357fab094",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -34,7 +34,38 @@
           "default": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "banks_bank_id_index": {
+          "name": "banks_bank_id_index",
+          "columns": [
+            {
+              "expression": "bank_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "banks_tombstone_index": {
+          "name": "banks_tombstone_index",
+          "columns": [
+            {
+              "expression": "tombstone",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
