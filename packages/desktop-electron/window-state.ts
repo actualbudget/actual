@@ -130,6 +130,16 @@ function validateState(state?: WindowState): Partial<WindowState> {
 }
 
 export async function get() {
+  if (process.env.EXECUTION_CONTEXT === 'playwright') {
+    // For Playwright screenshots to be consistent across machine we need a fixed window size
+    return {
+      x: 100,
+      y: 50,
+      width: 1300,
+      height: 800,
+    };
+  }
+
   const screen = electron.screen;
   const displayBounds = screen.getPrimaryDisplay().bounds;
 

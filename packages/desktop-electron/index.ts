@@ -33,7 +33,8 @@ import {
 
 import './security';
 
-const isDev = !app.isPackaged; // dev mode if not packaged
+const isPlaywrightTest = process.env.EXECUTION_CONTEXT === 'playwright';
+const isDev = !isPlaywrightTest && !app.isPackaged; // dev mode if not packaged and not playwright
 
 process.env.lootCoreScript = isDev
   ? 'loot-core/lib-dist/electron/bundle.desktop.js' // serve from local output in development (provides hot-reloading)
@@ -45,12 +46,20 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { standard: true } },
 ]);
 
-if (!isDev || !process.env.ACTUAL_DOCUMENT_DIR) {
-  process.env.ACTUAL_DOCUMENT_DIR = app.getPath('documents');
-}
+if (isPlaywrightTest) {
+  if (!process.env.ACTUAL_DOCUMENT_DIR || !process.env.ACTUAL_DATA_DIR) {
+    throw new Error(
+      'ACTUAL_DOCUMENT_DIR and ACTUAL_DATA_DIR must be set in the environment for playwright tests',
+    );
+  }
+} else {
+  if (!isDev || !process.env.ACTUAL_DOCUMENT_DIR) {
+    process.env.ACTUAL_DOCUMENT_DIR = app.getPath('documents');
+  }
 
-if (!isDev || !process.env.ACTUAL_DATA_DIR) {
-  process.env.ACTUAL_DATA_DIR = app.getPath('userData');
+  if (!isDev || !process.env.ACTUAL_DATA_DIR) {
+    process.env.ACTUAL_DATA_DIR = app.getPath('userData');
+  }
 }
 
 // Keep a global reference of the window object, if you don't, the window will
