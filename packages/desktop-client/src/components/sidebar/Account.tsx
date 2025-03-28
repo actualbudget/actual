@@ -24,6 +24,7 @@ import { type AccountEntity } from 'loot-core/types/models';
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useNotes } from '../../hooks/useNotes';
 import { useDispatch } from '../../redux';
+import { makeAmountFullStyle } from '../budget/util';
 import { Link } from '../common/Link';
 import { Notes } from '../Notes';
 import {
@@ -34,7 +35,7 @@ import {
   type OnDropCallback,
 } from '../sort';
 import { type SheetFields, type Binding } from '../spreadsheet';
-import { CellValue } from '../spreadsheet/CellValue';
+import { CellValue, CellValueText } from '../spreadsheet/CellValue';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,
@@ -217,7 +218,29 @@ export function Account<FieldName extends SheetFields<'account'>>({
                   name
                 )
               }
-              right={<CellValue binding={query} type="financial" />}
+              right={
+                <CellValue binding={query} type="financial">
+                  {props => {
+                    const value = props.value as number;
+
+                    return (
+                      <CellValueText
+                        {...props}
+                        value={value}
+                        style={
+                          account
+                            ? makeAmountFullStyle(value, {
+                                positiveColor: theme.sidebarItemText,
+                                negativeColor: theme.errorTextMenu,
+                                zeroColor: theme.sidebarItemText,
+                              })
+                            : null
+                        }
+                      />
+                    );
+                  }}
+                </CellValue>
+              }
             />
           </Link>
           {account && (
