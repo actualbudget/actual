@@ -77,6 +77,7 @@ import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
 import { useDispatch } from '../../redux';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
+import { Autocomplete } from '../autocomplete/Autocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { getStatusProps } from '../schedules/StatusBadge';
@@ -783,6 +784,156 @@ function PayeeIcons({
   );
 }
 
+function NotesCell({
+  value,
+  focused,
+  onUpdate,
+  onClickTag,
+  onExpose,
+  tagOptions,
+}) {
+  const [cursorPosition, setCursorPosition] = useState(undefined);
+  const [inputValue, setInputValue] = useState(value);
+  useEffect(() => setInputValue(value), [value, setInputValue]);
+
+  function onSelect(optionId, value, e) {
+    const [start, end] = getCurrentWordRange(value, cursorPosition);
+    const option = tagOptions.find(o => o.id === optionId);
+    if (option && e) {
+      const newValue =
+        value.slice(0, start) + option.name + value.slice(end + 1);
+      setInputValue(newValue + ' ');
+
+      // only stop event propagation (i.e. table navigation) when we want to do
+      // autocomplete things. If we don't choose an option, then we want to treat
+      // this as a regular input field and do table navigation.
+      e?.stopPropagation();
+    } else {
+      onUpdate(value);
+    }
+  }
+
+  function onKeyUp(e) {
+    if (e.target.selectionEnd === e.target.selectionStart) {
+      setCursorPosition(e.target.selectionStart);
+    } else {
+      setCursorPosition(undefined);
+    }
+  }
+
+  function onKeyDown(e) {
+    if (e.key === 'Escape') {
+      // reset to initial value
+      setInputValue(value);
+    }
+    if (e.key === 'Tab') {
+      // set to current value. For some reason this is
+      // is not getting caught by the onBlur handler
+      // likely because of Autocomplete complexity
+      onUpdate(inputValue);
+    }
+  }
+
+  return (
+    <CustomCell
+      width="flex"
+      name="notes"
+      value={value}
+      formatter={value => notesTagFormatter(value, onClickTag)}
+      focused={focused}
+      exposed={focused}
+      onExpose={onExpose}
+      onUpdate={onUpdate}
+      onFocus={() => setInputValue(value)}
+      onBlur={() => onUpdate(inputValue)}
+      onKeyDownCapture={onKeyDown}
+    >
+      {({ inputStyle, onKeyDown, onBlur, shouldSaveFromKey }) => (
+        <Autocomplete
+          strict={false}
+          value={value}
+          onBlur={onBlur}
+          shouldSaveFromKey={shouldSaveFromKey}
+          clearOnBlur={false}
+          closeOnBlur={true}
+          openOnFocus={false}
+          onSelect={onSelect}
+          inputProps={{
+            onBlur,
+            onKeyDown,
+            onKeyUp,
+            style: inputStyle,
+            value: inputValue,
+            onChange: v => setInputValue(v),
+          }}
+          getHighlightedIndex={() => 0}
+          suggestions={tagOptions}
+          filterSuggestions={(options, inputValue) => {
+            if (inputValue.trim() === '' || !cursorPosition) {
+              return [];
+            }
+            const currentWord = getCurrentWord(
+              inputValue,
+              cursorPosition,
+            )?.toLowerCase();
+            if (!currentWord || !options || currentWord.charAt(0) !== '#') {
+              return [];
+            }
+            const currentWordNoHash = currentWord.slice(1);
+            return options
+              .filter(o => o.id.toLowerCase().includes(currentWordNoHash))
+              .sort(({ id: a }, { id: b }) => {
+                const aStarts = a.toLowerCase().startsWith(currentWord);
+                const bStarts = b.toLowerCase().startsWith(currentWord);
+                if (aStarts && !bStarts) {
+                  return 1;
+                } else if (!aStarts && bStarts) {
+                  return -1;
+                }
+                const compare = a.toLowerCase().localeCompare(b.toLowerCase());
+                return compare > 0 ? 1 : compare < 0 ? -1 : 0;
+              })
+              .slice(0, 10);
+          }}
+        />
+      )}
+    </CustomCell>
+  );
+}
+
+function getCurrentWordRange(inputValue, cursorPosition) {
+  if (
+    cursorPosition === undefined ||
+    cursorPosition === null ||
+    inputValue.charAt(cursorPosition - 1).trim() === ''
+  ) {
+    return [0, 0];
+  }
+  cursorPosition = cursorPosition - 1;
+
+  let startIdx = cursorPosition;
+  let endIdx = cursorPosition;
+
+  while (startIdx > 0 && inputValue.charAt(startIdx - 1).trim() !== '') {
+    startIdx--;
+  }
+  while (
+    endIdx < inputValue.length &&
+    inputValue.charAt(endIdx).trim() !== ''
+  ) {
+    endIdx++;
+  }
+  if (startIdx < 0 || endIdx < 0 || startIdx === endIdx) {
+    return [0, 0];
+  }
+  return [startIdx, endIdx];
+}
+
+function getCurrentWord(inputValue, cursorPosition) {
+  const [startIdx, endIdx] = getCurrentWordRange(inputValue, cursorPosition);
+  return inputValue.slice(startIdx, endIdx);
+}
+
 const Transaction = memo(function Transaction({
   allTransactions,
   transaction: originalTransaction,
@@ -802,6 +953,7 @@ const Transaction = memo(function Transaction({
   focusedField,
   categoryGroups,
   payees,
+  tagOptions,
   accounts,
   balance,
   dateFormat = 'MM/dd/yyyy',
@@ -1003,7 +1155,7 @@ const Transaction = memo(function Transaction({
   // Problem: the split-error Popover (which has the buttons to distribute/add split)
   // renders before schedules are added to the table. After schedules finally load
   // the entire table gets pushed down. But the Popover does not re-calculate
-  // its positioning. This is because there is nothing in react-aria that would be
+  // ilts positioning. This is because there is nothing in react-aria that would be
   // watching for the position of the trigger element.
   // Solution: when transactions (this includes schedules) change - we increment
   // a variable (with a small delay in order for the next render cycle to pick up
@@ -1269,20 +1421,15 @@ const Transaction = memo(function Transaction({
         />
       ))()}
 
-      <InputCell
-        width="flex"
-        name="notes"
-        textAlign="flex"
-        exposed={focusedField === 'notes'}
-        focused={focusedField === 'notes'}
+      <NotesCell
         value={notes || ''}
-        valueStyle={valueStyle}
-        formatter={value => notesTagFormatter(value, onNotesTagClick)}
-        onExpose={name => !isPreview && onEdit(id, name)}
-        inputProps={{
-          value: notes || '',
-          onUpdate: onUpdate.bind(null, 'notes'),
+        focused={focusedField === 'notes'}
+        tagOptions={tagOptions}
+        onClickTag={onNotesTagClick}
+        onUpdate={value => {
+          onUpdate('notes', value?.trim());
         }}
+        onExpose={name => !isPreview && onEdit(id, name)}
       />
 
       {(isPreview && !isChild) || isParent ? (
@@ -1654,6 +1801,7 @@ function NewTransaction({
   accounts,
   categoryGroups,
   payees,
+  tagOptions,
   transferAccountsByTransaction,
   editingTransaction,
   focusedField,
@@ -1722,6 +1870,7 @@ function NewTransaction({
           accounts={accounts}
           categoryGroups={categoryGroups}
           payees={payees}
+          tagOptions={tagOptions}
           dateFormat={dateFormat}
           hideFraction={hideFraction}
           expanded={true}
@@ -1857,6 +2006,7 @@ function TransactionTableInner({
       accounts,
       categoryGroups,
       payees,
+      tagOptions,
       showCleared,
       showAccount,
       showCategory,
@@ -1919,6 +2069,7 @@ function TransactionTableInner({
         accounts={accounts}
         categoryGroups={categoryGroups}
         payees={payees}
+        tagOptions={tagOptions}
         dateFormat={dateFormat}
         hideFraction={hideFraction}
         onEdit={tableNavigator.onEdit}
@@ -1996,6 +2147,7 @@ function TransactionTableInner({
               accounts={props.accounts}
               categoryGroups={props.categoryGroups}
               payees={props.payees || []}
+              tagOptions={props.tagOptions || []}
               showAccount={props.showAccount}
               showCategory={props.showCategory}
               showBalance={props.showBalances}
@@ -2647,7 +2799,7 @@ export const TransactionTable = forwardRef((props, ref) => {
 TransactionTable.displayName = 'TransactionTable';
 
 function notesTagFormatter(notes, onNotesTagClick) {
-  const words = notes.split(' ');
+  const words = notes?.split(' ') || [];
   return (
     <>
       {words.map((word, i, arr) => {

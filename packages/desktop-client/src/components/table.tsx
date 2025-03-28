@@ -349,6 +349,8 @@ function InputValue({
     } else if (shouldSaveFromKey(e)) {
       onUpdate?.(value);
     }
+
+    props?.onKeyDown?.(e);
   }
 
   const ops = ['+', '-', '*', '/', '^'];
@@ -392,6 +394,8 @@ export function InputCell({
   inputProps,
   onUpdate,
   onBlur,
+  onKeyDown,
+  onKeyUp,
   textAlign,
   ...props
 }: InputCellProps) {
@@ -402,6 +406,8 @@ export function InputCell({
           value={props.value}
           onUpdate={onUpdate}
           onBlur={onBlur}
+          onKeyDown={onKeyDown}
+          onKeyUp={onKeyUp}
           style={{ textAlign, ...(inputProps && inputProps.style) }}
           {...inputProps}
         />

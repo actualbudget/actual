@@ -11,7 +11,12 @@ import {
   type Notification,
 } from './notifications/notificationsSlice';
 import { loadPrefs } from './prefs/prefsSlice';
-import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
+import {
+  getAccounts,
+  getCategories,
+  getPayees,
+  getTags,
+} from './queries/queriesSlice';
 import { type AppStore } from './store';
 import { signOut } from './users/usersSlice';
 
@@ -68,6 +73,10 @@ export function listenForSyncEvent(store: AppStore) {
         tables.includes('category_mapping')
       ) {
         store.dispatch(getCategories());
+      }
+
+      if (tables.includes('transactions')) {
+        store.dispatch(getTags());
       }
 
       if (

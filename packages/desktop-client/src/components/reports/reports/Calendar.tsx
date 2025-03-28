@@ -53,6 +53,7 @@ import { useResizeObserver } from '../../../hooks/useResizeObserver';
 import { SelectedProviderWithItems } from '../../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../../hooks/useSplitsExpanded';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
+import { useTagOptions } from '../../../hooks/useTags';
 import { useDispatch } from '../../../redux';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
@@ -123,6 +124,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
 
   const accounts = useAccounts();
   const payees = usePayees();
+  const tagOptions = useTagOptions();
   const { grouped: categoryGroups } = useCategories();
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
@@ -605,6 +607,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     category={undefined}
                     categoryGroups={categoryGroups}
                     payees={payees}
+                    tagOptions={tagOptions}
                     balances={null}
                     showBalances={false}
                     showReconciled={true}

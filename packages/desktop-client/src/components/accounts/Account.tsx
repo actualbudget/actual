@@ -85,6 +85,7 @@ import {
   useSplitsExpanded,
 } from '../../hooks/useSplitsExpanded';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { useTagOptions } from '../../hooks/useTags';
 import { useTransactionBatchActions } from '../../hooks/useTransactionBatchActions';
 import { useSelector, useDispatch } from '../../redux';
 import { type SavedFilter } from '../filters/SavedFilterMenuButton';
@@ -303,6 +304,7 @@ type AccountInternalProps = {
   failedAccounts: ReturnType<typeof useFailedAccounts>;
   dateFormat: ReturnType<typeof useDateFormat>;
   payees: ReturnType<typeof usePayees>;
+  tagOptions: ReturnType<typeof useTagOptions>;
   categoryGroups: ReturnType<typeof useCategories>['grouped'];
   hideFraction: boolean;
   accountsSyncing: string[];
@@ -1710,6 +1712,7 @@ class AccountInternal extends PureComponent<
       accounts,
       categoryGroups,
       payees,
+      tagOptions,
       dateFormat,
       hideFraction,
       accountsSyncing,
@@ -1849,6 +1852,7 @@ class AccountInternal extends PureComponent<
                   category={category}
                   categoryGroups={categoryGroups}
                   payees={payees}
+                  tagOptions={tagOptions}
                   balances={allBalances}
                   showBalances={!!allBalances}
                   showReconciled={showReconciled}
@@ -1968,6 +1972,7 @@ export function Account() {
   );
   const accounts = useAccounts();
   const payees = usePayees();
+  const tagOptions = useTagOptions();
   const failedAccounts = useFailedAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [hideFraction] = useSyncedPref('hideFraction');
@@ -2021,6 +2026,7 @@ export function Account() {
             setShowExtraBalances(String(extraBalances))
           }
           payees={payees}
+          tagOptions={tagOptions}
           modalShowing={modalShowing}
           accountsSyncing={accountsSyncing}
           filterConditions={filterConditions}
