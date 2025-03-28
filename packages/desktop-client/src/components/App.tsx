@@ -22,6 +22,7 @@ import { loadGlobalPrefs } from 'loot-core/client/prefs/prefsSlice';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import { signOut } from 'loot-core/client/users/usersSlice';
 import { init as initConnection, send } from 'loot-core/platform/client/fetch';
+import { isPreviewEnvironment } from 'loot-core/shared/environment';
 
 import { handleGlobalEvents } from '../global-events';
 import { useMetadataPref } from '../hooks/useMetadataPref';
@@ -230,8 +231,9 @@ export function App() {
                     }}
                   >
                     <ErrorBoundary FallbackComponent={ErrorFallback}>
-                      {process.env.REACT_APP_REVIEW_ID &&
-                        !Platform.isPlaywright && <DevelopmentTopBar />}
+                      {isPreviewEnvironment() && !Platform.isPlaywright && (
+                        <DevelopmentTopBar />
+                      )}
                       <AppInner />
                     </ErrorBoundary>
                     <ThemeStyle />
