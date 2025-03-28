@@ -5,5 +5,4 @@ CREATE TABLE "banks" (
 	"tombstone" boolean DEFAULT false
 );
 --> statement-breakpoint
-CREATE INDEX "banks_bank_id_index" ON "banks" USING btree ("bank_id");--> statement-breakpoint
-CREATE INDEX "banks_tombstone_index" ON "banks" USING btree ("tombstone");
+CREATE INDEX "banks_bank_id_index" ON "banks" USING btree ("bank_id") WHERE "banks"."tombstone" IS FALSE;

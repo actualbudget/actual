@@ -1,5 +1,5 @@
 {
-  "id": "ba7146f0-e6cc-451b-a821-760357fab094",
+  "id": "9fd1c064-ca0b-4378-814c-59762ad514e7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -46,21 +46,7 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "banks_tombstone_index": {
-          "name": "banks_tombstone_index",
-          "columns": [
-            {
-              "expression": "tombstone",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
+          "where": "\"banks\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}

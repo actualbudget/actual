@@ -5,7 +5,7 @@ CREATE VIEW "public"."v_transactions_internal_alive" AS (
       "v_transactions_internal"
     LEFT JOIN
       "transactions"
-        ON ("transactions"."isChild" IS TRUE
+        ON ("transactions"."is_child" IS TRUE
         AND "transactions"."id" = "v_transactions_internal"."parent_id")
     WHERE
       COALESCE("transactions"."tombstone", FALSE) IS FALSE

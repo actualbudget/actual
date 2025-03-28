@@ -9,45 +9,15 @@ import {
   index,
   integer,
   jsonb,
-  PgColumnBuilderBase,
   pgTable,
   pgView,
+  QueryBuilder,
+  serial,
   text,
   varchar,
 } from 'drizzle-orm/pg-core';
 
-import {
-  DbAccount,
-  DbBank,
-  DbCategory,
-  DbCategoryGroup,
-  DbCategoryMapping,
-  DbClockMessage,
-  DbCrdtMessage,
-  DbCustomReport,
-  DbDashboard,
-  DbKvCache,
-  DbKvCacheKey,
-  DbNote,
-  DbPayee,
-  DbPayeeMapping,
-  DbPreference,
-  DbReflectBudget,
-  DbRule,
-  DbSchedule,
-  DbScheduleJsonPath,
-  DbScheduleNextDate,
-  DbTransaction,
-  DbTransactionFilter,
-  DbViewCategory,
-  DbViewPayee,
-  DbViewSchedule,
-  DbViewTransaction,
-  DbViewTransactionInternal,
-  DbViewTransactionInternalAlive,
-  DbZeroBudget,
-  DbZeroBudgetMonth,
-} from '../types';
+import drizzleConfig from '../../../../drizzle.config';
 
 const bytea = customType<{
   // data: Buffer;
@@ -63,124 +33,109 @@ function isFalse(column: Column) {
   return sql`${column} IS FALSE`;
 }
 
-export const banksTable = pgTable<
-  'banks',
-  Record<keyof DbBank, PgColumnBuilderBase>
->(
+export function excluded(column: Column | string) {
+  if (typeof column === 'string') {
+    return sql`excluded.${sql.identifier(column)}`;
+  }
+  return sql`excluded.${column}`;
+}
+
+export const banksTable = pgTable(
   'banks',
   {
     id: varchar({ length: 36 }).primaryKey(),
     name: text(),
-    bank_id: text(),
+    bankId: text(),
     tombstone: boolean().default(false),
   },
-  table => [index().on(table.bank_id), index().on(table.tombstone)],
+  table => [index().on(table.bankId).where(isFalse(table.tombstone))],
 );
 
-export const accountsTable = pgTable<
-  'accounts',
-  Record<keyof DbAccount, PgColumnBuilderBase>
->(
+export const accountsTable = pgTable(
   'accounts',
   {
     id: varchar({ length: 36 }).primaryKey(),
     name: text(),
     offbudget: boolean().default(false),
     closed: boolean().default(false),
-    sort_order: bigint({ mode: 'number' }),
-    account_id: text(),
-    balance_current: bigint({ mode: 'number' }),
-    balance_available: bigint({ mode: 'number' }),
-    balance_limit: bigint({ mode: 'number' }),
+    sortOrder: bigint({ mode: 'number' }),
+    accountId: text(),
+    balanceCurrent: bigint({ mode: 'number' }),
+    balanceAvailable: bigint({ mode: 'number' }),
+    balanceLimit: bigint({ mode: 'number' }),
     mask: text(),
-    official_name: text(),
+    officialName: text(),
     type: text(),
     subtype: text(),
     bank: varchar({ length: 36 }).references(() => banksTable.id),
-    account_sync_source: text(),
+    accountSyncSource: text(),
     tombstone: boolean().default(false),
   },
   table => [
-    index().on(table.bank),
-    index().on(table.account_id),
-    index().on(table.closed),
-    index().on(table.offbudget),
-    index().on(table.sort_order),
-    index().on(table.tombstone),
+    index().on(table.name).where(isFalse(table.tombstone)),
+    index().on(table.bank).where(isFalse(table.tombstone)),
+    // Sorting indeces
+    index().on(table.sortOrder, table.name),
   ],
 );
 
-export const categoryGroupsTable = pgTable<
-  'category_groups',
-  Record<keyof DbCategoryGroup, PgColumnBuilderBase>
->(
+export const categoryGroupsTable = pgTable(
   'category_groups',
   {
     id: varchar({ length: 36 }).primaryKey(),
     name: text(),
-    is_income: boolean().default(false),
-    sort_order: bigint({ mode: 'number' }),
+    isIncome: boolean().default(false),
+    sortOrder: bigint({ mode: 'number' }),
     hidden: boolean().default(false),
     tombstone: boolean().default(false),
   },
   table => [
-    index().on(table.is_income),
-    index().on(table.hidden),
-    index().on(table.sort_order),
-    index().on(table.tombstone),
+    index().on(table.name).where(isFalse(table.tombstone)),
+    // Sorting indeces
+    index().on(table.isIncome, table.sortOrder, table.id),
+    index().on(table.sortOrder, table.id),
   ],
 );
 
-export const categoriesTable = pgTable<
-  'categories',
-  Record<keyof DbCategory, PgColumnBuilderBase>
->(
+export const categoriesTable = pgTable(
   'categories',
   {
     id: varchar({ length: 36 }).primaryKey(),
     name: text(),
-    is_income: boolean().default(false),
-    cat_group: varchar({ length: 36 }).references(() => categoryGroupsTable.id),
-    sort_order: bigint({ mode: 'number' }),
+    isIncome: boolean().default(false),
+    catGroup: varchar({ length: 36 }).references(() => categoryGroupsTable.id),
+    sortOrder: bigint({ mode: 'number' }),
     hidden: boolean().default(false),
-    goal_def: jsonb(),
+    goalDef: jsonb(),
     tombstone: boolean().default(false),
   },
   table => [
-    index().on(table.cat_group),
-    index().on(table.is_income),
-    index().on(table.hidden),
-    index().on(table.sort_order),
-    index().on(table.tombstone),
+    index().on(table.name).where(isFalse(table.tombstone)),
+    index().on(table.catGroup).where(isFalse(table.tombstone)),
+    // Sorting indeces
+    index().on(table.sortOrder, table.id),
+    index().on(table.goalDef.nullsFirst()),
   ],
 );
 
-export const categoryMappingTable = pgTable<
-  'category_mapping',
-  Record<keyof DbCategoryMapping, PgColumnBuilderBase>
->(
+export const categoryMappingTable = pgTable(
   'category_mapping',
   {
     id: varchar({ length: 36 })
       .primaryKey()
       .references(() => categoriesTable.id),
+    // This column is camelCase in sqlite. Let's use snake_case in pglite for consistency.
     transferId: varchar({ length: 36 }).references(() => categoriesTable.id),
   },
   table => [index().on(table.transferId)],
 );
 
-export const kvCacheTable = pgTable<
-  'kv_cache',
-  Record<keyof DbKvCache, PgColumnBuilderBase>
->('kv_cache', {
+export const kvCacheTable = pgTable('kv_cache', {
   key: text().primaryKey(),
   value: text(),
 });
 
-export const kvCacheKeyTable = pgTable<
-  'kv_cache_key',
-  Record<keyof DbKvCacheKey, PgColumnBuilderBase>
->(
+export const kvCacheKeyTable = pgTable(
   'kv_cache_key',
   {
     id: varchar({ length: 36 }).primaryKey(),
@@ -189,21 +144,19 @@ export const kvCacheKeyTable = pgTable<
   table => [index().on(table.key)],
 );
 
-export const messagesClockTable = pgTable<
+export const messagesClockTable = pgTable(
   'messages_clock',
-  Record<keyof DbClockMessage, PgColumnBuilderBase>
->('messages_clock', {
-  id: varchar({ length: 36 }).primaryKey(),
-  clock: jsonb(),
-});
+  {
+    id: integer().primaryKey(),
+    clock: jsonb(),
+  },
+  table => [index().using('gin', table.clock)],
+);
 
-export const messagesCrdtTable = pgTable<
-  'messages_crdt',
-  Record<keyof DbCrdtMessage, PgColumnBuilderBase>
->(
+export const messagesCrdtTable = pgTable(
   'messages_crdt',
   {
-    id: varchar({ length: 36 }).primaryKey(),
+    id: serial().primaryKey(),
     timestamp: text(),
     dataset: text(),
     row: varchar({ length: 36 }),
@@ -211,80 +164,64 @@ export const messagesCrdtTable = pgTable<
     value: bytea(),
   },
   table => [
-    index().on(table.dataset),
-    index().on(table.row),
-    index().on(table.column),
     index().on(table.timestamp),
+    index().on(table.dataset, table.row, table.column, table.timestamp),
   ],
 );
 
-export const notesTable = pgTable<
-  'notes',
-  Record<keyof DbNote, PgColumnBuilderBase>
->('notes', {
+export const notesTable = pgTable('notes', {
   id: varchar({ length: 36 }).primaryKey(),
   note: text(),
 });
 
-export const payeesTable = pgTable<
-  'payees',
-  Record<keyof DbPayee, PgColumnBuilderBase>
->(
+export const payeesTable = pgTable(
   'payees',
   {
     id: varchar({ length: 36 }).primaryKey(),
     name: text(),
-    transfer_acct: varchar({ length: 36 }).references(() => accountsTable.id),
+    transferAcct: varchar({ length: 36 }).references(() => accountsTable.id),
     favorite: boolean().default(false),
-    learn_categories: boolean().default(true),
+    learnCategories: boolean().default(true),
     tombstone: boolean().default(false),
     // Unused in codebase. Can this be removed?
     category: text(),
   },
   table => [
-    index().on(table.transfer_acct),
-    index().on(table.favorite),
-    index().on(table.learn_categories),
-    index().on(table.tombstone),
+    index().on(table.name).where(isFalse(table.tombstone)),
+    index().on(table.transferAcct.nullsFirst()).where(isFalse(table.tombstone)),
   ],
 );
 
-export const payeeMappingTable = pgTable<
-  'payee_mapping',
-  Record<keyof DbPayeeMapping, PgColumnBuilderBase>
->(
+export const payeeMappingTable = pgTable(
   'payee_mapping',
   {
     id: varchar({ length: 36 })
       .primaryKey()
       .references(() => payeesTable.id),
+    // This column is camelCase in sqlite. Let's use snake_case in pglite for consistency.
     targetId: varchar({ length: 36 }).references(() => payeesTable.id),
   },
   table => [index().on(table.targetId)],
 );
 
-export const rulesTable = pgTable<
-  'rules',
-  Record<keyof DbRule, PgColumnBuilderBase>
->(
+export const rulesTable = pgTable(
   'rules',
   {
     id: varchar({ length: 36 }).primaryKey(),
     stage: text({ enum: ['pre', 'post'] }),
-    // Consider indexing in the future.
     conditions: jsonb(),
-    // Consider indexing in the future.
     actions: jsonb(),
     tombstone: boolean().default(false),
-    conditions_op: text({ enum: ['and', 'or'] }),
+    conditionsOp: text({ enum: ['and', 'or'] }),
   },
-  table => [index().on(table.tombstone)],
+  table => [
+    index().on(table.stage).where(isFalse(table.tombstone)),
+    index().using('gin', table.conditions),
+    index().using('gin', table.actions),
+  ],
 );
 
-export const schedulesTable = pgTable<
-  'schedules',
-  Record<keyof DbSchedule, PgColumnBuilderBase>
->(
+export const schedulesTable = pgTable(
   'schedules',
   {
     id: varchar({ length: 36 }).primaryKey(),
@@ -292,21 +229,22 @@ export const schedulesTable = pgTable<
     rule: varchar({ length: 36 }).references(() => rulesTable.id),
     active: boolean().default(false),
     completed: boolean().default(false),
-    posts_transaction: boolean().default(false),
+    postsTransaction: boolean().default(false),
     tombstone: boolean().default(false),
   },
-  table => [index().on(table.rule), index().on(table.tombstone)],
+  table => [
+    index().on(table.name).where(isFalse(table.tombstone)),
+    index().on(table.rule).where(isFalse(table.tombstone)),
+    index().on(table.completed).where(isFalse(table.tombstone)),
+  ],
 );
 
 /**
  * This may no longer be needed since postgresql natively
  * supports querying jsonb columns.
  */
-export const schedulesJsonPathTable = pgTable<
-  'schedules_json_paths',
-  Record<keyof DbScheduleJsonPath, PgColumnBuilderBase>
->('schedules_json_paths', {
-  schedule_id: varchar({ length: 36 })
+export const schedulesJsonPathTable = pgTable('schedules_json_paths', {
+  scheduleId: varchar({ length: 36 })
     .primaryKey()
     .references(() => schedulesTable.id),
   payee: text(),
@@ -315,33 +253,25 @@ export const schedulesJsonPathTable = pgTable<
   date: text(),
 });
 
-export const schedulesNextDateTable = pgTable<
-  'schedules_next_date',
-  Record<keyof DbScheduleNextDate, PgColumnBuilderBase>
->(
-  'schedules_next_date',
-  {
-    id: varchar({ length: 36 }).primaryKey(),
-    schedule_id: varchar({ length: 36 })
-      .unique()
-      .references(() => schedulesTable.id),
-    local_next_date: date(),
-    local_next_date_ts: bigint({ mode: 'number' }),
-    base_next_date: date(),
-    base_next_date_ts: bigint({ mode: 'number' }),
-    tombstone: boolean().default(false),
-  },
-  table => [index().on(table.tombstone)],
-);
+export const schedulesNextDateTable = pgTable('schedules_next_date', {
+  id: varchar({ length: 36 }).primaryKey(),
+  scheduleId: varchar({ length: 36 })
+    .unique()
+    .references(() => schedulesTable.id),
+  localNextDate: date(),
+  localNextDateTs: bigint({ mode: 'number' }),
+  baseNextDate: date(),
+  baseNextDateTs: bigint({ mode: 'number' }),
+  tombstone: boolean().default(false),
+});
 
-export const transactionsTable = pgTable<
-  'transactions',
-  Record<keyof DbTransaction, PgColumnBuilderBase>
->(
+export const transactionsTable = pgTable(
   'transactions',
   {
     id: varchar({ length: 36 }).primaryKey(),
+    // This column is camelCase in sqlite. Let's use snake_case in pglite for consistency.
     isParent: boolean().default(false),
+    // This column is camelCase in sqlite. Let's use snake_case in pglite for consistency.
     isChild: boolean().default(false),
     acct: varchar({ length: 36 }).references(() => accountsTable.id),
     category: varchar({ length: 36 }).references(() => categoriesTable.id),
@@ -351,20 +281,20 @@ export const transactionsTable = pgTable<
     date: date(),
     // Need to add AnyPgColumn when self-referencing
     // https://orm.drizzle.team/docs/indexes-constraints#foreign-key
-    parent_id: varchar({ length: 36 }).references(
+    parentId: varchar({ length: 36 }).references(
       (): AnyPgColumn => transactionsTable.id,
     ),
-    financial_id: text(),
+    financialId: text(),
     error: jsonb(),
-    imported_description: text(),
+    importedDescription: text(),
     // Need to add AnyPgColumn when self-referencing
     // https://orm.drizzle.team/docs/indexes-constraints#foreign-key
-    transferred_id: varchar({ length: 36 }).references(
+    transferredId: varchar({ length: 36 }).references(
       (): AnyPgColumn => transactionsTable.id,
     ),
     schedule: varchar({ length: 36 }).references(() => schedulesTable.id),
-    sort_order: bigint({ mode: 'number' }),
-    starting_balance_flag: boolean().default(false),
+    sortOrder: bigint({ mode: 'number' }),
+    startingBalanceFlag: boolean().default(false),
     tombstone: boolean().default(false),
     cleared: boolean().default(true),
     reconciled: boolean().default(false),
@@ -374,30 +304,20 @@ export const transactionsTable = pgTable<
     type: text(),
   },
   table => [
-    index().on(table.isParent),
-    index().on(table.isChild),
-    index().on(table.acct),
-    index().on(table.category),
-    index().on(table.amount),
-    index().on(table.description),
-    index().on(table.notes),
-    index().on(table.date),
-    index().on(table.parent_id),
-    index().on(table.financial_id),
-    index().on(table.transferred_id),
-    index().on(table.schedule),
-    index().on(table.sort_order),
-    index().on(table.starting_balance_flag),
-    index().on(table.cleared),
-    index().on(table.reconciled),
-    index().on(table.tombstone),
+    index().on(table.category, table.date).where(isFalse(table.tombstone)),
+    index().on(table.acct).where(isFalse(table.tombstone)),
+    index().on(table.parentId).where(isFalse(table.tombstone)),
+    // Sorting indeces
+    index().on(
+      table.date.desc(),
+      table.startingBalanceFlag,
+      table.sortOrder.desc(),
+      table.id,
+    ),
   ],
 );
 
-export const reflectBudgetsTable = pgTable<
-  'reflect_budgets',
-  Record<keyof DbReflectBudget, PgColumnBuilderBase>
->(
+export const reflectBudgetsTable = pgTable(
   'reflect_budgets',
   {
     id: text().primaryKey(),
@@ -406,15 +326,12 @@ export const reflectBudgetsTable = pgTable<
     amount: bigint({ mode: 'number' }),
     carryover: boolean().default(false),
     goal: bigint({ mode: 'number' }),
-    long_goal: bigint({ mode: 'number' }),
+    longGoal: bigint({ mode: 'number' }),
   },
-  table => [index().on(table.month), index().on(table.category)],
+  table => [index().on(table.month, table.category)],
 );
 
-export const zeroBudgetsTable = pgTable<
-  'zero_budgets',
-  Record<keyof DbZeroBudget, PgColumnBuilderBase>
->(
+export const zeroBudgetsTable = pgTable(
   'zero_budgets',
   {
     id: text().primaryKey(),
@@ -423,81 +340,72 @@ export const zeroBudgetsTable = pgTable<
     amount: bigint({ mode: 'number' }),
     carryover: boolean().default(false),
     goal: bigint({ mode: 'number' }),
-    long_goal: bigint({ mode: 'number' }),
+    longGoal: bigint({ mode: 'number' }),
   },
-  table => [index().on(table.month), index().on(table.category)],
+  table => [index().on(table.month, table.category)],
 );
 
-export const zeroBudgetMonthsTable = pgTable<
-  'zero_budget_months',
-  Record<keyof DbZeroBudgetMonth, PgColumnBuilderBase>
->('zero_budget_months', {
+export const zeroBudgetMonthsTable = pgTable('zero_budget_months', {
   id: text().primaryKey(),
   buffered: bigint({ mode: 'number' }),
 });
 
-export const transactionFiltersTable = pgTable<
-  'transaction_filters',
-  Record<keyof DbTransactionFilter, PgColumnBuilderBase>
->(
+export const transactionFiltersTable = pgTable(
   'transaction_filters',
   {
     id: varchar({ length: 36 }).primaryKey(),
     name: text(),
     // Consider indexing in the future.
     conditions: jsonb(),
-    conditions_op: text({ enum: ['and', 'or'] }),
+    conditionsOp: text({ enum: ['and', 'or'] }),
     tombstone: boolean().default(false),
   },
-  table => [index().on(table.tombstone)],
+  table => [
+    index().on(table.name).where(isFalse(table.tombstone)),
+    index().using('gin', table.conditions).where(isFalse(table.tombstone)),
+  ],
 );
 
-export const preferencesTable = pgTable<
-  'preferences',
-  Record<keyof DbPreference, PgColumnBuilderBase>
->('preferences', {
+export const preferencesTable = pgTable('preferences', {
   id: text().primaryKey(),
   value: text(),
 });
 
-export const customReportsTable = pgTable<
-  'custom_reports',
-  Record<keyof DbCustomReport, PgColumnBuilderBase>
->(
+export const customReportsTable = pgTable(
   'custom_reports',
   {
     id: varchar({ length: 36 }).primaryKey(),
     name: text(),
-    start_date: date(),
-    end_date: date(),
-    date_static: bigint({ mode: 'number' }),
-    date_range: text(),
+    startDate: date(),
+    endDate: date(),
+    dateStatic: bigint({ mode: 'number' }),
+    dateRange: text(),
     mode: text(),
-    group_by: text(),
-    balance_type: text(),
-    show_empty: boolean().default(false),
-    show_offbudget: boolean().default(false),
-    show_hidden: boolean().default(false),
-    show_uncateogorized: boolean().default(false),
-    selected_categories: text(),
-    graph_type: text(),
+    groupBy: text(),
+    balanceType: text(),
+    showEmpty: boolean().default(false),
+    showOffbudget: boolean().default(false),
+    showHidden: boolean().default(false),
+    showUncategorized: boolean().default(false),
+    selectedCategories: text(),
+    graphType: text(),
     // Consider indexing in the future.
     conditions: jsonb(),
-    conditions_op: text({ enum: ['and', 'or'] }),
+    conditionsOp: text({ enum: ['and', 'or'] }),
     metadata: jsonb(),
     interval: text(),
-    color_scheme: text(),
-    include_current: boolean().default(false),
-    sort_by: text(),
+    colorScheme: text(),
+    includeCurrent: boolean().default(false),
+    sortBy: text(),
     tombstone: boolean().default(false),
   },
-  table => [index().on(table.tombstone)],
+  table => [
+    index().on(table.name).where(isFalse(table.tombstone)),
+    index().using('gin', table.conditions).where(isFalse(table.tombstone)),
+  ],
 );
 
-export const dashboardTable = pgTable<
-  'dashboard',
-  Record<keyof DbDashboard, PgColumnBuilderBase>
->(
+export const dashboardTable = pgTable(
   'dashboard',
   {
     id: varchar({ length: 36 }).primaryKey(),
@@ -509,61 +417,61 @@ export const dashboardTable = pgTable<
     meta: jsonb(),
     tombstone: boolean().default(false),
   },
-  table => [index().on(table.tombstone)],
+  table => [
+    // Sorting indeces
+    index().on(table.y.desc(), table.x.desc()).where(isFalse(table.tombstone)),
+  ],
 );
 
 const transactionsInternalViewColumns = {
   id: varchar({ length: 36 }),
-  is_parent: boolean(),
-  is_child: boolean(),
-  parent_id: varchar({ length: 36 }),
+  isParent: boolean(),
+  isChild: boolean(),
+  parentId: varchar({ length: 36 }),
   account: varchar({ length: 36 }),
   category: varchar({ length: 36 }),
   amount: bigint({ mode: 'number' }),
   payee: varchar({ length: 36 }),
   notes: text(),
   date: date(),
-  imported_id: text(),
+  importedId: text(),
   error: jsonb(),
-  imported_payee: text(),
-  starting_balance_flag: boolean(),
-  transfer_id: varchar({ length: 36 }),
+  importedPayee: text(),
+  startingBalanceFlag: boolean(),
+  transferId: varchar({ length: 36 }),
   schedule: varchar({ length: 36 }),
   cleared: boolean(),
   reconciled: boolean(),
   tombstone: boolean(),
-  sort_order: bigint({ mode: 'number' }),
+  sortOrder: bigint({ mode: 'number' }),
 };
 
 export const transactionsInternalView = pgView(
   'v_transactions_internal',
-  transactionsInternalViewColumns satisfies Record<
-    keyof DbViewTransactionInternal,
-    PgColumnBuilderBase
-  >,
+  transactionsInternalViewColumns,
 ).as(
   sql`
     SELECT
       ${transactionsTable.id},
-      ${transactionsTable.isParent} AS is_parent,
-      ${transactionsTable.isChild} AS is_child,
-      CASE WHEN ${transactionsTable.isChild} IS FALSE THEN NULL ELSE ${transactionsTable.parent_id} END AS parent_id,
+      ${transactionsTable.isParent},
+      ${transactionsTable.isChild},
+      CASE WHEN ${transactionsTable.isChild} IS FALSE THEN NULL ELSE ${transactionsTable.parentId} END AS parent_id,
       ${transactionsTable.acct} AS account,
       CASE WHEN ${transactionsTable.isParent} IS TRUE THEN NULL ELSE ${categoryMappingTable.transferId} END AS category,
       COALESCE(${transactionsTable.amount}, 0) AS amount,
       ${payeeMappingTable.targetId} AS payee,
       ${transactionsTable.notes},
       ${transactionsTable.date},
-      ${transactionsTable.financial_id} AS imported_id,
+      ${transactionsTable.financialId} AS imported_id,
       ${transactionsTable.error},
-      ${transactionsTable.imported_description} AS imported_payee,
-      ${transactionsTable.starting_balance_flag},
-      ${transactionsTable.transferred_id} AS transfer_id,
+      ${transactionsTable.importedDescription} AS imported_payee,
+      ${transactionsTable.startingBalanceFlag},
+      ${transactionsTable.transferredId} AS transfer_id,
       ${transactionsTable.schedule},
       ${transactionsTable.cleared},
       ${transactionsTable.reconciled},
       ${transactionsTable.tombstone},
-      ${transactionsTable.sort_order}
+      ${transactionsTable.sortOrder}
     FROM
       ${transactionsTable}
     LEFT JOIN
@@ -575,16 +483,13 @@ export const transactionsInternalView = pgView(
     WHERE
       ${transactionsTable.date} IS NOT NULL
       AND ${transactionsTable.acct} IS NOT NULL
-      AND (${transactionsTable.isChild} IS FALSE OR ${transactionsTable.parent_id} IS NOT NULL)
+      AND (${transactionsTable.isChild} IS FALSE OR ${transactionsTable.parentId} IS NOT NULL)
   `,
 );
 
 export const transactionsInternalViewAlive = pgView(
   'v_transactions_internal_alive',
-  transactionsInternalViewColumns satisfies Record<
-    keyof DbViewTransactionInternalAlive,
-    PgColumnBuilderBase
-  >,
+  transactionsInternalViewColumns,
 ).as(
   sql`
     SELECT
@@ -594,38 +499,35 @@ export const transactionsInternalViewAlive = pgView(
     LEFT JOIN
       ${transactionsTable}
         ON (${transactionsTable.isChild} IS TRUE
-        AND ${transactionsTable.id} = ${transactionsInternalView.parent_id})
+        AND ${transactionsTable.id} = ${transactionsInternalView.parentId})
     WHERE
       COALESCE(${transactionsTable.tombstone}, FALSE) IS FALSE
-      AND (${transactionsInternalView.is_child} IS FALSE OR ${transactionsTable.tombstone} IS FALSE)
+      AND (${transactionsInternalView.isChild} IS FALSE OR ${transactionsTable.tombstone} IS FALSE)
   `,
 );
 
 export const transactionsView = pgView(
   'v_transactions',
-  transactionsInternalViewColumns satisfies Record<
-    keyof DbViewTransaction,
-    PgColumnBuilderBase
-  >,
+  transactionsInternalViewColumns,
 ).as(
   sql`
     SELECT
       ${transactionsInternalViewAlive.id},
-      ${transactionsInternalViewAlive.is_parent},
-      ${transactionsInternalViewAlive.is_child},
-      ${transactionsInternalViewAlive.parent_id},
+      ${transactionsInternalViewAlive.isParent},
+      ${transactionsInternalViewAlive.isChild},
+      ${transactionsInternalViewAlive.parentId},
       ${accountsTable.id} AS account,
       ${categoriesTable.id} AS category,
       ${transactionsInternalViewAlive.amount},
       ${payeesTable.id} AS payee,
       ${transactionsInternalViewAlive.notes},
       ${transactionsInternalViewAlive.date},
-      ${transactionsInternalViewAlive.imported_id},
+      ${transactionsInternalViewAlive.importedId},
       ${transactionsInternalViewAlive.error},
-      ${transactionsInternalViewAlive.imported_payee},
-      ${transactionsInternalViewAlive.starting_balance_flag},
-      ${transactionsInternalViewAlive.transfer_id},
-      ${transactionsInternalViewAlive.sort_order},
+      ${transactionsInternalViewAlive.importedPayee},
+      ${transactionsInternalViewAlive.startingBalanceFlag},
+      ${transactionsInternalViewAlive.transferId},
+      ${transactionsInternalViewAlive.sortOrder},
       ${transactionsInternalViewAlive.cleared},
       ${transactionsInternalViewAlive.reconciled},
       ${transactionsInternalViewAlive.tombstone},
@@ -646,58 +548,63 @@ export const transactionsView = pgView(
         AND ${accountsTable.tombstone} IS FALSE)
     ORDER BY
       ${transactionsInternalViewAlive.date} DESC,
-      ${transactionsInternalViewAlive.starting_balance_flag},
-      ${transactionsInternalViewAlive.sort_order} DESC,
+      ${transactionsInternalViewAlive.startingBalanceFlag},
+      ${transactionsInternalViewAlive.sortOrder} DESC,
       ${transactionsInternalViewAlive.id}
   `,
 );
 
-export const categoriesView = pgView('v_categories').as(qb =>
-  qb
+// https://github.com/drizzle-team/drizzle-orm/issues/3332
+const snakeCaseQueryBuilder = new QueryBuilder({
+  casing: drizzleConfig.casing,
+});
+
+export const categoriesView = pgView('v_categories').as(
+  snakeCaseQueryBuilder
     .select({
       id: categoriesTable.id,
       name: categoriesTable.name,
-      is_income: categoriesTable.is_income,
+      isIncome: categoriesTable.isIncome,
       hidden: categoriesTable.hidden,
-      group: sql`${categoriesTable.cat_group}`.as('group'),
-      sort_order: categoriesTable.sort_order,
+      group: sql`${categoriesTable.catGroup}`.as('group'),
+      sortOrder: categoriesTable.sortOrder,
       tombstone: categoriesTable.tombstone,
-    } satisfies Record<keyof DbViewCategory, unknown>)
+    })
     .from(categoriesTable),
 );
 
-export const payeesView = pgView('v_payees').as(qb =>
-  qb
+export const payeesView = pgView('v_payees').as(
+  snakeCaseQueryBuilder
     .select({
       id: payeesTable.id,
       name: sql`COALESCE(${accountsTable.name}, ${payeesTable.name})`.as(
         'name',
       ),
-      transfer_acct: payeesTable.transfer_acct,
+      transferAcct: payeesTable.transferAcct,
       favorite: payeesTable.favorite,
-      learn_categories: payeesTable.learn_categories,
+      learnCategories: payeesTable.learnCategories,
       tombstone: payeesTable.tombstone,
-    } satisfies Record<keyof DbViewPayee, unknown>)
+    })
     .from(payeesTable)
     .leftJoin(
       accountsTable,
       and(
-        eq(payeesTable.transfer_acct, accountsTable.id),
+        eq(payeesTable.transferAcct, accountsTable.id),
         isFalse(accountsTable.tombstone),
       ),
     )
     // We never want to show transfer payees that are pointing to deleted accounts.
     // Either this is not a transfer payee, if the account exists
-    .where(or(isNull(payeesTable.transfer_acct), isNotNull(accountsTable.id))),
+    .where(or(isNull(payeesTable.transferAcct), isNotNull(accountsTable.id))),
 );
 
 export const schedulesView = pgView('v_schedules', {
   id: varchar({ length: 36 }),
   name: text(),
   rule: varchar({ length: 36 }),
-  next_date: date(),
+  nextDate: date(),
   completed: boolean(),
-  posts_transaction: boolean(),
+  postsTransaction: boolean(),
   active: boolean(),
   tombstone: boolean(),
   _payee: varchar({ length: 36 }),
@@ -707,7 +614,7 @@ export const schedulesView = pgView('v_schedules', {
   _date: jsonb(),
   _conditions: jsonb(),
   _actions: jsonb(),
-} satisfies Record<keyof DbViewSchedule, PgColumnBuilderBase>).as(
+}).as(
   sql`
     WITH parsed_rule_conditions AS (
       SELECT
@@ -725,23 +632,23 @@ export const schedulesView = pgView('v_schedules', {
         ${schedulesTable.name},
         ${schedulesTable.rule},
         CASE
-            WHEN ${schedulesNextDateTable.local_next_date_ts} = ${schedulesNextDateTable.base_next_date_ts} THEN ${schedulesNextDateTable.local_next_date}
-            ELSE ${schedulesNextDateTable.base_next_date}
+            WHEN ${schedulesNextDateTable.localNextDateTs} = ${schedulesNextDateTable.baseNextDateTs} THEN ${schedulesNextDateTable.localNextDate}
+            ELSE ${schedulesNextDateTable.baseNextDate}
         END AS next_date,
         ${schedulesTable.completed},
-        ${schedulesTable.posts_transaction},
+        ${schedulesTable.postsTransaction},
         ${schedulesTable.tombstone},
         ${payeeMappingTable.targetId} AS _payee,
         account_condition.value AS _account,
         amount_condition.value AS _amount,
-        amount_condition.op AS _amountOp,
+        amount_condition.op AS _amount_op,
         date_condition.value AS _date,
         ${rulesTable.conditions} AS _conditions,
         ${rulesTable.actions} AS _actions
     FROM
         ${schedulesTable}
     LEFT JOIN
-        ${schedulesNextDateTable} ON ${schedulesNextDateTable.schedule_id} = ${schedulesTable.id}
+        ${schedulesNextDateTable} ON ${schedulesNextDateTable.scheduleId} = ${schedulesTable.id}
     LEFT JOIN
         ${rulesTable} ON ${rulesTable.id} = ${schedulesTable.rule}
     LEFT JOIN

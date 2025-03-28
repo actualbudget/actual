@@ -1,6 +1,9 @@
 import { PGlite, types } from '@electric-sql/pglite';
 import { drizzle } from 'drizzle-orm/pglite';
 
+import drizzleConfig from '../../../../drizzle.config';
+import * as schema from '../../../server/db/schema';
+
 import { PgliteDatabase } from '.';
 
 export async function openDatabase(dataDir?: string): Promise<PgliteDatabase> {
@@ -49,6 +52,8 @@ export async function openDatabase(dataDir?: string): Promise<PgliteDatabase> {
   return drizzle({
     client: db,
     logger: true,
+    schema,
+    casing: drizzleConfig.casing,
   });
 }
 
