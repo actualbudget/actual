@@ -11,6 +11,7 @@ import * as asyncStorage from '../platform/server/asyncStorage';
 import * as connection from '../platform/server/connection';
 import * as fs from '../platform/server/fs';
 import { logger } from '../platform/server/log';
+import * as pglite from '../platform/server/pglite';
 import * as sqlite from '../platform/server/sqlite';
 import { q } from '../shared/query';
 import { type Budget } from '../types/budget';
@@ -1140,6 +1141,17 @@ export async function initApp(isDev, socketName) {
   await sqlite.init();
   await Promise.all([asyncStorage.init(), fs.init()]);
   await setupDocumentsDir();
+
+  const db = await pglite.openDatabase();
+
+  const results = await db.execute(
+    `SELECT table_name, column_name, data_type 
+      FROM information_schema.columns 
+      WHERE table_schema = 'public'
+      ORDER BY table_name, ordinal_position;
+    `,
+  );
+  console.log('PGlite columns:', JSON.stringify(results));
 
   const keysStr = await asyncStorage.getItem('encrypt-keys');
   if (keysStr) {
