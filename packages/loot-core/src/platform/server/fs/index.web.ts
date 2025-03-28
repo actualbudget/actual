@@ -246,6 +246,7 @@ export const populateFileHeirarchy = async function () {
   const { store } = idb.getStore(await idb.getDatabase(), 'files');
   const req = store.getAllKeys();
   const paths: string[] = await new Promise((resolve, reject) => {
+    // @ts-expect-error fix me
     req.onsuccess = e => resolve(e.target.result);
     req.onerror = e => reject(e);
   });

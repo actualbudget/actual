@@ -21,6 +21,7 @@ export const getItem: T.GetItem = async function (key) {
   return new Promise((resolve, reject) => {
     const req = objectStore.get(key);
     req.onerror = e => reject(e);
+    // @ts-expect-error fix me
     req.onsuccess = e => resolve(e.target.result);
     commit(transaction);
   });
@@ -67,6 +68,7 @@ export async function multiGet<K extends readonly (keyof GlobalPrefsJson)[]>(
       return new Promise<[string, string]>((resolve, reject) => {
         const req = objectStore.get(key);
         req.onerror = e => reject(e);
+        // @ts-expect-error fix me
         req.onsuccess = e => resolve([key, e.target.result]);
       });
     }),
