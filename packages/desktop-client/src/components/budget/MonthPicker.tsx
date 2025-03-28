@@ -2,6 +2,10 @@
 import React, { type CSSProperties, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import {
+  SvgCheveronLeft,
+  SvgCheveronRight,
+} from '@actual-app/components/icons/v1';
 import { SvgCalendar } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -97,6 +101,24 @@ export const MonthPicker = ({
         >
           <View title={t('Today')}>
             <SvgCalendar
+              style={{
+                width: 16,
+                height: 16,
+              }}
+            />
+          </View>
+        </Link>
+        <Link
+          variant="button"
+          buttonVariant="bare"
+          onPress={() => onSelect(monthUtils.prevMonth(startMonth))}
+          style={{
+            padding: '3px 3px',
+            marginRight: '12px',
+          }}
+        >
+          <View title={t('Previous month')}>
+            <SvgCheveronLeft
               style={{
                 width: 16,
                 height: 16,
@@ -213,6 +235,24 @@ export const MonthPicker = ({
             </View>
           );
         })}
+        <Link
+          variant="button"
+          buttonVariant="bare"
+          onPress={() => onSelect(monthUtils.nextMonth(startMonth))}
+          style={{
+            padding: '3px 3px',
+            marginLeft: '12px',
+          }}
+        >
+          <View title={t('Next month')}>
+            <SvgCheveronRight
+              style={{
+                width: 16,
+                height: 16,
+              }}
+            />
+          </View>
+        </Link>
         {/*Keep range centered*/}
         <span
           style={{
