@@ -302,7 +302,7 @@ function SingleAutocomplete<T extends Item>({
 
   const filtered = isChanged ? filteredSuggestions || suggestions : suggestions;
   const inputRef = useRef(null);
-  useProperFocus(inputRef, true);
+  useProperFocus(inputRef, focused);
 
   return (
     <Downshift
@@ -664,11 +664,10 @@ function MultiAutocomplete<T extends Item>({
   clearOnBlur = true,
   ...props
 }: MultiAutocompleteProps<T>) {
-  const inputRef = useRef(null);
-  useProperFocus(inputRef, true);
-
   const [focused, setFocused] = useState(false);
   const selectedItemIds = selectedItems.map(getItemId);
+  const inputRef = useRef(null);
+  useProperFocus(inputRef, focused);
 
   function onRemoveItem(id: T['id']) {
     const items = selectedItemIds.filter(i => i !== id);
