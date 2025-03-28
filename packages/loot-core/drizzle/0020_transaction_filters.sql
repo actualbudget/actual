@@ -6,4 +6,5 @@ CREATE TABLE "transaction_filters" (
 	"tombstone" boolean DEFAULT false
 );
 --> statement-breakpoint
-CREATE INDEX "transaction_filters_tombstone_index" ON "transaction_filters" USING btree ("tombstone");
+CREATE INDEX "transaction_filters_name_index" ON "transaction_filters" USING btree ("name") WHERE "transaction_filters"."tombstone" IS FALSE;--> statement-breakpoint
+CREATE INDEX "transaction_filters_conditions_index" ON "transaction_filters" USING gin ("conditions") WHERE "transaction_filters"."tombstone" IS FALSE;

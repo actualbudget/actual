@@ -9,5 +9,6 @@ CREATE TABLE "schedules" (
 );
 --> statement-breakpoint
 ALTER TABLE "schedules" ADD CONSTRAINT "schedules_rule_rules_id_fk" FOREIGN KEY ("rule") REFERENCES "public"."rules"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "schedules_rule_index" ON "schedules" USING btree ("rule");--> statement-breakpoint
-CREATE INDEX "schedules_tombstone_index" ON "schedules" USING btree ("tombstone");
+CREATE INDEX "schedules_name_index" ON "schedules" USING btree ("name") WHERE "schedules"."tombstone" IS FALSE;--> statement-breakpoint
+CREATE INDEX "schedules_rule_index" ON "schedules" USING btree ("rule") WHERE "schedules"."tombstone" IS FALSE;--> statement-breakpoint
+CREATE INDEX "schedules_completed_index" ON "schedules" USING btree ("completed") WHERE "schedules"."tombstone" IS FALSE;

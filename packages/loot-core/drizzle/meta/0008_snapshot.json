@@ -1,6 +1,6 @@
 {
-  "id": "8e7b3d86-6d0b-435d-8484-6fc94435b267",
-  "prevId": "5c52127f-5f4c-4741-ae79-0ec8db49b880",
+  "id": "1a04ce60-c02a-4123-b71e-6411990be062",
+  "prevId": "a52fda29-bfd1-4f7d-b633-db5426032028",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -109,6 +109,22 @@
         }
       },
       "indexes": {
+        "accounts_name_index": {
+          "name": "accounts_name_index",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"accounts\".\"tombstone\" IS FALSE",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "accounts_bank_index": {
           "name": "accounts_bank_index",
           "columns": [
@@ -120,75 +136,22 @@
             }
           ],
           "isUnique": false,
+          "where": "\"accounts\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
         },
-        "accounts_account_id_index": {
-          "name": "accounts_account_id_index",
-          "columns": [
-            {
-              "expression": "account_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "accounts_closed_index": {
-          "name": "accounts_closed_index",
-          "columns": [
-            {
-              "expression": "closed",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "accounts_offbudget_index": {
-          "name": "accounts_offbudget_index",
-          "columns": [
-            {
-              "expression": "offbudget",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "accounts_sort_order_index": {
-          "name": "accounts_sort_order_index",
+        "accounts_sort_order_name_index": {
+          "name": "accounts_sort_order_name_index",
           "columns": [
             {
               "expression": "sort_order",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "accounts_tombstone_index": {
-          "name": "accounts_tombstone_index",
-          "columns": [
+            },
             {
-              "expression": "tombstone",
+              "expression": "name",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -263,21 +226,7 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "banks_tombstone_index": {
-          "name": "banks_tombstone_index",
-          "columns": [
-            {
-              "expression": "tombstone",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
+          "where": "\"banks\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -347,6 +296,22 @@
         }
       },
       "indexes": {
+        "categories_name_index": {
+          "name": "categories_name_index",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"categories\".\"tombstone\" IS FALSE",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "categories_cat_group_index": {
           "name": "categories_cat_group_index",
           "columns": [
@@ -358,48 +323,25 @@
             }
           ],
           "isUnique": false,
+          "where": "\"categories\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
         },
-        "categories_is_income_index": {
-          "name": "categories_is_income_index",
-          "columns": [
-            {
-              "expression": "is_income",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "categories_hidden_index": {
-          "name": "categories_hidden_index",
-          "columns": [
-            {
-              "expression": "hidden",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "categories_sort_order_index": {
-          "name": "categories_sort_order_index",
+        "categories_sort_order_id_index": {
+          "name": "categories_sort_order_id_index",
           "columns": [
             {
               "expression": "sort_order",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
             }
           ],
           "isUnique": false,
@@ -407,14 +349,14 @@
           "method": "btree",
           "with": {}
         },
-        "categories_tombstone_index": {
-          "name": "categories_tombstone_index",
+        "categories_goal_def_index": {
+          "name": "categories_goal_def_index",
           "columns": [
             {
-              "expression": "tombstone",
+              "expression": "goal_def",
               "isExpression": false,
               "asc": true,
-              "nulls": "last"
+              "nulls": "first"
             }
           ],
           "isUnique": false,
@@ -489,26 +431,39 @@
         }
       },
       "indexes": {
-        "category_groups_is_income_index": {
-          "name": "category_groups_is_income_index",
+        "category_groups_name_index": {
+          "name": "category_groups_name_index",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"category_groups\".\"tombstone\" IS FALSE",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "category_groups_is_income_sort_order_id_index": {
+          "name": "category_groups_is_income_sort_order_id_index",
           "columns": [
             {
               "expression": "is_income",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "category_groups_hidden_index": {
-          "name": "category_groups_hidden_index",
-          "columns": [
+            },
             {
-              "expression": "hidden",
+              "expression": "sort_order",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -519,26 +474,17 @@
           "method": "btree",
           "with": {}
         },
-        "category_groups_sort_order_index": {
-          "name": "category_groups_sort_order_index",
+        "category_groups_sort_order_id_index": {
+          "name": "category_groups_sort_order_id_index",
           "columns": [
             {
               "expression": "sort_order",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "category_groups_tombstone_index": {
-          "name": "category_groups_tombstone_index",
-          "columns": [
+            },
             {
-              "expression": "tombstone",
+              "expression": "id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -567,19 +513,19 @@
           "primaryKey": true,
           "notNull": true
         },
-        "transferId": {
-          "name": "transferId",
+        "transfer_id": {
+          "name": "transfer_id",
           "type": "varchar(36)",
           "primaryKey": false,
           "notNull": false
         }
       },
       "indexes": {
-        "category_mapping_transferId_index": {
-          "name": "category_mapping_transferId_index",
+        "category_mapping_transfer_id_index": {
+          "name": "category_mapping_transfer_id_index",
           "columns": [
             {
-              "expression": "transferId",
+              "expression": "transfer_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -605,12 +551,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "category_mapping_transferId_categories_id_fk": {
-          "name": "category_mapping_transferId_categories_id_fk",
+        "category_mapping_transfer_id_categories_id_fk": {
+          "name": "category_mapping_transfer_id_categories_id_fk",
           "tableFrom": "category_mapping",
           "tableTo": "categories",
           "columnsFrom": [
-            "transferId"
+            "transfer_id"
           ],
           "columnsTo": [
             "id"
@@ -711,7 +657,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar(36)",
+          "type": "integer",
           "primaryKey": true,
           "notNull": true
         },
@@ -722,7 +668,23 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "messages_clock_clock_index": {
+          "name": "messages_clock_clock_index",
+          "columns": [
+            {
+              "expression": "clock",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -736,7 +698,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar(36)",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -772,54 +734,42 @@
         }
       },
       "indexes": {
-        "messages_crdt_dataset_index": {
-          "name": "messages_crdt_dataset_index",
+        "messages_crdt_timestamp_index": {
+          "name": "messages_crdt_timestamp_index",
+          "columns": [
+            {
+              "expression": "timestamp",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "messages_crdt_dataset_row_column_timestamp_index": {
+          "name": "messages_crdt_dataset_row_column_timestamp_index",
           "columns": [
             {
               "expression": "dataset",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "messages_crdt_row_index": {
-          "name": "messages_crdt_row_index",
-          "columns": [
+            },
             {
               "expression": "row",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "messages_crdt_column_index": {
-          "name": "messages_crdt_column_index",
-          "columns": [
+            },
             {
               "expression": "column",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "messages_crdt_timestamp_index": {
-          "name": "messages_crdt_timestamp_index",
-          "columns": [
+            },
             {
               "expression": "timestamp",
               "isExpression": false,

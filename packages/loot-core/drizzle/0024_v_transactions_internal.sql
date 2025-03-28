@@ -1,13 +1,13 @@
 CREATE VIEW "public"."v_transactions_internal" AS (
     SELECT
       "transactions"."id",
-      "transactions"."isParent" AS is_parent,
-      "transactions"."isChild" AS is_child,
-      CASE WHEN "transactions"."isChild" IS FALSE THEN NULL ELSE "transactions"."parent_id" END AS parent_id,
+      "transactions"."is_parent",
+      "transactions"."is_child",
+      CASE WHEN "transactions"."is_child" IS FALSE THEN NULL ELSE "transactions"."parent_id" END AS parent_id,
       "transactions"."acct" AS account,
-      CASE WHEN "transactions"."isParent" IS TRUE THEN NULL ELSE "category_mapping"."transferId" END AS category,
+      CASE WHEN "transactions"."is_parent" IS TRUE THEN NULL ELSE "category_mapping"."transfer_id" END AS category,
       COALESCE("transactions"."amount", 0) AS amount,
-      "payee_mapping"."targetId" AS payee,
+      "payee_mapping"."target_id" AS payee,
       "transactions"."notes",
       "transactions"."date",
       "transactions"."financial_id" AS imported_id,
@@ -31,5 +31,5 @@ CREATE VIEW "public"."v_transactions_internal" AS (
     WHERE
       "transactions"."date" IS NOT NULL
       AND "transactions"."acct" IS NOT NULL
-      AND ("transactions"."isChild" IS FALSE OR "transactions"."parent_id" IS NOT NULL)
+      AND ("transactions"."is_child" IS FALSE OR "transactions"."parent_id" IS NOT NULL)
   );

@@ -1,4 +1,6 @@
 CREATE TABLE "messages_clock" (
-	"id" varchar(36) PRIMARY KEY NOT NULL,
+	"id" integer PRIMARY KEY NOT NULL,
 	"clock" jsonb
 );
+--> statement-breakpoint
+CREATE INDEX "messages_clock_clock_index" ON "messages_clock" USING gin ("clock");

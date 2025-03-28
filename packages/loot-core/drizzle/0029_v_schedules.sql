@@ -21,10 +21,10 @@ CREATE VIEW "public"."v_schedules" AS (
         "schedules"."completed",
         "schedules"."posts_transaction",
         "schedules"."tombstone",
-        "payee_mapping"."targetId" AS _payee,
+        "payee_mapping"."target_id" AS _payee,
         account_condition.value AS _account,
         amount_condition.value AS _amount,
-        amount_condition.op AS _amountOp,
+        amount_condition.op AS _amount_op,
         date_condition.value AS _date,
         "rules"."conditions" AS _conditions,
         "rules"."actions" AS _actions
