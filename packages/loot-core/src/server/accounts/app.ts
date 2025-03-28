@@ -556,7 +556,7 @@ async function pollGoCardlessWebToken({
       return;
     }
 
-    if (Date.now() - startTime >= 1000 * 60 * 10) {
+    if (Date.now() - startTime >= 1000 * 60 * 60) {
       cb('timeout');
       return;
     }
