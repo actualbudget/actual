@@ -5,8 +5,8 @@
   "description": "actual syncing server",
   "type": "module",
   "scripts": {
-    "start": "node app",
-    "start-monitor": "nodemon app",
+    "start": "tsc && node build/app",
+    "start-monitor": "nodemon --exec 'tsc && node' --ignore './build/**/*' --ext 'ts,js' build/app",
     "build": "tsc",
     "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --trace-warnings' jest  --coverage",
     "db:migrate": "NODE_ENV=development node src/run-migrations.js up",
