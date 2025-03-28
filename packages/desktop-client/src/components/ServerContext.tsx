@@ -33,6 +33,8 @@ type ServerContextValue = {
   refreshLoginMethods: () => Promise<void>;
   setMultiuserEnabled: (enabled: boolean) => void;
   setLoginMethods: (methods: LoginMethods[]) => void;
+  autoLogin: boolean;
+  setAutoLogin: (autoLogin: boolean) => void;
 };
 
 const ServerContext = createContext<ServerContextValue>({
@@ -45,6 +47,8 @@ const ServerContext = createContext<ServerContextValue>({
     Promise.reject(new Error('ServerContext not initialized')),
   setMultiuserEnabled: () => {},
   setLoginMethods: () => {},
+  autoLogin: false,
+  setAutoLogin: () => {},
 });
 
 export const useServerURL = () => useContext(ServerContext).url;
@@ -85,6 +89,10 @@ export const useSetMultiuserEnabled = () =>
 export const useSetLoginMethods = () =>
   useContext(ServerContext).setLoginMethods;
 
+export const useAutoLogin = () => useContext(ServerContext).autoLogin;
+
+export const useSetAutoLogin = () => useContext(ServerContext).setAutoLogin;
+
 export function ServerProvider({ children }: { children: ReactNode }) {
   const dispatch = useDispatch();
   const [serverURL, setServerURL] = useState('');
@@ -93,6 +101,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
   const [availableLoginMethods, setAvailableLoginMethods] = useState<
     LoginMethods[]
   >([]);
+  const [autoLogin, setAutoLogin] = useState(false);
 
   useEffect(() => {
     async function run() {
@@ -166,6 +175,8 @@ export function ServerProvider({ children }: { children: ReactNode }) {
         refreshLoginMethods,
         setMultiuserEnabled,
         setLoginMethods: setAvailableLoginMethods,
+        autoLogin,
+        setAutoLogin,
       }}
     >
       {children}

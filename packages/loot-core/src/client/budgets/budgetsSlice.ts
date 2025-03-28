@@ -1,6 +1,8 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { t } from 'i18next';
 
+import { isElectron } from 'loot-core/shared/environment';
+
 import { send } from '../../platform/client/fetch';
 import { type RemoteFile } from '../../server/cloud-storage';
 import { getDownloadError, getSyncError } from '../../shared/errors';
@@ -98,14 +100,36 @@ export const loadBudget = createAppAsyncThunk(
 
 export const closeBudget = createAppAsyncThunk(
   `${sliceName}/closeBudget`,
-  async (_, { dispatch, getState }) => {
+  async (
+    { closeOpenId = false }: { closeOpenId?: boolean },
+    { dispatch, getState },
+  ) => {
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       await dispatch(resetApp());
       await dispatch(setAppState({ loadingText: t('Closing...') }));
       await send('close-budget');
       await dispatch(setAppState({ loadingText: null }));
-      if (localStorage.getItem('SharedArrayBufferOverride')) {
+
+      let redirectUrl = null;
+      if (closeOpenId) {
+        const ret =
+          (await send('subscribe-logout-openid', {
+            returnUrl: window.location.origin,
+          })) || {};
+
+        redirectUrl = ret.redirect_url;
+
+        if (redirectUrl) {
+          if (!isElectron()) {
+            window.location.href = redirectUrl;
+          } else {
+            //need to do this for electron
+          }
+        }
+      }
+
+      if (!redirectUrl && localStorage.getItem('SharedArrayBufferOverride')) {
         window.location.reload();
       }
     }
@@ -274,7 +298,7 @@ type CloseAndLoadBudgetPayload = {
 export const closeAndLoadBudget = createAppAsyncThunk(
   `${sliceName}/closeAndLoadBudget`,
   async ({ fileId }: CloseAndLoadBudgetPayload, { dispatch }) => {
-    await dispatch(closeBudget());
+    await dispatch(closeBudget({}));
     await dispatch(loadBudget({ id: fileId }));
   },
 );
@@ -286,7 +310,7 @@ type CloseAndDownloadBudgetPayload = {
 export const closeAndDownloadBudget = createAppAsyncThunk(
   `${sliceName}/closeAndDownloadBudget`,
   async ({ cloudFileId }: CloseAndDownloadBudgetPayload, { dispatch }) => {
-    await dispatch(closeBudget());
+    await dispatch(closeBudget({}));
     await dispatch(downloadBudget({ cloudFileId, replace: true }));
   },
 );
@@ -372,7 +396,7 @@ export const loadBackup = createAppAsyncThunk(
   async ({ budgetId, backupId }: LoadBackupPayload, { dispatch, getState }) => {
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
-      await dispatch(closeBudget());
+      await dispatch(closeBudget({}));
     }
 
     await send('backup-load', { id: budgetId, backupId });

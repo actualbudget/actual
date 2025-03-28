@@ -148,7 +148,7 @@ export function Settings() {
   const dispatch = useDispatch();
 
   const onCloseBudget = () => {
-    dispatch(closeBudget());
+    dispatch(closeBudget({}));
   };
 
   useEffect(() => {

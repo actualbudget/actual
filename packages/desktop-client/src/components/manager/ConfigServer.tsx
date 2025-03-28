@@ -19,7 +19,11 @@ import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useDispatch } from '../../redux';
 import { Link } from '../common/Link';
-import { useServerURL, useSetServerURL } from '../ServerContext';
+import {
+  useMultiuserEnabled,
+  useServerURL,
+  useSetServerURL,
+} from '../ServerContext';
 
 import { Title } from './subscribe/common';
 
@@ -30,6 +34,7 @@ export function ConfigServer() {
   const [url, setUrl] = useState('');
   const currentUrl = useServerURL();
   const setServerUrl = useSetServerURL();
+
   useEffect(() => {
     setUrl(currentUrl);
   }, [currentUrl]);
@@ -80,7 +85,7 @@ export function ConfigServer() {
       setError(error);
     } else {
       setLoading(false);
-      await dispatch(signOut());
+      await dispatch(signOut({ openidEnabled: true }));
       navigate('/');
     }
   }
