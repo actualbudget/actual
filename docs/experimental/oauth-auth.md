@@ -94,6 +94,10 @@ When all settings are correctly filled out, click the 'OK' button, and you will 
 There are some basic configuration checks when clicking 'OK', but if you somehow type the wrong information and the data is saved, when you login for the first time using OpenID, you will have a chance to review the settings.
 :::
 
+:::tip
+When configuring your OpenID provider, be sure to register the following **redirect URI** with the provider: `https://<your-domain.tld>/path/openid/callback`
+:::
+
 #### Tested Providers
 - Auth0
 - Authentik
