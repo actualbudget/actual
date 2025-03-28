@@ -7,7 +7,6 @@ CREATE TABLE "category_groups" (
 	"tombstone" boolean DEFAULT false
 );
 --> statement-breakpoint
-CREATE INDEX "category_groups_is_income_index" ON "category_groups" USING btree ("is_income");--> statement-breakpoint
-CREATE INDEX "category_groups_hidden_index" ON "category_groups" USING btree ("hidden");--> statement-breakpoint
-CREATE INDEX "category_groups_sort_order_index" ON "category_groups" USING btree ("sort_order");--> statement-breakpoint
-CREATE INDEX "category_groups_tombstone_index" ON "category_groups" USING btree ("tombstone");
+CREATE INDEX "category_groups_name_index" ON "category_groups" USING btree ("name") WHERE "category_groups"."tombstone" IS FALSE;--> statement-breakpoint
+CREATE INDEX "category_groups_is_income_sort_order_id_index" ON "category_groups" USING btree ("is_income","sort_order","id");--> statement-breakpoint
+CREATE INDEX "category_groups_sort_order_id_index" ON "category_groups" USING btree ("sort_order","id");
