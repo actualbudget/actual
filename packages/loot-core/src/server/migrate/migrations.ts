@@ -177,26 +177,30 @@ export async function migrate(db: Database): Promise<string[]> {
   return pending;
 }
 
+const DRIZZLE_MIGRATIONS_TABLE = sql.identifier('__drizzle_migrations__');
+
 async function ensureMigrationsTable(db: pglite.PgliteDatabase) {
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS drizzle_migrations (
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS ${DRIZZLE_MIGRATIONS_TABLE} (
       hash TEXT PRIMARY KEY,
       created_at TIMESTAMP NOT NULL DEFAULT NOW()
     )
   `);
 }
 
-async function getMigratedHashes(db: pglite.PgliteDatabase): Promise<string[]> {
-  const result = await db.execute(`
-    SELECT hash FROM drizzle_migrations ORDER BY created_at ASC
+async function getMigratedHashes(
+  db: pglite.PgliteDatabase,
+): Promise<Set<string>> {
+  const result = await db.execute<{ hash: string }>(sql`
+    SELECT hash FROM ${DRIZZLE_MIGRATIONS_TABLE} ORDER BY created_at ASC
   `);
-  return result.rows.map(row => row.hash as string);
+  return new Set<string>(result.rows.map(row => row.hash));
 }
 
 async function recordMigration(db: pglite.PgliteDatabase, hash: string) {
   await db.execute(
     sql`
-      INSERT INTO drizzle_migrations (hash, created_at)
+      INSERT INTO ${DRIZZLE_MIGRATIONS_TABLE} (hash, created_at)
       VALUES (${hash}, NOW())
       ON CONFLICT DO NOTHING
     `,
@@ -214,7 +218,7 @@ export async function migratePGlite(db: pglite.PgliteDatabase) {
 
   // Filter and execute pending migrations
   const pendingMigrations = drizzleMigrations.filter(
-    migration => !executedHashes.includes(migration.hash),
+    migration => !executedHashes.has(migration.hash),
   );
 
   if (pendingMigrations.length === 0) {
@@ -222,11 +226,11 @@ export async function migratePGlite(db: pglite.PgliteDatabase) {
     return;
   }
 
-  console.log(`📦 Found ${pendingMigrations.length} pending migrations`);
+  console.log(`👀 Found ${pendingMigrations.length} pending migrations.`);
 
   // Execute migrations in sequence
   for (const migration of pendingMigrations) {
-    console.log(`⚡ Executing migration: ${migration.hash}`);
+    console.log(`🪄 Executing migration: ${migration.hash}`);
     try {
       // Execute each SQL statement in sequence
       for (const sql of migration.sql) {
@@ -242,5 +246,5 @@ export async function migratePGlite(db: pglite.PgliteDatabase) {
     }
   }
 
-  console.log('🎉 All migrations completed successfully');
+  console.log('🎊 All migrations completed successfully!');
 }
