@@ -16,8 +16,6 @@ import { type MarkdownWidget } from 'loot-core/types/models';
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from '../constants';
 import { ReportCard } from '../ReportCard';
 
-const remarkPlugins = [rehypeExternalLinks({ target: '_blank' })];
-
 const markdownStyles = css({
   paddingRight: 20,
   '& h3': styles.mediumText,
@@ -137,7 +135,9 @@ export function MarkdownCard({
           />
         ) : (
           <Text className={markdownStyles}>
-            <ReactMarkdown remarkPlugins={remarkPlugins}>
+            <ReactMarkdown
+              rehypePlugins={[[rehypeExternalLinks, { target: '_blank' }]]}
+            >
               {meta.content}
             </ReactMarkdown>
           </Text>

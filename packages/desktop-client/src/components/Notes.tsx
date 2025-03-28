@@ -13,12 +13,7 @@ import remarkGfm from 'remark-gfm';
 
 import { remarkBreaks, sequentialNewlinesPlugin } from '../util/markdown';
 
-const remarkPlugins = [
-  sequentialNewlinesPlugin,
-  remarkGfm,
-  remarkBreaks,
-  rehypeExternalLinks({ target: '_blank' }),
-];
+const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];
 
 const markdownStyles = css({
   display: 'block',
@@ -134,7 +129,12 @@ export function Notes({
     />
   ) : (
     <Text className={css([markdownStyles, getStyle?.(editable)])}>
-      <ReactMarkdown remarkPlugins={remarkPlugins}>{notes}</ReactMarkdown>
+      <ReactMarkdown
+        remarkPlugins={remarkPlugins}
+        rehypePlugins={[[rehypeExternalLinks, { target: '_blank' }]]}
+      >
+        {notes}
+      </ReactMarkdown>
     </Text>
   );
 }
