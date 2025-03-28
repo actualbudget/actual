@@ -39,6 +39,10 @@ const argv = yargs()
   })
   .parseSync();
 
+function getDatabase() {
+  return sqlite.openDatabase(argv.db);
+}
+
 function create(migrationName) {
   const migrationsDir = getMigrationsDir();
   const ts = Date.now();
@@ -70,11 +74,10 @@ withMigrationsDir(argv.m || getMigrationsDir(), async () => {
         path.join(__dirname, '../../../src/server/sql/init.sql'),
         'utf8',
       );
-      const database = sqlite.openDatabase(argv.db);
-      await sqlite.execQuery(database, initSql);
+      getDatabase().exec(initSql);
       break;
     case 'migrate':
-      const applied = await migrate(sqlite.openDatabase(argv.db));
+      const applied = await migrate(getDatabase());
       if (applied.length === 0) {
         console.log('No pending migrations');
       } else {
@@ -82,7 +85,7 @@ withMigrationsDir(argv.m || getMigrationsDir(), async () => {
       }
       break;
     case 'list':
-      await list(sqlite.openDatabase(argv.db));
+      await list(getDatabase());
       break;
     case 'create':
     default:
