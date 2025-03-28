@@ -18,6 +18,7 @@ import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useDispatch } from '../../redux';
 
 import { TransactionTable } from './TransactionsTable';
+import { v4 } from 'uuid';
 
 // When data changes, there are two ways to update the UI:
 //
@@ -112,9 +113,36 @@ export function TransactionList({
 
   const onAdd = useCallback(
     async newTransactions => {
-      newTransactions = realizeTempTransactions(newTransactions);
+      const nonPending = newTransactions.filter(x => x.category !== 'Due');
 
-      await saveDiff({ added: newTransactions }, isLearnCategoriesEnabled);
+      if (nonPending.length) {
+        await saveDiff(
+          { added: realizeTempTransactions(nonPending) },
+          isLearnCategoriesEnabled,
+        );
+      }
+
+      const pending = newTransactions.filter(x => x.category === 'Due');
+      if (pending.length) {
+        await Promise.all(
+          pending.map(async t =>
+            send('schedule/create', {
+              conditions: [
+                t.amount
+                  ? [{ field: 'amount', op: 'is', value: t.amount }]
+                  : [],
+                { field: 'account', op: 'is', value: t.account },
+                { field: 'payee', op: 'is', value: t.payee },
+                { field: 'date', op: 'is', value: t.date },
+                { field: 'category', op: 'is', value: 'Due' },
+              ],
+              schedule: {
+                name: v4(),
+              },
+            }),
+          ),
+        );
+      }
       onRefetch();
     },
     [isLearnCategoriesEnabled, onRefetch],

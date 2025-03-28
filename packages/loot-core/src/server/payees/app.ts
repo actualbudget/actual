@@ -11,6 +11,7 @@ import { undoable } from '../undo';
 export type PayeesHandlers = {
   'payee-create': typeof createPayee;
   'common-payees-get': typeof getCommonPayees;
+  'payee-get': typeof getPayee;
   'payees-get': typeof getPayees;
   'payees-get-orphaned': typeof getOrphanedPayees;
   'payees-get-rule-counts': typeof getPayeeRuleCounts;
@@ -21,6 +22,7 @@ export type PayeesHandlers = {
 };
 
 export const app = createApp<PayeesHandlers>();
+app.method('payee-get', getPayee);
 app.method('payee-create', mutator(undoable(createPayee)));
 app.method('common-payees-get', getCommonPayees);
 app.method('payees-get', getPayees);
@@ -38,6 +40,10 @@ app.method(
 app.method('payees-batch-change', mutator(undoable(batchChangePayees)));
 app.method('payees-check-orphaned', checkOrphanedPayees);
 app.method('payees-get-rules', getPayeeRules);
+
+async function getPayee(id: PayeeEntity['id']) {
+  return db.getPayee(id);
+}
 
 async function createPayee({ name }: { name: PayeeEntity['name'] }) {
   return db.insertPayee({ name });
