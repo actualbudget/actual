@@ -848,6 +848,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
             </View>
           )}
           <View
+            id="custom-report-content"
             style={{
               backgroundColor: theme.tableBackground,
               flexDirection: 'row',
