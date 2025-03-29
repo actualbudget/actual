@@ -1,19 +1,20 @@
 // @ts-strict-ignore
 import React, {
   forwardRef,
-  useState,
   useCallback,
-  useRef,
-  useLayoutEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
+  useRef,
+  useState,
   type ComponentProps,
-  type ReactNode,
+  type JSX,
   type KeyboardEvent,
-  type UIEvent,
   type ReactElement,
+  type ReactNode,
   type Ref,
-  type MutableRefObject,
+  type RefObject,
+  type UIEvent,
 } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
@@ -926,7 +927,7 @@ type TableProps<T extends TableItem = TableItem> = {
   loadMore?: () => void;
   style?: CSSProperties;
   navigator?: ReturnType<typeof useTableNavigator<T>>;
-  listContainerRef?: MutableRefObject<HTMLDivElement>;
+  listContainerRef?: RefObject<HTMLDivElement>;
   onScroll?: () => void;
   isSelected?: (id: T['id']) => boolean;
   saveScrollWidth?: (parent, child) => void;
@@ -1225,7 +1226,7 @@ export function useTableNavigator<T extends TableItem>(
   const getFields = typeof fields !== 'function' ? () => fields : fields;
   const [editingId, setEditingId] = useState<T['id']>(null);
   const [focusedField, setFocusedField] = useState<string>(null);
-  const containerRef = useRef<HTMLDivElement>();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // See `onBlur` for why we need this
   const modalState = useModalState();

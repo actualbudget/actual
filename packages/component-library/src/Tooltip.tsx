@@ -26,7 +26,7 @@ export const Tooltip = ({
   const triggerRef = useRef(null);
   const [isHovered, setIsHover] = useState(false);
 
-  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const handlePointerEnter = useCallback(() => {
     const timeout = setTimeout(() => {

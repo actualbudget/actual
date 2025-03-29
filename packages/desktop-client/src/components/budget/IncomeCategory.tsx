@@ -3,6 +3,7 @@ import React, { type ComponentProps } from 'react';
 
 import { type CategoryEntity } from 'loot-core/types/models';
 
+import { useDragRef } from '../../hooks/useDragRef';
 import {
   useDraggable,
   useDroppable,
@@ -50,6 +51,7 @@ export function IncomeCategory({
     item: cat,
     canDrag: editingCell === null,
   });
+  const handleDragRef = useDragRef(dragRef);
 
   const { dropRef, dropPos } = useDroppable({
     types: 'income-category',
@@ -68,7 +70,7 @@ export function IncomeCategory({
       <DropHighlight pos={dropPos} offset={{ top: 1 }} />
 
       <SidebarCategory
-        innerRef={dragRef}
+        innerRef={handleDragRef}
         category={cat}
         isLast={isLast}
         editing={

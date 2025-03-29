@@ -47,7 +47,7 @@ function RenderTotalsRow({
 type ReportTableTotalsProps = {
   data: DataEntity;
   mode: string;
-  totalScrollRef: RefObject<HTMLDivElement>;
+  totalScrollRef: RefObject<HTMLDivElement | null>;
   compact: boolean;
   style?: CSSProperties;
   renderTotals: (arg: renderTotalsProps) => ReactNode;

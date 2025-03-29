@@ -1,6 +1,5 @@
 // @ts-strict-ignore
-import React, { type CSSProperties, useRef } from 'react';
-import { type ConnectDragSource } from 'react-dnd';
+import React, { type CSSProperties, type RefCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -27,7 +26,7 @@ type SidebarGroupProps = {
   editing?: boolean;
   collapsed: boolean;
   dragPreview?: boolean;
-  innerRef?: ConnectDragSource;
+  innerRef?: RefCallback<HTMLDivElement>;
   style?: CSSProperties;
   onEdit?: (id: CategoryGroupEntity['id']) => void;
   onSave?: (group: CategoryGroupEntity) => Promise<void>;

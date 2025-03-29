@@ -48,7 +48,7 @@ const AmountInput = memo(function AmountInput({
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState('');
   const [value, setValue] = useState(0);
-  const inputRef = useRef<HTMLInputElement>();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [hideFraction] = useSyncedPref('hideFraction');
 
   const mergedInputRef = useMergedRefs<HTMLInputElement>(

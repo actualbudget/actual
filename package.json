@@ -52,6 +52,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@types/node": "^22.13.14",
     "@types/prompts": "^2.4.9",
     "@typescript-eslint/parser": "^8.26.1",
     "cross-env": "^7.0.3",

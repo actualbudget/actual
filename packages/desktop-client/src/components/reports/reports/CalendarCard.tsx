@@ -177,7 +177,7 @@ export function CalendarCard({
       }}
     >
       <View
-        ref={el => el && cardRef(el)}
+        ref={el => (el ? cardRef(el) : undefined)}
         style={{ flex: 1, margin: 2, overflow: 'hidden', width: '100%' }}
       >
         <View style={{ flexDirection: 'row', padding: 20, paddingBottom: 0 }}>
