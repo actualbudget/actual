@@ -5,7 +5,7 @@ import { importActual } from './actual';
 import * as YNAB4 from './ynab4';
 import * as YNAB5 from './ynab5';
 
-type ImportableBudgetType = 'ynab4' | 'ynab5' | 'actual';
+export type ImportableBudgetType = 'ynab4' | 'ynab5' | 'actual';
 
 type Importer = {
   parseFile(buffer: Buffer): unknown;

@@ -1,4 +1,4 @@
-import { type Backup } from '../server/backups';
+import { type Backup } from '../server/budgetfiles/backups';
 import { type UndoState } from '../server/undo';
 
 type SyncSubtype =
