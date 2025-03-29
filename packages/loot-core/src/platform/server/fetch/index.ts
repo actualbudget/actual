@@ -13,7 +13,7 @@ export const fetch = async (
   // we want to fully reload and yeild control from the service worker back to the server.
   if (response.type === 'opaqueredirect') {
     connection.send('api-fetch-redirected');
-    throw new Error(`API request redirected to unknown destination`);
+    throw new Error(`API request redirected`);
   }
 
   return response;
