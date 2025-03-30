@@ -13,6 +13,7 @@ import {
   Modal as ReactAriaModal,
   Dialog,
 } from 'react-aria-components';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useHotkeysContext } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
@@ -32,7 +33,6 @@ import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
 import { useModalState } from '../../hooks/useModalState';
-import { ErrorBoundary } from 'react-error-boundary';
 
 type ModalProps = ComponentPropsWithRef<typeof ReactAriaModal> & {
   name: string;
@@ -496,8 +496,8 @@ export function ModalCloseButton({ onPress, style }: ModalCloseButtonProps) {
 function ErrorFallback() {
   const { t } = useTranslation();
   return (
-      <Text style={{ ...styles.mediumText, color: theme.errorText }}>
-        {t('There was a problem loading the modal')}
-      </Text>
+    <Text style={{ ...styles.mediumText, color: theme.errorText }}>
+      {t('There was a problem loading the modal')}
+    </Text>
   );
 }
