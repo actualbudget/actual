@@ -7,6 +7,8 @@ import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
+import { useDispatch } from '../../redux';
 
 import { useTransactions } from 'loot-core/client/data-hooks/transactions';
 import {
@@ -99,6 +101,8 @@ const mappableFields: MappableField[] = [
   },
 ];
 
+const dispatch = useDispatch();
+
 const getFields = (transaction: TransactionEntity) =>
   mappableFields.map(field => ({
     actualField: field.actualField,
@@ -181,6 +185,11 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
     close();
   };
 
+  const onUnlink = async (close: () => void) => {
+    dispatch(unlinkAccount({ id: account.id }));
+    close();
+  };
+
   const setMapping = (field: string, value: string) => {
     setMappings(prev => {
       const updated = new Map(prev);
@@ -200,9 +209,18 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={t('Account settings')}
+            title={account.name + t('bank sync settings')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
+
+          <Button
+          onPress={() => {
+                onUnlink(close);
+              }}>
+            <Trans>Unlink Account</Trans>
+          </Button>
+
+
 
           <Text style={{ fontSize: 15 }}>
             <Trans>Field mapping</Trans>
