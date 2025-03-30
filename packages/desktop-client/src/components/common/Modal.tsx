@@ -32,6 +32,7 @@ import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
 import { useModalState } from '../../hooks/useModalState';
+import { ErrorBoundary } from 'react-error-boundary';
 
 type ModalProps = ComponentPropsWithRef<typeof ReactAriaModal> & {
   name: string;
@@ -139,11 +140,13 @@ export const Modal = ({
                   ...containerProps?.style,
                 }}
               >
-                <View style={{ paddingTop: 0, flex: 1, flexShrink: 0 }}>
-                  {typeof children === 'function'
-                    ? children(modalProps)
-                    : children}
-                </View>
+                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                  <View style={{ paddingTop: 0, flex: 1, flexShrink: 0 }}>
+                    {typeof children === 'function'
+                      ? children(modalProps)
+                      : children}
+                  </View>
+                </ErrorBoundary>
                 {isLoading && (
                   <View
                     style={{
@@ -487,5 +490,14 @@ export function ModalCloseButton({ onPress, style }: ModalCloseButtonProps) {
     >
       <SvgDelete width={10} style={style} />
     </Button>
+  );
+}
+
+function ErrorFallback() {
+  const { t } = useTranslation();
+  return (
+      <Text style={{ ...styles.mediumText, color: theme.errorText }}>
+        {t('There was a problem loading the modal')}
+      </Text>
   );
 }
