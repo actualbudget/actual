@@ -181,7 +181,7 @@ export async function loginWithOpenIdFinalize(body) {
     let tokenSet = null;
 
     if (!configFromDb.authMethod || configFromDb.authMethod === 'openid') {
-      const params = { code: body.code, state: body.state };
+      const params = { code: body.code, state: body.state, iss: body.iss };
       tokenSet = await client.callback(client.redirect_uris[0], params, {
         code_verifier,
         state: body.state,

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { DialogTrigger } from 'react-aria-components';
+import { Dialog, DialogTrigger } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
@@ -416,19 +416,21 @@ export function CreateAccountModal({
                             </Button>
 
                             <Popover>
-                              <Menu
-                                onMenuSelect={item => {
-                                  if (item === 'reconfigure') {
-                                    onGoCardlessReset();
-                                  }
-                                }}
-                                items={[
-                                  {
-                                    name: 'reconfigure',
-                                    text: t('Reset GoCardless credentials'),
-                                  },
-                                ]}
-                              />
+                              <Dialog>
+                                <Menu
+                                  onMenuSelect={item => {
+                                    if (item === 'reconfigure') {
+                                      onGoCardlessReset();
+                                    }
+                                  }}
+                                  items={[
+                                    {
+                                      name: 'reconfigure',
+                                      text: t('Reset GoCardless credentials'),
+                                    },
+                                  ]}
+                                />
+                              </Dialog>
                             </Popover>
                           </DialogTrigger>
                         )}
@@ -479,19 +481,21 @@ export function CreateAccountModal({
                               />
                             </Button>
                             <Popover>
-                              <Menu
-                                onMenuSelect={item => {
-                                  if (item === 'reconfigure') {
-                                    onSimpleFinReset();
-                                  }
-                                }}
-                                items={[
-                                  {
-                                    name: 'reconfigure',
-                                    text: t('Reset SimpleFIN credentials'),
-                                  },
-                                ]}
-                              />
+                              <Dialog>
+                                <Menu
+                                  onMenuSelect={item => {
+                                    if (item === 'reconfigure') {
+                                      onSimpleFinReset();
+                                    }
+                                  }}
+                                  items={[
+                                    {
+                                      name: 'reconfigure',
+                                      text: t('Reset SimpleFIN credentials'),
+                                    },
+                                  ]}
+                                />
+                              </Dialog>
                             </Popover>
                           </DialogTrigger>
                         )}
@@ -543,19 +547,23 @@ export function CreateAccountModal({
                                 </Button>
 
                                 <Popover>
-                                  <Menu
-                                    onMenuSelect={item => {
-                                      if (item === 'reconfigure') {
-                                        onPluggyAiReset();
-                                      }
-                                    }}
-                                    items={[
-                                      {
-                                        name: 'reconfigure',
-                                        text: t('Reset Pluggy.ai credentials'),
-                                      },
-                                    ]}
-                                  />
+                                  <Dialog>
+                                    <Menu
+                                      onMenuSelect={item => {
+                                        if (item === 'reconfigure') {
+                                          onPluggyAiReset();
+                                        }
+                                      }}
+                                      items={[
+                                        {
+                                          name: 'reconfigure',
+                                          text: t(
+                                            'Reset Pluggy.ai credentials',
+                                          ),
+                                        },
+                                      ]}
+                                    />
+                                  </Dialog>
                                 </Popover>
                               </DialogTrigger>
                             )}

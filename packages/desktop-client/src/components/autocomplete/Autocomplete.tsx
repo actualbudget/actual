@@ -24,6 +24,8 @@ import Downshift, { type StateChangeTypes } from 'downshift';
 
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 
+import { useProperFocus } from '../../hooks/useProperFocus';
+
 type CommonAutocompleteProps<T extends Item> = {
   embedded?: boolean;
   containerProps?: HTMLProps<HTMLDivElement>;
@@ -297,6 +299,8 @@ function SingleAutocomplete<T extends Item>({
   }
 
   const filtered = isChanged ? filteredSuggestions || suggestions : suggestions;
+  const inputRef = useRef(null);
+  useProperFocus(inputRef, focused);
 
   return (
     <Downshift
@@ -455,6 +459,8 @@ function SingleAutocomplete<T extends Item>({
           <View ref={triggerRef} style={{ flexShrink: 0 }}>
             {renderInput(
               getInputProps({
+                focused,
+                inputRef,
                 ...inputProps,
                 onFocus: e => {
                   inputProps.onFocus?.(e);
@@ -658,6 +664,8 @@ function MultiAutocomplete<T extends Item>({
 }: MultiAutocompleteProps<T>) {
   const [focused, setFocused] = useState(false);
   const selectedItemIds = selectedItems.map(getItemId);
+  const inputRef = useRef(null);
+  useProperFocus(inputRef, focused);
 
   function onRemoveItem(id: T['id']) {
     const items = selectedItemIds.filter(i => i !== id);
@@ -725,6 +733,7 @@ function MultiAutocomplete<T extends Item>({
           })}
           <Input
             {...inputProps}
+            inputRef={inputRef}
             onKeyDown={e => onKeyDown(e, inputProps.onKeyDown)}
             onFocus={e => {
               setFocused(true);
