@@ -250,7 +250,7 @@ export function listenForSyncEvent(store: AppStore) {
             title: t('Syncing has been reset on this cloud file'),
             message:
               t(
-                'You need to revert it to continue syncing. Any unsynced ' +
+                'You need to revert to it to continue syncing. Any unsynced ' +
                   'data will be lost. If you like, you can instead ' +
                   '[upload this file](#upload) to be the latest version.',
               ) +
