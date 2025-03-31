@@ -25,7 +25,10 @@ The reasons for this change are as follows:
 - **Q.** _I [Build from source](https://actualbudget.org/docs/install/build-from-source). How do I keep up to date?_
 
   **A.** Follow these instructions:
-  1. Clone the [Actual repository](https://github.com/actualbudget/actual). You can use the following command:
+  
+  If you are on Windows, you'll need to install [Git Bash](https://git-scm.com/download).
+
+  1. Open Bash, then Clone the [Actual repository](https://github.com/actualbudget/actual). You can use the following command:
   ```
   git clone https://github.com/actualbudget/actual.git
   ```
