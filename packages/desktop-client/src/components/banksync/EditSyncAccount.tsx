@@ -101,8 +101,6 @@ const mappableFields: MappableField[] = [
   },
 ];
 
-const dispatch = useDispatch();
-
 const getFields = (transaction: TransactionEntity) =>
   mappableFields.map(field => ({
     actualField: field.actualField,
@@ -185,6 +183,8 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
     close();
   };
 
+  const dispatch = useDispatch();
+
   const onUnlink = async (close: () => void) => {
     dispatch(unlinkAccount({ id: account.id }));
     close();
@@ -209,11 +209,15 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={account.name + t('bank sync settings')}
+            title={account.name + t(' bank sync settings')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
+          
+          <Text style={{ fontSize: 15 }}>
+            <Trans>This page will close if account is unlinked.</Trans>
+          </Text>
 
-          <Button
+          <Button style={{ margin: '1em 0', width: '25%',}}
           onPress={() => {
                 onUnlink(close);
               }}>
