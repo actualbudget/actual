@@ -28,6 +28,13 @@ Server Version 25.4.0 or higher are required to use this feature.
 
 1. Visit [Meu Pluggy](https://meu.pluggy.ai) and log in or sign up.
 2. Follow the instructions provided on the official [github repository](https://github.com/pluggyai/meu-pluggy).
+
+:::info
+Please note, you will only be able to connect your account to meu.pluggy.ai while your pluggy.ai trial period is active so please complete this step promptly. Once the trial period lapses, the account will remain connected but the connector list configuration will not be editable.
+
+![](/static/img/connecting-your-bank/pluggy-trial-warning.png)
+:::
+
 3. After completing the steps in *item 2*, return to the Pluggy Console. Go to the application you created and click "Ir para Demo" to open the demo app.
 4. In the top right corner, open the three-dot menu. Open it and click **Copiar Item ID** from your bank sync to the clipboard. You'll need this to complete your Pluggy.ai bank sync setup.
 
