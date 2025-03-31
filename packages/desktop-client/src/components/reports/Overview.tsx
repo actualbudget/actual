@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { DialogTrigger } from 'react-aria-components';
+import { Dialog, DialogTrigger } from 'react-aria-components';
 import { Responsive, WidthProvider, type Layout } from 'react-grid-layout';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
@@ -339,73 +339,75 @@ export function Overview() {
                     </Button>
 
                     <Popover>
-                      <Menu
-                        onMenuSelect={item => {
-                          if (item === 'custom-report') {
-                            navigate('/reports/custom');
-                            return;
-                          }
+                      <Dialog>
+                        <Menu
+                          onMenuSelect={item => {
+                            if (item === 'custom-report') {
+                              navigate('/reports/custom');
+                              return;
+                            }
 
-                          function isExistingCustomReport(
-                            name: string,
-                          ): name is `custom-report-${string}` {
-                            return name.startsWith('custom-report-');
-                          }
-                          if (isExistingCustomReport(item)) {
-                            const [, reportId] = item.split('custom-report-');
-                            onAddWidget<CustomReportWidget>('custom-report', {
-                              id: reportId,
-                            });
-                            return;
-                          }
+                            function isExistingCustomReport(
+                              name: string,
+                            ): name is `custom-report-${string}` {
+                              return name.startsWith('custom-report-');
+                            }
+                            if (isExistingCustomReport(item)) {
+                              const [, reportId] = item.split('custom-report-');
+                              onAddWidget<CustomReportWidget>('custom-report', {
+                                id: reportId,
+                              });
+                              return;
+                            }
 
-                          if (item === 'markdown-card') {
-                            onAddWidget<MarkdownWidget>(item, {
-                              content: `### ${t('Text Widget')}\n\n${t('Edit this widget to change the **markdown** content.')}`,
-                            });
-                            return;
-                          }
+                            if (item === 'markdown-card') {
+                              onAddWidget<MarkdownWidget>(item, {
+                                content: `### ${t('Text Widget')}\n\n${t('Edit this widget to change the **markdown** content.')}`,
+                              });
+                              return;
+                            }
 
-                          onAddWidget(item);
-                        }}
-                        items={[
-                          {
-                            name: 'cash-flow-card' as const,
-                            text: t('Cash flow graph'),
-                          },
-                          {
-                            name: 'net-worth-card' as const,
-                            text: t('Net worth graph'),
-                          },
-                          {
-                            name: 'spending-card' as const,
-                            text: t('Spending analysis'),
-                          },
-                          {
-                            name: 'markdown-card' as const,
-                            text: t('Text widget'),
-                          },
-                          {
-                            name: 'summary-card' as const,
-                            text: t('Summary card'),
-                          },
-                          {
-                            name: 'calendar-card' as const,
-                            text: t('Calendar card'),
-                          },
-                          {
-                            name: 'custom-report' as const,
-                            text: t('New custom report'),
-                          },
-                          ...(customReports.length
-                            ? ([Menu.line] satisfies Array<typeof Menu.line>)
-                            : []),
-                          ...customReports.map(report => ({
-                            name: `custom-report-${report.id}` as const,
-                            text: report.name,
-                          })),
-                        ]}
-                      />
+                            onAddWidget(item);
+                          }}
+                          items={[
+                            {
+                              name: 'cash-flow-card' as const,
+                              text: t('Cash flow graph'),
+                            },
+                            {
+                              name: 'net-worth-card' as const,
+                              text: t('Net worth graph'),
+                            },
+                            {
+                              name: 'spending-card' as const,
+                              text: t('Spending analysis'),
+                            },
+                            {
+                              name: 'markdown-card' as const,
+                              text: t('Text widget'),
+                            },
+                            {
+                              name: 'summary-card' as const,
+                              text: t('Summary card'),
+                            },
+                            {
+                              name: 'calendar-card' as const,
+                              text: t('Calendar card'),
+                            },
+                            {
+                              name: 'custom-report' as const,
+                              text: t('New custom report'),
+                            },
+                            ...(customReports.length
+                              ? ([Menu.line] satisfies Array<typeof Menu.line>)
+                              : []),
+                            ...customReports.map(report => ({
+                              name: `custom-report-${report.id}` as const,
+                              text: report.name,
+                            })),
+                          ]}
+                        />
+                      </Dialog>
                     </Popover>
                   </DialogTrigger>
 
@@ -434,39 +436,41 @@ export function Overview() {
                       />
                     </Button>
                     <Popover>
-                      <Menu
-                        onMenuSelect={item => {
-                          switch (item) {
-                            case 'reset':
-                              onResetDashboard();
-                              break;
-                            case 'export':
-                              onExport();
-                              break;
-                            case 'import':
-                              onImport();
-                              break;
-                          }
-                        }}
-                        items={[
-                          {
-                            name: 'reset',
-                            text: t('Reset to default'),
-                            disabled: isImporting,
-                          },
-                          Menu.line,
-                          {
-                            name: 'import',
-                            text: t('Import'),
-                            disabled: isImporting,
-                          },
-                          {
-                            name: 'export',
-                            text: t('Export'),
-                            disabled: isImporting,
-                          },
-                        ]}
-                      />
+                      <Dialog>
+                        <Menu
+                          onMenuSelect={item => {
+                            switch (item) {
+                              case 'reset':
+                                onResetDashboard();
+                                break;
+                              case 'export':
+                                onExport();
+                                break;
+                              case 'import':
+                                onImport();
+                                break;
+                            }
+                          }}
+                          items={[
+                            {
+                              name: 'reset',
+                              text: t('Reset to default'),
+                              disabled: isImporting,
+                            },
+                            Menu.line,
+                            {
+                              name: 'import',
+                              text: t('Import'),
+                              disabled: isImporting,
+                            },
+                            {
+                              name: 'export',
+                              text: t('Export'),
+                              disabled: isImporting,
+                            },
+                          ]}
+                        />
+                      </Dialog>
                     </Popover>
                   </DialogTrigger>
                 </>

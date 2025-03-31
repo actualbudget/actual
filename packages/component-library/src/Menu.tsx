@@ -8,6 +8,7 @@ import {
   type CSSProperties,
 } from 'react';
 
+import { Button } from './Button';
 import { Text } from './Text';
 import { theme } from './theme';
 import { Toggle } from './Toggle';
@@ -161,9 +162,10 @@ export function Menu<const NameType = string>({
         const Icon = item.icon;
 
         return (
-          <View
-            role="button"
+          <Button
             key={String(item.name)}
+            variant="bare"
+            slot="close"
             style={{
               cursor: 'default',
               padding: 10,
@@ -179,11 +181,9 @@ export function Menu<const NameType = string>({
                 }),
               ...(!isLabel(item) && getItemStyle?.(item)),
             }}
-            onPointerEnter={() => setHoveredIndex(idx)}
-            onPointerLeave={() => setHoveredIndex(null)}
-            onPointerUp={e => {
-              e.stopPropagation();
-
+            onHoverStart={() => setHoveredIndex(idx)}
+            onHoverEnd={() => setHoveredIndex(null)}
+            onPress={() => {
               if (
                 !item.disabled &&
                 item.toggle === undefined &&
@@ -232,7 +232,7 @@ export function Menu<const NameType = string>({
               </View>
             )}
             {item.key && <Keybinding keyName={item.key} />}
-          </View>
+          </Button>
         );
       })}
       {footer}
