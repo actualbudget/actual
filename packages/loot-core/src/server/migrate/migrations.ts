@@ -3,9 +3,10 @@
 // them which doesn't play well with CSP. There isn't great, and eventually
 // we can remove this migration.
 import { Database } from '@jlongster/sql.js';
-import { sql } from 'drizzle-orm';
+import { PgDialect, PgSession } from 'drizzle-orm/pg-core';
 
 import drizzleMigrations from '../../../drizzle/migrations.json';
+import drizzleConfig from '../../../drizzle.config';
 import m1632571489012 from '../../../migrations/1632571489012_remove_cache';
 import m1722717601000 from '../../../migrations/1722717601000_reports_move_selected_categories';
 import m1722804019000 from '../../../migrations/1722804019000_create_dashboard_table';
@@ -177,74 +178,16 @@ export async function migrate(db: Database): Promise<string[]> {
   return pending;
 }
 
-const DRIZZLE_MIGRATIONS_TABLE = sql.identifier('__drizzle_migrations__');
-
-async function ensureMigrationsTable(db: pglite.PgliteDatabase) {
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS ${DRIZZLE_MIGRATIONS_TABLE} (
-      hash TEXT PRIMARY KEY,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW()
-    )
-  `);
-}
-
-async function getMigratedHashes(
-  db: pglite.PgliteDatabase,
-): Promise<Set<string>> {
-  const result = await db.execute<{ hash: string }>(sql`
-    SELECT hash FROM ${DRIZZLE_MIGRATIONS_TABLE} ORDER BY created_at ASC
-  `);
-  return new Set<string>(result.rows.map(row => row.hash));
-}
-
-async function recordMigration(db: pglite.PgliteDatabase, hash: string) {
-  await db.execute(
-    sql`
-      INSERT INTO ${DRIZZLE_MIGRATIONS_TABLE} (hash, created_at)
-      VALUES (${hash}, NOW())
-      ON CONFLICT DO NOTHING
-    `,
-  );
-}
-
 export async function migratePGlite(db: pglite.PgliteDatabase) {
   console.log('🚀 Starting pglite migration...');
 
-  // Ensure migrations table exists
-  await ensureMigrationsTable(db);
+  const dialect = new PgDialect({
+    casing: drizzleConfig.casing,
+  });
 
-  // Get already executed migrations
-  const executedHashes = await getMigratedHashes(db);
+  await dialect.migrate(drizzleMigrations, db._.session as PgSession, {
+    migrationsFolder: '../../../drizzle',
+  });
 
-  // Filter and execute pending migrations
-  const pendingMigrations = drizzleMigrations.filter(
-    migration => !executedHashes.has(migration.hash),
-  );
-
-  if (pendingMigrations.length === 0) {
-    console.log('✨ No pending migrations found.');
-    return;
-  }
-
-  console.log(`👀 Found ${pendingMigrations.length} pending migrations.`);
-
-  // Execute migrations in sequence
-  for (const migration of pendingMigrations) {
-    console.log(`🪄 Executing migration: ${migration.hash}`);
-    try {
-      // Execute each SQL statement in sequence
-      for (const sql of migration.sql) {
-        await db.execute(sql);
-      }
-
-      // Record successful migration
-      await recordMigration(db, migration.hash);
-      console.log(`✅ Successfully completed migration: ${migration.hash}`);
-    } catch (error) {
-      console.error(`❌ Failed to execute migration ${migration.hash}:`, error);
-      throw error;
-    }
-  }
-
-  console.log('🎊 All migrations completed successfully!');
+  console.log('🎉 Completed pglite migration.');
 }
