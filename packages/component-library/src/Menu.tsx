@@ -3,11 +3,13 @@ import {
   useEffect,
   useRef,
   useState,
+  type ComponentProps,
   type ComponentType,
   type SVGProps,
   type CSSProperties,
 } from 'react';
 
+import { Button } from './Button';
 import { Text } from './Text';
 import { theme } from './theme';
 import { Toggle } from './Toggle';
@@ -61,6 +63,7 @@ type MenuProps<NameType> = {
   style?: CSSProperties;
   className?: string;
   getItemStyle?: (item: MenuItemObject<NameType>) => CSSProperties;
+  slot?: ComponentProps<typeof Button>['slot'];
 };
 
 export function Menu<const NameType = string>({
@@ -71,6 +74,7 @@ export function Menu<const NameType = string>({
   style,
   className,
   getItemStyle,
+  slot,
 }: MenuProps<NameType>) {
   const elRef = useRef<HTMLDivElement>(null);
   const items = allItems.filter(x => x);
@@ -161,9 +165,10 @@ export function Menu<const NameType = string>({
         const Icon = item.icon;
 
         return (
-          <View
-            role="button"
+          <Button
             key={String(item.name)}
+            variant="bare"
+            slot={slot}
             style={{
               cursor: 'default',
               padding: 10,
@@ -179,11 +184,9 @@ export function Menu<const NameType = string>({
                 }),
               ...(!isLabel(item) && getItemStyle?.(item)),
             }}
-            onPointerEnter={() => setHoveredIndex(idx)}
-            onPointerLeave={() => setHoveredIndex(null)}
-            onPointerUp={e => {
-              e.stopPropagation();
-
+            onHoverStart={() => setHoveredIndex(idx)}
+            onHoverEnd={() => setHoveredIndex(null)}
+            onPress={() => {
               if (
                 !item.disabled &&
                 item.toggle === undefined &&
@@ -232,7 +235,7 @@ export function Menu<const NameType = string>({
               </View>
             )}
             {item.key && <Keybinding keyName={item.key} />}
-          </View>
+          </Button>
         );
       })}
       {footer}
