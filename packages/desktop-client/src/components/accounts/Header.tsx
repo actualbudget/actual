@@ -494,6 +494,7 @@ export function AccountHeader({
                 <Popover>
                   <Dialog>
                     <Menu
+                      slot="close"
                       onMenuSelect={onMenuSelect}
                       items={[
                         ...(isSorted
@@ -726,6 +727,7 @@ function AccountMenu({
 
   return (
     <Menu
+      slot="close"
       onMenuSelect={item => {
         onMenuSelect(item);
       }}

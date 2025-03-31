@@ -341,6 +341,7 @@ export function Overview() {
                     <Popover>
                       <Dialog>
                         <Menu
+                          slot="close"
                           onMenuSelect={item => {
                             if (item === 'custom-report') {
                               navigate('/reports/custom');
@@ -438,6 +439,7 @@ export function Overview() {
                     <Popover>
                       <Dialog>
                         <Menu
+                          slot="close"
                           onMenuSelect={item => {
                             switch (item) {
                               case 'reset':
