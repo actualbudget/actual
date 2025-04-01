@@ -29,7 +29,7 @@ type Actual = {
   ) => void;
   isUpdateReadyForDownload: () => boolean;
   waitForUpdateReadyForDownload: () => Promise<void>;
-  startOAuthServer: () => Promise<void>;
+  startOAuthServer: () => Promise<string>;
 };
 
 declare global {

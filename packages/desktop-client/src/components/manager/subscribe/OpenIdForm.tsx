@@ -73,7 +73,7 @@ export function OpenIdForm({
         (config: Awaited<ReturnType<Handlers['get-openid-config']>>) => {
           if (!config) return;
 
-          if ('error' in config) {
+          if ('error' in config && config.error) {
             dispatch(
               addNotification({
                 notification: {
@@ -85,11 +85,11 @@ export function OpenIdForm({
                 },
               }),
             );
-          } else if ('openId' in config) {
-            setProviderName(config?.openId?.selectedProvider ?? 'other');
-            setIssuer(config?.openId?.issuer ?? '');
-            setClientId(config?.openId?.client_id ?? '');
-            setClientSecret(config?.openId?.client_secret ?? '');
+          } else if ('openId' in config && config.openId) {
+            setProviderName(config.openId.selectedProvider ?? 'other');
+            setIssuer(config.openId.issuer ?? '');
+            setClientId(config.openId.client_id ?? '');
+            setClientSecret(config.openId.client_secret ?? '');
           }
         },
       );

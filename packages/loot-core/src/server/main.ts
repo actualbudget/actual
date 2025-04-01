@@ -15,12 +15,12 @@ import * as sqlite from '../platform/server/sqlite';
 import { q } from '../shared/query';
 import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
-import { OpenIdConfig } from '../types/models/openid';
 
 import { app as accountsApp } from './accounts/app';
 import { app as adminApp } from './admin/app';
 import { installAPI } from './api';
 import { runQuery as aqlQuery } from './aql';
+import { app as authApp } from './auth/app';
 import {
   getAvailableBackups,
   loadBackup,
@@ -48,7 +48,7 @@ import * as prefs from './prefs';
 import { app as reportsApp } from './reports/app';
 import { app as rulesApp } from './rules/app';
 import { app as schedulesApp } from './schedules/app';
-import { getServer, isValidBaseURL, setServer } from './server-config';
+import { getServer, setServer } from './server-config';
 import * as sheet from './sheet';
 import { app as spreadsheetApp } from './spreadsheet/app';
 import {
@@ -201,195 +201,6 @@ handlers['key-test'] = async function ({ fileId, password }) {
   }
 
   return {};
-};
-
-handlers['get-did-bootstrap'] = async function () {
-  return Boolean(await asyncStorage.getItem('did-bootstrap'));
-};
-
-handlers['subscribe-needs-bootstrap'] = async function ({
-  url,
-}: { url? } = {}) {
-  if (url && !isValidBaseURL(url)) {
-    return { error: 'get-server-failure' };
-  }
-
-  try {
-    if (!getServer(url)) {
-      return { bootstrapped: true, hasServer: false };
-    }
-  } catch (err) {
-    return { error: 'get-server-failure' };
-  }
-
-  let res;
-  try {
-    res = await get(getServer(url).SIGNUP_SERVER + '/needs-bootstrap');
-  } catch (err) {
-    return { error: 'network-failure' };
-  }
-
-  try {
-    res = JSON.parse(res);
-  } catch (err) {
-    return { error: 'parse-failure' };
-  }
-
-  if (res.status === 'error') {
-    return { error: res.reason };
-  }
-
-  return {
-    bootstrapped: res.data.bootstrapped,
-    availableLoginMethods: res.data.availableLoginMethods || [
-      { method: 'password', active: true, displayName: 'Password' },
-    ],
-    multiuser: res.data.multiuser || false,
-    hasServer: true,
-  };
-};
-
-handlers['subscribe-bootstrap'] = async function (loginConfig) {
-  try {
-    await post(getServer().SIGNUP_SERVER + '/bootstrap', loginConfig);
-  } catch (err) {
-    return { error: err.reason || 'network-failure' };
-  }
-  return {};
-};
-
-handlers['subscribe-get-login-methods'] = async function () {
-  let res;
-  try {
-    res = await fetch(getServer().SIGNUP_SERVER + '/login-methods').then(res =>
-      res.json(),
-    );
-  } catch (err) {
-    return { error: err.reason || 'network-failure' };
-  }
-
-  if (res.methods) {
-    return { methods: res.methods };
-  }
-  return { error: 'internal' };
-};
-
-handlers['subscribe-get-user'] = async function () {
-  if (!getServer()) {
-    if (!(await asyncStorage.getItem('did-bootstrap'))) {
-      return null;
-    }
-    return { offline: false };
-  }
-
-  const userToken = await asyncStorage.getItem('user-token');
-
-  if (!userToken) {
-    return null;
-  }
-
-  try {
-    const res = await get(getServer().SIGNUP_SERVER + '/validate', {
-      headers: {
-        'X-ACTUAL-TOKEN': userToken,
-      },
-    });
-    let tokenExpired = false;
-    const {
-      status,
-      reason,
-      data: {
-        userName = null,
-        permission = '',
-        userId = null,
-        displayName = null,
-        loginMethod = null,
-      } = {},
-    } = JSON.parse(res) || {};
-
-    if (status === 'error') {
-      if (reason === 'unauthorized') {
-        return null;
-      } else if (reason === 'token-expired') {
-        tokenExpired = true;
-      } else {
-        return { offline: true };
-      }
-    }
-
-    return {
-      offline: false,
-      userName,
-      permission,
-      userId,
-      displayName,
-      loginMethod,
-      tokenExpired,
-    };
-  } catch (e) {
-    console.log(e);
-    return { offline: true };
-  }
-};
-
-handlers['subscribe-change-password'] = async function ({ password }) {
-  const userToken = await asyncStorage.getItem('user-token');
-  if (!userToken) {
-    return { error: 'not-logged-in' };
-  }
-
-  try {
-    await post(getServer().SIGNUP_SERVER + '/change-password', {
-      token: userToken,
-      password,
-    });
-  } catch (err) {
-    return { error: err.reason || 'network-failure' };
-  }
-
-  return {};
-};
-
-handlers['subscribe-sign-in'] = async function (loginInfo) {
-  if (
-    typeof loginInfo.loginMethod !== 'string' ||
-    loginInfo.loginMethod == null
-  ) {
-    loginInfo.loginMethod = 'password';
-  }
-  let res;
-
-  try {
-    res = await post(getServer().SIGNUP_SERVER + '/login', loginInfo);
-  } catch (err) {
-    return { error: err.reason || 'network-failure' };
-  }
-
-  if (res.redirect_url) {
-    return { redirect_url: res.redirect_url };
-  }
-
-  if (!res.token) {
-    throw new Error('login: User token not set');
-  }
-
-  await asyncStorage.setItem('user-token', res.token);
-  return {};
-};
-
-handlers['subscribe-sign-out'] = async function () {
-  encryption.unloadAllKeys();
-  await asyncStorage.multiRemove([
-    'user-token',
-    'encrypt-keys',
-    'lastBudget',
-    'readOnly',
-  ]);
-  return 'ok';
-};
-
-handlers['subscribe-set-token'] = async function ({ token }) {
-  await asyncStorage.setItem('user-token', token);
 };
 
 handlers['get-server-version'] = async function () {
@@ -819,87 +630,6 @@ handlers['export-budget'] = async function () {
   }
 };
 
-handlers['enable-openid'] = async function (loginConfig) {
-  try {
-    const userToken = await asyncStorage.getItem('user-token');
-
-    if (!userToken) {
-      return { error: 'unauthorized' };
-    }
-
-    await post(getServer().BASE_SERVER + '/openid/enable', loginConfig, {
-      'X-ACTUAL-TOKEN': userToken,
-    });
-  } catch (err) {
-    return { error: err.reason || 'network-failure' };
-  }
-  return {};
-};
-
-handlers['enable-password'] = async function (loginConfig) {
-  try {
-    const userToken = await asyncStorage.getItem('user-token');
-
-    if (!userToken) {
-      return { error: 'unauthorized' };
-    }
-
-    await post(getServer().BASE_SERVER + '/openid/disable', loginConfig, {
-      'X-ACTUAL-TOKEN': userToken,
-    });
-  } catch (err) {
-    return { error: err.reason || 'network-failure' };
-  }
-  return {};
-};
-
-handlers['get-openid-config'] = async function () {
-  try {
-    const res = await get(getServer().BASE_SERVER + '/openid/config');
-
-    if (res) {
-      const config = JSON.parse(res) as OpenIdConfig;
-      return { openId: config };
-    }
-
-    return null;
-  } catch (err) {
-    return { error: 'config-fetch-failed' };
-  }
-};
-
-handlers['enable-password'] = async function (loginConfig) {
-  try {
-    const userToken = await asyncStorage.getItem('user-token');
-
-    if (!userToken) {
-      return { error: 'unauthorized' };
-    }
-
-    await post(getServer().BASE_SERVER + '/openid/disable', loginConfig, {
-      'X-ACTUAL-TOKEN': userToken,
-    });
-  } catch (err) {
-    return { error: err.reason || 'network-failure' };
-  }
-  return {};
-};
-
-handlers['get-openid-config'] = async function () {
-  try {
-    const res = await get(getServer().BASE_SERVER + '/openid/config');
-
-    if (res) {
-      const config = JSON.parse(res) as OpenIdConfig;
-      return { openId: config };
-    }
-
-    return null;
-  } catch (err) {
-    return { error: 'config-fetch-failed' };
-  }
-};
-
 async function loadBudget(id: string) {
   let dir: string;
   try {
@@ -1080,6 +810,7 @@ injectAPI.override((name, args) => runHandler(app.handlers[name], args));
 // A hack for now until we clean up everything
 app.handlers = handlers;
 app.combine(
+  authApp,
   schedulesApp,
   budgetApp,
   dashboardApp,
