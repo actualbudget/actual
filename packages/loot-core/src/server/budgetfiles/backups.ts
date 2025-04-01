@@ -2,13 +2,12 @@
 import * as dateFns from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
-import * as connection from '../platform/server/connection';
-import * as fs from '../platform/server/fs';
-import * as sqlite from '../platform/server/sqlite';
-import * as monthUtils from '../shared/months';
-
-import * as cloudStorage from './cloud-storage';
-import * as prefs from './prefs';
+import * as connection from '../../platform/server/connection';
+import * as fs from '../../platform/server/fs';
+import * as sqlite from '../../platform/server/sqlite';
+import * as monthUtils from '../../shared/months';
+import * as cloudStorage from '../cloud-storage';
+import * as prefs from '../prefs';
 
 // A special backup that represents the latest version of the db that
 // can be reverted to after loading a backup

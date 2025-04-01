@@ -96,7 +96,7 @@ export function useSchedules({
     setError(undefined);
 
     if (!query) {
-      console.error('No query provided to useSchedules');
+      // This usually means query is not yet set on this render cycle.
       return;
     }
 

@@ -189,7 +189,6 @@ export const duplicateBudget = createAppAsyncThunk(
   async (
     {
       id,
-      cloudId,
       oldName,
       newName,
       managePage,
@@ -198,6 +197,10 @@ export const duplicateBudget = createAppAsyncThunk(
     }: DuplicateBudgetPayload,
     { dispatch },
   ) => {
+    if (!id) {
+      throw new Error('Unable to duplicate a budget that is not local.');
+    }
+
     try {
       await dispatch(
         setAppState({
@@ -210,7 +213,6 @@ export const duplicateBudget = createAppAsyncThunk(
 
       await send('duplicate-budget', {
         id,
-        cloudId,
         newName,
         cloudSync,
         open: loadBudget,
@@ -309,14 +311,18 @@ export const downloadBudget = createAppAsyncThunk(
     );
 
     const { id, error } = await send('download-budget', {
-      fileId: cloudFileId,
-      replace,
+      cloudFileId,
     });
 
     if (error) {
       if (error.reason === 'decrypt-failure') {
         const opts = {
-          hasExistingKey: error.meta && error.meta.isMissingKey,
+          hasExistingKey: Boolean(
+            error.meta &&
+              typeof error.meta === 'object' &&
+              'isMissingKey' in error.meta &&
+              error.meta.isMissingKey,
+          ),
           cloudFileId,
           onSuccess: () => {
             dispatch(downloadBudget({ cloudFileId, replace }));
@@ -334,8 +340,16 @@ export const downloadBudget = createAppAsyncThunk(
               'This file will be replaced. This probably happened because files were manually ' +
               'moved around outside of Actual.',
             {
-              id: error.meta.id,
-              name: error.meta.name,
+              id:
+                error.meta &&
+                typeof error.meta === 'object' &&
+                'id' in error.meta &&
+                error.meta.id,
+              name:
+                error.meta &&
+                typeof error.meta === 'object' &&
+                'name' in error.meta &&
+                error.meta.name,
             },
           ),
         );
@@ -349,15 +363,17 @@ export const downloadBudget = createAppAsyncThunk(
       }
       return null;
     } else {
+      if (!id) {
+        throw new Error('No id returned from download.');
+      }
       await Promise.all([
         dispatch(loadGlobalPrefs()),
         dispatch(loadAllFiles()),
         dispatch(loadBudget({ id })),
       ]);
       await dispatch(setAppState({ loadingText: null }));
+      return id;
     }
-
-    return id;
   },
 );
 

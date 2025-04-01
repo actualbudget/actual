@@ -26,18 +26,20 @@ export function ExportBudget() {
 
     const response = await send('export-budget');
 
-    if ('error' in response) {
+    if ('error' in response && response.error) {
       setError(response.error);
       setIsLoading(false);
       console.log('Export error code:', response.error);
       return;
     }
 
-    window.Actual.saveFile(
-      response.data,
-      `${format(new Date(), 'yyyy-MM-dd')}-${budgetName}.zip`,
-      t('Export budget'),
-    );
+    if (response.data) {
+      window.Actual.saveFile(
+        response.data,
+        `${format(new Date(), 'yyyy-MM-dd')}-${budgetName}.zip`,
+        t('Export budget'),
+      );
+    }
     setIsLoading(false);
   }
 
