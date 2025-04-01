@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import type { Handlers } from 'loot-core/types/handlers';
+
 import * as injected from './injected';
 import type { Transaction } from './types/transaction';
 
