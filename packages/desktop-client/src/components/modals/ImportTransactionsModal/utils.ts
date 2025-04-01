@@ -201,12 +201,12 @@ export function parseAmountFields(
     // Split mode is a little weird; first we look for an outflow and
     // if that has a value, we never want to show a number in the
     // inflow. Same for `amount`; we choose outflow first and then inflow
-    value.outflow = parseAmount(trans.outflow, n => -Math.abs(n));
+    value.outflow = parseAmount(trans.outflow, n => -Math.abs(n)) || 0;
     value.inflow = value.outflow
       ? 0
-      : parseAmount(trans.inflow, n => Math.abs(n));
+      : parseAmount(trans.inflow, n => Math.abs(n)) || 0;
   } else {
-    const amount = parseAmount(trans.amount, n => n);
+    const amount = parseAmount(trans.amount, n => n) || 0;
     if (amount >= 0) value.inflow = amount;
     else value.outflow = amount;
   }

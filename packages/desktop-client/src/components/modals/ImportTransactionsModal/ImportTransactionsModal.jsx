@@ -412,7 +412,9 @@ export function ImportTransactionsModal({
         setTransactions(transactionPreview);
       }
     },
-    [accountId, getImportPreview, inOutMode, multiplierAmount, outValue, prefs],
+    // We use some state variables from the component, but do not want to re-parse when they change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [accountId, getImportPreview, prefs],
   );
 
   function onMultiplierChange(e) {
@@ -445,10 +447,6 @@ export function ImportTransactionsModal({
   function onSplitMode() {
     if (fieldMappings == null) {
       return;
-    }
-
-    if (flipAmount === true) {
-      setFlipAmount(!flipAmount);
     }
 
     const isSplit = !splitMode;
@@ -994,7 +992,7 @@ export function ImportTransactionsModal({
                     checked={flipAmount}
                     onChange={() => {
                       setFlipAmount(!flipAmount);
-                      // runImportPreview();
+                      runImportPreview();
                     }}
                   >
                     {t('Flip amount')}
