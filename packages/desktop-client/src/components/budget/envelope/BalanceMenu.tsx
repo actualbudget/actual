@@ -35,6 +35,9 @@ export function BalanceMenu({
   return (
     <Menu
       {...props}
+      style={{
+        width: '205px',
+      }}
       onMenuSelect={name => {
         switch (name) {
           case 'transfer':
