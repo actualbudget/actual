@@ -74,6 +74,9 @@ export function createCategory(cat, sheetName, prevSheetName) {
 export function createSummary(groups, categories, prevSheetName, sheetName) {
   const incomeGroup = groups.filter(group => group.is_income)[0];
   const expenseCategories = categories.filter(cat => !cat.is_income);
+  const visibleExpenseCategories = expenseCategories.filter(
+    cat => !cat.hidden && !groups.find(g => g.id === cat.cat_group)?.hidden,
+  );
 
   sheet.get().createStatic(sheetName, 'buffered', 0);
 
@@ -101,7 +104,7 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
   sheet.get().createDynamic(sheetName, 'last-month-overspent', {
     initialValue: 0,
     dependencies: flatten2(
-      expenseCategories.map(cat => [
+      visibleExpenseCategories.map(cat => [
         `${prevSheetName}!leftover-${cat.id}`,
         `${prevSheetName}!carryover-${cat.id}`,
       ]),
@@ -119,11 +122,14 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
     },
   });
 
+  // Filter out hidden groups for total-budgeted calculation
+  const visibleExpenseGroups = groups.filter(
+    group => !group.is_income && !group.hidden,
+  );
+
   sheet.get().createDynamic(sheetName, 'total-budgeted', {
     initialValue: 0,
-    dependencies: groups
-      .filter(group => !group.is_income)
-      .map(group => `group-budget-${group.id}`),
+    dependencies: visibleExpenseGroups.map(group => `group-budget-${group.id}`),
     run: (...amounts) => {
       // Negate budgeted amount
       return -sumAmounts(...amounts);
@@ -152,17 +158,17 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
 
   sheet.get().createDynamic(sheetName, 'total-spent', {
     initialValue: 0,
-    dependencies: groups
-      .filter(group => !group.is_income)
-      .map(group => `group-sum-amount-${group.id}`),
+    dependencies: visibleExpenseGroups.map(
+      group => `group-sum-amount-${group.id}`,
+    ),
     run: sumAmounts,
   });
 
   sheet.get().createDynamic(sheetName, 'total-leftover', {
     initialValue: 0,
-    dependencies: groups
-      .filter(group => !group.is_income)
-      .map(group => `group-leftover-${group.id}`),
+    dependencies: visibleExpenseGroups.map(
+      group => `group-leftover-${group.id}`,
+    ),
     run: sumAmounts,
   });
 }

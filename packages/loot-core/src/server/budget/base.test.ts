@@ -64,4 +64,176 @@ describe('Base budget', () => {
       ),
     ).toBe(-5000);
   });
+
+  it('Excludes hidden categories from group totals', async () => {
+    await sheet.loadSpreadsheet(db);
+
+    // Create a group with multiple categories
+    await db.insertCategoryGroup({ id: 'group1', name: 'Test Group' });
+    await db.insertCategoryGroup({
+      id: 'group2',
+      name: 'Income',
+      is_income: 1,
+    });
+    
+    // Create visible category
+    const visibleCatId = await db.insertCategory({
+      name: 'Visible Category',
+      cat_group: 'group1',
+    });
+    
+    // Create hidden category (like "Transfers")
+    const hiddenCatId = await db.insertCategory({
+      name: 'Hidden Category',
+      cat_group: 'group1',
+      hidden: 1,
+    });
+
+    await createAllBudgets();
+    const month = '2017-01';
+    const sheetName = monthUtils.sheetForMonth(month);
+
+    // Add transactions to each category
+    await db.insertAccount({ id: 'account1', name: 'Account 1' });
+    
+    // Add transaction to visible category
+    await db.insertTransaction({
+      date: '2017-01-15',
+      amount: -1000,
+      account: 'account1',
+      category: visibleCatId,
+    });
+    
+    // Add transaction to hidden category
+    await db.insertTransaction({
+      date: '2017-01-15',
+      amount: -2000,
+      account: 'account1',
+      category: hiddenCatId,
+    });
+
+    await sheet.waitOnSpreadsheet();
+
+    // Verify individual category amounts
+    expect(
+      sheet.getCellValue(sheetName, `sum-amount-${visibleCatId}`),
+    ).toBe(-1000);
+    
+    expect(
+      sheet.getCellValue(sheetName, `sum-amount-${hiddenCatId}`),
+    ).toBe(-2000);
+
+    // Verify group total only includes visible category
+    expect(
+      sheet.getCellValue(sheetName, `group-sum-amount-group1`),
+    ).toBe(-1000);
+
+    // Now toggle hidden status of the hidden category to make it visible
+    await db.updateCategory({ 
+      id: hiddenCatId, 
+      name: 'Hidden Category', 
+      cat_group: 'group1',
+      is_income: 0,
+      hidden: 0 
+    });
+    
+    await sheet.waitOnSpreadsheet();
+
+    // After making hidden category visible, group total should include both
+    expect(
+      sheet.getCellValue(sheetName, `group-sum-amount-group1`),
+    ).toBe(-3000);
+  });
+
+  it('Excludes hidden category groups from budget totals', async () => {
+    await sheet.loadSpreadsheet(db);
+
+    // Create two expense groups - one visible, one hidden
+    await db.insertCategoryGroup({ id: 'visible-group', name: 'Visible Group' });
+    await db.insertCategoryGroup({ 
+      id: 'hidden-group', 
+      name: 'Hidden Group',
+      hidden: 1 
+    });
+    
+    // Create income group (needed for budget setup)
+    await db.insertCategoryGroup({
+      id: 'income-group',
+      name: 'Income',
+      is_income: 1,
+    });
+    
+    // Create categories in each group
+    const visibleGroupCatId = await db.insertCategory({
+      name: 'Visible Group Category',
+      cat_group: 'visible-group',
+    });
+    
+    const hiddenGroupCatId = await db.insertCategory({
+      name: 'Hidden Group Category',
+      cat_group: 'hidden-group',
+    });
+
+    await createAllBudgets();
+    const month = '2017-01';
+    const sheetName = monthUtils.sheetForMonth(month);
+
+    // Add transactions
+    await db.insertAccount({ id: 'account1', name: 'Account 1' });
+    
+    // Add transaction to visible group category
+    await db.insertTransaction({
+      date: '2017-01-15',
+      amount: -1000,
+      account: 'account1',
+      category: visibleGroupCatId,
+    });
+    
+    // Add transaction to hidden group category
+    await db.insertTransaction({
+      date: '2017-01-15',
+      amount: -2000,
+      account: 'account1',
+      category: hiddenGroupCatId,
+    });
+
+    await sheet.waitOnSpreadsheet();
+
+    // Verify individual amounts
+    expect(
+      sheet.getCellValue(sheetName, `sum-amount-${visibleGroupCatId}`),
+    ).toBe(-1000);
+    
+    expect(
+      sheet.getCellValue(sheetName, `sum-amount-${hiddenGroupCatId}`),
+    ).toBe(-2000);
+    
+    expect(
+      sheet.getCellValue(sheetName, `group-sum-amount-visible-group`),
+    ).toBe(-1000);
+    
+    expect(
+      sheet.getCellValue(sheetName, `group-sum-amount-hidden-group`),
+    ).toBe(-2000);
+
+    // Verify total spent only includes visible group
+    expect(
+      sheet.getCellValue(sheetName, 'total-spent'),
+    ).toBe(-1000);
+
+    // Now toggle hidden status of the hidden group to make it visible
+    await db.updateCategoryGroup({ 
+      id: 'hidden-group', 
+      name: 'Hidden Group',
+      is_income: 0,
+      hidden: 0 
+    });
+    
+    await sheet.waitOnSpreadsheet();
+
+    // After making hidden group visible, total should include both
+    expect(
+      sheet.getCellValue(sheetName, 'total-spent'),
+    ).toBe(-3000);
+  });
 });

@@ -8,7 +8,7 @@ import { resolveName } from '../spreadsheet/util';
 import * as budgetActions from './actions';
 import * as envelopeBudget from './envelope';
 import * as report from './report';
-import { sumAmounts } from './util';
+import { sumAmounts, number } from './util';
 
 export function getBudgetType() {
   const meta = sheet.get().meta();
@@ -55,6 +55,9 @@ function createCategory(cat, sheetName, prevSheetName, start, end) {
     },
   });
 
+  // Create a cell to track the hidden status dynamically
+  sheet.get().createStatic(sheetName, `category-hidden-${cat.id}`, cat.hidden ? 1 : 0);
+
   if (getBudgetType() === 'rollover') {
     envelopeBudget.createCategory(cat, sheetName, prevSheetName);
   } else {
@@ -63,23 +66,50 @@ function createCategory(cat, sheetName, prevSheetName, start, end) {
 }
 
 function createCategoryGroup(group, sheetName) {
+  // Get ALL categories in the group
+  const allCategories = group.categories;
+
+  // Helper function to generate dependencies including hidden status
+  const makeDependencies = (valuePrefix) => {
+    return allCategories.flatMap(cat => [
+      `${valuePrefix}-${cat.id}`,
+      `category-hidden-${cat.id}`
+    ]);
+  };
+
+  // Helper run function to sum values only if the category is not hidden
+  const sumVisibleAmounts = (...deps) => {
+    let total = 0;
+    // Process dependencies in pairs (value, isHidden)
+    for (let i = 0; i < deps.length; i += 2) {
+      const value = deps[i];
+      const isHidden = deps[i + 1]; // This will be 1 if hidden, 0 if visible
+      if (isHidden === 0) { // Only sum if not hidden (status is 0)
+        total += number(value); // Use safe number conversion
+      }
+    }
+    return total;
+  };
+
   sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
     initialValue: 0,
-    dependencies: group.categories.map(cat => `sum-amount-${cat.id}`),
-    run: sumAmounts,
+    dependencies: makeDependencies('sum-amount'),
+    run: sumVisibleAmounts,
   });
 
+  // Group budget and leftover only exist for non-income groups in rollover, 
+  // but exist for all groups in report budget
   if (!group.is_income || getBudgetType() !== 'rollover') {
     sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
       initialValue: 0,
-      dependencies: group.categories.map(cat => `budget-${cat.id}`),
-      run: sumAmounts,
+      dependencies: makeDependencies('budget'),
+      run: sumVisibleAmounts,
     });
 
     sheet.get().createDynamic(sheetName, 'group-leftover-' + group.id, {
       initialValue: 0,
-      dependencies: group.categories.map(cat => `leftover-${cat.id}`),
-      run: sumAmounts,
+      dependencies: makeDependencies('leftover'),
+      run: sumVisibleAmounts,
     });
   }
 }
@@ -143,21 +173,24 @@ function handleCategoryMappingChange(months, oldValue, newValue) {
 
 function handleCategoryChange(months, oldValue, newValue) {
   function addDeps(sheetName, groupId, catId) {
-    sheet
-      .get()
-      .addDependencies(sheetName, `group-sum-amount-${groupId}`, [
-        `sum-amount-${catId}`,
-      ]);
-    sheet
-      .get()
-      .addDependencies(sheetName, `group-budget-${groupId}`, [
-        `budget-${catId}`,
-      ]);
-    sheet
-      .get()
-      .addDependencies(sheetName, `group-leftover-${groupId}`, [
-        `leftover-${catId}`,
-      ]);
+    // Only add dependencies if the category is not hidden
+    if (!newValue.hidden) {
+      sheet
+        .get()
+        .addDependencies(sheetName, `group-sum-amount-${groupId}`, [
+          `sum-amount-${catId}`,
+        ]);
+      sheet
+        .get()
+        .addDependencies(sheetName, `group-budget-${groupId}`, [
+          `budget-${catId}`,
+        ]);
+      sheet
+        .get()
+        .addDependencies(sheetName, `group-leftover-${groupId}`, [
+          `leftover-${catId}`,
+        ]);
+    }
   }
 
   function removeDeps(sheetName, groupId, catId) {
@@ -186,7 +219,18 @@ function handleCategoryChange(months, oldValue, newValue) {
 
     months.forEach(month => {
       const sheetName = monthUtils.sheetForMonth(month);
+      sheet.get().set(resolveName(sheetName, `category-hidden-${id}`), 1);
       removeDeps(sheetName, groupId, id);
+      if (getBudgetType() === 'rollover') {
+        const prevMonth = monthUtils.prevMonth(month);
+        const prevSheetName = monthUtils.sheetForMonth(prevMonth);
+        sheet
+          .get()
+          .removeDependencies(sheetName, 'last-month-overspent', [
+            `${prevSheetName}!leftover-${id}`,
+            `${prevSheetName}!carryover-${id}`,
+          ]);
+      }
     });
   } else if (
     newValue.tombstone === 0 &&
@@ -208,24 +252,46 @@ function handleCategoryChange(months, oldValue, newValue) {
       const groupId = newValue.cat_group;
 
       if (getBudgetType() === 'rollover') {
-        sheet
-          .get()
-          .addDependencies(sheetName, 'last-month-overspent', [
-            `${prevSheetName}!leftover-${id}`,
-            `${prevSheetName}!carryover-${id}`,
-          ]);
+        if (!newValue.hidden) {
+          sheet
+            .get()
+            .addDependencies(sheetName, 'last-month-overspent', [
+              `${prevSheetName}!leftover-${id}`,
+              `${prevSheetName}!carryover-${id}`,
+            ]);
+        }
       }
-
       addDeps(sheetName, groupId, id);
     });
   } else if (oldValue && oldValue.cat_group !== newValue.cat_group) {
-    // The category moved so we need to update the dependencies
     const id = newValue.id;
 
     months.forEach(month => {
       const sheetName = monthUtils.sheetForMonth(month);
       removeDeps(sheetName, oldValue.cat_group, id);
       addDeps(sheetName, newValue.cat_group, id);
+    });
+  } else if (oldValue && oldValue.hidden !== newValue.hidden) {
+    const id = newValue.id;
+
+    months.forEach(month => {
+      const sheetName = monthUtils.sheetForMonth(month);
+      sheet.get().set(resolveName(sheetName, `category-hidden-${id}`), newValue.hidden ? 1 : 0);
+
+      if (getBudgetType() === 'rollover') {
+        const prevMonth = monthUtils.prevMonth(month);
+        const prevSheetName = monthUtils.sheetForMonth(prevMonth);
+        const dep = [
+          `${prevSheetName}!leftover-${id}`,
+          `${prevSheetName}!carryover-${id}`,
+        ];
+        if (newValue.hidden) {
+          sheet.get().removeDependencies(sheetName, 'last-month-overspent', dep);
+        } else {
+          sheet.get().addDependencies(sheetName, 'last-month-overspent', dep);
+        }
+        sheet.get().recompute(resolveName(sheetName, 'last-month-overspent'));
+      }
     });
   }
 }
@@ -234,21 +300,24 @@ function handleCategoryGroupChange(months, oldValue, newValue) {
   const budgetType = getBudgetType();
 
   function addDeps(sheetName, groupId) {
-    sheet
-      .get()
-      .addDependencies(sheetName, 'total-budgeted', [
-        `group-budget-${groupId}`,
-      ]);
-    sheet
-      .get()
-      .addDependencies(sheetName, 'total-spent', [
-        `group-sum-amount-${groupId}`,
-      ]);
-    sheet
-      .get()
-      .addDependencies(sheetName, 'total-leftover', [
-        `group-leftover-${groupId}`,
-      ]);
+    // Only add dependencies if the group is not hidden
+    if (!newValue.hidden) {
+      sheet
+        .get()
+        .addDependencies(sheetName, 'total-budgeted', [
+          `group-budget-${groupId}`,
+        ]);
+      sheet
+        .get()
+        .addDependencies(sheetName, 'total-spent', [
+          `group-sum-amount-${groupId}`,
+        ]);
+      sheet
+        .get()
+        .addDependencies(sheetName, 'total-leftover', [
+          `group-leftover-${groupId}`,
+        ]);
+    }
   }
 
   function removeDeps(sheetName, groupId) {
@@ -299,6 +368,22 @@ function handleCategoryGroupChange(months, oldValue, newValue) {
         addDeps(sheetName, group.id);
       });
     }
+  } else if (oldValue && oldValue.hidden !== newValue.hidden) {
+    // The group's hidden status changed
+    const id = newValue.id;
+
+    months.forEach(month => {
+      const sheetName = monthUtils.sheetForMonth(month);
+
+      // If it was visible and now is hidden, remove from totals dependencies
+      if (!oldValue.hidden && newValue.hidden) {
+        removeDeps(sheetName, id);
+      }
+      // If it was hidden and now is visible, add to totals dependencies
+      else if (oldValue.hidden && !newValue.hidden) {
+        addDeps(sheetName, id);
+      }
+    });
   }
 }
 
