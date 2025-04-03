@@ -18,7 +18,6 @@ import { type TransactionEntity } from 'loot-core/types/models';
 import { useSelectedItems } from '../../hooks/useSelected';
 import { useDispatch } from '../../redux';
 import { SelectedItemsButton } from '../table';
-import { selected } from '../../style/colors';
 
 type SelectedTransactionsButtonProps = {
   getTransaction: (id: string) => TransactionEntity | undefined;
