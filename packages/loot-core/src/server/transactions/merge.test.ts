@@ -6,6 +6,7 @@ import { mergeTransactions } from './merge';
 
 describe('Merging fails for invalid quantity', () => {
   beforeEach(global.emptyDatabase());
+  afterEach(global.emptyDatabase());
 
   const tests: [TransactionEntity[], string][] = [
     [[{} as TransactionEntity], 'one transaction'],
@@ -86,6 +87,7 @@ function getAllTransactions() {
 describe('Merging success', () => {
   beforeEach(global.emptyDatabase());
   beforeEach(prepareDatabase);
+  afterEach(global.emptyDatabase());
   const transaction1 = {
     account: 'one',
     date: '2025-01-01',
