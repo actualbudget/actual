@@ -93,6 +93,8 @@ describe('Merging success', () => {
     notes: 'notes1',
     category: '1',
     amount: 5,
+    cleared: false,
+    reconciled: false,
   } as TransactionEntity;
 
   const transaction2 = {
@@ -102,6 +104,8 @@ describe('Merging success', () => {
     notes: 'notes2',
     category: '2',
     amount: 5,
+    cleared: true,
+    reconciled: true,
   } as TransactionEntity;
 
   it('two imported transactions keeps older transaction', async () => {

@@ -30,6 +30,8 @@ export async function mergeTransactions(
       payee: keep.payee || drop.payee,
       category: keep.category || drop.category,
       notes: keep.notes || drop.notes,
+      cleared: keep.cleared || drop.cleared,
+      reconciled: keep.reconciled || drop.reconciled,
     } as TransactionEntity),
     db.deleteTransaction(drop),
   ]);
