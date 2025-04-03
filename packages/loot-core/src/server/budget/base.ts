@@ -8,7 +8,7 @@ import { resolveName } from '../spreadsheet/util';
 import * as budgetActions from './actions';
 import * as envelopeBudget from './envelope';
 import * as report from './report';
-import { sumAmounts, number } from './util';
+import { number } from './util';
 
 export function getBudgetType() {
   const meta = sheet.get().meta();
@@ -56,7 +56,9 @@ function createCategory(cat, sheetName, prevSheetName, start, end) {
   });
 
   // Create a cell to track the hidden status dynamically
-  sheet.get().createStatic(sheetName, `category-hidden-${cat.id}`, cat.hidden ? 1 : 0);
+  sheet
+    .get()
+    .createStatic(sheetName, `category-hidden-${cat.id}`, cat.hidden ? 1 : 0);
 
   if (getBudgetType() === 'rollover') {
     envelopeBudget.createCategory(cat, sheetName, prevSheetName);
@@ -66,26 +68,22 @@ function createCategory(cat, sheetName, prevSheetName, start, end) {
 }
 
 function createCategoryGroup(group, sheetName) {
-  // Get ALL categories in the group
   const allCategories = group.categories;
 
-  // Helper function to generate dependencies including hidden status
-  const makeDependencies = (valuePrefix) => {
-    return allCategories.flatMap(cat => [
+  const makeDependencies = valuePrefix =>
+    allCategories.flatMap(cat => [
       `${valuePrefix}-${cat.id}`,
-      `category-hidden-${cat.id}`
+      `category-hidden-${cat.id}`,
     ]);
-  };
 
-  // Helper run function to sum values only if the category is not hidden
   const sumVisibleAmounts = (...deps) => {
     let total = 0;
     // Process dependencies in pairs (value, isHidden)
     for (let i = 0; i < deps.length; i += 2) {
       const value = deps[i];
-      const isHidden = deps[i + 1]; // This will be 1 if hidden, 0 if visible
-      if (isHidden === 0) { // Only sum if not hidden (status is 0)
-        total += number(value); // Use safe number conversion
+      const isHidden = deps[i + 1]; // 1 if hidden, 0 if visible
+      if (isHidden === 0) {
+        total += number(value);
       }
     }
     return total;
@@ -97,7 +95,7 @@ function createCategoryGroup(group, sheetName) {
     run: sumVisibleAmounts,
   });
 
-  // Group budget and leftover only exist for non-income groups in rollover, 
+  // Group budget and leftover only exist for non-income groups in rollover,
   // but exist for all groups in report budget
   if (!group.is_income || getBudgetType() !== 'rollover') {
     sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
@@ -173,22 +171,11 @@ function handleCategoryMappingChange(months, oldValue, newValue) {
 
 function handleCategoryChange(months, oldValue, newValue) {
   function addDeps(sheetName, groupId, catId) {
-    // Only add dependencies if the category is not hidden
     if (!newValue.hidden) {
       sheet
         .get()
         .addDependencies(sheetName, `group-sum-amount-${groupId}`, [
           `sum-amount-${catId}`,
-        ]);
-      sheet
-        .get()
-        .addDependencies(sheetName, `group-budget-${groupId}`, [
-          `budget-${catId}`,
-        ]);
-      sheet
-        .get()
-        .addDependencies(sheetName, `group-leftover-${groupId}`, [
-          `leftover-${catId}`,
         ]);
     }
   }
@@ -276,7 +263,12 @@ function handleCategoryChange(months, oldValue, newValue) {
 
     months.forEach(month => {
       const sheetName = monthUtils.sheetForMonth(month);
-      sheet.get().set(resolveName(sheetName, `category-hidden-${id}`), newValue.hidden ? 1 : 0);
+      sheet
+        .get()
+        .set(
+          resolveName(sheetName, `category-hidden-${id}`),
+          newValue.hidden ? 1 : 0,
+        );
 
       if (getBudgetType() === 'rollover') {
         const prevMonth = monthUtils.prevMonth(month);
@@ -286,7 +278,9 @@ function handleCategoryChange(months, oldValue, newValue) {
           `${prevSheetName}!carryover-${id}`,
         ];
         if (newValue.hidden) {
-          sheet.get().removeDependencies(sheetName, 'last-month-overspent', dep);
+          sheet
+            .get()
+            .removeDependencies(sheetName, 'last-month-overspent', dep);
         } else {
           sheet.get().addDependencies(sheetName, 'last-month-overspent', dep);
         }
