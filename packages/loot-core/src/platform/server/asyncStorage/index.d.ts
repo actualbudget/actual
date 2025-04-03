@@ -10,10 +10,10 @@ export function getItem<K extends keyof GlobalPrefsJson>(
 ): Promise<GlobalPrefsJson[K]>;
 export type GetItem = typeof getItem;
 
-export function setItem<K extends keyof GlobalPrefsJson>(
+export async function setItem<K extends keyof GlobalPrefsJson>(
   key: K,
   value: GlobalPrefsJson[K],
-): void;
+): Promise<void>;
 export type SetItem = typeof setItem;
 
 export function removeItem(key: keyof GlobalPrefsJson): void;

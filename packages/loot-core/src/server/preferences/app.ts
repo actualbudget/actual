@@ -67,25 +67,31 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
   }
 
   if (prefs.maxMonths) {
-    asyncStorage.setItem('max-months', '' + prefs.maxMonths);
+    await asyncStorage.setItem('max-months', '' + prefs.maxMonths);
   }
   if (prefs.documentDir && (await fs.exists(prefs.documentDir))) {
-    asyncStorage.setItem('document-dir', prefs.documentDir);
+    await asyncStorage.setItem('document-dir', prefs.documentDir);
   }
   if (prefs.floatingSidebar !== undefined) {
-    asyncStorage.setItem('floating-sidebar', '' + prefs.floatingSidebar);
+    await asyncStorage.setItem('floating-sidebar', '' + prefs.floatingSidebar);
   }
   if (prefs.language) {
-    asyncStorage.setItem('language', prefs.language);
+    await asyncStorage.setItem('language', prefs.language);
   }
   if (prefs.theme) {
-    asyncStorage.setItem('theme', prefs.theme);
+    await asyncStorage.setItem('theme', prefs.theme);
   }
   if (prefs.preferredDarkTheme) {
-    asyncStorage.setItem('preferred-dark-theme', prefs.preferredDarkTheme);
+    await asyncStorage.setItem(
+      'preferred-dark-theme',
+      prefs.preferredDarkTheme,
+    );
   }
   if (prefs.serverSelfSignedCert) {
-    asyncStorage.setItem('server-self-signed-cert', prefs.serverSelfSignedCert);
+    await asyncStorage.setItem(
+      'server-self-signed-cert',
+      prefs.serverSelfSignedCert,
+    );
   }
   return 'ok';
 }
