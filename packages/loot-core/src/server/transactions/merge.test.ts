@@ -97,6 +97,17 @@ describe('Merging success', () => {
     reconciled: false,
   } as TransactionEntity;
 
+  const dbTransaction1 = {
+    account: 'one',
+    date: 20250101,
+    payee: 'payee1',
+    notes: 'notes1',
+    category: '1',
+    amount: 5,
+    cleared: 1,
+    reconciled: 1,
+  } as db.DbViewTransaction;
+
   const transaction2 = {
     account: 'two',
     date: '2025-02-02',
@@ -108,7 +119,18 @@ describe('Merging success', () => {
     reconciled: true,
   } as TransactionEntity;
 
-  it('two imported transactions keeps older transaction', async () => {
+  const dbTransaction2 = {
+    account: 'two',
+    date: 20250202,
+    payee: 'payee2',
+    notes: 'notes2',
+    category: '2',
+    amount: 5,
+    cleared: 1,
+    reconciled: 1,
+  } as db.DbViewTransaction;
+
+  it('two banksynced transactions keeps older transaction', async () => {
     const t1 = await db.insertTransaction({
       ...transaction1,
       imported_id: 'imported_1',
@@ -123,13 +145,12 @@ describe('Merging success', () => {
     const transactions = await getAllTransactions();
     expect(transactions.length).toBe(1);
     expect(transactions[0]).toMatchObject({
-      ...transaction1,
-      date: 20250101,
+      ...dbTransaction1,
       imported_id: 'imported_1',
     });
   });
 
-  it('first imported, second manual keeps imported values', async () => {
+  it('first banksynced, second manual keeps banksynced values', async () => {
     const t1 = await db.insertTransaction({
       ...transaction1,
       imported_id: 'imported_1',
@@ -141,13 +162,12 @@ describe('Merging success', () => {
     const transactions = await getAllTransactions();
     expect(transactions.length).toBe(1);
     expect(transactions[0]).toMatchObject({
-      ...transaction1,
-      date: 20250101,
+      ...dbTransaction1,
       imported_id: 'imported_1',
     });
   });
 
-  it('second imported, first manual keeps imported values', async () => {
+  it('second banksynced, first manual keeps banksynced values', async () => {
     const t1 = await db.insertTransaction(transaction1);
     const t2 = await db.insertTransaction({
       ...transaction2,
@@ -159,8 +179,7 @@ describe('Merging success', () => {
     const transactions = await getAllTransactions();
     expect(transactions.length).toBe(1);
     expect(transactions[0]).toMatchObject({
-      ...transaction2,
-      date: 20250202,
+      ...dbTransaction2,
       imported_id: 'imported_2',
     });
   });
@@ -179,7 +198,7 @@ describe('Merging success', () => {
     const transactions = await getAllTransactions();
     expect(transactions.length).toBe(1);
     expect(transactions[0]).toMatchObject({
-      ...transaction2,
+      ...dbTransaction2,
       // values that should be kept from t1
       id: t1,
       account: 'one',
