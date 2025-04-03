@@ -27,11 +27,9 @@ export async function mergeTransactions(
   await Promise.all([
     db.updateTransaction({
       id: keep.id,
-      date: keep.date || drop.date,
       payee: keep.payee || drop.payee,
       category: keep.category || drop.category,
       notes: keep.notes || drop.notes,
-      imported_id: keep.imported_id || drop.imported_id,
     } as TransactionEntity),
     db.deleteTransaction(drop),
   ]);
@@ -44,9 +42,9 @@ function determineKeepDrop(
 ): { keep: TransactionEntity; drop: TransactionEntity } {
   // if one is imported and the other is manual, keep the manual transaction
   if (b.imported_id && !a.imported_id) {
-    return { keep: a, drop: b };
-  } else if (a.imported_id && !b.imported_id) {
     return { keep: b, drop: a };
+  } else if (a.imported_id && !b.imported_id) {
+    return { keep: a, drop: b };
   }
 
   // keep the earlier transaction

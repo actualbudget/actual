@@ -125,12 +125,30 @@ describe('Merging success', () => {
     });
   });
 
-  it('first imported, second manual keeps manual values', async () => {
+  it('first imported, second manual keeps imported values', async () => {
     const t1 = await db.insertTransaction({
       ...transaction1,
       imported_id: 'imported_1',
     });
     const t2 = await db.insertTransaction(transaction2);
+
+    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t1);
+
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(1);
+    expect(transactions[0]).toMatchObject({
+      ...transaction1,
+      date: 20250101,
+      imported_id: 'imported_1',
+    });
+  });
+
+  it('second imported, first manual keeps imported values', async () => {
+    const t1 = await db.insertTransaction(transaction1);
+    const t2 = await db.insertTransaction({
+      ...transaction2,
+      imported_id: 'imported_2',
+    });
 
     expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t2);
 
@@ -139,50 +157,31 @@ describe('Merging success', () => {
     expect(transactions[0]).toMatchObject({
       ...transaction2,
       date: 20250202,
-      imported_id: 'imported_1',
-    });
-  });
-
-  it('second imported, first manual keeps manual values', async () => {
-    const t1 = await db.insertTransaction(transaction1);
-    const t2 = await db.insertTransaction({
-      ...transaction2,
-      imported_id: 'imported_2',
-    });
-
-    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t1);
-
-    const transactions = await getAllTransactions();
-    expect(transactions.length).toBe(1);
-    expect(transactions[0]).toMatchObject({
-      ...transaction1,
-      date: 20250101,
       imported_id: 'imported_2',
     });
   });
 
   it('missing values in keep are filled in with drop values', async () => {
-    // only insert required fields
+    // only insert required fields, imported to be kept
     const t1 = await db.insertTransaction({
       account: 'one',
       amount: 5,
       date: '2025-01-01',
+      imported_id: 'imported_1',
     });
-    const t2 = await db.insertTransaction({
-      ...transaction2,
-      imported_id: 'imported_2',
-    });
+    const t2 = await db.insertTransaction(transaction2);
 
     expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t1);
     const transactions = await getAllTransactions();
     expect(transactions.length).toBe(1);
     expect(transactions[0]).toMatchObject({
       ...transaction2,
-      imported_id: 'imported_2',
-      // from transaction 1
+      // values that should be kept from t1
       id: t1,
       account: 'one',
+      amount: 5,
       date: 20250101,
+      imported_id: 'imported_1',
     });
   });
 });
