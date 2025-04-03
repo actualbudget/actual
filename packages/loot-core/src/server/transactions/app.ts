@@ -108,6 +108,7 @@ app.method(
   'transactions-batch-update',
   mutator(undoable(handleBatchUpdateTransactions)),
 );
+app.method('transactions-merge', mutator(undoable(mergeTransactions)));
 
 app.method('transaction-add', mutator(addTransaction));
 app.method('transaction-update', mutator(updateTransaction));
@@ -115,5 +116,4 @@ app.method('transaction-delete', mutator(deleteTransaction));
 app.method('transactions-parse-file', mutator(parseTransactionsFile));
 app.method('transactions-export', mutator(exportTransactions));
 app.method('transactions-export-query', mutator(exportTransactionsQuery));
-app.method('transactions-merge', mutator(mergeTransactions));
 app.method('get-earliest-transaction', getEarliestTransaction);
