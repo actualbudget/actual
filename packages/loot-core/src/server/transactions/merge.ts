@@ -42,10 +42,18 @@ function determineKeepDrop(
   a: TransactionEntity,
   b: TransactionEntity,
 ): { keep: TransactionEntity; drop: TransactionEntity } {
-  // if one is imported and the other is manual, keep the manual transaction
+  // if one is imported through bank sync and the other is manual,
+  // keep the imported transaction
   if (b.imported_id && !a.imported_id) {
     return { keep: b, drop: a };
   } else if (a.imported_id && !b.imported_id) {
+    return { keep: a, drop: b };
+  }
+
+  // same logic but for imported transactions
+  if (b.imported_payee && !a.imported_payee) {
+    return { keep: b, drop: a };
+  } else if (a.imported_payee && !b.imported_payee) {
     return { keep: a, drop: b };
   }
 

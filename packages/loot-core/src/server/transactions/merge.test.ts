@@ -167,6 +167,80 @@ describe('Merging success', () => {
     });
   });
 
+  it('first file imported, second banksycned keeps banksynced values', async () => {
+    const t1 = await db.insertTransaction({
+      ...transaction1,
+      imported_payee: 'payee',
+    });
+    const t2 = await db.insertTransaction({
+      ...transaction2,
+      imported_id: 'imported_2',
+    });
+
+    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t2);
+
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(1);
+    expect(transactions[0]).toMatchObject({
+      ...dbTransaction2,
+      imported_id: 'imported_2',
+    });
+  });
+
+  it('second file imported, first banksycned keeps banksynced values', async () => {
+    const t1 = await db.insertTransaction({
+      ...transaction1,
+      imported_id: 'imported_1',
+    });
+    const t2 = await db.insertTransaction({
+      ...transaction2,
+      imported_payee: 'payee',
+    });
+
+    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t1);
+
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(1);
+    expect(transactions[0]).toMatchObject({
+      ...dbTransaction1,
+      imported_id: 'imported_1',
+    });
+  });
+
+  it('second file imported, first manual keeps file imported values', async () => {
+    const t1 = await db.insertTransaction(transaction1);
+    const t2 = await db.insertTransaction({
+      ...transaction2,
+      imported_payee: 'payee',
+    });
+
+    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t2);
+
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(1);
+    expect(transactions[0]).toMatchObject({
+      ...dbTransaction2,
+      imported_payee: 'payee',
+    });
+  });
+
+  it('first file imported, second manual keeps file imported values', async () => {
+    const t1 = await db.insertTransaction({
+      ...transaction1,
+      imported_payee: 'payee',
+    });
+    const t2 = await db.insertTransaction(transaction2);
+
+    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t1);
+
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(1);
+    expect(transactions[0]).toMatchObject({
+      ...dbTransaction1,
+      imported_payee: 'payee',
+    });
+  });
+
   it('second banksynced, first manual keeps banksynced values', async () => {
     const t1 = await db.insertTransaction(transaction1);
     const t2 = await db.insertTransaction({
