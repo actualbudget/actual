@@ -25,7 +25,7 @@ export const init: T.Init = function ({ persist = true } = {}) {
   persisted = persist;
 };
 
-function _saveStore() {
+async function _saveStore(): Promise<void> {
   if (persisted) {
     return new Promise(function (resolve, reject) {
       fs.writeFile(
@@ -33,7 +33,7 @@ function _saveStore() {
         JSON.stringify(store),
         'utf8',
         function (err) {
-          return err ? reject(err) : resolve(undefined);
+          return err ? reject(err) : resolve();
         },
       );
     });

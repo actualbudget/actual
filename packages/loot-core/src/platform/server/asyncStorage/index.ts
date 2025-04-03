@@ -6,7 +6,7 @@ import * as T from './index.d';
 
 export const init: T.Init = function () {};
 
-function commit(trans) {
+function commit(trans: IDBTransaction) {
   if (trans.commit) {
     trans.commit();
   }
@@ -32,10 +32,10 @@ export const setItem: T.SetItem = async function (key, value) {
   const transaction = db.transaction(['asyncStorage'], 'readwrite');
   const objectStore = transaction.objectStore('asyncStorage');
 
-  new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const req = objectStore.put(value, key);
     req.onerror = e => reject(e);
-    req.onsuccess = () => resolve(undefined);
+    req.onsuccess = () => resolve();
     commit(transaction);
   });
 };

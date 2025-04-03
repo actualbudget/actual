@@ -12,7 +12,7 @@ export const getItem: T.GetItem = function (key) {
   });
 };
 
-export const setItem: T.SetItem = function (key, value) {
+export const setItem: T.SetItem = async function (key, value) {
   store[key] = value;
 };
 

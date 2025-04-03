@@ -1,7 +1,7 @@
-export function getDatabase();
+export function getDatabase(): Promise<IDBDatabase>;
 export type GetDatabase = typeof getDatabase;
 
-export function openDatabase();
+export function openDatabase(): Promise<IDBDatabase>;
 export type OpenDatabase = typeof openDatabase;
 
 export function closeDatabase();
@@ -17,7 +17,7 @@ export function get(
 );
 export type Get = typeof get;
 
-export function set(store: IDBObjectStore, value: unknown);
+export function set(store: IDBObjectStore, value: unknown): Promise<void>;
 export type Set = typeof set;
 
 export function del(store: IDBObjectStore, key: IDBValidKey);

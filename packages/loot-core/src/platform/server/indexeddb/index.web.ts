@@ -4,10 +4,10 @@ import type * as T from '.';
 let openedDb = _openDatabase();
 
 // The web version uses IndexedDB to store data
-function _openDatabase() {
+function _openDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const dbVersion = 9;
-    const openRequest = indexedDB.open('actual', dbVersion);
+    const openRequest: IDBOpenDBRequest = indexedDB.open('actual', dbVersion);
 
     openRequest.onupgradeneeded = function (e) {
       // @ts-expect-error EventTarget needs refinement
@@ -39,9 +39,9 @@ function _openDatabase() {
       reject(new Error('indexeddb-failure: Could not open IndexedDB'));
     };
 
-    openRequest.onsuccess = function (e) {
-      // @ts-expect-error EventTarget needs refinement
-      const db = e.target.result;
+    openRequest.onsuccess = function (e: Event) {
+      const target = e.target as IDBOpenDBRequest;
+      const db: IDBDatabase = target.result;
 
       db.onversionchange = () => {
         // TODO: Notify the user somehow
@@ -49,10 +49,11 @@ function _openDatabase() {
       };
 
       db.onerror = function (event) {
-        console.log('Database error: ' + (event.target && event.target.error));
+        const errorTarget = event.target as IDBOpenDBRequest;
+        console.log('Database error: ' + (target && target.error));
 
-        if (event.target && event.target.error) {
-          const e = event.target.error;
+        if (errorTarget.error) {
+          const e = errorTarget.error;
           if (e.name === 'QuotaExceededError') {
             // Don't try to get the sized used -- too brittle. Is there
             // a better way to do it?
@@ -139,7 +140,6 @@ export const openDatabase: T.OpenDatabase = function () {
 export const closeDatabase: T.CloseDatabase = function () {
   if (openedDb) {
     openedDb.then(db => {
-      // @ts-expect-error db type needs refinement
       db.close();
     });
     openedDb = null;
