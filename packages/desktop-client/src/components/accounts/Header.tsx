@@ -122,6 +122,7 @@ type AccountHeaderProps = {
   | 'onSetTransfer'
   | 'onMakeAsSplitTransaction'
   | 'onMakeAsNonSplitTransactions'
+  | 'onMergeTransactions'
 > &
   Pick<
     ComponentProps<typeof FiltersStack>,
@@ -189,6 +190,7 @@ export function AccountHeader({
   onRunRules,
   onMakeAsSplitTransaction,
   onMakeAsNonSplitTransactions,
+  onMergeTransactions,
 }: AccountHeaderProps) {
   const { t } = useTranslation();
 
@@ -379,6 +381,7 @@ export function AccountHeader({
               showMakeTransfer={showMakeTransfer}
               onMakeAsSplitTransaction={onMakeAsSplitTransaction}
               onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
+              onMergeTransactions={onMergeTransactions}
             />
           )}
           <View style={{ flex: '0 0 auto', marginLeft: 10 }}>
