@@ -18,6 +18,7 @@ import { type TransactionEntity } from 'loot-core/types/models';
 import { useSelectedItems } from '../../hooks/useSelected';
 import { useDispatch } from '../../redux';
 import { SelectedItemsButton } from '../table';
+import { selected } from '../../style/colors';
 
 type SelectedTransactionsButtonProps = {
   getTransaction: (id: string) => TransactionEntity | undefined;
@@ -136,8 +137,9 @@ export function SelectedTransactionsButton({
   }, [twoTransactions]);
 
   const canMerge = useMemo(() => {
-    return (
-      twoTransactions && twoTransactions[0].amount === twoTransactions[1].amount
+    return Boolean(
+      twoTransactions &&
+        twoTransactions[0].amount === twoTransactions[1].amount,
     );
   }, [twoTransactions]);
 
