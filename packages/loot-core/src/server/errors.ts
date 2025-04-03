@@ -45,7 +45,7 @@ export class SyncError extends Error {
       }
     | {
         error: { message: string; stack: string };
-        query: { sql: string; params: Array<string | number> };
+        query: { sql: string; params: Array<unknown> };
       }
     | undefined;
   reason: string;
@@ -58,7 +58,7 @@ export class SyncError extends Error {
         }
       | {
           error: { message: string; stack: string };
-          query: { sql: string; params: Array<string | number> };
+          query: { sql: string; params: Array<unknown> };
         },
   ) {
     super('SyncError: ' + reason);

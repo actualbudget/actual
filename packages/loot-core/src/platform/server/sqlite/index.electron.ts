@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { removeFile, readFile } from '../fs';
 
 import { normalise } from './normalise';
+import { pgliteSync } from './pgliteSync';
 import { unicodeLike } from './unicodeLike';
 
 function verifyParamTypes(sql, arr) {
@@ -120,6 +121,8 @@ export function openDatabase(pathOrBuffer: string | Buffer) {
   db.function('REGEXP', { deterministic: true }, regexp);
   // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
   db.function('NORMALISE', { deterministic: true }, normalise);
+  // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
+  db.function('SYNC_PGLITE', { deterministic: true }, pgliteSync);
   return db;
 }
 

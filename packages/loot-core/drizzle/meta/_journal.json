@@ -5,211 +5,218 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1743191595098,
-      "tag": "0000_banks",
+      "when": 1743629290803,
+      "tag": "0000_actual",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1743191628915,
-      "tag": "0001_accounts",
+      "when": 1743629300705,
+      "tag": "0001_banks",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1743191639804,
-      "tag": "0002_category_groups",
+      "when": 1743629322292,
+      "tag": "0002_accounts",
       "breakpoints": true
     },
     {
       "idx": 3,
       "version": "7",
-      "when": 1743191652928,
-      "tag": "0003_categories",
+      "when": 1743629329883,
+      "tag": "0003_category_groups",
       "breakpoints": true
     },
     {
       "idx": 4,
       "version": "7",
-      "when": 1743191663445,
-      "tag": "0004_category_mapping",
+      "when": 1743629337785,
+      "tag": "0004_categories",
       "breakpoints": true
     },
     {
       "idx": 5,
       "version": "7",
-      "when": 1743191671686,
-      "tag": "0005_kv_cache",
+      "when": 1743629370193,
+      "tag": "0005_category_mapping",
       "breakpoints": true
     },
     {
       "idx": 6,
       "version": "7",
-      "when": 1743191680185,
-      "tag": "0006_kv_cache_key",
+      "when": 1743629378052,
+      "tag": "0006_kvcache",
       "breakpoints": true
     },
     {
       "idx": 7,
       "version": "7",
-      "when": 1743191688387,
-      "tag": "0007_messages_clock",
+      "when": 1743629385880,
+      "tag": "0007_kvcache_key",
       "breakpoints": true
     },
     {
       "idx": 8,
       "version": "7",
-      "when": 1743191696693,
-      "tag": "0008_messages_crdt",
+      "when": 1743629403508,
+      "tag": "0008_messages_clock",
       "breakpoints": true
     },
     {
       "idx": 9,
       "version": "7",
-      "when": 1743191704117,
-      "tag": "0009_notes",
+      "when": 1743629412917,
+      "tag": "0009_messages_crdt",
       "breakpoints": true
     },
     {
       "idx": 10,
       "version": "7",
-      "when": 1743191724262,
-      "tag": "0010_payees",
+      "when": 1743629422853,
+      "tag": "0010_notes",
       "breakpoints": true
     },
     {
       "idx": 11,
       "version": "7",
-      "when": 1743191732584,
-      "tag": "0011_payee_mapping",
+      "when": 1743629429907,
+      "tag": "0011_payees",
       "breakpoints": true
     },
     {
       "idx": 12,
       "version": "7",
-      "when": 1743191771117,
-      "tag": "0012_rules",
+      "when": 1743629439383,
+      "tag": "0012_payee_mapping",
       "breakpoints": true
     },
     {
       "idx": 13,
       "version": "7",
-      "when": 1743191826560,
-      "tag": "0013_schedules",
+      "when": 1743629445739,
+      "tag": "0013_rules",
       "breakpoints": true
     },
     {
       "idx": 14,
       "version": "7",
-      "when": 1743191834876,
-      "tag": "0014_schedules_json_paths",
+      "when": 1743629573766,
+      "tag": "0014_schedules",
       "breakpoints": true
     },
     {
       "idx": 15,
       "version": "7",
-      "when": 1743191845666,
-      "tag": "0015_schedules_next_date",
+      "when": 1743629580747,
+      "tag": "0015_schedules_json_paths",
       "breakpoints": true
     },
     {
       "idx": 16,
       "version": "7",
-      "when": 1743191868694,
-      "tag": "0016_transactions",
+      "when": 1743629588257,
+      "tag": "0016_schedules_next_date",
       "breakpoints": true
     },
     {
       "idx": 17,
       "version": "7",
-      "when": 1743191878914,
-      "tag": "0017_reflect_budgets",
+      "when": 1743629597088,
+      "tag": "0017_transactions",
       "breakpoints": true
     },
     {
       "idx": 18,
       "version": "7",
-      "when": 1743191886835,
-      "tag": "0018_zero_budgets",
+      "when": 1743629604766,
+      "tag": "0018_reflect_budgets",
       "breakpoints": true
     },
     {
       "idx": 19,
       "version": "7",
-      "when": 1743191895863,
-      "tag": "0019_zero_budget_months",
+      "when": 1743629614283,
+      "tag": "0019_zero_budgets",
       "breakpoints": true
     },
     {
       "idx": 20,
       "version": "7",
-      "when": 1743191908292,
-      "tag": "0020_transaction_filters",
+      "when": 1743629624875,
+      "tag": "0020_zero_budget_months",
       "breakpoints": true
     },
     {
       "idx": 21,
       "version": "7",
-      "when": 1743191915422,
-      "tag": "0021_preferences",
+      "when": 1743629633421,
+      "tag": "0021_transaction_filters",
       "breakpoints": true
     },
     {
       "idx": 22,
       "version": "7",
-      "when": 1743191924627,
-      "tag": "0022_custom_reports",
+      "when": 1743629642217,
+      "tag": "0022_preferences",
       "breakpoints": true
     },
     {
       "idx": 23,
       "version": "7",
-      "when": 1743191940921,
-      "tag": "0023_dashboard",
+      "when": 1743629650114,
+      "tag": "0023_custom_reports",
       "breakpoints": true
     },
     {
       "idx": 24,
       "version": "7",
-      "when": 1743191954616,
-      "tag": "0024_v_transactions_internal",
+      "when": 1743629657841,
+      "tag": "0024_dashboard",
       "breakpoints": true
     },
     {
       "idx": 25,
       "version": "7",
-      "when": 1743191964402,
-      "tag": "0025_v_transactions_internal_alive",
+      "when": 1743629667308,
+      "tag": "0025_v_transactions_internal",
       "breakpoints": true
     },
     {
       "idx": 26,
       "version": "7",
-      "when": 1743191975534,
-      "tag": "0026_v_transactions",
+      "when": 1743629677241,
+      "tag": "0026_v_transactions_internal_alive",
       "breakpoints": true
     },
     {
       "idx": 27,
       "version": "7",
-      "when": 1743191986005,
-      "tag": "0027_v_categories",
+      "when": 1743629685911,
+      "tag": "0027_v_transactions",
       "breakpoints": true
     },
     {
       "idx": 28,
       "version": "7",
-      "when": 1743191994497,
-      "tag": "0028_v_payees",
+      "when": 1743629694855,
+      "tag": "0028_v_categories",
       "breakpoints": true
     },
     {
       "idx": 29,
       "version": "7",
-      "when": 1743198235603,
-      "tag": "0029_v_schedules",
+      "when": 1743629701970,
+      "tag": "0029_v_payees",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1743629710438,
+      "tag": "0030_v_schedules",
       "breakpoints": true
     }
   ]

@@ -10383,9 +10383,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"drizzle-kit@npm:^0.30.5":
-  version: 0.30.5
-  resolution: "drizzle-kit@npm:0.30.5"
+"drizzle-kit@npm:^0.30.6":
+  version: 0.30.6
+  resolution: "drizzle-kit@npm:0.30.6"
   dependencies:
     "@drizzle-team/brocli": "npm:^0.10.2"
     "@esbuild-kit/esm-loader": "npm:^2.5.5"
@@ -10394,7 +10394,7 @@ __metadata:
     gel: "npm:^2.0.0"
   bin:
     drizzle-kit: bin.cjs
-  checksum: 10/9d3f3a2de45c2cdc25dd7e53409d2e20245a850b4b11104f22a59468973f3af710d0a84d518f812d6309e457dc0439f730f6ab68338f636b347311857d75903a
+  checksum: 10/df00b4e5ac76b19b0852e1958426015fe8aa6664c854ec3a617105122048d8eb96a7443993363a765f4bf05d88d47a42bae6fe4814094ecb55777aa141ba478e
   languageName: node
   linkType: hard
 
@@ -15676,7 +15676,7 @@ __metadata:
     csv-stringify: "npm:^5.6.5"
     date-fns: "npm:^2.30.0"
     deep-equal: "npm:^2.2.3"
-    drizzle-kit: "npm:^0.30.5"
+    drizzle-kit: "npm:^0.30.6"
     drizzle-orm: "npm:^0.41.0"
     fake-indexeddb: "npm:^3.1.8"
     fast-check: "npm:3.15.1"

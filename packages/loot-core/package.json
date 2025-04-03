@@ -62,7 +62,7 @@
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
     "cross-env": "^7.0.3",
-    "drizzle-kit": "^0.30.5",
+    "drizzle-kit": "^0.30.6",
     "fake-indexeddb": "^3.1.8",
     "fast-check": "3.15.1",
     "i18next": "^23.11.5",
