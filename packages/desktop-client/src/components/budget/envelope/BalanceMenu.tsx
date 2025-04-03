@@ -36,7 +36,7 @@ export function BalanceMenu({
     <Menu
       {...props}
       style={{
-        width: '205px',
+        minWidth: '205px',
       }}
       onMenuSelect={name => {
         switch (name) {
