@@ -503,11 +503,11 @@ export function useTransactionBatchActions() {
   };
 
   const onMerge = async (ids: string[], onSuccess: () => void) => {
-    const keptId = await send(
+    await send(
       'transactions-merge',
       ids.map(id => ({ id })),
     );
-    onSuccess([keptId]);
+    onSuccess();
   };
 
   return {
