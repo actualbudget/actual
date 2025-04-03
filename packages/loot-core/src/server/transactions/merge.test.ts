@@ -1,9 +1,8 @@
 // @ts-strict-ignore
-import { TransactionEntity } from '@actual-app/api/@types/loot-core/types/models';
+import { TransactionEntity } from '../../types/models';
 import * as db from '../db';
 
 import { mergeTransactions } from './merge';
-import { Transaction } from '../../../../sync-server/src/app-gocardless/gocardless-node.types';
 
 describe('Merging fails for invalid quantity', () => {
   const tests: [TransactionEntity[], string][] = [
@@ -84,7 +83,7 @@ describe('Merging success', () => {
       imported_id: 'imported_2',
     });
 
-    await mergeTransactions([{ id: t1 }, { id: t2 }]);
+    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t1);
 
     const transactions = await getAllTransactions();
     expect(transactions.length).toBe(1);
@@ -102,7 +101,7 @@ describe('Merging success', () => {
     });
     const t2 = await db.insertTransaction(transaction2);
 
-    await mergeTransactions([{ id: t1 }, { id: t2 }]);
+    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t2);
 
     const transactions = await getAllTransactions();
     expect(transactions.length).toBe(1);
@@ -120,7 +119,7 @@ describe('Merging success', () => {
       imported_id: 'imported_2',
     });
 
-    await mergeTransactions([{ id: t1 }, { id: t2 }]);
+    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t1);
 
     const transactions = await getAllTransactions();
     expect(transactions.length).toBe(1);

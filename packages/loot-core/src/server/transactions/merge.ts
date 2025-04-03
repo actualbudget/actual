@@ -3,9 +3,10 @@ import * as db from '../db';
 
 export async function mergeTransactions(
   transactions: Pick<TransactionEntity, 'id'>[],
-): Promise<void> {
-  transactions = transactions?.filter(Boolean) || [];
-  if (transactions.filter(x => x).length !== 2) {
+): Promise<TransactionEntity['id']> {
+  // make sure all values have ids
+  const txIds = transactions?.map(x => x?.id).filter(Boolean) || [];
+  if (txIds.length !== 2) {
     throw new Error(
       'Merging is only possible with 2 transactions, but found ' +
         JSON.stringify(transactions),
@@ -14,7 +15,7 @@ export async function mergeTransactions(
 
   // get most recent transactions
   const [a, b]: TransactionEntity[] = await Promise.all(
-    transactions.map(({ id }) => db.getTransaction(id)),
+    txIds.map(db.getTransaction),
   );
   const { keep, drop } = determineKeepDrop(a, b);
 
@@ -25,6 +26,7 @@ export async function mergeTransactions(
     } as TransactionEntity),
     db.deleteTransaction(drop),
   ]);
+  return keep.id;
 }
 
 function determineKeepDrop(
