@@ -1,0 +1,47 @@
+import { type TransactionEntity } from '../../types/models';
+import * as db from '../db';
+
+export async function mergeTransactions(
+  transactions: Pick<TransactionEntity, 'id'>[],
+): Promise<void> {
+  transactions = transactions?.filter(Boolean) || [];
+  if (transactions.filter(x => x).length !== 2) {
+    throw new Error(
+      'Merging is only possible with 2 transactions, but found ' +
+        JSON.stringify(transactions),
+    );
+  }
+
+  // get most recent transactions
+  const [a, b]: TransactionEntity[] = await Promise.all(
+    transactions.map(({ id }) => db.getTransaction(id)),
+  );
+  const { keep, drop } = determineKeepDrop(a, b);
+
+  await Promise.all([
+    db.updateTransaction({
+      id: keep.id,
+      imported_id: keep.imported_id || drop.imported_id,
+    } as TransactionEntity),
+    db.deleteTransaction(drop),
+  ]);
+}
+
+function determineKeepDrop(
+  a: TransactionEntity,
+  b: TransactionEntity,
+): { keep: TransactionEntity; drop: TransactionEntity } {
+  // if one is imported and the other is manual, keep the manual transaction
+  if (b.imported_id && !a.imported_id) {
+    return { keep: a, drop: b };
+  } else if (a.imported_id && !b.imported_id) {
+    return { keep: b, drop: a };
+  }
+
+  // keep the earlier transaction
+  if (a.date.localeCompare(b.date) < 0) {
+    return { keep: a, drop: b };
+  } else {
+    return { keep: b, drop: a };
+  }
+}

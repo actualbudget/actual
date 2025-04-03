@@ -12,6 +12,7 @@ import { undoable } from '../undo';
 
 import { exportQueryToCSV, exportToCSV } from './export/export-to-csv';
 import { parseFile, ParseFileOptions } from './import/parse-file';
+import { mergeTransactions } from './merge';
 
 import { batchUpdateTransactions } from '.';
 
@@ -23,6 +24,7 @@ export type TransactionHandlers = {
   'transactions-parse-file': typeof parseTransactionsFile;
   'transactions-export': typeof exportTransactions;
   'transactions-export-query': typeof exportTransactionsQuery;
+  'transactions-merge': typeof mergeTransactions;
   'get-earliest-transaction': typeof getEarliestTransaction;
 };
 
@@ -113,4 +115,5 @@ app.method('transaction-delete', mutator(deleteTransaction));
 app.method('transactions-parse-file', mutator(parseTransactionsFile));
 app.method('transactions-export', mutator(exportTransactions));
 app.method('transactions-export-query', mutator(exportTransactionsQuery));
+app.method('transactions-merge', mutator(mergeTransactions));
 app.method('get-earliest-transaction', getEarliestTransaction);
