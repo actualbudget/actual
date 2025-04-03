@@ -5,6 +5,8 @@ import * as db from '../db';
 import { mergeTransactions } from './merge';
 
 describe('Merging fails for invalid quantity', () => {
+  beforeEach(global.emptyDatabase());
+
   const tests: [TransactionEntity[], string][] = [
     [[{} as TransactionEntity], 'one transaction'],
     [[], 'no transactions'],
@@ -18,6 +20,35 @@ describe('Merging fails for invalid quantity', () => {
   tests.forEach(([arr, message]) =>
     it(message, () => expect(() => mergeTransactions(arr)).rejects.toThrow()),
   );
+
+  it("fails when amounts don't match", async () => {
+    await prepareDatabase();
+    const t1 = await db.insertTransaction({
+      account: 'one',
+      date: '2025-01-01',
+      amount: 10,
+    });
+    const t2 = await db.insertTransaction({
+      account: 'one',
+      date: '2025-01-01',
+      amount: 12,
+    });
+    expect(() => mergeTransactions([{ id: t1 }, { id: t2 }])).rejects.toThrow(
+      'Transaction amounts must match for merge',
+    );
+  });
+
+  it("fails when transaction id doesn't exist", async () => {
+    await prepareDatabase();
+    const t1 = await db.insertTransaction({
+      account: 'one',
+      date: '2025-01-01',
+      amount: 10,
+    });
+    expect(() =>
+      mergeTransactions([{ id: t1 }, { id: 'missing' }]),
+    ).rejects.toThrow('One of the provided transactions does not exist');
+  });
 });
 
 async function prepareDatabase() {
@@ -61,7 +92,7 @@ describe('Merging success', () => {
     payee: 'payee1',
     notes: 'notes1',
     category: '1',
-    amount: 1,
+    amount: 5,
   } as TransactionEntity;
 
   const transaction2 = {
@@ -70,7 +101,7 @@ describe('Merging success', () => {
     payee: 'payee2',
     notes: 'notes2',
     category: '2',
-    amount: 2,
+    amount: 5,
   } as TransactionEntity;
 
   it('two imported transactions keeps older transaction', async () => {
@@ -127,6 +158,31 @@ describe('Merging success', () => {
       ...transaction1,
       date: 20250101,
       imported_id: 'imported_2',
+    });
+  });
+
+  it('missing values in keep are filled in with drop values', async () => {
+    // only insert required fields
+    const t1 = await db.insertTransaction({
+      account: 'one',
+      amount: 5,
+      date: '2025-01-01',
+    });
+    const t2 = await db.insertTransaction({
+      ...transaction2,
+      imported_id: 'imported_2',
+    });
+
+    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t1);
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(1);
+    expect(transactions[0]).toMatchObject({
+      ...transaction2,
+      imported_id: 'imported_2',
+      // from transaction 1
+      id: t1,
+      account: 'one',
+      date: 20250101,
     });
   });
 });
