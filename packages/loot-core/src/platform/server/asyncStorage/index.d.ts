@@ -10,7 +10,7 @@ export function getItem<K extends keyof GlobalPrefsJson>(
 ): Promise<GlobalPrefsJson[K]>;
 export type GetItem = typeof getItem;
 
-export async function setItem<K extends keyof GlobalPrefsJson>(
+export function setItem<K extends keyof GlobalPrefsJson>(
   key: K,
   value: GlobalPrefsJson[K],
 ): Promise<void>;
@@ -19,7 +19,7 @@ export type SetItem = typeof setItem;
 export function removeItem(key: keyof GlobalPrefsJson): void;
 export type RemoveItem = typeof removeItem;
 
-export async function multiGet<K extends readonly (keyof GlobalPrefsJson)[]>(
+export function multiGet<K extends readonly (keyof GlobalPrefsJson)[]>(
   keys: K,
 ): Promise<{ [P in keyof K]: [K[P], GlobalPrefsJson[K[P]]] }>;
 export type MultiGet = typeof multiGet;
