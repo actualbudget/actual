@@ -19,11 +19,13 @@ import type { ToolsHandlers } from '../server/tools/app';
 import type { TransactionHandlers } from '../server/transactions/app';
 
 import type { ApiHandlers } from './api-handlers';
+import type { PluginHandlers } from './plugin-handlers';
 import type { ServerHandlers } from './server-handlers';
 
 export interface Handlers
   extends ServerHandlers,
     ApiHandlers,
+    PluginHandlers,
     BudgetHandlers,
     DashboardHandlers,
     FiltersHandlers,

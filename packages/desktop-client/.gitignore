@@ -28,3 +28,5 @@ public/*.wasm
 
 # translations
 locale/
+
+.__mf__*

@@ -7,6 +7,7 @@ import {
   SvgCheveronRight,
   SvgCog,
   SvgCreditCard,
+  SvgPlugin,
   SvgReports,
   SvgStoreFront,
   SvgTag,
@@ -19,9 +20,13 @@ import { View } from '@actual-app/components/view';
 import { Item } from './Item';
 import { SecondaryItem } from './SecondaryItem';
 
+import { RenderPluginsComponent } from '@desktop-client/components/plugins/RenderPluginsComponent';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
+import { useActualPlugins } from '@desktop-client/plugin/ActualPluginsProvider';
 
 export function PrimaryButtons() {
+  const [pluginsEnabled] = useGlobalPref('plugins');
   const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
   const onToggle = useCallback(() => setOpen(open => !open), []);
@@ -29,6 +34,8 @@ export function PrimaryButtons() {
 
   const syncServerStatus = useSyncServerStatus();
   const isUsingServer = syncServerStatus !== 'no-server';
+
+  const { sidebarItems } = useActualPlugins();
 
   const isActive = [
     '/payees',
@@ -56,6 +63,9 @@ export function PrimaryButtons() {
         style={{ marginBottom: isOpen ? 8 : 0 }}
         forceActive={!isOpen && isActive}
       />
+
+      <RenderPluginsComponent toRender={sidebarItems['main-menu']} />
+
       {isOpen && (
         <>
           <SecondaryItem
@@ -84,6 +94,17 @@ export function PrimaryButtons() {
             to="/tags"
             indent={15}
           />
+          {pluginsEnabled && (
+            <SecondaryItem
+              title={t('Plugins')}
+              Icon={SvgPlugin}
+              to="/plugins"
+              indent={15}
+            />
+          )}
+
+          <RenderPluginsComponent toRender={sidebarItems['more-menu']} />
+
           <SecondaryItem
             title={t('Settings')}
             Icon={SvgCog}

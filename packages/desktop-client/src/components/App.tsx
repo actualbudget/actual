@@ -16,6 +16,7 @@ import { View } from '@actual-app/components/view';
 
 import { init as initConnection, send } from 'loot-core/platform/client/fetch';
 import * as Platform from 'loot-core/shared/platform';
+import type { GlobalPrefs } from 'loot-core/types/prefs';
 
 import { AppBackground } from './AppBackground';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
@@ -37,6 +38,10 @@ import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { SpreadsheetProvider } from '@desktop-client/hooks/useSpreadsheet';
 import { setI18NextLanguage } from '@desktop-client/i18n';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import {
+  ActualPluginsProvider,
+  useActualPlugins,
+} from '@desktop-client/plugin/ActualPluginsProvider';
 import { installPolyfills } from '@desktop-client/polyfills';
 import { loadGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
 import { useDispatch, useSelector, useStore } from '@desktop-client/redux';
@@ -48,6 +53,35 @@ import {
 import { signOut } from '@desktop-client/users/usersSlice';
 import { ExposeNavigate } from '@desktop-client/util/router-tools';
 
+// Wait for VitePWA service worker to be ready
+const waitForVitePWAServiceWorker = () => {
+  return new Promise<void>(resolve => {
+    if (!('serviceWorker' in navigator)) {
+      resolve();
+      return;
+    }
+
+    const timeout = setTimeout(() => resolve(), 5000);
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'service-worker-ready') {
+        clearTimeout(timeout);
+        navigator.serviceWorker.removeEventListener('message', handleMessage);
+        resolve();
+      }
+    };
+
+    navigator.serviceWorker.addEventListener('message', handleMessage);
+
+    // Fallback: If SW is already active, proceed
+    if (navigator.serviceWorker.controller) {
+      clearTimeout(timeout);
+      navigator.serviceWorker.removeEventListener('message', handleMessage);
+      resolve();
+    }
+  });
+};
+
 function AppInner() {
   const [budgetId] = useMetadataPref('id');
   const [cloudFileId] = useMetadataPref('cloudFileId');
@@ -55,9 +89,45 @@ function AppInner() {
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
   const dispatch = useDispatch();
   const userData = useSelector(state => state.user.data);
+  const { refreshPluginStore } = useActualPlugins();
 
   useEffect(() => {
     setI18NextLanguage(null);
+  }, []);
+
+  // Listen for messages from service worker
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      // Only handle messages from service worker
+      if (event.source instanceof ServiceWorker || event.ports?.length > 0) {
+        if (event.data && event.data.type === 'plugin-files') {
+          const { pluginUrl } = event.data.eventData;
+
+          try {
+            // Get plugin files from backend
+            const files = await send('plugin-files', { pluginUrl });
+
+            // Send response back through the MessagePort
+            if (event.ports && event.ports[0]) {
+              event.ports[0].postMessage(files || []);
+            }
+          } catch (error) {
+            console.error('Error handling plugin-files request:', error);
+            // Send error response
+            if (event.ports && event.ports[0]) {
+              event.ports[0].postMessage([]);
+            }
+          }
+        }
+      }
+    };
+
+    // Listen for messages on the window (service worker communicates via window.postMessage)
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
   }, []);
 
   useEffect(() => {
@@ -93,7 +163,23 @@ function AppInner() {
           loadingText: t('Loading global preferences...'),
         }),
       );
-      await dispatch(loadGlobalPrefs());
+      const globalPrefsResult = await dispatch(loadGlobalPrefs());
+
+      // Load plugins if enabled (now that global prefs are loaded)
+      const globalPrefs = globalPrefsResult.payload as GlobalPrefs;
+      if (globalPrefs?.plugins) {
+        dispatch(
+          setAppState({
+            loadingText: t('Loading Plugins...'),
+          }),
+        );
+
+        // Use VitePWA to refresh service worker for fresh start
+        await window.Actual.refreshServiceWorker();
+        await waitForVitePWAServiceWorker();
+
+        await refreshPluginStore(undefined, true);
+      }
 
       // Open the last opened budget, if any
       dispatch(
@@ -214,43 +300,48 @@ export function App() {
 
   return (
     <BrowserRouter>
-      <ExposeNavigate />
-      <HotkeysProvider initiallyActiveScopes={['*']}>
-        <SpreadsheetProvider>
-          <SidebarProvider>
-            <BudgetMonthCountProvider>
-              <DndProvider backend={HTML5Backend}>
-                <View
-                  data-theme={theme}
-                  style={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                >
+      <ActualPluginsProvider>
+        <ExposeNavigate />
+        <HotkeysProvider initiallyActiveScopes={['*']}>
+          <SpreadsheetProvider>
+            <SidebarProvider>
+              <BudgetMonthCountProvider>
+                <DndProvider backend={HTML5Backend}>
                   <View
-                    key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
+                    data-theme={theme}
                     style={{
-                      flexGrow: 1,
-                      overflow: 'hidden',
-                      ...styles.lightScrollbar,
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
                     }}
                   >
-                    <ErrorBoundary FallbackComponent={ErrorFallback}>
-                      {process.env.REACT_APP_REVIEW_ID &&
-                        !Platform.isPlaywright && <DevelopmentTopBar />}
-                      <AppInner />
-                    </ErrorBoundary>
-                    <ThemeStyle />
-                    <Modals />
-                    <UpdateNotification />
+                    <View
+                      key={
+                        hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'
+                      }
+                      style={{
+                        flexGrow: 1,
+                        overflow: 'hidden',
+                        ...styles.lightScrollbar,
+                      }}
+                    >
+                      <ErrorBoundary FallbackComponent={ErrorFallback}>
+                        {process.env.REACT_APP_REVIEW_ID &&
+                          !Platform.isPlaywright && <DevelopmentTopBar />}
+                        <AppInner />
+                      </ErrorBoundary>
+                      <ThemeStyle />
+                      <Modals />
+                      <UpdateNotification />
+                    </View>
+                    <div id="plugin-sidebar-root" />
                   </View>
-                </View>
-              </DndProvider>
-            </BudgetMonthCountProvider>
-          </SidebarProvider>
-        </SpreadsheetProvider>
-      </HotkeysProvider>
+                </DndProvider>
+              </BudgetMonthCountProvider>
+            </SidebarProvider>
+          </SpreadsheetProvider>
+        </HotkeysProvider>
+      </ActualPluginsProvider>
     </BrowserRouter>
   );
 }

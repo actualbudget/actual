@@ -44,12 +44,20 @@ const initialState: NotificationsState = {
 type AddNotificationPayload = {
   notification: Notification;
 };
+type AddUnknownErrorNotificationPayload = {
+  notification: Omit<Notification, 'message'> & { error: unknown };
+};
 type RemoveNotificationPayload = {
   id: NotificationWithId['id'];
 };
 type SetNotificationInsetPayload = {
   inset: NotificationsState['inset'];
 } | null;
+
+const genericErrorMessage = t(
+  'Something internally went wrong. You may want to restart the app if anything looks wrong. ' +
+    'Please report this as a new issue on GitHub.',
+);
 
 const notificationsSlice = createSlice({
   name: sliceName,
@@ -66,14 +74,30 @@ const notificationsSlice = createSlice({
       }
       state.notifications = [...state.notifications, notification];
     },
+    addUnknownErrorNotification(
+      state,
+      action: PayloadAction<AddUnknownErrorNotificationPayload>,
+    ) {
+      const { id, error } = action.payload.notification;
+      const message =
+        typeof error === 'string'
+          ? error
+          : typeof error === 'object'
+            ? error?.toString?.()
+            : undefined;
+      const notification: NotificationWithId = {
+        type: 'error',
+        ...action.payload.notification,
+        id: id ?? uuidv4(),
+        message: message ?? genericErrorMessage,
+      };
+      state.notifications = [...state.notifications, notification];
+    },
     addGenericErrorNotification(state) {
       const notification: NotificationWithId = {
         id: uuidv4(),
         type: 'error',
-        message: t(
-          'Something internally went wrong. You may want to restart the app if anything looks wrong. ' +
-            'Please report this as a new issue on GitHub.',
-        ),
+        message: genericErrorMessage,
       };
       state.notifications = [...state.notifications, notification];
     },
@@ -105,6 +129,7 @@ export const actions = {
 
 export const {
   addGenericErrorNotification,
+  addUnknownErrorNotification,
   addNotification,
   removeNotification,
   setNotificationInset,

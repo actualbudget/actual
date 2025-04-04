@@ -33,3 +33,18 @@ export const getBudgetDir = id => {
 
   return join(getDocumentDir(), id);
 };
+
+export const getPluginDir = id => {
+  if (!id) {
+    throw new Error('getPluginDir: id is falsy: ' + id);
+  }
+
+  // Same safeguard as budgets - restrict to safe characters only
+  if (id.match(/[^A-Za-z0-9\-_]/)) {
+    throw new Error(
+      `Invalid plugin id “${id}”. Plugin IDs must contain only alphanumeric characters, hyphens, and underscores.`,
+    );
+  }
+
+  return join(getDocumentDir(), 'plugins', id);
+};

@@ -204,8 +204,12 @@ export function TransactionList({
                 <TransactionListItem
                   key={transaction.id}
                   value={transaction}
-                  onPress={trans => onTransactionPress(trans)}
-                  onLongPress={trans => onTransactionPress(trans, true)}
+                  onPress={trans =>
+                    onTransactionPress(trans as TransactionEntity)
+                  }
+                  onLongPress={trans =>
+                    onTransactionPress(trans as TransactionEntity, true)
+                  }
                 />
               )}
             </Collection>

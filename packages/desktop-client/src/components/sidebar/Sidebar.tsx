@@ -18,10 +18,12 @@ import { SecondaryButtons } from './SecondaryButtons';
 import { useSidebar } from './SidebarProvider';
 import { ToggleButton } from './ToggleButton';
 
+import { RenderPluginsComponent } from '@desktop-client/components/plugins/RenderPluginsComponent';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 import { replaceModal } from '@desktop-client/modals/modalsSlice';
+import { useActualPlugins } from '@desktop-client/plugin/ActualPluginsProvider';
 import { useDispatch } from '@desktop-client/redux';
 
 export function Sidebar() {
@@ -65,6 +67,8 @@ export function Sidebar() {
   const containerRef = useResizeObserver<HTMLDivElement>(rect => {
     setSidebarWidth(rect.width);
   });
+
+  const { sidebarItems } = useActualPlugins();
 
   return (
     <Resizable
@@ -121,6 +125,8 @@ export function Sidebar() {
         >
           <PrimaryButtons />
 
+          <RenderPluginsComponent toRender={sidebarItems['before-accounts']} />
+
           <Accounts />
 
           <SecondaryButtons
@@ -128,6 +134,8 @@ export function Sidebar() {
               { title: t('Add account'), Icon: SvgAdd, onClick: onAddAccount },
             ]}
           />
+
+          <RenderPluginsComponent toRender={sidebarItems['after-accounts']} />
         </View>
       </View>
     </Resizable>

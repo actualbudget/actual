@@ -68,7 +68,7 @@ export function Bootstrap() {
   }
 
   return (
-    <View style={{ maxWidth: 450 }}>
+    <View style={{ maxWidth: 450 }} data-testid="bootstrap-page">
       <Title text={t('Welcome to Actual!')} />
       <Paragraph style={{ fontSize: 16, color: theme.pageTextDark }}>
         <Trans>

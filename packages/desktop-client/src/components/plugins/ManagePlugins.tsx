@@ -1,0 +1,701 @@
+import { type ChangeEvent, type RefObject, useRef, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+
+import { Button } from '@actual-app/components/button';
+import { SvgPause, SvgPlay, SvgTrash } from '@actual-app/components/icons/v1';
+import { Input } from '@actual-app/components/input';
+import { Popover } from '@actual-app/components/popover';
+import { Stack } from '@actual-app/components/stack';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
+import { t } from 'i18next';
+
+import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
+
+import { PluginsHeader } from './PluginsHeader';
+
+import { InfiniteScrollWrapper } from '@desktop-client/components/common/InfiniteScrollWrapper';
+import { Link } from '@desktop-client/components/common/Link';
+import { Cell, Row } from '@desktop-client/components/table';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import {
+  addNotification,
+  addUnknownErrorNotification,
+} from '@desktop-client/notifications/notificationsSlice';
+import { useActualPlugins } from '@desktop-client/plugin/ActualPluginsProvider';
+import {
+  checkForNewPluginRelease,
+  fetchRelease,
+  fetchWithHeader,
+  parseGitHubRepoUrl,
+} from '@desktop-client/plugin/core/githubUtils';
+import {
+  installPluginFromManifest,
+  installPluginFromZipFile,
+} from '@desktop-client/plugin/core/pluginInstaller';
+import {
+  persistPlugin,
+  removePlugin,
+} from '@desktop-client/plugin/core/pluginStore';
+import { useDispatch } from '@desktop-client/redux';
+
+export function ManagePlugins() {
+  const devPlugin = useRef<HTMLInputElement>(null);
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+  const { pluginStore, plugins, refreshPluginStore } = useActualPlugins();
+  return (
+    <View>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          flexShrink: 0,
+        }}
+      >
+        <View
+          style={{
+            color: theme.pageTextLight,
+            flexDirection: 'row',
+            alignItems: 'center',
+            width: '50%',
+          }}
+        >
+          <Text>
+            {
+              <Trans>
+                Manage and configure plugins to enhance functionality and
+                efficiency.
+              </Trans>
+            }{' '}
+            <Link
+              variant="external"
+              to="https://actualbudget.org/docs/experimental/plugins/"
+              linkColor="muted"
+            >
+              <Trans>Learn more</Trans>
+            </Link>
+          </Text>
+        </View>
+      </View>
+      <View
+        style={{
+          gap: 8,
+          flexDirection: 'row',
+          placeContent: 'end',
+          marginTop: 8,
+        }}
+      >
+        <Button
+          variant="normal"
+          onPress={async () => {
+            for (const plugin of pluginStore) {
+              const result = await checkForNewPluginRelease(
+                plugin.url,
+                plugin.version,
+              );
+              if (result.hasNewVersion) {
+                dispatch(
+                  addNotification({
+                    notification: {
+                      message: `New version found for ${plugin.name}: ${result.latestVersion} (Current installed version: ${plugin.version})`,
+                      sticky: true,
+                      type: 'message',
+                      button: {
+                        title: t(
+                          'Update {{pluginName}} to version {{latestVersion}}',
+                          {
+                            pluginName: plugin.name,
+                            latestVersion: result.latestVersion,
+                          },
+                        ),
+                        action: async () => {
+                          try {
+                            const parsedRepo = parseGitHubRepoUrl(plugin.url);
+                            if (parsedRepo == null) {
+                              throw new Error(
+                                `Plugin url ‘${plugin.url}’ could not be parsed`,
+                              );
+                            } else {
+                              const { manifestUrl } = await fetchRelease(
+                                parsedRepo.owner,
+                                parsedRepo.repo,
+                                `tags/${result.latestVersion}`,
+                              );
+                              const manifestResponse =
+                                await fetchWithHeader(manifestUrl);
+
+                              // Handle error responses
+                              if (
+                                typeof manifestResponse === 'object' &&
+                                'error' in manifestResponse
+                              ) {
+                                throw new Error(
+                                  `Failed to fetch plugin manifest: ${manifestResponse.error}`,
+                                );
+                              }
+
+                              // Handle binary responses (shouldn't happen for JSON)
+                              if (
+                                typeof manifestResponse === 'object' &&
+                                'isBinary' in manifestResponse &&
+                                manifestResponse.isBinary
+                              ) {
+                                throw new Error(
+                                  'Unexpected binary response for plugin manifest',
+                                );
+                              }
+
+                              // Handle string responses (JSON)
+                              if (typeof manifestResponse === 'string') {
+                                try {
+                                  const manifest = JSON.parse(manifestResponse);
+                                  await installPluginFromManifest(
+                                    plugins,
+                                    manifest,
+                                  );
+                                  await refreshPluginStore();
+                                  window.location.reload();
+                                } catch (parseError) {
+                                  throw new Error(
+                                    `Plugin manifest response was ‘${manifestResponse}’`,
+                                  );
+                                }
+                              } else {
+                                throw new Error(
+                                  'Unexpected response type for plugin manifest',
+                                );
+                              }
+                            }
+                          } catch (error) {
+                            dispatch(
+                              addUnknownErrorNotification({
+                                notification: {
+                                  type: 'error',
+                                  error,
+                                },
+                              }),
+                            );
+                          }
+                        },
+                      },
+                    },
+                  }),
+                );
+              } else {
+                dispatch(
+                  addNotification({
+                    notification: {
+                      message: `${plugin.name} is already in latest version`,
+                      sticky: false,
+                      type: 'message',
+                    },
+                  }),
+                );
+              }
+            }
+          }}
+        >
+          <Trans>Check for updates</Trans>
+        </Button>
+        <PluginUploader />
+        {/* <Button variant="normal" isDisabled onPress={() => {}}>
+          <Trans>Upload plugin manually</Trans>
+        </Button> */}
+        <Button
+          variant="primary"
+          onPress={() =>
+            dispatch(
+              pushModal({
+                modal: {
+                  name: 'select-new-plugin',
+                  options: {
+                    onSave: async () => {},
+                  },
+                },
+              }),
+            )
+          }
+        >
+          <Trans>Add new plugin</Trans>
+        </Button>
+      </View>
+      <View style={{ flex: 1, paddingTop: 16 }}>
+        <PluginsHeader />
+        <InfiniteScrollWrapper loadMore={() => {}}>
+          <div />
+          <PluginList />
+          {/* {filteredRules.length === 0 ? (
+              <EmptyMessage text={t('No rules')} style={{ marginTop: 15 }} />
+            ) : (
+              <RulesList
+                rules={filteredRules}
+                selectedItems={selectedInst.items}
+                hoveredRule={hoveredRule}
+                onHover={onHover}
+                onEditRule={onEditRule}
+                onDeleteRule={rule => onDeleteRule(rule.id)}
+              />
+            )} */}
+        </InfiniteScrollWrapper>
+      </View>
+      <View
+        style={{
+          paddingBlock: 15,
+          flexShrink: 0,
+        }}
+      >
+        <Stack direction="row" align="center" justify="flex-end" spacing={2}>
+          {/* {selectedInst.items.size > 0 && (
+              <Button onPress={onDeleteSelected}>
+                Delete {selectedInst.items.size} plugins
+              </Button>
+            )} */}
+        </Stack>
+      </View>
+      {process.env.NODE_ENV === 'development' && (
+        <View style={{ flexDirection: 'row', gap: 16 }}>
+          <Input
+            style={{ flex: 1 }}
+            ref={devPlugin}
+            value="http://localhost:2000/mf-manifest.json"
+          />{' '}
+          <Button
+            variant="primary"
+            onPress={async () => {
+              if (devPlugin.current) {
+                // Wait for service worker ready event
+                refreshPluginStore(devPlugin.current.value);
+              }
+            }}
+          >
+            <Trans>Enable Dev Plugin</Trans>
+          </Button>
+        </View>
+      )}
+    </View>
+  );
+}
+
+function PluginList() {
+  const { pluginStore, plugins } = useActualPlugins();
+
+  // Check if there are any dev plugins running (plugins not in pluginStore)
+  const devPlugins = plugins.filter(
+    p => !pluginStore.some(stored => stored.name === p.name),
+  );
+
+  return (
+    <div data-testid="installed-plugins">
+      {/* Show dev plugins first */}
+      {devPlugins.map((devPlugin, index) => (
+        <Row
+          key={`dev-plugin-${index}`}
+          height="auto"
+          style={{
+            fontSize: 13,
+            backgroundColor: theme.tableBackground,
+            borderLeft: `4px solid ${theme.noticeTextLight}`,
+          }}
+          collapsed={true}
+        >
+          <Cell
+            name="name"
+            width={180}
+            plain
+            style={{ color: theme.tableText }}
+          >
+            <View
+              style={{
+                alignSelf: 'flex-start',
+                margin: 5,
+                borderRadius: 4,
+                padding: '3px 5px',
+              }}
+            >
+              {devPlugin.name || 'Dev Plugin'}
+              <span
+                style={{
+                  color: theme.noticeTextLight,
+                  fontSize: 11,
+                  marginLeft: 4,
+                }}
+              >
+                (DEV)
+              </span>
+            </View>
+          </Cell>
+          <Cell
+            name="version"
+            width={80}
+            plain
+            style={{ color: theme.tableText }}
+          >
+            <View
+              style={{
+                alignSelf: 'flex-start',
+                margin: 5,
+                borderRadius: 4,
+                padding: '3px 5px',
+              }}
+            >
+              {devPlugin.version || '0.0.0-dev'}
+            </View>
+          </Cell>
+          <Cell
+            name="url"
+            width="flex"
+            plain
+            style={{ color: theme.tableText }}
+          >
+            <View
+              style={{
+                alignSelf: 'flex-start',
+                margin: 5,
+                borderRadius: 4,
+                padding: '3px 5px',
+              }}
+            >
+              http://localhost:2000/mf-manifest.json
+            </View>
+          </Cell>
+          <Cell
+            name="state"
+            width={100}
+            plain
+            style={{ color: theme.tableText }}
+          >
+            <View
+              style={{
+                alignSelf: 'flex-start',
+                margin: 5,
+                borderRadius: 4,
+                padding: '3px 5px',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+              }}
+            >
+              <Trans>Running</Trans>{' '}
+              <span style={{ color: theme.noticeTextLight }}>(DEV)</span>
+            </View>
+          </Cell>
+          <Cell
+            name="description"
+            width="flex"
+            plain
+            style={{ color: theme.tableText }}
+          >
+            <View
+              style={{
+                alignSelf: 'flex-start',
+                margin: 5,
+                borderRadius: 4,
+                padding: '3px 5px',
+              }}
+            >
+              <Trans>Development plugin loaded from local server</Trans>
+            </View>
+          </Cell>
+          <Cell
+            name="actions"
+            width={100}
+            plain
+            style={{ color: theme.tableText }}
+          >
+            <View
+              style={{
+                alignSelf: 'flex-start',
+                margin: 5,
+                borderRadius: 4,
+                padding: '3px 5px',
+              }}
+            >
+              <span style={{ color: theme.noticeTextLight, fontSize: 11 }}>
+                <Trans>Runtime only</Trans>
+              </span>
+            </View>
+          </Cell>
+        </Row>
+      ))}
+
+      {/* Show regular plugins */}
+      {pluginStore.map(plugin => (
+        <PluginRow
+          key={`${plugin.name}-${plugin.version}`}
+          plugin={plugin}
+          enabled={plugin.enabled}
+        />
+      ))}
+    </div>
+  );
+}
+
+type PluginRowProps = {
+  plugin: ActualPluginStored;
+  enabled: boolean;
+};
+function PluginRow({ plugin, enabled }: PluginRowProps) {
+  const [removeConfirmationOpen, setRemoveConfirmationOpen] = useState(false);
+  const removeTriggerRef = useRef<HTMLButtonElement>(null);
+
+  const [pauseConfirmationOpen, setPauseConfirmationOpen] = useState(false);
+  const pauseTriggerRef = useRef<HTMLButtonElement>(null);
+
+  const { refreshPluginStore, plugins, pluginStore } = useActualPlugins();
+
+  return (
+    <Row
+      height="auto"
+      style={{
+        fontSize: 13,
+        backgroundColor: theme.tableBackground,
+      }}
+      collapsed={true}
+    >
+      <Cell name="name" width={180} plain style={{ color: theme.tableText }}>
+        <View
+          style={{
+            alignSelf: 'flex-start',
+            margin: 5,
+            borderRadius: 4,
+            padding: '3px 5px',
+          }}
+        >
+          {plugin.name}
+        </View>
+      </Cell>
+      <Cell name="version" width={80} plain style={{ color: theme.tableText }}>
+        <View
+          style={{
+            alignSelf: 'flex-start',
+            margin: 5,
+            borderRadius: 4,
+            padding: '3px 5px',
+          }}
+        >
+          {plugin.version}
+        </View>
+      </Cell>
+      <Cell name="url" width="flex" plain style={{ color: theme.tableText }}>
+        <View
+          style={{
+            alignSelf: 'flex-start',
+            margin: 5,
+            borderRadius: 4,
+            padding: '3px 5px',
+          }}
+        >
+          {plugin.url}
+        </View>
+      </Cell>
+      <Cell name="state" width={100} plain style={{ color: theme.tableText }}>
+        <View
+          style={{
+            alignSelf: 'flex-start',
+            margin: 5,
+            borderRadius: 4,
+            padding: '3px 5px',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+          }}
+        >
+          {enabled ? 'Running' : ''}
+        </View>
+      </Cell>
+      <Cell
+        name="description"
+        width="flex"
+        plain
+        style={{ color: theme.tableText }}
+      >
+        <View
+          style={{
+            alignSelf: 'flex-start',
+            margin: 5,
+            borderRadius: 4,
+            padding: '3px 5px',
+          }}
+        >
+          {plugin.description}
+        </View>
+      </Cell>
+      <Cell name="actions" width={100} plain style={{ color: theme.tableText }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignSelf: 'flex-start',
+            margin: 5,
+            borderRadius: 4,
+            padding: '3px 5px',
+            gap: 8,
+          }}
+        >
+          <Button
+            ref={pauseTriggerRef}
+            variant="bare"
+            onPress={() => setPauseConfirmationOpen(true)}
+          >
+            {plugin.enabled ? (
+              <SvgPause style={{ width: 16, height: 16 }} />
+            ) : (
+              <SvgPlay style={{ width: 16, height: 16 }} />
+            )}
+          </Button>
+          <SmallConfirmationWindow
+            question={t(
+              'Are you sure you want to {{newstate}} the plugin ‘{{plugin}}‘',
+              {
+                newstate: plugin.enabled ? 'disable' : 'enable',
+                plugin: plugin.name,
+              },
+            )}
+            popoverRef={pauseTriggerRef as RefObject<HTMLElement>}
+            isOpen={pauseConfirmationOpen}
+            onYes={async () => {
+              const loadedPlugin = pluginStore.find(
+                p => p.name === plugin.name,
+              );
+              if (loadedPlugin) {
+                persistPlugin(loadedPlugin.plugin, {
+                  ...loadedPlugin,
+                  enabled: plugin.enabled ? false : true,
+                });
+                await refreshPluginStore();
+                window.location.reload();
+              }
+              setPauseConfirmationOpen(false);
+            }}
+            onNo={() => setPauseConfirmationOpen(false)}
+          />
+
+          <Button
+            ref={removeTriggerRef}
+            variant="bare"
+            style={{ color: theme.errorText }}
+            onPress={() => setRemoveConfirmationOpen(true)}
+          >
+            <SvgTrash style={{ width: 16, height: 16 }} />
+          </Button>
+          <SmallConfirmationWindow
+            question={t(
+              'Are you sure you want to delete the plugin ‘{{name}}‘',
+              { name: plugin.name },
+            )}
+            popoverRef={removeTriggerRef as RefObject<HTMLElement>}
+            isOpen={removeConfirmationOpen}
+            onYes={async () => {
+              const loadedPlugin = plugins.find(p => p.name === plugin.name);
+              if (loadedPlugin) {
+                loadedPlugin.uninstall?.();
+                removePlugin(plugin);
+                await refreshPluginStore();
+                window.location.reload();
+              }
+            }}
+            onNo={() => setRemoveConfirmationOpen(false)}
+          />
+        </View>
+      </Cell>
+    </Row>
+  );
+}
+
+type SmallConfirmationWindowProps = {
+  question: string;
+  popoverRef?: RefObject<HTMLElement>;
+  isOpen?: boolean;
+  onYes?: () => void;
+  onNo?: () => void;
+};
+
+function SmallConfirmationWindow({
+  question,
+  popoverRef,
+  isOpen,
+  onYes,
+  onNo,
+}: SmallConfirmationWindowProps) {
+  return (
+    <Popover
+      triggerRef={popoverRef}
+      isOpen={isOpen}
+      onOpenChange={onNo}
+      style={{ padding: 16 }}
+    >
+      <View style={{ align: 'center' }}>
+        <Text style={{ marginBottom: 5 }}>{question}</Text>
+      </View>
+
+      <Stack
+        direction="row"
+        justify="flex-end"
+        align="center"
+        style={{ marginTop: 15 }}
+      >
+        <View style={{ flex: 1 }} />
+        <Button variant="primary" autoFocus onPress={onYes}>
+          <Trans>Yes</Trans>
+        </Button>
+        <Button variant="primary" onPress={onNo}>
+          <Trans>No</Trans>
+        </Button>
+      </Stack>
+    </Popover>
+  );
+}
+
+function PluginUploader() {
+  const { plugins, refreshPluginStore } = useActualPlugins();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dispatch = useDispatch();
+
+  const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      await installPluginFromZipFile(plugins, file);
+      await refreshPluginStore();
+      dispatch(
+        addNotification({
+          notification: {
+            title: 'Manual plugin install',
+            message: 'Plugin installed sucessfully!',
+            type: 'message',
+          },
+        }),
+      );
+    } catch (error: unknown) {
+      console.error(error);
+      dispatch(
+        addUnknownErrorNotification({
+          notification: {
+            title: 'Error installing plugin',
+            error,
+          },
+        }),
+      );
+    } finally {
+      e.target.value = '';
+    }
+  };
+
+  return (
+    <View style={{ flexDirection: 'row' }}>
+      <Button onPress={() => fileInputRef.current?.click()} variant="normal">
+        <Trans>Upload plugin manually</Trans>
+      </Button>
+
+      <Input
+        ref={fileInputRef}
+        type="file"
+        accept=".zip"
+        style={{ display: 'none' }}
+        onChange={handleFileSelect}
+      />
+    </View>
+  );
+}

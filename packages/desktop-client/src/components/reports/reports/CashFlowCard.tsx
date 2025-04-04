@@ -57,7 +57,7 @@ function CustomLabel({
     left: -valueLengthOffset + 2,
   };
 
-  const anchorValue = {
+  const anchorValue: Record<string, 'start' | 'end' | 'middle' | 'inherit'> = {
     right: 'start',
     left: 'end',
   };

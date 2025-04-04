@@ -42,6 +42,9 @@ type Actual = {
   stopSyncServer: () => Promise<void>;
   isSyncServerRunning: () => Promise<boolean>;
   startOAuthServer: () => Promise<string>;
+
+  // VitePWA service worker management (browser only)
+  refreshServiceWorker: () => Promise<void>;
 };
 
 declare global {
@@ -49,8 +52,7 @@ declare global {
     __navigate?: import('react-router').NavigateFunction;
   }
 
-  // eslint-disable-next-line no-var
   var Actual: Actual;
-  // eslint-disable-next-line no-var
+
   var IS_TESTING: boolean;
 }

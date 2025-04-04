@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "build", "**/*.test.*"],
+  "compilerOptions": {
+    "composite": false,
+    "declaration": true,
+    "outDir": "build",
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "references": []
+}

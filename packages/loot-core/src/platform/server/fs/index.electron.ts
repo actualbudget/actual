@@ -6,7 +6,12 @@ import promiseRetry from 'promise-retry';
 
 import type * as T from '.';
 
-export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
+export {
+  getDocumentDir,
+  getBudgetDir,
+  getPluginDir,
+  _setDocumentDir,
+} from './shared';
 
 let rootPath = path.join(__dirname, '..', '..', '..', '..');
 

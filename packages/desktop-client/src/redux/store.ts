@@ -35,6 +35,10 @@ import {
   reducer as payeesSliceReducer,
 } from '@desktop-client/payees/payeesSlice';
 import {
+  name as pluginsSliceName,
+  reducer as pluginsSliceReducer,
+} from '@desktop-client/plugin/pluginsSlice';
+import {
   name as prefsSliceName,
   reducer as prefsSliceReducer,
 } from '@desktop-client/prefs/prefsSlice';
@@ -59,6 +63,7 @@ const rootReducer = combineReducers({
   [modalsSliceName]: modalsSliceReducer,
   [notificationsSliceName]: notificationsSliceReducer,
   [payeesSliceName]: payeesSliceReducer,
+  [pluginsSliceName]: pluginsSliceReducer,
   [prefsSliceName]: prefsSliceReducer,
   [transactionsSliceName]: transactionsSliceReducer,
   [tagsSliceName]: tagsSliceReducer,

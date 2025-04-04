@@ -8,7 +8,7 @@ import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 export const renderCustomLabel = (
   calcX: number,
   calcY: number,
-  textAnchor: string,
+  textAnchor: 'inherit' | 'start' | 'end' | 'middle',
   display: string,
   textSize?: string,
   showLabel?: number,

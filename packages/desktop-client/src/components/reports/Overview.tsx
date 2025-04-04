@@ -18,6 +18,7 @@ import {
   type CustomReportWidget,
   type ExportImportDashboard,
   type MarkdownWidget,
+  type PluginWidget,
   type Widget,
 } from 'loot-core/types/models';
 
@@ -28,6 +29,7 @@ import { CashFlowCard } from './reports/CashFlowCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
 import { MarkdownCard } from './reports/MarkdownCard';
 import { NetWorthCard } from './reports/NetWorthCard';
+import { PluginCard } from './reports/PluginCard';
 import { SpendingCard } from './reports/SpendingCard';
 import './overview.scss';
 import { SummaryCard } from './reports/SummaryCard';
@@ -48,6 +50,7 @@ import {
   addNotification,
   removeNotification,
 } from '@desktop-client/notifications/notificationsSlice';
+import { useActualPlugins } from '@desktop-client/plugin/ActualPluginsProvider';
 import { useDispatch } from '@desktop-client/redux';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -71,6 +74,7 @@ export function Overview() {
   const { data: customReports, isLoading: isCustomReportsLoading } =
     useReports();
   const { data: widgets, isLoading: isWidgetsLoading } = useDashboard();
+  const { pluginRegisteredWidgets } = useActualPlugins();
 
   const customReportMap = useMemo(
     () => new Map(customReports.map(report => [report.id, report])),
@@ -398,6 +402,39 @@ export function Overview() {
                               return;
                             }
 
+                            function isPluginWidget(
+                              name: string,
+                            ): name is `plugin-${string}` {
+                              return (
+                                name.startsWith('plugin-') && name.includes('|')
+                              );
+                            }
+                            if (isPluginWidget(item)) {
+                              // Parse plugin widget with pipe separator: "plugin-pluginId|widgetType"
+                              const pluginPrefix = 'plugin-';
+                              const withoutPrefix = item.slice(
+                                pluginPrefix.length,
+                              );
+                              const [pluginId, widgetType] =
+                                withoutPrefix.split('|');
+
+                              if (pluginId && widgetType) {
+                                onAddWidget<PluginWidget>(
+                                  `plugin-${pluginId}`,
+                                  {
+                                    pluginId,
+                                    pluginWidgetType: widgetType,
+                                  },
+                                );
+                              } else {
+                                console.error(
+                                  'Invalid plugin widget menu item format:',
+                                  item,
+                                );
+                              }
+                              return;
+                            }
+
                             if (item === 'markdown-card') {
                               onAddWidget<MarkdownWidget>(item, {
                                 content: `### ${t('Text Widget')}\n\n${t('Edit this widget to change the **markdown** content.')}`,
@@ -443,6 +480,15 @@ export function Overview() {
                               name: `custom-report-${report.id}` as const,
                               text: report.name,
                             })),
+                            ...(pluginRegisteredWidgets.size > 0
+                              ? ([Menu.line] satisfies Array<typeof Menu.line>)
+                              : []),
+                            ...Array.from(pluginRegisteredWidgets.values()).map(
+                              widget => ({
+                                name: `plugin-${widget.pluginId}|${widget.widgetType}` as const,
+                                text: widget.displayName,
+                              }),
+                            ),
                           ]}
                         />
                       </Dialog>
@@ -595,6 +641,14 @@ export function Overview() {
                       isEditing={isEditing}
                       meta={item.meta}
                       firstDayOfWeekIdx={firstDayOfWeekIdx}
+                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                      onRemove={() => onRemoveWidget(item.i)}
+                    />
+                  ) : item.type.startsWith('plugin-') ? (
+                    <PluginCard
+                      widgetId={item.i}
+                      isEditing={isEditing}
+                      meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
                     />

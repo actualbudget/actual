@@ -40,6 +40,8 @@ i18n
     },
   });
 
+export const i18nInstance = i18n;
+
 export const setI18NextLanguage = (language: string) => {
   if (!language) {
     // System default

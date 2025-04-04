@@ -1,0 +1,89 @@
+import { type ActualPluginManifest } from 'plugins-core/index';
+
+import { getDatabase } from 'loot-core/platform/server/indexeddb';
+import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
+
+/** Retrieve all plugins from the IndexedDB store */
+export async function getAllPlugins(): Promise<ActualPluginStored[]> {
+  const db = await getDatabase();
+  if (!db) {
+    throw new Error('Database not available');
+  }
+  const transaction = db.transaction(['plugins'], 'readonly');
+  const objectStore = transaction.objectStore('plugins');
+
+  return new Promise((resolve, reject) => {
+    const req = objectStore.getAll();
+    req.onsuccess = () => {
+      resolve(req.result);
+    };
+    req.onerror = () => {
+      reject(req.error);
+    };
+  });
+}
+
+/** Retrieve a single plugin by manifest from the DB */
+export async function getStoredPlugin(
+  manifest: ActualPluginManifest,
+): Promise<ActualPluginStored | null> {
+  const db = await getDatabase();
+  if (!db) {
+    throw new Error('Database not available');
+  }
+  const transaction = db.transaction(['plugins'], 'readonly');
+  const objectStore = transaction.objectStore('plugins');
+
+  return new Promise((resolve, reject) => {
+    const req = objectStore.get(manifest.url);
+    req.onsuccess = () => {
+      resolve(req.result || null);
+    };
+    req.onerror = () => {
+      reject(req.error);
+    };
+  });
+}
+
+/** Put or update the plugin in the DB */
+export async function persistPlugin(
+  scriptBlob: Blob,
+  manifest: ActualPluginManifest,
+): Promise<void> {
+  const db = await getDatabase();
+  if (!db) {
+    throw new Error('Database not available');
+  }
+  const transaction = db.transaction(['plugins'], 'readwrite');
+  const objectStore = transaction.objectStore('plugins');
+
+  const storedPlugin: ActualPluginStored = {
+    enabled: true,
+    ...manifest,
+    plugin: scriptBlob,
+  };
+
+  objectStore.put(storedPlugin);
+}
+
+/** Remove a plugin from the DB */
+export async function removePlugin(
+  manifest: ActualPluginManifest,
+): Promise<void> {
+  const db = await getDatabase();
+  if (!db) {
+    throw new Error('Database not available');
+  }
+  const transaction = db.transaction(['plugins'], 'readwrite');
+  const objectStore = transaction.objectStore('plugins');
+
+  return new Promise((resolve, reject) => {
+    const req = objectStore.delete(manifest.url);
+    req.onsuccess = () => {
+      resolve();
+    };
+    req.onerror = () => {
+      reject(req.error);
+    };
+  });
+}
