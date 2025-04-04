@@ -32,7 +32,8 @@ app.use('/', async (req, res) => {
         : JSON.stringify(req.body),
     });
 
-    const contentType = response.headers.get('content-type') || 'application/octet-stream';
+    const contentType =
+      response.headers.get('content-type') || 'application/octet-stream';
 
     res.set('Access-Control-Allow-Origin', '*');
     res.set('Content-Type', contentType);
@@ -42,9 +43,10 @@ app.use('/', async (req, res) => {
     const buffer = await response.arrayBuffer();
     res.send(Buffer.from(buffer)); // 👈 send as raw binary
   } catch (err) {
-    res.status(500).json({ error: 'Error proxying request', details: err.message });
+    res
+      .status(500)
+      .json({ error: 'Error proxying request', details: err.message });
   }
 });
-
 
 export { app as handlers };

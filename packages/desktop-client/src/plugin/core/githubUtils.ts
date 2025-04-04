@@ -1,8 +1,8 @@
 type GitHubAsset = {
-    name: string;
-    browser_download_url: string;
-  };
-  
+  name: string;
+  browser_download_url: string;
+};
+
 export async function fetchWithHeader(url: string): Promise<Response> {
   return await fetch(url, {
     headers: {
@@ -14,7 +14,7 @@ export async function fetchWithHeader(url: string): Promise<Response> {
 export async function fetchRelease(
   owner: string,
   repo: string,
-  releasePath: string
+  releasePath: string,
 ): Promise<{ version: string; scriptUrl: string; manifestUrl: string }> {
   const apiUrl = `http://localhost:5006/cors-proxy?url=https://api.github.com/repos/${owner}/${repo}/releases/${releasePath}`;
   const response = await fetchWithHeader(apiUrl);
@@ -24,18 +24,22 @@ export async function fetchRelease(
 
   const releaseData = await response.json();
   const version = releaseData.tag_name;
-  const scriptAsset = (releaseData.assets as GitHubAsset[]).find(a => a.name.endsWith('.zip'));
+  const scriptAsset = (releaseData.assets as GitHubAsset[]).find(a =>
+    a.name.endsWith('.zip'),
+  );
   const scriptUrl = scriptAsset ? scriptAsset.browser_download_url : '';
 
   const manifestAsset = (releaseData.assets as GitHubAsset[]).find(
-    a => a.name === 'manifest.json'
+    a => a.name === 'manifest.json',
   );
   const manifestUrl = manifestAsset ? manifestAsset.browser_download_url : '';
 
   return { version, scriptUrl, manifestUrl };
 }
 
-export function parseGitHubRepoUrl(url: string): { owner: string; repo: string } | null {
+export function parseGitHubRepoUrl(
+  url: string,
+): { owner: string; repo: string } | null {
   try {
     const parsedUrl = new URL(url);
 

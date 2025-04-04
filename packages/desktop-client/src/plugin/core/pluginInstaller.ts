@@ -1,21 +1,31 @@
-import { ActualPluginInitialized, ActualPluginManifest } from 'plugins-core/index';
-import { fetchRelease, fetchWithHeader, parseGitHubRepoUrl } from './githubUtils';
-import { getStoredPlugin, persistPlugin } from './pluginStore';
+import {
+  type ActualPluginInitialized,
+  type ActualPluginManifest,
+} from 'plugins-core/index';
+
+import {
+  fetchRelease,
+  fetchWithHeader,
+  parseGitHubRepoUrl,
+} from './githubUtils';
+import { persistPlugin } from './pluginStore';
 
 /**
  * Install a plugin from a manifest, fetching the .zip from GitHub.
  */
 export async function installPluginFromManifest(
   loadedPlugins: ActualPluginInitialized[],
-  manifest: ActualPluginManifest
+  manifest: ActualPluginManifest,
 ): Promise<void> {
   try {
     const foundPlugin = loadedPlugins.find(
-      plugin => plugin.name === manifest.name
+      plugin => plugin.name === manifest.name,
     );
     if (foundPlugin) return;
 
-    console.log(`Downloading plugin “${manifest.name}” v${manifest.version}...`);
+    console.log(
+      `Downloading plugin “${manifest.name}” v${manifest.version}...`,
+    );
 
     const parsedRepo = parseGitHubRepoUrl(manifest.url);
     if (!parsedRepo) throw new Error(`Invalid repo ${manifest.url}`);
@@ -23,11 +33,11 @@ export async function installPluginFromManifest(
     const { scriptUrl } = await fetchRelease(
       parsedRepo.owner,
       parsedRepo.repo,
-      `tags/${manifest.version}`
+      `tags/${manifest.version}`,
     );
 
     const response = await fetchWithHeader(
-      `http://localhost:5006/cors-proxy?url=${scriptUrl}`
+      `http://localhost:5006/cors-proxy?url=${scriptUrl}`,
     );
 
     if (!response.ok) {

@@ -1,6 +1,7 @@
-import { ActualPluginManifest } from 'plugins-core/index';
+import { type ActualPluginManifest } from 'plugins-core/index';
+
 import { getDatabase } from 'loot-core/platform/server/indexeddb';
-import { ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
+import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
 
 /** Retrieve all plugins from the IndexedDB store */
 export async function getAllPlugins(): Promise<ActualPluginStored[]> {
@@ -21,7 +22,7 @@ export async function getAllPlugins(): Promise<ActualPluginStored[]> {
 
 /** Retrieve a single plugin by manifest from the DB */
 export async function getStoredPlugin(
-  manifest: ActualPluginManifest
+  manifest: ActualPluginManifest,
 ): Promise<ActualPluginStored | null> {
   const db = await getDatabase();
   const transaction = db.transaction(['plugins'], 'readonly');
@@ -41,7 +42,7 @@ export async function getStoredPlugin(
 /** Put or update the plugin in the DB */
 export async function persistPlugin(
   scriptBlob: Blob,
-  manifest: ActualPluginManifest
+  manifest: ActualPluginManifest,
 ): Promise<void> {
   const db = await getDatabase();
   const transaction = db.transaction(['plugins'], 'readwrite');

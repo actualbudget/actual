@@ -1,5 +1,3 @@
-import { ActualPluginInitialized } from 'plugins-core/index';
-import { ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
 import React, {
   createContext,
   useContext,
@@ -8,11 +6,25 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { RouteObject } from 'react-router-dom';
-import { loadPlugins, loadPluginsScript, PluginModalModel, PluginSidebarRegistrationFn } from './core/pluginLoader';
-import { useFeatureFlag } from '../hooks/useFeatureFlag';
-import { useDispatch } from '../redux';
+import { type RouteObject } from 'react-router-dom';
+
+import {
+  type ActualPluginEntry,
+  type ActualPluginInitialized,
+} from 'plugins-core/index';
+
+import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
+
+//import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { useNavigate } from '../hooks/useNavigate';
+import { useDispatch } from '../redux';
+
+import {
+  loadPlugins,
+  loadPluginsScript,
+  type PluginModalModel,
+  type PluginSidebarRegistrationFn,
+} from './core/pluginLoader';
 import { getAllPlugins } from './core/pluginStore';
 
 export type ActualPluginsContextType = {
@@ -25,16 +37,14 @@ export type ActualPluginsContextType = {
 };
 
 // Create the context
-const ActualPluginsContext = createContext<ActualPluginsContextType | undefined>(
-  undefined
-);
+const ActualPluginsContext = createContext<
+  ActualPluginsContextType | undefined
+>(undefined);
 
 // The Provider
 export function ActualPluginsProvider({ children }: { children: ReactNode }) {
-  // Feature flag example
-  const pluginsEnabled = useFeatureFlag('plugins'); // you can use this if you want to conditionally load
+  //const pluginsEnabled = useFeatureFlag('plugins'); // you can use this if you want to conditionally load
 
-  // Global states
   const [plugins, setPlugins] = useState<ActualPluginInitialized[]>([]);
   const [pluginStore, setPluginStore] = useState<ActualPluginStored[]>([]);
 
@@ -44,7 +54,7 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
 
   const modalMap = useRef<Map<string, PluginModalModel>>(new Map());
   const [pluginsRoutes, setPluginsRoutes] = useState<Map<string, RouteObject>>(
-    new Map()
+    new Map(),
   );
   const [sidebarItems, setSidebarItems] = useState<
     Map<string, PluginSidebarRegistrationFn>
@@ -55,7 +65,7 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
 
   // The function that actually registers and activates plugin code
   const handleLoadPlugins = useCallback(
-    async (pluginsEntries: Map<string, any>) => {
+    async (pluginsEntries: Map<string, ActualPluginEntry>) => {
       // We pass these references so plugin activation can call them.
       await loadPlugins({
         pluginsEntries,
@@ -67,7 +77,7 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
         navigateBase,
       });
     },
-    [dispatch, navigateBase]
+    [dispatch, navigateBase],
   );
 
   // The function that loads plugin scripts (the remote modules) and calls handleLoadPlugins
@@ -78,7 +88,7 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
         handleLoadPlugins,
       });
     },
-    [handleLoadPlugins]
+    [handleLoadPlugins],
   );
 
   // A function to refresh the plugin store from IndexedDB and reload if needed
@@ -113,7 +123,9 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
 export function useActualPlugins() {
   const context = useContext(ActualPluginsContext);
   if (!context) {
-    throw new Error('useActualPlugins must be used within an ActualPluginsProvider');
+    throw new Error(
+      'useActualPlugins must be used within an ActualPluginsProvider',
+    );
   }
   return context;
 }

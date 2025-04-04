@@ -1,18 +1,27 @@
-import { init, loadRemote } from '@module-federation/enhanced/runtime';
-import type { Dispatch } from 'redux';
-import { pushModal as basePushModal } from 'loot-core/client/modals/modalsSlice';
-import { v4 as uuidv4 } from 'uuid';
+import {
+  type MutableRefObject,
+  type Dispatch as ReactDispatch,
+  type SetStateAction,
+} from 'react';
 import type { RouteObject } from 'react-router-dom';
-import { ActualPluginEntry, ActualPluginInitialized } from 'plugins-core/index';
-import { ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
 
+import { init, loadRemote } from '@module-federation/enhanced/runtime';
+import {
+  type ActualPluginEntry,
+  type ActualPluginInitialized,
+} from 'plugins-core/index';
+import type { Dispatch } from 'redux';
+import { v4 as uuidv4 } from 'uuid';
+
+import { pushModal as basePushModal } from 'loot-core/client/modals/modalsSlice';
+import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
 
 export type PluginModalModel = {
-    name: string;
-    modalBody: JSX.Element;
-  };
+  name: string;
+  modalBody: JSX.Element;
+};
 
-export type PluginSidebarRegistrationFn = (container: HTMLDivElement) => void;  
+export type PluginSidebarRegistrationFn = (container: HTMLDivElement) => void;
 
 export async function loadPlugins({
   pluginsEntries,
@@ -25,20 +34,31 @@ export async function loadPlugins({
 }: {
   pluginsEntries: Map<string, ActualPluginEntry>;
   dispatch: Dispatch;
-  setPlugins: React.Dispatch<React.SetStateAction<ActualPluginInitialized[]>>;
-  modalMap: React.MutableRefObject<Map<string, PluginModalModel>>;
-  setPluginsRoutes: React.Dispatch<React.SetStateAction<Map<string, RouteObject>>>;
-  setSidebarItems: React.Dispatch<React.SetStateAction<Map<string, PluginSidebarRegistrationFn>>>;
+  setPlugins: ReactDispatch<SetStateAction<ActualPluginInitialized[]>>;
+  modalMap: MutableRefObject<Map<string, PluginModalModel>>;
+  setPluginsRoutes: ReactDispatch<SetStateAction<Map<string, RouteObject>>>;
+  setSidebarItems: ReactDispatch<
+    SetStateAction<Map<string, PluginSidebarRegistrationFn>>
+  >;
   navigateBase: (path: string) => void;
 }) {
   const loadedList: ActualPluginInitialized[] = [];
 
   for (const [pluginId, entryModule] of pluginsEntries.entries()) {
     // the entry module is actually a function that returns an object with name, version, activate.
-    const pluginEntry = (entryModule as unknown as { default: ActualPluginEntry }).default || entryModule;
+    const pluginEntry =
+      (entryModule as unknown as { default: ActualPluginEntry }).default ||
+      entryModule;
 
     // The host context is how the plugin interacts with the app.
-    const hostContext = generateContext(modalMap, setPluginsRoutes, setSidebarItems, dispatch, pluginId, navigateBase);
+    const hostContext = generateContext(
+      modalMap,
+      setPluginsRoutes,
+      setSidebarItems,
+      dispatch,
+      pluginId,
+      navigateBase,
+    );
 
     const rawPlugin = pluginEntry();
     await rawPlugin.activate(hostContext);
@@ -49,7 +69,14 @@ export async function loadPlugins({
   setPlugins(loadedList);
 }
 
-function generateContext(modalMap, setPluginsRoutes, setSidebarItems, dispatch, pluginId: string, navigateBase: (path: string) => void) {
+function generateContext(
+  modalMap,
+  setPluginsRoutes,
+  setSidebarItems,
+  dispatch,
+  pluginId: string,
+  navigateBase: (path: string) => void,
+) {
   return {
     registerModal: (modalName: string, ModalBodyElement: JSX.Element) => {
       const id = uuidv4();
@@ -99,17 +126,17 @@ function generateContext(modalMap, setPluginsRoutes, setSidebarItems, dispatch, 
       });
     },
     on: (event: string, args: unknown) => {
-      // you can define event bus logic if needed
+      console.log(event, args);
     },
     actions: {
-      pushModal(modalName: string, options: any) {
+      pushModal(modalName: string, options: unknown) {
         dispatch(
           basePushModal({
             modal: {
               name: `plugin-${pluginId}-${modalName}`,
               options,
             },
-          })
+          }),
         );
       },
       navigate: (path: string) => {
@@ -128,7 +155,9 @@ export async function loadPluginsScript({
   handleLoadPlugins,
 }: {
   pluginsData: ActualPluginStored[];
-  handleLoadPlugins: (pluginsEntries: Map<string, ActualPluginEntry>) => Promise<void>;
+  handleLoadPlugins: (
+    pluginsEntries: Map<string, ActualPluginEntry>,
+  ) => Promise<void>;
 }) {
   init({
     name: '@actual/host-app',

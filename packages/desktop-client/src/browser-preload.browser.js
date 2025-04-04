@@ -53,7 +53,6 @@ function createBackendWorker() {
       }
     });
   }
-
 }
 
 createBackendWorker();

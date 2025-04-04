@@ -1,6 +1,3 @@
-import { CSSProperties } from '@actual-app/components/styles';
-import { HTMLProps } from 'react';
-
 export interface ActualPlugin {
   name: string;
   version: string;

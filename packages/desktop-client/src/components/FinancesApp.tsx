@@ -7,7 +7,6 @@ import {
   Navigate,
   useLocation,
   useHref,
-  useRoutes,
 } from 'react-router-dom';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -24,6 +23,7 @@ import { useAccounts } from '../hooks/useAccounts';
 import { useLocalPref } from '../hooks/useLocalPref';
 import { useMetaThemeColor } from '../hooks/useMetaThemeColor';
 import { useNavigate } from '../hooks/useNavigate';
+import { useActualPlugins } from '../plugin/ActualPluginsProvider';
 import { useSelector, useDispatch } from '../redux';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
@@ -47,7 +47,6 @@ import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { Titlebar } from './Titlebar';
-import { useActualPlugins } from '../plugin/ActualPluginsProvider';
 
 function NarrowNotSupported({
   redirectTo = '/budget',

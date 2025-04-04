@@ -14,7 +14,6 @@ import { type ScheduleEntity } from 'loot-core/types/models';
 import { useDispatch } from '../../redux';
 import { Search } from '../common/Search';
 import { Page } from '../Page';
-import { RenderPluginsComponent } from '../plugins/RenderPluginsComponent';
 
 import { type ScheduleItemAction, SchedulesTable } from './SchedulesTable';
 
@@ -84,11 +83,6 @@ export function Schedules() {
 
   return (
     <View>
-      <RenderPluginsComponent
-        page="schedules"
-        componentName="beforePageHeader"
-      />
-
       <Page header={t('Schedules')}>
         <View
           style={{
@@ -97,10 +91,6 @@ export function Schedules() {
             padding: '0 0 15px',
           }}
         >
-          <RenderPluginsComponent
-            page="schedules"
-            componentName="afterPageHeader"
-          />
           <View
             style={{
               flex: 1,

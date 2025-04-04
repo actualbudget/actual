@@ -23,8 +23,6 @@ import { Link } from '../common/Link';
 import { FormField, FormLabel } from '../forms';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
-import { RenderPluginsComponent } from '../plugins/RenderPluginsComponent';
-import { usePluginEventHook } from '../plugins/usePluginEventHook';
 import { useServerVersion } from '../ServerContext';
 
 import { AuthSettings } from './AuthSettings';
@@ -148,15 +146,10 @@ export function Settings() {
   const [floatingSidebar] = useGlobalPref('floatingSidebar');
   const [budgetName] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
-  const pluginHook = usePluginEventHook('settings');
 
   const onCloseBudget = () => {
     dispatch(closeBudget());
   };
-
-  useEffect(() => {
-    pluginHook('onInit');
-  }, [pluginHook]);
 
   useEffect(() => {
     const unlisten = listen('prefs-updated', () => {
@@ -177,7 +170,6 @@ export function Settings() {
         paddingBottom: MOBILE_NAV_HEIGHT,
       }}
     >
-      <RenderPluginsComponent page="settings" componentName="afterHeader" />
       <View
         data-testid="settings"
         style={{
@@ -214,10 +206,6 @@ export function Settings() {
         <BudgetTypeSettings />
         {isElectron() && <Backups />}
         <ExportBudget />
-        <RenderPluginsComponent
-          page="settings"
-          componentName="appendComponents"
-        />
         <AdvancedToggle>
           <AdvancedAbout />
           <ResetCache />

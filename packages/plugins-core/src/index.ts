@@ -24,7 +24,10 @@ export { View } from '@actual-app/components/view';
 
 export { initializePlugin } from './middleware';
 
-export type { ActualPlugin, ActualPluginInitialized } from './types/actualPlugin';
+export type {
+  ActualPlugin,
+  ActualPluginInitialized,
+} from './types/actualPlugin';
 export type { ActualPluginEntry } from './types/actualPluginEntry';
 
 export type { ActualPluginManifest } from './types/actualPluginManifest';

@@ -9,14 +9,14 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { type ActualPluginManifest } from '../../../../plugins-core/src';
+import { useActualPlugins } from '../../plugin/ActualPluginsProvider';
 import {
-  useActualPlugins,
-} from '../../plugin/ActualPluginsProvider';
-import { useDispatch } from '../../redux';
+  fetchRelease,
+  parseGitHubRepoUrl,
+} from '../../plugin/core/githubUtils';
+import { installPluginFromManifest } from '../../plugin/core/pluginInstaller';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { LoadingIndicator } from '../reports/LoadingIndicator';
-import { fetchRelease, parseGitHubRepoUrl } from '../../plugin/core/githubUtils';
-import { installPluginFromManifest } from '../../plugin/core/pluginInstaller';
 
 type SelectNewPluginModalProps = {
   onSave: () => void;
