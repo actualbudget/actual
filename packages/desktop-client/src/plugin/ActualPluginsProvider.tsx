@@ -15,7 +15,7 @@ import {
 
 import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
 
-//import { useFeatureFlag } from '../hooks/useFeatureFlag';
+import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { useNavigate } from '../hooks/useNavigate';
 import { useDispatch } from '../redux';
 
@@ -43,7 +43,7 @@ const ActualPluginsContext = createContext<
 
 // The Provider
 export function ActualPluginsProvider({ children }: { children: ReactNode }) {
-  //const pluginsEnabled = useFeatureFlag('plugins'); // you can use this if you want to conditionally load
+  const pluginsEnabled = useFeatureFlag('plugins'); // you can use this if you want to conditionally load
 
   const [plugins, setPlugins] = useState<ActualPluginInitialized[]>([]);
   const [pluginStore, setPluginStore] = useState<ActualPluginStored[]>([]);
@@ -66,6 +66,8 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
   // The function that actually registers and activates plugin code
   const handleLoadPlugins = useCallback(
     async (pluginsEntries: Map<string, ActualPluginEntry>) => {
+      if (!pluginsEnabled) return;
+
       // We pass these references so plugin activation can call them.
       await loadPlugins({
         pluginsEntries,
@@ -77,22 +79,26 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
         navigateBase,
       });
     },
-    [dispatch, navigateBase],
+    [dispatch, navigateBase, pluginsEnabled],
   );
 
   // The function that loads plugin scripts (the remote modules) and calls handleLoadPlugins
   const handleLoadPluginsScript = useCallback(
     async (pluginsData: ActualPluginStored[]) => {
+      if (!pluginsEnabled) return;
+
       await loadPluginsScript({
         pluginsData,
         handleLoadPlugins,
       });
     },
-    [handleLoadPlugins],
+    [handleLoadPlugins, pluginsEnabled],
   );
 
   // A function to refresh the plugin store from IndexedDB and reload if needed
   const refreshPluginStore = useCallback(async () => {
+    if (!pluginsEnabled) return;
+
     const pluginsFromDB = (await getAllPlugins()) as ActualPluginStored[];
     // If the new list has changed in size, we might want to reload
     // (or you can do more sophisticated checks if you want)
@@ -100,7 +106,7 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
       await handleLoadPluginsScript(pluginsFromDB);
     }
     setPluginStore(pluginsFromDB);
-  }, [pluginStore.length, handleLoadPluginsScript]);
+  }, [pluginStore.length, handleLoadPluginsScript, pluginsEnabled]);
 
   // Provide everything
   const contextValue: ActualPluginsContextType = {

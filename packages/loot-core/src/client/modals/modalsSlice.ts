@@ -533,7 +533,12 @@ export type Modal =
         onSave?: () => void;
       };
     }
-  | { name: `plugin-${string}`; options?: unknown };
+  | {
+      name: 'plugin-modal';
+      options: {
+        parameter: (container: HTMLDivElement) => void;
+      };
+    };
 
 type OpenAccountCloseModalPayload = {
   accountId: AccountEntity['id'];

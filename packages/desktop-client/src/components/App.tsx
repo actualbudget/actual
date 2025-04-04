@@ -24,6 +24,7 @@ import { signOut } from 'loot-core/client/users/usersSlice';
 import { init as initConnection, send } from 'loot-core/platform/client/fetch';
 
 import { handleGlobalEvents } from '../global-events';
+import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { setI18NextLanguage } from '../i18n';
 import {
@@ -53,14 +54,17 @@ function AppInner() {
   const dispatch = useDispatch();
   const userData = useSelector(state => state.user.data);
   const { refreshPluginStore } = useActualPlugins();
+  const pluginsEnabled = useFeatureFlag('plugins');
 
   useEffect(() => {
     setI18NextLanguage(null);
   }, []);
 
   useEffect(() => {
-    refreshPluginStore();
-  }, [refreshPluginStore]);
+    if (pluginsEnabled) {
+      refreshPluginStore();
+    }
+  }, [refreshPluginStore, pluginsEnabled]);
 
   useEffect(() => {
     const maybeUpdate = async <T,>(cb?: () => T): Promise<T> => {

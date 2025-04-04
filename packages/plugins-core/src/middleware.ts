@@ -2,7 +2,10 @@
 
 import ReactDOM from 'react-dom/client';
 
-import { ActualPlugin, ActualPluginInitialized } from './types/actualPlugin';
+import {
+  ActualPlugin,
+  ActualPluginInitialized,
+} from './types/actualPlugin';
 
 export function initializePlugin(
   plugin: ActualPlugin,
@@ -16,7 +19,7 @@ export function initializePlugin(
     activate: context => {
       const wrappedContext = {
         ...context,
-        registerSidebarMenu(element) {
+        registerSidebarMenu(element: JSX.Element) {
           const id = context.registerSidebarMenu(container => {
             const root = ReactDOM.createRoot(container);
             root.render(element);
@@ -24,6 +27,12 @@ export function initializePlugin(
 
           return id;
         },
+        pushModal(element: JSX.Element) {
+          context.pushModal(container => {
+            const root = ReactDOM.createRoot(container);
+            root.render(element);
+          })
+        }
       };
 
       // Call the original activate with the wrapped context

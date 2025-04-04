@@ -3,8 +3,9 @@ export interface ActualPlugin {
   version: string;
   uninstall: (db: IDBDatabase) => void;
   activate: (
-    context: Omit<HostContext, 'registerSidebarMenu'> & {
+    context: Omit<HostContext, 'registerSidebarMenu' | 'pushModal'> & {
       registerSidebarMenu: (element: JSX.Element) => string;
+      pushModal: (element: JSX.Element) => void;
     },
   ) => void;
 }
@@ -21,12 +22,9 @@ interface ContextEvent {
 }
 
 export interface HostContext {
-  actions: {
-    pushModal: (modalName: string, options: unknown) => void;
-    navigate: (routePath: string) => void;
-  };
-  registerModal: (modalName: string, modalBody: JSX.Element) => string;
-  unregisterModal: (id: string) => void;
+  navigate: (routePath: string) => void;
+  
+  pushModal: (parameter: (container: HTMLDivElement) => void) => void;
 
   registerRoute: (path: string, routeElement: JSX.Element) => string;
   unregisterRoute: (id: string) => void;

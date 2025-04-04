@@ -18,7 +18,7 @@ import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-st
 
 export type PluginModalModel = {
   name: string;
-  modalBody: JSX.Element;
+  modal: HTMLElement;
 };
 
 export type PluginSidebarRegistrationFn = (container: HTMLDivElement) => void;
@@ -70,7 +70,7 @@ export async function loadPlugins({
 }
 
 function generateContext(
-  modalMap,
+  modalMap: MutableRefObject<Map<string, PluginModalModel>>,
   setPluginsRoutes,
   setSidebarItems,
   dispatch,
@@ -78,17 +78,6 @@ function generateContext(
   navigateBase: (path: string) => void,
 ) {
   return {
-    registerModal: (modalName: string, ModalBodyElement: JSX.Element) => {
-      const id = uuidv4();
-      modalMap.current.set(id, {
-        name: modalName,
-        modalBody: ModalBodyElement,
-      });
-      return id;
-    },
-    unregisterModal: (id: string) => {
-      modalMap.current.delete(id);
-    },
     registerRoute: (path: string, routeElement: JSX.Element) => {
       const id = uuidv4();
       setPluginsRoutes(prev => {
@@ -128,20 +117,20 @@ function generateContext(
     on: (event: string, args: unknown) => {
       console.log(event, args);
     },
-    actions: {
-      pushModal(modalName: string, options: unknown) {
-        dispatch(
-          basePushModal({
-            modal: {
-              name: `plugin-${pluginId}-${modalName}`,
-              options,
+    pushModal(parameter: (container: HTMLDivElement) => void) {
+      dispatch(
+        basePushModal({
+          modal: {
+            name: `plugin-modal`,
+            options: {
+              parameter,
             },
-          }),
-        );
-      },
-      navigate: (path: string) => {
-        navigateBase(path);
-      },
+          },
+        }),
+      );
+    },
+    navigate: (path: string) => {
+      navigateBase(path);
     },
   };
 }

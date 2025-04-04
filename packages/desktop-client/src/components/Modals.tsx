@@ -8,7 +8,6 @@ import * as monthUtils from 'loot-core/shared/months';
 
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useModalState } from '../hooks/useModalState';
-import { useActualPlugins } from '../plugin/ActualPluginsProvider';
 import { useDispatch } from '../redux';
 
 import { EditSyncAccount } from './banksync/EditSyncAccount';
@@ -80,14 +79,14 @@ import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { UpcomingLength } from './schedules/UpcomingLength';
 import { NamespaceContext } from './spreadsheet/NamespaceContext';
+import { PluginModal } from './modals/PluginModal';
 
 export function Modals() {
   const location = useLocation();
   const dispatch = useDispatch();
   const { modalStack } = useModalState();
   const [budgetId] = useMetadataPref('id');
-  const { plugins } = useActualPlugins();
-
+  
   useEffect(() => {
     if (modalStack.length > 0) {
       dispatch(closeModal());
@@ -377,10 +376,10 @@ export function Modals() {
             <SelectNewPluginModal key={name} onSave={modal.options.onSave} />
           );
 
-        default:
-          if (name.startsWith('plugin-')) {
-          }
+        case 'plugin-modal':
+          return <PluginModal parameter={modal.options.parameter} />;
 
+        default:
           throw new Error('Unknown modal');
       }
     })
