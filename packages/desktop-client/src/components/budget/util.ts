@@ -72,8 +72,8 @@ export function makeAmountGrey(value: number | string): CSSProperties {
 
 export function makeBalanceAmountStyle(
   value: number,
-  goalValue?: number,
-  budgetedValue?: number,
+  goalValue?: number | null,
+  budgetedValue?: number | null,
 ) {
   if (value < 0) {
     return { color: theme.errorText };
