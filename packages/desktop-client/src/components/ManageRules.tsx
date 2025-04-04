@@ -91,6 +91,8 @@ function ruleToString(rule, data) {
         friendlyOp(action.op),
         '“' + mapValue(action.field, action.value, data) + '”',
       ];
+    } else if (action.op === 'delete-transaction') {
+      return [friendlyOp(action.op), '(delete)'];
     } else {
       return [];
     }
