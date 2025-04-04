@@ -1,4 +1,4 @@
-import { ActualPluginManifest } from '@actual-app/plugins-core';
+import { ActualPluginManifest } from 'plugins-core/index';
 import { getDatabase } from 'loot-core/platform/server/indexeddb';
 import { ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
 

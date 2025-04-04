@@ -1,4 +1,4 @@
-import { ActualPluginInitialized, ActualPluginManifest } from '@actual-app/plugins-core';
+import { ActualPluginInitialized, ActualPluginManifest } from 'plugins-core/index';
 import { fetchRelease, fetchWithHeader, parseGitHubRepoUrl } from './githubUtils';
 import { getStoredPlugin, persistPlugin } from './pluginStore';
 

@@ -1,4 +1,4 @@
-import { ActualPluginInitialized } from '@actual-app/plugins-core';
+import { ActualPluginInitialized } from 'plugins-core/index';
 import { ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
 import React, {
   createContext,
