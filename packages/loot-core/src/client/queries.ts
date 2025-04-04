@@ -30,7 +30,12 @@ const envelopeParametrizedField = parametrizedField<'envelope-budget'>();
 const trackingParametrizedField = parametrizedField<'tracking-budget'>();
 
 export function accountFilter(
-  accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized',
+  accountId?:
+    | AccountEntity['id']
+    | 'onbudget'
+    | 'offbudget'
+    | 'closed'
+    | 'uncategorized',
   field = 'account',
 ) {
   if (accountId) {
@@ -48,6 +53,8 @@ export function accountFilter(
           { [`${field}.closed`]: false },
         ],
       };
+    } else if (accountId === 'closed') {
+      return { [`${field}.closed`]: true };
     } else if (accountId === 'uncategorized') {
       return {
         [`${field}.offbudget`]: false,
@@ -69,7 +76,12 @@ export function accountFilter(
 }
 
 export function transactions(
-  accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized',
+  accountId?:
+    | AccountEntity['id']
+    | 'onbudget'
+    | 'offbudget'
+    | 'closed'
+    | 'uncategorized',
 ) {
   let query = q('transactions').options({ splits: 'grouped' });
 
@@ -177,6 +189,15 @@ export function offBudgetAccountBalance() {
       .filter({ 'account.offbudget': true, 'account.closed': false })
       .calculate({ $sum: '$amount' }),
   } satisfies Binding<'account', 'offbudget-accounts-balance'>;
+}
+
+export function closedAccountBalance() {
+  return {
+    name: `closed-accounts-balance`,
+    query: q('transactions')
+      .filter({ 'account.closed': true })
+      .calculate({ $sum: '$amount' }),
+  } satisfies Binding<'account', 'closed-accounts-balance'>;
 }
 
 export function categoryBalance(category: CategoryEntity, month: string) {
