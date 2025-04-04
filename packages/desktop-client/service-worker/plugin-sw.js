@@ -1,5 +1,7 @@
 import { precacheAndRoute } from 'workbox-precaching';
 
+self.__WB_DISABLE_DEV_LOGS = true
+
 // Injected by VitePWA
 precacheAndRoute(self.__WB_MANIFEST);
 
