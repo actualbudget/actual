@@ -95,7 +95,7 @@ export function FieldMappings({
             firstTransaction={transactions[0]}
           />
         </View>
-        {splitMode ? (
+        {splitMode && !inOutMode ? (
           <>
             <View style={{ flex: 0.5 }}>
               <SubLabel title="Outflow" />

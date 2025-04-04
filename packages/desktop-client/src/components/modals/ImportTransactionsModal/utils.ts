@@ -126,7 +126,7 @@ export type ImportTransaction = {
   amount: number;
   inflow: number;
   outflow: number;
-  inOut: number;
+  inOut: string;
 } & Record<string, string>;
 
 export type FieldMapping = {
@@ -161,7 +161,6 @@ export function applyFieldMappings(
 function parseAmount(
   amount: number | string | undefined | null,
   mapper: (parsed: number) => number,
-  multiplier: number,
 ) {
   if (amount == null) {
     return null;
@@ -174,54 +173,82 @@ function parseAmount(
     return null;
   }
 
-  return mapper(parsed) * multiplier;
+  return mapper(parsed);
 }
 
 export function parseAmountFields(
   trans: Partial<ImportTransaction>,
   splitMode: boolean,
   inOutMode: boolean,
-  outValue: number,
+  outValue: string,
   flipAmount: boolean,
   multiplierAmount: string,
 ) {
   const multiplier = parseFloat(multiplierAmount) || 1.0;
 
-  if (splitMode) {
+  /** Keep track of the transaction amount as inflow and outflow.
+   *
+   * Inflow/outflow is taken from a positive/negative transaction amount
+   * respectively, or the inflow/outflow fields if split mode is enabled.
+   */
+  const value = {
+    outflow: 0,
+    inflow: 0,
+  };
+
+  // Determine the base value of the transaction from the amount or inflow/outflow fields
+  if (splitMode && !inOutMode) {
     // Split mode is a little weird; first we look for an outflow and
     // if that has a value, we never want to show a number in the
     // inflow. Same for `amount`; we choose outflow first and then inflow
-    const outflow = parseAmount(trans.outflow, n => -Math.abs(n), multiplier);
-    const inflow = outflow
+    value.outflow = parseAmount(trans.outflow, n => -Math.abs(n)) || 0;
+    value.inflow = value.outflow
       ? 0
-      : parseAmount(trans.inflow, n => Math.abs(n), multiplier);
-
-    return {
-      amount: outflow || inflow,
-      outflow,
-      inflow,
-    };
+      : parseAmount(trans.inflow, n => Math.abs(n)) || 0;
+  } else {
+    const amount = parseAmount(trans.amount, n => n) || 0;
+    if (amount >= 0) value.inflow = amount;
+    else value.outflow = amount;
   }
+
+  // Apply in/out
   if (inOutMode) {
+    // The 'In/Out' field of a transaction will tell us
+    // whether the transaction value is inflow or outflow.
+    const transactionValue = value.outflow || value.inflow;
+    if (trans.inOut === outValue) {
+      value.outflow = -Math.abs(transactionValue);
+      value.inflow = 0;
+    } else {
+      value.inflow = Math.abs(transactionValue);
+      value.outflow = 0;
+    }
+  }
+
+  // Apply flip
+  if (flipAmount) {
+    const oldInflow = value.inflow;
+    value.inflow = Math.abs(value.outflow);
+    value.outflow = -Math.abs(oldInflow);
+  }
+
+  // Apply multiplier
+  value.inflow *= multiplier;
+  value.outflow *= multiplier;
+
+  if (splitMode) {
     return {
-      amount: parseAmount(
-        trans.amount,
-        n => (trans.inOut === outValue ? Math.abs(n) * -1 : Math.abs(n)),
-        multiplier,
-      ),
+      amount: value.outflow || value.inflow,
+      outflow: value.outflow,
+      inflow: value.inflow,
+    };
+  } else {
+    return {
+      amount: value.outflow || value.inflow,
       outflow: null,
       inflow: null,
     };
   }
-  return {
-    amount: parseAmount(
-      trans.amount,
-      n => (flipAmount ? n * -1 : n),
-      multiplier,
-    ),
-    outflow: null,
-    inflow: null,
-  };
 }
 
 export function stripCsvImportTransaction(transaction: ImportTransaction) {

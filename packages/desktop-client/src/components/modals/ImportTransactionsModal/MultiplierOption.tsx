@@ -25,7 +25,7 @@ export function MultiplierOption({
         checked={multiplierEnabled}
         onChange={onToggle}
       >
-        Add multiplier
+        Multiply amount
       </CheckboxOption>
       <Input
         type="text"
