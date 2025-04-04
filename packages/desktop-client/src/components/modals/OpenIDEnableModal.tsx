@@ -45,7 +45,7 @@ export function OpenIDEnableModal({
         try {
           await refreshLoginMethods();
           await asyncStorage.removeItem('user-token');
-          await dispatch(closeBudget());
+          await dispatch(closeBudget({}));
         } catch (e) {
           console.error('Failed to cleanup after OpenID enable:', e);
           setError(

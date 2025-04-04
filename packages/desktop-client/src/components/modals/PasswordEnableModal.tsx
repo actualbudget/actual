@@ -67,7 +67,7 @@ export function PasswordEnableModal({
       originalOnSave?.();
       await refreshLoginMethods();
       await asyncStorage.removeItem('user-token');
-      await dispatch(closeBudget());
+      await dispatch(closeBudget({}));
     } else {
       setError(getErrorMessage(error));
     }

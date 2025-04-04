@@ -38,6 +38,7 @@ import { FatalError } from './FatalError';
 import { FinancesApp } from './FinancesApp';
 import { ManagementApp } from './manager/ManagementApp';
 import { Modals } from './Modals';
+import { useMultiuserEnabled } from './ServerContext';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
 
@@ -48,6 +49,7 @@ function AppInner() {
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
   const dispatch = useDispatch();
   const userData = useSelector(state => state.user.data);
+  const multiuserEnabled = useMultiuserEnabled();
 
   useEffect(() => {
     setI18NextLanguage(null);
@@ -110,7 +112,7 @@ function AppInner() {
         if (files) {
           const remoteFile = files.find(f => f.fileId === cloudFileId);
           if (remoteFile && remoteFile.deleted) {
-            dispatch(closeBudget());
+            dispatch(closeBudget({}));
           }
         }
 
@@ -145,14 +147,14 @@ function AppInner() {
             button: {
               title: t('Go to log in'),
               action: () => {
-                dispatch(signOut());
+                dispatch(signOut({ openidEnabled: multiuserEnabled }));
               },
             },
           },
         }),
       );
     }
-  }, [dispatch, t, userData?.tokenExpired]);
+  }, [dispatch, t, userData?.tokenExpired, multiuserEnabled]);
 
   return budgetId ? <FinancesApp /> : <ManagementApp />;
 }

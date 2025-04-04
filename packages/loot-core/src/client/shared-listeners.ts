@@ -348,8 +348,8 @@ export function listenForSyncEvent(store: AppStore) {
             button: {
               title: 'Go to login',
               action: () => {
-                store.dispatch(signOut());
-              },
+                store.dispatch(signOut({ openidEnabled: false }));
+              }, //Treat here as non multiuser since we can't use the hook
             },
           };
           break;

@@ -74,7 +74,7 @@ function EditableBudgetName() {
         navigate('/settings');
         break;
       case 'close':
-        dispatch(closeBudget());
+        dispatch(closeBudget({}));
         break;
       default:
     }
