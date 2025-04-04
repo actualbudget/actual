@@ -1,0 +1,29 @@
+{
+  "name": "@actual-app/plugins-core",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@actual-app/components": "workspace:^",
+    "@types/react": "^18.2.0",
+    "react": "^18.2.0",
+    "react-aria-components": "^1.7.1",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.18.1",
+    "typescript-strict-plugin": "^2.4.4",
+    "vite": "^6.2.0",
+    "vite-plugin-dts": "^4.5.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "import": "./build/index.js",
+      "require": "./build/index.cjs"
+    }
+  }
+}

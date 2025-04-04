@@ -9,6 +9,7 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, loadEnv, Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
+import { federation } from '@module-federation/vite'
 
 const addWatchers = (): Plugin => ({
   name: 'add-watchers',
@@ -159,6 +160,13 @@ export default defineConfig(async ({ mode }) => {
         ? undefined
         : VitePWA({
             registerType: 'prompt',
+            strategies: 'injectManifest',
+            srcDir: 'service-worker',
+            filename: 'plugin-sw.js',
+            devOptions: {
+              enabled: true, // ✅ forces SW registration in dev
+              type: 'module'
+            },
             workbox: {
               globPatterns: [
                 '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
@@ -171,6 +179,7 @@ export default defineConfig(async ({ mode }) => {
                 /^\/admin\/.*$/,
                 /^\/secret\/.*$/,
                 /^\/openid\/.*$/,
+                /^\/plugins\/.*$/,
               ],
             },
           }),

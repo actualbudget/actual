@@ -3,6 +3,7 @@ import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-th
 import { registerSW } from 'virtual:pwa-register';
 
 import * as Platform from 'loot-core/client/platform';
+import { send } from 'loot-core/platform/client/fetch';
 
 import packageJson from '../package.json';
 
@@ -41,6 +42,18 @@ function createBackendWorker() {
       'SharedArrayBufferOverride',
     ),
   });
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', async event => {
+      console.log('Main App received message from Service Worker:', event.data);
+
+      if (event.data.type.startsWith('plugin-')) {
+        const object = await send(event.data.type, event.data.eventData);
+        event.ports[0].postMessage(object);
+      }
+    });
+  }
+
 }
 
 createBackendWorker();

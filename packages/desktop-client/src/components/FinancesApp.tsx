@@ -7,6 +7,7 @@ import {
   Navigate,
   useLocation,
   useHref,
+  useRoutes,
 } from 'react-router-dom';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -36,6 +37,7 @@ import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Notifications } from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
+import { Plugins } from './plugins/Plugins';
 import { Reports } from './reports';
 import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
@@ -45,6 +47,7 @@ import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { Titlebar } from './Titlebar';
+import { useActualPlugins } from '../plugin/ActualPluginsProvider';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -172,6 +175,8 @@ export function FinancesApp() {
 
   const scrollableRef = useRef<HTMLDivElement>(null);
 
+  const { pluginsRoutes } = useActualPlugins();
+
   return (
     <View style={{ height: '100%' }}>
       <RouterBehaviors />
@@ -257,6 +262,7 @@ export function FinancesApp() {
                 <Route path="/payees" element={<ManagePayeesPage />} />
                 <Route path="/rules" element={<ManageRulesPage />} />
                 <Route path="/bank-sync" element={<BankSync />} />
+                <Route path="/plugins" element={<Plugins />} />
                 <Route path="/settings" element={<Settings />} />
 
                 <Route
@@ -318,6 +324,13 @@ export function FinancesApp() {
                     }
                   />
                 )}
+                {...Array.from(pluginsRoutes.values()).map(route => (
+                  <Route
+                    key={route.id}
+                    path={route.path}
+                    element={route.element}
+                  />
+                ))}
                 {/* redirect all other traffic to the budget page */}
                 <Route path="/*" element={<Navigate to="/budget" replace />} />
               </Routes>

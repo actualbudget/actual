@@ -4,6 +4,7 @@ import { Message } from '../server/sync';
 
 import { Budget } from './budget';
 import { OpenIdConfig } from './models/openid';
+import { PluginFile } from './models/plugin-file';
 // eslint-disable-next-line import/no-unresolved
 import { Query } from './query';
 import { EmptyObject } from './util';
@@ -197,4 +198,6 @@ export interface ServerHandlers {
     | { error: string }
     | null
   >;
+
+  'plugin-files': (arg: { pluginUrl: string }) => Promise<PluginFile[]>;
 }

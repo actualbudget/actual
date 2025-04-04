@@ -10,11 +10,13 @@ import { captureException, captureBreadcrumb } from '../platform/exceptions';
 import * as asyncStorage from '../platform/server/asyncStorage';
 import * as connection from '../platform/server/connection';
 import * as fs from '../platform/server/fs';
+import * as idb from '../platform/server/indexeddb';
 import { logger } from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import { q } from '../shared/query';
 import { type Budget } from '../types/budget';
 import { Handlers } from '../types/handlers';
+import { ActualPluginStored } from '../types/models/actual-plugin-stored';
 import { OpenIdConfig } from '../types/models/openid';
 
 import { app as accountsApp } from './accounts/app';
@@ -42,6 +44,7 @@ import { mutator, runHandler } from './mutators';
 import { app as notesApp } from './notes/app';
 import { app as payeesApp } from './payees/app';
 import * as Platform from './platform';
+import { extractZipToMap } from './plugins/pluginUtil';
 import { get, post } from './post';
 import { app as preferencesApp } from './preferences/app';
 import * as prefs from './prefs';
@@ -1071,6 +1074,25 @@ handlers['app-focused'] = async function () {
     // First we sync
     fullSync();
   }
+};
+
+handlers['plugin-files'] = async function ({ pluginUrl }) {
+  const { store } = idb.getStore(await idb.getDatabase(), 'plugins');
+  const item: ActualPluginStored = await idb.get(
+    store,
+    decodeURIComponent(pluginUrl),
+  );
+
+  if (item == null) {
+    throw new Error('Plugin does not exist: ' + decodeURIComponent(pluginUrl));
+  }
+
+  const filesMap = await extractZipToMap(item.plugin);
+
+  return [...filesMap.entries()].map(keyValue => ({
+    name: keyValue[0].toString(),
+    content: keyValue[1].toString(),
+  }));
 };
 
 handlers = installAPI(handlers) as Handlers;

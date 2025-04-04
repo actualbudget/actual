@@ -9,6 +9,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   contextMenus: false,
   openidAuth: false,
   pluggyAiBankSync: false,
+  plugins: false,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {

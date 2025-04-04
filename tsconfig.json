@@ -31,7 +31,8 @@
     "noEmit": true,
     "paths": {
       // TEMPORARY: Until we can fix the "exports" in the loot-core package.json
-      "loot-core/*": ["./packages/loot-core/src/*"]
+      "loot-core/*": ["./packages/loot-core/src/*"],
+      "plugins-core/*": ["./packages/plugins-core/src/*"]
     },
     "plugins": [
       {

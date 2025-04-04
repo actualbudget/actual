@@ -1,4 +1,4 @@
-import React, { type CSSProperties, useState } from 'react';
+import React, { type CSSProperties, Fragment, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -23,6 +23,8 @@ import { PrimaryButtons } from './PrimaryButtons';
 import { SecondaryButtons } from './SecondaryButtons';
 import { useSidebar } from './SidebarProvider';
 import { ToggleButton } from './ToggleButton';
+import { useActualPlugins } from '../../plugin/ActualPluginsProvider';
+import { createPortal } from 'react-dom';
 
 export function Sidebar() {
   const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';
@@ -65,6 +67,18 @@ export function Sidebar() {
   const containerRef = useResizeObserver<HTMLDivElement>(rect => {
     setSidebarWidth(rect.width);
   });
+
+  const { sidebarItems } = useActualPlugins();
+  const pluginRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    [...sidebarItems.values()].forEach((plugin, index) => {
+      const pluginRef = pluginRefs.current[index];
+      if(pluginRef) {
+        plugin(pluginRef);
+      }
+    })
+  }, [sidebarItems, pluginRefs]);
 
   return (
     <Resizable
@@ -128,6 +142,10 @@ export function Sidebar() {
               { title: t('Add account'), Icon: SvgAdd, onClick: onAddAccount },
             ]}
           />
+
+          {[...sidebarItems.entries()].map(([item, element], index) => (
+            <div key={index} ref={el => (pluginRefs.current[index] = el)} />
+          ))}
         </View>
       </View>
     </Resizable>

@@ -7,6 +7,7 @@ import {
   SvgCheveronRight,
   SvgCog,
   SvgCreditCard,
+  SvgPlugin,
   SvgReports,
   SvgStoreFront,
   SvgTuning,
@@ -15,12 +16,14 @@ import {
 import { SvgCalendar3 } from '@actual-app/components/icons/v2';
 import { View } from '@actual-app/components/view';
 
+import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 
 import { Item } from './Item';
 import { SecondaryItem } from './SecondaryItem';
 
 export function PrimaryButtons() {
+  const pluginsEnabled = useFeatureFlag('plugins');
   const { t } = useTranslation();
   const [isOpen, setOpen] = useState(false);
   const onToggle = useCallback(() => setOpen(open => !open), []);
@@ -74,6 +77,14 @@ export function PrimaryButtons() {
               title={t('Bank Sync')}
               Icon={SvgCreditCard}
               to="/bank-sync"
+              indent={15}
+            />
+          )}
+          {pluginsEnabled && (
+            <SecondaryItem
+              title={t('Plugins')}
+              Icon={SvgPlugin}
+              to="/plugins"
               indent={15}
             />
           )}

@@ -14,6 +14,7 @@ import { type ScheduleEntity } from 'loot-core/types/models';
 import { useDispatch } from '../../redux';
 import { Search } from '../common/Search';
 import { Page } from '../Page';
+import { RenderPluginsComponent } from '../plugins/RenderPluginsComponent';
 
 import { type ScheduleItemAction, SchedulesTable } from './SchedulesTable';
 
@@ -82,66 +83,77 @@ export function Schedules() {
   } = useSchedules({ query: schedulesQuery });
 
   return (
-    <Page header={t('Schedules')}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          padding: '0 0 15px',
-        }}
-      >
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'row',
-            justifyContent: 'flex-end',
-          }}
-        >
-          <Search
-            placeholder={t('Filter schedules…')}
-            value={filter}
-            onChange={setFilter}
-          />
-        </View>
-      </View>
-
-      <SchedulesTable
-        isLoading={isSchedulesLoading}
-        schedules={schedules}
-        filter={filter}
-        statuses={statuses}
-        allowCompleted={true}
-        onSelect={onEdit}
-        onAction={onAction}
-        style={{ backgroundColor: theme.tableBackground }}
+    <View>
+      <RenderPluginsComponent
+        page="schedules"
+        componentName="beforePageHeader"
       />
 
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          margin: '20px 0',
-          flexShrink: 0,
-        }}
-      >
+      <Page header={t('Schedules')}>
         <View
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            gap: '1em',
+            padding: '0 0 15px',
           }}
         >
-          <Button onPress={onDiscover}>
-            <Trans>Find schedules</Trans>
-          </Button>
-          <Button onPress={onChangeUpcomingLength}>
-            <Trans>Change upcoming length</Trans>
+          <RenderPluginsComponent
+            page="schedules"
+            componentName="afterPageHeader"
+          />
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+            }}
+          >
+            <Search
+              placeholder={t('Filter schedules…')}
+              value={filter}
+              onChange={setFilter}
+            />
+          </View>
+        </View>
+
+        <SchedulesTable
+          isLoading={isSchedulesLoading}
+          schedules={schedules}
+          filter={filter}
+          statuses={statuses}
+          allowCompleted={true}
+          onSelect={onEdit}
+          onAction={onAction}
+          style={{ backgroundColor: theme.tableBackground }}
+        />
+
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            margin: '20px 0',
+            flexShrink: 0,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: '1em',
+            }}
+          >
+            <Button onPress={onDiscover}>
+              <Trans>Find schedules</Trans>
+            </Button>
+            <Button onPress={onChangeUpcomingLength}>
+              <Trans>Change upcoming length</Trans>
+            </Button>
+          </View>
+          <Button variant="primary" onPress={onAdd}>
+            <Trans>Add new schedule</Trans>
           </Button>
         </View>
-        <Button variant="primary" onPress={onAdd}>
-          <Trans>Add new schedule</Trans>
-        </Button>
-      </View>
-    </Page>
+      </Page>
+    </View>
   );
 }

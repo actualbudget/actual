@@ -4,7 +4,8 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'contextMenus'
   | 'openidAuth'
-  | 'pluggyAiBankSync';
+  | 'pluggyAiBankSync'
+  | 'plugins';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.

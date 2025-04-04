@@ -8,6 +8,7 @@ import * as monthUtils from 'loot-core/shared/months';
 
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useModalState } from '../hooks/useModalState';
+import { useActualPlugins } from '../plugin/ActualPluginsProvider';
 import { useDispatch } from '../redux';
 
 import { EditSyncAccount } from './banksync/EditSyncAccount';
@@ -64,6 +65,7 @@ import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
+import { SelectNewPluginModal } from './modals/SelectNewPluginModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
 import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
@@ -84,6 +86,7 @@ export function Modals() {
   const dispatch = useDispatch();
   const { modalStack } = useModalState();
   const [budgetId] = useMetadataPref('id');
+  const { plugins } = useActualPlugins();
 
   useEffect(() => {
     if (modalStack.length > 0) {
@@ -369,7 +372,31 @@ export function Modals() {
         case 'enable-password-auth':
           return <PasswordEnableModal key={key} {...modal.options} />;
 
+        case 'select-new-plugin':
+          return (
+            <SelectNewPluginModal key={name} onSave={modal.options.onSave} />
+          );
+
         default:
+          if (name.startsWith('plugin-')) {
+            let foundPlugin = null;
+            plugins.forEach(plugin => {
+              const modals = plugin.hooks?.onMethod?.ModalList?.();
+              if (
+                modals &&
+                modals.has(name.replace(`plugin-${plugin.name}-`, ''))
+              ) {
+                foundPlugin = modals.get(
+                  name.replace(`plugin-${plugin.name}-`, ''),
+                );
+              }
+            });
+
+            if (foundPlugin) {
+              return foundPlugin;
+            }
+          }
+
           throw new Error('Unknown modal');
       }
     })
