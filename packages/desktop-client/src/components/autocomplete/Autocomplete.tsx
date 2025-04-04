@@ -27,7 +27,6 @@ import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { useProperFocus } from '../../hooks/useProperFocus';
 
 type CommonAutocompleteProps<T extends Item> = {
-  focused?: boolean;
   embedded?: boolean;
   containerProps?: HTMLProps<HTMLDivElement>;
   labelProps?: { id?: string };
@@ -213,7 +212,6 @@ type SingleAutocompleteProps<T extends Item> = CommonAutocompleteProps<T> & {
 };
 
 function SingleAutocomplete<T extends Item>({
-  focused,
   embedded = false,
   containerProps,
   labelProps = {},

@@ -177,7 +177,6 @@ export function CloseAccountModal({
                       value={transferAccountId}
                       inputProps={{
                         placeholder: t('Select account...'),
-                        autoFocus: true,
                         ...(isNarrowWidth && {
                           value: transferAccount?.name || '',
                           style: {
