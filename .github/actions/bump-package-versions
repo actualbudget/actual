@@ -11,6 +11,7 @@ files_to_bump=(
     packages/api/package.json
     packages/desktop-client/package.json
     packages/desktop-electron/package.json
+    packages/sync-server/package.json
 )
 
 for file in "${files_to_bump[@]}"; do
