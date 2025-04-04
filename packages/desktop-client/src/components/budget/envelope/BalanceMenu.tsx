@@ -35,9 +35,6 @@ export function BalanceMenu({
   return (
     <Menu
       {...props}
-      style={{
-        minWidth: '205px',
-      }}
       onMenuSelect={name => {
         switch (name) {
           case 'transfer':
