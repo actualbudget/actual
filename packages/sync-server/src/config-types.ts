@@ -40,4 +40,5 @@ export interface Config {
   };
   token_expiration?: 'never' | 'openid-provider' | number;
   enforceOpenId: boolean;
+  userCreationMode?: 'manual' | 'login';
 }
