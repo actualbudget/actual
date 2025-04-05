@@ -17,7 +17,7 @@ type SaveReportNameProps = {
   menuItem: string;
   name: string;
   setName: (name: string) => void;
-  inputRef: RefObject<HTMLInputElement>;
+  inputRef: RefObject<HTMLInputElement | null>;
   onAddUpdate: ({
     menuChoice,
     reportData,

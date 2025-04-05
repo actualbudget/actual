@@ -24,9 +24,9 @@ import { ReportTableTotals } from './ReportTableTotals';
 
 type ReportTableProps = {
   saveScrollWidth: (value: number) => void;
-  headerScrollRef: RefObject<HTMLDivElement>;
-  listScrollRef: RefObject<HTMLDivElement>;
-  totalScrollRef: RefObject<HTMLDivElement>;
+  headerScrollRef: RefObject<HTMLDivElement | null>;
+  listScrollRef: RefObject<HTMLDivElement | null>;
+  totalScrollRef: RefObject<HTMLDivElement | null>;
   handleScroll: UIEventHandler<HTMLDivElement>;
   groupBy: string;
   balanceTypeOp: balanceTypeOpType;

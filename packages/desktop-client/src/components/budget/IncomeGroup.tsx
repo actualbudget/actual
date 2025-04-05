@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React from 'react';
+import React, { type JSX } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 

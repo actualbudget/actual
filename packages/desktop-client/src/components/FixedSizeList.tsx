@@ -4,7 +4,7 @@ import {
   PureComponent,
   type ReactNode,
   type Ref,
-  type MutableRefObject,
+  type RefObject,
   type UIEvent,
   type CSSProperties,
 } from 'react';
@@ -32,7 +32,7 @@ type FixedSizeListProps = {
   headerHeight?: number;
   initialScrollOffset?: number;
   itemCount?: number;
-  outerRef?: MutableRefObject<HTMLDivElement>;
+  outerRef?: RefObject<HTMLDivElement>;
   itemSize?: number;
   onItemsRendered?: (config: {
     overscanStartIndex: number;
@@ -66,8 +66,8 @@ export class FixedSizeList extends PureComponent<
 > {
   _outerRef: HTMLDivElement;
   _resetIsScrollingTimeoutId = null;
-  lastPositions: MutableRefObject<Map<string | number, number>>;
-  needsAnimationRerender: MutableRefObject<boolean>;
+  lastPositions: RefObject<Map<string | number, number>>;
+  needsAnimationRerender: RefObject<boolean>;
   animationEnabled: boolean;
   requestScrollUpdateHandled: boolean;
   anchored: null | {

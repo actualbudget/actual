@@ -4,6 +4,7 @@ import React, { type ComponentProps } from 'react';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { useDragRef } from '../../hooks/useDragRef';
 import {
   useDraggable,
   useDroppable,
@@ -62,6 +63,7 @@ export function ExpenseGroup({
     item: group,
     canDrag: editingCell === null,
   });
+  const handleDragRef = useDragRef(dragRef);
 
   const { dropRef, dropPos } = useDroppable({
     types: 'group',
@@ -117,7 +119,7 @@ export function ExpenseGroup({
         }}
       >
         <SidebarGroup
-          innerRef={dragRef}
+          innerRef={handleDragRef}
           group={group}
           editing={
             editingCell &&

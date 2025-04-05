@@ -67,7 +67,7 @@ export function AmountInput({
   const [value, setValue] = useState(initialValueAbsolute);
   useEffect(() => setValue(initialValueAbsolute), [initialValueAbsolute]);
 
-  const buttonRef = useRef();
+  const buttonRef = useRef(null);
   const ref = useRef<HTMLInputElement>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
   const [hideFraction] = useSyncedPref('hideFraction');
