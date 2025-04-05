@@ -461,7 +461,6 @@ function SingleAutocomplete<T extends Item>({
           <View ref={triggerRef} style={{ flexShrink: 0 }}>
             {renderInput(
               getInputProps({
-                focused,
                 inputRef,
                 ...inputProps,
                 onFocus: e => {
