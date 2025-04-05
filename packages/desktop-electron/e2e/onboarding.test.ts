@@ -1,4 +1,3 @@
-import { AccountPage } from '@actual-app/web/e2e/page-models/account-page';
 import { ConfigurationPage } from '@actual-app/web/e2e/page-models/configuration-page';
 import { expect } from '@playwright/test';
 

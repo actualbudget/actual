@@ -1,6 +1,7 @@
 name: /update-vrt
 on:
-  pull_request:
+  issue_comment:
+    types: [created]
 
 permissions:
   pull-requests: read
@@ -14,6 +15,9 @@ jobs:
   update-vrt:
     name: Update VRT
     runs-on: ubuntu-latest
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/update-vrt')
     container:
       image: mcr.microsoft.com/playwright:v1.41.1-jammy
     steps:
@@ -27,16 +31,16 @@ jobs:
           ref: ${{ steps.comment-branch.outputs.head_ref }}
       - name: Set up environment
         uses: ./.github/actions/setup
-      # - name: Wait for Netlify build to finish
-      #   id: netlify
-      #   env:
-      #     COMMIT_SHA: ${{ steps.comment-branch.outputs.head_sha }}
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: ./.github/actions/netlify-wait-for-build
-      # - name: Run VRT Tests on Netlify URL
-      #   run: yarn vrt --update-snapshots
-      #   env:
-      #     E2E_START_URL: ${{ steps.netlify.outputs.url }}
+      - name: Wait for Netlify build to finish
+        id: netlify
+        env:
+          COMMIT_SHA: ${{ steps.comment-branch.outputs.head_sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./.github/actions/netlify-wait-for-build
+      - name: Run VRT Tests on Netlify URL
+        run: yarn vrt --update-snapshots
+        env:
+          E2E_START_URL: ${{ steps.netlify.outputs.url }}
       - name: Run VRT Tests on Desktop app
         continue-on-error: true
         run: |
