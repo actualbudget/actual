@@ -502,6 +502,14 @@ export function useTransactionBatchActions() {
     );
   };
 
+  const onMerge = async (ids: string[], onSuccess: () => void) => {
+    await send(
+      'transactions-merge',
+      ids.map(id => ({ id })),
+    );
+    onSuccess();
+  };
+
   return {
     onBatchEdit,
     onBatchDuplicate,
@@ -509,5 +517,6 @@ export function useTransactionBatchActions() {
     onBatchLinkSchedule,
     onBatchUnlinkSchedule,
     onSetTransfer,
+    onMerge,
   };
 }
