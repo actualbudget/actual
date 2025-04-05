@@ -10,7 +10,9 @@ const require = createRequire(import.meta.url);
 const debug = createDebug('actual:config');
 const debugSensitive = createDebug('actual-sensitive:config');
 
-const projectRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+const projectRoot = path
+  .dirname(path.dirname(fileURLToPath(import.meta.url)))
+  .replace(/[\\/]build$/, '');
 const defaultDataDir = process.env.ACTUAL_DATA_DIR
   ? process.env.ACTUAL_DATA_DIR
   : fs.existsSync('/data')
