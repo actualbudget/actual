@@ -69,6 +69,7 @@ export function TransactionList({
   category,
   categoryGroups,
   payees,
+  tagOptions,
   balances,
   showBalances,
   showReconciled,
@@ -264,6 +265,7 @@ export function TransactionList({
       accounts={accounts}
       categoryGroups={categoryGroups}
       payees={payees}
+      tagOptions={tagOptions}
       balances={balances}
       showBalances={showBalances}
       showReconciled={showReconciled}

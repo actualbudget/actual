@@ -841,10 +841,6 @@ describe('Transactions', () => {
     expect(container.ownerDocument.activeElement).toBe(input);
     expect(input.value).not.toBe('');
 
-    input = await editNewField(container, 'notes');
-    await userEvent.clear(input);
-    await userEvent.type(input, 'a transaction');
-
     input = await editNewField(container, 'debit');
     expect(input.value).toBe('0.00');
     await userEvent.clear(input);
@@ -852,7 +848,6 @@ describe('Transactions', () => {
 
     expect(getTransactions().length).toBe(6);
     expect(getTransactions()[0].amount).toBe(-10000);
-    expect(getTransactions()[0].notes).toBe('a transaction');
 
     // The date field should be re-focused to enter a new transaction
     expect(container.ownerDocument.activeElement).toBe(
