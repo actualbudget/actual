@@ -49,7 +49,7 @@ export function FixEncryptionKeyModal({
 
       const { error } = await send('key-test', {
         password,
-        fileId: cloudFileId,
+        cloudFileId,
       });
       if (error) {
         setError(getTestKeyError(error));

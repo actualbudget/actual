@@ -203,7 +203,7 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
     }
 
     const result = await handlers['key-test']({
-      fileId: remoteBudget ? remoteBudget.fileId : localBudget.cloudFileId,
+      cloudFileId: remoteBudget ? remoteBudget.fileId : localBudget.cloudFileId,
       password,
     });
     if (result.error) {
