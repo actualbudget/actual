@@ -9718,6 +9718,7 @@ __metadata:
     "@electron/notarize": "npm:2.4.0"
     "@electron/rebuild": "npm:3.6.0"
     "@ngrok/ngrok": "npm:^1.4.1"
+    "@playwright/test": "npm:1.41.2"
     "@types/copyfiles": "npm:^2"
     "@types/fs-extra": "npm:^11"
     better-sqlite3: "npm:^11.9.1"
