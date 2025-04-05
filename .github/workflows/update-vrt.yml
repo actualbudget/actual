@@ -1,7 +1,6 @@
 name: /update-vrt
 on:
-  issue_comment:
-    types: [created]
+  pull_request:
 
 permissions:
   pull-requests: read
