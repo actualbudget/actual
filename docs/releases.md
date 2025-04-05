@@ -9,6 +9,7 @@ The release has the following notable improvements:
 - Experimental support for bank syncing in Brazil using Pluggy.ai
 - Banners to highlight overspending on mobile
 - Translation support for dates and datepickers
+- Experimental support for embedding the sync server in the Electron desktop apps. For more info check out [the PR](https://github.com/actualbudget/actual/pull/4526#issue-2892519042)
 
 **Docker tag: 25.4.0**
 
