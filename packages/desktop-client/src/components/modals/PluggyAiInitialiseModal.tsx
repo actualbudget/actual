@@ -110,7 +110,7 @@ export const PluggyAiInitialiseModal = ({
           <View style={{ display: 'flex', gap: 10 }}>
             <Text>
               <Trans>
-                In order to enable bank-sync via Pluggy.ai (only for Brazilian
+                In order to enable bank sync via Pluggy.ai (only for Brazilian
                 banks) you will need to create access credentials. This can be
                 done by creating an account with{' '}
                 <Link

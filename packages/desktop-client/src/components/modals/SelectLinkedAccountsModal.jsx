@@ -322,7 +322,7 @@ function TableRow({
             }}
             style={{ float: 'right' }}
           >
-            <Trans>Remove bank-sync</Trans>
+            <Trans>Remove bank sync</Trans>
           </Button>
         ) : (
           <Button
@@ -332,7 +332,7 @@ function TableRow({
             }}
             style={{ float: 'right' }}
           >
-            <Trans>Set up bank-sync</Trans>
+            <Trans>Set up bank sync</Trans>
           </Button>
         )}
       </Field>

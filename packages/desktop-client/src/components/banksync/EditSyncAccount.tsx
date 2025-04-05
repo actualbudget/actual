@@ -8,6 +8,7 @@ import { Text } from '@actual-app/components/text';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
+import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
 import { useTransactions } from 'loot-core/client/data-hooks/transactions';
 import {
   defaultMappings,
@@ -22,6 +23,7 @@ import {
 } from 'loot-core/types/models';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { CheckboxOption } from '../modals/ImportTransactionsModal/CheckboxOption';
 
@@ -181,6 +183,13 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
     close();
   };
 
+  const dispatch = useDispatch();
+
+  const onUnlink = async (close: () => void) => {
+    dispatch(unlinkAccount({ id: account.id }));
+    close();
+  };
+
   const setMapping = (field: string, value: string) => {
     setMappings(prev => {
       const updated = new Map(prev);
@@ -200,9 +209,22 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={t('Account settings')}
+            title={account.name + t(' bank sync settings')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
+
+          <Text style={{ fontSize: 15 }}>
+            <Trans>This page will close if account is unlinked.</Trans>
+          </Text>
+
+          <Button
+            style={{ margin: '1em 0', width: '25%' }}
+            onPress={() => {
+              onUnlink(close);
+            }}
+          >
+            <Trans>Unlink Account</Trans>
+          </Button>
 
           <Text style={{ fontSize: 15 }}>
             <Trans>Field mapping</Trans>
