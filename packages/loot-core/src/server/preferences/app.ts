@@ -69,12 +69,10 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
   if (prefs.maxMonths) {
     await asyncStorage.setItem('max-months', '' + prefs.maxMonths);
   }
-  if (prefs.documentDir) {
-    if (prefs.documentDir && (await fs.exists(prefs.documentDir))) {
-      await asyncStorage.setItem('document-dir', prefs.documentDir);
-    }
+  if (prefs.documentDir && (await fs.exists(prefs.documentDir))) {
+    await asyncStorage.setItem('document-dir', prefs.documentDir);
   }
-  if (prefs.floatingSidebar) {
+  if (prefs.floatingSidebar !== undefined) {
     await asyncStorage.setItem('floating-sidebar', '' + prefs.floatingSidebar);
   }
   if (prefs.language) {
