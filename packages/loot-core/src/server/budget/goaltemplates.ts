@@ -195,6 +195,9 @@ async function processTemplate(
 
   //break early if nothing to do, or there are errors
   if (catObjects.length === 0 && errors.length === 0) {
+    if (goalList.length > 0) {
+      setGoals(month, goalList);
+    }
     return {
       type: 'message',
       message: 'Everything is up to date',
