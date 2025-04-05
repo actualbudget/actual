@@ -24,10 +24,13 @@ test.describe('Onboarding', () => {
     await configurationPage.startFresh();
 
     const accountPage = new AccountPage(electronPage);
+    await accountPage.waitFor();
     await expect(accountPage.accountName).toBeVisible();
     await expect(accountPage.accountName).toHaveText('All Accounts');
     await expect(accountPage.accountBalance).toHaveText('0.00');
     await expect(electronPage).toHaveScreenshot();
+
+    // Close the budget file
     await electronPage.getByRole('button', { name: 'My Finances' }).click();
     await electronPage.getByRole('button', { name: 'Close' }).click();
     await expect(electronPage).toHaveScreenshot();
