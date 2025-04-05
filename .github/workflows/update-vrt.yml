@@ -38,6 +38,7 @@ jobs:
       #   env:
       #     E2E_START_URL: ${{ steps.netlify.outputs.url }}
       - name: Run VRT Tests on Desktop app
+        continue-on-error: true
         run: |
           xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" -- yarn e2e:desktop --update-snapshots
       - name: Create patch
