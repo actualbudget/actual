@@ -14,6 +14,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgSplit } from '@actual-app/components/icons/v0';
+import { SvgHourGlass } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
@@ -53,6 +54,9 @@ type CategoryListProps = {
   renderSplitTransactionButton?: (
     props: ComponentPropsWithoutRef<typeof SplitTransactionButton>,
   ) => ReactElement<typeof SplitTransactionButton>;
+  renderPendingTransactionButton?: (
+    props: ComponentPropsWithoutRef<typeof PendingTransactionButton>,
+  ) => ReactElement<typeof PendingTransactionButton>;
   renderCategoryItemGroupHeader?: (
     props: ComponentPropsWithoutRef<typeof ItemHeader>,
   ) => ReactElement<typeof ItemHeader>;
@@ -69,6 +73,7 @@ function CategoryList({
   embedded,
   footer,
   renderSplitTransactionButton = defaultRenderSplitTransactionButton,
+  renderPendingTransactionButton = defaultRenderPendingTransactionButton,
   renderCategoryItemGroupHeader = defaultRenderCategoryItemGroupHeader,
   renderCategoryItem = defaultRenderCategoryItem,
   showHiddenItems,
@@ -99,6 +104,13 @@ function CategoryList({
           if (item.id === 'split') {
             return renderSplitTransactionButton({
               key: 'split',
+              ...(getItemProps ? getItemProps({ item }) : null),
+              highlighted: highlightedIndex === idx,
+              embedded,
+            });
+          } else if (item.id === 'Due') {
+            return renderPendingTransactionButton({
+              key: 'pending',
               ...(getItemProps ? getItemProps({ item }) : null),
               highlighted: highlightedIndex === idx,
               embedded,
@@ -147,6 +159,8 @@ function customSort(obj: CategoryAutocompleteItem, value: string): number {
   const name = getNormalisedString(obj.name);
   const groupName = obj.group ? getNormalisedString(obj.group.name) : '';
   if (obj.id === 'split') {
+    return -3;
+  } else if (obj.id === 'Due') {
     return -2;
   }
   if (name.includes(value)) {
@@ -164,6 +178,7 @@ type CategoryAutocompleteProps = ComponentProps<
   categoryGroups?: Array<CategoryGroupEntity>;
   showBalances?: boolean;
   showSplitOption?: boolean;
+  showPendingOption?: boolean;
   renderSplitTransactionButton?: (
     props: ComponentPropsWithoutRef<typeof SplitTransactionButton>,
   ) => ReactElement<typeof SplitTransactionButton>;
@@ -180,6 +195,7 @@ export function CategoryAutocomplete({
   categoryGroups,
   showBalances = true,
   showSplitOption,
+  showPendingOption,
   embedded,
   closeOnBlur,
   renderSplitTransactionButton,
@@ -201,9 +217,12 @@ export function CategoryAutocomplete({
                 group,
               })),
           ),
-        showSplitOption ? [{ id: 'split', name: '' } as CategoryEntity] : [],
+        [
+          ...(showSplitOption ? [{ id: 'split', name: '' }] : []),
+          ...(showPendingOption ? [{ id: 'Due', name: 'Pending' }] : []),
+        ] as CategoryEntity[],
       ),
-    [defaultCategoryGroups, categoryGroups, showSplitOption],
+    [defaultCategoryGroups, categoryGroups, showSplitOption, showPendingOption],
   );
 
   const filterSuggestions = useCallback(
@@ -213,7 +232,7 @@ export function CategoryAutocomplete({
     ): CategoryAutocompleteItem[] => {
       return suggestions
         .filter(suggestion => {
-          if (suggestion.id === 'split') {
+          if (['split', 'Due'].includes(suggestion.id)) {
             return true;
           }
 
@@ -246,12 +265,10 @@ export function CategoryAutocomplete({
       embedded={embedded}
       closeOnBlur={closeOnBlur}
       getHighlightedIndex={suggestions => {
-        if (suggestions.length === 0) {
-          return null;
-        } else if (suggestions[0].id === 'split') {
-          return suggestions.length > 1 ? 1 : null;
-        }
-        return 0;
+        const idx = suggestions.findIndex(
+          s => s.id !== 'split' && s.id !== 'Due',
+        );
+        return idx === -1 ? null : idx;
       }}
       filterSuggestions={filterSuggestions}
       suggestions={categorySuggestions}
@@ -353,6 +370,58 @@ function defaultRenderSplitTransactionButton(
   props: SplitTransactionButtonProps,
 ): ReactElement<typeof SplitTransactionButton> {
   return <SplitTransactionButton {...props} />;
+}
+
+type PendingTransactionButtonProps = SplitTransactionButtonProps;
+
+function PendingTransactionButton({
+  highlighted,
+  embedded,
+  Icon,
+  style,
+  ...props
+}: PendingTransactionButtonProps) {
+  return (
+    <View
+      // this is ripped straight from the SplitTransactionButton, but I
+      // think DRY is going a little too far sometimes.
+      role="button"
+      style={{
+        backgroundColor: highlighted
+          ? theme.menuAutoCompleteBackgroundHover
+          : 'transparent',
+        borderRadius: embedded ? 4 : 0,
+        flexShrink: 0,
+        flexDirection: 'row',
+        alignItems: 'center',
+        fontSize: 11,
+        fontWeight: 500,
+        color: theme.tableTextInactive,
+        padding: '6px 8px',
+        ':active': {
+          backgroundColor: 'rgba(100, 100, 100, .25)',
+        },
+        ...style,
+      }}
+      data-testid="pending-transaction-button"
+      {...props}
+    >
+      <Text style={{ lineHeight: 0 }}>
+        {Icon ? (
+          <Icon style={{ marginRight: 5 }} />
+        ) : (
+          <SvgHourGlass width={10} height={10} style={{ marginRight: 5 }} />
+        )}
+      </Text>
+      <Trans>Pending</Trans>
+    </View>
+  );
+}
+
+function defaultRenderPendingTransactionButton(
+  props: PendingTransactionButtonProps,
+) {
+  return <PendingTransactionButton {...props} />;
 }
 
 type CategoryItemProps = {
