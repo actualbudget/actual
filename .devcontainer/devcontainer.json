@@ -1,14 +1,11 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-docker-compose
 {
-	"name": "Actual development",
-	"dockerComposeFile": [
-		"../docker-compose.yml",
-		"docker-compose.yml"
-	],
-	// Alternatively:
-	// "image": "mcr.microsoft.com/devcontainers/typescript-node:0-16",
-	"service": "actual-development",
-	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-	"postCreateCommand": "yarn install"
+  "name": "Actual development",
+  "dockerComposeFile": ["../docker-compose.yml", "docker-compose.yml"],
+  // Alternatively:
+  // "image": "mcr.microsoft.com/devcontainers/typescript-node:0-16",
+  "service": "actual-development",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "postCreateCommand": "yarn install"
 }

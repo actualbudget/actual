@@ -164,13 +164,16 @@ If the default bank integration does not work for you, you can integrate a new b
 7. Remember to add tests for new bank integration in
 
 ## normalizeTransaction
+
 This is the most commonly used override as it allows you to change the data that is returned to the client.
 
 Please follow the following patterns when implementing a custom normalizeTransaction method:
+
 1. If you need to edit the values of transaction fields (excluding the transaction amount) do not mutate the original transaction object. Instead, create a shallow copy and make your changes there.
 2. End the function by returning the result of calling the fallback normalizeTransaction method from integration-bank.js
 
 E.g.
+
 ```js
 import Fallback from './integration-bank.js';
 

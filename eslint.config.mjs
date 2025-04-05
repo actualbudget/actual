@@ -5,7 +5,6 @@ import globals from 'globals';
 
 import pluginImport from 'eslint-plugin-import';
 import pluginJSXA11y from 'eslint-plugin-jsx-a11y';
-import pluginPrettier from 'eslint-plugin-prettier/recommended';
 import pluginReact from 'eslint-plugin-react';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
 import pluginRulesDir from 'eslint-plugin-rulesdir';
@@ -90,6 +89,7 @@ export default [
   {
     ignores: [
       'packages/api/app/bundle.api.js',
+      'packages/api/app/stats.json',
       'packages/api/dist',
       'packages/api/@types',
       'packages/api/migrations',
@@ -145,7 +145,6 @@ export default [
   },
   pluginReact.configs.flat.recommended,
   pluginReact.configs.flat['jsx-runtime'],
-  pluginPrettier,
   ...pluginTypescript.configs.recommended,
   pluginImport.flatConfigs.recommended,
   {
@@ -529,7 +528,7 @@ export default [
       sourceType: 'module',
 
       parserOptions: {
-        project: [path.join(__dirname, './tsconfig.json')],
+        projectService: true,
         ecmaFeatures: {
           jsx: true,
         },
@@ -548,6 +547,13 @@ export default [
       'no-dupe-class-members': 'off',
       // 'tsc' already handles this (https://github.com/typescript-eslint/typescript-eslint/issues/477)
       'no-undef': 'off',
+
+      // TypeScript already handles these (https://typescript-eslint.io/troubleshooting/typed-linting/performance/#eslint-plugin-import)
+      'import/named': 'off',
+      'import/namespace': 'off',
+      'import/default': 'off',
+      'import/no-named-as-default-member': 'off',
+      'import/no-unresolved': 'off',
 
       // Add TypeScript specific rules (and turn off ESLint equivalents)
       '@typescript-eslint/consistent-type-assertions': 'warn',

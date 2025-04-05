@@ -39,6 +39,7 @@ HTTPS=true yarn start
 ```
 
 or using the dev container:
+
 ```
 HTTPS=true docker compose up --build
 ```
@@ -82,6 +83,7 @@ E2E_START_URL=https://ip:port yarn vrt
 You can also run the tests against a remote server by passing the URL:
 
 Run in standardized docker container:
+
 ```sh
 E2E_START_URL=https://my-remote-server.com yarn vrt:docker
 
@@ -90,6 +92,7 @@ E2E_START_URL=https://my-remote-server.com yarn vrt:docker
 ```
 
 Run locally:
+
 ```sh
 E2E_START_URL=https://my-remote-server.com yarn vrt
 ```
