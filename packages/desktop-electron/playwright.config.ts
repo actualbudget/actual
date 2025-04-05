@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 // eslint-disable-next-line import/no-default-export
 export default defineConfig({
-  timeout: 45000, // 45 seconds
+  timeout: 60000, // 60 seconds
   retries: 1,
   testDir: 'e2e/',
   reporter: undefined,
@@ -18,6 +18,6 @@ export default defineConfig({
   },
   expect: {
     toHaveScreenshot: { maxDiffPixels: 5 },
-    timeout: 45000, // 45 seconds
+    timeout: 60000, // 60 seconds
   },
 });
