@@ -3,6 +3,7 @@ export {};
 type Actual = {
   IS_DEV: boolean;
   ACTUAL_VERSION: string;
+  ACTUAL_VERSION_HASH: string | undefined;
   openURLInBrowser: (url: string) => void;
   saveFile: (
     contents: string | Buffer,

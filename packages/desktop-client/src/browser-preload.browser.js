@@ -22,12 +22,17 @@ const IS_DEV = process.env.NODE_ENV === 'development';
 const ACTUAL_VERSION = Platform.isPlaywright
   ? '99.9.9'
   : isPreviewEnvironment()
-    ? `.preview (${process.env.REACT_APP_COMMIT_REF?.substr(0, 7)})`
+    ? '.preview'
     : isEdgeEnvironment()
-      ? `.edge (${process.env.REACT_APP_COMMIT_REF?.substr(0, 7)})`
+      ? '.edge'
       : isDevelopmentEnvironment()
         ? '.development'
         : packageJson.version;
+const ACTUAL_VERSION_HASH =
+  isPreviewEnvironment() || isEdgeEnvironment()
+    ? process.env.REACT_APP_COMMIT_REF?.substr(0, 7)
+    : undefined;
+// TODO: add hash version for other builds too
 
 // *** Start the backend ***
 let worker;
@@ -43,6 +48,7 @@ function createBackendWorker() {
   worker.postMessage({
     type: 'init',
     version: ACTUAL_VERSION,
+    versionHash: ACTUAL_VERSION_HASH,
     isDev: IS_DEV,
     publicUrl: process.env.PUBLIC_URL,
     hash: process.env.REACT_APP_BACKEND_WORKER_HASH,
@@ -70,6 +76,7 @@ const updateSW = registerSW({
 global.Actual = {
   IS_DEV,
   ACTUAL_VERSION,
+  ACTUAL_VERSION_HASH,
 
   logToTerminal: (...args) => {
     console.log(...args);

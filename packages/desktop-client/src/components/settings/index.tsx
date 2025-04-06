@@ -23,7 +23,7 @@ import { Link } from '../common/Link';
 import { FormField, FormLabel } from '../forms';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
-import { useServerVersion } from '../ServerContext';
+import { useServerVersion, useServerVersionHash } from '../ServerContext';
 
 import { AuthSettings } from './AuthSettings';
 import { Backups } from './Backups';
@@ -39,7 +39,8 @@ import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
 function About() {
-  const version = useServerVersion();
+  const serverVersion = useServerVersion();
+  const serverVersionHash = useServerVersionHash();
   const latestVersion = useLatestVersion();
   const isOutdated = useIsOutdated();
 
@@ -71,9 +72,13 @@ function About() {
           <Trans>
             Client version: {{ version: `v${window.Actual?.ACTUAL_VERSION}` }}
           </Trans>
+          {window.Actual?.ACTUAL_VERSION_HASH && (
+            <pre>(hash: {window.Actual?.ACTUAL_VERSION_HASH})</pre>
+          )}
         </Text>
         <Text>
-          <Trans>Server version: {{ version }}</Trans>
+          <Trans>Server version: {{ version: serverVersion }}</Trans>
+          {serverVersionHash && <pre>(hash: {serverVersionHash})</pre>}
         </Text>
         {isOutdated ? (
           <Link

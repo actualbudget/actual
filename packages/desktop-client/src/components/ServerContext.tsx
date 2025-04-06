@@ -24,6 +24,7 @@ type LoginMethods = {
 type ServerContextValue = {
   url: string | null;
   version: string;
+  versionHash?: string;
   multiuserEnabled: boolean;
   availableLoginMethods: LoginMethods[];
   setURL: (
@@ -49,6 +50,7 @@ const ServerContext = createContext<ServerContextValue>({
 
 export const useServerURL = () => useContext(ServerContext).url;
 export const useServerVersion = () => useContext(ServerContext).version;
+export const useServerVersionHash = () => useContext(ServerContext).versionHash;
 export const useSetServerURL = () => useContext(ServerContext).setURL;
 export const useMultiuserEnabled = () => {
   const { multiuserEnabled } = useContext(ServerContext);
@@ -71,13 +73,9 @@ export const useAvailableLoginMethods = () =>
 async function getServerVersion() {
   const result = await send('get-server-version');
   if ('version' in result) {
-    if (result.commit) {
-      return `${result.version} (${result.commit})`;
-    }
-
-    return result.version;
+    return { version: result.version, hash: result.commit };
   }
-  return '';
+  return { version: '' };
 }
 
 export const useRefreshLoginMethods = () =>
@@ -93,6 +91,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
   const dispatch = useDispatch();
   const [serverURL, setServerURL] = useState('');
   const [version, setVersion] = useState('');
+  const [versionHash, setVersionHash] = useState<string | undefined>(undefined);
   const [multiuserEnabled, setMultiuserEnabled] = useState(false);
   const [availableLoginMethods, setAvailableLoginMethods] = useState<
     LoginMethods[]
@@ -105,7 +104,10 @@ export function ServerProvider({ children }: { children: ReactNode }) {
         return;
       }
       setServerURL(serverURL);
-      setVersion(await getServerVersion());
+
+      const { version, hash } = await getServerVersion();
+      setVersion(version);
+      setVersionHash(hash);
     }
     run();
   }, []);
@@ -152,7 +154,10 @@ export function ServerProvider({ children }: { children: ReactNode }) {
       if (!error) {
         const serverURL = await send('get-server-url');
         setServerURL(serverURL!);
-        setVersion(await getServerVersion());
+
+        const { version, hash } = await getServerVersion();
+        setVersion(version);
+        setVersionHash(hash);
       }
       return { error };
     },
@@ -167,6 +172,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
         availableLoginMethods,
         setURL,
         version: version ? `v${version}` : 'N/A',
+        versionHash,
         refreshLoginMethods,
         setMultiuserEnabled,
         setLoginMethods: setAvailableLoginMethods,
