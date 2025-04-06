@@ -9,17 +9,16 @@ import {
   parseGitHubRepoUrl,
 } from './githubUtils';
 import { persistPlugin } from './pluginStore';
+import JSZip from 'jszip';
 
-/**
- * Install a plugin from a manifest, fetching the .zip from GitHub.
- */
 export async function installPluginFromManifest(
   loadedPlugins: ActualPluginInitialized[],
   manifest: ActualPluginManifest,
 ): Promise<void> {
   try {
     const foundPlugin = loadedPlugins.find(
-      plugin => plugin.name === manifest.name,
+      plugin =>
+        plugin.name === manifest.name && plugin.version === manifest.version,
     );
     if (foundPlugin) return;
 
@@ -59,4 +58,36 @@ export async function installPluginFromManifest(
     console.error(`Error saving plugin “${manifest.name}”:`, error);
     return;
   }
+}
+
+export async function installPluginFromZipFile(
+  loadedPlugins: ActualPluginInitialized[],
+  file: File,
+): Promise<void> {
+  const zipData = await file.arrayBuffer();
+  const zip = await JSZip.loadAsync(zipData);
+
+  const manifestFile = zip.file('manifest.json');
+  if (!manifestFile) {
+    throw new Error(`manifest.json not found in zip file: ${file.name}`);
+  }
+
+  const manifestText = await manifestFile.async('string');
+  const manifest: ActualPluginManifest = JSON.parse(manifestText);
+
+  const alreadyInstalled = loadedPlugins.some(
+    plugin => plugin.name === manifest.name && plugin.version === manifest.version,
+  );
+  if (alreadyInstalled) {
+    console.log(`Plugin "${manifest.name}" v${manifest.version} is already installed.`);
+    return;
+  }
+
+  console.log(`Persisting plugin "${manifest.name}" from zip file...`);
+  const zipBytes = new Uint8Array(zipData);
+  
+  const blob = new Blob([zipBytes], { type: 'application/zip' });
+  
+  await persistPlugin(blob, manifest);
+  console.log(`Plugin "${manifest.name}" persisted successfully.`);
 }

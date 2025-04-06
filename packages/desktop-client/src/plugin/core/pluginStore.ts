@@ -56,3 +56,20 @@ export async function persistPlugin(
 
   objectStore.put(storedPlugin);
 }
+
+/** Remove a plugin from the DB */
+export async function removePlugin(manifest: ActualPluginManifest): Promise<void> {
+  const db = await getDatabase();
+  const transaction = db.transaction(['plugins'], 'readwrite');
+  const objectStore = transaction.objectStore('plugins');
+
+  return new Promise((resolve, reject) => {
+    const req = objectStore.delete(manifest.url);
+    req.onsuccess = () => {
+      resolve();
+    };
+    req.onerror = () => {
+      reject(req.error);
+    };
+  });
+}

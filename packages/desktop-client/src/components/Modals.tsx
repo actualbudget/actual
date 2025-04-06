@@ -86,7 +86,7 @@ export function Modals() {
   const dispatch = useDispatch();
   const { modalStack } = useModalState();
   const [budgetId] = useMetadataPref('id');
-  
+
   useEffect(() => {
     if (modalStack.length > 0) {
       dispatch(closeModal());
@@ -377,7 +377,12 @@ export function Modals() {
           );
 
         case 'plugin-modal':
-          return <PluginModal parameter={modal.options.parameter} />;
+          return (
+            <PluginModal
+              parameter={modal.options.parameter}
+              modalProps={modal.options.modalProps}
+            />
+          );
 
         default:
           throw new Error('Unknown modal');

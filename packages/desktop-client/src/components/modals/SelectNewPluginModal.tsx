@@ -1,3 +1,4 @@
+// SelectNewPluginModal.tsx
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -10,13 +11,10 @@ import { View } from '@actual-app/components/view';
 
 import { type ActualPluginManifest } from '../../../../plugins-core/src';
 import { useActualPlugins } from '../../plugin/ActualPluginsProvider';
-import {
-  fetchRelease,
-  parseGitHubRepoUrl,
-} from '../../plugin/core/githubUtils';
 import { installPluginFromManifest } from '../../plugin/core/pluginInstaller';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { LoadingIndicator } from '../reports/LoadingIndicator';
+import { loadWhiteListPlugins } from '../../plugin/core/githubUtils';
 
 type SelectNewPluginModalProps = {
   onSave: () => void;
@@ -30,14 +28,6 @@ type WhiteListPlugin = {
   loading: boolean;
 };
 
-async function fetchWithHeader(url: string): Promise<Response> {
-  return await fetch(url, {
-    headers: {
-      'x-requested-with': 'actual-budget',
-    },
-  });
-}
-
 export function SelectNewPluginModal({ onSave }: SelectNewPluginModalProps) {
   const { t } = useTranslation();
   const [pluginsListLoading, setPluginsListLoading] = useState(true);
@@ -50,55 +40,16 @@ export function SelectNewPluginModal({ onSave }: SelectNewPluginModalProps) {
   const { plugins, refreshPluginStore, pluginStore } = useActualPlugins();
 
   useEffect(() => {
-    const fetchPlugins = async () => {
+    refreshPluginStore().then(async () => {
       try {
-        const response = await fetchWithHeader(
-          'http://localhost:5006/cors-proxy?url=https://raw.githubusercontent.com/actual-plugins/whitelist/refs/heads/main/plugins.json',
-        );
-        if (response.ok) {
-          const plugins = (await response.json()) as WhiteListPlugin[];
-          const updatedPlugins = await Promise.all(
-            plugins.map(async plugin => {
-              plugin.loading = true;
-              const parsedRepo = parseGitHubRepoUrl(plugin.url);
-              if (parsedRepo == null) {
-                throw new Error(`Invalid repo ${plugin.url}`);
-              }
-
-              try {
-                const { manifestUrl } = await fetchRelease(
-                  parsedRepo.owner,
-                  parsedRepo.repo,
-                  `tags/${plugin.version}`,
-                );
-                const manifestResponse = await fetch(
-                  `http://localhost:5006/cors-proxy?url=${manifestUrl}`,
-                );
-                if (manifestResponse.ok) {
-                  plugin.manifest = await manifestResponse.json();
-                }
-              } catch (error) {
-                if (error && typeof error == 'object') {
-                  plugin.error = error.toString();
-                } else {
-                  plugin.error = 'unknown error';
-                }
-              } finally {
-                plugin.loading = false;
-              }
-              return plugin;
-            }),
-          );
-          setWhiteListPlugins(updatedPlugins);
-        }
+        const plugins = await loadWhiteListPlugins();
+        setWhiteListPlugins(plugins);
       } catch (error) {
         console.error('Error fetching plugin list:', error);
       } finally {
         setPluginsListLoading(false);
       }
-    };
-
-    refreshPluginStore().then(() => fetchPlugins());
+    });
   }, [refreshPluginStore]);
 
   async function _onSave() {

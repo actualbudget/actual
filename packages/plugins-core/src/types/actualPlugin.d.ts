@@ -3,7 +3,7 @@ import type { BasicModalProps } from '@actual-app/components/props/modalProps'
 export interface ActualPlugin {
   name: string;
   version: string;
-  uninstall: (db: IDBDatabase) => void;
+  uninstall: () => void;
   activate: (
     context: Omit<HostContext, 'registerSidebarMenu' | 'pushModal'> & {
       registerSidebarMenu: (element: JSX.Element) => string;
