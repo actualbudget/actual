@@ -103,6 +103,16 @@ To delete a rule (or rules), select the ones you want to delete. Then go down to
 
 To view the list of rules that apply to a specific payee, go to More > Payees… to view the list of payees. This table shows you which payees have rules associated with them, and you can click "# associated rules" to view the rules just for that payee.
 
+### Disabling Payee(s) Automatic Rule Creation
+
+To disable automatic rule creation for a payee, go to More > Payees… right-click on the payee you would like to disable automatic rule creation for and click "Disable learning". You will see a red icon indicating learning is disabled for the payee.
+
+To disable automatic rule creation for multiple payees, go to More > Payees… and select the payees by placing a checkmark on the left of each payee. At the top of the screen click the "N payee" button indicating the total payees selected and click "Category learning".
+
+### Disabling All Automatic Rule Creation
+
+To disable automatic rule creation for all payees, disable category learning by going to More > Payees > "Category learning settings"… at the bottom of the screen. Disabling category learning will not delete any existing rules but will prevent new rules from being created automatically on a global level.
+
 ## Using the Rule Editor for Sophisticated Batch Editing
 
 This deserves its own section because this turned out to be a surprising use case. Because the rule editor shows you a list of transactions that match the conditions, and allows you to manually apply actions to some or all of them, it turns out to be a great "batch editor".
