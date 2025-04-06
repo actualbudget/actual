@@ -15,6 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { pushModal as basePushModal } from 'loot-core/client/modals/modalsSlice';
 import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
+import { BasicModalProps } from '../../../../component-library/src/props/modalProps';
 
 export type PluginModalModel = {
   name: string;
@@ -117,13 +118,14 @@ function generateContext(
     on: (event: string, args: unknown) => {
       console.log(event, args);
     },
-    pushModal(parameter: (container: HTMLDivElement) => void) {
+    pushModal(parameter: (container: HTMLDivElement) => void, modalProps: BasicModalProps) {
       dispatch(
         basePushModal({
           modal: {
             name: `plugin-modal`,
             options: {
               parameter,
+              modalProps,
             },
           },
         }),

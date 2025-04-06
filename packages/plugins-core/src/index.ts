@@ -24,6 +24,12 @@ export { View } from '@actual-app/components/view';
 
 export { initializePlugin } from './middleware';
 
+export * from '@actual-app/components/icons/v2';
+export * from '@actual-app/components/styles';
+export * from '@actual-app/components/theme';
+
+export type { BasicModalProps } from '@actual-app/components/props/modalProps';
+
 export type {
   ActualPlugin,
   ActualPluginInitialized,
@@ -36,3 +42,10 @@ export type {
   ActualPluginToolkit,
   ActualPluginToolkitFunctions,
 } from './types/toolkit';
+
+export {
+  ModalTitle,
+  ModalButtons,
+  ModalHeader,
+  ModalCloseButton,
+} from './BasicModalComponents';

@@ -27,11 +27,11 @@ export function initializePlugin(
 
           return id;
         },
-        pushModal(element: JSX.Element) {
+        pushModal(element: JSX.Element, modalProps) {
           context.pushModal(container => {
             const root = ReactDOM.createRoot(container);
             root.render(element);
-          })
+          }, modalProps);
         }
       };
 

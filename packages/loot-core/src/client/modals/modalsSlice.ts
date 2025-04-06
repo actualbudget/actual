@@ -20,6 +20,7 @@ import {
 import { resetApp, setAppState } from '../app/appSlice';
 import { createAppAsyncThunk } from '../redux';
 import { signOut } from '../users/usersSlice';
+import { BasicModalProps } from '../../../../component-library/src/props/modalProps';
 
 const sliceName = 'modals';
 
@@ -537,6 +538,7 @@ export type Modal =
       name: 'plugin-modal';
       options: {
         parameter: (container: HTMLDivElement) => void;
+        modalProps?: BasicModalProps;
       };
     };
 

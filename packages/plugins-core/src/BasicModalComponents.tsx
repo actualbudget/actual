@@ -1,167 +1,17 @@
 import React, {
+  ComponentPropsWithoutRef,
+  ReactNode,
   useEffect,
-  useRef,
   useLayoutEffect,
+  useRef,
   useState,
-  type ReactNode,
-  type ComponentPropsWithoutRef,
-  type ComponentPropsWithRef,
-  type CSSProperties,
 } from 'react';
-import {
-  ModalOverlay as ReactAriaModalOverlay,
-  Modal as ReactAriaModal,
-  Dialog,
-} from 'react-aria-components';
-import { useHotkeysContext } from 'react-hotkeys-hook';
-import { useTranslation } from 'react-i18next';
-
-import { Button } from '@actual-app/components/button';
-import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
-import { SvgLogo } from '@actual-app/components/icons/logo';
-import { SvgDelete } from '@actual-app/components/icons/v0';
-import { Input } from '@actual-app/components/input';
-import { styles } from '@actual-app/components/styles';
-import { Text } from '@actual-app/components/text';
-import { TextOneLine } from '@actual-app/components/text-one-line';
-import { theme } from '@actual-app/components/theme';
-import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
-import { AutoTextSize } from 'auto-text-size';
-
-import { useModalState } from '../../hooks/useModalState';
-import { BasicModalProps } from '../../../../component-library/src/props/modalProps';
-
-export const Modal = ({
-  name,
-  isLoading = false,
-  noAnimation = false,
-  style,
-  children,
-  onClose,
-  containerProps,
-  ...props
-}: BasicModalProps & ComponentPropsWithRef<typeof ReactAriaModal>) => {
-  const { t } = useTranslation();
-  const { isNarrowWidth } = useResponsive();
-  const { enableScope, disableScope } = useHotkeysContext();
-
-  // This deactivates any key handlers in the "app" scope
-  useEffect(() => {
-    enableScope(name);
-    return () => disableScope(name);
-  }, [enableScope, disableScope, name]);
-
-  const { isHidden, isActive, onClose: closeModal } = useModalState();
-
-  const handleOnClose = () => {
-    closeModal();
-    onClose?.();
-  };
-
-  return (
-    <ReactAriaModalOverlay
-      data-testid={`${name}-modal`}
-      isDismissable
-      defaultOpen={true}
-      onOpenChange={isOpen => !isOpen && handleOnClose?.()}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 3000,
-        fontSize: 14,
-        willChange: 'transform',
-        // on mobile, we disable the blurred background for performance reasons
-        ...(isNarrowWidth
-          ? {
-              backgroundColor: 'rgba(0, 0, 0, 0.4)',
-            }
-          : {
-              backdropFilter: 'blur(1px) brightness(0.9)',
-            }),
-        ...style,
-      }}
-      {...props}
-    >
-      {/* A container for positioning the modal relative to the visual viewport */}
-      <View
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: 'var(--visual-viewport-height)',
-          overflowY: 'auto',
-        }}
-      >
-        <ReactAriaModal>
-          {modalProps => (
-            <Dialog
-              aria-label={t('Modal dialog')}
-              className={css(styles.lightScrollbar)}
-              style={{
-                outline: 'none', // remove focus outline
-              }}
-            >
-              <ModalContentContainer
-                noAnimation={noAnimation}
-                isActive={isActive(name)}
-                {...containerProps}
-                style={{
-                  flex: 1,
-                  padding: 10,
-                  willChange: 'opacity, transform',
-                  maxWidth: '90vw',
-                  minWidth: '90vw',
-                  maxHeight: 'calc(var(--visual-viewport-height) * 0.9)',
-                  minHeight: 0,
-                  borderRadius: 6,
-                  //border: '1px solid ' + theme.modalBorder,
-                  color: theme.pageText,
-                  backgroundColor: theme.modalBackground,
-                  opacity: isHidden ? 0 : 1,
-                  [`@media (min-width: ${tokens.breakpoint_small})`]: {
-                    minWidth: tokens.breakpoint_small,
-                  },
-                  overflowY: 'auto',
-                  ...styles.shadowLarge,
-                  ...containerProps?.style,
-                }}
-              >
-                <View style={{ paddingTop: 0, flex: 1, flexShrink: 0 }}>
-                  {typeof children === 'function'
-                    ? children(modalProps)
-                    : children}
-                </View>
-                {isLoading && (
-                  <View
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: theme.pageBackground,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      zIndex: 1000,
-                    }}
-                  >
-                    <AnimatedLoading
-                      style={{ width: 20, height: 20 }}
-                      color={theme.pageText}
-                    />
-                  </View>
-                )}
-              </ModalContentContainer>
-            </Dialog>
-          )}
-        </ReactAriaModal>
-      </View>
-    </ReactAriaModalOverlay>
-  );
-};
+import { SvgLogo } from '@actual-app/components/icons/logo';
+import { Input } from '@actual-app/components/input';
+import { Button } from '@actual-app/components/button';
+import { SvgDelete } from '@actual-app/components/icons/v0';
+import { CSSProperties, styles } from '@actual-app/components/styles';
 
 type ModalContentContainerProps = {
   style?: CSSProperties;
@@ -298,7 +148,6 @@ export function ModalHeader({
   title,
   rightContent,
 }: ModalHeaderProps) {
-  const { t } = useTranslation();
   return (
     <View
       role="heading"
@@ -330,7 +179,6 @@ export function ModalHeader({
         >
           {showLogo && (
             <SvgLogo
-              aria-label={t('Modal logo')}
               width={30}
               height={30}
               style={{ justifyContent: 'center', alignSelf: 'center' }}
@@ -365,7 +213,6 @@ type ModalTitleProps = {
   getStyle?: (isEditing: boolean) => CSSProperties;
   onEdit?: (isEditing: boolean) => void;
   onTitleUpdate?: (newName: string) => void;
-  shrinkOnOverflow?: boolean;
 };
 
 export function ModalTitle({
@@ -373,7 +220,6 @@ export function ModalTitle({
   isEditable,
   getStyle,
   onTitleUpdate,
-  shrinkOnOverflow = false,
 }: ModalTitleProps) {
   const [isEditing, setIsEditing] = useState(false);
 
@@ -427,36 +273,18 @@ export function ModalTitle({
         alignItems: 'center',
       }}
     >
-      {shrinkOnOverflow ? (
-        <AutoTextSize
-          as={Text}
-          minFontSizePx={15}
-          maxFontSizePx={25}
-          onClick={onTitleClick}
-          style={{
-            fontSize: 25,
-            fontWeight: 700,
-            textAlign: 'center',
-            ...(isEditable && styles.underlinedText),
-            ...style,
-          }}
-        >
-          {title}
-        </AutoTextSize>
-      ) : (
-        <TextOneLine
-          onClick={onTitleClick}
-          style={{
-            fontSize: 25,
-            fontWeight: 700,
-            textAlign: 'center',
-            ...(isEditable && styles.underlinedText),
-            ...style,
-          }}
-        >
-          {title}
-        </TextOneLine>
-      )}
+      <span
+        onClick={onTitleClick}
+        style={{
+          fontSize: 25,
+          fontWeight: 700,
+          textAlign: 'center',
+          ...(isEditable && styles.underlinedText),
+          ...style,
+        }}
+      >
+        {title}
+      </span>
     </View>
   );
 }
@@ -467,14 +295,8 @@ type ModalCloseButtonProps = {
 };
 
 export function ModalCloseButton({ onPress, style }: ModalCloseButtonProps) {
-  const { t } = useTranslation();
   return (
-    <Button
-      variant="bare"
-      onPress={onPress}
-      style={{ padding: '10px 10px' }}
-      aria-label={t('Close')}
-    >
+    <Button variant="bare" onPress={onPress} style={{ padding: '10px 10px' }}>
       <SvgDelete width={10} style={style} />
     </Button>
   );

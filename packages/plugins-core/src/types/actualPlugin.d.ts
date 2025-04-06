@@ -1,3 +1,5 @@
+import type { BasicModalProps } from '@actual-app/components/props/modalProps'
+
 export interface ActualPlugin {
   name: string;
   version: string;
@@ -5,7 +7,7 @@ export interface ActualPlugin {
   activate: (
     context: Omit<HostContext, 'registerSidebarMenu' | 'pushModal'> & {
       registerSidebarMenu: (element: JSX.Element) => string;
-      pushModal: (element: JSX.Element) => void;
+      pushModal: (element: JSX.Element, modalProps?: BasicModalProps) => void;
     },
   ) => void;
 }
@@ -24,7 +26,7 @@ interface ContextEvent {
 export interface HostContext {
   navigate: (routePath: string) => void;
   
-  pushModal: (parameter: (container: HTMLDivElement) => void) => void;
+  pushModal: (parameter: (container: HTMLDivElement) => void, modalProps?: BasicModalProps) => void;
 
   registerRoute: (path: string, routeElement: JSX.Element) => string;
   unregisterRoute: (id: string) => void;

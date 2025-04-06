@@ -23,7 +23,7 @@ export default defineConfig({
     dts({
       insertTypesEntry: true,
       outDir: 'build',
-      include: ['src/**/*.ts'],
+      include: ['src'],
       rollupTypes: true,
       copyDtsFiles: true,
     }),

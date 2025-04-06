@@ -24,6 +24,10 @@
       "types": "./build/index.d.ts",
       "import": "./build/index.js",
       "require": "./build/index.cjs"
-    }
+    },
+    "./BasicModalComponents": {
+    "types": "./build/BasicModalComponents.d.ts",
+    "import": "./build/BasicModalComponents.js"
+  }
   }
 }
