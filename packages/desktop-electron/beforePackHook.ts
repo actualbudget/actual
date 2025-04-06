@@ -23,10 +23,10 @@ const beforePackHook = async (context: AfterPackContext) => {
       electronVersion,
       force: true,
       projectRootPath,
-      onlyModules: ['better-sqlite3'],
+      onlyModules: ['better-sqlite3', '@ngrok/ngrok'],
     });
 
-    console.info(`Rebuilt better-sqlite3 with ${arch}!`);
+    console.info(`Rebuilt better-sqlite3 and @ngrok/ngrok with ${arch}!`);
 
     if (context.packager.platform.name === 'windows') {
       console.info(`Windows build - copying appx files...`);
