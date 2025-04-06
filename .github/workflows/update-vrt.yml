@@ -31,6 +31,10 @@ jobs:
           ref: ${{ steps.comment-branch.outputs.head_ref }}
       - name: Set up environment
         uses: ./.github/actions/setup
+      - name: Run VRT Tests on Desktop app
+        continue-on-error: true
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" -- yarn e2e:desktop --update-snapshots
       - name: Wait for Netlify build to finish
         id: netlify
         env:

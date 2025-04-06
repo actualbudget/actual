@@ -1,20 +1,18 @@
-import { test, expect, _electron } from '@playwright/test';
+import { ConfigurationPage } from '@actual-app/web/e2e/page-models/configuration-page';
+import { expect } from '@playwright/test';
+
+import { test } from './fixtures';
 
 test.describe('Onboarding', () => {
-  test('checks the page visuals', async () => {
-    const electronApp = await _electron.launch({
-      args: ['.'],
-      env: {
-        ...process.env,
-        ACTUAL_DOCUMENT_DIR: 'e2e/data',
-        ACTUAL_DATA_DIR: 'e2e/data',
-        EXECUTION_CONTEXT: 'playwright',
-        NODE_ENV: 'development',
-      },
-    });
+  let configurationPage: ConfigurationPage;
 
-    const window = await electronApp.firstWindow();
-    await expect(window).toHaveScreenshot();
-    await electronApp.close();
+  test.beforeEach(async ({ electronPage }) => {
+    configurationPage = new ConfigurationPage(electronPage);
+  });
+
+  test('checks the page visuals', async ({ electronPage }) => {
+    await expect(electronPage).toHaveScreenshot();
+    await configurationPage.clickOnNoServer();
+    await expect(electronPage).toHaveScreenshot();
   });
 });
