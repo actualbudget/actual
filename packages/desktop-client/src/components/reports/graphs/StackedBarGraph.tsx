@@ -215,13 +215,6 @@ export function StackedBarGraph({
                   tick={{ fill: theme.pageText }}
                   tickLine={{ stroke: theme.pageText }}
                 />
-                {!compact && (
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                  />
-                )}
                 {!compact && <CartesianGrid strokeDasharray="3 3" />}
                 {!compact && (
                   <YAxis
