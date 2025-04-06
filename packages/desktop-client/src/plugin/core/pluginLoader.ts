@@ -16,6 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { pushModal as basePushModal } from 'loot-core/client/modals/modalsSlice';
 import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
 import { BasicModalProps } from '../../../../component-library/src/props/modalProps';
+import { ContextEvent } from 'plugins-core/types/actualPlugin';
 
 export type PluginModalModel = {
   name: string;
@@ -115,8 +116,11 @@ function generateContext(
         return newMap;
       });
     },
-    on: (event: string, args: unknown) => {
-      console.log(event, args);
+    on: <K extends keyof ContextEvent>(
+        eventType: K,
+        callback: (data: ContextEvent[K]) => void,
+      ) =>  {
+      console.log(eventType, callback);
     },
     pushModal(parameter: (container: HTMLDivElement) => void, modalProps: BasicModalProps) {
       dispatch(

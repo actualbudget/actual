@@ -17,7 +17,7 @@ export type ActualPluginInitialized = Omit<ActualPlugin, 'activate'> & {
   activate: (context: HostContext) => void;
 };
 
-interface ContextEvent {
+export interface ContextEvent {
   sync: { success: boolean };
   'account-add': { transaction: unknown }; //move type transaction entity from loot-core
   //... other events
