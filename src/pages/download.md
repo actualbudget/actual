@@ -15,7 +15,7 @@ The simplest way to use Actual is to download the desktop application.  This wil
 |||
 |:--:|:--:|:--:|:--:|:--:|
 |<Winsvg width="100" height="100" fill="#6B46C1"/>|<Macsvg width="100" height="105" fill="#6B46C1"/>|<Macsvg width="100" height="105" fill="#6B46C1"/>|<Linuxsvg width="100" height="100" fill="#6B46C1" />|<Linuxsvg width="100" height="100" fill="#6B46C1"/>|
-|[Windows](https://apps.microsoft.com/detail/9p2hmlhsdbrm?cid=actualbudget.org&mode=direct)|[Mac (x64)](https://github.com/actualbudget/actual/releases/latest/download/Actual-mac-x64.dmg)|[Mac (arm64)](https://github.com/actualbudget/actual/releases/latest/download/Actual-mac-arm64.dmg)|[Linux (Appimage)](https://github.com/actualbudget/actual/releases/latest/download/Actual-linux.AppImage)|[Linux (Flatpak) ](https://github.com/actualbudget/actual/releases/latest/download/Actual-linux.flatpak)|
+|[Windows](https://apps.microsoft.com/detail/9p2hmlhsdbrm?cid=actualbudget.org&mode=direct)|[Mac (x64)](https://github.com/actualbudget/actual/releases/latest/download/Actual-mac-x64.dmg)|[Mac (arm64)](https://github.com/actualbudget/actual/releases/latest/download/Actual-mac-arm64.dmg)|[Linux (Appimage)](https://github.com/actualbudget/actual/releases/latest/download/Actual-linux-x86_64.AppImage)|[Linux (Flatpak) ](https://github.com/actualbudget/actual/releases/latest/download/Actual-linux-x86_64.flatpak)|
 
 
 ## Server Download
