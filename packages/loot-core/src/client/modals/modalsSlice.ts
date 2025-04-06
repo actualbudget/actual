@@ -117,7 +117,9 @@ export type Modal =
         onMoveExternal: (arg: {
           institutionId: string;
         }) => Promise<
-          { error: 'unknown' | 'timeout' } | { data: GoCardlessToken }
+          | { error: 'timeout' }
+          | { error: 'unknown'; message?: string }
+          | { data: GoCardlessToken }
         >;
         onClose?: (() => void) | undefined;
         onSuccess: (data: GoCardlessToken) => Promise<void>;
