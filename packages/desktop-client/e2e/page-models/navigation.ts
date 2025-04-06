@@ -5,6 +5,7 @@ import { ReportsPage } from './reports-page';
 import { RulesPage } from './rules-page';
 import { SchedulesPage } from './schedules-page';
 import { SettingsPage } from './settings-page';
+import { PayeesPage } from './payees-page';
 
 type AccountEntry = {
   name: string;
@@ -51,6 +52,20 @@ export class Navigation {
 
     return new RulesPage(this.page);
   }
+
+  async goToPayeesPage() {
+    const payeesLink = this.page.getByRole('link', { name: 'Payees' });
+
+    // Expand the "More" menu only if the Payees link is not visible
+    if (!(await payeesLink.isVisible())) {
+      await this.page.getByRole('button', { name: 'More' }).click();
+    }
+
+    await payeesLink.click();
+
+    return new PayeesPage(this.page);
+  }
+
 
   async goToSettingsPage() {
     const settingsLink = this.page.getByRole('link', { name: 'Settings' });
