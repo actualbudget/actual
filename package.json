@@ -84,7 +84,10 @@
     "node": ">=18.0.0"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,md,json,yml}": "prettier --write"
+    "*.{js,jsx,ts,tsx,md,json,yml}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   },
   "packageManager": "yarn@4.7.0",
   "browserslist": [
