@@ -1,0 +1,5 @@
+# testing
+test-results
+playwright-report
+data/
+!data/.gitkeep

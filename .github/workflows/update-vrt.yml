@@ -1,7 +1,7 @@
 name: /update-vrt
 on:
   issue_comment:
-    types: [ created ]
+    types: [created]
 
 permissions:
   pull-requests: read
@@ -22,7 +22,7 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.41.1-jammy
     steps:
       - name: Get PR branch
-#        Until https://github.com/xt0rted/pull-request-comment-branch/issues/322 is resolved we use the forked version
+        #        Until https://github.com/xt0rted/pull-request-comment-branch/issues/322 is resolved we use the forked version
         uses: gotson/pull-request-comment-branch@head-repo-owner-dist
         id: comment-branch
       - uses: actions/checkout@v4
@@ -97,7 +97,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commentId: ${{ github.event.comment.id }}
-          reaction: "rocket"
+          reaction: 'rocket'
 
   add-starting-reaction:
     runs-on: ubuntu-latest
@@ -112,4 +112,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commentId: ${{ github.event.comment.id }}
-          reaction: "+1"
+          reaction: '+1'

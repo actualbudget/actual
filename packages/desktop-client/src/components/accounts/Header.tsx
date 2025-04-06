@@ -5,7 +5,7 @@ import React, {
   type ReactNode,
   type ComponentProps,
 } from 'react';
-import { DialogTrigger } from 'react-aria-components';
+import { Dialog, DialogTrigger } from 'react-aria-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -463,18 +463,20 @@ export function AccountHeader({
                 </Button>
 
                 <Popover style={{ width: 275 }}>
-                  <AccountMenu
-                    account={account}
-                    canSync={canSync}
-                    canShowBalances={
-                      canCalculateBalance ? canCalculateBalance() : false
-                    }
-                    isSorted={isSorted}
-                    showBalances={showBalances}
-                    showCleared={showCleared}
-                    showReconciled={showReconciled}
-                    onMenuSelect={onMenuSelect}
-                  />
+                  <Dialog>
+                    <AccountMenu
+                      account={account}
+                      canSync={canSync}
+                      canShowBalances={
+                        canCalculateBalance ? canCalculateBalance() : false
+                      }
+                      isSorted={isSorted}
+                      showBalances={showBalances}
+                      showCleared={showCleared}
+                      showReconciled={showReconciled}
+                      onMenuSelect={onMenuSelect}
+                    />
+                  </Dialog>
                 </Popover>
               </DialogTrigger>
             </View>
@@ -490,20 +492,23 @@ export function AccountHeader({
                 </Button>
 
                 <Popover>
-                  <Menu
-                    onMenuSelect={onMenuSelect}
-                    items={[
-                      ...(isSorted
-                        ? [
-                            {
-                              name: 'remove-sorting',
-                              text: t('Remove all sorting'),
-                            } as const,
-                          ]
-                        : []),
-                      { name: 'export', text: t('Export') },
-                    ]}
-                  />
+                  <Dialog>
+                    <Menu
+                      slot="close"
+                      onMenuSelect={onMenuSelect}
+                      items={[
+                        ...(isSorted
+                          ? [
+                              {
+                                name: 'remove-sorting',
+                                text: t('Remove all sorting'),
+                              } as const,
+                            ]
+                          : []),
+                        { name: 'export', text: t('Export') },
+                      ]}
+                    />
+                  </Dialog>
                 </Popover>
               </DialogTrigger>
             </View>
@@ -722,6 +727,7 @@ function AccountMenu({
 
   return (
     <Menu
+      slot="close"
       onMenuSelect={item => {
         onMenuSelect(item);
       }}

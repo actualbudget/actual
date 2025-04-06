@@ -35,6 +35,8 @@ export function simpleCashFlow(
       return q('transactions')
         .filter({
           [conditionsOpKey]: filters,
+        })
+        .filter({
           $and: [
             { date: { $gte: start } },
             {

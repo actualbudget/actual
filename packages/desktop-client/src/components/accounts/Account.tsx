@@ -744,13 +744,13 @@ class AccountInternal extends PureComponent<
       const transactions = this.state.transactions.filter(trans =>
         ids.includes(trans.id),
       );
-      const changedTransactions = [];
+      const changedTransactions: TransactionEntity[] = [];
       for (const transaction of transactions) {
         const res: TransactionEntity | null = await send('rules-run', {
           transaction,
         });
         if (res) {
-          changedTransactions.push(res);
+          changedTransactions.push(...ungroupTransaction(res));
         }
       }
 
