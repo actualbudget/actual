@@ -16,7 +16,7 @@
     "@swc/helpers": "^0.5.11",
     "@swc/plugin-react-remove-properties": "^1.5.121",
     "@testing-library/dom": "10.4.0",
-    "@testing-library/react": "16.2.0",
+    "@testing-library/react": "16.3.0",
     "@testing-library/user-event": "14.6.1",
     "@types/debounce": "^1.2.4",
     "@types/lodash": "^4",

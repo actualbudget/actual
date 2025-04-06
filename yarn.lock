@@ -99,7 +99,7 @@ __metadata:
     "@types/express": "npm:^5.0.0"
     "@types/express-actuator": "npm:^1.8.3"
     "@types/jest": "npm:^29.5.14"
-    "@types/node": "npm:^22.13.14"
+    "@types/node": "npm:^22.14.0"
     "@types/supertest": "npm:^2.0.16"
     "@types/uuid": "npm:^9.0.8"
     bcrypt: "npm:^5.1.1"
@@ -143,7 +143,7 @@ __metadata:
     "@swc/helpers": "npm:^0.5.11"
     "@swc/plugin-react-remove-properties": "npm:^1.5.121"
     "@testing-library/dom": "npm:10.4.0"
-    "@testing-library/react": "npm:16.2.0"
+    "@testing-library/react": "npm:16.3.0"
     "@testing-library/user-event": "npm:14.6.1"
     "@types/debounce": "npm:^1.2.4"
     "@types/lodash": "npm:^4"
@@ -5607,9 +5607,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/react@npm:16.2.0":
-  version: 16.2.0
-  resolution: "@testing-library/react@npm:16.2.0"
+"@testing-library/react@npm:16.3.0":
+  version: 16.3.0
+  resolution: "@testing-library/react@npm:16.3.0"
   dependencies:
     "@babel/runtime": "npm:^7.12.5"
   peerDependencies:
@@ -5623,7 +5623,7 @@ __metadata:
       optional: true
     "@types/react-dom":
       optional: true
-  checksum: 10/cf10bfa9a363384e6861417696fff4a464a64f98ec6f0bb7f1fa7cbb550d075d23a2f6a943b7df85dded7bde3234f6ea6b6e36f95211f4544b846ea72c288289
+  checksum: 10/0ee9e31dd0d2396a924682d0e61a4ecc6bfab8eaff23dbf8a72c3c2ce22c116fa578148baeb4de75b968ef99d22e6e6aa0a00dba40286f71184918bb6bb5b06a
   languageName: node
   linkType: hard
 
@@ -6192,12 +6192,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^22.13.14":
-  version: 22.13.14
-  resolution: "@types/node@npm:22.13.14"
+"@types/node@npm:*, @types/node@npm:^22.14.0":
+  version: 22.14.0
+  resolution: "@types/node@npm:22.14.0"
   dependencies:
-    undici-types: "npm:~6.20.0"
-  checksum: 10/5fafad441c7bb27f963aa8fdfa0787ffb1142b27f4dd2047a2cc27a39f981b432acc71a9b5a428a258f93daeb72f12b7468ab9163a41fe4f98584bc5d42ade6e
+    undici-types: "npm:~6.21.0"
+  checksum: 10/d0669a8a37a18532c886ccfa51eb3fe1e46088deb4d3d27ebcd5d7d68bd6343ad1c7a3fcb85164780a57629359c33a6c917ecff748ea232bceac7692acc96537
   languageName: node
   linkType: hard
 
@@ -7054,7 +7054,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "actual@workspace:."
   dependencies:
-    "@types/node": "npm:^22.13.14"
+    "@types/node": "npm:^22.14.0"
     "@types/prompts": "npm:^2.4.9"
     "@typescript-eslint/parser": "npm:^8.26.1"
     cross-env: "npm:^7.0.3"
@@ -14702,7 +14702,7 @@ __metadata:
     "@types/better-sqlite3": "npm:^7.6.12"
     "@types/jest": "npm:^29.5.14"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
-    "@types/node": "npm:^22.13.14"
+    "@types/node": "npm:^22.14.0"
     "@types/pegjs": "npm:^0.10.6"
     "@types/uuid": "npm:^9.0.8"
     "@types/webpack": "npm:^5.28.5"
@@ -20643,10 +20643,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici-types@npm:~6.20.0":
-  version: 6.20.0
-  resolution: "undici-types@npm:6.20.0"
-  checksum: 10/583ac7bbf4ff69931d3985f4762cde2690bb607844c16a5e2fbb92ed312fe4fa1b365e953032d469fa28ba8b224e88a595f0b10a449332f83fa77c695e567dbe
+"undici-types@npm:~6.21.0":
+  version: 6.21.0
+  resolution: "undici-types@npm:6.21.0"
+  checksum: 10/ec8f41aa4359d50f9b59fa61fe3efce3477cc681908c8f84354d8567bb3701fafdddf36ef6bff307024d3feb42c837cf6f670314ba37fc8145e219560e473d14
   languageName: node
   linkType: hard
 

@@ -51,7 +51,7 @@
     "@types/express": "^5.0.0",
     "@types/express-actuator": "^1.8.3",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.13.14",
+    "@types/node": "^22.14.0",
     "@types/supertest": "^2.0.16",
     "@types/uuid": "^9.0.8",
     "http-proxy-middleware": "^3.0.3",
