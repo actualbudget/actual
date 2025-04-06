@@ -131,7 +131,12 @@ export function Notes({
     <Text className={css([markdownStyles, getStyle?.(editable)])}>
       <ReactMarkdown
         remarkPlugins={remarkPlugins}
-        rehypePlugins={[[rehypeExternalLinks, { target: '_blank' }]]}
+        rehypePlugins={[
+          [
+            rehypeExternalLinks,
+            { target: '_blank', rel: ['noopener', 'noreferrer'] },
+          ],
+        ]}
       >
         {notes}
       </ReactMarkdown>

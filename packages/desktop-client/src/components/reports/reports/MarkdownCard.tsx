@@ -136,7 +136,12 @@ export function MarkdownCard({
         ) : (
           <Text className={markdownStyles}>
             <ReactMarkdown
-              rehypePlugins={[[rehypeExternalLinks, { target: '_blank' }]]}
+              rehypePlugins={[
+                [
+                  rehypeExternalLinks,
+                  { target: '_blank', rel: ['noopener', 'noreferrer'] },
+                ],
+              ]}
             >
               {meta.content}
             </ReactMarkdown>
