@@ -84,6 +84,7 @@ export const schema = {
     is_income: f('boolean'),
     hidden: f('boolean'),
     group: f('id', { ref: 'category_groups' }),
+    goal_def: f('string'),
     sort_order: f('float'),
     tombstone: f('boolean'),
   },

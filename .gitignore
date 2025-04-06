@@ -56,3 +56,6 @@ package.tgz
 
 # Fly.io configuration
 fly.toml
+
+# TypeScript cache
+build/
