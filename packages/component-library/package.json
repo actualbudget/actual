@@ -48,7 +48,7 @@
     "./toggle": "./src/Toggle.tsx",
     "./tooltip": "./src/Tooltip.tsx",
     "./view": "./src/View.tsx",
-    "./props/*": "./src/props/*.d .ts"
+    "./props/*": "./src/props/*.ts"
   },
   "scripts": {
     "generate:icons": "rm src/icons/*/*.tsx; cd src/icons && svgr --template template.ts --index-template index-template.ts --typescript --expand-props start -d . ."
