@@ -120,7 +120,6 @@
     "./platform/server/connection": "./src/platform/server/connection/index.ts",
     "./platform/server/fetch": "./src/platform/server/fetch/index.web.ts",
     "./platform/server/fs": "./src/platform/server/fs/index.web.ts",
-    "./platform/server/indexeddb": "./src/platform/server/indexeddb/index.web.ts",
     "./platform/server/log": "./src/platform/server/log/index.web.ts",
     "./platform/server/sqlite": "./src/platform/server/sqlite/index.web.ts",
     "./server/budget/types/*": "./src/server/budget/types/*.d.ts",
