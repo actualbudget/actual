@@ -13,7 +13,7 @@ import {
 import type { Dispatch } from 'redux';
 import { v4 as uuidv4 } from 'uuid';
 
-import { pushModal as basePushModal } from 'loot-core/client/modals/modalsSlice';
+import { pushModal as basePushModal, popModal } from 'loot-core/client/modals/modalsSlice';
 import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
 import { BasicModalProps } from '../../../../component-library/src/props/modalProps';
 import { ContextEvent } from 'plugins-core/types/actualPlugin';
@@ -134,6 +134,9 @@ function generateContext(
           },
         }),
       );
+    },
+    popModal: () => {
+      dispatch(popModal());
     },
     navigate: (path: string) => {
       navigateBase(path);

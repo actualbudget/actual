@@ -43,7 +43,7 @@ export const Modal = ({
   onClose,
   containerProps,
   ...props
-}: BasicModalProps & ComponentPropsWithRef<typeof ReactAriaModal>) => {
+}: BasicModalProps & ComponentPropsWithRef<typeof ReactAriaModal> & { name: string; }) => {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const { enableScope, disableScope } = useHotkeysContext();

@@ -27,6 +27,7 @@ export interface HostContext {
   navigate: (routePath: string) => void;
   
   pushModal: (parameter: (container: HTMLDivElement) => void, modalProps?: BasicModalProps) => void;
+  popModal: () => void;
 
   registerRoute: (path: string, routeElement: JSX.Element) => string;
   unregisterRoute: (id: string) => void;

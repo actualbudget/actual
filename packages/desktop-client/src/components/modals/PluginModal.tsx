@@ -10,7 +10,7 @@ type PluginModalProps = {
 export function PluginModal({ parameter, modalProps }: PluginModalProps) {
   return (
     <Modal
-      name={modalProps?.name ?? "plugin-modal"}
+      name={"plugin-modal"}
       isLoading={modalProps?.isLoading}
       noAnimation={modalProps?.noAnimation}
       style={modalProps?.style}
