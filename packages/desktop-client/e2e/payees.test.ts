@@ -19,7 +19,7 @@ test.describe('Payees', () => {
 
     // Navigate to the root URL and create a fresh test file
     await page.goto('/');
-    await configurationPage.createTestFile(); 
+    await configurationPage.createTestFile();
   });
 
   test.afterAll(async () => {
@@ -30,7 +30,6 @@ test.describe('Payees', () => {
     // Navigate to the Payees page before each test
     payeesPage = await navigation.goToPayeesPage();
   });
-
 
   test('checks the payees page visuals', async () => {
     // This is a simple visual check to ensure the page loads
@@ -54,12 +53,11 @@ test.describe('Payees', () => {
 
   test('filters out unrelated payees', async () => {
     await payeesPage.searchFor('asdfasdf-nonsense');
-  
+
     // Get the text 'No payees' matching the search from the page
     const noPayeesMessage = page.locator('text=No payees').first();
-  
+
     // Assert it is visible
     await expect(noPayeesMessage).toBeVisible();
   });
-
 });

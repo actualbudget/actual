@@ -66,7 +66,6 @@ export class Navigation {
     return new PayeesPage(this.page);
   }
 
-
   async goToSettingsPage() {
     const settingsLink = this.page.getByRole('link', { name: 'Settings' });
 
