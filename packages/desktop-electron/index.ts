@@ -2,7 +2,6 @@ import fs from 'fs';
 import { createServer, Server } from 'http';
 import path from 'path';
 
-import ngrok from '@ngrok/ngrok';
 import {
   net,
   app,
@@ -311,41 +310,6 @@ async function startSyncServer() {
   }
 }
 
-async function exposeSyncServer(
-  syncServerConfig: GlobalPrefsJson['syncServerConfig'],
-) {
-  const hasRequiredConfig =
-    syncServerConfig?.ngrokConfig?.authToken &&
-    syncServerConfig?.ngrokConfig?.domain &&
-    syncServerConfig?.port;
-
-  if (!hasRequiredConfig) {
-    logMessage(
-      'error',
-      'Sync-Server: Cannot expose sync server: missing ngrok settings',
-    );
-    return { error: 'Missing ngrok settings' };
-  }
-
-  try {
-    const listener = await ngrok.forward({
-      schemes: ['https'],
-      addr: syncServerConfig.port,
-      authtoken: syncServerConfig?.ngrokConfig?.authToken,
-      domain: syncServerConfig?.ngrokConfig?.domain,
-    });
-
-    logMessage(
-      'info',
-      `Sync-Server: Exposing actual server on url: ${listener.url()}`,
-    );
-    return { url: listener.url() };
-  } catch (error) {
-    logMessage('error', `Unable to run ngrok: ${error}`);
-    return { error: `Unable to run ngrok. ${error}` };
-  }
-}
-
 async function createWindow() {
   const windowState = await getWindowState();
 
@@ -488,11 +452,8 @@ app.on('ready', async () => {
   const globalPrefs = await loadGlobalPrefs();
 
   if (globalPrefs.syncServerConfig?.autoStart) {
-    // wait for both server and ngrok to start before starting the Actual client to ensure server is available
-    await Promise.allSettled([
-      startSyncServer(),
-      exposeSyncServer(globalPrefs.syncServerConfig),
-    ]);
+    // wait for the server to start before starting the Actual client to ensure server is available
+    await startSyncServer();
   }
 
   protocol.handle('app', request => {

@@ -90,7 +90,6 @@
   },
   "dependencies": {
     "@actual-app/sync-server": "workspace:*",
-    "@ngrok/ngrok": "^1.4.1",
     "better-sqlite3": "^11.9.1",
     "fs-extra": "^11.3.0",
     "promise-retry": "^2.0.1"
