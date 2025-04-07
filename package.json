@@ -39,15 +39,16 @@
     "generate:release-notes": "ts-node ./bin/release-note-generator.ts",
     "test": "yarn workspaces foreach --all --parallel --verbose run test",
     "test:debug": "yarn workspaces foreach --all --verbose run test",
-    "e2e": "yarn workspaces foreach --all --parallel --verbose run e2e",
+    "e2e": "yarn workspaces foreach --all --exclude desktop-electron --parallel --verbose run e2e",
+    "e2e:desktop": "yarn build:desktop --skip-exe-build && yarn workspace desktop-electron e2e",
     "vrt": "yarn workspaces foreach --all --parallel --verbose run vrt",
     "vrt:docker": "./bin/run-vrt",
     "rebuild-electron": "./node_modules/.bin/electron-rebuild -f -m ./packages/loot-core",
     "rebuild-node": "yarn workspace loot-core rebuild",
-    "lint": "eslint . --max-warnings 0",
-    "lint:verbose": "DEBUG=eslint:cli-engine eslint . --max-warnings 0",
+    "lint": "prettier --check . && eslint . --max-warnings 0",
+    "lint:fix": "prettier --check --write . && eslint . --max-warnings 0 --fix",
     "install:server": "yarn workspaces focus @actual-app/sync-server --production",
-    "typecheck": "yarn tsc && tsc-strict",
+    "typecheck": "yarn tsc --incremental && tsc-strict",
     "jq": "./node_modules/node-jq/bin/jq",
     "prepare": "husky"
   },
@@ -60,7 +61,6 @@
     "eslint-import-resolver-typescript": "^4.2.2",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
-    "eslint-plugin-prettier": "5.2.3",
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-rulesdir": "^0.2.2",
@@ -84,7 +84,7 @@
     "node": ">=18.0.0"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,md,json}": "prettier --write"
+    "*.{js,jsx,ts,tsx,md,json,yml}": "prettier --write"
   },
   "packageManager": "yarn@4.7.0",
   "browserslist": [
