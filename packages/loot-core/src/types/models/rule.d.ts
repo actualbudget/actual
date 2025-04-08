@@ -75,63 +75,41 @@ export type RuleConditionEntity =
       'account',
       | 'is'
       | 'isNot'
-      | 'oneOf'
-      | 'notOneOf'
       | 'contains'
       | 'doesNotContain'
       | 'matches'
       | 'onBudget'
       | 'offBudget'
     >
+  // separating oneOf, notOneOf, and isbetween into separate types makes typescript behave like we want
+  | BaseConditionEntity<'account', 'oneOf' | 'notOneOf'>
   | BaseConditionEntity<
       'category',
-      | 'is'
-      | 'isNot'
-      | 'oneOf'
-      | 'notOneOf'
-      | 'contains'
-      | 'doesNotContain'
-      | 'matches'
+      'is' | 'isNot' | 'contains' | 'doesNotContain' | 'matches'
     >
+  | BaseConditionEntity<'category', 'oneOf' | 'notOneOf'>
   | BaseConditionEntity<
       'amount',
-      'is' | 'isapprox' | 'isbetween' | 'gt' | 'gte' | 'lt' | 'lte'
+      'is' | 'isapprox' | 'gt' | 'gte' | 'lt' | 'lte'
     >
-  | BaseConditionEntity<
-      'date',
-      'is' | 'isapprox' | 'isbetween' | 'gt' | 'gte' | 'lt' | 'lte'
-    >
+  | BaseConditionEntity<'amount', 'isbetween'>
+  | BaseConditionEntity<'date', 'is' | 'isapprox' | 'gt' | 'gte' | 'lt' | 'lte'>
+  | BaseConditionEntity<'date', 'isbetween'>
   | BaseConditionEntity<
       'notes',
-      | 'is'
-      | 'isNot'
-      | 'oneOf'
-      | 'notOneOf'
-      | 'contains'
-      | 'doesNotContain'
-      | 'matches'
-      | 'hasTags'
+      'is' | 'isNot' | 'contains' | 'doesNotContain' | 'matches' | 'hasTags'
     >
+  | BaseConditionEntity<'notes', 'oneOf' | 'notOneOf'>
   | BaseConditionEntity<
       'payee',
-      | 'is'
-      | 'isNot'
-      | 'oneOf'
-      | 'notOneOf'
-      | 'contains'
-      | 'doesNotContain'
-      | 'matches'
+      'is' | 'isNot' | 'contains' | 'doesNotContain' | 'matches'
     >
+  | BaseConditionEntity<'payee', 'oneOf' | 'notOneOf'>
   | BaseConditionEntity<
       'imported_payee',
-      | 'is'
-      | 'isNot'
-      | 'oneOf'
-      | 'notOneOf'
-      | 'contains'
-      | 'doesNotContain'
-      | 'matches'
+      'is' | 'isNot' | 'contains' | 'doesNotContain' | 'matches'
     >
+  | BaseConditionEntity<'imported_payee', 'oneOf' | 'notOneOf'>
   | BaseConditionEntity<'saved', 'is'>
   | BaseConditionEntity<'cleared', 'is'>
   | BaseConditionEntity<'reconciled', 'is'>;
