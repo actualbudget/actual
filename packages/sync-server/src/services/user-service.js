@@ -241,14 +241,25 @@ export function deleteUserAccessByFileId(userIds, fileId) {
 }
 
 export function getAllUserAccess(fileId) {
+  //This can't be used here until we can create user invite links:
+  //const isLoginMode = config.get('userCreationMode') === 'login';
+  const isLoginMode = false;
+  const joinType = isLoginMode ? 'JOIN' : 'LEFT JOIN';
+
   return getAccountDb().all(
-    `SELECT users.id as userId, user_name as userName, display_name as displayName,
-            CASE WHEN user_access.file_id IS NULL THEN 0 ELSE 1 END as haveAccess,
-            CASE WHEN files.id IS NULL THEN 0 ELSE 1 END as owner
-     FROM users
-     LEFT JOIN user_access ON user_access.file_id = ? and user_access.user_id = users.id
-     LEFT JOIN files ON files.id = ? and files.owner = users.id
-     WHERE users.enabled = 1 AND users.user_name <> ''`,
+    `
+      SELECT
+        users.id as userId,
+        user_name     as userName,
+        display_name  as displayName,
+        CASE WHEN user_access.file_id IS NULL THEN 0 ELSE 1 END as haveAccess,
+        CASE WHEN files.id IS NULL THEN 0 ELSE 1 END as owner
+      FROM users
+      ${joinType} user_access ON user_access.file_id = ? AND user_access.user_id = users.id
+      ${joinType} files       ON files.id = ? AND files.owner = users.id
+      WHERE users.enabled = 1
+        AND users.user_name <> ''
+    `,
     [fileId, fileId],
   );
 }
