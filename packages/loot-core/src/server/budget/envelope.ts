@@ -131,7 +131,8 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
     },
   });
 
-  sheet.get().createDynamic(sheetName, 'buffered', {
+  sheet.get().createDynamic(sheetName, 'buffered', { initialValue: 0 });
+  sheet.get().createDynamic(sheetName, 'buffered-auto', {
     initialValue: 0,
     dependencies: flatten2(
       incomeCategories.map(c => [
