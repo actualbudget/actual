@@ -1,4 +1,3 @@
-import { Message } from '../server/sync';
 import { QueryState } from '../shared/query';
 
 export interface ServerHandlers {
