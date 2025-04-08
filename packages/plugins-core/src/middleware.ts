@@ -19,8 +19,8 @@ export function initializePlugin(
     activate: context => {
       const wrappedContext = {
         ...context,
-        registerSidebarMenu(element: JSX.Element) {
-          const id = context.registerSidebarMenu(container => {
+        registerSidebarMenu(position, element: JSX.Element) {
+          const id = context.registerSidebarMenu(position, container => {
             const root = ReactDOM.createRoot(container);
             root.render(element);
           });

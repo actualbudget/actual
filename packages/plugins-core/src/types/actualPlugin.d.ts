@@ -1,4 +1,10 @@
-import type { BasicModalProps } from '@actual-app/components/props/modalProps'
+import type { BasicModalProps } from '@actual-app/components/props/modalProps';
+
+export type SidebarLocations =
+  | 'main-menu'
+  | 'more-menu'
+  | 'before-accounts'
+  | 'after-accounts';
 
 export interface ActualPlugin {
   name: string;
@@ -6,7 +12,10 @@ export interface ActualPlugin {
   uninstall: () => void;
   activate: (
     context: Omit<HostContext, 'registerSidebarMenu' | 'pushModal'> & {
-      registerSidebarMenu: (element: JSX.Element) => string;
+      registerSidebarMenu: (
+        location: SidebarLocations,
+        element: JSX.Element,
+      ) => string;
       pushModal: (element: JSX.Element, modalProps?: BasicModalProps) => void;
     },
   ) => void;
@@ -18,21 +27,25 @@ export type ActualPluginInitialized = Omit<ActualPlugin, 'activate'> & {
 };
 
 export interface ContextEvent {
-  sync: { success: boolean };
-  'account-add': { transaction: unknown }; //move type transaction entity from loot-core
-  //... other events
+  payess: { payess: unknown[] };
+  categories: { categories: unknown[], groups: unknown[] };
+  accounts: { accounts: unknown[] };
 }
 
 export interface HostContext {
   navigate: (routePath: string) => void;
-  
-  pushModal: (parameter: (container: HTMLDivElement) => void, modalProps?: BasicModalProps) => void;
+
+  pushModal: (
+    parameter: (container: HTMLDivElement) => void,
+    modalProps?: BasicModalProps,
+  ) => void;
   popModal: () => void;
 
   registerRoute: (path: string, routeElement: JSX.Element) => string;
   unregisterRoute: (id: string) => void;
 
   registerSidebarMenu: (
+    location: SidebarLocations,
     parameter: (container: HTMLDivElement) => void,
   ) => string;
   unregisterSidebarMenu: (id: string) => void;

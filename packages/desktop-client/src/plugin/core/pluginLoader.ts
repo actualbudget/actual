@@ -13,10 +13,16 @@ import {
 import type { Dispatch } from 'redux';
 import { v4 as uuidv4 } from 'uuid';
 
-import { pushModal as basePushModal, popModal } from 'loot-core/client/modals/modalsSlice';
+import {
+  pushModal as basePushModal,
+  popModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
 import { BasicModalProps } from '../../../../component-library/src/props/modalProps';
-import { ContextEvent } from 'plugins-core/types/actualPlugin';
+import {
+  ContextEvent,
+  SidebarLocations,
+} from 'plugins-core/types/actualPlugin';
 
 export type PluginModalModel = {
   name: string;
@@ -33,6 +39,7 @@ export async function loadPlugins({
   setPluginsRoutes,
   setSidebarItems,
   navigateBase,
+  setEvents,
 }: {
   pluginsEntries: Map<string, ActualPluginEntry>;
   dispatch: Dispatch;
@@ -40,9 +47,16 @@ export async function loadPlugins({
   modalMap: MutableRefObject<Map<string, PluginModalModel>>;
   setPluginsRoutes: ReactDispatch<SetStateAction<Map<string, RouteObject>>>;
   setSidebarItems: ReactDispatch<
-    SetStateAction<Map<string, PluginSidebarRegistrationFn>>
+    SetStateAction<
+      Record<SidebarLocations, Map<string, PluginSidebarRegistrationFn>>
+    >
   >;
   navigateBase: (path: string) => void;
+  setEvents: ReactDispatch<
+    SetStateAction<{
+      [K in keyof ContextEvent]?: Array<(data: ContextEvent[K]) => void>;
+    }>
+  >;
 }) {
   const loadedList: ActualPluginInitialized[] = [];
 
@@ -60,6 +74,7 @@ export async function loadPlugins({
       dispatch,
       pluginId,
       navigateBase,
+      setEvents,
     );
 
     const rawPlugin = pluginEntry();
@@ -74,10 +89,19 @@ export async function loadPlugins({
 function generateContext(
   modalMap: MutableRefObject<Map<string, PluginModalModel>>,
   setPluginsRoutes,
-  setSidebarItems,
+  setSidebarItems: ReactDispatch<
+    SetStateAction<
+      Record<SidebarLocations, Map<string, PluginSidebarRegistrationFn>>
+    >
+  >,
   dispatch,
   pluginId: string,
   navigateBase: (path: string) => void,
+  setEvents: ReactDispatch<
+    SetStateAction<{
+      [K in keyof ContextEvent]?: Array<(data: ContextEvent[K]) => void>;
+    }>
+  >,
 ) {
   return {
     registerRoute: (path: string, routeElement: JSX.Element) => {
@@ -100,29 +124,56 @@ function generateContext(
         return newMap;
       });
     },
-    registerSidebarMenu: (param: PluginSidebarRegistrationFn) => {
+    registerSidebarMenu: (
+      position: SidebarLocations,
+      param: PluginSidebarRegistrationFn,
+    ) => {
       const id = uuidv4();
       setSidebarItems(prev => {
-        const newMap = new Map(prev);
-        newMap.set(id, param);
-        return newMap;
+        const updated = new Map(prev[position]);
+        updated.set(id, param);
+
+        return {
+          ...prev,
+          [position]: updated,
+        };
       });
       return id;
     },
     unregisterSidebarMenu: (id: string) => {
       setSidebarItems(prev => {
-        const newMap = new Map(prev);
-        newMap.delete(id);
-        return newMap;
+        const updated: Record<
+          SidebarLocations,
+          Map<string, PluginSidebarRegistrationFn>
+        > = {
+          ...prev,
+        };
+
+        (Object.keys(prev) as SidebarLocations[]).forEach(location => {
+          const currentMap = prev[location];
+          if (currentMap.has(id)) {
+            const newMap = new Map(currentMap);
+            newMap.delete(id);
+            updated[location] = newMap;
+          }
+        });
+
+        return updated;
       });
     },
     on: <K extends keyof ContextEvent>(
-        eventType: K,
-        callback: (data: ContextEvent[K]) => void,
-      ) =>  {
-      console.log(eventType, callback);
+      eventType: K,
+      callback: (data: ContextEvent[K]) => void,
+    ) => {
+      setEvents(prev => ({
+        ...prev,
+        [eventType]: [...(prev[eventType] ?? []), callback],
+      }));
     },
-    pushModal(parameter: (container: HTMLDivElement) => void, modalProps: BasicModalProps) {
+    pushModal(
+      parameter: (container: HTMLDivElement) => void,
+      modalProps: BasicModalProps,
+    ) {
       dispatch(
         basePushModal({
           modal: {

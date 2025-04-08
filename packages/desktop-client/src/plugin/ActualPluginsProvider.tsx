@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useRef,
   useState,
+  useEffect,
 } from 'react';
 import { type RouteObject } from 'react-router-dom';
 
@@ -17,7 +18,7 @@ import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-st
 
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { useNavigate } from '../hooks/useNavigate';
-import { useDispatch } from '../redux';
+import { useDispatch, useSelector } from '../redux';
 
 import {
   loadPlugins,
@@ -26,6 +27,11 @@ import {
   type PluginSidebarRegistrationFn,
 } from './core/pluginLoader';
 import { getAllPlugins } from './core/pluginStore';
+import {
+  ContextEvent,
+  SidebarLocations,
+} from 'plugins-core/types/actualPlugin';
+import { store } from 'loot-core/client/store';
 
 export type ActualPluginsContextType = {
   plugins: ActualPluginInitialized[];
@@ -33,7 +39,10 @@ export type ActualPluginsContextType = {
   refreshPluginStore: () => Promise<void>;
   modalMap: Map<string, PluginModalModel>;
   pluginsRoutes: Map<string, RouteObject>;
-  sidebarItems: Map<string, PluginSidebarRegistrationFn>;
+  sidebarItems: Record<
+    SidebarLocations,
+    Map<string, PluginSidebarRegistrationFn>
+  >;
 };
 
 // Create the context
@@ -47,6 +56,23 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
 
   const [plugins, setPlugins] = useState<ActualPluginInitialized[]>([]);
   const [pluginStore, setPluginStore] = useState<ActualPluginStored[]>([]);
+  const [events, setEvents] = useState<{
+    [K in keyof ContextEvent]?: Array<(data: ContextEvent[K]) => void>;
+  }>({});
+
+  useEventDispatcher(
+    'payess',
+    state => ({ payess: state.queries.payees }),
+    events,
+  );
+  useEventDispatcher(
+    'categories',
+    state => ({
+      categories: state.queries.categories.list,
+      groups: state.queries.categories.grouped,
+    }),
+    events,
+  );
 
   // We store modules in memory if needed (original code had it, but not used outside loadPlugins)
   // If you want to keep that, do so:
@@ -57,8 +83,13 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
     new Map(),
   );
   const [sidebarItems, setSidebarItems] = useState<
-    Map<string, PluginSidebarRegistrationFn>
-  >(new Map());
+    Record<SidebarLocations, Map<string, PluginSidebarRegistrationFn>>
+  >({
+    'main-menu': new Map(),
+    'more-menu': new Map(),
+    'before-accounts': new Map(),
+    'after-accounts': new Map(),
+  });
 
   const dispatch = useDispatch();
   const navigateBase = useNavigate();
@@ -77,6 +108,18 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
         setPluginsRoutes,
         setSidebarItems,
         navigateBase,
+        setEvents,
+      });
+
+      dispatchEvent('payess', events, {
+        payess: store.getState().queries.payees,
+      });
+      dispatchEvent('categories', events, {
+        categories: store.getState().queries.categories.list,
+        groups: store.getState().queries.categories.grouped,
+      });
+      dispatchEvent('accounts', events, {
+        accounts: store.getState().queries.accounts,
       });
     },
     [dispatch, navigateBase, pluginsEnabled],
@@ -134,4 +177,31 @@ export function useActualPlugins() {
     );
   }
   return context;
+}
+
+function dispatchEvent<K extends keyof ContextEvent>(
+  key: K,
+  events: {
+    [K in keyof ContextEvent]?: Array<(data: ContextEvent[K]) => void>;
+  },
+  data: ContextEvent[K],
+) {
+  const listeners = events[key];
+  if (listeners && listeners.length > 0) {
+    listeners.forEach(cb => cb(data));
+  }
+}
+
+function useEventDispatcher<K extends keyof ContextEvent>(
+  key: K,
+  selector: (state: any) => ContextEvent[K],
+  events: {
+    [K in keyof ContextEvent]?: Array<(data: ContextEvent[K]) => void>;
+  },
+) {
+  const value = useSelector(selector);
+
+  useEffect(() => {
+    dispatchEvent(key, events, value);
+  }, [value, events[key]]);
 }

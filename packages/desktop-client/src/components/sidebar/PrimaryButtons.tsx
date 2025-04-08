@@ -21,6 +21,8 @@ import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 
 import { Item } from './Item';
 import { SecondaryItem } from './SecondaryItem';
+import { RenderPluginsComponent } from '../plugins/RenderPluginsComponent';
+import { useActualPlugins } from '../../plugin/ActualPluginsProvider';
 
 export function PrimaryButtons() {
   const pluginsEnabled = useFeatureFlag('plugins');
@@ -31,6 +33,8 @@ export function PrimaryButtons() {
 
   const syncServerStatus = useSyncServerStatus();
   const isUsingServer = syncServerStatus !== 'no-server';
+
+  const { sidebarItems } = useActualPlugins();
 
   const isActive = [
     '/payees',
@@ -58,6 +62,9 @@ export function PrimaryButtons() {
         style={{ marginBottom: isOpen ? 8 : 0 }}
         forceActive={!isOpen && isActive}
       />
+
+      <RenderPluginsComponent toRender={sidebarItems['main-menu']} />
+
       {isOpen && (
         <>
           <SecondaryItem
@@ -88,6 +95,9 @@ export function PrimaryButtons() {
               indent={15}
             />
           )}
+
+          <RenderPluginsComponent toRender={sidebarItems['more-menu']} />
+
           <SecondaryItem
             title={t('Settings')}
             Icon={SvgCog}

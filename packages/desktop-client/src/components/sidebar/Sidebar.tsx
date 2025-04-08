@@ -125,6 +125,8 @@ export function Sidebar() {
         >
           <PrimaryButtons />
 
+          <RenderPluginsComponent toRender={sidebarItems['before-accounts']} />
+
           <Accounts />
 
           <SecondaryButtons
@@ -133,7 +135,7 @@ export function Sidebar() {
             ]}
           />
 
-          <RenderPluginsComponent toRender={sidebarItems} />
+          <RenderPluginsComponent toRender={sidebarItems['after-accounts']} />
         </View>
       </View>
     </Resizable>
