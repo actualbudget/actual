@@ -581,7 +581,7 @@ handlers['api/account-create'] = withMutation(async function ({
 
 handlers['api/account-update'] = withMutation(async function ({ id, fields }) {
   checkFileOpen();
-  return db.updateAccount({ id, ...accountModel.fromExternal(fields) });
+  return db.updateAccount(accountModel.fromExternal({ id, ...fields }));
 });
 
 handlers['api/account-close'] = withMutation(async function ({
@@ -675,10 +675,9 @@ handlers['api/category-create'] = withMutation(async function ({ category }) {
 
 handlers['api/category-update'] = withMutation(async function ({ id, fields }) {
   checkFileOpen();
-  return handlers['category-update']({
-    id,
-    ...categoryModel.fromExternal(fields),
-  });
+  return handlers['category-update'](
+    categoryModel.fromExternal({ id, ...fields }),
+  );
 });
 
 handlers['api/category-delete'] = withMutation(async function ({
@@ -712,7 +711,7 @@ handlers['api/payee-create'] = withMutation(async function ({ payee }) {
 handlers['api/payee-update'] = withMutation(async function ({ id, fields }) {
   checkFileOpen();
   return handlers['payees-batch-change']({
-    updated: [{ id, ...payeeModel.fromExternal(fields) }],
+    updated: [payeeModel.fromExternal({ id, ...fields })],
   });
 });
 

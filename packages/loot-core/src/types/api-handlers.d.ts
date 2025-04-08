@@ -1,7 +1,5 @@
 import { ImportTransactionsOpts } from '@actual-app/api';
 
-import { IntegerAmount } from '../shared/util';
-
 import type {
   APIAccountEntity,
   APICategoryEntity,
@@ -10,6 +8,7 @@ import type {
   APIPayeeEntity,
 } from '../server/api-models';
 import { type batchUpdateTransactions } from '../server/transactions';
+import { IntegerAmount } from '../shared/util';
 
 import type {
   AccountEntity,
@@ -161,7 +160,7 @@ export interface ApiHandlers {
   'api/category-groups-get': () => Promise<APICategoryGroupEntity[]>;
 
   'api/category-group-create': (arg: {
-    group: APICategoryGroupEntity['id'];
+    group: APICategoryGroupEntity;
   }) => Promise<string>;
 
   'api/category-group-update': (arg: { id; fields }) => Promise<unknown>;
@@ -175,7 +174,7 @@ export interface ApiHandlers {
 
   'api/category-update': (arg: {
     id: APICategoryEntity['id'];
-    fields: Omit<CategoryEntity, 'id'>;
+    fields: Omit<APICategoryEntity, 'id'>;
   }) => Promise<unknown>;
 
   'api/category-delete': (arg: {

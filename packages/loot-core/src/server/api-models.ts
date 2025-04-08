@@ -112,7 +112,7 @@ export const payeeModel = {
 
   fromExternal(payee: APIPayeeEntity) {
     // No translation is needed
-    return payee as PayeeEntity;
+    return { ...payee } as PayeeEntity;
   },
 };
 
