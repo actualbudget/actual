@@ -1,11 +1,11 @@
 import { type Page } from '@playwright/test';
 
 import { AccountPage } from './account-page';
+import { PayeesPage } from './payees-page';
 import { ReportsPage } from './reports-page';
 import { RulesPage } from './rules-page';
 import { SchedulesPage } from './schedules-page';
 import { SettingsPage } from './settings-page';
-import { PayeesPage } from './payees-page';
 
 type AccountEntry = {
   name: string;
