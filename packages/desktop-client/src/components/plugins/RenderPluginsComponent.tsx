@@ -1,9 +1,10 @@
 import React, { useRef, useEffect } from 'react';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { type PluginSidebarRegistrationFn } from '../../plugin/core/pluginLoader';
 
 type RenderPluginsComponentProps = {
-  toRender: Map<string, (container: HTMLDivElement) => void>;
+  toRender: Map<string, PluginSidebarRegistrationFn>;
 };
 
 export function RenderPluginsComponent({

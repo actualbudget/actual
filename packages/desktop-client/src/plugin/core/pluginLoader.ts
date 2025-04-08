@@ -209,18 +209,39 @@ function generateContext(
 export async function loadPluginsScript({
   pluginsData,
   handleLoadPlugins,
+  devUrl = '',
 }: {
   pluginsData: ActualPluginStored[];
   handleLoadPlugins: (
     pluginsEntries: Map<string, ActualPluginEntry>,
   ) => Promise<void>;
-}) {
+  devUrl?: string;
+}): Promise<boolean> {
+  const remotes = [
+    ...pluginsData,
+    ...(devUrl !== ''
+      ? [
+          {
+            name: 'dev-plugin',
+            alias: 'dev-plugin',
+            url: null,
+            entry: devUrl,
+          },
+        ]
+      : []),
+  ];
+
+  if (remotes.length === 0) return false;
+
   init({
     name: '@actual/host-app',
-    remotes: pluginsData.map(plugin => ({
+    remotes: remotes.map(plugin => ({
       name: plugin.name,
       alias: plugin.name,
-      entry: `plugin-data/${encodeURIComponent(plugin.url)}`,
+      entry:
+        'entry' in plugin
+          ? plugin.entry
+          : `plugin-data/${encodeURIComponent(plugin.url)}`,
     })),
     shared: {
       react: {
@@ -235,7 +256,14 @@ export async function loadPluginsScript({
     loadedPlugins.set(plugin.name, mod);
   }
 
+  if (devUrl !== '') {
+    const mod = await loadRemote<ActualPluginEntry>('dev-plugin');
+    loadedPlugins.set('dev-plugin', mod);
+  }
+
   await handleLoadPlugins(loadedPlugins);
+
+  return true;
 }
 
 function joinRelativePaths(...parts) {

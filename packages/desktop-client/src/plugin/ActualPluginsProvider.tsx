@@ -36,7 +36,7 @@ import { store } from 'loot-core/client/store';
 export type ActualPluginsContextType = {
   plugins: ActualPluginInitialized[];
   pluginStore: ActualPluginStored[];
-  refreshPluginStore: () => Promise<void>;
+  refreshPluginStore: (devUrl?: string) => Promise<void>;
   modalMap: Map<string, PluginModalModel>;
   pluginsRoutes: Map<string, PluginRouteFn>;
   sidebarItems: Record<
@@ -78,10 +78,12 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
   // If you want to keep that, do so:
   // const [pluginsModules, setPluginsModules] = useState<Map<string, ActualPluginEntry>>(new Map());
 
+  const [initialized, setinitialized] = useState(false);
+
   const modalMap = useRef<Map<string, PluginModalModel>>(new Map());
-  const [pluginsRoutes, setPluginsRoutes] = useState<Map<string, PluginRouteFn>>(
-    new Map(),
-  );
+  const [pluginsRoutes, setPluginsRoutes] = useState<
+    Map<string, PluginRouteFn>
+  >(new Map());
   const [sidebarItems, setSidebarItems] = useState<
     Record<SidebarLocations, Map<string, PluginSidebarRegistrationFn>>
   >({
@@ -89,7 +91,7 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
     'more-menu': new Map(),
     'before-accounts': new Map(),
     'after-accounts': new Map(),
-    'topbar': new Map(),
+    topbar: new Map(),
   });
 
   const dispatch = useDispatch();
@@ -128,29 +130,35 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
 
   // The function that loads plugin scripts (the remote modules) and calls handleLoadPlugins
   const handleLoadPluginsScript = useCallback(
-    async (pluginsData: ActualPluginStored[]) => {
-      if (!pluginsEnabled) return;
+    async (pluginsData: ActualPluginStored[], devUrl?: string) => {
+      if (!pluginsEnabled || initialized) return;
 
-      await loadPluginsScript({
-        pluginsData,
-        handleLoadPlugins,
-      });
+      setinitialized(
+        await loadPluginsScript({
+          pluginsData,
+          handleLoadPlugins,
+          devUrl,
+        }),
+      );
     },
-    [handleLoadPlugins, pluginsEnabled],
+    [handleLoadPlugins, pluginsEnabled, initialized, setinitialized],
   );
 
   // A function to refresh the plugin store from IndexedDB and reload if needed
-  const refreshPluginStore = useCallback(async () => {
-    if (!pluginsEnabled) return;
+  const refreshPluginStore = useCallback(
+    async (devUrl?: string) => {
+      if (!pluginsEnabled) return;
 
-    const pluginsFromDB = (await getAllPlugins()) as ActualPluginStored[];
-    // If the new list has changed in size, we might want to reload
-    // (or you can do more sophisticated checks if you want)
-    if (pluginsFromDB.length !== pluginStore.length) {
-      await handleLoadPluginsScript(pluginsFromDB);
-    }
-    setPluginStore(pluginsFromDB);
-  }, [pluginStore.length, handleLoadPluginsScript, pluginsEnabled]);
+      const pluginsFromDB = (await getAllPlugins()) as ActualPluginStored[];
+      // If the new list has changed in size, we might want to reload
+      // (or you can do more sophisticated checks if you want)
+      if (pluginsFromDB.length !== pluginStore.length || devUrl !== '') {
+        await handleLoadPluginsScript(pluginsFromDB, devUrl);
+      }
+      setPluginStore(pluginsFromDB);
+    },
+    [pluginStore.length, handleLoadPluginsScript, pluginsEnabled],
+  );
 
   // Provide everything
   const contextValue: ActualPluginsContextType = {
