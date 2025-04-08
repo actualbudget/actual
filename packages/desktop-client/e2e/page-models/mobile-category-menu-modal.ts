@@ -25,6 +25,10 @@ export class CategoryMenuModal {
   async editNotes() {
     await this.editNotesButton.click();
 
-    return new EditNotesModal(this.page.getByRole('dialog'));
+    return new EditNotesModal(
+      this.page.getByRole('dialog', {
+        name: 'Modal dialog',
+      }),
+    );
   }
 }

@@ -24,6 +24,8 @@ import Downshift, { type StateChangeTypes } from 'downshift';
 
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 
+import { useProperFocus } from '../../hooks/useProperFocus';
+
 type CommonAutocompleteProps<T extends Item> = {
   focused?: boolean;
   embedded?: boolean;
@@ -51,6 +53,7 @@ type CommonAutocompleteProps<T extends Item> = {
   clearOnBlur?: boolean;
   clearOnSelect?: boolean;
   closeOnBlur?: boolean;
+  closeOnSelect?: boolean;
   onClose?: () => void;
 };
 
@@ -230,6 +233,7 @@ function SingleAutocomplete<T extends Item>({
   clearOnBlur = true,
   clearOnSelect = false,
   closeOnBlur = true,
+  closeOnSelect = !clearOnSelect,
   onClose,
   value: initialValue,
 }: SingleAutocompleteProps<T>) {
@@ -297,6 +301,8 @@ function SingleAutocomplete<T extends Item>({
   }
 
   const filtered = isChanged ? filteredSuggestions || suggestions : suggestions;
+  const inputRef = useRef(null);
+  useProperFocus(inputRef, focused);
 
   return (
     <Downshift
@@ -306,7 +312,9 @@ function SingleAutocomplete<T extends Item>({
 
         if (clearOnSelect) {
           setValue('');
-        } else {
+        }
+
+        if (closeOnSelect) {
           close();
         }
 
@@ -348,6 +356,7 @@ function SingleAutocomplete<T extends Item>({
             Downshift.stateChangeTypes.controlledPropUpdatedSelectedItem,
             // Do nothing if it is a "touch" selection event
             Downshift.stateChangeTypes.touchEnd,
+            Downshift.stateChangeTypes.mouseUp,
             // @ts-expect-error Types say there is no type
           ].includes(changes.type)
         ) {
@@ -395,7 +404,8 @@ function SingleAutocomplete<T extends Item>({
       onStateChange={changes => {
         if (
           !clearOnBlur &&
-          changes.type === Downshift.stateChangeTypes.mouseUp
+          (changes.type === Downshift.stateChangeTypes.mouseUp ||
+            changes.type === Downshift.stateChangeTypes.touchEnd)
         ) {
           return;
         }
@@ -451,7 +461,7 @@ function SingleAutocomplete<T extends Item>({
           <View ref={triggerRef} style={{ flexShrink: 0 }}>
             {renderInput(
               getInputProps({
-                focused,
+                inputRef,
                 ...inputProps,
                 onFocus: e => {
                   inputProps.onFocus?.(e);
@@ -655,6 +665,8 @@ function MultiAutocomplete<T extends Item>({
 }: MultiAutocompleteProps<T>) {
   const [focused, setFocused] = useState(false);
   const selectedItemIds = selectedItems.map(getItemId);
+  const inputRef = useRef(null);
+  useProperFocus(inputRef, focused);
 
   function onRemoveItem(id: T['id']) {
     const items = selectedItemIds.filter(i => i !== id);
@@ -722,6 +734,7 @@ function MultiAutocomplete<T extends Item>({
           })}
           <Input
             {...inputProps}
+            inputRef={inputRef}
             onKeyDown={e => onKeyDown(e, inputProps.onKeyDown)}
             onFocus={e => {
               setFocused(true);

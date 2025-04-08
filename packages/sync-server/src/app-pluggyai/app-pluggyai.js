@@ -129,6 +129,8 @@ app.post(
         newTrans.transactionId = trans.id;
         newTrans.sortOrder = transactionDate.getTime();
 
+        delete trans.amount;
+
         const finalTrans = { ...flattenObject(trans), ...newTrans };
         if (newTrans.booked) {
           booked.push(finalTrans);

@@ -2,7 +2,6 @@ import fs from 'fs';
 import { createServer, Server } from 'http';
 import path from 'path';
 
-import ngrok from '@ngrok/ngrok';
 import {
   net,
   app,
@@ -33,7 +32,8 @@ import {
 
 import './security';
 
-const isDev = !app.isPackaged; // dev mode if not packaged
+const isPlaywrightTest = process.env.EXECUTION_CONTEXT === 'playwright';
+const isDev = !isPlaywrightTest && !app.isPackaged; // dev mode if not packaged and not playwright
 
 process.env.lootCoreScript = isDev
   ? 'loot-core/lib-dist/electron/bundle.desktop.js' // serve from local output in development (provides hot-reloading)
@@ -45,12 +45,20 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { standard: true } },
 ]);
 
-if (!isDev || !process.env.ACTUAL_DOCUMENT_DIR) {
-  process.env.ACTUAL_DOCUMENT_DIR = app.getPath('documents');
-}
+if (isPlaywrightTest) {
+  if (!process.env.ACTUAL_DOCUMENT_DIR || !process.env.ACTUAL_DATA_DIR) {
+    throw new Error(
+      'ACTUAL_DOCUMENT_DIR and ACTUAL_DATA_DIR must be set in the environment for playwright tests',
+    );
+  }
+} else {
+  if (!isDev || !process.env.ACTUAL_DOCUMENT_DIR) {
+    process.env.ACTUAL_DOCUMENT_DIR = app.getPath('documents');
+  }
 
-if (!isDev || !process.env.ACTUAL_DATA_DIR) {
-  process.env.ACTUAL_DATA_DIR = app.getPath('userData');
+  if (!isDev || !process.env.ACTUAL_DATA_DIR) {
+    process.env.ACTUAL_DATA_DIR = app.getPath('userData');
+  }
 }
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -302,41 +310,6 @@ async function startSyncServer() {
   }
 }
 
-async function exposeSyncServer(
-  syncServerConfig: GlobalPrefsJson['syncServerConfig'],
-) {
-  const hasRequiredConfig =
-    syncServerConfig?.ngrokConfig?.authToken &&
-    syncServerConfig?.ngrokConfig?.domain &&
-    syncServerConfig?.port;
-
-  if (!hasRequiredConfig) {
-    logMessage(
-      'error',
-      'Sync-Server: Cannot expose sync server: missing ngrok settings',
-    );
-    return { error: 'Missing ngrok settings' };
-  }
-
-  try {
-    const listener = await ngrok.forward({
-      schemes: ['https'],
-      addr: syncServerConfig.port,
-      authtoken: syncServerConfig?.ngrokConfig?.authToken,
-      domain: syncServerConfig?.ngrokConfig?.domain,
-    });
-
-    logMessage(
-      'info',
-      `Sync-Server: Exposing actual server on url: ${listener.url()}`,
-    );
-    return { url: listener.url() };
-  } catch (error) {
-    logMessage('error', `Unable to run ngrok: ${error}`);
-    return { error: `Unable to run ngrok. ${error}` };
-  }
-}
-
 async function createWindow() {
   const windowState = await getWindowState();
 
@@ -479,11 +452,8 @@ app.on('ready', async () => {
   const globalPrefs = await loadGlobalPrefs();
 
   if (globalPrefs.syncServerConfig?.autoStart) {
-    // wait for both server and ngrok to start before starting the Actual client to ensure server is available
-    await Promise.allSettled([
-      startSyncServer(),
-      exposeSyncServer(globalPrefs.syncServerConfig),
-    ]);
+    // wait for the server to start before starting the Actual client to ensure server is available
+    await startSyncServer();
   }
 
   protocol.handle('app', request => {
