@@ -28,6 +28,7 @@ import {
   categoryGroupModel,
   payeeModel,
   remoteFileModel,
+  scheduleModel,
 } from './api-models';
 import { runQuery as aqlQuery } from './aql';
 import * as cloudStorage from './cloud-storage';
@@ -763,6 +764,11 @@ handlers['api/rule-update'] = withMutation(async function ({ rule }) {
 handlers['api/rule-delete'] = withMutation(async function (id) {
   checkFileOpen();
   return handlers['rule-delete'](id);
+});
+
+handlers['api/schedule-create'] = withMutation(async function ({ schedule }) {
+  const newSchedule = await handlers['schedule/create']({ schedule });
+  return scheduleModel.toExternal(newSchedule);
 });
 
 export function installAPI(serverHandlers: ServerHandlers) {

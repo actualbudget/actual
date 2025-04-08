@@ -7,6 +7,7 @@ import { Condition } from '../server/rules';
 
 import * as monthUtils from './months';
 import { q } from './query';
+import { PayeeEntity, ScheduleEntity } from 'loot-core/types/models';
 
 export function getStatus(
   nextDate: string,

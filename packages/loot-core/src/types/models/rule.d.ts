@@ -165,7 +165,7 @@ export interface SetSplitAmountRuleActionEntity {
 
 export interface LinkScheduleRuleActionEntity {
   op: 'link-schedule';
-  value: ScheduleEntity;
+  value: ScheduleEntity['id'];
 }
 
 export interface PrependNoteRuleActionEntity {

@@ -16,7 +16,7 @@ import {
   getStatus,
   recurConfigToRSchedule,
 } from '../../shared/schedules';
-import { ScheduleEntity } from '../../types/models';
+import { RuleConditionEntity, ScheduleEntity } from '../../types/models';
 import { addTransactions } from '../accounts/sync';
 import { createApp } from '../app';
 import { runQuery as aqlQuery } from '../aql';
@@ -184,7 +184,10 @@ async function checkIfScheduleExists(name, scheduleId) {
 export async function createSchedule({
   schedule = null,
   conditions = [],
-} = {}): Promise<ScheduleEntity['id']> {
+}: {
+  schedule: ScheduleEntity | null;
+  conditions: RuleConditionEntity[];
+}): Promise<ScheduleEntity['id']> {
   const scheduleId = schedule?.id || uuidv4();
 
   const { date: dateCond } = extractScheduleConds(conditions);

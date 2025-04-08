@@ -14,7 +14,7 @@ import { usePayees } from '../../hooks/usePayees';
 import { Value } from './Value';
 
 type ScheduleValueProps = {
-  value: ScheduleEntity;
+  value: ScheduleEntity['id'];
 };
 
 export function ScheduleValue({ value }: ScheduleValueProps) {
@@ -38,8 +38,11 @@ export function ScheduleValue({ value }: ScheduleValueProps) {
       data={schedules}
       // TODO: this manual type coercion does not make much sense -
       // should we instead do `schedule._payee.id`?
-      describe={schedule =>
-        describeSchedule(schedule, byId[schedule._payee as unknown as string])
+      describe={(schedule: unknown) =>
+        describeSchedule(
+          schedule,
+          byId[(schedule as ScheduleEntity)._payee as unknown as string],
+        )
       }
     />
   );

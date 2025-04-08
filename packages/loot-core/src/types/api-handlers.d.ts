@@ -6,6 +6,7 @@ import type {
   APICategoryGroupEntity,
   APIFileEntity,
   APIPayeeEntity,
+  APIScheduleEntity,
 } from '../server/api-models';
 import { type batchUpdateTransactions } from '../server/transactions';
 import { IntegerAmount } from '../shared/util';
@@ -14,6 +15,7 @@ import type {
   AccountEntity,
   NewRuleEntity,
   RuleEntity,
+  ScheduleEntity,
   TransactionEntity,
 } from './models';
 import { type ServerHandlers } from './server-handlers';
@@ -209,4 +211,15 @@ export interface ApiHandlers {
   'api/rule-update': (arg: { rule: RuleEntity }) => Promise<RuleEntity>;
 
   'api/rule-delete': (id: string) => Promise<boolean>;
+
+  'api/schedule-create': (arg: {
+    schedule: APIScheduleEntity;
+  }) => Promise<APIScheduleEntity>;
+
+  'api/schedule-update': (arg: {
+    id: ScheduleEntity['id'];
+    fields: Omit<ScheduleEntity, 'id'>;
+  }) => Promise<APIScheduleEntity>;
+
+  'api/schedule-delete': (arg: { id: ScheduleEntity['id'] }) => Promise<void>;
 }
