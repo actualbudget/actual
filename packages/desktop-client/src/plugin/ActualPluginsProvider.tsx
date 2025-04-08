@@ -89,6 +89,7 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
     'more-menu': new Map(),
     'before-accounts': new Map(),
     'after-accounts': new Map(),
+    'topbar': new Map(),
   });
 
   const dispatch = useDispatch();

@@ -4,15 +4,16 @@ export type SidebarLocations =
   | 'main-menu'
   | 'more-menu'
   | 'before-accounts'
-  | 'after-accounts';
+  | 'after-accounts'
+  | 'topbar';
 
 export interface ActualPlugin {
   name: string;
   version: string;
   uninstall: () => void;
   activate: (
-    context: Omit<HostContext, 'registerSidebarMenu' | 'pushModal' | 'registerRoute'> & {
-      registerSidebarMenu: (
+    context: Omit<HostContext, 'registerMenu' | 'pushModal' | 'registerRoute'> & {
+      registerMenu: (
         location: SidebarLocations,
         element: JSX.Element,
       ) => string;
@@ -45,11 +46,11 @@ export interface HostContext {
   registerRoute: (path: string, routeElement: (container: HTMLDivElement) => void) => string;
   unregisterRoute: (id: string) => void;
 
-  registerSidebarMenu: (
+  registerMenu: (
     location: SidebarLocations,
     parameter: (container: HTMLDivElement) => void,
   ) => string;
-  unregisterSidebarMenu: (id: string) => void;
+  unregisterMenu: (id: string) => void;
 
   on: <K extends keyof ContextEvent>(
     eventType: K,

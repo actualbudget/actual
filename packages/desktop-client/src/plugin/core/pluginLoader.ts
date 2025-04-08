@@ -131,7 +131,7 @@ function generateContext(
         return newMap;
       });
     },
-    registerSidebarMenu: (
+    registerMenu: (
       position: SidebarLocations,
       param: PluginSidebarRegistrationFn,
     ) => {
@@ -147,7 +147,7 @@ function generateContext(
       });
       return id;
     },
-    unregisterSidebarMenu: (id: string) => {
+    unregisterMenu: (id: string) => {
       setSidebarItems(prev => {
         const updated: Record<
           SidebarLocations,
