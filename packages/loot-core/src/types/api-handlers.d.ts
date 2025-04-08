@@ -11,7 +11,12 @@ import type {
 } from '../server/api-models';
 import { type batchUpdateTransactions } from '../server/transactions';
 
-import type { NewRuleEntity, RuleEntity, TransactionEntity } from './models';
+import type {
+  AccountEntity,
+  NewRuleEntity,
+  RuleEntity,
+  TransactionEntity,
+} from './models';
 import { type ServerHandlers } from './server-handlers';
 
 export interface ApiHandlers {

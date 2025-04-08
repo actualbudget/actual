@@ -1,14 +1,21 @@
 // @ts-strict-ignore
 import csvStringify from 'csv-stringify/lib/sync';
 
+import { Query } from '../../../shared/query';
 import { integerToAmount } from '../../../shared/util';
+import {
+  AccountEntity,
+  CategoryGroupEntity,
+  PayeeEntity,
+  TransactionEntity,
+} from '../../../types/models';
 import { runQuery as aqlQuery } from '../../aql';
 
 export async function exportToCSV(
-  transactions,
-  accounts,
-  categoryGroups,
-  payees,
+  transactions: TransactionEntity[],
+  accounts: Pick<AccountEntity, 'id' | 'name'>[],
+  categoryGroups: Pick<CategoryGroupEntity, 'name' | 'categories'>[],
+  payees: Pick<PayeeEntity, 'id' | 'name'>[],
 ) {
   const accountNamesById = accounts.reduce((reduced, { id, name }) => {
     reduced[id] = name;
@@ -56,7 +63,7 @@ export async function exportToCSV(
   return csvStringify(transactionsForExport, { header: true });
 }
 
-export async function exportQueryToCSV(query) {
+export async function exportQueryToCSV(query: Query) {
   const { data: transactions } = await aqlQuery(
     query
       .select([
