@@ -3,6 +3,7 @@ import MockDate from 'mockdate';
 
 import { q } from '../../shared/query';
 import { getNextDate } from '../../shared/schedules';
+import { RuleConditionEntity } from '../../types/models';
 import { runQuery as aqlQuery } from '../aql';
 import { loadMappings } from '../db/mappings';
 import { loadRules, updateRule } from '../transactions/transaction-rules';
@@ -24,7 +25,7 @@ beforeEach(async () => {
 describe('schedule app', () => {
   describe('utility', () => {
     it('conditions are updated when they exist', () => {
-      const conds = [
+      const conds: RuleConditionEntity[] = [
         { op: 'is', field: 'payee', value: 'FOO' },
         { op: 'is', field: 'date', value: '2020-01-01' },
       ];
@@ -42,7 +43,7 @@ describe('schedule app', () => {
     });
 
     it('conditions are added if they don’t exist', () => {
-      const conds = [
+      const conds: RuleConditionEntity[] = [
         { op: 'contains', field: 'payee', value: 'FOO' },
         { op: 'contains', field: 'notes', value: 'dflksjdflskdjf' },
       ];
@@ -74,6 +75,7 @@ describe('schedule app', () => {
               { type: 'day', value: 15 },
               { type: 'day', value: 30 },
             ],
+            endMode: 'never',
           },
         }),
       ).toBe('2020-12-30');
@@ -94,9 +96,10 @@ describe('schedule app', () => {
                 { type: 'day', value: 15 },
                 { type: 'day', value: 30 },
               ],
+              endMode: 'never',
             },
           },
-        ],
+        ] satisfies RuleConditionEntity[],
       });
 
       const {
@@ -158,6 +161,7 @@ describe('schedule app', () => {
                 { type: 'day', value: 18 },
                 { type: 'day', value: 29 },
               ],
+              endMode: 'never',
             },
           },
         ],

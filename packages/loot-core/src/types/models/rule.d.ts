@@ -81,7 +81,7 @@ export type RuleConditionEntity =
       | 'onBudget'
       | 'offBudget'
     >
-  // separating oneOf, notOneOf, and isbetween into separate types makes typescript behave like we want
+  // separating oneOf, notOneOf, and isbetween into separate types makes typescript narrowing behave properly with the value type
   | BaseConditionEntity<'account', 'oneOf' | 'notOneOf'>
   | BaseConditionEntity<
       'category',

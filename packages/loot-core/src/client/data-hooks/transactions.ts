@@ -183,7 +183,7 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
 
         const dates: string[] = [schedule.next_date];
         let day = d.startOfDay(parseDate(schedule.next_date));
-        if (isRecurring) {
+        if (isRecurring && dateConditions) {
           while (day <= upcomingPeriodEnd) {
             const nextDate = getNextDate(dateConditions, day);
 

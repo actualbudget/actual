@@ -187,9 +187,6 @@ async function checkIfScheduleExists(name, scheduleId) {
 export async function createSchedule({
   schedule = null,
   conditions = [],
-}: {
-  schedule: ScheduleEntity | null;
-  conditions: RuleConditionEntity[];
 }): Promise<ScheduleEntity['id']> {
   const scheduleId = schedule?.id || uuidv4();
 
