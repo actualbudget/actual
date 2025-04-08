@@ -67,9 +67,9 @@ export function ExpenseGroupListItem({
 
   const shouldHideCategory = useCallback(
     (category: CategoryEntity) => {
-      return !!(category.hidden || group.hidden);
+      return !!(category.hidden || group?.hidden);
     },
-    [group.hidden],
+    [group?.hidden],
   );
   
   if (!group) {
