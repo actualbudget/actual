@@ -322,23 +322,25 @@ async function enableOpenId(openIdConfig: { openId: OpenIdConfig }) {
   return {};
 }
 
-async function getOpenIdConfig() {
+async function getOpenIdConfig({ password }: { password: string }) {
   try {
-    const serverConfig = getServer();
-    if (!serverConfig) {
-      throw new Error('No sync server configured.');
-    }
+    const userToken = await asyncStorage.getItem('user-token');
 
-    const res = await get(serverConfig.BASE_SERVER + '/openid/config');
+    const res = await post(
+      getServer().BASE_SERVER + '/openid/config',
+      { password },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
 
     if (res) {
-      const config = JSON.parse(res) as OpenIdConfig;
-      return { openId: config };
+      return res as { openId: OpenIdConfig };
     }
 
     return null;
   } catch (err) {
-    return { error: 'config-fetch-failed' };
+    return { error: err.reason };
   }
 }
 
