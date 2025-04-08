@@ -5,6 +5,7 @@ import { Query } from '../../../shared/query';
 import { integerToAmount } from '../../../shared/util';
 import {
   AccountEntity,
+  CategoryEntity,
   CategoryGroupEntity,
   PayeeEntity,
   TransactionEntity,
@@ -14,7 +15,9 @@ import { runQuery as aqlQuery } from '../../aql';
 export async function exportToCSV(
   transactions: TransactionEntity[],
   accounts: Pick<AccountEntity, 'id' | 'name'>[],
-  categoryGroups: Pick<CategoryGroupEntity, 'name' | 'categories'>[],
+  categoryGroups: (Pick<CategoryGroupEntity, 'name'> & {
+    categories: Pick<CategoryEntity, 'id' | 'name'>[];
+  })[],
   payees: Pick<PayeeEntity, 'id' | 'name'>[],
 ) {
   const accountNamesById = accounts.reduce((reduced, { id, name }) => {

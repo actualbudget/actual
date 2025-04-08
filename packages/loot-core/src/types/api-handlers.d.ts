@@ -14,6 +14,7 @@ import { IntegerAmount } from '../shared/util';
 import type {
   AccountEntity,
   NewRuleEntity,
+  RuleConditionEntity,
   RuleEntity,
   ScheduleEntity,
   TransactionEntity,
@@ -214,12 +215,15 @@ export interface ApiHandlers {
 
   'api/schedule-create': (arg: {
     schedule: APIScheduleEntity;
-  }) => Promise<APIScheduleEntity>;
+    conditions?: RuleConditionEntity[];
+  }) => Promise<APIScheduleEntity['id']>;
 
   'api/schedule-update': (arg: {
     id: ScheduleEntity['id'];
-    fields: Omit<ScheduleEntity, 'id'>;
-  }) => Promise<APIScheduleEntity>;
+    fields?: Omit<ScheduleEntity, 'id'>;
+    conditions?: RuleConditionEntity[];
+    resetNextDate?: boolean;
+  }) => Promise<APIScheduleEntity['id']>;
 
   'api/schedule-delete': (arg: { id: ScheduleEntity['id'] }) => Promise<void>;
 }

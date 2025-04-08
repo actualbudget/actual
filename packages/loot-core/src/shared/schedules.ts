@@ -4,10 +4,10 @@ import * as d from 'date-fns';
 import { t } from 'i18next';
 
 import { Condition } from '../server/rules';
+import { RuleConditionEntity } from '../types/models';
 
 import * as monthUtils from './months';
 import { q } from './query';
-import { PayeeEntity, ScheduleEntity } from 'loot-core/types/models';
 
 export function getStatus(
   nextDate: string,
@@ -300,17 +300,16 @@ export function recurConfigToRSchedule(config) {
   }
 }
 
-export function extractScheduleConds(conditions) {
+export function extractScheduleConds(conditions: RuleConditionEntity[]) {
   return {
     payee:
       conditions.find(cond => cond.op === 'is' && cond.field === 'payee') ||
       conditions.find(
-        cond => cond.op === 'is' && cond.field === 'description',
+        cond => cond.op === 'is' && cond.field === 'imported_payee',
       ) ||
       null,
     account:
       conditions.find(cond => cond.op === 'is' && cond.field === 'account') ||
-      conditions.find(cond => cond.op === 'is' && cond.field === 'acct') ||
       null,
     amount:
       conditions.find(
@@ -329,7 +328,7 @@ export function extractScheduleConds(conditions) {
 }
 
 export function getNextDate(
-  dateCond,
+  dateCond: RuleConditionEntity,
   start = new Date(monthUtils.currentDay()),
   noSkipWeekend = false,
 ) {
