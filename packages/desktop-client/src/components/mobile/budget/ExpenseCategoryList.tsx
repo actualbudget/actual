@@ -68,7 +68,7 @@ export function ExpenseCategoryList({
         );
       }
 
-      if (!categoryToMove.cat_group) {
+      if (!categoryToMove.group) {
         throw new Error(
           `Internal error: category ${categoryIdToMove} is not in a group and cannot be moved.`,
         );
@@ -80,7 +80,7 @@ export function ExpenseCategoryList({
         dispatch(
           moveCategory({
             id: categoryToMove.id,
-            groupId: categoryToMove.cat_group,
+            groupId: categoryToMove.group,
             targetId: targetCategoryId,
           }),
         );
@@ -100,7 +100,7 @@ export function ExpenseCategoryList({
         dispatch(
           moveCategory({
             id: categoryToMove.id,
-            groupId: categoryToMove.cat_group,
+            groupId: categoryToMove.group,
             // Due to the way `moveCategory` works, we use the category next to the
             // actual target category here because `moveCategory` always shoves the
             // category *before* the target category.
