@@ -133,6 +133,7 @@ export function IncomeCategoryList({
       aria-label={t('Income categories')}
       items={categories}
       dragAndDropHooks={dragAndDropHooks}
+      dependencies={[month, onEditCategory, onBudgetAction]}
     >
       {category => (
         <IncomeCategoryListItem
