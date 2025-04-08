@@ -3,7 +3,6 @@ import {
   type Dispatch as ReactDispatch,
   type SetStateAction,
 } from 'react';
-import type { RouteObject } from 'react-router-dom';
 
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
 import {
@@ -31,6 +30,11 @@ export type PluginModalModel = {
 
 export type PluginSidebarRegistrationFn = (container: HTMLDivElement) => void;
 
+export type PluginRouteFn = {
+  path: string;
+  parameter: (container: HTMLDivElement) => void;
+};
+
 export async function loadPlugins({
   pluginsEntries,
   dispatch,
@@ -45,7 +49,7 @@ export async function loadPlugins({
   dispatch: Dispatch;
   setPlugins: ReactDispatch<SetStateAction<ActualPluginInitialized[]>>;
   modalMap: MutableRefObject<Map<string, PluginModalModel>>;
-  setPluginsRoutes: ReactDispatch<SetStateAction<Map<string, RouteObject>>>;
+  setPluginsRoutes: ReactDispatch<SetStateAction<Map<string, PluginRouteFn>>>;
   setSidebarItems: ReactDispatch<
     SetStateAction<
       Record<SidebarLocations, Map<string, PluginSidebarRegistrationFn>>
@@ -88,7 +92,7 @@ export async function loadPlugins({
 
 function generateContext(
   modalMap: MutableRefObject<Map<string, PluginModalModel>>,
-  setPluginsRoutes,
+  setPluginsRoutes: ReactDispatch<SetStateAction<Map<string, PluginRouteFn>>>,
   setSidebarItems: ReactDispatch<
     SetStateAction<
       Record<SidebarLocations, Map<string, PluginSidebarRegistrationFn>>
@@ -104,15 +108,18 @@ function generateContext(
   >,
 ) {
   return {
-    registerRoute: (path: string, routeElement: JSX.Element) => {
+    registerRoute: (
+      path: string,
+      routeElement: (container: HTMLDivElement) => void,
+    ) => {
       const id = uuidv4();
+      const url = joinRelativePaths('/custom', path);
       setPluginsRoutes(prev => {
         const newMap = new Map(prev);
         newMap.set(id, {
-          id,
-          path: `/custom/${path}`,
-          element: routeElement,
-        } as RouteObject);
+          path: url,
+          parameter: routeElement,
+        });
         return newMap;
       });
       return id;
@@ -229,4 +236,11 @@ export async function loadPluginsScript({
   }
 
   await handleLoadPlugins(loadedPlugins);
+}
+
+function joinRelativePaths(...parts) {
+  return parts
+    .map(p => p.replace(/(^\/+|\/+$)/g, ''))
+    .filter(Boolean)
+    .join('/');
 }

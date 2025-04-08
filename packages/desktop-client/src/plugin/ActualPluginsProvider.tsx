@@ -7,7 +7,6 @@ import React, {
   useState,
   useEffect,
 } from 'react';
-import { type RouteObject } from 'react-router-dom';
 
 import {
   type ActualPluginEntry,
@@ -23,6 +22,7 @@ import { useDispatch, useSelector } from '../redux';
 import {
   loadPlugins,
   loadPluginsScript,
+  PluginRouteFn,
   type PluginModalModel,
   type PluginSidebarRegistrationFn,
 } from './core/pluginLoader';
@@ -38,7 +38,7 @@ export type ActualPluginsContextType = {
   pluginStore: ActualPluginStored[];
   refreshPluginStore: () => Promise<void>;
   modalMap: Map<string, PluginModalModel>;
-  pluginsRoutes: Map<string, RouteObject>;
+  pluginsRoutes: Map<string, PluginRouteFn>;
   sidebarItems: Record<
     SidebarLocations,
     Map<string, PluginSidebarRegistrationFn>
@@ -79,7 +79,7 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
   // const [pluginsModules, setPluginsModules] = useState<Map<string, ActualPluginEntry>>(new Map());
 
   const modalMap = useRef<Map<string, PluginModalModel>>(new Map());
-  const [pluginsRoutes, setPluginsRoutes] = useState<Map<string, RouteObject>>(
+  const [pluginsRoutes, setPluginsRoutes] = useState<Map<string, PluginRouteFn>>(
     new Map(),
   );
   const [sidebarItems, setSidebarItems] = useState<

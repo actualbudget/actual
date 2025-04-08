@@ -11,12 +11,13 @@ export interface ActualPlugin {
   version: string;
   uninstall: () => void;
   activate: (
-    context: Omit<HostContext, 'registerSidebarMenu' | 'pushModal'> & {
+    context: Omit<HostContext, 'registerSidebarMenu' | 'pushModal' | 'registerRoute'> & {
       registerSidebarMenu: (
         location: SidebarLocations,
         element: JSX.Element,
       ) => string;
       pushModal: (element: JSX.Element, modalProps?: BasicModalProps) => void;
+      registerRoute: (path: string, routeElement: JSX.Element) => string;
     },
   ) => void;
 }
@@ -41,7 +42,7 @@ export interface HostContext {
   ) => void;
   popModal: () => void;
 
-  registerRoute: (path: string, routeElement: JSX.Element) => string;
+  registerRoute: (path: string, routeElement: (container: HTMLDivElement) => void) => string;
   unregisterRoute: (id: string) => void;
 
   registerSidebarMenu: (
