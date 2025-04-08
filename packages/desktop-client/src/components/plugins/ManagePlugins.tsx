@@ -22,16 +22,21 @@ import {
   fetchRelease,
   parseGitHubRepoUrl,
 } from '../../plugin/core/githubUtils';
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
+import {
+  addGenericErrorNotification,
+  addNotification,
+  addUnknownErrorNotification,
+} from 'loot-core/client/notifications/notificationsSlice';
 import {
   installPluginFromManifest,
   installPluginFromZipFile,
 } from '../../plugin/core/pluginInstaller';
-import { SvgPause, SvgTrash } from '@actual-app/components/icons/v1';
-import { useRef, useState } from 'react';
+import { SvgPause, SvgPlay, SvgTrash } from '@actual-app/components/icons/v1';
+import { MutableRefObject, RefObject, useRef, useState } from 'react';
 import { TransObjectLiteral } from 'loot-core/types/util';
-import { removePlugin } from '../../plugin/core/pluginStore';
+import { persistPlugin, removePlugin } from '../../plugin/core/pluginStore';
 import { Input } from '@actual-app/components/input';
+import { t } from 'i18next';
 
 export function ManagePlugins() {
   const dispatch = useDispatch();
@@ -128,12 +133,12 @@ export function ManagePlugins() {
                                 );
                               }
                             }
-                          } catch (error: unknown) {
+                          } catch (error) {
                             dispatch(
-                              addNotification({
+                              addUnknownErrorNotification({
                                 notification: {
                                   type: 'error',
-                                  message: error.toString(),
+                                  error,
                                 },
                               }),
                             );
@@ -226,7 +231,7 @@ function PluginList() {
         <PluginRow
           key={`${plugin.name}-${plugin.version}`}
           plugin={plugin}
-          enabled={plugins.some(p => p.name === plugin.name)}
+          enabled={plugin.enabled}
         />
       ))}
     </>
@@ -244,7 +249,7 @@ function PluginRow({ plugin, enabled }: PluginRowProps) {
   const [pauseConfirmationOpen, setPauseConfirmationOpen] = useState(false);
   const pauseTriggerRef = useRef<HTMLButtonElement>(null);
 
-  const { refreshPluginStore, plugins } = useActualPlugins();
+  const { refreshPluginStore, plugins, pluginStore } = useActualPlugins();
 
   return (
     <Row
@@ -339,8 +344,39 @@ function PluginRow({ plugin, enabled }: PluginRowProps) {
             variant="bare"
             onPress={() => setPauseConfirmationOpen(true)}
           >
-            <SvgPause style={{ width: 16, height: 16 }} />
+            {plugin.enabled ? (
+              <SvgPause style={{ width: 16, height: 16 }} />
+            ) : (
+              <SvgPlay style={{ width: 16, height: 16 }} />
+            )}
           </Button>
+          <SmallConfirmationWindow
+            question={t(
+              'Are you sure you want to {{newstate}} the plugin ‘{{plugin}}‘',
+              {
+                newstate: plugin.enabled ? 'disable' : 'enable',
+                plugin: plugin.name,
+              },
+            )}
+            popoverRef={pauseTriggerRef}
+            isOpen={pauseConfirmationOpen}
+            onYes={async () => {
+              const loadedPlugin = pluginStore.find(
+                p => p.name === plugin.name,
+              );
+              if (loadedPlugin) {
+                persistPlugin(loadedPlugin.plugin, {
+                  ...loadedPlugin,
+                  enabled: plugin.enabled ? false : true,
+                });
+                await refreshPluginStore();
+                window.location.reload();
+              }
+              setPauseConfirmationOpen(false);
+            }}
+            onNo={() => setPauseConfirmationOpen(false)}
+          />
+
           <Button
             ref={removeTriggerRef}
             variant="bare"
@@ -349,60 +385,71 @@ function PluginRow({ plugin, enabled }: PluginRowProps) {
           >
             <SvgTrash style={{ width: 16, height: 16 }} />
           </Button>
-
-          <Popover
-            triggerRef={removeTriggerRef}
+          <SmallConfirmationWindow
+            question={t(
+              'Are you sure you want to delete the plugin ‘{{name}}‘',
+              { name: plugin.name },
+            )}
+            popoverRef={removeTriggerRef}
             isOpen={removeConfirmationOpen}
-            onOpenChange={() => setRemoveConfirmationOpen(false)}
-            style={{ padding: 16 }}
-          >
-            <View style={{ align: 'center' }}>
-              <Text style={{ marginBottom: 5 }}>
-                <Trans>
-                  Are you sure you want to delete the plugin {' ‘'}
-                  <Text style={{ display: 'inline' }}>
-                    {{ name: plugin.name } as TransObjectLiteral}
-                  </Text>
-                  ’?
-                </Trans>
-              </Text>
-            </View>
-
-            <Stack
-              direction="row"
-              justify="flex-end"
-              align="center"
-              style={{ marginTop: 15 }}
-            >
-              <View style={{ flex: 1 }} />
-              <Button
-                variant="primary"
-                autoFocus
-                onPress={async () => {
-                  const loadedPlugin = plugins.find(
-                    p => p.name === plugin.name,
-                  );
-                  if (loadedPlugin) {
-                    loadedPlugin.uninstall?.();
-                    removePlugin(plugin);
-                    await refreshPluginStore();
-                    window.location.reload();
-                  }
-                }}
-              >
-                <Trans>Yes</Trans>
-              </Button>
-              <Button
-                variant="primary"
-                onPress={() => setRemoveConfirmationOpen(false)}
-              >
-                <Trans>No</Trans>
-              </Button>
-            </Stack>
-          </Popover>
+            onYes={async () => {
+              const loadedPlugin = plugins.find(p => p.name === plugin.name);
+              if (loadedPlugin) {
+                loadedPlugin.uninstall?.();
+                removePlugin(plugin);
+                await refreshPluginStore();
+                window.location.reload();
+              }
+            }}
+            onNo={() => setRemoveConfirmationOpen(false)}
+          />
         </View>
       </Cell>
     </Row>
+  );
+}
+
+type SmallConfirmationWindowProps = {
+  question: string;
+  popoverRef?: RefObject<HTMLElement>;
+  isOpen?: boolean;
+  onYes?: () => void;
+  onNo?: () => void;
+};
+
+function SmallConfirmationWindow({
+  question,
+  popoverRef,
+  isOpen,
+  onYes,
+  onNo,
+}: SmallConfirmationWindowProps) {
+  return (
+    <Popover
+      triggerRef={popoverRef}
+      isOpen={isOpen}
+      onOpenChange={onNo}
+      style={{ padding: 16 }}
+    >
+      <View style={{ align: 'center' }}>
+        <Text style={{ marginBottom: 5 }}>{question}</Text>
+      </View>
+
+      <Stack
+        direction="row"
+        justify="flex-end"
+        align="center"
+        style={{ marginTop: 15 }}
+      >
+        <View style={{ flex: 1 }} />
+        <Button variant="primary" autoFocus onPress={onYes}>
+          <Trans>Yes</Trans>
+        </Button>
+        <Button variant="primary" onPress={onNo}>
+          <Trans>No</Trans>
+        </Button>
+      </Stack>
+    </Popover>
   );
 }
 
@@ -422,19 +469,18 @@ function PluginUploader() {
         addNotification({
           notification: {
             title: 'Manual plugin install',
-            message: "Plugin installed sucessfully!",
+            message: 'Plugin installed sucessfully!',
             type: 'message',
           },
         }),
       );
-    } catch (err: unknown) {
-      console.error(err);
+    } catch (error: unknown) {
+      console.error(error);
       dispatch(
-        addNotification({
+        addUnknownErrorNotification({
           notification: {
             title: 'Error installing plugin',
-            message: err.toString(),
-            type: 'error',
+            error,
           },
         }),
       );

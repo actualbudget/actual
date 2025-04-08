@@ -13,7 +13,10 @@ import {
 import type { Dispatch } from 'redux';
 import { v4 as uuidv4 } from 'uuid';
 
-import { pushModal as basePushModal, popModal } from 'loot-core/client/modals/modalsSlice';
+import {
+  pushModal as basePushModal,
+  popModal,
+} from 'loot-core/client/modals/modalsSlice';
 import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
 import { BasicModalProps } from '../../../../component-library/src/props/modalProps';
 import { ContextEvent } from 'plugins-core/types/actualPlugin';
@@ -117,12 +120,15 @@ function generateContext(
       });
     },
     on: <K extends keyof ContextEvent>(
-        eventType: K,
-        callback: (data: ContextEvent[K]) => void,
-      ) =>  {
+      eventType: K,
+      callback: (data: ContextEvent[K]) => void,
+    ) => {
       console.log(eventType, callback);
     },
-    pushModal(parameter: (container: HTMLDivElement) => void, modalProps: BasicModalProps) {
+    pushModal(
+      parameter: (container: HTMLDivElement) => void,
+      modalProps: BasicModalProps,
+    ) {
       dispatch(
         basePushModal({
           modal: {
@@ -173,8 +179,12 @@ export async function loadPluginsScript({
 
   const loadedPlugins: Map<string, ActualPluginEntry> = new Map();
   for (const plugin of pluginsData) {
-    const mod = await loadRemote<ActualPluginEntry>(plugin.name);
-    loadedPlugins.set(plugin.name, mod);
+    if (plugin.enabled) {
+      const mod = await loadRemote<ActualPluginEntry>(plugin.name);
+      if (mod) {
+        loadedPlugins.set(plugin.name, mod);
+      }
+    }
   }
 
   await handleLoadPlugins(loadedPlugins);
