@@ -152,6 +152,16 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
       );
     },
   });
+  sheet.get().createDynamic(sheetName, 'buffered-selected', {
+    initialValue: 0,
+    dependencies: [`${sheetName}!buffered`, `${sheetName}!buffered-auto`],
+    run: (man, auto) => {
+      if (man !== 0) {
+        return auto;
+      }
+      return man;
+    },
+  });
 
   sheet.get().createDynamic(sheetName, 'to-budget', {
     initialValue: 0,
