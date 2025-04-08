@@ -1,11 +1,10 @@
 import { Backup } from '../server/backups';
 import { RemoteFile } from '../server/cloud-storage';
 import { Message } from '../server/sync';
+import { QueryState } from '../shared/query';
 
 import { Budget } from './budget';
 import { OpenIdConfig } from './models/openid';
-// eslint-disable-next-line import/no-unresolved
-import { Query } from './query';
 import { EmptyObject } from './util';
 
 export interface ServerHandlers {
@@ -20,7 +19,7 @@ export interface ServerHandlers {
   }) => Promise<{ filters: unknown[] }>;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  query: (query: Query) => Promise<{ data: any; dependencies: string[] }>;
+  query: (query: QueryState) => Promise<{ data: any; dependencies: string[] }>;
 
   'key-make': (arg: {
     password;
@@ -190,7 +189,7 @@ export interface ServerHandlers {
 
   'enable-password': (arg: { password: string }) => Promise<{ error?: string }>;
 
-  'get-openid-config': () => Promise<
+  'get-openid-config': (arg: { password: string }) => Promise<
     | {
         openId: OpenIdConfig;
       }
