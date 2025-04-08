@@ -1,6 +1,9 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
+import { q } from '../../shared/query';
 import { getChangedValues } from '../../shared/util';
+import { CategoryGroupEntity } from '../../types/models';
+import { runQuery as aqlQuery } from '../aql';
 import * as db from '../db';
 import * as sheet from '../sheet';
 import { resolveName } from '../spreadsheet/util';
@@ -390,8 +393,10 @@ export async function doTransfer(categoryIds, transferId) {
 }
 
 export async function createBudget(months) {
-  const categories = await db.getCategories();
-  const groups = await db.getCategoriesGrouped();
+  const { data: groups }: { data: CategoryGroupEntity[] } = await aqlQuery(
+    q('category_groups').select('*'),
+  );
+  const categories = groups.flatMap(group => group.categories);
 
   sheet.startTransaction();
   const meta = sheet.get().meta();

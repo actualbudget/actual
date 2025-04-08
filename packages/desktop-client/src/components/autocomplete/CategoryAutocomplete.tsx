@@ -38,7 +38,7 @@ import { useSheetValue } from '../spreadsheet/useSheetValue';
 import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
 
-type CategoryAutocompleteItem = CategoryEntity & {
+type CategoryAutocompleteItem = Omit<CategoryEntity, 'group'> & {
   group?: CategoryGroupEntity;
 };
 
@@ -105,9 +105,10 @@ function CategoryList({
             });
           }
 
-          const showGroup = item.cat_group !== lastGroup;
+          const groupId = item.group?.id;
+          const showGroup = groupId !== lastGroup;
           const groupName = `${item.group?.name}${item.group?.hidden ? ' ' + t('(hidden)') : ''}`;
-          lastGroup = item.cat_group;
+          lastGroup = groupId;
           return (
             <Fragment key={item.id}>
               {showGroup && item.group?.name && (
@@ -195,13 +196,15 @@ export function CategoryAutocomplete({
         (list, group) =>
           list.concat(
             (group.categories || [])
-              .filter(category => category.cat_group === group.id)
+              .filter(category => category.group === group.id)
               .map(category => ({
                 ...category,
                 group,
               })),
           ),
-        showSplitOption ? [{ id: 'split', name: '' } as CategoryEntity] : [],
+        showSplitOption
+          ? [{ id: 'split', name: '' } as CategoryAutocompleteItem]
+          : [],
       ),
     [defaultCategoryGroups, categoryGroups, showSplitOption],
   );
