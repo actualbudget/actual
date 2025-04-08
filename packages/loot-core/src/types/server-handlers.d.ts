@@ -15,15 +15,6 @@ export interface ServerHandlers {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   query: (query: QueryState) => Promise<{ data: any; dependencies: string[] }>;
 
-  'key-make': (arg: {
-    password;
-  }) => Promise<{ error?: { reason: string; meta?: unknown } }>;
-
-  'key-test': (arg: {
-    fileId;
-    password;
-  }) => Promise<{ error?: { reason: string } }>;
-
   'get-did-bootstrap': () => Promise<boolean>;
 
   'subscribe-needs-bootstrap': (args: { url }) => Promise<
