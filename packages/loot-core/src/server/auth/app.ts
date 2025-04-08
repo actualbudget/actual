@@ -326,8 +326,13 @@ async function getOpenIdConfig({ password }: { password: string }) {
   try {
     const userToken = await asyncStorage.getItem('user-token');
 
+    const serverConfig = getServer();
+    if (!serverConfig) {
+      throw new Error('No sync server configured.');
+    }
+
     const res = await post(
-      getServer().BASE_SERVER + '/openid/config',
+      serverConfig.BASE_SERVER + '/openid/config',
       { password },
       {
         'X-ACTUAL-TOKEN': userToken,
@@ -340,7 +345,13 @@ async function getOpenIdConfig({ password }: { password: string }) {
 
     return null;
   } catch (err) {
-    return { error: err.reason };
+    if (err instanceof PostError) {
+      return {
+        error: err.reason || 'network-failure',
+      };
+    }
+
+    throw err;
   }
 }
 
