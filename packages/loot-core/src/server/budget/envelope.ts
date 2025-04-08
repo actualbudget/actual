@@ -157,9 +157,9 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
     dependencies: [`${sheetName}!buffered`, `${sheetName}!buffered-auto`],
     run: (man, auto) => {
       if (man !== 0) {
-        return auto;
+        return man;
       }
-      return man;
+      return auto;
     },
   });
 
