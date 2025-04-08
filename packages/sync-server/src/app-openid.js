@@ -5,6 +5,7 @@ import {
   isValidRedirectUrl,
   loginWithOpenIdFinalize,
 } from './accounts/openid.js';
+import { checkPassword } from './accounts/password.js';
 import * as UserService from './services/user-service.js';
 import {
   errorMiddleware,
@@ -56,11 +57,16 @@ app.post('/disable', validateSessionMiddleware, async (req, res) => {
   res.send({ status: 'ok' });
 });
 
-app.get('/config', async (req, res) => {
+app.post('/config', async (req, res) => {
   const { cnt: ownerCount } = UserService.getOwnerCount() || {};
 
   if (ownerCount > 0) {
     res.status(400).send({ status: 'error', reason: 'already-bootstraped' });
+    return;
+  }
+
+  if (!checkPassword(req.body.password)) {
+    res.status(400).send({ status: 'error', reason: 'invalid-password' });
     return;
   }
 
@@ -75,7 +81,7 @@ app.get('/config', async (req, res) => {
 
   try {
     const openIdConfig = JSON.parse(auth.extra_data);
-    res.send({ openId: openIdConfig });
+    res.send({ status: 'ok', data: { openId: openIdConfig } });
   } catch (error) {
     res
       .status(500)

@@ -126,6 +126,7 @@
     "./server/*": "./src/server/*.ts",
     "./shared/*": "./src/shared/*.ts",
     "./types/models": "./src/types/models/index.d.ts",
-    "./types/*": "./src/types/*.d.ts"
+    "./types/*": "./src/types/*.d.ts",
+    "./lib-dist/electron/bundle.desktop.js": "./lib-dist/electron/bundle.desktop.js"
   }
 }
