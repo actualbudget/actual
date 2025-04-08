@@ -39,6 +39,7 @@ import { Input } from '@actual-app/components/input';
 import { t } from 'i18next';
 
 export function ManagePlugins() {
+  const devPlugin = useRef<HTMLInputElement>(null);
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const { pluginStore, plugins, refreshPluginStore } = useActualPlugins();
@@ -218,6 +219,19 @@ export function ManagePlugins() {
               </Button>
             )} */}
         </Stack>
+      </View>
+      <View style={{ flexDirection: 'row', gap: 16 }}>
+        <Input
+        style={{flex: 1}}
+          inputRef={devPlugin}
+          value="http://localhost:2000/mf-manifest.json"
+        />{' '}
+        <Button
+          variant="primary"
+          onPress={() => {
+            refreshPluginStore(devPlugin.current.value);
+          }}
+        >Enable Dev Plugin</Button>
       </View>
     </View>
   );

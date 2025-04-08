@@ -24,6 +24,8 @@ import { useSelector, useDispatch } from '../redux';
 
 import { PrivacyFilter } from './PrivacyFilter';
 import { useMultiuserEnabled, useServerURL } from './ServerContext';
+import { RenderPluginsComponent } from './plugins/RenderPluginsComponent';
+import { useActualPlugins } from '../plugin/ActualPluginsProvider';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;
@@ -55,6 +57,7 @@ export function LoggedInUser({
   ) as (SyncedLocalFile | RemoteFile)[];
   const currentFile = remoteFiles.find(f => f.cloudFileId === cloudFileId);
   const hasSyncedPrefs = useSelector(state => state.prefs.synced);
+  const { sidebarItems } = useActualPlugins();
 
   const initializeUserData = async () => {
     try {
@@ -222,6 +225,8 @@ export function LoggedInUser({
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', ...style }}>
+      <RenderPluginsComponent toRender={sidebarItems['topbar']} />
+
       <Button
         ref={triggerRef}
         variant="bare"

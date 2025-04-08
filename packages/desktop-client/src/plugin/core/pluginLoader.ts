@@ -3,7 +3,6 @@ import {
   type Dispatch as ReactDispatch,
   type SetStateAction,
 } from 'react';
-import type { RouteObject } from 'react-router-dom';
 
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
 import {
@@ -19,7 +18,10 @@ import {
 } from 'loot-core/client/modals/modalsSlice';
 import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
 import { BasicModalProps } from '../../../../component-library/src/props/modalProps';
-import { ContextEvent } from 'plugins-core/types/actualPlugin';
+import {
+  ContextEvent,
+  SidebarLocations,
+} from 'plugins-core/types/actualPlugin';
 
 export type PluginModalModel = {
   name: string;
@@ -27,6 +29,11 @@ export type PluginModalModel = {
 };
 
 export type PluginSidebarRegistrationFn = (container: HTMLDivElement) => void;
+
+export type PluginRouteFn = {
+  path: string;
+  parameter: (container: HTMLDivElement) => void;
+};
 
 export async function loadPlugins({
   pluginsEntries,
@@ -36,16 +43,24 @@ export async function loadPlugins({
   setPluginsRoutes,
   setSidebarItems,
   navigateBase,
+  setEvents,
 }: {
   pluginsEntries: Map<string, ActualPluginEntry>;
   dispatch: Dispatch;
   setPlugins: ReactDispatch<SetStateAction<ActualPluginInitialized[]>>;
   modalMap: MutableRefObject<Map<string, PluginModalModel>>;
-  setPluginsRoutes: ReactDispatch<SetStateAction<Map<string, RouteObject>>>;
+  setPluginsRoutes: ReactDispatch<SetStateAction<Map<string, PluginRouteFn>>>;
   setSidebarItems: ReactDispatch<
-    SetStateAction<Map<string, PluginSidebarRegistrationFn>>
+    SetStateAction<
+      Record<SidebarLocations, Map<string, PluginSidebarRegistrationFn>>
+    >
   >;
   navigateBase: (path: string) => void;
+  setEvents: ReactDispatch<
+    SetStateAction<{
+      [K in keyof ContextEvent]?: Array<(data: ContextEvent[K]) => void>;
+    }>
+  >;
 }) {
   const loadedList: ActualPluginInitialized[] = [];
 
@@ -63,6 +78,7 @@ export async function loadPlugins({
       dispatch,
       pluginId,
       navigateBase,
+      setEvents,
     );
 
     const rawPlugin = pluginEntry();
@@ -76,22 +92,34 @@ export async function loadPlugins({
 
 function generateContext(
   modalMap: MutableRefObject<Map<string, PluginModalModel>>,
-  setPluginsRoutes,
-  setSidebarItems,
+  setPluginsRoutes: ReactDispatch<SetStateAction<Map<string, PluginRouteFn>>>,
+  setSidebarItems: ReactDispatch<
+    SetStateAction<
+      Record<SidebarLocations, Map<string, PluginSidebarRegistrationFn>>
+    >
+  >,
   dispatch,
   pluginId: string,
   navigateBase: (path: string) => void,
+  setEvents: ReactDispatch<
+    SetStateAction<{
+      [K in keyof ContextEvent]?: Array<(data: ContextEvent[K]) => void>;
+    }>
+  >,
 ) {
   return {
-    registerRoute: (path: string, routeElement: JSX.Element) => {
+    registerRoute: (
+      path: string,
+      routeElement: (container: HTMLDivElement) => void,
+    ) => {
       const id = uuidv4();
+      const url = joinRelativePaths('/custom', path);
       setPluginsRoutes(prev => {
         const newMap = new Map(prev);
         newMap.set(id, {
-          id,
-          path: `/custom/${path}`,
-          element: routeElement,
-        } as RouteObject);
+          path: url,
+          parameter: routeElement,
+        });
         return newMap;
       });
       return id;
@@ -103,27 +131,51 @@ function generateContext(
         return newMap;
       });
     },
-    registerSidebarMenu: (param: PluginSidebarRegistrationFn) => {
+    registerMenu: (
+      position: SidebarLocations,
+      param: PluginSidebarRegistrationFn,
+    ) => {
       const id = uuidv4();
       setSidebarItems(prev => {
-        const newMap = new Map(prev);
-        newMap.set(id, param);
-        return newMap;
+        const updated = new Map(prev[position]);
+        updated.set(id, param);
+
+        return {
+          ...prev,
+          [position]: updated,
+        };
       });
       return id;
     },
-    unregisterSidebarMenu: (id: string) => {
+    unregisterMenu: (id: string) => {
       setSidebarItems(prev => {
-        const newMap = new Map(prev);
-        newMap.delete(id);
-        return newMap;
+        const updated: Record<
+          SidebarLocations,
+          Map<string, PluginSidebarRegistrationFn>
+        > = {
+          ...prev,
+        };
+
+        (Object.keys(prev) as SidebarLocations[]).forEach(location => {
+          const currentMap = prev[location];
+          if (currentMap.has(id)) {
+            const newMap = new Map(currentMap);
+            newMap.delete(id);
+            updated[location] = newMap;
+          }
+        });
+
+        return updated;
       });
     },
     on: <K extends keyof ContextEvent>(
       eventType: K,
       callback: (data: ContextEvent[K]) => void,
     ) => {
-      console.log(eventType, callback);
+      setEvents(prev => ({
+        ...prev,
+        [eventType]: [...(prev[eventType] ?? []), callback],
+      }));
     },
     pushModal(
       parameter: (container: HTMLDivElement) => void,
@@ -157,18 +209,39 @@ function generateContext(
 export async function loadPluginsScript({
   pluginsData,
   handleLoadPlugins,
+  devUrl = '',
 }: {
   pluginsData: ActualPluginStored[];
   handleLoadPlugins: (
     pluginsEntries: Map<string, ActualPluginEntry>,
   ) => Promise<void>;
-}) {
+  devUrl?: string;
+}): Promise<boolean> {
+  const remotes = [
+    ...pluginsData,
+    ...(devUrl !== ''
+      ? [
+          {
+            name: 'dev-plugin',
+            alias: 'dev-plugin',
+            url: null,
+            entry: devUrl,
+          },
+        ]
+      : []),
+  ];
+
+  if (remotes.length === 0) return false;
+
   init({
     name: '@actual/host-app',
-    remotes: pluginsData.map(plugin => ({
+    remotes: remotes.map(plugin => ({
       name: plugin.name,
       alias: plugin.name,
-      entry: `plugin-data/${encodeURIComponent(plugin.url)}`,
+      entry:
+        'entry' in plugin
+          ? plugin.entry
+          : `plugin-data/${encodeURIComponent(plugin.url)}`,
     })),
     shared: {
       react: {
@@ -187,5 +260,18 @@ export async function loadPluginsScript({
     }
   }
 
+  if (devUrl !== '') {
+    const mod = await loadRemote<ActualPluginEntry>('dev-plugin');
+    loadedPlugins.set('dev-plugin', mod);
+  }
+
   await handleLoadPlugins(loadedPlugins);
+  return true;
+}
+
+function joinRelativePaths(...parts) {
+  return parts
+    .map(p => p.replace(/(^\/+|\/+$)/g, ''))
+    .filter(Boolean)
+    .join('/');
 }

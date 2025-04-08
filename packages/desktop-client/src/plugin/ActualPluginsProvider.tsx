@@ -5,8 +5,8 @@ import React, {
   useCallback,
   useRef,
   useState,
+  useEffect,
 } from 'react';
-import { type RouteObject } from 'react-router-dom';
 
 import {
   type ActualPluginEntry,
@@ -17,23 +17,32 @@ import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-st
 
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { useNavigate } from '../hooks/useNavigate';
-import { useDispatch } from '../redux';
+import { useDispatch, useSelector } from '../redux';
 
 import {
   loadPlugins,
   loadPluginsScript,
+  PluginRouteFn,
   type PluginModalModel,
   type PluginSidebarRegistrationFn,
 } from './core/pluginLoader';
 import { getAllPlugins } from './core/pluginStore';
+import {
+  ContextEvent,
+  SidebarLocations,
+} from 'plugins-core/types/actualPlugin';
+import { store } from 'loot-core/client/store';
 
 export type ActualPluginsContextType = {
   plugins: ActualPluginInitialized[];
   pluginStore: ActualPluginStored[];
-  refreshPluginStore: () => Promise<void>;
+  refreshPluginStore: (devUrl?: string) => Promise<void>;
   modalMap: Map<string, PluginModalModel>;
-  pluginsRoutes: Map<string, RouteObject>;
-  sidebarItems: Map<string, PluginSidebarRegistrationFn>;
+  pluginsRoutes: Map<string, PluginRouteFn>;
+  sidebarItems: Record<
+    SidebarLocations,
+    Map<string, PluginSidebarRegistrationFn>
+  >;
 };
 
 // Create the context
@@ -47,18 +56,43 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
 
   const [plugins, setPlugins] = useState<ActualPluginInitialized[]>([]);
   const [pluginStore, setPluginStore] = useState<ActualPluginStored[]>([]);
+  const [events, setEvents] = useState<{
+    [K in keyof ContextEvent]?: Array<(data: ContextEvent[K]) => void>;
+  }>({});
+
+  useEventDispatcher(
+    'payess',
+    state => ({ payess: state.queries.payees }),
+    events,
+  );
+  useEventDispatcher(
+    'categories',
+    state => ({
+      categories: state.queries.categories.list,
+      groups: state.queries.categories.grouped,
+    }),
+    events,
+  );
 
   // We store modules in memory if needed (original code had it, but not used outside loadPlugins)
   // If you want to keep that, do so:
   // const [pluginsModules, setPluginsModules] = useState<Map<string, ActualPluginEntry>>(new Map());
 
+  const [initialized, setinitialized] = useState(false);
+
   const modalMap = useRef<Map<string, PluginModalModel>>(new Map());
-  const [pluginsRoutes, setPluginsRoutes] = useState<Map<string, RouteObject>>(
-    new Map(),
-  );
-  const [sidebarItems, setSidebarItems] = useState<
-    Map<string, PluginSidebarRegistrationFn>
+  const [pluginsRoutes, setPluginsRoutes] = useState<
+    Map<string, PluginRouteFn>
   >(new Map());
+  const [sidebarItems, setSidebarItems] = useState<
+    Record<SidebarLocations, Map<string, PluginSidebarRegistrationFn>>
+  >({
+    'main-menu': new Map(),
+    'more-menu': new Map(),
+    'before-accounts': new Map(),
+    'after-accounts': new Map(),
+    topbar: new Map(),
+  });
 
   const dispatch = useDispatch();
   const navigateBase = useNavigate();
@@ -77,6 +111,18 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
         setPluginsRoutes,
         setSidebarItems,
         navigateBase,
+        setEvents,
+      });
+
+      dispatchEvent('payess', events, {
+        payess: store.getState().queries.payees,
+      });
+      dispatchEvent('categories', events, {
+        categories: store.getState().queries.categories.list,
+        groups: store.getState().queries.categories.grouped,
+      });
+      dispatchEvent('accounts', events, {
+        accounts: store.getState().queries.accounts,
       });
     },
     [dispatch, navigateBase, pluginsEnabled],
@@ -84,29 +130,35 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
 
   // The function that loads plugin scripts (the remote modules) and calls handleLoadPlugins
   const handleLoadPluginsScript = useCallback(
-    async (pluginsData: ActualPluginStored[]) => {
-      if (!pluginsEnabled) return;
+    async (pluginsData: ActualPluginStored[], devUrl?: string) => {
+      if (!pluginsEnabled || initialized) return;
 
-      await loadPluginsScript({
-        pluginsData,
-        handleLoadPlugins,
-      });
+      setinitialized(
+        await loadPluginsScript({
+          pluginsData,
+          handleLoadPlugins,
+          devUrl,
+        }),
+      );
     },
-    [handleLoadPlugins, pluginsEnabled],
+    [handleLoadPlugins, pluginsEnabled, initialized, setinitialized],
   );
 
   // A function to refresh the plugin store from IndexedDB and reload if needed
-  const refreshPluginStore = useCallback(async () => {
-    if (!pluginsEnabled) return;
+  const refreshPluginStore = useCallback(
+    async (devUrl?: string) => {
+      if (!pluginsEnabled) return;
 
-    const pluginsFromDB = (await getAllPlugins()) as ActualPluginStored[];
-    // If the new list has changed in size, we might want to reload
-    // (or you can do more sophisticated checks if you want)
-    if (pluginsFromDB.length !== pluginStore.length) {
-      await handleLoadPluginsScript(pluginsFromDB);
-    }
-    setPluginStore(pluginsFromDB);
-  }, [pluginStore.length, handleLoadPluginsScript, pluginsEnabled]);
+      const pluginsFromDB = (await getAllPlugins()) as ActualPluginStored[];
+      // If the new list has changed in size, we might want to reload
+      // (or you can do more sophisticated checks if you want)
+      if (pluginsFromDB.length !== pluginStore.length || devUrl !== '') {
+        await handleLoadPluginsScript(pluginsFromDB, devUrl);
+      }
+      setPluginStore(pluginsFromDB);
+    },
+    [pluginStore.length, handleLoadPluginsScript, pluginsEnabled],
+  );
 
   // Provide everything
   const contextValue: ActualPluginsContextType = {
@@ -134,4 +186,31 @@ export function useActualPlugins() {
     );
   }
   return context;
+}
+
+function dispatchEvent<K extends keyof ContextEvent>(
+  key: K,
+  events: {
+    [K in keyof ContextEvent]?: Array<(data: ContextEvent[K]) => void>;
+  },
+  data: ContextEvent[K],
+) {
+  const listeners = events[key];
+  if (listeners && listeners.length > 0) {
+    listeners.forEach(cb => cb(data));
+  }
+}
+
+function useEventDispatcher<K extends keyof ContextEvent>(
+  key: K,
+  selector: (state: any) => ContextEvent[K],
+  events: {
+    [K in keyof ContextEvent]?: Array<(data: ContextEvent[K]) => void>;
+  },
+) {
+  const value = useSelector(selector);
+
+  useEffect(() => {
+    dispatchEvent(key, events, value);
+  }, [value, events[key]]);
 }

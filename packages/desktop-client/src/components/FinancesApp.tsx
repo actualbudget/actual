@@ -47,6 +47,7 @@ import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { Titlebar } from './Titlebar';
+import { PluginCustomPage } from './plugins/PluginCustomPage';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -323,11 +324,11 @@ export function FinancesApp() {
                     }
                   />
                 )}
-                {...Array.from(pluginsRoutes.values()).map(route => (
+                {...Array.from(pluginsRoutes.values()).map((plugin, index) => (
                   <Route
-                    key={route.id}
-                    path={route.path}
-                    element={route.element}
+                    key={`plugin-id-${index}`}
+                    path={plugin.path}
+                    element={<PluginCustomPage parameter={plugin.parameter} />}
                   />
                 ))}
                 {/* redirect all other traffic to the budget page */}
