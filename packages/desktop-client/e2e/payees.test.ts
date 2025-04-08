@@ -1,10 +1,10 @@
 import { type Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
+import { AccountPage } from './page-models/account-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
-import { AccountPage } from './page-models/account-page';
-import { PayeesPage } from './page-models/payees-page';
+import { type PayeesPage } from './page-models/payees-page';
 
 test.describe('Payees', () => {
   let page: Page;
