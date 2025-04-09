@@ -230,3 +230,15 @@ export function holdBudgetForNextMonth(month, amount) {
 export function resetBudgetHold(month) {
   return send('api/budget-reset-hold', { month });
 }
+
+export function createSchedule(schedule, conditions) {
+  return send('api/schedule-create', { schedule, conditions });
+}
+
+export function updateSchedule(id, { conditions, fields }) {
+  return send('api/schedule-update', { id, conditions, fields });
+}
+
+export function deleteSchedule(id) {
+  return send('api/schedule-delete', { id });
+}
