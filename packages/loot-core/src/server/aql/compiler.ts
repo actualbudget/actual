@@ -1003,8 +1003,8 @@ export function isAggregateQuery(queryState) {
 
 export type SchemaConfig = {
   tableViews?:
-    | Record<string, unknown>
-    | ((name: string, config: { withDead; isJoin; tableOptions }) => unknown);
+    | Record<string, string>
+    | ((name: string, config: { withDead; isJoin; tableOptions }) => string);
   tableFilters?: (name: string) => unknown[];
   customizeQuery?: (queryString: QueryState) => QueryState;
   views?: Record<
@@ -1015,8 +1015,44 @@ export type SchemaConfig = {
     }
   >;
 };
+
+// Types per field. Should be based on the schema.
+export type OutputTypes = Map<string, string | number | null>;
+
+type NamedParameter = {
+  type: string;
+  paramName: string;
+  paramType?: string;
+  value: string;
+};
+
+export type CompilerState = {
+  // Should be based on schema/index
+  schema: unknown;
+  implicitTableName: string;
+  implicitTableId: string;
+  paths: Map<string, unknown>;
+  dependencies: string[];
+  // TODO: type this
+  compileStack: unknown[];
+  outputTypes: OutputTypes;
+  validateRefs: boolean;
+  namedParameters: NamedParameter[];
+};
+
+export type SqlPieces = {
+  select: string;
+  from: unknown;
+  joins: string;
+  where: string;
+  groupBy: string;
+  orderBy: string;
+  limit: number;
+  offset: number;
+};
+
 export function compileQuery(
-  queryState,
+  queryState: QueryState,
   schema,
   schemaConfig: SchemaConfig = {},
 ) {
@@ -1070,7 +1106,7 @@ export function compileQuery(
   let joins = '';
   let groupBy = '';
   let orderBy = '';
-  const state = {
+  const state: CompilerState = {
     schema,
     implicitTableName: tableName,
     implicitTableId: tableRef(tableName),
@@ -1128,7 +1164,7 @@ export function compileQuery(
     throw e;
   }
 
-  const sqlPieces = {
+  const sqlPieces: SqlPieces = {
     select,
     from: tableRef(tableName),
     joins,
@@ -1145,7 +1181,7 @@ export function compileQuery(
   };
 }
 
-export function defaultConstructQuery(queryState, state, sqlPieces) {
+export function defaultConstructQuery(queryState: QueryState, state, sqlPieces: SqlPieces) {
   const s = sqlPieces;
 
   const where = queryState.withDead
@@ -1169,9 +1205,9 @@ export function defaultConstructQuery(queryState, state, sqlPieces) {
 }
 
 export function generateSQLWithState(
-  queryState,
+  queryState: QueryState,
   schema?: unknown,
-  schemaConfig?: unknown,
+  schemaConfig?: SchemaConfig,
 ) {
   const { sqlPieces, state } = compileQuery(queryState, schema, schemaConfig);
   return { sql: defaultConstructQuery(queryState, state, sqlPieces), state };

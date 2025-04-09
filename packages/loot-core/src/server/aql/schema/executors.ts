@@ -1,14 +1,13 @@
 // @ts-strict-ignore
 
+import { aqlQuery } from '..';
 import { q } from '../../../shared/query';
 import { CategoryEntity, CategoryGroupEntity } from '../../../types/models';
 import * as db from '../../db';
 import { whereIn } from '../../db/util';
 import { isAggregateQuery } from '../compiler';
-import { execQuery } from '../exec';
+import { AqlQueryExecutor, execQuery } from '../exec';
 import { convertOutputType } from '../schema-helpers';
-
-import { runQuery as aqlQuery } from './run-query';
 
 // Transactions executor
 
@@ -300,6 +299,6 @@ async function execCategoryGroupsBasic(
 }
 
 export const schemaExecutors = {
-  transactions: execTransactions,
-  category_groups: execCategoryGroups,
+  transactions: execTransactions as AqlQueryExecutor,
+  category_groups: execCategoryGroups as AqlQueryExecutor,
 };

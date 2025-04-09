@@ -19,7 +19,7 @@ import * as modalsSlice from 'loot-core/client/modals/modalsSlice';
 import * as notificationsSlice from 'loot-core/client/notifications/notificationsSlice';
 import * as prefsSlice from 'loot-core/client/prefs/prefsSlice';
 import * as queriesSlice from 'loot-core/client/queries/queriesSlice';
-import { runQuery } from 'loot-core/client/query-helpers';
+import { aqlQuery } from 'loot-core/client/query-helpers';
 import { store } from 'loot-core/client/store';
 import { redo, undo } from 'loot-core/client/undo';
 import * as usersSlice from 'loot-core/client/users/usersSlice';
@@ -80,7 +80,7 @@ window.__actionsForMenu = {
 
 // Expose send for fun!
 window.$send = send;
-window.$query = runQuery;
+window.$query = aqlQuery;
 window.$q = q;
 
 const container = document.getElementById('root');
@@ -107,7 +107,7 @@ declare global {
     };
 
     $send: typeof send;
-    $query: typeof runQuery;
+    $query: typeof aqlQuery;
     $q: typeof q;
   }
 }

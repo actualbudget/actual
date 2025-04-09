@@ -8,7 +8,7 @@ import { Stack } from '@actual-app/components/stack';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { runQuery } from 'loot-core/client/query-helpers';
+import { aqlQuery } from 'loot-core/client/query-helpers';
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 import { getRecurringDescription } from 'loot-core/shared/schedules';
@@ -177,7 +177,7 @@ export function DiscoverSchedules() {
       });
 
       if (filters.length > 0) {
-        const { data: transactions } = await runQuery(
+        const { data: transactions } = await aqlQuery(
           q('transactions').filter({ $and: filters }).select('id'),
         );
 

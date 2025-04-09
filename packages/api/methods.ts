@@ -52,7 +52,7 @@ export async function batchBudgetUpdates(func) {
   }
 }
 
-export function runQuery(query) {
+export function aqlQuery(query) {
   return send('api/query', { query: query.serialize() });
 }
 
