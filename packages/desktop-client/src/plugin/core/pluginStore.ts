@@ -49,16 +49,18 @@ export async function persistPlugin(
   const objectStore = transaction.objectStore('plugins');
 
   const storedPlugin: ActualPluginStored = {
+    enabled: true,
     ...manifest,
     plugin: scriptBlob,
-    enabled: true, //TODO
   };
 
   objectStore.put(storedPlugin);
 }
 
 /** Remove a plugin from the DB */
-export async function removePlugin(manifest: ActualPluginManifest): Promise<void> {
+export async function removePlugin(
+  manifest: ActualPluginManifest,
+): Promise<void> {
   const db = await getDatabase();
   const transaction = db.transaction(['plugins'], 'readwrite');
   const objectStore = transaction.objectStore('plugins');

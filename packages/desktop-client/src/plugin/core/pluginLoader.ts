@@ -252,8 +252,12 @@ export async function loadPluginsScript({
 
   const loadedPlugins: Map<string, ActualPluginEntry> = new Map();
   for (const plugin of pluginsData) {
-    const mod = await loadRemote<ActualPluginEntry>(plugin.name);
-    loadedPlugins.set(plugin.name, mod);
+    if (plugin.enabled) {
+      const mod = await loadRemote<ActualPluginEntry>(plugin.name);
+      if (mod) {
+        loadedPlugins.set(plugin.name, mod);
+      }
+    }
   }
 
   if (devUrl !== '') {
@@ -262,7 +266,6 @@ export async function loadPluginsScript({
   }
 
   await handleLoadPlugins(loadedPlugins);
-
   return true;
 }
 
