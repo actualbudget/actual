@@ -143,11 +143,11 @@ export interface ApiHandlers {
   }) => Promise<unknown>;
 
   'api/account-reopen': (arg: {
-    id: APIAccountEntity['account_id'];
+    id: APIAccountEntity['id'];
   }) => Promise<unknown>;
 
   'api/account-delete': (arg: {
-    id: APIAccountEntity['account_id'];
+    id: APIAccountEntity['id'];
   }) => Promise<unknown>;
 
   'api/account-balance': (arg: {
@@ -162,7 +162,7 @@ export interface ApiHandlers {
   'api/category-groups-get': () => Promise<APICategoryGroupEntity[]>;
 
   'api/category-group-create': (arg: {
-    group: RequireOnLy<APICategoryGroupEntity, 'name'>;
+    group: RequireOnly<APICategoryGroupEntity, 'name'>;
   }) => Promise<string>;
 
   'api/category-group-update': (arg: {
