@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 ROOT=`dirname $0`
+BUILD_DIR=packages/sync-server/build
 
 cd "$ROOT/.."
 
@@ -10,7 +11,11 @@ yarn build:browser
 echo "Building @actual-app/sync-server"
 yarn workspaces focus @actual-app/sync-server --production
 
-BUILD_DIR=packages/sync-server/build
+if test -d $BUILD_DIR; then
+  echo "Cleaning previous build"
+  rm -rf $BUILD_DIR
+fi
+
 mkdir -p $BUILD_DIR
 cp -r node_modules $BUILD_DIR/
 cp packages/sync-server/{package.json,app.js} $BUILD_DIR/

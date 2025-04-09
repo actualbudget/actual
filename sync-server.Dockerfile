@@ -18,6 +18,7 @@ COPY packages/loot-core/package.json packages/loot-core/package.json
 COPY packages/sync-server/package.json packages/sync-server/package.json
 
 COPY ./bin/package-browser ./bin/package-browser
+COPY ./bin/package-server ./bin/package-server
 
 RUN yarn install
 
@@ -26,17 +27,7 @@ FROM deps as builder
 WORKDIR /app
 
 COPY packages/ ./packages/
-RUN yarn build:browser
-
-# Focus the workspaces in production mode (including @actual-app/web you just built)
-RUN yarn workspaces focus @actual-app/sync-server --production
-
-# Remove symbolic links for @actual-app/web and @actual-app/sync-server
-RUN rm -rf ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
-
-# Copy in the @actual-app/web artifacts manually, so we don't need the entire packages folder
-COPY ./packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
-RUN cp -r ./packages/desktop-client/build ./node_modules/@actual-app/web/build
+RUN yarn build:server
 
 FROM node:18-bookworm-slim as prod
 
@@ -55,10 +46,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Pull in only the necessary artifacts (built node_modules, server files, etc.)
-COPY --from=builder /app/node_modules /app/node_modules
-COPY --from=builder /app/packages/sync-server/package.json /app/packages/sync-server/app.js ./
-COPY --from=builder /app/packages/sync-server/src ./src
-COPY --from=builder /app/packages/sync-server/migrations ./migrations
+COPY --from=builder /app/packages/sync-server/build/ /app/
 
 ENTRYPOINT ["/usr/bin/tini", "-g", "--"]
 EXPOSE 5006
