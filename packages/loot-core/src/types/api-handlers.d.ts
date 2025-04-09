@@ -16,7 +16,6 @@ import type {
   NewRuleEntity,
   RuleConditionEntity,
   RuleEntity,
-  ScheduleEntity,
   TransactionEntity,
 } from './models';
 import { type ServerHandlers } from './server-handlers';
@@ -219,11 +218,13 @@ export interface ApiHandlers {
   }) => Promise<APIScheduleEntity['id']>;
 
   'api/schedule-update': (arg: {
-    id: ScheduleEntity['id'];
-    fields?: Omit<ScheduleEntity, 'id'>;
+    id: APIScheduleEntity['id'];
+    fields?: Omit<APIScheduleEntity, 'id'>;
     conditions?: RuleConditionEntity[];
     resetNextDate?: boolean;
   }) => Promise<APIScheduleEntity['id']>;
 
-  'api/schedule-delete': (arg: { id: ScheduleEntity['id'] }) => Promise<void>;
+  'api/schedule-delete': (arg: {
+    id: APIScheduleEntity['id'];
+  }) => Promise<void>;
 }
