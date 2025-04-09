@@ -1047,8 +1047,8 @@ export type SqlPieces = {
   where: string;
   groupBy: string;
   orderBy: string;
-  limit: number;
-  offset: number;
+  limit: number | null;
+  offset: number | null;
 };
 
 export function compileQuery(
