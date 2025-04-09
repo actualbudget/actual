@@ -89,7 +89,7 @@ export interface ApiHandlers {
 
   'api/transactions-import': (arg: {
     accountId: APIAccountEntity['id'];
-    transactions: TransactionEntity[];
+    transactions: APIAddTransactionEntity[];
     isPreview?: boolean;
     opts?: ImportTransactionsOpts;
   }) => Promise<{
@@ -100,7 +100,7 @@ export interface ApiHandlers {
 
   'api/transactions-add': (arg: {
     accountId: APIAccountEntity['id'];
-    transactions: TransactionEntity[];
+    transactions: APIAddTransactionEntity[];
     runTransfers?: boolean;
     learnCategories?: boolean;
   }) => Promise<'ok'>;
@@ -113,7 +113,7 @@ export interface ApiHandlers {
 
   'api/transaction-update': (arg: {
     id: TransactionEntity['id'];
-    fields: Omit<TransactionEntity, 'id'>;
+    fields: NoId<TransactionEntity>;
   }) => Promise<Awaited<ReturnType<typeof batchUpdateTransactions>>['updated']>;
 
   'api/transaction-delete': (arg: {
@@ -127,13 +127,13 @@ export interface ApiHandlers {
   'api/accounts-get': () => Promise<APIAccountEntity[]>;
 
   'api/account-create': (arg: {
-    account: APIAccountEntity;
+    account: RequireOnly<APIAccountEntity, 'name'>;
     initialBalance?: IntegerAmount;
   }) => Promise<string>;
 
   'api/account-update': (arg: {
     id: APIAccountEntity['id'];
-    fields: Omit<APIAccountEntity, 'id'>;
+    fields: Partial<NoId<APIAccountEntity>>;
   }) => Promise<void>;
 
   'api/account-close': (arg: {
@@ -162,21 +162,26 @@ export interface ApiHandlers {
   'api/category-groups-get': () => Promise<APICategoryGroupEntity[]>;
 
   'api/category-group-create': (arg: {
-    group: APICategoryGroupEntity;
+    group: RequireOnLy<APICategoryGroupEntity, 'name'>;
   }) => Promise<string>;
 
-  'api/category-group-update': (arg: { id; fields }) => Promise<unknown>;
+  'api/category-group-update': (arg: {
+    id: APICategoryGroupEntity['id'];
+    fields: Partial<NoId<APICategoryEntity>>;
+  }) => Promise<unknown>;
 
   'api/category-group-delete': (arg: {
     id: APICategoryEntity['id'];
     transferCategoryId?: APICategoryEntity['id'];
   }) => Promise<unknown>;
 
-  'api/category-create': (arg: { category: CategoryEntity }) => Promise<string>;
+  'api/category-create': (arg: {
+    category: RequireOnly<APICategoryEntity, 'name' | 'group_id'>;
+  }) => Promise<string>;
 
   'api/category-update': (arg: {
     id: APICategoryEntity['id'];
-    fields: Omit<APICategoryEntity, 'id'>;
+    fields: NoId<APICategoryEntity>;
   }) => Promise<unknown>;
 
   'api/category-delete': (arg: {
@@ -188,11 +193,13 @@ export interface ApiHandlers {
 
   'api/common-payees-get': () => Promise<APIPayeeEntity[]>;
 
-  'api/payee-create': (arg: { payee: APIPayeeEntity }) => Promise<string>;
+  'api/payee-create': (arg: {
+    payee: Pick<APIPayeeEntity, 'name'>;
+  }) => Promise<string>;
 
   'api/payee-update': (arg: {
     id: APIPayeeEntity['id'];
-    fields: Omit<APIPayeeEntity, 'id'>;
+    fields: NoId<APIPayeeEntity>;
   }) => Promise<unknown>;
 
   'api/payee-delete': (arg: { id: APIPayeeEntity['id'] }) => Promise<unknown>;
@@ -219,7 +226,7 @@ export interface ApiHandlers {
 
   'api/schedule-update': (arg: {
     id: APIScheduleEntity['id'];
-    fields?: Omit<APIScheduleEntity, 'id'>;
+    fields?: NoId<APIScheduleEntity>;
     conditions?: RuleConditionEntity[];
     resetNextDate?: boolean;
   }) => Promise<APIScheduleEntity['id']>;

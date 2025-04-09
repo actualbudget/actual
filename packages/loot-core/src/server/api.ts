@@ -648,8 +648,8 @@ handlers['api/category-group-update'] = withMutation(async function ({
 }) {
   checkFileOpen();
   return handlers['category-group-update']({
-    id,
     ...categoryGroupModel.fromExternal(fields),
+    id,
   });
 });
 

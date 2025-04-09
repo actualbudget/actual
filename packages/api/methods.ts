@@ -1,10 +1,13 @@
 // @ts-strict-ignore
 import {
   APIAccountEntity,
+  APIAddTransactionEntity,
   APICategoryEntity,
   APICategoryGroupEntity,
   APIPayeeEntity,
   APIScheduleEntity,
+  NoId,
+  RequireOnly,
 } from 'loot-core/server/api-models';
 import { Query } from 'loot-core/shared/query';
 import type { Handlers } from 'loot-core/types/handlers';
@@ -103,7 +106,7 @@ export function setBudgetCarryover(
 
 export function addTransactions(
   accountId: APIAccountEntity['id'],
-  transactions: TransactionEntity[],
+  transactions: APIAddTransactionEntity[],
   { learnCategories = false, runTransfers = false } = {},
 ) {
   return send('api/transactions-add', {
@@ -120,7 +123,7 @@ export interface ImportTransactionsOpts {
 
 export function importTransactions(
   accountId: APIAccountEntity['id'],
-  transactions: TransactionEntity[],
+  transactions: APIAddTransactionEntity[],
   opts: ImportTransactionsOpts = {
     defaultCleared: true,
   },
@@ -142,7 +145,7 @@ export function getTransactions(
 
 export function updateTransaction(
   id: TransactionEntity['id'],
-  fields: Omit<TransactionEntity, 'id'>,
+  fields: Partial<NoId<TransactionEntity>>,
 ) {
   return send('api/transaction-update', { id, fields });
 }
@@ -156,7 +159,7 @@ export function getAccounts() {
 }
 
 export function createAccount(
-  account: APIAccountEntity,
+  account: RequireOnly<APIAccountEntity, 'name'>,
   initialBalance?: number,
 ) {
   return send('api/account-create', { account, initialBalance });
@@ -164,7 +167,7 @@ export function createAccount(
 
 export function updateAccount(
   id: APIAccountEntity['id'],
-  fields: Omit<APIAccountEntity, 'id'>,
+  fields: Partial<NoId<APIAccountEntity>>,
 ) {
   return send('api/account-update', { id, fields });
 }
@@ -197,13 +200,15 @@ export function getCategoryGroups() {
   return send('api/category-groups-get');
 }
 
-export function createCategoryGroup(group: APICategoryGroupEntity) {
+export function createCategoryGroup(
+  group: RequireOnly<APICategoryGroupEntity, 'name'>,
+) {
   return send('api/category-group-create', { group });
 }
 
 export function updateCategoryGroup(
   id: APICategoryGroupEntity['id'],
-  fields: Omit<APICategoryEntity, 'id'>,
+  fields: Partial<NoId<APICategoryEntity>>,
 ) {
   return send('api/category-group-update', { id, fields });
 }
@@ -219,13 +224,15 @@ export function getCategories() {
   return send('api/categories-get', { grouped: false });
 }
 
-export function createCategory(category: APICategoryEntity) {
+export function createCategory(
+  category: RequireOnly<APICategoryEntity, 'name' | 'group_id'>,
+) {
   return send('api/category-create', { category });
 }
 
 export function updateCategory(
   id: APICategoryEntity['id'],
-  fields: Omit<APICategoryEntity, 'id'>,
+  fields: NoId<APICategoryEntity>,
 ) {
   return send('api/category-update', { id, fields });
 }
@@ -245,13 +252,13 @@ export function getPayees() {
   return send('api/payees-get');
 }
 
-export function createPayee(payee: APIPayeeEntity) {
+export function createPayee(payee: Pick<APIPayeeEntity, 'name'>) {
   return send('api/payee-create', { payee });
 }
 
 export function updatePayee(
   id: APIPayeeEntity['id'],
-  fields: Omit<APIPayeeEntity, 'id'>,
+  fields: NoId<APIPayeeEntity>,
 ) {
   return send('api/payee-update', { id, fields });
 }
@@ -275,7 +282,7 @@ export function getPayeeRules(id: APIPayeeEntity['id']) {
   return send('api/payee-rules-get', { id });
 }
 
-export function createRule(rule: RuleEntity) {
+export function createRule(rule: NoId<RuleEntity>) {
   return send('api/rule-create', { rule });
 }
 
@@ -309,7 +316,7 @@ export function updateSchedule(
     fields,
   }: {
     conditions?: RuleConditionEntity[];
-    fields?: Omit<APIScheduleEntity, 'id'>;
+    fields?: NoId<APIScheduleEntity>;
   },
 ) {
   return send('api/schedule-update', { id, conditions, fields });

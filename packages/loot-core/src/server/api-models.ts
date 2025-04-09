@@ -6,10 +6,15 @@ import type {
   PayeeEntity,
   RecurConfig,
   ScheduleEntity,
+  TransactionEntity,
 } from '../types/models';
 
 import { RemoteFile } from './cloud-storage';
 import * as models from './models';
+
+export type NoId<T extends { id: string }> = Omit<T, 'id'>;
+export type RequireOnly<T, R extends keyof T> = Partial<Omit<T, R>> &
+  Pick<T, R>;
 
 export type APIAccountEntity = Pick<AccountEntity, 'id' | 'name'> & {
   offbudget: boolean;
@@ -38,6 +43,15 @@ export const accountModel = {
     }
     return result;
   },
+};
+
+export type APIAddTransactionEntity = Omit<
+  TransactionEntity,
+  'account' | 'id' | 'subtransactions'
+> & {
+  subtransactions?: (Omit<APIAddTransactionEntity, 'date'> &
+    Partial<Pick<APIAddTransactionEntity, 'date'>>)[];
+  id?: TransactionEntity['id'];
 };
 
 export type APICategoryEntity = Pick<
