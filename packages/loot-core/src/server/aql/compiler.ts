@@ -1009,7 +1009,7 @@ export type SchemaConfig = {
     | Record<string, string>
     | ((name: string, config: { withDead; isJoin; tableOptions }) => string);
   tableFilters?: (name: string) => unknown[];
-  customizeQuery?: (queryString: QueryState) => QueryState;
+  customizeQuery?: (queryState: QueryState) => QueryState;
   views?: Record<
     string,
     {
