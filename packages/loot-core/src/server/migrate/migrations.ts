@@ -3,12 +3,16 @@
 // them which doesn't play well with CSP. There isn't great, and eventually
 // we can remove this migration.
 import { Database } from '@jlongster/sql.js';
+import { PgDialect, PgSession } from 'drizzle-orm/pg-core';
 
+import drizzleMigrations from '../../../drizzle/migrations.json';
+import drizzleConfig from '../../../drizzle.config';
 import m1632571489012 from '../../../migrations/1632571489012_remove_cache';
 import m1722717601000 from '../../../migrations/1722717601000_reports_move_selected_categories';
 import m1722804019000 from '../../../migrations/1722804019000_create_dashboard_table';
 import m1723665565000 from '../../../migrations/1723665565000_prefs';
 import * as fs from '../../platform/server/fs';
+import * as pglite from '../../platform/server/pglite';
 import * as sqlite from '../../platform/server/sqlite';
 import * as prefs from '../prefs';
 
@@ -96,7 +100,7 @@ export function getPending(appliedIds: number[], all: string[]): string[] {
   });
 }
 
-async function applyJavaScript(db, id) {
+async function applyJavaScript(db: Database, id) {
   const dbInterface = {
     runQuery: (query, params, fetchAll) =>
       sqlite.runQuery(db, query, params, fetchAll),
@@ -115,7 +119,7 @@ async function applyJavaScript(db, id) {
   });
 }
 
-async function applySql(db, sql) {
+async function applySql(db: Database, sql: string) {
   try {
     await sqlite.execQuery(db, sql);
   } catch (e) {
@@ -172,4 +176,18 @@ export async function migrate(db: Database): Promise<string[]> {
   }
 
   return pending;
+}
+
+export async function migratePGlite(db: pglite.PgliteDatabase) {
+  console.log('🚀 Starting pglite migration...');
+
+  const dialect = new PgDialect({
+    casing: drizzleConfig.casing,
+  });
+
+  await dialect.migrate(drizzleMigrations, db._.session as PgSession, {
+    migrationsFolder: '../../../drizzle',
+  });
+
+  console.log('🎉 Completed pglite migration.');
 }
