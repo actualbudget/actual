@@ -98,7 +98,7 @@ function generateContext(
       Record<SidebarLocations, Map<string, PluginSidebarRegistrationFn>>
     >
   >,
-  dispatch,
+  dispatch: Dispatch,
   pluginId: string,
   navigateBase: (path: string) => void,
   setEvents: ReactDispatch<
@@ -179,7 +179,7 @@ function generateContext(
     },
     pushModal(
       parameter: (container: HTMLDivElement) => void,
-      modalProps: BasicModalProps,
+      modalProps?: BasicModalProps,
     ) {
       dispatch(
         basePushModal({
@@ -262,14 +262,16 @@ export async function loadPluginsScript({
 
   if (devUrl !== '') {
     const mod = await loadRemote<ActualPluginEntry>('dev-plugin');
-    loadedPlugins.set('dev-plugin', mod);
+    if (mod) {
+      loadedPlugins.set('dev-plugin', mod);
+    }
   }
 
   await handleLoadPlugins(loadedPlugins);
   return true;
 }
 
-function joinRelativePaths(...parts) {
+function joinRelativePaths(...parts: string[]) {
   return parts
     .map(p => p.replace(/(^\/+|\/+$)/g, ''))
     .filter(Boolean)

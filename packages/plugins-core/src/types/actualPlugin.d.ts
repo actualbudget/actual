@@ -12,7 +12,10 @@ export interface ActualPlugin {
   version: string;
   uninstall: () => void;
   activate: (
-    context: Omit<HostContext, 'registerMenu' | 'pushModal' | 'registerRoute'> & {
+    context: Omit<
+      HostContext,
+      'registerMenu' | 'pushModal' | 'registerRoute'
+    > & {
       registerMenu: (
         location: SidebarLocations,
         element: JSX.Element,
@@ -30,7 +33,7 @@ export type ActualPluginInitialized = Omit<ActualPlugin, 'activate'> & {
 
 export interface ContextEvent {
   payess: { payess: unknown[] };
-  categories: { categories: unknown[], groups: unknown[] };
+  categories: { categories: unknown[]; groups: unknown[] };
   accounts: { accounts: unknown[] };
 }
 
@@ -43,7 +46,10 @@ export interface HostContext {
   ) => void;
   popModal: () => void;
 
-  registerRoute: (path: string, routeElement: (container: HTMLDivElement) => void) => string;
+  registerRoute: (
+    path: string,
+    routeElement: (container: HTMLDivElement) => void,
+  ) => string;
   unregisterRoute: (id: string) => void;
 
   registerMenu: (
