@@ -418,6 +418,8 @@ async function postTransactionForSchedule({ id }: { id: string }) {
     return;
   }
 
+  // Fixing bug #4705
+  
   const transaction = {
     payee: schedule._payee,
     account: schedule._account,
