@@ -10,12 +10,7 @@ import type {
 import { type batchUpdateTransactions } from '../server/transactions';
 import { IntegerAmount } from '../shared/util';
 
-import type {
-  AccountEntity,
-  NewRuleEntity,
-  RuleEntity,
-  TransactionEntity,
-} from './models';
+import type { NewRuleEntity, RuleEntity, TransactionEntity } from './models';
 import { type ServerHandlers } from './server-handlers';
 
 export interface ApiHandlers {
@@ -104,7 +99,7 @@ export interface ApiHandlers {
   }) => Promise<'ok'>;
 
   'api/transactions-get': (arg: {
-    accountId?: AccountEntity['id'];
+    accountId?: APIAccountEntity['id'];
     startDate?: string;
     endDate?: string;
   }) => Promise<TransactionEntity[]>;
