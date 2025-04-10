@@ -2,6 +2,9 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
+import { APIAddTransactionEntity } from 'loot-core/server/api-models';
+import { RuleEntity } from 'loot-core/types/models';
+
 import * as api from './index';
 
 const budgetName = 'test-budget';
@@ -502,7 +505,7 @@ describe('API CRUD operations', () => {
     );
 
     // update one rule
-    const updatedRule = {
+    const updatedRule: RuleEntity = {
       ...rule,
       stage: 'post',
       conditionsOp: 'or',
@@ -568,7 +571,7 @@ describe('API CRUD operations', () => {
   test('Transactions: successfully update transactions', async () => {
     const accountId = await api.createAccount({ name: 'test-account' }, 0);
 
-    let newTransaction = [
+    let newTransaction: APIAddTransactionEntity[] = [
       { date: '2023-11-03', imported_id: '11', amount: 100, notes: 'notes' },
       { date: '2023-11-03', imported_id: '12', amount: 100, notes: '' },
     ];

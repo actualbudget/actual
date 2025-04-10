@@ -1,10 +1,5 @@
 import { q, Query, QueryState } from '../../shared/query';
-import {
-  AccountEntity,
-  CategoryGroupEntity,
-  PayeeEntity,
-  TransactionEntity,
-} from '../../types/models';
+import { TransactionEntity } from '../../types/models';
 import { createApp } from '../app';
 import { runQuery } from '../aql';
 import { mutator } from '../mutators';
@@ -73,10 +68,10 @@ async function exportTransactions({
   categoryGroups,
   payees,
 }: {
-  transactions: TransactionEntity[];
-  accounts: AccountEntity[];
-  categoryGroups: CategoryGroupEntity[];
-  payees: PayeeEntity[];
+  transactions: Parameters<typeof exportToCSV>[0];
+  accounts: Parameters<typeof exportToCSV>[1];
+  categoryGroups: Parameters<typeof exportToCSV>[2];
+  payees: Parameters<typeof exportToCSV>[3];
 }) {
   return exportToCSV(transactions, accounts, categoryGroups, payees);
 }

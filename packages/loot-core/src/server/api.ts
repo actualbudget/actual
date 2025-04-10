@@ -356,9 +356,9 @@ handlers['api/budget-month'] = async function ({ month }) {
   checkFileOpen();
   await validateMonth(month);
 
-  const { data: groups }: { data: CategoryGroupEntity[] } = await aqlQuery(
-    q('category_groups').select('*'),
-  );
+  // TODO: Force cast to CategoryGroupEntity. This should be updated to an AQL query.
+  const groups =
+    (await db.getCategoriesGrouped()) as unknown as CategoryGroupEntity[];
   const sheetName = monthUtils.sheetForMonth(month);
 
   function value(name) {
@@ -581,7 +581,7 @@ handlers['api/account-create'] = withMutation(async function ({
 
 handlers['api/account-update'] = withMutation(async function ({ id, fields }) {
   checkFileOpen();
-  return db.updateAccount({ id, ...accountModel.fromExternal(fields) });
+  return db.updateAccount(accountModel.fromExternal({ id, ...fields }));
 });
 
 handlers['api/account-close'] = withMutation(async function ({
@@ -647,8 +647,8 @@ handlers['api/category-group-update'] = withMutation(async function ({
 }) {
   checkFileOpen();
   return handlers['category-group-update']({
-    id,
     ...categoryGroupModel.fromExternal(fields),
+    id,
   });
 });
 
@@ -675,10 +675,9 @@ handlers['api/category-create'] = withMutation(async function ({ category }) {
 
 handlers['api/category-update'] = withMutation(async function ({ id, fields }) {
   checkFileOpen();
-  return handlers['category-update']({
-    id,
-    ...categoryModel.fromExternal(fields),
-  });
+  return handlers['category-update'](
+    categoryModel.fromExternal({ id, ...fields }),
+  );
 });
 
 handlers['api/category-delete'] = withMutation(async function ({
@@ -712,7 +711,7 @@ handlers['api/payee-create'] = withMutation(async function ({ payee }) {
 handlers['api/payee-update'] = withMutation(async function ({ id, fields }) {
   checkFileOpen();
   return handlers['payees-batch-change']({
-    updated: [{ id, ...payeeModel.fromExternal(fields) }],
+    updated: [payeeModel.fromExternal({ id, ...fields })],
   });
 });
 

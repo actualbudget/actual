@@ -25,6 +25,7 @@ import {
   type ScheduleEntity,
   type RuleConditionOp,
   type RecurConfig,
+  type RuleConditionEntity,
 } from 'loot-core/types/models';
 
 import { useDateFormat } from '../../hooks/useDateFormat';
@@ -100,7 +101,7 @@ function updateScheduleConditions(
         field: 'amount',
         value: fields.amount,
       },
-    ].filter(val => !!val),
+    ].filter(val => !!val) as RuleConditionEntity[],
   };
 }
 
@@ -436,9 +437,9 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
       // public names automatically. We really should be doing that
       // at the database layer
       const conditions = updated.conditions.map(cond => {
-        if (cond.field === 'description') {
+        if ((cond.field as string) === 'description') {
           return { ...cond, field: 'payee' };
-        } else if (cond.field === 'acct') {
+        } else if ((cond.field as string) === 'acct') {
           return { ...cond, field: 'account' };
         }
         return cond;

@@ -4,10 +4,17 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
   PayeeEntity,
+  RecurConfig,
+  ScheduleEntity,
+  TransactionEntity,
 } from '../types/models';
 
 import { RemoteFile } from './cloud-storage';
 import * as models from './models';
+
+export type NoId<T extends { id: string }> = Omit<T, 'id'>;
+export type RequireOnly<T, R extends keyof T> = Partial<Omit<T, R>> &
+  Pick<T, R>;
 
 export type APIAccountEntity = Pick<AccountEntity, 'id' | 'name'> & {
   offbudget: boolean;
@@ -36,6 +43,15 @@ export const accountModel = {
     }
     return result;
   },
+};
+
+export type APIAddTransactionEntity = Omit<
+  TransactionEntity,
+  'account' | 'id' | 'subtransactions'
+> & {
+  subtransactions?: (Omit<APIAddTransactionEntity, 'date'> &
+    Partial<Pick<APIAddTransactionEntity, 'date'>>)[];
+  id?: TransactionEntity['id'];
 };
 
 export type APICategoryEntity = Pick<
@@ -112,7 +128,7 @@ export const payeeModel = {
 
   fromExternal(payee: APIPayeeEntity) {
     // No translation is needed
-    return payee as PayeeEntity;
+    return { ...payee } as PayeeEntity;
   },
 };
 
@@ -151,5 +167,37 @@ export const budgetModel = {
 
   fromExternal(file: APIFileEntity) {
     return file as Budget;
+  },
+};
+
+type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type APIScheduleEntity = PartialBy<
+  Omit<ScheduleEntity, 'tombstone'>,
+  | '_payee'
+  | '_actions'
+  | '_account'
+  | '_amount'
+  | '_amountOp'
+  | '_date'
+  | '_conditions'
+>;
+
+export const scheduleModel = {
+  toExternal(schedule: ScheduleEntity): APIScheduleEntity {
+    return { ...schedule };
+  },
+
+  fromExternal(schedule: APIScheduleEntity): ScheduleEntity {
+    return {
+      ...schedule,
+      _payee: '',
+      _actions: [],
+      _account: '',
+      _amount: 0,
+      _amountOp: '',
+      _date: {} as unknown as RecurConfig,
+      _conditions: [],
+      tombstone: false,
+    };
   },
 };

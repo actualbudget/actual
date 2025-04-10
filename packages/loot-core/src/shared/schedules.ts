@@ -4,6 +4,7 @@ import * as d from 'date-fns';
 import { t } from 'i18next';
 
 import { Condition } from '../server/rules';
+import { RuleConditionEntity } from '../types/models';
 
 import * as monthUtils from './months';
 import { q } from './query';
@@ -299,36 +300,43 @@ export function recurConfigToRSchedule(config) {
   }
 }
 
-export function extractScheduleConds(conditions) {
+export function extractScheduleConds(conditions: RuleConditionEntity[]) {
   return {
     payee:
-      conditions.find(cond => cond.op === 'is' && cond.field === 'payee') ||
-      conditions.find(
-        cond => cond.op === 'is' && cond.field === 'description',
-      ) ||
+      (conditions.find(cond => cond.op === 'is' && cond.field === 'payee') as
+        | Extract<RuleConditionEntity, { field: 'payee'; op: 'is' }>
+        | undefined) ??
+      (conditions.find(
+        cond => cond.op === 'is' && (cond.field as string) === 'description',
+      ) as
+        | Extract<RuleConditionEntity, { field: 'payee'; op: 'is' }>
+        | undefined) ??
       null,
     account:
-      conditions.find(cond => cond.op === 'is' && cond.field === 'account') ||
-      conditions.find(cond => cond.op === 'is' && cond.field === 'acct') ||
-      null,
+      (conditions.find(cond => cond.op === 'is' && cond.field === 'account') as
+        | Extract<RuleConditionEntity, { field: 'account'; op: 'is' }>
+        | undefined) ?? null,
     amount:
-      conditions.find(
+      (conditions.find(
         cond =>
           (cond.op === 'is' ||
             cond.op === 'isapprox' ||
             cond.op === 'isbetween') &&
           cond.field === 'amount',
-      ) || null,
+      ) as Extract<RuleConditionEntity, { field: 'amount' }> | undefined) ??
+      null,
     date:
-      conditions.find(
+      (conditions.find(
         cond =>
           (cond.op === 'is' || cond.op === 'isapprox') && cond.field === 'date',
-      ) || null,
+      ) as
+        | Extract<RuleConditionEntity, { field: 'date'; op: 'is' | 'isapprox' }>
+        | undefined) || null,
   };
 }
 
 export function getNextDate(
-  dateCond,
+  dateCond: RuleConditionEntity,
   start = new Date(monthUtils.currentDay()),
   noSkipWeekend = false,
 ) {
@@ -442,7 +450,7 @@ export function getUpcomingDays(
   }
 }
 
-export function scheduleIsRecurring(dateCond: Condition | null) {
+export function scheduleIsRecurring(dateCond: RuleConditionEntity | null) {
   if (!dateCond) {
     return false;
   }
