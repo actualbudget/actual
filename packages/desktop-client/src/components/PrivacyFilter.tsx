@@ -78,10 +78,10 @@ function PrivacyOverlay({ children, ...props }) {
             display: 'inline-flex',
             flexGrow: 1,
             position: 'relative',
-            ' > div:first-child': {
+            '> div:first-child': {
               opacity: 0,
             },
-            ' > div:nth-child(2)': {
+            '> div:nth-child(2)': {
               display: 'flex',
             },
             '&:hover': {
