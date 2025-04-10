@@ -1,7 +1,9 @@
 import React, {
+  forwardRef,
   type ComponentPropsWithoutRef,
   type CSSProperties,
   useCallback,
+  useRef,
 } from 'react';
 import { type DragItem } from 'react-aria';
 import {
@@ -13,7 +15,11 @@ import {
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgAdd, SvgCheveronRight } from '@actual-app/components/icons/v1';
+import {
+  SvgAdd,
+  SvgCheveronRight,
+  SvgCheveronDown,
+} from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
@@ -29,6 +35,7 @@ import { type AccountEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
+import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useDispatch, useSelector } from '../../../redux';
@@ -44,6 +51,8 @@ type AccountHeaderProps<SheetFieldName extends SheetFields<'account'>> = {
   name: string;
   amount: Binding<'account', SheetFieldName>;
   style?: CSSProperties;
+  showCheveronDown?: boolean;
+  onPress?: () => void;
 };
 
 function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
@@ -51,15 +60,19 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
   name,
   amount,
   style = {},
+  showCheveronDown = false,
+  onPress,
 }: AccountHeaderProps<SheetFieldName>) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const Cheveron = showCheveronDown ? SvgCheveronDown : SvgCheveronRight;
 
   return (
     <Button
       variant="bare"
       aria-label={t('View {{name}} transactions', { name })}
-      onPress={() => navigate(`/accounts/${id}`)}
+      onPress={onPress ? onPress : () => navigate(`/accounts/${id}`)}
       style={{
         flex: 1,
         flexDirection: 'row',
@@ -91,7 +104,7 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
         >
           {name}
         </Text>
-        <SvgCheveronRight
+        <Cheveron
           style={{
             flexShrink: 0,
             color: theme.mobileHeaderTextSubdued,
@@ -237,6 +250,7 @@ type AllAccountListProps = {
   getAccountBalance: (account: AccountEntity) => Binding<'account', 'balance'>;
   getOnBudgetBalance: () => Binding<'account', 'onbudget-accounts-balance'>;
   getOffBudgetBalance: () => Binding<'account', 'offbudget-accounts-balance'>;
+  getClosedAccountsBalance: () => Binding<'account', 'closed-accounts-balance'>;
   onAddAccount: () => void;
   onOpenAccount: (account: AccountEntity) => void;
   onSync: () => Promise<void>;
@@ -247,13 +261,38 @@ function AllAccountList({
   getAccountBalance,
   getOnBudgetBalance,
   getOffBudgetBalance,
+  getClosedAccountsBalance,
   onAddAccount,
   onOpenAccount,
   onSync,
 }: AllAccountListProps) {
   const { t } = useTranslation();
-  const onBudgetAccounts = accounts.filter(account => account.offbudget === 0);
-  const offBudgetAccounts = accounts.filter(account => account.offbudget === 1);
+  const onBudgetAccounts = accounts.filter(
+    account => account.offbudget === 0 && account.closed === 0,
+  );
+  const offBudgetAccounts = accounts.filter(
+    account => account.offbudget === 1 && account.closed === 0,
+  );
+  const closedAccounts = accounts.filter(account => account.closed === 1);
+
+  const closedAccountsRef = useRef<HTMLDivElement | null>(null);
+  const [showClosedAccounts, setShowClosedAccountsPref] = useLocalPref(
+    'ui.showClosedAccounts',
+  );
+
+  const onToggleClosedAccounts = () => {
+    const toggledState = !showClosedAccounts;
+    setShowClosedAccountsPref(toggledState);
+    if (toggledState) {
+      // Make sure to scroll to the closed accounts when the user presses
+      // on the account header, otherwise it's not clear that the accounts are there.
+      // Delay the scroll until the component is rendered, otherwise the scroll
+      // won't work.
+      setTimeout(() => {
+        closedAccountsRef.current?.scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+  };
 
   return (
     <Page
@@ -307,6 +346,27 @@ function AllAccountList({
             getAccountBalance={getAccountBalance}
             onOpenAccount={onOpenAccount}
           />
+          {closedAccounts.length > 0 && (
+            <AccountHeader
+              id="closed"
+              name={t('Closed')}
+              onPress={onToggleClosedAccounts}
+              amount={getClosedAccountsBalance()}
+              style={{ marginTop: 30 }}
+              showCheveronDown={showClosedAccounts}
+            />
+          )}
+          {showClosedAccounts && (
+            <AccountList
+              aria-label={t('Closed accounts')}
+              accounts={closedAccounts}
+              getAccountBalance={getAccountBalance}
+              onOpenAccount={onOpenAccount}
+              ref={el => {
+                if (el) closedAccountsRef.current = el;
+              }}
+            />
+          )}
         </View>
       </PullToRefresh>
     </Page>
@@ -320,100 +380,110 @@ type AccountListProps = {
   onOpenAccount: (account: AccountEntity) => void;
 };
 
-function AccountList({
-  'aria-label': ariaLabel,
-  accounts,
-  getAccountBalance: getBalanceBinding,
-  onOpenAccount,
-}: AccountListProps) {
-  const failedAccounts = useFailedAccounts();
-  const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
-  const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
-  const dispatch = useDispatch();
+const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
+  (
+    {
+      'aria-label': ariaLabel,
+      accounts,
+      getAccountBalance: getBalanceBinding,
+      onOpenAccount,
+    }: AccountListProps,
+    ref,
+  ) => {
+    const failedAccounts = useFailedAccounts();
+    const syncingAccountIds = useSelector(
+      state => state.account.accountsSyncing,
+    );
+    const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
+    const dispatch = useDispatch();
 
-  const { dragAndDropHooks } = useDragAndDrop({
-    getItems: keys =>
-      [...keys].map(
-        key =>
-          ({
-            'text/plain': key as AccountEntity['id'],
-          }) as DragItem,
-      ),
-    renderDropIndicator: target => {
-      return (
-        <DropIndicator
-          target={target}
-          className={css({
-            '&[data-drop-target]': {
-              height: 4,
-              backgroundColor: theme.tableBorderSeparator,
-              opacity: 1,
-              borderRadius: 4,
-            },
-          })}
-        />
-      );
-    },
-    onReorder: e => {
-      const [key] = e.keys;
-      const accountIdToMove = key as AccountEntity['id'];
-      const targetAccountId = e.target.key as AccountEntity['id'];
+    const { dragAndDropHooks } = useDragAndDrop({
+      getItems: keys =>
+        [...keys].map(
+          key =>
+            ({
+              'text/plain': key as AccountEntity['id'],
+            }) as DragItem,
+        ),
+      renderDropIndicator: target => {
+        return (
+          <DropIndicator
+            target={target}
+            className={css({
+              '&[data-drop-target]': {
+                height: 4,
+                backgroundColor: theme.tableBorderSeparator,
+                opacity: 1,
+                borderRadius: 4,
+              },
+            })}
+          />
+        );
+      },
+      onReorder: e => {
+        const [key] = e.keys;
+        const accountIdToMove = key as AccountEntity['id'];
+        const targetAccountId = e.target.key as AccountEntity['id'];
 
-      if (e.target.dropPosition === 'before') {
-        dispatch(
-          moveAccount({
-            id: accountIdToMove,
-            targetId: targetAccountId,
-          }),
-        );
-      } else if (e.target.dropPosition === 'after') {
-        const targetAccountIndex = accounts.findIndex(
-          account => account.id === e.target.key,
-        );
-        if (targetAccountIndex === -1) {
-          throw new Error(
-            `Internal error: account with ID ${targetAccountId} not found.`,
+        if (e.target.dropPosition === 'before') {
+          dispatch(
+            moveAccount({
+              id: accountIdToMove,
+              targetId: targetAccountId,
+            }),
+          );
+        } else if (e.target.dropPosition === 'after') {
+          const targetAccountIndex = accounts.findIndex(
+            account => account.id === e.target.key,
+          );
+          if (targetAccountIndex === -1) {
+            throw new Error(
+              `Internal error: account with ID ${targetAccountId} not found.`,
+            );
+          }
+
+          const nextToTargetAccount = accounts[targetAccountIndex + 1];
+
+          dispatch(
+            moveAccount({
+              id: accountIdToMove,
+              // Due to the way `moveAccount` works, we use the account next to the
+              // actual target account here because `moveAccount` always shoves the
+              // account *before* the target account.
+              // On the other hand, using `null` as `targetId`moves the account
+              // to the end of the list.
+              targetId: nextToTargetAccount?.id || null,
+            }),
           );
         }
+      },
+    });
+    return (
+      <ListBox
+        aria-label={ariaLabel}
+        items={accounts}
+        dragAndDropHooks={dragAndDropHooks}
+        ref={ref}
+      >
+        {account => (
+          <AccountListItem
+            key={account.id}
+            id={account.id}
+            value={account}
+            isUpdated={updatedAccounts && updatedAccounts.includes(account.id)}
+            isConnected={!!account.bank}
+            isPending={syncingAccountIds.includes(account.id)}
+            isFailed={failedAccounts && failedAccounts.has(account.id)}
+            getBalanceQuery={getBalanceBinding}
+            onSelect={onOpenAccount}
+          />
+        )}
+      </ListBox>
+    );
+  },
+);
 
-        const nextToTargetAccount = accounts[targetAccountIndex + 1];
-
-        dispatch(
-          moveAccount({
-            id: accountIdToMove,
-            // Due to the way `moveAccount` works, we use the account next to the
-            // actual target account here because `moveAccount` always shoves the
-            // account *before* the target account.
-            // On the other hand, using `null` as `targetId`moves the account
-            // to the end of the list.
-            targetId: nextToTargetAccount?.id || null,
-          }),
-        );
-      }
-    },
-  });
-  return (
-    <ListBox
-      aria-label={ariaLabel}
-      items={accounts}
-      dragAndDropHooks={dragAndDropHooks}
-    >
-      {account => (
-        <AccountListItem
-          key={account.id}
-          id={account.id}
-          value={account}
-          isUpdated={updatedAccounts && updatedAccounts.includes(account.id)}
-          isConnected={!!account.bank}
-          isPending={syncingAccountIds.includes(account.id)}
-          isFailed={failedAccounts && failedAccounts.has(account.id)}
-          getBalanceQuery={getBalanceBinding}
-          onSelect={onOpenAccount}
-        />
-      )}
-    </ListBox>
-  );
-}
+AccountList.displayName = 'AccountList';
 
 export function Accounts() {
   const dispatch = useDispatch();
@@ -445,10 +515,11 @@ export function Accounts() {
         // This key forces the whole table rerender when the number
         // format changes
         key={numberFormat + hideFraction}
-        accounts={accounts.filter(account => !account.closed)}
+        accounts={accounts}
         getAccountBalance={queries.accountBalance}
         getOnBudgetBalance={queries.onBudgetAccountBalance}
         getOffBudgetBalance={queries.offBudgetAccountBalance}
+        getClosedAccountsBalance={queries.closedAccountBalance}
         onAddAccount={onAddAccount}
         onOpenAccount={onOpenAccount}
         onSync={onSync}

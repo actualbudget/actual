@@ -56,7 +56,7 @@ export function ExpenseCategory({
 }: ExpenseCategoryProps) {
   let dragging = dragState && dragState.item === cat;
 
-  if (dragState && dragState.item.id === cat.cat_group) {
+  if (dragState && dragState.item.id === cat.group) {
     dragging = true;
   }
 

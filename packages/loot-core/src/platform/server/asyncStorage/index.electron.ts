@@ -25,7 +25,7 @@ export const init: T.Init = function ({ persist = true } = {}) {
   persisted = persist;
 };
 
-function _saveStore() {
+function _saveStore(): Promise<void> {
   if (persisted) {
     return new Promise(function (resolve, reject) {
       fs.writeFile(
@@ -33,7 +33,7 @@ function _saveStore() {
         JSON.stringify(store),
         'utf8',
         function (err) {
-          return err ? reject(err) : resolve(undefined);
+          return err ? reject(err) : resolve();
         },
       );
     });
@@ -59,13 +59,9 @@ export const removeItem: T.RemoveItem = function (key) {
 export async function multiGet<K extends readonly (keyof GlobalPrefsJson)[]>(
   keys: K,
 ) {
-  return new Promise(function (resolve) {
-    return resolve(
-      keys.map(function (key) {
-        return [key, store[key]];
-      }) as { [P in keyof K]: [K[P], GlobalPrefsJson[K[P]]] },
-    );
-  });
+  return keys.map(key => [key, store[key]]) as {
+    [P in keyof K]: [K[P], GlobalPrefsJson[K[P]]];
+  };
 }
 
 export const multiSet: T.MultiSet = function (keyValues) {

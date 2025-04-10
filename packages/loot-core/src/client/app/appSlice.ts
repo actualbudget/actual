@@ -91,7 +91,7 @@ export const sync = createAppAsyncThunk(
     const prefs = getState().prefs.local;
     if (prefs && prefs.id) {
       const result = await send('sync');
-      if ('error' in result) {
+      if (result && 'error' in result) {
         return { error: result.error };
       }
 
