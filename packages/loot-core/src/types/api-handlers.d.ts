@@ -6,7 +6,6 @@ import type {
   APICategoryGroupEntity,
   APIFileEntity,
   APIPayeeEntity,
-  APIScheduleEntity,
 } from '../server/api-models';
 import { type batchUpdateTransactions } from '../server/transactions';
 import { IntegerAmount } from '../shared/util';
@@ -14,7 +13,6 @@ import { IntegerAmount } from '../shared/util';
 import type {
   AccountEntity,
   NewRuleEntity,
-  RuleConditionEntity,
   RuleEntity,
   TransactionEntity,
 } from './models';
