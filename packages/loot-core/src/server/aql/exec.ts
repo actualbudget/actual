@@ -119,6 +119,11 @@ export async function compileAndRunAqlQuery(
 ) {
   const { sqlPieces, state } = compileQuery(queryState, schema, schemaConfig);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data: any = await runCompiledAqlQuery(queryState, sqlPieces, state, options);
+  const data: any = await runCompiledAqlQuery(
+    queryState,
+    sqlPieces,
+    state,
+    options,
+  );
   return { data, dependencies: state.dependencies };
 }
