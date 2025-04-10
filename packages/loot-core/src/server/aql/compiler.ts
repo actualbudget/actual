@@ -1181,7 +1181,11 @@ export function compileQuery(
   };
 }
 
-export function defaultConstructQuery(queryState: QueryState, state, sqlPieces: SqlPieces) {
+export function defaultConstructQuery(
+  queryState: QueryState,
+  state,
+  sqlPieces: SqlPieces,
+) {
   const s = sqlPieces;
 
   const where = queryState.withDead

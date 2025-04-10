@@ -2,7 +2,13 @@
 import { QueryState } from '../../shared/query';
 import * as db from '../db';
 
-import { compileQuery, defaultConstructQuery, OutputTypes, SchemaConfig, SqlPieces } from './compiler';
+import {
+  compileQuery,
+  defaultConstructQuery,
+  OutputTypes,
+  SchemaConfig,
+  SqlPieces,
+} from './compiler';
 import { convertInputType, convertOutputType } from './schema-helpers';
 
 // TODO (compiler):
@@ -39,7 +45,13 @@ export async function execQuery(
   return data;
 }
 
-export type AqlQueryExecutor = (compilerState, queryState: QueryState, sqlPieces: SqlPieces, params: (string | number)[], outputTypes: OutputTypes) => Promise<unknown[]>;
+export type AqlQueryExecutor = (
+  compilerState,
+  queryState: QueryState,
+  sqlPieces: SqlPieces,
+  params: (string | number)[],
+  outputTypes: OutputTypes,
+) => Promise<unknown[]>;
 
 type AqlQueryParamName = string;
 type AqlQueryParamValue = unknown;
@@ -48,7 +60,7 @@ export type AqlQueryParams = Record<AqlQueryParamName, AqlQueryParamValue>;
 export type RunCompiledAqlQueryOptions = {
   params?: AqlQueryParams;
   executors?: Record<string, AqlQueryExecutor>;
-}
+};
 
 export async function runCompiledAqlQuery(
   queryState: QueryState,
@@ -74,7 +86,13 @@ export async function runCompiledAqlQuery(
       compilerState.outputTypes,
     );
   } else {
-    data = await execQuery(queryState, compilerState, sqlPieces, paramArray, compilerState.outputTypes);
+    data = await execQuery(
+      queryState,
+      compilerState,
+      sqlPieces,
+      paramArray,
+      compilerState.outputTypes,
+    );
   }
 
   if (queryState.calculation) {
@@ -91,7 +109,12 @@ export async function runCompiledAqlQuery(
   return data;
 }
 
-export async function compileAndRunAqlQuery(schema, schemaConfig: SchemaConfig, queryState: QueryState, options: RunCompiledAqlQueryOptions) {
+export async function compileAndRunAqlQuery(
+  schema,
+  schemaConfig: SchemaConfig,
+  queryState: QueryState,
+  options: RunCompiledAqlQueryOptions,
+) {
   const { sqlPieces, state } = compileQuery(queryState, schema, schemaConfig);
   const data = await runCompiledAqlQuery(queryState, sqlPieces, state, options);
   return { data, dependencies: state.dependencies };

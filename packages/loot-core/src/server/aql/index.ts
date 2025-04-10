@@ -19,7 +19,12 @@ export { compileQuery } from './compiler';
 export { makeViews } from './views';
 export { schema, schemaConfig } from './schema';
 
-export function aqlCompiledQuery(queryState: QueryState, sqlPieces: SqlPieces, compilerState: CompilerState, params?: AqlQueryParams) {
+export function aqlCompiledQuery(
+  queryState: QueryState,
+  sqlPieces: SqlPieces,
+  compilerState: CompilerState,
+  params?: AqlQueryParams,
+) {
   return runCompiledAqlQuery(queryState, sqlPieces, compilerState, {
     params,
     executors: schemaExecutors,

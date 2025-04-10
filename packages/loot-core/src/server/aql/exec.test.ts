@@ -18,7 +18,7 @@ function repeat(arr, times) {
   return result;
 }
 
-function compileAndRunQuery(query, options?: unknown) {
+function compileAndRunAqlQuery(query, options?: unknown) {
   return aql.compileAndRunAqlQuery(schema, schemaConfig, query, options);
 }
 
@@ -76,12 +76,14 @@ describe('compileAndRunQuery', () => {
     await insertTransactions();
 
     // date
-    let { data } = await compileAndRunQuery(q('transactions').select('date').serialize());
+    let { data } = await compileAndRunAqlQuery(
+      q('transactions').select('date').serialize(),
+    );
     expect(data[0].date).toBe('2020-01-04');
 
     // date-month
     data = (
-      await compileAndRunQuery(
+      await compileAndRunAqlQuery(
         q('transactions')
           .select({ month: { $month: '$date' } })
           .serialize(),
@@ -91,7 +93,7 @@ describe('compileAndRunQuery', () => {
 
     // date-year
     data = (
-      await compileAndRunQuery(
+      await compileAndRunAqlQuery(
         q('transactions')
           .select({ year: { $year: '$date' } })
           .serialize(),
@@ -101,7 +103,7 @@ describe('compileAndRunQuery', () => {
 
     // boolean
     data = (
-      await compileAndRunQuery(
+      await compileAndRunAqlQuery(
         q('transactions').select(['is_child', 'is_parent']).raw().serialize(),
       )
     ).data;
@@ -121,7 +123,7 @@ describe('compileAndRunQuery', () => {
       cleared: true,
     });
 
-    let { data } = await compileAndRunQuery(
+    let { data } = await compileAndRunAqlQuery(
       q('transactions')
         .filter({ amount: { $lt: { $neg: ':amount' } } })
         .select()
@@ -131,7 +133,7 @@ describe('compileAndRunQuery', () => {
     expect(data[0].id).toBe(transId);
 
     data = (
-      await compileAndRunQuery(
+      await compileAndRunAqlQuery(
         q('transactions')
           .filter({ date: { $transform: '$month', $eq: { $month: ':month' } } })
           .select('date')
@@ -142,7 +144,7 @@ describe('compileAndRunQuery', () => {
     expect(data[0].id).toBe(transId);
 
     data = (
-      await compileAndRunQuery(
+      await compileAndRunAqlQuery(
         q('transactions')
           .filter({ date: { $transform: '$year', $eq: { $year: ':month' } } })
           .select('date')
@@ -153,7 +155,7 @@ describe('compileAndRunQuery', () => {
     expect(data[0].id).toBe(transId);
 
     data = (
-      await compileAndRunQuery(
+      await compileAndRunAqlQuery(
         q('transactions')
           .filter({ cleared: ':cleared' })
           .select('date')
@@ -192,14 +194,18 @@ describe('compileAndRunQuery', () => {
       .select()
       .serialize();
 
-    let { data } = await compileAndRunQuery(queryState, { params: { category: null } });
+    let { data } = await compileAndRunAqlQuery(queryState, {
+      params: { category: null },
+    });
     expect(data[0].id).toBe(transNoCat);
 
-    data = (await compileAndRunQuery(queryState, { params: { category: 'cat' } })).data;
+    data = (
+      await compileAndRunAqlQuery(queryState, { params: { category: 'cat' } })
+    ).data;
     expect(data[0].id).toBe(transCat);
 
     data = (
-      await compileAndRunQuery(
+      await compileAndRunAqlQuery(
         q('transactions')
           .filter({ category: { $ne: ':category' } })
           .select('category')
@@ -218,7 +224,7 @@ describe('compileAndRunQuery', () => {
     );
 
     data = (
-      await compileAndRunQuery(
+      await compileAndRunAqlQuery(
         q('transactions')
           .filter({ category: { $ne: ':category' } })
           .select('category')
@@ -245,7 +251,7 @@ describe('compileAndRunQuery', () => {
       amount: -5001,
     });
 
-    const { data } = await compileAndRunQuery(
+    const { data } = await compileAndRunAqlQuery(
       q('transactions')
         .filter({
           amount: { $lt: { $neg: ':amount' } },
@@ -267,7 +273,7 @@ describe('compileAndRunQuery', () => {
     const ids = rows.slice(0, 3).map(row => row.id);
     ids.sort();
 
-    const { data } = await compileAndRunQuery(
+    const { data } = await compileAndRunAqlQuery(
       q('transactions')
         .filter({ id: { $oneof: repeat(ids, 1000) }, amount: { $lt: 50 } })
         .select('id')
