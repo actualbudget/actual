@@ -2,6 +2,7 @@
 import type { Handlers } from 'loot-core/types/handlers';
 
 import * as injected from './injected';
+import type { Transaction } from './types/transaction';
 
 export { q } from './app/query';
 
@@ -90,8 +91,8 @@ export interface ImportTransactionsOpts {
 }
 
 export function importTransactions(
-  accountId,
-  transactions,
+  accountId: string,
+  transactions: Transaction[],
   opts: ImportTransactionsOpts = {
     defaultCleared: true,
   },
