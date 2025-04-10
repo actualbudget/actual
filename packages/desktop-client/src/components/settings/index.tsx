@@ -73,12 +73,26 @@ function About() {
             Client version: {{ version: `v${window.Actual?.ACTUAL_VERSION}` }}
           </Trans>
           {window.Actual?.ACTUAL_VERSION_HASH && (
-            <pre>(hash: {window.Actual?.ACTUAL_VERSION_HASH})</pre>
+            <>
+              <br />
+              <Text fontSize="tiny">
+                <Trans>
+                  (hash: {{ hash: window.Actual?.ACTUAL_VERSION_HASH }})
+                </Trans>
+              </Text>
+            </>
           )}
         </Text>
         <Text>
           <Trans>Server version: {{ version: serverVersion }}</Trans>
-          {serverVersionHash && <pre>(hash: {serverVersionHash})</pre>}
+          {serverVersionHash && (
+            <>
+              <br />
+              <Text fontSize="tiny">
+                <Trans>(hash: {{ hash: serverVersionHash }})</Trans>
+              </Text>
+            </>
+          )}
         </Text>
         {isOutdated ? (
           <Link
