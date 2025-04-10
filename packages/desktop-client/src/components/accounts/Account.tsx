@@ -1248,6 +1248,18 @@ class AccountInternal extends PureComponent<
     });
   };
 
+  onMergeTransactions = async (ids: string[]) => {
+    const keptId = await send(
+      'transactions-merge',
+      ids.map(id => ({ id })),
+    );
+    await this.refetchTransactions();
+    this.dispatchSelected?.({
+      type: 'select-all',
+      ids: [keptId],
+    });
+  };
+
   checkForReconciledTransactions = async (
     ids: string[],
     confirmReason: string,
@@ -1833,6 +1845,7 @@ class AccountInternal extends PureComponent<
                 onSetTransfer={this.onSetTransfer}
                 onMakeAsSplitTransaction={this.onMakeAsSplitTransaction}
                 onMakeAsNonSplitTransactions={this.onMakeAsNonSplitTransactions}
+                onMergeTransactions={this.onMergeTransactions}
               />
 
               <View style={{ flex: 1 }}>
