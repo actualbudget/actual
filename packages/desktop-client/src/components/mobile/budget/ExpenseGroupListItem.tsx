@@ -1,11 +1,10 @@
-import { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { type ComponentPropsWithoutRef, useCallback, useMemo } from 'react';
+import { GridListItem } from 'react-aria-components';
 
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
 import { SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { SvgCheveronRight } from '@actual-app/components/icons/v1';
-import { Label } from '@actual-app/components/label';
 import { type CSSProperties, styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -15,7 +14,10 @@ import { AutoTextSize } from 'auto-text-size';
 
 import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
 import * as monthUtils from 'loot-core/shared/months';
-import { type CategoryGroupEntity } from 'loot-core/types/models';
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/types/models';
 
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { PrivacyFilter } from '../../PrivacyFilter';
@@ -23,10 +25,11 @@ import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
 
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
-import { IncomeCategoryList } from './IncomeCategoryList';
+import { ExpenseCategoryList } from './ExpenseCategoryList';
 
-type IncomeGroupProps = {
-  group: CategoryGroupEntity;
+type ExpenseGroupListItemProps = ComponentPropsWithoutRef<
+  typeof GridListItem<CategoryGroupEntity>
+> & {
   month: string;
   showHiddenCategories: boolean;
   onEditGroup: (id: CategoryGroupEntity['id']) => void;
@@ -34,86 +37,97 @@ type IncomeGroupProps = {
   onBudgetAction: (month: string, action: string, args: unknown) => void;
   isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
+  showBudgetedColumn: boolean;
+  show3Columns: boolean;
 };
 
-export function IncomeGroup({
-  group,
-  month,
-  showHiddenCategories,
+export function ExpenseGroupListItem({
   onEditGroup,
   onEditCategory,
+  month,
   onBudgetAction,
+  showBudgetedColumn,
+  show3Columns,
+  showHiddenCategories,
   isCollapsed,
   onToggleCollapse,
-}: IncomeGroupProps) {
-  const { t } = useTranslation();
-  const columnWidth = getColumnWidth();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  ...props
+}: ExpenseGroupListItemProps) {
+  const { value: group } = props;
 
   const categories = useMemo(
     () =>
-      isCollapsed(group.id)
+      !group || isCollapsed(group.id)
         ? []
         : (group.categories?.filter(
             category => !category.hidden || showHiddenCategories,
           ) ?? []),
-    [group.categories, group.id, isCollapsed, showHiddenCategories],
+    [group, isCollapsed, showHiddenCategories],
   );
 
+  const shouldHideCategory = useCallback(
+    (category: CategoryEntity) => {
+      return !!(category.hidden || group?.hidden);
+    },
+    [group?.hidden],
+  );
+  
+  if (!group) {
+    return null;
+  }
+
   return (
-    <View>
-      <View
+    <GridListItem textValue={group.name} {...props}>
+      <Card
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          marginTop: 50,
-          marginBottom: 5,
-          marginRight: 15,
+          marginTop: 4,
+          marginBottom: 4,
         }}
       >
-        {budgetType === 'report' && (
-          <Label title={t('Budgeted')} style={{ width: columnWidth }} />
-        )}
-        <Label title={t('Received')} style={{ width: columnWidth }} />
-      </View>
-
-      <Card style={{ marginTop: 0 }}>
-        <IncomeGroupHeader
+        <ExpenseGroupHeader
           group={group}
           month={month}
+          showBudgetedColumn={showBudgetedColumn}
+          show3Columns={show3Columns}
           onEdit={onEditGroup}
           isCollapsed={isCollapsed}
           onToggleCollapse={onToggleCollapse}
         />
-        <IncomeCategoryList
+
+        <ExpenseCategoryList
+          group={group}
           categories={categories}
           month={month}
           onEditCategory={onEditCategory}
           onBudgetAction={onBudgetAction}
+          shouldHideCategory={shouldHideCategory}
+          show3Columns={show3Columns}
+          showBudgetedColumn={showBudgetedColumn}
         />
       </Card>
-    </View>
+    </GridListItem>
   );
 }
 
-type IncomeGroupHeaderProps = {
+type ExpenseGroupHeaderProps = {
   group: CategoryGroupEntity;
   month: string;
   onEdit: (id: CategoryGroupEntity['id']) => void;
   isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
-  style?: CSSProperties;
+  show3Columns: boolean;
+  showBudgetedColumn: boolean;
 };
 
-function IncomeGroupHeader({
+export function ExpenseGroupHeader({
   group,
   month,
   onEdit,
+  show3Columns,
+  showBudgetedColumn,
   isCollapsed,
   onToggleCollapse,
-  style,
-}: IncomeGroupHeaderProps) {
+}: ExpenseGroupHeaderProps) {
   return (
     <View
       style={{
@@ -129,37 +143,44 @@ function IncomeGroupHeader({
         backgroundColor: monthUtils.isCurrentMonth(month)
           ? theme.budgetHeaderCurrentMonth
           : theme.budgetHeaderOtherMonth,
-        ...style,
       }}
       data-testid="category-group-row"
     >
-      <IncomeGroupName
+      <ExpenseGroupName
         group={group}
         onEdit={onEdit}
         isCollapsed={isCollapsed}
         onToggleCollapse={onToggleCollapse}
+        show3Columns={show3Columns}
       />
-      <IncomeGroupCells group={group} />
+      <ExpenseGroupCells
+        group={group}
+        show3Columns={show3Columns}
+        showBudgetedColumn={showBudgetedColumn}
+      />
     </View>
   );
 }
 
-type IncomeGroupNameProps = {
+type ExpenseGroupNameProps = {
   group: CategoryGroupEntity;
   onEdit: (id: CategoryGroupEntity['id']) => void;
   isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
+  show3Columns: boolean;
 };
 
-function IncomeGroupName({
+function ExpenseGroupName({
   group,
   onEdit,
   isCollapsed,
   onToggleCollapse,
-}: IncomeGroupNameProps) {
+  show3Columns,
+}: ExpenseGroupNameProps) {
   const sidebarColumnWidth = getColumnWidth({
+    show3Columns,
     isSidebar: true,
-    offset: -13.5,
+    offset: -3.5,
   });
   return (
     <View
@@ -170,6 +191,17 @@ function IncomeGroupName({
         width: sidebarColumnWidth,
       }}
     >
+      {/* Hidden drag button */}
+      <Button
+        slot="drag"
+        style={{
+          opacity: 0,
+          width: 1,
+          height: 1,
+          position: 'absolute',
+          overflow: 'hidden',
+        }}
+      />
       <Button
         variant="bare"
         className={css({
@@ -212,6 +244,7 @@ function IncomeGroupName({
               width: sidebarColumnWidth,
               textAlign: 'left',
               ...styles.smallText,
+              fontWeight: '500',
             }}
             data-testid="category-group-name"
           >
@@ -228,23 +261,44 @@ function IncomeGroupName({
   );
 }
 
-type IncomeGroupCellsProps = {
+type ExpenseGroupCellsProps = {
   group: CategoryGroupEntity;
+  show3Columns: boolean;
+  showBudgetedColumn: boolean;
 };
 
-function IncomeGroupCells({ group }: IncomeGroupCellsProps) {
+function ExpenseGroupCells({
+  group,
+  show3Columns,
+  showBudgetedColumn,
+}: ExpenseGroupCellsProps) {
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
   const format = useFormat();
 
-  const budgeted =
-    budgetType === 'report' ? trackingBudget.groupBudgeted(group.id) : null;
+  const columnWidth = getColumnWidth({ show3Columns });
 
-  const balance =
+  const amountStyle: CSSProperties = {
+    width: columnWidth,
+    fontSize: 12,
+    fontWeight: '500',
+    paddingLeft: 5,
+    textAlign: 'right',
+  };
+
+  const budgeted =
+    budgetType === 'report'
+      ? trackingBudget.groupBudgeted(group.id)
+      : envelopeBudget.groupBudgeted(group.id);
+
+  const spent =
     budgetType === 'report'
       ? trackingBudget.groupSumAmount(group.id)
       : envelopeBudget.groupSumAmount(group.id);
 
-  const columnWidth = getColumnWidth();
+  const balance =
+    budgetType === 'report'
+      ? trackingBudget.groupBalance(group.id)
+      : envelopeBudget.groupBalance(group.id);
 
   return (
     <View
@@ -255,7 +309,11 @@ function IncomeGroupCells({ group }: IncomeGroupCellsProps) {
         paddingRight: 5,
       }}
     >
-      {budgeted && (
+      <View
+        style={{
+          ...(!show3Columns && !showBudgetedColumn && { display: 'none' }),
+        }}
+      >
         <CellValue<'envelope-budget' | 'tracking-budget', 'group-budget'>
           binding={budgeted}
           type="financial"
@@ -269,15 +327,7 @@ function IncomeGroupCells({ group }: IncomeGroupCellsProps) {
                   minFontSizePx={6}
                   maxFontSizePx={12}
                   mode="oneline"
-                  style={{
-                    width: columnWidth,
-                    justifyContent: 'center',
-                    alignItems: 'flex-end',
-                    paddingLeft: 5,
-                    textAlign: 'right',
-                    fontSize: 12,
-                    fontWeight: '500',
-                  }}
+                  style={amountStyle}
                 >
                   {format(value, type)}
                 </AutoTextSize>
@@ -285,8 +335,35 @@ function IncomeGroupCells({ group }: IncomeGroupCellsProps) {
             </View>
           )}
         </CellValue>
-      )}
-      <CellValue<'envelope-budget' | 'tracking-budget', 'group-sum-amount'>
+      </View>
+      <View
+        style={{
+          ...(!show3Columns && showBudgetedColumn && { display: 'none' }),
+        }}
+      >
+        <CellValue<'envelope-budget' | 'tracking-budget', 'group-sum-amount'>
+          binding={spent}
+          type="financial"
+        >
+          {({ type, value }) => (
+            <View>
+              <PrivacyFilter>
+                <AutoTextSize
+                  key={value}
+                  as={Text}
+                  minFontSizePx={6}
+                  maxFontSizePx={12}
+                  mode="oneline"
+                  style={amountStyle}
+                >
+                  {format(value, type)}
+                </AutoTextSize>
+              </PrivacyFilter>
+            </View>
+          )}
+        </CellValue>
+      </View>
+      <CellValue<'envelope-budget' | 'tracking-budget', 'group-leftover'>
         binding={balance}
         type="financial"
       >
@@ -299,15 +376,7 @@ function IncomeGroupCells({ group }: IncomeGroupCellsProps) {
                 minFontSizePx={6}
                 maxFontSizePx={12}
                 mode="oneline"
-                style={{
-                  width: columnWidth,
-                  justifyContent: 'center',
-                  alignItems: 'flex-end',
-                  paddingLeft: 5,
-                  textAlign: 'right',
-                  fontSize: 12,
-                  fontWeight: '500',
-                }}
+                style={amountStyle}
               >
                 {format(value, type)}
               </AutoTextSize>
