@@ -10,7 +10,6 @@ import { View } from '@actual-app/components/view';
 
 import { envelopeBudget } from 'loot-core/client/queries';
 
-import { useContextMenu } from '../../../../hooks/useContextMenu';
 import { CoverMenu } from '../CoverMenu';
 import { useEnvelopeSheetValue } from '../EnvelopeBudgetComponents';
 import { HoldMenu } from '../HoldMenu';
@@ -18,6 +17,8 @@ import { TransferMenu } from '../TransferMenu';
 
 import { ToBudgetAmount } from './ToBudgetAmount';
 import { ToBudgetMenu } from './ToBudgetMenu';
+
+import { useContextMenu } from '@hooks/useContextMenu';
 
 type ToBudgetProps = {
   month: string;

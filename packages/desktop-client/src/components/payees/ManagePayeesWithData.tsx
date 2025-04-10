@@ -11,10 +11,11 @@ import { type UndoState } from 'loot-core/server/undo';
 import { applyChanges, type Diff } from 'loot-core/shared/util';
 import { type NewRuleEntity, type PayeeEntity } from 'loot-core/types/models';
 
-import { usePayees } from '../../hooks/usePayees';
 import { useDispatch } from '../../redux';
 
 import { ManagePayees } from './ManagePayees';
+
+import { usePayees } from '@hooks/usePayees';
 
 type ManagePayeesWithDataProps = {
   initialSelectedIds: string[];

@@ -3,12 +3,12 @@ import { useEffect, useState } from 'react';
 import { isNonProductionEnvironment } from 'loot-core/shared/environment';
 import type { DarkTheme, Theme } from 'loot-core/types/prefs';
 
-import { useGlobalPref } from '../hooks/useGlobalPref';
-
 import * as darkTheme from './themes/dark';
 import * as developmentTheme from './themes/development';
 import * as lightTheme from './themes/light';
 import * as midnightTheme from './themes/midnight';
+
+import { useGlobalPref } from '@hooks/useGlobalPref';
 
 const themes = {
   light: { name: 'Light', colors: lightTheme },

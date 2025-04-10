@@ -17,7 +17,6 @@ import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
 import * as monthUtils from 'loot-core/shared/months';
 import { type CategoryGroupEntity } from 'loot-core/types/models';
 
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
@@ -25,6 +24,8 @@ import { useFormat } from '../../spreadsheet/useFormat';
 import { getColumnWidth } from './BudgetTable';
 import { IncomeCategoryList } from './IncomeCategoryList';
 import { ListItem } from './ListItem';
+
+import { useSyncedPref } from '@hooks/useSyncedPref';
 
 type IncomeGroupProps = {
   group: CategoryGroupEntity;

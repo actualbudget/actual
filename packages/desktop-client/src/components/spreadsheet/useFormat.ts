@@ -7,7 +7,7 @@ import {
   setNumberFormat,
 } from 'loot-core/shared/util';
 
-import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { useSyncedPref } from '@hooks/useSyncedPref';
 
 export type FormatType =
   | 'string'

@@ -21,11 +21,12 @@ import {
   type AccountEntity,
 } from 'loot-core/types/models';
 
-import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { CheckboxOption } from '../modals/ImportTransactionsModal/CheckboxOption';
 
 import { FieldMapping } from './FieldMapping';
+
+import { useSyncedPref } from '@hooks/useSyncedPref';
 
 export type TransactionDirection = 'payment' | 'deposit';
 

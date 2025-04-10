@@ -1,11 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-  useSelectedItems,
-  useSelectedDispatch,
-} from '../../../hooks/useSelected';
 import { SelectCell, Cell, TableHeader } from '../../table';
+
+import { useSelectedItems, useSelectedDispatch } from '@hooks/useSelected';
 
 export function UserDirectoryHeader() {
   const { t } = useTranslation();

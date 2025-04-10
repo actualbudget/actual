@@ -22,8 +22,6 @@ import { moveCategory } from 'loot-core/client/queries/queriesSlice';
 import * as monthUtils from 'loot-core/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { useNavigate } from '../../../hooks/useNavigate';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useDispatch } from '../../../redux';
 import { makeAmountGrey } from '../../budget/util';
 import { PrivacyFilter } from '../../PrivacyFilter';
@@ -32,6 +30,9 @@ import { useFormat } from '../../spreadsheet/useFormat';
 
 import { BudgetCell } from './BudgetCell';
 import { getColumnWidth, PILL_STYLE } from './BudgetTable';
+
+import { useNavigate } from '@hooks/useNavigate';
+import { useSyncedPref } from '@hooks/useSyncedPref';
 
 type IncomeCategoryListProps = {
   categories: CategoryEntity[];

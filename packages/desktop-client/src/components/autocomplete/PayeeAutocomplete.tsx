@@ -29,8 +29,6 @@ import {
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { type AccountEntity, type PayeeEntity } from 'loot-core/types/models';
 
-import { useAccounts } from '../../hooks/useAccounts';
-import { useCommonPayees, usePayees } from '../../hooks/usePayees';
 import { useDispatch } from '../../redux';
 
 import {
@@ -39,6 +37,9 @@ import {
   AutocompleteFooter,
 } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
+
+import { useAccounts } from '@hooks/useAccounts';
+import { useCommonPayees, usePayees } from '@hooks/usePayees';
 
 export type PayeeAutocompleteItem = PayeeEntity;
 

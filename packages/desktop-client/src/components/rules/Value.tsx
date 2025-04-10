@@ -10,12 +10,13 @@ import { getMonthYearFormat } from 'loot-core/shared/months';
 import { getRecurringDescription } from 'loot-core/shared/schedules';
 import { integerToCurrency } from 'loot-core/shared/util';
 
-import { useAccounts } from '../../hooks/useAccounts';
-import { useCategories } from '../../hooks/useCategories';
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { useLocale } from '../../hooks/useLocale';
-import { usePayees } from '../../hooks/usePayees';
 import { Link } from '../common/Link';
+
+import { useAccounts } from '@hooks/useAccounts';
+import { useCategories } from '@hooks/useCategories';
+import { useDateFormat } from '@hooks/useDateFormat';
+import { useLocale } from '@hooks/useLocale';
+import { usePayees } from '@hooks/usePayees';
 
 type ValueProps<T> = {
   value: T;

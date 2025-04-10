@@ -14,20 +14,21 @@ import { q } from 'loot-core/shared/query';
 import { getRecurringDescription } from 'loot-core/shared/schedules';
 import type { DiscoverScheduleEntity } from 'loot-core/types/models';
 
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { useLocale } from '../../hooks/useLocale';
-import {
-  useSelected,
-  useSelectedDispatch,
-  useSelectedItems,
-  SelectedProvider,
-} from '../../hooks/useSelected';
-import { useSendPlatformRequest } from '../../hooks/useSendPlatformRequest';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import { DisplayId } from '../util/DisplayId';
 
 import { ScheduleAmountCell } from './SchedulesTable';
+
+import { useDateFormat } from '@hooks/useDateFormat';
+import { useLocale } from '@hooks/useLocale';
+import {
+  useSelected,
+  useSelectedDispatch,
+  useSelectedItems,
+  SelectedProvider,
+} from '@hooks/useSelected';
+import { useSendPlatformRequest } from '@hooks/useSendPlatformRequest';
 
 const ROW_HEIGHT = 43;
 

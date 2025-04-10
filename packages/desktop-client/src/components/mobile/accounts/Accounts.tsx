@@ -33,11 +33,6 @@ import { replaceModal } from 'loot-core/client/modals/modalsSlice';
 import * as queries from 'loot-core/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
-import { useLocalPref } from '../../../hooks/useLocalPref';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useDispatch, useSelector } from '../../../redux';
 import { makeAmountFullStyle } from '../../budget/util';
 import { MobilePageHeader, Page } from '../../Page';
@@ -45,6 +40,12 @@ import { type Binding, type SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
+
+import { useAccounts } from '@hooks/useAccounts';
+import { useFailedAccounts } from '@hooks/useFailedAccounts';
+import { useLocalPref } from '@hooks/useLocalPref';
+import { useNavigate } from '@hooks/useNavigate';
+import { useSyncedPref } from '@hooks/useSyncedPref';
 
 type AccountHeaderProps<SheetFieldName extends SheetFields<'account'>> = {
   id: string;

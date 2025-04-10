@@ -69,29 +69,27 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
-import { useAccountPreviewTransactions } from '../../hooks/useAccountPreviewTransactions';
-import { useAccounts } from '../../hooks/useAccounts';
-import { useCategories } from '../../hooks/useCategories';
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { useFailedAccounts } from '../../hooks/useFailedAccounts';
-import { useLocalPref } from '../../hooks/useLocalPref';
-import { usePayees } from '../../hooks/usePayees';
-import {
-  SelectedProviderWithItems,
-  type Actions,
-} from '../../hooks/useSelected';
-import {
-  SplitsExpandedProvider,
-  useSplitsExpanded,
-} from '../../hooks/useSplitsExpanded';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { useTransactionBatchActions } from '../../hooks/useTransactionBatchActions';
 import { useSelector, useDispatch } from '../../redux';
 import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { TransactionList } from '../transactions/TransactionList';
 import { validateAccountName } from '../util/accountValidation';
 
 import { AccountHeader } from './Header';
+
+import { useAccountPreviewTransactions } from '@hooks/useAccountPreviewTransactions';
+import { useAccounts } from '@hooks/useAccounts';
+import { useCategories } from '@hooks/useCategories';
+import { useDateFormat } from '@hooks/useDateFormat';
+import { useFailedAccounts } from '@hooks/useFailedAccounts';
+import { useLocalPref } from '@hooks/useLocalPref';
+import { usePayees } from '@hooks/usePayees';
+import { SelectedProviderWithItems, type Actions } from '@hooks/useSelected';
+import {
+  SplitsExpandedProvider,
+  useSplitsExpanded,
+} from '@hooks/useSplitsExpanded';
+import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useTransactionBatchActions } from '@hooks/useTransactionBatchActions';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
 
