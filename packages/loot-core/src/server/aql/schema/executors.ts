@@ -1,15 +1,22 @@
 // @ts-strict-ignore
 
 import { aqlQuery } from '..';
-import { q } from '../../../shared/query';
-import { CategoryEntity, CategoryGroupEntity } from '../../../types/models';
+import { q, QueryState } from '../../../shared/query';
+import { CategoryEntity } from '../../../types/models';
 import * as db from '../../db';
 import { whereIn } from '../../db/util';
-import { isAggregateQuery } from '../compiler';
+import {
+  CompilerState,
+  isAggregateQuery,
+  OutputTypes,
+  SqlPieces,
+} from '../compiler';
 import { AqlQueryExecutor, execQuery } from '../exec';
 import { convertOutputType } from '../schema-helpers';
 
 // Transactions executor
+
+type SplitsOption = 'all' | 'inline' | 'none' | 'grouped';
 
 function toGroup(parents, children, mapper = x => x) {
   return parents.reduce((list, parent) => {
@@ -31,9 +38,16 @@ function toGroup(parents, children, mapper = x => x) {
 // transactions, and the second will return the count of all parent
 // (or non-split) transactions
 
-function execTransactions(state, query, sql, params, outputTypes) {
-  const tableOptions = query.tableOptions || {};
-  const splitType = tableOptions.splits || 'inline';
+function execTransactions(
+  compilerState: CompilerState,
+  queryState: QueryState,
+  sqlPieces: SqlPieces,
+  params: (string | number)[],
+  outputTypes: OutputTypes,
+) {
+  const tableOptions = queryState.tableOptions || {};
+  const splitType: SplitsOption =
+    (tableOptions.splits as SplitsOption) || 'inline';
 
   if (['all', 'inline', 'none', 'grouped'].indexOf(splitType) === -1) {
     throw new Error(`Invalid “splits” option for transactions: “${splitType}”`);
@@ -41,20 +55,19 @@ function execTransactions(state, query, sql, params, outputTypes) {
 
   if (splitType === 'all' || splitType === 'inline' || splitType === 'none') {
     return execTransactionsBasic(
-      state,
-      query,
-      sql,
+      compilerState,
+      queryState,
+      sqlPieces,
       params,
       splitType,
       outputTypes,
     );
   } else if (splitType === 'grouped') {
     return execTransactionsGrouped(
-      state,
-      query,
-      sql,
+      compilerState,
+      queryState,
+      sqlPieces,
       params,
-      splitType,
       outputTypes,
     );
   }
@@ -80,15 +93,14 @@ export function isHappyPathQuery(queryState) {
 }
 
 async function execTransactionsGrouped(
-  state,
-  queryState,
-  sql,
-  params,
-  splitType,
-  outputTypes,
+  compilerState: CompilerState,
+  queryState: QueryState,
+  sqlPieces: SqlPieces,
+  params: (string | number)[],
+  outputTypes: OutputTypes,
 ) {
   const { withDead } = queryState;
-  const whereDead = withDead ? '' : `AND ${sql.from}.tombstone = 0`;
+  const whereDead = withDead ? '' : `AND ${sqlPieces.from}.tombstone = 0`;
 
   // Aggregate queries don't make sense for a grouped transactions
   // query. We never should include both parent and children
@@ -96,7 +108,7 @@ async function execTransactionsGrouped(
   // would never make sense. In this case, switch back to the "inline"
   // type where only non-parent transactions are considered
   if (isAggregateQuery(queryState)) {
-    const s = { ...sql };
+    const s = { ...sqlPieces };
 
     // Modify the where to only include non-parents
     s.where = `${s.where} AND ${s.from}.is_parent = 0`;
@@ -111,7 +123,7 @@ async function execTransactionsGrouped(
       s.from = 'v_transactions_internal_alive v_transactions_internal';
     }
 
-    return execQuery(queryState, state, s, params, outputTypes);
+    return execQuery(queryState, compilerState, s, params, outputTypes);
   }
 
   let rows;
@@ -121,13 +133,13 @@ async function execTransactionsGrouped(
     // This is just an optimization - we can just filter out children
     // directly and only list parents
     const rowSql = `
-      SELECT ${sql.from}.id as group_id
-      FROM ${sql.from}
-      ${sql.joins}
-      ${sql.where} AND is_child = 0 ${whereDead}
-      ${sql.orderBy}
-      ${sql.limit != null ? `LIMIT ${sql.limit}` : ''}
-      ${sql.offset != null ? `OFFSET ${sql.offset}` : ''}
+      SELECT ${sqlPieces.from}.id as group_id
+      FROM ${sqlPieces.from}
+      ${sqlPieces.joins}
+      ${sqlPieces.where} AND is_child = 0 ${whereDead}
+      ${sqlPieces.orderBy}
+      ${sqlPieces.limit != null ? `LIMIT ${sqlPieces.limit}` : ''}
+      ${sqlPieces.offset != null ? `OFFSET ${sqlPieces.offset}` : ''}
     `;
     rows = await db.all<db.DbViewTransactionInternal>(rowSql, params);
   } else {
@@ -140,19 +152,19 @@ async function execTransactionsGrouped(
           group_id,
           GROUP_CONCAT(id) as matched
           FROM (
-            SELECT ${sql.from}.id, IFNULL(${sql.from}.parent_id, ${sql.from}.id) as group_id
-            FROM ${sql.from}
-            LEFT JOIN transactions _t2 ON ${sql.from}.is_child = 1 AND _t2.id = ${sql.from}.parent_id
-            ${sql.joins}
-            ${sql.where} AND ${sql.from}.tombstone = 0 AND IFNULL(_t2.tombstone, 0) = 0
+            SELECT ${sqlPieces.from}.id, IFNULL(${sqlPieces.from}.parent_id, ${sqlPieces.from}.id) as group_id
+            FROM ${sqlPieces.from}
+            LEFT JOIN transactions _t2 ON ${sqlPieces.from}.is_child = 1 AND _t2.id = ${sqlPieces.from}.parent_id
+            ${sqlPieces.joins}
+            ${sqlPieces.where} AND ${sqlPieces.from}.tombstone = 0 AND IFNULL(_t2.tombstone, 0) = 0
           )
         GROUP BY group_id
       )
-      LEFT JOIN ${sql.from} ON ${sql.from}.id = group_id
-      ${sql.joins}
-      ${sql.orderBy}
-      ${sql.limit != null ? `LIMIT ${sql.limit}` : ''}
-      ${sql.offset != null ? `OFFSET ${sql.offset}` : ''}
+      LEFT JOIN ${sqlPieces.from} ON ${sqlPieces.from}.id = group_id
+      ${sqlPieces.joins}
+      ${sqlPieces.orderBy}
+      ${sqlPieces.limit != null ? `LIMIT ${sqlPieces.limit}` : ''}
+      ${sqlPieces.offset != null ? `OFFSET ${sqlPieces.offset}` : ''}
     `;
 
     rows = await db.all<db.DbViewTransactionInternal>(rowSql, params);
@@ -166,13 +178,13 @@ async function execTransactionsGrouped(
 
   const where = whereIn(
     rows.map(row => row.group_id),
-    `IFNULL(${sql.from}.parent_id, ${sql.from}.id)`,
+    `IFNULL(${sqlPieces.from}.parent_id, ${sqlPieces.from}.id)`,
   );
   const finalSql = `
-    SELECT ${sql.select}, parent_id AS _parent_id FROM ${sql.from}
-    ${sql.joins}
+    SELECT ${sqlPieces.select}, parent_id AS _parent_id FROM ${sqlPieces.from}
+    ${sqlPieces.joins}
     WHERE ${where} ${whereDead}
-    ${sql.orderBy}
+    ${sqlPieces.orderBy}
   `;
 
   const allRows = await db.all<
@@ -214,14 +226,14 @@ async function execTransactionsGrouped(
 }
 
 async function execTransactionsBasic(
-  state,
-  queryState,
-  sql,
-  params,
-  splitType,
-  outputTypes,
+  compilerState: CompilerState,
+  queryState: QueryState,
+  sqlPieces: SqlPieces,
+  params: (string | number)[],
+  splitType: SplitsOption,
+  outputTypes: OutputTypes,
 ) {
-  const s = { ...sql };
+  const s = { ...sqlPieces };
 
   if (splitType !== 'all') {
     if (splitType === 'none') {
@@ -231,41 +243,58 @@ async function execTransactionsBasic(
     }
   }
 
-  return execQuery(queryState, state, s, params, outputTypes);
+  return execQuery(queryState, compilerState, s, params, outputTypes);
 }
 
-async function execCategoryGroups(state, query, sql, params, outputTypes) {
-  const tableOptions = query.tableOptions || {};
-  const categoriesOption = tableOptions.categories || 'all';
+// Category groups executor
+
+type CategoriesOption = 'all' | 'none';
+
+async function execCategoryGroups(
+  compilerState: CompilerState,
+  queryState: QueryState,
+  sqlPieces: SqlPieces,
+  params: (string | number)[],
+  outputTypes: OutputTypes,
+) {
+  const tableOptions = queryState.tableOptions || {};
+  const categoriesOption: CategoriesOption =
+    (tableOptions.categories as CategoriesOption) || 'all';
 
   if (categoriesOption !== 'none') {
     return execCategoryGroupsWithCategories(
-      state,
-      query,
-      sql,
+      compilerState,
+      queryState,
+      sqlPieces,
       params,
       categoriesOption,
       outputTypes,
     );
   }
-  return execCategoryGroupsBasic(state, query, sql, params, outputTypes);
+  return execCategoryGroupsBasic(
+    compilerState,
+    queryState,
+    sqlPieces,
+    params,
+    outputTypes,
+  );
 }
 
 async function execCategoryGroupsWithCategories(
-  state,
-  queryState,
-  sql,
-  params,
-  categoriesOption,
-  outputTypes,
+  compilerState: CompilerState,
+  queryState: QueryState,
+  sqlPieces: SqlPieces,
+  params: (string | number)[],
+  categoriesOption: CategoriesOption,
+  outputTypes: OutputTypes,
 ) {
-  const categoryGroups = (await execCategoryGroupsBasic(
-    state,
+  const categoryGroups = await execCategoryGroupsBasic(
+    compilerState,
     queryState,
-    sql,
+    sqlPieces,
     params,
     outputTypes,
-  )) as CategoryGroupEntity[];
+  );
 
   if (categoriesOption === 'none') {
     return categoryGroups;
@@ -289,16 +318,16 @@ async function execCategoryGroupsWithCategories(
 }
 
 async function execCategoryGroupsBasic(
-  state,
-  queryState,
-  sql,
-  params,
-  outputTypes,
+  compilerState: CompilerState,
+  queryState: QueryState,
+  sqlPieces: SqlPieces,
+  params: (string | number)[],
+  outputTypes: OutputTypes,
 ) {
-  return execQuery(queryState, state, sql, params, outputTypes);
+  return execQuery(queryState, compilerState, sqlPieces, params, outputTypes);
 }
 
-export const schemaExecutors = {
-  transactions: execTransactions as AqlQueryExecutor,
-  category_groups: execCategoryGroups as AqlQueryExecutor,
+export const schemaExecutors: Record<string, AqlQueryExecutor> = {
+  transactions: execTransactions,
+  category_groups: execCategoryGroups,
 };

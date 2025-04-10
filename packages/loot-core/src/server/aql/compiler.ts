@@ -1001,6 +1001,9 @@ export function isAggregateQuery(queryState) {
   });
 }
 
+// TODO: Type this based on schema/index
+type Schema = unknown;
+
 export type SchemaConfig = {
   tableViews?:
     | Record<string, string>
@@ -1026,15 +1029,16 @@ type NamedParameter = {
   value: string;
 };
 
+// TODO: Type this
+type CompileStack = unknown[];
+
 export type CompilerState = {
-  // Should be based on schema/index
-  schema: unknown;
+  schema: Schema;
   implicitTableName: string;
   implicitTableId: string;
   paths: Map<string, unknown>;
   dependencies: string[];
-  // TODO: type this
-  compileStack: unknown[];
+  compileStack: CompileStack;
   outputTypes: OutputTypes;
   validateRefs: boolean;
   namedParameters: NamedParameter[];

@@ -4,6 +4,7 @@ import * as db from '../db';
 
 import {
   compileQuery,
+  CompilerState,
   defaultConstructQuery,
   OutputTypes,
   SchemaConfig,
@@ -23,7 +24,7 @@ import { convertInputType, convertOutputType } from './schema-helpers';
 //   global "field lookup" table that other filter/groupBy/etc
 //   expressions can reference
 
-function applyTypes(data, outputTypes: OutputTypes) {
+function applyTypes(data: Record<string, unknown>[], outputTypes: OutputTypes) {
   for (let i = 0; i < data.length; i++) {
     const item = data[i];
     Object.keys(item).forEach(name => {
@@ -34,24 +35,24 @@ function applyTypes(data, outputTypes: OutputTypes) {
 
 export async function execQuery(
   queryState: QueryState,
-  state,
+  compilerState: CompilerState,
   sqlPieces: SqlPieces,
   params: (string | number)[],
   outputTypes: OutputTypes,
 ) {
-  const sql = defaultConstructQuery(queryState, state, sqlPieces);
-  const data = await db.all(sql, params);
+  const sql = defaultConstructQuery(queryState, compilerState, sqlPieces);
+  const data = await db.all<Record<string, unknown>>(sql, params);
   applyTypes(data, outputTypes);
   return data;
 }
 
 export type AqlQueryExecutor = (
-  compilerState,
+  compilerState: CompilerState,
   queryState: QueryState,
   sqlPieces: SqlPieces,
   params: (string | number)[],
   outputTypes: OutputTypes,
-) => Promise<unknown[]>;
+) => Promise<Record<string, unknown>[]>;
 
 type AqlQueryParamName = string;
 type AqlQueryParamValue = unknown;
@@ -65,7 +66,7 @@ export type RunCompiledAqlQueryOptions = {
 export async function runCompiledAqlQuery(
   queryState: QueryState,
   sqlPieces: SqlPieces,
-  compilerState,
+  compilerState: CompilerState,
   { params = {}, executors = {} }: RunCompiledAqlQueryOptions = {},
 ) {
   const paramArray = compilerState.namedParameters.map(param => {
@@ -76,7 +77,7 @@ export async function runCompiledAqlQuery(
     return convertInputType(params[name], param.paramType);
   });
 
-  let data;
+  let data: Record<string, unknown>[] = [];
   if (executors[compilerState.implicitTableName]) {
     data = await executors[compilerState.implicitTableName](
       compilerState,
@@ -101,11 +102,12 @@ export async function runCompiledAqlQuery(
       const k = Object.keys(row)[0];
       // TODO: the function being run should be the one to
       // determine the default value, not hardcoded as 0
-      data = row[k] || 0;
+      return row[k] || 0;
     } else {
-      data = null;
+      return null;
     }
   }
+
   return data;
 }
 
