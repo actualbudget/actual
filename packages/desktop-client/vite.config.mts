@@ -198,5 +198,8 @@ export default defineConfig(async ({ mode }) => {
       globals: true,
       setupFiles: './src/setupTests.js',
     },
+    optimizeDeps: {
+      exclude: ['moment'],
+    },
   };
 });
