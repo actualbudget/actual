@@ -511,6 +511,7 @@ export type Modal =
       name: 'confirm-unlink-account';
       options: {
         accountName: string;
+        isViewBankSyncSettings: boolean;
         onUnlink: () => void;
       };
     }

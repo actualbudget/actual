@@ -70,7 +70,7 @@ export const SimpleFinInitialiseModal = ({
           <View style={{ display: 'flex', gap: 10 }}>
             <Text>
               <Trans>
-                In order to enable bank-sync via SimpleFIN (only for North
+                In order to enable bank sync via SimpleFIN (only for North
                 American banks), you will need to create a token. This can be
                 done by creating an account with{' '}
                 <Link

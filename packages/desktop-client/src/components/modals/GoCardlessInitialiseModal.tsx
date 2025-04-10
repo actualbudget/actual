@@ -92,7 +92,7 @@ export const GoCardlessInitialiseModal = ({
           <View style={{ display: 'flex', gap: 10 }}>
             <Text>
               <Trans>
-                In order to enable bank-sync via GoCardless (only for EU banks)
+                In order to enable bank sync via GoCardless (only for EU banks)
                 you will need to create access credentials. This can be done by
                 creating an account with{' '}
                 <Link
