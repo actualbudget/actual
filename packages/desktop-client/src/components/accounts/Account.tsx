@@ -847,6 +847,7 @@ class AccountInternal extends PureComponent<
               name: 'confirm-unlink-account',
               options: {
                 accountName: account.name,
+                isViewBankSyncSettings: false,
                 onUnlink: () => {
                   this.props.dispatch(unlinkAccount({ id: accountId }));
                 },

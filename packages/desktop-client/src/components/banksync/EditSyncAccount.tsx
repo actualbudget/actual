@@ -5,11 +5,13 @@ import { Button } from '@actual-app/components/button';
 import { SvgQuestion } from '@actual-app/components/icons/v1';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
 import { useTransactions } from 'loot-core/client/data-hooks/transactions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   defaultMappings,
   type Mappings,
@@ -186,8 +188,21 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
   const dispatch = useDispatch();
 
   const onUnlink = async (close: () => void) => {
-    dispatch(unlinkAccount({ id: account.id }));
-    close();
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'confirm-unlink-account',
+          options: {
+            accountName: account.name,
+            isViewBankSyncSettings: true,
+            onUnlink: () => {
+              dispatch(unlinkAccount({ id: account.id }));
+              close();
+            },
+          },
+        },
+      }),
+    );
   };
 
   const setMapping = (field: string, value: string) => {
@@ -197,6 +212,9 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
       return updated;
     });
   };
+
+  const potentiallyTruncatedAccountName =
+    account.name.length > 25 ? account.name.slice(0, 25) + '...' : account.name;
 
   const fields = exampleTransaction ? getFields(exampleTransaction) : [];
   const mapping = mappings.get(transactionDirection);
@@ -209,22 +227,11 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={account.name + t(' bank sync settings')}
+            title={t('{{accountName}} bank sync settings', {
+              accountName: potentiallyTruncatedAccountName,
+            })}
             rightContent={<ModalCloseButton onPress={close} />}
           />
-
-          <Text style={{ fontSize: 15 }}>
-            <Trans>This page will close if account is unlinked.</Trans>
-          </Text>
-
-          <Button
-            style={{ margin: '1em 0', width: '25%' }}
-            onPress={() => {
-              onUnlink(close);
-            }}
-          >
-            <Trans>Unlink Account</Trans>
-          </Button>
 
           <Text style={{ fontSize: 15 }}>
             <Trans>Field mapping</Trans>
@@ -289,6 +296,17 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             align="center"
             style={{ marginTop: 20 }}
           >
+            <Button
+              style={{ color: theme.errorText }}
+              onPress={() => {
+                onUnlink(close);
+              }}
+            >
+              <Trans>Unlink account</Trans>
+            </Button>
+
+            <View style={{ flexGrow: 1 }} />
+
             <Button style={{ marginRight: 10 }} onPress={close}>
               <Trans>Cancel</Trans>
             </Button>
