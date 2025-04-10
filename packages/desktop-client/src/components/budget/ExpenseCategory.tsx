@@ -9,6 +9,7 @@ import {
   type CategoryEntity,
 } from 'loot-core/types/models';
 
+import { useDragRef } from '../../hooks/useDragRef';
 import {
   useDraggable,
   useDroppable,
@@ -55,7 +56,7 @@ export function ExpenseCategory({
 }: ExpenseCategoryProps) {
   let dragging = dragState && dragState.item === cat;
 
-  if (dragState && dragState.item.id === cat.cat_group) {
+  if (dragState && dragState.item.id === cat.group) {
     dragging = true;
   }
 
@@ -65,6 +66,7 @@ export function ExpenseCategory({
     item: cat,
     canDrag: editingCell === null,
   });
+  const handleDragRef = useDragRef(dragRef);
 
   const { dropRef, dropPos } = useDroppable({
     types: 'category',
@@ -85,7 +87,7 @@ export function ExpenseCategory({
 
       <View style={{ flex: 1, flexDirection: 'row' }}>
         <SidebarCategory
-          innerRef={dragRef}
+          innerRef={handleDragRef}
           category={cat}
           categoryGroup={categoryGroup}
           dragPreview={dragging && dragState.preview}

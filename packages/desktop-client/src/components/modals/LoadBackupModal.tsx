@@ -10,7 +10,7 @@ import { View } from '@actual-app/components/view';
 import { loadBackup, makeBackup } from 'loot-core/client/budgets/budgetsSlice';
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { send, listen } from 'loot-core/platform/client/fetch';
-import { type Backup } from 'loot-core/server/backups';
+import { type Backup } from 'loot-core/server/budgetfiles/backups';
 
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useDispatch } from '../../redux';

@@ -13,6 +13,7 @@ import { useDrag, useDrop } from 'react-dnd';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { useDragRef } from '../hooks/useDragRef';
 import { useMergedRefs } from '../hooks/useMergedRefs';
 
 export type DragState<T> = {
@@ -119,6 +120,7 @@ export function useDroppable<T extends { id: string }>({
       return { isOver: monitor.isOver() };
     },
   });
+  const handleDropRef = useDragRef(dropRef);
 
   useEffect(() => {
     let timeout;
@@ -130,7 +132,7 @@ export function useDroppable<T extends { id: string }>({
   }, [isOver]);
 
   return {
-    dropRef: useMergedRefs(dropRef, ref),
+    dropRef: useMergedRefs(handleDropRef, ref),
     dropPos: isOver ? dropPos : null,
   };
 }

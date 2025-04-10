@@ -94,10 +94,6 @@ export type GlobalPrefs = Partial<{
     // Electron only
     autoStart?: boolean;
     port?: number;
-    ngrokConfig?: {
-      domain?: string;
-      authToken?: string;
-    };
   };
 }>;
 
