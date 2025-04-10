@@ -1057,7 +1057,7 @@ export type SqlPieces = {
 
 export function compileQuery(
   queryState: QueryState,
-  schema,
+  schema: Schema,
   schemaConfig: SchemaConfig = {},
 ) {
   const { withDead, validateRefs = true, tableOptions, rawMode } = queryState;
@@ -1187,7 +1187,7 @@ export function compileQuery(
 
 export function defaultConstructQuery(
   queryState: QueryState,
-  state,
+  compilerState: CompilerState,
   sqlPieces: SqlPieces,
 ) {
   const s = sqlPieces;
@@ -1195,9 +1195,9 @@ export function defaultConstructQuery(
   const where = queryState.withDead
     ? s.where
     : addTombstone(
-        state.schema,
-        state.implicitTableName,
-        state.implicitTableId,
+        compilerState.schema,
+        compilerState.implicitTableName,
+        compilerState.implicitTableId,
         s.where,
       );
 
@@ -1214,7 +1214,7 @@ export function defaultConstructQuery(
 
 export function generateSQLWithState(
   queryState: QueryState,
-  schema?: unknown,
+  schema?: Schema,
   schemaConfig?: SchemaConfig,
 ) {
   const { sqlPieces, state } = compileQuery(queryState, schema, schemaConfig);
