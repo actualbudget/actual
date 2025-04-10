@@ -1042,7 +1042,7 @@ export type CompilerState = {
 
 export type SqlPieces = {
   select: string;
-  from: unknown;
+  from: string;
   joins: string;
   where: string;
   groupBy: string;
