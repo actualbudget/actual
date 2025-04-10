@@ -27,10 +27,6 @@ import {
   type Widget,
 } from 'loot-core/types/models';
 
-import { useAccounts } from '../../hooks/useAccounts';
-import { useNavigate } from '../../hooks/useNavigate';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { useUndo } from '../../hooks/useUndo';
 import { useDispatch } from '../../redux';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { MobilePageHeader, Page, PageHeader } from '../Page';
@@ -45,6 +41,11 @@ import { NetWorthCard } from './reports/NetWorthCard';
 import { SpendingCard } from './reports/SpendingCard';
 import './overview.scss';
 import { SummaryCard } from './reports/SummaryCard';
+
+import { useAccounts } from '@hooks/useAccounts';
+import { useNavigate } from '@hooks/useNavigate';
+import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useUndo } from '@hooks/useUndo';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 

@@ -22,16 +22,17 @@ import { send } from 'loot-core/platform/client/fetch';
 import { useAuth } from '../../auth/AuthProvider';
 import { Permissions } from '../../auth/types';
 import { authorizeBank } from '../../gocardless';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
-import { usePluggyAiStatus } from '../../hooks/usePluggyAiStatus';
-import { useSimpleFinStatus } from '../../hooks/useSimpleFinStatus';
-import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { useDispatch } from '../../redux';
 import { Warning } from '../alerts';
 import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { useMultiuserEnabled } from '../ServerContext';
+
+import { useFeatureFlag } from '@hooks/useFeatureFlag';
+import { useGoCardlessStatus } from '@hooks/useGoCardlessStatus';
+import { usePluggyAiStatus } from '@hooks/usePluggyAiStatus';
+import { useSimpleFinStatus } from '@hooks/useSimpleFinStatus';
+import { useSyncServerStatus } from '@hooks/useSyncServerStatus';
 
 type CreateAccountModalProps = Extract<
   ModalType,

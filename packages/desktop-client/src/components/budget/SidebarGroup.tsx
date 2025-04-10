@@ -10,15 +10,15 @@ import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useContextMenu } from '@hooks/useContextMenu';
+import { useFeatureFlag } from '@hooks/useFeatureFlag';
+import { useGlobalPref } from '@hooks/useGlobalPref';
 
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { useContextMenu } from '../../hooks/useContextMenu';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 

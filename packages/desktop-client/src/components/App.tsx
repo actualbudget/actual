@@ -24,7 +24,6 @@ import { signOut } from 'loot-core/client/users/usersSlice';
 import { init as initConnection, send } from 'loot-core/platform/client/fetch';
 
 import { handleGlobalEvents } from '../global-events';
-import { useMetadataPref } from '../hooks/useMetadataPref';
 import { setI18NextLanguage } from '../i18n';
 import { installPolyfills } from '../polyfills';
 import { useDispatch, useSelector, useStore } from '../redux';
@@ -40,6 +39,8 @@ import { ManagementApp } from './manager/ManagementApp';
 import { Modals } from './Modals';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
+
+import { useMetadataPref } from '@hooks/useMetadataPref';
 
 function AppInner() {
   const [budgetId] = useMetadataPref('id');

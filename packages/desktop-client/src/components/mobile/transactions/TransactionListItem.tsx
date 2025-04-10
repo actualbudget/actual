@@ -37,14 +37,15 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { useAccount } from '../../../hooks/useAccount';
-import { useCategories } from '../../../hooks/useCategories';
-import { useDisplayPayee } from '../../../hooks/useDisplayPayee';
-import { usePayee } from '../../../hooks/usePayee';
 import { useSelector } from '../../../redux';
 import { makeAmountFullStyle } from '../../budget/util';
 
 import { lookupName, Status } from './TransactionEdit';
+
+import { useAccount } from '@hooks/useAccount';
+import { useCategories } from '@hooks/useCategories';
+import { useDisplayPayee } from '@hooks/useDisplayPayee';
+import { usePayee } from '@hooks/usePayee';
 
 const ROW_HEIGHT = 60;
 

@@ -15,9 +15,6 @@ import { Tooltip } from '@actual-app/components/tooltip';
 
 import { type PayeeEntity } from 'loot-core/types/models';
 
-import { useContextMenu } from '../../hooks/useContextMenu';
-import { useSelectedDispatch } from '../../hooks/useSelected';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
 import {
   Cell,
   CellButton,
@@ -26,6 +23,10 @@ import {
   Row,
   SelectCell,
 } from '../table';
+
+import { useContextMenu } from '@hooks/useContextMenu';
+import { useSelectedDispatch } from '@hooks/useSelected';
+import { useSyncedPref } from '@hooks/useSyncedPref';
 
 type RuleButtonProps = {
   ruleCount: number;

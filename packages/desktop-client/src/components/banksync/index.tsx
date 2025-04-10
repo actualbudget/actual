@@ -11,14 +11,15 @@ import {
   type AccountEntity,
 } from 'loot-core/types/models';
 
-import { useAccounts } from '../../hooks/useAccounts';
-import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useDispatch } from '../../redux';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
 
 import { AccountsHeader } from './AccountsHeader';
 import { AccountsList } from './AccountsList';
+
+import { useAccounts } from '@hooks/useAccounts';
+import { useGlobalPref } from '@hooks/useGlobalPref';
 
 type SyncProviders = BankSyncProviders | 'unlinked';
 

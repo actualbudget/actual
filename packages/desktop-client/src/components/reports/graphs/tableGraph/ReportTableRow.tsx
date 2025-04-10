@@ -21,11 +21,12 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { useAccounts } from '../../../../hooks/useAccounts';
-import { useCategories } from '../../../../hooks/useCategories';
-import { useNavigate } from '../../../../hooks/useNavigate';
 import { Row, Cell } from '../../../table';
 import { showActivity } from '../showActivity';
+
+import { useAccounts } from '@hooks/useAccounts';
+import { useCategories } from '@hooks/useCategories';
+import { useNavigate } from '@hooks/useNavigate';
 
 type ReportTableRowProps = {
   item: GroupedEntity;

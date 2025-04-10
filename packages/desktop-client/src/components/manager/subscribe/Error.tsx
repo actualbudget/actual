@@ -8,7 +8,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useNavigate } from '../../../hooks/useNavigate';
+import { useNavigate } from '@hooks/useNavigate';
 
 function getErrorMessage(reason) {
   switch (reason) {

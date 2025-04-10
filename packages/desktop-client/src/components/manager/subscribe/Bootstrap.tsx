@@ -11,13 +11,14 @@ import { View } from '@actual-app/components/view';
 import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 
-import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
 import { Link } from '../../common/Link';
 import { useRefreshLoginMethods } from '../../ServerContext';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
+
+import { useNavigate } from '@hooks/useNavigate';
 
 export function Bootstrap() {
   const { t } = useTranslation();

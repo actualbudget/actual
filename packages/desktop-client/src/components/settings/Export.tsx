@@ -9,9 +9,9 @@ import { format } from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 
-import { useMetadataPref } from '../../hooks/useMetadataPref';
-
 import { Setting } from './UI';
+
+import { useMetadataPref } from '@hooks/useMetadataPref';
 
 export function ExportBudget() {
   const { t } = useTranslation();

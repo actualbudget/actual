@@ -56,16 +56,6 @@ import {
   groupById,
 } from 'loot-core/shared/util';
 
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useCategories } from '../../../hooks/useCategories';
-import { useDateFormat } from '../../../hooks/useDateFormat';
-import { useInitialMount } from '../../../hooks/useInitialMount';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { usePayees } from '../../../hooks/usePayees';
-import {
-  SingleActiveEditFormProvider,
-  useSingleActiveEditForm,
-} from '../../../hooks/useSingleActiveEditForm';
 import { useSelector, useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { AmountInput } from '../../util/AmountInput';
@@ -74,6 +64,17 @@ import { FieldLabel, TapField, InputField, ToggleField } from '../MobileForms';
 import { getPrettyPayee } from '../utils';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
+
+import { useAccounts } from '@hooks/useAccounts';
+import { useCategories } from '@hooks/useCategories';
+import { useDateFormat } from '@hooks/useDateFormat';
+import { useInitialMount } from '@hooks/useInitialMount';
+import { useNavigate } from '@hooks/useNavigate';
+import { usePayees } from '@hooks/usePayees';
+import {
+  SingleActiveEditFormProvider,
+  useSingleActiveEditForm,
+} from '@hooks/useSingleActiveEditForm';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;

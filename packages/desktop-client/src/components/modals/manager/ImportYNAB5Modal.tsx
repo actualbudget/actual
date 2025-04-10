@@ -11,10 +11,11 @@ import { View } from '@actual-app/components/view';
 
 import { importBudget } from 'loot-core/client/budgets/budgetsSlice';
 
-import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
 import { Link } from '../../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
+
+import { useNavigate } from '@hooks/useNavigate';
 
 function getErrorMessage(error: string): string {
   switch (error) {

@@ -7,15 +7,15 @@ import React, {
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useCategories } from '@hooks/useCategories';
+import { useGlobalPref } from '@hooks/useGlobalPref';
+import { useLocalPref } from '@hooks/useLocalPref';
 
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { useCategories } from '../../hooks/useCategories';
-import { useGlobalPref } from '../../hooks/useGlobalPref';
-import { useLocalPref } from '../../hooks/useLocalPref';
 import { type DropPosition } from '../sort';
 
 import { BudgetCategories } from './BudgetCategories';

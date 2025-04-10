@@ -21,15 +21,16 @@ import { getScheduledAmount } from 'loot-core/shared/schedules';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type ScheduleEntity } from 'loot-core/types/models';
 
-import { useAccounts } from '../../hooks/useAccounts';
-import { useContextMenu } from '../../hooks/useContextMenu';
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { usePayees } from '../../hooks/usePayees';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { Table, TableHeader, Row, Field, Cell } from '../table';
 import { DisplayId } from '../util/DisplayId';
 
 import { StatusBadge } from './StatusBadge';
+
+import { useAccounts } from '@hooks/useAccounts';
+import { useContextMenu } from '@hooks/useContextMenu';
+import { useDateFormat } from '@hooks/useDateFormat';
+import { usePayees } from '@hooks/usePayees';
 
 type SchedulesTableProps = {
   isLoading?: boolean;

@@ -8,15 +8,15 @@ import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useContextMenu } from '@hooks/useContextMenu';
+import { useFeatureFlag } from '@hooks/useFeatureFlag';
+import { useGlobalPref } from '@hooks/useGlobalPref';
 
 import {
   type CategoryGroupEntity,
   type CategoryEntity,
 } from 'loot-core/types/models';
 
-import { useContextMenu } from '../../hooks/useContextMenu';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 

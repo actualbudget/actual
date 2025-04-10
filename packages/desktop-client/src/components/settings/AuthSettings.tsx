@@ -8,11 +8,12 @@ import { theme } from '@actual-app/components/theme';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useDispatch } from '../../redux';
 import { useMultiuserEnabled, useLoginMethod } from '../ServerContext';
 
 import { Setting } from './UI';
+
+import { useFeatureFlag } from '@hooks/useFeatureFlag';
 
 export function AuthSettings() {
   const { t } = useTranslation();

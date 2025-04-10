@@ -12,7 +12,6 @@ import { loggedIn } from 'loot-core/client/users/usersSlice';
 
 import { ProtectedRoute } from '../../auth/ProtectedRoute';
 import { Permissions } from '../../auth/types';
-import { useMetaThemeColor } from '../../hooks/useMetaThemeColor';
 import { useSelector, useDispatch } from '../../redux';
 import {
   BackToFileListButton,
@@ -32,6 +31,8 @@ import { Error } from './subscribe/Error';
 import { Login } from './subscribe/Login';
 import { OpenIdCallback } from './subscribe/OpenIdCallback';
 import { WelcomeScreen } from './WelcomeScreen';
+
+import { useMetaThemeColor } from '@hooks/useMetaThemeColor';
 
 function Version() {
   const version = useServerVersion();

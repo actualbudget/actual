@@ -29,11 +29,12 @@ import {
 } from 'loot-core/types/models';
 
 import { AuthProvider } from '../../auth/AuthProvider';
-import { SelectedProviderWithItems } from '../../hooks/useSelected';
-import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
 import { TestProvider } from '../../redux/mock';
 
 import { TransactionTable } from './TransactionsTable';
+
+import { SelectedProviderWithItems } from '@hooks/useSelected';
+import { SplitsExpandedProvider } from '@hooks/useSplitsExpanded';
 
 vi.mock('loot-core/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => ({

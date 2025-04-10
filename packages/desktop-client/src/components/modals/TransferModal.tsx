@@ -11,7 +11,6 @@ import {
   pushModal,
 } from 'loot-core/client/modals/modalsSlice';
 
-import { useCategories } from '../../hooks/useCategories';
 import { useDispatch } from '../../redux';
 import {
   addToBeBudgetedGroup,
@@ -20,6 +19,8 @@ import {
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
 import { AmountInput } from '../util/AmountInput';
+
+import { useCategories } from '@hooks/useCategories';
 
 type TransferModalProps = Extract<ModalType, { name: 'transfer' }>['options'];
 

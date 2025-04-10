@@ -27,7 +27,6 @@ import {
   type UserAccessEntity,
 } from 'loot-core/types/models';
 
-import { useMetadataPref } from '../../../hooks/useMetadataPref';
 import { useDispatch } from '../../../redux';
 import { InfiniteScrollWrapper } from '../../common/InfiniteScrollWrapper';
 import { Link } from '../../common/Link';
@@ -35,6 +34,8 @@ import { Search } from '../../common/Search';
 
 import { UserAccessHeader } from './UserAccessHeader';
 import { UserAccessRow } from './UserAccessRow';
+
+import { useMetadataPref } from '@hooks/useMetadataPref';
 
 type ManageUserAccessContentProps = {
   isModal: boolean;

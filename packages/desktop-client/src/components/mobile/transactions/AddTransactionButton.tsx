@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
 
-import { useNavigate } from '../../../hooks/useNavigate';
+import { useNavigate } from '@hooks/useNavigate';
 
 type AddTransactionButtonProps = {
   to?: string;

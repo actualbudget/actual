@@ -17,10 +17,11 @@ import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { currentDay, dayFromDate } from 'loot-core/shared/months';
 import { amountToInteger } from 'loot-core/shared/util';
 
-import { useDateFormat } from '../../hooks/useDateFormat';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { SectionLabel } from '../forms';
 import { DateSelect } from '../select/DateSelect';
+
+import { useDateFormat } from '@hooks/useDateFormat';
 
 const itemStyle: CSSProperties = {
   fontSize: 17,

@@ -14,7 +14,6 @@ import {
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { useLocale } from '../../hooks/useLocale';
 import { AppliedFilters } from '../filters/AppliedFilters';
 import { FilterButton } from '../filters/FiltersMenu';
 
@@ -26,6 +25,8 @@ import {
   validateEnd,
   validateStart,
 } from './reportRanges';
+
+import { useLocale } from '@hooks/useLocale';
 
 type HeaderProps = {
   start: TimeFrame['start'];

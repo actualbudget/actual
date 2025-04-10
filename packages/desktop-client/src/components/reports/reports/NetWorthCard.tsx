@@ -12,7 +12,6 @@ import {
   type NetWorthWidget,
 } from 'loot-core/types/models';
 
-import { useLocale } from '../../../hooks/useLocale';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
 import { DateRange } from '../DateRange';
@@ -23,6 +22,8 @@ import { ReportCardName } from '../ReportCardName';
 import { calculateTimeRange } from '../reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
 import { useReport } from '../useReport';
+
+import { useLocale } from '@hooks/useLocale';
 
 type NetWorthCardProps = {
   widgetId: string;

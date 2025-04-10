@@ -6,7 +6,6 @@ import { generateAccount } from 'loot-core/mocks';
 import type { AccountEntity, PayeeEntity } from 'loot-core/types/models';
 
 import { AuthProvider } from '../../auth/AuthProvider';
-import { useCommonPayees } from '../../hooks/usePayees';
 import { TestProvider } from '../../redux/mock';
 
 import {
@@ -14,6 +13,8 @@ import {
   type PayeeAutocompleteItem,
   type PayeeAutocompleteProps,
 } from './PayeeAutocomplete';
+
+import { useCommonPayees } from '@hooks/usePayees';
 
 const PAYEE_SELECTOR = '[data-testid][role=option]';
 const PAYEE_SECTION_SELECTOR = '[data-testid$="-item-group"]';

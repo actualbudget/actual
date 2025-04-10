@@ -21,6 +21,13 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useCategories } from '@hooks/useCategories';
+import { useLocale } from '@hooks/useLocale';
+import { useLocalPref } from '@hooks/useLocalPref';
+import { useNavigate } from '@hooks/useNavigate';
+import { useOverspentCategories } from '@hooks/useOverspentCategories';
+import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useUndo } from '@hooks/useUndo';
 import { AutoTextSize } from 'auto-text-size';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
@@ -32,13 +39,6 @@ import {
 import * as monthUtils from 'loot-core/shared/months';
 import { groupById } from 'loot-core/shared/util';
 
-import { useCategories } from '../../../hooks/useCategories';
-import { useLocale } from '../../../hooks/useLocale';
-import { useLocalPref } from '../../../hooks/useLocalPref';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { useOverspentCategories } from '../../../hooks/useOverspentCategories';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { useUndo } from '../../../hooks/useUndo';
 import { useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
