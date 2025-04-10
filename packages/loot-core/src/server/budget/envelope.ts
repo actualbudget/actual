@@ -74,6 +74,7 @@ export function createCategory(cat, sheetName, prevSheetName) {
 export function createSummary(groups, categories, prevSheetName, sheetName) {
   const incomeGroup = groups.filter(group => group.is_income)[0];
   const expenseCategories = categories.filter(cat => !cat.is_income);
+  const incomeCategories = categories.filter(cat => cat.is_income);
 
   sheet.get().createStatic(sheetName, 'buffered', 0);
 
@@ -131,6 +132,36 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
   });
 
   sheet.get().createDynamic(sheetName, 'buffered', { initialValue: 0 });
+  sheet.get().createDynamic(sheetName, 'buffered-auto', {
+    initialValue: 0,
+    dependencies: flatten2(
+      incomeCategories.map(c => [
+        `${sheetName}!sum-amount-${c.id}`,
+        `${sheetName}!carryover-${c.id}`,
+      ]),
+    ),
+    run: (...data) => {
+      data = unflatten2(data);
+      return safeNumber(
+        data.reduce((total, [sumAmount, carryover]) => {
+          if (carryover) {
+            return total + sumAmount;
+          }
+          return total;
+        }, 0),
+      );
+    },
+  });
+  sheet.get().createDynamic(sheetName, 'buffered-selected', {
+    initialValue: 0,
+    dependencies: [`${sheetName}!buffered`, `${sheetName}!buffered-auto`],
+    run: (man, auto) => {
+      if (man !== 0) {
+        return man;
+      }
+      return auto;
+    },
+  });
 
   sheet.get().createDynamic(sheetName, 'to-budget', {
     initialValue: 0,
