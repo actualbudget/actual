@@ -91,24 +91,27 @@ export function CloseAccountModal({
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const transferError = balance !== 0 && transferAccountId === '';
+    const transferError = balance !== 0 && !transferAccountId;
     setTransferError(transferError);
 
     const categoryError =
-      needsCategory(account, transferAccountId, accounts) && categoryId === '';
+      needsCategory(account, transferAccountId, accounts) && !categoryId;
     setCategoryError(categoryError);
 
-    if (!transferError && !categoryError) {
-      setLoading(true);
-
-      dispatch(
-        closeAccount({
-          id: account.id,
-          transferAccountId: transferAccountId || null,
-          categoryId: categoryId || null,
-        }),
-      );
+    if (transferError || categoryError) {
+      return false;
     }
+
+    setLoading(true);
+
+    dispatch(
+      closeAccount({
+        id: account.id,
+        transferAccountId: transferAccountId || null,
+        categoryId: categoryId || null,
+      }),
+    );
+    return true;
   };
 
   return (
@@ -150,8 +153,9 @@ export function CloseAccountModal({
             </Paragraph>
             <Form
               onSubmit={e => {
-                onSubmit(e);
-                close();
+                if (onSubmit(e)) {
+                  close();
+                }
               }}
             >
               {balance !== 0 && (
