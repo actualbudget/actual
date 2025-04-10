@@ -270,12 +270,24 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   useEffect(() => {
     async function run() {
       onApplyFilter(null);
-      report.conditions?.forEach((condition: RuleConditionEntity) =>
+
+      const filtersToApply =
+        savedStatus !== 'saved' ? conditions : report.conditions;
+      const conditionsOpToApply =
+        savedStatus !== 'saved' ? conditionsOp : report.conditionsOp;
+
+      filtersToApply?.forEach((condition: RuleConditionEntity) =>
         onApplyFilter(condition),
       );
-      onConditionsOpChange(report.conditionsOp);
-      const trans = await send('get-earliest-transaction');
-      setEarliestTransaction(trans ? trans.date : monthUtils.currentDay());
+      onConditionsOpChange(conditionsOpToApply);
+
+      const earliestTransaction = await send('get-earliest-transaction');
+      setEarliestTransaction(
+        earliestTransaction
+          ? earliestTransaction.date
+          : monthUtils.currentDay(),
+      );
+
       const fromDate =
         interval === 'Weekly'
           ? 'dayFromDate'
@@ -295,14 +307,23 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         interval === 'Weekly'
           ? monthUtils.currentWeek(firstDayOfWeekIdx)
           : monthUtils[currentDate]();
+
       const earliestInterval =
         interval === 'Weekly'
           ? monthUtils.weekFromDate(
-              d.parseISO(fromDateRepr(trans.date || monthUtils.currentDay())),
+              d.parseISO(
+                fromDateRepr(
+                  earliestTransaction.date || monthUtils.currentDay(),
+                ),
+              ),
               firstDayOfWeekIdx,
             )
           : monthUtils[fromDate](
-              d.parseISO(fromDateRepr(trans.date || monthUtils.currentDay())),
+              d.parseISO(
+                fromDateRepr(
+                  earliestTransaction.date || monthUtils.currentDay(),
+                ),
+              ),
             );
 
       const allIntervals =
@@ -332,7 +353,9 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       if (!isDateStatic) {
         const [dateStart, dateEnd] = getLiveRange(
           dateRange,
-          trans ? trans.date : monthUtils.currentDay(),
+          earliestTransaction
+            ? earliestTransaction.date
+            : monthUtils.currentDay(),
           includeCurrentInterval,
           firstDayOfWeekIdx,
         );
@@ -340,7 +363,10 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         setEndDate(dateEnd);
       }
     }
+
     run();
+    // omitted `conditions` and `conditionsOp` from dependencies to avoid infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     interval,
     dateRange,
@@ -352,6 +378,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     report.conditionsOp,
     includeCurrentInterval,
     locale,
+    savedStatus,
   ]);
 
   useEffect(() => {
