@@ -1,6 +1,6 @@
 import * as d from 'date-fns';
 
-import { runQuery } from 'loot-core/client/query-helpers';
+import { aqlQuery } from 'loot-core/client/query-helpers';
 import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -115,7 +115,7 @@ export function summarySpreadsheet(
 
     let data;
     try {
-      data = await runQuery(query);
+      data = await aqlQuery(query);
     } catch (error) {
       console.error('Error executing query:', error);
       return;
@@ -278,7 +278,7 @@ async function calculatePercentage(
 
   let divisorData;
   try {
-    divisorData = (await runQuery(query)) as { data: { amount: number }[] };
+    divisorData = (await aqlQuery(query)) as { data: { amount: number }[] };
   } catch (error) {
     console.error('Error executing divisor query:', error);
     return {

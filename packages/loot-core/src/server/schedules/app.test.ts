@@ -3,7 +3,7 @@ import MockDate from 'mockdate';
 
 import { q } from '../../shared/query';
 import { getNextDate } from '../../shared/schedules';
-import { runQuery as aqlQuery } from '../aql';
+import { aqlQuery } from '../aql';
 import { loadMappings } from '../db/mappings';
 import { loadRules, updateRule } from '../transactions/transaction-rules';
 

@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import { q } from '../../shared/query';
-import { runQuery } from '../aql';
+import { aqlQuery } from '../aql';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
 
@@ -29,7 +29,7 @@ beforeEach(async () => {
 
 async function getMatchingTransactions(conds) {
   const { filters } = conditionsToAQL(conds);
-  const { data } = await runQuery(
+  const { data } = await aqlQuery(
     q('transactions').filter({ $and: filters }).select('*'),
   );
   return data;

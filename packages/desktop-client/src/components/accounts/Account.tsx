@@ -41,7 +41,7 @@ import {
   updateNewTransactions,
 } from 'loot-core/client/queries/queriesSlice';
 import {
-  runQuery,
+  aqlQuery,
   pagedQuery,
   type PagedQuery,
 } from 'loot-core/client/query-helpers';
@@ -490,7 +490,7 @@ class AccountInternal extends PureComponent<
       return [];
     }
 
-    const { data } = await runQuery(this.paged.query.select('id'));
+    const { data } = await aqlQuery(this.paged.query.select('id'));
     // Remember, this is the `grouped` split type so we need to deal
     // with the `subtransactions` property
     return data.reduce((arr: string[], t: TransactionEntity) => {
@@ -728,7 +728,7 @@ class AccountInternal extends PureComponent<
       return null;
     }
 
-    const { data } = await runQuery(
+    const { data } = await aqlQuery(
       this.paged.query
         .options({ splits: 'none' })
         .select([{ balance: { $sumOver: '$amount' } }]),
@@ -961,7 +961,7 @@ class AccountInternal extends PureComponent<
       return 0;
     }
 
-    const { data: amount } = await runQuery(
+    const { data: amount } = await aqlQuery(
       this.paged.query.calculate({ $sum: '$amount' }),
     );
     return amount;
@@ -988,7 +988,7 @@ class AccountInternal extends PureComponent<
 
     const { accountId } = this.props;
 
-    const { data } = await runQuery(
+    const { data } = await aqlQuery(
       q('transactions')
         .filter({ cleared: true, reconciled: false, account: accountId })
         .select('*')
@@ -1036,7 +1036,7 @@ class AccountInternal extends PureComponent<
 
     const { reconcileAmount } = this.state;
 
-    const { data } = await runQuery(
+    const { data } = await aqlQuery(
       q('transactions')
         .filter({ cleared: true, account: accountId })
         .select('*')
@@ -1136,7 +1136,7 @@ class AccountInternal extends PureComponent<
   onMakeAsSplitTransaction = async (ids: string[]) => {
     this.setState({ workingHard: true });
 
-    const { data } = await runQuery(
+    const { data } = await aqlQuery(
       q('transactions')
         .filter({ id: { $oneof: ids } })
         .select('*')
@@ -1175,7 +1175,7 @@ class AccountInternal extends PureComponent<
   onMakeAsNonSplitTransactions = async (ids: string[]) => {
     this.setState({ workingHard: true });
 
-    const { data } = await runQuery(
+    const { data } = await aqlQuery(
       q('transactions')
         .filter({ id: { $oneof: ids } })
         .select('*')
@@ -1253,7 +1253,7 @@ class AccountInternal extends PureComponent<
     confirmReason: string,
     onConfirm: (ids: string[]) => void,
   ) => {
-    const { data } = await runQuery(
+    const { data } = await aqlQuery(
       q('transactions')
         .filter({ id: { $oneof: ids }, reconciled: true })
         .select('*')
@@ -1295,7 +1295,7 @@ class AccountInternal extends PureComponent<
   };
 
   onCreateRule = async (ids: string[]) => {
-    const { data } = await runQuery(
+    const { data } = await aqlQuery(
       q('transactions')
         .filter({ id: { $oneof: ids } })
         .select('*')

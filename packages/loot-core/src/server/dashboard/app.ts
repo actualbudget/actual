@@ -12,7 +12,7 @@ import {
 } from '../../types/models';
 import { type EverythingButIdOptional } from '../../types/util';
 import { createApp } from '../app';
-import { runQuery as aqlQuery } from '../aql';
+import { aqlQuery } from '../aql';
 import * as db from '../db';
 import { ValidationError } from '../errors';
 import { requiredFields } from '../models';
