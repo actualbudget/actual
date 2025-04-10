@@ -39,22 +39,20 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useCategories } from '../../../hooks/useCategories';
-import { useLocale } from '../../../hooks/useLocale';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { usePayees } from '../../../hooks/usePayees';
-import {
-  useSelectedDispatch,
-  useSelectedItems,
-} from '../../../hooks/useSelected';
-import { useTransactionBatchActions } from '../../../hooks/useTransactionBatchActions';
-import { useUndo } from '../../../hooks/useUndo';
 import { useDispatch } from '../../../redux';
 import { useScrollListener } from '../../ScrollProvider';
 import { FloatingActionBar } from '../FloatingActionBar';
 
 import { TransactionListItem } from './TransactionListItem';
+
+import { useAccounts } from '@hooks/useAccounts';
+import { useCategories } from '@hooks/useCategories';
+import { useLocale } from '@hooks/useLocale';
+import { useNavigate } from '@hooks/useNavigate';
+import { usePayees } from '@hooks/usePayees';
+import { useSelectedDispatch, useSelectedItems } from '@hooks/useSelected';
+import { useTransactionBatchActions } from '@hooks/useTransactionBatchActions';
+import { useUndo } from '@hooks/useUndo';
 
 const NOTIFICATION_BOTTOM_INSET = 75;
 

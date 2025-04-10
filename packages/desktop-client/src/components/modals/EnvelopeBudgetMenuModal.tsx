@@ -11,7 +11,6 @@ import * as Platform from 'loot-core/client/platform';
 import { envelopeBudget } from 'loot-core/client/queries';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
-import { useCategory } from '../../hooks/useCategory';
 import { BudgetMenu } from '../budget/envelope/BudgetMenu';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import {
@@ -21,6 +20,8 @@ import {
   ModalTitle,
 } from '../common/Modal';
 import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
+
+import { useCategory } from '@hooks/useCategory';
 
 type EnvelopeBudgetMenuModalProps = Omit<
   Extract<ModalType, { name: 'envelope-budget-menu' }>['options'],

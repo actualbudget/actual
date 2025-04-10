@@ -9,7 +9,6 @@ import {
   type CategoryEntity,
 } from 'loot-core/types/models';
 
-import { useDragRef } from '../../hooks/useDragRef';
 import {
   useDraggable,
   useDroppable,
@@ -22,6 +21,8 @@ import { Row } from '../table';
 
 import { RenderMonths } from './RenderMonths';
 import { SidebarCategory } from './SidebarCategory';
+
+import { useDragRef } from '@hooks/useDragRef';
 
 type ExpenseCategoryProps = {
   cat: CategoryEntity;

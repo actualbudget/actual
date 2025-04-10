@@ -23,7 +23,6 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type NewUserEntity, type UserEntity } from 'loot-core/types/models';
 
-import { SelectedProvider, useSelected } from '../../../hooks/useSelected';
 import { useDispatch } from '../../../redux';
 import { InfiniteScrollWrapper } from '../../common/InfiniteScrollWrapper';
 import { Link } from '../../common/Link';
@@ -31,6 +30,8 @@ import { Search } from '../../common/Search';
 
 import { UserDirectoryHeader } from './UserDirectoryHeader';
 import { UserDirectoryRow } from './UserDirectoryRow';
+
+import { SelectedProvider, useSelected } from '@hooks/useSelected';
 
 type ManageUserDirectoryContentProps = {
   isModal: boolean;

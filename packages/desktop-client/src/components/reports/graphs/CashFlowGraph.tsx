@@ -23,10 +23,11 @@ import {
   amountToCurrencyNoDecimal,
 } from 'loot-core/shared/util';
 
-import { useLocale } from '../../../hooks/useLocale';
-import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { chartTheme } from '../chart-theme';
 import { Container } from '../Container';
+
+import { useLocale } from '@hooks/useLocale';
+import { usePrivacyMode } from '@hooks/usePrivacyMode';
 
 const MAX_BAR_SIZE = 50;
 const ANIMATION_DURATION = 1000; // in ms

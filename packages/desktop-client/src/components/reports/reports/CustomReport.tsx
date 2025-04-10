@@ -26,14 +26,6 @@ import {
 } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useCategories } from '../../../hooks/useCategories';
-import { useFilters } from '../../../hooks/useFilters';
-import { useLocale } from '../../../hooks/useLocale';
-import { useLocalPref } from '../../../hooks/useLocalPref';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { usePayees } from '../../../hooks/usePayees';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { Warning } from '../../alerts';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
@@ -63,6 +55,15 @@ import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
+
+import { useAccounts } from '@hooks/useAccounts';
+import { useCategories } from '@hooks/useCategories';
+import { useFilters } from '@hooks/useFilters';
+import { useLocale } from '@hooks/useLocale';
+import { useLocalPref } from '@hooks/useLocalPref';
+import { useNavigate } from '@hooks/useNavigate';
+import { usePayees } from '@hooks/usePayees';
+import { useSyncedPref } from '@hooks/useSyncedPref';
 
 /**
  * Transform `selectedCategories` into `conditions`.

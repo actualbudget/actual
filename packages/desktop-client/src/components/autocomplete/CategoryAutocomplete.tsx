@@ -29,14 +29,15 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { useCategories } from '../../hooks/useCategories';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '../budget/util';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
+
+import { useCategories } from '@hooks/useCategories';
+import { useSyncedPref } from '@hooks/useSyncedPref';
 
 type CategoryAutocompleteItem = Omit<CategoryEntity, 'group'> & {
   group?: CategoryGroupEntity;

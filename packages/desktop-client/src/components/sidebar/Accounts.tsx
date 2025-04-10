@@ -8,17 +8,18 @@ import { moveAccount } from 'loot-core/client/accounts/accountsSlice';
 import * as queries from 'loot-core/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { useAccounts } from '../../hooks/useAccounts';
-import { useClosedAccounts } from '../../hooks/useClosedAccounts';
-import { useFailedAccounts } from '../../hooks/useFailedAccounts';
-import { useLocalPref } from '../../hooks/useLocalPref';
-import { useOffBudgetAccounts } from '../../hooks/useOffBudgetAccounts';
-import { useOnBudgetAccounts } from '../../hooks/useOnBudgetAccounts';
-import { useUpdatedAccounts } from '../../hooks/useUpdatedAccounts';
 import { useSelector, useDispatch } from '../../redux';
 
 import { Account } from './Account';
 import { SecondaryItem } from './SecondaryItem';
+
+import { useAccounts } from '@hooks/useAccounts';
+import { useClosedAccounts } from '@hooks/useClosedAccounts';
+import { useFailedAccounts } from '@hooks/useFailedAccounts';
+import { useLocalPref } from '@hooks/useLocalPref';
+import { useOffBudgetAccounts } from '@hooks/useOffBudgetAccounts';
+import { useOnBudgetAccounts } from '@hooks/useOnBudgetAccounts';
+import { useUpdatedAccounts } from '@hooks/useUpdatedAccounts';
 
 const fontWeight = 600;
 

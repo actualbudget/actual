@@ -21,13 +21,14 @@ import { integerToCurrency } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
-import { useAccounts } from '../../hooks/useAccounts';
-import { useCategories } from '../../hooks/useCategories';
 import { useDispatch } from '../../redux';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
+
+import { useAccounts } from '@hooks/useAccounts';
+import { useCategories } from '@hooks/useCategories';
 
 function needsCategory(
   account: AccountEntity,

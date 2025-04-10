@@ -45,14 +45,6 @@ import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import * as monthUtils from 'loot-core/shared/months';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 
-import { useCategories } from '../../../hooks/useCategories';
-import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
-import { useLocale } from '../../../hooks/useLocale';
-import { useLocalPref } from '../../../hooks/useLocalPref';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { usePrevious } from '../../../hooks/usePrevious';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { useUndo } from '../../../hooks/useUndo';
 import { useDispatch } from '../../../redux';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
@@ -68,6 +60,15 @@ import { PullToRefresh } from '../PullToRefresh';
 import { BudgetCell } from './BudgetCell';
 import { IncomeGroup } from './IncomeGroup';
 import { ListItem } from './ListItem';
+
+import { useCategories } from '@hooks/useCategories';
+import { useFeatureFlag } from '@hooks/useFeatureFlag';
+import { useLocale } from '@hooks/useLocale';
+import { useLocalPref } from '@hooks/useLocalPref';
+import { useNavigate } from '@hooks/useNavigate';
+import { usePrevious } from '@hooks/usePrevious';
+import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useUndo } from '@hooks/useUndo';
 
 export const PILL_STYLE = {
   borderRadius: 16,

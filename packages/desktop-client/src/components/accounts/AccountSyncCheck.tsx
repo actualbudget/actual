@@ -12,10 +12,11 @@ import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { authorizeBank } from '../../gocardless';
-import { useAccounts } from '../../hooks/useAccounts';
-import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { useDispatch } from '../../redux';
 import { Link } from '../common/Link';
+
+import { useAccounts } from '@hooks/useAccounts';
+import { useFailedAccounts } from '@hooks/useFailedAccounts';
 
 function useErrorMessage() {
   const { t } = useTranslation();

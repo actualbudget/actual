@@ -7,12 +7,13 @@ import { View } from '@actual-app/components/view';
 
 import type { FeatureFlag } from 'loot-core/types/prefs';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { Link } from '../common/Link';
 import { Checkbox } from '../forms';
 
 import { Setting } from './UI';
+
+import { useFeatureFlag } from '@hooks/useFeatureFlag';
+import { useSyncedPref } from '@hooks/useSyncedPref';
 
 type FeatureToggleProps = {
   flag: FeatureFlag;

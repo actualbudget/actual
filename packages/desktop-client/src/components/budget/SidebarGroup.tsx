@@ -16,10 +16,11 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { useContextMenu } from '../../hooks/useContextMenu';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
+
+import { useContextMenu } from '@hooks/useContextMenu';
+import { useFeatureFlag } from '@hooks/useFeatureFlag';
 
 type SidebarGroupProps = {
   group: CategoryGroupEntity;
