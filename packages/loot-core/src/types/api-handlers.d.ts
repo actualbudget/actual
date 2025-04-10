@@ -218,20 +218,4 @@ export interface ApiHandlers {
   'api/rule-update': (arg: { rule: RuleEntity }) => Promise<RuleEntity>;
 
   'api/rule-delete': (id: string) => Promise<boolean>;
-
-  'api/schedule-create': (arg: {
-    schedule: APIScheduleEntity;
-    conditions?: RuleConditionEntity[];
-  }) => Promise<APIScheduleEntity['id']>;
-
-  'api/schedule-update': (arg: {
-    id: APIScheduleEntity['id'];
-    fields?: NoId<APIScheduleEntity>;
-    conditions?: RuleConditionEntity[];
-    resetNextDate?: boolean;
-  }) => Promise<APIScheduleEntity['id']>;
-
-  'api/schedule-delete': (arg: {
-    id: APIScheduleEntity['id'];
-  }) => Promise<void>;
 }

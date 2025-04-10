@@ -5,17 +5,12 @@ import {
   APICategoryEntity,
   APICategoryGroupEntity,
   APIPayeeEntity,
-  APIScheduleEntity,
   NoId,
   RequireOnly,
 } from 'loot-core/server/api-models';
 import { Query } from 'loot-core/shared/query';
 import type { Handlers } from 'loot-core/types/handlers';
-import {
-  RuleConditionEntity,
-  RuleEntity,
-  TransactionEntity,
-} from 'loot-core/types/models';
+import { RuleEntity, TransactionEntity } from 'loot-core/types/models';
 
 import * as injected from './injected';
 
@@ -300,36 +295,4 @@ export function holdBudgetForNextMonth(month: string, amount: number) {
 
 export function resetBudgetHold(month: string) {
   return send('api/budget-reset-hold', { month });
-}
-
-export function getSchedule(id: APIScheduleEntity['id']) {
-  return send('api/schedule-get', { id });
-}
-
-export function getSchedules() {
-  return send('api/schedules-get');
-}
-
-export function createSchedule(
-  schedule: APIScheduleEntity,
-  conditions?: RuleConditionEntity[],
-) {
-  return send('api/schedule-create', { schedule, conditions });
-}
-
-export function updateSchedule(
-  id: APIScheduleEntity['id'],
-  {
-    conditions,
-    fields,
-  }: {
-    conditions?: RuleConditionEntity[];
-    fields?: NoId<APIScheduleEntity>;
-  },
-) {
-  return send('api/schedule-update', { id, conditions, fields });
-}
-
-export function deleteSchedule(id: APIScheduleEntity['id']) {
-  return send('api/schedule-delete', { id });
 }
