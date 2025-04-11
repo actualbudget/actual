@@ -31,8 +31,8 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
+import { type BasicModalProps } from '../../../../component-library/src/props/modalProps';
 import { useModalState } from '../../hooks/useModalState';
-import { BasicModalProps } from '../../../../component-library/src/props/modalProps';
 
 export const Modal = ({
   name,
@@ -43,7 +43,8 @@ export const Modal = ({
   onClose,
   containerProps,
   ...props
-}: BasicModalProps & ComponentPropsWithRef<typeof ReactAriaModal> & { name: string; }) => {
+}: BasicModalProps &
+  ComponentPropsWithRef<typeof ReactAriaModal> & { name: string }) => {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const { enableScope, disableScope } = useHotkeysContext();

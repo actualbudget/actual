@@ -18,11 +18,11 @@ import { View } from '@actual-app/components/view';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
+import { useActualPlugins } from '../../plugin/ActualPluginsProvider';
+import { RenderPluginsComponent } from '../plugins/RenderPluginsComponent';
 
 import { Item } from './Item';
 import { SecondaryItem } from './SecondaryItem';
-import { RenderPluginsComponent } from '../plugins/RenderPluginsComponent';
-import { useActualPlugins } from '../../plugin/ActualPluginsProvider';
 
 export function PrimaryButtons() {
   const pluginsEnabled = useFeatureFlag('plugins');

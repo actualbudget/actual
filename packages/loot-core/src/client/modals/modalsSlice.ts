@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
+import { type BasicModalProps } from '../../../../component-library/src/props/modalProps';
 import { send } from '../../platform/client/fetch';
 import { type File } from '../../types/file';
 import {
@@ -20,7 +21,6 @@ import {
 import { resetApp, setAppState } from '../app/appSlice';
 import { createAppAsyncThunk } from '../redux';
 import { signOut } from '../users/usersSlice';
-import { BasicModalProps } from '../../../../component-library/src/props/modalProps';
 
 const sliceName = 'modals';
 

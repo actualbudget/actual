@@ -1,3 +1,4 @@
+import JSZip from 'jszip';
 import {
   type ActualPluginInitialized,
   type ActualPluginManifest,
@@ -9,7 +10,6 @@ import {
   parseGitHubRepoUrl,
 } from './githubUtils';
 import { persistPlugin } from './pluginStore';
-import JSZip from 'jszip';
 
 export async function installPluginFromManifest(
   loadedPlugins: ActualPluginInitialized[],
@@ -76,18 +76,21 @@ export async function installPluginFromZipFile(
   const manifest: ActualPluginManifest = JSON.parse(manifestText);
 
   const alreadyInstalled = loadedPlugins.some(
-    plugin => plugin.name === manifest.name && plugin.version === manifest.version,
+    plugin =>
+      plugin.name === manifest.name && plugin.version === manifest.version,
   );
   if (alreadyInstalled) {
-    console.log(`Plugin "${manifest.name}" v${manifest.version} is already installed.`);
+    console.log(
+      `Plugin "${manifest.name}" v${manifest.version} is already installed.`,
+    );
     return;
   }
 
   console.log(`Persisting plugin "${manifest.name}" from zip file...`);
   const zipBytes = new Uint8Array(zipData);
-  
+
   const blob = new Blob([zipBytes], { type: 'application/zip' });
-  
+
   await persistPlugin(blob, manifest);
   console.log(`Plugin "${manifest.name}" persisted successfully.`);
 }

@@ -9,6 +9,10 @@ import {
   type ActualPluginEntry,
   type ActualPluginInitialized,
 } from 'plugins-core/index';
+import {
+  type ContextEvent,
+  type SidebarLocations,
+} from 'plugins-core/types/actualPlugin';
 import type { Dispatch } from 'redux';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -17,11 +21,8 @@ import {
   popModal,
 } from 'loot-core/client/modals/modalsSlice';
 import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
-import { BasicModalProps } from '../../../../component-library/src/props/modalProps';
-import {
-  ContextEvent,
-  SidebarLocations,
-} from 'plugins-core/types/actualPlugin';
+
+import { type BasicModalProps } from '../../../../component-library/src/props/modalProps';
 
 export type PluginModalModel = {
   name: string;

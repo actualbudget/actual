@@ -1,6 +1,7 @@
 // githubUtils.ts
+import semverGt from 'semver/functions/gt';
+
 import { type ActualPluginManifest } from '../../../../plugins-core/src';
-import semverGt from 'semver/functions/gt'
 
 type GitHubAsset = {
   name: string;
@@ -121,7 +122,6 @@ export async function loadWhiteListPlugins(): Promise<WhiteListPlugin[]> {
     }),
   );
 }
-
 
 export async function checkForNewPluginRelease(
   pluginUrl: string,

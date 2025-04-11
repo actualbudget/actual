@@ -11,10 +11,10 @@ import { View } from '@actual-app/components/view';
 
 import { type ActualPluginManifest } from '../../../../plugins-core/src';
 import { useActualPlugins } from '../../plugin/ActualPluginsProvider';
+import { loadWhiteListPlugins } from '../../plugin/core/githubUtils';
 import { installPluginFromManifest } from '../../plugin/core/pluginInstaller';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { LoadingIndicator } from '../reports/LoadingIndicator';
-import { loadWhiteListPlugins } from '../../plugin/core/githubUtils';
 
 type SelectNewPluginModalProps = {
   onSave: () => void;
