@@ -78,6 +78,9 @@ export default defineConfig(async ({ mode }) => {
   if (process.env.REVIEW_ID) {
     process.env.REACT_APP_REVIEW_ID = process.env.REVIEW_ID;
   }
+  if (process.env.COMMIT_REF) {
+    process.env.REACT_APP_COMMIT_REF = process.env.COMMIT_REF;
+  }
 
   let resolveExtensions = [
     '.web.js',
@@ -194,6 +197,9 @@ export default defineConfig(async ({ mode }) => {
       environment: 'jsdom',
       globals: true,
       setupFiles: './src/setupTests.js',
+    },
+    optimizeDeps: {
+      exclude: ['moment'],
     },
   };
 });
