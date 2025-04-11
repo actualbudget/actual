@@ -7,5 +7,12 @@ export interface ActualPluginManifest {
   pluginType: 'server' | 'client';
   minimumActualVersion: string;
   author: string;
+  config?: ActualPluginConfigField[];
   plugin?: Blob;
+}
+
+export interface ActualPluginConfigField {
+  name: string;
+  title?: string;
+  desription?: string;
 }

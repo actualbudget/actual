@@ -36,7 +36,10 @@ export type {
 } from './types/actualPlugin';
 export type { ActualPluginEntry } from './types/actualPluginEntry';
 
-export type { ActualPluginManifest } from './types/actualPluginManifest';
+export type {
+  ActualPluginManifest,
+  ActualPluginConfigField,
+} from './types/actualPluginManifest';
 
 export type {
   ActualPluginToolkit,

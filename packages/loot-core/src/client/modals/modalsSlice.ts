@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { type ActualPluginManifest } from 'plugins-core/index';
 
 import { type BasicModalProps } from '../../../../component-library/src/props/modalProps';
 import { send } from '../../platform/client/fetch';
@@ -49,6 +50,12 @@ export type Modal =
         account: AccountEntity;
         balance: number;
         canDelete: boolean;
+      };
+    }
+  | {
+      name: 'configure-plugin';
+      options: {
+        plugin: ActualPluginManifest;
       };
     }
   | {

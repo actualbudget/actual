@@ -2,7 +2,12 @@ import { type RefObject, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgPause, SvgPlay, SvgTrash } from '@actual-app/components/icons/v1';
+import {
+  SvgPause,
+  SvgPlay,
+  SvgTrash,
+  SvgWrench,
+} from '@actual-app/components/icons/v1';
 import { Input } from '@actual-app/components/input';
 import { Popover } from '@actual-app/components/popover';
 import { Stack } from '@actual-app/components/stack';
@@ -257,6 +262,7 @@ type PluginRowProps = {
   enabled: boolean;
 };
 function PluginRow({ plugin, enabled }: PluginRowProps) {
+  const dispatch = useDispatch();
   const [removeConfirmationOpen, setRemoveConfirmationOpen] = useState(false);
   const removeTriggerRef = useRef<HTMLButtonElement>(null);
 
@@ -286,7 +292,7 @@ function PluginRow({ plugin, enabled }: PluginRowProps) {
           {plugin.name}
         </View>
       </Cell>
-      <Cell name="version" width={80} plain style={{ color: theme.tableText }}>
+      <Cell name="version" width={60} plain style={{ color: theme.tableText }}>
         <View
           style={{
             alignSelf: 'flex-start',
@@ -342,7 +348,7 @@ function PluginRow({ plugin, enabled }: PluginRowProps) {
           {plugin.description}
         </View>
       </Cell>
-      <Cell name="actions" width={100} plain style={{ color: theme.tableText }}>
+      <Cell name="actions" width={120} plain style={{ color: theme.tableText }}>
         <View
           style={{
             flexDirection: 'row',
@@ -353,6 +359,25 @@ function PluginRow({ plugin, enabled }: PluginRowProps) {
             gap: 8,
           }}
         >
+          {plugin.config?.length && (
+            <Button
+              variant="bare"
+              onPress={() => {
+                dispatch(
+                  pushModal({
+                    modal: {
+                      name: 'configure-plugin',
+                      options: {
+                        plugin,
+                      },
+                    },
+                  }),
+                );
+              }}
+            >
+              <SvgWrench style={{ width: 16, height: 16 }} />
+            </Button>
+          )}
           <Button
             ref={pauseTriggerRef}
             variant="bare"
