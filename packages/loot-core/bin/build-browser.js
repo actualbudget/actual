@@ -103,7 +103,11 @@ if (process.env.NODE_ENV === 'production') {
   const kcabDir = resolve(PUBLIC_DIR, 'kcab');
   mkdirSync(kcabDir, { recursive: true });
 
-  copyfiles(['./lib-dist/browser/*', kcabDir], { error: true }, () => {
-    console.log(`Copied lib-dist/browser to ${kcabDir}`);
-  });
+  copyfiles(
+    ['./lib-dist/browser/*', kcabDir],
+    { error: true, up: true },
+    () => {
+      console.log(`Copied lib-dist/browser to ${kcabDir}`);
+    },
+  );
 }
