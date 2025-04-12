@@ -6915,9 +6915,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "actual@workspace:."
   dependencies:
+    "@types/copyfiles": "npm:^2"
     "@types/node": "npm:^22.14.0"
     "@types/prompts": "npm:^2.4.9"
     "@typescript-eslint/parser": "npm:^8.26.1"
+    copyfiles: "npm:^2.4.1"
     cross-env: "npm:^7.0.3"
     eslint: "npm:^9.22.0"
     eslint-config-prettier: "npm:^10.1.1"
