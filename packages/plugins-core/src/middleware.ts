@@ -6,6 +6,10 @@ import {
   ActualPluginInitialized,
   SidebarLocations,
 } from './types/actualPlugin';
+import {
+  ActualPluginConfigType,
+  ActualPluginManifest,
+} from './types/actualPluginManifest';
 
 const containerRoots = new WeakMap<HTMLElement, Map<string, ReactDOM.Root>>();
 
@@ -70,4 +74,28 @@ export function initializePlugin(
   };
 
   return newPlugin;
+}
+
+export async function getPluginConfig<T extends ActualPluginManifest>(
+  manifest: T,
+): Promise<ActualPluginConfigType<typeof manifest>> {
+  const db: IDBDatabase = await new Promise((res, rej) => {
+    const dbRequest = indexedDB.open('actual', 9);
+    dbRequest.onsuccess = event => {
+      // @ts-ignore do later
+      res(event.target.result as IDBDatabase);
+    };
+    dbRequest.onerror = event => {
+      rej(event.target);
+    };
+  });
+  const transaction = db.transaction(['plugin-configs'], 'readonly');
+  const objectStore = transaction.objectStore('plugin-configs');
+  const objectStoreValue = await new Promise((res, rej) => {
+    const req = objectStore.get(`${manifest.name}-config`);
+    // @ts-ignore handle it later
+    req.onsuccess = event => res(event.target.result);
+    req.onerror = event => rej(event.target);
+  });
+  return (objectStoreValue ?? {}) as ActualPluginConfigType<typeof manifest>;
 }

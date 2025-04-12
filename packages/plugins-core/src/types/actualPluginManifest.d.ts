@@ -7,8 +7,8 @@ export interface ActualPluginManifest {
   pluginType: 'server' | 'client';
   minimumActualVersion: string;
   author: string;
-  config?: ActualPluginConfigField[];
   plugin?: Blob;
+  config?: ActualPluginConfigField[];
 }
 
 export interface ActualPluginConfigField {
@@ -16,3 +16,12 @@ export interface ActualPluginConfigField {
   title?: string;
   desription?: string;
 }
+
+export type ActualPluginConfigType<T extends ActualPluginManifest> =
+  T['config'] extends ActualPluginConfigField[]
+    ? Partial<ActualPluginConfigToType<T['config']>>
+    : { [name: string]: string };
+
+type ActualPluginConfigToType<T extends ActualPluginConfigField[]> = {
+  [K in T[number]['name']]: string;
+};
