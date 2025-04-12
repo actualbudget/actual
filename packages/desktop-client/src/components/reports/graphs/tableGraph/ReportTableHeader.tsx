@@ -21,7 +21,7 @@ type ReportTableHeaderProps = {
   interval: string;
   data: IntervalEntity[];
   balanceTypeOp: balanceTypeOpType;
-  headerScrollRef: RefObject<HTMLDivElement>;
+  headerScrollRef: RefObject<HTMLDivElement | null>;
   handleScroll: UIEventHandler<HTMLDivElement>;
   compact: boolean;
   style?: CSSProperties;

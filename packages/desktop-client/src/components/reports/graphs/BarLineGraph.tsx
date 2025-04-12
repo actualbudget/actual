@@ -118,12 +118,10 @@ export function BarLineGraph({
                     isAnimationActive={false}
                   />
                 )}
+                {!compact && <CartesianGrid strokeDasharray="3 3" />}
+                {!compact && <XAxis dataKey="x" />}
                 {!compact && (
-                  <>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="x" />
-                    <YAxis dataKey="y" tickFormatter={tickFormatter} />
-                  </>
+                  <YAxis dataKey="y" tickFormatter={tickFormatter} />
                 )}
                 <Bar type="monotone" dataKey="y" fill="#8884d8" />
                 <Line type="monotone" dataKey="y" stroke="#8884d8" />

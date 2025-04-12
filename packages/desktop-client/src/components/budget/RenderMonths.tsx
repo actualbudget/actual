@@ -3,6 +3,7 @@ import React, {
   useContext,
   type CSSProperties,
   type ComponentType,
+  type JSX,
 } from 'react';
 
 import { theme } from '@actual-app/components/theme';
