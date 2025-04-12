@@ -9,6 +9,10 @@ import {
   type ActualPluginEntry,
   type ActualPluginInitialized,
 } from 'plugins-core/index';
+import {
+  type ContextEvent,
+  type SidebarLocations,
+} from 'plugins-core/types/actualPlugin';
 import type { Dispatch } from 'redux';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -17,11 +21,8 @@ import {
   popModal,
 } from 'loot-core/client/modals/modalsSlice';
 import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
-import { BasicModalProps } from '../../../../component-library/src/props/modalProps';
-import {
-  ContextEvent,
-  SidebarLocations,
-} from 'plugins-core/types/actualPlugin';
+
+import { type BasicModalProps } from '../../../../component-library/src/props/modalProps';
 
 export type PluginModalModel = {
   name: string;
@@ -98,7 +99,7 @@ function generateContext(
       Record<SidebarLocations, Map<string, PluginSidebarRegistrationFn>>
     >
   >,
-  dispatch,
+  dispatch: Dispatch,
   pluginId: string,
   navigateBase: (path: string) => void,
   setEvents: ReactDispatch<
@@ -179,7 +180,7 @@ function generateContext(
     },
     pushModal(
       parameter: (container: HTMLDivElement) => void,
-      modalProps: BasicModalProps,
+      modalProps?: BasicModalProps,
     ) {
       dispatch(
         basePushModal({
@@ -262,14 +263,16 @@ export async function loadPluginsScript({
 
   if (devUrl !== '') {
     const mod = await loadRemote<ActualPluginEntry>('dev-plugin');
-    loadedPlugins.set('dev-plugin', mod);
+    if (mod) {
+      loadedPlugins.set('dev-plugin', mod);
+    }
   }
 
   await handleLoadPlugins(loadedPlugins);
   return true;
 }
 
-function joinRelativePaths(...parts) {
+function joinRelativePaths(...parts: string[]) {
   return parts
     .map(p => p.replace(/(^\/+|\/+$)/g, ''))
     .filter(Boolean)

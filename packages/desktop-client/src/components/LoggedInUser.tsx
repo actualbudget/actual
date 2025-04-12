@@ -20,12 +20,12 @@ import { useAuth } from '../auth/AuthProvider';
 import { Permissions } from '../auth/types';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
+import { useActualPlugins } from '../plugin/ActualPluginsProvider';
 import { useSelector, useDispatch } from '../redux';
 
+import { RenderPluginsComponent } from './plugins/RenderPluginsComponent';
 import { PrivacyFilter } from './PrivacyFilter';
 import { useMultiuserEnabled, useServerURL } from './ServerContext';
-import { RenderPluginsComponent } from './plugins/RenderPluginsComponent';
-import { useActualPlugins } from '../plugin/ActualPluginsProvider';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;

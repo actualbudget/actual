@@ -1,42 +1,45 @@
+import { type RefObject, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import {
+  SvgPause,
+  SvgPlay,
+  SvgTrash,
+  SvgWrench,
+} from '@actual-app/components/icons/v1';
+import { Input } from '@actual-app/components/input';
+import { Popover } from '@actual-app/components/popover';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { Popover } from '@actual-app/components/popover';
+import { t } from 'i18next';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import {
+  addNotification,
+  addUnknownErrorNotification,
+} from 'loot-core/client/notifications/notificationsSlice';
 import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
 
 import { useActualPlugins } from '../../plugin/ActualPluginsProvider';
-import { useDispatch } from '../../redux';
-import { InfiniteScrollWrapper } from '../common/InfiniteScrollWrapper';
-import { Link } from '../common/Link';
-import { Cell, Row } from '../table';
-
-import { PluginsHeader } from './PluginsHeader';
 import {
   checkForNewPluginRelease,
   fetchRelease,
   parseGitHubRepoUrl,
 } from '../../plugin/core/githubUtils';
 import {
-  addGenericErrorNotification,
-  addNotification,
-  addUnknownErrorNotification,
-} from 'loot-core/client/notifications/notificationsSlice';
-import {
   installPluginFromManifest,
   installPluginFromZipFile,
 } from '../../plugin/core/pluginInstaller';
-import { SvgPause, SvgPlay, SvgTrash } from '@actual-app/components/icons/v1';
-import { MutableRefObject, RefObject, useRef, useState } from 'react';
-import { TransObjectLiteral } from 'loot-core/types/util';
 import { persistPlugin, removePlugin } from '../../plugin/core/pluginStore';
-import { Input } from '@actual-app/components/input';
-import { t } from 'i18next';
+import { useDispatch } from '../../redux';
+import { InfiniteScrollWrapper } from '../common/InfiniteScrollWrapper';
+import { Link } from '../common/Link';
+import { Cell, Row } from '../table';
+
+import { PluginsHeader } from './PluginsHeader';
 
 export function ManagePlugins() {
   const devPlugin = useRef<HTMLInputElement>(null);
@@ -85,7 +88,7 @@ export function ManagePlugins() {
         <Button
           variant="normal"
           onPress={async () => {
-            for (let plugin of pluginStore) {
+            for (const plugin of pluginStore) {
               const result = await checkForNewPluginRelease(
                 plugin.url,
                 plugin.version,
@@ -222,23 +225,25 @@ export function ManagePlugins() {
       </View>
       <View style={{ flexDirection: 'row', gap: 16 }}>
         <Input
-        style={{flex: 1}}
+          style={{ flex: 1 }}
           inputRef={devPlugin}
           value="http://localhost:2000/mf-manifest.json"
         />{' '}
         <Button
           variant="primary"
           onPress={() => {
-            refreshPluginStore(devPlugin.current.value);
+            refreshPluginStore(devPlugin.current?.value);
           }}
-        >Enable Dev Plugin</Button>
+        >
+          Enable Dev Plugin
+        </Button>
       </View>
     </View>
   );
 }
 
 function PluginList() {
-  const { pluginStore, plugins } = useActualPlugins();
+  const { pluginStore } = useActualPlugins();
   return (
     <>
       {pluginStore.map(plugin => (
@@ -257,6 +262,7 @@ type PluginRowProps = {
   enabled: boolean;
 };
 function PluginRow({ plugin, enabled }: PluginRowProps) {
+  const dispatch = useDispatch();
   const [removeConfirmationOpen, setRemoveConfirmationOpen] = useState(false);
   const removeTriggerRef = useRef<HTMLButtonElement>(null);
 
@@ -286,7 +292,7 @@ function PluginRow({ plugin, enabled }: PluginRowProps) {
           {plugin.name}
         </View>
       </Cell>
-      <Cell name="version" width={80} plain style={{ color: theme.tableText }}>
+      <Cell name="version" width={60} plain style={{ color: theme.tableText }}>
         <View
           style={{
             alignSelf: 'flex-start',
@@ -342,7 +348,7 @@ function PluginRow({ plugin, enabled }: PluginRowProps) {
           {plugin.description}
         </View>
       </Cell>
-      <Cell name="actions" width={100} plain style={{ color: theme.tableText }}>
+      <Cell name="actions" width={120} plain style={{ color: theme.tableText }}>
         <View
           style={{
             flexDirection: 'row',
@@ -353,6 +359,25 @@ function PluginRow({ plugin, enabled }: PluginRowProps) {
             gap: 8,
           }}
         >
+          {plugin.config?.length && (
+            <Button
+              variant="bare"
+              onPress={() => {
+                dispatch(
+                  pushModal({
+                    modal: {
+                      name: 'configure-plugin',
+                      options: {
+                        plugin,
+                      },
+                    },
+                  }),
+                );
+              }}
+            >
+              <SvgWrench style={{ width: 16, height: 16 }} />
+            </Button>
+          )}
           <Button
             ref={pauseTriggerRef}
             variant="bare"

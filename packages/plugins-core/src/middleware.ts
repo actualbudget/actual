@@ -1,25 +1,23 @@
+import { BasicModalProps } from '@actual-app/components/props/modalProps';
 import ReactDOM from 'react-dom/client';
+
 import {
   ActualPlugin,
   ActualPluginInitialized,
+  SidebarLocations,
 } from './types/actualPlugin';
+import {
+  ActualPluginConfigType,
+  ActualPluginManifest,
+} from './types/actualPluginManifest';
 
-const containerRoots = new WeakMap<
-  HTMLElement,
-  Map<string, ReactDOM.Root>
->();
+const containerRoots = new WeakMap<HTMLElement, Map<string, ReactDOM.Root>>();
 
 function generateRandomPluginId() {
-  return (
-    'plugin-' +
-    Math.random().toString(36).slice(2, 12)
-  );
+  return 'plugin-' + Math.random().toString(36).slice(2, 12);
 }
 
-function getOrCreateRoot(
-  container: HTMLElement,
-  pluginId: string
-) {
+function getOrCreateRoot(container: HTMLElement, pluginId: string) {
   let pluginMap = containerRoots.get(container);
   if (!pluginMap) {
     pluginMap = new Map();
@@ -36,7 +34,7 @@ function getOrCreateRoot(
 
 export function initializePlugin(
   plugin: ActualPlugin,
-  providedPluginId?: string
+  providedPluginId?: string,
 ): ActualPluginInitialized {
   const pluginId = providedPluginId || generateRandomPluginId();
 
@@ -49,21 +47,21 @@ export function initializePlugin(
       const wrappedContext = {
         ...context,
 
-        registerMenu(position, element: JSX.Element) {
+        registerMenu(position: SidebarLocations, element: JSX.Element) {
           return context.registerMenu(position, container => {
             const root = getOrCreateRoot(container, pluginId);
             root.render(element);
           });
         },
 
-        pushModal(element: JSX.Element, modalProps) {
+        pushModal(element: JSX.Element, modalProps?: BasicModalProps) {
           context.pushModal(container => {
             const root = getOrCreateRoot(container, pluginId);
             root.render(element);
           }, modalProps);
         },
 
-        registerRoute(path, element: JSX.Element) {
+        registerRoute(path: string, element: JSX.Element) {
           return context.registerRoute(path, container => {
             const root = getOrCreateRoot(container, pluginId);
             root.render(element);
@@ -76,4 +74,28 @@ export function initializePlugin(
   };
 
   return newPlugin;
+}
+
+export async function getPluginConfig<T extends ActualPluginManifest>(
+  manifest: T,
+): Promise<ActualPluginConfigType<typeof manifest>> {
+  const db: IDBDatabase = await new Promise((res, rej) => {
+    const dbRequest = indexedDB.open('actual', 9);
+    dbRequest.onsuccess = event => {
+      // @ts-ignore do later
+      res(event.target.result as IDBDatabase);
+    };
+    dbRequest.onerror = event => {
+      rej(event.target);
+    };
+  });
+  const transaction = db.transaction(['plugin-configs'], 'readonly');
+  const objectStore = transaction.objectStore('plugin-configs');
+  const objectStoreValue = await new Promise((res, rej) => {
+    const req = objectStore.get(`${manifest.name}-config`);
+    // @ts-ignore handle it later
+    req.onsuccess = event => res(event.target.result);
+    req.onerror = event => rej(event.target);
+  });
+  return (objectStoreValue ?? {}) as ActualPluginConfigType<typeof manifest>;
 }

@@ -6,12 +6,13 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { View } from '@actual-app/components/view';
-import { SvgLogo } from '@actual-app/components/icons/logo';
-import { Input } from '@actual-app/components/input';
+
 import { Button } from '@actual-app/components/button';
+import { SvgLogo } from '@actual-app/components/icons/logo';
 import { SvgDelete } from '@actual-app/components/icons/v0';
+import { Input } from '@actual-app/components/input';
 import { CSSProperties, styles } from '@actual-app/components/styles';
+import { View } from '@actual-app/components/view';
 
 type ModalContentContainerProps = {
   style?: CSSProperties;
@@ -20,7 +21,7 @@ type ModalContentContainerProps = {
   children: ReactNode;
 };
 
-const ModalContentContainer = ({
+export const ModalContentContainer = ({
   style,
   noAnimation,
   isActive,

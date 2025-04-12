@@ -12,7 +12,12 @@ import {
   type ActualPluginEntry,
   type ActualPluginInitialized,
 } from 'plugins-core/index';
+import {
+  type ContextEvent,
+  type SidebarLocations,
+} from 'plugins-core/types/actualPlugin';
 
+import { store } from 'loot-core/client/store';
 import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
 
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
@@ -22,16 +27,11 @@ import { useDispatch, useSelector } from '../redux';
 import {
   loadPlugins,
   loadPluginsScript,
-  PluginRouteFn,
+  type PluginRouteFn,
   type PluginModalModel,
   type PluginSidebarRegistrationFn,
 } from './core/pluginLoader';
 import { getAllPlugins } from './core/pluginStore';
-import {
-  ContextEvent,
-  SidebarLocations,
-} from 'plugins-core/types/actualPlugin';
-import { store } from 'loot-core/client/store';
 
 export type ActualPluginsContextType = {
   plugins: ActualPluginInitialized[];
@@ -212,5 +212,5 @@ function useEventDispatcher<K extends keyof ContextEvent>(
 
   useEffect(() => {
     dispatchEvent(key, events, value);
-  }, [value, events[key]]);
+  }, [key, value, events[key]]);
 }

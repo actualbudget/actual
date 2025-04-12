@@ -62,6 +62,7 @@ import { OutOfSyncMigrationsModal } from './modals/OutOfSyncMigrationsModal';
 import { PasswordEnableModal } from './modals/PasswordEnableModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
+import { PluginModal } from './modals/PluginModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SelectNewPluginModal } from './modals/SelectNewPluginModal';
@@ -79,7 +80,7 @@ import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { UpcomingLength } from './schedules/UpcomingLength';
 import { NamespaceContext } from './spreadsheet/NamespaceContext';
-import { PluginModal } from './modals/PluginModal';
+import { ConfigurePluginModal } from './modals/ConfigurePluginModal';
 
 export function Modals() {
   const location = useLocation();
@@ -116,6 +117,9 @@ export function Modals() {
 
         case 'close-account':
           return <CloseAccountModal key={key} {...modal.options} />;
+
+        case 'configure-plugin':
+          return <ConfigurePluginModal key={key} {...modal.options} />;
 
         case 'select-linked-accounts':
           return <SelectLinkedAccountsModal key={key} {...modal.options} />;

@@ -1,9 +1,9 @@
 import { ReactNode } from 'react';
 
-import { ModalProps } from './props';
+import { BasicModalProps } from '@actual-app/components/props/modalProps';
 
 export type ActualPluginToolkitCommonComponents = {
-  Modal: (props: ModalProps) => JSX.Element;
+  Modal: (props: BasicModalProps) => JSX.Element;
 };
 
 export type ActualPluginToolkitFunctions = {

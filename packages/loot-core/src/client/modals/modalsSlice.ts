@@ -1,5 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { type ActualPluginManifest } from 'plugins-core/index';
 
+import { type BasicModalProps } from '../../../../component-library/src/props/modalProps';
 import { send } from '../../platform/client/fetch';
 import { type File } from '../../types/file';
 import {
@@ -20,7 +22,6 @@ import {
 import { resetApp, setAppState } from '../app/appSlice';
 import { createAppAsyncThunk } from '../redux';
 import { signOut } from '../users/usersSlice';
-import { BasicModalProps } from '../../../../component-library/src/props/modalProps';
 
 const sliceName = 'modals';
 
@@ -49,6 +50,12 @@ export type Modal =
         account: AccountEntity;
         balance: number;
         canDelete: boolean;
+      };
+    }
+  | {
+      name: 'configure-plugin';
+      options: {
+        plugin: ActualPluginManifest;
       };
     }
   | {

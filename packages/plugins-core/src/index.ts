@@ -22,7 +22,7 @@ export { Tooltip } from '@actual-app/components/tooltip';
 
 export { View } from '@actual-app/components/view';
 
-export { initializePlugin } from './middleware';
+export { initializePlugin, getPluginConfig } from './middleware';
 
 export * from '@actual-app/components/icons/v2';
 export * from '@actual-app/components/styles';
@@ -36,7 +36,11 @@ export type {
 } from './types/actualPlugin';
 export type { ActualPluginEntry } from './types/actualPluginEntry';
 
-export type { ActualPluginManifest } from './types/actualPluginManifest';
+export type {
+  ActualPluginManifest,
+  ActualPluginConfigField,
+  ActualPluginConfigType,
+} from './types/actualPluginManifest';
 
 export type {
   ActualPluginToolkit,

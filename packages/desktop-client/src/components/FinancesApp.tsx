@@ -37,6 +37,7 @@ import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Notifications } from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
+import { PluginCustomPage } from './plugins/PluginCustomPage';
 import { Plugins } from './plugins/Plugins';
 import { Reports } from './reports';
 import { LoadingIndicator } from './reports/LoadingIndicator';
@@ -47,7 +48,6 @@ import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { Titlebar } from './Titlebar';
-import { PluginCustomPage } from './plugins/PluginCustomPage';
 
 function NarrowNotSupported({
   redirectTo = '/budget',

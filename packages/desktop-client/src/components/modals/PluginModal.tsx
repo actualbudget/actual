@@ -1,4 +1,4 @@
-import { BasicModalProps } from '../../../../component-library/src/props/modalProps';
+import { type BasicModalProps } from '../../../../component-library/src/props/modalProps';
 import { Modal } from '../common/Modal';
 import { RenderPluginsComponent } from '../plugins/RenderPluginsComponent';
 
@@ -10,7 +10,7 @@ type PluginModalProps = {
 export function PluginModal({ parameter, modalProps }: PluginModalProps) {
   return (
     <Modal
-      name={"plugin-modal"}
+      name="plugin-modal"
       isLoading={modalProps?.isLoading}
       noAnimation={modalProps?.noAnimation}
       style={modalProps?.style}

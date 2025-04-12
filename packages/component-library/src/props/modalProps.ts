@@ -1,4 +1,4 @@
-import { CSSProperties } from "../styles";
+import { CSSProperties } from '../styles';
 
 export type BasicModalProps = {
   isLoading?: boolean;
