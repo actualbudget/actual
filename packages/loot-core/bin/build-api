@@ -18,4 +18,4 @@ do
 done
 cd "$ROOT"
 yarn webpack --config ./webpack/webpack.api.config.js;
-./bin/copy-migrations ../api
+node ./bin/copy-migrations.js ../api
