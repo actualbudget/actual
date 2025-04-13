@@ -66,9 +66,9 @@ function getAccountBalance(account) {
   }
 }
 
-async function updateAccountBalance(id, balance) {
+async function updateAccountBalance(id: string, balance: number) {
   await db.runQuery('UPDATE accounts SET balance_current = ? WHERE id = ?', [
-    amountToInteger(balance),
+    balance,
     id,
   ]);
 }
@@ -194,8 +194,6 @@ async function downloadSimpleFinTransactions(
   if (!userToken) return;
 
   const batchSync = Array.isArray(acctId);
-
-  console.log('Pulling transactions from SimpleFin');
 
   let res;
   try {
@@ -879,12 +877,14 @@ async function processBankSyncDownload(
   // that account sync sources can give two different transaction IDs even though it's the same transaction.
   const useStrictIdChecking = !acctRow.account_sync_source;
 
+  /** Starting balance is actually the current balance of the account. */
+  const { transactions: originalTransactions, startingBalance: currentBalance } = download;
+
   if (initialSync) {
     const { transactions } = download;
-    let balanceToUse = download.startingBalance;
+    let balanceToUse = currentBalance;
 
     if (acctRow.account_sync_source === 'simpleFin') {
-      const currentBalance = download.startingBalance;
       const previousBalance = transactions.reduce((total, trans) => {
         return (
           total - parseInt(trans.transactionAmount.amount.replace('.', ''))
@@ -935,8 +935,6 @@ async function processBankSyncDownload(
     });
   }
 
-  const { transactions: originalTransactions, accountBalance } = download;
-
   if (originalTransactions.length === 0) {
     return { added: [], updated: [] };
   }
@@ -954,7 +952,8 @@ async function processBankSyncDownload(
       useStrictIdChecking,
     );
 
-    if (accountBalance) await updateAccountBalance(id, accountBalance);
+    /** Starting balance is actually the current balance of the account. */
+    if (currentBalance) await updateAccountBalance(id, currentBalance);
 
     return result;
   });
@@ -972,6 +971,8 @@ export async function syncAccount(
   const syncStartDate = await getAccountSyncStartDate(id);
   const oldestTransaction = await getAccountOldestTransaction(id);
   const newAccount = oldestTransaction == null;
+
+  console.log('syncAccount!', acctRow, syncStartDate, oldestTransaction, newAccount);
 
   let download;
   if (acctRow.account_sync_source === 'simpleFin') {
@@ -1002,6 +1003,8 @@ export async function simpleFinBatchSync(
   const startDates = await Promise.all(
     accounts.map(async a => getAccountSyncStartDate(a.id)),
   );
+
+  console.log('batchSync', accounts);
 
   const res = await downloadSimpleFinTransactions(
     accounts.map(a => a.account_id),
