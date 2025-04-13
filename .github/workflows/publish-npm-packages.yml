@@ -34,7 +34,7 @@ jobs:
       - name: Upload package artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: packages
+          name: npm-packages
           path: |
             packages/desktop-client/@actual-app/web.tgz
             packages/sync-server/@actual-app/sync-server.tgz
@@ -50,7 +50,7 @@ jobs:
       - name: Download the artifacts
         uses: actions/download-artifact@v4
         with:
-          name: packages
+          name: npm-packages
 
       - name: Setup node and npm registry
         uses: actions/setup-node@v4
@@ -59,7 +59,7 @@ jobs:
           # registry-url: 'https://registry.npmjs.org'
           # delete the below
           registry-url: 'https://npm.pkg.github.com'
-          scope: '@octocat'
+          # scope: '@octocat'
           # delete the above
 
       - name: Publish Web
