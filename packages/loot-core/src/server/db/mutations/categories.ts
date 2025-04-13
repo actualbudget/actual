@@ -76,7 +76,7 @@ export async function deleteCategoryGroup(
 export async function insertCategory(
   category: WithRequired<Partial<DbCategory>, 'name' | 'cat_group'>,
   { atEnd }: { atEnd?: boolean | undefined } = { atEnd: undefined },
-): Promise<DbCategory['id'] | undefined> {
+): Promise<DbCategory['id']> {
   let sort_order;
 
   let id_: DbCategory['id'] | undefined;
@@ -125,6 +125,9 @@ export async function insertCategory(
     await insert('category_mapping', { id, transferId: id });
     id_ = id;
   });
+  if (!id_) {
+    throw new Error('insertCategory: id_ is undefined');
+  }
   return id_;
 }
 

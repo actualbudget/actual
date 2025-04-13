@@ -126,7 +126,7 @@ describe('Transfer', () => {
     transaction = await db.getTransaction(transaction.id);
     expect(transaction.transfer_id).toBeDefined();
 
-    await db.deleteTransaction(transaction);
+    await db.deleteTransaction({ id: transaction.id });
     await transfer.onDelete(transaction);
     differ.expectToMatchDiff(await getAllTransactions());
   });
