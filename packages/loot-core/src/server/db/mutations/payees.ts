@@ -1,9 +1,9 @@
-import { insertWithUUID, insert, first, delete_, update, all } from "../db";
-import { DbPayee, DbPayeeMapping } from "../types";
-import { payeeModel } from "../../models";
-import { batchMessages } from "../../sync";
-import { groupById } from "../../../shared/util";
-import { WithRequired } from "../../../types/util";
+import { groupById } from '../../../shared/util';
+import { WithRequired } from '../../../types/util';
+import { payeeModel } from '../../models';
+import { batchMessages } from '../../sync';
+import { insertWithUUID, insert, first, delete_, update, all } from '../db';
+import { DbPayee, DbPayeeMapping } from '../types';
 
 export async function insertPayee(
   payee: WithRequired<Partial<DbPayee>, 'name'>,
@@ -18,10 +18,9 @@ export async function insertPayee(
 }
 
 export async function deletePayee(payee: Pick<DbPayee, 'id'>) {
-  const dbPayee = await first<DbPayee>(
-    'SELECT * FROM payees WHERE id = ?',
-    [payee.id],
-  );
+  const dbPayee = await first<DbPayee>('SELECT * FROM payees WHERE id = ?', [
+    payee.id,
+  ]);
   const { transfer_acct } = dbPayee ?? {};
   if (transfer_acct) {
     // You should never be able to delete transfer payees

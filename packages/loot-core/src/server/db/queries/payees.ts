@@ -1,6 +1,6 @@
-import { all, first, toDateRepr } from "../db";
-import { DbAccount, DbPayee, DbViewTransactionInternalAlive } from "../types";
 import * as monthUtils from '../../../shared/months';
+import { all, first, toDateRepr } from '../db';
+import { DbAccount, DbPayee, DbViewTransactionInternalAlive } from '../types';
 export async function getPayee(id: DbPayee['id']) {
   return first<DbPayee>(`SELECT * FROM payees WHERE id = ?`, [id]);
 }

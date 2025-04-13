@@ -1,9 +1,9 @@
-import { first, insertWithUUID, update, all, delete_, insert } from "../db";
-import { SORT_INCREMENT, shoveSortOrders } from "../sort";
-import { DbCategoryGroup, DbCategory, DbCategoryMapping } from "../types";
-import { categoryGroupModel, categoryModel } from "../../models";
-import { batchMessages } from "../../sync";
-import { WithRequired } from "../../../types/util";
+import { WithRequired } from '../../../types/util';
+import { categoryGroupModel, categoryModel } from '../../models';
+import { batchMessages } from '../../sync';
+import { first, insertWithUUID, update, all, delete_, insert } from '../db';
+import { SORT_INCREMENT, shoveSortOrders } from '../sort';
+import { DbCategoryGroup, DbCategory, DbCategoryMapping } from '../types';
 
 export async function insertCategoryGroup(
   group: WithRequired<Partial<DbCategoryGroup>, 'name'>,

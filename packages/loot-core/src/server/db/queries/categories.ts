@@ -1,6 +1,6 @@
-import { all } from "../db";
-import { DbCategory, DbCategoryGroup } from "../types";
-import { toSqlQueryParameters } from "../util";
+import { all } from '../db';
+import { DbCategory, DbCategoryGroup } from '../types';
+import { toSqlQueryParameters } from '../util';
 
 export async function getCategories(
   ids?: Array<DbCategory['id']>,

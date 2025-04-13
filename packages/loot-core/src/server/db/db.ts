@@ -22,9 +22,7 @@ import {
 } from '../aql';
 import { sendMessages } from '../sync';
 
-import {
-  DbClockMessage,
-} from './types';
+import { DbClockMessage } from './types';
 
 export * from './types';
 

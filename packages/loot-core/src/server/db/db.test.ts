@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import * as db from './';
+import * as db from '.';
 
 beforeEach(global.emptyDatabase());
 

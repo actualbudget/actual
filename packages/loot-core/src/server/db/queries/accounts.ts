@@ -1,5 +1,5 @@
-import { first, all } from "../db";
-import { DbAccount, DbBank } from "../types";
+import { first, all } from '../db';
+import { DbAccount, DbBank } from '../types';
 
 export async function getAccount(id: DbAccount['id']) {
   return first<DbAccount>(`SELECT * FROM accounts WHERE id = ?`, [id]);

@@ -1,11 +1,11 @@
-import { insertWithSchema, updateWithSchema, delete_ } from "../db";
-import { DbTransaction } from "../types";
+// @ts-strict-ignore
+import { insertWithSchema, updateWithSchema, delete_ } from '../db';
 
-export function insertTransaction(transaction: any) {
+export function insertTransaction(transaction) {
   return insertWithSchema('transactions', transaction);
 }
 
-export function updateTransaction(transaction: any) {
+export function updateTransaction(transaction) {
   return updateWithSchema('transactions', transaction);
 }
 

@@ -1,5 +1,5 @@
-import { selectWithSchema } from "../db";
-import { DbViewTransaction, DbTransaction } from "../types";
+import { selectWithSchema } from '../db';
+import { DbViewTransaction, DbTransaction } from '../types';
 
 export async function getTransaction(id: DbViewTransaction['id']) {
   const rows = await selectWithSchema(

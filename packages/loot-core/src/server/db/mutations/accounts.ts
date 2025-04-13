@@ -1,8 +1,9 @@
-import { all, insertWithUUID, update, delete_, first } from "../db";
-import { shoveSortOrders } from "../sort";
-import { DbAccount } from "../types";
-import { accountModel } from "../../models";
-import { batchMessages } from "../../sync";
+// @ts-strict-ignore
+import { accountModel } from '../../models';
+import { batchMessages } from '../../sync';
+import { all, insertWithUUID, update, delete_, first } from '../db';
+import { shoveSortOrders } from '../sort';
+import { DbAccount } from '../types';
 
 export async function insertAccount(account: Partial<DbAccount>) {
   const accounts = await all<DbAccount>(
@@ -17,7 +18,7 @@ export async function insertAccount(account: Partial<DbAccount>) {
   return insertWithUUID('accounts', account);
 }
 
-export function updateAccount(account: any) {
+export function updateAccount(account) {
   account = accountModel.validate(account, { update: true });
   return update('accounts', account);
 }
