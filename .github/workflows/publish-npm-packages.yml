@@ -51,12 +51,11 @@ jobs:
 
       - name: Publish Web
         run: |
-          ls -la
           # Publish the packages
           # The publish command will automatically detect the version from the tag
           # and publish the packages to the npm registry
           # The --access public flag is required for scoped packages
-          npm publish packages/desktop-client/@actual-app/web.tgz --access public
+          npm publish desktop-client/@actual-app/web.tgz --access public
 
       - name: Publish Sync-Server
         run: |
@@ -64,4 +63,4 @@ jobs:
           # The publish command will automatically detect the version from the tag
           # and publish the packages to the npm registry
           # The --access public flag is required for scoped packages
-          npm publish packages/sync-server/@actual-app/sync-server.tgz --access public
+          npm publish sync-server/@actual-app/sync-server.tgz --access public
