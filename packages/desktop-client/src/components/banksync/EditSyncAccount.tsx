@@ -214,7 +214,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
   };
 
   const potentiallyTruncatedAccountName =
-    account.name.length > 25 ? account.name.slice(0, 25) + '...' : account.name;
+    account.name.length > 30 ? account.name.slice(0, 30) + '...' : account.name;
 
   const fields = exampleTransaction ? getFields(exampleTransaction) : [];
   const mapping = mappings.get(transactionDirection);
@@ -290,11 +290,14 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             </Tooltip>
           </CheckboxOption>
 
-          <Stack
-            direction="row"
-            justify="flex-end"
-            align="center"
-            style={{ marginTop: 20 }}
+          <View
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: 20,
+              }}
           >
             <Button
               style={{ color: theme.errorText }}
@@ -305,20 +308,20 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
               <Trans>Unlink account</Trans>
             </Button>
 
-            <View style={{ flexGrow: 1 }} />
-
-            <Button style={{ marginRight: 10 }} onPress={close}>
-              <Trans>Cancel</Trans>
-            </Button>
-            <Button
-              variant="primary"
-              onPress={() => {
-                onSave(close);
-              }}
-            >
-              <Trans>Save</Trans>
-            </Button>
-          </Stack>
+            <Stack direction="row" >
+              <Button style={{ marginRight: 10 }} onPress={close}>
+                <Trans>Cancel</Trans>
+              </Button>
+              <Button
+                variant="primary"
+                onPress={() => {
+                  onSave(close);
+                }}
+              >
+                <Trans>Save</Trans>
+              </Button>
+            </Stack>
+          </View>
         </>
       )}
     </Modal>

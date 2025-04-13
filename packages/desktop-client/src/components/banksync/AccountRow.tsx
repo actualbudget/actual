@@ -26,8 +26,8 @@ export const AccountRow = memo(
     });
 
     const potentiallyTruncatedAccountName =
-      account.name.length > 25
-        ? account.name.slice(0, 25) + '...'
+      account.name.length > 30
+        ? account.name.slice(0, 30) + '...'
         : account.name;
 
     return (
