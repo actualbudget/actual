@@ -291,13 +291,13 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
           </CheckboxOption>
 
           <View
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginTop: 20,
-              }}
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: 20,
+            }}
           >
             <Button
               style={{ color: theme.errorText }}
@@ -308,7 +308,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
               <Trans>Unlink account</Trans>
             </Button>
 
-            <Stack direction="row" >
+            <Stack direction="row">
               <Button style={{ marginRight: 10 }} onPress={close}>
                 <Trans>Cancel</Trans>
               </Button>
