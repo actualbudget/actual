@@ -30,9 +30,7 @@ jobs:
           # The publish command will automatically detect the version from the tag
           # and publish the packages to the npm registry
           # The --access public flag is required for scoped packages
-          # The --no-git-checks flag is required to avoid git checks
-          # The --no-verify flag is required to avoid git checks
-          yarn workspace @actual-app/web npm publish --access public --no-git-checks --no-verify
+          yarn workspace @actual-app/web npm publish --access public
 
       - name: publish sync-server
         run: |
@@ -40,6 +38,4 @@ jobs:
           # The publish command will automatically detect the version from the tag
           # and publish the packages to the npm registry
           # The --access public flag is required for scoped packages
-          # The --no-git-checks flag is required to avoid git checks
-          # The --no-verify flag is required to avoid git checks
-          yarn workspace @actual-app/sync-server npm publish --access public --no-git-checks --no-verify
+          yarn workspace @actual-app/sync-server npm publish --access public
