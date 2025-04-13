@@ -51,6 +51,7 @@ jobs:
 
       - name: Publish Web
         run: |
+          ls -la
           # Publish the packages
           # The publish command will automatically detect the version from the tag
           # and publish the packages to the npm registry
