@@ -972,8 +972,6 @@ export async function syncAccount(
   const oldestTransaction = await getAccountOldestTransaction(id);
   const newAccount = oldestTransaction == null;
 
-  console.log('syncAccount!', acctRow, syncStartDate, oldestTransaction, newAccount);
-
   let download;
   if (acctRow.account_sync_source === 'simpleFin') {
     download = await downloadSimpleFinTransactions(acctId, syncStartDate);
@@ -1003,8 +1001,6 @@ export async function simpleFinBatchSync(
   const startDates = await Promise.all(
     accounts.map(async a => getAccountSyncStartDate(a.id)),
   );
-
-  console.log('batchSync', accounts);
 
   const res = await downloadSimpleFinTransactions(
     accounts.map(a => a.account_id),
