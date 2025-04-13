@@ -3,6 +3,7 @@
   "version": "25.4.0",
   "license": "MIT",
   "description": "actual syncing server",
+  "bin": "bin/@actual-app/sync-server",
   "type": "module",
   "scripts": {
     "start": "node app",
