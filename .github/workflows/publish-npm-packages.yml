@@ -12,7 +12,7 @@ on:
 # DELETE ME
 
 jobs:
-  build-and-publish:
+  build-and-pack:
     runs-on: ubuntu-latest
     name: Build and publish npm packages
     steps:
@@ -42,6 +42,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     name: Publish npm packages
+    needs: build-and-pack
     steps:
       - name: Download the artifacts
         uses: actions/download-artifact@v4
