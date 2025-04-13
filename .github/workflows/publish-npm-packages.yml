@@ -1,0 +1,48 @@
+name: Publish npm packages
+
+# # Npm packages are published for every new tag
+# on:
+#   push:
+#     tags:
+#       - 'v*.*.*'
+
+# DELETE ME
+on:
+  pull_request:
+# DELETE ME
+
+jobs:
+  build:
+    name: Build web package
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+
+      - name: Build Web
+        run: yarn build:browser
+
+  publish:
+    name: Publish the npm packages
+    needs: build
+    steps:
+      - name: publish web
+        run: |
+          # Publish the packages
+          # The publish command will automatically detect the version from the tag
+          # and publish the packages to the npm registry
+          # The --access public flag is required for scoped packages
+          # The --no-git-checks flag is required to avoid git checks
+          # The --no-verify flag is required to avoid git checks
+          yarn workspace @actual-app/web npm publish --access public --no-git-checks --no-verify
+
+      - name: publish sync-server
+        run: |
+          # Publish the packages
+          # The publish command will automatically detect the version from the tag
+          # and publish the packages to the npm registry
+          # The --access public flag is required for scoped packages
+          # The --no-git-checks flag is required to avoid git checks
+          # The --no-verify flag is required to avoid git checks
+          yarn workspace @actual-app/sync-server npm publish --access public --no-git-checks --no-verify
