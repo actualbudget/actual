@@ -174,7 +174,11 @@ export function ReconcileMenu({
         </InitialFocus>
       )}
       {lastSyncedBalance != null && (
-        <Button variant="menu" onPress={() => setInputValue(format(lastSyncedBalance, 'financial'))} style={{ marginBottom: 7 }}>
+        <Button
+          variant="menu"
+          onPress={() => setInputValue(format(lastSyncedBalance, 'financial'))}
+          style={{ marginBottom: 7 }}
+        >
           <Trans>Use last synced balance</Trans>
         </Button>
       )}

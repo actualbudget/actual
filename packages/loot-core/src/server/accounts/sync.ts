@@ -878,7 +878,10 @@ async function processBankSyncDownload(
   const useStrictIdChecking = !acctRow.account_sync_source;
 
   /** Starting balance is actually the current balance of the account. */
-  const { transactions: originalTransactions, startingBalance: currentBalance } = download;
+  const {
+    transactions: originalTransactions,
+    startingBalance: currentBalance,
+  } = download;
 
   if (initialSync) {
     const { transactions } = download;

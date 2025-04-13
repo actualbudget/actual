@@ -168,7 +168,12 @@ function MoreBalances({ balanceQuery, currentBalance }: MoreBalancesProps) {
     <View style={{ flexDirection: 'row' }}>
       <DetailedBalance name={t('Cleared total:')} balance={cleared ?? 0} />
       <DetailedBalance name={t('Uncleared total:')} balance={uncleared ?? 0} />
-      {currentBalance && <DetailedBalance name={t('Last synced balance:')} balance={currentBalance} />}
+      {currentBalance && (
+        <DetailedBalance
+          name={t('Last synced balance:')}
+          balance={currentBalance}
+        />
+      )}
     </View>
   );
 }
@@ -254,7 +259,12 @@ export function Balances({
         />
       </Button>
 
-      {showExtraBalances && <MoreBalances balanceQuery={balanceQuery} currentBalance={account?.balance_current} />}
+      {showExtraBalances && (
+        <MoreBalances
+          balanceQuery={balanceQuery}
+          currentBalance={account?.balance_current}
+        />
+      )}
 
       {selectedItems.size > 0 && (
         <SelectedBalance selectedItems={selectedItems} account={account} />
