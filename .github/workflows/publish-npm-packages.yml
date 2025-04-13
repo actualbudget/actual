@@ -44,6 +44,16 @@ jobs:
     name: Publish npm packages
     needs: build-and-pack
     steps:
+      - name: Setup node and npm registry
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          # registry-url: 'https://registry.npmjs.org'
+          # delete the below
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@octocat'
+          # delete the above
+
       - name: Download the artifacts
         uses: actions/download-artifact@v4
         with:
@@ -56,6 +66,9 @@ jobs:
           # and publish the packages to the npm registry
           # The --access public flag is required for scoped packages
           npm publish desktop-client/@actual-app/web.tgz --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish Sync-Server
         run: |
@@ -64,3 +77,6 @@ jobs:
           # and publish the packages to the npm registry
           # The --access public flag is required for scoped packages
           npm publish sync-server/@actual-app/sync-server.tgz --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
