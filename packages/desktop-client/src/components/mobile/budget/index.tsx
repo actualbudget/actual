@@ -474,10 +474,19 @@ export function Budget() {
     'budget.showHiddenCategories',
   );
 
+  const [showProgressBars, setShowProgressBarsPref] = useLocalPref(
+    'budget.showProgressBars',
+  );
+
   const onToggleHiddenCategories = useCallback(() => {
     setShowHiddenCategoriesPref(!showHiddenCategories);
     dispatch(collapseModals({ rootModalName: 'budget-page-menu' }));
   }, [dispatch, setShowHiddenCategoriesPref, showHiddenCategories]);
+
+  const onToggleProgressBars = useCallback(() => {
+    setShowProgressBarsPref(!showProgressBars);
+    dispatch(collapseModals({ rootModalName: 'budget-page-menu' }));
+  }, [dispatch, setShowProgressBarsPref, showProgressBars]);
 
   const onOpenBudgetMonthNotesModal = useCallback(
     month => {
@@ -528,6 +537,7 @@ export function Budget() {
             onAddCategoryGroup: onOpenNewCategoryGroupModal,
             onToggleHiddenCategories,
             onSwitchBudgetFile,
+            onToggleProgressBars,
           },
         },
       }),
@@ -537,6 +547,7 @@ export function Budget() {
     onOpenNewCategoryGroupModal,
     onSwitchBudgetFile,
     onToggleHiddenCategories,
+    onToggleProgressBars,
   ]);
 
   if (!categoryGroups || !initialized) {
