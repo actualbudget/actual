@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { addSyncListener } from '../sync/index';
 
-import * as db from './index';
+import * as db from './';
 
 // This file keeps all the mappings in memory so we can access it
 // synchronously. This is primarily used in the rules system, but
