@@ -12,7 +12,7 @@ on:
 # DELETE ME
 
 jobs:
-  build:
+  build & publish:
     runs-on: ubuntu-latest
     name: Build web package
     steps:
@@ -24,11 +24,6 @@ jobs:
       - name: Build Web
         run: yarn build:browser
 
-  publish:
-    runs-on: ubuntu-latest
-    name: Publish the npm packages
-    needs: build
-    steps:
       - name: publish web
         run: |
           # Publish the packages
