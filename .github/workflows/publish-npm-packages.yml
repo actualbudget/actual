@@ -36,8 +36,8 @@ jobs:
         with:
           name: packages
           path: |
-            @actual-app/web.tgz
-            @actual-app/sync-server.tgz
+            packages/desktop-client/@actual-app/web.tgz
+            packages/sync-server/@actual-app/sync-server.tgz
 
   publish:
     runs-on: ubuntu-latest
