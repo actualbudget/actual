@@ -24,18 +24,42 @@ jobs:
       - name: Build Web
         run: yarn build:browser
 
-      - name: publish web
+      - name: Pack the web package
         run: |
-          # Publish the packages
-          # The publish command will automatically detect the version from the tag
-          # and publish the packages to the npm registry
-          # The --access public flag is required for scoped packages
-          yarn workspace @actual-app/web npm publish --access public
+          # Pack the packages
+          # The pack command will create a .tgz file for each package in the packages directory
+          yarn workspace @actual-app/web pack --filename @actual-app/web.tgz
+          yarn workspace @actual-app/sync-server pack --filename @actual-app/sync-server.tgz
 
-      - name: publish sync-server
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: packages
+          path: |
+            @actual-app/web.tgz
+            @actual-app/sync-server.tgz
+
+  publish:
+    runs-on: ubuntu-latest
+    name: Publish npm packages
+    steps:
+      - name: Download the artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: packages
+
+      - name: Publish Web
         run: |
           # Publish the packages
           # The publish command will automatically detect the version from the tag
           # and publish the packages to the npm registry
           # The --access public flag is required for scoped packages
-          yarn workspace @actual-app/sync-server npm publish --access public
+          npm publish ./@actual-app/web.tgz --access public
+
+      - name: Publish Sync-Server
+        run: |
+          # Publish the packages
+          # The publish command will automatically detect the version from the tag
+          # and publish the packages to the npm registry
+          # The --access public flag is required for scoped packages
+          npm publish ./@actual-app/sync-server.tgz --access public
