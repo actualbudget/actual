@@ -141,7 +141,7 @@ export function ReconcileMenu({
     if (clearedBalance != null) {
       setInputValue(format(clearedBalance, 'financial'));
     }
-  }, [clearedBalance]);
+  }, [clearedBalance, format]);
 
   function onSubmit() {
     if (inputValue === '') {
