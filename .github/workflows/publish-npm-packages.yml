@@ -43,6 +43,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Publish npm packages
     needs: build-and-pack
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Setup node and npm registry
         uses: actions/setup-node@v4
