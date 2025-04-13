@@ -12,9 +12,9 @@ on:
 # DELETE ME
 
 jobs:
-  build & publish:
+  build-and-publish:
     runs-on: ubuntu-latest
-    name: Build web package
+    name: Build and publish npm packages
     steps:
       - uses: actions/checkout@v4
 
