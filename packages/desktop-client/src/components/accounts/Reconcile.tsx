@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -131,8 +131,17 @@ export function ReconcileMenu({
     value: null,
     query: balanceQuery.query.filter({ cleared: true }),
   });
+  const lastSyncedBalance = account.balance_current;
   const format = useFormat();
+
   const [inputValue, setInputValue] = useState<string | null>(null);
+
+  // useEffect sets the input value to the clearedBalance when it is available
+  useEffect(() => {
+    if (clearedBalance != null) {
+      setInputValue(format(clearedBalance, 'financial'));
+    }
+  }, [clearedBalance]);
 
   function onSubmit() {
     if (inputValue === '') {
@@ -157,12 +166,17 @@ export function ReconcileMenu({
       {clearedBalance != null && (
         <InitialFocus>
           <Input
-            defaultValue={format(clearedBalance, 'financial')}
+            value={inputValue ?? ''}
             onChangeValue={setInputValue}
             style={{ margin: '7px 0' }}
             onEnter={onSubmit}
           />
         </InitialFocus>
+      )}
+      {lastSyncedBalance != null && (
+        <Button variant="menu" onPress={() => setInputValue(format(lastSyncedBalance, 'financial'))} style={{ marginBottom: 7 }}>
+          <Trans>Use last synced balance</Trans>
+        </Button>
       )}
       <Button variant="primary" onPress={onSubmit}>
         <Trans>Reconcile</Trans>
