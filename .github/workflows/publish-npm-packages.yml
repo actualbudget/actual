@@ -45,7 +45,7 @@ jobs:
     needs: build-and-pack
     steps:
       - name: Setup node and npm registry
-      - uses: actions/setup-node@v4
+        uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           # registry-url: 'https://registry.npmjs.org'
