@@ -10,13 +10,13 @@ Want to say thanks? Click the ⭐ at the top of the page.
 
 ### Using the CLI tool
 
+Node.js v18 or higher is required for the @actual-app/sync-server npm package
+
 **Install globally with npm:**
 
 ```bash
 npm install --location=global @actual-app/sync-server
 ```
-
-Node.js v18 or higher is required for @actual-app/sync-server
 
 After installing, you can execute actual-server commands directly in your terminal.
 
@@ -34,6 +34,20 @@ actual-server [options]
 |`-v` or `--version` |Print this version and exit. |
 |`--config` |Path to the config file. |
 
+
+**Examples**
+
+Run with default configuration
+
+```bash
+actual-server
+```
+
+Runs with custom configuration
+
+```bash
+actual-server --config ./config.json
+```
 
 ### Documentation
 
