@@ -3,7 +3,9 @@
   "version": "25.4.0",
   "license": "MIT",
   "description": "actual syncing server",
-  "bin": "bin/sync-server.js",
+  "bin": {
+    "actual-server": "./bin/actual-server.js"
+  },
   "type": "module",
   "files": [
     "bin",
