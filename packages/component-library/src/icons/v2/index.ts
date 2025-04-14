@@ -2,6 +2,7 @@ export { SvgAlertTriangle } from './AlertTriangle';
 export { SvgArrowButtonDown1 } from './ArrowButtonDown1';
 export { SvgArrowButtonLeft1 } from './ArrowButtonLeft1';
 export { SvgArrowButtonRight1 } from './ArrowButtonRight1';
+export { SvgArrowButtonSingleLeft1 } from './ArrowButtonSingleLeft1';
 export { SvgArrowButtonUp1 } from './ArrowButtonUp1';
 export { SvgArrowsExpand3 } from './ArrowsExpand3';
 export { SvgArrowsShrink3 } from './ArrowsShrink3';

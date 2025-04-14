@@ -84,6 +84,7 @@ export type DarkTheme = 'dark' | 'midnight';
 export type GlobalPrefs = Partial<{
   floatingSidebar: boolean;
   maxMonths: number;
+  categoryExpandedState: number;
   keyId?: string;
   language: string;
   theme: Theme;
@@ -109,6 +110,7 @@ export type GlobalPrefsJson = Partial<{
   'user-token'?: string;
   'floating-sidebar'?: string; // "true" or "false"
   'max-months'?: string; // e.g. "2" or "3"
+  'category-expanded-state'?: string; // "0" or "1" or "2"
   'document-dir'?: GlobalPrefs['documentDir'];
   'encrypt-key'?: string;
   language?: GlobalPrefs['language'];
