@@ -42,7 +42,7 @@ Run with default configuration
 actual-server
 ```
 
-Runs with custom configuration
+Run with custom configuration
 
 ```bash
 actual-server --config ./config.json
