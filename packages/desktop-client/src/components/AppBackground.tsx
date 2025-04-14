@@ -31,6 +31,7 @@ export function AppBackground({ isLoading }: AppBackgroundProps) {
 
       {showLoading &&
         transitions((style, item) => (
+          // @ts-expect-error react-spring types currently do not support React v19 (but they soon will..)
           <animated.div key={item} style={style}>
             <View
               className={css({

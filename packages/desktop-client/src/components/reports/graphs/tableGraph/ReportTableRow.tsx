@@ -43,7 +43,7 @@ type ReportTableRowProps = {
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
   interval: string;
-  totalScrollRef?: RefObject<HTMLDivElement>;
+  totalScrollRef?: RefObject<HTMLDivElement | null>;
   handleScroll?: UIEventHandler<HTMLDivElement>;
   height?: number;
 };

@@ -15,7 +15,7 @@ import { type Handlers } from 'loot-core/types/handlers';
 
 import { useDispatch } from '../redux';
 
-type LoginMethods = {
+type LoginMethod = {
   method: string;
   displayName: string;
   active: boolean;
@@ -25,14 +25,14 @@ type ServerContextValue = {
   url: string | null;
   version: string;
   multiuserEnabled: boolean;
-  availableLoginMethods: LoginMethods[];
+  availableLoginMethods: LoginMethod[];
   setURL: (
     url: string,
     opts?: { validate?: boolean },
   ) => Promise<{ error?: string }>;
   refreshLoginMethods: () => Promise<void>;
   setMultiuserEnabled: (enabled: boolean) => void;
-  setLoginMethods: (methods: LoginMethods[]) => void;
+  setLoginMethods: (methods: LoginMethod[]) => void;
 };
 
 const ServerContext = createContext<ServerContextValue>({
@@ -91,7 +91,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
   const [version, setVersion] = useState('');
   const [multiuserEnabled, setMultiuserEnabled] = useState(false);
   const [availableLoginMethods, setAvailableLoginMethods] = useState<
-    LoginMethods[]
+    LoginMethod[]
   >([]);
 
   useEffect(() => {
@@ -134,8 +134,8 @@ export function ServerProvider({ children }: { children: ReactNode }) {
       send('subscribe-needs-bootstrap').then(
         (data: Awaited<ReturnType<Handlers['subscribe-needs-bootstrap']>>) => {
           if ('hasServer' in data && data.hasServer) {
-            setAvailableLoginMethods(data.availableLoginMethods);
-            setMultiuserEnabled(data.multiuser);
+            setAvailableLoginMethods(data.availableLoginMethods || []);
+            setMultiuserEnabled(data.multiuser || false);
           }
         },
       );

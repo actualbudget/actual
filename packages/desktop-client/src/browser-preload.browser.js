@@ -86,7 +86,9 @@ global.Actual = {
       });
   },
 
-  startOAuthServer: () => {},
+  startOAuthServer: () => {
+    return '';
+  },
 
   restartElectronServer: () => {},
 

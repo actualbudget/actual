@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -189,8 +189,8 @@ export function Balances({
   filteredAmount,
 }: BalancesProps) {
   const selectedItems = useSelectedItems();
-  const buttonRef = useRef(null);
-  const isButtonHovered = useHover(buttonRef);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const isButtonHovered = useHover(buttonRef as RefObject<HTMLButtonElement>);
 
   return (
     <View
