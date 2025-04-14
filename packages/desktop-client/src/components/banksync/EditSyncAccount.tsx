@@ -5,10 +5,13 @@ import { Button } from '@actual-app/components/button';
 import { SvgQuestion } from '@actual-app/components/icons/v1';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
+import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
 import { useTransactions } from 'loot-core/client/data-hooks/transactions';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   defaultMappings,
   type Mappings,
@@ -22,6 +25,7 @@ import {
 } from 'loot-core/types/models';
 
 import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { CheckboxOption } from '../modals/ImportTransactionsModal/CheckboxOption';
 
@@ -181,6 +185,26 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
     close();
   };
 
+  const dispatch = useDispatch();
+
+  const onUnlink = async (close: () => void) => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'confirm-unlink-account',
+          options: {
+            accountName: account.name,
+            isViewBankSyncSettings: true,
+            onUnlink: () => {
+              dispatch(unlinkAccount({ id: account.id }));
+              close();
+            },
+          },
+        },
+      }),
+    );
+  };
+
   const setMapping = (field: string, value: string) => {
     setMappings(prev => {
       const updated = new Map(prev);
@@ -188,6 +212,9 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
       return updated;
     });
   };
+
+  const potentiallyTruncatedAccountName =
+    account.name.length > 30 ? account.name.slice(0, 30) + '...' : account.name;
 
   const fields = exampleTransaction ? getFields(exampleTransaction) : [];
   const mapping = mappings.get(transactionDirection);
@@ -200,7 +227,9 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={t('Account settings')}
+            title={t('{{accountName}} bank sync settings', {
+              accountName: potentiallyTruncatedAccountName,
+            })}
             rightContent={<ModalCloseButton onPress={close} />}
           />
 
@@ -261,24 +290,38 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             </Tooltip>
           </CheckboxOption>
 
-          <Stack
-            direction="row"
-            justify="flex-end"
-            align="center"
-            style={{ marginTop: 20 }}
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: 20,
+            }}
           >
-            <Button style={{ marginRight: 10 }} onPress={close}>
-              <Trans>Cancel</Trans>
-            </Button>
             <Button
-              variant="primary"
+              style={{ color: theme.errorText }}
               onPress={() => {
-                onSave(close);
+                onUnlink(close);
               }}
             >
-              <Trans>Save</Trans>
+              <Trans>Unlink account</Trans>
             </Button>
-          </Stack>
+
+            <Stack direction="row">
+              <Button style={{ marginRight: 10 }} onPress={close}>
+                <Trans>Cancel</Trans>
+              </Button>
+              <Button
+                variant="primary"
+                onPress={() => {
+                  onSave(close);
+                }}
+              >
+                <Trans>Save</Trans>
+              </Button>
+            </Stack>
+          </View>
         </>
       )}
     </Modal>

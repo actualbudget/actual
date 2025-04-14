@@ -215,26 +215,19 @@ export function StackedBarGraph({
                   tick={{ fill: theme.pageText }}
                   tickLine={{ stroke: theme.pageText }}
                 />
+                {!compact && <CartesianGrid strokeDasharray="3 3" />}
                 {!compact && (
-                  <>
-                    <XAxis
-                      dataKey="date"
-                      tick={{ fill: theme.pageText }}
-                      tickLine={{ stroke: theme.pageText }}
-                    />
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <YAxis
-                      tickFormatter={value =>
-                        getCustomTick(
-                          amountToCurrencyNoDecimal(value),
-                          privacyMode,
-                        )
-                      }
-                      tick={{ fill: theme.pageText }}
-                      tickLine={{ stroke: theme.pageText }}
-                      tickSize={0}
-                    />
-                  </>
+                  <YAxis
+                    tickFormatter={value =>
+                      getCustomTick(
+                        amountToCurrencyNoDecimal(value),
+                        privacyMode,
+                      )
+                    }
+                    tick={{ fill: theme.pageText }}
+                    tickLine={{ stroke: theme.pageText }}
+                    tickSize={0}
+                  />
                 )}
                 {data.legend
                   .slice(0)

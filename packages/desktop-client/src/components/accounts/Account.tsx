@@ -1,6 +1,6 @@
 import React, {
   PureComponent,
-  type MutableRefObject,
+  type RefObject,
   createRef,
   useMemo,
   type ReactElement,
@@ -338,7 +338,7 @@ type AccountInternalState = {
   filteredAmount: null | number;
 };
 
-export type TableRef = MutableRefObject<{
+export type TableRef = RefObject<{
   edit: (updatedId: string | null, op?: string, someBool?: boolean) => void;
   setRowAnimation: (animation: boolean) => void;
   scrollTo: (focusId: string) => void;
@@ -847,6 +847,7 @@ class AccountInternal extends PureComponent<
               name: 'confirm-unlink-account',
               options: {
                 accountName: account.name,
+                isViewBankSyncSettings: false,
                 onUnlink: () => {
                   this.props.dispatch(unlinkAccount({ id: accountId }));
                 },
