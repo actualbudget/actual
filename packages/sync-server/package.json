@@ -4,7 +4,7 @@
   "license": "MIT",
   "description": "actual syncing server",
   "bin": {
-    "@actual-app/sync-server": "bin/actual-sync-server.js"
+    "@actual-app/sync-server": "bin/sync-server.js"
   },
   "type": "module",
   "files": [
