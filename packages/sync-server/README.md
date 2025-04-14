@@ -28,12 +28,11 @@ actual-server [options]
 
 **Available options**
 
-| Command         | 	Description         |
-| -------------  |-------------|
-|`-h` or `--help` |Print this list and exit. |
-|`-v` or `--version` |Print this version and exit. |
-|`--config` |Path to the config file. |
-
+| Command             | Description                  |
+| ------------------- | ---------------------------- |
+| `-h` or `--help`    | Print this list and exit.    |
+| `-v` or `--version` | Print this version and exit. |
+| `--config`          | Path to the config file.     |
 
 **Examples**
 
