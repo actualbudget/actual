@@ -127,7 +127,7 @@ __metadata:
     uuid: "npm:^9.0.1"
     winston: "npm:^3.17.0"
   bin:
-    sync-server: bin/sync-server.js
+    actual-server: ./bin/actual-server.js
   languageName: unknown
   linkType: soft
 
