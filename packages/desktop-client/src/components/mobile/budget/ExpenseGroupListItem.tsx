@@ -71,7 +71,7 @@ export function ExpenseGroupListItem({
     },
     [group?.hidden],
   );
-  
+
   if (!group) {
     return null;
   }
