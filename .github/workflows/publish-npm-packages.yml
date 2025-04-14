@@ -26,10 +26,15 @@ jobs:
 
       - name: Pack the web and server packages
         run: |
-          # Pack the packages
-          # The pack command will create a .tgz file for each package in the packages directory
           yarn workspace @actual-app/web pack --filename @actual-app/web.tgz
           yarn workspace @actual-app/sync-server pack --filename @actual-app/sync-server.tgz
+
+      - name: Build API
+        run: yarn build:api
+
+      - name: Pack the api package
+        run: |
+          yarn workspace @actual-app/api pack --filename @actual-app/api.tgz
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v4
@@ -38,6 +43,7 @@ jobs:
           path: |
             packages/desktop-client/@actual-app/web.tgz
             packages/sync-server/@actual-app/sync-server.tgz
+            packages/api/@actual-app/api.tgz
 
   publish:
     runs-on: ubuntu-latest
@@ -58,24 +64,20 @@ jobs:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Publish Web
-        run: |
-          # Publish the packages
-          # The publish command will automatically detect the version from the tag
-          # and publish the packages to the npm registry
-          # The --access public flag is required for scoped packages
-          # npm publish desktop-client/@actual-app/web.tgz --access public
-          npm publish desktop-client/@actual-app/web.tgz --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # - name: Publish Web
+      #   run: |
+      #     npm publish desktop-client/@actual-app/web.tgz --access public
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish Sync-Server
+      # - name: Publish Sync-Server
+      #   run: |
+      #     npm publish sync-server/@actual-app/sync-server.tgz --access public
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish API
         run: |
-          # Publish the packages
-          # The publish command will automatically detect the version from the tag
-          # and publish the packages to the npm registry
-          # The --access public flag is required for scoped packages
-          # npm publish sync-server/@actual-app/sync-server.tgz --access public
-          npm publish sync-server/@actual-app/sync-server.tgz --access public
+          npm publish api/@actual-app/api.tgz --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
