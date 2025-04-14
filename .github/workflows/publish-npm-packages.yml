@@ -14,7 +14,7 @@ on:
 jobs:
   build-and-pack:
     runs-on: ubuntu-latest
-    name: Build and publish npm packages
+    name: Build and pack npm packages
     steps:
       - uses: actions/checkout@v4
 
@@ -24,7 +24,7 @@ jobs:
       - name: Build Web
         run: yarn build:browser
 
-      - name: Pack the web package
+      - name: Pack the web and server packages
         run: |
           # Pack the packages
           # The pack command will create a .tgz file for each package in the packages directory
