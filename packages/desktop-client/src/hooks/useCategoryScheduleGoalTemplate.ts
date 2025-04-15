@@ -8,6 +8,11 @@ import {
   type CategoryEntity,
 } from 'loot-core/types/models';
 
+type ScheduleGoalDefinition = {
+  type: 'schedule';
+  name: ScheduleEntity['name'];
+};
+
 type UseCategoryScheduleGoalTemplateProps = {
   category: CategoryEntity;
 };
@@ -27,13 +32,12 @@ export function useCategoryScheduleGoalTemplate({
     return {};
   }
 
-  // TODO: Define type for GoalDefinition
   const goalDefinitions: Record<string, unknown>[] = JSON.parse(
     category.goal_def,
   );
   const scheduleGoalDefinition = goalDefinitions.find(
     g => g.type === 'schedule',
-  );
+  ) as ScheduleGoalDefinition | undefined;
 
   if (!scheduleGoalDefinition) {
     return {};
@@ -41,8 +45,8 @@ export function useCategoryScheduleGoalTemplate({
 
   const schedule =
     schedules.find(s => s.name === scheduleGoalDefinition.name) ?? null;
-  const status = schedule ? statuses.get(schedule.id) : null;
-  const statusLabel = schedule ? statusLabels.get(schedule.id) : null;
+  const status = schedule ? statuses.get(schedule.id) || null : null;
+  const statusLabel = schedule ? statusLabels.get(schedule.id) || null : null;
 
   return {
     schedule,
