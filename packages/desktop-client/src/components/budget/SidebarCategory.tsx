@@ -86,8 +86,7 @@ export function SidebarCategory({
     scheduleStatus === 'due' ||
     scheduleStatus === 'upcoming';
 
-  const isScheduleRecurring =
-    schedule && schedule._date && !!schedule._date.frequency;
+  const isScheduleRecurring = !!schedule?._date?.frequency;
 
   const displayed = (
     <View
