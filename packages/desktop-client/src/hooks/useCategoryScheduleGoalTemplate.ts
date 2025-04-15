@@ -32,9 +32,14 @@ export function useCategoryScheduleGoalTemplate({
     return {};
   }
 
-  const goalDefinitions: Record<string, unknown>[] = JSON.parse(
-    category.goal_def,
-  );
+  let goalDefinitions: Record<string, unknown>[] = [];
+  try {
+    goalDefinitions = JSON.parse(category.goal_def);
+  } catch (e) {
+    console.error('Failed to parse category goal_def:', e);
+    return {};
+  }
+
   const scheduleGoalDefinition = goalDefinitions.find(
     g => g.type === 'schedule',
   ) as ScheduleGoalDefinition | undefined;
