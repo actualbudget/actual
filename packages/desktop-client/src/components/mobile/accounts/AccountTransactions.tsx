@@ -13,7 +13,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import {
   accountSchedulesQuery,
   SchedulesProvider,
@@ -41,6 +40,7 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
+import { syncAndDownload } from '../../../app/appSlice';
 import { useAccountPreviewTransactions } from '../../../hooks/useAccountPreviewTransactions';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';

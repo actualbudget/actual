@@ -18,7 +18,6 @@ import { debounce } from 'debounce';
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import { useFilters } from 'loot-core/client/data-hooks/filters';
 import {
   SchedulesProvider,
@@ -69,6 +68,7 @@ import {
 } from 'loot-core/types/models';
 
 import { unlinkAccount } from '../../accounts/accountsSlice';
+import { syncAndDownload } from '../../app/appSlice';
 import { useAccountPreviewTransactions } from '../../hooks/useAccountPreviewTransactions';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';

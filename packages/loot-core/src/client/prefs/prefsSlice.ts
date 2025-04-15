@@ -1,5 +1,8 @@
-// eslint-disable-next-line no-restricted-imports -- fix me -- do not import @actual-app/web in loot-core
+// This is temporary until we move all loot-core/client over to desktop-client.
+/* eslint-disable no-restricted-imports */
+import { resetApp } from '@actual-app/web/src/app/appSlice';
 import { setI18NextLanguage } from '@actual-app/web/src/i18n';
+/* eslint-enable no-restricted-imports */
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { send } from '../../platform/client/fetch';
@@ -9,7 +12,6 @@ import {
   type MetadataPrefs,
   type SyncedPrefs,
 } from '../../types/prefs';
-import { resetApp } from '../app/appSlice';
 import { closeModal } from '../modals/modalsSlice';
 import { createAppAsyncThunk } from '../redux';
 

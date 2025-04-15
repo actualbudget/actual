@@ -19,7 +19,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { sync } from 'loot-core/client/app/appSlice';
 import * as Platform from 'loot-core/client/platform';
 import * as queries from 'loot-core/client/queries';
 import { listen } from 'loot-core/platform/client/fetch';
@@ -28,6 +27,7 @@ import {
   isElectron,
 } from 'loot-core/shared/environment';
 
+import { sync } from '../app/appSlice';
 import { useGlobalPref } from '../hooks/useGlobalPref';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
