@@ -301,7 +301,7 @@ export function TransactionListItem({
                     ...makeAmountFullStyle(balance),
                   }}
                 >
-                  {integerToCurrency(balance)}
+                  {balance && integerToCurrency(balance)}
                 </Text>
               </View>
             </View>
