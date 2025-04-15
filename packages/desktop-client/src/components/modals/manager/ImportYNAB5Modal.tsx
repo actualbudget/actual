@@ -9,8 +9,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { importBudget } from 'loot-core/client/budgets/budgetsSlice';
-
+import { importBudget } from '../../../budgets/budgetsSlice';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
 import { Link } from '../../common/Link';

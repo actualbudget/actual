@@ -1,12 +1,16 @@
 // @ts-strict-ignore
 // This is temporary until we move all loot-core/client over to desktop-client.
-// eslint-disable-next-line no-restricted-imports
+/* eslint-disable no-restricted-imports */
 import { resetSync, sync } from '@actual-app/web/src/app/appSlice';
+import {
+  closeAndDownloadBudget,
+  uploadBudget,
+} from '@actual-app/web/src/budgets/budgetsSlice';
+/* eslint-enable no-restricted-imports */
 import { t } from 'i18next';
 
 import { listen, send } from '../platform/client/fetch';
 
-import { closeAndDownloadBudget, uploadBudget } from './budgets/budgetsSlice';
 import { pushModal } from './modals/modalsSlice';
 import {
   addNotification,

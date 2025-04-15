@@ -7,7 +7,6 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
 import {
   type Modal as ModalType,
   popModal,
@@ -17,6 +16,7 @@ import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
 import { getOpenIdErrors } from 'loot-core/shared/errors';
 import { type OpenIdConfig } from 'loot-core/types/models';
 
+import { closeBudget } from '../../budgets/budgetsSlice';
 import { useDispatch } from '../../redux';
 import { Error } from '../alerts';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';

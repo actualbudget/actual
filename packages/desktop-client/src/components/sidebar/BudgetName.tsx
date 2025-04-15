@@ -11,9 +11,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
 import * as Platform from 'loot-core/client/platform';
 
+import { closeBudget } from '../../budgets/budgetsSlice';
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useNavigate } from '../../hooks/useNavigate';

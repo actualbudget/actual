@@ -8,13 +8,13 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { loggedIn, signOut } from 'loot-core/client/users/usersSlice';
 import {
   isNonProductionEnvironment,
   isElectron,
 } from 'loot-core/shared/environment';
 
+import { createBudget } from '../../budgets/budgetsSlice';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useDispatch } from '../../redux';
