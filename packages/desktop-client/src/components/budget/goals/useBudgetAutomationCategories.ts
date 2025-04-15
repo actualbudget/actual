@@ -13,10 +13,10 @@ export function useBudgetAutomationCategories() {
         id: '',
         name: t('Special categories'),
         categories: [
-          { id: 'total', cat_group: '', name: t('Total of all income') },
+          { id: 'total', group: '', name: t('Total of all income') },
           {
             id: 'to-budget',
-            cat_group: '',
+            group: '',
             name: t('Available funds to budget'),
           },
         ],
