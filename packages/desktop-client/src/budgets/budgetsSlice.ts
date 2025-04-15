@@ -1,5 +1,3 @@
-// This is temporary until we move all loot-core/client over to desktop-client.
- 
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { t } from 'i18next';
 
