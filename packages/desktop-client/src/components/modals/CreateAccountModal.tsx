@@ -12,16 +12,13 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  type Modal as ModalType,
-  pushModal,
-} from 'loot-core/client/modals/modalsSlice';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 
 import { useAuth } from '../../auth/AuthProvider';
 import { Permissions } from '../../auth/types';
 import { authorizeBank } from '../../gocardless';
+import { type Modal as ModalType, pushModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { Warning } from '../alerts';
 import { Link } from '../common/Link';

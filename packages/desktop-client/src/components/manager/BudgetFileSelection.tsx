@@ -36,7 +36,6 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { getUserData } from 'loot-core/client/users/usersSlice';
 import {
   isElectron,
@@ -58,6 +57,7 @@ import {
   loadAllFiles,
   loadBudget,
 } from '../../budgets/budgetsSlice';
+import { pushModal } from '../../modals/modalsSlice';
 import { useSelector, useDispatch } from '../../redux';
 import { useMultiuserEnabled } from '../ServerContext';
 

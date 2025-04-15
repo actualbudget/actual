@@ -6,9 +6,9 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { envelopeBudget } from 'loot-core/client/queries';
 
+import { type Modal as ModalType } from '../../modals/modalsSlice';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FieldLabel } from '../mobile/MobileForms';

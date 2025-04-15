@@ -6,12 +6,12 @@ import {
   closeAndDownloadBudget,
   uploadBudget,
 } from '@actual-app/web/src/budgets/budgetsSlice';
+import { pushModal } from '@actual-app/web/src/modals/modalsSlice';
 /* eslint-enable no-restricted-imports */
 import { t } from 'i18next';
 
 import { listen, send } from '../platform/client/fetch';
 
-import { pushModal } from './modals/modalsSlice';
 import {
   addNotification,
   type Notification,
