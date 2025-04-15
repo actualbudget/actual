@@ -27,7 +27,8 @@ export function useCategoryScheduleGoalTemplate({
     return {};
   }
 
-  const goalDefinitions = JSON.parse(category.goal_def);
+  // TODO: Define type for GoalDefinition
+  const goalDefinitions: Record<string, unknown>[] = JSON.parse(category.goal_def);
   const scheduleGoalDefinition = goalDefinitions.find(
     g => g.type === 'schedule',
   );
@@ -35,8 +36,9 @@ export function useCategoryScheduleGoalTemplate({
   if (!scheduleGoalDefinition) {
     return {};
   }
-  
-  const schedule = schedules.find(s => s.name === scheduleGoalDefinition.name) ?? null;
+
+  const schedule =
+    schedules.find(s => s.name === scheduleGoalDefinition.name) ?? null;
   const status = schedule ? statuses.get(schedule.id) : null;
   const statusLabel = schedule ? statusLabels.get(schedule.id) : null;
 
