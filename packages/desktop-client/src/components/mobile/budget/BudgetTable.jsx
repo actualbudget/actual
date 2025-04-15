@@ -57,7 +57,7 @@ import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
 
-import { ExpenseGroup } from './ExpenseGroup';
+import { ExpenseGroupList } from './ExpenseGroupList';
 import { IncomeGroup } from './IncomeGroup';
 
 export const ROW_HEIGHT = 50;
@@ -282,26 +282,18 @@ function BudgetGroups({
       data-testid="budget-groups"
       style={{ flex: '1 0 auto', overflowY: 'auto', paddingBottom: 15 }}
     >
-      {expenseGroups
-        .filter(group => !group.hidden || showHiddenCategories)
-        .map(group => {
-          return (
-            <ExpenseGroup
-              // Re-render when columns are toggled.
-              key={`${group.id}|${show3Columns}|${showBudgetedColumn}`}
-              group={group}
-              showBudgetedColumn={showBudgetedColumn}
-              month={month}
-              onEditGroup={onEditGroup}
-              onEditCategory={onEditCategory}
-              onBudgetAction={onBudgetAction}
-              show3Columns={show3Columns}
-              showHiddenCategories={showHiddenCategories}
-              isCollapsed={isCollapsed}
-              onToggleCollapse={onToggleCollapse}
-            />
-          );
-        })}
+      <ExpenseGroupList
+        groups={expenseGroups}
+        showBudgetedColumn={showBudgetedColumn}
+        month={month}
+        onEditGroup={onEditGroup}
+        onEditCategory={onEditCategory}
+        onBudgetAction={onBudgetAction}
+        show3Columns={show3Columns}
+        showHiddenCategories={showHiddenCategories}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={onToggleCollapse}
+      />
 
       {incomeGroup && (
         <IncomeGroup

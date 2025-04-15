@@ -1,4 +1,5 @@
-import { useCallback, useMemo } from 'react';
+import { type ComponentPropsWithoutRef, useCallback, useMemo } from 'react';
+import { GridListItem } from 'react-aria-components';
 
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
@@ -23,12 +24,12 @@ import { PrivacyFilter } from '../../PrivacyFilter';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
 
-import { getColumnWidth } from './BudgetTable';
+import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { ExpenseCategoryList } from './ExpenseCategoryList';
-import { ListItem } from './ListItem';
 
-type ExpenseGroupProps = {
-  group: CategoryGroupEntity;
+type ExpenseGroupListItemProps = ComponentPropsWithoutRef<
+  typeof GridListItem<CategoryGroupEntity>
+> & {
   month: string;
   showHiddenCategories: boolean;
   onEditGroup: (id: CategoryGroupEntity['id']) => void;
@@ -40,8 +41,7 @@ type ExpenseGroupProps = {
   show3Columns: boolean;
 };
 
-export function ExpenseGroup({
-  group,
+export function ExpenseGroupListItem({
   onEditGroup,
   onEditCategory,
   month,
@@ -51,51 +51,61 @@ export function ExpenseGroup({
   showHiddenCategories,
   isCollapsed,
   onToggleCollapse,
-}: ExpenseGroupProps) {
+  ...props
+}: ExpenseGroupListItemProps) {
+  const { value: group } = props;
+
   const categories = useMemo(
     () =>
-      isCollapsed(group.id)
+      !group || isCollapsed(group.id)
         ? []
         : (group.categories?.filter(
             category => !category.hidden || showHiddenCategories,
           ) ?? []),
-    [group.categories, group.id, isCollapsed, showHiddenCategories],
+    [group, isCollapsed, showHiddenCategories],
   );
 
   const shouldHideCategory = useCallback(
     (category: CategoryEntity) => {
-      return !!(category.hidden || group.hidden);
+      return !!(category.hidden || group?.hidden);
     },
-    [group.hidden],
+    [group?.hidden],
   );
 
-  return (
-    <Card
-      style={{
-        marginTop: 4,
-        marginBottom: 4,
-      }}
-    >
-      <ExpenseGroupHeader
-        group={group}
-        month={month}
-        showBudgetedColumn={showBudgetedColumn}
-        show3Columns={show3Columns}
-        onEdit={onEditGroup}
-        isCollapsed={isCollapsed(group.id)}
-        onToggleCollapse={onToggleCollapse}
-      />
+  if (!group) {
+    return null;
+  }
 
-      <ExpenseCategoryList
-        categories={categories}
-        month={month}
-        onEditCategory={onEditCategory}
-        onBudgetAction={onBudgetAction}
-        shouldHideCategory={shouldHideCategory}
-        show3Columns={show3Columns}
-        showBudgetedColumn={showBudgetedColumn}
-      />
-    </Card>
+  return (
+    <GridListItem textValue={group.name} {...props}>
+      <Card
+        style={{
+          marginTop: 4,
+          marginBottom: 4,
+        }}
+      >
+        <ExpenseGroupHeader
+          group={group}
+          month={month}
+          showBudgetedColumn={showBudgetedColumn}
+          show3Columns={show3Columns}
+          onEdit={onEditGroup}
+          isCollapsed={isCollapsed}
+          onToggleCollapse={onToggleCollapse}
+        />
+
+        <ExpenseCategoryList
+          group={group}
+          categories={categories}
+          month={month}
+          onEditCategory={onEditCategory}
+          onBudgetAction={onBudgetAction}
+          shouldHideCategory={shouldHideCategory}
+          show3Columns={show3Columns}
+          showBudgetedColumn={showBudgetedColumn}
+        />
+      </Card>
+    </GridListItem>
   );
 }
 
@@ -103,13 +113,13 @@ type ExpenseGroupHeaderProps = {
   group: CategoryGroupEntity;
   month: string;
   onEdit: (id: CategoryGroupEntity['id']) => void;
-  isCollapsed: boolean;
+  isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
   show3Columns: boolean;
   showBudgetedColumn: boolean;
 };
 
-function ExpenseGroupHeader({
+export function ExpenseGroupHeader({
   group,
   month,
   onEdit,
@@ -119,13 +129,17 @@ function ExpenseGroupHeader({
   onToggleCollapse,
 }: ExpenseGroupHeaderProps) {
   return (
-    <ListItem
+    <View
       style={{
+        height: ROW_HEIGHT,
+        borderBottomWidth: 1,
+        borderColor: theme.tableBorder,
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingLeft: 5,
+        paddingRight: 5,
         opacity: !!group.hidden ? 0.5 : undefined,
-        paddingLeft: 0,
         backgroundColor: monthUtils.isCurrentMonth(month)
           ? theme.budgetHeaderCurrentMonth
           : theme.budgetHeaderOtherMonth,
@@ -144,14 +158,14 @@ function ExpenseGroupHeader({
         show3Columns={show3Columns}
         showBudgetedColumn={showBudgetedColumn}
       />
-    </ListItem>
+    </View>
   );
 }
 
 type ExpenseGroupNameProps = {
   group: CategoryGroupEntity;
   onEdit: (id: CategoryGroupEntity['id']) => void;
-  isCollapsed: boolean;
+  isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
   show3Columns: boolean;
 };
@@ -177,6 +191,17 @@ function ExpenseGroupName({
         width: sidebarColumnWidth,
       }}
     >
+      {/* Hidden drag button */}
+      <Button
+        slot="drag"
+        style={{
+          opacity: 0,
+          width: 1,
+          height: 1,
+          position: 'absolute',
+          overflow: 'hidden',
+        }}
+      />
       <Button
         variant="bare"
         className={css({
@@ -185,6 +210,7 @@ function ExpenseGroupName({
           '&[data-pressed]': {
             backgroundColor: 'transparent',
           },
+          marginLeft: -5,
         })}
         onPress={() => onToggleCollapse(group.id)}
       >
@@ -194,7 +220,7 @@ function ExpenseGroupName({
           style={{
             flexShrink: 0,
             transition: 'transform .1s',
-            transform: isCollapsed ? 'rotate(-90deg)' : '',
+            transform: isCollapsed(group.id) ? 'rotate(-90deg)' : '',
           }}
         />
       </Button>
