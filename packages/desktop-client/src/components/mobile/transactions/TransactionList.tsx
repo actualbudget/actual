@@ -83,6 +83,7 @@ function Loading({ style, 'aria-label': ariaLabel }: LoadingProps) {
 type TransactionListProps = {
   isLoading: boolean;
   transactions: readonly TransactionEntity[];
+  runningBalances: number[];
   onOpenTransaction?: (transaction: TransactionEntity) => void;
   isLoadingMore: boolean;
   onLoadMore: () => void;
@@ -92,6 +93,7 @@ type TransactionListProps = {
 export function TransactionList({
   isLoading,
   transactions,
+  runningBalances,
   onOpenTransaction,
   isLoadingMore,
   onLoadMore,
@@ -201,6 +203,7 @@ export function TransactionList({
               {transaction => (
                 <TransactionListItem
                   key={transaction.id}
+                  balance={runningBalances[transaction.id]}
                   value={transaction}
                   onPress={trans => onTransactionPress(trans)}
                   onLongPress={trans => onTransactionPress(trans, true)}

@@ -45,6 +45,7 @@ import { useSelector } from '../../../redux';
 import { makeAmountFullStyle } from '../../budget/util';
 
 import { lookupName, Status } from './TransactionEdit';
+import { Balance } from '../../../../build-electron/static/js/en.3FQh5jc_.chunk';
 
 const ROW_HEIGHT = 60;
 
@@ -73,11 +74,13 @@ const getScheduleIconStyle = ({ isPreview }: { isPreview: boolean }) => ({
 type TransactionListItemProps = ComponentPropsWithoutRef<
   typeof ListBoxItem<TransactionEntity>
 > & {
+  balance: number;
   onPress: (transaction: TransactionEntity) => void;
   onLongPress: (transaction: TransactionEntity) => void;
 };
 
 export function TransactionListItem({
+  balance,
   onPress,
   onLongPress,
   ...props
@@ -290,6 +293,15 @@ export function TransactionListItem({
                   }}
                 >
                   {integerToCurrency(amount)}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 11,
+                    fontWeight: '400',
+                    ...makeAmountFullStyle(balance),
+                  }}
+                >
+                  {integerToCurrency(balance)}
                 </Text>
               </View>
             </View>

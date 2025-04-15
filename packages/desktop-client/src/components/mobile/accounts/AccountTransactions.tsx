@@ -247,6 +247,14 @@ function TransactionListWithPreviews({
       queries.transactions(accountId).options({ splits: 'all' }).select('*'),
     [accountId],
   );
+  const runningBalancesQuery = useCallback(
+    () =>
+      queries
+        .transactions(accountId)
+        .options({ splits: 'none' })
+        .select([{ balance: { $sumOver: '$amount' } }]),
+    [accountId],
+  );
 
   const [transactionsQuery, setTransactionsQuery] = useState<Query>(
     baseTransactionsQuery(),
@@ -260,6 +268,11 @@ function TransactionListWithPreviews({
   } = useTransactions({
     query: transactionsQuery,
   });
+  const [getBalancesQuery] = useState<Query>(runningBalancesQuery());
+  const balancesDirty = useTransactions({ query: getBalancesQuery });
+  const balances: number[] = [];
+  //@ts-ignore
+  balancesDirty.transactions.forEach(t => (balances[t.id] = t.balance));
 
   const { previewTransactions } = useAccountPreviewTransactions({
     accountId: account?.id || '',
@@ -368,6 +381,7 @@ function TransactionListWithPreviews({
       balance={balanceQueries.balance}
       balanceCleared={balanceQueries.cleared}
       balanceUncleared={balanceQueries.uncleared}
+      runningBalances={balances}
       isLoadingMore={isLoadingMore}
       onLoadMore={loadMoreTransactions}
       searchPlaceholder={t('Search {{accountName}}', { accountName })}
