@@ -2,10 +2,10 @@
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { closeModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
+import { closeModal } from '../modals/modalsSlice';
 import { useDispatch } from '../redux';
 
 import { EditSyncAccount } from './banksync/EditSyncAccount';

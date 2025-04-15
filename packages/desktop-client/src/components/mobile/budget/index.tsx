@@ -5,7 +5,6 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { collapseModals, pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   applyBudgetAction,
   createCategory,
@@ -20,6 +19,7 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
 import { sync } from '../../../app/appSlice';
+import { collapseModals, pushModal } from '../../../modals/modalsSlice';
 import { useDispatch } from '../../../redux';
 import { prewarmMonth } from '../../budget/util';
 import { NamespaceContext } from '../../spreadsheet/NamespaceContext';

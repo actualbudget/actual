@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { Menu } from '@actual-app/components/menu';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { validForTransfer } from 'loot-core/client/transfer';
 import { q } from 'loot-core/shared/query';
 import {
@@ -15,6 +14,7 @@ import {
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { type TransactionEntity } from 'loot-core/types/models';
 
+import { pushModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { SelectedItemsButton } from '../table';
 

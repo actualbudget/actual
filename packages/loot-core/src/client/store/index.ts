@@ -12,6 +12,10 @@ import {
   name as budgetsSliceName,
   reducer as budgetsSliceReducer,
 } from '@actual-app/web/src/budgets/budgetsSlice';
+import {
+  name as modalsSliceName,
+  reducer as modalsSliceReducer,
+} from '@actual-app/web/src/modals/modalsSlice';
 /* eslint-enable no-restricted-imports */
 import {
   combineReducers,
@@ -20,10 +24,6 @@ import {
   isRejected,
 } from '@reduxjs/toolkit';
 
-import {
-  name as modalsSliceName,
-  reducer as modalsSliceReducer,
-} from '../modals/modalsSlice';
 import {
   name as notificationsSliceName,
   reducer as notificationsSliceReducer,
