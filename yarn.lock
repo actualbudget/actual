@@ -126,6 +126,8 @@ __metadata:
     typescript: "npm:^5.8.2"
     uuid: "npm:^9.0.1"
     winston: "npm:^3.17.0"
+  bin:
+    actual-server: ./bin/actual-server.js
   languageName: unknown
   linkType: soft
 

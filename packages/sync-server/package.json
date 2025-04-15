@@ -3,7 +3,19 @@
   "version": "25.4.0",
   "license": "MIT",
   "description": "actual syncing server",
+  "bin": {
+    "actual-server": "./bin/actual-server.js"
+  },
   "type": "module",
+  "files": [
+    "bin",
+    "src",
+    "app.js",
+    "migrations",
+    "default-db.sqlite",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "start": "node app",
     "start-monitor": "nodemon app",
