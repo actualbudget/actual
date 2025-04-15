@@ -1,6 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import {
   getAccounts,
   getPayees,
@@ -19,6 +18,7 @@ import {
 } from 'loot-core/types/models';
 
 import { resetApp } from '../app/appSlice';
+import { addNotification } from '../notifications/notificationsSlice';
 
 const sliceName = 'account';
 

@@ -17,13 +17,13 @@ import {
   name as modalsSliceName,
   reducer as modalsSliceReducer,
 } from '@actual-app/web/src/modals/modalsSlice';
-/* eslint-enable */
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
-
 import {
   name as notificationsSliceName,
   reducer as notificationsSliceReducer,
-} from '../notifications/notificationsSlice';
+} from '@actual-app/web/src/notifications/notificationsSlice';
+/* eslint-enable */
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
+
 import {
   name as prefsSliceName,
   reducer as prefsSliceReducer,

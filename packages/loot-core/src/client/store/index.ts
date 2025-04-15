@@ -16,6 +16,11 @@ import {
   name as modalsSliceName,
   reducer as modalsSliceReducer,
 } from '@actual-app/web/src/modals/modalsSlice';
+import {
+  name as notificationsSliceName,
+  reducer as notificationsSliceReducer,
+  addNotification,
+} from '@actual-app/web/src/notifications/notificationsSlice';
 /* eslint-enable no-restricted-imports */
 import {
   combineReducers,
@@ -24,11 +29,6 @@ import {
   isRejected,
 } from '@reduxjs/toolkit';
 
-import {
-  name as notificationsSliceName,
-  reducer as notificationsSliceReducer,
-  addNotification,
-} from '../notifications/notificationsSlice';
 import {
   name as prefsSliceName,
   reducer as prefsSliceReducer,

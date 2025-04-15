@@ -28,7 +28,6 @@ import { format, parseISO } from 'date-fns';
 import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
 import { useTransactions } from 'loot-core/client/data-hooks/transactions';
 import { useWidget } from 'loot-core/client/data-hooks/widget';
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q, type Query } from 'loot-core/shared/query';
@@ -41,6 +40,7 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
+import { addNotification } from '../../../notifications/notificationsSlice';
 import { useDispatch } from '../../../redux';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
