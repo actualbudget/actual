@@ -1,8 +1,4 @@
 // @ts-strict-ignore
-import {
-  addGenericErrorNotification,
-  addNotification,
-} from 'loot-core/client/notifications/notificationsSlice';
 import { loadPrefs } from 'loot-core/client/prefs/prefsSlice';
 import {
   getAccounts,
@@ -17,6 +13,10 @@ import * as undo from 'loot-core/platform/client/undo';
 import { setAppState } from './app/appSlice';
 import { closeBudgetUI } from './budgets/budgetsSlice';
 import { closeModal, pushModal, replaceModal } from './modals/modalsSlice';
+import {
+  addGenericErrorNotification,
+  addNotification,
+} from './notifications/notificationsSlice';
 
 export function handleGlobalEvents(store: AppStore) {
   const unlistenServerError = listen('server-error', () => {
