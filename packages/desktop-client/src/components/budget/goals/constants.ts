@@ -13,8 +13,6 @@ export const displayTemplateTypes = [
   ['schedule', 'Schedule'] as const,
   ['percentage', 'Percent of category'] as const,
   ['historical', 'Copy past budgets'] as const,
-  // TODO(jfdoming): implement
-  // ['goal', 'Set a goal'] as const,
 ];
 
 export type DisplayTemplateType = (typeof displayTemplateTypes)[number][0];
@@ -40,8 +38,3 @@ export type ReducerState =
       template: CopyTemplate | AverageTemplate;
       displayType: 'historical';
     };
-// TODO(jfdoming): implement
-// | {
-//     template: ByTemplate | SpendTemplate;
-//     displayType: 'goal';
-//   };

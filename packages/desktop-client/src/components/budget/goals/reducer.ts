@@ -28,11 +28,6 @@ export const getInitialState = (template: Template | null): ReducerState => {
       };
     case 'spend':
     case 'by':
-      // TODO(jfdoming): add goal template type
-      // return {
-      //   template,
-      //   displayType: 'goal',
-      // };
       throw new Error('Goal is not yet supported');
     case 'remainder':
       throw new Error('Remainder is not yet supported');
@@ -123,24 +118,6 @@ const changeType = (
           numMonths: 3,
         },
       };
-    // TODO(jfdoming): add goal template type
-    // case 'goal':
-    //   if (
-    //     prevState.template.type === 'spend' ||
-    //     prevState.template.type === 'by'
-    //   ) {
-    //     return prevState;
-    //   }
-    //   return {
-    //     displayType: visualType,
-    //     template: {
-    //       directive: '',
-    //       type: 'spend',
-    //       amount: 0,
-    //       month: '',
-    //       from: '',
-    //     },
-    //   };
     default:
       // Make sure we're not missing any cases
       throw new Error(`Unknown display type: ${visualType satisfies never}`);
