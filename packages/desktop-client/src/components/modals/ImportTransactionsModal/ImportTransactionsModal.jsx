@@ -10,14 +10,14 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import deepEqual from 'deep-equal';
 
+import { send } from 'loot-core/platform/client/fetch';
+import { amountToInteger } from 'loot-core/shared/util';
+
 import {
   getPayees,
   importPreviewTransactions,
   importTransactions,
-} from 'loot-core/client/queries/queriesSlice';
-import { send } from 'loot-core/platform/client/fetch';
-import { amountToInteger } from 'loot-core/shared/util';
-
+} from '../../../queries/queriesSlice';
 import { useDispatch } from '../../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { SectionLabel } from '../../forms';

@@ -31,7 +31,6 @@ import {
 } from 'date-fns';
 
 import * as Platform from 'loot-core/client/platform';
-import { setLastTransaction } from 'loot-core/client/queries/queriesSlice';
 import { aqlQuery } from 'loot-core/client/query-helpers';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -56,6 +55,7 @@ import {
 } from 'loot-core/shared/util';
 
 import { pushModal } from '../../../modals/modalsSlice';
+import { setLastTransaction } from '../../../queries/queriesSlice';
 import { useSelector, useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { AmountInput } from '../../util/AmountInput';

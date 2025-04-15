@@ -25,13 +25,13 @@ import {
   name as prefsSliceName,
   reducer as prefsSliceReducer,
 } from '@actual-app/web/src/prefs/prefsSlice';
-/* eslint-enable */
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
-
 import {
   name as queriesSliceName,
   reducer as queriesSliceReducer,
-} from '../queries/queriesSlice';
+} from '@actual-app/web/src/queries/queriesSlice';
+/* eslint-enable */
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
+
 import {
   name as usersSliceName,
   reducer as usersSliceReducer,

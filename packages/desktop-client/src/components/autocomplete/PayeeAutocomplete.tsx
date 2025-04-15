@@ -22,13 +22,10 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
-import {
-  createPayee,
-  getActivePayees,
-} from 'loot-core/client/queries/queriesSlice';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { type AccountEntity, type PayeeEntity } from 'loot-core/types/models';
 
+import { createPayee, getActivePayees } from '../../queries/queriesSlice';
 import { useDispatch } from '../../redux';
 
 import {
