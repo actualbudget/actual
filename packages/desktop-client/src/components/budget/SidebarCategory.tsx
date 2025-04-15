@@ -4,14 +4,22 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
+import {
+  SvgArrowsSynchronize,
+  SvgCalendar3,
+} from '@actual-app/components/icons/v2';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { type TFunction } from 'i18next';
 
+import * as monthUtils from 'loot-core/shared/months';
 import {
   type CategoryGroupEntity,
   type CategoryEntity,
+  type ScheduleEntity,
 } from 'loot-core/types/models';
 
 import { NotesButton } from '../NotesButton';
@@ -19,9 +27,12 @@ import { InputCell } from '../table';
 
 import { CategoryAutomationButton } from './goals/CategoryAutomationButton';
 
+import { useCategorySchedule } from '@desktop-client/hooks/useCategorySchedule';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 type SidebarCategoryProps = {
   innerRef: Ref<HTMLDivElement>;
@@ -56,6 +67,7 @@ export function SidebarCategory({
   onHideNewCategory,
 }: SidebarCategoryProps) {
   const { t } = useTranslation();
+  const locale = useLocale();
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
@@ -64,6 +76,18 @@ export function SidebarCategory({
   const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
     useContextMenu();
   const triggerRef = useRef(null);
+  const navigate = useNavigate();
+
+  const { schedule, status: scheduleStatus } = useCategorySchedule({
+    category,
+  });
+  const isScheduleUpcomingOrMissed =
+    scheduleStatus === 'missed' ||
+    scheduleStatus === 'due' ||
+    scheduleStatus === 'upcoming';
+
+  const isScheduleRecurring =
+    schedule && schedule._date && !!schedule._date.frequency;
 
   const displayed = (
     <View
@@ -79,17 +103,7 @@ export function SidebarCategory({
       ref={triggerRef}
       onContextMenu={handleContextMenu}
     >
-      <div
-        data-testid="category-name"
-        style={{
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          minWidth: 0,
-        }}
-      >
-        {category.name}
-      </div>
+      <TextOneLine data-testid="category-name">{category.name}</TextOneLine>
       <View style={{ flexShrink: 0, marginLeft: 5 }}>
         <Button
           variant="bare"
@@ -145,6 +159,41 @@ export function SidebarCategory({
             style={dragging && { color: 'currentColor' }}
             defaultColor={theme.pageTextLight}
           />
+        </View>
+      )}
+
+      {isScheduleUpcomingOrMissed && (
+        <View
+          title={getScheduleButtonTitle({
+            t,
+            schedule,
+            scheduleStatus,
+            locale,
+          })}
+          style={{ flexShrink: 0 }}
+        >
+          <Button
+            variant="bare"
+            style={{
+              color:
+                scheduleStatus === 'missed'
+                  ? theme.errorBackground
+                  : scheduleStatus === 'due'
+                    ? theme.warningBackground
+                    : theme.upcomingBackground,
+            }}
+            onPress={() =>
+              schedule._account
+                ? navigate(`/accounts/${schedule._account}`)
+                : navigate('/accounts')
+            }
+          >
+            {isScheduleRecurring ? (
+              <SvgArrowsSynchronize style={{ width: 13, height: 13 }} />
+            ) : (
+              <SvgCalendar3 style={{ width: 13, height: 13 }} />
+            )}
+          </Button>
         </View>
       )}
       <View style={{ flexShrink: 0 }}>
@@ -216,4 +265,38 @@ export function SidebarCategory({
       />
     </View>
   );
+}
+
+function getScheduleButtonTitle({
+  t,
+  schedule,
+  scheduleStatus,
+  locale,
+}: {
+  t: TFunction;
+  schedule: ScheduleEntity;
+  scheduleStatus: 'missed' | 'due' | 'upcoming';
+  locale?: Locale;
+}) {
+  const isToday = monthUtils.currentDay() === schedule.next_date;
+  const formattedDate = monthUtils.format(
+    schedule.next_date,
+    'MMMM dd, yyyy',
+    locale,
+  );
+  switch (scheduleStatus) {
+    case 'missed':
+      return t('Missed {{scheduleName}} payment due last {{scheduleDate}}', {
+        scheduleName: schedule.name,
+        scheduleDate: formattedDate,
+      });
+    case 'due':
+    case 'upcoming':
+      return t('{{scheduleName}} payment is due {{scheduleDate}}', {
+        scheduleName: schedule.name,
+        scheduleDate: isToday ? 'today' : formattedDate,
+      });
+    default:
+      throw new Error(`Unrecognized schedule status: ${scheduleStatus}`);
+  }
 }

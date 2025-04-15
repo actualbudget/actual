@@ -1,6 +1,7 @@
 import React, {
   type ComponentPropsWithoutRef,
   type KeyboardEvent,
+  useMemo,
   useState,
 } from 'react';
 
@@ -8,6 +9,8 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
+import { q } from 'loot-core/shared/query';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
@@ -227,6 +230,8 @@ export function BudgetTable(props: BudgetTableProps) {
     onCollapse(categoryGroups.map(g => g.id));
   };
 
+  const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
+
   return (
     <View
       data-testid="budget-table"
@@ -270,46 +275,48 @@ export function BudgetTable(props: BudgetTableProps) {
         monthBounds={monthBounds}
         type={type}
       >
-        <BudgetTotals
-          MonthComponent={dataComponents.BudgetTotalsComponent}
-          toggleHiddenCategories={toggleHiddenCategories}
-          expandAllCategories={expandAllCategories}
-          collapseAllCategories={collapseAllCategories}
-        />
-        <View
-          style={{
-            overflowY: 'scroll',
-            overflowAnchor: 'none',
-            flex: 1,
-            paddingLeft: 5,
-            paddingRight: 5,
-          }}
-        >
+        <SchedulesProvider query={schedulesQuery}>
+          <BudgetTotals
+            MonthComponent={dataComponents.BudgetTotalsComponent}
+            toggleHiddenCategories={toggleHiddenCategories}
+            expandAllCategories={expandAllCategories}
+            collapseAllCategories={collapseAllCategories}
+          />
           <View
             style={{
-              flexShrink: 0,
+              overflowY: 'scroll',
+              overflowAnchor: 'none',
+              flex: 1,
+              paddingLeft: 5,
+              paddingRight: 5,
             }}
-            onKeyDown={onKeyDown}
           >
-            <BudgetCategories
-              // @ts-expect-error Fix when migrating BudgetCategories to ts
-              categoryGroups={categoryGroups}
-              editingCell={editing}
-              dataComponents={dataComponents}
-              onEditMonth={onEditMonth}
-              onEditName={onEditName}
-              onSaveCategory={onSaveCategory}
-              onSaveGroup={onSaveGroup}
-              onDeleteCategory={onDeleteCategory}
-              onDeleteGroup={onDeleteGroup}
-              onReorderCategory={_onReorderCategory}
-              onReorderGroup={_onReorderGroup}
-              onBudgetAction={onBudgetAction}
-              onShowActivity={onShowActivity}
-              onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
-            />
+            <View
+              style={{
+                flexShrink: 0,
+              }}
+              onKeyDown={onKeyDown}
+            >
+              <BudgetCategories
+                // @ts-expect-error Fix when migrating BudgetCategories to ts
+                categoryGroups={categoryGroups}
+                editingCell={editing}
+                dataComponents={dataComponents}
+                onEditMonth={onEditMonth}
+                onEditName={onEditName}
+                onSaveCategory={onSaveCategory}
+                onSaveGroup={onSaveGroup}
+                onDeleteCategory={onDeleteCategory}
+                onDeleteGroup={onDeleteGroup}
+                onReorderCategory={_onReorderCategory}
+                onReorderGroup={_onReorderGroup}
+                onBudgetAction={onBudgetAction}
+                onShowActivity={onShowActivity}
+                onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
+              />
+            </View>
           </View>
-        </View>
+        </SchedulesProvider>
       </MonthsProvider>
     </View>
   );

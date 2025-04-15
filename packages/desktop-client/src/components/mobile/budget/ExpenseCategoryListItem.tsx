@@ -4,6 +4,10 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheveronRight } from '@actual-app/components/icons/v1';
+import {
+  SvgArrowsSynchronize,
+  SvgCalendar3,
+} from '@actual-app/components/icons/v2';
 import { styles, type CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -27,6 +31,8 @@ import { BudgetCell } from './BudgetCell';
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { SpentCell } from './SpentCell';
 
+import { useCategorySchedule } from '@desktop-client/hooks/useCategorySchedule';
+
 type ExpenseCategoryNameProps = {
   category: CategoryEntity;
   onEditCategory: (id: CategoryEntity['id']) => void;
@@ -42,6 +48,17 @@ function ExpenseCategoryName({
     show3Columns,
     isSidebar: true,
   });
+  const { schedule, status: scheduleStatus } = useCategorySchedule({
+    category,
+  });
+  const isScheduleUpcomingOrMissed =
+    scheduleStatus === 'upcoming' ||
+    scheduleStatus === 'due' ||
+    scheduleStatus === 'missed';
+
+  const isScheduleRecurring =
+    schedule && schedule._date && !!schedule._date.frequency;
+
   return (
     <View
       style={{
@@ -86,6 +103,25 @@ function ExpenseCategoryName({
           >
             {category.name}
           </Text>
+          {isScheduleUpcomingOrMissed && (
+            <View
+              style={{
+                flexShrink: 0,
+                color:
+                  scheduleStatus === 'missed'
+                    ? theme.errorBackground
+                    : scheduleStatus === 'due'
+                      ? theme.warningBackground
+                      : theme.upcomingBackground,
+              }}
+            >
+              {isScheduleRecurring ? (
+                <SvgArrowsSynchronize style={{ width: 14, height: 14 }} />
+              ) : (
+                <SvgCalendar3 style={{ width: 14, height: 14 }} />
+              )}
+            </View>
+          )}
           <SvgCheveronRight
             style={{ flexShrink: 0, color: theme.tableTextSubdued }}
             width={14}
