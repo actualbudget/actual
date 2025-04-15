@@ -21,13 +21,13 @@ import {
   name as notificationsSliceName,
   reducer as notificationsSliceReducer,
 } from '@actual-app/web/src/notifications/notificationsSlice';
-/* eslint-enable */
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
-
 import {
   name as prefsSliceName,
   reducer as prefsSliceReducer,
-} from '../prefs/prefsSlice';
+} from '@actual-app/web/src/prefs/prefsSlice';
+/* eslint-enable */
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
+
 import {
   name as queriesSliceName,
   reducer as queriesSliceReducer,

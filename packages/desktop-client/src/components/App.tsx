@@ -15,7 +15,6 @@ import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import * as Platform from 'loot-core/client/platform';
-import { loadGlobalPrefs } from 'loot-core/client/prefs/prefsSlice';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import { signOut } from 'loot-core/client/users/usersSlice';
 import { init as initConnection, send } from 'loot-core/platform/client/fetch';
@@ -26,6 +25,7 @@ import { handleGlobalEvents } from '../global-events';
 import { setI18NextLanguage } from '../i18n';
 import { addNotification } from '../notifications/notificationsSlice';
 import { installPolyfills } from '../polyfills';
+import { loadGlobalPrefs } from '../prefs/prefsSlice';
 import { useDispatch, useSelector, useStore } from '../redux';
 import { hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
 import { ExposeNavigate } from '../util/router-tools';

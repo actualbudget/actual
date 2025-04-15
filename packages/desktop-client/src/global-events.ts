@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import { loadPrefs } from 'loot-core/client/prefs/prefsSlice';
 import {
   getAccounts,
   getCategories,
@@ -17,6 +16,7 @@ import {
   addGenericErrorNotification,
   addNotification,
 } from './notifications/notificationsSlice';
+import { loadPrefs } from './prefs/prefsSlice';
 
 export function handleGlobalEvents(store: AppStore) {
   const unlistenServerError = listen('server-error', () => {

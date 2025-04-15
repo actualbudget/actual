@@ -4,7 +4,6 @@ import {
   type PayloadAction,
 } from '@reduxjs/toolkit';
 
-import { loadPrefs } from 'loot-core/client/prefs/prefsSlice';
 import { createAppAsyncThunk } from 'loot-core/client/redux';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUploadError } from 'loot-core/shared/errors';
@@ -13,6 +12,7 @@ import { type AtLeastOne } from 'loot-core/types/util';
 
 import { syncAccounts } from '../accounts/accountsSlice';
 import { pushModal } from '../modals/modalsSlice';
+import { loadPrefs } from '../prefs/prefsSlice';
 
 const sliceName = 'app';
 

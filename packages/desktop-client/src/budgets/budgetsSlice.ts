@@ -1,7 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { t } from 'i18next';
 
-import { loadGlobalPrefs, loadPrefs } from 'loot-core/client/prefs/prefsSlice';
 import { createAppAsyncThunk } from 'loot-core/client/redux';
 import { signOut } from 'loot-core/client/users/usersSlice';
 import { send } from 'loot-core/platform/client/fetch';
@@ -13,6 +12,7 @@ import { type Handlers } from 'loot-core/types/handlers';
 
 import { resetApp, setAppState } from '../app/appSlice';
 import { closeModal, pushModal } from '../modals/modalsSlice';
+import { loadGlobalPrefs, loadPrefs } from '../prefs/prefsSlice';
 
 const sliceName = 'budgets';
 
