@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useReducer } from 'react';
+import React, { useState, useRef, useEffect, useReducer, useMemo } from 'react';
 import { FocusScope } from 'react-aria';
 import { Form } from 'react-aria-components';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -264,6 +264,18 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
+  const translatedFilterFields = useMemo(() => {
+    const retValue = [...filterFields];
+
+    if (retValue && retValue.length > 0) {
+      retValue.forEach(field => {
+        field[1] = mapField(field[0]);
+      });
+    }
+
+    return retValue;
+  }, []);
+
   const [state, dispatch] = useReducer(
     (state, action) => {
       switch (action.type) {
@@ -379,12 +391,12 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
           onMenuSelect={name => {
             dispatch({ type: 'configure', field: name });
           }}
-          items={filterFields
+          items={translatedFilterFields
             .filter(f => (exclude ? !exclude.includes(f[0]) : true))
             .sort()
             .map(([name, text]) => ({
               name,
-              text: titleFirst(mapField(text)),
+              text: titleFirst(text),
             }))}
         />
       </Popover>

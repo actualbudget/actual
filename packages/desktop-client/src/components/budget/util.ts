@@ -27,15 +27,11 @@ export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
       categories: [
         {
           id: 'to-budget',
-          name: t('To Budget'),
-          cat_group: 'to-budget',
-          group: {
-            id: 'to-budget',
-            name: t('To Budget'),
-          },
+          name: t('To  Budget'),
+          group: 'to-budget',
         },
       ],
-    },
+    } as CategoryGroupEntity,
     ...groups,
   ];
 }
@@ -72,8 +68,8 @@ export function makeAmountGrey(value: number | string): CSSProperties {
 
 export function makeBalanceAmountStyle(
   value: number,
-  goalValue?: number,
-  budgetedValue?: number,
+  goalValue?: number | null,
+  budgetedValue?: number | null,
 ) {
   if (value < 0) {
     return { color: theme.errorText };

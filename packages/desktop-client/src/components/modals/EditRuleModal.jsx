@@ -237,6 +237,18 @@ function ConditionEditor({
     inputKey,
   } = condition;
 
+  const translatedConditions = useMemo(() => {
+    const retValue = [...conditionFields];
+
+    if (retValue && retValue.length > 0) {
+      retValue.forEach(field => {
+        field[1] = mapField(field[0]);
+      });
+    }
+
+    return retValue;
+  }, []);
+
   let field = originalField;
   if (field === 'amount' && options) {
     if (options.inflow) {
@@ -273,7 +285,7 @@ function ConditionEditor({
   return (
     <Editor style={editorStyle} error={error}>
       <FieldSelect
-        fields={conditionFields}
+        fields={translatedConditions}
         value={field}
         onChange={value => onChange('field', value)}
       />
@@ -581,6 +593,12 @@ function ConditionsList({
   onChangeConditions,
 }) {
   function addCondition(index) {
+    if (conditionFields && conditionFields.length > 0) {
+      conditionFields.forEach(field => {
+        field[1] = mapField(field[0]);
+      });
+    }
+
     // (remove the inflow and outflow pseudo-fields since they’d be a pain to get right)
     let fields = conditionFields
       .map(f => f[0])

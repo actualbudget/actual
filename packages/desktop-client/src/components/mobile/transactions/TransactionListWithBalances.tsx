@@ -65,6 +65,7 @@ type TransactionListWithBalancesProps = {
   balance:
     | Binding<'account', 'onbudget-accounts-balance'>
     | Binding<'account', 'offbudget-accounts-balance'>
+    | Binding<'account', 'closed-accounts-balance'>
     | Binding<SheetNames, 'uncategorized-balance'>
     | Binding<'category', 'balance'>
     | Binding<'account', 'balance'>

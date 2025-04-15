@@ -6,12 +6,6 @@ import * as T from './index.d';
 
 export const init: T.Init = function () {};
 
-function commit(trans) {
-  if (trans.commit) {
-    trans.commit();
-  }
-}
-
 export const getItem: T.GetItem = async function (key) {
   const db = await getDatabase();
 
@@ -23,7 +17,6 @@ export const getItem: T.GetItem = async function (key) {
     req.onerror = e => reject(e);
     // @ts-expect-error fix me
     req.onsuccess = e => resolve(e.target.result);
-    commit(transaction);
   });
 };
 
@@ -37,7 +30,7 @@ export const setItem: T.SetItem = async function (key, value) {
     const req = objectStore.put(value, key);
     req.onerror = e => reject(e);
     req.onsuccess = () => resolve(undefined);
-    commit(transaction);
+    transaction.commit();
   });
 };
 
@@ -51,7 +44,7 @@ export const removeItem: T.RemoveItem = async function (key) {
     const req = objectStore.delete(key);
     req.onerror = e => reject(e);
     req.onsuccess = () => resolve(undefined);
-    commit(transaction);
+    transaction.commit();
   });
 };
 
@@ -74,7 +67,7 @@ export async function multiGet<K extends readonly (keyof GlobalPrefsJson)[]>(
     }),
   );
 
-  commit(transaction);
+  transaction.commit();
   return promise;
 }
 
@@ -94,8 +87,8 @@ export const multiSet: T.MultiSet = async function (keyValues) {
     }),
   );
 
-  commit(transaction);
-  return promise;
+  transaction.commit();
+  await promise;
 };
 
 export const multiRemove: T.MultiRemove = async function (keys) {
@@ -114,6 +107,6 @@ export const multiRemove: T.MultiRemove = async function (keys) {
     }),
   );
 
-  commit(transaction);
-  return promise;
+  transaction.commit();
+  await promise;
 };

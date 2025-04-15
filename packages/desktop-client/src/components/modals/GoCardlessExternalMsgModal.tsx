@@ -66,12 +66,18 @@ function useAvailableBanks(country: string) {
   };
 }
 
-function renderError(error: 'unknown' | 'timeout', t: (key: string) => string) {
+function renderError(
+  error: { code: 'unknown' | 'timeout'; message?: string },
+  t: ReturnType<typeof useTranslation>['t'],
+) {
   return (
-    <Error style={{ alignSelf: 'center' }}>
-      {error === 'timeout'
+    <Error style={{ alignSelf: 'center', marginBottom: 10 }}>
+      {error.code === 'timeout'
         ? t('Timed out. Please try again.')
-        : t('An error occurred while linking your account, sorry!')}
+        : t(
+            'An error occurred while linking your account, sorry! The potential issue could be: {{ message }}',
+            { message: error.message },
+          )}
     </Error>
   );
 }
@@ -94,7 +100,10 @@ export function GoCardlessExternalMsgModal({
   const [success, setSuccess] = useState<boolean>(false);
   const [institutionId, setInstitutionId] = useState<string>();
   const [country, setCountry] = useState<string>();
-  const [error, setError] = useState<'unknown' | 'timeout' | null>(null);
+  const [error, setError] = useState<{
+    code: 'unknown' | 'timeout';
+    message?: string;
+  } | null>(null);
   const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
     boolean | null
   >(null);
@@ -116,7 +125,10 @@ export function GoCardlessExternalMsgModal({
 
     const res = await onMoveExternal({ institutionId });
     if ('error' in res) {
-      setError(res.error);
+      setError({
+        code: res.error,
+        message: 'message' in res ? res.message : undefined,
+      });
       setWaiting(null);
       return;
     }
@@ -206,7 +218,7 @@ export function GoCardlessExternalMsgModal({
 
         <Warning>
           <Trans>
-            By enabling bank-sync, you will be granting GoCardless (a third
+            By enabling bank sync, you will be granting GoCardless (a third
             party service) read-only access to your entire account’s transaction
             history. This service is not affiliated with Actual in any way. Make
             sure you’ve read and understand GoCardless’s{' '}
