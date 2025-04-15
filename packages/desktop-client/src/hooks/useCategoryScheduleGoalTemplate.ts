@@ -28,7 +28,9 @@ export function useCategoryScheduleGoalTemplate({
   }
 
   // TODO: Define type for GoalDefinition
-  const goalDefinitions: Record<string, unknown>[] = JSON.parse(category.goal_def);
+  const goalDefinitions: Record<string, unknown>[] = JSON.parse(
+    category.goal_def,
+  );
   const scheduleGoalDefinition = goalDefinitions.find(
     g => g.type === 'schedule',
   );
