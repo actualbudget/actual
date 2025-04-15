@@ -1,19 +1,20 @@
 // This is temporary until we move all loot-core/client over to desktop-client.
-// eslint-disable-next-line no-restricted-imports
-import { resetApp, setAppState } from '@actual-app/web/src/app/appSlice';
+ 
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { t } from 'i18next';
 
-import { send } from '../../platform/client/fetch';
-import { type RemoteFile } from '../../server/cloud-storage';
-import { getDownloadError, getSyncError } from '../../shared/errors';
-import { type Budget } from '../../types/budget';
-import { type File } from '../../types/file';
-import { type Handlers } from '../../types/handlers';
-import { closeModal, pushModal } from '../modals/modalsSlice';
-import { loadGlobalPrefs, loadPrefs } from '../prefs/prefsSlice';
-import { createAppAsyncThunk } from '../redux';
-import { signOut } from '../users/usersSlice';
+import { closeModal, pushModal } from 'loot-core/client/modals/modalsSlice';
+import { loadGlobalPrefs, loadPrefs } from 'loot-core/client/prefs/prefsSlice';
+import { createAppAsyncThunk } from 'loot-core/client/redux';
+import { signOut } from 'loot-core/client/users/usersSlice';
+import { send } from 'loot-core/platform/client/fetch';
+import { type RemoteFile } from 'loot-core/server/cloud-storage';
+import { getDownloadError, getSyncError } from 'loot-core/shared/errors';
+import { type Budget } from 'loot-core/types/budget';
+import { type File } from 'loot-core/types/file';
+import { type Handlers } from 'loot-core/types/handlers';
+
+import { resetApp, setAppState } from '../app/appSlice';
 
 const sliceName = 'budgets';
 

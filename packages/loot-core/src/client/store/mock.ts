@@ -8,14 +8,14 @@ import {
   name as appSliceName,
   reducer as appSliceReducer,
 } from '@actual-app/web/src/app/appSlice';
-/* eslint-enable */
-
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
 
 import {
   name as budgetsSliceName,
   reducer as budgetsSliceReducer,
-} from '../budgets/budgetsSlice';
+} from '@actual-app/web/src/budgets/budgetsSlice';
+/* eslint-enable */
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
+
 import {
   name as modalsSliceName,
   reducer as modalsSliceReducer,
