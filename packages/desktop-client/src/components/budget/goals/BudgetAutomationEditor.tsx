@@ -117,6 +117,7 @@ export function BudgetAutomationEditor({
           <FormField>
             <FormLabel title={t('Amount')} htmlFor="amount-field" />
             <AmountInput
+              id="amount-field"
               key="amount-input"
               value={state.template.monthly ?? 0}
               zeroSign="+"
@@ -130,6 +131,7 @@ export function BudgetAutomationEditor({
           <FormField style={{ flex: 1 }}>
             <FormLabel title={t('Amount')} htmlFor="amount-field" />
             <AmountInput
+              id="amount-field"
               key="amount-input"
               value={state.template.amount ?? 0}
               zeroSign="+"
@@ -321,7 +323,13 @@ export function BudgetAutomationEditor({
                     : state.template.lookBack
                 }
                 onChange={(value: number) =>
-                  dispatch(updateTemplate({ numMonths: value }))
+                  dispatch(
+                    updateTemplate(
+                      state.template.type === 'average'
+                        ? { numMonths: value }
+                        : { lookBack: value },
+                    ),
+                  )
                 }
               />
             </FormField>
