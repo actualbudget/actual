@@ -15,9 +15,9 @@ type UseCategoryScheduleGoalTemplateProps = {
 };
 
 type UseCategoryScheduleGoalTemplateResult = {
-  schedule: ScheduleEntity | null;
-  status: ScheduleStatusType | null;
-  statusLabel: ScheduleStatusLabelType | null;
+  schedule?: ScheduleEntity | null;
+  status?: ScheduleStatusType | null;
+  statusLabel?: ScheduleStatusLabelType | null;
 };
 
 export function useCategoryScheduleGoalTemplate({
