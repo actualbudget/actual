@@ -1,5 +1,3 @@
-// This is temporary until we move all loot-core/client over to desktop-client.
- 
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { createAppAsyncThunk } from '../../../loot-core/src/client/redux';
@@ -21,8 +19,7 @@ import {
   type NewUserEntity,
   type NoteEntity,
 } from '../../../loot-core/src/types/models';
-
-import { resetApp, setAppState } from '@actual-app/web/src/app/appSlice';
+import { resetApp, setAppState } from '../app/appSlice';
 
 const sliceName = 'modals';
 
