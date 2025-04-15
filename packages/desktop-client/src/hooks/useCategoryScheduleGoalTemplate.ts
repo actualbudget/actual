@@ -8,8 +8,6 @@ import {
   type CategoryEntity,
 } from 'loot-core/types/models';
 
-import { useNotes } from './useNotes';
-
 type UseCategoryScheduleGoalTemplateProps = {
   category: CategoryEntity;
 };
@@ -23,16 +21,22 @@ type UseCategoryScheduleGoalTemplateResult = {
 export function useCategoryScheduleGoalTemplate({
   category,
 }: UseCategoryScheduleGoalTemplateProps): UseCategoryScheduleGoalTemplateResult {
-  const notes = useNotes(category.id);
-  const scheduleTemplate = notes
-    ?.split('\n')
-    ?.find(line => line.includes('#template schedule'));
-  const scheduleName = scheduleTemplate
-    ?.slice('#template schedule'.length)
-    ?.trim();
-
   const { schedules, statuses, statusLabels } = useCachedSchedules();
-  const schedule = schedules.find(s => s.name === scheduleName) ?? null;
+
+  if (!category || !category.goal_def) {
+    return {};
+  }
+
+  const goalDefinitions = JSON.parse(category.goal_def);
+  const scheduleGoalDefinition = goalDefinitions.find(
+    g => g.type === 'schedule',
+  );
+
+  if (!scheduleGoalDefinition) {
+    return {};
+  }
+  
+  const schedule = schedules.find(s => s.name === scheduleGoalDefinition.name) ?? null;
   const status = schedule ? statuses.get(schedule.id) : null;
   const statusLabel = schedule ? statusLabels.get(schedule.id) : null;
 
