@@ -5,6 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
+import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
+import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
+
+import { pushModal } from '../../modals/modalsSlice';
+import { addNotification } from '../../notifications/notificationsSlice';
 import {
   applyBudgetAction,
   createCategory,
@@ -16,13 +22,7 @@ import {
   moveCategoryGroup,
   updateCategory,
   updateGroup,
-} from 'loot-core/client/queries/queriesSlice';
-import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
-import { send } from 'loot-core/platform/client/fetch';
-import * as monthUtils from 'loot-core/shared/months';
-
-import { pushModal } from '../../modals/modalsSlice';
-import { addNotification } from '../../notifications/notificationsSlice';
+} from '../../queries/queriesSlice';
 import { useDispatch } from '../../redux';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
