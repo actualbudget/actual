@@ -27,7 +27,7 @@ import { InputCell } from '../table';
 
 import { CategoryAutomationButton } from './goals/CategoryAutomationButton';
 
-import { useCategorySchedule } from '@desktop-client/hooks/useCategorySchedule';
+import { useCategoryScheduleGoalTemplate } from '@desktop-client/hooks/useCategoryScheduleGoalTemplate';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
@@ -78,7 +78,7 @@ export function SidebarCategory({
   const triggerRef = useRef(null);
   const navigate = useNavigate();
 
-  const { schedule, status: scheduleStatus } = useCategorySchedule({
+  const { schedule, status: scheduleStatus } = useCategoryScheduleGoalTemplate({
     category,
   });
   const isScheduleUpcomingOrMissed =

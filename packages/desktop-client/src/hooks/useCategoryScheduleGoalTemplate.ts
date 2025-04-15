@@ -10,19 +10,19 @@ import {
 
 import { useNotes } from './useNotes';
 
-type UseCategoryScheduleProps = {
+type UseCategoryScheduleGoalTemplateProps = {
   category: CategoryEntity;
 };
 
-type UseCategoryScheduleResult = {
+type UseCategoryScheduleGoalTemplateResult = {
   schedule: ScheduleEntity | null;
   status: ScheduleStatusType | null;
   statusLabel: ScheduleStatusLabelType | null;
 };
 
-export function useCategorySchedule({
+export function useCategoryScheduleGoalTemplate({
   category,
-}: UseCategoryScheduleProps): UseCategoryScheduleResult {
+}: UseCategoryScheduleGoalTemplateProps): UseCategoryScheduleGoalTemplateResult {
   const notes = useNotes(category.id);
   const scheduleTemplate = notes
     ?.split('\n')

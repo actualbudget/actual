@@ -20,6 +20,7 @@ import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useCategories } from '../../../hooks/useCategories';
+import { useCategoryScheduleGoalTemplate } from '../../../hooks/useCategoryScheduleGoalTemplate';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useUndo } from '../../../hooks/useUndo';
@@ -30,8 +31,6 @@ import { BalanceCell } from './BalanceCell';
 import { BudgetCell } from './BudgetCell';
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { SpentCell } from './SpentCell';
-
-import { useCategorySchedule } from '@desktop-client/hooks/useCategorySchedule';
 
 type ExpenseCategoryNameProps = {
   category: CategoryEntity;
@@ -48,7 +47,7 @@ function ExpenseCategoryName({
     show3Columns,
     isSidebar: true,
   });
-  const { schedule, status: scheduleStatus } = useCategorySchedule({
+  const { schedule, status: scheduleStatus } = useCategoryScheduleGoalTemplate({
     category,
   });
   const isScheduleUpcomingOrMissed =
