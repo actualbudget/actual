@@ -16,7 +16,6 @@ import { View } from '@actual-app/components/view';
 
 import * as Platform from 'loot-core/client/platform';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
-import { signOut } from 'loot-core/client/users/usersSlice';
 import { init as initConnection, send } from 'loot-core/platform/client/fetch';
 
 import { setAppState, sync } from '../app/appSlice';
@@ -28,6 +27,7 @@ import { installPolyfills } from '../polyfills';
 import { loadGlobalPrefs } from '../prefs/prefsSlice';
 import { useDispatch, useSelector, useStore } from '../redux';
 import { hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
+import { signOut } from '../users/usersSlice';
 import { ExposeNavigate } from '../util/router-tools';
 
 import { AppBackground } from './AppBackground';
