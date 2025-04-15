@@ -1,7 +1,10 @@
 // This is temporary until we move all loot-core/client over to desktop-client.
 /* eslint-disable no-restricted-imports */
 import { resetApp } from '@actual-app/web/src/app/appSlice';
-import { closeBudget, loadAllFiles } from '@actual-app/web/src/budgets/budgetsSlice';
+import {
+  closeBudget,
+  loadAllFiles,
+} from '@actual-app/web/src/budgets/budgetsSlice';
 /* eslint-enable no-restricted-imports */
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
