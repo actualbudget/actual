@@ -7,7 +7,6 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-
 import {
   linkAccount,
   linkAccountPluggyAi,
