@@ -1,3 +1,6 @@
+// This is temporary until we move all loot-core/client over to desktop-client.
+// eslint-disable-next-line no-restricted-imports
+import { resetApp, setAppState } from '@actual-app/web/src/app/appSlice';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { t } from 'i18next';
 
@@ -7,7 +10,6 @@ import { getDownloadError, getSyncError } from '../../shared/errors';
 import { type Budget } from '../../types/budget';
 import { type File } from '../../types/file';
 import { type Handlers } from '../../types/handlers';
-import { resetApp, setAppState } from '../app/appSlice';
 import { closeModal, pushModal } from '../modals/modalsSlice';
 import { loadGlobalPrefs, loadPrefs } from '../prefs/prefsSlice';
 import { createAppAsyncThunk } from '../redux';
