@@ -81,7 +81,7 @@ const setupDataDir = (dataDir = undefined) => {
 
     console.info(`Data directory: ${process.env.ACTUAL_DATA_DIR}`);
   }
-}
+};
 
 if (values.config) {
   const configExists = existsSync(values.config);
