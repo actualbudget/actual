@@ -8,7 +8,6 @@ import { resetApp } from '../app/appSlice';
 import { closeBudget, loadAllFiles } from '../budgets/budgetsSlice';
 import { loadGlobalPrefs } from '../prefs/prefsSlice';
 
-
 const sliceName = 'user';
 
 export const getUserData = createAppAsyncThunk(
