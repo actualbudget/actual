@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type CSSProperties, type Ref, useRef } from 'react';
+import React, { type CSSProperties, type Ref, useContext, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -26,6 +26,7 @@ import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 
 import { CategoryAutomationButton } from './goals/CategoryAutomationButton';
+import { MonthsContext } from './MonthsContext';
 
 import { useCategoryScheduleGoalTemplate } from '@desktop-client/hooks/useCategoryScheduleGoalTemplate';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
@@ -78,6 +79,8 @@ export function SidebarCategory({
   const triggerRef = useRef(null);
   const navigate = useNavigate();
 
+  const { months } = useContext(MonthsContext);
+
   const { schedule, status: scheduleStatus } = useCategoryScheduleGoalTemplate({
     category,
   });
@@ -87,6 +90,9 @@ export function SidebarCategory({
     scheduleStatus === 'upcoming';
 
   const isScheduleRecurring = !!schedule?._date?.frequency;
+  const showScheduleStatus =
+    isScheduleUpcomingOrMissed &&
+    months.includes(monthUtils.monthFromDate(schedule.next_date));
 
   const displayed = (
     <View
@@ -161,9 +167,9 @@ export function SidebarCategory({
         </View>
       )}
 
-      {isScheduleUpcomingOrMissed && (
+      {showScheduleStatus && (
         <View
-          title={getScheduleButtonTitle({
+          title={getScheduleStatusTooltip({
             t,
             schedule,
             scheduleStatus,
@@ -266,7 +272,7 @@ export function SidebarCategory({
   );
 }
 
-function getScheduleButtonTitle({
+function getScheduleStatusTooltip({
   t,
   schedule,
   scheduleStatus,
