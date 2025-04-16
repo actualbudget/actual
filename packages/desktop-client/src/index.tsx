@@ -16,7 +16,6 @@ import { createRoot } from 'react-dom/client';
 import { runQuery } from 'loot-core/client/query-helpers';
 import { store } from 'loot-core/client/store';
 import { redo, undo } from 'loot-core/client/undo';
-import * as usersSlice from 'loot-core/client/users/usersSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 
@@ -30,6 +29,7 @@ import * as modalsSlice from './modals/modalsSlice';
 import * as notificationsSlice from './notifications/notificationsSlice';
 import * as prefsSlice from './prefs/prefsSlice';
 import * as queriesSlice from './queries/queriesSlice';
+import * as usersSlice from './users/usersSlice';
 
 // See https://github.com/WICG/focus-visible. Only makes the blue
 // focus outline appear from keyboard events.

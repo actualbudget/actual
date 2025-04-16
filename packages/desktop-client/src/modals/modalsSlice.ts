@@ -1,7 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { createAppAsyncThunk } from 'loot-core/client/redux';
-import { signOut } from 'loot-core/client/users/usersSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { type File } from 'loot-core/types/file';
 import {
@@ -21,6 +20,7 @@ import {
 } from 'loot-core/types/models';
 
 import { resetApp, setAppState } from '../app/appSlice';
+import { signOut } from '../users/usersSlice';
 
 const sliceName = 'modals';
 

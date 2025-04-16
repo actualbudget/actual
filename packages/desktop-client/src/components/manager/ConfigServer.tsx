@@ -8,7 +8,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { loggedIn, signOut } from 'loot-core/client/users/usersSlice';
 import {
   isNonProductionEnvironment,
   isElectron,
@@ -18,6 +17,7 @@ import { createBudget } from '../../budgets/budgetsSlice';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useDispatch } from '../../redux';
+import { loggedIn, signOut } from '../../users/usersSlice';
 import { Link } from '../common/Link';
 import { useServerURL, useSetServerURL } from '../ServerContext';
 

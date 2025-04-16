@@ -36,7 +36,6 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { getUserData } from 'loot-core/client/users/usersSlice';
 import {
   isElectron,
   isNonProductionEnvironment,
@@ -61,6 +60,7 @@ import { useInitialMount } from '../../hooks/useInitialMount';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { pushModal } from '../../modals/modalsSlice';
 import { useSelector, useDispatch } from '../../redux';
+import { getUserData } from '../../users/usersSlice';
 import { useMultiuserEnabled } from '../ServerContext';
 
 function getFileDescription(file: File, t: (key: string) => string) {
