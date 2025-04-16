@@ -1,9 +1,9 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { createAppAsyncThunk } from '../../../loot-core/src/client/redux';
-import { signOut } from '../../../loot-core/src/client/users/usersSlice';
-import { send } from '../../../loot-core/src/platform/client/fetch';
-import { type File } from '../../../loot-core/src/types/file';
+import { createAppAsyncThunk } from 'loot-core/client/redux';
+import { signOut } from 'loot-core/client/users/usersSlice';
+import { send } from 'loot-core/platform/client/fetch';
+import { type File } from 'loot-core/types/file';
 import {
   type AccountEntity,
   type AccountSyncSource,
@@ -18,7 +18,7 @@ import {
   type UserAccessEntity,
   type NewUserEntity,
   type NoteEntity,
-} from '../../../loot-core/src/types/models';
+} from 'loot-core/types/models';
 import { resetApp, setAppState } from '../app/appSlice';
 
 const sliceName = 'modals';
