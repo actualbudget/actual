@@ -25,9 +25,6 @@ import { css } from '@emotion/css';
 import { useDrag } from '@use-gesture/react';
 import { format, parseISO } from 'date-fns';
 
-import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
-import { useTransactions } from 'loot-core/client/data-hooks/transactions';
-import { useWidget } from 'loot-core/client/data-hooks/widget';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q, type Query } from 'loot-core/shared/query';
@@ -41,17 +38,20 @@ import {
 } from 'loot-core/types/models';
 
 import { useAccounts } from '../../../hooks/useAccounts';
+import { SchedulesProvider } from '../../../hooks/useCachedSchedules';
 import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
-import { useFilters } from '../../../hooks/useFilters';
 import { useLocale } from '../../../hooks/useLocale';
 import { useMergedRefs } from '../../../hooks/useMergedRefs';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
 import { useResizeObserver } from '../../../hooks/useResizeObserver';
+import { useRuleConditionFilters } from '../../../hooks/useRuleConditionFilters';
 import { SelectedProviderWithItems } from '../../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../../hooks/useSplitsExpanded';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
+import { useTransactions } from '../../../hooks/useTransactions';
+import { useWidget } from '../../../hooks/useWidget';
 import { addNotification } from '../../../notifications/notificationsSlice';
 import { useDispatch } from '../../../redux';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
@@ -134,7 +134,10 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
     onConditionsOpChange,
-  } = useFilters(widget?.meta?.conditions, widget?.meta?.conditionsOp);
+  } = useRuleConditionFilters(
+    widget?.meta?.conditions,
+    widget?.meta?.conditionsOp,
+  );
 
   useEffect(() => {
     const day = parameters.get('day');

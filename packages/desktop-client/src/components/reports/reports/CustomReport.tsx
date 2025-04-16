@@ -11,7 +11,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
-import { useReport as useCustomReport } from 'loot-core/client/data-hooks/reports';
 import { calculateHasWarning } from 'loot-core/client/reports';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -28,11 +27,12 @@ import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
-import { useFilters } from '../../../hooks/useFilters';
 import { useLocale } from '../../../hooks/useLocale';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePayees } from '../../../hooks/usePayees';
+import { useReport as useCustomReport } from '../../../hooks/useReport';
+import { useRuleConditionFilters } from '../../../hooks/useRuleConditionFilters';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { Warning } from '../../alerts';
 import { AppliedFilters } from '../../filters/AppliedFilters';
@@ -144,7 +144,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
     onConditionsOpChange,
-  } = useFilters();
+  } = useRuleConditionFilters();
 
   const location = useLocation();
 

@@ -3,11 +3,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { View } from '@actual-app/components/view';
 
-import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
-import {
-  useTransactions,
-  useTransactionsSearch,
-} from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
 import { listen } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -18,9 +13,12 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
+import { SchedulesProvider } from '../../../hooks/useCachedSchedules';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { useTransactions } from '../../../hooks/useTransactions';
+import { useTransactionsSearch } from '../../../hooks/useTransactionsSearch';
 import { useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';

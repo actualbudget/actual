@@ -8,12 +8,12 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { useHover } from 'usehooks-ts';
 
-import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
 import { q, type Query } from 'loot-core/shared/query';
 import { getScheduledAmount } from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { type AccountEntity } from 'loot-core/types/models';
 
+import { useCachedSchedules } from '../../hooks/useCachedSchedules';
 import { useSelectedItems } from '../../hooks/useSelected';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { type Binding } from '../spreadsheet';

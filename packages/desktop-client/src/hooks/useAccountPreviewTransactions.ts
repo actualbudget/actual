@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 
-import { usePreviewTransactions } from 'loot-core/client/data-hooks/transactions';
 import {
   type AccountEntity,
   type PayeeEntity,
@@ -9,6 +8,7 @@ import {
 
 import { useAccounts } from './useAccounts';
 import { usePayees } from './usePayees';
+import { usePreviewTransactions } from './usePreviewTransactions';
 
 type UseAccountPreviewTransactionsProps = {
   accountId?: AccountEntity['id'] | undefined;

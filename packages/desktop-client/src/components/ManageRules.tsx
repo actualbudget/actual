@@ -15,7 +15,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
@@ -27,6 +26,7 @@ import { type RuleEntity, type NewRuleEntity } from 'loot-core/types/models';
 import { useAccounts } from '../hooks/useAccounts';
 import { useCategories } from '../hooks/useCategories';
 import { usePayees } from '../hooks/usePayees';
+import { useSchedules } from '../hooks/useSchedules';
 import { useSelected, SelectedProvider } from '../hooks/useSelected';
 import { pushModal } from '../modals/modalsSlice';
 import { initiallyLoadPayees } from '../queries/queriesSlice';

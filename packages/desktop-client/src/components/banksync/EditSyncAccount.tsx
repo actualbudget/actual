@@ -9,7 +9,6 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { useTransactions } from 'loot-core/client/data-hooks/transactions';
 import {
   defaultMappings,
   type Mappings,
@@ -24,6 +23,7 @@ import {
 
 import { unlinkAccount } from '../../accounts/accountsSlice';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { useTransactions } from '../../hooks/useTransactions';
 import { pushModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';

@@ -41,7 +41,6 @@ import {
   isValid as isDateValid,
 } from 'date-fns';
 
-import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { currentDay } from 'loot-core/shared/months';
 import * as monthUtils from 'loot-core/shared/months';
@@ -61,6 +60,7 @@ import {
   titleFirst,
 } from 'loot-core/shared/util';
 
+import { useCachedSchedules } from '../../hooks/useCachedSchedules';
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useDisplayPayee } from '../../hooks/useDisplayPayee';
 import { useMergedRefs } from '../../hooks/useMergedRefs';

@@ -13,14 +13,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  accountSchedulesQuery,
-  SchedulesProvider,
-} from 'loot-core/client/data-hooks/schedules';
-import {
-  useTransactions,
-  useTransactionsSearch,
-} from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
 import { listen, send } from 'loot-core/platform/client/fetch';
 import { type Query } from 'loot-core/shared/query';
@@ -32,9 +24,13 @@ import {
 
 import { syncAndDownload } from '../../../app/appSlice';
 import { useAccountPreviewTransactions } from '../../../hooks/useAccountPreviewTransactions';
+import { SchedulesProvider } from '../../../hooks/useCachedSchedules';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { accountSchedulesQuery } from '../../../hooks/useSchedules';
+import { useTransactions } from '../../../hooks/useTransactions';
+import { useTransactionsSearch } from '../../../hooks/useTransactionsSearch';
 import {
   collapseModals,
   openAccountCloseModal,

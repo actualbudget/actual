@@ -16,7 +16,6 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
-import { useWidget } from 'loot-core/client/data-hooks/widget';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
@@ -25,9 +24,10 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { useFilters } from '../../../hooks/useFilters';
 import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { useRuleConditionFilters } from '../../../hooks/useRuleConditionFilters';
+import { useWidget } from '../../../hooks/useWidget';
 import { addNotification } from '../../../notifications/notificationsSlice';
 import { useDispatch } from '../../../redux';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
@@ -75,7 +75,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
     onConditionsOpChange,
-  } = useFilters<RuleConditionEntity>(
+  } = useRuleConditionFilters<RuleConditionEntity>(
     widget?.meta?.conditions,
     widget?.meta?.conditionsOp,
   );

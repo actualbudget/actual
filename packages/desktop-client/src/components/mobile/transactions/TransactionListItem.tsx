@@ -29,7 +29,6 @@ import {
   useLongPress,
 } from '@react-aria/interactions';
 
-import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { integerToCurrency } from 'loot-core/shared/util';
 import {
@@ -38,6 +37,7 @@ import {
 } from 'loot-core/types/models';
 
 import { useAccount } from '../../../hooks/useAccount';
+import { useCachedSchedules } from '../../../hooks/useCachedSchedules';
 import { useCategories } from '../../../hooks/useCategories';
 import { useDisplayPayee } from '../../../hooks/useDisplayPayee';
 import { usePayee } from '../../../hooks/usePayee';

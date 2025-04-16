@@ -5,7 +5,6 @@ import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
-import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
 import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import {
   generateTransaction,
@@ -29,6 +28,7 @@ import {
 } from 'loot-core/types/models';
 
 import { AuthProvider } from '../../auth/AuthProvider';
+import { SchedulesProvider } from '../../hooks/useCachedSchedules';
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
 import { TestProvider } from '../../redux/mock';

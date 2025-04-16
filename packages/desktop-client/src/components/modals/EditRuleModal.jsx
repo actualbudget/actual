@@ -23,7 +23,6 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { v4 as uuid } from 'uuid';
 
-import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { runQuery } from 'loot-core/client/query-helpers';
 import { enableUndo, disableUndo } from 'loot-core/client/undo';
 import { send } from 'loot-core/platform/client/fetch';
@@ -49,6 +48,7 @@ import {
 
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useSchedules } from '../../hooks/useSchedules';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { initiallyLoadPayees } from '../../queries/queriesSlice';
 import { useDispatch } from '../../redux';

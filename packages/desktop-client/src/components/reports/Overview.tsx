@@ -13,8 +13,6 @@ import { Popover } from '@actual-app/components/popover';
 import { breakpoints } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
-import { useDashboard } from 'loot-core/client/data-hooks/dashboard';
-import { useReports } from 'loot-core/client/data-hooks/reports';
 import { send } from 'loot-core/platform/client/fetch';
 import {
   type CustomReportWidget,
@@ -24,7 +22,9 @@ import {
 } from 'loot-core/types/models';
 
 import { useAccounts } from '../../hooks/useAccounts';
+import { useDashboard } from '../../hooks/useDashboard';
 import { useNavigate } from '../../hooks/useNavigate';
+import { useReports } from '../../hooks/useReports';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useUndo } from '../../hooks/useUndo';
 import {

@@ -11,7 +11,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { format } from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
@@ -20,6 +19,7 @@ import {
 } from 'loot-core/shared/schedules';
 
 import { useLocale } from '../../hooks/useLocale';
+import { useSchedules } from '../../hooks/useSchedules';
 import { type Modal as ModalType } from '../../modals/modalsSlice';
 import {
   Modal,

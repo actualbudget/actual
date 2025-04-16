@@ -18,11 +18,6 @@ import { debounce } from 'debounce';
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-import { useFilters } from 'loot-core/client/data-hooks/filters';
-import {
-  SchedulesProvider,
-  accountSchedulesQuery,
-} from 'loot-core/client/data-hooks/schedules';
 import * as queries from 'loot-core/client/queries';
 import {
   runQuery,
@@ -56,11 +51,13 @@ import { unlinkAccount } from '../../accounts/accountsSlice';
 import { syncAndDownload } from '../../app/appSlice';
 import { useAccountPreviewTransactions } from '../../hooks/useAccountPreviewTransactions';
 import { useAccounts } from '../../hooks/useAccounts';
+import { SchedulesProvider } from '../../hooks/useCachedSchedules';
 import { useCategories } from '../../hooks/useCategories';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { usePayees } from '../../hooks/usePayees';
+import { accountSchedulesQuery } from '../../hooks/useSchedules';
 import {
   SelectedProviderWithItems,
   type Actions,
@@ -71,6 +68,7 @@ import {
 } from '../../hooks/useSplitsExpanded';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useTransactionBatchActions } from '../../hooks/useTransactionBatchActions';
+import { useTransactionFilters } from '../../hooks/useTransactionFilters';
 import {
   openAccountCloseModal,
   pushModal,
@@ -1989,7 +1987,7 @@ export function Account() {
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
   const filterConditions = location?.state?.filterConditions || [];
 
-  const savedFiters = useFilters();
+  const savedFiters = useTransactionFilters();
 
   const schedulesQuery = useMemo(
     () => accountSchedulesQuery(params.id),
