@@ -23,7 +23,6 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { v4 as uuid } from 'uuid';
 
-import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { aqlQuery } from 'loot-core/client/query-helpers';
 import { enableUndo, disableUndo } from 'loot-core/client/undo';
 import { send } from 'loot-core/platform/client/fetch';
@@ -58,6 +57,7 @@ import { GenericInput } from '../util/GenericInput';
 
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useSchedules } from '@desktop-client/hooks/useSchedules';
 import {
   useSelected,
   SelectedProvider,

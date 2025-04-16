@@ -16,11 +16,6 @@ import { debounce } from 'debounce';
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-import { useFilters } from 'loot-core/client/data-hooks/filters';
-import {
-  SchedulesProvider,
-  accountSchedulesQuery,
-} from 'loot-core/client/data-hooks/schedules';
 import * as queries from 'loot-core/client/queries';
 import {
   aqlQuery,
@@ -82,6 +77,7 @@ import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { usePayees } from '@desktop-client/hooks/usePayees';
+import { accountSchedulesQuery } from '@desktop-client/hooks/useSchedules';
 import {
   SelectedProviderWithItems,
   type Actions,
@@ -92,6 +88,7 @@ import {
 } from '@desktop-client/hooks/useSplitsExpanded';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useTransactionBatchActions } from '@desktop-client/hooks/useTransactionBatchActions';
+import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
 
@@ -1948,7 +1945,7 @@ export function Account() {
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
   const filterConditions = location?.state?.filterConditions || [];
 
-  const savedFiters = useFilters();
+  const savedFiters = useTransactionFilters();
 
   const schedulesQuery = useMemo(
     () => accountSchedulesQuery(params.id),

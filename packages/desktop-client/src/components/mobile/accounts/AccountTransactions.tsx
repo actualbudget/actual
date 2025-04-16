@@ -13,14 +13,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  accountSchedulesQuery,
-  SchedulesProvider,
-} from 'loot-core/client/data-hooks/schedules';
-import {
-  useTransactions,
-  useTransactionsSearch,
-} from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
 import { listen, send } from 'loot-core/platform/client/fetch';
 import { type Query } from 'loot-core/shared/query';
@@ -51,6 +43,9 @@ import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountP
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { accountSchedulesQuery } from '@desktop-client/hooks/useSchedules';
+import { useTransactions } from '@desktop-client/hooks/useTransactions';
+import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
 
 export function AccountTransactions({
   account,
