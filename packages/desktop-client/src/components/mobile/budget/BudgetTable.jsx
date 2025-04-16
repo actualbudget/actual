@@ -30,7 +30,6 @@ import { View } from '@actual-app/components/view';
 import { AutoTextSize } from 'auto-text-size';
 import memoizeOne from 'memoize-one';
 
-import { collapseModals, pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   envelopeBudget,
   trackingBudget,
@@ -47,6 +46,7 @@ import { useNavigate } from '../../../hooks/useNavigate';
 import { usePrevious } from '../../../hooks/usePrevious';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useUndo } from '../../../hooks/useUndo';
+import { collapseModals, pushModal } from '../../../modals/modalsSlice';
 import { useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';

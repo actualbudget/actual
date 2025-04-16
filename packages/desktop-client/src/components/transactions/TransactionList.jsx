@@ -2,7 +2,6 @@ import React, { useRef, useCallback, useLayoutEffect } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import {
   splitTransaction,
@@ -15,6 +14,7 @@ import { getChangedValues, applyChanges } from 'loot-core/shared/util';
 
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { pushModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 
 import { TransactionTable } from './TransactionsTable';

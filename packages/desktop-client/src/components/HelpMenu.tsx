@@ -10,9 +10,8 @@ import { Popover } from '@actual-app/components/popover';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { useToggle } from 'usehooks-ts';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
-
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
+import { pushModal } from '../modals/modalsSlice';
 import { useDispatch } from '../redux';
 
 const getPageDocs = (page: string) => {

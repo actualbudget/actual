@@ -4,10 +4,10 @@ import { Button } from '@actual-app/components/button';
 import { SvgChartPie } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { type Template } from 'loot-core/server/budget/types/templates';
 
 import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
+import { pushModal } from '../../../modals/modalsSlice';
 import { useDispatch } from '../../../redux';
 
 type CategoryAutomationButtonProps = {

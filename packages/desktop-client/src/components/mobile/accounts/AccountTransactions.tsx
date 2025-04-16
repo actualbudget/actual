@@ -21,11 +21,6 @@ import {
   useTransactions,
   useTransactionsSearch,
 } from 'loot-core/client/data-hooks/transactions';
-import {
-  collapseModals,
-  openAccountCloseModal,
-  pushModal,
-} from 'loot-core/client/modals/modalsSlice';
 import * as queries from 'loot-core/client/queries';
 import {
   markAccountRead,
@@ -45,6 +40,11 @@ import { useAccountPreviewTransactions } from '../../../hooks/useAccountPreviewT
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
 import { useNavigate } from '../../../hooks/useNavigate';
+import {
+  collapseModals,
+  openAccountCloseModal,
+  pushModal,
+} from '../../../modals/modalsSlice';
 import { useSelector, useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';

@@ -23,11 +23,6 @@ import {
   SchedulesProvider,
   accountSchedulesQuery,
 } from 'loot-core/client/data-hooks/schedules';
-import {
-  openAccountCloseModal,
-  pushModal,
-  replaceModal,
-} from 'loot-core/client/modals/modalsSlice';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import * as queries from 'loot-core/client/queries';
 import {
@@ -86,6 +81,11 @@ import {
 } from '../../hooks/useSplitsExpanded';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useTransactionBatchActions } from '../../hooks/useTransactionBatchActions';
+import {
+  openAccountCloseModal,
+  pushModal,
+  replaceModal,
+} from '../../modals/modalsSlice';
 import { useSelector, useDispatch } from '../../redux';
 import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { TransactionList } from '../transactions/TransactionList';

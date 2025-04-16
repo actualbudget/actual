@@ -30,7 +30,6 @@ import {
   isValid as isValidDate,
 } from 'date-fns';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import * as Platform from 'loot-core/client/platform';
 import { setLastTransaction } from 'loot-core/client/queries/queriesSlice';
 import { runQuery } from 'loot-core/client/query-helpers';
@@ -66,6 +65,7 @@ import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
 } from '../../../hooks/useSingleActiveEditForm';
+import { pushModal } from '../../../modals/modalsSlice';
 import { useSelector, useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { AmountInput } from '../../util/AmountInput';

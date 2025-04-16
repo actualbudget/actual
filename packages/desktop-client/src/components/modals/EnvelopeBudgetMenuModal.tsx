@@ -6,12 +6,12 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import * as Platform from 'loot-core/client/platform';
 import { envelopeBudget } from 'loot-core/client/queries';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
 import { useCategory } from '../../hooks/useCategory';
+import { type Modal as ModalType } from '../../modals/modalsSlice';
 import { BudgetMenu } from '../budget/envelope/BudgetMenu';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import {

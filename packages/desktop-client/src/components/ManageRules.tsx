@@ -16,7 +16,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { initiallyLoadPayees } from 'loot-core/client/queries/queriesSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
@@ -30,6 +29,7 @@ import { useAccounts } from '../hooks/useAccounts';
 import { useCategories } from '../hooks/useCategories';
 import { usePayees } from '../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../hooks/useSelected';
+import { pushModal } from '../modals/modalsSlice';
 import { useDispatch } from '../redux';
 
 import { InfiniteScrollWrapper } from './common/InfiniteScrollWrapper';

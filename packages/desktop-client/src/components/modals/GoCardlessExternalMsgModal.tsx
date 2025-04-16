@@ -8,10 +8,6 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  type Modal as ModalType,
-  pushModal,
-} from 'loot-core/client/modals/modalsSlice';
 import { sendCatch } from 'loot-core/platform/client/fetch';
 import {
   type GoCardlessInstitution,
@@ -19,6 +15,7 @@ import {
 } from 'loot-core/types/models';
 
 import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
+import { type Modal as ModalType, pushModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';

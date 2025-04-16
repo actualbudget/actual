@@ -5,7 +5,6 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   type BankSyncProviders,
   type AccountEntity,
@@ -13,6 +12,7 @@ import {
 
 import { useAccounts } from '../../hooks/useAccounts';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
+import { pushModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';

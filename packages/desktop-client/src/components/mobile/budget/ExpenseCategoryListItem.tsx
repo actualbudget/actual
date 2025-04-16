@@ -13,7 +13,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { AutoTextSize } from 'auto-text-size';
 
-import { collapseModals, pushModal } from 'loot-core/client/modals/modalsSlice';
 import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
 import * as monthUtils from 'loot-core/shared/months';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
@@ -24,6 +23,7 @@ import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useUndo } from '../../../hooks/useUndo';
+import { collapseModals, pushModal } from '../../../modals/modalsSlice';
 import { useDispatch } from '../../../redux';
 import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
 import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';

@@ -13,7 +13,6 @@ import { Provider } from 'react-redux';
 import { bindActionCreators } from '@reduxjs/toolkit';
 import { createRoot } from 'react-dom/client';
 
-import * as modalsSlice from 'loot-core/client/modals/modalsSlice';
 import * as notificationsSlice from 'loot-core/client/notifications/notificationsSlice';
 import * as prefsSlice from 'loot-core/client/prefs/prefsSlice';
 import * as queriesSlice from 'loot-core/client/queries/queriesSlice';
@@ -30,6 +29,7 @@ import { AuthProvider } from './auth/AuthProvider';
 import * as budgetsSlice from './budgets/budgetsSlice';
 import { App } from './components/App';
 import { ServerProvider } from './components/ServerContext';
+import * as modalsSlice from './modals/modalsSlice';
 
 // See https://github.com/WICG/focus-visible. Only makes the blue
 // focus outline appear from keyboard events.

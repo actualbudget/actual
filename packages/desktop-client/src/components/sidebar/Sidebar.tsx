@@ -9,12 +9,12 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { Resizable } from 're-resizable';
 
-import { replaceModal } from 'loot-core/client/modals/modalsSlice';
 import * as Platform from 'loot-core/client/platform';
 
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useResizeObserver } from '../../hooks/useResizeObserver';
+import { replaceModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 
 import { Accounts } from './Accounts';

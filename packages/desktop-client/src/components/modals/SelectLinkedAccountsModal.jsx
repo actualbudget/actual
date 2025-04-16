@@ -7,8 +7,6 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { closeModal } from 'loot-core/client/modals/modalsSlice';
-
 import {
   linkAccount,
   linkAccountPluggyAi,
@@ -16,6 +14,7 @@ import {
   unlinkAccount,
 } from '../../accounts/accountsSlice';
 import { useAccounts } from '../../hooks/useAccounts';
+import { closeModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';

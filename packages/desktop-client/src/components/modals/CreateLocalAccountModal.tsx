@@ -12,12 +12,12 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { closeModal } from 'loot-core/client/modals/modalsSlice';
 import { createAccount } from 'loot-core/client/queries/queriesSlice';
 import { toRelaxedNumber } from 'loot-core/shared/util';
 
 import * as useAccounts from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';
+import { closeModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { Link } from '../common/Link';
 import {

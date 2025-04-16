@@ -2,6 +2,7 @@
 /* eslint-disable no-restricted-imports */
 import { resetApp } from '@actual-app/web/src/app/appSlice';
 import { setI18NextLanguage } from '@actual-app/web/src/i18n';
+import { closeModal } from '@actual-app/web/src/modals/modalsSlice';
 /* eslint-enable no-restricted-imports */
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
@@ -12,7 +13,6 @@ import {
   type MetadataPrefs,
   type SyncedPrefs,
 } from '../../types/prefs';
-import { closeModal } from '../modals/modalsSlice';
 import { createAppAsyncThunk } from '../redux';
 
 const sliceName = 'prefs';

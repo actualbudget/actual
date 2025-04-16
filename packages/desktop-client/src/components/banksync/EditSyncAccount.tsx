@@ -10,7 +10,6 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import { useTransactions } from 'loot-core/client/data-hooks/transactions';
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   defaultMappings,
   type Mappings,
@@ -25,6 +24,7 @@ import {
 
 import { unlinkAccount } from '../../accounts/accountsSlice';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { pushModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { CheckboxOption } from '../modals/ImportTransactionsModal/CheckboxOption';

@@ -5,8 +5,7 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
-
+import { type Modal as ModalType } from '../../modals/modalsSlice';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import {
   ModalCloseButton,
