@@ -11,15 +11,16 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { t } from 'i18next';
 
-import * as queries from 'loot-core/client/queries';
 import { type Query } from 'loot-core/shared/query';
 import { currencyToInteger, tsToRelativeTime } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
-import { useLocale } from '../../hooks/useLocale';
+import * as queries from '../../queries/queries';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
+
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type ReconcilingMessageProps = {
   balanceQuery: { name: `balance-query-${string}`; query: Query };

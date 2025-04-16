@@ -2,22 +2,26 @@
 import { parse as parseDate, isValid as isDateValid } from 'date-fns';
 
 import {
-  parametrizedField,
-  type SheetFields,
-  type Binding,
-  type SheetNames,
-} from '../../../desktop-client/src/components/spreadsheet';
-import {
   dayFromDate,
   getDayMonthRegex,
   getDayMonthFormat,
   getShortYearRegex,
   getShortYearFormat,
-} from '../shared/months';
-import { q, type Query } from '../shared/query';
-import { currencyToAmount, amountToInteger } from '../shared/util';
-import { type CategoryEntity, type AccountEntity } from '../types/models';
-import { type SyncedPrefs } from '../types/prefs';
+} from 'loot-core/shared/months';
+import { q, type Query } from 'loot-core/shared/query';
+import { currencyToAmount, amountToInteger } from 'loot-core/shared/util';
+import {
+  type CategoryEntity,
+  type AccountEntity,
+} from 'loot-core/types/models';
+import { type SyncedPrefs } from 'loot-core/types/prefs';
+
+import {
+  parametrizedField,
+  type SheetFields,
+  type Binding,
+  type SheetNames,
+} from '../components/spreadsheet';
 
 type BudgetType<SheetName extends SheetNames> = Record<
   string,
