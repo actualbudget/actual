@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -76,9 +76,7 @@ const setupDataDir = (dataDir = undefined) => {
       console.info(
         'Using default data directory. You can specify a custom config with --config',
       );
-
-      mkdirSync('./data');
-      process.env.ACTUAL_DATA_DIR = './data';
+      process.env.ACTUAL_DATA_DIR = './';
     }
 
     console.info(`Data directory: ${process.env.ACTUAL_DATA_DIR}`);
