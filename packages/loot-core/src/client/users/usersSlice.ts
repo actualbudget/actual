@@ -5,12 +5,12 @@ import {
   closeBudget,
   loadAllFiles,
 } from '@actual-app/web/src/budgets/budgetsSlice';
+import { loadGlobalPrefs } from '@actual-app/web/src/prefs/prefsSlice';
 /* eslint-enable no-restricted-imports */
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { send } from '../../platform/client/fetch';
 import { type Handlers } from '../../types/handlers';
-import { loadGlobalPrefs } from '../prefs/prefsSlice';
 import { createAppAsyncThunk } from '../redux';
 
 const sliceName = 'user';

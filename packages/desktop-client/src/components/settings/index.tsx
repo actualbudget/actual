@@ -10,7 +10,6 @@ import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { loadPrefs } from 'loot-core/client/prefs/prefsSlice';
 import { listen } from 'loot-core/platform/client/fetch';
 import { isElectron } from 'loot-core/shared/environment';
 
@@ -18,6 +17,7 @@ import { closeBudget } from '../../budgets/budgetsSlice';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useIsOutdated, useLatestVersion } from '../../hooks/useLatestVersion';
 import { useMetadataPref } from '../../hooks/useMetadataPref';
+import { loadPrefs } from '../../prefs/prefsSlice';
 import { useDispatch } from '../../redux';
 import { Link } from '../common/Link';
 import { FormField, FormLabel } from '../forms';
