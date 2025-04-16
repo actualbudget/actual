@@ -1,8 +1,6 @@
 // @ts-strict-ignore
 import keyBy from 'lodash/keyBy';
 
-import { aqlQuery } from 'loot-core/client/query-helpers';
-import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
@@ -13,7 +11,11 @@ import {
   type SpendingEntity,
 } from 'loot-core/types/models';
 
+import { aqlQuery } from '../../../queries/aqlQuery';
+
 import { makeQuery } from './makeQuery';
+
+import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 type createSpendingSpreadsheetProps = {
   conditions?: RuleConditionEntity[];

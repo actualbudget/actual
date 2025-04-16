@@ -10,11 +10,11 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { AutoTextSize } from 'auto-text-size';
 
-import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
 import * as monthUtils from 'loot-core/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
+import { envelopeBudget, trackingBudget } from '../../../queries/queries';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';

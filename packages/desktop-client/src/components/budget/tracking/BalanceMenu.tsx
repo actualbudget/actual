@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 
-import { trackingBudget } from 'loot-core/client/queries';
+import { trackingBudget } from '../../../queries/queries';
 
 import { useTrackingSheetValue } from './TrackingBudgetComponents';
 

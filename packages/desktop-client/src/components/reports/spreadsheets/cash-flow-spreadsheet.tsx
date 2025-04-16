@@ -4,13 +4,13 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import * as d from 'date-fns';
 import { t } from 'i18next';
 
-import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { integerToCurrency, integerToAmount } from 'loot-core/shared/util';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
+import { type useSpreadsheet } from '../../../hooks/useSpreadsheet';
 import { runAll, indexCashFlow } from '../util';
 
 export function simpleCashFlow(

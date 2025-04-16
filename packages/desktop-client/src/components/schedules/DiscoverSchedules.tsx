@@ -8,12 +8,12 @@ import { Stack } from '@actual-app/components/stack';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { aqlQuery } from 'loot-core/client/query-helpers';
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 import { getRecurringDescription } from 'loot-core/shared/schedules';
 import type { DiscoverScheduleEntity } from 'loot-core/types/models';
 
+import { aqlQuery } from '../../queries/aqlQuery';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import { DisplayId } from '../util/DisplayId';

@@ -13,7 +13,7 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
-import * as Platform from 'loot-core/client/platform';
+import * as Platform from 'loot-core/shared/platform';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { openAccountCloseModal } from '../../modals/modalsSlice';

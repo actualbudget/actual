@@ -1,4 +1,4 @@
-import * as Platform from '../client/platform';
+import * as Platform from '../shared/platform';
 
 // Fake "random" function used to have stable data structures for
 // e2e and visual regression tests

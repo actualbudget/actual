@@ -8,7 +8,6 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { calculateHasWarning } from 'loot-core/client/reports';
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { type CustomReportEntity } from 'loot-core/types/models';
@@ -18,6 +17,7 @@ import { useDispatch } from '../../../redux';
 import { DateRange } from '../DateRange';
 import { ReportCard } from '../ReportCard';
 import { ReportCardName } from '../ReportCardName';
+import { calculateHasWarning } from '../util';
 
 import { GetCardData } from './GetCardData';
 import { MissingReportCard } from './MissingReportCard';

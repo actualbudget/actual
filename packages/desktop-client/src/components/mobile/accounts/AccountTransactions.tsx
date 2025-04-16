@@ -13,7 +13,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import * as queries from 'loot-core/client/queries';
 import { listen, send } from 'loot-core/platform/client/fetch';
 import { type Query } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
@@ -28,6 +27,7 @@ import {
   openAccountCloseModal,
   pushModal,
 } from '../../../modals/modalsSlice';
+import * as queries from '../../../queries/queries';
 import {
   markAccountRead,
   reopenAccount,

@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import * as sharedListeners from 'loot-core/client/shared-listeners';
 import { listen } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 
@@ -13,6 +12,7 @@ import {
 import { loadPrefs } from './prefs/prefsSlice';
 import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
 import { type AppStore } from './redux/store';
+import * as syncEvents from './sync-events';
 
 export function handleGlobalEvents(store: AppStore) {
   const unlistenServerError = listen('server-error', () => {
@@ -43,7 +43,7 @@ export function handleGlobalEvents(store: AppStore) {
     );
   });
 
-  const unlistenSync = sharedListeners.listenForSyncEvent(store);
+  const unlistenSync = syncEvents.listenForSyncEvent(store);
 
   const unlistenUndo = listen('undo-event', undoState => {
     const { tables, undoTag } = undoState;

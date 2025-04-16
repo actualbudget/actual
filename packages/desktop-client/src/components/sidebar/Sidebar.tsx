@@ -9,7 +9,7 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { Resizable } from 're-resizable';
 
-import * as Platform from 'loot-core/client/platform';
+import * as Platform from 'loot-core/shared/platform';
 
 import { replaceModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';

@@ -2,8 +2,9 @@ import { useState, useMemo, useEffect } from 'react';
 
 import { debounce } from 'lodash';
 
-import * as queries from 'loot-core/client/queries';
 import type { Query } from 'loot-core/shared/query';
+
+import * as queries from '../queries/queries';
 
 type UseTransactionsSearchProps = {
   updateQuery: (updateFn: (searchQuery: Query) => Query) => void;
