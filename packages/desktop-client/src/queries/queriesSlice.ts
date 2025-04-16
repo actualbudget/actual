@@ -3,7 +3,6 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
 
-import { createAppAsyncThunk } from 'loot-core/client/redux';
 import { send } from 'loot-core/platform/client/fetch';
 import { groupById } from 'loot-core/shared/util';
 import {
@@ -19,6 +18,7 @@ import {
   addGenericErrorNotification,
   addNotification,
 } from '../notifications/notificationsSlice';
+import { createAppAsyncThunk } from '../redux';
 
 const sliceName = 'queries';
 
