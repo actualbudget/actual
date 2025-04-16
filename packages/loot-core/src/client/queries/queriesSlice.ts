@@ -358,7 +358,7 @@ export const moveCategory = createAppAsyncThunk(
 
 type MoveCategoryGroupPayload = {
   id: CategoryGroupEntity['id'];
-  targetId: CategoryGroupEntity['id'];
+  targetId: CategoryGroupEntity['id'] | null;
 };
 
 export const moveCategoryGroup = createAppAsyncThunk(

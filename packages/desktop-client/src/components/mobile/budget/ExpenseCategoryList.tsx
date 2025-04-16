@@ -6,13 +6,17 @@ import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
 import { moveCategory } from 'loot-core/client/queries/queriesSlice';
-import { type CategoryEntity } from 'loot-core/types/models';
+import {
+  type CategoryGroupEntity,
+  type CategoryEntity,
+} from 'loot-core/types/models';
 
 import { useDispatch } from '../../../redux';
 
 import { ExpenseCategoryListItem } from './ExpenseCategoryListItem';
 
 type ExpenseCategoryListProps = {
+  group: CategoryGroupEntity;
   categories: CategoryEntity[];
   shouldHideCategory: (category: CategoryEntity) => boolean;
   month: string;
@@ -23,6 +27,7 @@ type ExpenseCategoryListProps = {
 };
 
 export function ExpenseCategoryList({
+  group,
   categories,
   month,
   onEditCategory,
@@ -115,7 +120,9 @@ export function ExpenseCategoryList({
 
   return (
     <GridList
-      aria-label={t('Expense categories')}
+      aria-label={t('{{groupName}} expense group categories', {
+        groupName: group.name,
+      })}
       items={categories}
       dragAndDropHooks={dragAndDropHooks}
       dependencies={[
