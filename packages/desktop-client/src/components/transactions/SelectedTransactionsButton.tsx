@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 
-import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { validForTransfer } from 'loot-core/client/transfer';
 import { q } from 'loot-core/shared/query';
 import {
@@ -18,6 +17,7 @@ import { pushModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { SelectedItemsButton } from '../table';
 
+import { useSchedules } from '@desktop-client/hooks/useSchedules';
 import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 
 type SelectedTransactionsButtonProps = {

@@ -29,7 +29,6 @@ import {
   useLongPress,
 } from '@react-aria/interactions';
 
-import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { integerToCurrency } from 'loot-core/shared/util';
 import {
@@ -43,6 +42,7 @@ import { makeAmountFullStyle } from '../../budget/util';
 import { lookupName, Status } from './TransactionEdit';
 
 import { useAccount } from '@desktop-client/hooks/useAccount';
+import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
 import { usePayee } from '@desktop-client/hooks/usePayee';

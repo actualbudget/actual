@@ -9,7 +9,6 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { useTransactions } from 'loot-core/client/data-hooks/transactions';
 import {
   defaultMappings,
   type Mappings,
@@ -31,6 +30,7 @@ import { CheckboxOption } from '../modals/ImportTransactionsModal/CheckboxOption
 import { FieldMapping } from './FieldMapping';
 
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useTransactions } from '@desktop-client/hooks/useTransactions';
 
 export type TransactionDirection = 'payment' | 'deposit';
 

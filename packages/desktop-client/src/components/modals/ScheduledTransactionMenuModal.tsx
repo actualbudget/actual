@@ -11,7 +11,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { format } from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
@@ -28,6 +27,7 @@ import {
 } from '../common/Modal';
 
 import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useSchedules } from '@desktop-client/hooks/useSchedules';
 
 type ScheduledTransactionMenuModalProps = Extract<
   ModalType,
