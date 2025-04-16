@@ -12,7 +12,7 @@ import {
 } from './notifications/notificationsSlice';
 import { loadPrefs } from './prefs/prefsSlice';
 import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
-import { type AppStore } from './redux';
+import { type AppStore } from './redux/store';
 
 export function handleGlobalEvents(store: AppStore) {
   const unlistenServerError = listen('server-error', () => {

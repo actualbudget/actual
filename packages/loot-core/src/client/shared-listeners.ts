@@ -17,7 +17,7 @@ import {
   getCategories,
   getPayees,
 } from '@actual-app/web/src/queries/queriesSlice';
-import { type AppStore } from '@actual-app/web/src/redux';
+import { type AppStore } from '@actual-app/web/src/redux/store';
 import { signOut } from '@actual-app/web/src/users/usersSlice';
 /* eslint-enable no-restricted-imports */
 import { t } from 'i18next';

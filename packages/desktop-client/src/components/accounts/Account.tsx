@@ -66,7 +66,8 @@ import {
   updateAccount,
   updateNewTransactions,
 } from '../../queries/queriesSlice';
-import { type AppDispatch, useSelector, useDispatch } from '../../redux';
+import { useSelector, useDispatch } from '../../redux';
+import { type AppDispatch } from '../../redux/store';
 import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { TransactionList } from '../transactions/TransactionList';
 import { validateAccountName } from '../util/accountValidation';
