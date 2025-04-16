@@ -59,24 +59,10 @@ if (values.version) {
   process.exit();
 }
 
-// Read the config argument if specified
-if (values.config) {
-  const configExists = existsSync(values.config);
-
-  if (!configExists) {
-    console.log(
-      `Please specify a valid config path. The path ${values.config} does not exist.`,
-    );
-
-    process.exit();
-  } else if (values.config) {
-    console.log(`Loading config from ${values.config}`);
-    process.env.ACTUAL_CONFIG_PATH = values.config;
-  }
-} else {
-  // No config specified, use reasonable defaults
+const setupDataDir = () => {
   if (!process.env.ACTUAL_DATA_DIR) {
     if (existsSync('./data')) {
+      // The default data directory exists - use it
       console.info('Found existing data directory');
       process.env.ACTUAL_DATA_DIR = './data';
     } else {
@@ -87,6 +73,42 @@ if (values.config) {
     }
 
     console.info(`Data directory: ${process.env.ACTUAL_DATA_DIR}`);
+  }
+};
+
+if (values.config) {
+  const configExists = existsSync(values.config);
+
+  if (!configExists) {
+    console.log(
+      `Please specify a valid config path. The path ${values.config} does not exist.`,
+    );
+
+    process.exit();
+  } else {
+    console.log(`Loading config from ${values.config}`);
+    process.env.ACTUAL_CONFIG_PATH = values.config;
+
+    const configJson = JSON.parse(readFileSync(values.config, 'utf-8'));
+    if (!configJson.dataDir) {
+      setupDataDir();
+    }
+  }
+} else {
+  // If no config is specified, check for a default config in the current directory
+  const defaultConfigJsonFile = './config.json';
+  const configExists = existsSync(defaultConfigJsonFile);
+
+  if (configExists) {
+    console.info('Found config.json in the current directory');
+    const configJson = JSON.parse(readFileSync(defaultConfigJsonFile, 'utf-8'));
+    process.env.ACTUAL_CONFIG_PATH = defaultConfigJsonFile;
+
+    if (!configJson.dataDir) {
+      setupDataDir(); // No dataDir specified in config.json. Set it up
+    }
+  } else {
+    setupDataDir(); // No default config exists - setup data dir
   }
 }
 
