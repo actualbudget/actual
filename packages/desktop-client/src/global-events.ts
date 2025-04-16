@@ -1,9 +1,4 @@
 // @ts-strict-ignore
-import {
-  getAccounts,
-  getCategories,
-  getPayees,
-} from 'loot-core/client/queries/queriesSlice';
 import * as sharedListeners from 'loot-core/client/shared-listeners';
 import { type AppStore } from 'loot-core/client/store';
 import { listen } from 'loot-core/platform/client/fetch';
@@ -17,6 +12,7 @@ import {
   addNotification,
 } from './notifications/notificationsSlice';
 import { loadPrefs } from './prefs/prefsSlice';
+import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
 
 export function handleGlobalEvents(store: AppStore) {
   const unlistenServerError = listen('server-error', () => {

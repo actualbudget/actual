@@ -24,7 +24,6 @@ import { css } from '@emotion/css';
 import { v4 as uuid } from 'uuid';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
-import { initiallyLoadPayees } from 'loot-core/client/queries/queriesSlice';
 import { runQuery } from 'loot-core/client/query-helpers';
 import { enableUndo, disableUndo } from 'loot-core/client/undo';
 import { send } from 'loot-core/platform/client/fetch';
@@ -51,6 +50,7 @@ import {
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
+import { initiallyLoadPayees } from '../../queries/queriesSlice';
 import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { StatusBadge } from '../schedules/StatusBadge';

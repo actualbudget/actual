@@ -14,16 +14,13 @@ import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
 import * as Platform from 'loot-core/client/platform';
-import {
-  reopenAccount,
-  updateAccount,
-} from 'loot-core/client/queries/queriesSlice';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useDragRef } from '../../hooks/useDragRef';
 import { useNotes } from '../../hooks/useNotes';
 import { openAccountCloseModal } from '../../modals/modalsSlice';
+import { reopenAccount, updateAccount } from '../../queries/queriesSlice';
 import { useDispatch } from '../../redux';
 import { Link } from '../common/Link';
 import { Notes } from '../Notes';

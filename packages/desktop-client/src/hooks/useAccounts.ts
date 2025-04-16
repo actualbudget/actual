@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 
-import { getAccounts } from 'loot-core/client/queries/queriesSlice';
-
+import { getAccounts } from '../queries/queriesSlice';
 import { useSelector, useDispatch } from '../redux';
 
 import { useInitialMount } from './useInitialMount';

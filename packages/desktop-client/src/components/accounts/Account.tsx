@@ -25,14 +25,6 @@ import {
 } from 'loot-core/client/data-hooks/schedules';
 import * as queries from 'loot-core/client/queries';
 import {
-  createPayee,
-  initiallyLoadPayees,
-  markAccountRead,
-  reopenAccount,
-  updateAccount,
-  updateNewTransactions,
-} from 'loot-core/client/queries/queriesSlice';
-import {
   runQuery,
   pagedQuery,
   type PagedQuery,
@@ -86,6 +78,14 @@ import {
   replaceModal,
 } from '../../modals/modalsSlice';
 import { addNotification } from '../../notifications/notificationsSlice';
+import {
+  createPayee,
+  initiallyLoadPayees,
+  markAccountRead,
+  reopenAccount,
+  updateAccount,
+  updateNewTransactions,
+} from '../../queries/queriesSlice';
 import { useSelector, useDispatch } from '../../redux';
 import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { TransactionList } from '../transactions/TransactionList';

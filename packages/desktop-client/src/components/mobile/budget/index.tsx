@@ -5,15 +5,6 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  applyBudgetAction,
-  createCategory,
-  createGroup,
-  deleteCategory,
-  deleteGroup,
-  updateCategory,
-  updateGroup,
-} from 'loot-core/client/queries/queriesSlice';
 import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -24,6 +15,15 @@ import { useLocale } from '../../../hooks/useLocale';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { collapseModals, pushModal } from '../../../modals/modalsSlice';
+import {
+  applyBudgetAction,
+  createCategory,
+  createGroup,
+  deleteCategory,
+  deleteGroup,
+  updateCategory,
+  updateGroup,
+} from '../../../queries/queriesSlice';
 import { useDispatch } from '../../../redux';
 import { prewarmMonth } from '../../budget/util';
 import { NamespaceContext } from '../../spreadsheet/NamespaceContext';

@@ -10,17 +10,17 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import deepEqual from 'deep-equal';
 
-import {
-  getPayees,
-  importPreviewTransactions,
-  importTransactions,
-} from 'loot-core/client/queries/queriesSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { amountToInteger } from 'loot-core/shared/util';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useDateFormat } from '../../../hooks/useDateFormat';
 import { useSyncedPrefs } from '../../../hooks/useSyncedPrefs';
+import {
+  getPayees,
+  importPreviewTransactions,
+  importTransactions,
+} from '../../../queries/queriesSlice';
 import { useDispatch } from '../../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { SectionLabel } from '../../forms';

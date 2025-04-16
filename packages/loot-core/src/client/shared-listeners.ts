@@ -12,12 +12,16 @@ import {
   type Notification,
 } from '@actual-app/web/src/notifications/notificationsSlice';
 import { loadPrefs } from '@actual-app/web/src/prefs/prefsSlice';
+import {
+  getAccounts,
+  getCategories,
+  getPayees,
+} from '@actual-app/web/src/queries/queriesSlice';
 /* eslint-enable no-restricted-imports */
 import { t } from 'i18next';
 
 import { listen, send } from '../platform/client/fetch';
 
-import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
 import { type AppStore } from './store';
 import { signOut } from './users/usersSlice';
 
