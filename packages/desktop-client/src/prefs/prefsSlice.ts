@@ -1,6 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { createAppAsyncThunk } from 'loot-core/client/redux';
 import { send } from 'loot-core/platform/client/fetch';
 import { parseNumberFormat, setNumberFormat } from 'loot-core/shared/util';
 import {
@@ -12,6 +11,7 @@ import {
 import { resetApp } from '../app/appSlice';
 import { setI18NextLanguage } from '../i18n';
 import { closeModal } from '../modals/modalsSlice';
+import { createAppAsyncThunk } from '../redux';
 
 const sliceName = 'prefs';
 
