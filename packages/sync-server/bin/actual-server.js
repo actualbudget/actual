@@ -59,8 +59,15 @@ if (values.version) {
   process.exit();
 }
 
-const setupDataDir = () => {
-  if (!process.env.ACTUAL_DATA_DIR) {
+const setupDataDir = (dataDir = undefined) => {
+  if (process.env.ACTUAL_DATA_DIR) {
+    return; // Env variables must not be overwritten
+  }
+
+  if (dataDir) {
+    process.env.ACTUAL_DATA_DIR = dataDir; // Use the dir specified
+  } else {
+    // Setup defaults
     if (existsSync('./data')) {
       // The default data directory exists - use it
       console.info('Found existing data directory');
@@ -74,7 +81,7 @@ const setupDataDir = () => {
 
     console.info(`Data directory: ${process.env.ACTUAL_DATA_DIR}`);
   }
-};
+}
 
 if (values.config) {
   const configExists = existsSync(values.config);
@@ -87,12 +94,9 @@ if (values.config) {
     process.exit();
   } else {
     console.log(`Loading config from ${values.config}`);
-    process.env.ACTUAL_CONFIG_PATH = values.config;
-
     const configJson = JSON.parse(readFileSync(values.config, 'utf-8'));
-    if (!configJson.dataDir) {
-      setupDataDir();
-    }
+    process.env.ACTUAL_CONFIG_PATH = values.config;
+    setupDataDir(configJson.dataDir);
   }
 } else {
   // If no config is specified, check for a default config in the current directory
@@ -103,12 +107,9 @@ if (values.config) {
     console.info('Found config.json in the current directory');
     const configJson = JSON.parse(readFileSync(defaultConfigJsonFile, 'utf-8'));
     process.env.ACTUAL_CONFIG_PATH = defaultConfigJsonFile;
-
-    if (!configJson.dataDir) {
-      setupDataDir(); // No dataDir specified in config.json. Set it up
-    }
+    setupDataDir(configJson.dataDir);
   } else {
-    setupDataDir(); // No default config exists - setup data dir
+    setupDataDir(); // No default config exists - setup data dir with defaults
   }
 }
 
