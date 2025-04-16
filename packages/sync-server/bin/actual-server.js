@@ -75,13 +75,19 @@ if (values.config) {
   }
 } else {
   // No config specified, use reasonable defaults
-  console.info(
-    'Using default config. You can specify a custom config with --config',
-  );
-  process.env.ACTUAL_DATA_DIR = './';
-  console.info(
-    'user-files and server-files will be created in the current directory',
-  );
+  if (!process.env.ACTUAL_DATA_DIR) {
+    if (existsSync('./data')) {
+      console.info('Found existing data directory');
+      process.env.ACTUAL_DATA_DIR = './data';
+    } else {
+      console.info(
+        'Using default data directory. You can specify a custom config with --config',
+      );
+      process.env.ACTUAL_DATA_DIR = './';
+    }
+
+    console.info(`Data directory: ${process.env.ACTUAL_DATA_DIR}`);
+  }
 }
 
 // start the sync server
