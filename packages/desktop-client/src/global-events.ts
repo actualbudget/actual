@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import * as sharedListeners from 'loot-core/client/shared-listeners';
-import { type AppStore } from 'loot-core/client/store';
 import { listen } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 
@@ -13,6 +12,7 @@ import {
 } from './notifications/notificationsSlice';
 import { loadPrefs } from './prefs/prefsSlice';
 import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
+import { type AppStore } from './redux';
 
 export function handleGlobalEvents(store: AppStore) {
   const unlistenServerError = listen('server-error', () => {
