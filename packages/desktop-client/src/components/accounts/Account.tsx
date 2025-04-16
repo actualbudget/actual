@@ -273,7 +273,6 @@ type AccountInternalState = {
   showCleared?: boolean | undefined;
   prevShowCleared?: boolean | undefined;
   showReconciled: boolean;
-  editingName: boolean;
   nameError: string;
   isAdding: boolean;
   modalShowing?: boolean;
@@ -324,7 +323,6 @@ class AccountInternal extends PureComponent<
       balances: null,
       showCleared: props.showCleared,
       showReconciled: props.showReconciled,
-      editingName: false,
       nameError: '',
       isAdding: false,
       sort: null,
@@ -538,7 +536,6 @@ class AccountInternal extends PureComponent<
     if (this.props.accountId !== nextProps.accountId) {
       this.setState(
         {
-          editingName: false,
           loading: true,
           search: '',
           showBalances: nextProps.showBalances,
@@ -730,10 +727,6 @@ class AccountInternal extends PureComponent<
     this.setState({ isAdding: true });
   };
 
-  onExposeName = (flag: boolean) => {
-    this.setState({ editingName: flag });
-  };
-
   onSaveName = (name: string) => {
     const accountNameError = validateAccountName(
       name,
@@ -750,7 +743,7 @@ class AccountInternal extends PureComponent<
         throw new Error(`Account with ID ${this.props.accountId} not found.`);
       }
       this.props.dispatch(updateAccount({ account: { ...account, name } }));
-      this.setState({ editingName: false, nameError: '' });
+      this.setState({ nameError: '' });
     }
   };
 
@@ -1674,7 +1667,6 @@ class AccountInternal extends PureComponent<
       filterId,
       reconcileAmount,
       transactionsFiltered,
-      editingName,
       showBalances,
       balances,
       showCleared,
@@ -1724,7 +1716,6 @@ class AccountInternal extends PureComponent<
             <View style={styles.page}>
               <AccountHeader
                 tableRef={this.table}
-                editingName={editingName ?? false}
                 isNameEditable={isNameEditable ?? false}
                 workingHard={workingHard ?? false}
                 account={account}
@@ -1757,7 +1748,6 @@ class AccountInternal extends PureComponent<
                 onToggleExtraBalances={this.onToggleExtraBalances}
                 onSaveName={this.onSaveName}
                 saveNameError={this.state.nameError}
-                onExposeName={this.onExposeName}
                 onReconcile={this.onReconcile}
                 onDoneReconciling={this.onDoneReconciling}
                 onCreateReconciliationTransaction={
