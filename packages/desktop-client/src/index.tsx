@@ -31,7 +31,7 @@ import * as modalsSlice from './modals/modalsSlice';
 import * as notificationsSlice from './notifications/notificationsSlice';
 import * as prefsSlice from './prefs/prefsSlice';
 import * as queriesSlice from './queries/queriesSlice';
-import { store } from './redux';
+import { store } from './redux/store';
 import * as usersSlice from './users/usersSlice';
 
 const boundActions = bindActionCreators(

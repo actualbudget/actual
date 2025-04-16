@@ -1,7 +1,9 @@
-import React, { type ReactNode } from 'react';
-import { Provider } from 'react-redux';
-
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
+import {
+  combineReducers,
+  configureStore,
+  createListenerMiddleware,
+  isRejected,
+} from '@reduxjs/toolkit';
 
 import {
   name as accountsSliceName,
@@ -22,6 +24,7 @@ import {
 import {
   name as notificationsSliceName,
   reducer as notificationsSliceReducer,
+  addNotification,
 } from '../notifications/notificationsSlice';
 import {
   name as prefsSliceName,
@@ -36,9 +39,7 @@ import {
   reducer as usersSliceReducer,
 } from '../users/usersSlice';
 
-import { type store as realStore } from './store';
-
-const appReducer = combineReducers({
+const rootReducer = combineReducers({
   [accountsSliceName]: accountsSliceReducer,
   [appSliceName]: appSliceReducer,
   [budgetsSliceName]: budgetsSliceReducer,
@@ -49,16 +50,33 @@ const appReducer = combineReducers({
   [usersSliceName]: usersSliceReducer,
 });
 
-export let mockStore: typeof realStore = configureStore({
-  reducer: appReducer,
+const notifyOnRejectedActionsMiddleware = createListenerMiddleware();
+notifyOnRejectedActionsMiddleware.startListening({
+  matcher: isRejected,
+  effect: (action, { dispatch }) => {
+    console.error(action.error);
+    dispatch(
+      addNotification({
+        notification: {
+          id: action.type,
+          type: 'error',
+          message: action.error.message || 'An unexpected error occurred.',
+        },
+      }),
+    );
+  },
 });
 
-export function resetMockStore() {
-  mockStore = configureStore({
-    reducer: appReducer,
-  });
-}
+export const store = configureStore({
+  reducer: rootReducer,
+  middleware: getDefaultMiddleware =>
+    getDefaultMiddleware({
+      // TODO: Fix this in a separate PR. Remove non-serializable states in the store.
+      serializableCheck: false,
+    }).prepend(notifyOnRejectedActionsMiddleware.middleware),
+});
 
-export function TestProvider({ children }: { children: ReactNode }) {
-  return <Provider store={mockStore}>{children}</Provider>;
-}
+export type AppStore = typeof store;
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+export type GetRootState = typeof store.getState;
