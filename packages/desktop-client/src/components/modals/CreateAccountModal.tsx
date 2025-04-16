@@ -12,7 +12,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 
 import { useAuth } from '../../auth/AuthProvider';
@@ -24,6 +23,7 @@ import { usePluggyAiStatus } from '../../hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '../../hooks/useSimpleFinStatus';
 import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { type Modal as ModalType, pushModal } from '../../modals/modalsSlice';
+import { addNotification } from '../../notifications/notificationsSlice';
 import { useDispatch } from '../../redux';
 import { Warning } from '../alerts';
 import { Link } from '../common/Link';

@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import {
   applyBudgetAction,
   createCategory,
@@ -28,6 +27,7 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { pushModal } from '../../modals/modalsSlice';
+import { addNotification } from '../../notifications/notificationsSlice';
 import { useDispatch } from '../../redux';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 

@@ -1,4 +1,3 @@
-import { Notification } from '../../client/notifications/notificationsSlice';
 import * as db from '../db';
 
 import { parse } from './goal-template.pegjs';
@@ -9,6 +8,13 @@ import {
   resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
 import { Template } from './types/templates';
+
+type Notification = {
+  type?: 'message' | 'error' | 'warning' | undefined;
+  pre?: string | undefined;
+  message: string;
+  sticky?: boolean | undefined;
+};
 
 export const TEMPLATE_PREFIX = '#template';
 export const GOAL_PREFIX = '#goal';

@@ -13,7 +13,6 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import * as undo from 'loot-core/platform/client/undo';
 
 import { sync } from '../app/appSlice';
@@ -23,6 +22,7 @@ import { useAccounts } from '../hooks/useAccounts';
 import { useLocalPref } from '../hooks/useLocalPref';
 import { useMetaThemeColor } from '../hooks/useMetaThemeColor';
 import { useNavigate } from '../hooks/useNavigate';
+import { addNotification } from '../notifications/notificationsSlice';
 import { useSelector, useDispatch } from '../redux';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 

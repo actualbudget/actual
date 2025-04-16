@@ -24,8 +24,7 @@ import { css } from '@emotion/css';
 import {
   removeNotification,
   type NotificationWithId,
-} from 'loot-core/client/notifications/notificationsSlice';
-
+} from '../notifications/notificationsSlice';
 import { useSelector, useDispatch } from '../redux';
 
 import { Link } from './common/Link';

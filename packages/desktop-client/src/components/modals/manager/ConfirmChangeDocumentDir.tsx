@@ -7,9 +7,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
-
 import { useGlobalPref } from '../../../hooks/useGlobalPref';
+import { addNotification } from '../../../notifications/notificationsSlice';
 import { useDispatch } from '../../../redux';
 import { Information } from '../../alerts';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
