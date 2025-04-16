@@ -41,7 +41,6 @@ import {
   isRejected,
 } from '@reduxjs/toolkit';
 
-
 const rootReducer = combineReducers({
   [accountsSliceName]: accountsSliceReducer,
   [appSliceName]: appSliceReducer,
