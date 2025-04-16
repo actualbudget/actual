@@ -19,6 +19,7 @@ import {
   type NewUserEntity,
   type NoteEntity,
 } from 'loot-core/types/models';
+
 import { resetApp, setAppState } from '../app/appSlice';
 
 const sliceName = 'modals';
