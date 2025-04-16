@@ -9,6 +9,8 @@ import {
 } from '../services/user-service.js';
 import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user.js';
 
+import { checkPassword } from './password.js';
+
 export async function bootstrapOpenId(configParameter) {
   if (!('issuer' in configParameter) && !('discoveryURL' in configParameter)) {
     return { error: 'missing-issuer-or-discoveryURL' };
@@ -79,7 +81,10 @@ async function setupOpenIdClient(configParameter) {
   return client;
 }
 
-export async function loginWithOpenIdSetup(returnUrl) {
+export async function loginWithOpenIdSetup(
+  returnUrl,
+  firstTimeLoginPassword = '',
+) {
   if (!returnUrl) {
     return { error: 'return-url-missing' };
   }
@@ -88,6 +93,19 @@ export async function loginWithOpenIdSetup(returnUrl) {
   }
 
   const accountDb = getAccountDb();
+
+  const { countUsersWithUserName } = accountDb.first(
+    'SELECT count(*) as countUsersWithUserName FROM users WHERE user_name <> ?',
+    [''],
+  );
+  if (countUsersWithUserName === 0) {
+    const valid = checkPassword(firstTimeLoginPassword);
+
+    if (!valid) {
+      return { error: 'invalid-password' };
+    }
+  }
+
   let config = accountDb.first('SELECT extra_data FROM auth WHERE method = ?', [
     'openid',
   ]);
@@ -181,7 +199,7 @@ export async function loginWithOpenIdFinalize(body) {
     let tokenSet = null;
 
     if (!configFromDb.authMethod || configFromDb.authMethod === 'openid') {
-      const params = { code: body.code, state: body.state };
+      const params = { code: body.code, state: body.state, iss: body.iss };
       tokenSet = await client.callback(client.redirect_uris[0], params, {
         code_verifier,
         state: body.state,
@@ -200,8 +218,8 @@ export async function loginWithOpenIdFinalize(body) {
       userInfo.login ??
       userInfo.email ??
       userInfo.id ??
-      userInfo.name ??
-      'default-username';
+      userInfo.sub;
+
     if (identity == null) {
       return { error: 'openid-grant-failed: no identification was found' };
     }
@@ -213,29 +231,35 @@ export async function loginWithOpenIdFinalize(body) {
           'SELECT count(*) as countUsersWithUserName FROM users WHERE user_name <> ?',
           [''],
         );
-        if (countUsersWithUserName === 0) {
+
+        // Check if user was created by another transaction
+        const existingUser = accountDb.first(
+          'SELECT id FROM users WHERE user_name = ?',
+          [identity],
+        );
+
+        if (
+          !existingUser &&
+          (countUsersWithUserName === 0 ||
+            config.get('userCreationMode') === 'login')
+        ) {
           userId = uuidv4();
-          // Check if user was created by another transaction
-          const existingUser = accountDb.first(
-            'SELECT id FROM users WHERE user_name = ?',
-            [identity],
-          );
-          if (existingUser) {
-            throw new Error('user-already-exists');
-          }
           accountDb.mutate(
-            'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, 1, ?)',
+            'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, ?, ?)',
             [
               userId,
               identity,
               userInfo.name ?? userInfo.email ?? identity,
-              'ADMIN',
+              countUsersWithUserName === 0 ? '1' : '0',
+              countUsersWithUserName === 0 ? 'ADMIN' : 'BASIC',
             ],
           );
 
-          const userFromPasswordMethod = getUserByUsername('');
-          if (userFromPasswordMethod) {
-            transferAllFilesFromUser(userId, userFromPasswordMethod.user_id);
+          if (countUsersWithUserName === 0) {
+            const userFromPasswordMethod = getUserByUsername('');
+            if (userFromPasswordMethod) {
+              transferAllFilesFromUser(userId, userFromPasswordMethod.user_id);
+            }
           }
         } else {
           const { id: userIdFromDb, display_name: displayName } =

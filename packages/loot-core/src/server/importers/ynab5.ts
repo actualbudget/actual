@@ -8,7 +8,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as monthUtils from '../../shared/months';
 import { sortByKey, groupBy } from '../../shared/util';
-import { CategoryGroupEntity } from '../../types/models';
 
 import { YNAB5 } from './ynab5-types';
 
@@ -535,16 +534,16 @@ function equalsIgnoreCase(stringa: string, stringb: string): boolean {
   );
 }
 
-function findByNameIgnoreCase(
-  categories: (YNAB5.CategoryGroup | CategoryGroupEntity)[],
+function findByNameIgnoreCase<T extends { name: string }>(
+  categories: T[],
   name: string,
 ) {
   return categories.find(cat => equalsIgnoreCase(cat.name, name));
 }
 
-function findIdByName(
-  categories: (YNAB5.CategoryGroup | CategoryGroupEntity)[],
+function findIdByName<T extends { id: string; name: string }>(
+  categories: Array<T>,
   name: string,
 ) {
-  return findByNameIgnoreCase(categories, name)?.id;
+  return findByNameIgnoreCase<T>(categories, name)?.id;
 }

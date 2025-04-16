@@ -203,7 +203,7 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
     }
 
     const result = await handlers['key-test']({
-      fileId: remoteBudget ? remoteBudget.fileId : localBudget.cloudFileId,
+      cloudFileId: remoteBudget ? remoteBudget.fileId : localBudget.cloudFileId,
       password,
     });
     if (result.error) {
@@ -223,7 +223,7 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
 
   // Download the remote file (no need to perform a sync as the file will already be up-to-date)
   const result = await handlers['download-budget']({
-    fileId: remoteBudget.fileId,
+    cloudFileId: remoteBudget.fileId,
   });
   if (result.error) {
     console.log('Full error details', result.error);
@@ -258,7 +258,7 @@ handlers['api/bank-sync'] = async function (args) {
       ids: [args.accountId],
     });
 
-    allErrors.push(errors);
+    allErrors.push(...errors);
   } else {
     const accountsData = await handlers['accounts-get']();
     const accountIdsToSync = accountsData.map(a => a.id);
@@ -356,9 +356,9 @@ handlers['api/budget-month'] = async function ({ month }) {
   checkFileOpen();
   await validateMonth(month);
 
-  // TODO: Force cast to CategoryGroupEntity. This should be updated to an AQL query.
-  const groups =
-    (await db.getCategoriesGrouped()) as unknown as CategoryGroupEntity[];
+  const { data: groups }: { data: CategoryGroupEntity[] } = await aqlQuery(
+    q('category_groups').select('*'),
+  );
   const sheetName = monthUtils.sheetForMonth(month);
 
   function value(name) {

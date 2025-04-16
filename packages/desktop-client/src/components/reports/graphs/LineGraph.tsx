@@ -196,26 +196,26 @@ export function LineGraph({
                     isAnimationActive={false}
                   />
                 )}
+                {!compact && <CartesianGrid strokeDasharray="3 3" />}
                 {!compact && (
-                  <>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="date"
-                      tick={{ fill: theme.pageText }}
-                      tickLine={{ stroke: theme.pageText }}
-                    />
-                    <YAxis
-                      tickFormatter={value =>
-                        getCustomTick(
-                          amountToCurrencyNoDecimal(value),
-                          privacyMode,
-                        )
-                      }
-                      tick={{ fill: theme.pageText }}
-                      tickLine={{ stroke: theme.pageText }}
-                      tickSize={0}
-                    />
-                  </>
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fill: theme.pageText }}
+                    tickLine={{ stroke: theme.pageText }}
+                  />
+                )}
+                {!compact && (
+                  <YAxis
+                    tickFormatter={value =>
+                      getCustomTick(
+                        amountToCurrencyNoDecimal(value),
+                        privacyMode,
+                      )
+                    }
+                    tick={{ fill: theme.pageText }}
+                    tickLine={{ stroke: theme.pageText }}
+                    tickSize={0}
+                  />
                 )}
                 {data.legend.map((entry, index) => {
                   return (

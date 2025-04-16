@@ -217,7 +217,7 @@ export const BudgetCategories = memo(
                   <SidebarCategory
                     category={{
                       name: '',
-                      cat_group: newCategoryForGroup,
+                      group: newCategoryForGroup,
                       is_income:
                         newCategoryForGroup ===
                         categoryGroups.find(g => g.is_income).id,

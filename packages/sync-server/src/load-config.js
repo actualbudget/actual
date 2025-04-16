@@ -130,33 +130,24 @@ const configSchema = convict({
 
   https: {
     doc: 'HTTPS configuration.',
-    format: Object,
-    default: {
-      key: '',
-      cert: '',
-    },
 
     key: {
       doc: 'HTTPS Certificate key',
       format: String,
       default: '',
+      env: 'ACTUAL_HTTPS_KEY',
     },
 
     cert: {
       doc: 'HTTPS Certificate',
       format: String,
       default: '',
+      env: 'ACTUAL_HTTPS_CERT',
     },
   },
 
   upload: {
     doc: 'Upload configuration.',
-    format: Object,
-    default: {
-      fileSizeSyncLimitMB: 20,
-      syncEncryptedFileSizeLimitMB: 50,
-      fileSizeLimitMB: 20,
-    },
 
     fileSizeSyncLimitMB: {
       doc: 'Sync file size limit (in MB)',
@@ -256,6 +247,13 @@ const configSchema = convict({
     format: Boolean,
     default: false,
     env: 'ACTUAL_OPENID_ENFORCE',
+  },
+
+  userCreationMode: {
+    doc: 'Determines how users can be created.',
+    format: ['manual', 'login'],
+    default: 'manual',
+    env: 'ACTUAL_USER_CREATION_MODE',
   },
 });
 

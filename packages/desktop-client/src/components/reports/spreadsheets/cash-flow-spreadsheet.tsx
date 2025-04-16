@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type JSX } from 'react';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import * as d from 'date-fns';
@@ -35,6 +35,8 @@ export function simpleCashFlow(
       return q('transactions')
         .filter({
           [conditionsOpKey]: filters,
+        })
+        .filter({
           $and: [
             { date: { $gte: start } },
             {
