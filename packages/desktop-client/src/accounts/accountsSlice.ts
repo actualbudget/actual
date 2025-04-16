@@ -17,7 +17,8 @@ import {
   getPayees,
   setNewTransactions,
 } from '../queries/queriesSlice';
-import { type AppDispatch, createAppAsyncThunk } from '../redux';
+import { createAppAsyncThunk } from '../redux';
+import { type AppDispatch } from '../redux/store';
 
 const sliceName = 'account';
 
