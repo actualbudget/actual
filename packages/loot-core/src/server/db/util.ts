@@ -34,3 +34,11 @@ export function whereIn(ids: string[], field: string) {
   const filter = `${field} IN (` + ids2.map(id => `'${id}'`).join(',') + ')';
   return filter;
 }
+
+/**
+ * Converts an array of parameters to a SQL query parameter string.
+ * eg. ['a', 'b', 'c'] -> '?, ?, ?'
+ */
+export function toSqlQueryParameters(params: unknown[]) {
+  return params.map(() => '?').join(',');
+}
