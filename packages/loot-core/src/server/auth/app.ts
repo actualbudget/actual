@@ -248,7 +248,7 @@ async function signIn(
   }
   let res: {
     token?: string;
-    redirect_url?: string;
+    returnUrl?: string;
   };
 
   try {
@@ -267,8 +267,8 @@ async function signIn(
     throw err;
   }
 
-  if (res.redirect_url) {
-    return { redirectUrl: res.redirect_url };
+  if (res.returnUrl) {
+    return { redirectUrl: res.returnUrl };
   }
 
   if (!res.token) {
