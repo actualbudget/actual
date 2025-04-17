@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { initServer, serverPush } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
-import { tracer } from 'loot-core/shared/test-helpers';
+import { resetTracer, tracer } from 'loot-core/shared/test-helpers';
 
 import { liveQuery } from './liveQuery';
 
@@ -33,6 +33,10 @@ function initBasicServer(delay?) {
 }
 
 describe('liveQuery', () => {
+  beforeEach(() => {
+    resetTracer();
+  });
+
   it(`runs and subscribes to a query`, async () => {
     initBasicServer();
     tracer.start();
