@@ -205,6 +205,7 @@ export function FinancesApp() {
                 flex: 1,
                 overflow: 'auto',
                 position: 'relative',
+                background: 'var(--color-background-default)',
               }}
             >
               <Titlebar
