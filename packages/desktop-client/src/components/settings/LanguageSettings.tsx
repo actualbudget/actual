@@ -47,6 +47,7 @@ export function LanguageSettings() {
             isEnabled ? t('Select language') : t('No languages available')
           }
           onChange={value => {
+            console.log(value);
             setLanguage(value);
             setI18NextLanguage(value);
           }}
@@ -79,7 +80,7 @@ export function LanguageSettings() {
             the instructions{' '}
             <Link
               variant="external"
-              to="https://actualbudget.org/docs/install/local#translations"
+              to="https://actualbudget.org/docs/install/build-from-source#translations"
             >
               here
             </Link>{' '}
