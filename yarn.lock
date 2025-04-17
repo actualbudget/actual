@@ -114,7 +114,7 @@ __metadata:
     express-rate-limit: "npm:^7.5.0"
     express-response-size: "npm:^0.0.3"
     express-winston: "npm:^4.2.0"
-    http-proxy-middleware: "npm:^3.0.3"
+    http-proxy-middleware: "npm:^3.0.5"
     jest: "npm:^29.7.0"
     jws: "npm:^4.0.0"
     migrate: "npm:^2.1.0"
@@ -12391,9 +12391,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"http-proxy-middleware@npm:^3.0.3":
-  version: 3.0.3
-  resolution: "http-proxy-middleware@npm:3.0.3"
+"http-proxy-middleware@npm:^3.0.5":
+  version: 3.0.5
+  resolution: "http-proxy-middleware@npm:3.0.5"
   dependencies:
     "@types/http-proxy": "npm:^1.17.15"
     debug: "npm:^4.3.6"
@@ -12401,7 +12401,7 @@ __metadata:
     is-glob: "npm:^4.0.3"
     is-plain-object: "npm:^5.0.0"
     micromatch: "npm:^4.0.8"
-  checksum: 10/32f58c29288ca63e109909fb998bd0f6f50eb15a98dec9487eac07dfc4f09d8507dbfa00b44442d868bafa904bd633c8bbd55686bb13b4d4af4f5c5b3bbca430
+  checksum: 10/83c1956be6451a5f4a2f3c7b3d84085dbd47e1efb5bb684c1ed668a6606c18c7c07be823b0dbba1326955b64cf88de2672492940b0b48d140215fbdb06105c9a
   languageName: node
   linkType: hard
 
