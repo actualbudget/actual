@@ -47,7 +47,6 @@ export function LanguageSettings() {
             isEnabled ? t('Select language') : t('No languages available')
           }
           onChange={value => {
-            console.log(value);
             setLanguage(value);
             setI18NextLanguage(value);
           }}
