@@ -52,6 +52,7 @@ function ExpenseCategoryName({
   const { schedule, status: scheduleStatus } = useCategoryScheduleGoalTemplate({
     category,
   });
+
   const isScheduleUpcomingOrMissed =
     scheduleStatus === 'upcoming' ||
     scheduleStatus === 'due' ||
@@ -59,9 +60,11 @@ function ExpenseCategoryName({
 
   const isScheduleRecurring =
     schedule && schedule._date && !!schedule._date.frequency;
+
   const showScheduleStatus =
     isScheduleUpcomingOrMissed &&
-    month === monthUtils.monthFromDate(schedule.next_date);
+    schedule &&
+    monthUtils.monthFromDate(schedule.next_date) === month;
 
   return (
     <View

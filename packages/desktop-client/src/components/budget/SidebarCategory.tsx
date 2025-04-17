@@ -84,14 +84,17 @@ export function SidebarCategory({
   const { schedule, status: scheduleStatus } = useCategoryScheduleGoalTemplate({
     category,
   });
+
   const isScheduleUpcomingOrMissed =
     scheduleStatus === 'missed' ||
     scheduleStatus === 'due' ||
     scheduleStatus === 'upcoming';
 
   const isScheduleRecurring = !!schedule?._date?.frequency;
+
   const showScheduleStatus =
     isScheduleUpcomingOrMissed &&
+    schedule &&
     months.includes(monthUtils.monthFromDate(schedule.next_date));
 
   const displayed = (
@@ -284,23 +287,35 @@ function getScheduleStatusTooltip({
   locale?: Locale;
 }) {
   const isToday = monthUtils.isCurrentDay(schedule.next_date);
-  const formattedDate = monthUtils.format(
+  const distanceFromNow = monthUtils.formatDistance(
     schedule.next_date,
-    'MMMM d',
+    monthUtils.currentDay(),
     locale,
+    {
+      addSuffix: true,
+    },
   );
+  const formattedDate = monthUtils.format(schedule.next_date, 'MMMM d', locale);
   switch (scheduleStatus) {
     case 'missed':
-      return t('Missed {{scheduleName}} due last {{scheduleDate}}', {
-        scheduleName: schedule.name,
-        scheduleDate: formattedDate,
-      });
+      return t(
+        'Missed {{scheduleName}} due {{distanceFromNow}} ({{formattedDate}})',
+        {
+          scheduleName: schedule.name,
+          distanceFromNow,
+          formattedDate,
+        },
+      );
     case 'due':
     case 'upcoming':
-      return t('{{scheduleName}} is due {{scheduleDate}}', {
-        scheduleName: schedule.name,
-        scheduleDate: isToday ? 'today' : formattedDate,
-      });
+      return t(
+        '{{scheduleName}} is due {{distanceFromNow}} ({{formattedDate}})',
+        {
+          scheduleName: schedule.name,
+          distanceFromNow: isToday ? t('today') : distanceFromNow,
+          formattedDate,
+        },
+      );
     default:
       throw new Error(`Unrecognized schedule status: ${scheduleStatus}`);
   }

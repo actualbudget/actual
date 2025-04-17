@@ -409,6 +409,18 @@ export function format(
   return d.format(_parse(month), format, { locale });
 }
 
+export function formatDistance(
+  date1: DateLike,
+  date2: DateLike,
+  locale?: Locale,
+  options?: { addSuffix?: boolean; includeSeconds?: boolean },
+): string {
+  return d.formatDistance(_parse(date1), _parse(date2), {
+    locale,
+    ...options,
+  });
+}
+
 export const getDateFormatRegex = memoizeOne((format: string) => {
   return new RegExp(
     format
