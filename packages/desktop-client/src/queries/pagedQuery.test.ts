@@ -2,7 +2,7 @@
 import { initServer, serverPush } from 'loot-core/platform/client/fetch';
 import { subDays } from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
-import { tracer } from 'loot-core/shared/test-helpers';
+import { resetTracer, tracer } from 'loot-core/shared/test-helpers';
 
 import { pagedQuery } from './pagedQuery';
 
@@ -120,11 +120,14 @@ function initPagingServer(
   return data;
 }
 
-describe('query helpers', () => {
-  it('aqlQuery runs a query', async () => {
-    initServer({
-      query: query => Promise.resolve({ data: query, dependencies: [] }),
-    });
+describe('pagedQuery', () => {
+  beforeEach(() => {
+    resetTracer();
+  });
+
+  it(`runs and subscribes to a query`, async () => {
+    initBasicServer();
+    tracer.start();
 
     const query = q('transactions').select('*');
     const { data } = await aqlQuery(query);
