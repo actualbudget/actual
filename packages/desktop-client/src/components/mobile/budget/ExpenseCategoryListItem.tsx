@@ -34,12 +34,14 @@ import { SpentCell } from './SpentCell';
 
 type ExpenseCategoryNameProps = {
   category: CategoryEntity;
+  month: string;
   onEditCategory: (id: CategoryEntity['id']) => void;
   show3Columns: boolean;
 };
 
 function ExpenseCategoryName({
   category,
+  month,
   onEditCategory,
   show3Columns,
 }: ExpenseCategoryNameProps) {
@@ -57,6 +59,9 @@ function ExpenseCategoryName({
 
   const isScheduleRecurring =
     schedule && schedule._date && !!schedule._date.frequency;
+  const showScheduleStatus =
+    isScheduleUpcomingOrMissed &&
+    month === monthUtils.monthFromDate(schedule.next_date);
 
   return (
     <View
@@ -102,7 +107,7 @@ function ExpenseCategoryName({
           >
             {category.name}
           </Text>
-          {isScheduleUpcomingOrMissed && (
+          {showScheduleStatus && (
             <View
               style={{
                 flexShrink: 0,
@@ -451,6 +456,7 @@ export function ExpenseCategoryListItem({
       >
         <ExpenseCategoryName
           category={category}
+          month={month}
           onEditCategory={onEditCategory}
           show3Columns={show3Columns}
         />

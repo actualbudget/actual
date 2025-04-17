@@ -228,6 +228,10 @@ export function isCurrentMonth(month: DateLike): boolean {
   return month === currentMonth();
 }
 
+export function isCurrentDay(day: DateLike): boolean {
+  return day === currentDay();
+}
+
 // TODO: This doesn't really fit in this module anymore, should
 // probably live elsewhere
 export function bounds(month: DateLike): { start: number; end: number } {

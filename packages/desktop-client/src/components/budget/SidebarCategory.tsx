@@ -283,21 +283,21 @@ function getScheduleStatusTooltip({
   scheduleStatus: 'missed' | 'due' | 'upcoming';
   locale?: Locale;
 }) {
-  const isToday = monthUtils.currentDay() === schedule.next_date;
+  const isToday = monthUtils.isCurrentDay(schedule.next_date);
   const formattedDate = monthUtils.format(
     schedule.next_date,
-    'MMMM dd, yyyy',
+    'MMMM d',
     locale,
   );
   switch (scheduleStatus) {
     case 'missed':
-      return t('Missed {{scheduleName}} payment due last {{scheduleDate}}', {
+      return t('Missed {{scheduleName}} due last {{scheduleDate}}', {
         scheduleName: schedule.name,
         scheduleDate: formattedDate,
       });
     case 'due':
     case 'upcoming':
-      return t('{{scheduleName}} payment is due {{scheduleDate}}', {
+      return t('{{scheduleName}} is due {{scheduleDate}}', {
         scheduleName: schedule.name,
         scheduleDate: isToday ? 'today' : formattedDate,
       });
