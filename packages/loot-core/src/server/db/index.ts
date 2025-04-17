@@ -15,6 +15,7 @@ import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
 import * as monthUtils from '../../shared/months';
 import { groupById } from '../../shared/util';
+import { TransactionEntity } from '../../types/models';
 import { WithRequired } from '../../types/util';
 import {
   schema,
@@ -785,7 +786,9 @@ export async function getTransactions(accountId: DbTransaction['acct']) {
   );
 }
 
-export function insertTransaction(transaction) {
+export function insertTransaction(
+  transaction,
+): Promise<TransactionEntity['id']> {
   return insertWithSchema('transactions', transaction);
 }
 

@@ -3,7 +3,19 @@
   "version": "25.4.0",
   "license": "MIT",
   "description": "actual syncing server",
+  "bin": {
+    "actual-server": "./bin/actual-server.js"
+  },
   "type": "module",
+  "files": [
+    "bin",
+    "src",
+    "app.js",
+    "migrations",
+    "default-db.sqlite",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "start": "node app",
     "start-monitor": "node-git-info && nodemon app",
@@ -54,7 +66,7 @@
     "@types/node": "^22.14.0",
     "@types/supertest": "^2.0.16",
     "@types/uuid": "^9.0.8",
-    "http-proxy-middleware": "^3.0.3",
+    "http-proxy-middleware": "^3.0.5",
     "jest": "^29.7.0",
     "node-git-info": "^1.1.0",
     "nodemon": "^3.1.9",
