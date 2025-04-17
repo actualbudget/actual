@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 import { fetch } from '../platform/server/fetch';
+import * as Platform from '../shared/platform';
 
 import { PostError } from './errors';
-import * as Platform from './platform';
 
 function throwIfNot200(res: Response, text: string) {
   if (res.status !== 200) {
@@ -190,7 +190,7 @@ export async function postBinary(url, data, headers) {
   try {
     res = await fetch(url, {
       method: 'POST',
-      body: Platform.isWeb ? data : Buffer.from(data),
+      body: Platform.isBrowser ? data : Buffer.from(data),
       headers: {
         'Content-Length': data.length,
         'Content-Type': 'application/actual-sync',

@@ -27,7 +27,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import * as queries from 'loot-core/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { moveAccount } from '../../../accounts/accountsSlice';
@@ -38,6 +37,7 @@ import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { replaceModal } from '../../../modals/modalsSlice';
+import * as queries from '../../../queries/queries';
 import { useDispatch, useSelector } from '../../../redux';
 import { makeAmountFullStyle } from '../../budget/util';
 import { MobilePageHeader, Page } from '../../Page';

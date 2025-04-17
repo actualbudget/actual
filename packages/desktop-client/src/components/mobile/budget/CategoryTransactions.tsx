@@ -3,7 +3,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { View } from '@actual-app/components/view';
 
-import * as queries from 'loot-core/client/queries';
 import { listen } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
@@ -19,6 +18,7 @@ import { useLocale } from '../../../hooks/useLocale';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useTransactions } from '../../../hooks/useTransactions';
 import { useTransactionsSearch } from '../../../hooks/useTransactionsSearch';
+import * as queries from '../../../queries/queries';
 import { useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';

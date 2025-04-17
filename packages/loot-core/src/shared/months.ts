@@ -2,8 +2,9 @@
 import * as d from 'date-fns';
 import memoizeOne from 'memoize-one';
 
-import * as Platform from '../client/platform';
 import { type SyncedPrefs } from '../types/prefs';
+
+import * as Platform from './platform';
 
 type DateLike = string | Date;
 type Day = 0 | 1 | 2 | 3 | 4 | 5 | 6;

@@ -8,7 +8,6 @@ import { Stack } from '@actual-app/components/stack';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { runQuery } from 'loot-core/client/query-helpers';
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 import { getRecurringDescription } from 'loot-core/shared/schedules';
@@ -23,6 +22,7 @@ import {
   SelectedProvider,
 } from '../../hooks/useSelected';
 import { useSendPlatformRequest } from '../../hooks/useSendPlatformRequest';
+import { runQuery } from '../../queries/runQuery';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import { DisplayId } from '../util/DisplayId';

@@ -14,14 +14,14 @@ import { BrowserRouter } from 'react-router-dom';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import * as Platform from 'loot-core/client/platform';
-import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import { init as initConnection, send } from 'loot-core/platform/client/fetch';
+import * as Platform from 'loot-core/shared/platform';
 
 import { setAppState, sync } from '../app/appSlice';
 import { closeBudget, loadBudget } from '../budgets/budgetsSlice';
 import { handleGlobalEvents } from '../global-events';
 import { useMetadataPref } from '../hooks/useMetadataPref';
+import { SpreadsheetProvider } from '../hooks/useSpreadsheet';
 import { setI18NextLanguage } from '../i18n';
 import { addNotification } from '../notifications/notificationsSlice';
 import { installPolyfills } from '../polyfills';

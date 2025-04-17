@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import * as queries from 'loot-core/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { moveAccount } from '../../accounts/accountsSlice';
@@ -15,6 +14,7 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { useOffBudgetAccounts } from '../../hooks/useOffBudgetAccounts';
 import { useOnBudgetAccounts } from '../../hooks/useOnBudgetAccounts';
 import { useUpdatedAccounts } from '../../hooks/useUpdatedAccounts';
+import * as queries from '../../queries/queries';
 import { useSelector, useDispatch } from '../../redux';
 
 import { Account } from './Account';

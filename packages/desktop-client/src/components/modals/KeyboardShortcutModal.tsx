@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import * as Platform from 'loot-core/client/platform';
+import * as Platform from 'loot-core/shared/platform';
 
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 

@@ -11,7 +11,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
-import { calculateHasWarning } from 'loot-core/client/reports';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
@@ -62,7 +61,7 @@ import { setSessionReport } from '../setSessionReport';
 import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
-import { fromDateRepr } from '../util';
+import { calculateHasWarning, fromDateRepr } from '../util';
 
 /**
  * Transform `selectedCategories` into `conditions`.

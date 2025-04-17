@@ -10,7 +10,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { t } from 'i18next';
 
-import { runQuery, liveQuery } from 'loot-core/client/query-helpers';
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
@@ -27,7 +26,9 @@ import { useLocale } from '../../hooks/useLocale';
 import { usePayees } from '../../hooks/usePayees';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { type Modal as ModalType, pushModal } from '../../modals/modalsSlice';
+import { liveQuery } from '../../queries/liveQuery';
 import { getPayeesById } from '../../queries/queriesSlice';
+import { runQuery } from '../../queries/runQuery';
 import { useDispatch } from '../../redux';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';

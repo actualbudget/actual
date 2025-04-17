@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
@@ -13,6 +12,7 @@ import { useCategories } from '../../hooks/useCategories';
 import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { useLocalPref } from '../../hooks/useLocalPref';
 import { useNavigate } from '../../hooks/useNavigate';
+import { useSpreadsheet } from '../../hooks/useSpreadsheet';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { pushModal } from '../../modals/modalsSlice';
 import { addNotification } from '../../notifications/notificationsSlice';

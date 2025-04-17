@@ -30,12 +30,6 @@ import { View } from '@actual-app/components/view';
 import { AutoTextSize } from 'auto-text-size';
 import memoizeOne from 'memoize-one';
 
-import {
-  envelopeBudget,
-  trackingBudget,
-  uncategorizedCount,
-} from 'loot-core/client/queries';
-import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import * as monthUtils from 'loot-core/shared/months';
 import { groupById } from 'loot-core/shared/util';
 
@@ -44,9 +38,15 @@ import { useLocale } from '../../../hooks/useLocale';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { usePrevious } from '../../../hooks/usePrevious';
+import { useSpreadsheet } from '../../../hooks/useSpreadsheet';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useUndo } from '../../../hooks/useUndo';
 import { collapseModals, pushModal } from '../../../modals/modalsSlice';
+import {
+  envelopeBudget,
+  trackingBudget,
+  uncategorizedCount,
+} from '../../../queries/queries';
 import { useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';

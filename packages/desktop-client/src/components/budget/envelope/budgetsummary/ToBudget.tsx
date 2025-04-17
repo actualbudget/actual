@@ -8,9 +8,8 @@ import React, {
 import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
 
-import { envelopeBudget } from 'loot-core/client/queries';
-
 import { useContextMenu } from '../../../../hooks/useContextMenu';
+import { envelopeBudget } from '../../../../queries/queries';
 import { CoverMenu } from '../CoverMenu';
 import { useEnvelopeSheetValue } from '../EnvelopeBudgetComponents';
 import { HoldMenu } from '../HoldMenu';

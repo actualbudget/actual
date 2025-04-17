@@ -5,7 +5,6 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
@@ -13,6 +12,7 @@ import { sync } from '../../../app/appSlice';
 import { useCategories } from '../../../hooks/useCategories';
 import { useLocale } from '../../../hooks/useLocale';
 import { useLocalPref } from '../../../hooks/useLocalPref';
+import { useSpreadsheet } from '../../../hooks/useSpreadsheet';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { collapseModals, pushModal } from '../../../modals/modalsSlice';
 import {

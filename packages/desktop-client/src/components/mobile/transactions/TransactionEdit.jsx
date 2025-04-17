@@ -30,10 +30,9 @@ import {
   isValid as isValidDate,
 } from 'date-fns';
 
-import * as Platform from 'loot-core/client/platform';
-import { runQuery } from 'loot-core/client/query-helpers';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
+import * as Platform from 'loot-core/shared/platform';
 import { q } from 'loot-core/shared/query';
 import {
   ungroupTransactions,
@@ -66,6 +65,7 @@ import {
 } from '../../../hooks/useSingleActiveEditForm';
 import { pushModal } from '../../../modals/modalsSlice';
 import { setLastTransaction } from '../../../queries/queriesSlice';
+import { runQuery } from '../../../queries/runQuery';
 import { useSelector, useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { AmountInput } from '../../util/AmountInput';

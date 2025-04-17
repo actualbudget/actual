@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
+import { useSpreadsheet } from '../../hooks/useSpreadsheet';
 
 export function useReport<T>(
   sheetName: string,

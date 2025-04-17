@@ -23,8 +23,6 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { v4 as uuid } from 'uuid';
 
-import { runQuery } from 'loot-core/client/query-helpers';
-import { enableUndo, disableUndo } from 'loot-core/client/undo';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
@@ -51,7 +49,9 @@ import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useSchedules } from '../../hooks/useSchedules';
 import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { initiallyLoadPayees } from '../../queries/queriesSlice';
+import { runQuery } from '../../queries/runQuery';
 import { useDispatch } from '../../redux';
+import { enableUndo, disableUndo } from '../../undo';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { StatusBadge } from '../schedules/StatusBadge';
 import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable';
