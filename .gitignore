@@ -3,6 +3,7 @@
 !data/.gitkeep
 /data2
 Actual-*
+!actual-server.js
 **/xcuserdata/*
 export-2020-01-10.csv
 
@@ -56,3 +57,6 @@ package.tgz
 
 # Fly.io configuration
 fly.toml
+
+# TypeScript cache
+build/

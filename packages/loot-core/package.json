@@ -50,7 +50,7 @@
     "@types/better-sqlite3": "^7.6.12",
     "@types/jest": "^29.5.14",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
-    "@types/node": "^22.13.10",
+    "@types/node": "^22.14.0",
     "@types/pegjs": "^0.10.6",
     "@types/uuid": "^9.0.8",
     "@types/webpack": "^5.28.5",
@@ -120,13 +120,13 @@
     "./platform/server/connection": "./src/platform/server/connection/index.ts",
     "./platform/server/fetch": "./src/platform/server/fetch/index.web.ts",
     "./platform/server/fs": "./src/platform/server/fs/index.web.ts",
-    "./platform/server/indexeddb": "./src/platform/server/indexeddb/index.web.ts",
     "./platform/server/log": "./src/platform/server/log/index.web.ts",
     "./platform/server/sqlite": "./src/platform/server/sqlite/index.web.ts",
     "./server/budget/types/*": "./src/server/budget/types/*.d.ts",
     "./server/*": "./src/server/*.ts",
     "./shared/*": "./src/shared/*.ts",
     "./types/models": "./src/types/models/index.d.ts",
-    "./types/*": "./src/types/*.d.ts"
+    "./types/*": "./src/types/*.d.ts",
+    "./lib-dist/electron/bundle.desktop.js": "./lib-dist/electron/bundle.desktop.js"
   }
 }

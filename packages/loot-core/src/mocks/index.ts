@@ -6,7 +6,6 @@ import type {
   AccountEntity,
   CategoryEntity,
   CategoryGroupEntity,
-  NewCategoryGroupEntity,
   TransactionEntity,
 } from '../types/models';
 
@@ -73,7 +72,7 @@ export function generateCategory(
   return {
     id: uuidv4(),
     name,
-    cat_group: group,
+    group,
     is_income: isIncome,
     sort_order: sortOrder++,
   };
@@ -92,8 +91,15 @@ export function generateCategoryGroup(
   };
 }
 
+export type CategoryGroupDefinition = Omit<
+  CategoryGroupEntity,
+  'id' | 'categories'
+> & {
+  categories: Omit<CategoryEntity, 'id' | 'group'>[];
+};
+
 export function generateCategoryGroups(
-  definition: Partial<NewCategoryGroupEntity>[],
+  definition: Partial<CategoryGroupDefinition>[],
 ): CategoryGroupEntity[] {
   return definition.map(group => {
     const g = generateCategoryGroup(group.name ?? '', group.is_income);

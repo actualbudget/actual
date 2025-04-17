@@ -42,7 +42,7 @@ export type APICategoryEntity = Pick<
   CategoryEntity,
   'id' | 'name' | 'is_income' | 'hidden'
 > & {
-  group_id?: string;
+  group_id: string;
 };
 
 export const categoryModel = {
@@ -54,17 +54,16 @@ export const categoryModel = {
       name: category.name,
       is_income: category.is_income ? true : false,
       hidden: category.hidden ? true : false,
-      ...(category.cat_group && { group_id: category.cat_group }),
+      group_id: category.group,
     };
   },
 
   fromExternal(category: APICategoryEntity) {
-    const { group_id: _, ...result }: { group_id?: string } & CategoryEntity =
-      category;
-
-    if ('group_id' in category) {
-      result.cat_group = category.group_id;
-    }
+    const { group_id, ...apiCategory } = category;
+    const result: CategoryEntity = {
+      ...apiCategory,
+      group: group_id,
+    };
     return result;
   },
 };

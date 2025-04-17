@@ -1,4 +1,5 @@
 import React, { type CSSProperties, type MouseEventHandler } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
@@ -35,6 +36,7 @@ export function ToBudgetAmount({
   isTotalsListTooltipDisabled = false,
   onContextMenu,
 }: ToBudgetAmountProps) {
+  const { t } = useTranslation();
   const sheetName = useEnvelopeSheetName(envelopeBudget.toBudget);
   const sheetValue = useEnvelopeSheetValue({
     name: envelopeBudget.toBudget,
@@ -52,7 +54,7 @@ export function ToBudgetAmount({
 
   return (
     <View style={{ alignItems: 'center', ...style }}>
-      <Block>{isNegative ? 'Overbudgeted:' : 'To Budget:'}</Block>
+      <Block>{isNegative ? t('Overbudgeted:') : t('To Budget:')}</Block>
       <View>
         <Tooltip
           content={

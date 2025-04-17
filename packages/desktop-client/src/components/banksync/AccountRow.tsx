@@ -25,6 +25,11 @@ export const AccountRow = memo(
       capitalize: true,
     });
 
+    const potentiallyTruncatedAccountName =
+      account.name.length > 30
+        ? account.name.slice(0, 30) + '...'
+        : account.name;
+
     return (
       <Row
         height="auto"
@@ -44,7 +49,7 @@ export const AccountRow = memo(
           plain
           style={{ color: theme.tableText, padding: '10px' }}
         >
-          {account.name}
+          {potentiallyTruncatedAccountName}
         </Cell>
 
         <Cell
