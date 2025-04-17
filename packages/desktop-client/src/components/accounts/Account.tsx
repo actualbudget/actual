@@ -9,9 +9,7 @@ import React, {
 import { Trans } from 'react-i18next';
 import { Navigate, useParams, useLocation } from 'react-router-dom';
 
-import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
-import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { debounce } from 'debounce';
@@ -91,6 +89,7 @@ import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { TransactionList } from '../transactions/TransactionList';
 import { validateAccountName } from '../util/accountValidation';
 
+import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
@@ -99,57 +98,6 @@ function isTransactionFilterEntity(
   filter: ConditionEntity,
 ): filter is TransactionFilterEntity {
   return 'id' in filter;
-}
-
-type EmptyMessageProps = {
-  onAdd: () => void;
-};
-
-function EmptyMessage({ onAdd }: EmptyMessageProps) {
-  return (
-    <View
-      style={{
-        color: theme.tableText,
-        backgroundColor: theme.tableBackground,
-        flex: 1,
-        alignItems: 'center',
-        borderTopWidth: 1,
-        borderColor: theme.tableBorder,
-      }}
-    >
-      <View
-        style={{
-          width: 550,
-          marginTop: 75,
-          fontSize: 15,
-          alignItems: 'center',
-        }}
-      >
-        <Text style={{ textAlign: 'center', lineHeight: '1.4em' }}>
-          <Trans>
-            For Actual to be useful, you need to <strong>add an account</strong>
-            . You can link an account to automatically download transactions, or
-            manage it locally yourself.
-          </Trans>
-        </Text>
-
-        <Button
-          variant="primary"
-          style={{ marginTop: 20 }}
-          autoFocus
-          onPress={onAdd}
-        >
-          <Trans>Add account</Trans>
-        </Button>
-
-        <View
-          style={{ marginTop: 20, fontSize: 13, color: theme.tableTextLight }}
-        >
-          <Trans>In the future, you can add accounts from the sidebar.</Trans>
-        </View>
-      </View>
-    </View>
-  );
 }
 
 type AllTransactionsProps = {
@@ -325,7 +273,6 @@ type AccountInternalState = {
   showCleared?: boolean | undefined;
   prevShowCleared?: boolean | undefined;
   showReconciled: boolean;
-  editingName: boolean;
   nameError: string;
   isAdding: boolean;
   modalShowing?: boolean;
@@ -376,7 +323,6 @@ class AccountInternal extends PureComponent<
       balances: null,
       showCleared: props.showCleared,
       showReconciled: props.showReconciled,
-      editingName: false,
       nameError: '',
       isAdding: false,
       sort: null,
@@ -590,7 +536,6 @@ class AccountInternal extends PureComponent<
     if (this.props.accountId !== nextProps.accountId) {
       this.setState(
         {
-          editingName: false,
           loading: true,
           search: '',
           showBalances: nextProps.showBalances,
@@ -782,10 +727,6 @@ class AccountInternal extends PureComponent<
     this.setState({ isAdding: true });
   };
 
-  onExposeName = (flag: boolean) => {
-    this.setState({ editingName: flag });
-  };
-
   onSaveName = (name: string) => {
     const accountNameError = validateAccountName(
       name,
@@ -802,7 +743,7 @@ class AccountInternal extends PureComponent<
         throw new Error(`Account with ID ${this.props.accountId} not found.`);
       }
       this.props.dispatch(updateAccount({ account: { ...account, name } }));
-      this.setState({ editingName: false, nameError: '' });
+      this.setState({ nameError: '' });
     }
   };
 
@@ -1738,7 +1679,6 @@ class AccountInternal extends PureComponent<
       filterId,
       reconcileAmount,
       transactionsFiltered,
-      editingName,
       showBalances,
       balances,
       showCleared,
@@ -1788,7 +1728,6 @@ class AccountInternal extends PureComponent<
             <View style={styles.page}>
               <AccountHeader
                 tableRef={this.table}
-                editingName={editingName ?? false}
                 isNameEditable={isNameEditable ?? false}
                 workingHard={workingHard ?? false}
                 account={account}
@@ -1821,7 +1760,6 @@ class AccountInternal extends PureComponent<
                 onToggleExtraBalances={this.onToggleExtraBalances}
                 onSaveName={this.onSaveName}
                 saveNameError={this.state.nameError}
-                onExposeName={this.onExposeName}
                 onReconcile={this.onReconcile}
                 onDoneReconciling={this.onDoneReconciling}
                 onCreateReconciliationTransaction={
@@ -1881,7 +1819,7 @@ class AccountInternal extends PureComponent<
                   hideFraction={hideFraction}
                   renderEmpty={() =>
                     showEmptyMessage ? (
-                      <EmptyMessage
+                      <AccountEmptyMessage
                         onAdd={() =>
                           this.props.dispatch(
                             replaceModal({
