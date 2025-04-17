@@ -12,9 +12,6 @@ import { useDispatch } from '../../../redux';
 
 import { IncomeCategoryListItem } from './IncomeCategoryListItem';
 
-import { useNavigate } from '@hooks/useNavigate';
-import { useSyncedPref } from '@hooks/useSyncedPref';
-
 type IncomeCategoryListProps = {
   categories: CategoryEntity[];
   month: string;
