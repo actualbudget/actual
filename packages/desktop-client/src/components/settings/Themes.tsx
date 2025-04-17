@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import React, { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
@@ -19,6 +19,7 @@ import {
 import { useSidebar } from '../sidebar/SidebarProvider';
 
 import { Setting } from './UI';
+import { Button } from '@actual-app/components/button';
 
 function Column({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -41,6 +42,15 @@ export function ThemeSettings() {
   const sidebar = useSidebar();
   const [theme, switchTheme] = useTheme();
   const [darkTheme, switchDarkTheme] = usePreferredDarkTheme();
+
+  const [isDarkTheme, setIsDarkTheme] = useState(
+    document.documentElement.classList.contains('theme-dark'),
+  );
+
+  const toggleTheme = () => {
+    document.documentElement.classList.toggle('theme-dark');
+    setIsDarkTheme(prev => !prev);
+  };
 
   return (
     <Setting
@@ -89,6 +99,15 @@ export function ThemeSettings() {
               />
             </Column>
           )}
+          <Column title={t('Theme CSS Vars')}>
+            <Button
+              style={{ height: 27.5 }}
+              variant="normal"
+              onPress={toggleTheme}
+            >
+              {isDarkTheme ? 'Light' : 'Dark'}
+            </Button>
+          </Column>
         </View>
       }
     >
