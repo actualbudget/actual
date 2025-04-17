@@ -1,5 +1,9 @@
 // @ts-strict-ignore
-import { initServer, serverPush } from 'loot-core/platform/client/fetch';
+import {
+  clearServer,
+  initServer,
+  serverPush,
+} from 'loot-core/platform/client/fetch';
 import { subDays } from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { resetTracer, tracer } from 'loot-core/shared/test-helpers';
@@ -123,6 +127,7 @@ function initPagingServer(
 describe('pagedQuery', () => {
   beforeEach(() => {
     resetTracer();
+    clearServer();
   });
 
   it(`runs and subscribes to a query`, async () => {
