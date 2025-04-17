@@ -1,37 +1,16 @@
-import { type ComponentPropsWithoutRef, useCallback, useRef } from 'react';
 import { type DragItem } from 'react-aria';
-import {
-  DropIndicator,
-  ListBox,
-  ListBoxItem,
-  useDragAndDrop,
-} from 'react-aria-components';
+import { DropIndicator, GridList, useDragAndDrop } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
-import { SvgCheveronRight } from '@actual-app/components/icons/v1';
-import { styles } from '@actual-app/components/styles';
-import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
-import { AutoTextSize } from 'auto-text-size';
 
-import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
 import { moveCategory } from 'loot-core/client/queries/queriesSlice';
-import * as monthUtils from 'loot-core/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { useNavigate } from '../../../hooks/useNavigate';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useDispatch } from '../../../redux';
-import { makeAmountGrey } from '../../budget/util';
-import { PrivacyFilter } from '../../PrivacyFilter';
-import { CellValue } from '../../spreadsheet/CellValue';
-import { useFormat } from '../../spreadsheet/useFormat';
 
-import { BudgetCell } from './BudgetCell';
-import { getColumnWidth, PILL_STYLE } from './BudgetTable';
+import { IncomeCategoryListItem } from './IncomeCategoryListItem';
 
 type IncomeCategoryListProps = {
   categories: CategoryEntity[];
@@ -83,7 +62,7 @@ export function IncomeCategoryList({
         );
       }
 
-      if (!categoryToMove.cat_group) {
+      if (!categoryToMove.group) {
         throw new Error(
           `Internal error: category ${categoryIdToMove} is not in a group and cannot be moved.`,
         );
@@ -95,7 +74,7 @@ export function IncomeCategoryList({
         dispatch(
           moveCategory({
             id: categoryToMove.id,
-            groupId: categoryToMove.cat_group,
+            groupId: categoryToMove.group,
             targetId: targetCategoryId,
           }),
         );
@@ -115,7 +94,7 @@ export function IncomeCategoryList({
         dispatch(
           moveCategory({
             id: categoryToMove.id,
-            groupId: categoryToMove.cat_group,
+            groupId: categoryToMove.group,
             // Due to the way `moveCategory` works, we use the category next to the
             // actual target category here because `moveCategory` always shoves the
             // category *before* the target category.
@@ -129,10 +108,11 @@ export function IncomeCategoryList({
   });
 
   return (
-    <ListBox
+    <GridList
       aria-label={t('Income categories')}
       items={categories}
       dragAndDropHooks={dragAndDropHooks}
+      dependencies={[month, onEditCategory, onBudgetAction]}
     >
       {category => (
         <IncomeCategoryListItem
@@ -143,223 +123,6 @@ export function IncomeCategoryList({
           onBudgetAction={onBudgetAction}
         />
       )}
-    </ListBox>
-  );
-}
-
-type IncomeCategoryNameProps = {
-  category: CategoryEntity;
-  onEdit: (id: CategoryEntity['id']) => void;
-};
-
-function IncomeCategoryName({ category, onEdit }: IncomeCategoryNameProps) {
-  const sidebarColumnWidth = getColumnWidth({
-    show3Cols: false,
-    isSidebar: true,
-    offset: -10,
-  });
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'flex-start',
-        width: sidebarColumnWidth,
-      }}
-    >
-      <Button
-        variant="bare"
-        style={{
-          maxWidth: sidebarColumnWidth,
-        }}
-        onPress={() => onEdit?.(category.id)}
-      >
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-          }}
-        >
-          <Text
-            style={{
-              ...styles.lineClamp(2),
-              width: sidebarColumnWidth,
-              textAlign: 'left',
-              ...styles.smallText,
-            }}
-            data-testid="category-name"
-          >
-            {category.name}
-          </Text>
-          <SvgCheveronRight
-            style={{ flexShrink: 0, color: theme.tableTextSubdued }}
-            width={14}
-            height={14}
-          />
-        </View>
-      </Button>
-    </View>
-  );
-}
-
-type IncomeCategoryCellsProps = {
-  category: CategoryEntity;
-  month: string;
-  onBudgetAction: (month: string, action: string, args: unknown) => void;
-};
-
-function IncomeCategoryCells({
-  category,
-  month,
-  onBudgetAction,
-}: IncomeCategoryCellsProps) {
-  const { t } = useTranslation();
-  const format = useFormat();
-  const columnWidth = getColumnWidth();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
-
-  const budgeted =
-    budgetType === 'report' ? trackingBudget.catBudgeted(category.id) : null;
-
-  const balance =
-    budgetType === 'report'
-      ? trackingBudget.catSumAmount(category.id)
-      : envelopeBudget.catSumAmount(category.id);
-
-  const navigate = useNavigate();
-  const onShowActivity = useCallback(() => {
-    navigate(`/categories/${category.id}?month=${month}`);
-  }, [category.id, month, navigate]);
-
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-      }}
-    >
-      {budgeted && (
-        <View
-          style={{
-            width: columnWidth,
-            justifyContent: 'center',
-            alignItems: 'flex-end',
-          }}
-        >
-          <BudgetCell
-            binding={budgeted}
-            type="financial"
-            category={category}
-            month={month}
-            onBudgetAction={onBudgetAction}
-          />
-        </View>
-      )}
-      <View
-        style={{
-          width: columnWidth,
-          justifyContent: 'center',
-          alignItems: 'flex-end',
-        }}
-      >
-        <CellValue<'envelope-budget' | 'tracking-budget', 'sum-amount'>
-          binding={balance}
-          type="financial"
-          aria-label={t('Balance for {{categoryName}} category', {
-            categoryName: category.name,
-          })} // Translated aria-label
-        >
-          {({ type, value }) => (
-            <Button
-              variant="bare"
-              style={{
-                ...PILL_STYLE,
-              }}
-              onPress={onShowActivity}
-              aria-label={t('Show transactions for {{categoryName}} category', {
-                categoryName: category.name,
-              })} // Translated aria-label
-            >
-              <PrivacyFilter>
-                <AutoTextSize
-                  key={value}
-                  as={Text}
-                  minFontSizePx={6}
-                  maxFontSizePx={12}
-                  mode="oneline"
-                  style={{
-                    ...makeAmountGrey(value),
-                    maxWidth: columnWidth,
-                    textAlign: 'right',
-                    fontSize: 12,
-                  }}
-                >
-                  {format(value, type)}
-                </AutoTextSize>
-              </PrivacyFilter>
-            </Button>
-          )}
-        </CellValue>
-      </View>
-    </View>
-  );
-}
-
-type IncomeCategoryListItemProps = ComponentPropsWithoutRef<
-  typeof ListBoxItem<CategoryEntity>
-> & {
-  month: string;
-  onEdit: (id: CategoryEntity['id']) => void;
-  onBudgetAction: (month: string, action: string, args: unknown) => void;
-};
-
-function IncomeCategoryListItem({
-  month,
-  onEdit,
-  onBudgetAction,
-  ...props
-}: IncomeCategoryListItemProps) {
-  const listItemRef = useRef<HTMLDivElement | null>(null);
-  const { value: category } = props;
-
-  if (!category) {
-    return null;
-  }
-
-  return (
-    <ListBoxItem
-      textValue={category.name}
-      data-testid="category-row"
-      {...props}
-    >
-      <View
-        style={{
-          height: 50,
-          borderColor: theme.tableBorder,
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingLeft: 5,
-          paddingRight: 5,
-          zIndex: 1,
-          justifyContent: 'space-between',
-          borderBottomWidth: 0.5,
-          borderTopWidth: 0.5,
-          opacity: !!category.hidden ? 0.5 : undefined,
-          backgroundColor: monthUtils.isCurrentMonth(month)
-            ? theme.budgetCurrentMonth
-            : theme.budgetOtherMonth,
-        }}
-        innerRef={listItemRef}
-      >
-        <IncomeCategoryName category={category} onEdit={onEdit} />
-        <IncomeCategoryCells
-          category={category}
-          month={month}
-          onBudgetAction={onBudgetAction}
-        />
-      </View>
-    </ListBoxItem>
+    </GridList>
   );
 }

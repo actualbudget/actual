@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { Input } from '@actual-app/components/input';
@@ -163,6 +163,7 @@ export function ImportTransactionsModal({
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
   const [reconcile, setReconcile] = useState(true);
+  const [importNotes, setImportNotes] = useState(true);
 
   // This cannot be set after parsing the file, because changing it
   // requires re-parsing the file. This is different from the other
@@ -432,6 +433,7 @@ export function ImportTransactionsModal({
       hasHeaderRow,
       skipLines,
       fallbackMissingPayeeToMemo,
+      importNotes,
     });
 
     parse(originalFileName, parseOptions);
@@ -441,6 +443,7 @@ export function ImportTransactionsModal({
     hasHeaderRow,
     skipLines,
     fallbackMissingPayeeToMemo,
+    importNotes,
     parse,
   ]);
 
@@ -486,6 +489,7 @@ export function ImportTransactionsModal({
       hasHeaderRow,
       skipLines,
       fallbackMissingPayeeToMemo,
+      importNotes,
     });
 
     parse(res[0], parseOptions);
@@ -616,6 +620,7 @@ export function ImportTransactionsModal({
         date,
         amount: amountToInteger(amount),
         cleared: clearOnImport,
+        notes: importNotes ? finalTransaction.notes : null,
       });
     }
 
@@ -652,6 +657,7 @@ export function ImportTransactionsModal({
     if (filetype === 'csv' || filetype === 'qif') {
       savePrefs({
         [`flip-amount-${accountId}-${filetype}`]: String(flipAmount),
+        [`import-notes-${accountId}-${filetype}`]: String(importNotes),
       });
     }
 
@@ -840,6 +846,7 @@ export function ImportTransactionsModal({
                   filename,
                   getParseOptions('ofx', {
                     fallbackMissingPayeeToMemo: !fallbackMissingPayeeToMemo,
+                    importNotes,
                   }),
                 );
               }}
@@ -847,6 +854,29 @@ export function ImportTransactionsModal({
               {t('Use Memo as a fallback for empty Payees')}
             </CheckboxOption>
           )}
+
+          {filetype !== 'csv' && (
+            <CheckboxOption
+              id="import_notes"
+              checked={importNotes}
+              onChange={() => {
+                setImportNotes(!importNotes);
+                parse(
+                  filename,
+                  getParseOptions(filetype, {
+                    delimiter,
+                    hasHeaderRow,
+                    skipLines,
+                    fallbackMissingPayeeToMemo,
+                    importNotes: !importNotes,
+                  }),
+                );
+              }}
+            >
+              <Trans>Import notes from file</Trans>
+            </CheckboxOption>
+          )}
+
           {(isOfxFile(filetype) || isCamtFile(filetype)) && (
             <CheckboxOption
               id="form_dont_reconcile"
@@ -912,6 +942,7 @@ export function ImportTransactionsModal({
                               delimiter: value,
                               hasHeaderRow,
                               skipLines,
+                              importNotes,
                             }),
                           );
                         }}
@@ -939,6 +970,7 @@ export function ImportTransactionsModal({
                               delimiter,
                               hasHeaderRow,
                               skipLines: +value,
+                              importNotes,
                             }),
                           );
                         }}
@@ -956,6 +988,7 @@ export function ImportTransactionsModal({
                             delimiter,
                             hasHeaderRow: !hasHeaderRow,
                             skipLines,
+                            importNotes,
                           }),
                         );
                       }}
@@ -1078,11 +1111,17 @@ function getParseOptions(fileType, options = {}) {
   if (fileType === 'csv') {
     const { delimiter, hasHeaderRow, skipLines } = options;
     return { delimiter, hasHeaderRow, skipLines };
-  } else if (isOfxFile(fileType)) {
-    const { fallbackMissingPayeeToMemo } = options;
-    return { fallbackMissingPayeeToMemo };
   }
-  return {};
+  if (isOfxFile(fileType)) {
+    const { fallbackMissingPayeeToMemo, importNotes } = options;
+    return { fallbackMissingPayeeToMemo, importNotes };
+  }
+  if (isCamtFile(fileType)) {
+    const { importNotes } = options;
+    return { importNotes };
+  }
+  const { importNotes } = options;
+  return { importNotes };
 }
 
 function isOfxFile(fileType) {

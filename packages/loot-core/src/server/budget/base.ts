@@ -1,6 +1,9 @@
 // @ts-strict-ignore
 import * as monthUtils from '../../shared/months';
+import { q } from '../../shared/query';
 import { getChangedValues } from '../../shared/util';
+import { CategoryGroupEntity } from '../../types/models';
+import { runQuery as aqlQuery } from '../aql';
 import * as db from '../db';
 import * as sheet from '../sheet';
 import { resolveName } from '../spreadsheet/util';
@@ -8,7 +11,6 @@ import { resolveName } from '../spreadsheet/util';
 import * as budgetActions from './actions';
 import * as envelopeBudget from './envelope';
 import * as report from './report';
-import { sumAmounts } from './util';
 
 export function getBudgetType() {
   const meta = sheet.get().meta();
@@ -36,7 +38,7 @@ export function getBudgetRange(start: string, end: string) {
   return { start, end, range: monthUtils.rangeInclusive(start, end) };
 }
 
-function createCategory(cat, sheetName, prevSheetName, start, end) {
+export function createCategory(cat, sheetName, prevSheetName, start, end) {
   sheet.get().createDynamic(sheetName, 'sum-amount-' + cat.id, {
     initialValue: 0,
     run: () => {
@@ -59,28 +61,6 @@ function createCategory(cat, sheetName, prevSheetName, start, end) {
     envelopeBudget.createCategory(cat, sheetName, prevSheetName);
   } else {
     report.createCategory(cat, sheetName, prevSheetName);
-  }
-}
-
-function createCategoryGroup(group, sheetName) {
-  sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
-    initialValue: 0,
-    dependencies: group.categories.map(cat => `sum-amount-${cat.id}`),
-    run: sumAmounts,
-  });
-
-  if (!group.is_income || getBudgetType() !== 'rollover') {
-    sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
-      initialValue: 0,
-      dependencies: group.categories.map(cat => `budget-${cat.id}`),
-      run: sumAmounts,
-    });
-
-    sheet.get().createDynamic(sheetName, 'group-leftover-' + group.id, {
-      initialValue: 0,
-      dependencies: group.categories.map(cat => `leftover-${cat.id}`),
-      run: sumAmounts,
-    });
   }
 }
 
@@ -141,167 +121,6 @@ function handleCategoryMappingChange(months, oldValue, newValue) {
   });
 }
 
-function handleCategoryChange(months, oldValue, newValue) {
-  function addDeps(sheetName, groupId, catId) {
-    sheet
-      .get()
-      .addDependencies(sheetName, `group-sum-amount-${groupId}`, [
-        `sum-amount-${catId}`,
-      ]);
-    sheet
-      .get()
-      .addDependencies(sheetName, `group-budget-${groupId}`, [
-        `budget-${catId}`,
-      ]);
-    sheet
-      .get()
-      .addDependencies(sheetName, `group-leftover-${groupId}`, [
-        `leftover-${catId}`,
-      ]);
-  }
-
-  function removeDeps(sheetName, groupId, catId) {
-    sheet
-      .get()
-      .removeDependencies(sheetName, `group-sum-amount-${groupId}`, [
-        `sum-amount-${catId}`,
-      ]);
-    sheet
-      .get()
-      .removeDependencies(sheetName, `group-budget-${groupId}`, [
-        `budget-${catId}`,
-      ]);
-    sheet
-      .get()
-      .removeDependencies(sheetName, `group-leftover-${groupId}`, [
-        `leftover-${catId}`,
-      ]);
-  }
-
-  const budgetType = getBudgetType();
-
-  if (oldValue && oldValue.tombstone === 0 && newValue.tombstone === 1) {
-    const id = newValue.id;
-    const groupId = newValue.cat_group;
-
-    months.forEach(month => {
-      const sheetName = monthUtils.sheetForMonth(month);
-      removeDeps(sheetName, groupId, id);
-    });
-  } else if (
-    newValue.tombstone === 0 &&
-    (!oldValue || oldValue.tombstone === 1)
-  ) {
-    if (budgetType === 'rollover') {
-      envelopeBudget.createBlankCategory(newValue, months);
-    }
-
-    months.forEach(month => {
-      const prevMonth = monthUtils.prevMonth(month);
-      const prevSheetName = monthUtils.sheetForMonth(prevMonth);
-      const sheetName = monthUtils.sheetForMonth(month);
-      const { start, end } = monthUtils.bounds(month);
-
-      createCategory(newValue, sheetName, prevSheetName, start, end);
-
-      const id = newValue.id;
-      const groupId = newValue.cat_group;
-
-      if (getBudgetType() === 'rollover') {
-        sheet
-          .get()
-          .addDependencies(sheetName, 'last-month-overspent', [
-            `${prevSheetName}!leftover-${id}`,
-            `${prevSheetName}!carryover-${id}`,
-          ]);
-      }
-
-      addDeps(sheetName, groupId, id);
-    });
-  } else if (oldValue && oldValue.cat_group !== newValue.cat_group) {
-    // The category moved so we need to update the dependencies
-    const id = newValue.id;
-
-    months.forEach(month => {
-      const sheetName = monthUtils.sheetForMonth(month);
-      removeDeps(sheetName, oldValue.cat_group, id);
-      addDeps(sheetName, newValue.cat_group, id);
-    });
-  }
-}
-
-function handleCategoryGroupChange(months, oldValue, newValue) {
-  const budgetType = getBudgetType();
-
-  function addDeps(sheetName, groupId) {
-    sheet
-      .get()
-      .addDependencies(sheetName, 'total-budgeted', [
-        `group-budget-${groupId}`,
-      ]);
-    sheet
-      .get()
-      .addDependencies(sheetName, 'total-spent', [
-        `group-sum-amount-${groupId}`,
-      ]);
-    sheet
-      .get()
-      .addDependencies(sheetName, 'total-leftover', [
-        `group-leftover-${groupId}`,
-      ]);
-  }
-
-  function removeDeps(sheetName, groupId) {
-    sheet
-      .get()
-      .removeDependencies(sheetName, 'total-budgeted', [
-        `group-budget-${groupId}`,
-      ]);
-    sheet
-      .get()
-      .removeDependencies(sheetName, 'total-spent', [
-        `group-sum-amount-${groupId}`,
-      ]);
-    sheet
-      .get()
-      .removeDependencies(sheetName, 'total-leftover', [
-        `group-leftover-${groupId}`,
-      ]);
-  }
-
-  if (newValue.tombstone === 1 && oldValue && oldValue.tombstone === 0) {
-    const id = newValue.id;
-    months.forEach(month => {
-      const sheetName = monthUtils.sheetForMonth(month);
-      removeDeps(sheetName, id);
-    });
-  } else if (
-    newValue.tombstone === 0 &&
-    (!oldValue || oldValue.tombstone === 1)
-  ) {
-    const group = newValue;
-
-    if (!group.is_income || budgetType !== 'rollover') {
-      months.forEach(month => {
-        const sheetName = monthUtils.sheetForMonth(month);
-
-        // Dirty, dirty hack. These functions should not be async, but this is
-        // OK because we're leveraging the sync nature of queries. Ideally we
-        // wouldn't be querying here. But I think we have to. At least for now
-        // we do
-        const categories = db.runQuery(
-          'SELECT * FROM categories WHERE tombstone = 0 AND cat_group = ?',
-          [group.id],
-          true,
-        );
-        createCategoryGroup({ ...group, categories }, sheetName);
-
-        addDeps(sheetName, group.id);
-      });
-    }
-  }
-}
-
 function handleBudgetMonthChange(budget) {
   const sheetName = monthUtils.sheetForMonth(budget.id);
   sheet.get().set(`${sheetName}!buffered`, budget.buffered);
@@ -328,6 +147,7 @@ function handleBudgetChange(budget) {
 
 export function triggerBudgetChanges(oldValues, newValues) {
   const { createdMonths = new Set() } = sheet.get().meta();
+  const budgetType = getBudgetType();
   sheet.startTransaction();
 
   try {
@@ -353,9 +173,25 @@ export function triggerBudgetChanges(oldValues, newValues) {
         } else if (table === 'category_mapping') {
           handleCategoryMappingChange(createdMonths, oldValue, newValue);
         } else if (table === 'categories') {
-          handleCategoryChange(createdMonths, oldValue, newValue);
+          if (budgetType === 'rollover') {
+            envelopeBudget.handleCategoryChange(
+              createdMonths,
+              oldValue,
+              newValue,
+            );
+          } else {
+            report.handleCategoryChange(createdMonths, oldValue, newValue);
+          }
         } else if (table === 'category_groups') {
-          handleCategoryGroupChange(createdMonths, oldValue, newValue);
+          if (budgetType === 'rollover') {
+            envelopeBudget.handleCategoryGroupChange(
+              createdMonths,
+              oldValue,
+              newValue,
+            );
+          } else {
+            report.handleCategoryGroupChange(createdMonths, oldValue, newValue);
+          }
         } else if (table === 'accounts') {
           handleAccountChange(createdMonths, oldValue, newValue);
         }
@@ -390,8 +226,10 @@ export async function doTransfer(categoryIds, transferId) {
 }
 
 export async function createBudget(months) {
-  const categories = await db.getCategories();
-  const groups = await db.getCategoriesGrouped();
+  const { data: groups }: { data: CategoryGroupEntity[] } = await aqlQuery(
+    q('category_groups').select('*'),
+  );
+  const categories = groups.flatMap(group => group.categories);
 
   sheet.startTransaction();
   const meta = sheet.get().meta();
@@ -414,7 +252,11 @@ export async function createBudget(months) {
         createCategory(cat, sheetName, prevSheetName, start, end);
       });
       groups.forEach(group => {
-        createCategoryGroup(group, sheetName);
+        if (budgetType === 'rollover') {
+          envelopeBudget.createCategoryGroup(group, sheetName);
+        } else {
+          report.createCategoryGroup(group, sheetName);
+        }
       });
 
       if (budgetType === 'rollover') {
@@ -425,7 +267,7 @@ export async function createBudget(months) {
           sheetName,
         );
       } else {
-        report.createSummary(groups, categories, sheetName);
+        report.createSummary(groups, sheetName);
       }
 
       meta.createdMonths.add(month);

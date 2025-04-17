@@ -53,6 +53,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@types/node": "^22.14.0",
     "@types/prompts": "^2.4.9",
     "@typescript-eslint/parser": "^8.26.1",
     "cross-env": "^7.0.3",
@@ -65,6 +66,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-rulesdir": "^0.2.2",
     "globals": "^15.13.0",
+    "html-to-image": "^1.11.11",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.0",
     "node-jq": "^4.0.2",
@@ -84,7 +86,10 @@
     "node": ">=18.0.0"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,md,json,yml}": "prettier --write"
+    "*.{js,jsx,ts,tsx,md,json,yml}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   },
   "packageManager": "yarn@4.7.0",
   "browserslist": [
