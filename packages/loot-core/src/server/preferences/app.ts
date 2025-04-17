@@ -66,28 +66,28 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
     return 'ok';
   }
 
-  if (prefs.maxMonths) {
+  if (prefs.maxMonths !== undefined) {
     await asyncStorage.setItem('max-months', '' + prefs.maxMonths);
   }
-  if (prefs.documentDir && (await fs.exists(prefs.documentDir))) {
+  if (prefs.documentDir !== undefined && (await fs.exists(prefs.documentDir))) {
     await asyncStorage.setItem('document-dir', prefs.documentDir);
   }
   if (prefs.floatingSidebar !== undefined) {
     await asyncStorage.setItem('floating-sidebar', '' + prefs.floatingSidebar);
   }
-  if (prefs.language) {
+  if (prefs.language !== undefined) {
     await asyncStorage.setItem('language', prefs.language);
   }
-  if (prefs.theme) {
+  if (prefs.theme !== undefined) {
     await asyncStorage.setItem('theme', prefs.theme);
   }
-  if (prefs.preferredDarkTheme) {
+  if (prefs.preferredDarkTheme !== undefined) {
     await asyncStorage.setItem(
       'preferred-dark-theme',
       prefs.preferredDarkTheme,
     );
   }
-  if (prefs.serverSelfSignedCert) {
+  if (prefs.serverSelfSignedCert !== undefined) {
     await asyncStorage.setItem(
       'server-self-signed-cert',
       prefs.serverSelfSignedCert,
