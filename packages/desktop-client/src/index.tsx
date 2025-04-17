@@ -4,6 +4,8 @@
 import './browser-preload';
 
 import './fonts.scss';
+import './style/light.css';
+import './style/dark.css';
 
 import './i18n';
 
