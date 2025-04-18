@@ -53,9 +53,11 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@types/copyfiles": "^2",
     "@types/node": "^22.14.0",
     "@types/prompts": "^2.4.9",
     "@typescript-eslint/parser": "^8.26.1",
+    "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
     "eslint": "^9.22.0",
     "eslint-config-prettier": "^10.1.1",
