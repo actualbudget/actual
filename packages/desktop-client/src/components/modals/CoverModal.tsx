@@ -10,7 +10,6 @@ import {
   pushModal,
 } from 'loot-core/client/modals/modalsSlice';
 
-import { useCategories } from '../../hooks/useCategories';
 import { useDispatch } from '../../redux';
 import {
   addToBeBudgetedGroup,
@@ -18,6 +17,8 @@ import {
 } from '../budget/util';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
+
+import { useCategories } from '@hooks/useCategories';
 
 type CoverModalProps = Extract<ModalType, { name: 'cover' }>['options'];
 

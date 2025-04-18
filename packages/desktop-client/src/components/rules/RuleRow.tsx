@@ -16,12 +16,13 @@ import { v4 as uuid } from 'uuid';
 import { friendlyOp } from 'loot-core/shared/rules';
 import { type RuleEntity } from 'loot-core/types/models';
 
-import { useContextMenu } from '../../hooks/useContextMenu';
-import { useSelectedDispatch } from '../../hooks/useSelected';
 import { SelectCell, Row, Field, Cell } from '../table';
 
 import { ActionExpression } from './ActionExpression';
 import { ConditionExpression } from './ConditionExpression';
+
+import { useContextMenu } from '@hooks/useContextMenu';
+import { useSelectedDispatch } from '@hooks/useSelected';
 
 type RuleRowProps = {
   rule: RuleEntity;

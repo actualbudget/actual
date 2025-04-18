@@ -7,12 +7,13 @@ import { theme } from '@actual-app/components/theme';
 import { send } from 'loot-core/platform/client/fetch';
 import { type Handlers } from 'loot-core/types/handlers';
 
-import { useNavigate } from '../../../hooks/useNavigate';
 import {
   useSetLoginMethods,
   useSetMultiuserEnabled,
   useSetServerURL,
 } from '../../ServerContext';
+
+import { useNavigate } from '@hooks/useNavigate';
 
 // There are two URLs that dance with each other: `/login` and
 // `/bootstrap`. Both of these URLs check the state of the the server

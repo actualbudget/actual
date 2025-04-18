@@ -26,7 +26,6 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { useUndo } from '../../../hooks/useUndo';
 import { type Binding, type SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
@@ -36,6 +35,8 @@ import { makeAmountGrey } from '../util';
 
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
+
+import { useUndo } from '@hooks/useUndo';
 
 export const useTrackingSheetValue = <
   FieldName extends SheetFields<'tracking-budget'>,

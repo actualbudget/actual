@@ -7,9 +7,10 @@ import { View } from '@actual-app/components/view';
 
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { useCategories } from '../../../hooks/useCategories';
 import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
 import { addToBeBudgetedGroup, removeCategoriesFromGroups } from '../util';
+
+import { useCategories } from '@hooks/useCategories';
 
 type CoverMenuProps = {
   showToBeBudgeted?: boolean;

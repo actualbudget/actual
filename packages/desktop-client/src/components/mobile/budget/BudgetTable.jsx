@@ -40,13 +40,6 @@ import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import * as monthUtils from 'loot-core/shared/months';
 import { groupById } from 'loot-core/shared/util';
 
-import { useCategories } from '../../../hooks/useCategories';
-import { useLocale } from '../../../hooks/useLocale';
-import { useLocalPref } from '../../../hooks/useLocalPref';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { usePrevious } from '../../../hooks/usePrevious';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { useUndo } from '../../../hooks/useUndo';
 import { useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
@@ -59,6 +52,14 @@ import { PullToRefresh } from '../PullToRefresh';
 
 import { ExpenseGroupList } from './ExpenseGroupList';
 import { IncomeGroup } from './IncomeGroup';
+
+import { useCategories } from '@hooks/useCategories';
+import { useLocale } from '@hooks/useLocale';
+import { useLocalPref } from '@hooks/useLocalPref';
+import { useNavigate } from '@hooks/useNavigate';
+import { usePrevious } from '@hooks/usePrevious';
+import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useUndo } from '@hooks/useUndo';
 
 export const ROW_HEIGHT = 50;
 

@@ -14,10 +14,6 @@ import { send, sendCatch } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { type CustomReportEntity } from 'loot-core/types/models';
 
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useCategories } from '../../../hooks/useCategories';
-import { usePayees } from '../../../hooks/usePayees';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useDispatch } from '../../../redux';
 import { DateRange } from '../DateRange';
 import { ReportCard } from '../ReportCard';
@@ -25,6 +21,11 @@ import { ReportCardName } from '../ReportCardName';
 
 import { GetCardData } from './GetCardData';
 import { MissingReportCard } from './MissingReportCard';
+
+import { useAccounts } from '@hooks/useAccounts';
+import { useCategories } from '@hooks/useCategories';
+import { usePayees } from '@hooks/usePayees';
+import { useSyncedPref } from '@hooks/useSyncedPref';
 
 type CustomReportListCardsProps = {
   isEditing?: boolean;

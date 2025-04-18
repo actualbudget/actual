@@ -18,9 +18,6 @@ import {
 import { send } from 'loot-core/platform/client/fetch';
 import { amountToInteger } from 'loot-core/shared/util';
 
-import { useCategories } from '../../../hooks/useCategories';
-import { useDateFormat } from '../../../hooks/useDateFormat';
-import { useSyncedPrefs } from '../../../hooks/useSyncedPrefs';
 import { useDispatch } from '../../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { SectionLabel } from '../../forms';
@@ -39,6 +36,10 @@ import {
   parseDate,
   stripCsvImportTransaction,
 } from './utils';
+
+import { useCategories } from '@hooks/useCategories';
+import { useDateFormat } from '@hooks/useDateFormat';
+import { useSyncedPrefs } from '@hooks/useSyncedPrefs';
 
 function getFileType(filepath) {
   const m = filepath.match(/\.([^.]*)$/);

@@ -30,11 +30,12 @@ import {
   type WithRequired,
 } from 'loot-core/types/util';
 
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { useLocale } from '../../hooks/useLocale';
 import { Checkbox } from '../forms';
 
 import { DateSelect } from './DateSelect';
+
+import { useDateFormat } from '@hooks/useDateFormat';
+import { useLocale } from '@hooks/useLocale';
 
 // ex: There is no 6th Friday of the Month
 const MAX_DAY_OF_WEEK_INTERVAL = 5;
