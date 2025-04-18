@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`merkle trie adding an item works 1`] = `
+exports[`merkle trie > adding an item works 1`] = `
 {
   "1": {
     "2": {
@@ -78,7 +78,7 @@ exports[`merkle trie adding an item works 1`] = `
 }
 `;
 
-exports[`merkle trie pruning works and keeps correct hashes 1`] = `
+exports[`merkle trie > pruning works and keeps correct hashes 1`] = `
 {
   "1": {
     "2": {
@@ -246,7 +246,7 @@ exports[`merkle trie pruning works and keeps correct hashes 1`] = `
 }
 `;
 
-exports[`merkle trie pruning works and keeps correct hashes 2`] = `
+exports[`merkle trie > pruning works and keeps correct hashes 2`] = `
 {
   "1": {
     "2": {
