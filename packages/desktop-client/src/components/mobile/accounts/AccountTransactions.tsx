@@ -279,16 +279,40 @@ function TransactionListWithPreviews({
   } = useTransactions({
     query: balancesQuery,
   });
+
+  const { previewTransactions } = useAccountPreviewTransactions({
+    accountId: account?.id || '',
+  });
+
   const balances = useMemo(() => {
     const map = new Map<TransactionEntity['id'], number>();
     if (!isLoadingBalances && !isLoadingMoreBalances && balanceTransactions) {
+      // First add all transaction balances
       balanceTransactions.forEach(t => {
         //@ts-ignore
         map.set(t.id, t.balance);
       });
+
+      // Get the last transaction's balance to continue from
+      const lastTransaction = balanceTransactions[0];
+      let runningBalance = lastTransaction
+        ? (lastTransaction as any).balance
+        : 0;
+
+      // Add rolling balances for scheduled transactions in reverse order
+      [...previewTransactions].reverse().forEach(t => {
+        //@ts-ignore
+        runningBalance += t.amount;
+        map.set(t.id, runningBalance);
+      });
     }
     return map;
-  }, [balanceTransactions, isLoadingBalances, isLoadingMoreBalances]);
+  }, [
+    balanceTransactions,
+    isLoadingBalances,
+    isLoadingMoreBalances,
+    previewTransactions,
+  ]);
 
   // Wait for initial balances before rendering
   const hasInitialBalances = useMemo(() => {
@@ -298,10 +322,6 @@ function TransactionListWithPreviews({
       balanceTransactions.length > 0
     );
   }, [isLoadingBalances, balanceTransactions]);
-
-  const { previewTransactions } = useAccountPreviewTransactions({
-    accountId: account?.id || '',
-  });
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
