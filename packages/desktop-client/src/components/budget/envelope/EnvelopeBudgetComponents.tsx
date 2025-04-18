@@ -7,7 +7,10 @@ import React, {
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgCheveronDown } from '@actual-app/components/icons/v1';
+import {
+  SvgCheveronDown,
+  SvgArrowThinRight,
+} from '@actual-app/components/icons/v1';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -31,7 +34,10 @@ import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetName } from '../../spreadsheet/useSheetName';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Row, Field, SheetCell, type SheetCellProps } from '../../table';
-import { BalanceWithCarryover } from '../BalanceWithCarryover';
+import {
+  BalanceWithCarryover,
+  CarryoverIndicator,
+} from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
@@ -507,6 +513,10 @@ export function IncomeCategoryMonth({
   const carryover = useEnvelopeSheetValue(
     envelopeBudget.catCarryover(category.id),
   );
+  const amount = useEnvelopeSheetValue(
+    envelopeBudget.catSumAmount(category.id),
+  );
+  const amountStyle = makeAmountGrey(amount);
 
   return (
     <View style={{ flex: 1 }}>
@@ -534,6 +544,7 @@ export function IncomeCategoryMonth({
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'flex-end',
+            position: 'relative',
           }}
         >
           <View style={{ flexShrink: 0, marginRight: 4 }}>
@@ -541,9 +552,9 @@ export function IncomeCategoryMonth({
               variant="bare"
               className="hover-visible"
               onPress={() => {
-                onBudgetAction(month, 'toggle-carryover', {
+                onBudgetAction(month, 'carryover', {
                   category: category.id,
-                  value: !carryover,
+                  flag: !carryover,
                 });
               }}
               style={{
@@ -574,6 +585,19 @@ export function IncomeCategoryMonth({
               )}
             </EnvelopeCellValue>
           </span>
+          {carryover && (
+            <View
+              style={{
+                marginLeft: 2,
+                position: 'relative',
+                display: 'inline-flex',
+                alignItems: 'center',
+                ...amountStyle,
+              }}
+            >
+              <SvgArrowThinRight width={7} height={7} style={amountStyle} />
+            </View>
+          )}
         </View>
       </Field>
     </View>
