@@ -16,6 +16,7 @@ import {
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 
@@ -55,6 +56,8 @@ export function SidebarCategory({
 }: SidebarCategoryProps) {
   const { t } = useTranslation();
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
+  const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
+  const categoryExpandedState = categoryExpandedStatePref ?? 0;
 
   const temporary = category.id === 'new';
   const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
@@ -157,7 +160,7 @@ export function SidebarCategory({
     <View
       innerRef={innerRef}
       style={{
-        width: 200,
+        width: 200 + 100 * categoryExpandedState,
         overflow: 'hidden',
         '& .hover-visible': {
           display: 'none',

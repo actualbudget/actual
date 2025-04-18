@@ -18,6 +18,7 @@ import {
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 
@@ -56,6 +57,8 @@ export function SidebarGroup({
 }: SidebarGroupProps) {
   const { t } = useTranslation();
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
+  const categoryExpandedState = categoryExpandedStatePref ?? 0;
 
   const temporary = group.id === 'new';
   const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
@@ -180,7 +183,7 @@ export function SidebarGroup({
       innerRef={innerRef}
       style={{
         ...style,
-        width: 200,
+        width: 200 + 100 * categoryExpandedState,
         backgroundColor: theme.tableRowHeaderBackground,
         overflow: 'hidden',
         '& .hover-visible': {
