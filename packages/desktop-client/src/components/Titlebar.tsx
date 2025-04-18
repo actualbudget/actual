@@ -284,6 +284,7 @@ export function Titlebar({ style }: TitlebarProps) {
         alignItems: 'center',
         padding: '0 10px 0 15px',
         height: 36,
+        color: 'var(--color-foreground-contrast)',
         pointerEvents: 'none',
         '& *': {
           pointerEvents: 'auto',
