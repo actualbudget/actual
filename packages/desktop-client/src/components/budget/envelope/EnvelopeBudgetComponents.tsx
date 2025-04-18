@@ -556,6 +556,9 @@ export function IncomeCategoryMonth({
                   category: category.id,
                   flag: !carryover,
                 });
+                if (!carryover) {
+                  onBudgetAction(month, 'reset-hold');
+                }
               }}
               style={{
                 padding: 3,
