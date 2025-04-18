@@ -196,7 +196,6 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
         SpkMarburgBiedenkopfHeladef1mar.normalizeTransaction(tx, true),
       );
       const originalOrder = Array.from(normalizeTransactions);
-      console.log(originalOrder);
       const swap = (a, b) => {
         const swap = normalizeTransactions[a];
         normalizeTransactions[a] = normalizeTransactions[b];
