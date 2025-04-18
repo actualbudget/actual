@@ -1,4 +1,3 @@
-import React, { type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
@@ -12,6 +11,7 @@ type ToBudgetMenuProps = {
   onCover?: () => void;
   onHoldBuffer?: () => void;
   onResetHoldBuffer?: () => void;
+  //@ts-ignore fix this any
   onBudgetAction?: (month: string, action: string, payload: any) => void;
   month: string;
 };

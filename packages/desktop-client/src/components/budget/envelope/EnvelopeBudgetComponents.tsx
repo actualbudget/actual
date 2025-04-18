@@ -34,10 +34,7 @@ import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetName } from '../../spreadsheet/useSheetName';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Row, Field, SheetCell, type SheetCellProps } from '../../table';
-import {
-  BalanceWithCarryover,
-  CarryoverIndicator,
-} from '../BalanceWithCarryover';
+import { BalanceWithCarryover } from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
@@ -239,10 +236,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
 
   const { showUndoNotification } = useUndo();
 
-  const carryover = useEnvelopeSheetValue(
-    envelopeBudget.catCarryover(category.id),
-  );
-
   return (
     <View
       style={{
@@ -317,7 +310,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                     category: category.id,
                   });
                   showUndoNotification({
-                    message: t(`Budget set to last month's budget.`),
+                    message: t(`Budget set to last month‘s budget.`),
                   });
                 }}
                 onSetMonthsAverage={numberOfMonths => {
