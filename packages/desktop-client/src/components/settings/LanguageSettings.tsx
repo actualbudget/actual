@@ -79,7 +79,7 @@ export function LanguageSettings() {
             the instructions{' '}
             <Link
               variant="external"
-              to="https://actualbudget.org/docs/install/local#translations"
+              to="https://actualbudget.org/docs/install/build-from-source#translations"
             >
               here
             </Link>{' '}
