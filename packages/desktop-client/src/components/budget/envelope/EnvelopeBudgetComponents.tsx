@@ -552,13 +552,13 @@ export function IncomeCategoryMonth({
               variant="bare"
               className="hover-visible"
               onPress={() => {
+                if (!carryover) {
+                  onBudgetAction(month, 'reset-hold');
+                }
                 onBudgetAction(month, 'carryover', {
                   category: category.id,
                   flag: !carryover,
                 });
-                if (!carryover) {
-                  onBudgetAction(month, 'reset-hold');
-                }
               }}
               style={{
                 padding: 3,
