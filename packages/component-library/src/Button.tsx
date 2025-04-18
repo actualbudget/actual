@@ -22,7 +22,9 @@ const backgroundColor: {
   primary: theme.buttonPrimaryBackground,
   primaryDisabled: theme.buttonPrimaryDisabledBackground,
   bare: 'transparent',
+  bareAlwaysDark: 'transparent',
   bareDisabled: theme.buttonBareDisabledBackground,
+  bareAlwaysDarkDisabled: 'transparent',
   menu: theme.buttonMenuBackground,
   menuSelected: theme.buttonMenuSelectedBackground,
 };
@@ -34,11 +36,13 @@ const backgroundColorHover: Record<
   normal: 'var(--color-fill-float-hover)',
   primary: theme.buttonPrimaryBackgroundHover,
   bare: 'var(--color-fill-ghost)',
+  bareAlwaysDark: 'var(--color-always-dark-fill-ghost)',
   menu: theme.buttonMenuBackgroundHover,
   menuSelected: theme.buttonMenuSelectedBackgroundHover,
   normalDisabled: 'transparent',
   primaryDisabled: 'transparent',
   bareDisabled: 'transparent',
+  bareAlwaysDarkDisabled: 'transparent',
   menuDisabled: 'transparent',
   menuSelectedDisabled: 'transparent',
 };
@@ -65,6 +69,7 @@ const textColor: {
   primaryDisabled: theme.buttonPrimaryDisabledText,
   bare: 'var(--color-foreground-contrast)',
   bareDisabled: theme.buttonBareDisabledText,
+  bareAlwaysDark: 'var(--color-always-dark-foreground-dim)',
   menu: theme.buttonMenuText,
   menuSelected: theme.buttonMenuSelectedText,
 };
@@ -75,6 +80,7 @@ const textColorHover: {
   normal: 'var(--color-foreground-contrast)',
   primary: theme.buttonPrimaryTextHover,
   bare: 'var(--color-foreground-contrast)',
+  bareAlwaysDark: 'var(--color-always-dark-foreground-contrast)',
   menu: theme.buttonMenuTextHover,
   menuSelected: theme.buttonMenuSelectedTextHover,
 };
@@ -86,7 +92,8 @@ const _getBorder = (
   switch (variant) {
     case 'bare':
       return 'none';
-
+    case 'bareAlwaysDark':
+      return 'none';
     default:
       return '1px solid ' + borderColor[variantWithDisabled];
   }
@@ -134,7 +141,13 @@ type ButtonProps = ComponentPropsWithoutRef<typeof ReactAriaButton> & {
   children?: ReactNode;
 };
 
-type ButtonVariant = 'normal' | 'primary' | 'bare' | 'menu' | 'menuSelected';
+type ButtonVariant =
+  | 'normal'
+  | 'primary'
+  | 'bare'
+  | 'bareAlwaysDark'
+  | 'menu'
+  | 'menuSelected';
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (props, ref) => {
