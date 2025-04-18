@@ -33,20 +33,17 @@ describe('FilesService', () => {
     accountDb.mutate('DELETE FROM files');
   };
 
-  beforeAll(done => {
+  beforeAll(() => {
     accountDb = getAccountDb();
     filesService = new FilesService(accountDb);
-    done();
   });
 
-  beforeEach(done => {
+  beforeEach(() => {
     insertToyExampleData();
-    done();
   });
 
-  afterEach(done => {
+  afterEach(() => {
     clearDatabase();
-    done();
   });
 
   test('get should return a file', () => {

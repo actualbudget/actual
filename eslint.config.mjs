@@ -118,6 +118,25 @@ export default [
     ],
   },
   {
+    files: [
+      'packages/sync-server/**/*.spec.js?(x)',
+      'packages/sync-server/**/*.test.js?(x)',
+    ],
+    languageOptions: {
+      globals: {
+        vi: true,
+        describe: true,
+        expect: true,
+        it: true,
+        beforeAll: true,
+        beforeEach: true,
+        afterAll: true,
+        afterEach: true,
+        test: true,
+      },
+    },
+  },
+  {
     linterOptions: {
       reportUnusedDisableDirectives: true,
     },
@@ -752,6 +771,16 @@ export default [
       'import/no-unresolved': 'off',
     },
   },
+
+  // Allow configuring vitest with default exports (recommended as per vitest docs)
+  {
+    files: ['**/vitest.config.ts', '**/vitest.web.config.ts'],
+    rules: {
+      'import/no-anonymous-default-export': 'off',
+      'import/no-default-export': 'off',
+    },
+  },
+
   {},
   {
     // TODO: fix the issues in these files
