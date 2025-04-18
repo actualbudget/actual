@@ -232,7 +232,7 @@ exports[`File import handles html escaped plaintext 1`] = `
     "error": null,
     "financial_id": "23060061032549554596530000",
     "id": "id5",
-    "imported_description": "TPAY <DEFTPYMT>",
+    "imported_description": "TPAY &lt;DEFTPYMT&gt;",
     "isChild": 0,
     "isParent": 0,
     "location": null,
