@@ -65,7 +65,7 @@ if (isPlaywrightTest) {
 // be closed automatically when the JavaScript object is garbage collected.
 let clientWin: BrowserWindow | null;
 let serverProcess: UtilityProcess | null;
-let actualServerProcess: UtilityProcess | null;
+let syncServerProcess: UtilityProcess | null;
 
 let oAuthServer: ReturnType<typeof createServer> | null;
 
@@ -264,19 +264,19 @@ async function startSyncServer() {
     let syncServerStarted = false;
 
     const syncServerPromise = new Promise<void>(resolve => {
-      actualServerProcess = utilityProcess.fork(serverPath, [], forkOptions);
+      syncServerProcess = utilityProcess.fork(serverPath, [], forkOptions);
 
-      actualServerProcess.stdout?.on('data', (chunk: Buffer) => {
+      syncServerProcess.stdout?.on('data', (chunk: Buffer) => {
         // Send the Server console.log messages to the main browser window
         logMessage('info', `Sync-Server: ${chunk.toString('utf8')}`);
       });
 
-      actualServerProcess.stderr?.on('data', (chunk: Buffer) => {
+      syncServerProcess.stderr?.on('data', (chunk: Buffer) => {
         // Send the Server console.error messages out to the main browser window
         logMessage('error', `Sync-Server: ${chunk.toString('utf8')}`);
       });
 
-      actualServerProcess.on('message', msg => {
+      syncServerProcess.on('message', msg => {
         switch (msg.type) {
           case 'server-started':
             logMessage('info', 'Sync-Server: Actual Sync Server has started!');
@@ -308,6 +308,12 @@ async function startSyncServer() {
   } catch (error) {
     logMessage('error', `Sync-Server: Error starting sync server: ${error}`);
   }
+}
+
+async function stopSyncServer() {
+  logMessage('info', 'Stopping sync server...');
+  syncServerProcess?.kill();
+  syncServerProcess = null;
 }
 
 async function createWindow() {
@@ -547,6 +553,14 @@ ipcMain.on('get-bootstrap-data', event => {
 
   event.returnValue = payload;
 });
+
+ipcMain.handle('start-sync-server', async () => startSyncServer());
+
+ipcMain.handle('stop-sync-server', async () => stopSyncServer());
+
+ipcMain.handle('is-sync-server-running', async () =>
+  syncServerProcess ? true : false,
+);
 
 ipcMain.handle('start-oauth-server', async () => {
   const { url, server: newServer } = await createOAuthServer();
