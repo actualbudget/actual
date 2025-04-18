@@ -311,9 +311,9 @@ async function startSyncServer() {
 }
 
 async function stopSyncServer() {
-  logMessage('info', 'Stopping sync server...');
   syncServerProcess?.kill();
   syncServerProcess = null;
+  logMessage('info', 'Sync-Server: Stopped');
 }
 
 async function createWindow() {
