@@ -80,7 +80,10 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
 
   sheet.get().createDynamic(sheetName, 'from-last-month', {
     initialValue: 0,
-    dependencies: [`${prevSheetName}!to-budget`, `${prevSheetName}!buffered`],
+    dependencies: [
+      `${prevSheetName}!to-budget`,
+      `${prevSheetName}!buffered-selected`,
+    ],
     run: (toBudget, buffered) =>
       safeNumber(number(toBudget) + number(buffered)),
   });
@@ -169,7 +172,7 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
       'available-funds',
       'last-month-overspent',
       'total-budgeted',
-      'buffered',
+      'buffered-selected',
     ],
     run: (available, lastOverspent, totalBudgeted, buffered) => {
       return safeNumber(
