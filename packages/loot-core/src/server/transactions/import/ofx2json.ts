@@ -31,12 +31,11 @@ function sgml2Xml(sgml) {
 
 function html2Plain(value) {
   return value
-    ?.replace(/&amp;/g, '&') // ampersands
-    .replace(/&#038;/g, '&') // other ampersands
-    .replace(/&lt;/g, '<') // lessthan
+    ?.replace(/&lt;/g, '<') // lessthan
     .replace(/&gt;/g, '>') // greaterthan
     .replace(/&#39;/g, "'") // eslint-disable-line rulesdir/typography
-    .replace(/&quot;/g, '"'); // eslint-disable-line rulesdir/typography
+    .replace(/&quot;/g, '"') // eslint-disable-line rulesdir/typography
+    .replace(/(&amp;|&#038;)/g, '&'); // ampersands
 }
 
 async function parseXml(content) {
