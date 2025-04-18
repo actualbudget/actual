@@ -297,7 +297,7 @@ export function TransactionListItem({
                   style={{
                     fontSize: 11,
                     fontWeight: '400',
-                    ...makeAmountFullStyle(balance),
+                    ...makeAmountFullStyle(balance || 0),
                   }}
                 >
                   {balance && integerToCurrency(balance)}
