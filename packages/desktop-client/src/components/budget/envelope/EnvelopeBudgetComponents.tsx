@@ -233,6 +233,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
 
   const { showUndoNotification } = useUndo();
 
+  const carryover = useEnvelopeSheetValue(
+    envelopeBudget.catCarryover(category.id),
+  );
+
   return (
     <View
       style={{
@@ -307,7 +311,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                     category: category.id,
                   });
                   showUndoNotification({
-                    message: t(`Budget set to last month’s budget.`),
+                    message: t(`Budget set to last month's budget.`),
                   });
                 }}
                 onSetMonthsAverage={numberOfMonths => {
@@ -491,13 +495,19 @@ type IncomeCategoryMonthProps = {
   isLast: boolean;
   month: string;
   onShowActivity: (id: CategoryEntity['id'], month: string) => void;
+  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
 };
 export function IncomeCategoryMonth({
   category,
   isLast,
   month,
   onShowActivity,
+  onBudgetAction,
 }: IncomeCategoryMonthProps) {
+  const carryover = useEnvelopeSheetValue(
+    envelopeBudget.catCarryover(category.id),
+  );
+
   return (
     <View style={{ flex: 1 }}>
       <Field
@@ -510,25 +520,61 @@ export function IncomeCategoryMonth({
           backgroundColor: monthUtils.isCurrentMonth(month)
             ? theme.budgetCurrentMonth
             : theme.budgetOtherMonth,
+          '& .hover-visible': {
+            opacity: 0,
+          },
+          '&:hover .hover-visible': {
+            opacity: 1,
+          },
         }}
       >
-        <span onClick={() => onShowActivity(category.id, month)}>
-          <EnvelopeCellValue
-            binding={envelopeBudget.catSumAmount(category.id)}
-            type="financial"
-          >
-            {props => (
-              <CellValueText
-                {...props}
-                className={css({
-                  cursor: 'pointer',
-                  ':hover': { textDecoration: 'underline' },
-                  ...makeAmountGrey(props.value),
-                })}
-              />
-            )}
-          </EnvelopeCellValue>
-        </span>
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+          }}
+        >
+          <View style={{ flexShrink: 0, marginRight: 4 }}>
+            <Button
+              variant="bare"
+              className="hover-visible"
+              onPress={() => {
+                onBudgetAction(month, 'toggle-carryover', {
+                  category: category.id,
+                  value: !carryover,
+                });
+              }}
+              style={{
+                padding: 3,
+                border: `1px solid ${theme.buttonMenuBorder}`,
+                borderRadius: 4,
+              }}
+            >
+              <Text style={{ fontSize: 12 }}>
+                {carryover ? 'Disable Auto Hold' : 'Enable Auto Hold'}
+              </Text>
+            </Button>
+          </View>
+          <span onClick={() => onShowActivity(category.id, month)}>
+            <EnvelopeCellValue
+              binding={envelopeBudget.catSumAmount(category.id)}
+              type="financial"
+            >
+              {props => (
+                <CellValueText
+                  {...props}
+                  className={css({
+                    cursor: 'pointer',
+                    ':hover': { textDecoration: 'underline' },
+                    ...makeAmountGrey(props.value),
+                  })}
+                />
+              )}
+            </EnvelopeCellValue>
+          </span>
+        </View>
       </Field>
     </View>
   );
