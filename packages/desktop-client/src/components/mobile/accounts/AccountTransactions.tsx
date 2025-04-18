@@ -295,7 +295,7 @@ function TransactionListWithPreviews({
 
       // Get the last transaction's balance to continue from
       const lastTransaction = balanceTransactions[0];
-      let runningBalance = lastTransaction
+      let runningBalance: number = lastTransaction
         ? (lastTransaction as any).balance
         : 0;
 
