@@ -29,7 +29,7 @@ function sgml2Xml(sgml) {
     .replace(/<\/<added>(\w+?)>(<\/\1>)?/g, '</$1>'); // Remove duplicate end-tags
 }
 
-function html2Plain(value) {
+export function html2Plain(value) {
   return value
     ?.replace(/&lt;/g, '<') // lessthan
     .replace(/&gt;/g, '>') // greaterthan
