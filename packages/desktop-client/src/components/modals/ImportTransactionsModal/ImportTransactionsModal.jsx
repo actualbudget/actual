@@ -207,6 +207,7 @@ export function ImportTransactionsModal({
       multiplierAmount,
     ) => {
       const previewTransactions = [];
+      const inOutModeEnabled = isOfxFile(filetype) ? false : inOutMode;
 
       for (let trans of transactions) {
         if (trans.isMatchedTransaction) {
@@ -237,7 +238,7 @@ export function ImportTransactionsModal({
         const { amount } = parseAmountFields(
           trans,
           splitMode,
-          isOfxFile(filetype) ? false : inOutMode,
+          inOutModeEnabled,
           outValue,
           flipAmount,
           multiplierAmount,
@@ -412,7 +413,9 @@ export function ImportTransactionsModal({
         setTransactions(transactionPreview);
       }
     },
-    [accountId, getImportPreview, inOutMode, multiplierAmount, outValue, prefs],
+    // We use some state variables from the component, but do not want to re-parse when they change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [accountId, getImportPreview, prefs],
   );
 
   function onMultiplierChange(e) {
@@ -449,14 +452,8 @@ export function ImportTransactionsModal({
       return;
     }
 
-    if (flipAmount === true) {
-      setFlipAmount(!flipAmount);
-    }
-
     const isSplit = !splitMode;
     setSplitMode(isSplit);
-    setInOutMode(false);
-    setFlipAmount(false);
 
     // Run auto-detection on the fields to try to detect the fields
     // automatically
@@ -1026,7 +1023,6 @@ export function ImportTransactionsModal({
                   <CheckboxOption
                     id="form_flip"
                     checked={flipAmount}
-                    disabled={splitMode || inOutMode}
                     onChange={() => {
                       setFlipAmount(!flipAmount);
                       runImportPreview();
@@ -1034,31 +1030,6 @@ export function ImportTransactionsModal({
                   >
                     {t('Flip amount')}
                   </CheckboxOption>
-                  {filetype === 'csv' && (
-                    <>
-                      <CheckboxOption
-                        id="form_split"
-                        checked={splitMode}
-                        disabled={inOutMode || flipAmount}
-                        onChange={() => {
-                          onSplitMode();
-                          runImportPreview();
-                        }}
-                      >
-                        {t('Split amount into separate inflow/outflow columns')}
-                      </CheckboxOption>
-                      <InOutOption
-                        inOutMode={inOutMode}
-                        outValue={outValue}
-                        disabled={splitMode || flipAmount}
-                        onToggle={() => {
-                          setInOutMode(!inOutMode);
-                          runImportPreview();
-                        }}
-                        onChangeText={setOutValue}
-                      />
-                    </>
-                  )}
                   <MultiplierOption
                     multiplierEnabled={multiplierEnabled}
                     multiplierAmount={multiplierAmount}
@@ -1069,6 +1040,29 @@ export function ImportTransactionsModal({
                     }}
                     onChangeAmount={onMultiplierChange}
                   />
+                  {filetype === 'csv' && (
+                    <>
+                      <CheckboxOption
+                        id="form_split"
+                        checked={splitMode}
+                        onChange={() => {
+                          onSplitMode();
+                          runImportPreview();
+                        }}
+                      >
+                        {t('Split amount into separate inflow/outflow columns')}
+                      </CheckboxOption>
+                      <InOutOption
+                        inOutMode={inOutMode}
+                        outValue={outValue}
+                        onToggle={() => {
+                          setInOutMode(!inOutMode);
+                          runImportPreview();
+                        }}
+                        onChangeText={setOutValue}
+                      />
+                    </>
+                  )}
                 </View>
               </Stack>
             </View>
