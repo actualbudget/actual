@@ -118,6 +118,7 @@ export default [
     ],
   },
   {
+    // Temporary until the sync-server is migrated to TypeScript
     files: [
       'packages/sync-server/**/*.spec.js?(x)',
       'packages/sync-server/**/*.test.js?(x)',
