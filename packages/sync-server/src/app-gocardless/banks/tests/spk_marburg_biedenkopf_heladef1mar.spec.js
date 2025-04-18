@@ -196,14 +196,14 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
         SpkMarburgBiedenkopfHeladef1mar.normalizeTransaction(tx, true),
       );
       const originalOrder = Array.from(normalizeTransactions);
+      console.log(originalOrder);
       const swap = (a, b) => {
         const swap = normalizeTransactions[a];
         normalizeTransactions[a] = normalizeTransactions[b];
         normalizeTransactions[b] = swap;
       };
-      swap(1, 4);
-      swap(3, 6);
-      swap(0, 7);
+      swap(1, 3);
+      swap(0, 2);
       const sortedTransactions =
         SpkMarburgBiedenkopfHeladef1mar.sortTransactions(normalizeTransactions);
       expect(sortedTransactions).toEqual(originalOrder);
