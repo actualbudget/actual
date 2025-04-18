@@ -268,11 +268,36 @@ function TransactionListWithPreviews({
   } = useTransactions({
     query: transactionsQuery,
   });
-  const [getBalancesQuery] = useState<Query>(runningBalancesQuery());
-  const balancesDirty = useTransactions({ query: getBalancesQuery });
-  const balances: number[] = [];
-  //@ts-ignore
-  balancesDirty.transactions.forEach(t => (balances[t.id] = t.balance));
+
+  const [balancesQuery] = useState<Query>(runningBalancesQuery());
+  const {
+    transactions: balanceTransactions,
+    isLoading: isLoadingBalances,
+    isLoadingMore: isLoadingMoreBalances,
+    reload: reloadBalances,
+    loadMore: loadMoreBalances,
+  } = useTransactions({
+    query: balancesQuery,
+  });
+  const balances = useMemo(() => {
+    const map = new Map<TransactionEntity['id'], number>();
+    if (!isLoadingBalances && !isLoadingMoreBalances && balanceTransactions) {
+      balanceTransactions.forEach(t => {
+        //@ts-ignore
+        map.set(t.id, t.balance);
+      });
+    }
+    return map;
+  }, [balanceTransactions, isLoadingBalances, isLoadingMoreBalances]);
+
+  // Wait for initial balances before rendering
+  const hasInitialBalances = useMemo(() => {
+    return (
+      !isLoadingBalances &&
+      balanceTransactions &&
+      balanceTransactions.length > 0
+    );
+  }, [isLoadingBalances, balanceTransactions]);
 
   const { previewTransactions } = useAccountPreviewTransactions({
     accountId: account?.id || '',
@@ -304,10 +329,19 @@ function TransactionListWithPreviews({
           tables.includes('payee_mapping')
         ) {
           reloadTransactions();
+          // Also reload balances when transactions change
+          reloadBalances();
         }
       }
     });
-  }, [dispatch, reloadTransactions]);
+  }, [dispatch, reloadTransactions, reloadBalances]);
+
+  // Load more balances when transactions load more
+  useEffect(() => {
+    if (isLoadingMore) {
+      loadMoreBalances();
+    }
+  }, [isLoadingMore, loadMoreBalances]);
 
   const { isSearching, search: onSearch } = useTransactionsSearch({
     updateQuery: setTransactionsQuery,
@@ -373,6 +407,11 @@ function TransactionListWithPreviews({
     ? // Do not render child transactions in the list, unless searching
       previewTransactions.concat(transactions.filter(t => !t.is_child))
     : transactions;
+
+  // Don't render until we have initial balances
+  if (!hasInitialBalances) {
+    return null;
+  }
 
   return (
     <TransactionListWithBalances
