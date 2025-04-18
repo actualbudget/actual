@@ -39,6 +39,7 @@ export interface BudgetHandlers {
   'budget/cover-overbudgeted': typeof actions.coverOverbudgeted;
   'budget/transfer-category': typeof actions.transferCategory;
   'budget/set-carryover': typeof actions.setCategoryCarryover;
+  'budget/reset-income-carryover': typeof actions.resetIncomeCarryover;
   'get-categories': typeof getCategories;
   'get-budget-bounds': typeof getBudgetBounds;
   'envelope-budget-month': typeof envelopeBudgetMonth;
@@ -119,6 +120,10 @@ app.method(
 app.method(
   'budget/set-carryover',
   mutator(undoable(actions.setCategoryCarryover)),
+);
+app.method(
+  'budget/reset-income-carryover',
+  mutator(undoable(actions.resetIncomeCarryover)),
 );
 app.method('get-categories', getCategories);
 app.method('get-budget-bounds', getBudgetBounds);

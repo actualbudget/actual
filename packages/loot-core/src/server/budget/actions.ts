@@ -599,3 +599,20 @@ async function addMovementNotes({
     note: `${existingMonthBudgetNotes}- ${note}`,
   });
 }
+
+export async function resetIncomeCarryover({
+  month,
+}: {
+  month: string;
+}): Promise<void> {
+  const table = getBudgetTable();
+  const categories = await db.all<db.DbViewCategory>(
+    'SELECT * FROM v_categories WHERE is_income = 1 AND tombstone = 0',
+  );
+
+  await batchMessages(async () => {
+    for (const category of categories) {
+      await setCarryover(table, category.id, dbMonth(month).toString(), false);
+    }
+  });
+}

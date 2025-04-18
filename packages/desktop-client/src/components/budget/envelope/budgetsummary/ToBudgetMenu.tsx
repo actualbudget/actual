@@ -7,26 +7,29 @@ import { envelopeBudget } from 'loot-core/client/queries';
 
 import { useEnvelopeSheetValue } from '../EnvelopeBudgetComponents';
 
-type ToBudgetMenuProps = Omit<
-  ComponentPropsWithoutRef<typeof Menu>,
-  'onMenuSelect' | 'items'
-> & {
-  onTransfer: () => void;
-  onCover: () => void;
-  onHoldBuffer: () => void;
-  onResetHoldBuffer: () => void;
+type ToBudgetMenuProps = {
+  onTransfer?: () => void;
+  onCover?: () => void;
+  onHoldBuffer?: () => void;
+  onResetHoldBuffer?: () => void;
+  onBudgetAction?: (month: string, action: string, payload: any) => void;
+  month: string;
 };
+
 export function ToBudgetMenu({
   onTransfer,
   onCover,
   onHoldBuffer,
   onResetHoldBuffer,
+  onBudgetAction,
+  month,
   ...props
 }: ToBudgetMenuProps) {
   const { t } = useTranslation();
 
   const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
   const forNextMonth = useEnvelopeSheetValue(envelopeBudget.forNextMonth) ?? 0;
+  const buffered = useEnvelopeSheetValue(envelopeBudget.manualBuffered) ?? 0;
   const items = [
     ...(toBudget > 0
       ? [
@@ -48,7 +51,15 @@ export function ToBudgetMenu({
           },
         ]
       : []),
-    ...(forNextMonth > 0
+    ...(forNextMonth > 0 && buffered === 0
+      ? [
+          {
+            name: 'disable-auto-buffer',
+            text: t('Reset hold this month'),
+          },
+        ]
+      : []),
+    ...(forNextMonth > 0 && buffered !== 0
       ? [
           {
             name: 'reset-buffer',
@@ -74,6 +85,9 @@ export function ToBudgetMenu({
             break;
           case 'reset-buffer':
             onResetHoldBuffer?.();
+            break;
+          case 'disable-auto-buffer':
+            onBudgetAction?.(month, 'reset-income-carryover', {});
             break;
           default:
             throw new Error(`Unrecognized menu option: ${name}`);

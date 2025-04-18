@@ -527,6 +527,11 @@ type ApplyBudgetActionPayload =
       };
     }
   | {
+      type: 'reset-income-carryover';
+      month: string;
+      args: never;
+    }
+  | {
       type: 'apply-single-category-template';
       month: string;
       args: {
@@ -680,6 +685,9 @@ export const applyBudgetAction = createAppAsyncThunk(
         });
         break;
       }
+      case 'reset-income-carryover':
+        await send('budget/reset-income-carryover', { month });
+        break;
       case 'apply-multiple-templates':
         dispatch(
           addNotification({
