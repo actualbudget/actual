@@ -56,17 +56,17 @@ export function SecondaryItem({
       <ItemContent
         style={{
           ...accountNameStyle,
-          color: theme.sidebarItemText,
+          color: 'var(--color-always-dark-foreground-contrast)',
           paddingLeft: 14 + indent,
           fontWeight: bold ? fontWeight : null,
-          ':hover': { backgroundColor: theme.sidebarItemBackgroundHover },
+          ':hover': { backgroundColor: 'var(--color-always-dark-fill-ghost)' },
         }}
         to={to}
         onClick={onClick}
         activeStyle={{
           borderLeft: '4px solid ' + theme.sidebarItemTextSelected,
           paddingLeft: 14 - 4 + indent,
-          color: theme.sidebarItemTextSelected,
+          color: 'var(--color-always-dark-foreground-primary)',
           fontWeight: bold ? fontWeight : null,
         }}
       >

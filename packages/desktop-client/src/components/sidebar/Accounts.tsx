@@ -84,7 +84,7 @@ export function Accounts() {
       <View
         style={{
           height: 1,
-          backgroundColor: theme.sidebarItemBackgroundHover,
+          backgroundColor: 'var(--color-always-dark-fill-ghost)',
           marginTop: 15,
           flexShrink: 0,
         }}

@@ -64,6 +64,7 @@ type MenuProps<NameType> = {
   className?: string;
   getItemStyle?: (item: MenuItemObject<NameType>) => CSSProperties;
   slot?: ComponentProps<typeof Button>['slot'];
+  alwaysDark?: boolean;
 };
 
 export function Menu<const NameType = string>({
@@ -75,6 +76,7 @@ export function Menu<const NameType = string>({
   className,
   getItemStyle,
   slot,
+  alwaysDark,
 }: MenuProps<NameType>) {
   const elRef = useRef<HTMLDivElement>(null);
   const items = allItems.filter(x => x);
@@ -172,7 +174,7 @@ export function Menu<const NameType = string>({
         return (
           <Button
             key={String(item.name)}
-            variant="bare"
+            variant={alwaysDark ? 'bareAlwaysDark' : 'bare'}
             slot={slot}
             style={{
               cursor: 'default',
@@ -180,11 +182,15 @@ export function Menu<const NameType = string>({
               flexDirection: 'row',
               justifyContent: 'center',
               alignItems: 'center',
-              color: 'var(--color-foreground-contrast)',
+              color: alwaysDark
+                ? 'var(--color-always-dark-foreground-contrast)'
+                : 'var(--color-foreground-contrast)',
               ...(item.disabled && { color: theme.buttonBareDisabledText }),
               ...(!item.disabled &&
                 hoveredIndex === idx && {
-                  backgroundColor: 'var(--color-fill-ghost)',
+                  backgroundColor: alwaysDark
+                    ? 'var(--color-always-dark-fill-ghost)'
+                    : 'var(--color-fill-ghost)',
                 }),
               ...(!isLabel(item) && getItemStyle?.(item)),
             }}

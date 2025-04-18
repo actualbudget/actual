@@ -25,10 +25,9 @@ export function ToggleButton({
   return (
     <View className="float" style={{ ...style, flexShrink: 0 }}>
       <Button
-        variant="bare"
+        variant="bareAlwaysDark"
         aria-label={isFloating ? t('Pin sidebar') : t('Unpin sidebar')}
         onPress={onFloat}
-        style={{ color: theme.buttonMenuBorder }}
       >
         {isFloating ? (
           <SvgPin

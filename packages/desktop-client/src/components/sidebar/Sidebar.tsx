@@ -91,7 +91,7 @@ export function Sidebar() {
         className={css({
           color: theme.sidebarItemText,
           height: '100%',
-          backgroundColor: theme.sidebarBackground,
+          backgroundColor: 'var(--color-always-dark-fill-float)',
           '& .float': {
             opacity: isFloating ? 1 : 0,
             transition: 'opacity .25s, width .25s',

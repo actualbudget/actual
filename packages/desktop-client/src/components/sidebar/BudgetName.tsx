@@ -114,9 +114,8 @@ function EditableBudgetName() {
     <View onContextMenu={handleContextMenu}>
       <Button
         ref={triggerRef}
-        variant="bare"
+        variant="bareAlwaysDark"
         style={{
-          color: theme.buttonNormalBorder,
           fontSize: 16,
           fontWeight: 500,
           marginLeft: -5,
@@ -142,10 +141,14 @@ function EditableBudgetName() {
         placement="bottom start"
         isOpen={menuOpen}
         onOpenChange={() => setMenuOpen(false)}
-        style={{ margin: 1 }}
+        style={{
+          border: '1px solid var(--color-always-dark-border-hint)',
+          marginTop: '0.25rem',
+          background: 'var(--color-always-dark-fill-float)',
+        }}
         {...position}
       >
-        <Menu onMenuSelect={onMenuSelect} items={items} />
+        <Menu alwaysDark onMenuSelect={onMenuSelect} items={items} />
       </Popover>
     </View>
   );

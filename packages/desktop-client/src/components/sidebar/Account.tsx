@@ -45,8 +45,8 @@ export const accountNameStyle: CSSProperties = {
   paddingRight: 15,
   paddingLeft: 10,
   textDecoration: 'none',
-  color: theme.sidebarItemText,
-  ':hover': { backgroundColor: theme.sidebarItemBackgroundHover },
+  color: 'var(--color-always-dark-foreground-contrast)',
+  ':hover': { backgroundColor: 'var(--color-always-dark-fill-ghost)' },
   ...styles.smallText,
 };
 
