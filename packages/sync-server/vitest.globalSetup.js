@@ -60,8 +60,7 @@ const setSessionUser = (userId, token = 'valid-token') => {
   }
 };
 
-// eslint-disable-next-line import/no-default-export
-export default async function setup() {
+export async function setup() {
   const NEVER_EXPIRES = -1; // or consider using a far future timestamp
 
   await runMigrations();
@@ -98,4 +97,8 @@ export default async function setup() {
   setSessionUser('genericAdmin', 'valid-token-admin');
 
   createUser(GENERIC_USER_ID, 'user', BASIC_ROLE_ID, 1);
+}
+
+export async function teardown() {
+  await runMigrations('down');
 }

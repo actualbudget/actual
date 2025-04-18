@@ -1,5 +1,3 @@
-import { jest } from '@jest/globals';
-
 import {
   AccessDeniedError,
   AccountNotLinkedToRequisition,
@@ -51,29 +49,29 @@ describe('goCardlessService', () => {
   let setTokenSpy;
 
   beforeEach(() => {
-    getInstitutionsSpy = jest.spyOn(client, 'getInstitutions');
-    getInstitutionSpy = jest.spyOn(client, 'getInstitutionById');
-    getRequisitionsSpy = jest.spyOn(client, 'getRequisitionById');
-    deleteRequisitionsSpy = jest.spyOn(client, 'deleteRequisition');
-    createRequisitionSpy = jest.spyOn(client, 'initSession');
-    getBalancesSpy = jest.spyOn(client, 'getBalances');
-    getTransactionsSpy = jest.spyOn(client, 'getTransactions');
-    getDetailsSpy = jest.spyOn(client, 'getDetails');
-    getMetadataSpy = jest.spyOn(client, 'getMetadata');
-    setTokenSpy = jest.spyOn(goCardlessService, 'setToken');
+    getInstitutionsSpy = vi.spyOn(client, 'getInstitutions');
+    getInstitutionSpy = vi.spyOn(client, 'getInstitutionById');
+    getRequisitionsSpy = vi.spyOn(client, 'getRequisitionById');
+    deleteRequisitionsSpy = vi.spyOn(client, 'deleteRequisition');
+    createRequisitionSpy = vi.spyOn(client, 'initSession');
+    getBalancesSpy = vi.spyOn(client, 'getBalances');
+    getTransactionsSpy = vi.spyOn(client, 'getTransactions');
+    getDetailsSpy = vi.spyOn(client, 'getDetails');
+    getMetadataSpy = vi.spyOn(client, 'getMetadata');
+    setTokenSpy = vi.spyOn(goCardlessService, 'setToken');
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('#getLinkedRequisition', () => {
     it('returns requisition', async () => {
       setTokenSpy.mockResolvedValue();
 
-      jest
-        .spyOn(goCardlessService, 'getRequisition')
-        .mockResolvedValue(mockRequisition);
+      vi.spyOn(goCardlessService, 'getRequisition').mockResolvedValue(
+        mockRequisition,
+      );
 
       expect(
         await goCardlessService.getLinkedRequisition(requisitionId),
@@ -83,9 +81,10 @@ describe('goCardlessService', () => {
     it('throws RequisitionNotLinked error if requisition status is different than LN', async () => {
       setTokenSpy.mockResolvedValue();
 
-      jest
-        .spyOn(goCardlessService, 'getRequisition')
-        .mockResolvedValue({ ...mockRequisition, status: 'ER' });
+      vi.spyOn(goCardlessService, 'getRequisition').mockResolvedValue({
+        ...mockRequisition,
+        status: 'ER',
+      });
 
       await expect(() =>
         goCardlessService.getLinkedRequisition(requisitionId),
@@ -95,30 +94,31 @@ describe('goCardlessService', () => {
 
   describe('#getRequisitionWithAccounts', () => {
     it('returns combined data', async () => {
-      jest
-        .spyOn(goCardlessService, 'getRequisition')
-        .mockResolvedValue(mockRequisitionWithExampleAccounts);
-      jest
-        .spyOn(goCardlessService, 'getDetailedAccount')
-        .mockResolvedValueOnce(mockDetailedAccountExample1);
-      jest
-        .spyOn(goCardlessService, 'getDetailedAccount')
-        .mockResolvedValueOnce(mockDetailedAccountExample2);
-      jest
-        .spyOn(goCardlessService, 'getInstitution')
-        .mockResolvedValue(mockInstitution);
-      jest
-        .spyOn(goCardlessService, 'extendAccountsAboutInstitutions')
-        .mockResolvedValue([
-          {
-            ...mockExtendAccountsAboutInstitutions[0],
-            institution_id: 'NEWONE',
-          },
-          {
-            ...mockExtendAccountsAboutInstitutions[1],
-            institution_id: 'NEWONE',
-          },
-        ]);
+      vi.spyOn(goCardlessService, 'getRequisition').mockResolvedValue(
+        mockRequisitionWithExampleAccounts,
+      );
+      vi.spyOn(goCardlessService, 'getDetailedAccount').mockResolvedValueOnce(
+        mockDetailedAccountExample1,
+      );
+      vi.spyOn(goCardlessService, 'getDetailedAccount').mockResolvedValueOnce(
+        mockDetailedAccountExample2,
+      );
+      vi.spyOn(goCardlessService, 'getInstitution').mockResolvedValue(
+        mockInstitution,
+      );
+      vi.spyOn(
+        goCardlessService,
+        'extendAccountsAboutInstitutions',
+      ).mockResolvedValue([
+        {
+          ...mockExtendAccountsAboutInstitutions[0],
+          institution_id: 'NEWONE',
+        },
+        {
+          ...mockExtendAccountsAboutInstitutions[1],
+          institution_id: 'NEWONE',
+        },
+      ]);
 
       const response = await goCardlessService.getRequisitionWithAccounts(
         mockRequisitionWithExampleAccounts.id,
@@ -146,18 +146,18 @@ describe('goCardlessService', () => {
   describe('#getTransactionsWithBalance', () => {
     const requisitionId = mockRequisition.id;
     it('returns transaction with starting balance', async () => {
-      jest
-        .spyOn(goCardlessService, 'getLinkedRequisition')
-        .mockResolvedValue(mockRequisition);
-      jest
-        .spyOn(goCardlessService, 'getAccountMetadata')
-        .mockResolvedValue(mockAccountMetaData);
-      jest
-        .spyOn(goCardlessService, 'getTransactions')
-        .mockResolvedValue(mockTransactions);
-      jest
-        .spyOn(goCardlessService, 'getBalances')
-        .mockResolvedValue(mockedBalances);
+      vi.spyOn(goCardlessService, 'getLinkedRequisition').mockResolvedValue(
+        mockRequisition,
+      );
+      vi.spyOn(goCardlessService, 'getAccountMetadata').mockResolvedValue(
+        mockAccountMetaData,
+      );
+      vi.spyOn(goCardlessService, 'getTransactions').mockResolvedValue(
+        mockTransactions,
+      );
+      vi.spyOn(goCardlessService, 'getBalances').mockResolvedValue(
+        mockedBalances,
+      );
 
       expect(
         await goCardlessService.getTransactionsWithBalance(
@@ -216,9 +216,9 @@ describe('goCardlessService', () => {
     });
 
     it('throws AccountNotLinkedToRequisition error if requisition accounts not includes requested account', async () => {
-      jest
-        .spyOn(goCardlessService, 'getLinkedRequisition')
-        .mockResolvedValue(mockRequisition);
+      vi.spyOn(goCardlessService, 'getLinkedRequisition').mockResolvedValue(
+        mockRequisition,
+      );
 
       await expect(() =>
         goCardlessService.getTransactionsWithBalance({

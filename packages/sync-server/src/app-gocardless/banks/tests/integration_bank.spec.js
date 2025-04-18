@@ -1,5 +1,3 @@
-import { jest } from '@jest/globals';
-
 import {
   mockExtendAccountsAboutInstitutions,
   mockInstitution,
@@ -10,7 +8,7 @@ describe('IntegrationBank', () => {
   let consoleSpy;
 
   beforeEach(() => {
-    consoleSpy = jest.spyOn(console, 'debug');
+    consoleSpy = vi.spyOn(console, 'debug');
   });
 
   describe('normalizeAccount', () => {
