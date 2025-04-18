@@ -70,16 +70,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/crdt@workspace:packages/crdt"
   dependencies:
-    "@swc/core": "npm:^1.5.3"
-    "@swc/jest": "npm:^0.2.36"
-    "@types/jest": "npm:^29.5.14"
     "@types/uuid": "npm:^9.0.8"
     google-protobuf: "npm:^3.12.4"
-    jest: "npm:^29.7.0"
     murmurhash: "npm:^2.0.1"
     ts-protoc-gen: "npm:^0.15.0"
     typescript: "npm:^5.8.2"
     uuid: "npm:^9.0.1"
+    vitest: "npm:^3.0.2"
   languageName: unknown
   linkType: soft
 
