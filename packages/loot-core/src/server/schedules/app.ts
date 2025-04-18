@@ -16,7 +16,7 @@ import {
   getStatus,
   recurConfigToRSchedule,
 } from '../../shared/schedules';
-import { ScheduleEntity } from '../../types/models';
+import { RuleConditionEntity, ScheduleEntity } from '../../types/models';
 import { addTransactions } from '../accounts/sync';
 import { createApp } from '../app';
 import { runQuery as aqlQuery } from '../aql';
@@ -39,7 +39,7 @@ import { findSchedules } from './find-schedules';
 
 // Utilities
 
-function zip(arr1, arr2) {
+function zip<T1, T2>(arr1: T1[], arr2: T2[]): [T1, T2][] {
   const result = [];
   for (let i = 0; i < arr1.length; i++) {
     result.push([arr1[i], arr2[i]]);
@@ -47,7 +47,10 @@ function zip(arr1, arr2) {
   return result;
 }
 
-export function updateConditions(conditions, newConditions) {
+export function updateConditions(
+  conditions: RuleConditionEntity[],
+  newConditions: RuleConditionEntity[],
+): RuleConditionEntity[] {
   const scheduleConds = extractScheduleConds(conditions);
   const newScheduleConds = extractScheduleConds(newConditions);
 
@@ -185,7 +188,7 @@ async function checkIfScheduleExists(name, scheduleId) {
 export async function createSchedule({
   schedule = null,
   conditions = [],
-} = {}): Promise<ScheduleEntity['id']> {
+}): Promise<ScheduleEntity['id']> {
   const scheduleId = schedule?.id || uuidv4();
 
   const { date: dateCond } = extractScheduleConds(conditions);
@@ -241,14 +244,14 @@ export async function updateSchedule({
   conditions,
   resetNextDate,
 }: {
-  schedule;
-  conditions?;
+  schedule: Partial<ScheduleEntity>;
+  conditions?: RuleConditionEntity[];
   resetNextDate?: boolean;
 }) {
   if (schedule.rule) {
     throw new Error('You cannot change the rule of a schedule');
   }
-  let rule;
+  let rule: Rule;
 
   // This must be outside the `batchMessages` call because we change
   // and then read data
@@ -279,7 +282,7 @@ export async function updateSchedule({
       await updateRule({ id: rule.id, conditions: newConditions });
 
       // Annoyingly, sometimes it has `type` and sometimes it doesn't
-      const stripType = ({ type, ...fields }) => fields;
+      const stripType = ({ type, ...fields }: { type?: string }) => fields;
 
       // Update `next_date` if the user forced it, or if the account
       // or date changed. We check account because we don't update
