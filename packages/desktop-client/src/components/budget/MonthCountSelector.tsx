@@ -45,7 +45,11 @@ export function MonthCountSelector({
     calendars.push(
       <Calendar
         key={i}
-        color={maxMonths >= i ? theme.pageTextLight : theme.pageTextSubdued}
+        color={
+          maxMonths >= i
+            ? 'var(--color-foreground-contrast)'
+            : 'var(--color-foreground-disabled)'
+        }
         onClick={() => onChange(i)}
       />,
     );

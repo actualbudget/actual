@@ -160,14 +160,15 @@ export const MonthPicker = ({
                 cursor: 'default',
                 borderRadius: 2,
                 border: 'none',
+                color: 'var(--color-foreground-contrast)',
                 ...(!isMonthBudgeted && {
                   textDecoration: 'line-through',
-                  color: theme.pageTextSubdued,
+                  color: 'var(--color-foreground-disabled)',
                 }),
                 ...styles.smallText,
                 ...(selected && {
-                  backgroundColor: theme.tableBorderHover,
-                  color: theme.buttonPrimaryText,
+                  backgroundColor: 'var(--color-fill-primary)',
+                  color: 'white',
                 }),
                 ...((hovered || selected) && {
                   borderRadius: 0,
@@ -175,17 +176,18 @@ export const MonthPicker = ({
                 }),
                 ...(hoverId !== null &&
                   !hovered &&
-                  selected && {
-                    filter: 'brightness(65%)',
+                  selected &&
+                  {
+                    // filter: 'brightness(65%)',
                   }),
                 ...(hovered &&
                   !selected && {
-                    backgroundColor: theme.buttonBareBackgroundHover,
+                    backgroundColor: 'var(--color-fill-ghost)',
                   }),
                 ...(!hovered &&
                   !selected &&
                   current && {
-                    backgroundColor: theme.buttonBareBackgroundHover,
+                    backgroundColor: 'var(--color-fill-float)',
                     filter: 'brightness(120%)',
                   }),
                 ...(hovered &&
@@ -195,7 +197,7 @@ export const MonthPicker = ({
                   }),
                 ...(hovered &&
                   selected && {
-                    backgroundColor: theme.tableBorderHover,
+                    backgroundColor: 'var(--color-fill-primary-hover)',
                   }),
                 ...((idx === firstSelectedIndex ||
                   (idx === hoverId && !selected)) && {
