@@ -15,7 +15,7 @@ import {
   pushModal,
 } from 'loot-core/client/modals/modalsSlice';
 import { getPayeesById } from 'loot-core/client/queries/queriesSlice';
-import { runQuery, liveQuery } from 'loot-core/client/query-helpers';
+import { aqlQuery, liveQuery } from 'loot-core/client/query-helpers';
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
@@ -316,7 +316,7 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
   );
 
   async function loadSchedule() {
-    const { data } = await runQuery(q('schedules').filter({ id }).select('*'));
+    const { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
     return data[0];
   }
 
@@ -480,7 +480,7 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
   async function onSave(close: () => void, schedule: Partial<ScheduleEntity>) {
     dispatch({ type: 'form-error', error: null });
     if (state.fields.name) {
-      const { data: sameName } = await runQuery(
+      const { data: sameName } = await aqlQuery(
         q('schedules').filter({ name: state.fields.name }).select('id'),
       );
       if (sameName.length > 0 && sameName[0].id !== schedule.id) {

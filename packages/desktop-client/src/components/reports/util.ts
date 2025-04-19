@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { runQuery } from 'loot-core/client/query-helpers';
+import { aqlQuery } from 'loot-core/client/query-helpers';
 import type { Query } from 'loot-core/shared/query';
 
 export function fromDateRepr(date: string): string {
@@ -12,7 +12,7 @@ export async function runAll(
 ): Promise<void> {
   const data = await Promise.all(
     queries.map(q => {
-      return runQuery(q).then(({ data }) => data);
+      return aqlQuery(q).then(({ data }) => data);
     }),
   );
   cb(data);

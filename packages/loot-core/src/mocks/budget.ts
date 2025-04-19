@@ -2,7 +2,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { addTransactions } from '../server/accounts/sync';
-import { runQuery as aqlQuery } from '../server/aql';
+import { aqlQuery } from '../server/aql';
 import * as budgetActions from '../server/budget/actions';
 import * as budget from '../server/budget/base';
 import * as db from '../server/db';

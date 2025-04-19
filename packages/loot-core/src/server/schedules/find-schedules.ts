@@ -7,7 +7,7 @@ import { q } from '../../shared/query';
 import { getApproxNumberThreshold } from '../../shared/rules';
 import { recurConfigToRSchedule } from '../../shared/schedules';
 import { groupBy } from '../../shared/util';
-import { runQuery as aqlQuery } from '../aql';
+import { aqlQuery } from '../aql';
 import * as db from '../db';
 import { fromDateRepr } from '../models';
 import { conditionsToAQL } from '../transactions/transaction-rules';
