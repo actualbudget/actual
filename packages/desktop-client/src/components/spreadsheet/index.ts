@@ -35,6 +35,7 @@ export type Spreadsheets = {
     'available-funds': number;
     'last-month-overspent': number;
     buffered: number;
+    'buffered-auto': number;
     'buffered-selected': number;
     'to-budget': number | null;
     'from-last-month': number;

@@ -12,7 +12,7 @@ type ToBudgetMenuProps = {
   onHoldBuffer?: () => void;
   onResetHoldBuffer?: () => void;
   //@ts-ignore fix this any
-  onBudgetAction?: (month: string, action: string, payload: any) => void;
+  onBudgetAction?: (month: string, action: string, arg?: unknown) => void;
   month: string;
 };
 
@@ -30,6 +30,7 @@ export function ToBudgetMenu({
   const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
   const forNextMonth = useEnvelopeSheetValue(envelopeBudget.forNextMonth) ?? 0;
   const buffered = useEnvelopeSheetValue(envelopeBudget.manualBuffered) ?? 0;
+  const autoBuffered = useEnvelopeSheetValue(envelopeBudget.autoBuffered) ?? 0;
   const items = [
     ...(toBudget > 0
       ? [
@@ -37,6 +38,10 @@ export function ToBudgetMenu({
             name: 'transfer',
             text: t('Move to a category'),
           },
+        ]
+      : []),
+    ...(autoBuffered === 0
+      ? [
           {
             name: 'buffer',
             text: t('Hold for next month'),
@@ -55,7 +60,7 @@ export function ToBudgetMenu({
       ? [
           {
             name: 'disable-auto-buffer',
-            text: t('Reset hold this month'),
+            text: t('Disable current auto buffer'),
           },
         ]
       : []),
@@ -82,6 +87,7 @@ export function ToBudgetMenu({
             break;
           case 'buffer':
             onHoldBuffer?.();
+            onBudgetAction?.(month, 'reset-income-carryover', {});
             break;
           case 'reset-buffer':
             onResetHoldBuffer?.();
