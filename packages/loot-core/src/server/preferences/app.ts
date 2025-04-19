@@ -99,21 +99,25 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
       prefs.serverSelfSignedCert,
     );
   }
+  if (prefs.syncServerConfig !== undefined) {
+    await asyncStorage.setItem('syncServerConfig', prefs.syncServerConfig);
+  }
   return 'ok';
 }
 
 async function loadGlobalPrefs(): Promise<GlobalPrefs> {
-  const [
-    [, floatingSidebar],
-    [, categoryExpandedState],
-    [, maxMonths],
-    [, documentDir],
-    [, encryptKey],
-    [, language],
-    [, theme],
-    [, preferredDarkTheme],
-    [, serverSelfSignedCert],
-  ] = await asyncStorage.multiGet([
+  const {
+    'floating-sidebar': floatingSidebar,
+    'category-expanded-state': categoryExpandedState,
+    'max-months': maxMonths,
+    'document-dir': documentDir,
+    'encrypt-key': encryptKey,
+    language,
+    theme,
+    'preferred-dark-theme': preferredDarkTheme,
+    'server-self-signed-cert': serverSelfSignedCert,
+    syncServerConfig,
+  } = await asyncStorage.multiGet([
     'floating-sidebar',
     'category-expanded-state',
     'max-months',
@@ -123,6 +127,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     'theme',
     'preferred-dark-theme',
     'server-self-signed-cert',
+    'syncServerConfig',
   ] as const);
   return {
     floatingSidebar: floatingSidebar === 'true',
@@ -144,6 +149,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
         ? preferredDarkTheme
         : 'dark',
     serverSelfSignedCert: serverSelfSignedCert || undefined,
+    syncServerConfig: syncServerConfig || undefined,
   };
 }
 

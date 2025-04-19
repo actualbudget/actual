@@ -21,7 +21,8 @@ export type RemoveItem = typeof removeItem;
 
 export function multiGet<K extends readonly (keyof GlobalPrefsJson)[]>(
   keys: K,
-): Promise<{ [P in keyof K]: [K[P], GlobalPrefsJson[K[P]]] }>;
+): Promise<{ [P in K[number]]: GlobalPrefsJson[P] }>;
+
 export type MultiGet = typeof multiGet;
 
 export function multiSet<K extends keyof GlobalPrefsJson>(
