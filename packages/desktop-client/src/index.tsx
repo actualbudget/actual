@@ -13,7 +13,6 @@ import { Provider } from 'react-redux';
 import { bindActionCreators } from '@reduxjs/toolkit';
 import { createRoot } from 'react-dom/client';
 
-import * as accountsSlice from 'loot-core/client/accounts/accountsSlice';
 import * as appSlice from 'loot-core/client/app/appSlice';
 import * as budgetsSlice from 'loot-core/client/budgets/budgetsSlice';
 import * as modalsSlice from 'loot-core/client/modals/modalsSlice';
@@ -27,6 +26,7 @@ import * as usersSlice from 'loot-core/client/users/usersSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 
+import * as accountsSlice from './accounts/accountsSlice';
 import { AuthProvider } from './auth/AuthProvider';
 import { App } from './components/App';
 import { ServerProvider } from './components/ServerContext';
