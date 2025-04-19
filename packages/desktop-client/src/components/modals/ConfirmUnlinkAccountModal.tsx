@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
@@ -17,6 +17,7 @@ type ConfirmUnlinkAccountModalProps = Extract<
 
 export function ConfirmUnlinkAccountModal({
   accountName,
+  isViewBankSyncSettings,
   onUnlink,
 }: ConfirmUnlinkAccountModalProps) {
   const { t } = useTranslation();
@@ -34,13 +35,19 @@ export function ConfirmUnlinkAccountModal({
           />
           <View style={{ lineHeight: 1.5 }}>
             <Paragraph>
-              Are you sure you want to unlink <strong>{accountName}</strong>?
+              <Trans>
+                Are you sure you want to unlink <strong>{accountName}</strong>?
+              </Trans>
             </Paragraph>
 
             <Paragraph>
-              {t(
-                'Transactions will no longer be synchronized with this account and must be manually entered.',
-              )}
+              {isViewBankSyncSettings
+                ? t(
+                    'Transactions will no longer be synchronized with this account and must be manually entered. You will not be able to edit the bank sync settings for this account and the settings will close.',
+                  )
+                : t(
+                    'Transactions will no longer be synchronized with this account and must be manually entered.',
+                  )}
             </Paragraph>
 
             <View

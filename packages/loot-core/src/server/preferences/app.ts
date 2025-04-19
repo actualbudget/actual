@@ -66,28 +66,34 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
     return 'ok';
   }
 
-  if (prefs.maxMonths) {
+  if (prefs.maxMonths !== undefined) {
     await asyncStorage.setItem('max-months', '' + prefs.maxMonths);
   }
-  if (prefs.documentDir && (await fs.exists(prefs.documentDir))) {
+  if (prefs.categoryExpandedState) {
+    await asyncStorage.setItem(
+      'category-expanded-state',
+      '' + prefs.categoryExpandedState,
+    );
+  }
+  if (prefs.documentDir !== undefined && (await fs.exists(prefs.documentDir))) {
     await asyncStorage.setItem('document-dir', prefs.documentDir);
   }
   if (prefs.floatingSidebar !== undefined) {
     await asyncStorage.setItem('floating-sidebar', '' + prefs.floatingSidebar);
   }
-  if (prefs.language) {
+  if (prefs.language !== undefined) {
     await asyncStorage.setItem('language', prefs.language);
   }
-  if (prefs.theme) {
+  if (prefs.theme !== undefined) {
     await asyncStorage.setItem('theme', prefs.theme);
   }
-  if (prefs.preferredDarkTheme) {
+  if (prefs.preferredDarkTheme !== undefined) {
     await asyncStorage.setItem(
       'preferred-dark-theme',
       prefs.preferredDarkTheme,
     );
   }
-  if (prefs.serverSelfSignedCert) {
+  if (prefs.serverSelfSignedCert !== undefined) {
     await asyncStorage.setItem(
       'server-self-signed-cert',
       prefs.serverSelfSignedCert,
@@ -99,6 +105,7 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
 async function loadGlobalPrefs(): Promise<GlobalPrefs> {
   const [
     [, floatingSidebar],
+    [, categoryExpandedState],
     [, maxMonths],
     [, documentDir],
     [, encryptKey],
@@ -108,6 +115,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     [, serverSelfSignedCert],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
+    'category-expanded-state',
     'max-months',
     'document-dir',
     'encrypt-key',
@@ -118,6 +126,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
   ] as const);
   return {
     floatingSidebar: floatingSidebar === 'true',
+    categoryExpandedState: stringToInteger(categoryExpandedState || '') || 0,
     maxMonths: stringToInteger(maxMonths || '') || 1,
     documentDir: documentDir || getDefaultDocumentDir(),
     keyId: encryptKey && JSON.parse(encryptKey).id,

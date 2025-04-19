@@ -21,7 +21,14 @@ function getChildren(key, children) {
           'type' in child &&
           child.type === Fragment
         ) {
-          return list.concat(getChildren(child.key, child.props.children));
+          return list.concat(
+            getChildren(
+              child.key,
+              typeof child.props === 'object' && 'children' in child.props
+                ? child.props.children
+                : [],
+            ),
+          );
         }
         list.push({ key: key + child['key'], child });
         return list;

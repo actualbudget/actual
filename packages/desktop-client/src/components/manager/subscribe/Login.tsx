@@ -113,8 +113,8 @@ function OpenIdLogin({ setError }) {
   }, []);
 
   async function onSubmitOpenId() {
-    const { error, redirect_url } = await send('subscribe-sign-in', {
-      return_url: isElectron()
+    const { error, redirectUrl } = await send('subscribe-sign-in', {
+      returnUrl: isElectron()
         ? await window.Actual.startOAuthServer()
         : window.location.origin,
       loginMethod: 'openid',
@@ -125,9 +125,9 @@ function OpenIdLogin({ setError }) {
       setError(error);
     } else {
       if (isElectron()) {
-        window.Actual?.openURLInBrowser(redirect_url);
+        window.Actual?.openURLInBrowser(redirectUrl);
       } else {
-        window.location.href = redirect_url;
+        window.location.href = redirectUrl;
       }
     }
   }

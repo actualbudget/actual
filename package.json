@@ -53,6 +53,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@types/node": "^22.14.0",
     "@types/prompts": "^2.4.9",
     "@typescript-eslint/parser": "^8.26.1",
     "cross-env": "^7.0.3",
@@ -85,7 +86,10 @@
     "node": ">=18.0.0"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,md,json,yml}": "prettier --write"
+    "*.{js,jsx,ts,tsx,md,json,yml}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   },
   "packageManager": "yarn@4.7.0",
   "browserslist": [
