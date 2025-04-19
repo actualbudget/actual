@@ -1,0 +1,216 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1743191595098,
+      "tag": "0000_banks",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1743191628915,
+      "tag": "0001_accounts",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1743191639804,
+      "tag": "0002_category_groups",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1743191652928,
+      "tag": "0003_categories",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1743191663445,
+      "tag": "0004_category_mapping",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1743191671686,
+      "tag": "0005_kv_cache",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1743191680185,
+      "tag": "0006_kv_cache_key",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1743191688387,
+      "tag": "0007_messages_clock",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1743191696693,
+      "tag": "0008_messages_crdt",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1743191704117,
+      "tag": "0009_notes",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1743191724262,
+      "tag": "0010_payees",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1743191732584,
+      "tag": "0011_payee_mapping",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1743191771117,
+      "tag": "0012_rules",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1743191826560,
+      "tag": "0013_schedules",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1743191834876,
+      "tag": "0014_schedules_json_paths",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1743191845666,
+      "tag": "0015_schedules_next_date",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1743191868694,
+      "tag": "0016_transactions",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1743191878914,
+      "tag": "0017_reflect_budgets",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1743191886835,
+      "tag": "0018_zero_budgets",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1743191895863,
+      "tag": "0019_zero_budget_months",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1743191908292,
+      "tag": "0020_transaction_filters",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1743191915422,
+      "tag": "0021_preferences",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1743191924627,
+      "tag": "0022_custom_reports",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1743191940921,
+      "tag": "0023_dashboard",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1743191954616,
+      "tag": "0024_v_transactions_internal",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1743191964402,
+      "tag": "0025_v_transactions_internal_alive",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1743191975534,
+      "tag": "0026_v_transactions",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1743191986005,
+      "tag": "0027_v_categories",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1743191994497,
+      "tag": "0028_v_payees",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1743198235603,
+      "tag": "0029_v_schedules",
+      "breakpoints": true
+    }
+  ]
+}
