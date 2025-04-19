@@ -106,5 +106,28 @@ describe('CommerzbankCobadeff', () => {
         'CREDITOR00BIC CREDITOR000IBAN DESCRIPTION, Dauerauftrag',
       );
     });
+
+    it('correctly uses regex on payee with special characters', () => {
+      const transaction = {
+        endToEndId: '1234567890',
+        mandateId: '1234567890',
+        bookingDate: '2025-04-18',
+        valueDate: '2025-04-18',
+        transactionAmount: {
+          amount: '-1',
+          currency: 'EUR',
+        },
+        creditorName: 'Netto Marken-Discount Halle (Saale',
+        remittanceInformationUnstructured: 'Example',
+        remittanceInformationUnstructuredArray: ['Example'],
+        remittanceInformationStructured: 'Example',
+        // internalTransactionId: '3815213adb654baeadfb231c853',
+      };
+      const normalizedTransaction = CommerzbankCobadeff.normalizeTransaction(
+        transaction,
+        false,
+      );
+      expect(normalizedTransaction.notes).toEqual('Example');
+    });
   });
 });
