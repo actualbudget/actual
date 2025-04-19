@@ -40,7 +40,7 @@ export function Item({
   forceActive = false,
 }: ItemProps) {
   const hoverStyle = {
-    backgroundColor: theme.sidebarItemBackgroundHover,
+    backgroundColor: 'var(--color-always-dark-fill-ghost)',
   };
 
   const content = (

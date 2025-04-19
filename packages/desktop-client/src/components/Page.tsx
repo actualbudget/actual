@@ -132,9 +132,8 @@ export function Page({ header, style, padding, children, footer }: PageProps) {
       style={{
         ...(!isNarrowWidth && styles.page),
         flex: 1,
-        backgroundColor: isNarrowWidth
-          ? theme.mobilePageBackground
-          : theme.pageBackground,
+        backgroundColor: 'var(--color-background-default)',
+        color: 'var(--color-foreground-contrast)',
         ...style,
       }}
     >

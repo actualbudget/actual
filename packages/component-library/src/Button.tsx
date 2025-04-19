@@ -17,12 +17,14 @@ import { View } from './View';
 const backgroundColor: {
   [key in ButtonVariant | `${ButtonVariant}Disabled`]?: string;
 } = {
-  normal: theme.buttonNormalBackground,
-  normalDisabled: theme.buttonNormalDisabledBackground,
+  normal: 'transparent',
+  normalDisabled: 'transparent',
   primary: theme.buttonPrimaryBackground,
   primaryDisabled: theme.buttonPrimaryDisabledBackground,
-  bare: theme.buttonBareBackground,
+  bare: 'transparent',
+  bareAlwaysDark: 'transparent',
   bareDisabled: theme.buttonBareDisabledBackground,
+  bareAlwaysDarkDisabled: 'transparent',
   menu: theme.buttonMenuBackground,
   menuSelected: theme.buttonMenuSelectedBackground,
 };
@@ -31,14 +33,16 @@ const backgroundColorHover: Record<
   ButtonVariant | `${ButtonVariant}Disabled`,
   CSSProperties['backgroundColor']
 > = {
-  normal: theme.buttonNormalBackgroundHover,
+  normal: 'var(--color-fill-float-hover)',
   primary: theme.buttonPrimaryBackgroundHover,
-  bare: theme.buttonBareBackgroundHover,
+  bare: 'var(--color-fill-ghost)',
+  bareAlwaysDark: 'var(--color-always-dark-fill-ghost)',
   menu: theme.buttonMenuBackgroundHover,
   menuSelected: theme.buttonMenuSelectedBackgroundHover,
   normalDisabled: 'transparent',
   primaryDisabled: 'transparent',
   bareDisabled: 'transparent',
+  bareAlwaysDarkDisabled: 'transparent',
   menuDisabled: 'transparent',
   menuSelectedDisabled: 'transparent',
 };
@@ -48,8 +52,8 @@ const borderColor: {
     | ButtonVariant
     | `${ButtonVariant}Disabled`]?: CSSProperties['borderColor'];
 } = {
-  normal: theme.buttonNormalBorder,
-  normalDisabled: theme.buttonNormalDisabledBorder,
+  normal: 'var(--color-border-hint)',
+  normalDisabled: 'var(--color-border-hint)',
   primary: theme.buttonPrimaryBorder,
   primaryDisabled: theme.buttonPrimaryDisabledBorder,
   menu: theme.buttonMenuBorder,
@@ -59,12 +63,13 @@ const borderColor: {
 const textColor: {
   [key in ButtonVariant | `${ButtonVariant}Disabled`]?: CSSProperties['color'];
 } = {
-  normal: theme.buttonNormalText,
-  normalDisabled: theme.buttonNormalDisabledText,
+  normal: 'var(--color-foreground-contrast)',
+  normalDisabled: 'var(--color-foreground-disabled)',
   primary: theme.buttonPrimaryText,
   primaryDisabled: theme.buttonPrimaryDisabledText,
-  bare: theme.buttonBareText,
+  bare: 'var(--color-foreground-contrast)',
   bareDisabled: theme.buttonBareDisabledText,
+  bareAlwaysDark: 'var(--color-always-dark-foreground-dim)',
   menu: theme.buttonMenuText,
   menuSelected: theme.buttonMenuSelectedText,
 };
@@ -72,9 +77,10 @@ const textColor: {
 const textColorHover: {
   [key in ButtonVariant]?: string;
 } = {
-  normal: theme.buttonNormalTextHover,
+  normal: 'var(--color-foreground-contrast)',
   primary: theme.buttonPrimaryTextHover,
-  bare: theme.buttonBareTextHover,
+  bare: 'var(--color-foreground-contrast)',
+  bareAlwaysDark: 'var(--color-always-dark-foreground-contrast)',
   menu: theme.buttonMenuTextHover,
   menuSelected: theme.buttonMenuSelectedTextHover,
 };
@@ -86,7 +92,8 @@ const _getBorder = (
   switch (variant) {
     case 'bare':
       return 'none';
-
+    case 'bareAlwaysDark':
+      return 'none';
     default:
       return '1px solid ' + borderColor[variantWithDisabled];
   }
@@ -134,7 +141,13 @@ type ButtonProps = ComponentPropsWithoutRef<typeof ReactAriaButton> & {
   children?: ReactNode;
 };
 
-type ButtonVariant = 'normal' | 'primary' | 'bare' | 'menu' | 'menuSelected';
+type ButtonVariant =
+  | 'normal'
+  | 'primary'
+  | 'bare'
+  | 'bareAlwaysDark'
+  | 'menu'
+  | 'menuSelected';
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (props, ref) => {

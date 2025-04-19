@@ -51,7 +51,10 @@ export function Select<const Value = string>({
   disabled = false,
   disabledKeys = [],
   style = {},
-  popoverStyle = {},
+  popoverStyle = {
+    border: '1px solid var(--color-border-hint)',
+    marginTop: '0.25rem',
+  },
   className,
 }: SelectProps<Value>) {
   const targetOption = options

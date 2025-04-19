@@ -134,14 +134,14 @@ export const styles: Record<string, any> = {
     borderRadius: 4,
     borderStyle: 'solid',
     borderColor: theme.tooltipBorder,
-    backgroundColor: theme.tooltipBackground,
-    color: theme.tooltipText,
+    backgroundColor: 'var(--color-fill-float)',
+    color: 'var(--color-foreground-contrast)',
     overflow: 'auto',
   },
   popover: {
     border: 'none',
-    backgroundColor: theme.menuBackground,
-    color: theme.menuItemText,
+    backgroundColor: 'var(--color-fill-float)',
+    color: 'var(--color-foreground-contrast)',
   },
   // Dynamically set
   horizontalScrollbar: null as CSSProperties | null,

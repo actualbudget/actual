@@ -21,13 +21,14 @@ export const Setting = ({ primaryAction, style, children }: SettingProps) => {
     <View
       className={css([
         {
-          backgroundColor: theme.pillBackground,
+          backgroundColor: 'var(--color-fill-float)',
           alignSelf: 'flex-start',
           alignItems: 'flex-start',
           padding: 15,
           borderRadius: 4,
-          border: '1px solid ' + theme.pillBorderDark,
+          border: '1px solid ' + 'var(--color-border-hint)',
           width: '100%',
+          color: 'var(--color-foreground-contrast)',
         },
         style,
       ])}

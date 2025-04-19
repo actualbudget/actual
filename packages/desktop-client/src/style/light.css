@@ -1,0 +1,33 @@
+:root {
+  /* Light theme variables */
+  --color-background-default: #dde6ee;
+  --color-background-float: #f8fafb;
+  --color-background-dip: #a9c0d6;
+  --color-fill-float: #f8fafb;
+  --color-fill-float-hover: #fff;
+  --color-fill-ghost: #eef2f6;
+  --color-fill-ghost-hover: #f8fafb;
+  --color-fill-primary: #8719e0;
+  --color-fill-primary-hover: #9446ed;
+  --color-fill-primary-pressed: #610ba2;
+  --color-fill-separator: #cdd9e4;
+  --color-foreground-contrast: #070d12;
+  --color-foreground-dim: #172a3d;
+  --color-foreground-disabled: #a9c0d6;
+  --color-foreground-match-background: #dde6ee;
+  --color-foreground-error: #ff3533;
+  --color-foreground-primary: #8719e0;
+  --color-foreground-primary-contrast: #efe5ff;
+  --color-foreground-success: #147d64;
+  --color-border-default: #a9c0d6;
+  --color-border-hint: #cdd9e4;
+  --color-border-emphasized: #ac6ff1;
+  --color-always-dark-fill-float: #172a3d;
+  --color-always-dark-fill-float-hover: #1f3951;
+  --color-always-dark-fill-ghost: #325576;
+  --color-always-dark-fill-separator: #3c648b;
+  --color-always-dark-foreground-contrast: #f8fafb;
+  --color-always-dark-foreground-dim: #a9c0d6;
+  --color-always-dark-foreground-primary: #b990ff;
+  --color-always-dark-border-hint: #325576;
+}

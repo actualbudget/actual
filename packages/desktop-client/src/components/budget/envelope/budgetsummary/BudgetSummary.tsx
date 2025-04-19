@@ -68,8 +68,8 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
       style={{
         backgroundColor:
           month === currentMonth
-            ? theme.budgetCurrentMonth
-            : theme.budgetOtherMonth,
+            ? 'var(--color-fill-float-hover)'
+            : 'var(--color-fill-float)',
         boxShadow: styles.cardShadow,
         borderRadius: 6,
         marginLeft: 0,
@@ -116,7 +116,7 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
                 width={13}
                 height={13}
                 // The margin is to make it the exact same size as the dots button
-                style={{ color: theme.tableTextLight, margin: 1 }}
+                style={{ color: 'var(--color-foreground-dim)', margin: 1 }}
               />
             </Button>
           </View>
@@ -129,6 +129,7 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
                 fontSize: 18,
                 fontWeight: 500,
                 textDecorationSkip: 'ink',
+                color: 'var(--color-foreground-dim)',
               },
               currentMonth === month && { fontWeight: 'bold' },
             ])}
@@ -151,7 +152,7 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
                 width={15}
                 height={15}
                 tooltipPosition="bottom right"
-                defaultColor={theme.tableTextLight}
+                defaultColor="var(--color-foreground-dim)"
               />
             </View>
             <View style={{ userSelect: 'none', marginLeft: 2 }}>
@@ -164,7 +165,7 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
                 <SvgDotsHorizontalTriple
                   width={15}
                   height={15}
-                  style={{ color: theme.pageTextLight }}
+                  style={{ color: 'var(--color-foreground-dim)' }}
                 />
               </Button>
 
@@ -254,8 +255,9 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
               alignItems: 'center',
               padding: '10px 20px',
               justifyContent: 'space-between',
-              backgroundColor: theme.tableBackground,
-              borderTop: '1px solid ' + theme.tableBorder,
+              backgroundColor: 'var(--color-fill-ghost)',
+              color: 'var(--color-foreground-contrast)',
+              borderTop: '1px solid var(--color-border-hint)',
             }}
           >
             <ToBudget
@@ -272,13 +274,19 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
               style={{
                 padding: '5px 0',
                 marginTop: 17,
-                backgroundColor: theme.tableRowHeaderBackground,
+                backgroundColor: 'var(--color-fill-ghost)',
+                color: 'var(--color-foreground-contrast)',
                 borderTopWidth: 1,
                 borderBottomWidth: 1,
-                borderColor: theme.tableBorder,
+                borderColor: 'var(--color-border-hint)',
               }}
             />
-            <View style={{ margin: '23px 0' }}>
+            <View
+              style={{
+                margin: '23px 0',
+                color: 'var(--color-foreground-contrast)',
+              }}
+            >
               <ToBudget
                 prevMonthName={prevMonthName}
                 month={month}
