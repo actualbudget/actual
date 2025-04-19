@@ -9,7 +9,7 @@ import React, {
   useState,
   type ComponentProps,
   type KeyboardEvent,
-  type MutableRefObject,
+  type RefObject,
 } from 'react';
 
 import { Input } from '@actual-app/components/input';
@@ -224,7 +224,7 @@ type DateSelectProps = {
   embedded?: boolean;
   dateFormat: string;
   openOnFocus?: boolean;
-  inputRef?: MutableRefObject<HTMLInputElement>;
+  inputRef?: RefObject<HTMLInputElement>;
   shouldSaveFromKey?: (e: KeyboardEvent<HTMLInputElement>) => boolean;
   clearOnBlur?: boolean;
   onUpdate?: (selectedDate: string) => void;

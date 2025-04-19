@@ -296,6 +296,7 @@ function SelectedTransactionsFloatingActionBar({
     onBatchLinkSchedule,
     onBatchUnlinkSchedule,
     onSetTransfer,
+    onMerge,
   } = useTransactionBatchActions();
 
   const navigate = useNavigate();
@@ -318,25 +319,37 @@ function SelectedTransactionsFloatingActionBar({
     };
   }, [dispatch]);
 
+  const twoTransactions: [TransactionEntity, TransactionEntity] | undefined =
+    useMemo(() => {
+      // only two selected
+      if (selectedTransactionsArray.length !== 2) {
+        return undefined;
+      }
+
+      const [a, b] = selectedTransactionsArray.map(id =>
+        transactions.find(t => t.id === id),
+      );
+      if (!a || !b) {
+        return undefined;
+      }
+
+      return [a, b];
+    }, [selectedTransactionsArray, transactions]);
+
   const canBeTransfer = useMemo(() => {
-    // only two selected
-    if (selectedTransactionsArray.length !== 2) {
+    if (!twoTransactions) {
       return false;
     }
-    const fromTrans = transactions.find(
-      t => t.id === selectedTransactionsArray[0],
-    );
-    const toTrans = transactions.find(
-      t => t.id === selectedTransactionsArray[1],
-    );
-
-    // previously selected transactions aren't always present in current transaction list
-    if (!fromTrans || !toTrans) {
-      return false;
-    }
-
+    const [fromTrans, toTrans] = twoTransactions;
     return validForTransfer(fromTrans, toTrans);
-  }, [selectedTransactionsArray, transactions]);
+  }, [twoTransactions]);
+
+  const canMerge = useMemo(() => {
+    return Boolean(
+      twoTransactions &&
+        twoTransactions[0].amount === twoTransactions[1].amount,
+    );
+  }, [twoTransactions]);
 
   const moreOptionsMenuItems: MenuItem<string>[] = [
     {
@@ -352,6 +365,11 @@ function SelectedTransactionsFloatingActionBar({
     {
       name: 'delete',
       text: t('Delete'),
+    },
+    {
+      name: 'merge',
+      text: t('Merge'),
+      disabled: !canMerge,
     },
   ];
 
@@ -605,6 +623,12 @@ function SelectedTransactionsFloatingActionBar({
                           count: ids.length,
                         },
                       ),
+                    }),
+                  );
+                } else if (type === 'merge') {
+                  onMerge?.(selectedTransactionsArray, () =>
+                    showUndoNotification({
+                      message: t('Successfully merged transactions'),
                     }),
                   );
                 }

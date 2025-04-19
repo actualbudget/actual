@@ -1,6 +1,5 @@
 // @ts-strict-ignore
-import React, { type CSSProperties, useRef } from 'react';
-import { type ConnectDragSource } from 'react-dnd';
+import React, { type CSSProperties, type RefCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -19,6 +18,7 @@ import {
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 
@@ -27,7 +27,7 @@ type SidebarGroupProps = {
   editing?: boolean;
   collapsed: boolean;
   dragPreview?: boolean;
-  innerRef?: ConnectDragSource;
+  innerRef?: RefCallback<HTMLDivElement>;
   style?: CSSProperties;
   onEdit?: (id: CategoryGroupEntity['id']) => void;
   onSave?: (group: CategoryGroupEntity) => Promise<void>;
@@ -57,6 +57,8 @@ export function SidebarGroup({
 }: SidebarGroupProps) {
   const { t } = useTranslation();
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
+  const categoryExpandedState = categoryExpandedStatePref ?? 0;
 
   const temporary = group.id === 'new';
   const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
@@ -181,7 +183,7 @@ export function SidebarGroup({
       innerRef={innerRef}
       style={{
         ...style,
-        width: 200,
+        width: 200 + 100 * categoryExpandedState,
         backgroundColor: theme.tableRowHeaderBackground,
         overflow: 'hidden',
         '& .hover-visible': {

@@ -248,7 +248,7 @@ async function signIn(
   }
   let res: {
     token?: string;
-    redirect_url?: string;
+    returnUrl?: string;
   };
 
   try {
@@ -267,8 +267,8 @@ async function signIn(
     throw err;
   }
 
-  if (res.redirect_url) {
-    return { redirectUrl: res.redirect_url };
+  if (res.returnUrl) {
+    return { redirectUrl: res.returnUrl };
   }
 
   if (!res.token) {
@@ -322,23 +322,36 @@ async function enableOpenId(openIdConfig: { openId: OpenIdConfig }) {
   return {};
 }
 
-async function getOpenIdConfig() {
+async function getOpenIdConfig({ password }: { password: string }) {
   try {
+    const userToken = await asyncStorage.getItem('user-token');
+
     const serverConfig = getServer();
     if (!serverConfig) {
       throw new Error('No sync server configured.');
     }
 
-    const res = await get(serverConfig.BASE_SERVER + '/openid/config');
+    const res = await post(
+      serverConfig.BASE_SERVER + '/openid/config',
+      { password },
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
 
     if (res) {
-      const config = JSON.parse(res) as OpenIdConfig;
-      return { openId: config };
+      return res as { openId: OpenIdConfig };
     }
 
     return null;
   } catch (err) {
-    return { error: 'config-fetch-failed' };
+    if (err instanceof PostError) {
+      return {
+        error: err.reason || 'network-failure',
+      };
+    }
+
+    throw err;
   }
 }
 
