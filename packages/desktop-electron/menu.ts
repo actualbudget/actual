@@ -16,7 +16,7 @@ export function getMenu(
             if (focusedWindow && budgetId) {
               if (focusedWindow.webContents.getTitle() === 'Actual') {
                 focusedWindow.webContents.executeJavaScript(
-                  `__actionsForMenu.replaceModal('load-backup', { budgetId: '${budgetId}' })`,
+                  `__actionsForMenu.replaceModal({ modal: { name: 'load-backup', options: { budgetId: '${budgetId}' } } })`,
                 );
               }
             }
