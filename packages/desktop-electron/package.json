@@ -13,7 +13,7 @@
     "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron .",
     "e2e": "npx playwright test"
   },
-  "main": "build/index.js",
+  "main": "build/desktop-electron/index.js",
   "build": {
     "appId": "com.actualbudget.actual",
     "files": [
@@ -27,7 +27,7 @@
       "!build/client-build/sql-wasm.wasm",
       "!build/loot-core/lib-dist/electron/{browser,bundle.mobile*}"
     ],
-    "beforePack": "./build/beforePackHook.js",
+    "beforePack": "./build/desktop-electron/beforePackHook.js",
     "mac": {
       "category": "public.app-category.finance",
       "icon": "icons/icon.icns",
