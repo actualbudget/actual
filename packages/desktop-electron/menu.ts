@@ -148,7 +148,7 @@ export function getMenu(
           click: function (_menuItem, focusedWin) {
             if (focusedWin) {
               focusedWin.webContents.executeJavaScript(
-                'window.__actionsForMenu && window.__actionsForMenu.pushModal("schedules-discover")',
+                'window.__actionsForMenu && window.__actionsForMenu.pushModal({ modal: { name: "schedules-discover" } })',
               );
             }
           },
@@ -170,7 +170,7 @@ export function getMenu(
           label: 'Documentation',
           click(_menuItem, focusedWin) {
             focusedWin?.webContents.executeJavaScript(
-              'window.__actionsForMenu && window.__actionsForMenu.openDocsForCurrentPage()',
+              'window.open("https://actualbudget.org/docs", "_blank")',
             );
           },
         },
@@ -181,7 +181,7 @@ export function getMenu(
           click: function (_menuItem, focusedWin) {
             if (focusedWin) {
               focusedWin.webContents.executeJavaScript(
-                'window.__actionsForMenu && !window.__actionsForMenu.inputFocused() && window.__actionsForMenu.pushModal("keyboard-shortcuts")',
+                'window.__actionsForMenu && !window.__actionsForMenu.inputFocused() && window.__actionsForMenu.pushModal({ modal: { name: "keyboard-shortcuts" } })',
               );
             }
           },
