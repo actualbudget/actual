@@ -66,7 +66,7 @@ function getAccountBalance(account) {
   }
 }
 
-async function updateAccountBalance(id: string, balance: number) {
+async function updateAccountBalance(id: AccountEntity['id'], balance: number) {
   await db.runQuery('UPDATE accounts SET balance_current = ? WHERE id = ?', [
     balance,
     id,
@@ -194,6 +194,8 @@ async function downloadSimpleFinTransactions(
   if (!userToken) return;
 
   const batchSync = Array.isArray(acctId);
+
+  console.log('Pulling transactions from SimpleFin');
 
   let res;
   try {
