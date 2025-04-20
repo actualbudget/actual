@@ -75,6 +75,7 @@ export type LocalPrefs = Partial<{
   reportsViewLabel: boolean;
   sidebarWidth: number;
   'mobile.showSpentColumn': boolean;
+  'notifications.uncategorizedTransactions': boolean;
 }>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';

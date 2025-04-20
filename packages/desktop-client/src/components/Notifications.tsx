@@ -25,10 +25,13 @@ import {
   removeNotification,
   type NotificationWithId,
 } from 'loot-core/client/notifications/notificationsSlice';
+import * as queries from 'loot-core/client/queries';
 
+import { useLocalPref } from '../hooks/useLocalPref';
 import { useSelector, useDispatch } from '../redux';
 
 import { Link } from './common/Link';
+import { useSheetValue } from './spreadsheet/useSheetValue';
 
 function compileMessage(
   message: string,
@@ -307,6 +310,28 @@ export function Notifications({ style }: { style?: CSSProperties }) {
   const { isNarrowWidth } = useResponsive();
   const notifications = useSelector(state => state.notifications.notifications);
   const notificationInset = useSelector(state => state.notifications.inset);
+
+  // Get the count of uncategorized transactions
+  const uncategorizedCount = useSheetValue(queries.uncategorizedCount());
+
+  // Check if push notifications for uncategorized transactions are enabled
+  const [pushNotificationsEnabled] = useLocalPref(
+    'notifications.uncategorizedTransactions',
+  );
+
+  // Send a push notification if there are uncategorized transactions
+  useEffect(() => {
+    if (!pushNotificationsEnabled || uncategorizedCount <= 0) return;
+    if (!('serviceWorker' in navigator)) return;
+
+    navigator.serviceWorker.ready.then(registration => {
+      registration.active.postMessage({
+        title: 'Transactions',
+        body: `You have ${uncategorizedCount} uncategorized transactions.`,
+      });
+    });
+  }, [uncategorizedCount, pushNotificationsEnabled]);
+
   return (
     <View
       style={{

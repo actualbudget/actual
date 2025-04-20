@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useState, useEffect } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
@@ -8,6 +8,7 @@ import { View } from '@actual-app/components/view';
 import type { FeatureFlag } from 'loot-core/types/prefs';
 
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { Link } from '../common/Link';
 import { Checkbox } from '../forms';
@@ -78,6 +79,49 @@ export function ExperimentalFeatures() {
     (goalTemplatesEnabled &&
       localStorage.getItem('devEnableGoalTemplatesUI') === 'true');
 
+  const [notificationsEnabled, setNotificationsEnabled] = useLocalPref(
+    'notifications.uncategorizedTransactions',
+  );
+  const [notificationPermissionGranted, setNotificationPermissionGranted] =
+    useState(false);
+  const [
+    notificationServiceWorkerRegistration,
+    setNotificationServiceWorkerRegistration,
+  ] = useState<ServiceWorkerRegistration | null>(null);
+
+  // Request notification permission
+  useEffect(() => {
+    if (!notificationsEnabled || !('Notification' in window)) return;
+
+    window.Notification.requestPermission().then(permission => {
+      if (permission === 'granted') {
+        setNotificationPermissionGranted(true);
+      } else {
+        setNotificationsEnabled(false);
+      }
+    });
+  }, [notificationsEnabled, setNotificationsEnabled]);
+
+  // Register service worker if permission is granted
+  useEffect(() => {
+    if (!notificationPermissionGranted || !notificationsEnabled) return;
+
+    navigator.serviceWorker
+      .register('/push-service-worker.js')
+      .then(setNotificationServiceWorkerRegistration)
+      .catch(error => {
+        setNotificationPermissionGranted(false);
+        throw error;
+      });
+  }, [notificationPermissionGranted, notificationsEnabled]);
+
+  // Unregister service worker if notifications are disabled
+  useEffect(() => {
+    if (!notificationsEnabled && notificationServiceWorkerRegistration) {
+      notificationServiceWorkerRegistration.unregister();
+    }
+  }, [notificationsEnabled, notificationServiceWorkerRegistration]);
+
   return (
     <Setting
       primaryAction={
@@ -117,6 +161,13 @@ export function ExperimentalFeatures() {
             >
               <Trans>Pluggy.ai Bank Sync (Brazilian banks only)</Trans>
             </FeatureToggle>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <Checkbox
+                checked={notificationsEnabled}
+                onChange={() => setNotificationsEnabled(!notificationsEnabled)}
+              />
+              <Trans>Push Notifications for Uncategorized Transactions</Trans>
+            </label>
           </View>
         ) : (
           <Link
