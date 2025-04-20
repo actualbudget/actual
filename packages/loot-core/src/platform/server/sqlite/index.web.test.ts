@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import { patchFetchForSqlJS } from '../../../mocks/util';
+
 // eslint-disable-next-line no-restricted-imports
 import {
   init,
@@ -8,10 +10,11 @@ import {
   runQuery,
 } from './index.web';
 
-beforeAll(() => {
-  process.env.PUBLIC_URL =
-    __dirname + '/../../../../../../node_modules/@jlongster/sql.js/dist/';
-  return init();
+beforeAll(async () => {
+  const baseURL = `${__dirname}/../../../../../../node_modules/@jlongster/sql.js/dist/`;
+  patchFetchForSqlJS(baseURL);
+
+  return init({ baseURL });
 });
 
 const initSQL = `
