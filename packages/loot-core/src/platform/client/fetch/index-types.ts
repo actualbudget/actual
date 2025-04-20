@@ -1,10 +1,10 @@
 import type { Handlers } from '../../../types/handlers';
 import type { ServerEvents } from '../../../types/server-events';
 
-export function init(socketName: string): Promise<unknown>;
+export declare function init(socketName: string): Promise<unknown>;
 export type Init = typeof init;
 
-export function send<K extends keyof Handlers>(
+export declare function send<K extends keyof Handlers>(
   name: K,
   args: Parameters<Handlers[K]>[0],
   options: { catchErrors: true },
@@ -15,14 +15,14 @@ export function send<K extends keyof Handlers>(
       error: { type: 'APIError' | 'InternalError'; message: string };
     }
 >;
-export function send<K extends keyof Handlers>(
+export declare function send<K extends keyof Handlers>(
   name: K,
   args?: Parameters<Handlers[K]>[0],
   options?: { catchErrors?: boolean },
 ): Promise<Awaited<ReturnType<Handlers[K]>>>;
 export type Send = typeof send;
 
-export function sendCatch<K extends keyof Handlers>(
+export declare function sendCatch<K extends keyof Handlers>(
   name: K,
   args?: Parameters<Handlers[K]>[0],
 ): Promise<
@@ -34,21 +34,21 @@ export function sendCatch<K extends keyof Handlers>(
 >;
 export type SendCatch = typeof sendCatch;
 
-export function listen<K extends keyof ServerEvents>(
+export declare function listen<K extends keyof ServerEvents>(
   name: K,
   cb: (arg: ServerEvents[K]) => void,
 ): () => void;
 export type Listen = typeof listen;
 
-export function unlisten(name: string): void;
+export declare function unlisten(name: string): void;
 export type Unlisten = typeof unlisten;
 
 /** Mock functions */
-export function initServer(handlers: Partial<Handlers>): void;
+export declare function initServer(handlers: Partial<Handlers>): void;
 export type InitServer = typeof initServer;
 
-export function serverPush(name: string, args: unknown): void;
+export declare function serverPush(name: string, args: unknown): void;
 export type ServerPush = typeof serverPush;
 
-export async function clearServer(): void;
+export declare function clearServer(): Promise<void>;
 export type ClearServer = typeof clearServer;

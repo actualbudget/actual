@@ -53,7 +53,7 @@ interface SimpleTemplate extends BaseTemplate {
   };
 }
 
-interface ScheduleTemplate extends BaseTemplate {
+export interface ScheduleTemplate extends BaseTemplate {
   type: 'schedule';
   name: string;
   full?: boolean;

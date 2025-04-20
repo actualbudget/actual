@@ -8,7 +8,7 @@ export type AccountEntity = {
   tombstone: 0 | 1;
 } & (_SyncFields<true> | _SyncFields<false>);
 
-type _SyncFields<T> = {
+export type _SyncFields<T> = {
   account_id: T extends true ? string : null;
   bank: T extends true ? string : null;
   bankName: T extends true ? string : null;

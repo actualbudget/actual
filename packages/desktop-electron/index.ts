@@ -594,7 +594,7 @@ ipcMain.handle('relaunch', () => {
 });
 
 export type OpenFileDialogPayload = {
-  properties: OpenDialogSyncOptions['properties'];
+  properties?: OpenDialogSyncOptions['properties'];
   filters?: OpenDialogSyncOptions['filters'];
 };
 
