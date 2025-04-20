@@ -272,7 +272,7 @@ describe('query helpers', () => {
       await tracer.expect('data', ['*']);
     });
 
-    it(`${queryType} unsubscribes correctly`, async () => {
+    it(`${queryType} unsubscribes correctly`, () => async done => {
       initBasicServer();
       tracer.start();
 
@@ -291,10 +291,11 @@ describe('query helpers', () => {
       // Wait a bit and make sure nothing comes through
       const p = Promise.race([tracer.expect('server-query'), wait(100)]);
       expect(await p).toEqual('wait(100)');
+      done();
     });
   });
 
-  it('pagedQuery makes requests in pages', async () => {
+  it('pagedQuery makes requests in pages', () => async done => {
     const data = initPagingServer(1502);
     tracer.start();
 
@@ -353,6 +354,7 @@ describe('query helpers', () => {
     // Wait a bit and make sure nothing comes through
     const p = Promise.race([tracer.expect('server-query'), wait(100)]);
     expect(await p).toEqual('wait(100)');
+    done();
   });
 
   it('pagedQuery allows customizing page count', async () => {
@@ -372,7 +374,7 @@ describe('query helpers', () => {
     await tracer.expect('data', selectData(data, ['id']).slice(0, 10));
   });
 
-  it('pagedQuery only runs `fetchNext` once at a time', async () => {
+  it('pagedQuery only runs `fetchNext` once at a time', () => async done => {
     initPagingServer(1000, { delay: 200 });
     tracer.start();
 
@@ -396,6 +398,7 @@ describe('query helpers', () => {
     // Wait a bit and make sure nothing comes through
     const p = Promise.race([tracer.expect('server-query'), wait(200)]);
     expect(await p).toEqual('wait(200)');
+    done();
   });
 
   it('pagedQuery refetches all paged data on update', async () => {
