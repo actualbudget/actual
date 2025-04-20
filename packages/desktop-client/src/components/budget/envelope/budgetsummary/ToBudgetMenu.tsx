@@ -8,7 +8,7 @@ import { envelopeBudget } from 'loot-core/client/queries';
 import { useEnvelopeSheetValue } from '../EnvelopeBudgetComponents';
 
 type ToBudgetMenuProps = Omit<
-  ComponentPropsWithoutRef<typeof Menu<string>>,
+  ComponentPropsWithoutRef<typeof Menu>,
   'onMenuSelect' | 'items'
 > & {
   onTransfer: () => void;
