@@ -20,7 +20,7 @@ global.__resetWorld = () => {
 };
 
 process.on('unhandledRejection', reason => {
-  console.log('REJECTION', reason);
+  console.error('REJECTION', reason);
 });
 
 global.afterEach(() => {

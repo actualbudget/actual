@@ -26,9 +26,12 @@ export default defineConfig({
     },
   },
   resolve: {
-    alias: {
-      '@actual-app/crdt': path.resolve('../crdt'),
-    },
+    alias: [
+      {
+        find: /^@actual-app\/crdt(\/.*)?$/,
+        replacement: path.resolve('../crdt/src$1'),
+      },
+    ],
     extensions: resolveExtensions,
   },
   plugins: [peggyLoader()],
