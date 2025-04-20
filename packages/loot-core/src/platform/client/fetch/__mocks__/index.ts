@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import type * as T from '../index.d';
+import type * as T from '../index-types';
 
 let listeners = new Map();
 let serverHandler = null;
