@@ -96,8 +96,6 @@ export function ToBudget({
         <span tabIndex={-1} ref={ref}>
           {menuStep === 'actions' && (
             <ToBudgetMenu
-              month={month}
-              onBudgetAction={onBudgetAction}
               onTransfer={() => setMenuStep('transfer')}
               onCover={() => setMenuStep('cover')}
               onHoldBuffer={() => setMenuStep('buffer')}
@@ -105,6 +103,8 @@ export function ToBudget({
                 onBudgetAction(month, 'reset-hold');
                 setMenuOpen(false);
               }}
+              month={month}
+              onBudgetAction={onBudgetAction}
             />
           )}
           {menuStep === 'buffer' && (

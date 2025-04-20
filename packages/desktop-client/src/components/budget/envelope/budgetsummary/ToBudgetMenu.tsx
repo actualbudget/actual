@@ -8,14 +8,13 @@ import { envelopeBudget } from 'loot-core/client/queries';
 import { useEnvelopeSheetValue } from '../EnvelopeBudgetComponents';
 
 type ToBudgetMenuProps = Omit<
-  ComponentPropsWithoutRef<typeof Menu>,
+  ComponentPropsWithoutRef<typeof Menu<string>>,
   'onMenuSelect' | 'items'
 > & {
   onTransfer: () => void;
   onCover: () => void;
   onHoldBuffer: () => void;
   onResetHoldBuffer: () => void;
-  //@ts-ignore fix this any
   onBudgetAction?: (month: string, action: string, arg?: unknown) => void;
   month: string;
 };
@@ -64,7 +63,7 @@ export function ToBudgetMenu({
       ? [
           {
             name: 'disable-auto-buffer',
-            text: t('Disable current auto buffer'),
+            text: t('Disable current auto hold'),
           },
         ]
       : []),
