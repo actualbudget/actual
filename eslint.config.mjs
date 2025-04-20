@@ -145,7 +145,6 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.commonjs,
-        ...globals.jest,
         ...globals.node,
         globalThis: false,
         vi: true,

@@ -41,6 +41,7 @@
     "i18next-parser": "^9.0.2",
     "i18next-resources-to-backend": "^1.2.1",
     "inter-ui": "^3.19.3",
+    "jsdom": "^26.1.0",
     "lodash": "^4.17.21",
     "loot-core": "workspace:*",
     "mdast-util-newline-to-break": "^2.0.0",

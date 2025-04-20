@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Accounts Transfers are properly updated 1`] = `
+exports[`Accounts > Transfers are properly updated 1`] = `
 [
   {
     "acct": "one",
@@ -57,7 +57,7 @@ exports[`Accounts Transfers are properly updated 1`] = `
 ]
 `;
 
-exports[`Accounts Transfers are properly updated 2`] = `
+exports[`Accounts > Transfers are properly updated 2`] = `
 "Snapshot Diff:
 - First value
 + Second value
@@ -97,7 +97,7 @@ exports[`Accounts Transfers are properly updated 2`] = `
       "imported_description": null,"
 `;
 
-exports[`Accounts Transfers are properly updated 3`] = `
+exports[`Accounts > Transfers are properly updated 3`] = `
 "Snapshot Diff:
 - First value
 + Second value
@@ -131,25 +131,25 @@ exports[`Accounts Transfers are properly updated 3`] = `
   ]"
 `;
 
-exports[`Budget budget updates when changing a category 1`] = `
+exports[`Budget > budget updates when changing a category 1`] = `
 [
   "budget201702!sum-amount-id2",
 ]
 `;
 
-exports[`Budget budget updates when changing a category 2`] = `
+exports[`Budget > budget updates when changing a category 2`] = `
 [
   "budget201702!sum-amount-id2",
 ]
 `;
 
-exports[`Budget budget updates when changing a category 3`] = `
+exports[`Budget > budget updates when changing a category 3`] = `
 [
   "budget201702!sum-amount-id2",
 ]
 `;
 
-exports[`Budget new budgets should be created 1`] = `
+exports[`Budget > new budgets should be created 1`] = `
 Set {
   "2016-10",
   "2016-11",
@@ -170,7 +170,7 @@ Set {
 }
 `;
 
-exports[`Budget new budgets should be created 2`] = `
+exports[`Budget > new budgets should be created 2`] = `
 Set {
   "2016-10",
   "2016-11",
