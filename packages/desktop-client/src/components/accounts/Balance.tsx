@@ -170,7 +170,7 @@ function MoreBalances({ balanceQuery, currentBalance }: MoreBalancesProps) {
       <DetailedBalance name={t('Uncleared total:')} balance={uncleared ?? 0} />
       {currentBalance && (
         <DetailedBalance
-          name={t('Last synced balance:')}
+          name={t('Synced total:')}
           balance={currentBalance}
         />
       )}

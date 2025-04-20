@@ -179,7 +179,7 @@ export function ReconcileMenu({
           onPress={() => setInputValue(format(lastSyncedBalance, 'financial'))}
           style={{ marginBottom: 7 }}
         >
-          <Trans>Use last synced balance</Trans>
+          <Trans>Use last synced total</Trans>
         </Button>
       )}
       <Button variant="primary" onPress={onSubmit}>
