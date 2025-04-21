@@ -575,7 +575,7 @@ export function IncomeCategoryMonth({
                   className={css({
                     cursor: 'pointer',
                     ':hover': { textDecoration: 'underline' },
-                    ...makeAmountGrey(props.value),
+                    ...amountStyle,
                   })}
                 />
               )}
