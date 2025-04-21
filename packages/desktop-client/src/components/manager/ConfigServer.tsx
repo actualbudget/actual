@@ -24,6 +24,208 @@ import { useServerURL, useSetServerURL } from '../ServerContext';
 
 import { Title } from './subscribe/common';
 
+export function ElectronServerConfig({
+  onDoNotUseServer,
+  onSetServerConfigView,
+}: {
+  onDoNotUseServer: () => void;
+  onSetServerConfigView: (view: 'internal' | 'external') => void;
+}) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const setServerUrl = useSetServerURL();
+  const currentUrl = useServerURL();
+
+  const [syncServerConfig, setSyncServerConfig] =
+    useGlobalPref('syncServerConfig');
+
+  const [electronServerPort, setElectronServerPort] = useState(
+    syncServerConfig?.port || 5007,
+  );
+
+  const canShowExternalServerConfig = !syncServerConfig?.port && !currentUrl; // Nothing setup yet
+  const hasInternalServerConfig = syncServerConfig?.port;
+
+  const [startingSyncServer, setStartingSyncServer] = useState(false);
+
+  const onConfigureSyncServer = async () => {
+    setStartingSyncServer(true);
+    setSyncServerConfig({
+      ...syncServerConfig,
+      port: electronServerPort,
+      autoStart: true,
+    });
+
+    await window.globalThis.Actual.stopSyncServer();
+    await window.globalThis.Actual.startSyncServer();
+    setStartingSyncServer(false);
+    initElectronSyncServerRunningStatus();
+    await setServerUrl(`http://localhost:${electronServerPort}`);
+    navigate('/');
+  };
+
+  const [electronSyncServerRunning, setElectronSyncServerRunning] =
+    useState(false);
+
+  const initElectronSyncServerRunningStatus = async () => {
+    setElectronSyncServerRunning(
+      await window.globalThis.Actual.isSyncServerRunning(),
+    );
+  };
+
+  useEffect(() => {
+    initElectronSyncServerRunningStatus();
+  }, []);
+
+  async function dontUseSyncServer() {
+    setSyncServerConfig(null);
+
+    if (electronSyncServerRunning) {
+      await window.globalThis.Actual.stopSyncServer();
+    }
+
+    onDoNotUseServer();
+  }
+
+  return (
+    <>
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 20,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 16,
+            color: theme.pageText,
+            lineHeight: 1.5,
+          }}
+        >
+          <Trans>
+            Configure your local server below to allow seamless data
+            synchronization across your devices, bank sync and more...
+          </Trans>
+        </Text>
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 10,
+          }}
+        >
+          <View style={{ flexDirection: 'column', gap: 5, flex: 1 }}>
+            <Label title={t('Domain')} style={{ textAlign: 'left' }} />
+            <BigInput
+              value="localhost"
+              disabled
+              type="text"
+              style={{
+                '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
+                  WebkitAppearance: 'none',
+                  margin: 0,
+                },
+              }}
+            />
+          </View>
+
+          <View style={{ flexDirection: 'column', gap: 5 }}>
+            <Label
+              title={t('Port')}
+              style={{ textAlign: 'left', width: '7ch' }}
+            />
+            <BigInput
+              name="name"
+              value={electronServerPort}
+              aria-label={t('Port')}
+              type="number"
+              style={{
+                '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
+                  WebkitAppearance: 'none',
+                  margin: 0,
+                },
+                width: '7ch',
+                textAlign: 'center',
+              }}
+              autoFocus={true}
+              maxLength={5}
+              onChange={event =>
+                setElectronServerPort(Number(event.target.value))
+              }
+            />
+          </View>
+
+          <View
+            style={{
+              flexDirection: 'column',
+              gap: 5,
+              justifyContent: 'end',
+            }}
+          >
+            <Label title={t('')} style={{ textAlign: 'left', width: '7ch' }} />
+            {!electronSyncServerRunning ? (
+              <Button
+                variant="primary"
+                style={{ padding: 10, width: '8ch' }}
+                onPress={onConfigureSyncServer}
+                isPending={startingSyncServer}
+              >
+                <Trans>Start</Trans>
+              </Button>
+            ) : (
+              <Button
+                variant="primary"
+                style={{ padding: 10, width: '8ch' }}
+                onPress={onConfigureSyncServer}
+                isPending={startingSyncServer}
+              >
+                <Trans>Save</Trans>
+              </Button>
+            )}
+          </View>
+        </View>
+      </View>
+
+      <View
+        style={{
+          flexDirection: 'row',
+          marginTop: 20,
+          gap: 15,
+          flexFlow: 'row wrap',
+          justifyContent: 'center',
+        }}
+      >
+        {hasInternalServerConfig && (
+          <Button
+            variant="bare"
+            style={{ color: theme.pageTextLight, margin: 5 }}
+            onPress={() => navigate(-1)}
+          >
+            {t('Cancel')}
+          </Button>
+        )}
+        <Button
+          variant="bare"
+          style={{ color: theme.pageTextLight, margin: 5 }}
+          onPress={dontUseSyncServer}
+        >
+          {t('Don’t use a server')}
+        </Button>
+        {canShowExternalServerConfig && (
+          <Button
+            variant="bare"
+            style={{ color: theme.pageTextLight, margin: 5 }}
+            onPress={() => onSetServerConfigView('external')}
+          >
+            Use an external server
+          </Button>
+        )}
+      </View>
+    </>
+  );
+}
+
 export function ConfigServer() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -61,7 +263,7 @@ export function ConfigServer() {
   }
 
   async function onSubmit() {
-    if (url === '' || loading) {
+    if (url === null || url === '' || loading) {
       return;
     }
 
@@ -118,17 +320,11 @@ export function ConfigServer() {
     navigate('/');
   }
 
-  const [syncServerConfig, setSyncServerConfig] =
-    useGlobalPref('syncServerConfig');
+  const [syncServerConfig] = useGlobalPref('syncServerConfig');
 
-  const [electronServerPort, setElectronServerPort] = useState(
-    syncServerConfig?.port || 5007,
-  );
-
-  const canShowExternalServerConfig = !syncServerConfig?.port && !currentUrl; // Nothing setup yet
   const hasExternalServerConfig = !syncServerConfig?.port && !!currentUrl;
 
-  const [serverConfigView, setServerConfigView] = useState<
+  const [serverConfigView, onSetServerConfigView] = useState<
     'internal' | 'external'
   >(() => {
     if (isElectron() && !hasExternalServerConfig) {
@@ -138,190 +334,15 @@ export function ConfigServer() {
     return 'external';
   });
 
-  const [startingSyncServer, setStartingSyncServer] = useState(false);
-
-  const onConfigureSyncServer = async () => {
-    setStartingSyncServer(true);
-    setSyncServerConfig({
-      ...syncServerConfig,
-      port: electronServerPort,
-      autoStart: true,
-    });
-
-    await window.globalThis.Actual.stopSyncServer();
-    await window.globalThis.Actual.startSyncServer();
-    setStartingSyncServer(false);
-    initElectronSyncServerRunningStatus();
-    await setServerUrl(`http://localhost:${electronServerPort}`);
-    navigate('/');
-  };
-
-  const [electronSyncServerRunning, setElectronSyncServerRunning] =
-    useState(false);
-
-  const initElectronSyncServerRunningStatus = async () => {
-    setElectronSyncServerRunning(
-      await window.globalThis.Actual.isSyncServerRunning(),
-    );
-  };
-
-  useEffect(() => {
-    initElectronSyncServerRunningStatus();
-  }, []);
-
-  async function dontUseSyncServer() {
-    setSyncServerConfig(null);
-
-    if (electronSyncServerRunning) {
-      await window.globalThis.Actual.stopSyncServer();
-    }
-
-    onSkip();
-  }
-
   return (
     <View style={{ maxWidth: 500, marginTop: -30 }}>
       <Title text={t('Where’s the server?')} />
 
       {serverConfigView === 'internal' && (
-        <>
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 20,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 16,
-                color: theme.pageText,
-                lineHeight: 1.5,
-              }}
-            >
-              <Trans>
-                Configure your local server below to allow seamless data
-                synchronization across your devices, bank sync and more...
-              </Trans>
-            </Text>
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                gap: 10,
-              }}
-            >
-              <View style={{ flexDirection: 'column', gap: 5, flex: 1 }}>
-                <Label title={t('Domain')} style={{ textAlign: 'left' }} />
-                <BigInput
-                  value="localhost"
-                  disabled
-                  type="text"
-                  style={{
-                    '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button':
-                      {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                  }}
-                />
-              </View>
-
-              <View style={{ flexDirection: 'column', gap: 5 }}>
-                <Label
-                  title={t('Port')}
-                  style={{ textAlign: 'left', width: '7ch' }}
-                />
-                <BigInput
-                  name="name"
-                  value={electronServerPort}
-                  aria-label={t('Port')}
-                  type="number"
-                  style={{
-                    '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button':
-                      {
-                        WebkitAppearance: 'none',
-                        margin: 0,
-                      },
-                    width: '7ch',
-                    textAlign: 'center',
-                  }}
-                  autoFocus={true}
-                  maxLength={5}
-                  onChange={event =>
-                    setElectronServerPort(Number(event.target.value))
-                  }
-                />
-              </View>
-
-              <View
-                style={{
-                  flexDirection: 'column',
-                  gap: 5,
-                  justifyContent: 'end',
-                }}
-              >
-                <Label
-                  title={t('')}
-                  style={{ textAlign: 'left', width: '7ch' }}
-                />
-                {!electronSyncServerRunning ? (
-                  <Button
-                    variant="primary"
-                    style={{ padding: 10, width: '8ch' }}
-                    onPress={onConfigureSyncServer}
-                    isPending={startingSyncServer}
-                  >
-                    <Trans>Start</Trans>
-                  </Button>
-                ) : (
-                  <Button
-                    variant="primary"
-                    style={{ padding: 10, width: '8ch' }}
-                    onPress={onConfigureSyncServer}
-                    isPending={startingSyncServer}
-                  >
-                    <Trans>Save</Trans>
-                  </Button>
-                )}
-              </View>
-            </View>
-          </View>
-
-          <View
-            style={{
-              flexDirection: 'row',
-              marginTop: 20,
-              gap: 15,
-              flexFlow: 'row wrap',
-              justifyContent: 'center',
-            }}
-          >
-            <Button
-              variant="bare"
-              style={{ color: theme.pageTextLight, margin: 5 }}
-              onPress={() => navigate(-1)}
-            >
-              {t('Cancel')}
-            </Button>
-            <Button
-              variant="bare"
-              style={{ color: theme.pageTextLight, margin: 5 }}
-              onPress={dontUseSyncServer}
-            >
-              {t('Don’t use a server')}
-            </Button>
-            {canShowExternalServerConfig && (
-              <Button
-                variant="bare"
-                style={{ color: theme.pageTextLight, margin: 5 }}
-                onPress={() => setServerConfigView('external')}
-              >
-                Use an external server
-              </Button>
-            )}
-          </View>
-        </>
+        <ElectronServerConfig
+          onDoNotUseServer={onSkip}
+          onSetServerConfigView={onSetServerConfigView}
+        />
       )}
       {serverConfigView === 'external' && (
         <>
