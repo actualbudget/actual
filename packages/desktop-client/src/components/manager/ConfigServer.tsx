@@ -10,6 +10,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
+import { saveGlobalPrefs } from 'loot-core/client/prefs/prefsSlice';
 import { loggedIn, signOut } from 'loot-core/client/users/usersSlice';
 import {
   isNonProductionEnvironment,
@@ -35,6 +36,7 @@ export function ElectronServerConfig({
   const navigate = useNavigate();
   const setServerUrl = useSetServerURL();
   const currentUrl = useServerURL();
+  const dispatch = useDispatch();
 
   const [syncServerConfig, setSyncServerConfig] =
     useGlobalPref('syncServerConfig');
@@ -49,19 +51,31 @@ export function ElectronServerConfig({
   const [startingSyncServer, setStartingSyncServer] = useState(false);
 
   const onConfigureSyncServer = async () => {
-    setStartingSyncServer(true);
-    setSyncServerConfig({
-      ...syncServerConfig,
-      port: electronServerPort,
-      autoStart: true,
-    });
+    try {
+      setStartingSyncServer(true);
+      // Ensure config is saved before starting the server
+      await dispatch(
+        saveGlobalPrefs({
+          prefs: {
+            syncServerConfig: {
+              ...syncServerConfig,
+              port: electronServerPort,
+              autoStart: true,
+            },
+          },
+        }),
+      ).unwrap();
 
-    await window.globalThis.Actual.stopSyncServer();
-    await window.globalThis.Actual.startSyncServer();
-    setStartingSyncServer(false);
-    initElectronSyncServerRunningStatus();
-    await setServerUrl(`http://localhost:${electronServerPort}`);
-    navigate('/');
+      await window.globalThis.Actual.stopSyncServer();
+      await window.globalThis.Actual.startSyncServer();
+      setStartingSyncServer(false);
+      initElectronSyncServerRunningStatus();
+      await setServerUrl(`http://localhost:${electronServerPort}`);
+      navigate('/');
+    } catch (error) {
+      setStartingSyncServer(false);
+      console.error('Failed to configure sync server:', error);
+    }
   };
 
   const [electronSyncServerRunning, setElectronSyncServerRunning] =
