@@ -15,7 +15,7 @@ export type SimpleFinAccount = {
 };
 
 export interface SimpleFinBatchSyncResponse {
-  [accountId: AccountEntity['id']]: BankSyncResponse;
+  [accountId: NonNullable<AccountEntity['account_id']>]: BankSyncResponse;
 }
 
 export type SyncServerSimpleFinAccount = {
