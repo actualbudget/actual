@@ -64,7 +64,7 @@ handlers['make-filters-from-conditions'] = async function ({
 };
 
 handlers['query'] = async function (query) {
-  if (query.table == null) {
+  if (query['table'] == null) {
     throw new Error('query has no table, did you forgot to call `.serialize`?');
   }
 

@@ -81,7 +81,7 @@ export interface DataEntity {
   totalTotals: number;
 }
 
-type LegendEntity = {
+export type LegendEntity = {
   name: string;
   id: string | null;
   color: string;
