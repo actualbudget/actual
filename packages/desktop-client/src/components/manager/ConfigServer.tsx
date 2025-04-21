@@ -136,8 +136,8 @@ export function ElectronServerConfig({
               style={{ textAlign: 'left', width: '7ch' }}
             />
             <BigInput
-              name="name"
-              value={electronServerPort}
+              name="port"
+              value={String(electronServerPort)}
               aria-label={t('Port')}
               type="number"
               style={{
