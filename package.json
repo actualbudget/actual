@@ -95,5 +95,8 @@
   "browserslist": [
     "electron 24.0",
     "defaults"
-  ]
+  ],
+  "dependencies": {
+    "@actual-app/api": "workspace:^"
+  }
 }
