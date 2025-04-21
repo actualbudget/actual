@@ -43,7 +43,7 @@ export function ElectronServerConfig({
     syncServerConfig?.port || 5007,
   );
 
-  const canShowExternalServerConfig = !syncServerConfig?.port && !currentUrl; // Nothing setup yet
+  const canShowExternalServerConfig = !syncServerConfig?.port && !currentUrl;
   const hasInternalServerConfig = syncServerConfig?.port;
 
   const [startingSyncServer, setStartingSyncServer] = useState(false);
@@ -202,7 +202,7 @@ export function ElectronServerConfig({
             style={{ color: theme.pageTextLight, margin: 5 }}
             onPress={() => navigate(-1)}
           >
-            {t('Cancel')}
+            <Trans>Cancel</Trans>
           </Button>
         )}
         <Button
@@ -210,7 +210,7 @@ export function ElectronServerConfig({
           style={{ color: theme.pageTextLight, margin: 5 }}
           onPress={dontUseSyncServer}
         >
-          {t('Don’t use a server')}
+          <Trans>Don’t use a server</Trans>
         </Button>
         {canShowExternalServerConfig && (
           <Button
@@ -218,7 +218,7 @@ export function ElectronServerConfig({
             style={{ color: theme.pageTextLight, margin: 5 }}
             onPress={() => onSetServerConfigView('external')}
           >
-            Use an external server
+            <Trans>Use an external server</Trans>
           </Button>
         )}
       </View>
