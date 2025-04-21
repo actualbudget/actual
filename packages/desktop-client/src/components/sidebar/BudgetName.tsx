@@ -83,7 +83,7 @@ function EditableBudgetName() {
   const items = [
     { name: 'rename', text: t('Rename budget') },
     { name: 'settings', text: t('Settings') },
-    { name: 'close', text: t('Close file') },
+    { name: 'close', text: t('Exit file') },
   ];
 
   if (editing) {
