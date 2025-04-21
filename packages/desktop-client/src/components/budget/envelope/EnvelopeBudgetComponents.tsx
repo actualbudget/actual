@@ -560,7 +560,11 @@ export function IncomeCategoryMonth({
               }}
             >
               <Text style={{ fontSize: 12 }}>
-                {carryover ? 'Disable Auto Hold' : 'Enable Auto Hold'}
+                {carryover ? (
+                  <Trans>Disable Auto Hold</Trans>
+                ) : (
+                  <Trans>Enable Auto Hold</Trans>
+                )}
               </Text>
             </Button>
           </View>
