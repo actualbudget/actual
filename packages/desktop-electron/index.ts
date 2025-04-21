@@ -205,6 +205,14 @@ async function createBackgroundProcess() {
 
 async function startSyncServer() {
   try {
+    if (syncServerProcess) {
+      logMessage(
+        'info',
+        'Sync-Server: Already started! Ignoring request to start.',
+      );
+      return;
+    }
+
     const globalPrefs = await loadGlobalPrefs();
 
     const syncServerConfig = {
