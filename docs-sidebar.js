@@ -164,6 +164,7 @@ const sidebars = {
               items: ['budgeting/rules/custom'],
             },
             'transactions/importing',
+            'transactions/merging',
             'accounts/reconciliation',
             'transactions/payees',
             'transactions/bulk-editing',
