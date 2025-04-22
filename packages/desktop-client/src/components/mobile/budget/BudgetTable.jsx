@@ -681,11 +681,6 @@ function Banners({ month, onBudgetAction }) {
   const { t } = useTranslation();
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
 
-  // Limit to rollover for now.
-  if (budgetType !== 'rollover') {
-    return null;
-  }
-
   return (
     <GridList
       aria-label={t('Banners')}
@@ -693,7 +688,7 @@ function Banners({ month, onBudgetAction }) {
     >
       <UncategorizedTransactionsBanner />
       <OverspendingBanner month={month} onBudgetAction={onBudgetAction} />
-      <OverbudgetedBanner month={month} onBudgetAction={onBudgetAction} />
+      {budgetType === 'rollover' && <OverbudgetedBanner month={month} onBudgetAction={onBudgetAction} />}
     </GridList>
   );
 }
