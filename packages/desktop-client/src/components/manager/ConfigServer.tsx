@@ -103,6 +103,7 @@ export function ElectronServerConfig({
 
   return (
     <>
+      <Title text={t('Configure your server')} />
       <View
         style={{
           display: 'flex',
@@ -350,8 +351,6 @@ export function ConfigServer() {
 
   return (
     <View style={{ maxWidth: 500, marginTop: -30 }}>
-      <Title text={t('Where’s the server?')} />
-
       {serverConfigView === 'internal' && (
         <ElectronServerConfig
           onDoNotUseServer={onSkip}
@@ -360,6 +359,7 @@ export function ConfigServer() {
       )}
       {serverConfigView === 'external' && (
         <>
+          <Title text={t('Where’s the server?')} />
           <Text
             style={{
               fontSize: 16,
