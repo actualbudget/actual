@@ -8,6 +8,8 @@ import {
   type CategoryEntity,
 } from 'loot-core/types/models';
 
+import { useFeatureFlag } from './useFeatureFlag';
+
 type ScheduleGoalDefinition = {
   type: 'schedule';
   name: ScheduleEntity['name'];
@@ -26,9 +28,10 @@ type UseCategoryScheduleGoalTemplateResult = {
 export function useCategoryScheduleGoalTemplate({
   category,
 }: UseCategoryScheduleGoalTemplateProps): UseCategoryScheduleGoalTemplateResult {
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const { schedules, statuses, statusLabels } = useCachedSchedules();
 
-  if (!category || !category.goal_def) {
+  if (!isGoalTemplatesEnabled || !category || !category.goal_def) {
     return {};
   }
 

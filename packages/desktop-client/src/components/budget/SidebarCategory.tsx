@@ -69,7 +69,7 @@ export function SidebarCategory({
 }: SidebarCategoryProps) {
   const { t } = useTranslation();
   const locale = useLocale();
-  const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
+  const isGoalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
 
@@ -161,7 +161,7 @@ export function SidebarCategory({
         </Popover>
       </View>
       <View style={{ flex: 1 }} />
-      {!goalsShown && goalTemplatesUIEnabled && (
+      {!goalsShown && isGoalTemplatesUIEnabled && (
         <View style={{ flexShrink: 0 }}>
           <CategoryAutomationButton
             style={dragging && { color: 'currentColor' }}
