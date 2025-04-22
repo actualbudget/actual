@@ -36,6 +36,18 @@ If using a Docker container, this folder is `/data` within the container. If you
    }
    ```
 
+If using MacOS/*nix based systems
+in terminal paste the following. This will create the `config.json` in the current directory
+```zsh
+cat <<"EOF" | tee config.json
+{
+  "https": {
+    "key": "/data/selfhost.key",
+    "cert": "/data/selfhost.crt"
+  }
+}
+EOF
+```
 ### Configuring with environment variables:
 If you can’t easily create new files, you can also configure HTTPS using environment variables. Set the `ACTUAL_HTTPS_KEY` and `ACTUAL_HTTPS_CERT` environment variables to the contents of the `.key` and `.crt` files, respectively. If you’re unable to include newlines in the environment variable values, you can replace any newlines with `\n` and Actual will automatically convert them back to newlines.
 
