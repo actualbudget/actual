@@ -9,6 +9,9 @@ Schedules can be used to enter anticipated transactions early. Some of the avail
 3. Options for recurring entries for multiple specific days of the month.
     1. A single schedule can be created for a Cell phone plan that has multiple users and different payment cycles for each phone. If you have 3 cell phones that all get paid on different days of the month, each day can be defined in a single schedule for each phone.
 4. Options to determine frequency of payments, such as every month, every 2 months, every 2 years, etc.
+     a. "Last" day of month can be selected by selecting "Add specific days", and selecting "Last" from the day drop-down list.
+     b. Otherwise, if you select the 30th of every month, February will be skipped every year.
+     c. If you select 31st, approximately every other month will be skipped. 
 
 Once a schedule is started, Actual will search the transaction history for entries that match the schedule.  You can then select the matches, and will have the option to link those transactions to the current schedule. You can click on the **Find missing transactions** button to have Actual look for matches.
 
