@@ -46,10 +46,10 @@ function execTransactions(
   outputTypes: OutputTypes,
 ) {
   const tableOptions = queryState.tableOptions || {};
-  const splitType: SplitsOption =
-    (tableOptions.splits as SplitsOption) || 'inline';
-
-  if (['all', 'inline', 'none', 'grouped'].indexOf(splitType) === -1) {
+  const splitType = tableOptions.splits
+    ? (tableOptions.splits as string)
+    : 'inline';
+  if (!isValidSplitsOption(splitType)) {
     throw new Error(`Invalid “splits” option for transactions: “${splitType}”`);
   }
 
@@ -246,6 +246,10 @@ async function execTransactionsBasic(
   return execQuery(queryState, compilerState, s, params, outputTypes);
 }
 
+function isValidSplitsOption(splits: string): splits is SplitsOption {
+  return ['all', 'inline', 'none', 'grouped'].includes(splits);
+}
+
 // Category groups executor
 
 type CategoriesOption = 'all' | 'none';
@@ -258,8 +262,14 @@ async function execCategoryGroups(
   outputTypes: OutputTypes,
 ) {
   const tableOptions = queryState.tableOptions || {};
-  const categoriesOption: CategoriesOption =
-    (tableOptions.categories as CategoriesOption) || 'all';
+  const categoriesOption = tableOptions.categories
+    ? (tableOptions.categories as string)
+    : 'all';
+  if (!isValidCategoriesOption(categoriesOption)) {
+    throw new Error(
+      `Invalid “categories” option for category_groups: “${categoriesOption}”`,
+    );
+  }
 
   if (categoriesOption !== 'none') {
     return execCategoryGroupsWithCategories(
@@ -325,6 +335,12 @@ async function execCategoryGroupsBasic(
   outputTypes: OutputTypes,
 ) {
   return execQuery(queryState, compilerState, sqlPieces, params, outputTypes);
+}
+
+function isValidCategoriesOption(
+  categories: string,
+): categories is CategoriesOption {
+  return ['all', 'none'].includes(categories);
 }
 
 export const schemaExecutors: Record<string, AqlQueryExecutor> = {
