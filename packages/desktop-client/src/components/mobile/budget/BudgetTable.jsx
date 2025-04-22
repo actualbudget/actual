@@ -525,7 +525,9 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
     t,
   ]);
 
-  if (!toBudgetAmount || toBudgetAmount >= 0) {
+  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+
+  if (budgetType !== 'rollover' || !toBudgetAmount || toBudgetAmount >= 0) {
     return null;
   }
 
@@ -751,7 +753,9 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
     previousNumberOfOverspentCategories,
   ]);
 
-  if (numberOfOverspentCategories === 0) {
+  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+
+  if (budgetType !== 'rollover' || numberOfOverspentCategories === 0) {
     return null;
   }
 
@@ -790,12 +794,6 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
 
 function Banners({ month, onBudgetAction }) {
   const { t } = useTranslation();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
-
-  // Limit to rollover for now.
-  if (budgetType !== 'rollover') {
-    return null;
-  }
 
   return (
     <GridList
