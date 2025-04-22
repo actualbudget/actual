@@ -6,9 +6,9 @@ import {
   compileAndRunAqlQuery,
   runCompiledAqlQuery,
 } from './exec';
+import { schema, schemaConfig } from './schema';
 import { schemaExecutors } from './schema/executors';
 
-import { schema, schemaConfig } from './index';
 export {
   convertForInsert,
   convertForUpdate,
