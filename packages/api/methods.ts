@@ -54,7 +54,7 @@ export async function batchBudgetUpdates(func) {
 
 /** 
  * @deprecated Please use `aqlQuery` instead.
- * This method will be removed in a future release.
+ * This function will be removed in a future release.
  */
 export function runQuery(query) {
   return send('api/query', { query: query.serialize() });
