@@ -80,7 +80,7 @@ export function useOverspentCategories({ month }: UseOverspentCategoriesProps) {
   }, [categoryCarryoverBindings, sheetName, spreadsheet]);
 
   useEffect(() => {
-    const unbindList = [];
+    const unbindList: (() => void)[] = [];
     for (const [categoryId, balanceBinding] of categoryBalanceBindings) {
       const unbind = spreadsheet.bind(sheetName, balanceBinding, result => {
         const balance = result.value as number;
