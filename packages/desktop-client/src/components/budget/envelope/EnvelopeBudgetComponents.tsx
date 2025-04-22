@@ -8,6 +8,10 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
+import {
+  SvgArrowsSynchronize,
+  SvgCalendar3,
+} from '@actual-app/components/icons/v2';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -30,12 +34,15 @@ import { useSheetName } from '../../spreadsheet/useSheetName';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Row, Field, SheetCell, type SheetCellProps } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
-import { makeAmountGrey } from '../util';
+import { getScheduleStatusTooltip, makeAmountGrey } from '../util';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
 
+import { useCategoryScheduleGoalTemplate } from '@desktop-client/hooks/useCategoryScheduleGoalTemplate';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 
 export function useEnvelopeSheetName<
@@ -234,6 +241,25 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
 
   const { showUndoNotification } = useUndo();
 
+  const navigate = useNavigate();
+  const locale = useLocale();
+
+  const { schedule, status: scheduleStatus } = useCategoryScheduleGoalTemplate({
+    category,
+  });
+
+  const isScheduleUpcomingOrMissed =
+    scheduleStatus === 'missed' ||
+    scheduleStatus === 'due' ||
+    scheduleStatus === 'upcoming';
+
+  const isScheduleRecurring = !!schedule?._date?.frequency;
+
+  const showScheduleStatus =
+    isScheduleUpcomingOrMissed &&
+    schedule &&
+    month === monthUtils.monthFromDate(schedule.next_date);
+
   return (
     <View
       style={{
@@ -388,10 +414,50 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         />
       </View>
       <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
-        <span
+        <View
           data-testid="category-month-spent"
           onClick={() => onShowActivity(category.id, month)}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            gap: 2,
+          }}
         >
+          {showScheduleStatus && (
+            <View
+              title={getScheduleStatusTooltip({
+                t,
+                schedule,
+                scheduleStatus,
+                locale,
+              })}
+              style={{ flexShrink: 0 }}
+            >
+              <Button
+                variant="bare"
+                style={{
+                  color:
+                    scheduleStatus === 'missed'
+                      ? theme.errorBackground
+                      : scheduleStatus === 'due'
+                        ? theme.warningBackground
+                        : theme.upcomingBackground,
+                }}
+                onPress={() =>
+                  schedule._account
+                    ? navigate(`/accounts/${schedule._account}`)
+                    : navigate('/accounts')
+                }
+              >
+                {isScheduleRecurring ? (
+                  <SvgArrowsSynchronize style={{ width: 12, height: 12 }} />
+                ) : (
+                  <SvgCalendar3 style={{ width: 12, height: 12 }} />
+                )}
+              </Button>
+            </View>
+          )}
           <EnvelopeCellValue
             binding={envelopeBudget.catSumAmount(category.id)}
             type="financial"
@@ -407,7 +473,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               />
             )}
           </EnvelopeCellValue>
-        </span>
+        </View>
       </Field>
       <Field
         ref={balanceMenuTriggerRef}

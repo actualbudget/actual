@@ -6,10 +6,14 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
+import {
+  SvgArrowsSynchronize,
+  SvgCalendar3,
+} from '@actual-app/components/icons/v2';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -31,11 +35,14 @@ import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Field, SheetCell, type SheetCellProps } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
-import { makeAmountGrey } from '../util';
+import { getScheduleStatusTooltip, makeAmountGrey } from '../util';
 
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
 
+import { useCategoryScheduleGoalTemplate } from '@desktop-client/hooks/useCategoryScheduleGoalTemplate';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 
 export const useTrackingSheetValue = <
@@ -213,6 +220,7 @@ export const CategoryMonth = memo(function CategoryMonth({
   onBudgetAction,
   onShowActivity,
 }: CategoryMonthProps) {
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
 
@@ -226,6 +234,25 @@ export const CategoryMonth = memo(function CategoryMonth({
   };
 
   const { showUndoNotification } = useUndo();
+
+  const navigate = useNavigate();
+  const locale = useLocale();
+
+  const { schedule, status: scheduleStatus } = useCategoryScheduleGoalTemplate({
+    category,
+  });
+
+  const isScheduleUpcomingOrMissed =
+    scheduleStatus === 'missed' ||
+    scheduleStatus === 'due' ||
+    scheduleStatus === 'upcoming';
+
+  const isScheduleRecurring = !!schedule?._date?.frequency;
+
+  const showScheduleStatus =
+    isScheduleUpcomingOrMissed &&
+    schedule &&
+    month === monthUtils.monthFromDate(schedule.next_date);
 
   return (
     <View
@@ -368,10 +395,50 @@ export const CategoryMonth = memo(function CategoryMonth({
         />
       </View>
       <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
-        <span
+        <View
           data-testid="category-month-spent"
           onClick={() => onShowActivity(category.id, month)}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            gap: 2,
+          }}
         >
+          {showScheduleStatus && (
+            <View
+              title={getScheduleStatusTooltip({
+                t,
+                schedule,
+                scheduleStatus,
+                locale,
+              })}
+              style={{ flexShrink: 0 }}
+            >
+              <Button
+                variant="bare"
+                style={{
+                  color:
+                    scheduleStatus === 'missed'
+                      ? theme.errorBackground
+                      : scheduleStatus === 'due'
+                        ? theme.warningBackground
+                        : theme.upcomingBackground,
+                }}
+                onPress={() =>
+                  schedule._account
+                    ? navigate(`/accounts/${schedule._account}`)
+                    : navigate('/accounts')
+                }
+              >
+                {isScheduleRecurring ? (
+                  <SvgArrowsSynchronize style={{ width: 12, height: 12 }} />
+                ) : (
+                  <SvgCalendar3 style={{ width: 12, height: 12 }} />
+                )}
+              </Button>
+            </View>
+          )}
           <TrackingCellValue
             binding={trackingBudget.catSumAmount(category.id)}
             type="financial"
@@ -389,7 +456,7 @@ export const CategoryMonth = memo(function CategoryMonth({
               />
             )}
           </TrackingCellValue>
-        </span>
+        </View>
       </Field>
 
       {!category.is_income && (

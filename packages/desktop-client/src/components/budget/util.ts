@@ -3,13 +3,14 @@ import { type CSSProperties } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
-import { t } from 'i18next';
+import { t, type TFunction } from 'i18next';
 
 import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { type Handlers } from 'loot-core/types/handlers';
 import {
+  type ScheduleEntity,
   type CategoryEntity,
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
@@ -194,4 +195,50 @@ export async function prewarmAllMonths(
   await Promise.all(
     months.map(month => prewarmMonth(budgetType, spreadsheet, month)),
   );
+}
+
+export function getScheduleStatusTooltip({
+  t,
+  schedule,
+  scheduleStatus,
+  locale,
+}: {
+  t: TFunction;
+  schedule: ScheduleEntity;
+  scheduleStatus: 'missed' | 'due' | 'upcoming';
+  locale?: Locale;
+}) {
+  const isToday = monthUtils.isCurrentDay(schedule.next_date);
+  const distanceFromNow = monthUtils.formatDistance(
+    schedule.next_date,
+    monthUtils.currentDay(),
+    locale,
+    {
+      addSuffix: true,
+    },
+  );
+  const formattedDate = monthUtils.format(schedule.next_date, 'MMMM d', locale);
+  switch (scheduleStatus) {
+    case 'missed':
+      return t(
+        'Missed {{scheduleName}} due {{distanceFromNow}} ({{formattedDate}})',
+        {
+          scheduleName: schedule.name,
+          distanceFromNow,
+          formattedDate,
+        },
+      );
+    case 'due':
+    case 'upcoming':
+      return t(
+        '{{scheduleName}} is due {{distanceFromNow}} ({{formattedDate}})',
+        {
+          scheduleName: schedule.name,
+          distanceFromNow: isToday ? t('today') : distanceFromNow,
+          formattedDate,
+        },
+      );
+    default:
+      throw new Error(`Unrecognized schedule status: ${scheduleStatus}`);
+  }
 }

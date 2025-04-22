@@ -1,32 +1,24 @@
 // @ts-strict-ignore
-import React, { type CSSProperties, type Ref, useContext, useRef } from 'react';
+import React, { type CSSProperties, type Ref, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
-import {
-  SvgArrowsSynchronize,
-  SvgCalendar3,
-} from '@actual-app/components/icons/v2';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { type TFunction } from 'i18next';
 
-import * as monthUtils from 'loot-core/shared/months';
 import {
   type CategoryGroupEntity,
   type CategoryEntity,
-  type ScheduleEntity,
 } from 'loot-core/types/models';
 
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 
 import { CategoryAutomationButton } from './goals/CategoryAutomationButton';
-import { MonthsContext } from './MonthsContext';
 
 import { useCategoryScheduleGoalTemplate } from '@desktop-client/hooks/useCategoryScheduleGoalTemplate';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
@@ -68,7 +60,6 @@ export function SidebarCategory({
   onHideNewCategory,
 }: SidebarCategoryProps) {
   const { t } = useTranslation();
-  const locale = useLocale();
   const isGoalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
@@ -77,25 +68,6 @@ export function SidebarCategory({
   const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
     useContextMenu();
   const triggerRef = useRef(null);
-  const navigate = useNavigate();
-
-  const { months } = useContext(MonthsContext);
-
-  const { schedule, status: scheduleStatus } = useCategoryScheduleGoalTemplate({
-    category,
-  });
-
-  const isScheduleUpcomingOrMissed =
-    scheduleStatus === 'missed' ||
-    scheduleStatus === 'due' ||
-    scheduleStatus === 'upcoming';
-
-  const isScheduleRecurring = !!schedule?._date?.frequency;
-
-  const showScheduleStatus =
-    isScheduleUpcomingOrMissed &&
-    schedule &&
-    months.includes(monthUtils.monthFromDate(schedule.next_date));
 
   const displayed = (
     <View
@@ -169,41 +141,6 @@ export function SidebarCategory({
           />
         </View>
       )}
-
-      {showScheduleStatus && (
-        <View
-          title={getScheduleStatusTooltip({
-            t,
-            schedule,
-            scheduleStatus,
-            locale,
-          })}
-          style={{ flexShrink: 0 }}
-        >
-          <Button
-            variant="bare"
-            style={{
-              color:
-                scheduleStatus === 'missed'
-                  ? theme.errorBackground
-                  : scheduleStatus === 'due'
-                    ? theme.warningBackground
-                    : theme.upcomingBackground,
-            }}
-            onPress={() =>
-              schedule._account
-                ? navigate(`/accounts/${schedule._account}`)
-                : navigate('/accounts')
-            }
-          >
-            {isScheduleRecurring ? (
-              <SvgArrowsSynchronize style={{ width: 13, height: 13 }} />
-            ) : (
-              <SvgCalendar3 style={{ width: 13, height: 13 }} />
-            )}
-          </Button>
-        </View>
-      )}
       <View style={{ flexShrink: 0 }}>
         <NotesButton
           id={category.id}
@@ -273,50 +210,4 @@ export function SidebarCategory({
       />
     </View>
   );
-}
-
-function getScheduleStatusTooltip({
-  t,
-  schedule,
-  scheduleStatus,
-  locale,
-}: {
-  t: TFunction;
-  schedule: ScheduleEntity;
-  scheduleStatus: 'missed' | 'due' | 'upcoming';
-  locale?: Locale;
-}) {
-  const isToday = monthUtils.isCurrentDay(schedule.next_date);
-  const distanceFromNow = monthUtils.formatDistance(
-    schedule.next_date,
-    monthUtils.currentDay(),
-    locale,
-    {
-      addSuffix: true,
-    },
-  );
-  const formattedDate = monthUtils.format(schedule.next_date, 'MMMM d', locale);
-  switch (scheduleStatus) {
-    case 'missed':
-      return t(
-        'Missed {{scheduleName}} due {{distanceFromNow}} ({{formattedDate}})',
-        {
-          scheduleName: schedule.name,
-          distanceFromNow,
-          formattedDate,
-        },
-      );
-    case 'due':
-    case 'upcoming':
-      return t(
-        '{{scheduleName}} is due {{distanceFromNow}} ({{formattedDate}})',
-        {
-          scheduleName: schedule.name,
-          distanceFromNow: isToday ? t('today') : distanceFromNow,
-          formattedDate,
-        },
-      );
-    default:
-      throw new Error(`Unrecognized schedule status: ${scheduleStatus}`);
-  }
 }
