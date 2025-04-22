@@ -49,10 +49,17 @@ export class CategoryTemplate {
       `carryover-${category.id}`,
     );
     let fromLastMonth;
+    const isFutureMonth =
+      monthUtils.differenceInCalendarMonths(month, monthUtils.currentMonth()) >
+      0;
+    const isSingleSimpleTemplate =
+      templates.length === 1 && templates[0].type === 'simple';
     if (lastMonthBalance < 0 && !carryover) {
       fromLastMonth = 0;
     } else if (category.is_income) {
       //for tracking budget
+      fromLastMonth = 0;
+    } else if (isFutureMonth && isSingleSimpleTemplate) {
       fromLastMonth = 0;
     } else {
       fromLastMonth = lastMonthBalance;
