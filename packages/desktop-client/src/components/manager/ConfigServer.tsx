@@ -44,6 +44,7 @@ export function ElectronServerConfig({
   const [electronServerPort, setElectronServerPort] = useState(
     syncServerConfig?.port || 5007,
   );
+  const [configError, setConfigError] = useState<string | null>(null);
 
   const canShowExternalServerConfig = !syncServerConfig?.port && !currentUrl;
   const hasInternalServerConfig = syncServerConfig?.port;
@@ -51,7 +52,17 @@ export function ElectronServerConfig({
   const [startingSyncServer, setStartingSyncServer] = useState(false);
 
   const onConfigureSyncServer = async () => {
+    if (
+      isNaN(electronServerPort) ||
+      electronServerPort <= 0 ||
+      electronServerPort > 65535
+    ) {
+      setConfigError('Ports must be within range 1 - 65535');
+      return;
+    }
+
     try {
+      setConfigError(null);
       setStartingSyncServer(true);
       // Ensure config is saved before starting the server
       await dispatch(
@@ -74,6 +85,7 @@ export function ElectronServerConfig({
       navigate('/');
     } catch (error) {
       setStartingSyncServer(false);
+      setConfigError('Failed to configure sync server');
       console.error('Failed to configure sync server:', error);
     }
   };
@@ -123,6 +135,13 @@ export function ElectronServerConfig({
             synchronization across your devices, bank sync and more...
           </Trans>
         </Text>
+
+        {configError && (
+          <Text style={{ color: theme.errorText, marginTop: 10 }}>
+            {configError}
+          </Text>
+        )}
+
         <View
           style={{
             display: 'flex',
