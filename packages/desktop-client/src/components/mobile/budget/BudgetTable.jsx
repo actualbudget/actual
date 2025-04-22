@@ -688,7 +688,9 @@ function Banners({ month, onBudgetAction }) {
     >
       <UncategorizedTransactionsBanner />
       <OverspendingBanner month={month} onBudgetAction={onBudgetAction} />
-      {budgetType === 'rollover' && <OverbudgetedBanner month={month} onBudgetAction={onBudgetAction} />}
+      {budgetType === 'rollover' && (
+        <OverbudgetedBanner month={month} onBudgetAction={onBudgetAction} />
+      )}
     </GridList>
   );
 }
