@@ -54,7 +54,7 @@ export function useOverspentCategories({ month }: UseOverspentCategoriesProps) {
   const sheetName = monthUtils.sheetForMonth(month);
 
   useEffect(() => {
-    const unbindList = [];
+    const unbindList: (() => void)[] = [];
     for (const [categoryId, carryoverBinding] of categoryCarryoverBindings) {
       const unbind = spreadsheet.bind(sheetName, carryoverBinding, result => {
         const isRolloverEnabled = Boolean(result.value);
