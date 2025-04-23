@@ -106,7 +106,7 @@ const DynamicBudgetTableInner = ({
       _onMonthSelect(
         monthUtils.subMonths(
           monthUtils.currentMonth(),
-          type === 'rollover'
+          type === 'envelope'
             ? Math.floor((numMonths - 1) / 2)
             : numMonths === 2
               ? 1

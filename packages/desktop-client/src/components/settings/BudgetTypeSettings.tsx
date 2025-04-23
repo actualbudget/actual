@@ -11,10 +11,10 @@ import { Setting } from './UI';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function BudgetTypeSettings() {
-  const [budgetType = 'rollover', setBudgetType] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope', setBudgetType] = useSyncedPref('budgetType');
 
   function onSwitchType() {
-    const newBudgetType = budgetType === 'rollover' ? 'report' : 'rollover';
+    const newBudgetType = budgetType === 'envelope' ? 'tracking' : 'envelope';
     setBudgetType(newBudgetType);
   }
 
@@ -22,7 +22,7 @@ export function BudgetTypeSettings() {
     <Setting
       primaryAction={
         <Button onPress={onSwitchType}>
-          {budgetType === 'report' ? (
+          {budgetType === 'tracking' ? (
             <Trans>Switch to envelope budgeting</Trans>
           ) : (
             <Trans>Switch to tracking budgeting</Trans>
