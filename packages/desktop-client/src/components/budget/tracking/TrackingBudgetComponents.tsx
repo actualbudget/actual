@@ -420,10 +420,10 @@ export const CategoryMonth = memo(function CategoryMonth({
                 style={{
                   color:
                     scheduleStatus === 'missed'
-                      ? theme.errorBackground
+                      ? theme.errorText
                       : scheduleStatus === 'due'
-                        ? theme.warningBackground
-                        : theme.upcomingBackground,
+                        ? theme.warningText
+                        : theme.upcomingText,
                 }}
                 onPress={() =>
                   schedule._account

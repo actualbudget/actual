@@ -116,10 +116,10 @@ function ExpenseCategoryName({
                 flexShrink: 0,
                 color:
                   scheduleStatus === 'missed'
-                    ? theme.errorBackground
+                    ? theme.errorText
                     : scheduleStatus === 'due'
-                      ? theme.warningBackground
-                      : theme.upcomingBackground,
+                      ? theme.warningText
+                      : theme.upcomingText,
               }}
             >
               {isScheduleRecurring ? (
