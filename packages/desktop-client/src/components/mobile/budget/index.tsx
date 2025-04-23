@@ -1,12 +1,11 @@
 // @ts-strict-ignore
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { sync } from 'loot-core/client/app/appSlice';
-import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
 import { collapseModals, pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   applyBudgetAction,
@@ -20,7 +19,6 @@ import {
 import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
 
 import { useDispatch } from '../../../redux';
 import { prewarmMonth } from '../../budget/util';
@@ -494,8 +492,6 @@ export function Budget() {
     onToggleHiddenCategories,
   ]);
 
-  const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
-
   if (!categoryGroups || !initialized) {
     return (
       <View
@@ -514,34 +510,32 @@ export function Budget() {
 
   return (
     <NamespaceContext.Provider value={monthUtils.sheetForMonth(startMonth)}>
-      <SchedulesProvider query={schedulesQuery}>
-        <SyncRefresh
-          onSync={async () => {
-            dispatch(sync());
-          }}
-        >
-          {({ onRefresh }) => (
-            <BudgetTable
-              // This key forces the whole table rerender when the number
-              // format changes
-              key={`${numberFormat}${hideFraction}`}
-              categoryGroups={categoryGroups}
-              month={startMonth}
-              monthBounds={bounds}
-              onShowBudgetSummary={onShowBudgetSummary}
-              onPrevMonth={onPrevMonth}
-              onNextMonth={onNextMonth}
-              onCurrentMonth={onCurrentMonth}
-              onBudgetAction={onBudgetAction}
-              onRefresh={onRefresh}
-              onEditCategoryGroup={onOpenCategoryGroupMenuModal}
-              onEditCategory={onOpenCategoryMenuModal}
-              onOpenBudgetPageMenu={onOpenBudgetPageMenu}
-              onOpenBudgetMonthMenu={onOpenBudgetMonthMenu}
-            />
-          )}
-        </SyncRefresh>
-      </SchedulesProvider>
+      <SyncRefresh
+        onSync={async () => {
+          dispatch(sync());
+        }}
+      >
+        {({ onRefresh }) => (
+          <BudgetTable
+            // This key forces the whole table rerender when the number
+            // format changes
+            key={`${numberFormat}${hideFraction}`}
+            categoryGroups={categoryGroups}
+            month={startMonth}
+            monthBounds={bounds}
+            onShowBudgetSummary={onShowBudgetSummary}
+            onPrevMonth={onPrevMonth}
+            onNextMonth={onNextMonth}
+            onCurrentMonth={onCurrentMonth}
+            onBudgetAction={onBudgetAction}
+            onRefresh={onRefresh}
+            onEditCategoryGroup={onOpenCategoryGroupMenuModal}
+            onEditCategory={onOpenCategoryMenuModal}
+            onOpenBudgetPageMenu={onOpenBudgetPageMenu}
+            onOpenBudgetMonthMenu={onOpenBudgetMonthMenu}
+          />
+        )}
+      </SyncRefresh>
     </NamespaceContext.Provider>
   );
 }

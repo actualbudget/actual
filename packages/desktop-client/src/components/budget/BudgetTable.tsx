@@ -275,28 +275,28 @@ export function BudgetTable(props: BudgetTableProps) {
         monthBounds={monthBounds}
         type={type}
       >
-        <SchedulesProvider query={schedulesQuery}>
-          <BudgetTotals
-            MonthComponent={dataComponents.BudgetTotalsComponent}
-            toggleHiddenCategories={toggleHiddenCategories}
-            expandAllCategories={expandAllCategories}
-            collapseAllCategories={collapseAllCategories}
-          />
+        <BudgetTotals
+          MonthComponent={dataComponents.BudgetTotalsComponent}
+          toggleHiddenCategories={toggleHiddenCategories}
+          expandAllCategories={expandAllCategories}
+          collapseAllCategories={collapseAllCategories}
+        />
+        <View
+          style={{
+            overflowY: 'scroll',
+            overflowAnchor: 'none',
+            flex: 1,
+            paddingLeft: 5,
+            paddingRight: 5,
+          }}
+        >
           <View
             style={{
-              overflowY: 'scroll',
-              overflowAnchor: 'none',
-              flex: 1,
-              paddingLeft: 5,
-              paddingRight: 5,
+              flexShrink: 0,
             }}
+            onKeyDown={onKeyDown}
           >
-            <View
-              style={{
-                flexShrink: 0,
-              }}
-              onKeyDown={onKeyDown}
-            >
+            <SchedulesProvider query={schedulesQuery}>
               <BudgetCategories
                 // @ts-expect-error Fix when migrating BudgetCategories to ts
                 categoryGroups={categoryGroups}
@@ -314,9 +314,9 @@ export function BudgetTable(props: BudgetTableProps) {
                 onShowActivity={onShowActivity}
                 onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
               />
-            </View>
+            </SchedulesProvider>
           </View>
-        </SchedulesProvider>
+        </View>
       </MonthsProvider>
     </View>
   );
