@@ -22,7 +22,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { AutoTextSize } from 'auto-text-size';
-import memoizeOne from 'memoize-one';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
@@ -232,7 +231,7 @@ function Saved({ projected, onPress, show3Columns }) {
 
 function BudgetGroups({
   categoryGroups,
-  onEditGroup,
+  onEditCategoryGroup,
   onEditCategory,
   month,
   onBudgetAction,
@@ -240,14 +239,16 @@ function BudgetGroups({
   show3Columns,
   showHiddenCategories,
 }) {
-  const separateGroups = memoizeOne(groups => {
+  const { incomeGroup, expenseGroups } = useMemo(() => {
+    const categoryGroupsToDisplay = categoryGroups.filter(
+      group => !group.hidden || showHiddenCategories,
+    );
     return {
-      incomeGroup: groups.find(group => group.is_income),
-      expenseGroups: groups.filter(group => !group.is_income),
+      incomeGroup: categoryGroupsToDisplay.find(group => group.is_income),
+      expenseGroups: categoryGroupsToDisplay.filter(group => !group.is_income),
     };
-  });
+  }, [categoryGroups, showHiddenCategories]);
 
-  const { incomeGroup, expenseGroups } = separateGroups(categoryGroups);
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
 
@@ -275,10 +276,10 @@ function BudgetGroups({
       style={{ flex: '1 0 auto', overflowY: 'auto', paddingBottom: 15 }}
     >
       <ExpenseGroupList
-        groups={expenseGroups}
+        categoryGroups={expenseGroups}
         showBudgetedColumn={showBudgetedColumn}
         month={month}
-        onEditGroup={onEditGroup}
+        onEditCategoryGroup={onEditCategoryGroup}
         onEditCategory={onEditCategory}
         onBudgetAction={onBudgetAction}
         show3Columns={show3Columns}
@@ -289,10 +290,10 @@ function BudgetGroups({
 
       {incomeGroup && (
         <IncomeGroup
-          group={incomeGroup}
+          categoryGroup={incomeGroup}
           month={month}
           showHiddenCategories={showHiddenCategories}
-          onEditGroup={onEditGroup}
+          onEditCategoryGroup={onEditCategoryGroup}
           onEditCategory={onEditCategory}
           onBudgetAction={onBudgetAction}
           isCollapsed={isCollapsed}
@@ -313,7 +314,7 @@ export function BudgetTable({
   onShowBudgetSummary,
   onBudgetAction,
   onRefresh,
-  onEditGroup,
+  onEditCategoryGroup,
   onEditCategory,
   onOpenBudgetPageMenu,
   onOpenBudgetMonthMenu,
@@ -409,7 +410,7 @@ export function BudgetTable({
             show3Columns={show3Columns}
             showHiddenCategories={showHiddenCategories}
             month={month}
-            onEditGroup={onEditGroup}
+            onEditCategoryGroup={onEditCategoryGroup}
             onEditCategory={onEditCategory}
             onBudgetAction={onBudgetAction}
           />

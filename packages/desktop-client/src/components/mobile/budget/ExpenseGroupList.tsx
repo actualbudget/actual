@@ -19,11 +19,11 @@ import {
 } from './ExpenseGroupListItem';
 
 type ExpenseGroupListProps = {
-  groups: CategoryGroupEntity[];
+  categoryGroups: CategoryGroupEntity[];
   show3Columns: boolean;
   showBudgetedColumn: boolean;
   month: string;
-  onEditGroup: (id: CategoryGroupEntity['id']) => void;
+  onEditCategoryGroup: (id: CategoryGroupEntity['id']) => void;
   onEditCategory: (id: CategoryEntity['id']) => void;
   onBudgetAction: (month: string, action: string, args: unknown) => void;
   showHiddenCategories: boolean;
@@ -32,11 +32,11 @@ type ExpenseGroupListProps = {
 };
 
 export function ExpenseGroupList({
-  groups,
+  categoryGroups,
   show3Columns,
   showBudgetedColumn,
   month,
-  onEditGroup,
+  onEditCategoryGroup,
   onEditCategory,
   onBudgetAction,
   showHiddenCategories,
@@ -71,7 +71,7 @@ export function ExpenseGroupList({
     },
     renderDragPreview: items => {
       const draggedGroupId = items[0]['text/plain'];
-      const group = groups.find(c => c.id === draggedGroupId);
+      const group = categoryGroups.find(c => c.id === draggedGroupId);
       if (!group) {
         throw new Error(
           `Internal error: category group with ID ${draggedGroupId} not found.`,
@@ -79,20 +79,21 @@ export function ExpenseGroupList({
       }
       return (
         <ExpenseGroupHeader
-          group={group}
+          categoryGroup={group}
           month={month}
           showBudgetedColumn={showBudgetedColumn}
           show3Columns={show3Columns}
-          onEdit={() => {}}
+          onEditCategoryGroup={() => {}}
           isCollapsed={() => true}
           onToggleCollapse={() => {}}
+          isHidden={false}
         />
       );
     },
     onReorder: e => {
       const [key] = e.keys;
       const groupIdToMove = key as CategoryGroupEntity['id'];
-      const groupToMove = groups.find(c => c.id === groupIdToMove);
+      const groupToMove = categoryGroups.find(c => c.id === groupIdToMove);
 
       if (!groupToMove) {
         throw new Error(
@@ -110,7 +111,9 @@ export function ExpenseGroupList({
           }),
         );
       } else if (e.target.dropPosition === 'after') {
-        const targetGroupIndex = groups.findIndex(c => c.id === targetGroupId);
+        const targetGroupIndex = categoryGroups.findIndex(
+          c => c.id === targetGroupId,
+        );
 
         if (targetGroupIndex === -1) {
           throw new Error(
@@ -118,7 +121,7 @@ export function ExpenseGroupList({
           );
         }
 
-        const nextToTargetCategory = groups[targetGroupIndex + 1];
+        const nextToTargetCategory = categoryGroups[targetGroupIndex + 1];
 
         dispatch(
           moveCategoryGroup({
@@ -138,10 +141,10 @@ export function ExpenseGroupList({
   return (
     <GridList
       aria-label={t('Expense category groups')}
-      items={groups}
+      items={categoryGroups}
       dependencies={[
         month,
-        onEditGroup,
+        onEditCategoryGroup,
         onEditCategory,
         onBudgetAction,
         show3Columns,
@@ -152,12 +155,12 @@ export function ExpenseGroupList({
       ]}
       dragAndDropHooks={dragAndDropHooks}
     >
-      {group => (
+      {categoryGroup => (
         <ExpenseGroupListItem
-          key={group.id}
-          value={group}
+          key={categoryGroup.id}
+          value={categoryGroup}
           month={month}
-          onEditGroup={onEditGroup}
+          onEditCategoryGroup={onEditCategoryGroup}
           onEditCategory={onEditCategory}
           onBudgetAction={onBudgetAction}
           showBudgetedColumn={showBudgetedColumn}
@@ -165,6 +168,7 @@ export function ExpenseGroupList({
           showHiddenCategories={showHiddenCategories}
           isCollapsed={isCollapsed}
           onToggleCollapse={onToggleCollapse}
+          isHidden={!!categoryGroup.hidden}
         />
       )}
     </GridList>
