@@ -27,7 +27,6 @@ Here are some initial guidelines for how contributions will be treated:
 
 (sorted alphabetically)
 
-- @carkom
 - @jfdoming
 - @joel-jeremy
 - @lelemm
@@ -36,8 +35,6 @@ Here are some initial guidelines for how contributions will be treated:
 - @MikesGlitch
 - @RubenOlsen
 - @teprifer
-- @twk3
-- @UnderKoen
 - @youngcw
 
 ### Alumni
@@ -45,6 +42,7 @@ Here are some initial guidelines for how contributions will be treated:
 (sorted alphabetically)
 
 - @albertogasparin
+- @carkom
 - @j-f1
 - @jlongster
 - @Kidglove57
@@ -52,6 +50,8 @@ Here are some initial guidelines for how contributions will be treated:
 - @shall0pass
 - @trevdor
 - @shaankhosla
+- @twk3
+- @UnderKoen
 
 ### The Project Layout
 
