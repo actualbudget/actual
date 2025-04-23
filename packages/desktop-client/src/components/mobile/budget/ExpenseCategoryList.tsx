@@ -16,7 +16,7 @@ import { useDispatch } from '../../../redux';
 import { ExpenseCategoryListItem } from './ExpenseCategoryListItem';
 
 type ExpenseCategoryListProps = {
-  group: CategoryGroupEntity;
+  categoryGroup: CategoryGroupEntity;
   categories: CategoryEntity[];
   shouldHideCategory: (category: CategoryEntity) => boolean;
   month: string;
@@ -27,7 +27,7 @@ type ExpenseCategoryListProps = {
 };
 
 export function ExpenseCategoryList({
-  group,
+  categoryGroup,
   categories,
   month,
   onEditCategory,
@@ -120,8 +120,8 @@ export function ExpenseCategoryList({
 
   return (
     <GridList
-      aria-label={t('{{groupName}} expense group categories', {
-        groupName: group.name,
+      aria-label={t('{{categoryGroupName}} expense group categories', {
+        categoryGroupName: categoryGroup.name,
       })}
       items={categories}
       dragAndDropHooks={dragAndDropHooks}
@@ -139,7 +139,7 @@ export function ExpenseCategoryList({
           key={category.id}
           value={category}
           month={month}
-          onEdit={onEditCategory}
+          onEditCategory={onEditCategory}
           onBudgetAction={onBudgetAction}
           isHidden={shouldHideCategory(category)}
           show3Columns={show3Columns}

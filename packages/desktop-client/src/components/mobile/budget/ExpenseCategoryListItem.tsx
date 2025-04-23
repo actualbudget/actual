@@ -37,13 +37,13 @@ import { getColumnWidth, PILL_STYLE, ROW_HEIGHT } from './BudgetTable';
 
 type ExpenseCategoryNameProps = {
   category: CategoryEntity;
-  onEdit: (id: CategoryEntity['id']) => void;
+  onEditCategory: (id: CategoryEntity['id']) => void;
   show3Columns: boolean;
 };
 
 function ExpenseCategoryName({
   category,
-  onEdit,
+  onEditCategory,
   show3Columns,
 }: ExpenseCategoryNameProps) {
   const sidebarColumnWidth = getColumnWidth({
@@ -74,7 +74,7 @@ function ExpenseCategoryName({
         style={{
           maxWidth: sidebarColumnWidth,
         }}
-        onPress={() => onEdit?.(category.id)}
+        onPress={() => onEditCategory?.(category.id)}
       >
         <View
           style={{
@@ -337,14 +337,14 @@ type ExpenseCategoryListItemProps = ComponentPropsWithoutRef<
   style?: CSSProperties;
   show3Columns: boolean;
   showBudgetedColumn: boolean;
-  onEdit: (id: CategoryEntity['id']) => void;
+  onEditCategory: (id: CategoryEntity['id']) => void;
   onBudgetAction: (month: string, action: string, args: unknown) => void;
 };
 
 export function ExpenseCategoryListItem({
   month,
   isHidden,
-  onEdit,
+  onEditCategory,
   onBudgetAction,
   show3Columns,
   showBudgetedColumn,
@@ -547,7 +547,7 @@ export function ExpenseCategoryListItem({
       >
         <ExpenseCategoryName
           category={category}
-          onEdit={onEdit}
+          onEditCategory={onEditCategory}
           show3Columns={show3Columns}
         />
         <ExpenseCategoryCells
