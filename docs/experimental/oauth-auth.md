@@ -24,7 +24,7 @@ If your OpenID provider supports discovery, use the following configuration exam
 
 ```json title="config.json"
 "openId": {
-        "issuer": "URL for the OpenID Provider",
+        "discoveryURL": "URL for the OpenID Provider",
         "client_id": "client_id given by the provider",
         "client_secret": "client_secret given by the provider",
         "server_hostname": "your Actual Server URL (so the provider redirects you to this)",
