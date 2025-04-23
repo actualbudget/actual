@@ -44,6 +44,8 @@ Please note, you will only be able to connect your account to meu.pluggy.ai whil
 
 ### Set Up Pluggy in Actual
 
+Pluggy integration is experimental at this point, so before you can use it you need to enable it under Settings -> Advanced Settings -> Experimental Features -> Pluggy.ai Bank Sync
+
 1. In Actual, click **“+ Add account”** at the bottom of the sidebar.
 
     ![](/static/img/connecting-your-bank/connecting-your-bank-02.png)
