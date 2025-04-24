@@ -430,7 +430,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             schedules.map(schedule => {
               const scheduleStatus = scheduleStatuses.get(schedule.id);
               const isScheduleRecurring = !!schedule._date?.frequency;
-              return (
+              return scheduleStatus && (
                 <View
                   key={schedule.id}
                   title={getScheduleStatusTooltip({

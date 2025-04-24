@@ -18,7 +18,7 @@ type ScheduleGoalDefinition = {
 };
 
 type UseCategoryScheduleGoalTemplatesProps = {
-  category: CategoryEntity;
+  category?: CategoryEntity | undefined;
 };
 
 type UseCategoryScheduleGoalTemplatesResult = {
@@ -45,7 +45,7 @@ export function useCategoryScheduleGoalTemplates({
         statusLabels: new Map(),
       };
     }
-  
+
     let goalDefinitions: Record<string, unknown>[] = [];
     try {
       goalDefinitions = JSON.parse(category.goal_def);
@@ -57,11 +57,11 @@ export function useCategoryScheduleGoalTemplates({
         statusLabels: new Map(),
       };
     }
-  
+
     const scheduleGoalDefinitions = goalDefinitions.filter(
       g => g.type === 'schedule',
     ) as ScheduleGoalDefinition[];
-  
+
     if (!scheduleGoalDefinitions?.length) {
       return {
         schedules: [],
@@ -69,7 +69,7 @@ export function useCategoryScheduleGoalTemplates({
         statusLabels: new Map(),
       };
     }
-  
+
     const schedules = allSchedules.filter(s =>
       scheduleGoalDefinitions.some(g => g.name === s.name),
     );
@@ -79,11 +79,17 @@ export function useCategoryScheduleGoalTemplates({
     const statusLabels = new Map(
       [...allStatusLabels].filter(([id]) => schedules.some(s => s.id === id)),
     );
-  
+
     return {
       schedules,
       statuses,
       statusLabels,
     };
-  }, [allSchedules, allStatusLabels, allStatuses, category, isGoalTemplatesEnabled]);
+  }, [
+    allSchedules,
+    allStatusLabels,
+    allStatuses,
+    category,
+    isGoalTemplatesEnabled,
+  ]);
 }
