@@ -37,8 +37,9 @@ export function useCategoryPreviewTransactions({
     }
 
     return {
-      previewTransactions: allPreviewTransactions.filter(transaction =>
-        transaction.schedule && schedulesToPreview.has(transaction.schedule),
+      previewTransactions: allPreviewTransactions.filter(
+        transaction =>
+          transaction.schedule && schedulesToPreview.has(transaction.schedule),
       ),
       isLoading,
     };

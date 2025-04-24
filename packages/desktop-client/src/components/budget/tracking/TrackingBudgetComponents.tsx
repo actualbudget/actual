@@ -411,39 +411,43 @@ export const CategoryMonth = memo(function CategoryMonth({
             schedules.map(schedule => {
               const scheduleStatus = scheduleStatuses.get(schedule.id);
               const isScheduleRecurring = !!schedule._date?.frequency;
-              return scheduleStatus && (
-                <View
-                  key={schedule.id}
-                  title={getScheduleStatusTooltip({
-                    t,
-                    schedule,
-                    scheduleStatus,
-                    locale,
-                  })}
-                >
-                  <Button
-                    variant="bare"
-                    style={{
-                      color:
-                        scheduleStatus === 'missed'
-                          ? theme.errorText
-                          : scheduleStatus === 'due'
-                            ? theme.warningText
-                            : theme.upcomingText,
-                    }}
-                    onPress={() =>
-                      schedule._account
-                        ? navigate(`/accounts/${schedule._account}`)
-                        : navigate('/accounts')
-                    }
+              return (
+                scheduleStatus && (
+                  <View
+                    key={schedule.id}
+                    title={getScheduleStatusTooltip({
+                      t,
+                      schedule,
+                      scheduleStatus,
+                      locale,
+                    })}
                   >
-                    {isScheduleRecurring ? (
-                      <SvgArrowsSynchronize style={{ width: 12, height: 12 }} />
-                    ) : (
-                      <SvgCalendar3 style={{ width: 12, height: 12 }} />
-                    )}
-                  </Button>
-                </View>
+                    <Button
+                      variant="bare"
+                      style={{
+                        color:
+                          scheduleStatus === 'missed'
+                            ? theme.errorText
+                            : scheduleStatus === 'due'
+                              ? theme.warningText
+                              : theme.upcomingText,
+                      }}
+                      onPress={() =>
+                        schedule._account
+                          ? navigate(`/accounts/${schedule._account}`)
+                          : navigate('/accounts')
+                      }
+                    >
+                      {isScheduleRecurring ? (
+                        <SvgArrowsSynchronize
+                          style={{ width: 12, height: 12 }}
+                        />
+                      ) : (
+                        <SvgCalendar3 style={{ width: 12, height: 12 }} />
+                      )}
+                    </Button>
+                  </View>
+                )
               );
             })}
           <TrackingCellValue
