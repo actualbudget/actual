@@ -414,7 +414,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             gap: 2,
           }}
         >
-          {schedule && (
+          {schedule && scheduleStatus && (
             <View
               title={getScheduleStatusTooltip({
                 t,

@@ -395,7 +395,7 @@ export const CategoryMonth = memo(function CategoryMonth({
             gap: 2,
           }}
         >
-          {schedule && (
+          {schedule && scheduleStatus && (
             <View
               title={getScheduleStatusTooltip({
                 t,

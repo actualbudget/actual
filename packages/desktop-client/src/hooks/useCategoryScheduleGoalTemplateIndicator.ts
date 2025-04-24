@@ -21,7 +21,7 @@ type UseCategoryScheduleGoalTemplateResult = {
 };
 
 /**
- * We only display an indicator for one schedule at a time, so we 
+ * We only display an indicator for one schedule at a time, so we
  * filter and then sort the schedules to show missed schedules first,
  * then due schedules, then upcoming schedules. This is to ensure that
  * the user sees the most important schedule first.
@@ -56,7 +56,7 @@ export function useCategoryScheduleGoalTemplateIndicator({
       });
 
     const schedule = currentMonthSchedules[0] || null;
-    const scheduleStatus = schedule ? scheduleStatuses.get(schedule.id) : null;
+    const scheduleStatus = (schedule ? scheduleStatuses.get(schedule.id) : null) || null;
 
     return {
       schedule,
