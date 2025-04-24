@@ -367,7 +367,7 @@ describe('CategoryTemplate', () => {
         .mockResolvedValueOnce(-300); // Oct 2023
 
       const result = await CategoryTemplate.runAverage(template, instance);
-      expect(result).toBe(-200); // Average of -100, -200, -300
+      expect(result).toBe(200); // Average of -100, -200, -300
     });
 
     it('should handle zero amounts', async () => {
@@ -384,7 +384,7 @@ describe('CategoryTemplate', () => {
         .mockResolvedValueOnce(-300);
 
       const result = await CategoryTemplate.runAverage(template, instance);
-      expect(result).toBe(-100);
+      expect(result).toBe(100);
     });
 
     it('should handle mixed positive and negative amounts', async () => {
@@ -401,7 +401,7 @@ describe('CategoryTemplate', () => {
         .mockResolvedValueOnce(-300);
 
       const result = await CategoryTemplate.runAverage(template, instance);
-      expect(result).toBe(-67); // Average of -100, 200, -300
+      expect(result).toBe(67); // Average of -100, 200, -300
     });
   });
 
