@@ -40,7 +40,7 @@ import { getScheduleStatusTooltip, makeAmountGrey } from '../util';
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
 
-import { useCategoryScheduleGoalTemplates } from '@desktop-client/hooks/useCategoryScheduleGoalTemplates';
+import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useUndo } from '@desktop-client/hooks/useUndo';
@@ -238,22 +238,11 @@ export const CategoryMonth = memo(function CategoryMonth({
   const navigate = useNavigate();
   const locale = useLocale();
 
-  const { schedules, statuses: scheduleStatuses } =
-    useCategoryScheduleGoalTemplates({
+  const { schedule, scheduleStatus, isScheduleRecurring } =
+    useCategoryScheduleGoalTemplateIndicator({
       category,
+      month,
     });
-
-  const hasUpcomingOrMissedSchedules = Array.from(
-    scheduleStatuses.values(),
-  ).some(
-    status => status === 'upcoming' || status === 'due' || status === 'missed',
-  );
-
-  const showScheduleStatuses =
-    hasUpcomingOrMissedSchedules &&
-    schedules.some(
-      schedule => monthUtils.monthFromDate(schedule.next_date) === month,
-    );
 
   return (
     <View
@@ -406,49 +395,39 @@ export const CategoryMonth = memo(function CategoryMonth({
             gap: 2,
           }}
         >
-          {showScheduleStatuses &&
-            schedules.map(schedule => {
-              const scheduleStatus = scheduleStatuses.get(schedule.id);
-              const isScheduleRecurring = !!schedule._date?.frequency;
-              return (
-                scheduleStatus && (
-                  <View
-                    key={schedule.id}
-                    title={getScheduleStatusTooltip({
-                      t,
-                      schedule,
-                      scheduleStatus,
-                      locale,
-                    })}
-                  >
-                    <Button
-                      variant="bare"
-                      style={{
-                        color:
-                          scheduleStatus === 'missed'
-                            ? theme.errorText
-                            : scheduleStatus === 'due'
-                              ? theme.warningText
-                              : theme.upcomingText,
-                      }}
-                      onPress={() =>
-                        schedule._account
-                          ? navigate(`/accounts/${schedule._account}`)
-                          : navigate('/accounts')
-                      }
-                    >
-                      {isScheduleRecurring ? (
-                        <SvgArrowsSynchronize
-                          style={{ width: 12, height: 12 }}
-                        />
-                      ) : (
-                        <SvgCalendar3 style={{ width: 12, height: 12 }} />
-                      )}
-                    </Button>
-                  </View>
-                )
-              );
-            })}
+          {schedule && (
+            <View
+              title={getScheduleStatusTooltip({
+                t,
+                schedule,
+                scheduleStatus,
+                locale,
+              })}
+            >
+              <Button
+                variant="bare"
+                style={{
+                  color:
+                    scheduleStatus === 'missed'
+                      ? theme.errorText
+                      : scheduleStatus === 'due'
+                        ? theme.warningText
+                        : theme.upcomingText,
+                }}
+                onPress={() =>
+                  schedule._account
+                    ? navigate(`/accounts/${schedule._account}`)
+                    : navigate('/accounts')
+                }
+              >
+                {isScheduleRecurring ? (
+                  <SvgArrowsSynchronize style={{ width: 12, height: 12 }} />
+                ) : (
+                  <SvgCalendar3 style={{ width: 12, height: 12 }} />
+                )}
+              </Button>
+            </View>
+          )}
           <TrackingCellValue
             binding={trackingBudget.catSumAmount(category.id)}
             type="financial"
