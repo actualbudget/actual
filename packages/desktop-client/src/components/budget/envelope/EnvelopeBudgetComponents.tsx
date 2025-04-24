@@ -34,14 +34,13 @@ import { useSheetName } from '../../spreadsheet/useSheetName';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Row, Field, SheetCell, type SheetCellProps } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
-import { getScheduleStatusTooltip, makeAmountGrey } from '../util';
+import { makeAmountGrey } from '../util';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
 
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 
@@ -242,9 +241,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const { showUndoNotification } = useUndo();
 
   const navigate = useNavigate();
-  const locale = useLocale();
 
-  const { schedule, scheduleStatus, isScheduleRecurring } =
+  const { schedule, scheduleStatus, isScheduleRecurring, description } =
     useCategoryScheduleGoalTemplateIndicator({
       category,
       month,
@@ -419,14 +417,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           }}
         >
           {showScheduleIndicator && (
-            <View
-              title={getScheduleStatusTooltip({
-                t,
-                schedule,
-                scheduleStatus,
-                locale,
-              })}
-            >
+            <View title={description}>
               <Button
                 variant="bare"
                 style={{

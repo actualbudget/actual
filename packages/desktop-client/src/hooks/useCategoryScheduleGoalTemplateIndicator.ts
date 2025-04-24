@@ -1,4 +1,7 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { type TFunction } from 'i18next';
 
 import { type ScheduleStatusType } from 'loot-core/client/data-hooks/schedules';
 import * as monthUtils from 'loot-core/shared/months';
@@ -8,6 +11,7 @@ import {
 } from 'loot-core/types/models';
 
 import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTemplates';
+import { useLocale } from './useLocale';
 
 type UseCategoryScheduleGoalTemplateProps = {
   category: CategoryEntity;
@@ -18,6 +22,7 @@ type UseCategoryScheduleGoalTemplateResult = {
   schedule: ScheduleEntity | null;
   scheduleStatus: ScheduleStatusType | null;
   isScheduleRecurring: boolean;
+  description: string;
 };
 
 /**
@@ -30,13 +35,16 @@ export function useCategoryScheduleGoalTemplateIndicator({
   category,
   month,
 }: UseCategoryScheduleGoalTemplateProps): UseCategoryScheduleGoalTemplateResult {
+  const { t } = useTranslation();
+  const locale = useLocale();
+
   const { schedules, statuses: scheduleStatuses } =
     useCategoryScheduleGoalTemplates({
       category,
     });
 
   return useMemo<UseCategoryScheduleGoalTemplateResult>(() => {
-    const currentMonthSchedules = schedules
+    const schedulesToDisplay = schedules
       .filter(schedule => {
         const status = scheduleStatuses.get(schedule.id);
         return status === 'upcoming' || status === 'due' || status === 'missed';
@@ -55,7 +63,20 @@ export function useCategoryScheduleGoalTemplateIndicator({
         return 0;
       });
 
-    const schedule = currentMonthSchedules[0] || null;
+    const description = schedulesToDisplay
+      .map(s => {
+        return getScheduleStatusDescription({
+          t,
+          schedule: s,
+          scheduleStatus: scheduleStatuses.get(s.id),
+          locale,
+        });
+      })
+      .reduce((acc, tooltip) => {
+        return `${acc}\n${tooltip}`;
+      }, '');
+
+    const schedule = schedulesToDisplay[0] || null;
     const scheduleStatus =
       (schedule ? scheduleStatuses.get(schedule.id) : null) || null;
 
@@ -63,6 +84,55 @@ export function useCategoryScheduleGoalTemplateIndicator({
       schedule,
       scheduleStatus,
       isScheduleRecurring: !!schedule?._date?.frequency,
+      description,
     };
-  }, [month, scheduleStatuses, schedules]);
+  }, [locale, month, scheduleStatuses, schedules, t]);
+}
+
+function getScheduleStatusDescription({
+  t,
+  schedule,
+  scheduleStatus,
+  locale,
+}: {
+  t: TFunction;
+  schedule: ScheduleEntity;
+  scheduleStatus: ScheduleStatusType;
+  locale?: Locale;
+}) {
+  const isToday = monthUtils.isCurrentDay(schedule.next_date);
+  const distanceFromNow = monthUtils.formatDistance(
+    schedule.next_date,
+    monthUtils.currentDay(),
+    locale,
+    {
+      addSuffix: true,
+    },
+  );
+  const formattedDate = monthUtils.format(schedule.next_date, 'MMMM d', locale);
+  switch (scheduleStatus) {
+    case 'missed':
+      return t(
+        'Missed {{scheduleName}} due {{distanceFromNow}} ({{formattedDate}})',
+        {
+          scheduleName: schedule.name,
+          distanceFromNow,
+          formattedDate,
+        },
+      );
+    case 'due':
+    case 'upcoming':
+      return t(
+        '{{scheduleName}} is due {{distanceFromNow}} ({{formattedDate}})',
+        {
+          scheduleName: schedule.name,
+          distanceFromNow: isToday ? t('today') : distanceFromNow,
+          formattedDate,
+        },
+      );
+    default:
+      throw new Error(
+        `Unsupported schedule status for tooltip: ${scheduleStatus}`,
+      );
+  }
 }

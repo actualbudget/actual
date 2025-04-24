@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
@@ -35,13 +35,12 @@ import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Field, SheetCell, type SheetCellProps } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
-import { getScheduleStatusTooltip, makeAmountGrey } from '../util';
+import { makeAmountGrey } from '../util';
 
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
 
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
-import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 
@@ -220,7 +219,6 @@ export const CategoryMonth = memo(function CategoryMonth({
   onBudgetAction,
   onShowActivity,
 }: CategoryMonthProps) {
-  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
 
@@ -236,9 +234,8 @@ export const CategoryMonth = memo(function CategoryMonth({
   const { showUndoNotification } = useUndo();
 
   const navigate = useNavigate();
-  const locale = useLocale();
 
-  const { schedule, scheduleStatus, isScheduleRecurring } =
+  const { schedule, scheduleStatus, isScheduleRecurring, description } =
     useCategoryScheduleGoalTemplateIndicator({
       category,
       month,
@@ -400,14 +397,7 @@ export const CategoryMonth = memo(function CategoryMonth({
           }}
         >
           {showScheduleIndicator && (
-            <View
-              title={getScheduleStatusTooltip({
-                t,
-                schedule,
-                scheduleStatus,
-                locale,
-              })}
-            >
+            <View title={description}>
               <Button
                 variant="bare"
                 style={{
