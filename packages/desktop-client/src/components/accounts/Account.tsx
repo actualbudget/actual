@@ -167,7 +167,7 @@ function AllTransactions({
           };
         } else {
           return {
-            balance: null,
+            balance: 0,
             id: previewTransaction.id,
           };
         }
