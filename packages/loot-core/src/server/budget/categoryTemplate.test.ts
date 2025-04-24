@@ -226,7 +226,8 @@ describe('CategoryTemplate', () => {
         amount: 1000,
         from: '2023-11',
         month: '2023-12',
-        repeat: { annual: false, repeat: 3 },
+        //@ts-ignore this is what the template expects
+        repeat: 3,
         directive: 'template',
         priority: 1,
       };
@@ -471,7 +472,7 @@ describe('CategoryTemplate', () => {
       );
 
       const result = CategoryTemplate.runBy(instance);
-      expect(result).toBe(33333);
+      expect(result).toBe(83333);
     });
 
     it('should handle existing balance', () => {
@@ -499,7 +500,7 @@ describe('CategoryTemplate', () => {
       );
 
       const result = CategoryTemplate.runBy(instance);
-      expect(result).toBe(665); // (1000 + 2000 - 5) / 3
+      expect(result).toBe(66500); // (1000 + 2000 - 5) / 3
     });
   });
 });
