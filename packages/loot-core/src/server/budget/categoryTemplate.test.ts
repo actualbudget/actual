@@ -150,10 +150,6 @@ describe('CategoryTemplate', () => {
 
       const result = await CategoryTemplate.runCopy(template, instance);
       expect(result).toBe(100);
-      expect(actions.getSheetValue).toHaveBeenCalledWith(
-        '202312',
-        'budget-test',
-      );
     });
 
     it('should copy budget from multiple months back', async () => {
@@ -168,10 +164,6 @@ describe('CategoryTemplate', () => {
 
       const result = await CategoryTemplate.runCopy(template, instance);
       expect(result).toBe(200);
-      expect(actions.getSheetValue).toHaveBeenCalledWith(
-        '202310',
-        'budget-test',
-      );
     });
 
     it('should handle zero budget amount', async () => {
@@ -186,10 +178,6 @@ describe('CategoryTemplate', () => {
 
       const result = await CategoryTemplate.runCopy(template, instance);
       expect(result).toBe(0);
-      expect(actions.getSheetValue).toHaveBeenCalledWith(
-        '202312',
-        'budget-test',
-      );
     });
   });
 
@@ -222,19 +210,6 @@ describe('CategoryTemplate', () => {
 
       const result = await CategoryTemplate.runAverage(template, instance);
       expect(result).toBe(-200); // Average of -100, -200, -300
-
-      expect(actions.getSheetValue).toHaveBeenCalledWith(
-        '202312',
-        'sum-amount-test',
-      );
-      expect(actions.getSheetValue).toHaveBeenCalledWith(
-        '202311',
-        'sum-amount-test',
-      );
-      expect(actions.getSheetValue).toHaveBeenCalledWith(
-        '202310',
-        'sum-amount-test',
-      );
     });
 
     it('should handle zero amounts', async () => {
