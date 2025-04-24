@@ -55,7 +55,7 @@ const verifyFileExists = (fileId, filesService, res, errorObject) => {
   }
 };
 
-app.post('/sync', async (req, res) => {
+app.post('/sync', async (req, res): Promise<void> => {
   let requestPb;
   try {
     requestPb = SyncProtoBuf.SyncRequest.deserializeBinary(req.body);
@@ -73,11 +73,12 @@ app.post('/sync', async (req, res) => {
   const messages = requestPb.getMessagesList();
 
   if (!since) {
-    return res.status(422).send({
+    res.status(422).send({
       details: 'since-required',
       reason: 'unprocessable-entity',
       status: 'error',
     });
+    return;
   }
 
   const filesService = new FilesService(getAccountDb());
@@ -373,11 +374,12 @@ app.post('/delete-user-file', (req, res) => {
   const { fileId } = req.body;
 
   if (!fileId) {
-    return res.status(422).send({
+    res.status(422).send({
       details: 'fileId-required',
       reason: 'unprocessable-entity',
       status: 'error',
     });
+    return;
   }
 
   const filesService = new FilesService(getAccountDb());

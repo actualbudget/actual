@@ -4,8 +4,8 @@ import fs from 'node:fs';
 import { SyncProtoBuf } from '@actual-app/crdt';
 import request from 'supertest';
 
-import { getAccountDb } from './account-db.js';
-import { handlers as app } from './app-sync.js';
+import { getAccountDb } from './account-db';
+import { handlers as app } from './app-sync';
 import { getPathForUserFile } from './util/paths.js';
 
 const ADMIN_ROLE = 'ADMIN';

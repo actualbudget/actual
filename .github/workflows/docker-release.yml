@@ -76,6 +76,7 @@ jobs:
         uses: ./.github/actions/setup
       - name: Build Web
         run: ./bin/package-browser
+      ## TODO build sync-server here
 
       - name: Build and push ubuntu image
         uses: docker/build-push-action@v5
