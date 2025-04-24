@@ -192,4 +192,83 @@ describe('CategoryTemplate', () => {
       );
     });
   });
+
+  describe('runAverage', () => {
+    let instance: TestCategoryTemplate;
+
+    beforeEach(() => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      instance = new TestCategoryTemplate([], category, '2024-01', 0, 0);
+      vi.clearAllMocks();
+    });
+
+    it('should calculate average of 3 months', async () => {
+      const template: Template = {
+        type: 'average',
+        numMonths: 3,
+        directive: 'budget',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-100) // Dec 2023
+        .mockResolvedValueOnce(-200) // Nov 2023
+        .mockResolvedValueOnce(-300); // Oct 2023
+
+      const result = await CategoryTemplate.runAverage(template, instance);
+      expect(result).toBe(-200); // Average of -100, -200, -300
+
+      expect(actions.getSheetValue).toHaveBeenCalledWith(
+        '202312',
+        'sum-amount-test',
+      );
+      expect(actions.getSheetValue).toHaveBeenCalledWith(
+        '202311',
+        'sum-amount-test',
+      );
+      expect(actions.getSheetValue).toHaveBeenCalledWith(
+        '202310',
+        'sum-amount-test',
+      );
+    });
+
+    it('should handle zero amounts', async () => {
+      const template: Template = {
+        type: 'average',
+        numMonths: 3,
+        directive: 'budget',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(0)
+        .mockResolvedValueOnce(-300);
+
+      const result = await CategoryTemplate.runAverage(template, instance);
+      expect(result).toBe(-100);
+    });
+
+    it('should handle mixed positive and negative amounts', async () => {
+      const template: Template = {
+        type: 'average',
+        numMonths: 3,
+        directive: 'budget',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-100)
+        .mockResolvedValueOnce(200)
+        .mockResolvedValueOnce(-300);
+
+      const result = await CategoryTemplate.runAverage(template, instance);
+      expect(result).toBe(-67); // Average of -100, 200, -300
+    });
+  });
 });
