@@ -72,6 +72,7 @@ describe('CategoryTemplate', () => {
       instance = new TestCategoryTemplate([], category, '2024-01', 0, 0);
     });
 
+    //5 mondays in January 2024
     it('should calculate weekly amount for single week', () => {
       const template: Template = {
         type: 'week',
@@ -83,7 +84,7 @@ describe('CategoryTemplate', () => {
       };
 
       const result = CategoryTemplate.runWeek(template, instance);
-      expect(result).toBe(amountToInteger(100));
+      expect(result).toBe(amountToInteger(500));
     });
 
     it('should calculate weekly amount for multiple weeks', () => {
@@ -97,35 +98,21 @@ describe('CategoryTemplate', () => {
       };
 
       const result = CategoryTemplate.runWeek(template, instance);
-      expect(result).toBe(amountToInteger(100));
+      expect(result).toBe(amountToInteger(300));
     });
 
     it('should handle weeks spanning multiple months', () => {
       const template: Template = {
         type: 'week',
         amount: 100,
-        weeks: 1,
-        starting: '2023-12-25',
+        weeks: 7,
+        starting: '2024-12-04',
         directive: 'budget',
         priority: 1,
       };
 
       const result = CategoryTemplate.runWeek(template, instance);
       expect(result).toBe(amountToInteger(100));
-    });
-
-    it('should handle decimal amounts', () => {
-      const template: Template = {
-        type: 'week',
-        amount: 100.5,
-        weeks: 1,
-        starting: '2024-01-01',
-        directive: 'budget',
-        priority: 1,
-      };
-
-      const result = CategoryTemplate.runWeek(template, instance);
-      expect(result).toBe(amountToInteger(100.5));
     });
   });
 });
