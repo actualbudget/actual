@@ -250,6 +250,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       month,
     });
 
+  const showScheduleIndicator = schedule && scheduleStatus;
+
   return (
     <View
       style={{
@@ -410,11 +412,13 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'flex-end',
+            justifyContent: showScheduleIndicator
+              ? 'space-between'
+              : 'flex-end',
             gap: 2,
           }}
         >
-          {schedule && scheduleStatus && (
+          {showScheduleIndicator && (
             <View
               title={getScheduleStatusTooltip({
                 t,

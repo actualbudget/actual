@@ -244,6 +244,8 @@ export const CategoryMonth = memo(function CategoryMonth({
       month,
     });
 
+  const showScheduleIndicator = schedule && scheduleStatus;
+
   return (
     <View
       style={{
@@ -391,11 +393,13 @@ export const CategoryMonth = memo(function CategoryMonth({
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'flex-end',
+            justifyContent: showScheduleIndicator
+              ? 'space-between'
+              : 'flex-end',
             gap: 2,
           }}
         >
-          {schedule && scheduleStatus && (
+          {showScheduleIndicator && (
             <View
               title={getScheduleStatusTooltip({
                 t,
