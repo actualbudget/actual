@@ -2,14 +2,20 @@ import { vi } from 'vitest';
 
 import { amountToInteger } from '../../shared/util';
 import { type CategoryEntity } from '../../types/models';
+import * as db from '../db';
 
 import * as actions from './actions';
 import { CategoryTemplate } from './categoryTemplate';
 import { type Template } from './types/templates';
 
-// Mock getSheetValue
+// Mock getSheetValue and getCategories
 vi.mock('./actions', () => ({
   getSheetValue: vi.fn(),
+  getSheetBoolean: vi.fn(),
+}));
+
+vi.mock('../db', () => ({
+  getCategories: vi.fn(),
 }));
 
 // Test helper class to access constructor and methods
@@ -64,6 +70,63 @@ describe('CategoryTemplate', () => {
 
       const result = CategoryTemplate.runSimple(template, limit);
       expect(result).toBe(amountToInteger(100.5));
+    });
+  });
+
+  describe('runCopy', () => {
+    let instance: TestCategoryTemplate;
+
+    beforeEach(() => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      instance = new TestCategoryTemplate([], category, '2024-01', 0, 0);
+      vi.clearAllMocks();
+    });
+
+    it('should copy budget from previous month', async () => {
+      const template: Template = {
+        type: 'copy',
+        lookBack: 1,
+        directive: 'budget',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValue(100);
+
+      const result = await CategoryTemplate.runCopy(template, instance);
+      expect(result).toBe(100);
+    });
+
+    it('should copy budget from multiple months back', async () => {
+      const template: Template = {
+        type: 'copy',
+        lookBack: 3,
+        directive: 'budget',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValue(200);
+
+      const result = await CategoryTemplate.runCopy(template, instance);
+      expect(result).toBe(200);
+    });
+
+    it('should handle zero budget amount', async () => {
+      const template: Template = {
+        type: 'copy',
+        lookBack: 1,
+        directive: 'budget',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValue(0);
+
+      const result = await CategoryTemplate.runCopy(template, instance);
+      expect(result).toBe(0);
     });
   });
 
@@ -124,7 +187,7 @@ describe('CategoryTemplate', () => {
     });
   });
 
-  describe('runCopy', () => {
+  describe('runSpend', () => {
     let instance: TestCategoryTemplate;
 
     beforeEach(() => {
@@ -138,46 +201,141 @@ describe('CategoryTemplate', () => {
       vi.clearAllMocks();
     });
 
-    it('should copy budget from previous month', async () => {
+    it('should calculate monthly amount needed to reach target', async () => {
       const template: Template = {
-        type: 'copy',
-        lookBack: 1,
+        type: 'spend',
+        amount: 1000,
+        from: '2024-01',
+        month: '2024-03',
         directive: 'budget',
         priority: 1,
       };
 
-      vi.mocked(actions.getSheetValue).mockResolvedValue(100);
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-100) // spent in Jan
+        .mockResolvedValueOnce(200) // balance in Jan
+        .mockResolvedValueOnce(100); // budgeted in Feb
 
-      const result = await CategoryTemplate.runCopy(template, instance);
-      expect(result).toBe(100);
+      const result = await CategoryTemplate.runSpend(template, instance);
+      expect(result).toBe(300); // (1000 - (200 - 100 + 100)) / 2
     });
 
-    it('should copy budget from multiple months back', async () => {
+    it('should handle repeating spend template', async () => {
       const template: Template = {
-        type: 'copy',
-        lookBack: 3,
+        type: 'spend',
+        amount: 1000,
+        from: '2023-12',
+        month: '2024-02',
+        repeat: { annual: false, repeat: 3 },
         directive: 'budget',
         priority: 1,
       };
 
-      vi.mocked(actions.getSheetValue).mockResolvedValue(200);
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-100) // spent in Dec
+        .mockResolvedValueOnce(200) // balance in Dec
+        .mockResolvedValueOnce(100); // budgeted in Jan
 
-      const result = await CategoryTemplate.runCopy(template, instance);
-      expect(result).toBe(200);
+      const result = await CategoryTemplate.runSpend(template, instance);
+      expect(result).toBe(300); // (1000 - (200 - 100 + 100)) / 2
     });
 
-    it('should handle zero budget amount', async () => {
+    it('should return zero for past target date', async () => {
       const template: Template = {
-        type: 'copy',
-        lookBack: 1,
+        type: 'spend',
+        amount: 1000,
+        from: '2023-12',
+        month: '2023-12',
         directive: 'budget',
         priority: 1,
       };
 
-      vi.mocked(actions.getSheetValue).mockResolvedValue(0);
-
-      const result = await CategoryTemplate.runCopy(template, instance);
+      const result = await CategoryTemplate.runSpend(template, instance);
       expect(result).toBe(0);
+    });
+  });
+
+  describe('runPercentage', () => {
+    let instance: TestCategoryTemplate;
+
+    beforeEach(() => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      instance = new TestCategoryTemplate([], category, '2024-01', 0, 0);
+      vi.clearAllMocks();
+    });
+
+    it('should calculate percentage of all income', async () => {
+      const template: Template = {
+        type: 'percentage',
+        percent: 10,
+        category: 'all income',
+        previous: false,
+        directive: 'budget',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValue(1000);
+
+      const result = await CategoryTemplate.runPercentage(
+        template,
+        0,
+        instance,
+      );
+      expect(result).toBe(100); // 10% of 1000
+    });
+
+    it('should calculate percentage of available funds', async () => {
+      const template: Template = {
+        type: 'percentage',
+        percent: 20,
+        category: 'available funds',
+        previous: false,
+        directive: 'budget',
+        priority: 1,
+      };
+
+      const result = await CategoryTemplate.runPercentage(
+        template,
+        500,
+        instance,
+      );
+      expect(result).toBe(100); // 20% of 500
+    });
+
+    it('should calculate percentage of specific income category', async () => {
+      const template: Template = {
+        type: 'percentage',
+        percent: 15,
+        category: 'Salary',
+        previous: false,
+        directive: 'budget',
+        priority: 1,
+      };
+
+      vi.mocked(db.getCategories).mockResolvedValue([
+        {
+          id: 'income1',
+          name: 'Salary',
+          is_income: 1,
+          cat_group: 'income',
+          sort_order: 1,
+          hidden: 0,
+          tombstone: 0,
+        },
+      ]);
+      vi.mocked(actions.getSheetValue).mockResolvedValue(2000);
+
+      const result = await CategoryTemplate.runPercentage(
+        template,
+        0,
+        instance,
+      );
+      expect(result).toBe(300); // 15% of 2000
     });
   });
 
@@ -244,6 +402,104 @@ describe('CategoryTemplate', () => {
 
       const result = await CategoryTemplate.runAverage(template, instance);
       expect(result).toBe(-67); // Average of -100, 200, -300
+    });
+  });
+
+  describe('runBy', () => {
+    let instance: TestCategoryTemplate;
+
+    beforeEach(() => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      instance = new TestCategoryTemplate(
+        [
+          {
+            type: 'by',
+            amount: 1000,
+            month: '2024-03',
+            directive: 'budget',
+            priority: 1,
+          },
+          {
+            type: 'by',
+            amount: 2000,
+            month: '2024-06',
+            directive: 'budget',
+            priority: 1,
+          },
+        ],
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+    });
+
+    it('should calculate monthly amount needed for multiple targets', () => {
+      const result = CategoryTemplate.runBy(instance);
+      expect(result).toBe(1000); // (1000 + 2000 - 0) / 3
+    });
+
+    it('should handle repeating targets', () => {
+      instance = new TestCategoryTemplate(
+        [
+          {
+            type: 'by',
+            amount: 1000,
+            month: '2024-03',
+            repeat: 3,
+            directive: 'budget',
+            priority: 1,
+          },
+          {
+            type: 'by',
+            amount: 2000,
+            month: '2024-06',
+            repeat: 3,
+            directive: 'budget',
+            priority: 1,
+          },
+        ],
+        instance.category,
+        '2024-01',
+        0,
+        0,
+      );
+
+      const result = CategoryTemplate.runBy(instance);
+      expect(result).toBe(1000); // (1000 + 2000 - 0) / 3
+    });
+
+    it('should handle existing balance', () => {
+      instance = new TestCategoryTemplate(
+        [
+          {
+            type: 'by',
+            amount: 1000,
+            month: '2024-03',
+            directive: 'budget',
+            priority: 1,
+          },
+          {
+            type: 'by',
+            amount: 2000,
+            month: '2024-06',
+            directive: 'budget',
+            priority: 1,
+          },
+        ],
+        instance.category,
+        '2024-01',
+        500,
+        0,
+      );
+
+      const result = CategoryTemplate.runBy(instance);
+      expect(result).toBe(833); // (1000 + 2000 - 500) / 3
     });
   });
 });
