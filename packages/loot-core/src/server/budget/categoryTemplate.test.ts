@@ -106,7 +106,7 @@ describe('CategoryTemplate', () => {
         type: 'week',
         amount: 100,
         weeks: 7,
-        starting: '2024-12-04',
+        starting: '2023-12-04',
         directive: 'budget',
         priority: 1,
       };
