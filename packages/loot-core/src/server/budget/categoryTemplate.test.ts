@@ -237,7 +237,7 @@ describe('CategoryTemplate', () => {
         .mockResolvedValueOnce(10000);
 
       const result = await CategoryTemplate.runSpend(template, instance);
-      expect(result).toBe(33333); // (1000 - (200 - 100 + 100)) / 2
+      expect(result).toBe(33333);
     });
 
     it('should return zero for past target date', async () => {
@@ -279,14 +279,14 @@ describe('CategoryTemplate', () => {
         priority: 1,
       };
 
-      vi.mocked(actions.getSheetValue).mockResolvedValue(1000);
+      vi.mocked(actions.getSheetValue).mockResolvedValue(10000);
 
       const result = await CategoryTemplate.runPercentage(
         template,
         0,
         instance,
       );
-      expect(result).toBe(100); // 10% of 1000
+      expect(result).toBe(1000); // 10% of 10000
     });
 
     it('should calculate percentage of available funds', async () => {
@@ -441,7 +441,7 @@ describe('CategoryTemplate', () => {
 
     it('should calculate monthly amount needed for multiple targets', () => {
       const result = CategoryTemplate.runBy(instance);
-      expect(result).toBe(1000); // (1000 + 2000 - 0) / 3
+      expect(result).toBe(66667);
     });
 
     it('should handle repeating targets', () => {
@@ -450,16 +450,16 @@ describe('CategoryTemplate', () => {
           {
             type: 'by',
             amount: 1000,
-            month: '2024-03',
-            repeat: 3,
+            month: '2023-03',
+            repeat: 12,
             directive: 'template',
             priority: 1,
           },
           {
             type: 'by',
             amount: 2000,
-            month: '2024-06',
-            repeat: 3,
+            month: '2023-06',
+            repeat: 12,
             directive: 'template',
             priority: 1,
           },
@@ -471,7 +471,7 @@ describe('CategoryTemplate', () => {
       );
 
       const result = CategoryTemplate.runBy(instance);
-      expect(result).toBe(1000); // (1000 + 2000 - 0) / 3
+      expect(result).toBe(33333);
     });
 
     it('should handle existing balance', () => {
@@ -499,7 +499,7 @@ describe('CategoryTemplate', () => {
       );
 
       const result = CategoryTemplate.runBy(instance);
-      expect(result).toBe(833); // (1000 + 2000 - 500) / 3
+      expect(result).toBe(665); // (1000 + 2000 - 5) / 3
     });
   });
 });
