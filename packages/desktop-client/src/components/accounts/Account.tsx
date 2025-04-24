@@ -161,15 +161,11 @@ function AllTransactions({
       .map(previewTransaction => {
         if (!previewTransaction.is_child) {
           return {
-            // TODO: fix me
-            // eslint-disable-next-line react-hooks/exhaustive-deps
             balance: (runningBalance += previewTransaction.amount),
             id: previewTransaction.id,
           };
         } else {
           return {
-            // TODO: fix me
-
             balance: null,
             id: previewTransaction.id,
           };
