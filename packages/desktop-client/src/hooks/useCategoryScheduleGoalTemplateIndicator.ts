@@ -96,10 +96,14 @@ function getScheduleStatusDescription({
   locale,
 }: {
   t: TFunction;
-  schedule: ScheduleEntity;
-  scheduleStatus: ScheduleStatusType;
+  schedule?: ScheduleEntity;
+  scheduleStatus?: ScheduleStatusType;
   locale?: Locale;
 }) {
+  if (!schedule || !scheduleStatus) {
+    return '';
+  }
+
   const isToday = monthUtils.isCurrentDay(schedule.next_date);
   const distanceFromNow = monthUtils.formatDistance(
     schedule.next_date,
