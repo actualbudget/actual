@@ -5,6 +5,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { t, type TFunction } from 'i18next';
 
+import { type ScheduleStatusType } from 'loot-core/client/data-hooks/schedules';
 import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -205,7 +206,7 @@ export function getScheduleStatusTooltip({
 }: {
   t: TFunction;
   schedule: ScheduleEntity;
-  scheduleStatus: 'missed' | 'due' | 'upcoming';
+  scheduleStatus: ScheduleStatusType;
   locale?: Locale;
 }) {
   const isToday = monthUtils.isCurrentDay(schedule.next_date);
@@ -239,6 +240,6 @@ export function getScheduleStatusTooltip({
         },
       );
     default:
-      throw new Error(`Unrecognized schedule status: ${scheduleStatus}`);
+      throw new Error(`Unsupported schedule status for tooltip: ${scheduleStatus}`);
   }
 }
