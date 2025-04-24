@@ -1,8 +1,16 @@
+import { vi } from 'vitest';
+
 import { amountToInteger } from '../../shared/util';
 import { type CategoryEntity } from '../../types/models';
 
+import * as actions from './actions';
 import { CategoryTemplate } from './categoryTemplate';
 import { type Template } from './types/templates';
+
+// Mock getSheetValue
+vi.mock('./actions', () => ({
+  getSheetValue: vi.fn(),
+}));
 
 // Test helper class to access constructor and methods
 class TestCategoryTemplate extends CategoryTemplate {
@@ -113,6 +121,75 @@ describe('CategoryTemplate', () => {
 
       const result = CategoryTemplate.runWeek(template, instance);
       expect(result).toBe(amountToInteger(100));
+    });
+  });
+
+  describe('runCopy', () => {
+    let instance: TestCategoryTemplate;
+
+    beforeEach(() => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      instance = new TestCategoryTemplate([], category, '2024-01', 0, 0);
+      vi.clearAllMocks();
+    });
+
+    it('should copy budget from previous month', async () => {
+      const template: Template = {
+        type: 'copy',
+        lookBack: 1,
+        directive: 'budget',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValue(100);
+
+      const result = await CategoryTemplate.runCopy(template, instance);
+      expect(result).toBe(100);
+      expect(actions.getSheetValue).toHaveBeenCalledWith(
+        '202312',
+        'budget-test',
+      );
+    });
+
+    it('should copy budget from multiple months back', async () => {
+      const template: Template = {
+        type: 'copy',
+        lookBack: 3,
+        directive: 'budget',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValue(200);
+
+      const result = await CategoryTemplate.runCopy(template, instance);
+      expect(result).toBe(200);
+      expect(actions.getSheetValue).toHaveBeenCalledWith(
+        '202310',
+        'budget-test',
+      );
+    });
+
+    it('should handle zero budget amount', async () => {
+      const template: Template = {
+        type: 'copy',
+        lookBack: 1,
+        directive: 'budget',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValue(0);
+
+      const result = await CategoryTemplate.runCopy(template, instance);
+      expect(result).toBe(0);
+      expect(actions.getSheetValue).toHaveBeenCalledWith(
+        '202312',
+        'budget-test',
+      );
     });
   });
 });
