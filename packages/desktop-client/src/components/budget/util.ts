@@ -240,6 +240,8 @@ export function getScheduleStatusTooltip({
         },
       );
     default:
-      throw new Error(`Unsupported schedule status for tooltip: ${scheduleStatus}`);
+      throw new Error(
+        `Unsupported schedule status for tooltip: ${scheduleStatus}`,
+      );
   }
 }
