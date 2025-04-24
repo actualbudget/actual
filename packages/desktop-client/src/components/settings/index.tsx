@@ -34,6 +34,7 @@ import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
+import { CurrencySettings } from './Currency';
 
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import {
@@ -204,6 +205,7 @@ export function Settings() {
         <About />
         <ThemeSettings />
         <FormatSettings />
+        <CurrencySettings />
         <LanguageSettings />
         <AuthSettings />
         <EncryptionSettings />

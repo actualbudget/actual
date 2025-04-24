@@ -284,9 +284,11 @@ export function setNumberFormat(config: typeof numberFormatConfig) {
 export function getNumberFormat({
   format,
   hideFraction,
+  decimalPlaces,
 }: {
   format?: NumberFormats;
   hideFraction: boolean;
+  decimalPlaces?: number;
 } = numberFormatConfig) {
   let locale, thousandsSeparator, decimalSeparator;
 
@@ -318,13 +320,21 @@ export function getNumberFormat({
       decimalSeparator = '.';
   }
 
+  let digits = 2;
+  
+  if (hideFraction) {
+    digits = 0;
+  } else if (decimalPlaces !== undefined) {
+    digits = decimalPlaces;
+  }
+
   return {
     value: format,
     thousandsSeparator,
     decimalSeparator,
     formatter: new Intl.NumberFormat(locale, {
-      minimumFractionDigits: hideFraction ? 0 : 2,
-      maximumFractionDigits: hideFraction ? 0 : 2,
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
     }),
   };
 }

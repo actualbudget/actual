@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
+import { getCurrency } from 'loot-core/shared/currencies';
 
 import {
   getNumberFormat,
@@ -62,6 +63,13 @@ function format(
 export function useFormat() {
   const [numberFormat] = useSyncedPref('numberFormat');
   const [hideFraction] = useSyncedPref('hideFraction');
+  const [currencyCode] = useSyncedPref('currencyCode');
+  const [symbolPosition] = useSyncedPref('currencySymbolPosition');
+  const [spaceEnabled] = useSyncedPref('currencySpaceBetweenAmountAndSymbol');
+
+  const currency = useMemo(() => {
+    return currencyCode ? getCurrency(currencyCode) : null;
+  }, [currencyCode]);
 
   const config = useMemo(
     () => parseNumberFormat({ format: numberFormat, hideFraction }),
@@ -76,9 +84,47 @@ export function useFormat() {
     setNumberFormat(config);
   }, [config]);
 
+  const applyCurrencyFormatting = useCallback(
+    (formattedValue: string): string => {
+      if (!currencyCode) {
+        return formattedValue;
+      }
+      
+      const currency = getCurrency(currencyCode);
+
+      const space = spaceEnabled === 'true' ? ' ' : '';
+      const position = symbolPosition || 'before';
+      
+      return position === 'after'
+        ? `${formattedValue}${space}${currency.symbol}`
+        : `${currency.symbol}${space}${formattedValue}`;
+    },
+    [currencyCode, currency, symbolPosition, spaceEnabled]
+  );
+
   return useCallback(
-    (value: unknown, type: FormatType = 'string') =>
-      format(value, type, getNumberFormat(config).formatter),
-    [config],
+    (value: unknown, type: FormatType = 'string') => {
+
+      const isFinancialType = type === 'financial' || type === 'financial-with-sign';
+
+      const decimalPlaces = isFinancialType && currency 
+        ? currency.decimalPlaces
+        : undefined;
+
+      const formatter = getNumberFormat({
+        format: config.format,
+        hideFraction: config.hideFraction,
+        decimalPlaces: decimalPlaces
+      }).formatter;
+
+      const baseFormatted = format(value, type, formatter);
+      
+      if (isFinancialType && currencyCode) {
+        return applyCurrencyFormatting(baseFormatted);
+      }
+      
+      return baseFormatted;
+    },
+    [config, currency, applyCurrencyFormatting, currencyCode],
   );
 }
