@@ -37,7 +37,7 @@ describe('CategoryTemplate', () => {
       const template: Template = {
         type: 'simple',
         monthly: 100,
-        directive: 'budget',
+        directive: 'template',
         priority: 1,
       };
       const limit = 0;
@@ -50,7 +50,7 @@ describe('CategoryTemplate', () => {
       const template: Template = {
         type: 'simple',
         limit: { amount: 500, hold: false },
-        directive: 'budget',
+        directive: 'template',
         priority: 1,
       };
       const limit = 500;
@@ -63,7 +63,7 @@ describe('CategoryTemplate', () => {
       const template: Template = {
         type: 'simple',
         monthly: 100.5,
-        directive: 'budget',
+        directive: 'template',
         priority: 1,
       };
       const limit = 0;
@@ -91,7 +91,7 @@ describe('CategoryTemplate', () => {
       const template: Template = {
         type: 'copy',
         lookBack: 1,
-        directive: 'budget',
+        directive: 'template',
         priority: 1,
       };
 
@@ -105,7 +105,7 @@ describe('CategoryTemplate', () => {
       const template: Template = {
         type: 'copy',
         lookBack: 3,
-        directive: 'budget',
+        directive: 'template',
         priority: 1,
       };
 
@@ -119,7 +119,7 @@ describe('CategoryTemplate', () => {
       const template: Template = {
         type: 'copy',
         lookBack: 1,
-        directive: 'budget',
+        directive: 'template',
         priority: 1,
       };
 
@@ -150,7 +150,7 @@ describe('CategoryTemplate', () => {
         amount: 100,
         weeks: 1,
         starting: '2024-01-01',
-        directive: 'budget',
+        directive: 'template',
         priority: 1,
       };
 
@@ -164,7 +164,7 @@ describe('CategoryTemplate', () => {
         amount: 100,
         weeks: 2,
         starting: '2024-01-01',
-        directive: 'budget',
+        directive: 'template',
         priority: 1,
       };
 
@@ -178,7 +178,7 @@ describe('CategoryTemplate', () => {
         amount: 100,
         weeks: 7,
         starting: '2023-12-04',
-        directive: 'budget',
+        directive: 'template',
         priority: 1,
       };
 
@@ -205,39 +205,39 @@ describe('CategoryTemplate', () => {
       const template: Template = {
         type: 'spend',
         amount: 1000,
-        from: '2024-01',
-        month: '2024-03',
-        directive: 'budget',
+        from: '2023-11',
+        month: '2024-01',
+        directive: 'template',
         priority: 1,
       };
 
       vi.mocked(actions.getSheetValue)
-        .mockResolvedValueOnce(-100) // spent in Jan
-        .mockResolvedValueOnce(200) // balance in Jan
-        .mockResolvedValueOnce(100); // budgeted in Feb
+        .mockResolvedValueOnce(-10000) // spent in Nov
+        .mockResolvedValueOnce(20000) // leftover in Nov
+        .mockResolvedValueOnce(10000); // budgeted in Dec
 
       const result = await CategoryTemplate.runSpend(template, instance);
-      expect(result).toBe(300); // (1000 - (200 - 100 + 100)) / 2
+      expect(result).toBe(60000);
     });
 
     it('should handle repeating spend template', async () => {
       const template: Template = {
         type: 'spend',
         amount: 1000,
-        from: '2023-12',
-        month: '2024-02',
+        from: '2023-11',
+        month: '2023-12',
         repeat: { annual: false, repeat: 3 },
-        directive: 'budget',
+        directive: 'template',
         priority: 1,
       };
 
       vi.mocked(actions.getSheetValue)
-        .mockResolvedValueOnce(-100) // spent in Dec
-        .mockResolvedValueOnce(200) // balance in Dec
-        .mockResolvedValueOnce(100); // budgeted in Jan
+        .mockResolvedValueOnce(-10000)
+        .mockResolvedValueOnce(20000)
+        .mockResolvedValueOnce(10000);
 
       const result = await CategoryTemplate.runSpend(template, instance);
-      expect(result).toBe(300); // (1000 - (200 - 100 + 100)) / 2
+      expect(result).toBe(33333); // (1000 - (200 - 100 + 100)) / 2
     });
 
     it('should return zero for past target date', async () => {
@@ -246,7 +246,7 @@ describe('CategoryTemplate', () => {
         amount: 1000,
         from: '2023-12',
         month: '2023-12',
-        directive: 'budget',
+        directive: 'template',
         priority: 1,
       };
 
@@ -275,7 +275,7 @@ describe('CategoryTemplate', () => {
         percent: 10,
         category: 'all income',
         previous: false,
-        directive: 'budget',
+        directive: 'template',
         priority: 1,
       };
 
@@ -295,7 +295,7 @@ describe('CategoryTemplate', () => {
         percent: 20,
         category: 'available funds',
         previous: false,
-        directive: 'budget',
+        directive: 'template',
         priority: 1,
       };
 
@@ -313,7 +313,7 @@ describe('CategoryTemplate', () => {
         percent: 15,
         category: 'Salary',
         previous: false,
-        directive: 'budget',
+        directive: 'template',
         priority: 1,
       };
 
@@ -357,7 +357,7 @@ describe('CategoryTemplate', () => {
       const template: Template = {
         type: 'average',
         numMonths: 3,
-        directive: 'budget',
+        directive: 'template',
         priority: 1,
       };
 
@@ -374,7 +374,7 @@ describe('CategoryTemplate', () => {
       const template: Template = {
         type: 'average',
         numMonths: 3,
-        directive: 'budget',
+        directive: 'template',
         priority: 1,
       };
 
@@ -391,7 +391,7 @@ describe('CategoryTemplate', () => {
       const template: Template = {
         type: 'average',
         numMonths: 3,
-        directive: 'budget',
+        directive: 'template',
         priority: 1,
       };
 
@@ -421,14 +421,14 @@ describe('CategoryTemplate', () => {
             type: 'by',
             amount: 1000,
             month: '2024-03',
-            directive: 'budget',
+            directive: 'template',
             priority: 1,
           },
           {
             type: 'by',
             amount: 2000,
             month: '2024-06',
-            directive: 'budget',
+            directive: 'template',
             priority: 1,
           },
         ],
@@ -452,7 +452,7 @@ describe('CategoryTemplate', () => {
             amount: 1000,
             month: '2024-03',
             repeat: 3,
-            directive: 'budget',
+            directive: 'template',
             priority: 1,
           },
           {
@@ -460,7 +460,7 @@ describe('CategoryTemplate', () => {
             amount: 2000,
             month: '2024-06',
             repeat: 3,
-            directive: 'budget',
+            directive: 'template',
             priority: 1,
           },
         ],
@@ -481,14 +481,14 @@ describe('CategoryTemplate', () => {
             type: 'by',
             amount: 1000,
             month: '2024-03',
-            directive: 'budget',
+            directive: 'template',
             priority: 1,
           },
           {
             type: 'by',
             amount: 2000,
             month: '2024-06',
-            directive: 'budget',
+            directive: 'template',
             priority: 1,
           },
         ],
