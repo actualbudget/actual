@@ -56,7 +56,8 @@ export function useCategoryScheduleGoalTemplateIndicator({
       });
 
     const schedule = currentMonthSchedules[0] || null;
-    const scheduleStatus = (schedule ? scheduleStatuses.get(schedule.id) : null) || null;
+    const scheduleStatus =
+      (schedule ? scheduleStatuses.get(schedule.id) : null) || null;
 
     return {
       schedule,
