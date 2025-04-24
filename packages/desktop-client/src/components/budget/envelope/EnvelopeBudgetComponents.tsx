@@ -249,12 +249,11 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       category,
     });
 
-  const hasUpcomingOrMissedSchedules = scheduleStatuses
-    .values()
-    .some(
-      status =>
-        status === 'upcoming' || status === 'due' || status === 'missed',
-    );
+  const hasUpcomingOrMissedSchedules = Array.from(
+    scheduleStatuses.values(),
+  ).some(
+    status => status === 'upcoming' || status === 'due' || status === 'missed',
+  );
 
   const showScheduleStatuses =
     hasUpcomingOrMissedSchedules &&

@@ -62,7 +62,7 @@ export function useCategoryScheduleGoalTemplates({
       g => g.type === 'schedule',
     ) as ScheduleGoalDefinition[];
 
-    if (!scheduleGoalDefinitions?.length) {
+    if (!scheduleGoalDefinitions.length) {
       return {
         schedules: [],
         statuses: new Map(),
