@@ -83,7 +83,7 @@ describe('CategoryTemplate', () => {
         0,
         0,
       );
-      const result = await instance.runAll(1000);
+      const result = await instance.runTemplatesForPriority(1, 1000, 1000);
       expect(result).toBe(500); // 5 Mondays * 100
     });
 
@@ -107,7 +107,7 @@ describe('CategoryTemplate', () => {
         0,
         0,
       );
-      const result = await instance.runAll(1000);
+      const result = await instance.runTemplatesForPriority(1, 1000, 1000);
       expect(result).toBe(310); // 31 days * 10
     });
   });
@@ -596,7 +596,7 @@ describe('CategoryTemplate', () => {
         0,
         0,
       );
-      const result = await instance.runTemplatesForPriority(1, 150, 150); // Not enough for both templates
+      const result = await instance.runTemplatesForPriority(1, 150, 150);
       expect(result).toBe(150); // Max out at available funds
     });
   });
@@ -615,7 +615,7 @@ describe('CategoryTemplate', () => {
           monthly: 100,
           limit: { amount: 150, hold: false, period: 'monthly' },
           directive: 'template',
-          priority: 2,
+          priority: 1,
         },
       ];
       const instance = new TestCategoryTemplate(
@@ -642,7 +642,7 @@ describe('CategoryTemplate', () => {
           monthly: 100,
           limit: { amount: 200, hold: true, period: 'monthly' },
           directive: 'template',
-          priority: 2,
+          priority: 1,
         },
       ];
       const instance = new TestCategoryTemplate(
@@ -653,7 +653,7 @@ describe('CategoryTemplate', () => {
         0,
       );
       const result = await instance.runTemplatesForPriority(1, 1000, 1000); // More than enough funds
-      expect(result).toBe(0); // Should not budget anything due to hold flag
+      expect(result).toBe(0);
     });
 
     it('should remove funds if over limit', async () => {
@@ -669,7 +669,7 @@ describe('CategoryTemplate', () => {
           monthly: 100,
           limit: { amount: 200, hold: false, period: 'monthly' },
           directive: 'template',
-          priority: 2,
+          priority: 1,
         },
       ];
       const instance = new TestCategoryTemplate(
@@ -706,11 +706,11 @@ describe('CategoryTemplate', () => {
         0,
         0,
       );
-      const result = instance.runRemainder(100, 50); // 100 available, 50 per weight
+      const result = instance.runRemainder(100, 50);
       expect(result).toBe(100); // 2 * 50 = 100
     });
 
-    it('should handle multiple remainder templates with different weights and catch last cent', async () => {
+    it('remainder should handle last cent', async () => {
       const category: CategoryEntity = {
         id: 'test',
         name: 'Test Category',
@@ -731,8 +731,8 @@ describe('CategoryTemplate', () => {
         0,
         0,
       );
-      const result = instance.runRemainder(101, 100); // 100 available, 20 per weight
-      expect(result).toBe(101); // (2 + 3) * 20 = 100 and 1 cent left over
+      const result = instance.runRemainder(101, 100);
+      expect(result).toBe(101);
     });
   });
 });
