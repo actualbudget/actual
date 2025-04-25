@@ -62,7 +62,12 @@ interface ScheduleTemplate extends BaseTemplate {
 interface RemainderTemplate extends BaseTemplate {
   type: 'remainder';
   weight: number;
-  limit?: { amount: number; hold: boolean };
+  limit?: {
+    amount: number;
+    hold: boolean;
+    period?: 'daily' | 'weekly' | 'monthly';
+    start?: string;
+  };
 }
 
 interface AverageTemplate extends BaseTemplate {
