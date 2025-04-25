@@ -18,17 +18,13 @@
   ],
   "scripts": {
     "start": "tsc && node build/app",
-    "start-monitor": "nodemon --exec 'tsc && node' --ignore './build/**/*' --ext 'ts,js' build/app",
+    "start-monitor": "nodemon --exec 'tsc && node build/app' --ignore './build/**/*' --ext 'ts,js' build/app",
     "build": "tsc",
-<<<<<<< HEAD
     "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --trace-warnings' vitest",
-=======
-    "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --trace-warnings' jest",
->>>>>>> 885c8de07 (working jest tests for TS files)
-    "db:migrate": "NODE_ENV=development node src/run-migrations.js up",
-    "db:downgrade": "NODE_ENV=development node src/run-migrations.js down",
-    "db:test-migrate": "NODE_ENV=test node src/run-migrations.js up",
-    "db:test-downgrade": "NODE_ENV=test node src/run-migrations.js down",
+    "db:migrate": "NODE_ENV=development node src/scripts/run-migrations.js up",
+    "db:downgrade": "NODE_ENV=development node src/scripts/run-migrations.js down",
+    "db:test-migrate": "NODE_ENV=test node src/scripts/run-migrations.js up",
+    "db:test-downgrade": "NODE_ENV=test node src/scripts/run-migrations.js down",
     "reset-password": "node src/scripts/reset-password.js",
     "disable-openid": "node src/scripts/disable-openid.js",
     "health-check": "node src/scripts/health-check.js"
