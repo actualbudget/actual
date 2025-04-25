@@ -622,11 +622,11 @@ describe('CategoryTemplate', () => {
         templates,
         category,
         '2024-01',
-        90,
+        9000,
         0,
       );
       const result = await instance.runTemplatesForPriority(1, 1000, 1000); // More than enough funds
-      expect(result).toBe(60); //150 - 90
+      expect(result).toBe(6000); //150 - 90
     });
 
     it('should handle hold flag when limit is reached', async () => {
@@ -652,7 +652,7 @@ describe('CategoryTemplate', () => {
         300,
         0,
       );
-      const result = await instance.runTemplatesForPriority(1, 1000, 1000); // More than enough funds
+      const result = await instance.getLimitExcess();
       expect(result).toBe(0);
     });
 
@@ -679,8 +679,8 @@ describe('CategoryTemplate', () => {
         300,
         0,
       );
-      const result = await instance.runTemplatesForPriority(1, 1000, 1000); // More than enough funds
-      expect(result).toBe(-100);
+      const result = await instance.getLimitExcess();
+      expect(result).toBe(100);
     });
   });
 
@@ -733,6 +733,31 @@ describe('CategoryTemplate', () => {
       );
       const result = instance.runRemainder(101, 100);
       expect(result).toBe(101);
+    });
+
+    it('remainder wont over budget', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const templates: Template[] = [
+        {
+          type: 'remainder',
+          weight: 1,
+          directive: 'template',
+        },
+      ];
+      const instance = new TestCategoryTemplate(
+        templates,
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      const result = instance.runRemainder(99, 100);
+      expect(result).toBe(99);
     });
   });
 });

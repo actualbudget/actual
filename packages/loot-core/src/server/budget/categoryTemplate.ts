@@ -210,16 +210,20 @@ export class CategoryTemplate {
   // run all of the 'remainder' type templates
   runRemainder(budgetAvail: number, perWeight: number) {
     if (this.remainder.length === 0) return 0;
-    const toBudget = Math.round(this.remainderWeight * perWeight);
+    let toBudget = Math.round(this.remainderWeight * perWeight);
     //check possible overbudget from rounding, 1cent leftover
     if (toBudget > budgetAvail) {
-      this.toBudgetAmount += budgetAvail;
+      toBudget = budgetAvail;
+      this.toBudgetAmount += toBudget;
+      return toBudget;
     } else if (budgetAvail - toBudget === 1) {
-      this.toBudgetAmount += toBudget + 1;
+      toBudget += 1;
+      this.toBudgetAmount += toBudget;
+      return toBudget;
     } else {
       this.toBudgetAmount += toBudget;
+      return toBudget;
     }
-    return toBudget;
   }
 
   getValues(): { budgeted; goal; longGoal } {
