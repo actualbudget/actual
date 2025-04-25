@@ -760,4 +760,179 @@ describe('CategoryTemplate', () => {
       expect(result).toBe(99);
     });
   });
+
+  describe('full process', () => {
+    it('should handle priority limits through the entire process', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const templates: Template[] = [
+        {
+          type: 'simple',
+          monthly: 100,
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'simple',
+          monthly: 200,
+          directive: 'template',
+          priority: 2,
+        },
+        {
+          type: 'remainder',
+          weight: 1,
+          directive: 'template',
+        },
+      ];
+
+      // Mock the sheet values needed for init
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+
+      // Initialize the template
+      const instance = await CategoryTemplate.init(
+        templates,
+        category,
+        '2024-01',
+        0,
+      );
+
+      // Run each priority level separately
+      const priority1Result = await instance.runTemplatesForPriority(
+        1,
+        15000,
+        15000,
+      );
+      const priority2Result = await instance.runTemplatesForPriority(
+        2,
+        15000 - priority1Result,
+        15000,
+      );
+
+      // Get the final values
+      const values = instance.getValues();
+
+      // Verify the results
+      expect(priority1Result).toBe(10000); // Should get full amount for priority 1
+      expect(priority2Result).toBe(5000); // Should get remaining funds for priority 2
+      expect(values.budgeted).toBe(15000); // Should match the total of both priorities
+      expect(values.goal).toBe(30000); // Should be the sum of all template amounts
+      expect(values.longGoal).toBe(false); // No goal template
+    });
+
+    it('should handle category limits through the entire process', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const templates: Template[] = [
+        {
+          type: 'simple',
+          monthly: 100,
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'simple',
+          monthly: 200,
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'simple',
+          limit: { amount: 150, hold: false, period: 'monthly' },
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+
+      // Mock the sheet values needed for init
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+
+      // Initialize the template
+      const instance = await CategoryTemplate.init(
+        templates,
+        category,
+        '2024-01',
+        0,
+      );
+
+      // Run the templates with more than enough funds
+      const result = await instance.runTemplatesForPriority(1, 100000, 100000);
+
+      // Get the final values
+      const values = instance.getValues();
+
+      // Verify the results
+      expect(result).toBe(15000); // Should be limited by the category limit
+      expect(values.budgeted).toBe(15000); // Should match the limit
+      expect(values.goal).toBe(15000); // Should be the limit amount
+      expect(values.longGoal).toBe(false); // No goal template
+    });
+
+    it('should handle remainder template at the end of the process', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const templates: Template[] = [
+        {
+          type: 'simple',
+          monthly: 100,
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'simple',
+          monthly: 200,
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'remainder',
+          weight: 1,
+          directive: 'template',
+        },
+      ];
+
+      // Mock the sheet values needed for init
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+
+      // Initialize the template
+      const instance = await CategoryTemplate.init(
+        templates,
+        category,
+        '2024-01',
+        0,
+      );
+      const weight = instance.getRemainderWeight();
+
+      // Run the templates with more than enough funds
+      const result = await instance.runTemplatesForPriority(1, 100000, 100000);
+
+      // Run the remainder template
+      const perWeight = (100000 - result) / weight;
+      const remainderResult = instance.runRemainder(perWeight, perWeight);
+
+      // Get the final values
+      const values = instance.getValues();
+
+      // Verify the results
+      expect(result).toBe(30000); // Should get full amount for both simple templates
+      expect(remainderResult).toBe(70000); // Should get remaining funds
+      expect(values.budgeted).toBe(100000); // Should match the total of all templates
+      expect(values.goal).toBe(30000); // Should be the sum of the simple templates
+      expect(values.longGoal).toBe(false); // No goal template
+    });
+  });
 });
