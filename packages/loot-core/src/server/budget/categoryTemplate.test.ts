@@ -71,6 +71,59 @@ describe('CategoryTemplate', () => {
       const result = CategoryTemplate.runSimple(template, limit);
       expect(result).toBe(amountToInteger(100.5));
     });
+
+    it('should handle weekly limit', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const template: Template = {
+        type: 'simple',
+        limit: {
+          amount: 100,
+          hold: false,
+          period: 'weekly',
+          start: '2024-01-01',
+        },
+        directive: 'template',
+        priority: 1,
+      };
+      const instance = new TestCategoryTemplate(
+        [template],
+        category,
+        '2024-01',
+        10,
+        0,
+      );
+      const result = await instance.runAll(1000);
+      expect(result).toBe(490); // 5 Mondays * 100 -10
+    });
+
+    it('should handle daily limit', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const template: Template = {
+        type: 'simple',
+        limit: { amount: 10, hold: false, period: 'daily' },
+        directive: 'template',
+        priority: 1,
+      };
+      const instance = new TestCategoryTemplate(
+        [template],
+        category,
+        '2024-01',
+        10,
+        0,
+      );
+      const result = await instance.runAll(1000);
+      expect(result).toBe(300); // 31 days * 10 -10
+    });
   });
 
   describe('runCopy', () => {

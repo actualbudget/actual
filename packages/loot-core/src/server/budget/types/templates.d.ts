@@ -16,7 +16,12 @@ interface WeekTemplate extends BaseTemplate {
   amount: number;
   weeks: number | null;
   starting: string;
-  limit?: { amount: number; hold: boolean };
+  limit?: {
+    amount: number;
+    hold: boolean;
+    period?: 'daily' | 'weekly' | 'monthly';
+    start?: string;
+  };
 }
 
 interface ByTemplate extends BaseTemplate {
@@ -39,7 +44,12 @@ interface SpendTemplate extends BaseTemplate {
 interface SimpleTemplate extends BaseTemplate {
   type: 'simple';
   monthly?: number;
-  limit?: { amount: number; hold: boolean };
+  limit?: {
+    amount: number;
+    hold: boolean;
+    period?: 'daily' | 'weekly' | 'monthly';
+    start?: string;
+  };
 }
 
 interface ScheduleTemplate extends BaseTemplate {
