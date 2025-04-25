@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { Buffer } from 'node:buffer';
 import fs from 'node:fs/promises';
 
