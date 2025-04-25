@@ -25,6 +25,7 @@ function useRenderResults() {
       numTransfersFixed,
       mismatchedSplits,
       numNonParentErrorsFixed,
+      numParentTransactionsWithCategoryFixed,
     } = results;
     const result: string[] = [];
 
@@ -34,7 +35,8 @@ function useRenderResults() {
       numDeleted === 0 &&
       numTransfersFixed === 0 &&
       numNonParentErrorsFixed === 0 &&
-      mismatchedSplits.length === 0
+      mismatchedSplits.length === 0 &&
+      numParentTransactionsWithCategoryFixed === 0
     ) {
       result.push(t('No split transactions found needing repair.'));
     } else {
@@ -83,6 +85,13 @@ function useRenderResults() {
             'Found {{count}} split transactions with mismatched amounts on the below dates. Please review them manually:',
             { count: mismatchedSplits.length },
           ) + `\n${mismatchedSplitInfo}`,
+        );
+      }
+      if (numParentTransactionsWithCategoryFixed > 0) {
+        result.push(
+          t('Fixed {{count}} split transactions with non-null category.', {
+            count: numParentTransactionsWithCategoryFixed,
+          }),
         );
       }
     }
@@ -169,6 +178,10 @@ export function RepairTransactions() {
           <li>
             Check if you have any budget transfers that erroneous contain a
             category, and remove the category.
+          </li>
+          <li>
+            Checks for any parent transactions with a category and removes the
+            category if found.
           </li>
         </ul>
       </Trans>

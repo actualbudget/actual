@@ -21,6 +21,7 @@ async function fixSplitTransactions(): Promise<{
   numDeleted: number;
   numTransfersFixed: number;
   numNonParentErrorsFixed: number;
+  numParentTransactionsWithCategoryFixed: number;
   mismatchedSplits: TransactionEntity[];
 }> {
   // 1. Check for child transactions that have a blank payee, and set
@@ -123,12 +124,25 @@ async function fixSplitTransactions(): Promise<{
     await batchUpdateTransactions({ updated });
   });
 
+  // 7. Clear categories of parent transactions
+  const parentTransactionsWithCategory = await db.all<Pick<db.DbViewTransactionInternal, 'id'>>(`
+    SELECT id FROM transactions WHERE isParent = 1 AND category IS NOT NULL
+  `);
+
+  console.log('parentTransactionsWithCategory', parentTransactionsWithCategory);
+
+  await runMutator(async () => {
+    const updated = parentTransactionsWithCategory.map(({ id }) => ({ id, category: null }));
+    await batchUpdateTransactions({ updated });
+  });
+
   return {
     numBlankPayees: blankPayeeRows.length,
     numCleared: clearedRows.length,
     numDeleted: deletedRows.length,
     numTransfersFixed: brokenTransfers.length,
     numNonParentErrorsFixed: errorRows.length,
+    numParentTransactionsWithCategoryFixed: parentTransactionsWithCategory.length,
     mismatchedSplits,
   };
 }
