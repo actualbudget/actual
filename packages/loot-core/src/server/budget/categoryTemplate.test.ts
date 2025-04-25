@@ -580,4 +580,94 @@ describe('CategoryTemplate', () => {
       expect(result).toBe(66500); // (1000 + 2000 - 5) / 3
     });
   });
+
+  describe('template priorities', () => {
+    it('should handle multiple templates with priorities and insufficient funds', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const templates: Template[] = [
+        {
+          type: 'simple',
+          monthly: 100,
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'simple',
+          monthly: 200,
+          directive: 'template',
+          priority: 2,
+        },
+      ];
+      const instance = new TestCategoryTemplate(
+        templates,
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      const result = await instance.runAll(150); // Not enough for both templates
+      expect(result).toBe(150); // Only the higher priority template should be funded
+    });
+  });
+
+  describe('category limits', () => {
+    it('should not budget over monthly limit', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const templates: Template[] = [
+        {
+          type: 'simple',
+          monthly: 100,
+          limit: { amount: 150, hold: false, period: 'monthly' },
+          directive: 'template',
+          priority: 2,
+        },
+      ];
+      const instance = new TestCategoryTemplate(
+        templates,
+        category,
+        '2024-01',
+        90,
+        0,
+      );
+      const result = await instance.runAll(1000); // More than enough funds
+      expect(result).toBe(60); //150 - 90
+    });
+
+    it('should handle hold flag when limit is reached', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const templates: Template[] = [
+        {
+          type: 'simple',
+          monthly: 100,
+          limit: { amount: 200, hold: true, period: 'monthly' },
+          directive: 'template',
+          priority: 2,
+        },
+      ];
+      const instance = new TestCategoryTemplate(
+        templates,
+        category,
+        '2024-01',
+        300,
+        0,
+      );
+      const result = await instance.runAll(1000); // More than enough funds
+      expect(result).toBe(0); // Should not budget anything due to hold flag
+    });
+  });
 });
