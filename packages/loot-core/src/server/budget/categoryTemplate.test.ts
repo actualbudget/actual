@@ -83,8 +83,8 @@ describe('CategoryTemplate', () => {
         0,
         0,
       );
-      const result = await instance.runTemplatesForPriority(1, 1000, 1000);
-      expect(result).toBe(500); // 5 Mondays * 100
+      const result = await instance.runTemplatesForPriority(1, 100000, 100000);
+      expect(result).toBe(50000); // 5 Mondays * 100
     });
 
     it('should handle daily limit', async () => {
@@ -107,8 +107,8 @@ describe('CategoryTemplate', () => {
         0,
         0,
       );
-      const result = await instance.runTemplatesForPriority(1, 1000, 1000);
-      expect(result).toBe(310); // 31 days * 10
+      const result = await instance.runTemplatesForPriority(1, 100000, 100000);
+      expect(result).toBe(31000); // 31 days * 10
     });
   });
 
@@ -625,7 +625,7 @@ describe('CategoryTemplate', () => {
         9000,
         0,
       );
-      const result = await instance.runTemplatesForPriority(1, 1000, 1000); // More than enough funds
+      const result = await instance.runTemplatesForPriority(1, 10000, 10000);
       expect(result).toBe(6000); //150 - 90
     });
 
@@ -676,11 +676,11 @@ describe('CategoryTemplate', () => {
         templates,
         category,
         '2024-01',
-        300,
+        30000,
         0,
       );
       const result = await instance.getLimitExcess();
-      expect(result).toBe(100);
+      expect(result).toBe(10000);
     });
   });
 
