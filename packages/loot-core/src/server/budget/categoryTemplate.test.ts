@@ -391,6 +391,30 @@ describe('CategoryTemplate', () => {
       );
       expect(result).toBe(300); // 15% of 2000
     });
+
+    it('should calculate percentage of previous month income', async () => {
+      const template: Template = {
+        type: 'percentage',
+        percent: 10,
+        category: 'all income',
+        previous: true,
+        directive: 'template',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValue(10000);
+
+      const result = await CategoryTemplate.runPercentage(
+        template,
+        0,
+        instance,
+      );
+      expect(result).toBe(1000); // 10% of 10000
+      expect(actions.getSheetValue).toHaveBeenCalledWith(
+        '2023-12',
+        'total-income',
+      );
+    });
   });
 
   describe('runAverage', () => {
