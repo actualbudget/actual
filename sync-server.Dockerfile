@@ -27,7 +27,6 @@ WORKDIR /app
 
 COPY packages/ ./packages/
 RUN yarn build:browser
-RUN yarn build:sync-server
 
 # Focus the workspaces in production mode (including @actual-app/web you just built)
 RUN yarn workspaces focus @actual-app/sync-server --production
