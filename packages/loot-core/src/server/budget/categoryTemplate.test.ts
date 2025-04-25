@@ -934,5 +934,95 @@ describe('CategoryTemplate', () => {
       expect(values.goal).toBe(30000); // Should be the sum of the simple templates
       expect(values.longGoal).toBe(null); // No goal template
     });
+
+    it('should handle goal template through the entire process', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const templates: Template[] = [
+        {
+          type: 'simple',
+          monthly: 100,
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'simple',
+          monthly: 200,
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'goal',
+          amount: 1000,
+          directive: 'goal',
+        },
+      ];
+
+      // Mock the sheet values needed for init
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+
+      // Initialize the template
+      const instance = await CategoryTemplate.init(
+        templates,
+        category,
+        '2024-01',
+        0,
+      );
+
+      // Run the templates with more than enough funds
+      const result = await instance.runTemplatesForPriority(1, 100000, 100000);
+
+      // Get the final values
+      const values = instance.getValues();
+
+      // Verify the results
+      expect(result).toBe(30000); // Should get full amount for both simple templates
+      expect(values.budgeted).toBe(30000); // Should match the result
+      expect(values.goal).toBe(100000); // Should be the goal amount
+      expect(values.longGoal).toBe(true); // Should have a long goal
+      expect(instance.getGoalOnly()).toBe(false); // Should not be goal only
+    });
+
+    it('should handle goal-only template through the entire process', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const templates: Template[] = [
+        {
+          type: 'goal',
+          amount: 1000,
+          directive: 'goal',
+        },
+      ];
+
+      // Mock the sheet values needed for init
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(10000); // lastMonthBalance
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+
+      // Initialize the template
+      const instance = await CategoryTemplate.init(
+        templates,
+        category,
+        '2024-01',
+        0,
+      );
+
+      expect(instance.getGoalOnly()).toBe(true); // Should be goal only
+      // Get the final values
+      const values = instance.getValues();
+
+      // Verify the results
+      expect(values.budgeted).toBe(10000); // Should match the result
+      expect(values.goal).toBe(100000); // Should be the goal amount
+      expect(values.longGoal).toBe(true); // Should have a long goal
+    });
   });
 });
