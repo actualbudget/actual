@@ -821,7 +821,7 @@ describe('CategoryTemplate', () => {
       expect(priority2Result).toBe(5000); // Should get remaining funds for priority 2
       expect(values.budgeted).toBe(15000); // Should match the total of both priorities
       expect(values.goal).toBe(30000); // Should be the sum of all template amounts
-      expect(values.longGoal).toBe(false); // No goal template
+      expect(values.longGoal).toBe(null); // No goal template
     });
 
     it('should handle category limits through the entire process', async () => {
@@ -874,7 +874,7 @@ describe('CategoryTemplate', () => {
       expect(result).toBe(15000); // Should be limited by the category limit
       expect(values.budgeted).toBe(15000); // Should match the limit
       expect(values.goal).toBe(15000); // Should be the limit amount
-      expect(values.longGoal).toBe(false); // No goal template
+      expect(values.longGoal).toBe(null); // No goal template
     });
 
     it('should handle remainder template at the end of the process', async () => {
@@ -932,7 +932,7 @@ describe('CategoryTemplate', () => {
       expect(remainderResult).toBe(70000); // Should get remaining funds
       expect(values.budgeted).toBe(100000); // Should match the total of all templates
       expect(values.goal).toBe(30000); // Should be the sum of the simple templates
-      expect(values.longGoal).toBe(false); // No goal template
+      expect(values.longGoal).toBe(null); // No goal template
     });
   });
 });
