@@ -43,6 +43,8 @@ import {
 } from './spreadsheet';
 import { type FormatType, useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
+import { useSyncedPref } from '../hooks/useSyncedPref';
+import { getCurrency } from 'loot-core/shared/currencies';
 
 import { useModalState } from '@desktop-client/hooks/useModalState';
 import {
@@ -700,6 +702,7 @@ export type SheetCellProps<
   onSave?: (value) => void;
   textAlign?: CSSProperties['textAlign'];
 };
+//TODO: REMOVE COMMENT
 export function SheetCell<
   SheetName extends SheetNames,
   FieldName extends SheetFields<SheetName>,
@@ -720,12 +723,19 @@ export function SheetCell<
     privacyFilter,
   } = valueProps;
 
+  const [currencyCode] = useSyncedPref('currencyCode');
+  const currency = currencyCode ? getCurrency(currencyCode) : null;
+  const decimalPlaces = (type === 'financial' || type === 'financial-with-sign') && currency 
+    ? currency.decimalPlaces 
+    : 2;
+
   const sheetValue = useSheetValue(binding, () => {
     // "close" the cell if it's editing
     if (props.exposed && inputProps && inputProps.onBlur) {
       inputProps.onBlur();
     }
   });
+
   const format = useFormat();
 
   return (
@@ -751,9 +761,27 @@ export function SheetCell<
       data-cellname={sheetValue}
     >
       {() => {
+        let formattedForEdit: string;
+  
+        if (formatExpr) {
+          console.log('formatExpr', formatExpr);
+          console.log('sheetValue', sheetValue);
+          formattedForEdit = formatExpr(sheetValue);
+        } else if (typeof sheetValue === 'number') {
+          console.log('number', sheetValue);
+          formattedForEdit = sheetValue.toFixed(decimalPlaces);
+        } else if (sheetValue && typeof sheetValue === 'object' && 'value' in sheetValue && typeof sheetValue.value === 'number') {
+          console.log('object', sheetValue);
+          formattedForEdit = sheetValue.value.toFixed(decimalPlaces);
+        } else {
+          console.log('string', sheetValue);
+          formattedForEdit = String(sheetValue ?? '');
+        }
+
+        // before value={formatExpr ? formatExpr(sheetValue) : sheetValue.toString()}
         return (
           <InputValue
-            value={formatExpr ? formatExpr(sheetValue) : sheetValue.toString()}
+            value={formattedForEdit}
             onUpdate={value => {
               onSave(unformatExpr ? unformatExpr(value) : value);
             }}

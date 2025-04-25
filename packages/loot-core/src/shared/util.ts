@@ -388,7 +388,11 @@ export function integerToCurrency(
   integerAmount: IntegerAmount,
   formatter = getNumberFormat().formatter,
 ) {
-  return formatter.format(safeNumber(integerAmount) / 100);
+  const digits = formatter.resolvedOptions().maximumFractionDigits;
+  const divisor = Math.pow(10, digits);
+  
+  // Use the formatter directly - no need to create a new one
+  return formatter.format(safeNumber(integerAmount) / divisor);
 }
 
 export function amountToCurrency(amount: Amount): CurrencyAmount {
@@ -439,12 +443,14 @@ export function stringToInteger(str: string): number | null {
   return null;
 }
 
-export function amountToInteger(amount: Amount): IntegerAmount {
-  return Math.round(amount * 100);
+export function amountToInteger(amount: Amount, decimalPlaces: number = 2): IntegerAmount {
+  const multiplier = Math.pow(10, decimalPlaces);
+  return Math.round(amount * multiplier);
 }
 
-export function integerToAmount(integerAmount: IntegerAmount): Amount {
-  return parseFloat((safeNumber(integerAmount) / 100).toFixed(2));
+export function integerToAmount(integerAmount: IntegerAmount, decimalPlaces: number = 2): Amount {
+  const divisor = Math.pow(10, decimalPlaces);
+  return parseFloat((safeNumber(integerAmount) / divisor).toFixed(2));
 }
 
 // This is used when the input format could be anything (from

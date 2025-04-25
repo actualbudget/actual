@@ -2,6 +2,7 @@ import React, {
   type ComponentProps,
   type CSSProperties,
   memo,
+  useMemo,
   useRef,
 } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
@@ -22,7 +23,7 @@ import { css } from '@emotion/css';
 import { envelopeBudget } from 'loot-core/client/queries';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import * as monthUtils from 'loot-core/shared/months';
-import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
+import { integerToCurrency, amountToInteger, getNumberFormat } from 'loot-core/shared/util';
 import {
   type CategoryGroupEntity,
   type CategoryEntity,
@@ -38,6 +39,9 @@ import { makeAmountGrey } from '../util';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
+import { getCurrency } from 'loot-core/shared/currencies';
+import { useFormat } from '../../spreadsheet/useFormat';
 
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
@@ -233,6 +237,19 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
     position: balancePosition,
   } = useContextMenu();
 
+  const [currencyCode] = useSyncedPref('currencyCode');
+  const currency = currencyCode ? getCurrency(currencyCode) : null;
+  const decimalPlaces = currency ? currency.decimalPlaces : 2;
+
+  const formatter = new Intl.NumberFormat(
+    getNumberFormat().formatter.resolvedOptions().locale,
+    {
+      minimumFractionDigits: decimalPlaces,
+      maximumFractionDigits: decimalPlaces,
+      style: 'decimal'
+    }
+  );
+
   const onMenuAction = (...args: Parameters<typeof onBudgetAction>) => {
     onBudgetAction(...args);
     setBudgetMenuOpen(false);
@@ -381,10 +398,11 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             type: 'financial',
             getValueStyle: makeAmountGrey,
             formatExpr: expr => {
-              return integerToCurrency(expr);
+              return integerToCurrency(expr, formatter);
             },
             unformatExpr: expr => {
-              return amountToInteger(evalArithmetic(expr, 0));
+              console.log('decimalPlaces', decimalPlaces);
+              return amountToInteger(evalArithmetic(expr, 0), decimalPlaces);
             },
           }}
           inputProps={{
