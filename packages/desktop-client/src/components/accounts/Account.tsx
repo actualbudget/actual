@@ -159,12 +159,18 @@ function AllTransactions({
     const previewBalances = [...previewTransactions]
       .reverse()
       .map(previewTransaction => {
-        return {
-          // TODO: fix me
-          // eslint-disable-next-line react-hooks/exhaustive-deps
-          balance: (runningBalance += previewTransaction.amount),
-          id: previewTransaction.id,
-        };
+        if (!previewTransaction.is_child) {
+          return {
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            balance: (runningBalance += previewTransaction.amount),
+            id: previewTransaction.id,
+          };
+        } else {
+          return {
+            balance: 0,
+            id: previewTransaction.id,
+          };
+        }
       });
     return groupById(previewBalances);
   }, [showBalances, previewTransactions, runningBalance]);
