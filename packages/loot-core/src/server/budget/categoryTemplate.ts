@@ -323,10 +323,13 @@ export class CategoryTemplate {
   //-----------------------------------------------------------------------------
   //  Template Validation
   static async checkByAndScheduleAndSpend(templates, month) {
-    //check schedule names
-    if (templates.filter(t => t.type === 'schedule' || 'by') === 0) {
+    if (
+      templates.filter(t => t.type === 'schedule' || t.type === 'by').length ===
+      0
+    ) {
       return;
     }
+    //check schedule names
     const scheduleNames = (await getActiveSchedules()).map(({ name }) =>
       name.trim(),
     );
