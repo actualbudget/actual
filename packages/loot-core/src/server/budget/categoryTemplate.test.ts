@@ -1012,7 +1012,7 @@ describe('CategoryTemplate', () => {
         templates,
         category,
         '2024-01',
-        0,
+        10000,
       );
 
       expect(instance.getGoalOnly()).toBe(true); // Should be goal only
@@ -1020,7 +1020,7 @@ describe('CategoryTemplate', () => {
       const values = instance.getValues();
 
       // Verify the results
-      expect(values.budgeted).toBe(10000); // Should match the result
+      expect(values.budgeted).toBe(10000);
       expect(values.goal).toBe(100000); // Should be the goal amount
       expect(values.longGoal).toBe(true); // Should have a long goal
     });
