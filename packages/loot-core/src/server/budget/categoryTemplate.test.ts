@@ -670,4 +670,61 @@ describe('CategoryTemplate', () => {
       expect(result).toBe(0); // Should not budget anything due to hold flag
     });
   });
+
+  describe('remainder templates', () => {
+    it('should distribute available funds based on weight', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const templates: Template[] = [
+        {
+          type: 'remainder',
+          weight: 2,
+          directive: 'template',
+        },
+      ];
+      const instance = new TestCategoryTemplate(
+        templates,
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      const result = instance.runRemainder(100, 50); // 100 available, 50 per weight
+      expect(result).toBe(100); // 2 * 50 = 100
+    });
+
+    it('should handle multiple remainder templates with different weights and catch last cent', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const templates: Template[] = [
+        {
+          type: 'remainder',
+          weight: 2,
+          directive: 'template',
+        },
+        {
+          type: 'remainder',
+          weight: 3,
+          directive: 'template',
+        },
+      ];
+      const instance = new TestCategoryTemplate(
+        templates,
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      const result = instance.runRemainder(101, 20); // 100 available, 20 per weight
+      expect(result).toBe(101); // (2 + 3) * 20 = 100
+    });
+  });
 });
