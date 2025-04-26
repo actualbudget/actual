@@ -125,14 +125,19 @@ async function fixSplitTransactions(): Promise<{
   });
 
   // 7. Clear categories of parent transactions
-  const parentTransactionsWithCategory = await db.all<Pick<db.DbViewTransactionInternal, 'id'>>(`
+  const parentTransactionsWithCategory = await db.all<
+    Pick<db.DbViewTransactionInternal, 'id'>
+  >(`
     SELECT id FROM transactions WHERE isParent = 1 AND category IS NOT NULL
   `);
 
   console.log('parentTransactionsWithCategory', parentTransactionsWithCategory);
 
   await runMutator(async () => {
-    const updated = parentTransactionsWithCategory.map(({ id }) => ({ id, category: null }));
+    const updated = parentTransactionsWithCategory.map(({ id }) => ({
+      id,
+      category: null,
+    }));
     await batchUpdateTransactions({ updated });
   });
 
@@ -142,7 +147,8 @@ async function fixSplitTransactions(): Promise<{
     numDeleted: deletedRows.length,
     numTransfersFixed: brokenTransfers.length,
     numNonParentErrorsFixed: errorRows.length,
-    numParentTransactionsWithCategoryFixed: parentTransactionsWithCategory.length,
+    numParentTransactionsWithCategoryFixed:
+      parentTransactionsWithCategory.length,
     mismatchedSplits,
   };
 }
