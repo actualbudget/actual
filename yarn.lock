@@ -121,7 +121,7 @@ __metadata:
     vitest: "npm:^3.0.2"
     winston: "npm:^3.17.0"
   bin:
-    actual-server: ./bin/actual-server.js
+    actual-server: ./build/bin/actual-server.js
   languageName: unknown
   linkType: soft
 
