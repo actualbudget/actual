@@ -61,6 +61,8 @@ import {
   isPreviewId,
 } from 'loot-core/shared/transactions';
 import {
+  getNumberFormat,
+  parseNumberFormat,
   integerToCurrency,
   amountToInteger,
   titleFirst,
@@ -91,6 +93,9 @@ import {
 } from '../table';
 
 import { TransactionMenu } from './TransactionMenu';
+import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { getCurrency } from 'loot-core/shared/currencies';
+import { useFormat } from '../spreadsheet/useFormat';
 
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
@@ -134,12 +139,13 @@ function serializeTransaction(transaction, showZeroInDeposit) {
   return {
     ...transaction,
     date,
-    debit: debit != null ? integerToCurrency(debit) : '',
-    credit: credit != null ? integerToCurrency(credit) : '',
+    debit: debit != null ? debit : '',
+    credit: credit != null ? credit : '',
   };
 }
 
-function deserializeTransaction(transaction, originalTransaction) {
+function deserializeTransaction(transaction, originalTransaction, decimalPlaces) {
+
   const { debit, credit, date: originalDate, ...realTransaction } = transaction;
 
   let amount;
@@ -151,7 +157,9 @@ function deserializeTransaction(transaction, originalTransaction) {
   }
 
   amount =
-    amount != null ? amountToInteger(amount) : originalTransaction.amount;
+    amount != null
+      ? amountToInteger(amount, decimalPlaces)
+      : originalTransaction.amount;
 
   let date = originalDate;
   if (date == null) {
@@ -831,6 +839,8 @@ const Transaction = memo(function Transaction({
   listContainerRef,
   showSelection,
   allowSplitTransaction,
+  formatter,
+  format,
 }) {
   const dispatch = useDispatch();
   const dispatchSelected = useSelectedDispatch();
@@ -864,7 +874,6 @@ const Transaction = memo(function Transaction({
     // click off of the cell manually after confirming your change post modal for example. The last
     // row seems to have more issues than others but the combination of tab, return, and clicking out
     // of the cell all have different implications as well.
-
     if (transaction[name] !== value) {
       if (
         transaction.reconciled === true &&
@@ -918,6 +927,7 @@ const Transaction = memo(function Transaction({
   }
 
   function onUpdateAfterConfirm(name, value) {
+
     const newTransaction = { ...transaction, [name]: value };
 
     // Don't change the note to an empty string if it's null (since they are both rendered the same)
@@ -955,6 +965,7 @@ const Transaction = memo(function Transaction({
       const deserialized = deserializeTransaction(
         newTransaction,
         originalTransaction,
+        formatter.resolvedOptions().maximumFractionDigits
       );
       // Run the transaction through the formatting so that we know
       // it's always showing the formatted result
@@ -1485,25 +1496,29 @@ const Transaction = memo(function Transaction({
 
       <InputCell
         /* Debit field for all transactions */
-        type="input"
+        type="financial"
         width={100}
         name="debit"
         exposed={focusedField === 'debit'}
         focused={focusedField === 'debit'}
-        value={debit === '' && credit === '' ? amountToCurrency(0) : debit}
+        value={debit === '' && credit === '' ? '0' : debit}
         valueStyle={valueStyle}
         textAlign="right"
-        title={debit}
+        title={format(debit, 'financial')}
         onExpose={name => !isPreview && onEdit(id, name)}
         style={{
           ...(isParent && { fontStyle: 'italic' }),
           ...styles.tnum,
           ...amountStyle,
         }}
-        inputProps={{
-          value: debit === '' && credit === '' ? amountToCurrency(0) : debit,
-          onUpdate: onUpdate.bind(null, 'debit'),
-        }}
+        formatter={format}
+        formatExpr={expr => integerToCurrency(expr, formatter)}
+        // unformatExpr={expr => amountToInteger(evalArithmetic(expr, 0), decimalPlaces)}
+        onUpdate={onUpdate.bind(null, 'debit')}
+        // inputProps={{
+        //   value: debit === '' && credit === '' ? '0.00' : debit,
+        //   onUpdate: onUpdate.bind(null, 'debit'),
+        // }}
         privacyFilter={{
           activationFilters: [!isTemporaryId(transaction.id)],
         }}
@@ -1511,7 +1526,7 @@ const Transaction = memo(function Transaction({
 
       <InputCell
         /* Credit field for all transactions */
-        type="input"
+        type="financial"
         width={100}
         name="credit"
         exposed={focusedField === 'credit'}
@@ -1519,17 +1534,28 @@ const Transaction = memo(function Transaction({
         value={credit}
         valueStyle={valueStyle}
         textAlign="right"
-        title={credit}
+        title={format(credit, 'financial')}
         onExpose={name => !isPreview && onEdit(id, name)}
         style={{
           ...(isParent && { fontStyle: 'italic' }),
           ...styles.tnum,
           ...amountStyle,
         }}
-        inputProps={{
-          value: credit,
-          onUpdate: onUpdate.bind(null, 'credit'),
+        formatter={format}
+        formatExpr={expr => {
+          if (expr === '') {
+            return '';
+          }
+          return integerToCurrency(expr, formatter)
         }}
+        unformatExpr={expr => {
+          return expr === '' ? '0' : expr;
+        }}
+        onUpdate={onUpdate.bind(null, 'credit')}
+        // inputProps={{
+        //   value: credit,
+        //   onUpdate: onUpdate.bind(null, 'credit'),
+        // }}
         privacyFilter={{
           activationFilters: [!isTemporaryId(transaction.id)],
         }}
@@ -1542,7 +1568,7 @@ const Transaction = memo(function Transaction({
           value={
             runningBalance == null || isChild
               ? ''
-              : integerToCurrency(runningBalance)
+              : format(runningBalance, 'financial')
           }
           valueStyle={{
             color: runningBalance < 0 ? theme.errorText : theme.noticeTextLight,
@@ -1797,8 +1823,11 @@ function TransactionTableInner({
   newNavigator,
   renderEmpty,
   onScroll,
+  formatter,
+  format,
   ...props
 }) {
+
   const containerRef = createRef();
   const isAddingPrev = usePrevious(props.isAdding);
   const [scrollWidth, setScrollWidth] = useState(0);
@@ -1958,6 +1987,8 @@ function TransactionTableInner({
         listContainerRef={listContainerRef}
         showSelection={showSelection}
         allowSplitTransaction={allowSplitTransaction}
+        formatter={formatter}
+        format={format}
       />
     );
   };
@@ -2076,6 +2107,29 @@ export const TransactionTable = forwardRef((props, ref) => {
   const splitsExpanded = useSplitsExpanded();
   const splitsExpandedDispatch = splitsExpanded.dispatch;
   const prevSplitsExpanded = useRef(null);
+
+  const [numberFormat] = useSyncedPref('numberFormat');
+  const [hideFraction] = useSyncedPref('hideFraction');
+  const [currencyCode] = useSyncedPref('currencyCode');
+  const currency = currencyCode ? getCurrency(currencyCode) : null;
+  const decimalPlaces = currency ? currency.decimalPlaces : 2;
+
+  const config = useMemo(
+    () => parseNumberFormat({ format: numberFormat, hideFraction }),
+    [numberFormat, hideFraction],
+  );
+
+  const { formatter } = useMemo(
+    () =>
+      getNumberFormat({
+        format: config.format,
+        hideFraction: config.hideFraction,
+        decimalPlaces: decimalPlaces,
+      }),
+    [config, decimalPlaces],
+  );
+
+  const format = useFormat();
 
   const tableRef = useRef(null);
   const listContainerRef = useRef(null);
@@ -2645,6 +2699,8 @@ export const TransactionTable = forwardRef((props, ref) => {
       newNavigator={newNavigator}
       showSelection={props.showSelection}
       allowSplitTransaction={props.allowSplitTransaction}
+      formatter={formatter}
+      format={format}
     />
   );
 });

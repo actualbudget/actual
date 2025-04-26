@@ -43,8 +43,6 @@ import {
 } from './spreadsheet';
 import { type FormatType, useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
-import { useSyncedPref } from '../hooks/useSyncedPref';
-import { getCurrency } from 'loot-core/shared/currencies';
 
 import { useModalState } from '@desktop-client/hooks/useModalState';
 import {
@@ -390,25 +388,51 @@ type InputCellProps = ComponentProps<typeof Cell> & {
   onUpdate?: ComponentProps<typeof InputValue>['onUpdate'];
   onBlur?: ComponentProps<typeof InputValue>['onBlur'];
   textAlign?: CSSProperties['textAlign'];
+  type?: FormatType;
+  formatExpr?: (value: string) => string;
+  unformatExpr?: (value: string) => string;
 };
+//TODO: REMOVE COMMENT
 export function InputCell({
   inputProps,
   onUpdate,
   onBlur,
   textAlign,
+  type = 'string',
+  formatExpr,
+  unformatExpr,
   ...props
 }: InputCellProps) {
+
   return (
-    <Cell textAlign={textAlign} {...props}>
-      {() => (
-        <InputValue
-          value={props.value}
-          onUpdate={onUpdate}
-          onBlur={onBlur}
-          style={{ textAlign, ...(inputProps && inputProps.style) }}
-          {...inputProps}
-        />
-      )}
+    <Cell
+      textAlign={textAlign}
+      {...props}
+      formatter={value => {
+          if (value === '' || value === null || value === undefined) {
+            return '';
+          }
+
+          return props.formatter ? props.formatter(value, type) : value;
+        }
+      }
+      >
+      {() => {
+
+        let formattedForEdit: string = formatExpr ? formatExpr(props.value) : props.value;
+
+        return (
+          <InputValue
+            {...inputProps}
+            value={formattedForEdit}
+            onUpdate={value => {
+              onUpdate?.(unformatExpr ? unformatExpr(value) : value);
+            }}
+            onBlur={onBlur}
+            style={{ textAlign, ...(inputProps && inputProps.style) }}
+          />
+        );
+      }}
     </Cell>
   );
 }
@@ -723,12 +747,6 @@ export function SheetCell<
     privacyFilter,
   } = valueProps;
 
-  const [currencyCode] = useSyncedPref('currencyCode');
-  const currency = currencyCode ? getCurrency(currencyCode) : null;
-  const decimalPlaces = (type === 'financial' || type === 'financial-with-sign') && currency 
-    ? currency.decimalPlaces 
-    : 2;
-
   const sheetValue = useSheetValue(binding, () => {
     // "close" the cell if it's editing
     if (props.exposed && inputProps && inputProps.onBlur) {
@@ -748,8 +766,9 @@ export function SheetCell<
       textAlign={textAlign}
       {...props}
       value={String(sheetValue ?? '')}
-      formatter={value =>
-        props.formatter ? props.formatter(value, type) : format(value, type)
+      formatter={value => {
+          return props.formatter ? props.formatter(value, type) : format(value, type)
+        }
       }
       privacyFilter={
         privacyFilter != null
@@ -761,24 +780,8 @@ export function SheetCell<
       data-cellname={sheetValue}
     >
       {() => {
-        let formattedForEdit: string;
-  
-        if (formatExpr) {
-          console.log('formatExpr', formatExpr);
-          console.log('sheetValue', sheetValue);
-          formattedForEdit = formatExpr(sheetValue);
-        } else if (typeof sheetValue === 'number') {
-          console.log('number', sheetValue);
-          formattedForEdit = sheetValue.toFixed(decimalPlaces);
-        } else if (sheetValue && typeof sheetValue === 'object' && 'value' in sheetValue && typeof sheetValue.value === 'number') {
-          console.log('object', sheetValue);
-          formattedForEdit = sheetValue.value.toFixed(decimalPlaces);
-        } else {
-          console.log('string', sheetValue);
-          formattedForEdit = String(sheetValue ?? '');
-        }
+        let formattedForEdit: string = formatExpr ? formatExpr(sheetValue) : String(sheetValue ?? '');
 
-        // before value={formatExpr ? formatExpr(sheetValue) : sheetValue.toString()}
         return (
           <InputValue
             value={formattedForEdit}
