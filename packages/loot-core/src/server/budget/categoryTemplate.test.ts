@@ -20,8 +20,7 @@ vi.mock('../db', () => ({
 
 // Test helper class to access constructor and methods
 class TestCategoryTemplate extends CategoryTemplate {
-  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
-  constructor(
+  public constructor(
     templates: Template[],
     category: CategoryEntity,
     month: string,
