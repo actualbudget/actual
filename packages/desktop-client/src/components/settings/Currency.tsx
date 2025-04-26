@@ -120,7 +120,7 @@ export function CurrencySettings() {
       <Text>
         <Trans>
           <strong>Currency settings</strong> affect how amounts are displayed throughout 
-          the application. The underlying data is always stored as a number.
+          the application.
         </Trans>
       </Text>
     </Setting>
