@@ -228,6 +228,7 @@ async function startSyncServer() {
     const serverPath = path.join(
       // require.resolve will recursively search up the workspace for the module
       path.dirname(require.resolve('@actual-app/sync-server/package.json')),
+      // TODO
       'app.js',
     );
 
