@@ -4,14 +4,11 @@
   "license": "MIT",
   "description": "actual syncing server",
   "bin": {
-    "actual-server": "./bin/actual-server.js"
+    "actual-server": "./build/bin/actual-server.js"
   },
   "type": "module",
   "files": [
-    "bin",
-    "src",
-    "app.js",
-    "migrations",
+    "build",
     "default-db.sqlite",
     "README.md",
     "LICENSE"

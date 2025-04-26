@@ -17,6 +17,12 @@
     "outDir": "build",
     "types": ["vite/client", "vitest/globals"]
   },
-  "include": ["src/**/*", "migrations/**/*", "types/**/*", "app.ts"],
+  "include": [
+    "src/**/*",
+    "migrations/**/*",
+    "types/**/*",
+    "app.ts",
+    "bin/**/*"
+  ],
   "exclude": ["node_modules", "build", "coverage"]
 }
