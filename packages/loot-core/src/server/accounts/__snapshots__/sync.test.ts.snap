@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Account sync reconcile does rematch deleted transactions by default 1`] = `
+exports[`Account sync > reconcile does rematch deleted transactions by default 1`] = `
 [
   {
     "account": "one",
@@ -53,7 +53,7 @@ exports[`Account sync reconcile does rematch deleted transactions by default 1`]
 ]
 `;
 
-exports[`Account sync reconcile doesnt rematch deleted transactions if reimport disabled 1`] = `
+exports[`Account sync > reconcile doesnt rematch deleted transactions if reimport disabled 1`] = `
 [
   {
     "account": "one",
@@ -82,7 +82,7 @@ exports[`Account sync reconcile doesnt rematch deleted transactions if reimport 
 ]
 `;
 
-exports[`Account sync reconcile handles transactions with undefined fields 1`] = `
+exports[`Account sync > reconcile handles transactions with undefined fields 1`] = `
 [
   {
     "account": "one",

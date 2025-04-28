@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { ImportTransactionsOpts } from '@actual-app/api';
 
 import type {
@@ -7,10 +8,10 @@ import type {
   APIFileEntity,
   APIPayeeEntity,
 } from '../server/api-models';
+import { BudgetFileHandlers } from '../server/budgetfiles/app';
 import { type batchUpdateTransactions } from '../server/transactions';
 
 import type { NewRuleEntity, RuleEntity, TransactionEntity } from './models';
-import { type ServerHandlers } from './server-handlers';
 
 export interface ApiHandlers {
   'api/batch-budget-start': () => Promise<unknown>;
@@ -18,7 +19,7 @@ export interface ApiHandlers {
   'api/batch-budget-end': () => Promise<unknown>;
 
   'api/load-budget': (
-    ...args: Parameters<ServerHandlers['load-budget']>
+    ...args: Parameters<BudgetFileHandlers['load-budget']>
   ) => Promise<void>;
 
   'api/download-budget': (arg: {
