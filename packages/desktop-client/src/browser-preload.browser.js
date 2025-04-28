@@ -86,6 +86,12 @@ global.Actual = {
       });
   },
 
+  startSyncServer: () => {},
+
+  stopSyncServer: () => {},
+
+  isSyncServerRunning: () => false,
+
   startOAuthServer: () => {
     return '';
   },

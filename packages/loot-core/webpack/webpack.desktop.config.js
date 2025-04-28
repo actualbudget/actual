@@ -27,6 +27,9 @@ module.exports = {
       '.json',
       'pegjs',
     ],
+    alias: {
+      handlebars: 'handlebars/dist/handlebars.js',
+    },
   },
   externals: ['better-sqlite3'],
   plugins: [

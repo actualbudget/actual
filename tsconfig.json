@@ -19,7 +19,7 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "jsx": "preserve",
-    "types": ["vite/client", "jest", "vitest/globals"],
+    "types": ["vite/client", "vitest/globals"],
     // Check JS files too
     "allowJs": true,
     "checkJs": false,

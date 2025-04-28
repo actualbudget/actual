@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`File import CAMT.053 import works 1`] = `
+exports[`File import > CAMT.053 import works 1`] = `
 [
   {
     "acct": "one",
@@ -194,7 +194,7 @@ exports[`File import CAMT.053 import works 1`] = `
 ]
 `;
 
-exports[`File import handles html escaped plaintext 1`] = `
+exports[`File import > handles html escaped plaintext 1`] = `
 [
   {
     "acct": "one",
@@ -251,7 +251,7 @@ exports[`File import handles html escaped plaintext 1`] = `
 ]
 `;
 
-exports[`File import handles non-ASCII characters 1`] = `
+exports[`File import > handles non-ASCII characters 1`] = `
 [
   {
     "acct": "one",
@@ -282,7 +282,7 @@ exports[`File import handles non-ASCII characters 1`] = `
 ]
 `;
 
-exports[`File import import notes are respected when importing: transactions with notes 1`] = `
+exports[`File import > import notes are respected when importing > transactions with notes 1`] = `
 [
   {
     "acct": "one",
@@ -547,7 +547,7 @@ exports[`File import import notes are respected when importing: transactions wit
 ]
 `;
 
-exports[`File import ofx import works (credit card) 1`] = `
+exports[`File import > ofx import works (credit card) 1`] = `
 [
   {
     "acct": "one",
@@ -578,7 +578,7 @@ exports[`File import ofx import works (credit card) 1`] = `
 ]
 `;
 
-exports[`File import ofx import works 1`] = `
+exports[`File import > ofx import works 1`] = `
 [
   {
     "acct": "one",
@@ -843,7 +843,7 @@ exports[`File import ofx import works 1`] = `
 ]
 `;
 
-exports[`File import qfx import works 1`] = `
+exports[`File import > qfx import works 1`] = `
 [
   {
     "acct": "one",
@@ -1108,7 +1108,7 @@ exports[`File import qfx import works 1`] = `
 ]
 `;
 
-exports[`File import qif import works 1`] = `
+exports[`File import > qif import works 1`] = `
 [
   {
     "acct": "one",

@@ -2,14 +2,16 @@
 import 'fake-indexeddb/auto';
 import FDBFactory from 'fake-indexeddb/lib/FDBFactory';
 
+import { patchFetchForSqlJS } from '../../../mocks/util';
 import * as idb from '../indexeddb';
 import * as sqlite from '../sqlite';
 
 import { init, readFile, writeFile, exists, pathToId, join } from './index';
 
 beforeAll(() => {
-  process.env.PUBLIC_URL =
-    __dirname + '/../../../../../../node_modules/@jlongster/sql.js/dist/';
+  const baseURL = `${__dirname}/../../../../../../node_modules/@jlongster/sql.js/dist/`;
+  patchFetchForSqlJS(baseURL);
+  process.env.PUBLIC_URL = baseURL;
 });
 
 beforeEach(() => {

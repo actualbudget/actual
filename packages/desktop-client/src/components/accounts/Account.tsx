@@ -16,7 +16,6 @@ import { debounce } from 'debounce';
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
 import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import { useFilters } from 'loot-core/client/data-hooks/filters';
 import {
@@ -67,6 +66,7 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
+import { unlinkAccount } from '../../accounts/accountsSlice';
 import { useAccountPreviewTransactions } from '../../hooks/useAccountPreviewTransactions';
 import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
@@ -159,12 +159,18 @@ function AllTransactions({
     const previewBalances = [...previewTransactions]
       .reverse()
       .map(previewTransaction => {
-        return {
-          // TODO: fix me
-          // eslint-disable-next-line react-hooks/exhaustive-deps
-          balance: (runningBalance += previewTransaction.amount),
-          id: previewTransaction.id,
-        };
+        if (!previewTransaction.is_child) {
+          return {
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            balance: (runningBalance += previewTransaction.amount),
+            id: previewTransaction.id,
+          };
+        } else {
+          return {
+            balance: 0,
+            id: previewTransaction.id,
+          };
+        }
       });
     return groupById(previewBalances);
   }, [showBalances, previewTransactions, runningBalance]);

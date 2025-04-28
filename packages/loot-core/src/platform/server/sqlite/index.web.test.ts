@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import { patchFetchForSqlJS } from '../../../mocks/util';
+
 // eslint-disable-next-line no-restricted-imports
 import {
   init,
@@ -8,10 +10,11 @@ import {
   runQuery,
 } from './index.web';
 
-beforeAll(() => {
-  process.env.PUBLIC_URL =
-    __dirname + '/../../../../../../node_modules/@jlongster/sql.js/dist/';
-  return init();
+beforeAll(async () => {
+  const baseURL = `${__dirname}/../../../../../../node_modules/@jlongster/sql.js/dist/`;
+  patchFetchForSqlJS(baseURL);
+
+  return init({ baseURL });
 });
 
 const initSQL = `
@@ -31,7 +34,7 @@ describe('Web sqlite', () => {
     // @ts-expect-error Property 'number' does not exist on type 'unknown'
     expect(rows[0].number).toBe(4);
 
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => null);
     expect(() => {
       transaction(db, () => {
         runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id2', 5)");
@@ -65,7 +68,9 @@ describe('Web sqlite', () => {
       runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id3', 6)");
 
       // Only this transaction should fail
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      const consoleSpy = vi
+        .spyOn(console, 'log')
+        .mockImplementation(() => null);
       expect(() => {
         transaction(db, () => {
           runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id4', 7)");

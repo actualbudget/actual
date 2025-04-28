@@ -29,6 +29,12 @@ contextBridge.exposeInMainWorld('Actual', {
     });
   },
 
+  startSyncServer: () => ipcRenderer.invoke('start-sync-server'),
+
+  stopSyncServer: () => ipcRenderer.invoke('stop-sync-server'),
+
+  isSyncServerRunning: () => ipcRenderer.invoke('is-sync-server-running'),
+
   startOAuthServer: () => ipcRenderer.invoke('start-oauth-server'),
 
   relaunch: () => {

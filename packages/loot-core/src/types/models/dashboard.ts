@@ -9,7 +9,7 @@ export type TimeFrame = {
 
 type AbstractWidget<
   T extends string,
-  Meta extends Record<string, unknown> = null,
+  Meta extends Record<string, unknown> | null = null,
 > = {
   id: string;
   type: T;

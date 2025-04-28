@@ -883,10 +883,8 @@ async function accountsBankSync({
 }: {
   ids: Array<AccountEntity['id']>;
 }): Promise<SyncResponseWithErrors> {
-  const [[, userId], [, userKey]] = await asyncStorage.multiGet([
-    'user-id',
-    'user-key',
-  ]);
+  const { 'user-id': userId, 'user-key': userKey } =
+    await asyncStorage.multiGet(['user-id', 'user-key']);
 
   const accounts = await db.runQuery<
     db.DbAccount & { bankId: db.DbBank['bank_id'] }
