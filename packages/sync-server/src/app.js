@@ -1,4 +1,6 @@
-import fs from 'node:fs';
+import fs, { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -65,6 +67,20 @@ app.use('/openid', openidApp.handlers);
 
 app.get('/mode', (req, res) => {
   res.send(config.get('mode'));
+});
+
+app.get('/info', (req, res) => {
+  const __dirname = dirname(fileURLToPath(import.meta.url));
+  const packageJsonPath = resolve(__dirname, '../package.json');
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+  res.status(200).json({
+    build: {
+      name: packageJson.name,
+      description: packageJson.description,
+      version: packageJson.version,
+    },
+    git: {},
+  });
 });
 
 app.use(actuator()); // Provides /health, /metrics, /info
