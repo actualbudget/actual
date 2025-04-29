@@ -7,6 +7,8 @@ export type Currency = {
   decimalPlaces: number;
 };
 
+// When adding a new currency with a higher decimal precision, make sure to update
+// the MAX_SAFE_NUMBER in util.ts.
 export const currencies: Currency[] = [
   { code: '', name: 'None', symbol: '', decimalPlaces: 2 },
   { code: 'AUD', name: 'Australian Dollar', symbol: 'A$', decimalPlaces: 2 },
