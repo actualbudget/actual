@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react';
-import { getCurrency } from 'loot-core/shared/currencies';
 
+import { getCurrency } from 'loot-core/shared/currencies';
 import {
   getNumberFormat,
   integerToCurrency,
@@ -89,40 +89,39 @@ export function useFormat() {
       if (!currencyCode) {
         return formattedValue;
       }
-      
+
       const currency = getCurrency(currencyCode);
 
       const space = spaceEnabled === 'true' ? ' ' : '';
       const position = symbolPosition || 'before';
-      
+
       return position === 'after'
         ? `${formattedValue}${space}${currency.symbol}`
         : `${currency.symbol}${space}${formattedValue}`;
     },
-    [currencyCode, currency, symbolPosition, spaceEnabled]
+    [currencyCode, symbolPosition, spaceEnabled],
   );
 
   return useCallback(
     (value: unknown, type: FormatType = 'string') => {
+      const isFinancialType =
+        type === 'financial' || type === 'financial-with-sign';
 
-      const isFinancialType = type === 'financial' || type === 'financial-with-sign';
-
-      const decimalPlaces = isFinancialType && currency 
-        ? currency.decimalPlaces
-        : undefined;
+      const decimalPlaces =
+        isFinancialType && currency ? currency.decimalPlaces : undefined;
 
       const formatter = getNumberFormat({
         format: config.format,
         hideFraction: config.hideFraction,
-        decimalPlaces: decimalPlaces
+        decimalPlaces,
       }).formatter;
 
       const baseFormatted = format(value, type, formatter);
-      
+
       if (isFinancialType && currencyCode) {
         return applyCurrencyFormatting(baseFormatted);
       }
-      
+
       return baseFormatted;
     },
     [config, currency, applyCurrencyFormatting, currencyCode],

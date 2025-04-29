@@ -50,6 +50,7 @@ import {
   getCategoriesById,
 } from 'loot-core/client/queries/queriesSlice';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import { getCurrency } from 'loot-core/shared/currencies';
 import { currentDay } from 'loot-core/shared/months';
 import * as monthUtils from 'loot-core/shared/months';
 import {
@@ -78,6 +79,7 @@ import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { getStatusProps } from '../schedules/StatusBadge';
 import { DateSelect } from '../select/DateSelect';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
+import { useFormat } from '../spreadsheet/useFormat';
 import {
   Cell,
   Field,
@@ -93,9 +95,6 @@ import {
 } from '../table';
 
 import { TransactionMenu } from './TransactionMenu';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { getCurrency } from 'loot-core/shared/currencies';
-import { useFormat } from '../spreadsheet/useFormat';
 
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
@@ -107,6 +106,7 @@ import {
   useSelectedItems,
 } from '@desktop-client/hooks/useSelected';
 import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -144,8 +144,11 @@ function serializeTransaction(transaction, showZeroInDeposit) {
   };
 }
 
-function deserializeTransaction(transaction, originalTransaction, decimalPlaces) {
-
+function deserializeTransaction(
+  transaction,
+  originalTransaction,
+  decimalPlaces,
+) {
   const { debit, credit, date: originalDate, ...realTransaction } = transaction;
 
   let amount;
@@ -927,7 +930,6 @@ const Transaction = memo(function Transaction({
   }
 
   function onUpdateAfterConfirm(name, value) {
-
     const newTransaction = { ...transaction, [name]: value };
 
     // Don't change the note to an empty string if it's null (since they are both rendered the same)
@@ -965,7 +967,7 @@ const Transaction = memo(function Transaction({
       const deserialized = deserializeTransaction(
         newTransaction,
         originalTransaction,
-        formatter.resolvedOptions().maximumFractionDigits
+        formatter.resolvedOptions().maximumFractionDigits,
       );
       // Run the transaction through the formatting so that we know
       // it's always showing the formatted result
@@ -1514,12 +1516,11 @@ const Transaction = memo(function Transaction({
         }}
         formatter={format}
         formatExpr={expr => {
-            if (expr === '') {
-              return '';
-            }
-            return integerToCurrency(expr, formatter);
+          if (expr === '') {
+            return '';
           }
-        }
+          return integerToCurrency(expr, formatter);
+        }}
         onUpdate={onUpdate.bind(null, 'debit')}
         privacyFilter={{
           activationFilters: [!isTemporaryId(transaction.id)],
@@ -1549,7 +1550,7 @@ const Transaction = memo(function Transaction({
             return '';
           }
 
-          return integerToCurrency(expr, formatter)
+          return integerToCurrency(expr, formatter);
         }}
         onUpdate={onUpdate.bind(null, 'credit')}
         privacyFilter={{
@@ -1705,7 +1706,7 @@ function NewTransaction({
   onNotesTagClick,
   balance,
   formatter,
-  format
+  format,
 }) {
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
@@ -1827,7 +1828,6 @@ function TransactionTableInner({
   format,
   ...props
 }) {
-
   const containerRef = createRef();
   const isAddingPrev = usePrevious(props.isAdding);
   const [scrollWidth, setScrollWidth] = useState(0);
@@ -2126,7 +2126,7 @@ export const TransactionTable = forwardRef((props, ref) => {
       getNumberFormat({
         format: config.format,
         hideFraction: config.hideFraction,
-        decimalPlaces: decimalPlaces,
+        decimalPlaces,
       }),
     [config, decimalPlaces],
   );
