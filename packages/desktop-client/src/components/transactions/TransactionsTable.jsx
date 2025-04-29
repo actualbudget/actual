@@ -1295,9 +1295,10 @@ const Transaction = memo(function Transaction({
         valueStyle={valueStyle}
         formatter={value => notesTagFormatter(value, onNotesTagClick)}
         onExpose={name => !isPreview && onEdit(id, name)}
+        onUpdate={onUpdate.bind(null, 'notes')}
         inputProps={{
           value: notes || '',
-          onUpdate: onUpdate.bind(null, 'notes'),
+          // onUpdate: onUpdate.bind(null, 'notes'),
         }}
       />
 
@@ -1501,7 +1502,7 @@ const Transaction = memo(function Transaction({
         name="debit"
         exposed={focusedField === 'debit'}
         focused={focusedField === 'debit'}
-        value={debit === '' && credit === '' ? '0' : debit}
+        value={debit === '' && credit === '' ? 0 : debit}
         valueStyle={valueStyle}
         textAlign="right"
         title={format(debit, 'financial')}
@@ -1512,13 +1513,14 @@ const Transaction = memo(function Transaction({
           ...amountStyle,
         }}
         formatter={format}
-        formatExpr={expr => integerToCurrency(expr, formatter)}
-        // unformatExpr={expr => amountToInteger(evalArithmetic(expr, 0), decimalPlaces)}
+        formatExpr={expr => {
+            if (expr === '') {
+              return '';
+            }
+            return integerToCurrency(expr, formatter);
+          }
+        }
         onUpdate={onUpdate.bind(null, 'debit')}
-        // inputProps={{
-        //   value: debit === '' && credit === '' ? '0.00' : debit,
-        //   onUpdate: onUpdate.bind(null, 'debit'),
-        // }}
         privacyFilter={{
           activationFilters: [!isTemporaryId(transaction.id)],
         }}
@@ -1546,16 +1548,10 @@ const Transaction = memo(function Transaction({
           if (expr === '') {
             return '';
           }
+
           return integerToCurrency(expr, formatter)
         }}
-        unformatExpr={expr => {
-          return expr === '' ? '0' : expr;
-        }}
         onUpdate={onUpdate.bind(null, 'credit')}
-        // inputProps={{
-        //   value: credit,
-        //   onUpdate: onUpdate.bind(null, 'credit'),
-        // }}
         privacyFilter={{
           activationFilters: [!isTemporaryId(transaction.id)],
         }}
@@ -1708,6 +1704,8 @@ function NewTransaction({
   onNavigateToSchedule,
   onNotesTagClick,
   balance,
+  formatter,
+  format
 }) {
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
@@ -1770,6 +1768,8 @@ function NewTransaction({
           balance={balance}
           showSelection={true}
           allowSplitTransaction={true}
+          formatter={formatter}
+          format={format}
         />
       ))}
       <View
@@ -2056,6 +2056,8 @@ function TransactionTableInner({
                   ? (props.balances?.[props.transactions[0]?.id]?.balance ?? 0)
                   : 0
               }
+              formatter={formatter}
+              format={format}
             />
           </View>
         )}
