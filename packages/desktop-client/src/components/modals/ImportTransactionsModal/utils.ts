@@ -161,13 +161,16 @@ export function applyFieldMappings(
 function parseAmount(
   amount: number | string | undefined | null,
   mapper: (parsed: number) => number,
+  decimalPlaces: number,
 ) {
   if (amount == null) {
     return null;
   }
 
   const parsed =
-    typeof amount === 'string' ? looselyParseAmount(amount) : amount;
+    typeof amount === 'string'
+      ? looselyParseAmount(amount, decimalPlaces)
+      : amount;
 
   if (parsed === null) {
     return null;
@@ -183,6 +186,7 @@ export function parseAmountFields(
   outValue: string,
   flipAmount: boolean,
   multiplierAmount: string,
+  decimalPlaces: number,
 ) {
   const multiplier = parseFloat(multiplierAmount) || 1.0;
 
@@ -201,12 +205,13 @@ export function parseAmountFields(
     // Split mode is a little weird; first we look for an outflow and
     // if that has a value, we never want to show a number in the
     // inflow. Same for `amount`; we choose outflow first and then inflow
-    value.outflow = parseAmount(trans.outflow, n => -Math.abs(n)) || 0;
+    value.outflow =
+      parseAmount(trans.outflow, n => -Math.abs(n), decimalPlaces) || 0;
     value.inflow = value.outflow
       ? 0
-      : parseAmount(trans.inflow, n => Math.abs(n)) || 0;
+      : parseAmount(trans.inflow, n => Math.abs(n), decimalPlaces) || 0;
   } else {
-    const amount = parseAmount(trans.amount, n => n) || 0;
+    const amount = parseAmount(trans.amount, n => n, decimalPlaces) || 0;
     if (amount >= 0) value.inflow = amount;
     else value.outflow = amount;
   }

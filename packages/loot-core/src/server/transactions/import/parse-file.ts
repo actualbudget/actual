@@ -25,6 +25,7 @@ export type ParseFileOptions = {
 export async function parseFile(
   filepath: string,
   options: ParseFileOptions = {},
+  decimalPlaces: number = 2,
 ): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
   const m = filepath.match(/\.[^.]*$/);
@@ -34,7 +35,7 @@ export async function parseFile(
 
     switch (ext.toLowerCase()) {
       case '.qif':
-        return parseQIF(filepath, options);
+        return parseQIF(filepath, options, decimalPlaces);
       case '.csv':
       case '.tsv':
         return parseCSV(filepath, options);
@@ -92,6 +93,7 @@ async function parseCSV(
 async function parseQIF(
   filepath: string,
   options: ParseFileOptions = {},
+  decimalPlaces: number = 2,
 ): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
   const contents = await fs.readFile(filepath);
@@ -111,7 +113,10 @@ async function parseQIF(
     errors: [],
     transactions: data.transactions
       .map(trans => ({
-        amount: trans.amount != null ? looselyParseAmount(trans.amount) : null,
+        amount:
+          trans.amount != null
+            ? looselyParseAmount(trans.amount, decimalPlaces)
+            : null,
         date: trans.date,
         payee_name: trans.payee,
         imported_payee: trans.payee,

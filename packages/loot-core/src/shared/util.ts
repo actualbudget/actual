@@ -463,13 +463,16 @@ export function integerToAmount(
 // financial files and we don't want to parse based on the user's
 // number format, because the user could be importing from many
 // currencies. We extract out the numbers and just ignore separators.
-export function looselyParseAmount(amount: string) {
+export function looselyParseAmount(
+  amount: string,
+  decimalPlaces: number,
+): Amount | null {
   function safeNumber(v: number): null | number {
     if (isNaN(v)) {
       return null;
     }
 
-    const value = v * 100;
+    const value = v * decimalPlaces;
     if (value > MAX_SAFE_NUMBER || value < MIN_SAFE_NUMBER) {
       return null;
     }
