@@ -6,29 +6,31 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
-import { useFormat } from '../../components/spreadsheet/useFormat';
 
-import { 
-  currencies, 
-  getLocalizedCurrencyOption, 
-  getCurrency 
+import {
+  currencies,
+  getLocalizedCurrencyOption,
 } from 'loot-core/shared/currencies';
+
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { Checkbox } from '../forms';
+import { useFormat } from '../spreadsheet/useFormat';
 
 import { Setting } from './UI';
 
 export function CurrencySettings() {
   const { t } = useTranslation();
   const format = useFormat();
-  
+
   const [currencyCode, setCurrencyCodePref] = useSyncedPref('currencyCode');
   const selectedCurrencyCode = currencyCode || '';
-  
-  const [symbolPosition, setSymbolPositionPref] = 
-    useSyncedPref('currencySymbolPosition');
-  const [spaceEnabled, setSpaceEnabledPref] = 
-    useSyncedPref('currencySpaceBetweenAmountAndSymbol');
+
+  const [symbolPosition, setSymbolPositionPref] = useSyncedPref(
+    'currencySymbolPosition',
+  );
+  const [spaceEnabled, setSpaceEnabledPref] = useSyncedPref(
+    'currencySpaceBetweenAmountAndSymbol',
+  );
 
   const selectButtonClassName = css({
     '&[data-hovered]': {
@@ -46,9 +48,8 @@ export function CurrencySettings() {
   ];
 
   const formatSample = () => {
-
     const sampleAmount = 123456;
-    
+
     return format(sampleAmount, 'financial');
   };
 
@@ -64,20 +65,24 @@ export function CurrencySettings() {
           }}
         >
           <View style={{ width: 'fit-content' }}>
-            <Text style={{ fontWeight: 500, marginBottom: '0.5em' }}>{t('Currency')}</Text>
+            <Text style={{ fontWeight: 500, marginBottom: '0.5em' }}>
+              {t('Currency')}
+            </Text>
             <Select
               value={selectedCurrencyCode}
               onChange={handleCurrencyChange}
               options={currencies.map(getLocalizedCurrencyOption)}
               className={selectButtonClassName}
-              style={{ width: 'fit-content' }} 
+              style={{ width: 'fit-content' }}
             />
           </View>
-          
+
           {selectedCurrencyCode !== '' && (
             <>
               <View style={{ width: 'fit-content' }}>
-                <Text style={{ fontWeight: 500, marginBottom: '0.5em' }}>{t('Symbol Position')}</Text>
+                <Text style={{ fontWeight: 500, marginBottom: '0.5em' }}>
+                  {t('Symbol Position')}
+                </Text>
                 <Select
                   value={symbolPosition || 'before'}
                   onChange={value => setSymbolPositionPref(value)}
@@ -86,31 +91,42 @@ export function CurrencySettings() {
                   style={{ width: 'auto' }}
                 />
               </View>
-              
-              <View style={{ 
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'flex-start'
-              }}>
+
+              <View
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                }}
+              >
                 <Checkbox
                   id="settings-spaceEnabled"
                   checked={spaceEnabled === 'true'}
-                  onChange={e => setSpaceEnabledPref(e.target.checked ? 'true' : 'false')}
+                  onChange={e =>
+                    setSpaceEnabledPref(e.target.checked ? 'true' : 'false')
+                  }
                 />
-                <label htmlFor="settings-spaceEnabled" style={{ marginLeft: '0.5em' }}>
+                <label
+                  htmlFor="settings-spaceEnabled"
+                  style={{ marginLeft: '0.5em' }}
+                >
                   <Trans>Add space between amount and symbol</Trans>
                 </label>
               </View>
-              
-              <View style={{ 
-                padding: '10px', 
-                border: `1px solid ${theme.pillBorder}`,
-                borderRadius: '4px',
-                marginTop: '0.5em',
-              }}>
+
+              <View
+                style={{
+                  padding: '10px',
+                  border: `1px solid ${theme.pillBorder}`,
+                  borderRadius: '4px',
+                  marginTop: '0.5em',
+                }}
+              >
                 <Text style={{ fontWeight: 500 }}>{t('Preview')}:</Text>
-                <Text style={{ fontSize: '1.2em', marginTop: '5px' }}>{formatSample()}</Text>
+                <Text style={{ fontSize: '1.2em', marginTop: '5px' }}>
+                  {formatSample()}
+                </Text>
               </View>
             </>
           )}
@@ -119,8 +135,8 @@ export function CurrencySettings() {
     >
       <Text>
         <Trans>
-          <strong>Currency settings</strong> affect how amounts are displayed throughout 
-          the application.
+          <strong>Currency settings</strong> affect how amounts are displayed
+          throughout the application.
         </Trans>
       </Text>
     </Setting>

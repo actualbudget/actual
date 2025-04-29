@@ -22,8 +22,14 @@ import { css } from '@emotion/css';
 
 import { envelopeBudget } from 'loot-core/client/queries';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import { getCurrency } from 'loot-core/shared/currencies';
 import * as monthUtils from 'loot-core/shared/months';
-import { integerToCurrency, amountToInteger, getNumberFormat, parseNumberFormat } from 'loot-core/shared/util';
+import {
+  integerToCurrency,
+  amountToInteger,
+  getNumberFormat,
+  parseNumberFormat,
+} from 'loot-core/shared/util';
 import {
   type CategoryGroupEntity,
   type CategoryEntity,
@@ -39,13 +45,12 @@ import { makeAmountGrey } from '../util';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { getCurrency } from 'loot-core/shared/currencies';
 
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function useEnvelopeSheetName<
   FieldName extends SheetFields<'envelope-budget'>,
@@ -250,7 +255,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const { formatter } = getNumberFormat({
     format: config.format,
     hideFraction: config.hideFraction,
-    decimalPlaces: decimalPlaces,
+    decimalPlaces,
   });
 
   const onMenuAction = (...args: Parameters<typeof onBudgetAction>) => {

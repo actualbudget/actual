@@ -403,23 +403,22 @@ export function InputCell({
   unformatExpr,
   ...props
 }: InputCellProps) {
-
   return (
     <Cell
       textAlign={textAlign}
       {...props}
       formatter={value => {
-          if (value === '' || value === null || value === undefined) {
-            return '';
-          }
-
-          return props.formatter ? props.formatter(value, type) : value;
+        if (value === '' || value === null || value === undefined) {
+          return '';
         }
-      }
-      >
-      {() => {
 
-        let formattedForEdit: string = formatExpr ? formatExpr(props.value) : props.value;
+        return props.formatter ? props.formatter(value, type) : value;
+      }}
+    >
+      {() => {
+        const formattedForEdit: string = formatExpr
+          ? formatExpr(props.value)
+          : props.value;
 
         return (
           <InputValue
@@ -767,9 +766,10 @@ export function SheetCell<
       {...props}
       value={String(sheetValue ?? '')}
       formatter={value => {
-          return props.formatter ? props.formatter(value, type) : format(value, type)
-        }
-      }
+        return props.formatter
+          ? props.formatter(value, type)
+          : format(value, type);
+      }}
       privacyFilter={
         privacyFilter != null
           ? privacyFilter
@@ -780,7 +780,9 @@ export function SheetCell<
       data-cellname={sheetValue}
     >
       {() => {
-        let formattedForEdit: string = formatExpr ? formatExpr(sheetValue) : String(sheetValue ?? '');
+        const formattedForEdit: string = formatExpr
+          ? formatExpr(sheetValue)
+          : String(sheetValue ?? '');
 
         return (
           <InputValue

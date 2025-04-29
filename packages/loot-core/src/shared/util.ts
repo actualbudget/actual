@@ -321,7 +321,7 @@ export function getNumberFormat({
   }
 
   let digits = 2;
-  
+
   if (hideFraction) {
     digits = 0;
   } else if (decimalPlaces !== undefined) {
@@ -390,7 +390,7 @@ export function integerToCurrency(
 ) {
   const digits = formatter.resolvedOptions().maximumFractionDigits;
   const divisor = Math.pow(10, digits);
-  
+
   // Use the formatter directly - no need to create a new one
   return formatter.format(safeNumber(integerAmount) / divisor);
 }
@@ -443,12 +443,18 @@ export function stringToInteger(str: string): number | null {
   return null;
 }
 
-export function amountToInteger(amount: Amount, decimalPlaces: number = 2): IntegerAmount {
+export function amountToInteger(
+  amount: Amount,
+  decimalPlaces: number = 2,
+): IntegerAmount {
   const multiplier = Math.pow(10, decimalPlaces);
   return Math.round(amount * multiplier);
 }
 
-export function integerToAmount(integerAmount: IntegerAmount, decimalPlaces: number = 2): Amount {
+export function integerToAmount(
+  integerAmount: IntegerAmount,
+  decimalPlaces: number = 2,
+): Amount {
   const divisor = Math.pow(10, decimalPlaces);
   return parseFloat((safeNumber(integerAmount) / divisor).toFixed(2));
 }

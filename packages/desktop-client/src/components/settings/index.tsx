@@ -25,6 +25,7 @@ import { useServerVersion } from '../ServerContext';
 import { AuthSettings } from './AuthSettings';
 import { Backups } from './Backups';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
+import { CurrencySettings } from './Currency';
 import { EncryptionSettings } from './Encryption';
 import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
@@ -34,7 +35,6 @@ import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
-import { CurrencySettings } from './Currency';
 
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import {
