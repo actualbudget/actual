@@ -10,9 +10,12 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { integerToCurrency } from 'loot-core/shared/util';
-
 import { type ReducerState } from './constants';
+import { HistoricalAutomationReadOnly } from './editor/HistoricalAutomationReadOnly';
+import { PercentageAutomationReadOnly } from './editor/PercentageAutomationReadOnly';
+import { ScheduleAutomationReadOnly } from './editor/ScheduleAutomationReadOnly';
+import { SimpleAutomationReadOnly } from './editor/SimpleAutomationReadOnly';
+import { WeekAutomationReadOnly } from './editor/WeekAutomationReadOnly';
 
 type BudgetAutomationReadOnlyProps = {
   state: ReducerState;
@@ -33,6 +36,43 @@ export function BudgetAutomationReadOnly({
 }: BudgetAutomationReadOnlyProps) {
   const { t } = useTranslation();
 
+  let automationReadOnly;
+  switch (state.displayType) {
+    case 'simple':
+      automationReadOnly = (
+        <SimpleAutomationReadOnly template={state.template} />
+      );
+      break;
+    case 'week':
+      automationReadOnly = <WeekAutomationReadOnly template={state.template} />;
+      break;
+    case 'schedule':
+      automationReadOnly = (
+        <ScheduleAutomationReadOnly template={state.template} />
+      );
+      break;
+    case 'percentage':
+      automationReadOnly = (
+        <PercentageAutomationReadOnly
+          template={state.template}
+          categoryNameMap={categoryNameMap}
+        />
+      );
+      break;
+    case 'historical':
+      automationReadOnly = (
+        <HistoricalAutomationReadOnly template={state.template} />
+      );
+      break;
+    default:
+      automationReadOnly = (
+        <Text>
+          <Trans>Unrecognized automation type.</Trans>
+        </Text>
+      );
+      break;
+  }
+
   return (
     <Stack direction="row" align="center" spacing={2} style={style}>
       {inline && (
@@ -44,90 +84,7 @@ export function BudgetAutomationReadOnly({
         />
       )}
       <Text style={{ color: theme.tableText, fontSize: 13 }}>
-        {state.displayType === 'simple' && (
-          <Trans>
-            Budget {{ monthly: integerToCurrency(state.template.monthly ?? 0) }}{' '}
-            each month
-          </Trans>
-        )}
-        {state.displayType === 'week' && (
-          <Trans>
-            Budget {{ amount: integerToCurrency(state.template.amount) }} each
-            week
-          </Trans>
-        )}
-        {state.displayType === 'schedule' &&
-          (state.template.name ? (
-            state.template.full ? (
-              <Trans>
-                Cover the occurrences of the schedule &lsquo;
-                {{ name: state.template.name }}
-                &rsquo; this month
-              </Trans>
-            ) : (
-              <Trans>
-                Save up for the schedule &lsquo;
-                {{ name: state.template.name }}
-                &rsquo;
-              </Trans>
-            )
-          ) : (
-            <Trans>Budget for a schedule</Trans>
-          ))}
-        {state.displayType === 'percentage' &&
-          (state.template.category === 'total' ? (
-            state.template.previous ? (
-              <Trans>
-                Budget {{ percent: state.template.percent }}% of total income
-                last month
-              </Trans>
-            ) : (
-              <Trans>
-                Budget {{ percent: state.template.percent }}% of total income
-                this month
-              </Trans>
-            )
-          ) : state.template.category === 'to-budget' ? (
-            state.template.previous ? (
-              <Trans>
-                Budget {{ percent: state.template.percent }}% of available funds
-                to budget last month
-              </Trans>
-            ) : (
-              <Trans>
-                Budget {{ percent: state.template.percent }}% of available funds
-                to budget this month
-              </Trans>
-            )
-          ) : state.template.previous ? (
-            <Trans>
-              Budget {{ percent: state.template.percent }}% of &lsquo;
-              {{
-                category: categoryNameMap[state.template.category] ?? 'Unknown',
-              }}
-              &rsquo; last month
-            </Trans>
-          ) : (
-            <Trans>
-              Budget {{ percent: state.template.percent }}% of &lsquo;
-              {{
-                category: categoryNameMap[state.template.category] ?? 'Unknown',
-              }}
-              &rsquo; this month
-            </Trans>
-          ))}
-        {state.displayType === 'historical' &&
-          (state.template.type === 'copy' ? (
-            <Trans>
-              Budget the same amount as {{ amount: state.template.lookBack }}{' '}
-              months ago
-            </Trans>
-          ) : (
-            <Trans>
-              Budget the average of the last{' '}
-              {{ amount: state.template.numMonths }} months
-            </Trans>
-          ))}
+        {automationReadOnly}
       </Text>
       <View style={{ flex: 1 }} />
       <Button
