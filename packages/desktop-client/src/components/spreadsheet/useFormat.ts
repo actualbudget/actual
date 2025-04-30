@@ -68,7 +68,7 @@ export function useFormat() {
   const [spaceEnabled] = useSyncedPref('currencySpaceBetweenAmountAndSymbol');
 
   const currency = useMemo(() => {
-    return currencyCode ? getCurrency(currencyCode) : null;
+    return getCurrency(currencyCode);
   }, [currencyCode]);
 
   const config = useMemo(
