@@ -244,7 +244,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const [numberFormat] = useSyncedPref('numberFormat');
   const [hideFraction] = useSyncedPref('hideFraction');
   const [currencyCode] = useSyncedPref('currencyCode');
-  const currency = getCurrency(currencyCode);
+  const currency = getCurrency(currencyCode || '');
   const decimalPlaces = currency ? currency.decimalPlaces : 2;
 
   const config = useMemo(
