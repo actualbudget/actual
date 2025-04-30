@@ -8,7 +8,6 @@ import { theme } from '@actual-app/components/theme';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useDispatch } from '../../redux';
 import { useMultiuserEnabled, useLoginMethod } from '../ServerContext';
 
@@ -20,9 +19,8 @@ export function AuthSettings() {
   const multiuserEnabled = useMultiuserEnabled();
   const loginMethod = useLoginMethod();
   const dispatch = useDispatch();
-  const openidAuthFeatureFlag = useFeatureFlag('openidAuth');
 
-  return openidAuthFeatureFlag === true ? (
+  return (
     <Setting
       primaryAction={
         <>

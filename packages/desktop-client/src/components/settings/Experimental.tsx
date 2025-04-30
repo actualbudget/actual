@@ -106,12 +106,6 @@ export function ExperimentalFeatures() {
               <Trans>Context menus</Trans>
             </FeatureToggle>
             <FeatureToggle
-              flag="openidAuth"
-              feedbackLink="https://github.com/actualbudget/actual/issues/4029"
-            >
-              <Trans>OpenID authentication method</Trans>
-            </FeatureToggle>
-            <FeatureToggle
               flag="pluggyAiBankSync"
               feedbackLink="https://github.com/actualbudget/actual/pull/4049"
             >
