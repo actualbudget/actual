@@ -41,7 +41,7 @@ export function SpendingCard({
   const { t } = useTranslation();
 
   const [currencyCode] = useSyncedPref('currencyCode');
-  const currency = currencyCode ? getCurrency(currencyCode) : null;
+  const currency = getCurrency(currencyCode || '');
 
   const [compare, compareTo] = calculateSpendingReportTimeRange(meta ?? {});
 
