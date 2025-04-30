@@ -395,15 +395,21 @@ export function integerToCurrency(
   return formatter.format(safeNumber(integerAmount) / divisor);
 }
 
-export function amountToCurrency(amount: Amount): CurrencyAmount {
-  return getNumberFormat().formatter.format(amount);
+export function amountToCurrency(
+  amount: Amount,
+  formatter = getNumberFormat().formatter,
+): CurrencyAmount {
+  return formatter.format(amount);
 }
 
-export function amountToCurrencyNoDecimal(amount: Amount): CurrencyAmount {
-  return getNumberFormat({
+export function amountToCurrencyNoDecimal(
+  amount: Amount,
+  formatter = getNumberFormat({
     ...numberFormatConfig,
     hideFraction: true,
-  }).formatter.format(amount);
+  }).formatter,
+): CurrencyAmount {
+  return formatter.format(amount);
 }
 
 export function currencyToAmount(currencyAmount: string): Amount | null {
