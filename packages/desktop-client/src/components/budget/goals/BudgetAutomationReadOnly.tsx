@@ -3,7 +3,10 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgDelete } from '@actual-app/components/icons/v0';
-import { SvgPencil1 } from '@actual-app/components/icons/v2';
+import {
+  SvgCheveronDown,
+  SvgCheveronUp,
+} from '@actual-app/components/icons/v1';
 import { Stack } from '@actual-app/components/stack';
 import { type CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -20,6 +23,7 @@ import { WeekAutomationReadOnly } from './editor/WeekAutomationReadOnly';
 type BudgetAutomationReadOnlyProps = {
   state: ReducerState;
   categoryNameMap: Record<string, string>;
+  isEditing: boolean;
   setIsEditing: Dispatch<SetStateAction<boolean>>;
   onDelete?: () => void;
   style?: CSSProperties;
@@ -29,6 +33,7 @@ type BudgetAutomationReadOnlyProps = {
 export function BudgetAutomationReadOnly({
   state,
   categoryNameMap,
+  isEditing,
   setIsEditing,
   onDelete,
   style,
@@ -90,10 +95,16 @@ export function BudgetAutomationReadOnly({
       <Button
         variant="bare"
         onPress={() => setIsEditing(prev => !prev)}
-        style={{ padding: 5 }}
+        style={{ padding: 2 }}
         aria-label={t('Edit template')}
       >
-        <SvgPencil1 style={{ width: 8, height: 8, color: 'inherit' }} />
+        {isEditing ? (
+          <SvgCheveronUp style={{ width: 16, height: 16, color: 'inherit' }} />
+        ) : (
+          <SvgCheveronDown
+            style={{ width: 16, height: 16, color: 'inherit' }}
+          />
+        )}
       </Button>
       <Button
         variant="bare"

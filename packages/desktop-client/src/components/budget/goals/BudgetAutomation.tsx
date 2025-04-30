@@ -76,6 +76,7 @@ export const BudgetAutomation = ({
       <BudgetAutomationReadOnly
         state={state}
         categoryNameMap={categoryNameMap}
+        isEditing={isEditing}
         setIsEditing={setIsEditing}
         onDelete={onDelete}
         style={readOnlyStyle}
@@ -88,7 +89,6 @@ export const BudgetAutomation = ({
           dispatch={dispatch}
           schedules={schedules}
           categories={categories}
-          onClose={() => setIsEditing(false)}
         />
       )}
     </Stack>

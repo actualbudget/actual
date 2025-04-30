@@ -1,12 +1,11 @@
 import { useTranslation, Trans } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
-import { SvgDelete } from '@actual-app/components/icons/v0';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 
 import type {
   CategoryGroupEntity,
@@ -29,7 +28,6 @@ type BudgetAutomationEditorProps = {
   dispatch: (action: Action) => void;
   schedules: readonly ScheduleEntity[];
   categories: CategoryGroupEntity[];
-  onClose: () => void;
 };
 
 const displayTypeToDescription = {
@@ -72,7 +70,6 @@ export function BudgetAutomationEditor({
   dispatch,
   schedules,
   categories,
-  onClose,
 }: BudgetAutomationEditorProps) {
   const { t } = useTranslation();
 
@@ -121,51 +118,41 @@ export function BudgetAutomationEditor({
 
   return (
     <Stack
-      direction="row"
-      align="center"
-      justify="center"
-      spacing={10}
+      direction="column"
+      spacing={2}
       style={{
+        flex: 1,
         ...styles.editorPill,
+        backgroundColor: theme.pillBackgroundLight,
         ...(inline ? { borderRadius: 0 } : {}),
         padding: 30,
         minHeight: 'fit-content',
       }}
     >
-      <Stack direction="column" spacing={2} style={{ flex: 1 }}>
-        <Stack direction="row" align="flex-start" spacing={4}>
-          <FormField style={{ flexShrink: 0 }}>
-            <FormLabel title={t('Type')} htmlFor="type-field" />
-            <InitialFocus>
-              <Select
-                id="type-field"
-                options={displayTemplateTypes}
-                defaultLabel="Select an option"
-                value={state.displayType}
-                onChange={type => type && dispatch(setType(type))}
-                style={{ width: 172 }}
-              />
-            </InitialFocus>
-          </FormField>
-          <FormField style={{ flex: 1 }}>
-            <FormLabel title={t('Description')} />
-            <Text>
-              {displayTypeToDescription[state.displayType] ?? (
-                <Trans>No description available</Trans>
-              )}
-            </Text>
-          </FormField>
-        </Stack>
-        {automationEditor}
+      <Stack direction="row" align="flex-start" spacing={4}>
+        <FormField style={{ flexShrink: 0 }}>
+          <FormLabel title={t('Type')} htmlFor="type-field" />
+          <InitialFocus>
+            <Select
+              id="type-field"
+              options={displayTemplateTypes}
+              defaultLabel="Select an option"
+              value={state.displayType}
+              onChange={type => type && dispatch(setType(type))}
+              style={{ width: 172 }}
+            />
+          </InitialFocus>
+        </FormField>
+        <FormField style={{ flex: 1 }}>
+          <FormLabel title={t('Description')} />
+          <Text>
+            {displayTypeToDescription[state.displayType] ?? (
+              <Trans>No description available</Trans>
+            )}
+          </Text>
+        </FormField>
       </Stack>
-      <Button
-        variant="bare"
-        onPress={onClose}
-        style={{ padding: 7 }}
-        aria-label={t('Close automation editor')}
-      >
-        <SvgDelete style={{ width: 10, height: 10, color: 'inherit' }} />
-      </Button>
+      {automationEditor}
     </Stack>
   );
 }

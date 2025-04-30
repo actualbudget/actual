@@ -62,7 +62,7 @@ export function BudgetAutomationsModal() {
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <Stack
-            spacing={2}
+            spacing={4}
             style={{
               overflowY: 'scroll',
             }}
@@ -76,10 +76,12 @@ export function BudgetAutomationsModal() {
                 categories={categories}
                 schedules={schedules}
                 readOnlyStyle={{
-                  backgroundColor: theme.tableBackground,
+                  color: theme.pillText,
+                  backgroundColor: theme.pillBackground,
                   borderRadius: 4,
-                  padding: 8,
-                  paddingRight: 12,
+                  padding: 16,
+                  paddingLeft: 30,
+                  paddingRight: 16,
                 }}
               />
             ))}
