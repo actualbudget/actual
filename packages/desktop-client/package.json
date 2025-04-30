@@ -78,7 +78,7 @@
     "terser-webpack-plugin": "^5.3.14",
     "usehooks-ts": "^3.1.1",
     "uuid": "^9.0.1",
-    "vite": "^5.4.18",
+    "vite": "^5.4.19",
     "vite-plugin-pwa": "^0.20.5",
     "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^3.0.2",
