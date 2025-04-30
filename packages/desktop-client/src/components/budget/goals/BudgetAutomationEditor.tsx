@@ -7,23 +7,21 @@ import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
-import { View } from '@actual-app/components/view';
 
 import type {
-  CategoryEntity,
   CategoryGroupEntity,
   ScheduleEntity,
 } from 'loot-core/types/models';
 
-import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
-import { Link } from '../../common/Link';
 import { FormField, FormLabel } from '../../forms';
-import { AmountInput } from '../../util/AmountInput';
-import { GenericInput } from '../../util/GenericInput';
-import { PercentInput } from '../../util/PercentInput';
 
-import { type Action, setType, updateTemplate } from './actions';
+import { type Action, setType } from './actions';
 import { displayTemplateTypes, type ReducerState } from './constants';
+import { HistoricalAutomation } from './editor/HistoricalAutomation';
+import { PercentageAutomation } from './editor/PercentageAutomation';
+import { ScheduleAutomation } from './editor/ScheduleAutomation';
+import { SimpleAutomation } from './editor/SimpleAutomation';
+import { WeekAutomation } from './editor/WeekAutomation';
 
 type BudgetAutomationEditorProps = {
   inline: boolean;
@@ -32,6 +30,40 @@ type BudgetAutomationEditorProps = {
   schedules: readonly ScheduleEntity[];
   categories: CategoryGroupEntity[];
   onClose: () => void;
+};
+
+const displayTypeToDescription = {
+  simple: <Trans>Add a fixed amount to this category each month.</Trans>,
+  week: (
+    <Trans>
+      Add a fixed amount to this category for each week in the month. For
+      example, $100 per week would be $400 per month in a 4-week month.
+    </Trans>
+  ),
+  schedule: (
+    <Trans>
+      Add enough to this category to cover the selected schedule. If the
+      schedule occurs multiple times in a month, an amount will be added for
+      each occurrence. You can choose to save up for the next occurrence over
+      time (e.g. save $100 each month for a $300 quarterly bill) or cover each
+      occurrence when it occurs (e.g. only add the $300 when the bill is due).
+    </Trans>
+  ),
+  percentage: (
+    <Trans>
+      Add a fixed percentage of your income to this category each month. You can
+      choose to take the percentage from the current month or the previous
+      month.
+    </Trans>
+  ),
+  historical: (
+    <Trans>
+      Add an amount to this category each month based on the values from
+      previous months. For example, you can copy the amount from a year ago to
+      budget for an annual expense, or budget the average of the last 3 months
+      to account for seasonal changes.
+    </Trans>
+  ),
 };
 
 export function BudgetAutomationEditor({
@@ -43,6 +75,49 @@ export function BudgetAutomationEditor({
   onClose,
 }: BudgetAutomationEditorProps) {
   const { t } = useTranslation();
+
+  let automationEditor;
+  switch (state.displayType) {
+    case 'simple':
+      automationEditor = (
+        <SimpleAutomation template={state.template} dispatch={dispatch} />
+      );
+      break;
+    case 'week':
+      automationEditor = (
+        <WeekAutomation template={state.template} dispatch={dispatch} />
+      );
+      break;
+    case 'schedule':
+      automationEditor = (
+        <ScheduleAutomation
+          schedules={schedules}
+          template={state.template}
+          dispatch={dispatch}
+        />
+      );
+      break;
+    case 'percentage':
+      automationEditor = (
+        <PercentageAutomation
+          dispatch={dispatch}
+          template={state.template}
+          categories={categories}
+        />
+      );
+      break;
+    case 'historical':
+      automationEditor = (
+        <HistoricalAutomation template={state.template} dispatch={dispatch} />
+      );
+      break;
+    default:
+      automationEditor = (
+        <Text>
+          <Trans>Unrecognized automation type.</Trans>
+        </Text>
+      );
+  }
 
   return (
     <Stack
@@ -75,266 +150,13 @@ export function BudgetAutomationEditor({
           <FormField style={{ flex: 1 }}>
             <FormLabel title={t('Description')} />
             <Text>
-              {state.displayType === 'simple' && (
-                <Trans>Add a fixed amount to this category each month.</Trans>
-              )}
-              {state.displayType === 'week' && (
-                <Trans>
-                  Add a fixed amount to this category for each week in the
-                  month. For example, $100 per week would be $400 per month in a
-                  4-week month.
-                </Trans>
-              )}
-              {state.displayType === 'schedule' && (
-                <Trans>
-                  Add enough to this category to cover the selected schedule. If
-                  the schedule occurs multiple times in a month, an amount will
-                  be added for each occurrence. You can choose to save up for
-                  the next occurrence over time (e.g. save $100 each month for a
-                  $300 quarterly bill) or cover each occurrence when it occurs
-                  (e.g. only add the $300 when the bill is due).
-                </Trans>
-              )}
-              {state.displayType === 'percentage' && (
-                <Trans>
-                  Add a fixed percentage of your income to this category each
-                  month. You can choose to take the percentage from the current
-                  month or the previous month.
-                </Trans>
-              )}
-              {state.displayType === 'historical' && (
-                <Trans>
-                  Add an amount to this category each month based on the values
-                  from previous months. For example, you can copy the amount
-                  from a year ago to budget for an annual expense, or budget the
-                  average of the last 3 months to account for seasonal changes.
-                </Trans>
+              {displayTypeToDescription[state.displayType] ?? (
+                <Trans>No description available</Trans>
               )}
             </Text>
           </FormField>
         </Stack>
-        {state.template.type === 'simple' && (
-          <FormField>
-            <FormLabel title={t('Amount')} htmlFor="amount-field" />
-            <AmountInput
-              id="amount-field"
-              key="amount-input"
-              value={state.template.monthly ?? 0}
-              zeroSign="+"
-              onUpdate={(value: number) =>
-                dispatch(updateTemplate({ type: 'simple', monthly: value }))
-              }
-            />
-          </FormField>
-        )}
-        {state.template.type === 'week' && (
-          <FormField style={{ flex: 1 }}>
-            <FormLabel title={t('Amount')} htmlFor="amount-field" />
-            <AmountInput
-              id="amount-field"
-              key="amount-input"
-              value={state.template.amount ?? 0}
-              zeroSign="+"
-              onUpdate={(value: number) =>
-                dispatch(updateTemplate({ type: 'week', amount: value }))
-              }
-            />
-          </FormField>
-        )}
-        {state.template.type === 'schedule' &&
-          (schedules.length ? (
-            <Stack
-              direction="row"
-              align="center"
-              spacing={10}
-              style={{ marginTop: 10 }}
-            >
-              <FormField style={{ flex: 1 }}>
-                <FormLabel title={t('Schedule')} htmlFor="schedule-field" />
-                <Select
-                  id="schedule-field"
-                  key="schedule-picker"
-                  defaultLabel="Select a schedule"
-                  value={state.template.name}
-                  onChange={schedule =>
-                    dispatch(
-                      updateTemplate({
-                        type: 'schedule',
-                        name: schedule,
-                      }),
-                    )
-                  }
-                  options={schedules.flatMap(schedule =>
-                    schedule.name ? [[schedule.name, schedule.name]] : [],
-                  )}
-                />
-              </FormField>
-              <FormField style={{ flex: 1 }}>
-                <FormLabel
-                  title={t('Savings mode')}
-                  htmlFor="schedule-full-field"
-                />
-                <Select
-                  id="schedule-full-field"
-                  key="schedule-full"
-                  options={[
-                    ['false', t('Save up for the next occurrence')],
-                    ['true', t('Cover each occurrence when it occurs')],
-                  ]}
-                  value={String(!!state.template.full)}
-                  onChange={full =>
-                    dispatch(
-                      updateTemplate({
-                        type: 'schedule',
-                        full: full === 'true',
-                      }),
-                    )
-                  }
-                />
-              </FormField>
-            </Stack>
-          ) : (
-            <Text style={{ marginTop: 10 }}>
-              <Trans>
-                No schedules found, create one in the{' '}
-                <Link variant="internal" to="/schedules">
-                  schedules
-                </Link>{' '}
-                page.
-              </Trans>
-            </Text>
-          ))}
-        {state.template.type === 'percentage' && (
-          <>
-            <Stack
-              direction="row"
-              align="center"
-              spacing={10}
-              style={{ marginTop: 10 }}
-            >
-              <FormField style={{ flex: 1 }}>
-                <FormLabel title={t('Category')} htmlFor="category-field" />
-                <CategoryAutocomplete
-                  inputProps={{ id: 'category-field' }}
-                  onSelect={(category: CategoryEntity['id']) =>
-                    dispatch(updateTemplate({ type: 'percentage', category }))
-                  }
-                  value={state.template.category}
-                  categoryGroups={
-                    state.template.previous
-                      ? categories.map(group => ({
-                          ...group,
-                          categories: group.categories?.filter(
-                            category => category.id !== 'to-budget',
-                          ),
-                        }))
-                      : categories
-                  }
-                />
-              </FormField>
-              <FormField style={{ flex: 1 }}>
-                <FormLabel title={t('Percentage')} htmlFor="percent-field" />
-                <PercentInput
-                  id="percent-field"
-                  key="percent-input"
-                  value={state.template.percent}
-                  onUpdatePercent={(percent: number) =>
-                    dispatch(
-                      updateTemplate({
-                        type: 'percentage',
-                        percent,
-                      }),
-                    )
-                  }
-                />
-              </FormField>
-            </Stack>
-            <Stack
-              direction="row"
-              align="center"
-              spacing={10}
-              style={{ marginTop: 10 }}
-            >
-              <FormField style={{ flex: 1 }}>
-                <FormLabel
-                  title={t('Percentage of')}
-                  htmlFor="previous-field"
-                />
-                <Select
-                  id="previous-field"
-                  key="previous-month"
-                  options={[
-                    [false, t('This month')],
-                    [true, t('Last month')],
-                  ]}
-                  value={state.template.previous}
-                  onChange={previous => {
-                    if (state.template.type !== 'percentage') {
-                      return;
-                    }
-                    return dispatch(
-                      updateTemplate({
-                        type: 'percentage',
-                        previous,
-                        ...(previous && state.template.category === 'to-budget'
-                          ? { category: '' }
-                          : {}),
-                      }),
-                    );
-                  }}
-                />
-              </FormField>
-              <View style={{ flex: 1 }} />
-            </Stack>
-          </>
-        )}
-        {state.displayType === 'historical' && (
-          <Stack
-            direction="row"
-            align="center"
-            spacing={10}
-            style={{ marginTop: 10 }}
-          >
-            <FormField style={{ flex: 1 }}>
-              <FormLabel title={t('Mode')} htmlFor="mode-field" />
-              <Select
-                id="mode-field"
-                key="mode-picker"
-                options={[
-                  ['copy', t('Copy a previous month')],
-                  ['average', t('Average of previous months')],
-                ]}
-                value={state.template.type}
-                onChange={type => dispatch(updateTemplate({ type }))}
-              />
-            </FormField>
-            <FormField style={{ flex: 1 }}>
-              <FormLabel
-                title={t('Number of months back')}
-                htmlFor="look-back-field"
-              />
-              {/* @ts-expect-error should be auto-patched once GenericInput is converted to TS */}
-              <GenericInput
-                key="look-back-input"
-                type="number"
-                value={
-                  state.template.type === 'average'
-                    ? state.template.numMonths
-                    : state.template.lookBack
-                }
-                onChange={(value: number) =>
-                  dispatch(
-                    updateTemplate(
-                      state.template.type === 'average'
-                        ? { numMonths: value }
-                        : { lookBack: value },
-                    ),
-                  )
-                }
-              />
-            </FormField>
-          </Stack>
-        )}
+        {automationEditor}
       </Stack>
       <Button
         variant="bare"
