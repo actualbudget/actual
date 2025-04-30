@@ -100,5 +100,5 @@ export function AuthSettings() {
         </Trans>
       </Text>
     </Setting>
-  ) : null;
+  );
 }
