@@ -169,7 +169,7 @@ export function ImportTransactionsModal({
   const [importNotes, setImportNotes] = useState(true);
 
   const [currencyCode] = useSyncedPref('currencyCode');
-  const currency = currencyCode ? getCurrency(currencyCode) : null;
+  const currency = getCurrency(currencyCode);
 
   // This cannot be set after parsing the file, because changing it
   // requires re-parsing the file. This is different from the other

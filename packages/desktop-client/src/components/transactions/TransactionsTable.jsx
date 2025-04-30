@@ -2113,8 +2113,8 @@ export const TransactionTable = forwardRef((props, ref) => {
   const [numberFormat] = useSyncedPref('numberFormat');
   const [hideFraction] = useSyncedPref('hideFraction');
   const [currencyCode] = useSyncedPref('currencyCode');
-  const currency = currencyCode ? getCurrency(currencyCode) : null;
-  const decimalPlaces = currency ? currency.decimalPlaces : 2;
+  const currency = getCurrency(currencyCode);
+  const decimalPlaces = currency.decimalPlaces;
 
   const config = useMemo(
     () => parseNumberFormat({ format: numberFormat, hideFraction }),

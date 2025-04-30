@@ -56,7 +56,7 @@ export function Transaction({
   reconcile,
 }: TransactionProps) {
   const [currencyCode] = useSyncedPref('currencyCode');
-  const currency = currencyCode ? getCurrency(currencyCode) : null;
+  const currency = getCurrency(currencyCode);
 
   const categoryList = categories.map(category => category.name);
   const transaction = useMemo(
