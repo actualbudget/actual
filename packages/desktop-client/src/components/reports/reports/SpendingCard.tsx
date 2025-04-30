@@ -6,11 +6,14 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { getCurrency } from 'loot-core/shared/currencies';
 import * as monthUtils from 'loot-core/shared/months';
-import { amountToCurrency } from 'loot-core/shared/util';
+import { amountToInteger } from 'loot-core/shared/util';
 import { type SpendingWidget } from 'loot-core/types/models';
 
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { PrivacyFilter } from '../../PrivacyFilter';
+import { useFormat } from '../../spreadsheet/useFormat';
 import { DateRange } from '../DateRange';
 import { SpendingGraph } from '../graphs/SpendingGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
@@ -37,12 +40,17 @@ export function SpendingCard({
 }: SpendingCardProps) {
   const { t } = useTranslation();
 
+  const [currencyCode] = useSyncedPref('currencyCode');
+  const currency = currencyCode ? getCurrency(currencyCode) : null;
+
   const [compare, compareTo] = calculateSpendingReportTimeRange(meta ?? {});
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const spendingReportMode = meta?.mode ?? 'single-month';
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
+
+  const format = useFormat();
 
   const selection =
     spendingReportMode === 'single-month' ? 'compareTo' : spendingReportMode;
@@ -137,7 +145,13 @@ export function SpendingCard({
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
                   {data &&
                     (difference && difference > 0 ? '+' : '') +
-                      amountToCurrency(difference || 0)}
+                      format(
+                        amountToInteger(
+                          difference || 0,
+                          currency.decimalPlaces,
+                        ),
+                        'financial',
+                      )}
                 </PrivacyFilter>
               </Block>
             </View>

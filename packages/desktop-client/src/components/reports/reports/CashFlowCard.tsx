@@ -5,10 +5,10 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { Bar, BarChart, LabelList, ResponsiveContainer } from 'recharts';
 
-import { integerToCurrency } from 'loot-core/shared/util';
 import { type CashFlowWidget } from 'loot-core/types/models';
 
 import { PrivacyFilter } from '../../PrivacyFilter';
+import { useFormat } from '../../spreadsheet/useFormat';
 import { Change } from '../Change';
 import { chartTheme } from '../chart-theme';
 import { Container } from '../Container';
@@ -43,6 +43,8 @@ function CustomLabel({
 }: CustomLabelProps) {
   const valueLengthOffset = 20;
 
+  const format = useFormat();
+
   const yOffset = barHeight < 25 ? 105 : y;
 
   const labelXOffsets = {
@@ -76,7 +78,7 @@ function CustomLabel({
         textAnchor={anchorValue[position]}
         fill={theme.tableText}
       >
-        <PrivacyFilter>{integerToCurrency(value)}</PrivacyFilter>
+        <PrivacyFilter>{format(value, 'financial')}</PrivacyFilter>
       </text>
     </>
   );
