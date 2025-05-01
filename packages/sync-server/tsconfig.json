@@ -12,7 +12,7 @@
     "jsx": "preserve",
     // Check JS files too
     "allowJs": true,
-    "moduleResolution": "nodenext",
+    "moduleResolution": "node16",
     "module": "node16",
     "outDir": "build",
     "types": ["vite/client", "vitest/globals"]
