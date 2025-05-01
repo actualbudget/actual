@@ -3,7 +3,6 @@ import { setI18NextLanguage } from '@actual-app/web/src/i18n';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { send } from '../../platform/client/fetch';
-import { parseNumberFormat, setNumberFormat } from '../../shared/util';
 import {
   type GlobalPrefs,
   type MetadataPrefs,
@@ -45,14 +44,6 @@ export const loadPrefs = createAppAsyncThunk(
 
     dispatch(
       setPrefs({ local: prefs, global: globalPrefs, synced: syncedPrefs }),
-    );
-
-    // Certain loot-core utils depend on state outside of the React tree, update them
-    setNumberFormat(
-      parseNumberFormat({
-        format: syncedPrefs.numberFormat,
-        hideFraction: syncedPrefs.hideFraction,
-      }),
     );
 
     // We need to load translations before the app renders
