@@ -17,7 +17,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Build Web
-        run: yarn build:browser
+        run: yarn build:browser && yarn build:sync-server
 
       - name: Pack the web and server packages
         run: |

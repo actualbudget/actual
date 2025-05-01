@@ -16,6 +16,5 @@ packages/desktop-client/bin/remove-untranslated-languages
 
 yarn workspace loot-core build:browser
 yarn workspace @actual-app/web build:browser
-yarn workspace @actual-app/sync-server build
 
 echo "packages/desktop-client/build"

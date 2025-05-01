@@ -30,7 +30,7 @@ jobs:
         run: npm install netlify-cli@17.10.1 -g
     
       - name: Build Actual
-        run: ./bin/package-browser
+        run: yarn build:browser && yarn build:sync-server
 
       - name: Deploy to Netlify
         id: netlify_deploy
