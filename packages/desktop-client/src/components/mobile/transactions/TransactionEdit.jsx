@@ -984,11 +984,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
               onFocus={() =>
                 onRequestActiveEdit(getFieldName(transaction.id, 'date'))
               }
-              onUpdate={value =>
+              onChange={event =>
                 onUpdateInner(
                   transaction,
                   'date',
-                  formatDate(parseISO(value), dateFormat),
+                  formatDate(parseISO(event.target.value), dateFormat),
                 )
               }
             />
@@ -1021,7 +1021,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
             onFocus={() => {
               onRequestActiveEdit(getFieldName(transaction.id, 'notes'));
             }}
-            onUpdate={value => onUpdateInner(transaction, 'notes', value)}
+            onChange={event =>
+              onUpdateInner(transaction, 'notes', event.target.value)
+            }
           />
         </View>
 
