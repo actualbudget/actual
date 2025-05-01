@@ -205,6 +205,9 @@ export function fastSetMerge<T>(set1: Set<T>, set2: Set<T>) {
 }
 
 export function titleFirst(str: string) {
+  if (!str || str.length <= 1) {
+    return str?.toUpperCase() ?? '';
+  }
   return str[0].toUpperCase() + str.slice(1);
 }
 

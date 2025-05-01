@@ -3,6 +3,7 @@ import {
   getNumberFormat,
   setNumberFormat,
   currencyToAmount,
+  titleFirst,
 } from './util';
 
 describe('utility functions', () => {
@@ -171,5 +172,15 @@ describe('utility functions', () => {
     expect(currencyToAmount('3.')).toBe(3);
     expect(currencyToAmount('3.000')).toBe(3000);
     expect(currencyToAmount('3.000,')).toBe(3000);
+  });
+
+  test('titleFirst works with all inputs', () => {
+    expect(titleFirst('')).toBe('');
+    // @ts-expect-error
+    expect(titleFirst(undefined)).toBe('');
+    // @ts-expect-error
+    expect(titleFirst(null)).toBe('');
+    expect(titleFirst('a')).toBe('A');
+    expect(titleFirst('abc')).toBe('Abc');
   });
 });
