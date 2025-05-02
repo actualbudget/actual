@@ -481,6 +481,12 @@ const TransactionEditInner = memo(function TransactionEditInner({
   );
   const { grouped: categoryGroups } = useCategories();
 
+  useEffect(() => {
+    if (history.state === null) {
+      history.pushState(null, '', '/accounts');
+    }
+  }, []);
+
   const [transaction, ...childTransactions] = transactions;
 
   const { editingField, onRequestActiveEdit, onClearActiveEdit } =
