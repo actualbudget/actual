@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import React, { type ComponentProps } from 'react';
 
+import { useDragRef } from '@desktop-client/hooks/useDragRef';
+
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import {
@@ -14,8 +16,6 @@ import { Row } from '../table';
 
 import { RenderMonths } from './RenderMonths';
 import { SidebarCategory } from './SidebarCategory';
-
-import { useDragRef } from '@desktop-client/hooks/useDragRef';
 
 type IncomeCategoryProps = {
   cat: CategoryEntity;

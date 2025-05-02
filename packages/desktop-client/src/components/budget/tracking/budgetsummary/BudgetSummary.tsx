@@ -13,6 +13,8 @@ import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/shared/months';
@@ -25,9 +27,6 @@ import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ExpenseTotal } from './ExpenseTotal';
 import { IncomeTotal } from './IncomeTotal';
 import { Saved } from './Saved';
-
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useUndo } from '@desktop-client/hooks/useUndo';
 
 type BudgetSummaryProps = {
   month: string;

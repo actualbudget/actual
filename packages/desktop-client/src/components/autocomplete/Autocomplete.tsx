@@ -19,12 +19,11 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 import { css, cx } from '@emotion/css';
 import Downshift, { type StateChangeTypes } from 'downshift';
 
 import { getNormalisedString } from 'loot-core/shared/normalisation';
-
-import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 
 type CommonAutocompleteProps<T extends Item> = {
   focused?: boolean;

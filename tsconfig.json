@@ -1,61 +1,13 @@
 {
+  "files": [],
   "references": [
-    // TODO: enable once every project is ts
-    // { "path": "./packages/api" },
-    // { "path": "./packages/desktop-client" }
-  ],
-  "compilerOptions": {
-    // "composite": true,
-    "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "resolveJsonModule": true,
-    "downlevelIteration": true,
-    // TODO: enable once every file is ts
-    // "strict": true,
-    "strictFunctionTypes": true,
-    "noFallthroughCasesInSwitch": true,
-    "skipLibCheck": true,
-    "jsx": "preserve",
-    "types": ["vite/client", "vitest/globals"],
-    // Check JS files too
-    "allowJs": true,
-    "checkJs": false,
-    // Used for temp builds
-    "outDir": "build",
-    "moduleResolution": "bundler",
-    "module": "es2022",
-    // Until/if we build using tsc
-    "noEmit": true,
-    "paths": {
-      // TEMPORARY: Until we can fix the "exports" in the loot-core package.json
-      "loot-core/*": ["./packages/loot-core/src/*"],
-      "@desktop-client/*": ["./packages/desktop-client/src/*"]
-    },
-    "plugins": [
-      {
-        "name": "typescript-strict-plugin",
-        "path": ["./packages"]
-      }
-    ]
-  },
-  "include": ["packages/**/*", "bin/*.ts"],
-  "exclude": [
-    "**/.*/",
-    "node_modules",
-    "**/node_modules/*",
-    "**/build/*",
-    "**/client-build/*",
-    "**/dist/*",
-    "**/lib-dist/*",
-    "**/test-results/*",
-    "**/playwright-report/*"
-  ],
-  "ts-node": {
-    "compilerOptions": {
-      "module": "CommonJS"
-    }
-  }
+    { "path": "./tsconfig.root.json" },
+    { "path": "./packages/api/tsconfig.json" },
+    { "path": "./packages/crdt/tsconfig.json" },
+    { "path": "./packages/component-library/tsconfig.json" },
+    { "path": "./packages/desktop-client/tsconfig.json" },
+    { "path": "./packages/desktop-electron/tsconfig.json" },
+    { "path": "./packages/loot-core/tsconfig.json" },
+    { "path": "./packages/sync-server/tsconfig.json" }
+  ]
 }

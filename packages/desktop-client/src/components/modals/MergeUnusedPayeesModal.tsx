@@ -6,6 +6,7 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { usePayees } from '@desktop-client/hooks/usePayees';
 
 import {
   type Modal as ModalType,
@@ -17,8 +18,6 @@ import { type PayeeEntity } from 'loot-core/types/models';
 import { useSelector, useDispatch } from '../../redux';
 import { Information } from '../alerts';
 import { Modal, ModalButtons } from '../common/Modal';
-
-import { usePayees } from '@desktop-client/hooks/usePayees';
 
 const highlightStyle = { color: theme.pageTextPositive };
 

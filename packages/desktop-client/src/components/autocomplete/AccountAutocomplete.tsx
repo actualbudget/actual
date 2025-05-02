@@ -13,14 +13,13 @@ import { styles } from '@actual-app/components/styles';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { css, cx } from '@emotion/css';
 
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { Autocomplete } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
-
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
 
 type AccountAutocompleteItem = AccountEntity;
 

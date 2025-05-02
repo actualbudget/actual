@@ -11,6 +11,8 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as useAccounts from '@desktop-client/hooks/useAccounts';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 import { closeModal } from 'loot-core/client/modals/modalsSlice';
 import { createAccount } from 'loot-core/client/queries/queriesSlice';
@@ -27,9 +29,6 @@ import {
 } from '../common/Modal';
 import { Checkbox } from '../forms';
 import { validateAccountName } from '../util/accountValidation';
-
-import * as useAccounts from '@desktop-client/hooks/useAccounts';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 export function CreateLocalAccountModal() {
   const { t } = useTranslation();

@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.base.json",
+  "files": ["bin/release-note-generator.ts"],
+  "compilerOptions": {
+    "composite": true
+  }
+}

@@ -15,14 +15,13 @@ import { SvgAdd, SvgSubtract } from '@actual-app/components/icons/v1';
 import { defaultInputStyle, Input } from '@actual-app/components/input';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { amountToInteger, appendDecimals } from 'loot-core/shared/util';
 
 import { useFormat } from '../spreadsheet/useFormat';
-
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type AmountInputProps = {
   id?: string;

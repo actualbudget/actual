@@ -6,6 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 import { loadBackup, makeBackup } from 'loot-core/client/budgets/budgetsSlice';
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
@@ -15,8 +16,6 @@ import { type Backup } from 'loot-core/server/budgetfiles/backups';
 import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Row, Cell } from '../table';
-
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 type BackupTableProps = {
   backups: Backup[];

@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { usePayee } from '@desktop-client/hooks/usePayee';
 

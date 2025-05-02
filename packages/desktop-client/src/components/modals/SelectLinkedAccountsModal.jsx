@@ -6,6 +6,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
 
 import { closeModal } from 'loot-core/client/modals/modalsSlice';
 
@@ -20,8 +21,6 @@ import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { TableHeader, Table, Row, Field } from '../table';
-
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
 
 function useAddBudgetAccountOptions() {
   const { t } = useTranslation();

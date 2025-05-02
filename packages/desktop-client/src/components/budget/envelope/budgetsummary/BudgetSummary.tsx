@@ -11,6 +11,8 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/shared/months';
@@ -22,9 +24,6 @@ import { useEnvelopeBudget } from '../EnvelopeBudgetContext';
 import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ToBudget } from './ToBudget';
 import { TotalsList } from './TotalsList';
-
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useUndo } from '@desktop-client/hooks/useUndo';
 
 type BudgetSummaryProps = {
   month: string;

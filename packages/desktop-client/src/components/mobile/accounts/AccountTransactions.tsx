@@ -12,6 +12,10 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import {
@@ -46,11 +50,6 @@ import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
-
-import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 export function AccountTransactions({
   account,

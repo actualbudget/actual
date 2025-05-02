@@ -9,14 +9,13 @@ import {
 } from 'react';
 
 import { View } from '@actual-app/components/view';
+import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 
 import { type PayeeEntity } from 'loot-core/types/models';
 
 import { useTableNavigator, Table } from '../table';
 
 import { PayeeTableRow } from './PayeeTableRow';
-
-import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 
 // Table items require an ID to work, it's optional in the loot-core
 // model so would need to verify accuracy of that before changing there

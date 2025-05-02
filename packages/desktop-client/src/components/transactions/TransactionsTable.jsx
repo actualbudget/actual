@@ -34,6 +34,16 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { usePrevious } from '@desktop-client/hooks/usePrevious';
+import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
+import {
+  useSelectedDispatch,
+  useSelectedItems,
+} from '@desktop-client/hooks/useSelected';
+import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
 import { css } from '@emotion/css';
 import {
   format as formatDate,
@@ -90,17 +100,6 @@ import {
 } from '../table';
 
 import { TransactionMenu } from './TransactionMenu';
-
-import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
-import { usePrevious } from '@desktop-client/hooks/usePrevious';
-import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
-import {
-  useSelectedDispatch,
-  useSelectedItems,
-} from '@desktop-client/hooks/useSelected';
-import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';

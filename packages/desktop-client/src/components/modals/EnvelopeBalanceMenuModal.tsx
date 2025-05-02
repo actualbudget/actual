@@ -5,6 +5,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useCategory } from '@desktop-client/hooks/useCategory';
 
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { envelopeBudget } from 'loot-core/client/queries';
@@ -21,8 +22,6 @@ import {
   ModalTitle,
 } from '../common/Modal';
 import { CellValueText } from '../spreadsheet/CellValue';
-
-import { useCategory } from '@desktop-client/hooks/useCategory';
 
 type EnvelopeBalanceMenuModalProps = Omit<
   Extract<ModalType, { name: 'envelope-balance-menu' }>['options'],

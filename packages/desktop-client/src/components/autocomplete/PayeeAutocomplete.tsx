@@ -20,6 +20,8 @@ import { styles } from '@actual-app/components/styles';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCommonPayees, usePayees } from '@desktop-client/hooks/usePayees';
 import { css, cx } from '@emotion/css';
 
 import {
@@ -37,9 +39,6 @@ import {
   AutocompleteFooter,
 } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
-
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCommonPayees, usePayees } from '@desktop-client/hooks/usePayees';
 
 export type PayeeAutocompleteItem = PayeeEntity;
 

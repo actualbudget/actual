@@ -7,6 +7,7 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 
 import {
   type Modal as ModalType,
@@ -25,8 +26,6 @@ import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FormField, FormLabel } from '../forms';
 import { COUNTRY_OPTIONS } from '../util/countries';
-
-import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 
 function useAvailableBanks(country: string) {
   const [banks, setBanks] = useState<GoCardlessInstitution[]>([]);

@@ -23,6 +23,10 @@ import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useAccount } from '@desktop-client/hooks/useAccount';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
+import { usePayee } from '@desktop-client/hooks/usePayee';
 import {
   PressResponder,
   usePress,
@@ -41,11 +45,6 @@ import { useSelector } from '../../../redux';
 import { makeAmountFullStyle } from '../../budget/util';
 
 import { lookupName, Status } from './TransactionEdit';
-
-import { useAccount } from '@desktop-client/hooks/useAccount';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
-import { usePayee } from '@desktop-client/hooks/usePayee';
 
 const ROW_HEIGHT = 60;
 

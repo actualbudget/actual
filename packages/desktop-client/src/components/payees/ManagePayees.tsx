@@ -12,6 +12,12 @@ import { SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import {
+  useSelected,
+  SelectedProvider,
+  useSelectedDispatch,
+  useSelectedItems,
+} from '@desktop-client/hooks/useSelected';
 import memoizeOne from 'memoize-one';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
@@ -25,13 +31,6 @@ import { TableHeader, Cell, SelectCell } from '../table';
 
 import { PayeeMenu } from './PayeeMenu';
 import { PayeeTable } from './PayeeTable';
-
-import {
-  useSelected,
-  SelectedProvider,
-  useSelectedDispatch,
-  useSelectedItems,
-} from '@desktop-client/hooks/useSelected';
 
 const getPayeesById = memoizeOne((payees: PayeeEntity[]) => groupById(payees));
 

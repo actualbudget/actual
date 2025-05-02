@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 import { css } from '@emotion/css';
 import * as d from 'date-fns';
 import {
@@ -25,9 +27,6 @@ import {
 
 import { chartTheme } from '../chart-theme';
 import { Container } from '../Container';
-
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 const MAX_BAR_SIZE = 50;
 const ANIMATION_DURATION = 1000; // in ms

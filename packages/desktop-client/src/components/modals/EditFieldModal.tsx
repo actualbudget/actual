@@ -11,6 +11,7 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
@@ -20,8 +21,6 @@ import { amountToInteger } from 'loot-core/shared/util';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { SectionLabel } from '../forms';
 import { DateSelect } from '../select/DateSelect';
-
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 
 const itemStyle: CSSProperties = {
   fontSize: 17,

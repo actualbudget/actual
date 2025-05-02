@@ -9,6 +9,8 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { getUserData, signOut } from 'loot-core/client/users/usersSlice';
@@ -22,9 +24,6 @@ import { useSelector, useDispatch } from '../redux';
 
 import { PrivacyFilter } from './PrivacyFilter';
 import { useMultiuserEnabled, useServerURL } from './ServerContext';
-
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;

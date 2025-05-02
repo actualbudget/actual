@@ -9,6 +9,9 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 import {
   amountToCurrency,
@@ -23,10 +26,6 @@ import {
 
 import { Row, Cell } from '../../../table';
 import { showActivity } from '../showActivity';
-
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 type ReportTableRowProps = {
   item: GroupedEntity;

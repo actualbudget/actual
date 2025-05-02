@@ -8,13 +8,12 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 import { importBudget } from 'loot-core/client/budgets/budgetsSlice';
 
 import { useDispatch } from '../../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
-
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 function getErrorMessage(error: string): string {
   switch (error) {

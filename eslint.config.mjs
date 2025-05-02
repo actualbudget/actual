@@ -85,7 +85,7 @@ const confusingBrowserGlobals = [
 ];
 
 /** @type {import('eslint').Linter.Config[]} */
-export default [
+export default pluginTypescript.config(
   {
     ignores: [
       'packages/api/app/bundle.api.js',
@@ -158,6 +158,7 @@ export default [
       'import/resolver': {
         typescript: {
           alwaysTryTypes: true,
+          project: path.join(__dirname, 'tsconfig.json'),
         },
       },
     },
@@ -547,7 +548,8 @@ export default [
       sourceType: 'module',
 
       parserOptions: {
-        projectService: true,
+        project: ['tsconfig.root.json', 'packages/*/tsconfig.json'],
+        tsconfigRootDir: __dirname,
         ecmaFeatures: {
           jsx: true,
         },
@@ -572,7 +574,6 @@ export default [
       'import/namespace': 'off',
       'import/default': 'off',
       'import/no-named-as-default-member': 'off',
-      'import/no-unresolved': 'off',
 
       // Add TypeScript specific rules (and turn off ESLint equivalents)
       '@typescript-eslint/consistent-type-assertions': 'warn',
@@ -766,7 +767,7 @@ export default [
     },
   },
   {
-    files: ['packages/api/index.ts'],
+    files: ['**/*.ts?(x)', '**/*.js?(x)'],
     rules: {
       'import/no-unresolved': 'off',
     },
@@ -780,8 +781,6 @@ export default [
       'import/no-default-export': 'off',
     },
   },
-
-  {},
   {
     // TODO: fix the issues in these files
     files: [
@@ -872,4 +871,4 @@ export default [
       '@typescript-eslint/no-unused-vars': 'off',
     },
   },
-];
+);

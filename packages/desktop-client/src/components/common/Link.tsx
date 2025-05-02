@@ -9,9 +9,8 @@ import { Button } from '@actual-app/components/button';
 import { styles, type CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { css } from '@emotion/css';
-
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { css } from '@emotion/css';
 
 type TextLinkProps = {
   style?: CSSProperties;

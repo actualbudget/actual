@@ -4,6 +4,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
@@ -17,9 +19,6 @@ import { Page } from '../Page';
 
 import { AccountsHeader } from './AccountsHeader';
 import { AccountsList } from './AccountsList';
-
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 type SyncProviders = BankSyncProviders | 'unlinked';
 

@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
+import { usePayees } from '@desktop-client/hooks/usePayees';
+
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   getPayees,
@@ -14,8 +16,6 @@ import { type NewRuleEntity, type PayeeEntity } from 'loot-core/types/models';
 import { useDispatch } from '../../redux';
 
 import { ManagePayees } from './ManagePayees';
-
-import { usePayees } from '@desktop-client/hooks/usePayees';
 
 type ManagePayeesWithDataProps = {
   initialSelectedIds: string[];

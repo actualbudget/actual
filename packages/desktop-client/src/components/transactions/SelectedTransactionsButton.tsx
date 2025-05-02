@@ -3,6 +3,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
+import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
@@ -17,8 +18,6 @@ import { type TransactionEntity } from 'loot-core/types/models';
 
 import { useDispatch } from '../../redux';
 import { SelectedItemsButton } from '../table';
-
-import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 
 type SelectedTransactionsButtonProps = {
   getTransaction: (id: string) => TransactionEntity | undefined;

@@ -1,3 +1,4 @@
+import { useCommonPayees } from '@desktop-client/hooks/usePayees';
 import { render, type Screen, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
@@ -13,8 +14,6 @@ import {
   type PayeeAutocompleteItem,
   type PayeeAutocompleteProps,
 } from './PayeeAutocomplete';
-
-import { useCommonPayees } from '@desktop-client/hooks/usePayees';
 
 const PAYEE_SELECTOR = '[data-testid][role=option]';
 const PAYEE_SECTION_SELECTOR = '[data-testid$="-item-group"]';

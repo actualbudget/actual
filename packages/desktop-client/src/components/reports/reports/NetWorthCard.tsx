@@ -5,6 +5,7 @@ import { Block } from '@actual-app/components/block';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 import { integerToCurrency } from 'loot-core/shared/util';
 import {
@@ -22,8 +23,6 @@ import { ReportCardName } from '../ReportCardName';
 import { calculateTimeRange } from '../reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
 import { useReport } from '../useReport';
-
-import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type NetWorthCardProps = {
   widgetId: string;

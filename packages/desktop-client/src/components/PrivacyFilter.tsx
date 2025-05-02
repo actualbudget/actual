@@ -7,9 +7,8 @@ import React, {
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
-
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
+import { css } from '@emotion/css';
 
 type ConditionalPrivacyFilterProps = {
   children: ReactNode;

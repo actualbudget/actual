@@ -13,12 +13,11 @@ import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { useNotes } from '@desktop-client/hooks/useNotes';
 
 import { send } from 'loot-core/platform/client/fetch';
 
 import { Notes } from './Notes';
-
-import { useNotes } from '@desktop-client/hooks/useNotes';
 
 type NotesButtonProps = {
   id: string;

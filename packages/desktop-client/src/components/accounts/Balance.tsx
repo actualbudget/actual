@@ -6,6 +6,7 @@ import { SvgArrowButtonRight1 } from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 import { useHover } from 'usehooks-ts';
 
 import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
@@ -19,8 +20,6 @@ import { type Binding } from '../spreadsheet';
 import { CellValue, CellValueText } from '../spreadsheet/CellValue';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
-
-import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 
 type DetailedBalanceProps = {
   name: string;

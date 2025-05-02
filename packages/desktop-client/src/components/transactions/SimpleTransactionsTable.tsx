@@ -10,6 +10,13 @@ import { useTranslation, Trans } from 'react-i18next';
 import { SvgArrowsSynchronize } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { useAccount } from '@desktop-client/hooks/useAccount';
+import { useCategory } from '@desktop-client/hooks/useCategory';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import {
+  useSelectedItems,
+  useSelectedDispatch,
+} from '@desktop-client/hooks/useSelected';
 import {
   format as formatDate,
   isValid as isDateValid,
@@ -22,14 +29,6 @@ import { type TransactionEntity } from 'loot-core/types/models';
 
 import { Cell, Field, Row, SelectCell, Table } from '../table';
 import { DisplayId } from '../util/DisplayId';
-
-import { useAccount } from '@desktop-client/hooks/useAccount';
-import { useCategory } from '@desktop-client/hooks/useCategory';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import {
-  useSelectedItems,
-  useSelectedDispatch,
-} from '@desktop-client/hooks/useSelected';
 
 function serializeTransaction(
   transaction: TransactionEntity,

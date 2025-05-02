@@ -28,10 +28,9 @@ import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
+import { useModalState } from '@desktop-client/hooks/useModalState';
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
-
-import { useModalState } from '@desktop-client/hooks/useModalState';
 
 type ModalProps = ComponentPropsWithRef<typeof ReactAriaModal> & {
   name: string;

@@ -1,5 +1,6 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
+  "references": [{ "path": "../loot-core/tsconfig.json" }],
   "compilerOptions": {
     // Using ES2021 because that’s the newest version where
     // the latest Node 16.x release supports all of the features
@@ -12,8 +13,8 @@
     "declarationDir": "@types",
     "paths": {
       "loot-core/*": ["./@types/loot-core/*"]
-    }
+    },
+    "composite": true
   },
-  "include": ["."],
-  "exclude": ["**/node_modules/*", "dist", "@types", "*.test.ts"]
+  "exclude": ["@types", "app", "dist", "migrations", "node_modules"]
 }

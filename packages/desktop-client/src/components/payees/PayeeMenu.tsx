@@ -5,10 +5,9 @@ import { SvgBookmark, SvgLightBulb } from '@actual-app/components/icons/v1';
 import { Menu, type MenuItem } from '@actual-app/components/menu';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 import { type PayeeEntity } from 'loot-core/types/models';
-
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type PayeeMenuProps = {
   payeesById: Record<PayeeEntity['id'], PayeeEntity>;

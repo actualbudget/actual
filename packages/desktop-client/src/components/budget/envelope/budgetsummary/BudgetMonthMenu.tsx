@@ -2,7 +2,6 @@ import React, { type ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
-
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 
 type BudgetMonthMenuProps = Omit<

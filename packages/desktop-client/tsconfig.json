@@ -1,0 +1,24 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "references": [{ "path": "../loot-core/tsconfig.json" }],
+  "compilerOptions": {
+    "paths": {
+      "@desktop-client/*": ["./src/*"],
+      "loot-core/*": ["../loot-core/src/*"],
+      "loot-core/globals": ["../loot-core/globals.d.ts"]
+    },
+    "composite": true,
+    "outDir": "build",
+    "tsBuildInfoFile": "build/.desktop-client.tsbuildinfo"
+  },
+  "exclude": [
+    "build",
+    "build-electron",
+    "build-stats",
+    "locale",
+    "logs",
+    "node_modules",
+    "playwright-report",
+    "test-results"
+  ]
+}

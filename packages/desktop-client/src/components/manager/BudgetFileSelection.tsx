@@ -34,6 +34,8 @@ import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { css } from '@emotion/css';
 
 import {
@@ -60,9 +62,6 @@ import {
 
 import { useSelector, useDispatch } from '../../redux';
 import { useMultiuserEnabled } from '../ServerContext';
-
-import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 function getFileDescription(file: File, t: (key: string) => string) {
   if (file.state === 'unknown') {

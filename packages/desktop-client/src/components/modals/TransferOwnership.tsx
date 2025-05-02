@@ -8,6 +8,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 import { closeAndLoadBudget } from 'loot-core/client/budgets/budgetsSlice';
 import {
@@ -24,8 +25,6 @@ import { type Handlers } from 'loot-core/types/handlers';
 import { useDispatch, useSelector } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FormField, FormLabel } from '../forms';
-
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 type TransferOwnershipProps = Extract<
   ModalType,

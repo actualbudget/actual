@@ -13,6 +13,7 @@ import { BrowserRouter } from 'react-router-dom';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 import { setAppState, sync } from 'loot-core/client/app/appSlice';
 import { closeBudget, loadBudget } from 'loot-core/client/budgets/budgetsSlice';
@@ -39,8 +40,6 @@ import { ManagementApp } from './manager/ManagementApp';
 import { Modals } from './Modals';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
-
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 function AppInner() {
   const [budgetId] = useMetadataPref('id');

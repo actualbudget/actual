@@ -1,17 +1,14 @@
 {
-  "extends": "../../tsconfig.json",
+  // Check packages/loot-core/bin/build-api on how this is used
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": "./src",
     "declaration": true,
     "emitDeclarationOnly": true,
     "allowJs": false,
-    "noEmit": false
+    "noEmit": false,
+    "composite": true
   },
-  "include": ["./typings", "./src/server/*"],
-  "exclude": [
-    "**/node_modules/*",
-    "**/build/*",
-    "**/lib-dist/*",
-    "./src/server/bench.ts"
-  ]
+  "include": ["typings/**/*", "src/server/*/**"],
+  "exclude": ["build", "lib_dist", "node_modules", "src/server/bench.ts"]
 }

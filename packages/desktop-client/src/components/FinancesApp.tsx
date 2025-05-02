@@ -12,6 +12,10 @@ import {
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 import { sync } from 'loot-core/client/app/appSlice';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
@@ -41,11 +45,6 @@ import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { Titlebar } from './Titlebar';
-
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 function NarrowNotSupported({
   redirectTo = '/budget',

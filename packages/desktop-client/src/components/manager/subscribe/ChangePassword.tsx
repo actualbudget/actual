@@ -6,13 +6,12 @@ import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 import { send } from 'loot-core/platform/client/fetch';
 
 import { Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
-
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 export function ChangePassword() {
   const { t } = useTranslation();

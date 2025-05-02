@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 
-import * as Platform from 'loot-core/client/platform';
-
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+
+import * as Platform from 'loot-core/client/platform';
 
 export function GlobalKeys() {
   const navigate = useNavigate();

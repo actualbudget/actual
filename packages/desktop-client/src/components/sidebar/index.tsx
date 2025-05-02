@@ -2,12 +2,11 @@ import React from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { View } from '@actual-app/components/view';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useDebounceCallback } from 'usehooks-ts';
 
 import { Sidebar } from './Sidebar';
 import { useSidebar } from './SidebarProvider';
-
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 export function FloatableSidebar() {
   const [floatingSidebar] = useGlobalPref('floatingSidebar');

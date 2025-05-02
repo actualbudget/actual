@@ -21,6 +21,9 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 import { format } from 'date-fns';
 import { debounce } from 'debounce';
 
@@ -42,10 +45,6 @@ import {
   calendarSpreadsheet,
 } from '../spreadsheets/calendar-spreadsheet';
 import { useReport } from '../useReport';
-
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 type CalendarCardProps = {
   widgetId: string;

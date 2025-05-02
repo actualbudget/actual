@@ -7,13 +7,12 @@ import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useCategories } from '@desktop-client/hooks/useCategories';
 
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-
-import { useCategories } from '@desktop-client/hooks/useCategories';
 
 type ConfirmCategoryDeleteModalProps = Extract<
   ModalType,

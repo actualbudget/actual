@@ -1,6 +1,8 @@
 import React, { useRef, useCallback, useLayoutEffect } from 'react';
 
 import { theme } from '@actual-app/components/theme';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
@@ -16,9 +18,6 @@ import { getChangedValues, applyChanges } from 'loot-core/shared/util';
 import { useDispatch } from '../../redux';
 
 import { TransactionTable } from './TransactionsTable';
-
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 // When data changes, there are two ways to update the UI:
 //

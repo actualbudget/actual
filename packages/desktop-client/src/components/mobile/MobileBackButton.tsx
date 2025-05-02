@@ -5,7 +5,6 @@ import { Button } from '@actual-app/components/button';
 import { SvgCheveronLeft } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
-
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 type MobileBackButtonProps = ComponentPropsWithoutRef<typeof Button>;

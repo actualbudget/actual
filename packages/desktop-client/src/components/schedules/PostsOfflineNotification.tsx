@@ -7,6 +7,7 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { useFormatList } from '@desktop-client/hooks/useFormatList';
 
 import { popModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
@@ -15,8 +16,6 @@ import { type PayeeEntity } from 'loot-core/types/models';
 import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { DisplayId } from '../util/DisplayId';
-
-import { useFormatList } from '@desktop-client/hooks/useFormatList';
 
 export function PostsOfflineNotification() {
   const { t, i18n } = useTranslation();

@@ -5,14 +5,13 @@ import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Select } from '@actual-app/components/select';
 import { View } from '@actual-app/components/view';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 
 import { CustomUpcomingLength } from './CustomUpcomingLength';
-
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 function useUpcomingLengthOptions() {
   const { t } = useTranslation();

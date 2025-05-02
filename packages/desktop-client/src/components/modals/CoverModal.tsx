@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
+import { useCategories } from '@desktop-client/hooks/useCategories';
 
 import {
   type Modal as ModalType,
@@ -17,8 +18,6 @@ import {
 } from '../budget/util';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
-
-import { useCategories } from '@desktop-client/hooks/useCategories';
 
 type CoverModalProps = Extract<ModalType, { name: 'cover' }>['options'];
 

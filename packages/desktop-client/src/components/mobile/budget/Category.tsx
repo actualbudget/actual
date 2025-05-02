@@ -1,12 +1,12 @@
 import React from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+
 import * as monthUtils from 'loot-core/shared/months';
 
 import { CategoryTransactions } from './CategoryTransactions';
-
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function Category() {
   const [_numberFormat] = useSyncedPref('numberFormat');

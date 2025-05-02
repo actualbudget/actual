@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
+import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
@@ -32,9 +34,6 @@ import { AuthProvider } from '../../auth/AuthProvider';
 import { TestProvider } from '../../redux/mock';
 
 import { TransactionTable } from './TransactionsTable';
-
-import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
-import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
 
 vi.mock('loot-core/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => ({

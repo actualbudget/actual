@@ -9,12 +9,11 @@ import React, {
 } from 'react';
 
 import { Input } from '@actual-app/components/input';
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 
 import { useFormat } from '../spreadsheet/useFormat';
-
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 
 type PercentInputProps = {
   id?: string;

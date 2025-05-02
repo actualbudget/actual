@@ -3,13 +3,12 @@ import React, { type CSSProperties } from 'react';
 import { Button } from '@actual-app/components/button';
 import { SvgChartPie } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { type Template } from 'loot-core/server/budget/types/templates';
 
 import { useDispatch } from '../../../redux';
-
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 
 type CategoryAutomationButtonProps = {
   width?: number;

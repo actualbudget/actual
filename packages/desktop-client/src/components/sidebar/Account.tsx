@@ -11,6 +11,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useDragRef } from '@desktop-client/hooks/useDragRef';
+import { useNotes } from '@desktop-client/hooks/useNotes';
 import { css, cx } from '@emotion/css';
 
 import { openAccountCloseModal } from 'loot-core/client/modals/modalsSlice';
@@ -33,10 +36,6 @@ import {
 } from '../sort';
 import { type SheetFields, type Binding } from '../spreadsheet';
 import { CellValue } from '../spreadsheet/CellValue';
-
-import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useDragRef } from '@desktop-client/hooks/useDragRef';
-import { useNotes } from '@desktop-client/hooks/useNotes';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,

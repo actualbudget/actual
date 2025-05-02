@@ -7,6 +7,8 @@ import { SvgExclamationOutline } from '@actual-app/components/icons/v1';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 
 import { type AccountEntity } from 'loot-core/types/models';
 
@@ -14,9 +16,6 @@ import { unlinkAccount } from '../../accounts/accountsSlice';
 import { authorizeBank } from '../../gocardless';
 import { useDispatch } from '../../redux';
 import { Link } from '../common/Link';
-
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 
 function useErrorMessage() {
   const { t } = useTranslation();

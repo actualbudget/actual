@@ -7,6 +7,7 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { send } from 'loot-core/platform/client/fetch';
@@ -17,8 +18,6 @@ import { useRefreshLoginMethods } from '../../ServerContext';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
-
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 export function Bootstrap() {
   const { t } = useTranslation();

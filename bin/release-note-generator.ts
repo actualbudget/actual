@@ -2,7 +2,7 @@ import { exec } from 'node:child_process';
 import { existsSync, writeFile } from 'node:fs';
 import { exit } from 'node:process';
 
-import prompts from 'prompts';
+import * as prompts from 'prompts';
 
 async function run() {
   const username = await execAsync(
@@ -18,7 +18,7 @@ async function run() {
   }
   const prNumber = activePr?.number ?? (await getNextPrNumber());
 
-  const result = await prompts([
+  const result = await prompts.prompt([
     {
       name: 'githubUsername',
       message: 'Comma-separated GitHub username(s)',

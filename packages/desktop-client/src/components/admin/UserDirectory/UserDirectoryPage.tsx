@@ -3,12 +3,11 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { View } from '@actual-app/components/view';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 import { Page } from '../../Page';
 
 import { UserDirectory } from './UserDirectory';
-
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 export function UserDirectoryPage({
   bottomContent,

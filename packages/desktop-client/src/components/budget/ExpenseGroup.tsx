@@ -3,6 +3,7 @@ import React, { type ComponentProps } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useDragRef } from '@desktop-client/hooks/useDragRef';
 
 import {
   useDraggable,
@@ -16,8 +17,6 @@ import { Row, ROW_HEIGHT } from '../table';
 
 import { RenderMonths } from './RenderMonths';
 import { SidebarGroup } from './SidebarGroup';
-
-import { useDragRef } from '@desktop-client/hooks/useDragRef';
 
 type ExpenseGroupProps = {
   group: ComponentProps<typeof SidebarGroup>['group'];

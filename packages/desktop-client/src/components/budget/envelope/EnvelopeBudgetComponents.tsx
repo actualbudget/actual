@@ -13,6 +13,8 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 import { css } from '@emotion/css';
 
 import { envelopeBudget } from 'loot-core/client/queries';
@@ -34,9 +36,6 @@ import { makeAmountGrey } from '../util';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
-
-import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useUndo } from '@desktop-client/hooks/useUndo';
 
 export function useEnvelopeSheetName<
   FieldName extends SheetFields<'envelope-budget'>,

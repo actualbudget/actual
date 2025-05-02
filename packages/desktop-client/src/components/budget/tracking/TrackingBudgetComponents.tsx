@@ -15,6 +15,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 import { css } from '@emotion/css';
 
 import { trackingBudget } from 'loot-core/client/queries';
@@ -35,8 +36,6 @@ import { makeAmountGrey } from '../util';
 
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
-
-import { useUndo } from '@desktop-client/hooks/useUndo';
 
 export const useTrackingSheetValue = <
   FieldName extends SheetFields<'tracking-budget'>,

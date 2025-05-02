@@ -4,14 +4,13 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Menu } from '@actual-app/components/menu';
 import { Select, type SelectOption } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { type TFunction } from 'i18next';
 
 import { availableLanguages, setI18NextLanguage } from '../../i18n';
 import { Link } from '../common/Link';
 
 import { Setting } from './UI';
-
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 const languageDisplayNameOverride: { [key: string]: string } = {
   'pt-BR': 'Português (Brasil)',

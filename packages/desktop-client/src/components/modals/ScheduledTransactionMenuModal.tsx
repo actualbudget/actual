@@ -10,6 +10,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
@@ -26,8 +27,6 @@ import {
   ModalHeader,
   ModalTitle,
 } from '../common/Modal';
-
-import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type ScheduledTransactionMenuModalProps = Extract<
   ModalType,

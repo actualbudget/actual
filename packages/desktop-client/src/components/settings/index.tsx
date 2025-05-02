@@ -8,6 +8,12 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import {
+  useIsOutdated,
+  useLatestVersion,
+} from '@desktop-client/hooks/useLatestVersion';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { css } from '@emotion/css';
 
 import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
@@ -34,13 +40,6 @@ import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
-
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import {
-  useIsOutdated,
-  useLatestVersion,
-} from '@desktop-client/hooks/useLatestVersion';
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 function About() {
   const version = useServerVersion();

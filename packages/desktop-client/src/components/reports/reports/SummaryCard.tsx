@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 import * as monthUtils from 'loot-core/shared/months';
 import {
@@ -17,8 +18,6 @@ import { calculateTimeRange } from '../reportRanges';
 import { summarySpreadsheet } from '../spreadsheets/summary-spreadsheet';
 import { SummaryNumber } from '../SummaryNumber';
 import { useReport } from '../useReport';
-
-import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type SummaryCardProps = {
   widgetId: string;

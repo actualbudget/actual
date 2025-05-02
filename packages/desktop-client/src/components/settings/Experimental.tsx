@@ -4,6 +4,8 @@ import { Trans } from 'react-i18next';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 import type { FeatureFlag } from 'loot-core/types/prefs';
 
@@ -11,9 +13,6 @@ import { Link } from '../common/Link';
 import { Checkbox } from '../forms';
 
 import { Setting } from './UI';
-
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type FeatureToggleProps = {
   flag: FeatureFlag;

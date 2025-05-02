@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+
 import {
   getNumberFormat,
   integerToCurrency,
   parseNumberFormat,
   setNumberFormat,
 } from 'loot-core/shared/util';
-
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export type FormatType =
   | 'string'
