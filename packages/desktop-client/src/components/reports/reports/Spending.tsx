@@ -516,17 +516,17 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         style={{ marginBottom: 5, minWidth: 210 }}
                         left={
                           <Block>
-                            {compare === monthUtils.currentMonth()
+                            {compareTo === monthUtils.currentMonth()
                               ? t('Spent {{monthYearFormatted}} MTD:', {
                                   monthYearFormatted: monthUtils.format(
-                                    compare,
+                                    compareTo,
                                     'MMM, yyyy',
                                     locale,
                                   ),
                                 })
                               : t('Spent {{monthYearFormatted}}:', {
                                   monthYearFormatted: monthUtils.format(
-                                    compare,
+                                    compareTo,
                                     'MMM, yyyy',
                                     locale,
                                   ),
