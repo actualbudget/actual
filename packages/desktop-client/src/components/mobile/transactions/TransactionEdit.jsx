@@ -482,7 +482,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const { grouped: categoryGroups } = useCategories();
 
   useEffect(() => {
-    if (history.state === null) {
+    if (window.history.length === 1) {
       window.history.replaceState(null, 'Actual Budget', '/');
       window.history.pushState(null, 'Add Transaction', '/transactions/new');
     }
