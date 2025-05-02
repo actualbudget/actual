@@ -92,7 +92,7 @@ export function useFormat() {
 
       const currency = getCurrency(currencyCode);
 
-      const space = spaceEnabled === 'true' ? ' ' : '';
+      const space = spaceEnabled === 'true' ? '\u00A0' : '';
       const position = symbolPosition || 'before';
 
       return position === 'after'

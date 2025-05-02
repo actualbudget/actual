@@ -22,6 +22,7 @@ import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
 
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 
 type NetWorthGraphProps = {
   style?: CSSProperties;
@@ -51,11 +52,12 @@ export function NetWorthGraph({
 }: NetWorthGraphProps) {
   const { t } = useTranslation();
   const privacyMode = usePrivacyMode();
+  const format = useFormat();
 
   const tickFormatter = tick => {
     const res = privacyMode
       ? '...'
-      : `${amountToCurrencyNoDecimal(Math.round(tick))}`; // Formats the tick values as strings with commas
+      : `${format(Math.round(tick), 'financial')}`; // Formats the tick values as strings with commas
 
     return res;
   };

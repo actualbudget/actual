@@ -14,7 +14,6 @@ import { useWidget } from 'loot-core/client/data-hooks/widget';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { integerToCurrency } from 'loot-core/shared/util';
 import { type TimeFrame, type NetWorthWidget } from 'loot-core/types/models';
 
 import { useDispatch } from '../../../redux';
@@ -22,6 +21,7 @@ import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
+import { useFormat } from '../../spreadsheet/useFormat';
 import { Change } from '../Change';
 import { NetWorthGraph } from '../graphs/NetWorthGraph';
 import { Header } from '../Header';
@@ -59,6 +59,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const locale = useLocale();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const format = useFormat();
 
   const accounts = useAccounts();
   const {
@@ -91,8 +92,9 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         conditions,
         conditionsOp,
         locale,
+        format,
       ),
-    [start, end, accounts, conditions, conditionsOp, locale],
+    [start, end, accounts, conditions, conditionsOp, locale, format],
   );
   const data = useReport('net_worth', reportParams);
   useEffect(() => {
@@ -252,7 +254,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
           <View
             style={{ ...styles.largeText, fontWeight: 400, marginBottom: 5 }}
           >
-            <PrivacyFilter>{integerToCurrency(data.netWorth)}</PrivacyFilter>
+            <PrivacyFilter>{format(data.netWorth, 'financial')}</PrivacyFilter>
           </View>
           <PrivacyFilter>
             <Change amount={data.totalChange} />
