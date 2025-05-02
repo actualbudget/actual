@@ -201,10 +201,10 @@ export interface ApiHandlers {
   }) => Promise<string>;
 
   'api/schedule-update': (arg: {
-    id: string;
+    id: ScheduleEntity['id'];
     conditions: Partial<RuleConditionEntity>[];
     resetNextDate?: boolean;
-  }) => Promise<string>;
+  }) => Promise<ScheduleEntity['id']>;
 
   'api/schedule-delete': (id: string) => Promise<void>;
 
