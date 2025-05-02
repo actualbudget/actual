@@ -6,7 +6,6 @@ import React, {
   type FocusEventHandler,
   type FocusEvent,
   type CSSProperties,
-  useCallback,
 } from 'react';
 
 import { Input } from '@actual-app/components/input';
@@ -23,10 +22,10 @@ type PercentInputProps = {
   value?: number;
   onFocus?: FocusEventHandler<HTMLInputElement>;
   onBlur?: FocusEventHandler<HTMLInputElement>;
-  // onChangeValue?: (value: string) => void;
+  onChangeValue?: (value: string) => void;
   onUpdatePercent?: (percent: number) => void;
   style?: CSSProperties;
-  // focused?: boolean;
+  focused?: boolean;
   disabled?: boolean;
 };
 
@@ -36,106 +35,91 @@ export function PercentInput({
   id,
   inputRef,
   value: initialValue = 0,
-  onFocus: parentOnFocus,
-  onBlur: parentOnBlur,
-  // onChangeValue,
+  onFocus,
+  onBlur,
+  onChangeValue,
   onUpdatePercent,
   style,
-  // focused,
+  focused,
   disabled = false,
 }: PercentInputProps) {
   const format = useFormat();
 
-  const [rawValue, setRawValue] = useState(() =>
-    String(clampToPercent(initialValue)),
+  const [value, setValue] = useState(() =>
+    format(clampToPercent(initialValue), 'percentage'),
   );
-  const [isFocused, setIsFocused] = useState(false);
+  useEffect(() => {
+    const clampedInitialValue = clampToPercent(initialValue);
+    if (clampedInitialValue !== initialValue) {
+      setValue(format(clampedInitialValue, 'percentage'));
+      onUpdatePercent?.(clampedInitialValue);
+    }
+  }, [initialValue, onUpdatePercent, format]);
 
   const ref = useRef<HTMLInputElement>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
 
   useEffect(() => {
-    if (!isFocused) {
-      const clampedInitialValue = clampToPercent(initialValue);
-      const initialValueStr = String(clampedInitialValue);
-      if (initialValueStr !== rawValue) {
-        setRawValue(initialValueStr);
-      }
+    if (focused) {
+      ref.current?.focus();
     }
-  }, [initialValue, isFocused]);
+  }, [focused]);
 
-  useEffect(() => {
-    const clampedInitialValue = clampToPercent(initialValue);
-    if (clampedInitialValue !== initialValue) {
-      onUpdatePercent?.(clampedInitialValue);
-    }
-  }, [initialValue, onUpdatePercent]);
-
-  const handleFocus = useCallback((e: FocusEvent<HTMLInputElement>) => {
-    setIsFocused(true);
-    setRawValue(String(clampToPercent(initialValue)));
-    e.target.select();
-    parentOnFocus?.(e);
-  }, [parentOnFocus, initialValue]);
-
-  const processValueAndUpdate = useCallback(() => {
-    const parsed = evalArithmetic(rawValue);
-    const clampedValue = clampToPercent(parsed == null || isNaN(parsed) ? 0 : parsed);
-    const clampedValueStr = String(clampedValue);
-
-    const initialClamped = clampToPercent(initialValue);
-    if (Math.abs(clampedValue - initialClamped) > 1e-9) {
-       onUpdatePercent?.(clampedValue);
+  function onSelectionChange() {
+    if (!ref.current) {
+      return;
     }
 
-    if (clampedValueStr !== rawValue) {
-        setRawValue(clampedValueStr);
+    const selectionStart = ref.current.selectionStart;
+    const selectionEnd = ref.current.selectionEnd;
+    if (
+      selectionStart === selectionEnd &&
+      selectionStart !== null &&
+      selectionStart >= ref.current.value.length
+    ) {
+      ref.current.setSelectionRange(
+        ref.current.value.length - 1,
+        ref.current.value.length - 1,
+      );
     }
-    return clampedValueStr;
-  }, [rawValue, onUpdatePercent, initialValue]);
+  }
 
-  const handleBlur = useCallback((e: FocusEvent<HTMLInputElement>) => {
-    processValueAndUpdate();
-    setIsFocused(false);
-    parentOnBlur?.(e);
-  }, [parentOnBlur, processValueAndUpdate]);
+  function onInputTextChange(val: string) {
+    const number = val.replace(/[^0-9.]/g, '');
+    setValue(number ? format(number, 'percentage') : '');
+    onChangeValue?.(number);
+  }
 
-  const handleInputTextChange = useCallback((val: string) => {
-    let number = val.replace(/[^0-9.]/g, '');
-    const decimalParts = number.split('.');
-    if (decimalParts.length > 2) {
-      number = decimalParts[0] + '.' + decimalParts.slice(1).join('');
+  function fireUpdate() {
+    const clampedValue = clampToPercent(evalArithmetic(value.replace('%', '')));
+    onUpdatePercent?.(clampedValue);
+    onInputTextChange(String(clampedValue));
+  }
+
+  function onInputAmountBlur(e: FocusEvent<HTMLInputElement>) {
+    if (!ref.current?.contains(e.relatedTarget)) {
+      fireUpdate();
     }
-    setRawValue(number);
-  }, []);
-
-  const handleKeyUp = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      processValueAndUpdate();
-      ref.current?.blur();
-    } else if (e.key === 'Escape') {
-      setRawValue(String(clampToPercent(initialValue)));
-      ref.current?.blur();
-    }
-  }, [processValueAndUpdate, initialValue]);
-
-  const displayValue = isFocused
-                         ? rawValue
-                         : format(initialValue, 'percentage');
+    onBlur?.(e);
+  }
 
   return (
     <Input
       id={id}
       inputRef={mergedRef}
       inputMode="decimal"
-      value={displayValue}
+      value={value}
       disabled={disabled}
       style={{ flex: 1, alignItems: 'stretch', ...style }}
-      onKeyUp={handleKeyUp}
-      onChangeValue={handleInputTextChange}
-      onBlur={handleBlur}
-      onFocus={handleFocus}
-      // onSelect={onSelectionChange}
+      onKeyUp={e => {
+        if (e.key === 'Enter') {
+          fireUpdate();
+        }
+      }}
+      onChangeValue={onInputTextChange}
+      onBlur={onInputAmountBlur}
+      onFocus={onFocus}
+      onSelect={onSelectionChange}
     />
   );
 }

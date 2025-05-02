@@ -1,13 +1,12 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
-import {
-  integerToAmount,
-  useCurrencyFormatter,
-} from 'loot-core/shared/currencies';
+import { getCurrency } from 'loot-core/shared/currencies';
 import {
   getNumberFormat,
-  type NumberFormats,
-} from 'loot-core/shared/number-format';
+  integerToCurrency,
+  parseNumberFormat,
+  setNumberFormat,
+} from 'loot-core/shared/util';
 
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
@@ -32,99 +31,99 @@ function format(
       }
       return val;
     case 'number':
-      if (typeof value === 'number') {
-        return formatter ? formatter.format(value) : String(value);
-      }
-      return String(value);
+      return '' + value;
     case 'percentage':
-      return (typeof value === 'number' ? value : '0') + '%';
+      return value + '%';
+    case 'financial-with-sign':
+      const formatted = format(value, 'financial', formatter);
+      if (typeof value === 'number' && value >= 0) {
+        return '+' + formatted;
+      }
+      return formatted;
     case 'financial':
-      if (value == null || value === '') {
-        value = 0;
+      if (value == null || value === '' || value === 0) {
+        return integerToCurrency(0, formatter);
+      } else if (typeof value === 'string') {
+        const parsed = parseFloat(value);
+        value = isNaN(parsed) ? 0 : parsed;
       }
 
-      let integerValue: number;
-      if (typeof value === 'number') {
-        integerValue = value;
-      } else {
-        const parsed = parseInt(String(value).replace(/[^\d-]/g, ''));
-        integerValue = isNaN(parsed) ? 0 : parsed;
+      if (typeof value !== 'number') {
+        throw new Error(
+          'Value is not a number (' + typeof value + '): ' + value,
+        );
       }
 
-      const decimalPlaces =
-        formatter?.resolvedOptions().maximumFractionDigits ?? 2;
-      const floatAmount = integerToAmount(integerValue, decimalPlaces);
-
-      return formatter ? formatter.format(floatAmount) : String(floatAmount);
+      return integerToCurrency(value, formatter);
     default:
       throw new Error('Unknown format type: ' + type);
   }
 }
 
 export function useFormat() {
-  const [numberFormatPref] = useSyncedPref('numberFormat');
-  const [hideFractionPref] = useSyncedPref('hideFraction');
-  const [currencyCodePref] = useSyncedPref('currencyCode');
-  const [symbolPositionPref] = useSyncedPref('currencySymbolPosition');
-  const [spaceEnabledPref] = useSyncedPref(
-    'currencySpaceBetweenAmountAndSymbol',
+  const [numberFormat] = useSyncedPref('numberFormat');
+  const [hideFraction] = useSyncedPref('hideFraction');
+  const [currencyCode] = useSyncedPref('currencyCode');
+  const [symbolPosition] = useSyncedPref('currencySymbolPosition');
+  const [spaceEnabled] = useSyncedPref('currencySpaceBetweenAmountAndSymbol');
+
+  const currency = useMemo(() => {
+    return getCurrency(currencyCode || '');
+  }, [currencyCode]);
+
+  const config = useMemo(
+    () => parseNumberFormat({ format: numberFormat, hideFraction }),
+    [numberFormat, hideFraction],
   );
 
-  const {
-    formatter: currencyFormatter, // The Intl.NumberFormat instance for the number part
-    currency, // The current currency object
-    applyCurrencySymbol, // The helper to add the symbol correctly
-  } = useCurrencyFormatter({
-    numberFormat: numberFormatPref,
-    hideFraction: hideFractionPref === 'true',
-    currencyCode: currencyCodePref,
-    currencySymbolPosition: symbolPositionPref,
-    currencySpaceEnabled: spaceEnabledPref,
-  });
+  // Hack: keep the global number format in sync - update the settings when
+  // the underlying configuration changes.
+  // This should be patched by moving all number-formatting utilities away from
+  // the global `getNumberFormat()` and to using the reactive `useFormat` hook.
+  useEffect(() => {
+    setNumberFormat(config);
+  }, [config]);
 
-  const genericNumberFormatter = useMemo(() => {
-    return getNumberFormat({
-      format: numberFormatPref as NumberFormats,
-    }).formatter;
-  }, [numberFormatPref]);
+  const applyCurrencyFormatting = useCallback(
+    (formattedValue: string): string => {
+      if (!currencyCode) {
+        return formattedValue;
+      }
+
+      const currency = getCurrency(currencyCode);
+
+      const space = spaceEnabled === 'true' ? ' ' : '';
+      const position = symbolPosition || 'before';
+
+      return position === 'after'
+        ? `${formattedValue}${space}${currency.symbol}`
+        : `${currency.symbol}${space}${formattedValue}`;
+    },
+    [currencyCode, symbolPosition, spaceEnabled],
+  );
 
   return useCallback(
     (value: unknown, type: FormatType = 'string') => {
       const isFinancialType =
         type === 'financial' || type === 'financial-with-sign';
 
-      let baseFormatted: string;
-      let shouldApplySymbol = false;
+      const decimalPlaces =
+        isFinancialType && currency ? currency.decimalPlaces : undefined;
 
-      if (isFinancialType) {
-        baseFormatted = format(value, 'financial', currencyFormatter);
-        shouldApplySymbol = !!currency.code;
+      const formatter = getNumberFormat({
+        format: config.format,
+        hideFraction: config.hideFraction,
+        decimalPlaces,
+      }).formatter;
 
-        if (type === 'financial-with-sign') {
-          let numericValue = 0;
-          if (typeof value === 'number') {
-            numericValue = value;
-          } else if (typeof value === 'string') {
-            // Attempt to parse integer value from string
-            numericValue = parseInt(value.replace(/[^\d-]/g, '')) || 0;
-          }
-          // Add '+' sign if non-negative
-          if (numericValue >= 0) {
-            baseFormatted = '+' + baseFormatted;
-          }
-        }
-      } else if (type === 'number') {
-        baseFormatted = format(value, 'number', genericNumberFormatter);
-      } else {
-        baseFormatted = format(value, type /*, undefined */);
-      }
+      const baseFormatted = format(value, type, formatter);
 
-      if (shouldApplySymbol) {
-        return applyCurrencySymbol(baseFormatted);
+      if (isFinancialType && currencyCode) {
+        return applyCurrencyFormatting(baseFormatted);
       }
 
       return baseFormatted;
     },
-    [currencyFormatter, currency, applyCurrencySymbol, genericNumberFormatter],
+    [config, currency, applyCurrencyFormatting, currencyCode],
   );
 }

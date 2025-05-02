@@ -51,7 +51,6 @@ import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { getCurrency } from 'loot-core/shared/currencies';
 import { currentDay } from 'loot-core/shared/months';
 import * as monthUtils from 'loot-core/shared/months';
-import { getNumberFormat } from 'loot-core/shared/number-format';
 import {
   splitTransaction,
   updateTransaction,
@@ -63,6 +62,7 @@ import {
   isPreviewId,
 } from 'loot-core/shared/transactions';
 import {
+  getNumberFormat,
   parseNumberFormat,
   integerToCurrency,
   amountToInteger,
