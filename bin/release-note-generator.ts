@@ -67,7 +67,7 @@ async function run() {
 
   const filepath = `./upcoming-release-notes/${prNumber}.md`;
   if (existsSync(filepath)) {
-    const { confirm } = await prompts({
+    const { confirm } = await prompts.prompt({
       name: 'confirm',
       type: 'confirm',
       message: `This will overwrite the existing release note ${filepath} Are you sure?`,
