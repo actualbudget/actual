@@ -8,7 +8,7 @@
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
     "build": "yarn build:dist && electron-builder",
-    "build:dist": "tsc --p tsconfig.dist.json && yarn copy-static-assets",
+    "build:dist": "tsc --p tsconfig.json && yarn copy-static-assets",
     "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* build",
     "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron .",
     "e2e": "npx playwright test"
