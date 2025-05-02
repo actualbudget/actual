@@ -17,7 +17,13 @@ import {
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
 import { Handlers } from '../types/handlers';
-import { AccountEntity, CategoryGroupEntity } from '../types/models';
+import {
+  AccountEntity,
+  CategoryGroupEntity,
+  RecurConfig,
+  RuleConditionEntity,
+  ScheduleEntity,
+} from '../types/models';
 import { ServerHandlers } from '../types/server-handlers';
 
 import { addTransactions } from './accounts/sync';
@@ -764,6 +770,59 @@ handlers['api/rule-update'] = withMutation(async function ({ rule }) {
 handlers['api/rule-delete'] = withMutation(async function (id) {
   checkFileOpen();
   return handlers['rule-delete'](id);
+});
+
+handlers['api/schedule-create'] = withMutation(async function ({
+  schedule,
+  conditions,
+}) {
+  checkFileOpen();
+  return handlers['schedule/create']({ schedule, conditions });
+});
+
+handlers['api/schedule-update'] = withMutation(async function ({
+  id,
+  conditions,
+  resetNextDate,
+}) {
+  checkFileOpen();
+  return handlers['schedule/update']({
+    schedule: { id },
+    conditions,
+    resetNextDate,
+  });
+});
+
+handlers['api/schedule-delete'] = withMutation(async function (id: string) {
+  checkFileOpen();
+  return handlers['schedule/delete']({ id });
+});
+
+handlers['api/schedule-skip-next-date'] = withMutation(async function (
+  id: string,
+) {
+  checkFileOpen();
+  return handlers['schedule/skip-next-date']({ id });
+});
+
+handlers['api/schedule-post-transaction'] = withMutation(async function (
+  id: string,
+) {
+  checkFileOpen();
+  return handlers['schedule/post-transaction']({ id });
+});
+
+handlers['api/schedule-get-upcoming-dates'] = withMutation(async function ({
+  config,
+  count,
+}) {
+  checkFileOpen();
+  return handlers['schedule/get-upcoming-dates']({ config, count });
+});
+
+handlers['api/schedule-discover'] = withMutation(async function () {
+  checkFileOpen();
+  return handlers['schedule/discover']();
 });
 
 export function installAPI(serverHandlers: ServerHandlers) {

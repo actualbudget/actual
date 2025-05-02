@@ -2,6 +2,11 @@
 import type { Handlers } from 'loot-core/types/handlers';
 
 import * as injected from './injected';
+import {
+  RecurConfig,
+  RuleConditionEntity,
+  ScheduleEntity,
+} from 'loot-core/types/models';
 
 export { q } from './app/query';
 
@@ -229,4 +234,43 @@ export function holdBudgetForNextMonth(month, amount) {
 
 export function resetBudgetHold(month) {
   return send('api/budget-reset-hold', { month });
+}
+
+export function createSchedule(
+  schedule: Partial<ScheduleEntity>,
+  conditions: Partial<RuleConditionEntity>[],
+) {
+  return send('api/schedule-create', { schedule, conditions });
+}
+
+export function updateSchedule(
+  id: string,
+  conditions: Partial<RuleConditionEntity>[],
+  resetNextDate?: boolean,
+) {
+  return send('api/schedule-update', {
+    id,
+    conditions,
+    resetNextDate,
+  });
+}
+
+export function deleteSchedule(scheduleId: string) {
+  return send('api/schedule-delete', scheduleId);
+}
+
+export function skipNextScheduleDate(scheduleId: string) {
+  return send('api/schedule-skip-next-date', scheduleId);
+}
+
+export function postScheduleTransaction(scheduleId: string) {
+  return send('api/schedule-post-transaction', scheduleId);
+}
+
+export function getUpcomingScheduleDates(config: RecurConfig, count: number) {
+  return send('api/schedule-get-upcoming-dates', { config, count });
+}
+
+export function discoverSchedules() {
+  return send('api/schedule-discover');
 }

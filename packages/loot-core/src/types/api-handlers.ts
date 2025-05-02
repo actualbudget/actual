@@ -11,7 +11,15 @@ import type {
 import { BudgetFileHandlers } from '../server/budgetfiles/app';
 import { type batchUpdateTransactions } from '../server/transactions';
 
-import type { NewRuleEntity, RuleEntity, TransactionEntity } from './models';
+import type {
+  DiscoverScheduleEntity,
+  NewRuleEntity,
+  RecurConfig,
+  RuleConditionEntity,
+  RuleEntity,
+  ScheduleEntity,
+  TransactionEntity,
+} from './models';
 
 export interface ApiHandlers {
   'api/batch-budget-start': () => Promise<unknown>;
@@ -186,4 +194,28 @@ export interface ApiHandlers {
   'api/rule-update': (arg: { rule: RuleEntity }) => Promise<RuleEntity>;
 
   'api/rule-delete': (id: string) => Promise<boolean>;
+
+  'api/schedule-create': (arg: {
+    schedule: Partial<ScheduleEntity>;
+    conditions: Partial<RuleConditionEntity>[];
+  }) => Promise<string>;
+
+  'api/schedule-update': (arg: {
+    id: string;
+    conditions: Partial<RuleConditionEntity>[];
+    resetNextDate?: boolean;
+  }) => Promise<string>;
+
+  'api/schedule-delete': (id: string) => Promise<void>;
+
+  'api/schedule-skip-next-date': (id: string) => Promise<void>;
+
+  'api/schedule-post-transaction': (id: string) => Promise<void>;
+
+  'api/schedule-get-upcoming-dates': (arg: {
+    config: RecurConfig;
+    count: number;
+  }) => Promise<string[]>;
+
+  'api/schedule-discover': () => Promise<DiscoverScheduleEntity[]>;
 }

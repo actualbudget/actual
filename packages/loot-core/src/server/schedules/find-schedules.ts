@@ -12,6 +12,7 @@ import * as db from '../db';
 import { fromDateRepr } from '../models';
 import { conditionsToAQL } from '../transactions/transaction-rules';
 import { Schedule as RSchedule } from '../util/rschedule';
+import { DiscoverScheduleEntity, ScheduleEntity } from 'loot-core/types/models';
 
 function takeDates(config) {
   const schedule = new RSchedule({ rrules: recurConfigToRSchedule(config) });
