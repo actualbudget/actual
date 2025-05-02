@@ -255,7 +255,7 @@ export function updateSchedule(
   });
 }
 
-export function deleteSchedule(id: ScheduleEntity['id']) {
+export function deleteSchedule(scheduleId: ScheduleEntity['id']) {
   return send('api/schedule-delete', scheduleId);
 }
 
