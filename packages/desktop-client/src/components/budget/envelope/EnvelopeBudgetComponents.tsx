@@ -20,10 +20,10 @@ import { envelopeBudget } from 'loot-core/client/queries';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { getCurrency } from 'loot-core/shared/currencies';
 import * as monthUtils from 'loot-core/shared/months';
-import { getNumberFormat } from 'loot-core/shared/number-format';
 import {
   integerToCurrency,
   amountToInteger,
+  getNumberFormat,
   parseNumberFormat,
 } from 'loot-core/shared/util';
 import {

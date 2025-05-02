@@ -1,12 +1,6 @@
 // @ts-strict-ignore
 import { formatDistanceToNow } from 'date-fns';
 
-import {
-  getNumberFormat,
-  isNumberFormat,
-  NumberFormats,
-} from './number-format';
-
 export function last<T>(arr: Array<T>) {
   return arr[arr.length - 1];
 }
@@ -221,12 +215,7 @@ export function appendDecimals(
   amountText: string,
   hideDecimals = false,
 ): string {
-  const { formatter } = getNumberFormat();
-
-  const parts = formatter.formatToParts(1.1);
-  const decimalPart = parts.find(part => part.type === 'decimal');
-  const separator = decimalPart ? decimalPart.value : '.';
-
+  const { decimalSeparator: separator } = getNumberFormat();
   let result = amountText;
   if (result.slice(-1) === separator) {
     result = result.slice(0, -1);
@@ -237,13 +226,22 @@ export function appendDecimals(
     result = result.padStart(3, '0');
     result = result.slice(0, -2) + separator + result.slice(-2);
   }
+  return amountToCurrency(currencyToAmount(result));
+}
 
-  const numericAmount = currencyToAmount(result);
-  if (numericAmount === null) {
-    amountToCurrency(0);
-  }
+const NUMBER_FORMATS = [
+  'comma-dot',
+  'dot-comma',
+  'space-comma',
+  'apostrophe-dot',
+  'comma-dot',
+  'comma-dot-in',
+] as const;
 
-  return amountToCurrency(numericAmount);
+type NumberFormats = (typeof NUMBER_FORMATS)[number];
+
+function isNumberFormat(input: string = ''): input is NumberFormats {
+  return (NUMBER_FORMATS as readonly string[]).includes(input);
 }
 
 export const numberFormats: Array<{
@@ -258,6 +256,14 @@ export const numberFormats: Array<{
   { value: 'comma-dot-in', label: '1,00,000.33', labelNoFraction: '1,00,000' },
 ];
 
+let numberFormatConfig: {
+  format: NumberFormats;
+  hideFraction: boolean;
+} = {
+  format: 'comma-dot',
+  hideFraction: false,
+};
+
 export function parseNumberFormat({
   format,
   hideFraction,
@@ -268,6 +274,68 @@ export function parseNumberFormat({
   return {
     format: isNumberFormat(format) ? format : 'comma-dot',
     hideFraction: String(hideFraction) === 'true',
+  };
+}
+
+export function setNumberFormat(config: typeof numberFormatConfig) {
+  numberFormatConfig = config;
+}
+
+export function getNumberFormat({
+  format,
+  hideFraction,
+  decimalPlaces,
+}: {
+  format?: NumberFormats;
+  hideFraction: boolean;
+  decimalPlaces?: number;
+} = numberFormatConfig) {
+  let locale, thousandsSeparator, decimalSeparator;
+
+  switch (format) {
+    case 'space-comma':
+      locale = 'en-SE';
+      thousandsSeparator = '\xa0';
+      decimalSeparator = ',';
+      break;
+    case 'dot-comma':
+      locale = 'de-DE';
+      thousandsSeparator = '.';
+      decimalSeparator = ',';
+      break;
+    case 'apostrophe-dot':
+      locale = 'de-CH';
+      thousandsSeparator = '’';
+      decimalSeparator = '.';
+      break;
+    case 'comma-dot-in':
+      locale = 'en-IN';
+      thousandsSeparator = ',';
+      decimalSeparator = '.';
+      break;
+    case 'comma-dot':
+    default:
+      locale = 'en-US';
+      thousandsSeparator = ',';
+      decimalSeparator = '.';
+  }
+
+  let digits = 2;
+
+  if (hideFraction) {
+    digits = 0;
+  } else if (decimalPlaces !== undefined) {
+    digits = decimalPlaces;
+  }
+
+  return {
+    value: format,
+    thousandsSeparator,
+    decimalSeparator,
+    formatter: new Intl.NumberFormat(locale, {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    }),
   };
 }
 
@@ -337,6 +405,7 @@ export function amountToCurrency(
 export function amountToCurrencyNoDecimal(
   amount: Amount,
   formatter = getNumberFormat({
+    ...numberFormatConfig,
     hideFraction: true,
   }).formatter,
 ): CurrencyAmount {
@@ -344,36 +413,24 @@ export function amountToCurrencyNoDecimal(
 }
 
 export function currencyToAmount(currencyAmount: string): Amount | null {
-  let integer: string, fraction: string;
+  let integer, fraction;
 
-  const { formatter } = getNumberFormat();
-  const parts = formatter.formatToParts(1000.1);
-  const groupingSeparator = parts.find(p => p.type === 'group')?.value || ',';
-
-  const cleanedAmount = currencyAmount.replace(/[^\d.,-]/g, '');
-
-  const match = cleanedAmount.match(/[,.](?=[^.,]*$)/);
+  // match the last dot or comma in the string
+  const match = currencyAmount.match(/[,.](?=[^.,]*$)/);
 
   if (
     !match ||
-    (match[0] === groupingSeparator &&
-      match.index !== undefined &&
-      cleanedAmount.length - (match.index + 1) > 2)
+    (match[0] === getNumberFormat().thousandsSeparator &&
+      match.index + 4 <= currencyAmount.length)
   ) {
     fraction = null;
-    integer = cleanedAmount.replace(/[^\d-]/g, '');
+    integer = currencyAmount.replace(/[^\d-]/g, '');
   } else {
-    integer = cleanedAmount.slice(0, match.index).replace(/[^\d-]/g, '');
-    fraction = cleanedAmount.slice(match.index + 1).replace(/[^\d]/g, '');
+    integer = currencyAmount.slice(0, match.index).replace(/[^\d-]/g, '');
+    fraction = currencyAmount.slice(match.index + 1);
   }
 
-  if ((integer === '' || integer === '-') && (!fraction || fraction === '')) {
-    return null;
-  }
-
-  const numberString = integer + '.' + (fraction || '0');
-  const amount = parseFloat(numberString);
-
+  const amount = parseFloat(integer + '.' + fraction);
   return isNaN(amount) ? null : amount;
 }
 
