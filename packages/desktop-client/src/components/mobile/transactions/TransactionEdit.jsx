@@ -483,8 +483,8 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   useEffect(() => {
     if (history.state === null) {
-      history.replaceState(null, 'Actual Budget', '/');
-      history.pushState(null, 'Add Transaction', '/transactions/new');
+      window.history.replaceState(null, 'Actual Budget', '/');
+      window.history.pushState(null, 'Add Transaction', '/transactions/new');
     }
   }, []);
 
