@@ -1,12 +1,12 @@
 // @ts-strict-ignore
 import type { Handlers } from 'loot-core/types/handlers';
-
-import * as injected from './injected';
 import {
   RecurConfig,
   RuleConditionEntity,
   ScheduleEntity,
 } from 'loot-core/types/models';
+
+import * as injected from './injected';
 
 export { q } from './app/query';
 

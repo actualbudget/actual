@@ -17,13 +17,7 @@ import {
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
 import { Handlers } from '../types/handlers';
-import {
-  AccountEntity,
-  CategoryGroupEntity,
-  RecurConfig,
-  RuleConditionEntity,
-  ScheduleEntity,
-} from '../types/models';
+import { AccountEntity, CategoryGroupEntity } from '../types/models';
 import { ServerHandlers } from '../types/server-handlers';
 
 import { addTransactions } from './accounts/sync';
