@@ -11,10 +11,24 @@ import {
 type FocusableElement = HTMLElement;
 
 type InitialFocusProps = {
+  /**
+   * The child element to focus when the component mounts. This can be either a single React element or a function that returns a React element.
+   */
   children: ReactElement | ((node: Ref<HTMLInputElement>) => ReactElement);
+  /**
+   * Whether to select the text in the input or textarea element when focused.
+   */
   selectText?: boolean;
 };
 
+/**
+ * InitialFocus sets focus on its child element
+ * when it mounts. It can also optionally select the text within an
+ * input or textarea element.
+ * @param {Object} props - The component props.
+ * @param {ReactElement | function} props.children - A single React element or a function that returns a React element.
+ * @param {boolean} props.selectText=false - Whether to select the text in the input or textarea element.
+ */
 export function InitialFocus({ children, selectText }: InitialFocusProps) {
   const node = useRef<FocusableElement>(null);
 
