@@ -48,6 +48,44 @@ describe('InitialFocus', () => {
     expect(document.activeElement).not.toBe(unfocusedTextarea);
   });
 
+  it('should select text in an input if selectTextIfInput is true', async () => {
+    const component = render(
+      <View>
+        <InitialFocus selectTextIfInput>
+          <input type="text" title="focused" defaultValue="Hello World" />
+        </InitialFocus>
+        <input type="text" title="unfocused" />
+      </View>,
+    );
+
+    // This is needed bc of the `setTimeout` in the `InitialFocus` component.
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    const input = component.getByTitle('focused') as HTMLInputElement;
+    expect(document.activeElement).toBe(input);
+    expect(input.selectionStart).toBe(0);
+    expect(input.selectionEnd).toBe(11); // Length of "Hello World"
+  });
+
+  it('should not select text in an input if selectTextIfInput is false', async () => {
+    const component = render(
+      <View>
+        <InitialFocus>
+          <input type="text" title="focused" defaultValue="Hello World" />
+        </InitialFocus>
+        <input type="text" title="unfocused" />
+      </View>,
+    );
+
+    // This is needed bc of the `setTimeout` in the `InitialFocus` component.
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    const input = component.getByTitle('focused') as HTMLInputElement;
+    expect(document.activeElement).toBe(input);
+    expect(input.selectionStart).toBe(11); // No selection should be made
+    expect(input.selectionEnd).toBe(11);
+  });
+
   it('should focus a button', async () => {
     const component = render(
       <View>
