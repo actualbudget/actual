@@ -3,6 +3,7 @@ import {
   cloneElement,
   isValidElement,
   type ReactElement,
+  Ref,
   useEffect,
   useRef,
 } from 'react';
@@ -10,7 +11,7 @@ import {
 type FocusableElement = HTMLElement;
 
 type InitialFocusProps = {
-  children: ReactElement;
+  children: ReactElement | ((node: Ref<HTMLInputElement>) => ReactElement);
   selectTextIfInput?: boolean;
 };
 
@@ -39,6 +40,10 @@ export function InitialFocus({
       }, 0);
     }
   }, [selectTextIfInput]);
+
+  if (typeof children === 'function') {
+    return children(node as Ref<HTMLInputElement>);
+  }
 
   const child = Children.only(children);
   if (isValidElement(child)) {

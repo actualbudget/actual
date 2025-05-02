@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { forwardRef } from 'react';
 
 import { render } from '@testing-library/react';
 
@@ -105,5 +106,29 @@ describe('InitialFocus', () => {
     ) as HTMLButtonElement;
     expect(document.activeElement).toBe(button);
     expect(document.activeElement).not.toBe(unfocusedButton);
+  });
+
+  it('should focus a custom component with ref forwarding', async () => {
+    const CustomInput = forwardRef<HTMLInputElement>((props, ref) => (
+      <input type="text" ref={ref} {...props} title="focused" />
+    ));
+    CustomInput.displayName = 'CustomInput';
+
+    const component = render(
+      <View>
+        <InitialFocus>{node => <CustomInput ref={node} />}</InitialFocus>
+        <input type="text" title="unfocused" />
+      </View>,
+    );
+
+    // This is needed bc of the `setTimeout` in the `InitialFocus` component.
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    const input = component.getByTitle('focused') as HTMLInputElement;
+    const unfocusedInput = component.getByTitle(
+      'unfocused',
+    ) as HTMLInputElement;
+    expect(document.activeElement).toBe(input);
+    expect(document.activeElement).not.toBe(unfocusedInput);
   });
 });
