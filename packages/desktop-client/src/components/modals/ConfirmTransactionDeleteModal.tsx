@@ -55,16 +55,19 @@ export function ConfirmTransactionDeleteModal({
                 {t('Cancel')}
               </Button>
               <InitialFocus>
-                <Button
-                  variant="primary"
-                  style={narrowButtonStyle}
-                  onPress={() => {
-                    onConfirm();
-                    close();
-                  }}
-                >
-                  {t('Delete')}
-                </Button>
+                {node => (
+                  <Button
+                    variant="primary"
+                    style={narrowButtonStyle}
+                    onPress={() => {
+                      onConfirm();
+                      close();
+                    }}
+                    ref={node}
+                  >
+                    {t('Delete')}
+                  </Button>
+                )}
               </InitialFocus>
             </View>
           </View>

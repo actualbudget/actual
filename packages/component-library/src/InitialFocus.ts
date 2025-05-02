@@ -1,7 +1,7 @@
 import {
+  cloneElement,
   type ReactElement,
   type Ref,
-  cloneElement,
   useEffect,
   useRef,
 } from 'react';
@@ -23,7 +23,12 @@ export function InitialFocus({ children }: InitialFocusProps) {
       setTimeout(() => {
         if (node.current) {
           node.current.focus();
-          node.current.setSelectionRange(0, 10000);
+          if (
+            node.current instanceof HTMLInputElement ||
+            node.current instanceof HTMLTextAreaElement
+          ) {
+            node.current.setSelectionRange(0, 10000);
+          }
         }
       }, 0);
     }
