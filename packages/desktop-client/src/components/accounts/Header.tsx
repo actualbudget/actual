@@ -598,7 +598,7 @@ function AccountNameField({
   if (editingName) {
     return (
       <Fragment>
-        <InitialFocus selectTextIfInput>
+        <InitialFocus selectText>
           <Input
             defaultValue={accountName}
             onEnter={e => handleSave(e.currentTarget.value)}

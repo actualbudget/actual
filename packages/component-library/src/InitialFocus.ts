@@ -12,13 +12,10 @@ type FocusableElement = HTMLElement;
 
 type InitialFocusProps = {
   children: ReactElement | ((node: Ref<HTMLInputElement>) => ReactElement);
-  selectTextIfInput?: boolean;
+  selectText?: boolean;
 };
 
-export function InitialFocus({
-  children,
-  selectTextIfInput,
-}: InitialFocusProps) {
+export function InitialFocus({ children, selectText }: InitialFocusProps) {
   const node = useRef<FocusableElement>(null);
 
   useEffect(() => {
@@ -30,7 +27,7 @@ export function InitialFocus({
         if (node.current) {
           node.current.focus();
           if (
-            selectTextIfInput &&
+            selectText &&
             (node.current instanceof HTMLInputElement ||
               node.current instanceof HTMLTextAreaElement)
           ) {
@@ -39,7 +36,7 @@ export function InitialFocus({
         }
       }, 0);
     }
-  }, [selectTextIfInput]);
+  }, [selectText]);
 
   if (typeof children === 'function') {
     return children(node as Ref<HTMLInputElement>);

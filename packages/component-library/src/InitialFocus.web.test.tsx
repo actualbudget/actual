@@ -52,7 +52,7 @@ describe('InitialFocus', () => {
   it('should select text in an input if selectTextIfInput is true', async () => {
     const component = render(
       <View>
-        <InitialFocus selectTextIfInput>
+        <InitialFocus selectText>
           <input type="text" title="focused" defaultValue="Hello World" />
         </InitialFocus>
         <input type="text" title="unfocused" />
