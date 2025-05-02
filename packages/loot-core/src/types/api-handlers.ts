@@ -198,7 +198,7 @@ export interface ApiHandlers {
   'api/schedule-create': (arg: {
     schedule: Partial<ScheduleEntity>;
     conditions: Partial<RuleConditionEntity>[];
-  }) => Promise<string>;
+  }) => Promise<ScheduleEntity['id']>;
 
   'api/schedule-update': (arg: {
     id: ScheduleEntity['id'];
