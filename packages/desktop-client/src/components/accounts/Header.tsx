@@ -1,9 +1,9 @@
 import React, {
-  useState,
-  useRef,
+  type ComponentProps,
   Fragment,
   type ReactNode,
-  type ComponentProps,
+  useRef,
+  useState,
 } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -54,7 +54,7 @@ import { SelectedTransactionsButton } from '../transactions/SelectedTransactions
 
 import { type TableRef } from './Account';
 import { Balances } from './Balance';
-import { ReconcilingMessage, ReconcileMenu } from './Reconcile';
+import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
 
 type AccountHeaderProps = {
   tableRef: TableRef;
@@ -598,7 +598,7 @@ function AccountNameField({
   if (editingName) {
     return (
       <Fragment>
-        <InitialFocus>
+        <InitialFocus selectTextIfInput>
           <Input
             defaultValue={accountName}
             onEnter={e => handleSave(e.currentTarget.value)}

@@ -28,13 +28,13 @@ import { useDispatch } from '../../redux';
 import { Link } from '../common/Link';
 import { Notes } from '../Notes';
 import {
-  useDraggable,
-  useDroppable,
   DropHighlight,
   type OnDragChangeCallback,
   type OnDropCallback,
+  useDraggable,
+  useDroppable,
 } from '../sort';
-import { type SheetFields, type Binding } from '../spreadsheet';
+import { type Binding, type SheetFields } from '../spreadsheet';
 import { CellValue } from '../spreadsheet/CellValue';
 
 export const accountNameStyle: CSSProperties = {
@@ -189,7 +189,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
               }
               left={
                 isEditing ? (
-                  <InitialFocus>
+                  <InitialFocus selectTextIfInput>
                     <Input
                       style={{
                         padding: 0,
