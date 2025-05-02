@@ -244,7 +244,7 @@ export function createSchedule(
 }
 
 export function updateSchedule(
-  id: string,
+  id: ScheduleEntity['id'],
   conditions: Partial<RuleConditionEntity>[],
   resetNextDate?: boolean,
 ) {
