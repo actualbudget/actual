@@ -8,7 +8,7 @@ import { Page } from '../../Page';
 
 import { UserDirectory } from './UserDirectory';
 
-import { useNavigate } from '@hooks/useNavigate';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 export function UserDirectoryPage({
   bottomContent,

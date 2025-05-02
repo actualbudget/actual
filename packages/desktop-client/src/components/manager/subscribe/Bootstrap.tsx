@@ -18,7 +18,7 @@ import { useRefreshLoginMethods } from '../../ServerContext';
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
-import { useNavigate } from '@hooks/useNavigate';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 export function Bootstrap() {
   const { t } = useTranslation();

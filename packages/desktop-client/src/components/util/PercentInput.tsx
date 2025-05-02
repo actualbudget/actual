@@ -14,7 +14,7 @@ import { evalArithmetic } from 'loot-core/shared/arithmetic';
 
 import { useFormat } from '../spreadsheet/useFormat';
 
-import { useMergedRefs } from '@hooks/useMergedRefs';
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 
 type PercentInputProps = {
   id?: string;

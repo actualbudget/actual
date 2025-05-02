@@ -36,8 +36,8 @@ import { useSheetValue } from '../spreadsheet/useSheetValue';
 import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
 
-import { useCategories } from '@hooks/useCategories';
-import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type CategoryAutocompleteItem = Omit<CategoryEntity, 'group'> & {
   group?: CategoryGroupEntity;

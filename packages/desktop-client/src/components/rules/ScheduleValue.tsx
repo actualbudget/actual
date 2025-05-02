@@ -11,7 +11,7 @@ import { type ScheduleEntity } from 'loot-core/types/models';
 
 import { Value } from './Value';
 
-import { usePayees } from '@hooks/usePayees';
+import { usePayees } from '@desktop-client/hooks/usePayees';
 
 type ScheduleValueProps = {
   value: ScheduleEntity;

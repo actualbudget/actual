@@ -15,7 +15,7 @@ import { useDispatch } from '../../../redux';
 import { Checkbox } from '../../forms';
 import { Row, Cell } from '../../table';
 
-import { useMetadataPref } from '@hooks/useMetadataPref';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 type UserAccessProps = {
   access: UserAvailable;

@@ -21,7 +21,7 @@ import {
 } from '../common/Modal';
 import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
 
-import { useCategory } from '@hooks/useCategory';
+import { useCategory } from '@desktop-client/hooks/useCategory';
 
 type TrackingBudgetMenuModalProps = Omit<
   Extract<ModalType, { name: 'tracking-budget-menu' }>['options'],

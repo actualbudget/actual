@@ -27,8 +27,8 @@ import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 
-import { useAccounts } from '@hooks/useAccounts';
-import { useCategories } from '@hooks/useCategories';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
 
 function needsCategory(
   account: AccountEntity,

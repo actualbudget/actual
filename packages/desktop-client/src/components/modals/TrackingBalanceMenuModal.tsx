@@ -22,7 +22,7 @@ import {
 } from '../common/Modal';
 import { CellValueText } from '../spreadsheet/CellValue';
 
-import { useCategory } from '@hooks/useCategory';
+import { useCategory } from '@desktop-client/hooks/useCategory';
 
 type TrackingBalanceMenuModalProps = Omit<
   Extract<ModalType, { name: 'tracking-balance-menu' }>['options'],

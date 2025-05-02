@@ -32,7 +32,7 @@ import { Login } from './subscribe/Login';
 import { OpenIdCallback } from './subscribe/OpenIdCallback';
 import { WelcomeScreen } from './WelcomeScreen';
 
-import { useMetaThemeColor } from '@hooks/useMetaThemeColor';
+import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
 
 function Version() {
   const version = useServerVersion();

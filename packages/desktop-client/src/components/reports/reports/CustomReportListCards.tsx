@@ -22,10 +22,10 @@ import { ReportCardName } from '../ReportCardName';
 import { GetCardData } from './GetCardData';
 import { MissingReportCard } from './MissingReportCard';
 
-import { useAccounts } from '@hooks/useAccounts';
-import { useCategories } from '@hooks/useCategories';
-import { usePayees } from '@hooks/usePayees';
-import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { usePayees } from '@desktop-client/hooks/usePayees';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type CustomReportListCardsProps = {
   isEditing?: boolean;

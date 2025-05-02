@@ -19,7 +19,10 @@ import { PullToRefresh } from '../PullToRefresh';
 
 import { TransactionList } from './TransactionList';
 
-import { SelectedProvider, useSelected } from '@hooks/useSelected';
+import {
+  SelectedProvider,
+  useSelected,
+} from '@desktop-client/hooks/useSelected';
 
 type TransactionSearchInputProps = {
   placeholder: string;

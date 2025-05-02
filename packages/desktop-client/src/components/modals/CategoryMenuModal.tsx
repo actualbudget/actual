@@ -28,9 +28,9 @@ import {
 } from '../common/Modal';
 import { Notes } from '../Notes';
 
-import { useCategory } from '@hooks/useCategory';
-import { useCategoryGroup } from '@hooks/useCategoryGroup';
-import { useNotes } from '@hooks/useNotes';
+import { useCategory } from '@desktop-client/hooks/useCategory';
+import { useCategoryGroup } from '@desktop-client/hooks/useCategoryGroup';
+import { useNotes } from '@desktop-client/hooks/useNotes';
 
 type CategoryMenuModalProps = Extract<
   ModalType,

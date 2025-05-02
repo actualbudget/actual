@@ -19,9 +19,9 @@ import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponen
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
-import { useCategories } from '@hooks/useCategories';
-import { useLocale } from '@hooks/useLocale';
-import { useUndo } from '@hooks/useUndo';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 
 type EnvelopeBudgetSummaryModalProps = Extract<
   ModalType,

@@ -31,11 +31,11 @@ import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-wo
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
-import { useAccounts } from '@hooks/useAccounts';
-import { useFilters } from '@hooks/useFilters';
-import { useLocale } from '@hooks/useLocale';
-import { useNavigate } from '@hooks/useNavigate';
-import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useFilters } from '@desktop-client/hooks/useFilters';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function NetWorth() {
   const params = useParams();

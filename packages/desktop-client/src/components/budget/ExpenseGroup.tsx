@@ -17,7 +17,7 @@ import { Row, ROW_HEIGHT } from '../table';
 import { RenderMonths } from './RenderMonths';
 import { SidebarGroup } from './SidebarGroup';
 
-import { useDragRef } from '@hooks/useDragRef';
+import { useDragRef } from '@desktop-client/hooks/useDragRef';
 
 type ExpenseGroupProps = {
   group: ComponentProps<typeof SidebarGroup>['group'];

@@ -20,7 +20,7 @@ import { CellValue, CellValueText } from '../spreadsheet/CellValue';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
-import { useSelectedItems } from '@hooks/useSelected';
+import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 
 type DetailedBalanceProps = {
   name: string;

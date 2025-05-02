@@ -18,7 +18,7 @@ import { useSelector, useDispatch } from '../../redux';
 import { Information } from '../alerts';
 import { Modal, ModalButtons } from '../common/Modal';
 
-import { usePayees } from '@hooks/usePayees';
+import { usePayees } from '@desktop-client/hooks/usePayees';
 
 const highlightStyle = { color: theme.pageTextPositive };
 

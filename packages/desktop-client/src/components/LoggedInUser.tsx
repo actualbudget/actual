@@ -23,8 +23,8 @@ import { useSelector, useDispatch } from '../redux';
 import { PrivacyFilter } from './PrivacyFilter';
 import { useMultiuserEnabled, useServerURL } from './ServerContext';
 
-import { useMetadataPref } from '@hooks/useMetadataPref';
-import { useNavigate } from '@hooks/useNavigate';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;

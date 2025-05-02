@@ -15,7 +15,7 @@ import { useDispatch } from '../../../redux';
 import { Link } from '../../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 
-import { useNavigate } from '@hooks/useNavigate';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 function getErrorMessage(error: string): string {
   switch (error) {

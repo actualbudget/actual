@@ -9,7 +9,7 @@ import * as d from 'date-fns';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { useLocale } from '@hooks/useLocale';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type DateRangeProps = {
   start: string;

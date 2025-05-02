@@ -16,7 +16,7 @@ import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Row, Cell } from '../table';
 
-import { useMetadataPref } from '@hooks/useMetadataPref';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 type BackupTableProps = {
   backups: Backup[];

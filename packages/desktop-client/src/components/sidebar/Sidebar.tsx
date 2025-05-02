@@ -21,9 +21,9 @@ import { SecondaryButtons } from './SecondaryButtons';
 import { useSidebar } from './SidebarProvider';
 import { ToggleButton } from './ToggleButton';
 
-import { useGlobalPref } from '@hooks/useGlobalPref';
-import { useLocalPref } from '@hooks/useLocalPref';
-import { useResizeObserver } from '@hooks/useResizeObserver';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 export function Sidebar() {
   const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';

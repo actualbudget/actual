@@ -21,7 +21,7 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { chartTheme } from '../chart-theme';
 
-import { useResizeObserver } from '@hooks/useResizeObserver';
+import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 type CalendarGraphProps = {
   data: {

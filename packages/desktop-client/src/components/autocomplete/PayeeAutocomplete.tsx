@@ -38,8 +38,8 @@ import {
 } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
 
-import { useAccounts } from '@hooks/useAccounts';
-import { useCommonPayees, usePayees } from '@hooks/usePayees';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCommonPayees, usePayees } from '@desktop-client/hooks/usePayees';
 
 export type PayeeAutocompleteItem = PayeeEntity;
 

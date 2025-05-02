@@ -21,7 +21,7 @@ import { PrivacyFilter } from '../PrivacyFilter';
 
 import { ReportOptions } from './ReportOptions';
 
-import { useLocale } from '@hooks/useLocale';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type ReportSummaryProps = {
   startDate: string;

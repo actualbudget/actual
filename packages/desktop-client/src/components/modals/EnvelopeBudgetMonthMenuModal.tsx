@@ -20,9 +20,9 @@ import { BudgetMonthMenu } from '../budget/envelope/budgetsummary/BudgetMonthMen
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Notes } from '../Notes';
 
-import { useLocale } from '@hooks/useLocale';
-import { useNotes } from '@hooks/useNotes';
-import { useUndo } from '@hooks/useUndo';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useNotes } from '@desktop-client/hooks/useNotes';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 
 type EnvelopeBudgetMonthMenuModalProps = Extract<
   ModalType,

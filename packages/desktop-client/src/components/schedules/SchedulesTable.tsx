@@ -27,10 +27,10 @@ import { DisplayId } from '../util/DisplayId';
 
 import { StatusBadge } from './StatusBadge';
 
-import { useAccounts } from '@hooks/useAccounts';
-import { useContextMenu } from '@hooks/useContextMenu';
-import { useDateFormat } from '@hooks/useDateFormat';
-import { usePayees } from '@hooks/usePayees';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { usePayees } from '@desktop-client/hooks/usePayees';
 
 type SchedulesTableProps = {
   isLoading?: boolean;

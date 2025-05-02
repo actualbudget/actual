@@ -33,11 +33,11 @@ import * as trackingBudget from './tracking/TrackingBudgetComponents';
 import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
 import { prewarmAllMonths, prewarmMonth } from './util';
 
-import { useCategories } from '@hooks/useCategories';
-import { useGlobalPref } from '@hooks/useGlobalPref';
-import { useLocalPref } from '@hooks/useLocalPref';
-import { useNavigate } from '@hooks/useNavigate';
-import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type TrackingReportComponents = {
   SummaryComponent: typeof trackingBudget.BudgetSummary;

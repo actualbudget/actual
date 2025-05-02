@@ -32,9 +32,9 @@ import {
 import { Notes } from '../Notes';
 import { validateAccountName } from '../util/accountValidation';
 
-import { useAccount } from '@hooks/useAccount';
-import { useAccounts } from '@hooks/useAccounts';
-import { useNotes } from '@hooks/useNotes';
+import { useAccount } from '@desktop-client/hooks/useAccount';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useNotes } from '@desktop-client/hooks/useNotes';
 
 type AccountMenuModalProps = Extract<
   ModalType,

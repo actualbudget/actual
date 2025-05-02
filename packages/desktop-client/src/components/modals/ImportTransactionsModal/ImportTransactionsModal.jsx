@@ -37,9 +37,9 @@ import {
   stripCsvImportTransaction,
 } from './utils';
 
-import { useCategories } from '@hooks/useCategories';
-import { useDateFormat } from '@hooks/useDateFormat';
-import { useSyncedPrefs } from '@hooks/useSyncedPrefs';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useSyncedPrefs } from '@desktop-client/hooks/useSyncedPrefs';
 
 function getFileType(filepath) {
   const m = filepath.match(/\.([^.]*)$/);

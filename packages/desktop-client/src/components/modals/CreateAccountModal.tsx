@@ -28,11 +28,11 @@ import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { useMultiuserEnabled } from '../ServerContext';
 
-import { useFeatureFlag } from '@hooks/useFeatureFlag';
-import { useGoCardlessStatus } from '@hooks/useGoCardlessStatus';
-import { usePluggyAiStatus } from '@hooks/usePluggyAiStatus';
-import { useSimpleFinStatus } from '@hooks/useSimpleFinStatus';
-import { useSyncServerStatus } from '@hooks/useSyncServerStatus';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
+import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
+import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
+import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 type CreateAccountModalProps = Extract<
   ModalType,

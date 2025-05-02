@@ -12,7 +12,7 @@ import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 
-import { useLocalPref } from '@hooks/useLocalPref';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 
 type BudgetPageMenuModalProps = Extract<
   ModalType,

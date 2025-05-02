@@ -8,7 +8,7 @@ import { Link } from '../common/Link';
 
 import { Setting } from './UI';
 
-import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function BudgetTypeSettings() {
   const [budgetType = 'rollover', setBudgetType] = useSyncedPref('budgetType');

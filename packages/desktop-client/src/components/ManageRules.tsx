@@ -34,10 +34,13 @@ import { Search } from './common/Search';
 import { RulesHeader } from './rules/RulesHeader';
 import { RulesList } from './rules/RulesList';
 
-import { useAccounts } from '@hooks/useAccounts';
-import { useCategories } from '@hooks/useCategories';
-import { usePayees } from '@hooks/usePayees';
-import { useSelected, SelectedProvider } from '@hooks/useSelected';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { usePayees } from '@desktop-client/hooks/usePayees';
+import {
+  useSelected,
+  SelectedProvider,
+} from '@desktop-client/hooks/useSelected';
 
 function mapValue(
   field,

@@ -29,7 +29,7 @@ import { Container } from '../Container';
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 
-import { usePrivacyMode } from '@hooks/usePrivacyMode';
+import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type PayloadItem = {
   payload: {

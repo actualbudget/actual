@@ -5,8 +5,8 @@ import * as monthUtils from 'loot-core/shared/months';
 
 import { CategoryTransactions } from './CategoryTransactions';
 
-import { useCategories } from '@hooks/useCategories';
-import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function Category() {
   const [_numberFormat] = useSyncedPref('numberFormat');

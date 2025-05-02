@@ -35,7 +35,7 @@ import { Search } from '../../common/Search';
 import { UserAccessHeader } from './UserAccessHeader';
 import { UserAccessRow } from './UserAccessRow';
 
-import { useMetadataPref } from '@hooks/useMetadataPref';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 type ManageUserAccessContentProps = {
   isModal: boolean;

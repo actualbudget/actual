@@ -36,10 +36,10 @@ import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 
-import { useAccounts } from '@hooks/useAccounts';
-import { useCategories } from '@hooks/useCategories';
-import { useNavigate } from '@hooks/useNavigate';
-import { usePrivacyMode } from '@hooks/usePrivacyMode';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type PayloadChild = {
   props: {

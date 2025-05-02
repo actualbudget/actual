@@ -23,10 +23,13 @@ import { type TransactionEntity } from 'loot-core/types/models';
 import { Cell, Field, Row, SelectCell, Table } from '../table';
 import { DisplayId } from '../util/DisplayId';
 
-import { useAccount } from '@hooks/useAccount';
-import { useCategory } from '@hooks/useCategory';
-import { useDateFormat } from '@hooks/useDateFormat';
-import { useSelectedItems, useSelectedDispatch } from '@hooks/useSelected';
+import { useAccount } from '@desktop-client/hooks/useAccount';
+import { useCategory } from '@desktop-client/hooks/useCategory';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import {
+  useSelectedItems,
+  useSelectedDispatch,
+} from '@desktop-client/hooks/useSelected';
 
 function serializeTransaction(
   transaction: TransactionEntity,

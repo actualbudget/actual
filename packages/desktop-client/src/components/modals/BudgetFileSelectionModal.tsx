@@ -8,7 +8,7 @@ import { useSelector } from '../../redux';
 import { Modal, ModalHeader, ModalCloseButton } from '../common/Modal';
 import { BudgetFileSelection } from '../manager/BudgetFileSelection';
 
-import { useMetadataPref } from '@hooks/useMetadataPref';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 export function BudgetFileSelectionModal() {
   const { t } = useTranslation();

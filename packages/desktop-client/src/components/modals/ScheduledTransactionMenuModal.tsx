@@ -27,7 +27,7 @@ import {
   ModalTitle,
 } from '../common/Modal';
 
-import { useLocale } from '@hooks/useLocale';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type ScheduledTransactionMenuModalProps = Extract<
   ModalType,

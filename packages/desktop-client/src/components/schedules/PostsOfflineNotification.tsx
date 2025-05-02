@@ -16,7 +16,7 @@ import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { DisplayId } from '../util/DisplayId';
 
-import { useFormatList } from '@hooks/useFormatList';
+import { useFormatList } from '@desktop-client/hooks/useFormatList';
 
 export function PostsOfflineNotification() {
   const { t, i18n } = useTranslation();

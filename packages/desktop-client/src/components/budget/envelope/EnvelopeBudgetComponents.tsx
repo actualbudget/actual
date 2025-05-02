@@ -35,8 +35,8 @@ import { makeAmountGrey } from '../util';
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
 
-import { useContextMenu } from '@hooks/useContextMenu';
-import { useUndo } from '@hooks/useUndo';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 
 export function useEnvelopeSheetName<
   FieldName extends SheetFields<'envelope-budget'>,

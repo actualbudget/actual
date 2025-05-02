@@ -18,7 +18,7 @@ import { View } from '@actual-app/components/view';
 import { Item } from './Item';
 import { SecondaryItem } from './SecondaryItem';
 
-import { useSyncServerStatus } from '@hooks/useSyncServerStatus';
+import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 export function PrimaryButtons() {
   const { t } = useTranslation();

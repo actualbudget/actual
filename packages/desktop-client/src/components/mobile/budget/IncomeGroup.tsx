@@ -24,7 +24,7 @@ import { useFormat } from '../../spreadsheet/useFormat';
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { IncomeCategoryList } from './IncomeCategoryList';
 
-import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type IncomeGroupProps = {
   categoryGroup: CategoryGroupEntity;

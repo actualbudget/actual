@@ -31,7 +31,10 @@ import { Search } from '../../common/Search';
 import { UserDirectoryHeader } from './UserDirectoryHeader';
 import { UserDirectoryRow } from './UserDirectoryRow';
 
-import { SelectedProvider, useSelected } from '@hooks/useSelected';
+import {
+  SelectedProvider,
+  useSelected,
+} from '@desktop-client/hooks/useSelected';
 
 type ManageUserDirectoryContentProps = {
   isModal: boolean;

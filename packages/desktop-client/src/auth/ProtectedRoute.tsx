@@ -9,7 +9,7 @@ import { useSelector } from '../redux';
 import { useAuth } from './AuthProvider';
 import { type Permissions } from './types';
 
-import { useMetadataPref } from '@hooks/useMetadataPref';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 type ProtectedRouteProps = {
   permission: Permissions;

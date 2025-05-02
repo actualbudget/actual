@@ -12,8 +12,8 @@ import { Checkbox } from '../forms';
 
 import { Setting } from './UI';
 
-import { useFeatureFlag } from '@hooks/useFeatureFlag';
-import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type FeatureToggleProps = {
   flag: FeatureFlag;

@@ -16,7 +16,7 @@ import { type BudgetSummary as EnvelopeBudgetSummary } from './envelope/budgetsu
 import { MonthsContext } from './MonthsContext';
 import { type BudgetSummary as TrackingBudgetSummary } from './tracking/budgetsummary/BudgetSummary';
 
-import { useResizeObserver } from '@hooks/useResizeObserver';
+import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 type BudgetSummariesProps = {
   SummaryComponent: typeof TrackingBudgetSummary | typeof EnvelopeBudgetSummary;

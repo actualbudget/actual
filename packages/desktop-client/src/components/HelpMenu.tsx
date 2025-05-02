@@ -14,7 +14,7 @@ import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
 import { useDispatch } from '../redux';
 
-import { useFeatureFlag } from '@hooks/useFeatureFlag';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 
 const getPageDocs = (page: string) => {
   switch (page) {

@@ -18,7 +18,7 @@ import { TransferMenu } from '../TransferMenu';
 import { ToBudgetAmount } from './ToBudgetAmount';
 import { ToBudgetMenu } from './ToBudgetMenu';
 
-import { useContextMenu } from '@hooks/useContextMenu';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 
 type ToBudgetProps = {
   month: string;

@@ -13,7 +13,7 @@ import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 
-import { useCategories } from '@hooks/useCategories';
+import { useCategories } from '@desktop-client/hooks/useCategories';
 
 type ConfirmCategoryDeleteModalProps = Extract<
   ModalType,

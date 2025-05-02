@@ -21,7 +21,7 @@ import {
 } from '../common/Modal';
 import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
 
-import { useCategory } from '@hooks/useCategory';
+import { useCategory } from '@desktop-client/hooks/useCategory';
 
 type EnvelopeBudgetMenuModalProps = Omit<
   Extract<ModalType, { name: 'envelope-budget-menu' }>['options'],

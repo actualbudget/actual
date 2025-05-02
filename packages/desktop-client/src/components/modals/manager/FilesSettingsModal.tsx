@@ -14,7 +14,7 @@ import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { useDispatch } from '../../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 
-import { useGlobalPref } from '@hooks/useGlobalPref';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 function FileLocationSettings() {
   const [documentDir, _setDocumentDirPref] = useGlobalPref('documentDir');

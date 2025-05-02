@@ -18,7 +18,7 @@ import { summarySpreadsheet } from '../spreadsheets/summary-spreadsheet';
 import { SummaryNumber } from '../SummaryNumber';
 import { useReport } from '../useReport';
 
-import { useLocale } from '@hooks/useLocale';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type SummaryCardProps = {
   widgetId: string;

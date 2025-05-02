@@ -23,8 +23,8 @@ import {
 
 import { makeAmountFullStyle } from '../../budget/util';
 
-import { useMergedRefs } from '@hooks/useMergedRefs';
-import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type AmountInputProps = {
   value: number;

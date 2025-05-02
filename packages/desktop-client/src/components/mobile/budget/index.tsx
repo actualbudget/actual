@@ -27,10 +27,10 @@ import { SyncRefresh } from '../../SyncRefresh';
 
 import { BudgetTable } from './BudgetTable';
 
-import { useCategories } from '@hooks/useCategories';
-import { useLocale } from '@hooks/useLocale';
-import { useLocalPref } from '@hooks/useLocalPref';
-import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 function isBudgetType(input?: string): input is 'rollover' | 'report' {
   return ['rollover', 'report'].includes(input);

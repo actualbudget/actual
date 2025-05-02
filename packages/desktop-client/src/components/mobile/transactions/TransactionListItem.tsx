@@ -42,10 +42,10 @@ import { makeAmountFullStyle } from '../../budget/util';
 
 import { lookupName, Status } from './TransactionEdit';
 
-import { useAccount } from '@hooks/useAccount';
-import { useCategories } from '@hooks/useCategories';
-import { useDisplayPayee } from '@hooks/useDisplayPayee';
-import { usePayee } from '@hooks/usePayee';
+import { useAccount } from '@desktop-client/hooks/useAccount';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
+import { usePayee } from '@desktop-client/hooks/usePayee';
 
 const ROW_HEIGHT = 60;
 

@@ -18,7 +18,7 @@ import {
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
 
-import { useCategories } from '@hooks/useCategories';
+import { useCategories } from '@desktop-client/hooks/useCategories';
 
 type CoverModalProps = Extract<ModalType, { name: 'cover' }>['options'];
 

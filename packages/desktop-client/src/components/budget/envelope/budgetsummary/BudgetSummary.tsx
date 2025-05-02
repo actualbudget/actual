@@ -23,8 +23,8 @@ import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ToBudget } from './ToBudget';
 import { TotalsList } from './TotalsList';
 
-import { useLocale } from '@hooks/useLocale';
-import { useUndo } from '@hooks/useUndo';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 
 type BudgetSummaryProps = {
   month: string;

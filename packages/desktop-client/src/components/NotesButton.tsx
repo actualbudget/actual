@@ -18,7 +18,7 @@ import { send } from 'loot-core/platform/client/fetch';
 
 import { Notes } from './Notes';
 
-import { useNotes } from '@hooks/useNotes';
+import { useNotes } from '@desktop-client/hooks/useNotes';
 
 type NotesButtonProps = {
   id: string;

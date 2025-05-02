@@ -24,7 +24,7 @@ import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 import { makeBalanceAmountStyle } from './util';
 
-import { useFeatureFlag } from '@hooks/useFeatureFlag';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 
 type CarryoverIndicatorProps = {
   style?: CSSProperties;

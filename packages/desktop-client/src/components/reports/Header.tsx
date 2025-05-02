@@ -26,7 +26,7 @@ import {
   validateStart,
 } from './reportRanges';
 
-import { useLocale } from '@hooks/useLocale';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type HeaderProps = {
   start: TimeFrame['start'];

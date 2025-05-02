@@ -20,7 +20,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FieldLabel, TapField } from '../mobile/MobileForms';
 import { AmountInput } from '../util/AmountInput';
 
-import { useCategories } from '@hooks/useCategories';
+import { useCategories } from '@desktop-client/hooks/useCategories';
 
 type TransferModalProps = Extract<ModalType, { name: 'transfer' }>['options'];
 

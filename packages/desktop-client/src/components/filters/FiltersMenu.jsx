@@ -42,7 +42,7 @@ import { subfieldFromFilter } from './subfieldFromFilter';
 import { subfieldToOptions } from './subfieldToOptions';
 import { updateFilterReducer } from './updateFilterReducer';
 
-import { useDateFormat } from '@hooks/useDateFormat';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 
 let isDatepickerClick = false;
 

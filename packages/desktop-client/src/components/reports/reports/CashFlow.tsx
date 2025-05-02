@@ -36,10 +36,10 @@ import { calculateTimeRange } from '../reportRanges';
 import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '../useReport';
 
-import { useFilters } from '@hooks/useFilters';
-import { useLocale } from '@hooks/useLocale';
-import { useNavigate } from '@hooks/useNavigate';
-import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useFilters } from '@desktop-client/hooks/useFilters';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export const defaultTimeFrame = {
   start: monthUtils.dayFromDate(monthUtils.currentMonth()),

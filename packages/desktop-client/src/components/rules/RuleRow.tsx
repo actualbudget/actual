@@ -21,8 +21,8 @@ import { SelectCell, Row, Field, Cell } from '../table';
 import { ActionExpression } from './ActionExpression';
 import { ConditionExpression } from './ConditionExpression';
 
-import { useContextMenu } from '@hooks/useContextMenu';
-import { useSelectedDispatch } from '@hooks/useSelected';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
 
 type RuleRowProps = {
   rule: RuleEntity;

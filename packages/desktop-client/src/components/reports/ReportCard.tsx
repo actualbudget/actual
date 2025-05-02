@@ -16,9 +16,9 @@ import { View } from '@actual-app/components/view';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 
-import { useContextMenu } from '@hooks/useContextMenu';
-import { useIsInViewport } from '@hooks/useIsInViewport';
-import { useNavigate } from '@hooks/useNavigate';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useIsInViewport } from '@desktop-client/hooks/useIsInViewport';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 type ReportCardProps = {
   isEditing?: boolean;

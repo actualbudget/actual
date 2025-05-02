@@ -12,11 +12,11 @@ import { integerToCurrency } from 'loot-core/shared/util';
 
 import { Link } from '../common/Link';
 
-import { useAccounts } from '@hooks/useAccounts';
-import { useCategories } from '@hooks/useCategories';
-import { useDateFormat } from '@hooks/useDateFormat';
-import { useLocale } from '@hooks/useLocale';
-import { usePayees } from '@hooks/usePayees';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { usePayees } from '@desktop-client/hooks/usePayees';
 
 type ValueProps<T> = {
   value: T;

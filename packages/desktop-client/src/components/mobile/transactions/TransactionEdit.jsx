@@ -65,16 +65,16 @@ import { getPrettyPayee } from '../utils';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
 
-import { useAccounts } from '@hooks/useAccounts';
-import { useCategories } from '@hooks/useCategories';
-import { useDateFormat } from '@hooks/useDateFormat';
-import { useInitialMount } from '@hooks/useInitialMount';
-import { useNavigate } from '@hooks/useNavigate';
-import { usePayees } from '@hooks/usePayees';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
-} from '@hooks/useSingleActiveEditForm';
+} from '@desktop-client/hooks/useSingleActiveEditForm';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;

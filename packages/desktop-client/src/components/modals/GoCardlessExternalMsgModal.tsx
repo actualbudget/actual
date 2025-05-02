@@ -26,7 +26,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FormField, FormLabel } from '../forms';
 import { COUNTRY_OPTIONS } from '../util/countries';
 
-import { useGoCardlessStatus } from '@hooks/useGoCardlessStatus';
+import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 
 function useAvailableBanks(country: string) {
   const [banks, setBanks] = useState<GoCardlessInstitution[]>([]);

@@ -17,8 +17,8 @@ import { useSidebar } from '../sidebar/SidebarProvider';
 
 import { Setting } from './UI';
 
-import { useDateFormat } from '@hooks/useDateFormat';
-import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 // Follows Pikaday 'firstDay' numbering
 // https://github.com/Pikaday/Pikaday

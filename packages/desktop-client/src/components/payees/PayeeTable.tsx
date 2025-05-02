@@ -16,7 +16,7 @@ import { useTableNavigator, Table } from '../table';
 
 import { PayeeTableRow } from './PayeeTableRow';
 
-import { useSelectedItems } from '@hooks/useSelected';
+import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 
 // Table items require an ID to work, it's optional in the loot-core
 // model so would need to verify accuracy of that before changing there

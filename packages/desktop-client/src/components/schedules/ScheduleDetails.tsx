@@ -40,10 +40,13 @@ import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
 import { GenericInput } from '../util/GenericInput';
 
-import { useDateFormat } from '@hooks/useDateFormat';
-import { useLocale } from '@hooks/useLocale';
-import { usePayees } from '@hooks/usePayees';
-import { useSelected, SelectedProvider } from '@hooks/useSelected';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { usePayees } from '@desktop-client/hooks/usePayees';
+import {
+  useSelected,
+  SelectedProvider,
+} from '@desktop-client/hooks/useSelected';
 
 type Fields = {
   payee: null | string;

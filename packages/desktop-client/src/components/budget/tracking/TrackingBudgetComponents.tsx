@@ -36,7 +36,7 @@ import { makeAmountGrey } from '../util';
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
 
-import { useUndo } from '@hooks/useUndo';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 
 export const useTrackingSheetValue = <
   FieldName extends SheetFields<'tracking-budget'>,

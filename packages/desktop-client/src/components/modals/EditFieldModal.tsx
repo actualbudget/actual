@@ -21,7 +21,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { SectionLabel } from '../forms';
 import { DateSelect } from '../select/DateSelect';
 
-import { useDateFormat } from '@hooks/useDateFormat';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 
 const itemStyle: CSSProperties = {
   fontSize: 17,

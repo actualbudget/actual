@@ -12,7 +12,7 @@ import { send } from 'loot-core/platform/client/fetch';
 import { Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
-import { useNavigate } from '@hooks/useNavigate';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 export function ChangePassword() {
   const { t } = useTranslation();

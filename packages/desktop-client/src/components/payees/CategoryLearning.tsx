@@ -7,7 +7,7 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 
-import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function CategoryLearning() {
   const { t } = useTranslation();

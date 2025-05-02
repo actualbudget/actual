@@ -21,8 +21,8 @@ import { amountToInteger, appendDecimals } from 'loot-core/shared/util';
 
 import { useFormat } from '../spreadsheet/useFormat';
 
-import { useMergedRefs } from '@hooks/useMergedRefs';
-import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type AmountInputProps = {
   id?: string;

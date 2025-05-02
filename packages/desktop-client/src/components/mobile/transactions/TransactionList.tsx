@@ -45,14 +45,17 @@ import { FloatingActionBar } from '../FloatingActionBar';
 
 import { TransactionListItem } from './TransactionListItem';
 
-import { useAccounts } from '@hooks/useAccounts';
-import { useCategories } from '@hooks/useCategories';
-import { useLocale } from '@hooks/useLocale';
-import { useNavigate } from '@hooks/useNavigate';
-import { usePayees } from '@hooks/usePayees';
-import { useSelectedDispatch, useSelectedItems } from '@hooks/useSelected';
-import { useTransactionBatchActions } from '@hooks/useTransactionBatchActions';
-import { useUndo } from '@hooks/useUndo';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { usePayees } from '@desktop-client/hooks/usePayees';
+import {
+  useSelectedDispatch,
+  useSelectedItems,
+} from '@desktop-client/hooks/useSelected';
+import { useTransactionBatchActions } from '@desktop-client/hooks/useTransactionBatchActions';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 
 const NOTIFICATION_BOTTOM_INSET = 75;
 

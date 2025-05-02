@@ -23,7 +23,7 @@ import { calculateTimeRange } from '../reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
 import { useReport } from '../useReport';
 
-import { useLocale } from '@hooks/useLocale';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type NetWorthCardProps = {
   widgetId: string;

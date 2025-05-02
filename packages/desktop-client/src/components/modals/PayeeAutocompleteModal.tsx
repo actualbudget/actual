@@ -14,9 +14,9 @@ import {
   ModalHeader,
 } from '../common/Modal';
 
-import { useAccounts } from '@hooks/useAccounts';
-import { useNavigate } from '@hooks/useNavigate';
-import { usePayees } from '@hooks/usePayees';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { usePayees } from '@desktop-client/hooks/usePayees';
 
 type PayeeAutocompleteModalProps = Extract<
   ModalType,

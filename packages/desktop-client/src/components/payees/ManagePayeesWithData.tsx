@@ -15,7 +15,7 @@ import { useDispatch } from '../../redux';
 
 import { ManagePayees } from './ManagePayees';
 
-import { usePayees } from '@hooks/usePayees';
+import { usePayees } from '@desktop-client/hooks/usePayees';
 
 type ManagePayeesWithDataProps = {
   initialSelectedIds: string[];

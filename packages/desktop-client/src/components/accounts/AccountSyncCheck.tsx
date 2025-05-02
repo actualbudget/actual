@@ -15,8 +15,8 @@ import { authorizeBank } from '../../gocardless';
 import { useDispatch } from '../../redux';
 import { Link } from '../common/Link';
 
-import { useAccounts } from '@hooks/useAccounts';
-import { useFailedAccounts } from '@hooks/useFailedAccounts';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 
 function useErrorMessage() {
   const { t } = useTranslation();

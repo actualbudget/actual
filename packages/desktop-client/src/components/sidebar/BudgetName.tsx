@@ -16,9 +16,9 @@ import * as Platform from 'loot-core/client/platform';
 
 import { useDispatch } from '../../redux';
 
-import { useContextMenu } from '@hooks/useContextMenu';
-import { useMetadataPref } from '@hooks/useMetadataPref';
-import { useNavigate } from '@hooks/useNavigate';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 type BudgetNameProps = {
   children?: ReactNode;

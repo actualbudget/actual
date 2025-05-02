@@ -34,8 +34,8 @@ import { Checkbox } from '../forms';
 
 import { DateSelect } from './DateSelect';
 
-import { useDateFormat } from '@hooks/useDateFormat';
-import { useLocale } from '@hooks/useLocale';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 // ex: There is no 6th Friday of the Month
 const MAX_DAY_OF_WEEK_INTERVAL = 5;

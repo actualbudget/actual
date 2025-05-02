@@ -26,8 +26,8 @@ import { ExpenseTotal } from './ExpenseTotal';
 import { IncomeTotal } from './IncomeTotal';
 import { Saved } from './Saved';
 
-import { useLocale } from '@hooks/useLocale';
-import { useUndo } from '@hooks/useUndo';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 
 type BudgetSummaryProps = {
   month: string;

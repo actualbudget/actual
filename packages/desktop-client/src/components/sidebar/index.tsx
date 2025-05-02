@@ -7,7 +7,7 @@ import { useDebounceCallback } from 'usehooks-ts';
 import { Sidebar } from './Sidebar';
 import { useSidebar } from './SidebarProvider';
 
-import { useGlobalPref } from '@hooks/useGlobalPref';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 export function FloatableSidebar() {
   const [floatingSidebar] = useGlobalPref('floatingSidebar');

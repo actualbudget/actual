@@ -3,7 +3,10 @@ import { useTranslation } from 'react-i18next';
 
 import { SelectCell, Cell, TableHeader } from '../../table';
 
-import { useSelectedItems, useSelectedDispatch } from '@hooks/useSelected';
+import {
+  useSelectedItems,
+  useSelectedDispatch,
+} from '@desktop-client/hooks/useSelected';
 
 export function UserDirectoryHeader() {
   const { t } = useTranslation();

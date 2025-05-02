@@ -12,7 +12,7 @@ import { type UserEntity } from 'loot-core/types/models';
 import { Checkbox } from '../../forms';
 import { SelectCell, Row, Cell } from '../../table';
 
-import { useSelectedDispatch } from '@hooks/useSelected';
+import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
 
 type UserDirectoryProps = {
   user: UserEntity;

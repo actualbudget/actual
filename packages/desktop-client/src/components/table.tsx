@@ -44,12 +44,12 @@ import {
 import { type FormatType, useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
 
-import { useModalState } from '@hooks/useModalState';
+import { useModalState } from '@desktop-client/hooks/useModalState';
 import {
   AvoidRefocusScrollProvider,
   useProperFocus,
-} from '@hooks/useProperFocus';
-import { useSelectedItems } from '@hooks/useSelected';
+} from '@desktop-client/hooks/useProperFocus';
+import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 
 export const ROW_HEIGHT = 32;
 

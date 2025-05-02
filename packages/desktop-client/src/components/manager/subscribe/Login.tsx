@@ -28,7 +28,7 @@ import { useAvailableLoginMethods, useLoginMethod } from '../../ServerContext';
 import { useBootstrapped, Title } from './common';
 import { OpenIdForm } from './OpenIdForm';
 
-import { useNavigate } from '@hooks/useNavigate';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 function PasswordLogin({ setError, dispatch }) {
   const [password, setPassword] = useState('');

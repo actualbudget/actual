@@ -34,8 +34,8 @@ import {
 } from '../common/Modal';
 import { Notes } from '../Notes';
 
-import { useCategories } from '@hooks/useCategories';
-import { useNotes } from '@hooks/useNotes';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useNotes } from '@desktop-client/hooks/useNotes';
 
 type CategoryGroupMenuModalProps = Extract<
   ModalType,

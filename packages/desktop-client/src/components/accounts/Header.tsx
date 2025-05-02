@@ -52,10 +52,10 @@ import { type TableRef } from './Account';
 import { Balances } from './Balance';
 import { ReconcilingMessage, ReconcileMenu } from './Reconcile';
 
-import { useLocale } from '@hooks/useLocale';
-import { useLocalPref } from '@hooks/useLocalPref';
-import { useSplitsExpanded } from '@hooks/useSplitsExpanded';
-import { useSyncServerStatus } from '@hooks/useSyncServerStatus';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
+import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 type AccountHeaderProps = {
   tableRef: TableRef;

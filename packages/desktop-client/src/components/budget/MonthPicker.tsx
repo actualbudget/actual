@@ -17,8 +17,8 @@ import { Link } from '../common/Link';
 
 import { type MonthBounds } from './MonthsContext';
 
-import { useLocale } from '@hooks/useLocale';
-import { useResizeObserver } from '@hooks/useResizeObserver';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 type MonthPickerProps = {
   startMonth: string;

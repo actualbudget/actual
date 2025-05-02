@@ -16,7 +16,7 @@ import { SidebarCategory } from './SidebarCategory';
 import { SidebarGroup } from './SidebarGroup';
 import { separateGroups } from './util';
 
-import { useLocalPref } from '@hooks/useLocalPref';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 
 export const BudgetCategories = memo(
   ({

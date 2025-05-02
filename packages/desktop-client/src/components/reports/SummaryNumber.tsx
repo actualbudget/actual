@@ -10,8 +10,8 @@ import { PrivacyFilter } from '../PrivacyFilter';
 import { chartTheme } from './chart-theme';
 import { LoadingIndicator } from './LoadingIndicator';
 
-import { useMergedRefs } from '@hooks/useMergedRefs';
-import { useResizeObserver } from '@hooks/useResizeObserver';
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 const FONT_SIZE_SCALE_FACTOR = 1.6;
 const CONTAINER_MARGIN = 8;

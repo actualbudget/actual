@@ -9,7 +9,7 @@ import { type Template } from 'loot-core/server/budget/types/templates';
 
 import { useDispatch } from '../../../redux';
 
-import { useFeatureFlag } from '@hooks/useFeatureFlag';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 
 type CategoryAutomationButtonProps = {
   width?: number;

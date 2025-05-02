@@ -31,7 +31,7 @@ import {
   SelectedProvider,
   useSelectedDispatch,
   useSelectedItems,
-} from '@hooks/useSelected';
+} from '@desktop-client/hooks/useSelected';
 
 const getPayeesById = memoizeOne((payees: PayeeEntity[]) => groupById(payees));
 

@@ -15,7 +15,7 @@ import { Row } from '../table';
 import { RenderMonths } from './RenderMonths';
 import { SidebarCategory } from './SidebarCategory';
 
-import { useDragRef } from '@hooks/useDragRef';
+import { useDragRef } from '@desktop-client/hooks/useDragRef';
 
 type IncomeCategoryProps = {
   cat: CategoryEntity;

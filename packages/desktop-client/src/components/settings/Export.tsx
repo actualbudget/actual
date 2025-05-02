@@ -11,7 +11,7 @@ import { send } from 'loot-core/platform/client/fetch';
 
 import { Setting } from './UI';
 
-import { useMetadataPref } from '@hooks/useMetadataPref';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 export function ExportBudget() {
   const { t } = useTranslation();

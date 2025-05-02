@@ -18,8 +18,8 @@ import { Page } from '../Page';
 import { AccountsHeader } from './AccountsHeader';
 import { AccountsList } from './AccountsList';
 
-import { useAccounts } from '@hooks/useAccounts';
-import { useGlobalPref } from '@hooks/useGlobalPref';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 type SyncProviders = BankSyncProviders | 'unlinked';
 

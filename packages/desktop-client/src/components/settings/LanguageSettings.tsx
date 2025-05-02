@@ -11,7 +11,7 @@ import { Link } from '../common/Link';
 
 import { Setting } from './UI';
 
-import { useGlobalPref } from '@hooks/useGlobalPref';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 const languageDisplayNameOverride: { [key: string]: string } = {
   'pt-BR': 'Português (Brasil)',

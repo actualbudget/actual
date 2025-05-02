@@ -20,15 +20,15 @@ import { DisplayId } from '../util/DisplayId';
 
 import { ScheduleAmountCell } from './SchedulesTable';
 
-import { useDateFormat } from '@hooks/useDateFormat';
-import { useLocale } from '@hooks/useLocale';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 import {
   useSelected,
   useSelectedDispatch,
   useSelectedItems,
   SelectedProvider,
-} from '@hooks/useSelected';
-import { useSendPlatformRequest } from '@hooks/useSendPlatformRequest';
+} from '@desktop-client/hooks/useSelected';
+import { useSendPlatformRequest } from '@desktop-client/hooks/useSendPlatformRequest';
 
 const ROW_HEIGHT = 43;
 

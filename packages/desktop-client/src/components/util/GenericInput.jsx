@@ -22,8 +22,8 @@ import { RecurringSchedulePicker } from '../select/RecurringSchedulePicker';
 import { AmountInput } from './AmountInput';
 import { PercentInput } from './PercentInput';
 
-import { useCategories } from '@hooks/useCategories';
-import { useDateFormat } from '@hooks/useDateFormat';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 
 export function GenericInput({
   field,

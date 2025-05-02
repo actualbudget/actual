@@ -35,9 +35,12 @@ import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
-import { useGlobalPref } from '@hooks/useGlobalPref';
-import { useIsOutdated, useLatestVersion } from '@hooks/useLatestVersion';
-import { useMetadataPref } from '@hooks/useMetadataPref';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import {
+  useIsOutdated,
+  useLatestVersion,
+} from '@desktop-client/hooks/useLatestVersion';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 function About() {
   const version = useServerVersion();

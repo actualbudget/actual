@@ -42,10 +42,10 @@ import { SpendingCard } from './reports/SpendingCard';
 import './overview.scss';
 import { SummaryCard } from './reports/SummaryCard';
 
-import { useAccounts } from '@hooks/useAccounts';
-import { useNavigate } from '@hooks/useNavigate';
-import { useSyncedPref } from '@hooks/useSyncedPref';
-import { useUndo } from '@hooks/useUndo';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 

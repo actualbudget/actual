@@ -77,8 +77,8 @@ import { ScheduleLink } from './schedules/ScheduleLink';
 import { UpcomingLength } from './schedules/UpcomingLength';
 import { NamespaceContext } from './spreadsheet/NamespaceContext';
 
-import { useMetadataPref } from '@hooks/useMetadataPref';
-import { useModalState } from '@hooks/useModalState';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useModalState } from '@desktop-client/hooks/useModalState';
 
 export function Modals() {
   const location = useLocation();

@@ -28,8 +28,8 @@ import {
 import { Checkbox } from '../forms';
 import { validateAccountName } from '../util/accountValidation';
 
-import * as useAccounts from '@hooks/useAccounts';
-import { useNavigate } from '@hooks/useNavigate';
+import * as useAccounts from '@desktop-client/hooks/useAccounts';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 export function CreateLocalAccountModal() {
   const { t } = useTranslation();

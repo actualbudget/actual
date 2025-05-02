@@ -7,9 +7,6 @@ import React, {
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { useCategories } from '@hooks/useCategories';
-import { useGlobalPref } from '@hooks/useGlobalPref';
-import { useLocalPref } from '@hooks/useLocalPref';
 
 import {
   type CategoryEntity,
@@ -28,6 +25,10 @@ import {
   getScrollbarWidth,
   separateGroups,
 } from './util';
+
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 
 type BudgetTableProps = {
   type: string;

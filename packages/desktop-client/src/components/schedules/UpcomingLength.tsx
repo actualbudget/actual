@@ -12,7 +12,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 
 import { CustomUpcomingLength } from './CustomUpcomingLength';
 
-import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 function useUpcomingLengthOptions() {
   const { t } = useTranslation();

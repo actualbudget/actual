@@ -42,10 +42,10 @@ import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { Titlebar } from './Titlebar';
 
-import { useAccounts } from '@hooks/useAccounts';
-import { useLocalPref } from '@hooks/useLocalPref';
-import { useMetaThemeColor } from '@hooks/useMetaThemeColor';
-import { useNavigate } from '@hooks/useNavigate';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 function NarrowNotSupported({
   redirectTo = '/budget',

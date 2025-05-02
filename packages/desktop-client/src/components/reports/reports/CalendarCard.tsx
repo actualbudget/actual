@@ -43,9 +43,9 @@ import {
 } from '../spreadsheets/calendar-spreadsheet';
 import { useReport } from '../useReport';
 
-import { useMergedRefs } from '@hooks/useMergedRefs';
-import { useNavigate } from '@hooks/useNavigate';
-import { useResizeObserver } from '@hooks/useResizeObserver';
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 type CalendarCardProps = {
   widgetId: string;

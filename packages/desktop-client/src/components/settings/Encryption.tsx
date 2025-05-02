@@ -13,7 +13,7 @@ import { useServerURL } from '../ServerContext';
 
 import { Setting } from './UI';
 
-import { useMetadataPref } from '@hooks/useMetadataPref';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 export function EncryptionSettings() {
   const dispatch = useDispatch();

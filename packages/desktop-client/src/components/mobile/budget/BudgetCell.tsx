@@ -20,9 +20,9 @@ import { useFormat } from '../../spreadsheet/useFormat';
 
 import { getColumnWidth, PILL_STYLE } from './BudgetTable';
 
-import { useNotes } from '@hooks/useNotes';
-import { useSyncedPref } from '@hooks/useSyncedPref';
-import { useUndo } from '@hooks/useUndo';
+import { useNotes } from '@desktop-client/hooks/useNotes';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 
 type BudgetCellProps<
   SheetFieldName extends SheetFields<'envelope-budget' | 'tracking-budget'>,

@@ -24,9 +24,9 @@ import {
   SelectCell,
 } from '../table';
 
-import { useContextMenu } from '@hooks/useContextMenu';
-import { useSelectedDispatch } from '@hooks/useSelected';
-import { useSyncedPref } from '@hooks/useSyncedPref';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type RuleButtonProps = {
   ruleCount: number;

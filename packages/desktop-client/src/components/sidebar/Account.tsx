@@ -34,9 +34,9 @@ import {
 import { type SheetFields, type Binding } from '../spreadsheet';
 import { CellValue } from '../spreadsheet/CellValue';
 
-import { useContextMenu } from '@hooks/useContextMenu';
-import { useDragRef } from '@hooks/useDragRef';
-import { useNotes } from '@hooks/useNotes';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useDragRef } from '@desktop-client/hooks/useDragRef';
+import { useNotes } from '@desktop-client/hooks/useNotes';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,

@@ -14,7 +14,7 @@ import {
   type PayeeAutocompleteProps,
 } from './PayeeAutocomplete';
 
-import { useCommonPayees } from '@hooks/usePayees';
+import { useCommonPayees } from '@desktop-client/hooks/usePayees';
 
 const PAYEE_SELECTOR = '[data-testid][role=option]';
 const PAYEE_SECTION_SELECTOR = '[data-testid$="-item-group"]';
