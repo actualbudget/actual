@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { forwardRef } from 'react';
+import { forwardRef, Ref } from 'react';
 
 import { render } from '@testing-library/react';
 
@@ -49,26 +49,7 @@ describe('InitialFocus', () => {
     expect(document.activeElement).not.toBe(unfocusedTextarea);
   });
 
-  it('should select text in an input if selectTextIfInput is true', async () => {
-    const component = render(
-      <View>
-        <InitialFocus selectText>
-          <input type="text" title="focused" defaultValue="Hello World" />
-        </InitialFocus>
-        <input type="text" title="unfocused" />
-      </View>,
-    );
-
-    // This is needed bc of the `setTimeout` in the `InitialFocus` component.
-    await new Promise(resolve => setTimeout(resolve, 0));
-
-    const input = component.getByTitle('focused') as HTMLInputElement;
-    expect(document.activeElement).toBe(input);
-    expect(input.selectionStart).toBe(0);
-    expect(input.selectionEnd).toBe(11); // Length of "Hello World"
-  });
-
-  it('should not select text in an input if selectTextIfInput is false', async () => {
+  it('should select text in an input', async () => {
     const component = render(
       <View>
         <InitialFocus>
@@ -83,8 +64,8 @@ describe('InitialFocus', () => {
 
     const input = component.getByTitle('focused') as HTMLInputElement;
     expect(document.activeElement).toBe(input);
-    expect(input.selectionStart).toBe(11); // No selection should be made
-    expect(input.selectionEnd).toBe(11);
+    expect(input.selectionStart).toBe(0);
+    expect(input.selectionEnd).toBe(11); // Length of "Hello World"
   });
 
   it('should focus a button', async () => {
@@ -116,7 +97,9 @@ describe('InitialFocus', () => {
 
     const component = render(
       <View>
-        <InitialFocus>{node => <CustomInput ref={node} />}</InitialFocus>
+        <InitialFocus>
+          {node => <CustomInput ref={node as Ref<HTMLInputElement>} />}
+        </InitialFocus>
         <input type="text" title="unfocused" />
       </View>,
     );

@@ -14,22 +14,16 @@ type InitialFocusProps = {
   /**
    * The child element to focus when the component mounts. This can be either a single React element or a function that returns a React element.
    */
-  children: ReactElement | ((node: Ref<HTMLInputElement>) => ReactElement);
-  /**
-   * Whether to select the text in the input or textarea element when focused.
-   */
-  selectText?: boolean;
+  children: ReactElement | ((node: Ref<HTMLElement>) => ReactElement);
 };
 
 /**
  * InitialFocus sets focus on its child element
- * when it mounts. It can also optionally select the text within an
- * input or textarea element.
+ * when it mounts.
  * @param {Object} props - The component props.
  * @param {ReactElement | function} props.children - A single React element or a function that returns a React element.
- * @param {boolean} props.selectText=false - Whether to select the text in the input or textarea element.
  */
-export function InitialFocus({ children, selectText }: InitialFocusProps) {
+export function InitialFocus({ children }: InitialFocusProps) {
   const node = useRef<FocusableElement>(null);
 
   useEffect(() => {
@@ -41,19 +35,18 @@ export function InitialFocus({ children, selectText }: InitialFocusProps) {
         if (node.current) {
           node.current.focus();
           if (
-            selectText &&
-            (node.current instanceof HTMLInputElement ||
-              node.current instanceof HTMLTextAreaElement)
+            node.current instanceof HTMLInputElement ||
+            node.current instanceof HTMLTextAreaElement
           ) {
             node.current.setSelectionRange(0, 10000);
           }
         }
       }, 0);
     }
-  }, [selectText]);
+  }, []);
 
   if (typeof children === 'function') {
-    return children(node as Ref<HTMLInputElement>);
+    return children(node);
   }
 
   const child = Children.only(children);
