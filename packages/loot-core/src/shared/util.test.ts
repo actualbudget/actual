@@ -176,9 +176,7 @@ describe('utility functions', () => {
 
   test('titleFirst works with all inputs', () => {
     expect(titleFirst('')).toBe('');
-    // @ts-ignore testing undefined value which can happen sometimes
     expect(titleFirst(undefined)).toBe('');
-    // @ts-ignore testing null value which can happen sometimes
     expect(titleFirst(null)).toBe('');
     expect(titleFirst('a')).toBe('A');
     expect(titleFirst('abc')).toBe('Abc');
