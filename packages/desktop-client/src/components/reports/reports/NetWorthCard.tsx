@@ -63,8 +63,17 @@ export function NetWorthCard({
         meta?.conditions,
         meta?.conditionsOp,
         locale,
+        format,
       ),
-    [start, end, accounts, meta?.conditions, meta?.conditionsOp, locale],
+    [
+      start,
+      end,
+      accounts,
+      meta?.conditions,
+      meta?.conditionsOp,
+      locale,
+      format,
+    ],
   );
   const data = useReport('net_worth', params);
 

@@ -7,14 +7,11 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
-  integerToCurrency,
-  integerToAmount,
-  amountToInteger,
-} from 'loot-core/shared/util';
-import {
   type AccountEntity,
   type RuleConditionEntity,
 } from 'loot-core/types/models';
+
+import { type FormatType } from '../../spreadsheet/useFormat';
 
 type Balance = {
   date: string;
@@ -28,6 +25,7 @@ export function createSpreadsheet(
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
   locale: Locale,
+  format: (value: unknown, type?: FormatType) => string,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -79,7 +77,7 @@ export function createSpreadsheet(
       }),
     );
 
-    setData(recalculate(data, start, end, locale));
+    setData(recalculate(data, start, end, locale, format));
   };
 }
 
@@ -92,6 +90,7 @@ function recalculate(
   start: string,
   end: string,
   locale: Locale,
+  format: (value: unknown, type?: FormatType) => string,
 ) {
   const months = monthUtils.rangeInclusive(start, end);
 
@@ -143,7 +142,7 @@ function recalculate(
     }
 
     const x = d.parseISO(month + '-01');
-    const change = last ? total - amountToInteger(last.y) : 0;
+    const change = last ? total - last.y : 0;
 
     if (arr.length === 0) {
       startNetWorth = total;
@@ -152,11 +151,11 @@ function recalculate(
 
     arr.push({
       x: d.format(x, 'MMM ’yy', { locale }),
-      y: integerToAmount(total),
-      assets: integerToCurrency(assets),
-      debt: `-${integerToCurrency(debt)}`,
-      change: integerToCurrency(change),
-      networth: integerToCurrency(total),
+      y: total,
+      assets: format(assets, 'financial'),
+      debt: `-${format(debt, 'financial')}`,
+      change: format(change, 'financial'),
+      networth: format(total, 'financial'),
       date: d.format(x, 'MMMM yyyy', { locale }),
     });
 
