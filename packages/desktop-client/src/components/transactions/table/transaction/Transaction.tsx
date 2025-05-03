@@ -58,6 +58,7 @@ import {
   serializeTransaction,
 } from '../utils';
 
+import { NotesCell } from './NotesCell';
 import { PayeeCell } from './PayeeCell';
 import { StatusCell } from './StatusCell';
 
@@ -606,20 +607,14 @@ function TransactionInner({
         />
       ))()}
 
-      <InputCell
-        width="flex"
-        name="notes"
-        textAlign="flex"
-        exposed={focusedField === 'notes'}
-        focused={focusedField === 'notes'}
-        value={notes || ''}
-        valueStyle={valueStyle}
-        formatter={value => notesTagFormatter(value, onNotesTagClick)}
-        onExpose={name => !isPreview && onEdit(id, name)}
-        inputProps={{
-          value: notes || '',
-          onUpdate: onUpdate.bind(null, 'notes'),
-        }}
+      <NotesCell
+        id={id}
+        notes={notes}
+        focusedField={focusedField}
+        isPreview={isPreview}
+        onNotesTagClick={onNotesTagClick}
+        onEdit={onEdit}
+        onUpdate={onUpdate}
       />
 
       {(isPreview && !isChild) || isParent ? (
