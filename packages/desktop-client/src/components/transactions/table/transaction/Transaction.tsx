@@ -5,6 +5,7 @@ import React, {
   useEffect,
   type CSSProperties,
   type RefObject,
+  type ReactNode,
 } from 'react';
 
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
@@ -63,11 +64,11 @@ import { PayeeCell } from './PayeeCell';
 import { StatusCell } from './StatusCell';
 
 type TransactionProps = {
-  allTransactions?: SerializedTransaction[];
+  allTransactions?: TransactionEntity[];
   transaction: TransactionEntity;
-  subtransactions: SerializedTransaction[] | null;
+  subtransactions: TransactionEntity[] | null;
   transferAccountsByTransaction: {
-    [id: TransactionEntity['id']]: AccountEntity;
+    [id: TransactionEntity['id']]: AccountEntity | null;
   };
   editing: boolean;
   showAccount?: boolean;
@@ -89,7 +90,7 @@ type TransactionProps = {
   hideFraction?: boolean;
   onSave: (
     tx: TransactionEntity,
-    subTxs: SerializedTransaction[] | null,
+    subTxs: TransactionEntity[] | null,
     name: string,
   ) => void;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
@@ -107,7 +108,7 @@ type TransactionProps = {
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onNotesTagClick: (tag: string) => void;
-  splitError?: string;
+  splitError?: ReactNode;
   listContainerRef?: RefObject<HTMLDivElement>;
   showSelection?: boolean;
   allowSplitTransaction?: boolean;

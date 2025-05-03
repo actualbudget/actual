@@ -48,7 +48,7 @@ type PayeeCellProps = {
   payees: PayeeEntity[];
   accounts: AccountEntity[];
   transferAccountsByTransaction: {
-    [id: TransactionEntity['id']]: AccountEntity;
+    [id: TransactionEntity['id']]: AccountEntity | null;
   };
   valueStyle: CSSProperties | null;
   transaction: SerializedTransaction;

@@ -930,6 +930,7 @@ type TableProps<T extends TableItem = TableItem> = {
   navigator?: ReturnType<typeof useTableNavigator<T>>;
   listContainerRef?: RefObject<HTMLDivElement>;
   onScroll?: () => void;
+  onKeyDown?: (e: KeyboardEvent) => void;
   isSelected?: (id: T['id']) => boolean;
   saveScrollWidth?: (parent, child) => void;
 };
@@ -1213,7 +1214,7 @@ export const Table = forwardRef(
 // @ts-expect-error fix me
 Table.displayName = 'Table';
 
-type TableNavigator<T extends TableItem> = {
+export type TableNavigator<T extends TableItem> = {
   onEdit: (id: T['id'], field?: string) => void;
   editingId: T['id'];
   focusedField: string;

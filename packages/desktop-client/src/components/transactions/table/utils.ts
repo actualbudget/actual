@@ -11,7 +11,11 @@ import {
   CurrencyAmount,
   integerToCurrency,
 } from 'loot-core/shared/util';
-import { type TransactionEntity } from 'loot-core/types/models';
+import {
+  AccountEntity,
+  CategoryEntity,
+  type TransactionEntity,
+} from 'loot-core/types/models';
 
 export type SerializedTransaction = Omit<TransactionEntity, 'date'> & {
   date: string;
@@ -114,4 +118,21 @@ export function selectAscDesc(
 
 export function getDisplayValue<T>(obj: T | null | undefined, name: keyof T) {
   return obj ? obj[name] : '';
+}
+
+export function makeTemporaryTransactions(
+  currentAccountId: AccountEntity['id'],
+  currentCategoryId: CategoryEntity['id'],
+  lastDate?: string | null,
+) {
+  return [
+    {
+      id: 'temp',
+      date: lastDate || currentDay(),
+      account: currentAccountId || null,
+      category: currentCategoryId || null,
+      cleared: false,
+      amount: null,
+    },
+  ];
 }

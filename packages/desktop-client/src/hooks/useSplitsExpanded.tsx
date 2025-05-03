@@ -69,11 +69,15 @@ const SplitsExpandedContext = createContext<SplitsStateContext>({
   },
 });
 
+export type SplitsExpandedContextValue = {
+  isExpanded: (id: string) => boolean;
+} & SplitsStateContext;
+
 export function useSplitsExpanded() {
   const data = useContext(SplitsExpandedContext);
 
   return useMemo(
-    () => ({
+    (): SplitsExpandedContextValue => ({
       ...data,
       isExpanded: (id: string) => {
         return data.state.mode === 'collapse'
