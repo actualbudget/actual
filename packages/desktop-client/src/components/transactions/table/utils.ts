@@ -13,7 +13,10 @@ import {
 } from 'loot-core/shared/util';
 import { type TransactionEntity } from 'loot-core/types/models';
 
-type SerializedTransaction = Omit<TransactionEntity, 'amount' | 'date'> & {
+export type SerializedTransaction = Omit<
+  TransactionEntity,
+  'amount' | 'date'
+> & {
   date: string;
   debit: CurrencyAmount;
   credit: CurrencyAmount;
@@ -90,9 +93,9 @@ export function isLastChild(transactions: TransactionEntity[], index: number) {
 }
 
 export function selectAscDesc(
-  field: keyof SerializedTransaction,
+  field: string,
   ascDesc: 'asc' | 'desc',
-  clicked: keyof SerializedTransaction,
+  clicked: string,
   defaultAscDesc: 'asc' | 'desc' = 'asc',
 ) {
   return field === clicked

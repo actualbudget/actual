@@ -430,9 +430,9 @@ type CustomCellRenderProps = {
   inputStyle: CSSProperties;
 };
 type CustomCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
-  children: (props: CustomCellRenderProps) => ReactNode;
-  onUpdate: (value: string) => void;
-  onBlur: (ev: UIEvent<unknown>) => void;
+  children?: (props: CustomCellRenderProps) => ReactNode;
+  onUpdate?: (value: string) => void;
+  onBlur?: (ev: UIEvent<unknown>) => void;
 };
 export function CustomCell({
   value: defaultValue,
@@ -468,7 +468,7 @@ export function CustomCell({
   return (
     <Cell {...props} value={defaultValue}>
       {() =>
-        children({
+        children?.({
           onBlur: onBlur_,
           onKeyDown,
           onUpdate: val => setValue(val),
