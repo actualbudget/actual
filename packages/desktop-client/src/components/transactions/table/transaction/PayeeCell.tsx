@@ -36,6 +36,7 @@ import {
   UnexposedCellContent,
 } from '../../../table';
 import {
+  TransactionUpdateFunction,
   type SerializedTransaction,
   type TransactionEditFunction,
 } from '../utils';
@@ -54,10 +55,7 @@ type PayeeCellProps = {
   importedPayee?: PayeeEntity['id'];
   isPreview: boolean;
   onEdit: TransactionEditFunction;
-  onUpdate: <T extends keyof SerializedTransaction>(
-    name: T,
-    value: SerializedTransaction[T],
-  ) => void;
+  onUpdate: TransactionUpdateFunction;
   onCreatePayee: (name: string) => Promise<PayeeEntity['id']>;
   onManagePayees: (id: PayeeEntity['id'] | undefined) => void;
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;

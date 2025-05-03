@@ -4,10 +4,7 @@ import React, {
   useRef,
   useEffect,
   type CSSProperties,
-  Ref,
   type RefObject,
-  ChangeEvent,
-  SyntheticEvent,
 } from 'react';
 
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
@@ -41,6 +38,7 @@ import { useSelectedDispatch } from '../../../../hooks/useSelected';
 import { useDispatch } from '../../../../redux';
 import { AccountAutocomplete } from '../../../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../../../autocomplete/CategoryAutocomplete';
+import { type StatusTypes } from '../../../schedules/StatusBadge';
 import { DateSelect } from '../../../select/DateSelect';
 import { NamespaceContext } from '../../../spreadsheet/NamespaceContext';
 import {
@@ -61,6 +59,7 @@ import {
 } from '../utils';
 
 import { PayeeCell } from './PayeeCell';
+import { StatusCell } from './StatusCell';
 
 type TransactionProps = {
   allTransactions: SerializedTransaction[];
@@ -349,7 +348,7 @@ function TransactionInner({
   // a variable (with a small delay in order for the next render cycle to pick up
   // the change instead of the current). We pass the integer to the Popover which
   // causes it to re-calculate the positioning. Thus fixing the problem.
-  const [updateId, setUpdateId] = useState(1);
+  const [_, setUpdateId] = useState(1);
   useEffect(() => {
     // The hack applies to only transactions with split errors
     if (!splitError) {
@@ -892,7 +891,7 @@ function TransactionInner({
           isPreview={isPreview}
           status={
             isPreview
-              ? previewStatus
+              ? (previewStatus as StatusTypes)
               : reconciled
                 ? 'reconciled'
                 : cleared

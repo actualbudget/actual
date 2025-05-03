@@ -24,6 +24,11 @@ export type TransactionEditFunction = (
   name: string,
 ) => void;
 
+export type TransactionUpdateFunction = <T extends keyof SerializedTransaction>(
+  name: T,
+  value: SerializedTransaction[T],
+) => void;
+
 export function serializeTransaction(
   transaction: TransactionEntity,
   showZeroInDeposit?: boolean,
