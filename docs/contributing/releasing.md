@@ -1,10 +1,14 @@
 # How to Cut a Release
 
-In the open-source version of Actual, all updates go through NPM. There is one npm package:
+In the open-source version of Actual, there are 3 NPM packages:
 
-`@actual-app/api`: The API for the underlying functionality. This includes the entire backend of Actual, meant to be used with Node.
+[@actual-app/api](https://www.npmjs.com/package/@actual-app/api): The API for the underlying functionality. This includes the entire backend of Actual, meant to be used with Node.
 
-Both the API and the main Actual release are versioned together. That makes it clear which version of the API should be used with the version of Actual.
+[@actual-app/web](https://www.npmjs.com/package/@actual-app/web): A web build that will serve the app with a web frontend. This includes both the frontend and backend of Actual. It includes the backend as well because it's built to be used as a Web Worker.
+
+[@actual-app/sync-server](https://www.npmjs.com/package/@actual-app/sync-server): The entire sync-server and underlying web client in one package. This includes a CLI tool, meant to be used with Node.
+
+All packages and the main Actual release are versioned together. That makes it clear which version of the package should be used with the version of Actual.
 
 ### Versioning Strategy
 
@@ -38,26 +42,20 @@ This automation will also delete all the outdated release note files from the `u
 ### docs
 After the release notes workflows in the actual PR has been run, copy the collated notes into a new blog post using a previous release as a template. The release notes will also need adding to the `docs/releases.md` file.
 
-## Building and Publishing to NPM
-Once the Actual repository PR has been approved, the new version of the API package needs to be published to NPM. If you haven't done this before, another maintainer will need to give you access.
-
-###  @actual-app/api
-
-```bash
-cd packages/api
-yarn build
-yarn npm publish --access public
-```
-
 ## GitHub Tags and Releases
 
-Once the release has been merged, it need to be tagged. When the tag is pushed to `actual` it will trigger the Docker stable image to be built and published.
+Once the release has been merged, it needs to be tagged. When the tag is pushed to `actual` it will trigger the Docker stable image and all NPM packages to be built and published.
 
 Run the below in each repository, or use the GitHub UI.
 ```bash
 git tag vX.Y.Z
 git push vX.Y.Z
 ```
+
+All NPM packages should be automatically released and pushed to the NPM registry. Check them here:
+- [@actual-app/api](https://www.npmjs.com/package/@actual-app/api)
+- [@actual-app/web](https://www.npmjs.com/package/@actual-app/web)
+- [@actual-app/sync-server](https://www.npmjs.com/package/@actual-app/sync-server)
 
 A GitHub release should be automatically generated on push in [actual](https://github.com/actualbudget/actual). Un-mark it as a draft and change the text to the below
 

@@ -67,6 +67,7 @@ const sidebars = {
               collapsible: false,
               items: [
                 'install/docker',
+                'install/cli-tool',
                 { type: 'link', label: 'Desktop app', href: '/download' },
                 'install/build-from-source',
               ],

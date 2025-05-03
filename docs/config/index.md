@@ -12,17 +12,17 @@ Running into issues with your configuration not being interpreted correctly? Che
 
 ## `ACTUAL_DATA_DIR`
 
-This is where the server stores the budget data files (and configurations unless `ACTUAL_CONFIG_PATH`is set).
+This is where the server stores the budget data files (and configurations unless `ACTUAL_CONFIG_PATH` is set).
 
-The default value is `/data`.
+By default, the server will use the `/data` directory if it exists, or the current directory (`/`) if not.
 
 See also sections on `userFiles` and `serverFiles`.
 
 
 ## `ACTUAL_CONFIG_PATH`
 
-This is the path to the config file. If not specified, the server will look for a `config.json` file either in the
-`/data` folder if it is present or in the same directory as the sync-server's `package.json` if `/data` is absent.
+This is the path to the config file. If not specified, the server will look for a `config.json` file in the
+`/data` folder if it is present or in the sync-server's root directory if `/data` is absent.
 
 See the `ACTUAL_DATA_DIR` section above to override the data folder location.
 
