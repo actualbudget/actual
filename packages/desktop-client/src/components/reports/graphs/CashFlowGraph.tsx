@@ -33,7 +33,12 @@ type CustomTooltipProps = TooltipProps<number, 'date'> & {
   format: (value: unknown, type: FormatType) => string;
 };
 
-function CustomTooltip({ active, payload, isConcise, format }: CustomTooltipProps) {
+function CustomTooltip({
+  active,
+  payload,
+  isConcise,
+  format,
+}: CustomTooltipProps) {
   const locale = useLocale();
   const { t } = useTranslation();
 
@@ -74,7 +79,9 @@ function CustomTooltip({ active, payload, isConcise, format }: CustomTooltipProp
           <AlignedText
             left={t('Change:')}
             right={
-              <strong>{format(data.income + data.expenses, 'financial')}</strong>
+              <strong>
+                {format(data.income + data.expenses, 'financial')}
+              </strong>
             }
           />
           {data.transfers !== 0 && (
@@ -132,10 +139,11 @@ export function CashFlowGraph({
             height={height}
             stackOffset="sign"
             data={data}
-            margin={{ 
+            margin={{
               left: computePadding(
                 data.map(({ balance }) => ({ y: balance })),
-                (data) => format(data, 'financial')), // left padding for Y-axis
+                data => format(data, 'financial'),
+              ), // left padding for Y-axis
             }}
           >
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -203,7 +211,10 @@ export function CashFlowGraph({
   );
 }
 
-function computePadding(data: Array<{ y: number }>, formatter: (value: number) => string) {
+function computePadding(
+  data: Array<{ y: number }>,
+  formatter: (value: number) => string,
+) {
   const maxLength = Math.max(
     ...data.map(({ y }) => {
       return formatter(Math.round(y)).length;

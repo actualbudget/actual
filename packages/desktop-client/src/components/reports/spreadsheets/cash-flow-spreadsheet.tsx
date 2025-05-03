@@ -10,8 +10,8 @@ import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
+import { type FormatType } from '../../spreadsheet/useFormat';
 import { runAll, indexCashFlow } from '../util';
-import { FormatType } from '../../spreadsheet/useFormat';
 
 export function simpleCashFlow(
   startMonth: string,
