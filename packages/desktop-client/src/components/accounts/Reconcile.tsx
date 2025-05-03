@@ -9,13 +9,15 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { t } from 'i18next';
 
 import * as queries from 'loot-core/client/queries';
 import { type Query } from 'loot-core/shared/query';
-import { currencyToInteger } from 'loot-core/shared/util';
+import { currencyToInteger, tsToRelativeTime } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
+import { useLocale } from '../../hooks/useLocale';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
@@ -132,6 +134,7 @@ export function ReconcileMenu({
     query: balanceQuery.query.filter({ cleared: true }),
   });
   const format = useFormat();
+  const locale = useLocale();
   const [inputValue, setInputValue] = useState<string | null>(null);
 
   function onSubmit() {
@@ -164,6 +167,11 @@ export function ReconcileMenu({
           />
         </InitialFocus>
       )}
+      <Text style={{ color: theme.pageTextSubdued, paddingBottom: 4 }}>
+        {account?.last_reconciled
+          ? `${t('Reconciled')} ${tsToRelativeTime(account.last_reconciled, locale)}`
+          : t('Not yet reconciled')}
+      </Text>
       <Button variant="primary" onPress={onSubmit}>
         <Trans>Reconcile</Trans>
       </Button>
