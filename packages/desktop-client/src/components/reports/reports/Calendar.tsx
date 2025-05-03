@@ -189,7 +189,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   }, [start, end, conditions, conditionsOp, firstDayOfWeekIdx, dirty]);
 
   const [sortField, setSortField] = useState('');
-  const [ascDesc, setAscDesc] = useState('desc');
+  const [ascDesc, setAscDesc] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
@@ -595,7 +595,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
               {!isNarrowWidth ? (
                 <SplitsExpandedProvider initialMode="collapse">
                   <TransactionList
-                    headerContent={undefined}
+                    // @ts-ignore TODO
                     tableRef={table}
                     account={undefined}
                     transactions={transactionsGrouped}
@@ -613,7 +613,6 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     isAdding={false}
                     isNew={() => false}
                     isMatched={() => false}
-                    isFiltered={() => true}
                     dateFormat={dateFormat}
                     hideFraction={false}
                     renderEmpty={() => (

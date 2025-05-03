@@ -59,17 +59,12 @@ import { TransactionHeader } from './TransactionHeader';
 import { isLastChild, makeTemporaryTransactions } from './utils';
 
 export type TransactionTableProps = {
-  transactions: TransactionEntity[];
+  transactions: readonly TransactionEntity[];
   loadMoreTransactions: () => void;
   accounts: AccountEntity[];
   categoryGroups: CategoryGroupEntity[];
   payees: PayeeEntity[];
-  balances: {
-    [id: TransactionEntity['id']]: {
-      id: TransactionEntity['id'];
-      balance: number;
-    };
-  };
+  balances: Record<TransactionEntity['id'], { balance: number }> | null;
   showBalances: boolean;
   showReconciled: boolean;
   showCleared: boolean;
@@ -78,9 +73,8 @@ export type TransactionTableProps = {
   currentAccountId: AccountEntity['id'];
   currentCategoryId: CategoryEntity['id'];
   isAdding: boolean;
-  isNew: boolean;
-  isMatched?: boolean;
-  isFiltered?: boolean;
+  isNew: (id: TransactionEntity['id']) => boolean;
+  isMatched: (id: TransactionEntity['id']) => boolean;
   dateFormat?: string;
   hideFraction?: boolean;
   renderEmpty?: ReactNode | (() => ReactNode);
@@ -102,13 +96,13 @@ export type TransactionTableProps = {
   onSort: (field: string, ascDesc: 'asc' | 'desc') => void;
   sortField?: string;
   ascDesc?: 'asc' | 'desc';
-  onBatchDelete: (ids: TransactionEntity['id'][]) => Promise<void>;
-  onBatchDuplicate: (ids: TransactionEntity['id'][]) => Promise<void>;
-  onBatchLinkSchedule: (ids: TransactionEntity['id'][]) => Promise<void>;
-  onBatchUnlinkSchedule: (ids: TransactionEntity['id'][]) => Promise<void>;
-  onCreateRule: (ids: RuleEntity['id'][]) => Promise<void>;
+  onBatchDelete: (ids: TransactionEntity['id'][]) => void;
+  onBatchDuplicate: (ids: TransactionEntity['id'][]) => void;
+  onBatchLinkSchedule: (ids: TransactionEntity['id'][]) => void;
+  onBatchUnlinkSchedule: (ids: TransactionEntity['id'][]) => void;
+  onCreateRule: (ids: RuleEntity['id'][]) => void;
   onScheduleAction: (action: string, selectedIds: string[]) => void;
-  onMakeAsNonSplitTransactions: (ids: string[]) => Promise<void>;
+  onMakeAsNonSplitTransactions: (ids: string[]) => void;
   showSelection: boolean;
   allowSplitTransaction?: boolean;
   onManagePayees: (id?: PayeeEntity['id']) => void;
@@ -118,7 +112,7 @@ type TableState = {
   newTransactions: TransactionEntity[];
   newNavigator: TableNavigator<TransactionEntity>;
   tableNavigator: TableNavigator<TransactionEntity>;
-  transactions: TransactionEntity[];
+  transactions: readonly TransactionEntity[];
 };
 
 export const TransactionTable = forwardRef(
@@ -776,12 +770,11 @@ type TransactionTableInnerProps = {
   currentAccountId: AccountEntity['id'];
   currentCategoryId: CategoryEntity['id'];
   isAdding: boolean;
-  isNew?: (id: TransactionEntity['id']) => boolean;
-  isMatched?: (id: TransactionEntity['id']) => boolean;
-  isFiltered?: boolean;
-  dateFormat?: string;
-  hideFraction?: boolean;
-  renderEmpty?: ReactNode | (() => ReactNode);
+  isNew: (id: TransactionEntity['id']) => boolean;
+  isMatched: (id: TransactionEntity['id']) => boolean;
+  dateFormat: string;
+  hideFraction: boolean;
+  renderEmpty: ReactNode | (() => ReactNode);
   onSave: (transaction: TransactionEntity) => void;
   onApplyRules: (
     transaction: TransactionEntity,

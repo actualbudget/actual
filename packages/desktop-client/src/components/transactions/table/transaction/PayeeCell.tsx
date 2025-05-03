@@ -36,7 +36,7 @@ import {
   UnexposedCellContent,
 } from '../../../table';
 import {
-  TransactionUpdateFunction,
+  type TransactionUpdateFunction,
   type SerializedTransaction,
   type TransactionEditFunction,
 } from '../utils';

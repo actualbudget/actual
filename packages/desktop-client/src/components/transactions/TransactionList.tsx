@@ -20,6 +20,7 @@ import {
 } from 'loot-core/shared/transactions';
 import { getChangedValues, applyChanges } from 'loot-core/shared/util';
 import {
+  type TransactionFilterEntity,
   type AccountEntity,
   type CategoryEntity,
   type PayeeEntity,
@@ -90,7 +91,6 @@ type TransactionListProps = Pick<
   | 'dateFormat'
   | 'hideFraction'
   | 'isAdding'
-  | 'isFiltered'
   | 'isMatched'
   | 'isNew'
   | 'loadMoreTransactions'
@@ -116,14 +116,14 @@ type TransactionListProps = Pick<
 > & {
   tableRef: RefObject<HTMLDivElement>;
   allTransactions: TransactionEntity[];
-  account: AccountEntity;
-  category: CategoryEntity;
+  account: AccountEntity | undefined;
+  category: CategoryEntity | undefined;
   onChange: (
     transaction: TransactionEntity,
     transactions: TransactionEntity[],
   ) => void;
   onApplyFilter: (
-    f: Pick<RuleConditionEntity, 'field' | 'op' | 'value' | 'type'>,
+    f: Partial<RuleConditionEntity> | TransactionFilterEntity,
   ) => void;
   onRefetch: () => void;
 };
@@ -146,7 +146,6 @@ export function TransactionList({
   isAdding,
   isNew,
   isMatched,
-  isFiltered,
   dateFormat,
   hideFraction,
   renderEmpty,
@@ -173,7 +172,7 @@ export function TransactionList({
   const [learnCategories = 'true'] = useSyncedPref('learn-categories');
   const isLearnCategoriesEnabled = String(learnCategories) === 'true';
 
-  const transactionsLatest = useRef<TransactionEntity[]>([]);
+  const transactionsLatest = useRef<readonly TransactionEntity[]>([]);
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
   }, [transactions]);
@@ -323,7 +322,7 @@ export function TransactionList({
         op: 'hasTags',
         value: tag,
         type: 'string',
-      } as Pick<RuleConditionEntity, 'field' | 'op' | 'value' | 'type'>);
+      } as Partial<RuleConditionEntity> | TransactionFilterEntity);
     },
     [onApplyFilter],
   );
@@ -347,7 +346,6 @@ export function TransactionList({
       isAdding={isAdding}
       isNew={isNew}
       isMatched={isMatched}
-      isFiltered={isFiltered}
       dateFormat={dateFormat}
       hideFraction={hideFraction}
       renderEmpty={renderEmpty}

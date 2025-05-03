@@ -1,19 +1,15 @@
-import {
-  format as formatDate,
-  parseISO,
-  isValid as isDateValid,
-} from 'date-fns';
+import { parseISO, isValid as isDateValid } from 'date-fns';
+
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { currentDay } from 'loot-core/shared/months';
-
 import {
   amountToInteger,
-  CurrencyAmount,
+  type CurrencyAmount,
   integerToCurrency,
 } from 'loot-core/shared/util';
 import {
-  AccountEntity,
-  CategoryEntity,
+  type AccountEntity,
+  type CategoryEntity,
   type TransactionEntity,
 } from 'loot-core/types/models';
 
@@ -93,7 +89,10 @@ export function deserializeTransaction(
   return { ...realTransaction, date, amount };
 }
 
-export function isLastChild(transactions: TransactionEntity[], index: number) {
+export function isLastChild(
+  transactions: readonly TransactionEntity[],
+  index: number,
+) {
   const trans = transactions[index];
   return (
     trans &&

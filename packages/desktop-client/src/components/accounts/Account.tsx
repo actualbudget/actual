@@ -1457,10 +1457,7 @@ class AccountInternal extends PureComponent<
     }
   };
 
-  onScheduleAction = async (
-    name: 'skip' | 'post-transaction' | 'complete',
-    ids: string[],
-  ) => {
+  onScheduleAction = async (name: string, ids: string[]) => {
     const scheduleIds = ids.map(id => id.split('/')[1]);
 
     switch (name) {
@@ -1796,6 +1793,7 @@ class AccountInternal extends PureComponent<
               <View style={{ flex: 1 }}>
                 <TransactionList
                   headerContent={undefined}
+                  // @ts-ignore TODO
                   tableRef={this.table}
                   account={account}
                   transactions={transactions}
@@ -1810,7 +1808,7 @@ class AccountInternal extends PureComponent<
                   balances={allBalances}
                   showBalances={!!allBalances}
                   showReconciled={showReconciled}
-                  showCleared={showCleared}
+                  showCleared={!!showCleared}
                   showAccount={
                     !accountId ||
                     accountId === 'offbudget' ||
