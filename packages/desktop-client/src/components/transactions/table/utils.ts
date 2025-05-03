@@ -19,6 +19,11 @@ export type SerializedTransaction = Omit<TransactionEntity, 'date'> & {
   credit: CurrencyAmount;
 };
 
+export type TransactionEditFunction = (
+  id: TransactionEntity['id'],
+  name: string,
+) => void;
+
 export function serializeTransaction(
   transaction: TransactionEntity,
   showZeroInDeposit?: boolean,

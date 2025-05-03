@@ -3,9 +3,9 @@ import React, {
   useState,
   useRef,
   useEffect,
-  CSSProperties,
+  type CSSProperties,
   Ref,
-  RefObject,
+  type RefObject,
   ChangeEvent,
   SyntheticEvent,
 } from 'react';
@@ -28,6 +28,13 @@ import {
 import * as monthUtils from 'loot-core/shared/months';
 import { isTemporaryId, isPreviewId } from 'loot-core/shared/transactions';
 import { integerToCurrency, titleFirst } from 'loot-core/shared/util';
+import {
+  type AccountEntity,
+  type CategoryGroupEntity,
+  type PayeeEntity,
+  type ScheduleEntity,
+  type TransactionEntity,
+} from 'loot-core/types/models';
 
 import { useContextMenu } from '../../../../hooks/useContextMenu';
 import { useSelectedDispatch } from '../../../../hooks/useSelected';
@@ -46,21 +53,14 @@ import {
   CustomCell,
   CellButton,
 } from '../../../table';
-
 import { TransactionMenu } from '../../TransactionMenu';
 import {
   deserializeTransaction,
-  getDisplayValue,
-  SerializedTransaction,
-  SerializedTransactionUnion,
+  type SerializedTransaction,
   serializeTransaction,
 } from '../utils';
-import {
-  AccountEntity,
-  CategoryGroupEntity,
-  PayeeEntity,
-  TransactionEntity,
-} from 'loot-core/types/models';
+
+import { PayeeCell } from './PayeeCell';
 
 type TransactionProps = {
   allTransactions: SerializedTransaction[];
@@ -81,9 +81,9 @@ type TransactionProps = {
   matched?: boolean;
   expanded?: boolean;
   focusedField?: string;
-  categoryGroups?: CategoryGroupEntity[];
-  payees?: PayeeEntity[];
-  accounts?: AccountEntity[];
+  categoryGroups: CategoryGroupEntity[];
+  payees: PayeeEntity[];
+  accounts: AccountEntity[];
   balance: number;
   dateFormat?: string;
   hideFraction?: boolean;
@@ -102,10 +102,10 @@ type TransactionProps = {
   onMakeAsNonSplitTransactions?: (id: TransactionEntity['id']) => void;
   onSplit: (id: TransactionEntity['id']) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
-  onManagePayees;
-  onCreatePayee;
-  onNavigateToTransferAccount;
-  onNavigateToSchedule;
+  onCreatePayee: (name: string) => Promise<PayeeEntity['id']>;
+  onManagePayees: (id: PayeeEntity['id'] | undefined) => void;
+  onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
+  onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onNotesTagClick: (tag: string) => void;
   splitError?: string;
   listContainerRef: RefObject<HTMLDivElement>;
