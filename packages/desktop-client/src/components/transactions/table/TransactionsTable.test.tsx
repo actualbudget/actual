@@ -28,10 +28,10 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { AuthProvider } from '../../auth/AuthProvider';
-import { SelectedProviderWithItems } from '../../hooks/useSelected';
-import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
-import { TestProvider } from '../../redux/mock';
+import { AuthProvider } from '../../../auth/AuthProvider';
+import { SelectedProviderWithItems } from '../../../hooks/useSelected';
+import { SplitsExpandedProvider } from '../../../hooks/useSplitsExpanded';
+import { TestProvider } from '../../../redux/mock';
 
 import { TransactionTable } from './TransactionsTable';
 
@@ -69,8 +69,9 @@ const payees: PayeeEntity[] = [
   },
 ];
 vi.mock('../../hooks/usePayees', async importOriginal => {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-  const actual = await importOriginal<typeof import('../../hooks/usePayees')>();
+  const actual =
+    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+    await importOriginal<typeof import('../../../hooks/usePayees')>();
   return {
     ...actual,
     usePayees: () => payees,
@@ -199,9 +200,9 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
               <SplitsExpandedProvider>
                 <TransactionTable
                   {...props}
-                  // @ts-expect-error this will be auto-patched once TransactionTable is moved to TS
                   transactions={transactions}
                   loadMoreTransactions={() => {}}
+                  // @ts-ignore TODO:
                   commonPayees={[]}
                   payees={payees}
                   addNotification={console.log}
