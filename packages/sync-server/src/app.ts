@@ -99,7 +99,7 @@ if (process.env.NODE_ENV === 'development') {
   );
 }
 
-function parseHTTPSConfig(value) {
+function parseHTTPSConfig(value: string) {
   if (value.startsWith('-----BEGIN')) {
     return value;
   }
@@ -142,7 +142,7 @@ export async function run() {
   }
 
   // Signify to any parent process that the server has started. Used in electron desktop app
-  // @ts-expect-error electron types
+  // @ts-ignore-error electron types
   process.parentPort?.postMessage({ type: 'server-started' });
 
   console.log(
