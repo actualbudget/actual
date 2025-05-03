@@ -63,9 +63,9 @@ import { PayeeCell } from './PayeeCell';
 import { StatusCell } from './StatusCell';
 
 type TransactionProps = {
-  allTransactions: SerializedTransaction[];
+  allTransactions?: SerializedTransaction[];
   transaction: TransactionEntity;
-  subtransactions: SerializedTransaction[];
+  subtransactions: SerializedTransaction[] | null;
   transferAccountsByTransaction: {
     [id: TransactionEntity['id']]: AccountEntity;
   };
@@ -89,26 +89,26 @@ type TransactionProps = {
   hideFraction?: boolean;
   onSave: (
     tx: TransactionEntity,
-    subTxs: SerializedTransaction[],
+    subTxs: SerializedTransaction[] | null,
     name: string,
   ) => void;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
   onDelete: (id: TransactionEntity['id']) => void;
-  onDuplicate: (id: TransactionEntity['id']) => void;
-  onLinkSchedule: (id: TransactionEntity['id']) => void;
-  onUnlinkSchedule: (id: TransactionEntity['id']) => void;
-  onCreateRule: (id: TransactionEntity['id']) => void;
-  onScheduleAction: (action: string, id: TransactionEntity['id']) => void;
+  onDuplicate?: (id: TransactionEntity['id']) => void;
+  onLinkSchedule?: (id: TransactionEntity['id']) => void;
+  onUnlinkSchedule?: (id: TransactionEntity['id']) => void;
+  onCreateRule?: (id: TransactionEntity['id']) => void;
+  onScheduleAction?: (action: string, id: TransactionEntity['id']) => void;
   onMakeAsNonSplitTransactions?: (id: TransactionEntity['id']) => void;
   onSplit: (id: TransactionEntity['id']) => void;
-  onToggleSplit: (id: TransactionEntity['id']) => void;
+  onToggleSplit?: (id: TransactionEntity['id']) => void;
   onCreatePayee: (name: string) => Promise<PayeeEntity['id']>;
   onManagePayees: (id: PayeeEntity['id'] | undefined) => void;
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onNotesTagClick: (tag: string) => void;
   splitError?: string;
-  listContainerRef: RefObject<HTMLDivElement>;
+  listContainerRef?: RefObject<HTMLDivElement>;
   showSelection?: boolean;
   allowSplitTransaction?: boolean;
 };
@@ -420,7 +420,7 @@ function TransactionInner({
         />
       </Popover>
 
-      {splitError && listContainerRef.current && (
+      {splitError && listContainerRef?.current && (
         <Popover
           triggerRef={triggerRef}
           isOpen
@@ -673,7 +673,7 @@ function TransactionInner({
             }}
             disabled={isTemporaryId(transaction.id)}
             onEdit={() => !isPreview && onEdit(id, 'category')}
-            onSelect={() => onToggleSplit(id)}
+            onSelect={() => onToggleSplit?.(id)}
           >
             <View
               style={{
