@@ -1,12 +1,12 @@
 // @ts-strict-ignore
-import React, { type ReactElement, useEffect, useRef } from 'react';
+import { type ReactElement, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  Navigate,
   Route,
   Routes,
-  Navigate,
-  useLocation,
   useHref,
+  useLocation,
 } from 'react-router-dom';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -23,12 +23,13 @@ import { useAccounts } from '../hooks/useAccounts';
 import { useLocalPref } from '../hooks/useLocalPref';
 import { useMetaThemeColor } from '../hooks/useMetaThemeColor';
 import { useNavigate } from '../hooks/useNavigate';
-import { useSelector, useDispatch } from '../redux';
+import { useDispatch, useSelector } from '../redux';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
 import { BankSync } from './banksync';
 import { BankSyncStatus } from './BankSyncStatus';
+import { CommandBar } from './CommandBar';
 import { GlobalKeys } from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
 import { Category } from './mobile/budget/Category';
@@ -176,7 +177,7 @@ export function FinancesApp() {
     <View style={{ height: '100%' }}>
       <RouterBehaviors />
       <GlobalKeys />
-
+      <CommandBar />
       <View
         style={{
           flexDirection: 'row',
