@@ -259,7 +259,7 @@ export function TransactionList({
       if (diff) {
         (Object.keys(diff) as (keyof TransactionEntity)[]).forEach(field => {
           if (
-            newTransaction[field] === null ||
+            newTransaction[field] == null ||
             newTransaction[field] === '' ||
             newTransaction[field] === 0 ||
             newTransaction[field] === false
