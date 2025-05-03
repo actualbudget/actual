@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 import { css } from '@emotion/css';
 import * as d from 'date-fns';
 import {
@@ -23,8 +25,6 @@ import {
   amountToCurrencyNoDecimal,
 } from 'loot-core/shared/util';
 
-import { useLocale } from '../../../hooks/useLocale';
-import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { chartTheme } from '../chart-theme';
 import { Container } from '../Container';
 

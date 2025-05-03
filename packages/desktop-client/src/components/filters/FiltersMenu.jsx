@@ -14,6 +14,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import {
   parse as parseDate,
   format as formatDate,
@@ -33,7 +34,6 @@ import {
 } from 'loot-core/shared/rules';
 import { titleFirst } from 'loot-core/shared/util';
 
-import { useDateFormat } from '../../hooks/useDateFormat';
 import { GenericInput } from '../util/GenericInput';
 
 import { CompactFiltersButton } from './CompactFiltersButton';

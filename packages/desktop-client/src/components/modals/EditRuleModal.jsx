@@ -20,6 +20,12 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import {
+  useSelected,
+  SelectedProvider,
+} from '@desktop-client/hooks/useSelected';
 import { css } from '@emotion/css';
 import { v4 as uuid } from 'uuid';
 
@@ -48,9 +54,6 @@ import {
   amountToInteger,
 } from 'loot-core/shared/util';
 
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { StatusBadge } from '../schedules/StatusBadge';

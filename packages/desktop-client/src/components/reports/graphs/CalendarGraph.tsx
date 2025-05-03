@@ -6,6 +6,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 import {
   addDays,
   format,
@@ -18,7 +19,6 @@ import {
 import { amountToCurrency } from 'loot-core/shared/util';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { useResizeObserver } from '../../../hooks/useResizeObserver';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { chartTheme } from '../chart-theme';
 

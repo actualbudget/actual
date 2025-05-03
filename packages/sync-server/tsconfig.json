@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "composite": true,
     "target": "ES2022",
     // DOM for URL global in Node 16+
     "lib": ["ES2021"],
@@ -17,6 +18,5 @@
     "outDir": "build",
     "types": ["vite/client", "vitest/globals"]
   },
-  "include": ["src/**/*.js", "types/global.d.ts"],
-  "exclude": ["node_modules", "build", "./app-plaid.js", "coverage"]
+  "exclude": ["coverage", "node_modules", "server-files", "user-files", "build"]
 }

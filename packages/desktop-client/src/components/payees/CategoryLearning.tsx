@@ -3,8 +3,8 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
-import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 

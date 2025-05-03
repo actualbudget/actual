@@ -11,6 +11,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useDragRef } from '@desktop-client/hooks/useDragRef';
+import { useNotes } from '@desktop-client/hooks/useNotes';
 import { css, cx } from '@emotion/css';
 
 import { openAccountCloseModal } from 'loot-core/client/modals/modalsSlice';
@@ -21,9 +24,6 @@ import {
 } from 'loot-core/client/queries/queriesSlice';
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { useContextMenu } from '../../hooks/useContextMenu';
-import { useDragRef } from '../../hooks/useDragRef';
-import { useNotes } from '../../hooks/useNotes';
 import { useDispatch } from '../../redux';
 import { Link } from '../common/Link';
 import { Notes } from '../Notes';

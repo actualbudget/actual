@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
+import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
@@ -29,8 +31,6 @@ import {
 } from 'loot-core/types/models';
 
 import { AuthProvider } from '../../auth/AuthProvider';
-import { SelectedProviderWithItems } from '../../hooks/useSelected';
-import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
 import { TestProvider } from '../../redux/mock';
 
 import { TransactionTable } from './TransactionsTable';

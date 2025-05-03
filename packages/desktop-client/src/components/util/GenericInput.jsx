@@ -3,13 +3,13 @@ import { useTranslation } from 'react-i18next';
 
 import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 
 import { useReports } from 'loot-core/client/data-hooks/reports';
 import { getMonthYearFormat } from 'loot-core/shared/months';
 import { integerToAmount, amountToInteger } from 'loot-core/shared/util';
 
-import { useCategories } from '../../hooks/useCategories';
-import { useDateFormat } from '../../hooks/useDateFormat';
 import { useSelector } from '../../redux';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { Autocomplete } from '../autocomplete/Autocomplete';

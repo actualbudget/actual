@@ -34,6 +34,8 @@ import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { css } from '@emotion/css';
 
 import {
@@ -58,8 +60,6 @@ import {
   type SyncedLocalFile,
 } from 'loot-core/types/file';
 
-import { useInitialMount } from '../../hooks/useInitialMount';
-import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useSelector, useDispatch } from '../../redux';
 import { useMultiuserEnabled } from '../ServerContext';
 

@@ -31,6 +31,10 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
+import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 import { tsToRelativeTime } from 'loot-core/shared/util';
 import {
@@ -40,10 +44,6 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
-import { useLocale } from '../../hooks/useLocale';
-import { useLocalPref } from '../../hooks/useLocalPref';
-import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
-import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { AnimatedRefresh } from '../AnimatedRefresh';
 import { Search } from '../common/Search';
 import { FilterButton } from '../filters/FiltersMenu';

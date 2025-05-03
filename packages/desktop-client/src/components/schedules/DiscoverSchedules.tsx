@@ -7,6 +7,15 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { Stack } from '@actual-app/components/stack';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import {
+  useSelected,
+  useSelectedDispatch,
+  useSelectedItems,
+  SelectedProvider,
+} from '@desktop-client/hooks/useSelected';
+import { useSendPlatformRequest } from '@desktop-client/hooks/useSendPlatformRequest';
 
 import { runQuery } from 'loot-core/client/query-helpers';
 import { send } from 'loot-core/platform/client/fetch';
@@ -14,15 +23,6 @@ import { q } from 'loot-core/shared/query';
 import { getRecurringDescription } from 'loot-core/shared/schedules';
 import type { DiscoverScheduleEntity } from 'loot-core/types/models';
 
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { useLocale } from '../../hooks/useLocale';
-import {
-  useSelected,
-  useSelectedDispatch,
-  useSelectedItems,
-  SelectedProvider,
-} from '../../hooks/useSelected';
-import { useSendPlatformRequest } from '../../hooks/useSendPlatformRequest';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Table, TableHeader, Row, Field, SelectCell } from '../table';
 import { DisplayId } from '../util/DisplayId';

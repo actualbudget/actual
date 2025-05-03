@@ -8,11 +8,11 @@ import { SvgHelp } from '@actual-app/components/icons/v2';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useToggle } from 'usehooks-ts';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
-import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { useDispatch } from '../redux';
 
 const getPageDocs = (page: string) => {

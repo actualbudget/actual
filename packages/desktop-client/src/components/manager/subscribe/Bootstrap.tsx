@@ -7,11 +7,11 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 
-import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
 import { Link } from '../../common/Link';
 import { useRefreshLoginMethods } from '../../ServerContext';

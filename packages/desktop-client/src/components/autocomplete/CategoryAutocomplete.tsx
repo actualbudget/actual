@@ -19,6 +19,8 @@ import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { css, cx } from '@emotion/css';
 
 import { trackingBudget, envelopeBudget } from 'loot-core/client/queries';
@@ -29,8 +31,6 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { useCategories } from '../../hooks/useCategories';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '../budget/util';
 import { useSheetValue } from '../spreadsheet/useSheetValue';

@@ -6,10 +6,10 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 
-import { useGlobalPref } from '../../../hooks/useGlobalPref';
 import { useDispatch } from '../../../redux';
 import { Information } from '../../alerts';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';

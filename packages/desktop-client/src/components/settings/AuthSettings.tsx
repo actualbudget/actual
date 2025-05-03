@@ -5,10 +5,10 @@ import { Button } from '@actual-app/components/button';
 import { Label } from '@actual-app/components/label';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { useDispatch } from '../../redux';
 import { useMultiuserEnabled, useLoginMethod } from '../ServerContext';
 

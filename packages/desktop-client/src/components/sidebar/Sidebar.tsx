@@ -6,15 +6,15 @@ import { SvgAdd } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 import { css } from '@emotion/css';
 import { Resizable } from 're-resizable';
 
 import { replaceModal } from 'loot-core/client/modals/modalsSlice';
 import * as Platform from 'loot-core/client/platform';
 
-import { useGlobalPref } from '../../hooks/useGlobalPref';
-import { useLocalPref } from '../../hooks/useLocalPref';
-import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { useDispatch } from '../../redux';
 
 import { Accounts } from './Accounts';

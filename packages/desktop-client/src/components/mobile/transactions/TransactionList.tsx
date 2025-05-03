@@ -28,6 +28,17 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { usePayees } from '@desktop-client/hooks/usePayees';
+import {
+  useSelectedDispatch,
+  useSelectedItems,
+} from '@desktop-client/hooks/useSelected';
+import { useTransactionBatchActions } from '@desktop-client/hooks/useTransactionBatchActions';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 
 import { setNotificationInset } from 'loot-core/client/notifications/notificationsSlice';
 import { validForTransfer } from 'loot-core/client/transfer';
@@ -39,17 +50,6 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useCategories } from '../../../hooks/useCategories';
-import { useLocale } from '../../../hooks/useLocale';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { usePayees } from '../../../hooks/usePayees';
-import {
-  useSelectedDispatch,
-  useSelectedItems,
-} from '../../../hooks/useSelected';
-import { useTransactionBatchActions } from '../../../hooks/useTransactionBatchActions';
-import { useUndo } from '../../../hooks/useUndo';
 import { useDispatch } from '../../../redux';
 import { useScrollListener } from '../../ScrollProvider';
 import { FloatingActionBar } from '../FloatingActionBar';

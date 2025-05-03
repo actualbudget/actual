@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    // "composite": true,
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "downlevelIteration": true,
+    // TODO: enable once every file is ts
+    // "strict": true,
+    "strictFunctionTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "jsx": "preserve",
+    "types": ["vite/client", "vitest/globals"],
+    // Check JS files too
+    "allowJs": true,
+    "checkJs": false,
+    // Used for temp builds
+    "outDir": "build",
+    "moduleResolution": "bundler",
+    "module": "es2022",
+    // Until/if we build using tsc
+    // "noEmit": true,
+    "plugins": [
+      {
+        "name": "typescript-strict-plugin",
+        "path": ["./packages"]
+      }
+    ]
+  },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  }
+}

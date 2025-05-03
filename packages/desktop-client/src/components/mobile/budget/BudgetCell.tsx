@@ -5,15 +5,15 @@ import { Button } from '@actual-app/components/button';
 import { type CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
+import { useNotes } from '@desktop-client/hooks/useNotes';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 import { AutoTextSize } from 'auto-text-size';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { useNotes } from '../../../hooks/useNotes';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { useUndo } from '../../../hooks/useUndo';
 import { useDispatch } from '../../../redux';
 import { makeAmountGrey } from '../../budget/util';
 import { PrivacyFilter } from '../../PrivacyFilter';

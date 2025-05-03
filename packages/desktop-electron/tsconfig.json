@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     // Using ES2021 because that’s the newest version where
     // the latest Node 16.x release supports all of the features
@@ -8,8 +8,9 @@
     "moduleResolution": "node10",
     "noEmit": false,
     "declaration": true,
-    "outDir": "build"
+    "outDir": "build",
+    "composite": true,
+    "tsBuildInfoFile": "build/.desktop-electron.tsbuildinfo"
   },
-  "include": ["."],
-  "exclude": ["**/node_modules/*", "build/**/*", "e2e/**/*"]
+  "exclude": ["appx", "build", "dist", "logs"]
 }

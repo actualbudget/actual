@@ -8,6 +8,9 @@ import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useSyncedPrefs } from '@desktop-client/hooks/useSyncedPrefs';
 import deepEqual from 'deep-equal';
 
 import {
@@ -18,9 +21,6 @@ import {
 import { send } from 'loot-core/platform/client/fetch';
 import { amountToInteger } from 'loot-core/shared/util';
 
-import { useCategories } from '../../../hooks/useCategories';
-import { useDateFormat } from '../../../hooks/useDateFormat';
-import { useSyncedPrefs } from '../../../hooks/useSyncedPrefs';
 import { useDispatch } from '../../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 import { SectionLabel } from '../../forms';

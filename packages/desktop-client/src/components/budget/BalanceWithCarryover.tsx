@@ -13,11 +13,11 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { css } from '@emotion/css';
 
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { type Binding } from '../spreadsheet';
 import { CellValue, CellValueText } from '../spreadsheet/CellValue';
 import { useFormat } from '../spreadsheet/useFormat';

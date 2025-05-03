@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { type CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 import { css } from '@emotion/css';
 import {
   AreaChart,
@@ -18,7 +19,6 @@ import {
 
 import { amountToCurrencyNoDecimal } from 'loot-core/shared/util';
 
-import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
 

@@ -1,10 +1,9 @@
 import React from 'react';
 
 import { View } from '@actual-app/components/view';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 import { type AccountEntity } from 'loot-core/types/models';
-
-import { useLocale } from '../../hooks/useLocale';
 
 import { AccountRow } from './AccountRow';
 

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+
 import { isNonProductionEnvironment } from 'loot-core/shared/environment';
 import type { DarkTheme, Theme } from 'loot-core/types/prefs';
-
-import { useGlobalPref } from '../hooks/useGlobalPref';
 
 import * as darkTheme from './themes/dark';
 import * as developmentTheme from './themes/development';

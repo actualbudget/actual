@@ -11,6 +11,11 @@ import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
+import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
+import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
+import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 import {
   type Modal as ModalType,
@@ -22,11 +27,6 @@ import { send } from 'loot-core/platform/client/fetch';
 import { useAuth } from '../../auth/AuthProvider';
 import { Permissions } from '../../auth/types';
 import { authorizeBank } from '../../gocardless';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
-import { usePluggyAiStatus } from '../../hooks/usePluggyAiStatus';
-import { useSimpleFinStatus } from '../../hooks/useSimpleFinStatus';
-import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { useDispatch } from '../../redux';
 import { Warning } from '../alerts';
 import { Link } from '../common/Link';

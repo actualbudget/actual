@@ -7,6 +7,7 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 
 import {
   type Modal as ModalType,
@@ -18,7 +19,6 @@ import {
   type GoCardlessToken,
 } from 'loot-core/types/models';
 
-import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { useDispatch } from '../../redux';
 import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';

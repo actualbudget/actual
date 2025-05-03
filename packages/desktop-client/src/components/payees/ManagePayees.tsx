@@ -12,6 +12,12 @@ import { SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import {
+  useSelected,
+  SelectedProvider,
+  useSelectedDispatch,
+  useSelectedItems,
+} from '@desktop-client/hooks/useSelected';
 import memoizeOne from 'memoize-one';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
@@ -19,12 +25,6 @@ import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { type Diff, groupById } from 'loot-core/shared/util';
 import { type PayeeEntity } from 'loot-core/types/models';
 
-import {
-  useSelected,
-  SelectedProvider,
-  useSelectedDispatch,
-  useSelectedItems,
-} from '../../hooks/useSelected';
 import { useDispatch } from '../../redux';
 import { Search } from '../common/Search';
 import { TableHeader, Cell, SelectCell } from '../table';

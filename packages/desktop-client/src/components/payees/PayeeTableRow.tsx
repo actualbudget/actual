@@ -12,12 +12,12 @@ import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 import { type PayeeEntity } from 'loot-core/types/models';
 
-import { useContextMenu } from '../../hooks/useContextMenu';
-import { useSelectedDispatch } from '../../hooks/useSelected';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
 import {
   Cell,
   CellButton,

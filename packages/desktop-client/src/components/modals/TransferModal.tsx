@@ -5,13 +5,13 @@ import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
+import { useCategories } from '@desktop-client/hooks/useCategories';
 
 import {
   type Modal as ModalType,
   pushModal,
 } from 'loot-core/client/modals/modalsSlice';
 
-import { useCategories } from '../../hooks/useCategories';
 import { useDispatch } from '../../redux';
 import {
   addToBeBudgetedGroup,

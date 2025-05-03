@@ -21,6 +21,9 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 import { format } from 'date-fns';
 import { debounce } from 'debounce';
 
@@ -29,9 +32,6 @@ import { amountToCurrency } from 'loot-core/shared/util';
 import { type CalendarWidget } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { useMergedRefs } from '../../../hooks/useMergedRefs';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { useResizeObserver } from '../../../hooks/useResizeObserver';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { chartTheme } from '../chart-theme';
 import { DateRange } from '../DateRange';

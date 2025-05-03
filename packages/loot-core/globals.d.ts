@@ -45,3 +45,6 @@ declare global {
   // eslint-disable-next-line no-var
   var IS_TESTING: boolean;
 }
+
+declare module '*.pegjs';
+declare module 'vite-plugin-peggy-loader';

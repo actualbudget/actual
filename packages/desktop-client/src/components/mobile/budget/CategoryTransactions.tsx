@@ -2,6 +2,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { View } from '@actual-app/components/view';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
 import {
@@ -18,9 +21,6 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { useDateFormat } from '../../../hooks/useDateFormat';
-import { useLocale } from '../../../hooks/useLocale';
-import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';

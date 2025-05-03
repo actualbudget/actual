@@ -7,11 +7,11 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 import { loadAllFiles } from 'loot-core/client/budgets/budgetsSlice';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
-import { useGlobalPref } from '../../../hooks/useGlobalPref';
 import { useDispatch } from '../../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
 

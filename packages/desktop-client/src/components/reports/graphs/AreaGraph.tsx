@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
+import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 import { css } from '@emotion/css';
 import {
   AreaChart,
@@ -24,7 +25,6 @@ import {
   type DataEntity,
 } from 'loot-core/types/models';
 
-import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { Container } from '../Container';
 
 import { adjustTextSize } from './adjustTextSize';

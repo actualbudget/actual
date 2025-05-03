@@ -1,9 +1,10 @@
 // @ts-strict-ignore
 import React, { type ComponentProps } from 'react';
 
+import { useDragRef } from '@desktop-client/hooks/useDragRef';
+
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { useDragRef } from '../../hooks/useDragRef';
 import {
   useDraggable,
   useDroppable,

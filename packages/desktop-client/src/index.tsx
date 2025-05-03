@@ -28,12 +28,11 @@ import { q } from 'loot-core/shared/query';
 
 import * as accountsSlice from './accounts/accountsSlice';
 import { AuthProvider } from './auth/AuthProvider';
-import { App } from './components/App';
-import { ServerProvider } from './components/ServerContext';
-
 // See https://github.com/WICG/focus-visible. Only makes the blue
 // focus outline appear from keyboard events.
 import 'focus-visible';
+import { App } from './components/App';
+import { ServerProvider } from './components/ServerContext';
 
 const boundActions = bindActionCreators(
   {

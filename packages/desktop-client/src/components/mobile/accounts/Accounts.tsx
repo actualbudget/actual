@@ -25,6 +25,11 @@ import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { css } from '@emotion/css';
 
 import { syncAndDownload } from 'loot-core/client/app/appSlice';
@@ -33,11 +38,6 @@ import * as queries from 'loot-core/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { moveAccount } from '../../../accounts/accountsSlice';
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
-import { useLocalPref } from '../../../hooks/useLocalPref';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useDispatch, useSelector } from '../../../redux';
 import { makeAmountFullStyle } from '../../budget/util';
 import { MobilePageHeader, Page } from '../../Page';

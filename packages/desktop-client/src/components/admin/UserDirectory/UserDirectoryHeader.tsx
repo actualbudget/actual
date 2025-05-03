@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import {
   useSelectedItems,
   useSelectedDispatch,
-} from '../../../hooks/useSelected';
+} from '@desktop-client/hooks/useSelected';
+
 import { SelectCell, Cell, TableHeader } from '../../table';
 
 export function UserDirectoryHeader() {

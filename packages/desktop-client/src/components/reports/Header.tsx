@@ -6,6 +6,7 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 import * as monthUtils from 'loot-core/shared/months';
 import {
@@ -14,7 +15,6 @@ import {
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { useLocale } from '../../hooks/useLocale';
 import { AppliedFilters } from '../filters/AppliedFilters';
 import { FilterButton } from '../filters/FiltersMenu';
 

@@ -9,10 +9,10 @@ import {
 } from 'react';
 
 import { View } from '@actual-app/components/view';
+import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 
 import { type PayeeEntity } from 'loot-core/types/models';
 
-import { useSelectedItems } from '../../hooks/useSelected';
 import { useTableNavigator, Table } from '../table';
 
 import { PayeeTableRow } from './PayeeTableRow';

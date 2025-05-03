@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
-import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useSelector } from '../../redux';
 import { Modal, ModalHeader, ModalCloseButton } from '../common/Modal';
 import { BudgetFileSelection } from '../manager/BudgetFileSelection';

@@ -5,12 +5,12 @@ import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
+import { useCategories } from '@desktop-client/hooks/useCategories';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { useCategories } from '../../../hooks/useCategories';
 import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
 import { addToBeBudgetedGroup, removeCategoriesFromGroups } from '../util';
 

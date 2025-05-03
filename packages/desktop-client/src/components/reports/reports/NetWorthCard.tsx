@@ -5,6 +5,7 @@ import { Block } from '@actual-app/components/block';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 import { integerToCurrency } from 'loot-core/shared/util';
 import {
@@ -12,7 +13,6 @@ import {
   type NetWorthWidget,
 } from 'loot-core/types/models';
 
-import { useLocale } from '../../../hooks/useLocale';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Change } from '../Change';
 import { DateRange } from '../DateRange';

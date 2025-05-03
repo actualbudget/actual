@@ -11,13 +11,13 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
 import { v4 as uuid } from 'uuid';
 
 import { friendlyOp } from 'loot-core/shared/rules';
 import { type RuleEntity } from 'loot-core/types/models';
 
-import { useContextMenu } from '../../hooks/useContextMenu';
-import { useSelectedDispatch } from '../../hooks/useSelected';
 import { SelectCell, Row, Field, Cell } from '../table';
 
 import { ActionExpression } from './ActionExpression';

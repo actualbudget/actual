@@ -13,6 +13,7 @@ import { BrowserRouter } from 'react-router-dom';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 import { setAppState, sync } from 'loot-core/client/app/appSlice';
 import { closeBudget, loadBudget } from 'loot-core/client/budgets/budgetsSlice';
@@ -24,7 +25,6 @@ import { signOut } from 'loot-core/client/users/usersSlice';
 import { init as initConnection, send } from 'loot-core/platform/client/fetch';
 
 import { handleGlobalEvents } from '../global-events';
-import { useMetadataPref } from '../hooks/useMetadataPref';
 import { setI18NextLanguage } from '../i18n';
 import { installPolyfills } from '../polyfills';
 import { useDispatch, useSelector, useStore } from '../redux';

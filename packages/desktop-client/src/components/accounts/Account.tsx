@@ -12,6 +12,23 @@ import { Navigate, useParams, useLocation } from 'react-router-dom';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { usePayees } from '@desktop-client/hooks/usePayees';
+import {
+  SelectedProviderWithItems,
+  type Actions,
+} from '@desktop-client/hooks/useSelected';
+import {
+  SplitsExpandedProvider,
+  useSplitsExpanded,
+} from '@desktop-client/hooks/useSplitsExpanded';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useTransactionBatchActions } from '@desktop-client/hooks/useTransactionBatchActions';
 import { debounce } from 'debounce';
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
@@ -67,23 +84,6 @@ import {
 } from 'loot-core/types/models';
 
 import { unlinkAccount } from '../../accounts/accountsSlice';
-import { useAccountPreviewTransactions } from '../../hooks/useAccountPreviewTransactions';
-import { useAccounts } from '../../hooks/useAccounts';
-import { useCategories } from '../../hooks/useCategories';
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { useFailedAccounts } from '../../hooks/useFailedAccounts';
-import { useLocalPref } from '../../hooks/useLocalPref';
-import { usePayees } from '../../hooks/usePayees';
-import {
-  SelectedProviderWithItems,
-  type Actions,
-} from '../../hooks/useSelected';
-import {
-  SplitsExpandedProvider,
-  useSplitsExpanded,
-} from '../../hooks/useSplitsExpanded';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { useTransactionBatchActions } from '../../hooks/useTransactionBatchActions';
 import { useSelector, useDispatch } from '../../redux';
 import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { TransactionList } from '../transactions/TransactionList';

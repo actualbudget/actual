@@ -17,6 +17,10 @@ import { styles, type CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { css } from '@emotion/css';
 
 import { sync } from 'loot-core/client/app/appSlice';
@@ -28,10 +32,6 @@ import {
   isElectron,
 } from 'loot-core/shared/environment';
 
-import { useGlobalPref } from '../hooks/useGlobalPref';
-import { useMetadataPref } from '../hooks/useMetadataPref';
-import { useNavigate } from '../hooks/useNavigate';
-import { useSyncedPref } from '../hooks/useSyncedPref';
 import { useDispatch } from '../redux';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';

@@ -6,13 +6,13 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
+import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
 
 import { setAppState } from 'loot-core/client/app/appSlice';
 import { loggedIn } from 'loot-core/client/users/usersSlice';
 
 import { ProtectedRoute } from '../../auth/ProtectedRoute';
 import { Permissions } from '../../auth/types';
-import { useMetaThemeColor } from '../../hooks/useMetaThemeColor';
 import { useSelector, useDispatch } from '../../redux';
 import {
   BackToFileListButton,

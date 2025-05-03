@@ -7,10 +7,10 @@ import React, {
 
 import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 
 import { envelopeBudget } from 'loot-core/client/queries';
 
-import { useContextMenu } from '../../../../hooks/useContextMenu';
 import { CoverMenu } from '../CoverMenu';
 import { useEnvelopeSheetValue } from '../EnvelopeBudgetComponents';
 import { HoldMenu } from '../HoldMenu';

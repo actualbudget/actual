@@ -4,10 +4,10 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { View } from '@actual-app/components/view';
+import { useCategories } from '@desktop-client/hooks/useCategories';
 
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { useCategories } from '../../../hooks/useCategories';
 import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
 import { addToBeBudgetedGroup, removeCategoriesFromGroups } from '../util';
 

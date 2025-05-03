@@ -3,8 +3,8 @@ import React, { memo, useState, useMemo } from 'react';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 
-import { useLocalPref } from '../../hooks/useLocalPref';
 import { DropHighlightPosContext } from '../sort';
 import { Row } from '../table';
 

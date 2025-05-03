@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "build",
+    "tsBuildInfoFile": "build/.loot-core.tsbuildinfo"
+  },
+  "exclude": ["lib-dist", "node_modules"]
+}

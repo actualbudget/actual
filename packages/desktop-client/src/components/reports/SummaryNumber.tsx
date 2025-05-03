@@ -1,12 +1,12 @@
 import React, { type Ref, useRef, useState } from 'react';
 
 import { View } from '@actual-app/components/view';
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 import { debounce } from 'debounce';
 
 import { amountToCurrency } from 'loot-core/shared/util';
 
-import { useMergedRefs } from '../../hooks/useMergedRefs';
-import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { PrivacyFilter } from '../PrivacyFilter';
 
 import { chartTheme } from './chart-theme';

@@ -1,4 +1,5 @@
 import { type CSSObject } from '@emotion/css/dist/declarations/src/create-instance';
+import 'loot-core/globals';
 
 // Allow images to be imported
 declare module '*.png';

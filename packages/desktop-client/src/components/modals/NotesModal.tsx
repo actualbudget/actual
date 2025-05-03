@@ -5,10 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgCheck } from '@actual-app/components/icons/v2';
 import { View } from '@actual-app/components/view';
+import { useNotes } from '@desktop-client/hooks/useNotes';
 
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 
-import { useNotes } from '../../hooks/useNotes';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Notes } from '../Notes';
 

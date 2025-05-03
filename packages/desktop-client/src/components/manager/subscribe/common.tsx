@@ -3,11 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { theme } from '@actual-app/components/theme';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { type Handlers } from 'loot-core/types/handlers';
 
-import { useNavigate } from '../../../hooks/useNavigate';
 import {
   useSetLoginMethods,
   useSetMultiuserEnabled,

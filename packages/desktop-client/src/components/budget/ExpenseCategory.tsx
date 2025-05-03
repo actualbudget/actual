@@ -3,13 +3,13 @@ import React, { type ComponentProps } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useDragRef } from '@desktop-client/hooks/useDragRef';
 
 import {
   type CategoryGroupEntity,
   type CategoryEntity,
 } from 'loot-core/types/models';
 
-import { useDragRef } from '../../hooks/useDragRef';
 import {
   useDraggable,
   useDroppable,

@@ -6,6 +6,7 @@ import { SvgArrowButtonRight1 } from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 import { useHover } from 'usehooks-ts';
 
 import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
@@ -14,7 +15,6 @@ import { getScheduledAmount } from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { useSelectedItems } from '../../hooks/useSelected';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { type Binding } from '../spreadsheet';
 import { CellValue, CellValueText } from '../spreadsheet/CellValue';

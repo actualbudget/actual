@@ -13,6 +13,8 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 import { css } from '@emotion/css';
 
 import { envelopeBudget } from 'loot-core/client/queries';
@@ -24,8 +26,6 @@ import {
   type CategoryEntity,
 } from 'loot-core/types/models';
 
-import { useContextMenu } from '../../../hooks/useContextMenu';
-import { useUndo } from '../../../hooks/useUndo';
 import { type Binding, type SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetName } from '../../spreadsheet/useSheetName';

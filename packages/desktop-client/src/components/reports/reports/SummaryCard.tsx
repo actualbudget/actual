@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 import * as monthUtils from 'loot-core/shared/months';
 import {
@@ -9,7 +10,6 @@ import {
   type SummaryWidget,
 } from 'loot-core/types/models';
 
-import { useLocale } from '../../../hooks/useLocale';
 import { DateRange } from '../DateRange';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';

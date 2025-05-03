@@ -1,3 +1,4 @@
+import { useCommonPayees } from '@desktop-client/hooks/usePayees';
 import { render, type Screen, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
@@ -6,7 +7,6 @@ import { generateAccount } from 'loot-core/mocks';
 import type { AccountEntity, PayeeEntity } from 'loot-core/types/models';
 
 import { AuthProvider } from '../../auth/AuthProvider';
-import { useCommonPayees } from '../../hooks/usePayees';
 import { TestProvider } from '../../redux/mock';
 
 import {

@@ -3,8 +3,8 @@ import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
-import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { Link } from '../common/Link';
 
 import { Setting } from './UI';

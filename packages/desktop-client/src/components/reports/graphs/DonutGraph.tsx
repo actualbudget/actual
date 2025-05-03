@@ -2,6 +2,9 @@
 import React, { useState, type CSSProperties } from 'react';
 
 import { theme } from '@actual-app/components/theme';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
 
 import { amountToCurrency } from 'loot-core/shared/util';
@@ -11,9 +14,6 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useCategories } from '../../../hooks/useCategories';
-import { useNavigate } from '../../../hooks/useNavigate';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
 

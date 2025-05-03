@@ -2,6 +2,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 
 import {
   collapseModals,
@@ -12,9 +15,6 @@ import { envelopeBudget } from 'loot-core/client/queries';
 import { format, sheetForMonth, prevMonth } from 'loot-core/shared/months';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 
-import { useCategories } from '../../hooks/useCategories';
-import { useLocale } from '../../hooks/useLocale';
-import { useUndo } from '../../hooks/useUndo';
 import { useDispatch } from '../../redux';
 import { ToBudgetAmount } from '../budget/envelope/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '../budget/envelope/budgetsummary/TotalsList';

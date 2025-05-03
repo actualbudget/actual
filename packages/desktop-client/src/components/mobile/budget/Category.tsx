@@ -1,10 +1,10 @@
 import React from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 
-import * as monthUtils from 'loot-core/shared/months';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
-import { useCategories } from '../../../hooks/useCategories';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
+import * as monthUtils from 'loot-core/shared/months';
 
 import { CategoryTransactions } from './CategoryTransactions';
 

@@ -13,6 +13,8 @@ import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { css } from '@emotion/css';
 
 import {
@@ -21,8 +23,6 @@ import {
   currencyToAmount,
 } from 'loot-core/shared/util';
 
-import { useMergedRefs } from '../../../hooks/useMergedRefs';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { makeAmountFullStyle } from '../../budget/util';
 
 type AmountInputProps = {

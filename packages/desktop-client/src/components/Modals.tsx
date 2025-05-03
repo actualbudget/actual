@@ -2,12 +2,13 @@
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useModalState } from '@desktop-client/hooks/useModalState';
+
 import { closeModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
-import { useMetadataPref } from '../hooks/useMetadataPref';
-import { useModalState } from '../hooks/useModalState';
 import { useDispatch } from '../redux';
 
 import { EditSyncAccount } from './banksync/EditSyncAccount';

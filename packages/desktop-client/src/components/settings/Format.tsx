@@ -7,13 +7,13 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { css } from '@emotion/css';
 
 import { numberFormats } from 'loot-core/shared/util';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { Checkbox } from '../forms';
 import { useSidebar } from '../sidebar/SidebarProvider';
 
