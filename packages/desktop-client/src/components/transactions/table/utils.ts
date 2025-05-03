@@ -13,10 +13,7 @@ import {
 } from 'loot-core/shared/util';
 import { type TransactionEntity } from 'loot-core/types/models';
 
-export type SerializedTransaction = Omit<
-  TransactionEntity,
-  'amount' | 'date'
-> & {
+export type SerializedTransaction = Omit<TransactionEntity, 'date'> & {
   date: string;
   debit: CurrencyAmount;
   credit: CurrencyAmount;

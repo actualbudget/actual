@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, {
+  type FocusEvent,
   forwardRef,
   useCallback,
   useImperativeHandle,
@@ -66,7 +67,7 @@ function fireBlur(onBlur, e) {
 }
 
 type FieldProps = ComponentProps<typeof View> & {
-  width: CSSProperties['width'];
+  width?: CSSProperties['width'];
   name?: string;
   truncate?: boolean;
   contentStyle?: CSSProperties;
@@ -152,7 +153,7 @@ type CellProps = Omit<ComponentProps<typeof View>, 'children' | 'value'> & {
     props: ComponentProps<typeof UnexposedCellContent>,
   ) => ReactNode;
   value?: string;
-  valueStyle?: CSSProperties;
+  valueStyle?: CSSProperties | null;
   onExpose?: (name: string) => void;
   privacyFilter?: ComponentProps<
     typeof ConditionalPrivacyFilter
@@ -411,7 +412,7 @@ export function InputCell({
   );
 }
 
-function shouldSaveFromKey(e) {
+function shouldSaveFromKey(e: KeyboardEvent) {
   switch (e.key) {
     case 'Tab':
     case 'Enter':
@@ -422,11 +423,11 @@ function shouldSaveFromKey(e) {
 }
 
 type CustomCellRenderProps = {
-  onBlur: (ev: UIEvent<unknown>) => void;
-  onKeyDown: (ev: KeyboardEvent<unknown>) => void;
+  onBlur: (ev: FocusEvent) => void;
+  onKeyDown: (ev: KeyboardEvent) => void;
   onUpdate: (value: string) => void;
   onSave: (value: string) => void;
-  shouldSaveFromKey: (ev: KeyboardEvent<unknown>) => boolean;
+  shouldSaveFromKey: (ev: KeyboardEvent) => boolean;
   inputStyle: CSSProperties;
 };
 type CustomCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
@@ -449,7 +450,7 @@ export function CustomCell({
     setPrevDefaultValue(defaultValue);
   }
 
-  function onBlur_(e) {
+  function onBlur_(e: FocusEvent) {
     // Only save on blur if the app is focused. Blur events fire when
     // the app unfocuses, and it's unintuitive to save the value since
     // the input will be focused again when the app regains focus
@@ -459,7 +460,7 @@ export function CustomCell({
     }
   }
 
-  function onKeyDown(e) {
+  function onKeyDown(e: KeyboardEvent) {
     if (shouldSaveFromKey(e)) {
       onUpdate?.(value);
     }
