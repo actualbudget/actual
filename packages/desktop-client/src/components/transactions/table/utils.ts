@@ -1,0 +1,107 @@
+import {
+  format as formatDate,
+  parseISO,
+  isValid as isDateValid,
+} from 'date-fns';
+import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import { currentDay } from 'loot-core/shared/months';
+
+import {
+  amountToInteger,
+  CurrencyAmount,
+  integerToCurrency,
+} from 'loot-core/shared/util';
+import { type TransactionEntity } from 'loot-core/types/models';
+
+type SerializedTransaction = Omit<TransactionEntity, 'amount' | 'date'> & {
+  date: string;
+  debit: CurrencyAmount;
+  credit: CurrencyAmount;
+};
+
+export function serializeTransaction(
+  transaction: TransactionEntity,
+  showZeroInDeposit?: boolean,
+): SerializedTransaction {
+  const { amount, date: originalDate } = transaction;
+
+  let debit = amount < 0 ? -amount : null;
+  let credit = amount > 0 ? amount : null;
+
+  if (amount === 0) {
+    if (showZeroInDeposit) {
+      credit = 0;
+    } else {
+      debit = 0;
+    }
+  }
+
+  let date = originalDate;
+  // Validate the date format
+  if (!isDateValid(parseISO(date))) {
+    // Be a little forgiving if the date isn't valid. This at least
+    // stops the UI from crashing, but this is a serious problem with
+    // the data. This allows the user to go through and see empty
+    // dates and manually fix them.
+    console.error(`Date ‘${date}’ is not valid.`);
+    date = null as unknown as string;
+  }
+
+  return {
+    ...transaction,
+    date,
+    debit: debit != null ? integerToCurrency(debit) : '',
+    credit: credit != null ? integerToCurrency(credit) : '',
+  };
+}
+
+export function deserializeTransaction(
+  transaction: SerializedTransaction,
+  originalTransaction: TransactionEntity,
+) {
+  const { debit, credit, date: originalDate, ...realTransaction } = transaction;
+
+  let amount: number | null;
+  if (debit !== '') {
+    const parsed = evalArithmetic(debit, null);
+    amount = parsed != null ? -parsed : null;
+  } else {
+    amount = evalArithmetic(credit, null);
+  }
+
+  amount =
+    amount != null ? amountToInteger(amount) : originalTransaction.amount;
+  let date = originalDate;
+  if (date == null) {
+    date = originalTransaction.date || currentDay();
+  }
+
+  return { ...realTransaction, date, amount };
+}
+
+export function isLastChild(transactions: TransactionEntity[], index: number) {
+  const trans = transactions[index];
+  return (
+    trans &&
+    trans.is_child &&
+    (transactions[index + 1] == null ||
+      transactions[index + 1].parent_id !== trans.parent_id)
+  );
+}
+
+export function selectAscDesc(
+  field: keyof SerializedTransaction,
+  ascDesc: 'asc' | 'desc',
+  clicked: keyof SerializedTransaction,
+  defaultAscDesc: 'asc' | 'desc' = 'asc',
+) {
+  return field === clicked
+    ? ascDesc === 'asc'
+      ? 'desc'
+      : 'asc'
+    : defaultAscDesc;
+}
+
+export function getDisplayValue<T>(obj: T | null | undefined, name: keyof T) {
+  return obj ? obj[name] : '';
+}

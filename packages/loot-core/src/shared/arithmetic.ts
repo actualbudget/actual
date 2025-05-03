@@ -111,7 +111,7 @@ function evaluate(ast): number {
 
 export function evalArithmetic(
   expression: string,
-  defaultValue: number = null,
+  defaultValue: number | null = null,
 ) {
   // An empty expression always evals to the default
   if (expression === '') {
