@@ -58,7 +58,7 @@ import { TransactionError } from './transaction/TransactionError';
 import { TransactionHeader } from './TransactionHeader';
 import { isLastChild, makeTemporaryTransactions } from './utils';
 
-type TransactionTableProps = {
+export type TransactionTableProps = {
   transactions: TransactionEntity[];
   loadMoreTransactions: () => void;
   accounts: AccountEntity[];
@@ -83,12 +83,11 @@ type TransactionTableProps = {
   isFiltered?: boolean;
   dateFormat?: string;
   hideFraction?: boolean;
-  //headerContent={headerContent}
   renderEmpty?: ReactNode | (() => ReactNode);
   onSave: (transaction: TransactionEntity) => void;
   onApplyRules: (
     transaction: TransactionEntity,
-    field: string,
+    field: keyof TransactionEntity,
   ) => Promise<TransactionEntity>;
   onSplit: (id: TransactionEntity['id']) => TransactionEntity['id'];
   onAddSplit: (id: TransactionEntity['id']) => TransactionEntity['id'];
@@ -100,7 +99,7 @@ type TransactionTableProps = {
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onNotesTagClick: (tag: string) => void;
-  //onSort={onSort}
+  onSort: (field: string, ascDesc: 'asc' | 'desc') => void;
   sortField?: string;
   ascDesc?: 'asc' | 'desc';
   onBatchDelete: (ids: TransactionEntity['id'][]) => Promise<void>;
@@ -112,6 +111,7 @@ type TransactionTableProps = {
   onMakeAsNonSplitTransactions: (ids: string[]) => Promise<void>;
   showSelection: boolean;
   allowSplitTransaction?: boolean;
+  onManagePayees: (id?: PayeeEntity['id']) => void;
 };
 
 type TableState = {
@@ -459,7 +459,7 @@ export const TransactionTable = forwardRef(
       async (
         transaction: TransactionEntity,
         subtransactions: TransactionEntity[] | null = null,
-        updatedFieldName: string | null = null,
+        updatedFieldName: keyof TransactionEntity | null = null,
       ) => {
         savePending.current = true;
 
@@ -703,6 +703,7 @@ export const TransactionTable = forwardRef(
         // @ts-ignore TODO: refs are hard
         listContainerRef={listContainerRef}
         {...props}
+        onSort={props.onSort}
         transactions={transactionsWithExpandedSplits}
         transactionMap={transactionMap}
         transactionsByParent={transactionsByParent}
@@ -730,6 +731,7 @@ export const TransactionTable = forwardRef(
         newNavigator={newNavigator}
         showSelection={props.showSelection}
         allowSplitTransaction={props.allowSplitTransaction}
+        onManagePayees={props.onManagePayees}
       />
     );
   },
@@ -779,7 +781,6 @@ type TransactionTableInnerProps = {
   isFiltered?: boolean;
   dateFormat?: string;
   hideFraction?: boolean;
-  //headerContent={headerContent}
   renderEmpty?: ReactNode | (() => ReactNode);
   onSave: (transaction: TransactionEntity) => void;
   onApplyRules: (
@@ -790,7 +791,6 @@ type TransactionTableInnerProps = {
   onAddSplit: (id: TransactionEntity['id']) => void;
   onCloseAddTransaction: () => void;
   onAdd: (transactions: TransactionEntity[]) => void;
-  //onManagePayees={onManagePayees}
   onCreatePayee: (name: string) => Promise<string>;
   style?: CSSProperties;
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
