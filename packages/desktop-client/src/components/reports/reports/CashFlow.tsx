@@ -27,6 +27,7 @@ import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
+import { useFormat } from '../../spreadsheet/useFormat';
 import { Change } from '../Change';
 import { CashFlowGraph } from '../graphs/CashFlowGraph';
 import { Header } from '../Header';
@@ -34,7 +35,6 @@ import { LoadingIndicator } from '../LoadingIndicator';
 import { calculateTimeRange } from '../reportRanges';
 import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '../useReport';
-import { useFormat } from '../../spreadsheet/useFormat';
 
 import { useFilters } from '@desktop-client/hooks/useFilters';
 import { useLocale } from '@desktop-client/hooks/useLocale';
@@ -109,8 +109,16 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
 
   const params = useMemo(
     () =>
-      cashFlowByDate(start, end, isConcise, conditions, conditionsOp, locale, format),
-    [start, end, isConcise, conditions, conditionsOp, locale],
+      cashFlowByDate(
+        start,
+        end,
+        isConcise,
+        conditions,
+        conditionsOp,
+        locale,
+        format,
+      ),
+    [start, end, isConcise, conditions, conditionsOp, locale, format],
   );
   const data = useReport('cash_flow', params);
 
@@ -285,7 +293,9 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
             }
             right={
               <Text style={{ fontWeight: 600 }}>
-                <PrivacyFilter>{format(totalIncome, 'financial')}</PrivacyFilter>
+                <PrivacyFilter>
+                  {format(totalIncome, 'financial')}
+                </PrivacyFilter>
               </Text>
             }
           />
