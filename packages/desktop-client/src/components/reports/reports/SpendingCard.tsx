@@ -6,12 +6,9 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { getCurrency } from 'loot-core/shared/currencies';
 import * as monthUtils from 'loot-core/shared/months';
-import { amountToInteger } from 'loot-core/shared/util';
 import { type SpendingWidget } from 'loot-core/types/models';
 
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { useFormat } from '../../spreadsheet/useFormat';
 import { DateRange } from '../DateRange';
@@ -39,9 +36,6 @@ export function SpendingCard({
   onRemove,
 }: SpendingCardProps) {
   const { t } = useTranslation();
-
-  const [currencyCode] = useSyncedPref('currencyCode');
-  const currency = getCurrency(currencyCode || '');
 
   const [compare, compareTo] = calculateSpendingReportTimeRange(meta ?? {});
 
@@ -145,13 +139,7 @@ export function SpendingCard({
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
                   {data &&
                     (difference && difference > 0 ? '+' : '') +
-                      format(
-                        amountToInteger(
-                          difference || 0,
-                          currency.decimalPlaces,
-                        ),
-                        'financial',
-                      )}
+                      format(difference || 0, 'financial')}
                 </PrivacyFilter>
               </Block>
             </View>
