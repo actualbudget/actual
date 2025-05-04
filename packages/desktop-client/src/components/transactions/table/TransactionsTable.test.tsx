@@ -441,6 +441,7 @@ describe('Transactions', () => {
       expect(queryField(container, 'account', 'div', idx).textContent).toBe(
         accounts.find(acct => acct.id === transaction.account)?.name,
       );
+      console.log(queryField(container, 'payee', 'div', idx));
       expect(queryField(container, 'payee', 'div', idx).textContent).toBe(
         payees.find(p => p.id === transaction.payee)?.name,
       );
