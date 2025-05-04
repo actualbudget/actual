@@ -321,7 +321,7 @@ export function TransactionList({
         op: 'hasTags',
         value: tag,
         type: 'string',
-      } as Partial<RuleConditionEntity> | TransactionFilterEntity);
+      });
     },
     [onApplyFilter],
   );
