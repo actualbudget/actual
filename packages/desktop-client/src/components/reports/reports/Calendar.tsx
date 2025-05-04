@@ -521,7 +521,11 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
           )}
         </Header>
       </View>
-      <View ref={refContainer as Ref<HTMLDivElement>} style={{ flexGrow: 1 }}>
+      <View
+        // TODO: need to make TableHandleRef conform to HTMLDivElement
+        ref={refContainer as unknown as Ref<HTMLDivElement>}
+        style={{ flexGrow: 1 }}
+      >
         <View
           style={{
             backgroundColor: theme.pageBackground,
