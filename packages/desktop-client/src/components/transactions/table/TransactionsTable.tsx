@@ -101,7 +101,10 @@ export type TransactionTableProps = {
   onBatchLinkSchedule: (ids: TransactionEntity['id'][]) => void;
   onBatchUnlinkSchedule: (ids: TransactionEntity['id'][]) => void;
   onCreateRule: (ids: RuleEntity['id'][]) => void;
-  onScheduleAction: (action: string, selectedIds: string[]) => void;
+  onScheduleAction: (
+    name: 'skip' | 'post-transaction' | 'complete',
+    ids: TransactionEntity['id'][],
+  ) => void;
   onMakeAsNonSplitTransactions: (ids: string[]) => void;
   showSelection: boolean;
   allowSplitTransaction?: boolean;
@@ -530,7 +533,10 @@ export const TransactionTable = forwardRef(
       [onCreateRuleProp],
     );
     const onScheduleAction = useCallback(
-      (action: string, id: string) => {
+      (
+        action: 'skip' | 'post-transaction' | 'complete',
+        id: TransactionEntity['id'],
+      ) => {
         onScheduleActionProp(action, [id]);
       },
       [onScheduleActionProp],
@@ -793,7 +799,10 @@ type TransactionTableInnerProps = {
   sortField: string;
   ascDesc: 'asc' | 'desc';
   onCreateRule: (id: RuleEntity['id']) => void;
-  onScheduleAction: (action: string, id: string) => void;
+  onScheduleAction: (
+    name: 'skip' | 'post-transaction' | 'complete',
+    id: TransactionEntity['id'],
+  ) => void;
   onMakeAsNonSplitTransactions: (id: string) => void;
   showSelection: boolean;
   allowSplitTransaction?: boolean;

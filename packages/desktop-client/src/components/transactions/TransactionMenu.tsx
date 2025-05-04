@@ -25,7 +25,10 @@ type BalanceMenuProps = Omit<
   onLinkSchedule: (id: string) => void;
   onUnlinkSchedule: (id: string) => void;
   onCreateRule: (id: string) => void;
-  onScheduleAction: (action: string, id: string) => void;
+  onScheduleAction: (
+    name: 'skip' | 'post-transaction' | 'complete',
+    id: TransactionEntity['id'],
+  ) => void;
   onMakeAsNonSplitTransactions: (id: string) => void;
   closeMenu: () => void;
 };

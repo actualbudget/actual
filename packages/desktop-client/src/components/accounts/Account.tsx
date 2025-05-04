@@ -1457,7 +1457,10 @@ class AccountInternal extends PureComponent<
     }
   };
 
-  onScheduleAction = async (name: string, ids: string[]) => {
+  onScheduleAction = async (
+    name: 'skip' | 'post-transaction' | 'complete',
+    ids: TransactionEntity['id'][],
+  ) => {
     const scheduleIds = ids.map(id => id.split('/')[1]);
 
     switch (name) {

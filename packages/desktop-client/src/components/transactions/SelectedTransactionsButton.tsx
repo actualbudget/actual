@@ -42,7 +42,7 @@ type SelectedTransactionsButtonProps = {
   onSetTransfer: (selectedIds: string[]) => void;
   onScheduleAction: (
     action: 'post-transaction' | 'skip' | 'complete',
-    selectedIds: string[],
+    selectedIds: TransactionEntity['id'][],
   ) => void;
   showMakeTransfer: boolean;
   onMakeAsSplitTransaction: (selectedIds: string[]) => void;

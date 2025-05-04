@@ -99,7 +99,10 @@ type TransactionProps = {
   onLinkSchedule?: (id: TransactionEntity['id']) => void;
   onUnlinkSchedule?: (id: TransactionEntity['id']) => void;
   onCreateRule?: (id: TransactionEntity['id']) => void;
-  onScheduleAction?: (action: string, id: TransactionEntity['id']) => void;
+  onScheduleAction?: (
+    name: 'skip' | 'post-transaction' | 'complete',
+    id: TransactionEntity['id'],
+  ) => void;
   onMakeAsNonSplitTransactions?: (id: TransactionEntity['id']) => void;
   onSplit: (id: TransactionEntity['id']) => void;
   onToggleSplit?: (id: TransactionEntity['id']) => void;
