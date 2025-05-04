@@ -36,7 +36,8 @@ import { useDispatch } from '../../redux';
 import {
   type TransactionTableProps,
   TransactionTable,
-} from './table/TransactionsTable';
+} from './TransactionsTable';
+import { TableHandleRef } from '../table';
 
 // When data changes, there are two ways to update the UI:
 //
@@ -114,7 +115,7 @@ type TransactionListProps = Pick<
   | 'sortField'
   | 'transactions'
 > & {
-  tableRef: RefObject<HTMLDivElement>;
+  tableRef: RefObject<TableHandleRef<TransactionEntity> | null>;
   allTransactions: TransactionEntity[];
   account: AccountEntity | undefined;
   category: CategoryEntity | undefined;
@@ -250,7 +251,7 @@ export function TransactionList({
   const onApplyRules = useCallback(
     async (
       transaction: TransactionEntity,
-      updatedFieldName: keyof TransactionEntity | null = null,
+      updatedFieldName: string | null = null,
     ) => {
       const afterRules = await send('rules-run', { transaction });
       const diff = getChangedValues(transaction, afterRules);

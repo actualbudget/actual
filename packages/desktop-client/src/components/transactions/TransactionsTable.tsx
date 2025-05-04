@@ -472,7 +472,7 @@ type PayeeCellProps = {
   isPreview: boolean;
   onEdit: TransactionEditFunction;
   onUpdate: TransactionUpdateFunction;
-  onCreatePayee: (name: string) => Promise<PayeeEntity['id']>;
+  onCreatePayee: undefined | ((name: string) => Promise<PayeeEntity['id']>);
   onManagePayees: (id: PayeeEntity['id'] | undefined) => void;
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
@@ -612,7 +612,7 @@ function PayeeCell({
 
         if (value && value.startsWith('new:') && !isCreatingPayee.current) {
           isCreatingPayee.current = true;
-          const id = await onCreatePayee(value.slice('new:'.length));
+          const id = await onCreatePayee?.(value.slice('new:'.length));
           onUpdate('payee', id);
           isCreatingPayee.current = false;
         }
@@ -832,7 +832,7 @@ type TransactionProps = {
   onMakeAsNonSplitTransactions?: (id: TransactionEntity['id']) => void;
   onSplit: (id: TransactionEntity['id']) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
-  onCreatePayee: (name: string) => Promise<PayeeEntity['id']>;
+  onCreatePayee: ((name: string) => Promise<PayeeEntity['id']>) | undefined;
   onManagePayees: (id: PayeeEntity['id'] | undefined) => void;
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
@@ -1711,7 +1711,7 @@ type NewTransactionProps = {
   onAddSplit: (id: TransactionEntity['id']) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
   onClose: () => void;
-  onCreatePayee: (name: string) => Promise<PayeeEntity['id']>;
+  onCreatePayee: ((name: string) => Promise<PayeeEntity['id']>) | undefined;
   onDelete: (id: TransactionEntity['id']) => void;
   onDistributeRemainder: (id: TransactionEntity['id']) => void;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
@@ -1901,7 +1901,7 @@ type TransactionTableInnerProps = {
   isAdding: boolean;
   isNew: (id: TransactionEntity['id']) => boolean;
   isMatched: (id: TransactionEntity['id']) => boolean;
-  dateFormat: string;
+  dateFormat: string | undefined;
   hideFraction: boolean;
   renderEmpty: ReactNode | (() => ReactNode);
   onSave: (transaction: TransactionEntity) => void;
@@ -1913,12 +1913,11 @@ type TransactionTableInnerProps = {
   onAddSplit: (id: TransactionEntity['id']) => void;
   onCloseAddTransaction: () => void;
   onAdd: (transactions: TransactionEntity[]) => void;
-  onCreatePayee: (name: string) => Promise<string>;
+  onCreatePayee: ((name: string) => Promise<PayeeEntity['id']>) | undefined;
   style?: CSSProperties;
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onNotesTagClick: (tag: string) => void;
-  //onSort={onSort}
   sortField: string;
   ascDesc: 'asc' | 'desc';
   onCreateRule: (id: RuleEntity['id']) => void;
@@ -2248,7 +2247,7 @@ export type TransactionTableProps = {
   isAdding: boolean;
   isNew: (id: TransactionEntity['id']) => boolean;
   isMatched: (id: TransactionEntity['id']) => boolean;
-  dateFormat: string;
+  dateFormat: string | undefined;
   hideFraction: boolean;
   renderEmpty: ReactNode | (() => ReactNode);
   onSave: (transaction: TransactionEntity) => void;
@@ -2260,7 +2259,7 @@ export type TransactionTableProps = {
   onAddSplit: (id: TransactionEntity['id']) => TransactionEntity['id'];
   onCloseAddTransaction: () => void;
   onAdd: (transactions: TransactionEntity[]) => void;
-  onCreatePayee: (name: string) => Promise<PayeeEntity['id']>;
+  onCreatePayee: undefined | ((name: string) => Promise<PayeeEntity['id']>);
   style?: CSSProperties;
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;

@@ -33,7 +33,7 @@ import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
 import { TestProvider } from '../../redux/mock';
 
-import { TransactionTable } from './table/TransactionsTable';
+import { TransactionTable } from './TransactionsTable';
 
 vi.mock('loot-core/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => ({
@@ -181,7 +181,7 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
     return diff.added[0].id;
   };
 
-  const onCreatePayee = () => 'id';
+  const onCreatePayee = async () => 'id';
 
   // It's important that these functions are they same instances
   // across renders. Doing so tests that the transaction table

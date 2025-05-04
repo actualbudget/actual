@@ -72,6 +72,7 @@ import {
 } from '../spreadsheets/calendar-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
+import { TableHandleRef } from '../../table';
 
 const CHEVRON_HEIGHT = 42;
 const SUMMARY_HEIGHT = 140;
@@ -285,7 +286,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
   const title = widget?.meta?.name || t('Calendar');
-  const table = useRef(null);
+  const table = useRef<TableHandleRef<TransactionEntity>>(null);
   const dateFormat = useDateFormat();
 
   const onSaveWidgetName = async (newName: string) => {
@@ -590,12 +591,11 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                 flexGrow: 1,
                 overflow: isNarrowWidth ? 'auto' : 'hidden',
               }}
-              ref={table}
+              ref={table as Ref<HTMLDivElement>}
             >
               {!isNarrowWidth ? (
                 <SplitsExpandedProvider initialMode="collapse">
                   <TransactionList
-                    // @ts-ignore TODO
                     tableRef={table}
                     account={undefined}
                     transactions={transactionsGrouped}
@@ -633,7 +633,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     onChange={() => {}}
                     onRefetch={() => setDirty(true)}
                     onCloseAddTransaction={() => {}}
-                    onCreatePayee={() => {}}
+                    onCreatePayee={undefined}
                     onApplyFilter={() => {}}
                     onBatchDelete={() => {}}
                     onBatchDuplicate={() => {}}
