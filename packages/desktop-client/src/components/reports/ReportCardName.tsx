@@ -22,7 +22,7 @@ export const ReportCardName = ({
 }: ReportCardNameProps) => {
   if (isEditing) {
     return (
-      <InitialFocus selectText>
+      <InitialFocus>
         <Input
           className={NON_DRAGGABLE_AREA_CLASS_NAME}
           defaultValue={name}

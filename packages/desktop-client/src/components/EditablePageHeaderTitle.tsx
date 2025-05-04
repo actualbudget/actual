@@ -32,7 +32,7 @@ export function EditablePageHeaderTitle({
 
   if (isEditing) {
     return (
-      <InitialFocus selectText>
+      <InitialFocus>
         <Input
           defaultValue={title}
           onEnter={e => onSaveValue(e.currentTarget.value)}

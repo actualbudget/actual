@@ -88,7 +88,7 @@ function EditableBudgetName() {
 
   if (editing) {
     return (
-      <InitialFocus selectText>
+      <InitialFocus>
         <Input
           style={{
             maxWidth: 'calc(100% - 23px)',

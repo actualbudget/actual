@@ -189,7 +189,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
               }
               left={
                 isEditing ? (
-                  <InitialFocus selectText>
+                  <InitialFocus>
                     <Input
                       style={{
                         padding: 0,
