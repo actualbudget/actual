@@ -255,16 +255,15 @@ export function TransactionList({
       const afterRules = await send('rules-run', { transaction });
       const diff = getChangedValues(transaction, afterRules);
 
-      const newTransaction = { ...transaction };
+      const newTransaction: TransactionEntity = { ...transaction };
       if (diff) {
-        (Object.keys(diff) as (keyof TransactionEntity)[]).forEach(field => {
+        Object.keys(diff).forEach(field => {
           if (
             newTransaction[field] == null ||
             newTransaction[field] === '' ||
             newTransaction[field] === 0 ||
             newTransaction[field] === false
           ) {
-            // @ts-ignore TODO; newTransaction is showing never for some reason
             newTransaction[field] = diff[field];
           }
         });
