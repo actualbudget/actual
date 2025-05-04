@@ -391,8 +391,9 @@ export function integerToCurrency(
   const digits = formatter.resolvedOptions().maximumFractionDigits;
   const divisor = Math.pow(10, digits);
 
-  // Use the formatter directly - no need to create a new one
-  return formatter.format(safeNumber(integerAmount) / divisor);
+  const amount = safeNumber(integerAmount) / divisor;
+
+  return formatter.format(amount);
 }
 
 export function amountToCurrency(
