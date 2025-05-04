@@ -392,7 +392,6 @@ type InputCellProps = ComponentProps<typeof Cell> & {
   formatExpr?: (value: string) => string;
   unformatExpr?: (value: string) => string;
 };
-//TODO: REMOVE COMMENT
 export function InputCell({
   inputProps,
   onUpdate,
@@ -725,7 +724,6 @@ export type SheetCellProps<
   onSave?: (value) => void;
   textAlign?: CSSProperties['textAlign'];
 };
-//TODO: REMOVE COMMENT
 export function SheetCell<
   SheetName extends SheetNames,
   FieldName extends SheetFields<SheetName>,
