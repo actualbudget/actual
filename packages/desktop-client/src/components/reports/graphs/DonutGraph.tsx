@@ -24,6 +24,8 @@ import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 const RADIAN = Math.PI / 180;
 
+const isTouchDevice = () => window.matchMedia('(pointer: coarse)').matches;
+
 const ActiveShapeMobile = props => {
   const {
     cx,
@@ -285,24 +287,32 @@ export function DonutGraph({
                         setPointer('pointer');
                       }
                     }}
-                    onClick={item =>
-                      ((compact && showTooltip) || !compact) &&
-                      !['Group', 'Interval'].includes(groupBy) &&
-                      showActivity({
-                        navigate,
-                        categories,
-                        accounts,
-                        balanceTypeOp,
-                        filters,
-                        showHiddenCategories,
-                        showOffBudget,
-                        type: 'totals',
-                        startDate: data.startDate,
-                        endDate: data.endDate,
-                        field: groupBy.toLowerCase(),
-                        id: item.id,
-                      })
-                    }
+                    onClick={(item, index) => {
+                      if (isTouchDevice()) {
+                        setActiveIndex(index);
+                      }
+
+                      if (
+                        !['Group', 'Interval'].includes(groupBy) &&
+                        (!isTouchDevice() || activeIndex === index) &&
+                        ((compact && showTooltip) || !compact)
+                      ) {
+                        showActivity({
+                          navigate,
+                          categories,
+                          accounts,
+                          balanceTypeOp,
+                          filters,
+                          showHiddenCategories,
+                          showOffBudget,
+                          type: 'totals',
+                          startDate: data.startDate,
+                          endDate: data.endDate,
+                          field: groupBy.toLowerCase(),
+                          id: item.id,
+                        });
+                      }
+                    }}
                   >
                     {data.legend.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
