@@ -78,7 +78,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Web
-        run: yarn build:browser && yarn build:sync-server
+        run: yarn build:server
 
       - name: Build and push image
         uses: docker/build-push-action@v5
