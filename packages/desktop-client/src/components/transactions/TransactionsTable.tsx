@@ -1,14 +1,14 @@
 import {
   createElement,
   createRef,
-  CSSProperties,
-  ForwardedRef,
+  type CSSProperties,
+  type ForwardedRef,
   forwardRef,
-  KeyboardEvent,
+  type KeyboardEvent,
   memo,
-  ReactNode,
-  Ref,
-  RefObject,
+  type ReactNode,
+  type Ref,
+  type RefObject,
   useCallback,
   useEffect,
   useMemo,
@@ -63,6 +63,15 @@ import {
   updateTransaction,
 } from 'loot-core/shared/transactions';
 import { integerToCurrency, titleFirst } from 'loot-core/shared/util';
+import {
+  type AccountEntity,
+  type CategoryEntity,
+  type CategoryGroupEntity,
+  type PayeeEntity,
+  type RuleEntity,
+  type ScheduleEntity,
+  type TransactionEntity,
+} from 'loot-core/types/models';
 
 import { useContextMenu } from '../../hooks/useContextMenu';
 import { useDisplayPayee } from '../../hooks/useDisplayPayee';
@@ -71,14 +80,14 @@ import { usePrevious } from '../../hooks/usePrevious';
 import { useProperFocus } from '../../hooks/useProperFocus';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import {
-  SplitsExpandedContextValue,
+  type SplitsExpandedContextValue,
   useSplitsExpanded,
 } from '../../hooks/useSplitsExpanded';
 import { useDispatch } from '../../redux';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
-import { getStatusProps, StatusTypes } from '../schedules/StatusBadge';
+import { getStatusProps, type StatusTypes } from '../schedules/StatusBadge';
 import { DateSelect } from '../select/DateSelect';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 import {
@@ -91,33 +100,24 @@ import {
   Row,
   SelectCell,
   Table,
-  TableHandleRef,
-  TableNavigator,
-  TableProps,
+  type TableHandleRef,
+  type TableNavigator,
+  type TableProps,
   UnexposedCellContent,
   useTableNavigator,
 } from '../table';
 
 import {
-  AccountEntity,
-  CategoryEntity,
-  CategoryGroupEntity,
-  PayeeEntity,
-  RuleEntity,
-  ScheduleEntity,
-  TransactionEntity,
-} from 'loot-core/types/models';
-import { TransactionMenu } from './TransactionMenu';
-import {
   deserializeTransaction,
   isLastChild,
   makeTemporaryTransactions,
   selectAscDesc,
-  SerializedTransaction,
+  type SerializedTransaction,
   serializeTransaction,
-  TransactionEditFunction,
-  TransactionUpdateFunction,
+  type TransactionEditFunction,
+  type TransactionUpdateFunction,
 } from './table/utils';
+import { TransactionMenu } from './TransactionMenu';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;

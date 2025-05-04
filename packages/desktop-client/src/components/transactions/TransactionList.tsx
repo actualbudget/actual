@@ -1,43 +1,38 @@
 // @ts-strict-ignore
 // TODO: remove strict
-import React, {
-  useRef,
-  useCallback,
-  useLayoutEffect,
-  type RefObject,
-} from 'react';
+import { useCallback, useLayoutEffect, useRef, type RefObject } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import {
+  addSplitTransaction,
+  applyTransactionDiff,
+  realizeTempTransactions,
   splitTransaction,
   updateTransaction,
-  addSplitTransaction,
-  realizeTempTransactions,
-  applyTransactionDiff,
 } from 'loot-core/shared/transactions';
-import { getChangedValues, applyChanges } from 'loot-core/shared/util';
+import { applyChanges, getChangedValues } from 'loot-core/shared/util';
 import {
-  type TransactionFilterEntity,
   type AccountEntity,
   type CategoryEntity,
   type PayeeEntity,
   type RuleConditionEntity,
   type ScheduleEntity,
   type TransactionEntity,
+  type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
 import { useNavigate } from '../../hooks/useNavigate';
 import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useDispatch } from '../../redux';
+import { type TableHandleRef } from '../table';
 
 import {
-  type TransactionTableProps,
   TransactionTable,
+  type TransactionTableProps,
 } from './TransactionsTable';
-import { TableHandleRef } from '../table';
 
 // When data changes, there are two ways to update the UI:
 //
