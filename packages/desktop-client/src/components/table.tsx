@@ -882,7 +882,7 @@ const rowStyle: CSSProperties = {
   width: '100%',
 };
 
-type TableHandleRef<T extends TableItem = TableItem> = {
+export type TableHandleRef<T extends TableItem = TableItem> = {
   scrollTo: (id: T['id'], alignment?: string) => void;
   scrollToTop: () => void;
   getScrolledItem: () => T['id'];
@@ -907,7 +907,7 @@ export function TableWithNavigator({
 
 type TableItem = { id: number | string };
 
-type TableProps<T extends TableItem = TableItem> = {
+export type TableProps<T extends TableItem = TableItem> = {
   items: T[];
   count?: number;
   headers?: ReactNode | TableHeaderProps['headers'];
@@ -1215,7 +1215,7 @@ export const Table = forwardRef(
 Table.displayName = 'Table';
 
 export type TableNavigator<T extends TableItem> = {
-  onEdit: (id: T['id'], field?: string) => void;
+  onEdit: (id: T['id'] | null, field?: string) => void;
   editingId: T['id'];
   focusedField: string;
   getNavigatorProps: (userProps: object) => object;
@@ -1235,7 +1235,7 @@ export function useTableNavigator<T extends TableItem>(
   const modalStackLength = useRef(modalState.modalStack.length);
 
   // onEdit is passed to children, so make sure it maintains identity
-  const onEdit = useCallback((id: T['id'], field?: string) => {
+  const onEdit = useCallback((id: T['id'] | null, field?: string) => {
     setEditingId(id);
     setFocusedField(id ? field : null);
   }, []);

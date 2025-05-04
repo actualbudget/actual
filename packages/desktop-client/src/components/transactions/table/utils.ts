@@ -120,18 +120,19 @@ export function getDisplayValue<T>(obj: T | null | undefined, name: keyof T) {
 }
 
 export function makeTemporaryTransactions(
-  currentAccountId: AccountEntity['id'],
-  currentCategoryId: CategoryEntity['id'],
+  currentAccountId: AccountEntity['id'] | null | undefined,
+  currentCategoryId: CategoryEntity['id'] | null | undefined,
   lastDate?: string | null,
-) {
+): TransactionEntity[] {
   return [
     {
       id: 'temp',
       date: lastDate || currentDay(),
-      account: currentAccountId || null,
-      category: currentCategoryId || null,
+      // TODO: consider making this default to an empty string
+      account: (currentAccountId || null) as string,
+      category: currentCategoryId || undefined,
       cleared: false,
-      amount: null,
+      amount: null as unknown as number,
     },
   ];
 }
