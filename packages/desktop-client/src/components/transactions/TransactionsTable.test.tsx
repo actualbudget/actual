@@ -28,12 +28,12 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { AuthProvider } from '../../../auth/AuthProvider';
-import { SelectedProviderWithItems } from '../../../hooks/useSelected';
-import { SplitsExpandedProvider } from '../../../hooks/useSplitsExpanded';
-import { TestProvider } from '../../../redux/mock';
+import { AuthProvider } from '../../auth/AuthProvider';
+import { SelectedProviderWithItems } from '../../hooks/useSelected';
+import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
+import { TestProvider } from '../../redux/mock';
 
-import { TransactionTable } from './TransactionsTable';
+import { TransactionTable } from './table/TransactionsTable';
 
 vi.mock('loot-core/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => ({
@@ -71,7 +71,7 @@ const payees: PayeeEntity[] = [
 vi.mock('../../hooks/usePayees', async importOriginal => {
   const actual =
     // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-    await importOriginal<typeof import('../../../hooks/usePayees')>();
+    await importOriginal<typeof import('../../hooks/usePayees')>();
   return {
     ...actual,
     usePayees: () => payees,
@@ -441,7 +441,6 @@ describe('Transactions', () => {
       expect(queryField(container, 'account', 'div', idx).textContent).toBe(
         accounts.find(acct => acct.id === transaction.account)?.name,
       );
-      console.log(queryField(container, 'payee', 'div', idx));
       expect(queryField(container, 'payee', 'div', idx).textContent).toBe(
         payees.find(p => p.id === transaction.payee)?.name,
       );
