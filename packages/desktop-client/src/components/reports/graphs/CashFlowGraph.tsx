@@ -24,6 +24,7 @@ import { Container } from '../Container';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 import { FormatType, useFormat } from '@desktop-client/components/spreadsheet/useFormat';
+import { computePadding } from './computePadding';
 
 const MAX_BAR_SIZE = 50;
 const ANIMATION_DURATION = 1000; // in ms
@@ -141,7 +142,7 @@ export function CashFlowGraph({
             data={data}
             margin={{
               left: computePadding(
-                data.map(({ balance }) => ({ y: balance })),
+                data.map(item => item.balance),
                 data => format(data, 'financial'),
               ), // left padding for Y-axis
             }}
@@ -209,16 +210,4 @@ export function CashFlowGraph({
       )}
     </Container>
   );
-}
-
-function computePadding(
-  data: Array<{ y: number }>,
-  formatter: (value: number) => string,
-) {
-  const maxLength = Math.max(
-    ...data.map(({ y }) => {
-      return formatter(Math.round(y)).length;
-    }),
-  );
-  return Math.max(0, (maxLength - 5) * 5);
 }
