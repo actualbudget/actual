@@ -167,7 +167,7 @@ export function ReconcileMenu({
           />
         </InitialFocus>
       )}
-      <Text style={{ color: theme.pageTextSubdued, paddingBottom: 4 }}>
+      <Text style={{ color: theme.pageTextSubdued, paddingBottom: 6 }}>
         {account?.last_reconciled
           ? t('Reconciled {{ relativeTimeAgo }}', { relativeTimeAgo: tsToRelativeTime(account.last_reconciled, locale) })
           : t('Not yet reconciled')}
