@@ -923,7 +923,7 @@ class AccountInternal extends PureComponent<
     return this.props.matchedTransactions.includes(id);
   };
 
-  onCreatePayee = (name: string) => {
+  onCreatePayee = async (name: string) => {
     const trimmed = name.trim();
     if (trimmed !== '') {
       return this.props.dispatch(createPayee({ name })).unwrap();
@@ -1849,8 +1849,8 @@ class AccountInternal extends PureComponent<
                     ) : null
                   }
                   onSort={this.onSort}
-                  sortField={this.state.sort?.field}
-                  ascDesc={this.state.sort?.ascDesc}
+                  sortField={this.state.sort?.field ?? ''}
+                  ascDesc={this.state.sort?.ascDesc ?? 'asc'}
                   onChange={this.onTransactionsChange}
                   onBatchDelete={this.onBatchDelete}
                   onBatchDuplicate={this.onBatchDuplicate}

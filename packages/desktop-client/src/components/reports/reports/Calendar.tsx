@@ -521,11 +521,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
           )}
         </Header>
       </View>
-      <View
-        // TODO: need to make TableHandleRef conform to HTMLDivElement
-        ref={refContainer as unknown as Ref<HTMLDivElement>}
-        style={{ flexGrow: 1 }}
-      >
+      <View ref={refContainer as Ref<HTMLDivElement>} style={{ flexGrow: 1 }}>
         <View
           style={{
             backgroundColor: theme.pageBackground,
@@ -595,7 +591,8 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                 flexGrow: 1,
                 overflow: isNarrowWidth ? 'auto' : 'hidden',
               }}
-              ref={table as Ref<HTMLDivElement>}
+              // TODO: make TableHandleRef conform to HTMLDivEle
+              ref={table as unknown as Ref<HTMLDivElement>}
             >
               {!isNarrowWidth ? (
                 <SplitsExpandedProvider initialMode="collapse">
@@ -637,7 +634,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     onChange={() => {}}
                     onRefetch={() => setDirty(true)}
                     onCloseAddTransaction={() => {}}
-                    onCreatePayee={undefined}
+                    onCreatePayee={async () => null}
                     onApplyFilter={() => {}}
                     onBatchDelete={() => {}}
                     onBatchDuplicate={() => {}}
