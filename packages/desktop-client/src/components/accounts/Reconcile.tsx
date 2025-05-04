@@ -169,7 +169,7 @@ export function ReconcileMenu({
       )}
       <Text style={{ color: theme.pageTextSubdued, paddingBottom: 4 }}>
         {account?.last_reconciled
-          ? `${t('Reconciled')} ${tsToRelativeTime(account.last_reconciled, locale)}`
+          ? t('Reconciled {{ relativeTimeAgo }}', { relativeTimeAgo: tsToRelativeTime(account.last_reconciled, locale) })
           : t('Not yet reconciled')}
       </Text>
       <Button variant="primary" onPress={onSubmit}>
