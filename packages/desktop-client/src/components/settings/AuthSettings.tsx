@@ -13,8 +13,6 @@ import { useMultiuserEnabled, useLoginMethod } from '../ServerContext';
 
 import { Setting } from './UI';
 
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-
 export function AuthSettings() {
   const { t } = useTranslation();
 
