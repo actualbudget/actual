@@ -21,9 +21,8 @@ export function AuthSettings() {
   const multiuserEnabled = useMultiuserEnabled();
   const loginMethod = useLoginMethod();
   const dispatch = useDispatch();
-  const openidAuthFeatureFlag = useFeatureFlag('openidAuth');
 
-  return openidAuthFeatureFlag === true ? (
+  return (
     <Setting
       primaryAction={
         <>
@@ -103,5 +102,5 @@ export function AuthSettings() {
         </Trans>
       </Text>
     </Setting>
-  ) : null;
+  );
 }
