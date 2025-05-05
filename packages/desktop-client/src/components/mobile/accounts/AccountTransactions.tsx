@@ -40,6 +40,7 @@ import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
 
 import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
+import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
