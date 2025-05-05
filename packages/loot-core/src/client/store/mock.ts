@@ -29,13 +29,12 @@ import {
   name as queriesSliceName,
   reducer as queriesSliceReducer,
 } from '@actual-app/web/src/queries/queriesSlice';
-/* eslint-enable */
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
-
 import {
   name as usersSliceName,
   reducer as usersSliceReducer,
-} from '../users/usersSlice';
+} from '@actual-app/web/src/users/usersSlice';
+/* eslint-enable */
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
 
 import { type store as realStore } from './index';
 

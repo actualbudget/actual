@@ -10,7 +10,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { signOut } from 'loot-core/client/users/usersSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { PossibleRoles } from 'loot-core/shared/user';
 import { type NewUserEntity, type UserEntity } from 'loot-core/types/models';
@@ -18,6 +17,7 @@ import { type NewUserEntity, type UserEntity } from 'loot-core/types/models';
 import { type Modal as ModalType, popModal } from '../../modals/modalsSlice';
 import { addNotification } from '../../notifications/notificationsSlice';
 import { useDispatch } from '../../redux';
+import { signOut } from '../../users/usersSlice';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Checkbox, FormField, FormLabel } from '../forms';
 

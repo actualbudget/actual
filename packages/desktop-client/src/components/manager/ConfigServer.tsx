@@ -8,7 +8,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { loggedIn, signOut } from 'loot-core/client/users/usersSlice';
 import {
   isNonProductionEnvironment,
   isElectron,
@@ -16,6 +15,7 @@ import {
 
 import { createBudget } from '../../budgets/budgetsSlice';
 import { useDispatch } from '../../redux';
+import { loggedIn, signOut } from '../../users/usersSlice';
 import { Link } from '../common/Link';
 import { useServerURL, useSetServerURL } from '../ServerContext';
 
