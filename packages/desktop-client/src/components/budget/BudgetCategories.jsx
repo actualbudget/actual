@@ -4,7 +4,6 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useLocalPref } from '../../hooks/useLocalPref';
 import { DropHighlightPosContext } from '../sort';
 import { Row } from '../table';
 
@@ -16,6 +15,8 @@ import { IncomeHeader } from './IncomeHeader';
 import { SidebarCategory } from './SidebarCategory';
 import { SidebarGroup } from './SidebarGroup';
 import { separateGroups } from './util';
+
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 
 export const BudgetCategories = memo(
   ({

@@ -9,7 +9,6 @@ import { View } from '@actual-app/components/view';
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { trackingBudget } from 'loot-core/client/queries';
 
-import { useCategory } from '../../hooks/useCategory';
 import {
   BalanceWithCarryover,
   CarryoverIndicator,
@@ -22,6 +21,8 @@ import {
   ModalTitle,
 } from '../common/Modal';
 import { CellValueText } from '../spreadsheet/CellValue';
+
+import { useCategory } from '@desktop-client/hooks/useCategory';
 
 type TrackingBalanceMenuModalProps = Omit<
   Extract<ModalType, { name: 'tracking-balance-menu' }>['options'],

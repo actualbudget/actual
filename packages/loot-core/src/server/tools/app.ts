@@ -2,7 +2,7 @@
 import { q } from '../../shared/query';
 import { TransactionEntity } from '../../types/models';
 import { createApp } from '../app';
-import { runQuery } from '../aql';
+import { aqlQuery } from '../aql';
 import * as db from '../db';
 import { runMutator } from '../mutators';
 import { batchUpdateTransactions } from '../transactions';
@@ -76,7 +76,7 @@ async function fixSplitTransactions(): Promise<{
   });
 
   const splitTransactions = (
-    await runQuery(
+    await aqlQuery(
       q('transactions')
         .options({ splits: 'grouped' })
         .filter({

@@ -11,9 +11,6 @@ import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { useNotes } from '../../../hooks/useNotes';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { useUndo } from '../../../hooks/useUndo';
 import { useDispatch } from '../../../redux';
 import { makeAmountGrey } from '../../budget/util';
 import { PrivacyFilter } from '../../PrivacyFilter';
@@ -22,6 +19,10 @@ import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
 
 import { getColumnWidth, PILL_STYLE } from './BudgetTable';
+
+import { useNotes } from '@desktop-client/hooks/useNotes';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 
 type BudgetCellProps<
   SheetFieldName extends SheetFields<'envelope-budget' | 'tracking-budget'>,
