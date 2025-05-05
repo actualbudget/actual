@@ -8,9 +8,10 @@ import { View } from '@actual-app/components/view';
 
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 
-import { useNotes } from '../../hooks/useNotes';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Notes } from '../Notes';
+
+import { useNotes } from '@desktop-client/hooks/useNotes';
 
 type NotesModalProps = Extract<ModalType, { name: 'notes' }>['options'];
 

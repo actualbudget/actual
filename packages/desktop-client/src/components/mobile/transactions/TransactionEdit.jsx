@@ -33,7 +33,7 @@ import {
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import * as Platform from 'loot-core/client/platform';
 import { setLastTransaction } from 'loot-core/client/queries/queriesSlice';
-import { runQuery } from 'loot-core/client/query-helpers';
+import { aqlQuery } from 'loot-core/client/query-helpers';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
@@ -56,16 +56,6 @@ import {
   groupById,
 } from 'loot-core/shared/util';
 
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useCategories } from '../../../hooks/useCategories';
-import { useDateFormat } from '../../../hooks/useDateFormat';
-import { useInitialMount } from '../../../hooks/useInitialMount';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { usePayees } from '../../../hooks/usePayees';
-import {
-  SingleActiveEditFormProvider,
-  useSingleActiveEditForm,
-} from '../../../hooks/useSingleActiveEditForm';
 import { useSelector, useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { AmountInput } from '../../util/AmountInput';
@@ -74,6 +64,17 @@ import { FieldLabel, TapField, InputField, ToggleField } from '../MobileForms';
 import { getPrettyPayee } from '../utils';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
+
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { usePayees } from '@desktop-client/hooks/usePayees';
+import {
+  SingleActiveEditFormProvider,
+  useSingleActiveEditForm,
+} from '@desktop-client/hooks/useSingleActiveEditForm';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;
@@ -1107,7 +1108,7 @@ function TransactionEditUnconnected({
       // The edit item components expect to work with a flat array of
       // transactions when handling splits, so we call ungroupTransactions to
       // flatten parent and children into one array.
-      const { data } = await runQuery(
+      const { data } = await aqlQuery(
         q('transactions')
           .filter({ id: transactionId })
           .select('*')

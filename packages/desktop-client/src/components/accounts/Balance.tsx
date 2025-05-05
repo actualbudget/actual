@@ -14,12 +14,13 @@ import { getScheduledAmount } from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { useSelectedItems } from '../../hooks/useSelected';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { type Binding } from '../spreadsheet';
 import { CellValue, CellValueText } from '../spreadsheet/CellValue';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
+
+import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 
 type DetailedBalanceProps = {
   name: string;
