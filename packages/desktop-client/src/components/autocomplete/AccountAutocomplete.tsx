@@ -17,10 +17,10 @@ import { css, cx } from '@emotion/css';
 
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { useAccounts } from '../../hooks/useAccounts';
-
 import { Autocomplete } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
+
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
 
 type AccountAutocompleteItem = AccountEntity;
 

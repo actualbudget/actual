@@ -21,9 +21,6 @@ import {
 } from 'loot-core/client/queries/queriesSlice';
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { useContextMenu } from '../../hooks/useContextMenu';
-import { useDragRef } from '../../hooks/useDragRef';
-import { useNotes } from '../../hooks/useNotes';
 import { useDispatch } from '../../redux';
 import { Link } from '../common/Link';
 import { Notes } from '../Notes';
@@ -36,6 +33,10 @@ import {
 } from '../sort';
 import { type Binding, type SheetFields } from '../spreadsheet';
 import { CellValue } from '../spreadsheet/CellValue';
+
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useDragRef } from '@desktop-client/hooks/useDragRef';
+import { useNotes } from '@desktop-client/hooks/useNotes';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,

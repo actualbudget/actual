@@ -11,7 +11,7 @@ import React, {
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
-import { useGlobalPref } from '../../hooks/useGlobalPref';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 type SidebarContextValue = {
   hidden: boolean;

@@ -14,10 +14,11 @@ import { View } from '@actual-app/components/view';
 import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
 import * as Platform from 'loot-core/client/platform';
 
-import { useContextMenu } from '../../hooks/useContextMenu';
-import { useMetadataPref } from '../../hooks/useMetadataPref';
-import { useNavigate } from '../../hooks/useNavigate';
 import { useDispatch } from '../../redux';
+
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 type BudgetNameProps = {
   children?: ReactNode;

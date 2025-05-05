@@ -21,9 +21,10 @@ import {
 } from 'loot-core/shared/util';
 import { type SpendingEntity } from 'loot-core/types/models';
 
-import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
 import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
+
+import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type PayloadItem = {
   value: number;

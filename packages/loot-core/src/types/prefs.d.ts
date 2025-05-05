@@ -3,7 +3,6 @@ export type FeatureFlag =
   | 'goalTemplatesUIEnabled'
   | 'actionTemplating'
   | 'contextMenus'
-  | 'openidAuth'
   | 'pluggyAiBankSync';
 
 /**

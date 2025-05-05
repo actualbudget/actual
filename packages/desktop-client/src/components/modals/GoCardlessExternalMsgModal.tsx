@@ -18,7 +18,6 @@ import {
   type GoCardlessToken,
 } from 'loot-core/types/models';
 
-import { useGoCardlessStatus } from '../../hooks/useGoCardlessStatus';
 import { useDispatch } from '../../redux';
 import { Error, Warning } from '../alerts';
 import { Autocomplete } from '../autocomplete/Autocomplete';
@@ -26,6 +25,8 @@ import { Link } from '../common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FormField, FormLabel } from '../forms';
 import { COUNTRY_OPTIONS } from '../util/countries';
+
+import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 
 function useAvailableBanks(country: string) {
   const [banks, setBanks] = useState<GoCardlessInstitution[]>([]);

@@ -12,10 +12,11 @@ import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { send, listen } from 'loot-core/platform/client/fetch';
 import { type Backup } from 'loot-core/server/budgetfiles/backups';
 
-import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Row, Cell } from '../table';
+
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 type BackupTableProps = {
   backups: Backup[];
