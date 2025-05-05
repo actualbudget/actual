@@ -15,10 +15,6 @@ import { View } from '@actual-app/components/view';
 
 import { useDashboard } from 'loot-core/client/data-hooks/dashboard';
 import { useReports } from 'loot-core/client/data-hooks/reports';
-import {
-  addNotification,
-  removeNotification,
-} from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import {
   type CustomReportWidget,
@@ -27,6 +23,10 @@ import {
   type Widget,
 } from 'loot-core/types/models';
 
+import {
+  addNotification,
+  removeNotification,
+} from '../../notifications/notificationsSlice';
 import { useDispatch } from '../../redux';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { MobilePageHeader, Page, PageHeader } from '../Page';
