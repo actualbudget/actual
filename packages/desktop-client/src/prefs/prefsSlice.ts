@@ -1,19 +1,17 @@
-// This is temporary until we move all loot-core/client over to desktop-client.
-/* eslint-disable no-restricted-imports */
-import { resetApp } from '@actual-app/web/src/app/appSlice';
-import { setI18NextLanguage } from '@actual-app/web/src/i18n';
-import { closeModal } from '@actual-app/web/src/modals/modalsSlice';
-/* eslint-enable no-restricted-imports */
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { send } from '../../platform/client/fetch';
-import { parseNumberFormat, setNumberFormat } from '../../shared/util';
+import { createAppAsyncThunk } from 'loot-core/client/redux';
+import { send } from 'loot-core/platform/client/fetch';
+import { parseNumberFormat, setNumberFormat } from 'loot-core/shared/util';
 import {
   type GlobalPrefs,
   type MetadataPrefs,
   type SyncedPrefs,
-} from '../../types/prefs';
-import { createAppAsyncThunk } from '../redux';
+} from 'loot-core/types/prefs';
+
+import { resetApp } from '../app/appSlice';
+import { setI18NextLanguage } from '../i18n';
+import { closeModal } from '../modals/modalsSlice';
 
 const sliceName = 'prefs';
 
