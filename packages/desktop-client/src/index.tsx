@@ -20,7 +20,6 @@ import * as accountsSlice from './accounts/accountsSlice';
 import * as appSlice from './app/appSlice';
 import { AuthProvider } from './auth/AuthProvider';
 import * as budgetsSlice from './budgets/budgetsSlice';
-import * as modalsSlice from './modals/modalsSlice';
 // See https://github.com/WICG/focus-visible. Only makes the blue
 // focus outline appear from keyboard events.
 import 'focus-visible';
