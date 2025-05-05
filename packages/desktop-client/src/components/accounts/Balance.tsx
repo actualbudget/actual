@@ -8,7 +8,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { useHover } from 'usehooks-ts';
 
-import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
 import { q, type Query } from 'loot-core/shared/query';
 import { getScheduledAmount } from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
@@ -20,6 +19,7 @@ import { CellValue, CellValueText } from '../spreadsheet/CellValue';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
+import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 
 type DetailedBalanceProps = {
