@@ -86,7 +86,10 @@ type BalanceWithCarryoverProps = Omit<
    * Expense category balance binding is `leftover`,
    * while income category balance binding is `sum-amount`.
    */
-  balance: Binding<'envelope-budget' | 'tracking-budget', 'leftover' | 'sum-amount'>;
+  balance: Binding<
+    'envelope-budget' | 'tracking-budget',
+    'leftover' | 'sum-amount'
+  >;
   goal: Binding<'envelope-budget' | 'tracking-budget', 'goal'>;
   budgeted: Binding<'envelope-budget' | 'tracking-budget', 'budget'>;
   longGoal: Binding<'envelope-budget' | 'tracking-budget', 'long-goal'>;
