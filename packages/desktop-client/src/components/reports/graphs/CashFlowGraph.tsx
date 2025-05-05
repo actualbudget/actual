@@ -21,10 +21,14 @@ import {
 import { chartTheme } from '../chart-theme';
 import { Container } from '../Container';
 
+import { computePadding } from './computePadding';
+
+import {
+  type FormatType,
+  useFormat,
+} from '@desktop-client/components/spreadsheet/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
-import { FormatType, useFormat } from '@desktop-client/components/spreadsheet/useFormat';
-import { computePadding } from './computePadding';
 
 const MAX_BAR_SIZE = 50;
 const ANIMATION_DURATION = 1000; // in ms
