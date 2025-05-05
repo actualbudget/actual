@@ -1,6 +1,7 @@
 import { type Page } from '@playwright/test';
 
 import { AccountPage } from './account-page';
+import { PayeesPage } from './payees-page';
 import { ReportsPage } from './reports-page';
 import { RulesPage } from './rules-page';
 import { SchedulesPage } from './schedules-page';
@@ -50,6 +51,19 @@ export class Navigation {
     await rulesLink.click();
 
     return new RulesPage(this.page);
+  }
+
+  async goToPayeesPage() {
+    const payeesLink = this.page.getByRole('link', { name: 'Payees' });
+
+    // Expand the "More" menu only if the Payees link is not visible
+    if (!(await payeesLink.isVisible())) {
+      await this.page.getByRole('button', { name: 'More' }).click();
+    }
+
+    await payeesLink.click();
+
+    return new PayeesPage(this.page);
   }
 
   async goToSettingsPage() {
