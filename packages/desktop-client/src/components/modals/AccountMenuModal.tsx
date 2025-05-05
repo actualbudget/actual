@@ -23,9 +23,6 @@ import { View } from '@actual-app/components/view';
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { useAccount } from '../../hooks/useAccount';
-import { useAccounts } from '../../hooks/useAccounts';
-import { useNotes } from '../../hooks/useNotes';
 import {
   Modal,
   ModalCloseButton,
@@ -34,6 +31,10 @@ import {
 } from '../common/Modal';
 import { Notes } from '../Notes';
 import { validateAccountName } from '../util/accountValidation';
+
+import { useAccount } from '@desktop-client/hooks/useAccount';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useNotes } from '@desktop-client/hooks/useNotes';
 
 type AccountMenuModalProps = Extract<
   ModalType,

@@ -9,9 +9,9 @@ import { q } from 'loot-core/shared/query';
 import { describeSchedule } from 'loot-core/shared/schedules';
 import { type ScheduleEntity } from 'loot-core/types/models';
 
-import { usePayees } from '../../hooks/usePayees';
-
 import { Value } from './Value';
+
+import { usePayees } from '@desktop-client/hooks/usePayees';
 
 type ScheduleValueProps = {
   value: ScheduleEntity;

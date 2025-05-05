@@ -48,9 +48,6 @@ import {
   amountToInteger,
 } from 'loot-core/shared/util';
 
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { StatusBadge } from '../schedules/StatusBadge';
@@ -58,6 +55,13 @@ import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable
 import { BetweenAmountInput } from '../util/AmountInput';
 import { DisplayId } from '../util/DisplayId';
 import { GenericInput } from '../util/GenericInput';
+
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import {
+  useSelected,
+  SelectedProvider,
+} from '@desktop-client/hooks/useSelected';
 
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));
