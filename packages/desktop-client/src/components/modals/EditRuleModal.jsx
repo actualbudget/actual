@@ -25,7 +25,7 @@ import { v4 as uuid } from 'uuid';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { initiallyLoadPayees } from 'loot-core/client/queries/queriesSlice';
-import { runQuery } from 'loot-core/client/query-helpers';
+import { aqlQuery } from 'loot-core/client/query-helpers';
 import { enableUndo, disableUndo } from 'loot-core/client/undo';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -840,7 +840,7 @@ export function EditRuleModal({
         const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
         const parentOnlyCondition =
           actionSplits.length > 1 ? { is_child: false } : {};
-        const { data: transactions } = await runQuery(
+        const { data: transactions } = await aqlQuery(
           q('transactions')
             .filter({ [conditionsOpKey]: filters, ...parentOnlyCondition })
             .select('*'),
