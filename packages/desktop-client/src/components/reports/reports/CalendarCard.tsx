@@ -29,9 +29,6 @@ import { amountToCurrency } from 'loot-core/shared/util';
 import { type CalendarWidget } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { useMergedRefs } from '../../../hooks/useMergedRefs';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { useResizeObserver } from '../../../hooks/useResizeObserver';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { chartTheme } from '../chart-theme';
 import { DateRange } from '../DateRange';
@@ -45,6 +42,10 @@ import {
   calendarSpreadsheet,
 } from '../spreadsheets/calendar-spreadsheet';
 import { useReport } from '../useReport';
+
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 type CalendarCardProps = {
   widgetId: string;

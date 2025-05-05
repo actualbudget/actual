@@ -17,10 +17,11 @@ import {
   type DataEntity,
 } from 'loot-core/types/models';
 
-import { useLocale } from '../../hooks/useLocale';
 import { PrivacyFilter } from '../PrivacyFilter';
 
 import { ReportOptions } from './ReportOptions';
+
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type ReportSummaryProps = {
   startDate: string;

@@ -1,7 +1,15 @@
 // @ts-strict-ignore
+import { QueryState } from '../../shared/query';
 import * as db from '../db';
 
-import { compileQuery, defaultConstructQuery } from './compiler';
+import {
+  compileQuery,
+  CompilerState,
+  defaultConstructQuery,
+  OutputTypes,
+  SchemaConfig,
+  SqlPieces,
+} from './compiler';
 import { convertInputType, convertOutputType } from './schema-helpers';
 
 // TODO (compiler):
@@ -16,7 +24,7 @@ import { convertInputType, convertOutputType } from './schema-helpers';
 //   global "field lookup" table that other filter/groupBy/etc
 //   expressions can reference
 
-function applyTypes(data, outputTypes) {
+function applyTypes(data: Record<string, unknown>[], outputTypes: OutputTypes) {
   for (let i = 0; i < data.length; i++) {
     const item = data[i];
     Object.keys(item).forEach(name => {
@@ -26,25 +34,42 @@ function applyTypes(data, outputTypes) {
 }
 
 export async function execQuery(
-  queryState,
-  state,
-  sqlPieces,
-  params,
-  outputTypes,
+  queryState: QueryState,
+  compilerState: CompilerState,
+  sqlPieces: SqlPieces,
+  params: (string | number)[],
+  outputTypes: OutputTypes,
 ) {
-  const sql = defaultConstructQuery(queryState, state, sqlPieces);
-  const data = await db.all(sql, params);
+  const sql = defaultConstructQuery(queryState, compilerState, sqlPieces);
+  const data = await db.all<Record<string, unknown>>(sql, params);
   applyTypes(data, outputTypes);
   return data;
 }
 
-export async function runCompiledQuery(
-  query,
-  pieces,
-  state,
-  { params = {}, executors = {} } = {},
+export type AqlQueryExecutor = (
+  compilerState: CompilerState,
+  queryState: QueryState,
+  sqlPieces: SqlPieces,
+  params: (string | number)[],
+  outputTypes: OutputTypes,
+) => Promise<Record<string, unknown>[]>;
+
+type AqlQueryParamName = string;
+type AqlQueryParamValue = unknown;
+export type AqlQueryParams = Record<AqlQueryParamName, AqlQueryParamValue>;
+
+export type RunCompiledAqlQueryOptions = {
+  params?: AqlQueryParams;
+  executors?: Record<string, AqlQueryExecutor>;
+};
+
+export async function runCompiledAqlQuery(
+  queryState: QueryState,
+  sqlPieces: SqlPieces,
+  compilerState: CompilerState,
+  { params = {}, executors = {} }: RunCompiledAqlQueryOptions = {},
 ) {
-  const paramArray = state.namedParameters.map(param => {
+  const paramArray = compilerState.namedParameters.map(param => {
     const name = param.paramName;
     if (params[name] === undefined) {
       throw new Error(`Parameter ${name} not provided to query`);
@@ -52,35 +77,53 @@ export async function runCompiledQuery(
     return convertInputType(params[name], param.paramType);
   });
 
-  let data;
-  if (executors[state.implicitTableName]) {
-    data = await executors[state.implicitTableName](
-      state,
-      query,
-      pieces,
+  let data: Record<string, unknown>[] = [];
+  if (executors[compilerState.implicitTableName]) {
+    data = await executors[compilerState.implicitTableName](
+      compilerState,
+      queryState,
+      sqlPieces,
       paramArray,
-      state.outputTypes,
+      compilerState.outputTypes,
     );
   } else {
-    data = await execQuery(query, state, pieces, paramArray, state.outputTypes);
+    data = await execQuery(
+      queryState,
+      compilerState,
+      sqlPieces,
+      paramArray,
+      compilerState.outputTypes,
+    );
   }
 
-  if (query.calculation) {
+  if (queryState.calculation) {
     if (data.length > 0) {
       const row = data[0];
       const k = Object.keys(row)[0];
       // TODO: the function being run should be the one to
       // determine the default value, not hardcoded as 0
-      data = row[k] || 0;
+      return row[k] || 0;
     } else {
-      data = null;
+      return null;
     }
   }
+
   return data;
 }
 
-export async function runQuery(schema, schemaConfig, query, options) {
-  const { sqlPieces, state } = compileQuery(query, schema, schemaConfig);
-  const data = await runCompiledQuery(query, sqlPieces, state, options);
+export async function compileAndRunAqlQuery(
+  schema,
+  schemaConfig: SchemaConfig,
+  queryState: QueryState,
+  options: RunCompiledAqlQueryOptions,
+) {
+  const { sqlPieces, state } = compileQuery(queryState, schema, schemaConfig);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data: any = await runCompiledAqlQuery(
+    queryState,
+    sqlPieces,
+    state,
+    options,
+  );
   return { data, dependencies: state.dependencies };
 }

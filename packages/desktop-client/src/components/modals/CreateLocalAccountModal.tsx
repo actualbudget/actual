@@ -16,8 +16,6 @@ import { closeModal } from 'loot-core/client/modals/modalsSlice';
 import { createAccount } from 'loot-core/client/queries/queriesSlice';
 import { toRelaxedNumber } from 'loot-core/shared/util';
 
-import * as useAccounts from '../../hooks/useAccounts';
-import { useNavigate } from '../../hooks/useNavigate';
 import { useDispatch } from '../../redux';
 import { Link } from '../common/Link';
 import {
@@ -29,6 +27,9 @@ import {
 } from '../common/Modal';
 import { Checkbox } from '../forms';
 import { validateAccountName } from '../util/accountValidation';
+
+import * as useAccounts from '@desktop-client/hooks/useAccounts';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 export function CreateLocalAccountModal() {
   const { t } = useTranslation();

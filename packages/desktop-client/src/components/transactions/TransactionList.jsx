@@ -13,11 +13,12 @@ import {
 } from 'loot-core/shared/transactions';
 import { getChangedValues, applyChanges } from 'loot-core/shared/util';
 
-import { useNavigate } from '../../hooks/useNavigate';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useDispatch } from '../../redux';
 
 import { TransactionTable } from './TransactionsTable';
+
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 // When data changes, there are two ways to update the UI:
 //

@@ -1,7 +1,7 @@
 import * as d from 'date-fns';
 import keyBy from 'lodash/keyBy';
 
-import { runQuery } from 'loot-core/client/query-helpers';
+import { aqlQuery } from 'loot-core/client/query-helpers';
 import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -41,7 +41,7 @@ export function createSpreadsheet(
     const data = await Promise.all(
       accounts.map(async acct => {
         const [starting, balances]: [number, Balance[]] = await Promise.all([
-          runQuery(
+          aqlQuery(
             q('transactions')
               .filter({
                 [conditionsOpKey]: filters,
@@ -51,7 +51,7 @@ export function createSpreadsheet(
               .calculate({ $sum: '$amount' }),
           ).then(({ data }) => data),
 
-          runQuery(
+          aqlQuery(
             q('transactions')
               .filter({
                 [conditionsOpKey]: filters,

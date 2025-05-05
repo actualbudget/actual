@@ -6,8 +6,6 @@ import { closeModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
-import { useMetadataPref } from '../hooks/useMetadataPref';
-import { useModalState } from '../hooks/useModalState';
 import { useDispatch } from '../redux';
 
 import { EditSyncAccount } from './banksync/EditSyncAccount';
@@ -79,6 +77,9 @@ import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { UpcomingLength } from './schedules/UpcomingLength';
 import { NamespaceContext } from './spreadsheet/NamespaceContext';
+
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useModalState } from '@desktop-client/hooks/useModalState';
 
 export function Modals() {
   const location = useLocation();

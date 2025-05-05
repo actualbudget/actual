@@ -77,10 +77,23 @@ jobs:
           name: actual-electron-${{ matrix.os }}-appx
           path: |
             packages/desktop-electron/dist/*.appx
-      - name: Add to Release
+      - name: Process release version
+        id: process_version
+        run: |
+          echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+      - name: Add to new release
         uses: softprops/action-gh-release@v2
         with:
           draft: true
+          body: |
+            :link: [View release notes](https://actualbudget.org/blog/release-${{ steps.process_version.outputs.version }})
+
+            ## Desktop releases
+            Please note: Microsoft store updates can sometimes lag behind the main release by a couple of days while they verify the new version.
+
+            <a href="https://apps.microsoft.com/detail/9p2hmlhsdbrm?cid=Github+Releases&mode=direct">
+              <img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
+            </a>
           files: |
             packages/desktop-electron/dist/*.dmg
             packages/desktop-electron/dist/*.exe

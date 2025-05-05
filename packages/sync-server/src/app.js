@@ -108,10 +108,14 @@ function parseHTTPSConfig(value) {
 }
 
 export async function run() {
-  if (config.openId) {
+  const openIdConfig = config?.getProperties()?.openId;
+  if (
+    openIdConfig?.discoveryURL ||
+    openIdConfig?.issuer?.authorization_endpoint
+  ) {
     console.log('OpenID configuration found. Preparing server to use it');
     try {
-      const { error } = await bootstrap({ openId: config.openId }, true);
+      const { error } = await bootstrap({ openId: openIdConfig }, true);
       if (error) {
         console.log(error);
       } else {
