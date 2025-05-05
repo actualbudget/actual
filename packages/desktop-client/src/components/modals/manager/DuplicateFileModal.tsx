@@ -10,11 +10,11 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { duplicateBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 
+import { duplicateBudget } from '../../../budgets/budgetsSlice';
 import { useDispatch } from '../../../redux';
 import {
   Modal,

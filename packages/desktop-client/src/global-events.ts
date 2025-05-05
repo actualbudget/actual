@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import { closeBudgetUI } from 'loot-core/client/budgets/budgetsSlice';
 import {
   closeModal,
   pushModal,
@@ -21,6 +20,7 @@ import { listen } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 
 import { setAppState } from './app/appSlice';
+import { closeBudgetUI } from './budgets/budgetsSlice';
 
 export function handleGlobalEvents(store: AppStore) {
   const unlistenServerError = listen('server-error', () => {
