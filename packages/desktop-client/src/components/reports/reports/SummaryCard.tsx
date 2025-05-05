@@ -9,7 +9,6 @@ import {
   type SummaryWidget,
 } from 'loot-core/types/models';
 
-import { useLocale } from '../../../hooks/useLocale';
 import { DateRange } from '../DateRange';
 import { LoadingIndicator } from '../LoadingIndicator';
 import { ReportCard } from '../ReportCard';
@@ -18,6 +17,8 @@ import { calculateTimeRange } from '../reportRanges';
 import { summarySpreadsheet } from '../spreadsheets/summary-spreadsheet';
 import { SummaryNumber } from '../SummaryNumber';
 import { useReport } from '../useReport';
+
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type SummaryCardProps = {
   widgetId: string;

@@ -33,7 +33,6 @@ import {
 } from 'loot-core/shared/rules';
 import { titleFirst } from 'loot-core/shared/util';
 
-import { useDateFormat } from '../../hooks/useDateFormat';
 import { GenericInput } from '../util/GenericInput';
 
 import { CompactFiltersButton } from './CompactFiltersButton';
@@ -42,6 +41,8 @@ import { OpButton } from './OpButton';
 import { subfieldFromFilter } from './subfieldFromFilter';
 import { subfieldToOptions } from './subfieldToOptions';
 import { updateFilterReducer } from './updateFilterReducer';
+
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 
 let isDatepickerClick = false;
 

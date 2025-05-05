@@ -25,7 +25,7 @@ import { v4 as uuid } from 'uuid';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { initiallyLoadPayees } from 'loot-core/client/queries/queriesSlice';
-import { runQuery } from 'loot-core/client/query-helpers';
+import { aqlQuery } from 'loot-core/client/query-helpers';
 import { enableUndo, disableUndo } from 'loot-core/client/undo';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -48,9 +48,6 @@ import {
   amountToInteger,
 } from 'loot-core/shared/util';
 
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useSelected, SelectedProvider } from '../../hooks/useSelected';
 import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { StatusBadge } from '../schedules/StatusBadge';
@@ -58,6 +55,13 @@ import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable
 import { BetweenAmountInput } from '../util/AmountInput';
 import { DisplayId } from '../util/DisplayId';
 import { GenericInput } from '../util/GenericInput';
+
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import {
+  useSelected,
+  SelectedProvider,
+} from '@desktop-client/hooks/useSelected';
 
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));
@@ -840,7 +844,7 @@ export function EditRuleModal({
         const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
         const parentOnlyCondition =
           actionSplits.length > 1 ? { is_child: false } : {};
-        const { data: transactions } = await runQuery(
+        const { data: transactions } = await aqlQuery(
           q('transactions')
             .filter({ [conditionsOpKey]: filters, ...parentOnlyCondition })
             .select('*'),

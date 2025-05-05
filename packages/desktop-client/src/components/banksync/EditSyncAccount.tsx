@@ -24,12 +24,13 @@ import {
 } from 'loot-core/types/models';
 
 import { unlinkAccount } from '../../accounts/accountsSlice';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { CheckboxOption } from '../modals/ImportTransactionsModal/CheckboxOption';
 
 import { FieldMapping } from './FieldMapping';
+
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export type TransactionDirection = 'payment' | 'deposit';
 

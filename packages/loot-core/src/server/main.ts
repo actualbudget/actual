@@ -13,7 +13,7 @@ import { Handlers } from '../types/handlers';
 import { app as accountsApp } from './accounts/app';
 import { app as adminApp } from './admin/app';
 import { installAPI } from './api';
-import { runQuery as aqlQuery } from './aql';
+import { aqlQuery } from './aql';
 import { app as authApp } from './auth/app';
 import { app as budgetApp } from './budget/app';
 import { app as budgetFilesApp } from './budgetfiles/app';
