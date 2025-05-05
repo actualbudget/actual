@@ -1,4 +1,3 @@
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { aqlQuery } from 'loot-core/client/query-helpers';
 import { validForTransfer } from 'loot-core/client/transfer';
 import { send } from 'loot-core/platform/client/fetch';
@@ -19,6 +18,7 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
+import { pushModal } from '../modals/modalsSlice';
 import { useDispatch } from '../redux';
 
 type BatchEditProps = {

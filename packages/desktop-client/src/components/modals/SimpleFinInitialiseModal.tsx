@@ -7,10 +7,10 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getSecretsError } from 'loot-core/shared/errors';
 
+import { type Modal as ModalType } from '../../modals/modalsSlice';
 import { Error } from '../alerts';
 import { Link } from '../common/Link';
 import {
