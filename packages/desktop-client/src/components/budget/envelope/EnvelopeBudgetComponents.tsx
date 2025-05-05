@@ -43,8 +43,8 @@ import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
 
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useUndo } from '@desktop-client/hooks/useUndo';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 
 export function useEnvelopeSheetName<
   FieldName extends SheetFields<'envelope-budget'>,

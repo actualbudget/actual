@@ -19,9 +19,10 @@ import {
 import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
 
-import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
-import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { computePadding } from './computePadding';
+
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
+import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type NetWorthGraphProps = {
   style?: CSSProperties;

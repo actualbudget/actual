@@ -20,9 +20,13 @@ import { type SpendingEntity } from 'loot-core/types/models';
 import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
 
-import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
-import { useFormat, type FormatType } from '@desktop-client/components/spreadsheet/useFormat';
 import { computePadding } from './computePadding';
+
+import {
+  useFormat,
+  type FormatType,
+} from '@desktop-client/components/spreadsheet/useFormat';
+import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type PayloadItem = {
   value: number;
