@@ -1,10 +1,6 @@
 import { useEffect } from 'react';
 
-import {
-  getCommonPayees,
-  getPayees,
-} from 'loot-core/client/queries/queriesSlice';
-
+import { getCommonPayees, getPayees } from '../queries/queriesSlice';
 import { useSelector, useDispatch } from '../redux';
 
 import { useInitialMount } from './useInitialMount';

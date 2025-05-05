@@ -25,6 +25,10 @@ import {
   name as prefsSliceName,
   reducer as prefsSliceReducer,
 } from '@actual-app/web/src/prefs/prefsSlice';
+import {
+  name as queriesSliceName,
+  reducer as queriesSliceReducer,
+} from '@actual-app/web/src/queries/queriesSlice';
 /* eslint-enable no-restricted-imports */
 import {
   combineReducers,
@@ -33,10 +37,6 @@ import {
   isRejected,
 } from '@reduxjs/toolkit';
 
-import {
-  name as queriesSliceName,
-  reducer as queriesSliceReducer,
-} from '../queries/queriesSlice';
 import {
   name as usersSliceName,
   reducer as usersSliceReducer,

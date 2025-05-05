@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-import {
-  getPayees,
-  initiallyLoadPayees,
-} from 'loot-core/client/queries/queriesSlice';
 import { send, listen } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type UndoState } from 'loot-core/server/undo';
@@ -11,6 +7,7 @@ import { applyChanges, type Diff } from 'loot-core/shared/util';
 import { type NewRuleEntity, type PayeeEntity } from 'loot-core/types/models';
 
 import { pushModal } from '../../modals/modalsSlice';
+import { getPayees, initiallyLoadPayees } from '../../queries/queriesSlice';
 import { useDispatch } from '../../redux';
 
 import { ManagePayees } from './ManagePayees';
