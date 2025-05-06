@@ -5,21 +5,32 @@ export function useGeolocation() {
   const [error, setError] = useState<string>(null);
 
   useEffect(() => {
+    let isUnmounted = false;
+
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         async position => {
-          setCoordinates(position.coords);
+          if (!isUnmounted) {
+            setCoordinates(position.coords);
+          }
         },
         error => {
-          console.log(
-            `Error occurred while getting geolocation: ${error.message}`,
-          );
-          setError(error.message);
+          if (!isUnmounted) {
+            console.log(
+              `Error occurred while getting geolocation: ${error.message}`,
+            );
+            setError(error.message);
+          }
         },
       );
     } else {
-      setError('Geolocation is not supported by this browser.');
+      if (!isUnmounted) {
+        setError('Geolocation is not supported by this browser.');
+      }
     }
+    return () => {
+      isUnmounted = true;
+    };
   }, []);
 
   return {
