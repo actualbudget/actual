@@ -310,13 +310,26 @@ function parseAccessKey(accessKey) {
 
 async function getAccessKey(base64Token) {
   const token = Buffer.from(base64Token, 'base64').toString();
+  
+  // Allowlist of trusted base URLs
+  const allowedBaseUrls = ['https://api.simplefin.com', 'https://secure.simplefin.com'];
+  let tokenUrl;
+  try {
+    tokenUrl = new URL(token);
+    if (!allowedBaseUrls.some(base => tokenUrl.href.startsWith(base))) {
+      throw new Error('Invalid token URL');
+    }
+  } catch (e) {
+    throw new Error('Malformed or untrusted token URL');
+  }
+
   const options = {
     method: 'POST',
     port: 443,
     headers: { 'Content-Length': 0 },
   };
   return new Promise((resolve, reject) => {
-    const req = https.request(new URL(token), options, res => {
+    const req = https.request(tokenUrl, options, res => {
       res.on('data', d => {
         resolve(d.toString());
       });
