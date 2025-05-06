@@ -19,7 +19,7 @@ import {
 import { ScheduleEntity } from '../../types/models';
 import { addTransactions } from '../accounts/sync';
 import { createApp } from '../app';
-import { runQuery as aqlQuery } from '../aql';
+import { aqlQuery } from '../aql';
 import * as db from '../db';
 import { toDateRepr } from '../models';
 import { mutator, runMutator } from '../mutators';

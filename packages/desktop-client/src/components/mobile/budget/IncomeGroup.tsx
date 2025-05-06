@@ -17,7 +17,6 @@ import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
 import * as monthUtils from 'loot-core/shared/months';
 import { type CategoryGroupEntity } from 'loot-core/types/models';
 
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
@@ -25,11 +24,13 @@ import { useFormat } from '../../spreadsheet/useFormat';
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { IncomeCategoryList } from './IncomeCategoryList';
 
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+
 type IncomeGroupProps = {
-  group: CategoryGroupEntity;
+  categoryGroup: CategoryGroupEntity;
   month: string;
   showHiddenCategories: boolean;
-  onEditGroup: (id: CategoryGroupEntity['id']) => void;
+  onEditCategoryGroup: (id: CategoryGroupEntity['id']) => void;
   onEditCategory: (id: string) => void;
   onBudgetAction: (month: string, action: string, args: unknown) => void;
   isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
@@ -37,10 +38,10 @@ type IncomeGroupProps = {
 };
 
 export function IncomeGroup({
-  group,
+  categoryGroup,
   month,
   showHiddenCategories,
-  onEditGroup,
+  onEditCategoryGroup,
   onEditCategory,
   onBudgetAction,
   isCollapsed,
@@ -52,12 +53,17 @@ export function IncomeGroup({
 
   const categories = useMemo(
     () =>
-      isCollapsed(group.id)
+      isCollapsed(categoryGroup.id)
         ? []
-        : (group.categories?.filter(
+        : (categoryGroup.categories?.filter(
             category => !category.hidden || showHiddenCategories,
           ) ?? []),
-    [group.categories, group.id, isCollapsed, showHiddenCategories],
+    [
+      categoryGroup.categories,
+      categoryGroup.id,
+      isCollapsed,
+      showHiddenCategories,
+    ],
   );
 
   return (
@@ -80,9 +86,9 @@ export function IncomeGroup({
 
       <Card style={{ marginTop: 0 }}>
         <IncomeGroupHeader
-          group={group}
+          group={categoryGroup}
           month={month}
-          onEdit={onEditGroup}
+          onEdit={onEditCategoryGroup}
           isCollapsed={isCollapsed}
           onToggleCollapse={onToggleCollapse}
         />

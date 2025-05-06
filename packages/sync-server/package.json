@@ -1,33 +1,30 @@
 {
   "name": "@actual-app/sync-server",
-  "version": "25.4.0",
+  "version": "25.5.0",
   "license": "MIT",
   "description": "actual syncing server",
   "bin": {
-    "actual-server": "./bin/actual-server.js"
+    "actual-server": "./build/bin/actual-server.js"
   },
   "type": "module",
   "files": [
-    "bin",
-    "src",
-    "app.js",
-    "migrations",
+    "build",
     "default-db.sqlite",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "start": "node app",
-    "start-monitor": "nodemon app",
+    "start": "yarn build && node build/app",
+    "start-monitor": "nodemon --exec 'tsc && node build/app' --ignore './build/**/*' --ext 'ts,js' build/app",
     "build": "tsc",
     "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --trace-warnings' vitest",
-    "db:migrate": "NODE_ENV=development node src/run-migrations.js up",
-    "db:downgrade": "NODE_ENV=development node src/run-migrations.js down",
-    "db:test-migrate": "NODE_ENV=test node src/run-migrations.js up",
-    "db:test-downgrade": "NODE_ENV=test node src/run-migrations.js down",
-    "reset-password": "node src/scripts/reset-password.js",
-    "disable-openid": "node src/scripts/disable-openid.js",
-    "health-check": "node src/scripts/health-check.js"
+    "db:migrate": "yarn build && cross-env NODE_ENV=development node build/src/scripts/run-migrations.js up",
+    "db:downgrade": "yarn build && cross-env NODE_ENV=development node build/src/scripts/run-migrations.js down",
+    "db:test-migrate": "yarn build && cross-env NODE_ENV=test node build/src/scripts/run-migrations.js up",
+    "db:test-downgrade": "yarn build && cross-env NODE_ENV=test node build/src/scripts/run-migrations.js down",
+    "reset-password": "yarn build && node build/src/scripts/reset-password.js",
+    "disable-openid": "yarn build && node build/src/scripts/disable-openid.js",
+    "health-check": "yarn build && node build/src/scripts/health-check.js"
   },
   "dependencies": {
     "@actual-app/crdt": "2.1.0",

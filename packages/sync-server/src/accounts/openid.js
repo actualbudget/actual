@@ -1,7 +1,11 @@
 import { generators, Issuer } from 'openid-client';
 import { v4 as uuidv4 } from 'uuid';
 
-import { clearExpiredSessions, getAccountDb } from '../account-db.js';
+import {
+  clearExpiredSessions,
+  getAccountDb,
+  listLoginMethods,
+} from '../account-db.js';
 import { config } from '../load-config.js';
 import {
   getUserByUsername,
@@ -99,10 +103,13 @@ export async function loginWithOpenIdSetup(
     [''],
   );
   if (countUsersWithUserName === 0) {
-    const valid = checkPassword(firstTimeLoginPassword);
+    const methods = listLoginMethods();
+    if (methods.some(authMethod => authMethod.method === 'password')) {
+      const valid = checkPassword(firstTimeLoginPassword);
 
-    if (!valid) {
-      return { error: 'invalid-password' };
+      if (!valid) {
+        return { error: 'invalid-password' };
+      }
     }
   }
 

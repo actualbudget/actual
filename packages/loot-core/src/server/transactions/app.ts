@@ -6,7 +6,7 @@ import {
   TransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
-import { runQuery } from '../aql';
+import { aqlQuery } from '../aql';
 import { mutator } from '../mutators';
 import { undoable } from '../undo';
 
@@ -92,7 +92,7 @@ async function exportTransactionsQuery({
 }
 
 async function getEarliestTransaction() {
-  const { data } = await runQuery(
+  const { data } = await aqlQuery(
     q('transactions')
       .options({ splits: 'none' })
       .orderBy({ date: 'asc' })

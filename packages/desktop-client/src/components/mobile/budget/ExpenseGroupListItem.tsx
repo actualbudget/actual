@@ -32,17 +32,18 @@ type ExpenseGroupListItemProps = ComponentPropsWithoutRef<
 > & {
   month: string;
   showHiddenCategories: boolean;
-  onEditGroup: (id: CategoryGroupEntity['id']) => void;
+  onEditCategoryGroup: (id: CategoryGroupEntity['id']) => void;
   onEditCategory: (id: string) => void;
   onBudgetAction: (month: string, action: string, args: unknown) => void;
   isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
   showBudgetedColumn: boolean;
   show3Columns: boolean;
+  isHidden: boolean;
 };
 
 export function ExpenseGroupListItem({
-  onEditGroup,
+  onEditCategoryGroup,
   onEditCategory,
   month,
   onBudgetAction,
@@ -51,33 +52,34 @@ export function ExpenseGroupListItem({
   showHiddenCategories,
   isCollapsed,
   onToggleCollapse,
+  isHidden,
   ...props
 }: ExpenseGroupListItemProps) {
-  const { value: group } = props;
+  const { value: categoryGroup } = props;
 
   const categories = useMemo(
     () =>
-      !group || isCollapsed(group.id)
+      !categoryGroup || isCollapsed(categoryGroup.id)
         ? []
-        : (group.categories?.filter(
+        : (categoryGroup.categories?.filter(
             category => !category.hidden || showHiddenCategories,
           ) ?? []),
-    [group, isCollapsed, showHiddenCategories],
+    [categoryGroup, isCollapsed, showHiddenCategories],
   );
 
   const shouldHideCategory = useCallback(
     (category: CategoryEntity) => {
-      return !!(category.hidden || group?.hidden);
+      return !!(category.hidden || categoryGroup?.hidden);
     },
-    [group?.hidden],
+    [categoryGroup?.hidden],
   );
 
-  if (!group) {
+  if (!categoryGroup) {
     return null;
   }
 
   return (
-    <GridListItem textValue={group.name} {...props}>
+    <GridListItem textValue={categoryGroup.name} {...props}>
       <Card
         style={{
           marginTop: 4,
@@ -85,17 +87,18 @@ export function ExpenseGroupListItem({
         }}
       >
         <ExpenseGroupHeader
-          group={group}
+          categoryGroup={categoryGroup}
           month={month}
           showBudgetedColumn={showBudgetedColumn}
           show3Columns={show3Columns}
-          onEdit={onEditGroup}
+          onEditCategoryGroup={onEditCategoryGroup}
           isCollapsed={isCollapsed}
           onToggleCollapse={onToggleCollapse}
+          isHidden={isHidden}
         />
 
         <ExpenseCategoryList
-          group={group}
+          categoryGroup={categoryGroup}
           categories={categories}
           month={month}
           onEditCategory={onEditCategory}
@@ -110,23 +113,25 @@ export function ExpenseGroupListItem({
 }
 
 type ExpenseGroupHeaderProps = {
-  group: CategoryGroupEntity;
+  categoryGroup: CategoryGroupEntity;
   month: string;
-  onEdit: (id: CategoryGroupEntity['id']) => void;
+  onEditCategoryGroup: (id: CategoryGroupEntity['id']) => void;
   isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
   show3Columns: boolean;
   showBudgetedColumn: boolean;
+  isHidden: boolean;
 };
 
 export function ExpenseGroupHeader({
-  group,
+  categoryGroup,
   month,
-  onEdit,
+  onEditCategoryGroup,
   show3Columns,
   showBudgetedColumn,
   isCollapsed,
   onToggleCollapse,
+  isHidden,
 }: ExpenseGroupHeaderProps) {
   return (
     <View
@@ -139,7 +144,7 @@ export function ExpenseGroupHeader({
         justifyContent: 'space-between',
         paddingLeft: 5,
         paddingRight: 5,
-        opacity: !!group.hidden ? 0.5 : undefined,
+        opacity: isHidden ? 0.5 : undefined,
         backgroundColor: monthUtils.isCurrentMonth(month)
           ? theme.budgetHeaderCurrentMonth
           : theme.budgetHeaderOtherMonth,
@@ -147,14 +152,14 @@ export function ExpenseGroupHeader({
       data-testid="category-group-row"
     >
       <ExpenseGroupName
-        group={group}
-        onEdit={onEdit}
+        group={categoryGroup}
+        onEditCategoryGroup={onEditCategoryGroup}
         isCollapsed={isCollapsed}
         onToggleCollapse={onToggleCollapse}
         show3Columns={show3Columns}
       />
       <ExpenseGroupCells
-        group={group}
+        group={categoryGroup}
         show3Columns={show3Columns}
         showBudgetedColumn={showBudgetedColumn}
       />
@@ -164,7 +169,7 @@ export function ExpenseGroupHeader({
 
 type ExpenseGroupNameProps = {
   group: CategoryGroupEntity;
-  onEdit: (id: CategoryGroupEntity['id']) => void;
+  onEditCategoryGroup: (id: CategoryGroupEntity['id']) => void;
   isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
   show3Columns: boolean;
@@ -172,7 +177,7 @@ type ExpenseGroupNameProps = {
 
 function ExpenseGroupName({
   group,
-  onEdit,
+  onEditCategoryGroup,
   isCollapsed,
   onToggleCollapse,
   show3Columns,
@@ -229,7 +234,7 @@ function ExpenseGroupName({
         style={{
           maxWidth: sidebarColumnWidth,
         }}
-        onPress={() => onEdit(group.id)}
+        onPress={() => onEditCategoryGroup(group.id)}
       >
         <View
           style={{

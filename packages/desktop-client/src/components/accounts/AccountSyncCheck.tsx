@@ -8,14 +8,15 @@ import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
 import { type AccountEntity } from 'loot-core/types/models';
 
+import { unlinkAccount } from '../../accounts/accountsSlice';
 import { authorizeBank } from '../../gocardless';
-import { useAccounts } from '../../hooks/useAccounts';
-import { useFailedAccounts } from '../../hooks/useFailedAccounts';
 import { useDispatch } from '../../redux';
 import { Link } from '../common/Link';
+
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 
 function useErrorMessage() {
   const { t } = useTranslation();

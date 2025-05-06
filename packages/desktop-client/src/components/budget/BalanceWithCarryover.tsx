@@ -17,13 +17,14 @@ import { css } from '@emotion/css';
 
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { type Binding } from '../spreadsheet';
 import { CellValue, CellValueText } from '../spreadsheet/CellValue';
 import { useFormat } from '../spreadsheet/useFormat';
 import { useSheetValue } from '../spreadsheet/useSheetValue';
 
 import { makeBalanceAmountStyle } from './util';
+
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 
 type CarryoverIndicatorProps = {
   style?: CSSProperties;

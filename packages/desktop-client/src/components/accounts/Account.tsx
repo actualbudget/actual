@@ -16,7 +16,6 @@ import { debounce } from 'debounce';
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
 import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import { useFilters } from 'loot-core/client/data-hooks/filters';
 import {
@@ -39,7 +38,7 @@ import {
   updateNewTransactions,
 } from 'loot-core/client/queries/queriesSlice';
 import {
-  runQuery,
+  aqlQuery,
   pagedQuery,
   type PagedQuery,
 } from 'loot-core/client/query-helpers';
@@ -67,23 +66,7 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
-import { useAccountPreviewTransactions } from '../../hooks/useAccountPreviewTransactions';
-import { useAccounts } from '../../hooks/useAccounts';
-import { useCategories } from '../../hooks/useCategories';
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { useFailedAccounts } from '../../hooks/useFailedAccounts';
-import { useLocalPref } from '../../hooks/useLocalPref';
-import { usePayees } from '../../hooks/usePayees';
-import {
-  SelectedProviderWithItems,
-  type Actions,
-} from '../../hooks/useSelected';
-import {
-  SplitsExpandedProvider,
-  useSplitsExpanded,
-} from '../../hooks/useSplitsExpanded';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { useTransactionBatchActions } from '../../hooks/useTransactionBatchActions';
+import { unlinkAccount } from '../../accounts/accountsSlice';
 import { useSelector, useDispatch } from '../../redux';
 import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { TransactionList } from '../transactions/TransactionList';
@@ -91,6 +74,24 @@ import { validateAccountName } from '../util/accountValidation';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
+
+import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { usePayees } from '@desktop-client/hooks/usePayees';
+import {
+  SelectedProviderWithItems,
+  type Actions,
+} from '@desktop-client/hooks/useSelected';
+import {
+  SplitsExpandedProvider,
+  useSplitsExpanded,
+} from '@desktop-client/hooks/useSplitsExpanded';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useTransactionBatchActions } from '@desktop-client/hooks/useTransactionBatchActions';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
 
@@ -159,12 +160,18 @@ function AllTransactions({
     const previewBalances = [...previewTransactions]
       .reverse()
       .map(previewTransaction => {
-        return {
-          // TODO: fix me
-          // eslint-disable-next-line react-hooks/exhaustive-deps
-          balance: (runningBalance += previewTransaction.amount),
-          id: previewTransaction.id,
-        };
+        if (!previewTransaction.is_child) {
+          return {
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            balance: (runningBalance += previewTransaction.amount),
+            id: previewTransaction.id,
+          };
+        } else {
+          return {
+            balance: 0,
+            id: previewTransaction.id,
+          };
+        }
       });
     return groupById(previewBalances);
   }, [showBalances, previewTransactions, runningBalance]);
@@ -436,7 +443,7 @@ class AccountInternal extends PureComponent<
       return [];
     }
 
-    const { data } = await runQuery(this.paged.query.select('id'));
+    const { data } = await aqlQuery(this.paged.query.select('id'));
     // Remember, this is the `grouped` split type so we need to deal
     // with the `subtransactions` property
     return data.reduce((arr: string[], t: TransactionEntity) => {
@@ -673,7 +680,7 @@ class AccountInternal extends PureComponent<
       return null;
     }
 
-    const { data } = await runQuery(
+    const { data } = await aqlQuery(
       this.paged.query
         .options({ splits: 'none' })
         .select([{ balance: { $sumOver: '$amount' } }]),
@@ -903,7 +910,7 @@ class AccountInternal extends PureComponent<
       return 0;
     }
 
-    const { data: amount } = await runQuery(
+    const { data: amount } = await aqlQuery(
       this.paged.query.calculate({ $sum: '$amount' }),
     );
     return amount;
@@ -930,7 +937,7 @@ class AccountInternal extends PureComponent<
 
     const { accountId } = this.props;
 
-    const { data } = await runQuery(
+    const { data } = await aqlQuery(
       q('transactions')
         .filter({ cleared: true, reconciled: false, account: accountId })
         .select('*')
@@ -978,7 +985,7 @@ class AccountInternal extends PureComponent<
 
     const { reconcileAmount } = this.state;
 
-    const { data } = await runQuery(
+    const { data } = await aqlQuery(
       q('transactions')
         .filter({ cleared: true, account: accountId })
         .select('*')
@@ -1078,7 +1085,7 @@ class AccountInternal extends PureComponent<
   onMakeAsSplitTransaction = async (ids: string[]) => {
     this.setState({ workingHard: true });
 
-    const { data } = await runQuery(
+    const { data } = await aqlQuery(
       q('transactions')
         .filter({ id: { $oneof: ids } })
         .select('*')
@@ -1117,7 +1124,7 @@ class AccountInternal extends PureComponent<
   onMakeAsNonSplitTransactions = async (ids: string[]) => {
     this.setState({ workingHard: true });
 
-    const { data } = await runQuery(
+    const { data } = await aqlQuery(
       q('transactions')
         .filter({ id: { $oneof: ids } })
         .select('*')
@@ -1207,7 +1214,7 @@ class AccountInternal extends PureComponent<
     confirmReason: string,
     onConfirm: (ids: string[]) => void,
   ) => {
-    const { data } = await runQuery(
+    const { data } = await aqlQuery(
       q('transactions')
         .filter({ id: { $oneof: ids }, reconciled: true })
         .select('*')
@@ -1249,7 +1256,7 @@ class AccountInternal extends PureComponent<
   };
 
   onCreateRule = async (ids: string[]) => {
-    const { data } = await runQuery(
+    const { data } = await aqlQuery(
       q('transactions')
         .filter({ id: { $oneof: ids } })
         .select('*')

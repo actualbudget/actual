@@ -9,7 +9,6 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
 import { useTransactions } from 'loot-core/client/data-hooks/transactions';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
@@ -24,12 +23,14 @@ import {
   type AccountEntity,
 } from 'loot-core/types/models';
 
-import { useSyncedPref } from '../../hooks/useSyncedPref';
+import { unlinkAccount } from '../../accounts/accountsSlice';
 import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { CheckboxOption } from '../modals/ImportTransactionsModal/CheckboxOption';
 
 import { FieldMapping } from './FieldMapping';
+
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export type TransactionDirection = 'payment' | 'deposit';
 

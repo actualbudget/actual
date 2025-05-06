@@ -4,7 +4,7 @@ import { subDays } from '../shared/months';
 import { q } from '../shared/query';
 import { tracer } from '../shared/test-helpers';
 
-import { runQuery, liveQuery, pagedQuery } from './query-helpers';
+import { aqlQuery, liveQuery, pagedQuery } from './query-helpers';
 
 function wait(n) {
   return new Promise(resolve => setTimeout(() => resolve(`wait(${n})`), n));
@@ -121,13 +121,13 @@ function initPagingServer(
 }
 
 describe('query helpers', () => {
-  it('runQuery runs a query', async () => {
+  it('aqlQuery runs a query', async () => {
     initServer({
       query: query => Promise.resolve({ data: query, dependencies: [] }),
     });
 
     const query = q('transactions').select('*');
-    const { data } = await runQuery(query);
+    const { data } = await aqlQuery(query);
     expect(data).toEqual(query.serialize());
   });
 
