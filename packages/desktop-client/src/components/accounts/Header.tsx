@@ -354,6 +354,9 @@ export function AccountHeader({
             value={search}
             onChange={onSearch}
             inputRef={searchInput}
+            // Remove marginRight magically being added by Stack...
+            // We need to refactor the Stack component
+            style={{ marginRight: 0 }}
           />
           {workingHard ? (
             <View>

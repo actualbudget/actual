@@ -642,6 +642,13 @@ function MultiItem({ name, onRemove }: MultiItemProps) {
   );
 }
 
+const defaultMultiAutocompleteInputClassName = css({
+  flex: 1,
+  minWidth: 30,
+  border: 0,
+  '&[data-focused]': { border: 0, boxShadow: 'none' },
+});
+
 type MultiAutocompleteProps<T extends Item> = CommonAutocompleteProps<T> & {
   type: 'multi';
   onSelect: (ids: T['id'][], id?: T['id']) => void;
@@ -697,7 +704,7 @@ function MultiAutocomplete<T extends Item>({
       onSelect={onAddItem}
       highlightFirst
       strict={strict}
-      renderInput={inputProps => (
+      renderInput={({ className: inputClassName, ...inputProps }) => (
         <View
           style={{
             display: 'flex',
@@ -737,18 +744,14 @@ function MultiAutocomplete<T extends Item>({
               setFocused(false);
               inputProps.onBlur(e);
             }}
-            className={renderProps =>
-              cx(
-                css({
-                  flex: 1,
-                  minWidth: 30,
-                  border: 0,
-                  '&[data-focused]': { border: 0, boxShadow: 'none' },
-                }),
-                typeof inputProps.className === 'function'
-                  ? inputProps.className(renderProps)
-                  : inputProps.className,
-              )
+            className={
+              typeof inputClassName === 'function'
+                ? renderProps =>
+                    cx(
+                      defaultMultiAutocompleteInputClassName,
+                      inputClassName(renderProps),
+                    )
+                : cx(defaultMultiAutocompleteInputClassName, inputClassName)
             }
           />
         </View>
