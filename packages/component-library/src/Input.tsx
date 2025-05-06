@@ -1,4 +1,9 @@
-import React, { ChangeEvent, ComponentPropsWithRef, type KeyboardEvent, type FocusEvent } from 'react';
+import React, {
+  ChangeEvent,
+  ComponentPropsWithRef,
+  type KeyboardEvent,
+  type FocusEvent,
+} from 'react';
 import { Input as ReactAriaInput } from 'react-aria-components';
 
 import { css, cx } from '@emotion/css';
@@ -7,7 +12,7 @@ import { useResponsive } from './hooks/useResponsive';
 import { styles } from './styles';
 import { theme } from './theme';
 
-export const defaultInputStyle = {
+export const baseInputStyle = {
   outline: 0,
   backgroundColor: theme.tableBackground,
   color: theme.formInputText,
@@ -17,10 +22,30 @@ export const defaultInputStyle = {
   border: '1px solid ' + theme.formInputBorder,
 };
 
+const defaultInputClassName = css({
+  ...baseInputStyle,
+  color: theme.formInputText,
+  '&[data-disabled]': {
+    color: theme.formInputTextPlaceholder,
+  },
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  flexShrink: 0,
+  '&[data-focused]': {
+    border: '1px solid ' + theme.formInputBorderSelected,
+    boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
+  },
+  '::placeholder': { color: theme.formInputTextPlaceholder },
+  ...styles.smallText,
+});
+
 export type InputProps = ComponentPropsWithRef<typeof ReactAriaInput> & {
   onEnter?: (value: string, event: KeyboardEvent<HTMLInputElement>) => void;
   onEscape?: (value: string, event: KeyboardEvent<HTMLInputElement>) => void;
-  onChangeValue?: (newValue: string, event: ChangeEvent<HTMLInputElement>) => void;
+  onChangeValue?: (
+    newValue: string,
+    event: ChangeEvent<HTMLInputElement>,
+  ) => void;
   onUpdate?: (newValue: string, event: FocusEvent<HTMLInputElement>) => void;
 };
 
@@ -36,27 +61,10 @@ export function Input({
   return (
     <ReactAriaInput
       ref={ref}
-      className={renderProps =>
-        cx(
-          css(
-            defaultInputStyle,
-            {
-              color: props.disabled
-                ? theme.formInputTextPlaceholder
-                : theme.formInputText,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              flexShrink: 0,
-              '&[data-focused]': {
-                border: '1px solid ' + theme.formInputBorderSelected,
-                boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
-              },
-              '::placeholder': { color: theme.formInputTextPlaceholder },
-            },
-            styles.smallText,
-          ),
-          typeof className === 'function' ? className(renderProps) : className,
-        )
+      className={
+        typeof className === 'function'
+          ? renderProps => cx(defaultInputClassName, className(renderProps))
+          : cx(defaultInputClassName, className)
       }
       {...props}
       onKeyUp={e => {
@@ -82,23 +90,22 @@ export function Input({
   );
 }
 
-export function BigInput(props: InputProps) {
+const defaultBigInputClassName = css({
+  padding: 10,
+  fontSize: 15,
+  border: 'none',
+  ...styles.shadow,
+  '&[data-focused]': { border: 'none', ...styles.shadow },
+});
+
+export function BigInput({ className, ...props }: InputProps) {
   return (
     <Input
       {...props}
-      className={renderProps =>
-        cx(
-          {
-            padding: 10,
-            fontSize: 15,
-            border: 'none',
-            ...styles.shadow,
-            '&[data-focused]': { border: 'none', ...styles.shadow },
-          },
-          typeof props.className === 'function'
-            ? props.className(renderProps)
-            : props.className,
-        )
+      className={
+        typeof className === 'function'
+          ? renderProps => cx(defaultBigInputClassName, className(renderProps))
+          : cx(defaultBigInputClassName, className)
       }
     />
   );

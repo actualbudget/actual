@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgRemove, SvgSearchAlternate } from '@actual-app/components/icons/v2';
-import { defaultInputStyle, Input } from '@actual-app/components/input';
+import { baseInputStyle, Input } from '@actual-app/components/input';
 import { type CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -17,7 +17,7 @@ type SearchProps = {
   isInModal?: boolean;
   width?: number | '100%';
   height?: number;
-  inputStyle?: CSSProperties;
+  style?: CSSProperties;
 };
 
 export function Search({
@@ -28,7 +28,7 @@ export function Search({
   isInModal = false,
   width = 250,
   height,
-  inputStyle = {},
+  style,
 }: SearchProps) {
   const { t } = useTranslation();
 
@@ -39,7 +39,7 @@ export function Search({
   return (
     <View
       style={{
-        ...defaultInputStyle,
+        ...baseInputStyle,
         padding: 0,
         flexDirection: 'row',
         alignItems: 'center',
@@ -49,8 +49,7 @@ export function Search({
         flex: '',
         borderColor: isInModal ? undefined : 'transparent',
         backgroundColor: isInModal ? undefined : theme.formInputBackground,
-        ...inputStyle,
-
+        ...style,
         ...(focused && {
           boxShadow: '0 0 0 1px ' + theme.formInputShadowSelected,
           ...(isInModal
