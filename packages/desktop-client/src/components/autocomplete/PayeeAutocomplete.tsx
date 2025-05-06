@@ -39,6 +39,7 @@ import {
 import { ItemHeader } from './ItemHeader';
 
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useNearbyPayees } from '@desktop-client/hooks/useNearbyPayees';
 import { useCommonPayees, usePayees } from '@desktop-client/hooks/usePayees';
 
 export type PayeeAutocompleteItem = PayeeEntity;
@@ -46,9 +47,16 @@ export type PayeeAutocompleteItem = PayeeEntity;
 const MAX_AUTO_SUGGESTIONS = 5;
 
 function getPayeeSuggestions(
+  nearbyPayees: PayeeAutocompleteItem[],
   commonPayees: PayeeAutocompleteItem[],
   payees: PayeeAutocompleteItem[],
 ): (PayeeAutocompleteItem & PayeeItemType)[] {
+  const nearbyPayeeSuggestions: (PayeeAutocompleteItem & PayeeItemType)[] =
+    nearbyPayees.map(payee => ({
+      ...payee,
+      itemType: determineItemType(payee, false, true),
+    }));
+
   const favoritePayees = payees
     .filter(p => p.favorite)
     .map(p => {
@@ -76,14 +84,17 @@ function getPayeeSuggestions(
       .filter(p => !favoritePayees.find(fp => fp.id === p.id))
       .filter(p => !additionalCommonPayees.find(fp => fp.id === p.id))
       .map<PayeeAutocompleteItem & PayeeItemType>(p => {
-        return { ...p, itemType: determineItemType(p, false) };
+        return { ...p, itemType: determineItemType(p) };
       });
 
-    return favoritePayees.concat(additionalCommonPayees).concat(filteredPayees);
+    return nearbyPayeeSuggestions
+      .concat(favoritePayees)
+      .concat(additionalCommonPayees)
+      .concat(filteredPayees);
   }
 
   return payees.map(p => {
-    return { ...p, itemType: determineItemType(p, false) };
+    return { ...p, itemType: determineItemType(p) };
   });
 }
 
@@ -138,20 +149,23 @@ type PayeeListProps = {
   footer: ReactNode;
 };
 
-type ItemTypes = 'account' | 'payee' | 'common_payee';
+type ItemTypes = 'account' | 'payee' | 'common_payee' | 'nearby_payee';
 type PayeeItemType = {
   itemType: ItemTypes;
 };
 
 function determineItemType(
   item: PayeeAutocompleteItem,
-  isCommon: boolean,
+  isCommon: boolean = false,
+  isNearby: boolean = false,
 ): ItemTypes {
   if (item.transfer_acct) {
     return 'account';
   }
   if (isCommon) {
     return 'common_payee';
+  } else if (isNearby) {
+    return 'nearby_payee';
   } else {
     return 'payee';
   }
@@ -212,6 +226,8 @@ function PayeeList({
             title = t('Payees');
           } else if (itemType === 'account' && lastType !== itemType) {
             title = t('Transfer To/From');
+          } else if (itemType === 'nearby_payee' && lastType !== itemType) {
+            title = t('Nearby Payees');
           }
           const showMoreMessage =
             idx === items.length - 1 && items.length > 100;
@@ -297,6 +313,7 @@ export function PayeeAutocomplete({
   if (!payees) {
     payees = retrievedPayees;
   }
+  const { payees: nearbyPayees } = useNearbyPayees();
 
   const cachedAccounts = useAccounts();
   if (!accounts) {
@@ -307,7 +324,11 @@ export function PayeeAutocomplete({
   const [rawPayee, setRawPayee] = useState('');
   const hasPayeeInput = !!rawPayee;
   const payeeSuggestions: PayeeAutocompleteItem[] = useMemo(() => {
-    const suggestions = getPayeeSuggestions(commonPayees, payees);
+    const suggestions = getPayeeSuggestions(
+      nearbyPayees,
+      commonPayees,
+      payees,
+    );
     const filteredSuggestions = filterActivePayees(
       suggestions,
       focusTransferPayees,
@@ -319,7 +340,14 @@ export function PayeeAutocomplete({
     }
 
     return [{ id: 'new', favorite: false, name: '' }, ...filteredSuggestions];
-  }, [commonPayees, payees, focusTransferPayees, accounts, hasPayeeInput]);
+  }, [
+    nearbyPayees,
+    commonPayees,
+    payees,
+    focusTransferPayees,
+    accounts,
+    hasPayeeInput,
+  ]);
 
   const dispatch = useDispatch();
 
