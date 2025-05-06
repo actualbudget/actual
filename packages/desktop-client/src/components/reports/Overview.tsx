@@ -82,18 +82,52 @@ export function Overview() {
   const location = useLocation();
   sessionStorage.setItem('url', location.pathname);
 
-  const baseLayout = widgets.map(widget => ({
-    i: widget.id,
-    w: widget.width,
-    h: widget.height,
-    minW:
-      isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 2 : 3,
-    minH:
-      isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 1 : 2,
-    ...widget,
-  }));
-
-  const layout = baseLayout;
+  const mobileLayout = useMemo(() => {
+    // Return early if widgets aren't loaded to prevent errors
+    if (!widgets || widgets.length === 0) {
+      return [];
+    }
+  
+    // 1. Create a shallow copy to avoid mutating the original array.
+    const sortedDesktopItems = [...widgets];
+  
+    // 2. Sort the items.
+    sortedDesktopItems.sort((a, b) => {
+      if (a.y < b.y) return -1;
+      if (a.y > b.y) return 1;
+      if (a.x < b.x) return -1;
+      if (a.x > b.x) return 1;
+      return 0;
+    });
+  
+    let currentY = 0;
+    return sortedDesktopItems.map(widget => {
+      const itemY = currentY;
+      currentY += widget.height; 
+  
+      return {
+        ...widget,    
+        i: widget.id,  
+        x: 0,          
+        y: itemY,       
+        w: 1,          
+        h: widget.height, 
+      };
+    });
+  }, [widgets]); // Dependency array: recalculate only if 'widgets' changes
+  
+  // Your 'baseLayout' which you use for the desktop can also be memoized:
+  const desktopLayout = useMemo(() => {
+    if (!widgets) return [];
+    return widgets.map(widget => ({
+      i: widget.id,
+      w: widget.width,
+      h: widget.height,
+      minW: isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 2 : 3,
+      minH: isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 1 : 2,
+      ...widget, 
+    }));
+  }, [widgets]);
 
   const closeNotifications = () => {
     dispatch(removeNotification({ id: 'import' }));
@@ -185,7 +219,7 @@ export function Overview() {
 
     const data = {
       version: 1,
-      widgets: layout.map(item => {
+      widgets: desktopLayout.map(item => {
         const widget = widgetMap.get(item.i);
 
         if (!widget) {
@@ -491,7 +525,7 @@ export function Overview() {
         <View data-testid="reports-overview" style={{ userSelect: 'none' }}>
           <ResponsiveGridLayout
             breakpoints={{ desktop: breakpoints.medium, mobile: 1 }}
-            layouts={{ desktop: layout, mobile: layout }}
+            layouts={{ desktop: desktopLayout, mobile: mobileLayout }}
             onLayoutChange={
               currentBreakpoint === 'desktop' ? onLayoutChange : undefined
             }
@@ -502,7 +536,7 @@ export function Overview() {
             isDraggable={currentBreakpoint === 'desktop' && isEditing}
             isResizable={currentBreakpoint === 'desktop' && isEditing}
           >
-            {layout.map(item => (
+            {desktopLayout.map(item => (
               <div key={item.i}>
                 {item.type === 'net-worth-card' ? (
                   <NetWorthCard
