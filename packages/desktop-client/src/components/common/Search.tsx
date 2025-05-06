@@ -7,6 +7,7 @@ import { defaultInputStyle, Input } from '@actual-app/components/input';
 import { type CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { css } from '@emotion/css';
 
 type SearchProps = {
   inputRef?: Ref<HTMLInputElement>;
@@ -70,20 +71,18 @@ export function Search({
       />
 
       <Input
-        inputRef={inputRef}
+        ref={inputRef}
         value={value}
         placeholder={placeholder}
-        onKeyDown={e => {
-          if (e.key === 'Escape') onChange('');
-        }}
+        onEscape={() => onChange('')}
         onChangeValue={onChange}
-        style={{
+        className={css({
           width: '100%',
           '::placeholder': {
             color: theme.formInputTextPlaceholder,
             transition: 'color .25s',
           },
-          ':focus': isInModal
+          '&[data-focused]': isInModal
             ? {}
             : {
                 '::placeholder': {
@@ -91,13 +90,13 @@ export function Search({
                 },
               },
           flex: 1,
-          '&, &:focus, &:hover': {
+          '&, &[data-focused], &[data-hovered]': {
             border: 0,
             backgroundColor: 'transparent',
             boxShadow: 'none',
             color: 'inherit',
           },
-        }}
+        })}
         onFocus={() => {
           setFocused(true);
         }}

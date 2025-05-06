@@ -457,7 +457,7 @@ function RecurringScheduleTooltip({
               style={{ width: 40 }}
               type="number"
               min={1}
-              onChange={e => updateField('endOccurrences', e.target.value)}
+              onChangeValue={value => updateField('endOccurrences', value)}
               defaultValue={config.endOccurrences || 1}
             />
             {config.endOccurrences === '1' ? (
@@ -491,7 +491,7 @@ function RecurringScheduleTooltip({
           style={{ width: 40 }}
           type="number"
           min={1}
-          onChange={e => updateField('interval', e.target.value)}
+          onChangeValue={value => updateField('interval', value)}
           defaultValue={config.interval || 1}
         />
         <Select
