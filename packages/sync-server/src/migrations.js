@@ -11,7 +11,6 @@ export function run(direction = 'up') {
   );
 
   const __dirname = dirname(fileURLToPath(import.meta.url)); // this directory
-  console.info('directory', __dirname);
 
   return new Promise(resolve =>
     migrate.load(
