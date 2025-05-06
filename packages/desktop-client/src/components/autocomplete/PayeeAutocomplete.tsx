@@ -323,11 +323,7 @@ export function PayeeAutocomplete({
   const [rawPayee, setRawPayee] = useState('');
   const hasPayeeInput = !!rawPayee;
   const payeeSuggestions: PayeeAutocompleteItem[] = useMemo(() => {
-    const suggestions = getPayeeSuggestions(
-      nearbyPayees,
-      commonPayees,
-      payees,
-    );
+    const suggestions = getPayeeSuggestions(nearbyPayees, commonPayees, payees);
     const filteredSuggestions = filterActivePayees(
       suggestions,
       focusTransferPayees,
