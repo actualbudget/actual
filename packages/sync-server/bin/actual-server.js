@@ -71,12 +71,12 @@ const setupDataDir = (dataDir = undefined) => {
     if (existsSync('./data')) {
       // The default data directory exists - use it
       console.info('Found existing data directory');
-      process.env.ACTUAL_DATA_DIR = './data';
+      process.env.ACTUAL_DATA_DIR = resolve('./data');
     } else {
       console.info(
         'Using default data directory. You can specify a custom config with --config',
       );
-      process.env.ACTUAL_DATA_DIR = './';
+      process.env.ACTUAL_DATA_DIR = resolve('./');
     }
 
     console.info(`Data directory: ${process.env.ACTUAL_DATA_DIR}`);
