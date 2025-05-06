@@ -11,14 +11,13 @@ type LatLongCoordinates = Pick<
 >;
 
 const payeeGeolocations: Array<
-  Pick<PayeeEntity, 'id' | 'name'> & {
+  Pick<PayeeEntity, 'id'> & {
     geolocation: LatLongCoordinates;
   }
 > = [
   {
-    // 2 locations for Starline Windows
+    // 2 locations for same payee
     id: '263714b9-365d-49ae-9829-3d3fbe8d0216',
-    name: 'Starline Windows',
     geolocation: {
       latitude: 49.0677664,
       longitude: -122.6936539,
@@ -26,7 +25,6 @@ const payeeGeolocations: Array<
   },
   {
     id: '263714b9-365d-49ae-9829-3d3fbe8d0216',
-    name: 'Starline Windows',
     geolocation: {
       latitude: 49.06827256830727,
       longitude: -122.69461576882055,
@@ -34,7 +32,6 @@ const payeeGeolocations: Array<
   },
   {
     id: 'cf9d7939-95d1-4118-80b1-e1a4eec6ee03',
-    name: 'A&W',
     geolocation: {
       latitude: 49.05258819377441,
       longitude: -122.69136086574922,
@@ -42,7 +39,6 @@ const payeeGeolocations: Array<
   },
   {
     id: 'a759f467-74fd-4894-8c87-1bb20a13f6a8',
-    name: 'Sun Processing Ltd',
     geolocation: {
       latitude: 49.06719263166092,
       longitude: -122.6943839011504,
@@ -50,7 +46,6 @@ const payeeGeolocations: Array<
   },
   {
     id: '771432ea-7249-4fc7-bead-c2bc7e5e2223',
-    name: 'Caddydriver',
     geolocation: {
       latitude: 49.0669089090774,
       longitude: -122.69341856431981,
@@ -58,7 +53,6 @@ const payeeGeolocations: Array<
   },
   {
     id: '751762bc-61b7-4c77-a75a-d311af8399c5',
-    name: 'Super Save',
     geolocation: {
       latitude: 49.06774233955684,
       longitude: -122.69761371974859,
@@ -66,7 +60,6 @@ const payeeGeolocations: Array<
   },
   {
     id: 'b6349c65-a5ea-4c81-b4f5-b4181e520bf9',
-    name: 'Starline Windows Parking',
     geolocation: {
       latitude: 49.06839669373029,
       longitude: -122.6922249813429,
@@ -77,8 +70,6 @@ const payeeGeolocations: Array<
 export function useNearbyPayees({ thresholdInMeters = 50 } = {}) {
   const { coordinates: currentCoordinates, error } = useGeolocation();
   const payees = usePayees();
-
-  console.log('Payees:', payees);
 
   const payeesWithGeocoordinates = useMemo(
     () =>
@@ -111,6 +102,11 @@ export function useNearbyPayees({ thresholdInMeters = 50 } = {}) {
     [payeesWithGeocoordinates],
   );
 
+  const payeesWithinThreshold = useMemo(
+    () => getPayeesWithinThreshold(currentCoordinates, thresholdInMeters),
+    [currentCoordinates, getPayeesWithinThreshold, thresholdInMeters],
+  );
+
   const assignPayeesToLocation = useCallback(
     (
       payeeIds: Array<PayeeEntity['id']>,
@@ -121,44 +117,37 @@ export function useNearbyPayees({ thresholdInMeters = 50 } = {}) {
         return;
       }
 
-      const payeesWithinThreshold = new Set(
-        getPayeesWithinThreshold(coordinates, thresholdInMeters).map(p => p.id),
+      const payeesWithinThresholdSet = new Set(
+        payeesWithinThreshold.map(p => p.id),
       );
 
       for (const payeeId of payeeIds) {
         // If current coordinates is within the threshold of any
         // existing payee coordinates, skip
-        if (payeesWithinThreshold.has(payeeId)) {
+        if (payeesWithinThresholdSet.has(payeeId)) {
           continue;
         }
 
         payeeGeolocations.push({
           id: payeeId,
-          name: null,
           geolocation: {
-            latitude: currentCoordinates.latitude,
-            longitude: currentCoordinates.longitude,
+            latitude: coordinates.latitude,
+            longitude: coordinates.longitude,
           },
         });
       }
     },
-    [currentCoordinates, getPayeesWithinThreshold, thresholdInMeters],
+    [currentCoordinates, payeesWithinThreshold],
   );
 
   return useMemo(
     () => ({
-      payees: getPayeesWithinThreshold(currentCoordinates, thresholdInMeters),
+      payees: payeesWithinThreshold,
       coordinates: currentCoordinates,
       assignPayeesToLocation,
       error,
     }),
-    [
-      getPayeesWithinThreshold,
-      currentCoordinates,
-      thresholdInMeters,
-      assignPayeesToLocation,
-      error,
-    ],
+    [payeesWithinThreshold, currentCoordinates, assignPayeesToLocation, error],
   );
 }
 
