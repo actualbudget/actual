@@ -312,7 +312,10 @@ const readonlyInputStyle = {
   '::selection': { backgroundColor: theme.formInputTextReadOnlySelection },
 };
 
-type InputValueProps = Omit<ComponentProps<typeof Input>, 'value' | 'onUpdate'> & {
+type InputValueProps = Omit<
+  ComponentProps<typeof Input>,
+  'value' | 'onUpdate'
+> & {
   value?: string;
   onUpdate?: (newValue: string) => void;
 };

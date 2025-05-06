@@ -54,7 +54,7 @@ function TransactionSearchInput({
         placeholder={placeholder}
         width="100%"
         height={styles.mobileMinHeight}
-        inputStyle={{
+        style={{
           backgroundColor: theme.tableBackground,
           borderColor: theme.formInputBorder,
         }}

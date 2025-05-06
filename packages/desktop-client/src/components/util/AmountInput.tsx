@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgAdd, SvgSubtract } from '@actual-app/components/icons/v1';
-import { defaultInputStyle, Input } from '@actual-app/components/input';
+import { baseInputStyle, Input } from '@actual-app/components/input';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
@@ -123,7 +123,7 @@ export function AmountInput({
   return (
     <View
       style={{
-        ...defaultInputStyle,
+        ...baseInputStyle,
         padding: 0,
         flexDirection: 'row',
         flex: 1,
