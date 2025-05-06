@@ -35,8 +35,8 @@ export function EditablePageHeaderTitle({
       <InitialFocus>
         <Input
           defaultValue={title}
-          onEnter={e => onSaveValue(e.currentTarget.value)}
-          onBlur={e => onSaveValue(e.target.value)}
+          onEnter={onSaveValue}
+          onUpdate={onSaveValue}
           onEscape={() => setIsEditing(false)}
           style={{
             fontSize: 25,

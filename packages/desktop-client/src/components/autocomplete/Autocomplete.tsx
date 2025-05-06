@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import React, {
-  type ChangeEvent,
   type ComponentProps,
   type HTMLProps,
   type KeyboardEvent,
@@ -31,9 +30,7 @@ type CommonAutocompleteProps<T extends Item> = {
   embedded?: boolean;
   containerProps?: HTMLProps<HTMLDivElement>;
   labelProps?: { id?: string };
-  inputProps?: Omit<ComponentProps<typeof Input>, 'onChange'> & {
-    onChange?: (value: string) => void;
-  };
+  inputProps?: ComponentProps<typeof Input>;
   suggestions?: T[];
   renderInput?: (props: ComponentProps<typeof Input>) => ReactNode;
   renderItems?: (
@@ -461,7 +458,7 @@ function SingleAutocomplete<T extends Item>({
           <View ref={triggerRef} style={{ flexShrink: 0 }}>
             {renderInput(
               getInputProps({
-                inputRef,
+                ref: inputRef,
                 ...inputProps,
                 onFocus: e => {
                   inputProps.onFocus?.(e);
@@ -567,10 +564,6 @@ function SingleAutocomplete<T extends Item>({
                       close();
                     }
                   }
-                },
-                onChange: (e: ChangeEvent<HTMLInputElement>) => {
-                  const { onChange } = inputProps || {};
-                  onChange?.(e.target.value);
                 },
               }),
             )}
@@ -734,7 +727,7 @@ function MultiAutocomplete<T extends Item>({
           })}
           <Input
             {...inputProps}
-            inputRef={inputRef}
+            ref={inputRef}
             onKeyDown={e => onKeyDown(e, inputProps.onKeyDown)}
             onFocus={e => {
               setFocused(true);
@@ -744,13 +737,19 @@ function MultiAutocomplete<T extends Item>({
               setFocused(false);
               inputProps.onBlur(e);
             }}
-            style={{
-              flex: 1,
-              minWidth: 30,
-              border: 0,
-              ':focus': { border: 0, boxShadow: 'none' },
-              ...inputProps.style,
-            }}
+            className={renderProps =>
+              cx(
+                css({
+                  flex: 1,
+                  minWidth: 30,
+                  border: 0,
+                  '&[data-focused]': { border: 0, boxShadow: 'none' },
+                }),
+                typeof inputProps.className === 'function'
+                  ? inputProps.className(renderProps)
+                  : inputProps.className,
+              )
+            }
           />
         </View>
       )}

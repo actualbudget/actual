@@ -313,8 +313,9 @@ const readonlyInputStyle = {
   '::selection': { backgroundColor: theme.formInputTextReadOnlySelection },
 };
 
-type InputValueProps = Omit<ComponentProps<typeof Input>, 'value'> & {
+type InputValueProps = Omit<ComponentProps<typeof Input>, 'value' | 'onUpdate'> & {
   value?: string;
+  onUpdate?: (newValue: string) => void;
 };
 
 function InputValue({
@@ -344,12 +345,14 @@ function InputValue({
       e.stopPropagation();
     }
 
-    if (e.key === 'Escape') {
-      if (value !== defaultValue) {
-        setValue(defaultValue);
-      }
-    } else if (shouldSaveFromKey(e)) {
+    if (shouldSaveFromKey(e)) {
       onUpdate?.(value);
+    }
+  }
+
+  function onEscape() {
+    if (value !== defaultValue) {
+      setValue(defaultValue);
     }
   }
 
@@ -371,10 +374,11 @@ function InputValue({
     <Input
       {...props}
       value={value}
-      onChangeValue={text => setValue_(text)}
+      onChangeValue={setValue_}
       onBlur={onBlur_}
       onUpdate={onUpdate}
       onKeyDown={onKeyDown}
+      onEscape={onEscape}
       style={{
         ...inputCellStyle,
         ...(props.readOnly ? readonlyInputStyle : null),

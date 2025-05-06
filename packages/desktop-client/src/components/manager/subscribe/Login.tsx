@@ -68,7 +68,7 @@ function PasswordLogin({ setError, dispatch }) {
         autoFocus={true}
         placeholder={t('Password')}
         type="password"
-        onChangeValue={newValue => setPassword(newValue)}
+        onChangeValue={setPassword}
         style={{ flex: 1 }}
         onEnter={onSubmitPassword}
       />

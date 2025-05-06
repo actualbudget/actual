@@ -97,9 +97,7 @@ function EditableBudgetName() {
             fontWeight: 500,
           }}
           defaultValue={budgetName}
-          onEnter={e => {
-            const inputEl = e.target as HTMLInputElement;
-            const newBudgetName = inputEl.value;
+          onEnter={newBudgetName => {
             if (newBudgetName.trim() !== '') {
               setBudgetNamePref(newBudgetName);
               setEditing(false);

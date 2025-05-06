@@ -47,7 +47,7 @@ export function SaveReportChoose({ onApply }: SaveReportChooseProps) {
           <View style={{ flex: 1 }} />
         </View>
         <GenericInput
-          inputRef={inputRef}
+          ref={inputRef}
           field="report"
           subfield={null}
           type="saved"

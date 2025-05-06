@@ -92,9 +92,9 @@ export function CreateLocalAccountModal() {
                   <Input
                     name="name"
                     value={name}
-                    onChange={event => setName(event.target.value)}
-                    onBlur={event => {
-                      const name = event.target.value.trim();
+                    onChangeValue={setName}
+                    onUpdate={value => {
+                      const name = value.trim();
                       validateAndSetName(name);
                     }}
                     style={{ flex: 1 }}
@@ -167,9 +167,9 @@ export function CreateLocalAccountModal() {
                   name="balance"
                   inputMode="decimal"
                   value={balance}
-                  onChange={event => setBalance(event.target.value)}
-                  onBlur={event => {
-                    const balance = event.target.value.trim();
+                  onChangeValue={setBalance}
+                  onUpdate={value => {
+                    const balance = value.trim();
                     setBalance(balance);
                     if (validateBalance(balance) && balanceError) {
                       setBalanceError(false);

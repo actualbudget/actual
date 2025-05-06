@@ -15,6 +15,7 @@ import { SvgAdd, SvgSubtract } from '@actual-app/components/icons/v1';
 import { defaultInputStyle, Input } from '@actual-app/components/input';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { css, cx } from '@emotion/css';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { amountToInteger, appendDecimals } from 'loot-core/shared/util';
@@ -36,6 +37,7 @@ type AmountInputProps = {
   onUpdate?: (amount: number) => void;
   style?: CSSProperties;
   inputStyle?: CSSProperties;
+  inputClassName?: string;
   focused?: boolean;
   disabled?: boolean;
   autoDecimals?: boolean;
@@ -53,6 +55,7 @@ export function AmountInput({
   onEnter,
   style,
   inputStyle,
+  inputClassName,
   focused,
   disabled = false,
   autoDecimals = false,
@@ -149,21 +152,24 @@ export function AmountInput({
 
       <Input
         id={id}
-        inputRef={mergedRef}
+        ref={mergedRef}
         inputMode="decimal"
         value={value}
         disabled={disabled}
-        style={{
-          width: '100%',
-          ...inputStyle,
-          flex: 1,
-          '&, &:focus, &:hover': {
-            border: 0,
-            backgroundColor: 'transparent',
-            boxShadow: 'none',
-            color: 'inherit',
-          },
-        }}
+        style={inputStyle}
+        className={cx(
+          css({
+            width: '100%',
+            flex: 1,
+            '&, &[data-focused], &[data-hovered]': {
+              border: 0,
+              backgroundColor: 'transparent',
+              boxShadow: 'none',
+              color: 'inherit',
+            },
+          }),
+          inputClassName,
+        )}
         onFocus={e => {
           setIsFocused(true);
           onFocus?.(e);
@@ -172,13 +178,11 @@ export function AmountInput({
           setIsFocused(false);
           onInputAmountBlur(e);
         }}
-        onKeyUp={e => {
-          if (e.key === 'Enter') {
-            const amount = getAmount();
-            fireUpdate(amount);
-          }
+        onEnter={(_, e) => {
+          onEnter?.(e);
+          const amount = getAmount();
+          fireUpdate(amount);
         }}
-        onEnter={onEnter}
         onChangeValue={onInputTextChange}
       />
     </View>

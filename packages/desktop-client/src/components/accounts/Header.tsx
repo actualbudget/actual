@@ -1,6 +1,5 @@
 import React, {
   type ComponentProps,
-  Fragment,
   type ReactNode,
   useRef,
   useState,
@@ -598,12 +597,12 @@ function AccountNameField({
 
   if (editingName) {
     return (
-      <Fragment>
+      <>
         <InitialFocus>
           <Input
             defaultValue={accountName}
-            onEnter={e => handleSave(e.currentTarget.value)}
-            onBlur={e => handleSave(e.target.value)}
+            onEnter={handleSave}
+            onUpdate={handleSave}
             onEscape={() => setEditingName(false)}
             style={{
               fontSize: 25,
@@ -620,7 +619,7 @@ function AccountNameField({
         {saveNameError && (
           <View style={{ color: theme.warningText }}>{saveNameError}</View>
         )}
-      </Fragment>
+      </>
     );
   } else {
     if (isNameEditable) {
