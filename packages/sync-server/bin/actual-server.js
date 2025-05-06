@@ -52,7 +52,7 @@ if (values.help) {
 
 if (values.version) {
   const __dirname = dirname(fileURLToPath(import.meta.url));
-  const packageJsonPath = resolve(__dirname, '../package.json');
+  const packageJsonPath = resolve(__dirname, '../../package.json');
   const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
 
   console.log('v' + packageJson.version);
