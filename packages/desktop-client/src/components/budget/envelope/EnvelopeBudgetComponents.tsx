@@ -32,7 +32,10 @@ import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetName } from '../../spreadsheet/useSheetName';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Row, Field, SheetCell, type SheetCellProps } from '../../table';
-import { BalanceWithCarryover } from '../BalanceWithCarryover';
+import {
+  BalanceWithCarryover,
+  CarryoverIndicator,
+} from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
@@ -507,10 +510,6 @@ export function IncomeCategoryMonth({
   const carryover = useEnvelopeSheetValue(
     envelopeBudget.catCarryover(category.id),
   );
-  const amount = useEnvelopeSheetValue(
-    envelopeBudget.catSumAmount(category.id),
-  );
-  const amountStyle = makeAmountGrey(amount);
 
   return (
     <View style={{ flex: 1 }}>
@@ -518,7 +517,6 @@ export function IncomeCategoryMonth({
         name="received"
         width="flex"
         style={{
-          paddingRight: styles.monthRightPadding,
           textAlign: 'right',
           ...(isLast && { borderBottomWidth: 0 }),
           backgroundColor: monthUtils.isCurrentMonth(month)
@@ -533,6 +531,7 @@ export function IncomeCategoryMonth({
         }}
       >
         <View
+          name="received with button"
           style={{
             display: 'flex',
             flexDirection: 'row',
@@ -541,7 +540,7 @@ export function IncomeCategoryMonth({
             position: 'relative',
           }}
         >
-          <View style={{ flexShrink: 0, marginRight: 4 }}>
+          <View style={{ flexShrink: 0, marginRight: 10 }}>
             <Button
               variant="bare"
               className="hover-visible"
@@ -569,7 +568,10 @@ export function IncomeCategoryMonth({
               </Text>
             </Button>
           </View>
-          <span onClick={() => onShowActivity(category.id, month)}>
+          <span
+            onClick={() => onShowActivity(category.id, month)}
+            style={{ paddingRight: styles.monthRightPadding }}
+          >
             <BalanceWithCarryover
               carryover={envelopeBudget.catCarryover(category.id)}
               balance={envelopeBudget.catSumAmount(category.id)}
