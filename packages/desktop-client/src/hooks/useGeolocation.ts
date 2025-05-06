@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 
 export function useGeolocation() {
-  const [coordinates, setCoordinates] = useState<GeolocationCoordinates>(null);
-  const [error, setError] = useState<string>(null);
+  const [coordinates, setCoordinates] = useState<GeolocationCoordinates | null>(
+    null,
+  );
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let isUnmounted = false;
