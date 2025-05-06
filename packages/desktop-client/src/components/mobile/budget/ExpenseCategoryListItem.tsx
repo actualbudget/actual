@@ -35,6 +35,9 @@ import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { BudgetCell } from './BudgetCell';
 import { getColumnWidth, PILL_STYLE, ROW_HEIGHT } from './BudgetTable';
 
+import { ProgressBar } from '@desktop-client/components/budget/ProgressBar';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+
 type ExpenseCategoryNameProps = {
   category: CategoryEntity;
   onEditCategory: (id: CategoryEntity['id']) => void;
@@ -132,6 +135,7 @@ function ExpenseCategoryCells({
   });
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [showProgressBars] = useLocalPref('budget.showProgressBars');
 
   const goal =
     budgetType === 'report'
@@ -324,6 +328,9 @@ function ExpenseCategoryCells({
             </Button>
           )}
         </BalanceWithCarryover>
+        {showProgressBars && (
+          <ProgressBar category={category} month={month} isMobile={true} />
+        )}
       </View>
     </View>
   );

@@ -89,6 +89,9 @@ export function BudgetTable(props: BudgetTableProps) {
   );
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
+  const [showProgressBars, setShowProgressBars] = useLocalPref(
+    'budget.showProgressBars',
+  );
   const [editing, setEditing] = useState<{ id: string; cell: string } | null>(
     null,
   );
@@ -227,6 +230,10 @@ export function BudgetTable(props: BudgetTableProps) {
     onCollapse(categoryGroups.map(g => g.id));
   };
 
+  const toggleProgressBars = () => {
+    setShowProgressBars(!showProgressBars);
+  };
+
   return (
     <View
       data-testid="budget-table"
@@ -275,6 +282,7 @@ export function BudgetTable(props: BudgetTableProps) {
           toggleHiddenCategories={toggleHiddenCategories}
           expandAllCategories={expandAllCategories}
           collapseAllCategories={collapseAllCategories}
+          toggleProgressBars={toggleProgressBars}
         />
         <View
           style={{

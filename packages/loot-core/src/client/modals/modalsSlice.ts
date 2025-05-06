@@ -439,6 +439,7 @@ export type Modal =
         onAddCategoryGroup: () => void;
         onToggleHiddenCategories: () => void;
         onSwitchBudgetFile: () => void;
+        onToggleProgressBars: () => void;
       };
     }
   | {
