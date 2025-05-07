@@ -7,11 +7,10 @@ import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { useGlobalPref } from '../../hooks/useGlobalPref';
-
-import { useBudgetMonthCount } from './BudgetMonthCountContext';
-import { BudgetPageHeader } from './BudgetPageHeader';
-import { BudgetTable } from './BudgetTable';
+import { useBudgetMonthCount } from '@desktop-client/components/budget/BudgetMonthCountContext';
+import { BudgetPageHeader } from '@desktop-client/components/budget/BudgetPageHeader';
+import { BudgetTable } from '@desktop-client/components/budget/BudgetTable';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 function getNumPossibleMonths(width: number, categoryWidth: number) {
   const estimatedTableWidth = width - categoryWidth;

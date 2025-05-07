@@ -33,15 +33,13 @@ import {
 } from 'loot-core/shared/rules';
 import { titleFirst } from 'loot-core/shared/util';
 
-import { GenericInput } from '../util/GenericInput';
-
-import { CompactFiltersButton } from './CompactFiltersButton';
-import { FiltersButton } from './FiltersButton';
-import { OpButton } from './OpButton';
-import { subfieldFromFilter } from './subfieldFromFilter';
-import { subfieldToOptions } from './subfieldToOptions';
-import { updateFilterReducer } from './updateFilterReducer';
-
+import { CompactFiltersButton } from '@desktop-client/components/filters/CompactFiltersButton';
+import { FiltersButton } from '@desktop-client/components/filters/FiltersButton';
+import { OpButton } from '@desktop-client/components/filters/OpButton';
+import { subfieldFromFilter } from '@desktop-client/components/filters/subfieldFromFilter';
+import { subfieldToOptions } from '@desktop-client/components/filters/subfieldToOptions';
+import { updateFilterReducer } from '@desktop-client/components/filters/updateFilterReducer';
+import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 
 let isDatepickerClick = false;

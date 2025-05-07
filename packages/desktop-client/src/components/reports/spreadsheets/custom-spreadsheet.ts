@@ -25,14 +25,13 @@ import {
   type QueryDataEntity,
   ReportOptions,
   type UncategorizedEntity,
-} from '../ReportOptions';
-
-import { calculateLegend } from './calculateLegend';
-import { filterEmptyRows } from './filterEmptyRows';
-import { filterHiddenItems } from './filterHiddenItems';
-import { makeQuery } from './makeQuery';
-import { recalculate } from './recalculate';
-import { sortData } from './sortData';
+} from '@desktop-client/components/reports/ReportOptions';
+import { calculateLegend } from '@desktop-client/components/reports/spreadsheets/calculateLegend';
+import { filterEmptyRows } from '@desktop-client/components/reports/spreadsheets/filterEmptyRows';
+import { filterHiddenItems } from '@desktop-client/components/reports/spreadsheets/filterHiddenItems';
+import { makeQuery } from '@desktop-client/components/reports/spreadsheets/makeQuery';
+import { recalculate } from '@desktop-client/components/reports/spreadsheets/recalculate';
+import { sortData } from '@desktop-client/components/reports/spreadsheets/sortData';
 
 export type createCustomSpreadsheetProps = {
   startDate: string;

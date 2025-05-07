@@ -19,20 +19,23 @@ import {
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 
-import { useAuth } from '../../auth/AuthProvider';
-import { Permissions } from '../../auth/types';
-import { authorizeBank } from '../../gocardless';
-import { useDispatch } from '../../redux';
-import { Warning } from '../alerts';
-import { Link } from '../common/Link';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { useMultiuserEnabled } from '../ServerContext';
-
+import { useAuth } from '@desktop-client/auth/AuthProvider';
+import { Permissions } from '@desktop-client/auth/types';
+import { Warning } from '@desktop-client/components/alerts';
+import { Link } from '@desktop-client/components/common/Link';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
+import { authorizeBank } from '@desktop-client/gocardless';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
+import { useDispatch } from '@desktop-client/redux';
 
 type CreateAccountModalProps = Extract<
   ModalType,

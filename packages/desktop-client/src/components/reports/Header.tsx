@@ -14,18 +14,16 @@ import {
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { AppliedFilters } from '../filters/AppliedFilters';
-import { FilterButton } from '../filters/FiltersMenu';
-
-import { getLiveRange } from './getLiveRange';
+import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
+import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
+import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';
 import {
   calculateTimeRange,
   getFullRange,
   getLatestRange,
   validateEnd,
   validateStart,
-} from './reportRanges';
-
+} from '@desktop-client/components/reports/reportRanges';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type HeaderProps = {

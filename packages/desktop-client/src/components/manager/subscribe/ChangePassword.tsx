@@ -9,9 +9,8 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 
-import { Title } from './common';
-import { ConfirmPasswordForm } from './ConfirmPasswordForm';
-
+import { Title } from '@desktop-client/components/manager/subscribe/common';
+import { ConfirmPasswordForm } from '@desktop-client/components/manager/subscribe/ConfirmPasswordForm';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 export function ChangePassword() {

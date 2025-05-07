@@ -16,8 +16,8 @@ import { currencyToInteger } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
-import { useFormat } from '../spreadsheet/useFormat';
-import { useSheetValue } from '../spreadsheet/useSheetValue';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
+import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
 
 type ReconcilingMessageProps = {
   balanceQuery: { name: `balance-query-${string}`; query: Query };

@@ -11,12 +11,11 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { useDispatch } from '../../../redux';
-
 import {
   ExpenseGroupHeader,
   ExpenseGroupListItem,
-} from './ExpenseGroupListItem';
+} from '@desktop-client/components/mobile/budget/ExpenseGroupListItem';
+import { useDispatch } from '@desktop-client/redux';
 
 type ExpenseGroupListProps = {
   categoryGroups: CategoryGroupEntity[];

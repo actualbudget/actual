@@ -9,8 +9,12 @@ import { View } from '@actual-app/components/view';
 import { deleteBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 
-import { useDispatch } from '../../../redux';
-import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { useDispatch } from '@desktop-client/redux';
 
 type DeleteFileModalProps = Extract<
   ModalType,

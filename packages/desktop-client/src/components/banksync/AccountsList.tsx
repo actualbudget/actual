@@ -4,8 +4,7 @@ import { View } from '@actual-app/components/view';
 
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { AccountRow } from './AccountRow';
-
+import { AccountRow } from '@desktop-client/components/banksync/AccountRow';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type AccountsListProps = {

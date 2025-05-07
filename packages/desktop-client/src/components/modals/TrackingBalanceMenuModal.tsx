@@ -12,16 +12,15 @@ import { trackingBudget } from 'loot-core/client/queries';
 import {
   BalanceWithCarryover,
   CarryoverIndicator,
-} from '../budget/BalanceWithCarryover';
-import { BalanceMenu } from '../budget/tracking/BalanceMenu';
+} from '@desktop-client/components/budget/BalanceWithCarryover';
+import { BalanceMenu } from '@desktop-client/components/budget/tracking/BalanceMenu';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal';
-import { CellValueText } from '../spreadsheet/CellValue';
-
+} from '@desktop-client/components/common/Modal';
+import { CellValueText } from '@desktop-client/components/spreadsheet/CellValue';
 import { useCategory } from '@desktop-client/hooks/useCategory';
 
 type TrackingBalanceMenuModalProps = Omit<

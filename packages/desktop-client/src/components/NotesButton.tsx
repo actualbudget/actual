@@ -16,8 +16,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 
-import { Notes } from './Notes';
-
+import { Notes } from '@desktop-client/components/Notes';
 import { useNotes } from '@desktop-client/hooks/useNotes';
 
 type NotesButtonProps = {

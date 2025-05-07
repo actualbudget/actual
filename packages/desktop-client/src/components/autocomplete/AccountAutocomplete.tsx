@@ -17,9 +17,8 @@ import { css, cx } from '@emotion/css';
 
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { Autocomplete } from './Autocomplete';
-import { ItemHeader } from './ItemHeader';
-
+import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
+import { ItemHeader } from '@desktop-client/components/autocomplete/ItemHeader';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 
 type AccountAutocompleteItem = AccountEntity;

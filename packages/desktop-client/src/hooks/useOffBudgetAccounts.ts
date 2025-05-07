@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { useAccounts } from './useAccounts';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
 
 export function useOffBudgetAccounts() {
   const accounts = useAccounts();

@@ -7,14 +7,14 @@ import { View } from '@actual-app/components/view';
 
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 
-import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
+import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
 import {
   ModalCloseButton,
   Modal,
   ModalTitle,
   ModalHeader,
-} from '../common/Modal';
-import { SectionLabel } from '../forms';
+} from '@desktop-client/components/common/Modal';
+import { SectionLabel } from '@desktop-client/components/forms';
 
 type AccountAutocompleteModalProps = Extract<
   ModalType,

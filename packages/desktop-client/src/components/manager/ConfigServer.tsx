@@ -15,14 +15,15 @@ import {
   isElectron,
 } from 'loot-core/shared/environment';
 
-import { useDispatch } from '../../redux';
-import { Link } from '../common/Link';
-import { useServerURL, useSetServerURL } from '../ServerContext';
-
-import { Title } from './subscribe/common';
-
+import { Link } from '@desktop-client/components/common/Link';
+import { Title } from '@desktop-client/components/manager/subscribe/common';
+import {
+  useServerURL,
+  useSetServerURL,
+} from '@desktop-client/components/ServerContext';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useDispatch } from '@desktop-client/redux';
 
 export function ConfigServer() {
   const { t } = useTranslation();

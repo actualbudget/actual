@@ -2,10 +2,10 @@ import React, { useCallback, useRef, useState } from 'react';
 
 import { envelopeBudget } from 'loot-core/client/queries';
 
-import { BalanceMenu } from './BalanceMenu';
-import { CoverMenu } from './CoverMenu';
-import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
-import { TransferMenu } from './TransferMenu';
+import { BalanceMenu } from '@desktop-client/components/budget/envelope/BalanceMenu';
+import { CoverMenu } from '@desktop-client/components/budget/envelope/CoverMenu';
+import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
+import { TransferMenu } from '@desktop-client/components/budget/envelope/TransferMenu';
 
 type BalanceMovementMenuProps = {
   categoryId: string;

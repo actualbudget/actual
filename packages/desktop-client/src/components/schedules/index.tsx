@@ -11,11 +11,13 @@ import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 import { type ScheduleEntity } from 'loot-core/types/models';
 
-import { useDispatch } from '../../redux';
-import { Search } from '../common/Search';
-import { Page } from '../Page';
-
-import { type ScheduleItemAction, SchedulesTable } from './SchedulesTable';
+import { Search } from '@desktop-client/components/common/Search';
+import { Page } from '@desktop-client/components/Page';
+import {
+  type ScheduleItemAction,
+  SchedulesTable,
+} from '@desktop-client/components/schedules/SchedulesTable';
+import { useDispatch } from '@desktop-client/redux';
 
 export function Schedules() {
   const { t } = useTranslation();

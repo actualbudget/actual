@@ -3,8 +3,8 @@ import React, { type ComponentProps } from 'react';
 import { useFilters } from 'loot-core/client/data-hooks/filters';
 import { type TransactionFilterEntity } from 'loot-core/types/models';
 
-import { Autocomplete } from './Autocomplete';
-import { FilterList } from './FilterList';
+import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
+import { FilterList } from '@desktop-client/components/autocomplete/FilterList';
 
 export function FilterAutocomplete({
   embedded,

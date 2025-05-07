@@ -15,9 +15,8 @@ import {
 import { SvgCalendar3 } from '@actual-app/components/icons/v2';
 import { View } from '@actual-app/components/view';
 
-import { Item } from './Item';
-import { SecondaryItem } from './SecondaryItem';
-
+import { Item } from '@desktop-client/components/sidebar/Item';
+import { SecondaryItem } from '@desktop-client/components/sidebar/SecondaryItem';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 export function PrimaryButtons() {

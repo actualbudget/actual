@@ -12,15 +12,20 @@ import type {
   ScheduleEntity,
 } from 'loot-core/types/models';
 
-import { FormField, FormLabel } from '../../forms';
-
-import { type Action, setType } from './actions';
-import { displayTemplateTypes, type ReducerState } from './constants';
-import { HistoricalAutomation } from './editor/HistoricalAutomation';
-import { PercentageAutomation } from './editor/PercentageAutomation';
-import { ScheduleAutomation } from './editor/ScheduleAutomation';
-import { SimpleAutomation } from './editor/SimpleAutomation';
-import { WeekAutomation } from './editor/WeekAutomation';
+import {
+  type Action,
+  setType,
+} from '@desktop-client/components/budget/goals/actions';
+import {
+  displayTemplateTypes,
+  type ReducerState,
+} from '@desktop-client/components/budget/goals/constants';
+import { HistoricalAutomation } from '@desktop-client/components/budget/goals/editor/HistoricalAutomation';
+import { PercentageAutomation } from '@desktop-client/components/budget/goals/editor/PercentageAutomation';
+import { ScheduleAutomation } from '@desktop-client/components/budget/goals/editor/ScheduleAutomation';
+import { SimpleAutomation } from '@desktop-client/components/budget/goals/editor/SimpleAutomation';
+import { WeekAutomation } from '@desktop-client/components/budget/goals/editor/WeekAutomation';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
 
 type BudgetAutomationEditorProps = {
   inline: boolean;

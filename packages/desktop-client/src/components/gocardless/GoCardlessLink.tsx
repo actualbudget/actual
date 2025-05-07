@@ -4,7 +4,7 @@ import { Trans } from 'react-i18next';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { View } from '@actual-app/components/view';
 
-import { Modal, ModalHeader } from '../common/Modal';
+import { Modal, ModalHeader } from '@desktop-client/components/common/Modal';
 
 export function GoCardlessLink() {
   window.close();

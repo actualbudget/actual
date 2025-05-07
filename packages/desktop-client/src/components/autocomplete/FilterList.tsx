@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { ItemHeader } from './ItemHeader';
+import { ItemHeader } from '@desktop-client/components/autocomplete/ItemHeader';
 
 export function FilterList<T extends { id: string; name: string }>({
   items,

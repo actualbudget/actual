@@ -65,6 +65,7 @@
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-rulesdir": "^0.2.2",
+    "eslint-plugin-typescript-paths": "^0.0.33",
     "globals": "^15.13.0",
     "html-to-image": "^1.11.11",
     "husky": "^9.1.7",

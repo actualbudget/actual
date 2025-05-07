@@ -11,7 +11,10 @@ import { css } from '@emotion/css';
 import rehypeExternalLinks from 'rehype-external-links';
 import remarkGfm from 'remark-gfm';
 
-import { remarkBreaks, sequentialNewlinesPlugin } from '../util/markdown';
+import {
+  remarkBreaks,
+  sequentialNewlinesPlugin,
+} from '@desktop-client/util/markdown';
 
 const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];
 

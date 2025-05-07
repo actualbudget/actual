@@ -4,9 +4,8 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { View } from '@actual-app/components/view';
 import { useDebounceCallback } from 'usehooks-ts';
 
-import { Sidebar } from './Sidebar';
-import { useSidebar } from './SidebarProvider';
-
+import { Sidebar } from '@desktop-client/components/sidebar/Sidebar';
+import { useSidebar } from '@desktop-client/components/sidebar/SidebarProvider';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 export function FloatableSidebar() {

@@ -10,8 +10,7 @@ import { getMonthYearFormat } from 'loot-core/shared/months';
 import { getRecurringDescription } from 'loot-core/shared/schedules';
 import { integerToCurrency } from 'loot-core/shared/util';
 
-import { Link } from '../common/Link';
-
+import { Link } from '@desktop-client/components/common/Link';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';

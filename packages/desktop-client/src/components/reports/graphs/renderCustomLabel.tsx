@@ -3,7 +3,7 @@ import React from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
-import { PrivacyFilter } from '../../PrivacyFilter';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 
 export const renderCustomLabel = (
   calcX: number,

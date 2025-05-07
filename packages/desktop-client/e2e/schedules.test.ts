@@ -1,9 +1,9 @@
 import { type Page } from '@playwright/test';
 
-import { expect, test } from './fixtures';
-import { ConfigurationPage } from './page-models/configuration-page';
-import { Navigation } from './page-models/navigation';
-import { type SchedulesPage } from './page-models/schedules-page';
+import { expect, test } from '@desktop-client/e2e/fixtures';
+import { ConfigurationPage } from '@desktop-client/e2e/page-models/configuration-page';
+import { Navigation } from '@desktop-client/e2e/page-models/navigation';
+import { type SchedulesPage } from '@desktop-client/e2e/page-models/schedules-page';
 
 test.describe('Schedules', () => {
   let page: Page;

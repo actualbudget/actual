@@ -13,7 +13,7 @@ import { Popover } from '@actual-app/components/popover';
 
 import type { Theme } from 'loot-core/types/prefs';
 
-import { themeOptions, useTheme } from '../style';
+import { themeOptions, useTheme } from '@desktop-client/style';
 
 type ThemeSelectorProps = {
   style?: CSSProperties;

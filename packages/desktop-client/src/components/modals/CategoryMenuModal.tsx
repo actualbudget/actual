@@ -25,9 +25,8 @@ import {
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal';
-import { Notes } from '../Notes';
-
+} from '@desktop-client/components/common/Modal';
+import { Notes } from '@desktop-client/components/Notes';
 import { useCategory } from '@desktop-client/hooks/useCategory';
 import { useCategoryGroup } from '@desktop-client/hooks/useCategoryGroup';
 import { useNotes } from '@desktop-client/hooks/useNotes';

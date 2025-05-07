@@ -5,7 +5,7 @@ import { SvgCalendar } from '@actual-app/components/icons/v2';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useBudgetMonthCount } from './BudgetMonthCountContext';
+import { useBudgetMonthCount } from '@desktop-client/components/budget/BudgetMonthCountContext';
 
 type CalendarProps = {
   color: string;

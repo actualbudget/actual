@@ -1,6 +1,6 @@
 import type { FeatureFlag } from 'loot-core/types/prefs';
 
-import { useSyncedPref } from './useSyncedPref';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   goalTemplatesEnabled: false,

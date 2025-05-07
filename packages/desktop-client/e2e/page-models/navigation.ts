@@ -1,11 +1,11 @@
 import { type Page } from '@playwright/test';
 
-import { AccountPage } from './account-page';
-import { PayeesPage } from './payees-page';
-import { ReportsPage } from './reports-page';
-import { RulesPage } from './rules-page';
-import { SchedulesPage } from './schedules-page';
-import { SettingsPage } from './settings-page';
+import { AccountPage } from '@desktop-client/e2e/page-models/account-page';
+import { PayeesPage } from '@desktop-client/e2e/page-models/payees-page';
+import { ReportsPage } from '@desktop-client/e2e/page-models/reports-page';
+import { RulesPage } from '@desktop-client/e2e/page-models/rules-page';
+import { SchedulesPage } from '@desktop-client/e2e/page-models/schedules-page';
+import { SettingsPage } from '@desktop-client/e2e/page-models/settings-page';
 
 type AccountEntry = {
   name: string;

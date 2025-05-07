@@ -9,10 +9,14 @@ import { View } from '@actual-app/components/view';
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { envelopeBudget } from 'loot-core/client/queries';
 
-import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { FieldLabel } from '../mobile/MobileForms';
-import { AmountInput } from '../util/AmountInput';
+import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { FieldLabel } from '@desktop-client/components/mobile/MobileForms';
+import { AmountInput } from '@desktop-client/components/util/AmountInput';
 
 type HoldBufferModalProps = Extract<
   ModalType,

@@ -2,7 +2,7 @@ import React from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
-import { LoadComponent } from './util/LoadComponent';
+import { LoadComponent } from '@desktop-client/components/util/LoadComponent';
 
 export function Background() {
   return (

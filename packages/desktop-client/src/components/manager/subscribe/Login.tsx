@@ -20,15 +20,19 @@ import { send } from 'loot-core/platform/client/fetch';
 import { isElectron } from 'loot-core/shared/environment';
 import { type OpenIdConfig } from 'loot-core/types/models';
 
-import { useDispatch } from '../../../redux';
-import { warningBackground } from '../../../style/themes/dark';
-import { Link } from '../../common/Link';
-import { useAvailableLoginMethods, useLoginMethod } from '../../ServerContext';
-
-import { useBootstrapped, Title } from './common';
-import { OpenIdForm } from './OpenIdForm';
-
+import { Link } from '@desktop-client/components/common/Link';
+import {
+  useBootstrapped,
+  Title,
+} from '@desktop-client/components/manager/subscribe/common';
+import { OpenIdForm } from '@desktop-client/components/manager/subscribe/OpenIdForm';
+import {
+  useAvailableLoginMethods,
+  useLoginMethod,
+} from '@desktop-client/components/ServerContext';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useDispatch } from '@desktop-client/redux';
+import { warningBackground } from '@desktop-client/style/themes/dark';
 
 function PasswordLogin({ setError, dispatch }) {
   const [password, setPassword] = useState('');

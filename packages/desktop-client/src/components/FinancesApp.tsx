@@ -17,35 +17,36 @@ import { sync } from 'loot-core/client/app/appSlice';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import * as undo from 'loot-core/platform/client/undo';
 
-import { ProtectedRoute } from '../auth/ProtectedRoute';
-import { Permissions } from '../auth/types';
-import { useSelector, useDispatch } from '../redux';
-import { getIsOutdated, getLatestVersion } from '../util/versions';
-
-import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
-import { BankSync } from './banksync';
-import { BankSyncStatus } from './BankSyncStatus';
-import { GlobalKeys } from './GlobalKeys';
-import { ManageRulesPage } from './ManageRulesPage';
-import { Category } from './mobile/budget/Category';
-import { MobileNavTabs } from './mobile/MobileNavTabs';
-import { TransactionEdit } from './mobile/transactions/TransactionEdit';
-import { Notifications } from './Notifications';
-import { ManagePayeesPage } from './payees/ManagePayeesPage';
-import { Reports } from './reports';
-import { LoadingIndicator } from './reports/LoadingIndicator';
-import { NarrowAlternate, WideComponent } from './responsive';
-import { UserDirectoryPage } from './responsive/wide';
-import { ScrollProvider } from './ScrollProvider';
-import { useMultiuserEnabled } from './ServerContext';
-import { Settings } from './settings';
-import { FloatableSidebar } from './sidebar';
-import { Titlebar } from './Titlebar';
-
+import { ProtectedRoute } from '@desktop-client/auth/ProtectedRoute';
+import { Permissions } from '@desktop-client/auth/types';
+import { UserAccessPage } from '@desktop-client/components/admin/UserAccess/UserAccessPage';
+import { BankSync } from '@desktop-client/components/banksync';
+import { BankSyncStatus } from '@desktop-client/components/BankSyncStatus';
+import { GlobalKeys } from '@desktop-client/components/GlobalKeys';
+import { ManageRulesPage } from '@desktop-client/components/ManageRulesPage';
+import { Category } from '@desktop-client/components/mobile/budget/Category';
+import { MobileNavTabs } from '@desktop-client/components/mobile/MobileNavTabs';
+import { TransactionEdit } from '@desktop-client/components/mobile/transactions/TransactionEdit';
+import { Notifications } from '@desktop-client/components/Notifications';
+import { ManagePayeesPage } from '@desktop-client/components/payees/ManagePayeesPage';
+import { Reports } from '@desktop-client/components/reports';
+import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import {
+  NarrowAlternate,
+  WideComponent,
+} from '@desktop-client/components/responsive';
+import { UserDirectoryPage } from '@desktop-client/components/responsive/wide';
+import { ScrollProvider } from '@desktop-client/components/ScrollProvider';
+import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
+import { Settings } from '@desktop-client/components/settings';
+import { FloatableSidebar } from '@desktop-client/components/sidebar';
+import { Titlebar } from '@desktop-client/components/Titlebar';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSelector, useDispatch } from '@desktop-client/redux';
+import { getIsOutdated, getLatestVersion } from '@desktop-client/util/versions';
 
 function NarrowNotSupported({
   redirectTo = '/budget',

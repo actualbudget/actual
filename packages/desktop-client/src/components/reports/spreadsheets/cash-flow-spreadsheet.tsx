@@ -11,7 +11,7 @@ import { q } from 'loot-core/shared/query';
 import { integerToCurrency, integerToAmount } from 'loot-core/shared/util';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
-import { runAll, indexCashFlow } from '../util';
+import { runAll, indexCashFlow } from '@desktop-client/components/reports/util';
 
 export function simpleCashFlow(
   startMonth: string,

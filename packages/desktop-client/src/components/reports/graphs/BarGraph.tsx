@@ -28,14 +28,12 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { Container } from '../Container';
-import { getCustomTick } from '../getCustomTick';
-import { numberFormatterTooltip } from '../numberFormatter';
-
-import { adjustTextSize } from './adjustTextSize';
-import { renderCustomLabel } from './renderCustomLabel';
-import { showActivity } from './showActivity';
-
+import { Container } from '@desktop-client/components/reports/Container';
+import { getCustomTick } from '@desktop-client/components/reports/getCustomTick';
+import { adjustTextSize } from '@desktop-client/components/reports/graphs/adjustTextSize';
+import { renderCustomLabel } from '@desktop-client/components/reports/graphs/renderCustomLabel';
+import { showActivity } from '@desktop-client/components/reports/graphs/showActivity';
+import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';

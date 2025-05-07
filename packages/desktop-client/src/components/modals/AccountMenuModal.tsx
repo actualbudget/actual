@@ -28,10 +28,9 @@ import {
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal';
-import { Notes } from '../Notes';
-import { validateAccountName } from '../util/accountValidation';
-
+} from '@desktop-client/components/common/Modal';
+import { Notes } from '@desktop-client/components/Notes';
+import { validateAccountName } from '@desktop-client/components/util/accountValidation';
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useNotes } from '@desktop-client/hooks/useNotes';

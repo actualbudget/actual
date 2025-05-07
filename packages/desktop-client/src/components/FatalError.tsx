@@ -10,9 +10,9 @@ import { View } from '@actual-app/components/view';
 
 import { LazyLoadFailedError } from 'loot-core/shared/errors';
 
-import { Link } from './common/Link';
-import { Modal, ModalHeader } from './common/Modal';
-import { Checkbox } from './forms';
+import { Link } from '@desktop-client/components/common/Link';
+import { Modal, ModalHeader } from '@desktop-client/components/common/Modal';
+import { Checkbox } from '@desktop-client/components/forms';
 
 type AppError = Error & {
   type?: string;

@@ -1,6 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 
-import { CustomReportPage } from './custom-report-page';
+import { CustomReportPage } from '@desktop-client/e2e/page-models/custom-report-page';
 
 export class ReportsPage {
   readonly page: Page;

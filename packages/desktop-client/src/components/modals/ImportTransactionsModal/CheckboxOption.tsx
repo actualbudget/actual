@@ -7,7 +7,7 @@ import React, {
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { Checkbox } from '../../forms';
+import { Checkbox } from '@desktop-client/components/forms';
 
 type CheckboxOptionProps = {
   id: string;

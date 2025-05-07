@@ -13,7 +13,7 @@ import {
   type SpendingEntity,
 } from 'loot-core/types/models';
 
-import { makeQuery } from './makeQuery';
+import { makeQuery } from '@desktop-client/components/reports/spreadsheets/makeQuery';
 
 type createSpendingSpreadsheetProps = {
   conditions?: RuleConditionEntity[];

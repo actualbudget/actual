@@ -11,10 +11,13 @@ import { View } from '@actual-app/components/view';
 import { loadAllFiles } from 'loot-core/client/budgets/budgetsSlice';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
-import { useDispatch } from '../../../redux';
-import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
-
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useDispatch } from '@desktop-client/redux';
 
 function FileLocationSettings() {
   const [documentDir, _setDocumentDirPref] = useGlobalPref('documentDir');

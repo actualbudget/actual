@@ -20,17 +20,15 @@ import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
-import { useDispatch } from '../../../redux';
-import { prewarmMonth } from '../../budget/util';
-import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
-import { SyncRefresh } from '../../SyncRefresh';
-
-import { BudgetTable } from './BudgetTable';
-
+import { prewarmMonth } from '@desktop-client/components/budget/util';
+import { BudgetTable } from '@desktop-client/components/mobile/budget/BudgetTable';
+import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
+import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useDispatch } from '@desktop-client/redux';
 
 function isBudgetType(input?: string): input is 'rollover' | 'report' {
   return ['rollover', 'report'].includes(input);

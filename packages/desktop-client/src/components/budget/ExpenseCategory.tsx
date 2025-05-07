@@ -9,6 +9,8 @@ import {
   type CategoryEntity,
 } from 'loot-core/types/models';
 
+import { RenderMonths } from '@desktop-client/components/budget/RenderMonths';
+import { SidebarCategory } from '@desktop-client/components/budget/SidebarCategory';
 import {
   useDraggable,
   useDroppable,
@@ -16,12 +18,8 @@ import {
   type DragState,
   type OnDragChangeCallback,
   type OnDropCallback,
-} from '../sort';
-import { Row } from '../table';
-
-import { RenderMonths } from './RenderMonths';
-import { SidebarCategory } from './SidebarCategory';
-
+} from '@desktop-client/components/sort';
+import { Row } from '@desktop-client/components/table';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
 
 type ExpenseCategoryProps = {

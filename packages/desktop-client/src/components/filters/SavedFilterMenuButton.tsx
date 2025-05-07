@@ -13,8 +13,8 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { FilterMenu } from './FilterMenu';
-import { NameFilter } from './NameFilter';
+import { FilterMenu } from '@desktop-client/components/filters/FilterMenu';
+import { NameFilter } from '@desktop-client/components/filters/NameFilter';
 
 export type SavedFilter = {
   conditions?: RuleConditionEntity[];

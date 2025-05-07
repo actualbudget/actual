@@ -7,9 +7,8 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { useSelector } from '../redux';
-
-import { Background } from './Background';
+import { Background } from '@desktop-client/components/Background';
+import { useSelector } from '@desktop-client/redux';
 
 type AppBackgroundProps = {
   isLoading?: boolean;

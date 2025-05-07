@@ -2,7 +2,7 @@ import { useLocalStorage } from 'usehooks-ts';
 
 import { type LocalPrefs } from 'loot-core/types/prefs';
 
-import { useMetadataPref } from './useMetadataPref';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 type SetLocalPrefAction<K extends keyof LocalPrefs> = (
   value: LocalPrefs[K],

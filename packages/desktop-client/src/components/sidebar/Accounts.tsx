@@ -7,12 +7,9 @@ import { View } from '@actual-app/components/view';
 import * as queries from 'loot-core/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { moveAccount } from '../../accounts/accountsSlice';
-import { useSelector, useDispatch } from '../../redux';
-
-import { Account } from './Account';
-import { SecondaryItem } from './SecondaryItem';
-
+import { moveAccount } from '@desktop-client/accounts/accountsSlice';
+import { Account } from '@desktop-client/components/sidebar/Account';
+import { SecondaryItem } from '@desktop-client/components/sidebar/SecondaryItem';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useClosedAccounts } from '@desktop-client/hooks/useClosedAccounts';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
@@ -20,6 +17,7 @@ import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useOffBudgetAccounts } from '@desktop-client/hooks/useOffBudgetAccounts';
 import { useOnBudgetAccounts } from '@desktop-client/hooks/useOnBudgetAccounts';
 import { useUpdatedAccounts } from '@desktop-client/hooks/useUpdatedAccounts';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 const fontWeight = 600;
 

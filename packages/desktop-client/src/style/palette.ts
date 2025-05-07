@@ -1,4 +1,4 @@
-import * as oldColors from './colors';
+import * as oldColors from '@desktop-client/style/colors';
 
 // Only for use in contextual color definitions
 export const gray50 = '#f6f8fa';

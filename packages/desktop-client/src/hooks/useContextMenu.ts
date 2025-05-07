@@ -1,6 +1,6 @@
 import { type MouseEventHandler, useState } from 'react';
 
-import { useFeatureFlag } from './useFeatureFlag';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 
 export function useContextMenu() {
   const [menuOpen, setMenuOpen] = useState(false);

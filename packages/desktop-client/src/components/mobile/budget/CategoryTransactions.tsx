@@ -18,15 +18,14 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { useDispatch } from '../../../redux';
-import { MobilePageHeader, Page } from '../../Page';
-import { MobileBackButton } from '../MobileBackButton';
-import { AddTransactionButton } from '../transactions/AddTransactionButton';
-import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
-
+import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
+import { AddTransactionButton } from '@desktop-client/components/mobile/transactions/AddTransactionButton';
+import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
+import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useDispatch } from '@desktop-client/redux';
 
 type CategoryTransactionsProps = {
   category: CategoryEntity;

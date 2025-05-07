@@ -23,21 +23,22 @@ import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
-import { useDispatch } from '../../redux';
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
-
-import { DynamicBudgetTable } from './DynamicBudgetTable';
-import * as envelopeBudget from './envelope/EnvelopeBudgetComponents';
-import { EnvelopeBudgetProvider } from './envelope/EnvelopeBudgetContext';
-import * as trackingBudget from './tracking/TrackingBudgetComponents';
-import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
-import { prewarmAllMonths, prewarmMonth } from './util';
-
+import { DynamicBudgetTable } from '@desktop-client/components/budget/DynamicBudgetTable';
+import * as envelopeBudget from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
+import { EnvelopeBudgetProvider } from '@desktop-client/components/budget/envelope/EnvelopeBudgetContext';
+import * as trackingBudget from '@desktop-client/components/budget/tracking/TrackingBudgetComponents';
+import { TrackingBudgetProvider } from '@desktop-client/components/budget/tracking/TrackingBudgetContext';
+import {
+  prewarmAllMonths,
+  prewarmMonth,
+} from '@desktop-client/components/budget/util';
+import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useDispatch } from '@desktop-client/redux';
 
 type TrackingReportComponents = {
   SummaryComponent: typeof trackingBudget.BudgetSummary;

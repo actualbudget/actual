@@ -1,11 +1,11 @@
 // @ts-strict-ignore
 // This file will initialize the app if we are in a real browser
 // environment (not electron)
-import './browser-preload';
+import '@desktop-client/browser-preload';
 
-import './fonts.scss';
+import '@desktop-client/fonts.scss';
 
-import './i18n';
+import '@desktop-client/i18n';
 
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -26,13 +26,13 @@ import * as usersSlice from 'loot-core/client/users/usersSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 
-import * as accountsSlice from './accounts/accountsSlice';
-import { AuthProvider } from './auth/AuthProvider';
+import * as accountsSlice from '@desktop-client/accounts/accountsSlice';
+import { AuthProvider } from '@desktop-client/auth/AuthProvider';
 // See https://github.com/WICG/focus-visible. Only makes the blue
 // focus outline appear from keyboard events.
 import 'focus-visible';
-import { App } from './components/App';
-import { ServerProvider } from './components/ServerContext';
+import { App } from '@desktop-client/components/App';
+import { ServerProvider } from '@desktop-client/components/ServerContext';
 
 const boundActions = bindActionCreators(
   {

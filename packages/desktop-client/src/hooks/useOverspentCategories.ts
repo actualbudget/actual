@@ -4,8 +4,8 @@ import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
 import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import * as monthUtils from 'loot-core/shared/months';
 
-import { useCategories } from './useCategories';
-import { useSyncedPref } from './useSyncedPref';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type UseOverspentCategoriesProps = {
   month: string;

@@ -10,29 +10,30 @@ import { View } from '@actual-app/components/view';
 import { setAppState } from 'loot-core/client/app/appSlice';
 import { loggedIn } from 'loot-core/client/users/usersSlice';
 
-import { ProtectedRoute } from '../../auth/ProtectedRoute';
-import { Permissions } from '../../auth/types';
-import { useSelector, useDispatch } from '../../redux';
+import { ProtectedRoute } from '@desktop-client/auth/ProtectedRoute';
+import { Permissions } from '@desktop-client/auth/types';
 import {
   BackToFileListButton,
   UserDirectoryPage,
-} from '../admin/UserDirectory/UserDirectoryPage';
-import { AppBackground } from '../AppBackground';
-import { LoggedInUser } from '../LoggedInUser';
-import { Notifications } from '../Notifications';
-import { useMultiuserEnabled, useServerVersion } from '../ServerContext';
-
-import { BudgetFileSelection } from './BudgetFileSelection';
-import { ConfigServer } from './ConfigServer';
-import { ServerURL } from './ServerURL';
-import { Bootstrap } from './subscribe/Bootstrap';
-import { ChangePassword } from './subscribe/ChangePassword';
-import { Error } from './subscribe/Error';
-import { Login } from './subscribe/Login';
-import { OpenIdCallback } from './subscribe/OpenIdCallback';
-import { WelcomeScreen } from './WelcomeScreen';
-
+} from '@desktop-client/components/admin/UserDirectory/UserDirectoryPage';
+import { AppBackground } from '@desktop-client/components/AppBackground';
+import { LoggedInUser } from '@desktop-client/components/LoggedInUser';
+import { BudgetFileSelection } from '@desktop-client/components/manager/BudgetFileSelection';
+import { ConfigServer } from '@desktop-client/components/manager/ConfigServer';
+import { ServerURL } from '@desktop-client/components/manager/ServerURL';
+import { Bootstrap } from '@desktop-client/components/manager/subscribe/Bootstrap';
+import { ChangePassword } from '@desktop-client/components/manager/subscribe/ChangePassword';
+import { Error } from '@desktop-client/components/manager/subscribe/Error';
+import { Login } from '@desktop-client/components/manager/subscribe/Login';
+import { OpenIdCallback } from '@desktop-client/components/manager/subscribe/OpenIdCallback';
+import { WelcomeScreen } from '@desktop-client/components/manager/WelcomeScreen';
+import { Notifications } from '@desktop-client/components/Notifications';
+import {
+  useMultiuserEnabled,
+  useServerVersion,
+} from '@desktop-client/components/ServerContext';
 import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 function Version() {
   const version = useServerVersion();

@@ -15,32 +15,36 @@ import { loadPrefs } from 'loot-core/client/prefs/prefsSlice';
 import { listen } from 'loot-core/platform/client/fetch';
 import { isElectron } from 'loot-core/shared/environment';
 
-import { useDispatch } from '../../redux';
-import { Link } from '../common/Link';
-import { FormField, FormLabel } from '../forms';
-import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
-import { Page } from '../Page';
-import { useServerVersion } from '../ServerContext';
-
-import { AuthSettings } from './AuthSettings';
-import { Backups } from './Backups';
-import { BudgetTypeSettings } from './BudgetTypeSettings';
-import { EncryptionSettings } from './Encryption';
-import { ExperimentalFeatures } from './Experimental';
-import { ExportBudget } from './Export';
-import { FormatSettings } from './Format';
-import { LanguageSettings } from './LanguageSettings';
-import { RepairTransactions } from './RepairTransactions';
-import { ResetCache, ResetSync } from './Reset';
-import { ThemeSettings } from './Themes';
-import { AdvancedToggle, Setting } from './UI';
-
+import { Link } from '@desktop-client/components/common/Link';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
+import { Page } from '@desktop-client/components/Page';
+import { useServerVersion } from '@desktop-client/components/ServerContext';
+import { AuthSettings } from '@desktop-client/components/settings/AuthSettings';
+import { Backups } from '@desktop-client/components/settings/Backups';
+import { BudgetTypeSettings } from '@desktop-client/components/settings/BudgetTypeSettings';
+import { EncryptionSettings } from '@desktop-client/components/settings/Encryption';
+import { ExperimentalFeatures } from '@desktop-client/components/settings/Experimental';
+import { ExportBudget } from '@desktop-client/components/settings/Export';
+import { FormatSettings } from '@desktop-client/components/settings/Format';
+import { LanguageSettings } from '@desktop-client/components/settings/LanguageSettings';
+import { RepairTransactions } from '@desktop-client/components/settings/RepairTransactions';
+import {
+  ResetCache,
+  ResetSync,
+} from '@desktop-client/components/settings/Reset';
+import { ThemeSettings } from '@desktop-client/components/settings/Themes';
+import {
+  AdvancedToggle,
+  Setting,
+} from '@desktop-client/components/settings/UI';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import {
   useIsOutdated,
   useLatestVersion,
 } from '@desktop-client/hooks/useLatestVersion';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useDispatch } from '@desktop-client/redux';
 
 function About() {
   const version = useServerVersion();

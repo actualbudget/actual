@@ -10,14 +10,13 @@ import { css } from '@emotion/css';
 
 import { envelopeBudget } from 'loot-core/client/queries';
 
-import { PrivacyFilter } from '../../../PrivacyFilter';
-import { useFormat } from '../../../spreadsheet/useFormat';
+import { TotalsList } from '@desktop-client/components/budget/envelope/budgetsummary/TotalsList';
 import {
   useEnvelopeSheetName,
   useEnvelopeSheetValue,
-} from '../EnvelopeBudgetComponents';
-
-import { TotalsList } from './TotalsList';
+} from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 
 type ToBudgetAmountProps = {
   prevMonthName: string;

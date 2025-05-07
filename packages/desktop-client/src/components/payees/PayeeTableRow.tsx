@@ -22,8 +22,7 @@ import {
   InputCell,
   Row,
   SelectCell,
-} from '../table';
-
+} from '@desktop-client/components/table';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';

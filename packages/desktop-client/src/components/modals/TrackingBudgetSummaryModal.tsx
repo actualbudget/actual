@@ -8,11 +8,15 @@ import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { sheetForMonth } from 'loot-core/shared/months';
 import * as monthUtils from 'loot-core/shared/months';
 
-import { ExpenseTotal } from '../budget/tracking/budgetsummary/ExpenseTotal';
-import { IncomeTotal } from '../budget/tracking/budgetsummary/IncomeTotal';
-import { Saved } from '../budget/tracking/budgetsummary/Saved';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
+import { ExpenseTotal } from '@desktop-client/components/budget/tracking/budgetsummary/ExpenseTotal';
+import { IncomeTotal } from '@desktop-client/components/budget/tracking/budgetsummary/IncomeTotal';
+import { Saved } from '@desktop-client/components/budget/tracking/budgetsummary/Saved';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
 
 type TrackingBudgetSummaryModalProps = Extract<
   ModalType,

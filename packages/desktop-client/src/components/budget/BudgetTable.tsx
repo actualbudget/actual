@@ -13,19 +13,20 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { type DropPosition } from '../sort';
-
-import { BudgetCategories } from './BudgetCategories';
-import { BudgetSummaries } from './BudgetSummaries';
-import { BudgetTotals } from './BudgetTotals';
-import { type MonthBounds, MonthsProvider } from './MonthsContext';
+import { BudgetCategories } from '@desktop-client/components/budget/BudgetCategories';
+import { BudgetSummaries } from '@desktop-client/components/budget/BudgetSummaries';
+import { BudgetTotals } from '@desktop-client/components/budget/BudgetTotals';
+import {
+  type MonthBounds,
+  MonthsProvider,
+} from '@desktop-client/components/budget/MonthsContext';
 import {
   findSortDown,
   findSortUp,
   getScrollbarWidth,
   separateGroups,
-} from './util';
-
+} from '@desktop-client/components/budget/util';
+import { type DropPosition } from '@desktop-client/components/sort';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';

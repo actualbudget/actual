@@ -6,14 +6,13 @@ import { theme } from '@actual-app/components/theme';
 
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 
-import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
+import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
 import {
   ModalCloseButton,
   Modal,
   ModalTitle,
   ModalHeader,
-} from '../common/Modal';
-
+} from '@desktop-client/components/common/Modal';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';

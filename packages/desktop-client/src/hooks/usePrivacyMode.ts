@@ -1,4 +1,4 @@
-import { useSyncedPref } from './useSyncedPref';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function usePrivacyMode() {
   const [isPrivacyEnabled] = useSyncedPref('isPrivacyEnabled');

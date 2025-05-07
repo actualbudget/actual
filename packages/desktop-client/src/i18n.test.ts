@@ -1,6 +1,6 @@
 import i18n from 'i18next';
 
-import { setI18NextLanguage, availableLanguages } from './i18n';
+import { setI18NextLanguage, availableLanguages } from '@desktop-client/i18n';
 
 vi.mock('i18next', () => {
   const i18nMock = {

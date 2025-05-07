@@ -3,7 +3,7 @@ import React, { type ComponentProps } from 'react';
 import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
 
-import { CheckboxOption } from './CheckboxOption';
+import { CheckboxOption } from '@desktop-client/components/modals/ImportTransactionsModal/CheckboxOption';
 
 type MultiplierOptionProps = {
   multiplierEnabled: boolean;

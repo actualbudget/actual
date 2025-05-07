@@ -11,9 +11,8 @@ import {
   type CategoryEntity,
 } from 'loot-core/types/models';
 
-import { useDispatch } from '../../../redux';
-
-import { ExpenseCategoryListItem } from './ExpenseCategoryListItem';
+import { ExpenseCategoryListItem } from '@desktop-client/components/mobile/budget/ExpenseCategoryListItem';
+import { useDispatch } from '@desktop-client/redux';
 
 type ExpenseCategoryListProps = {
   categoryGroup: CategoryGroupEntity;

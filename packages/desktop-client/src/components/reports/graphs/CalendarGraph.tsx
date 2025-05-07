@@ -18,9 +18,8 @@ import {
 import { amountToCurrency } from 'loot-core/shared/util';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { PrivacyFilter } from '../../PrivacyFilter';
-import { chartTheme } from '../chart-theme';
-
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { chartTheme } from '@desktop-client/components/reports/chart-theme';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 type CalendarGraphProps = {

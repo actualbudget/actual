@@ -1,6 +1,6 @@
 import { resetMockStore } from 'loot-core/client/store/mock';
 
-import { installPolyfills } from './polyfills';
+import { installPolyfills } from '@desktop-client/polyfills';
 
 installPolyfills();
 

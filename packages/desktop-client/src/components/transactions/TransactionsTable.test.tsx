@@ -28,13 +28,11 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { AuthProvider } from '../../auth/AuthProvider';
-import { TestProvider } from '../../redux/mock';
-
-import { TransactionTable } from './TransactionsTable';
-
+import { AuthProvider } from '@desktop-client/auth/AuthProvider';
+import { TransactionTable } from '@desktop-client/components/transactions/TransactionsTable';
 import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
 import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
+import { TestProvider } from '@desktop-client/redux/mock';
 
 vi.mock('loot-core/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => ({

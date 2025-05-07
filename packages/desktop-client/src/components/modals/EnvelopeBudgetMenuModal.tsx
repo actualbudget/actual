@@ -11,16 +11,15 @@ import * as Platform from 'loot-core/client/platform';
 import { envelopeBudget } from 'loot-core/client/queries';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
-import { BudgetMenu } from '../budget/envelope/BudgetMenu';
-import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
+import { BudgetMenu } from '@desktop-client/components/budget/envelope/BudgetMenu';
+import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal';
-import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
-
+} from '@desktop-client/components/common/Modal';
+import { FocusableAmountInput } from '@desktop-client/components/mobile/transactions/FocusableAmountInput';
 import { useCategory } from '@desktop-client/hooks/useCategory';
 
 type EnvelopeBudgetMenuModalProps = Omit<

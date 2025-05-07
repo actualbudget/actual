@@ -5,11 +5,9 @@ import { debounce } from 'debounce';
 
 import { amountToCurrency } from 'loot-core/shared/util';
 
-import { PrivacyFilter } from '../PrivacyFilter';
-
-import { chartTheme } from './chart-theme';
-import { LoadingIndicator } from './LoadingIndicator';
-
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { chartTheme } from '@desktop-client/components/reports/chart-theme';
+import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 

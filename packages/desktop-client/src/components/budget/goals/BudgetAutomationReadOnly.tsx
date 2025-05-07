@@ -13,12 +13,12 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type ReducerState } from './constants';
-import { HistoricalAutomationReadOnly } from './editor/HistoricalAutomationReadOnly';
-import { PercentageAutomationReadOnly } from './editor/PercentageAutomationReadOnly';
-import { ScheduleAutomationReadOnly } from './editor/ScheduleAutomationReadOnly';
-import { SimpleAutomationReadOnly } from './editor/SimpleAutomationReadOnly';
-import { WeekAutomationReadOnly } from './editor/WeekAutomationReadOnly';
+import { type ReducerState } from '@desktop-client/components/budget/goals/constants';
+import { HistoricalAutomationReadOnly } from '@desktop-client/components/budget/goals/editor/HistoricalAutomationReadOnly';
+import { PercentageAutomationReadOnly } from '@desktop-client/components/budget/goals/editor/PercentageAutomationReadOnly';
+import { ScheduleAutomationReadOnly } from '@desktop-client/components/budget/goals/editor/ScheduleAutomationReadOnly';
+import { SimpleAutomationReadOnly } from '@desktop-client/components/budget/goals/editor/SimpleAutomationReadOnly';
+import { WeekAutomationReadOnly } from '@desktop-client/components/budget/goals/editor/WeekAutomationReadOnly';
 
 type BudgetAutomationReadOnlyProps = {
   state: ReducerState;

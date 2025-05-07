@@ -1,8 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 
-import { AccountTransactions } from './AccountTransactions';
-
+import { AccountTransactions } from '@desktop-client/components/mobile/accounts/AccountTransactions';
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 

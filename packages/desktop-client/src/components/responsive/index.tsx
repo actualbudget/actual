@@ -1,9 +1,8 @@
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
-import { LoadComponent } from '../util/LoadComponent';
-
-import type * as NarrowComponents from './narrow';
-import type * as WideComponents from './wide';
+import type * as NarrowComponents from '@desktop-client/components/responsive/narrow';
+import type * as WideComponents from '@desktop-client/components/responsive/wide';
+import { LoadComponent } from '@desktop-client/components/util/LoadComponent';
 
 const loadNarrow = () =>
   import(/* webpackChunkName: "narrow-components" */ './narrow');

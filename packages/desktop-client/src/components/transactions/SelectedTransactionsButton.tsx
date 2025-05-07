@@ -15,10 +15,9 @@ import {
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { type TransactionEntity } from 'loot-core/types/models';
 
-import { useDispatch } from '../../redux';
-import { SelectedItemsButton } from '../table';
-
+import { SelectedItemsButton } from '@desktop-client/components/table';
 import { useSelectedItems } from '@desktop-client/hooks/useSelected';
+import { useDispatch } from '@desktop-client/redux';
 
 type SelectedTransactionsButtonProps = {
   getTransaction: (id: string) => TransactionEntity | undefined;

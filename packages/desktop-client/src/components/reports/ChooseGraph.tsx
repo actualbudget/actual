@@ -7,14 +7,14 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { AreaGraph } from './graphs/AreaGraph';
-import { BarGraph } from './graphs/BarGraph';
-import { BarLineGraph } from './graphs/BarLineGraph';
-import { DonutGraph } from './graphs/DonutGraph';
-import { LineGraph } from './graphs/LineGraph';
-import { StackedBarGraph } from './graphs/StackedBarGraph';
-import { ReportTable } from './graphs/tableGraph/ReportTable';
-import { ReportOptions } from './ReportOptions';
+import { AreaGraph } from '@desktop-client/components/reports/graphs/AreaGraph';
+import { BarGraph } from '@desktop-client/components/reports/graphs/BarGraph';
+import { BarLineGraph } from '@desktop-client/components/reports/graphs/BarLineGraph';
+import { DonutGraph } from '@desktop-client/components/reports/graphs/DonutGraph';
+import { LineGraph } from '@desktop-client/components/reports/graphs/LineGraph';
+import { StackedBarGraph } from '@desktop-client/components/reports/graphs/StackedBarGraph';
+import { ReportTable } from '@desktop-client/components/reports/graphs/tableGraph/ReportTable';
+import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 
 type ChooseGraphProps = {
   data: DataEntity;

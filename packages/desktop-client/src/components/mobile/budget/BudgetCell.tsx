@@ -10,18 +10,19 @@ import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { useDispatch } from '../../../redux';
-import { makeAmountGrey } from '../../budget/util';
-import { PrivacyFilter } from '../../PrivacyFilter';
-import { type SheetFields } from '../../spreadsheet';
-import { CellValue } from '../../spreadsheet/CellValue';
-import { useFormat } from '../../spreadsheet/useFormat';
-
-import { getColumnWidth, PILL_STYLE } from './BudgetTable';
-
+import { makeAmountGrey } from '@desktop-client/components/budget/util';
+import {
+  getColumnWidth,
+  PILL_STYLE,
+} from '@desktop-client/components/mobile/budget/BudgetTable';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { type SheetFields } from '@desktop-client/components/spreadsheet';
+import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { useNotes } from '@desktop-client/hooks/useNotes';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import { useDispatch } from '@desktop-client/redux';
 
 type BudgetCellProps<
   SheetFieldName extends SheetFields<'envelope-budget' | 'tracking-budget'>,

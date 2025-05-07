@@ -6,9 +6,11 @@ import { AutoTextSize } from 'auto-text-size';
 
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { getColumnWidth, PILL_STYLE } from './BudgetTable';
-
 import { makeAmountGrey } from '@desktop-client/components/budget/util';
+import {
+  getColumnWidth,
+  PILL_STYLE,
+} from '@desktop-client/components/mobile/budget/BudgetTable';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { type Binding } from '@desktop-client/components/spreadsheet';
 import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';

@@ -66,15 +66,12 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
-import { unlinkAccount } from '../../accounts/accountsSlice';
-import { useSelector, useDispatch } from '../../redux';
-import { type SavedFilter } from '../filters/SavedFilterMenuButton';
-import { TransactionList } from '../transactions/TransactionList';
-import { validateAccountName } from '../util/accountValidation';
-
-import { AccountEmptyMessage } from './AccountEmptyMessage';
-import { AccountHeader } from './Header';
-
+import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
+import { AccountEmptyMessage } from '@desktop-client/components/accounts/AccountEmptyMessage';
+import { AccountHeader } from '@desktop-client/components/accounts/Header';
+import { type SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
+import { TransactionList } from '@desktop-client/components/transactions/TransactionList';
+import { validateAccountName } from '@desktop-client/components/util/accountValidation';
 import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -92,6 +89,7 @@ import {
 } from '@desktop-client/hooks/useSplitsExpanded';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useTransactionBatchActions } from '@desktop-client/hooks/useTransactionBatchActions';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
 

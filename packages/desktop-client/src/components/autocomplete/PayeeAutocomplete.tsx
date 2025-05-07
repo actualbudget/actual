@@ -29,17 +29,15 @@ import {
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { type AccountEntity, type PayeeEntity } from 'loot-core/types/models';
 
-import { useDispatch } from '../../redux';
-
 import {
   Autocomplete,
   defaultFilterSuggestion,
   AutocompleteFooter,
-} from './Autocomplete';
-import { ItemHeader } from './ItemHeader';
-
+} from '@desktop-client/components/autocomplete/Autocomplete';
+import { ItemHeader } from '@desktop-client/components/autocomplete/ItemHeader';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCommonPayees, usePayees } from '@desktop-client/hooks/usePayees';
+import { useDispatch } from '@desktop-client/redux';
 
 export type PayeeAutocompleteItem = PayeeEntity;
 

@@ -30,20 +30,22 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { FixedSizeList } from './FixedSizeList';
+import { FixedSizeList } from '@desktop-client/components/FixedSizeList';
 import {
   ConditionalPrivacyFilter,
   mergeConditionalPrivacyFilterProps,
-} from './PrivacyFilter';
+} from '@desktop-client/components/PrivacyFilter';
 import {
   type Spreadsheets,
   type SheetFields,
   type SheetNames,
   type Binding,
-} from './spreadsheet';
-import { type FormatType, useFormat } from './spreadsheet/useFormat';
-import { useSheetValue } from './spreadsheet/useSheetValue';
-
+} from '@desktop-client/components/spreadsheet';
+import {
+  type FormatType,
+  useFormat,
+} from '@desktop-client/components/spreadsheet/useFormat';
+import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
 import { useModalState } from '@desktop-client/hooks/useModalState';
 import {
   AvoidRefocusScrollProvider,

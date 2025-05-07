@@ -5,10 +5,9 @@ import { View } from '@actual-app/components/view';
 
 import { type GroupedEntity, type DataEntity } from 'loot-core/types/models';
 
-import { Row } from '../../../table';
-
-import { RenderTableRow } from './RenderTableRow';
-import { type renderRowProps } from './ReportTable';
+import { RenderTableRow } from '@desktop-client/components/reports/graphs/tableGraph/RenderTableRow';
+import { type renderRowProps } from '@desktop-client/components/reports/graphs/tableGraph/ReportTable';
+import { Row } from '@desktop-client/components/table';
 
 type ReportTableListProps = {
   data: DataEntity;

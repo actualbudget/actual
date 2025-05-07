@@ -1,6 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 
-import { AccountPage } from './account-page';
+import { AccountPage } from '@desktop-client/e2e/page-models/account-page';
 
 export class BudgetPage {
   readonly page: Page;

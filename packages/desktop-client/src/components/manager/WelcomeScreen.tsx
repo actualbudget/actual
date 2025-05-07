@@ -11,8 +11,8 @@ import { View } from '@actual-app/components/view';
 import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
-import { useDispatch } from '../../redux';
-import { Link } from '../common/Link';
+import { Link } from '@desktop-client/components/common/Link';
+import { useDispatch } from '@desktop-client/redux';
 
 export function WelcomeScreen() {
   const { t } = useTranslation();

@@ -13,7 +13,7 @@ import { addNotification } from 'loot-core/client/notifications/notificationsSli
 import { send } from 'loot-core/platform/client/fetch';
 import { type Handlers } from 'loot-core/types/handlers';
 
-import { useDispatch } from '../redux';
+import { useDispatch } from '@desktop-client/redux';
 
 type LoginMethod = {
   method: string;

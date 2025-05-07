@@ -48,20 +48,23 @@ import {
   amountToInteger,
 } from 'loot-core/shared/util';
 
-import { useDispatch } from '../../redux';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { StatusBadge } from '../schedules/StatusBadge';
-import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable';
-import { BetweenAmountInput } from '../util/AmountInput';
-import { DisplayId } from '../util/DisplayId';
-import { GenericInput } from '../util/GenericInput';
-
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { StatusBadge } from '@desktop-client/components/schedules/StatusBadge';
+import { SimpleTransactionsTable } from '@desktop-client/components/transactions/SimpleTransactionsTable';
+import { BetweenAmountInput } from '@desktop-client/components/util/AmountInput';
+import { DisplayId } from '@desktop-client/components/util/DisplayId';
+import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import {
   useSelected,
   SelectedProvider,
 } from '@desktop-client/hooks/useSelected';
+import { useDispatch } from '@desktop-client/redux';
 
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));

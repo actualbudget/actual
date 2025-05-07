@@ -5,8 +5,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { LegendItem } from './LegendItem';
-import { ReportOptions } from './ReportOptions';
+import { LegendItem } from '@desktop-client/components/reports/LegendItem';
+import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 
 type ReportLegendProps = {
   legend?: Array<{ name: string; color: string }>;

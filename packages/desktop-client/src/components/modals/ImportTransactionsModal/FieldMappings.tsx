@@ -3,15 +3,14 @@ import React from 'react';
 import { Stack } from '@actual-app/components/stack';
 import { View } from '@actual-app/components/view';
 
-import { SectionLabel } from '../../forms';
-
-import { SelectField } from './SelectField';
-import { SubLabel } from './SubLabel';
+import { SectionLabel } from '@desktop-client/components/forms';
+import { SelectField } from '@desktop-client/components/modals/ImportTransactionsModal/SelectField';
+import { SubLabel } from '@desktop-client/components/modals/ImportTransactionsModal/SubLabel';
 import {
   stripCsvImportTransaction,
   type FieldMapping,
   type ImportTransaction,
-} from './utils';
+} from '@desktop-client/components/modals/ImportTransactionsModal/utils';
 
 type FieldMappingsProps = {
   transactions: ImportTransaction[];

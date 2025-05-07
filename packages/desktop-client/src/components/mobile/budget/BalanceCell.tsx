@@ -12,9 +12,11 @@ import { AutoTextSize } from 'auto-text-size';
 import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { getColumnWidth, PILL_STYLE } from './BudgetTable';
-
 import { BalanceWithCarryover } from '@desktop-client/components/budget/BalanceWithCarryover';
+import {
+  getColumnWidth,
+  PILL_STYLE,
+} from '@desktop-client/components/mobile/budget/BudgetTable';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { type Binding } from '@desktop-client/components/spreadsheet';
 import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';

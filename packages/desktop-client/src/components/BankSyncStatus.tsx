@@ -7,9 +7,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useSelector } from '../redux';
-
-import { AnimatedRefresh } from './AnimatedRefresh';
+import { AnimatedRefresh } from '@desktop-client/components/AnimatedRefresh';
+import { useSelector } from '@desktop-client/redux';
 
 export function BankSyncStatus() {
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);

@@ -8,10 +8,12 @@ import { theme } from '@actual-app/components/theme';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
-import { useDispatch } from '../../redux';
-import { useMultiuserEnabled, useLoginMethod } from '../ServerContext';
-
-import { Setting } from './UI';
+import {
+  useMultiuserEnabled,
+  useLoginMethod,
+} from '@desktop-client/components/ServerContext';
+import { Setting } from '@desktop-client/components/settings/UI';
+import { useDispatch } from '@desktop-client/redux';
 
 export function AuthSettings() {
   const { t } = useTranslation();

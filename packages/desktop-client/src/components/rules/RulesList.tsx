@@ -5,7 +5,7 @@ import { View } from '@actual-app/components/view';
 
 import { type RuleEntity } from 'loot-core/types/models';
 
-import { RuleRow } from './RuleRow';
+import { RuleRow } from '@desktop-client/components/rules/RuleRow';
 
 type RulesListProps = {
   rules: RuleEntity[];

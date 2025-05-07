@@ -17,10 +17,8 @@ import {
   type DataEntity,
 } from 'loot-core/types/models';
 
-import { PrivacyFilter } from '../PrivacyFilter';
-
-import { ReportOptions } from './ReportOptions';
-
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type ReportSummaryProps = {

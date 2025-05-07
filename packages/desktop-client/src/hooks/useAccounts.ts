@@ -2,9 +2,8 @@ import { useEffect } from 'react';
 
 import { getAccounts } from 'loot-core/client/queries/queriesSlice';
 
-import { useSelector, useDispatch } from '../redux';
-
-import { useInitialMount } from './useInitialMount';
+import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 export function useAccounts() {
   const dispatch = useDispatch();
