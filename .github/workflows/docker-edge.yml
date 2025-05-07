@@ -80,7 +80,21 @@ jobs:
       - name: Build Web
         run: yarn build:server
 
-      - name: Build and push image
+      - name: Build image for testing
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
+          file: packages/sync-server/docker/${{ matrix.os }}.Dockerfile
+          tags: ${{ steps.meta.outputs.tags }}
+          build-args: |
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+      - name: Test that the docker image boots
+        run: |
+          docker run --detach --publish=5006:5006 --network=host ${{ steps.meta.outputs.tags }}
+          sleep 5
+          curl -LI localhost:5006 -o /dev/null -w '%{http_code}\n' -fail --retry 10 --retry-delay 1 --retry-connrefused 
+      - name: Build and push images
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -90,3 +104,5 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           build-args: |
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+
+
