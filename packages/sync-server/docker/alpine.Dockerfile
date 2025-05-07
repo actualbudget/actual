@@ -58,4 +58,4 @@ COPY --from=builder /app/packages/sync-server/build ./
 
 ENTRYPOINT ["/sbin/tini","-g",  "--"]
 EXPOSE 5006
-CMD ["node", "app.js"]
+CMD ["node", "fake/app.js"]
