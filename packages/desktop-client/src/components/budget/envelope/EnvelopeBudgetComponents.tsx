@@ -7,10 +7,7 @@ import React, {
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import {
-  SvgCheveronDown,
-  SvgArrowThinRight,
-} from '@actual-app/components/icons/v1';
+import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -32,10 +29,7 @@ import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetName } from '../../spreadsheet/useSheetName';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Row, Field, SheetCell, type SheetCellProps } from '../../table';
-import {
-  BalanceWithCarryover,
-  CarryoverIndicator,
-} from '../BalanceWithCarryover';
+import { BalanceWithCarryover } from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
