@@ -1,4 +1,5 @@
-import React, { useState, type ChangeEvent } from 'react';
+import React, { useState } from 'react';
+import { Form } from 'react-aria-components';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -22,7 +23,7 @@ export function HoldMenu({ onSubmit, onClose }: HoldMenuProps) {
     setAmount(integerToCurrency(Math.max(value || 0, 0)));
   });
 
-  function submit(newAmount: string) {
+  function _onSubmit(newAmount: string) {
     const parsedAmount = evalArithmetic(newAmount);
     if (parsedAmount) {
       onSubmit(amountToInteger(parsedAmount));
@@ -36,39 +37,40 @@ export function HoldMenu({ onSubmit, onClose }: HoldMenuProps) {
   }
 
   return (
-    <View style={{ padding: 10 }}>
-      <View style={{ marginBottom: 5 }}>
-        <Trans>Hold this amount:</Trans>
-      </View>
-      <View>
-        <InitialFocus>
-          <Input
-            value={amount}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setAmount(e.target.value)
-            }
-            onEnter={() => submit(amount)}
-          />
-        </InitialFocus>
-      </View>
-      <View
-        style={{
-          alignItems: 'flex-end',
-          marginTop: 10,
-        }}
-      >
-        <Button
-          variant="primary"
+    <Form
+      onSubmit={e => {
+        e.preventDefault();
+        _onSubmit(amount);
+      }}
+    >
+      <View style={{ padding: 10 }}>
+        <View style={{ marginBottom: 5 }}>
+          <Trans>Hold this amount:</Trans>
+        </View>
+        <View>
+          <InitialFocus>
+            <Input value={amount} onChangeValue={setAmount} />
+          </InitialFocus>
+        </View>
+        <View
           style={{
-            fontSize: 12,
-            paddingTop: 3,
-            paddingBottom: 3,
+            alignItems: 'flex-end',
+            marginTop: 10,
           }}
-          onPress={() => submit(amount)}
         >
-          <Trans>Hold</Trans>
-        </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            style={{
+              fontSize: 12,
+              paddingTop: 3,
+              paddingBottom: 3,
+            }}
+          >
+            <Trans>Hold</Trans>
+          </Button>
+        </View>
       </View>
-    </View>
+    </Form>
   );
 }

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Form } from 'react-aria-components';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -147,26 +148,27 @@ export function ReconcileMenu({
   }
 
   return (
-    <View style={{ padding: '5px 8px' }}>
-      <Text>
-        <Trans>
-          Enter the current balance of your bank account that you want to
-          reconcile with:
-        </Trans>
-      </Text>
-      {clearedBalance != null && (
-        <InitialFocus>
-          <Input
-            defaultValue={format(clearedBalance, 'financial')}
-            onChangeValue={setInputValue}
-            style={{ margin: '7px 0' }}
-            onEnter={onSubmit}
-          />
-        </InitialFocus>
-      )}
-      <Button variant="primary" onPress={onSubmit}>
-        <Trans>Reconcile</Trans>
-      </Button>
-    </View>
+    <Form onSubmit={onSubmit}>
+      <View style={{ padding: '5px 8px' }}>
+        <Text>
+          <Trans>
+            Enter the current balance of your bank account that you want to
+            reconcile with:
+          </Trans>
+        </Text>
+        {clearedBalance != null && (
+          <InitialFocus>
+            <Input
+              defaultValue={format(clearedBalance, 'financial')}
+              onChangeValue={setInputValue}
+              style={{ margin: '7px 0' }}
+            />
+          </InitialFocus>
+        )}
+        <Button type="submit" variant="primary">
+          <Trans>Reconcile</Trans>
+        </Button>
+      </View>
+    </Form>
   );
 }

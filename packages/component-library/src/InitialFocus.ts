@@ -8,7 +8,7 @@ import {
 
 type InitialFocusProps = {
   children:
-    | ReactElement<{ inputRef: Ref<HTMLInputElement> }>
+    | ReactElement<{ ref: Ref<HTMLInputElement> }>
     | ((node: Ref<HTMLInputElement>) => ReactElement);
 };
 
@@ -32,5 +32,5 @@ export function InitialFocus({ children }: InitialFocusProps) {
   if (typeof children === 'function') {
     return children(node);
   }
-  return cloneElement(children, { inputRef: node });
+  return cloneElement(children, { ref: node });
 }
