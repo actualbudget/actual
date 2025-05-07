@@ -6,11 +6,11 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import * as Platform from 'loot-core/client/platform';
-import { trackingBudget } from 'loot-core/client/queries';
+import * as Platform from 'loot-core/shared/platform';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
 import { type Modal as ModalType } from '../../modals/modalsSlice';
+import { trackingBudget } from '../../queries/queries';
 import { BudgetMenu } from '../budget/tracking/BudgetMenu';
 import { useTrackingSheetValue } from '../budget/tracking/TrackingBudgetComponents';
 import {

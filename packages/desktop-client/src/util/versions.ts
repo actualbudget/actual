@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import * as Platform from 'loot-core/client/platform';
+import * as Platform from 'loot-core/shared/platform';
 
 function parseSemanticVersion(versionString): [number, number, number] {
   return versionString

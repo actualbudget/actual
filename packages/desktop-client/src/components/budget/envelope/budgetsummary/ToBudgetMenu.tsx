@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 
-import { envelopeBudget } from 'loot-core/client/queries';
-
+import { envelopeBudget } from '../../../../queries/queries';
 import { useEnvelopeSheetValue } from '../EnvelopeBudgetComponents';
 
 type ToBudgetMenuProps = Omit<

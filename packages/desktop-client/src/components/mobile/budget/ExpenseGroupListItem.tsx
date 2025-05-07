@@ -12,7 +12,6 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
-import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
 import * as monthUtils from 'loot-core/shared/months';
 import {
   type CategoryEntity,
@@ -20,6 +19,7 @@ import {
 } from 'loot-core/types/models';
 
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
+import { envelopeBudget, trackingBudget } from '../../../queries/queries';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';

@@ -4,13 +4,13 @@ import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 
-import { validForTransfer } from 'loot-core/client/transfer';
 import { q } from 'loot-core/shared/query';
 import {
   scheduleIsRecurring,
   extractScheduleConds,
 } from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
+import { validForTransfer } from 'loot-core/shared/transfer';
 import { type TransactionEntity } from 'loot-core/types/models';
 
 import { pushModal } from '../../modals/modalsSlice';
