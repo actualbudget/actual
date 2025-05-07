@@ -93,7 +93,7 @@ jobs:
         run: |
           docker run --detach --publish=5006:5006 --network=host actual-test
           sleep 5
-          curl -LI localhost:5006 -o /dev/null --fail --retry 10 --retry-delay 1 --retry-connrefused 
+          curl -LI localhost:5006 -o /dev/null -fail --retry 10 --retry-delay 1 --retry-connrefused 
       - name: Build and push images
         uses: docker/build-push-action@v5
         with:
