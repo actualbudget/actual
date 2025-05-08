@@ -9,7 +9,6 @@
   "type": "module",
   "files": [
     "build",
-    "default-db.sqlite",
     "README.md",
     "LICENSE"
   ],
