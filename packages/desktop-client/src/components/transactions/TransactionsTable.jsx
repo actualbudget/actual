@@ -69,7 +69,6 @@ import {
   integerToCurrency,
   amountToInteger,
   titleFirst,
-  amountToCurrency,
 } from 'loot-core/shared/util';
 
 import { useDispatch } from '../../redux';
