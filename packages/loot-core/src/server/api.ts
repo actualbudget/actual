@@ -29,7 +29,7 @@ import {
   payeeModel,
   remoteFileModel,
 } from './api-models';
-import { runQuery as aqlQuery } from './aql';
+import { aqlQuery } from './aql';
 import * as cloudStorage from './cloud-storage';
 import { type RemoteFile } from './cloud-storage';
 import * as db from './db';

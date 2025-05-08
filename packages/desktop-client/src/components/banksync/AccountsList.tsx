@@ -4,9 +4,9 @@ import { View } from '@actual-app/components/view';
 
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { useLocale } from '../../hooks/useLocale';
-
 import { AccountRow } from './AccountRow';
+
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type AccountsListProps = {
   accounts: AccountEntity[];

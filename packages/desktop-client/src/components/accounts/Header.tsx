@@ -40,10 +40,6 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
-import { useLocale } from '../../hooks/useLocale';
-import { useLocalPref } from '../../hooks/useLocalPref';
-import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
-import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
 import { AnimatedRefresh } from '../AnimatedRefresh';
 import { Search } from '../common/Search';
 import { FilterButton } from '../filters/FiltersMenu';
@@ -55,6 +51,11 @@ import { SelectedTransactionsButton } from '../transactions/SelectedTransactions
 import { type TableRef } from './Account';
 import { Balances } from './Balance';
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
+
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
+import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 type AccountHeaderProps = {
   tableRef: TableRef;
