@@ -1,6 +1,6 @@
 {
-  "id": "6c844b2c-45e9-47ed-b0c6-a4b93c0f89f8",
-  "prevId": "1fc7d12c-3b9b-4cac-bd55-d7ebde07ffb1",
+  "id": "5b5cc129-d955-4e41-9834-394694abd2c6",
+  "prevId": "5f789619-5592-43df-a47a-1e926cd9b52d",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -100,6 +100,18 @@
           "primaryKey": false,
           "notNull": false
         },
+        "last_sync": {
+          "name": "last_sync",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_reconciled": {
+          "name": "last_reconciled",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
         "tombstone": {
           "name": "tombstone",
           "type": "boolean",
@@ -169,8 +181,12 @@
           "tableFrom": "accounts",
           "tableTo": "banks",
           "schemaTo": "actual",
-          "columnsFrom": ["bank"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "bank"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -368,8 +384,12 @@
           "tableFrom": "categories",
           "tableTo": "category_groups",
           "schemaTo": "actual",
-          "columnsFrom": ["cat_group"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "cat_group"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -537,8 +557,12 @@
           "tableFrom": "category_mapping",
           "tableTo": "categories",
           "schemaTo": "actual",
-          "columnsFrom": ["id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -547,8 +571,12 @@
           "tableFrom": "category_mapping",
           "tableTo": "categories",
           "schemaTo": "actual",
-          "columnsFrom": ["transfer_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "transfer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -559,8 +587,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "actual.kv_cache": {
-      "name": "kv_cache",
+    "actual.kvcache": {
+      "name": "kvcache",
       "schema": "actual",
       "columns": {
         "key": {

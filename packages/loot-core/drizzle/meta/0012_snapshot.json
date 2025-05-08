@@ -1,6 +1,6 @@
 {
-  "id": "9a4825c2-56f4-4c08-ac65-fc587acc31e6",
-  "prevId": "9d1e21ae-f333-4fa0-8a93-7c1b89703f2f",
+  "id": "3b0ba70e-fbae-49de-b920-2dddd51867a2",
+  "prevId": "0c675cab-ead6-45ba-866e-361a60cd5c62",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -100,6 +100,18 @@
           "primaryKey": false,
           "notNull": false
         },
+        "last_sync": {
+          "name": "last_sync",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_reconciled": {
+          "name": "last_reconciled",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
         "tombstone": {
           "name": "tombstone",
           "type": "boolean",
@@ -169,8 +181,12 @@
           "tableFrom": "accounts",
           "tableTo": "banks",
           "schemaTo": "actual",
-          "columnsFrom": ["bank"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "bank"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -368,8 +384,12 @@
           "tableFrom": "categories",
           "tableTo": "category_groups",
           "schemaTo": "actual",
-          "columnsFrom": ["cat_group"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "cat_group"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -537,8 +557,12 @@
           "tableFrom": "category_mapping",
           "tableTo": "categories",
           "schemaTo": "actual",
-          "columnsFrom": ["id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -547,8 +571,12 @@
           "tableFrom": "category_mapping",
           "tableTo": "categories",
           "schemaTo": "actual",
-          "columnsFrom": ["transfer_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "transfer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -559,8 +587,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "actual.kv_cache_key": {
-      "name": "kv_cache_key",
+    "actual.kvcache_key": {
+      "name": "kvcache_key",
       "schema": "actual",
       "columns": {
         "id": {
@@ -571,14 +599,14 @@
         },
         "key": {
           "name": "key",
-          "type": "text",
+          "type": "double precision",
           "primaryKey": false,
           "notNull": false
         }
       },
       "indexes": {
-        "kv_cache_key_key_index": {
-          "name": "kv_cache_key_key_index",
+        "kvcache_key_key_index": {
+          "name": "kvcache_key_key_index",
           "columns": [
             {
               "expression": "key",
@@ -593,26 +621,15 @@
           "with": {}
         }
       },
-      "foreignKeys": {
-        "kv_cache_key_key_kv_cache_key_fk": {
-          "name": "kv_cache_key_key_kv_cache_key_fk",
-          "tableFrom": "kv_cache_key",
-          "tableTo": "kv_cache",
-          "schemaTo": "actual",
-          "columnsFrom": ["key"],
-          "columnsTo": ["key"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "actual.kv_cache": {
-      "name": "kv_cache",
+    "actual.kvcache": {
+      "name": "kvcache",
       "schema": "actual",
       "columns": {
         "key": {
@@ -857,8 +874,12 @@
           "tableFrom": "payee_mapping",
           "tableTo": "payees",
           "schemaTo": "actual",
-          "columnsFrom": ["id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -867,8 +888,12 @@
           "tableFrom": "payee_mapping",
           "tableTo": "payees",
           "schemaTo": "actual",
-          "columnsFrom": ["target_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "target_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -975,8 +1000,12 @@
           "tableFrom": "payees",
           "tableTo": "accounts",
           "schemaTo": "actual",
-          "columnsFrom": ["transfer_acct"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "transfer_acct"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }

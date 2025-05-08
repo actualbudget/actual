@@ -1,6 +1,6 @@
 {
-  "id": "64ee5e49-093f-40c9-96d9-40e78dc1ab31",
-  "prevId": "342f772a-f1fc-4ac9-b689-e5a615870742",
+  "id": "ee14a096-e2a5-4716-bc37-9da5087ec4b0",
+  "prevId": "cfb3678f-33ce-4a3f-afa7-4732182b4332",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -97,6 +97,18 @@
         "account_sync_source": {
           "name": "account_sync_source",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_sync": {
+          "name": "last_sync",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_reconciled": {
+          "name": "last_reconciled",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         },
@@ -850,8 +862,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "actual.kv_cache_key": {
-      "name": "kv_cache_key",
+    "actual.kvcache_key": {
+      "name": "kvcache_key",
       "schema": "actual",
       "columns": {
         "id": {
@@ -862,14 +874,14 @@
         },
         "key": {
           "name": "key",
-          "type": "text",
+          "type": "double precision",
           "primaryKey": false,
           "notNull": false
         }
       },
       "indexes": {
-        "kv_cache_key_key_index": {
-          "name": "kv_cache_key_key_index",
+        "kvcache_key_key_index": {
+          "name": "kvcache_key_key_index",
           "columns": [
             {
               "expression": "key",
@@ -884,30 +896,15 @@
           "with": {}
         }
       },
-      "foreignKeys": {
-        "kv_cache_key_key_kv_cache_key_fk": {
-          "name": "kv_cache_key_key_kv_cache_key_fk",
-          "tableFrom": "kv_cache_key",
-          "tableTo": "kv_cache",
-          "schemaTo": "actual",
-          "columnsFrom": [
-            "key"
-          ],
-          "columnsTo": [
-            "key"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "actual.kv_cache": {
-      "name": "kv_cache",
+    "actual.kvcache": {
+      "name": "kvcache",
       "schema": "actual",
       "columns": {
         "key": {
@@ -1591,7 +1588,7 @@
         },
         "local_next_date_ts": {
           "name": "local_next_date_ts",
-          "type": "bigint",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         },
@@ -1603,7 +1600,7 @@
         },
         "base_next_date_ts": {
           "name": "base_next_date_ts",
-          "type": "bigint",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         },

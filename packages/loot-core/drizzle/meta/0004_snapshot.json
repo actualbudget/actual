@@ -1,6 +1,6 @@
 {
-  "id": "7e8b7711-85fe-4463-89e7-db936168c2c1",
-  "prevId": "27a9d355-31a5-4642-b223-9aea1ad72eef",
+  "id": "583b8aba-442b-40fe-87b9-ffde37f656ee",
+  "prevId": "8fb5a86a-fd5b-4283-bac0-048dba2cc089",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -100,6 +100,18 @@
           "primaryKey": false,
           "notNull": false
         },
+        "last_sync": {
+          "name": "last_sync",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_reconciled": {
+          "name": "last_reconciled",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
         "tombstone": {
           "name": "tombstone",
           "type": "boolean",
@@ -169,8 +181,12 @@
           "tableFrom": "accounts",
           "tableTo": "banks",
           "schemaTo": "actual",
-          "columnsFrom": ["bank"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "bank"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -368,8 +384,12 @@
           "tableFrom": "categories",
           "tableTo": "category_groups",
           "schemaTo": "actual",
-          "columnsFrom": ["cat_group"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "cat_group"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
