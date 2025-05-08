@@ -193,16 +193,16 @@ export async function initApp(isDev, socketName) {
   await Promise.all([asyncStorage.init(), fs.init()]);
   await setupDocumentsDir();
 
-  const db = await pglite.openDatabase();
+  // const db = await pglite.openDatabase();
 
-  const results = await db.execute(
-    `SELECT table_name, column_name, data_type 
-      FROM information_schema.columns 
-      WHERE table_schema = 'public'
-      ORDER BY table_name, ordinal_position;
-    `,
-  );
-  console.log('PGlite columns:', JSON.stringify(results));
+  // const results = await db.execute(
+  //   `SELECT table_name, column_name, data_type
+  //     FROM information_schema.columns
+  //     WHERE table_schema = 'public'
+  //     ORDER BY table_name, ordinal_position;
+  //   `,
+  // );
+  // console.log('PGlite columns:', JSON.stringify(results));
 
   const keysStr = await asyncStorage.getItem('encrypt-keys');
   if (keysStr) {

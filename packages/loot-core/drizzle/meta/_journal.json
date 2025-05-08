@@ -5,217 +5,217 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1746721361570,
+      "when": 1746730834210,
       "tag": "0000_actual",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1746721383355,
+      "when": 1746730843673,
       "tag": "0001_banks",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1746722525862,
+      "when": 1746730853644,
       "tag": "0002_accounts",
       "breakpoints": true
     },
     {
       "idx": 3,
       "version": "7",
-      "when": 1746722701856,
+      "when": 1746730864275,
       "tag": "0003_category_groups",
       "breakpoints": true
     },
     {
       "idx": 4,
       "version": "7",
-      "when": 1746722818051,
+      "when": 1746730874720,
       "tag": "0004_categories",
       "breakpoints": true
     },
     {
       "idx": 5,
       "version": "7",
-      "when": 1746722833733,
+      "when": 1746730886879,
       "tag": "0005_category_mapping",
       "breakpoints": true
     },
     {
       "idx": 6,
       "version": "7",
-      "when": 1746722844034,
-      "tag": "0006_kv_cache",
+      "when": 1746730896436,
+      "tag": "0006_kvcache",
       "breakpoints": true
     },
     {
       "idx": 7,
       "version": "7",
-      "when": 1746722851109,
-      "tag": "0007_kv_cache_key",
+      "when": 1746730906992,
+      "tag": "0007_kvcache_key",
       "breakpoints": true
     },
     {
       "idx": 8,
       "version": "7",
-      "when": 1746722862494,
+      "when": 1746730915928,
       "tag": "0008_messages_clock",
       "breakpoints": true
     },
     {
       "idx": 9,
       "version": "7",
-      "when": 1746722874189,
+      "when": 1746730924822,
       "tag": "0009_messages_crdt",
       "breakpoints": true
     },
     {
       "idx": 10,
       "version": "7",
-      "when": 1746722883714,
+      "when": 1746730934449,
       "tag": "0010_notes",
       "breakpoints": true
     },
     {
       "idx": 11,
       "version": "7",
-      "when": 1746722895450,
+      "when": 1746730943412,
       "tag": "0011_payees",
       "breakpoints": true
     },
     {
       "idx": 12,
       "version": "7",
-      "when": 1746722914119,
+      "when": 1746730954461,
       "tag": "0012_payee_mapping",
       "breakpoints": true
     },
     {
       "idx": 13,
       "version": "7",
-      "when": 1746722924364,
+      "when": 1746730963661,
       "tag": "0013_rules",
       "breakpoints": true
     },
     {
       "idx": 14,
       "version": "7",
-      "when": 1746722939843,
+      "when": 1746730971825,
       "tag": "0014_schedules",
       "breakpoints": true
     },
     {
       "idx": 15,
       "version": "7",
-      "when": 1746722950019,
+      "when": 1746730982958,
       "tag": "0015_schedules_json_paths",
       "breakpoints": true
     },
     {
       "idx": 16,
       "version": "7",
-      "when": 1746722959913,
+      "when": 1746730992016,
       "tag": "0016_schedules_next_date",
       "breakpoints": true
     },
     {
       "idx": 17,
       "version": "7",
-      "when": 1746722975886,
+      "when": 1746731005524,
       "tag": "0017_transactions",
       "breakpoints": true
     },
     {
       "idx": 18,
       "version": "7",
-      "when": 1746722990672,
+      "when": 1746731014562,
       "tag": "0018_reflect_budgets",
       "breakpoints": true
     },
     {
       "idx": 19,
       "version": "7",
-      "when": 1746723001917,
+      "when": 1746731028482,
       "tag": "0019_zero_budgets",
       "breakpoints": true
     },
     {
       "idx": 20,
       "version": "7",
-      "when": 1746723013002,
+      "when": 1746731036915,
       "tag": "0020_zero_budget_months",
       "breakpoints": true
     },
     {
       "idx": 21,
       "version": "7",
-      "when": 1746723025482,
+      "when": 1746731045941,
       "tag": "0021_transaction_filters",
       "breakpoints": true
     },
     {
       "idx": 22,
       "version": "7",
-      "when": 1746723037432,
+      "when": 1746731054763,
       "tag": "0022_preferences",
       "breakpoints": true
     },
     {
       "idx": 23,
       "version": "7",
-      "when": 1746723048051,
+      "when": 1746731066664,
       "tag": "0023_custom_reports",
       "breakpoints": true
     },
     {
       "idx": 24,
       "version": "7",
-      "when": 1746723056559,
+      "when": 1746731078967,
       "tag": "0024_dashboard",
       "breakpoints": true
     },
     {
       "idx": 25,
       "version": "7",
-      "when": 1746723071772,
+      "when": 1746731092244,
       "tag": "0025_v_transactions_internal",
       "breakpoints": true
     },
     {
       "idx": 26,
       "version": "7",
-      "when": 1746726265099,
+      "when": 1746731101910,
       "tag": "0026_v_transactions_internal_alive",
       "breakpoints": true
     },
     {
       "idx": 27,
       "version": "7",
-      "when": 1746726277967,
+      "when": 1746731113137,
       "tag": "0027_v_transactions",
       "breakpoints": true
     },
     {
       "idx": 28,
       "version": "7",
-      "when": 1746726288127,
+      "when": 1746731121373,
       "tag": "0028_v_categories",
       "breakpoints": true
     },
     {
       "idx": 29,
       "version": "7",
-      "when": 1746726296153,
+      "when": 1746731131384,
       "tag": "0029_v_payees",
       "breakpoints": true
     },
     {
       "idx": 30,
       "version": "7",
-      "when": 1746726307504,
+      "when": 1746731142894,
       "tag": "0030_v_schedules",
       "breakpoints": true
     }

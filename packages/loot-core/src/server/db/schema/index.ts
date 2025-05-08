@@ -14,6 +14,8 @@ import {
   serial,
   text,
   varchar,
+  timestamp,
+  doublePrecision,
 } from 'drizzle-orm/pg-core';
 
 import drizzleConfig from '../../../../drizzle.config';
@@ -64,6 +66,8 @@ export const accountsTable = actualSchema.table(
     accountSyncSource: text({
       enum: ['simpleFin', 'goCardless', 'pluggyai'],
     }),
+    lastSync: timestamp({ mode: 'string' }),
+    lastReconciled: timestamp({ mode: 'string' }),
     tombstone: boolean().default(false),
   },
   table => [
@@ -125,16 +129,16 @@ export const categoryMappingTable = actualSchema.table(
   table => [index().on(table.transferId)],
 );
 
-export const kvCacheTable = actualSchema.table('kv_cache', {
+export const kvCacheTable = actualSchema.table('kvcache', {
   key: text().primaryKey(),
   value: text(),
 });
 
 export const kvCacheKeyTable = actualSchema.table(
-  'kv_cache_key',
+  'kvcache_key',
   {
     id: varchar({ length: 36 }).primaryKey(),
-    key: text().references(() => kvCacheTable.key),
+    key: doublePrecision(),
   },
   table => [index().on(table.key)],
 );
@@ -277,10 +281,10 @@ export const schedulesNextDateTable = actualSchema.table(
     scheduleId: varchar({ length: 36 })
       .unique()
       .references(() => schedulesTable.id),
-    localNextDate: date(),
-    localNextDateTs: bigint({ mode: 'number' }),
-    baseNextDate: date(),
-    baseNextDateTs: bigint({ mode: 'number' }),
+    localNextDate: date({ mode: 'string' }),
+    localNextDateTs: timestamp({ mode: 'string' }),
+    baseNextDate: date({ mode: 'string' }),
+    baseNextDateTs: timestamp({ mode: 'string' }),
     tombstone: boolean().default(false),
   },
 );
@@ -298,7 +302,7 @@ export const transactionsTable = actualSchema.table(
     amount: bigint({ mode: 'number' }),
     description: varchar({ length: 36 }),
     notes: text(),
-    date: date(),
+    date: date({ mode: 'string' }),
     // Need to add AnyPgColumn when self-referencing
     // https://orm.drizzle.team/docs/indexes-constraints#foreign-key
     parentId: varchar({ length: 36 }).references(
@@ -341,7 +345,7 @@ export const reflectBudgetsTable = actualSchema.table(
   'reflect_budgets',
   {
     id: text().primaryKey(),
-    month: date(),
+    month: date({ mode: 'string' }),
     category: varchar({ length: 36 }).references(() => categoriesTable.id),
     amount: bigint({ mode: 'number' }),
     carryover: boolean().default(false),
@@ -355,7 +359,7 @@ export const zeroBudgetsTable = actualSchema.table(
   'zero_budgets',
   {
     id: text().primaryKey(),
-    month: date(),
+    month: date({ mode: 'string' }),
     category: varchar({ length: 36 }).references(() => categoriesTable.id),
     amount: bigint({ mode: 'number' }),
     carryover: boolean().default(false),
@@ -396,8 +400,8 @@ export const customReportsTable = actualSchema.table(
   {
     id: varchar({ length: 36 }).primaryKey(),
     name: text(),
-    startDate: date(),
-    endDate: date(),
+    startDate: date({ mode: 'string' }),
+    endDate: date({ mode: 'string' }),
     dateStatic: bigint({ mode: 'number' }),
     dateRange: text(),
     mode: text(),
@@ -453,7 +457,7 @@ const transactionsInternalViewColumns = {
   amount: bigint({ mode: 'number' }),
   payee: varchar({ length: 36 }),
   notes: text(),
-  date: date(),
+  date: date({ mode: 'string' }),
   importedId: text(),
   error: jsonb(),
   importedPayee: text(),
@@ -620,7 +624,7 @@ export const schedulesView = actualSchema
     id: varchar({ length: 36 }),
     name: text(),
     rule: varchar({ length: 36 }),
-    nextDate: date(),
+    nextDate: date({ mode: 'string' }),
     completed: boolean(),
     postsTransaction: boolean(),
     active: boolean(),
