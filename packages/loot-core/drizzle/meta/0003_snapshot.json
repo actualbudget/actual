@@ -1,6 +1,6 @@
 {
-  "id": "27a9d355-31a5-4642-b223-9aea1ad72eef",
-  "prevId": "dd7d985d-d4f0-4427-8ad5-377f46507848",
+  "id": "8fb5a86a-fd5b-4283-bac0-048dba2cc089",
+  "prevId": "8fe6d26f-d393-442a-868f-26f1074c1a93",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -100,6 +100,18 @@
           "primaryKey": false,
           "notNull": false
         },
+        "last_sync": {
+          "name": "last_sync",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_reconciled": {
+          "name": "last_reconciled",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
         "tombstone": {
           "name": "tombstone",
           "type": "boolean",
@@ -169,8 +181,12 @@
           "tableFrom": "accounts",
           "tableTo": "banks",
           "schemaTo": "actual",
-          "columnsFrom": ["bank"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "bank"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
