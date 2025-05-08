@@ -83,15 +83,13 @@ export function Overview() {
   sessionStorage.setItem('url', location.pathname);
 
   const mobileLayout = useMemo(() => {
-    // Return early if widgets aren't loaded to prevent errors
     if (!widgets || widgets.length === 0) {
       return [];
     }
-  
-    // 1. Create a shallow copy to avoid mutating the original array.
+
     const sortedDesktopItems = [...widgets];
-  
-    // 2. Sort the items.
+
+    // Sort to ensure that items are ordered top-to-bottom, and for items on the same row, left-to-right
     sortedDesktopItems.sort((a, b) => {
       if (a.y < b.y) return -1;
       if (a.y > b.y) return 1;
@@ -99,33 +97,34 @@ export function Overview() {
       if (a.x > b.x) return 1;
       return 0;
     });
-  
+
     let currentY = 0;
     return sortedDesktopItems.map(widget => {
       const itemY = currentY;
-      currentY += widget.height; 
-  
+      currentY += widget.height;
+
       return {
-        ...widget,    
-        i: widget.id,  
-        x: 0,          
-        y: itemY,       
-        w: 1,          
-        h: widget.height, 
+        ...widget,
+        i: widget.id,
+        x: 0,
+        y: itemY, // Calculate correct y co-ordinate to prevent react-grid-layout's auto-compacting behaviour
+        w: 1,
+        h: widget.height,
       };
     });
-  }, [widgets]); // Dependency array: recalculate only if 'widgets' changes
-  
-  // Your 'baseLayout' which you use for the desktop can also be memoized:
+  }, [widgets]);
+
   const desktopLayout = useMemo(() => {
     if (!widgets) return [];
     return widgets.map(widget => ({
       i: widget.id,
       w: widget.width,
       h: widget.height,
-      minW: isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 2 : 3,
-      minH: isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 1 : 2,
-      ...widget, 
+      minW:
+        isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 2 : 3,
+      minH:
+        isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 1 : 2,
+      ...widget,
     }));
   }, [widgets]);
 
