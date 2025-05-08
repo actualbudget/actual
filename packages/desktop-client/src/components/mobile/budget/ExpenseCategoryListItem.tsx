@@ -42,6 +42,7 @@ function ExpenseCategoryName({
     show3Columns,
     isSidebar: true,
   });
+
   return (
     <View
       style={{
@@ -173,6 +174,7 @@ function ExpenseCategoryCells({
         <SpentCell
           binding={spent}
           category={category}
+          month={month}
           show3Columns={show3Columns}
           onPress={onShowActivity}
         />

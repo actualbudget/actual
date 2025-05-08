@@ -94,7 +94,7 @@ type BalanceWithCarryoverProps = Omit<
   budgeted: Binding<'envelope-budget' | 'tracking-budget', 'budget'>;
   longGoal: Binding<'envelope-budget' | 'tracking-budget', 'long-goal'>;
   isDisabled?: boolean;
-  isMobileEnvelopeModal?: boolean;
+  shouldInlineGoalStatus?: boolean;
   CarryoverIndicator?: ComponentType<CarryoverIndicatorProps>;
 };
 
@@ -105,7 +105,7 @@ export function BalanceWithCarryover({
   budgeted,
   longGoal,
   isDisabled,
-  isMobileEnvelopeModal,
+  shouldInlineGoalStatus,
   CarryoverIndicator: CarryoverIndicatorComponent = CarryoverIndicator,
   children,
   ...props
@@ -282,7 +282,7 @@ export function BalanceWithCarryover({
               style={getBalanceAmountStyle(balanceValue)}
             />
           )}
-          {isMobileEnvelopeModal &&
+          {shouldInlineGoalStatus &&
             isGoalTemplatesEnabled &&
             goalValue !== null && (
               <>
