@@ -1,4 +1,5 @@
-import path from 'node:path';
+import path, { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import migrate from 'migrate';
 
@@ -9,13 +10,15 @@ export function run(direction = 'up') {
     `Checking if there are any migrations to run for direction "${direction}"...`,
   );
 
+  const __dirname = dirname(fileURLToPath(import.meta.url)); // this directory
+
   return new Promise(resolve =>
     migrate.load(
       {
         stateStore: `${path.join(config.get('dataDir'), '.migrate')}${
           config.get('mode') === 'test' ? '-test' : ''
         }`,
-        migrationsDirectory: `${path.join(config.get('projectRoot'), config.get('mode') === 'test' ? '' : 'build', 'migrations')}`,
+        migrationsDirectory: path.join(__dirname, '../migrations'),
       },
       (err, set) => {
         if (err) {

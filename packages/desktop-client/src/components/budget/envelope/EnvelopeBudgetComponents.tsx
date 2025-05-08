@@ -514,21 +514,13 @@ export function IncomeCategoryMonth({
         }}
       >
         <span onClick={() => onShowActivity(category.id, month)}>
-          <EnvelopeCellValue
-            binding={envelopeBudget.catSumAmount(category.id)}
-            type="financial"
-          >
-            {props => (
-              <CellValueText
-                {...props}
-                className={css({
-                  cursor: 'pointer',
-                  ':hover': { textDecoration: 'underline' },
-                  ...makeAmountGrey(props.value),
-                })}
-              />
-            )}
-          </EnvelopeCellValue>
+          <BalanceWithCarryover
+            carryover={envelopeBudget.catCarryover(category.id)}
+            balance={envelopeBudget.catSumAmount(category.id)}
+            goal={envelopeBudget.catGoal(category.id)}
+            budgeted={envelopeBudget.catBudgeted(category.id)}
+            longGoal={envelopeBudget.catLongGoal(category.id)}
+          />
         </span>
       </Field>
     </View>
