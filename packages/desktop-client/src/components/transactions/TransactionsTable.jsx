@@ -67,7 +67,6 @@ import {
   integerToCurrency,
   amountToInteger,
   titleFirst,
-  amountToCurrency,
 } from 'loot-core/shared/util';
 
 import { pushModal } from '../../modals/modalsSlice';
