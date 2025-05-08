@@ -3436,10 +3436,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electric-sql/pglite@npm:^0.2.17":
-  version: 0.2.17
-  resolution: "@electric-sql/pglite@npm:0.2.17"
-  checksum: 10/cb04d18614c9a3d985fa63f5ca889104eab55b15a9aa569df264e335ea559f2279ee64c1284aa68d5b92ff516dd37ae553299cf55c226a3e541d6c46416c7160
+"@electric-sql/pglite@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "@electric-sql/pglite@npm:0.3.0"
+  checksum: 10/6b8b7ad202d25c37eb99a179f8aa9cb9f5276a6298a6be297e88ece10204d089c82a9087bf3973ca94808160e30823f6245291df43fc8bf8f0c0f97581b6f566
   languageName: node
   linkType: hard
 
@@ -9687,6 +9687,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@typescript-eslint/visitor-keys@npm:8.39.0":
+  version: 8.39.0
+  resolution: "@typescript-eslint/visitor-keys@npm:8.39.0"
+  dependencies:
+    "@typescript-eslint/types": "npm:8.39.0"
+    eslint-visitor-keys: "npm:^4.2.1"
+  checksum: 10/2eb89b9e4d531d52de414591869bc208b45dd71b5f758302f176ef92bc3b922e60be5a046a2788cc0e16724631b2dc95aad849b866716a9c7a6361f994c97379
+  languageName: node
+  linkType: hard
+
 "@ungap/structured-clone@npm:^1.0.0":
   version: 1.3.0
   resolution: "@ungap/structured-clone@npm:1.3.0"
@@ -14154,9 +14164,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"drizzle-orm@npm:^0.41.0":
-  version: 0.41.0
-  resolution: "drizzle-orm@npm:0.41.0"
+"drizzle-orm@npm:^0.43.1":
+  version: 0.43.1
+  resolution: "drizzle-orm@npm:0.43.1"
   peerDependencies:
     "@aws-sdk/client-rds-data": ">=3"
     "@cloudflare/workers-types": ">=4"
@@ -14166,7 +14176,7 @@ __metadata:
     "@neondatabase/serverless": ">=0.10.0"
     "@op-engineering/op-sqlite": ">=2"
     "@opentelemetry/api": ^1.4.1
-    "@planetscale/database": ">=1"
+    "@planetscale/database": ">=1.13"
     "@prisma/client": "*"
     "@tidbcloud/serverless": "*"
     "@types/better-sqlite3": "*"
@@ -14242,7 +14252,7 @@ __metadata:
       optional: true
     sqlite3:
       optional: true
-  checksum: 10/56be10f99f7b6cc62a2751286d4fa35d30ee29d19b3576b92864c4c74cd95eba059a84f6f8ed7cd3b0184b0fbf97ce238c5e1ca5dc2f9107f57092436dcbd61f
+  checksum: 10/ba33711157fd8a5893e6d180ff963dfc248c135e5c9b8fabb770e85b22c431ec561a8c156ff080c3ab1e1b19736ddfbc01b27c36a03efc7e9eba9201b24adcf7
   languageName: node
   linkType: hard
 
@@ -18235,13 +18245,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"isexe@npm:^3.1.1":
-  version: 3.1.1
-  resolution: "isexe@npm:3.1.1"
-  checksum: 10/7fe1931ee4e88eb5aa524cd3ceb8c882537bc3a81b02e438b240e47012eef49c86904d0f0e593ea7c3a9996d18d0f1f3be8d3eaa92333977b0c3a9d353d5563e
-  languageName: node
-  linkType: hard
-
 "isobject@npm:^3.0.1":
   version: 3.0.1
   resolution: "isobject@npm:3.0.1"
@@ -19061,7 +19064,7 @@ __metadata:
     "@actual-app/api": "workspace:^"
     "@actual-app/crdt": "workspace:^"
     "@actual-app/web": "workspace:^"
-    "@electric-sql/pglite": "npm:^0.2.17"
+    "@electric-sql/pglite": "npm:^0.3.0"
     "@jlongster/sql.js": "npm:^1.6.7"
     "@reduxjs/toolkit": "npm:^2.10.1"
     "@rschedule/core": "npm:^1.5.0"

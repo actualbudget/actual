@@ -1,3 +1,5 @@
+import { Column, sql } from 'drizzle-orm';
+
 // @ts-strict-ignore
 export async function incrFetch(
   runQuery,
@@ -33,4 +35,28 @@ export function whereIn(ids: string[], field: string) {
 
   const filter = `${field} IN (` + ids2.map(id => `'${id}'`).join(',') + ')';
   return filter;
+}
+
+// Drizzle ORM expressions
+
+export function isTrue(column: Column | string) {
+  return sql`${columnOrIdentifier(column)} IS TRUE`;
+}
+
+export function isFalse(column: Column | string) {
+  return sql`${columnOrIdentifier(column)} IS FALSE`;
+}
+
+export function excluded(column: Column | string) {
+  return sql`excluded.${columnOrIdentifier(column)}`;
+}
+
+export function lower(column: Column | string) {
+  return sql`LOWER(${columnOrIdentifier(column)})`;
+}
+function columnOrIdentifier(column: Column | string) {
+  if (typeof column === 'string') {
+    return sql.identifier(column);
+  }
+  return column;
 }

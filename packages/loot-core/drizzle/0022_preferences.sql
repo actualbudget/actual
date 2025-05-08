@@ -1,4 +1,4 @@
-CREATE TABLE "preferences" (
+CREATE TABLE "actual"."preferences" (
 	"id" text PRIMARY KEY NOT NULL,
 	"value" text
 );
