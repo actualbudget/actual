@@ -55,7 +55,8 @@
   "devDependencies": {
     "@types/node": "^22.14.0",
     "@types/prompts": "^2.4.9",
-    "@typescript-eslint/parser": "^8.26.1",
+    "@typescript-eslint/eslint-plugin": "^8.32.0",
+    "@typescript-eslint/parser": "^8.32.0",
     "cross-env": "^7.0.3",
     "eslint": "^9.22.0",
     "eslint-config-prettier": "^10.1.1",

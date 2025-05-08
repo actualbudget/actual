@@ -1,192 +1,12 @@
 {
-  "id": "3d010e0f-4a8a-4a8a-b871-75e65835759a",
-  "prevId": "9fd1c064-ca0b-4378-814c-59762ad514e7",
+  "id": "0614a4f2-d914-45db-b87a-7ae8f19ff645",
+  "prevId": "f813e5f1-ebe7-46fe-aaf3-10eea0b4c2a6",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.accounts": {
-      "name": "accounts",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(36)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "offbudget": {
-          "name": "offbudget",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "closed": {
-          "name": "closed",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "sort_order": {
-          "name": "sort_order",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "account_id": {
-          "name": "account_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "balance_current": {
-          "name": "balance_current",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "balance_available": {
-          "name": "balance_available",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "balance_limit": {
-          "name": "balance_limit",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "mask": {
-          "name": "mask",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "official_name": {
-          "name": "official_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "type": {
-          "name": "type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "subtype": {
-          "name": "subtype",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "bank": {
-          "name": "bank",
-          "type": "varchar(36)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "account_sync_source": {
-          "name": "account_sync_source",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tombstone": {
-          "name": "tombstone",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        }
-      },
-      "indexes": {
-        "accounts_name_index": {
-          "name": "accounts_name_index",
-          "columns": [
-            {
-              "expression": "name",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "where": "\"accounts\".\"tombstone\" IS FALSE",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "accounts_bank_index": {
-          "name": "accounts_bank_index",
-          "columns": [
-            {
-              "expression": "bank",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "where": "\"accounts\".\"tombstone\" IS FALSE",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "accounts_sort_order_name_index": {
-          "name": "accounts_sort_order_name_index",
-          "columns": [
-            {
-              "expression": "sort_order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "name",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "accounts_bank_banks_id_fk": {
-          "name": "accounts_bank_banks_id_fk",
-          "tableFrom": "accounts",
-          "tableTo": "banks",
-          "columnsFrom": [
-            "bank"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.banks": {
+    "actual.banks": {
       "name": "banks",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -226,7 +46,7 @@
             }
           ],
           "isUnique": false,
-          "where": "\"banks\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"banks\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -241,7 +61,9 @@
     }
   },
   "enums": {},
-  "schemas": {},
+  "schemas": {
+    "actual": "actual"
+  },
   "sequences": {},
   "roles": {},
   "policies": {},

@@ -1,67 +1,13 @@
 {
-  "id": "9fd1c064-ca0b-4378-814c-59762ad514e7",
+  "id": "f813e5f1-ebe7-46fe-aaf3-10eea0b4c2a6",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
-  "tables": {
-    "public.banks": {
-      "name": "banks",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(36)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "bank_id": {
-          "name": "bank_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tombstone": {
-          "name": "tombstone",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        }
-      },
-      "indexes": {
-        "banks_bank_id_index": {
-          "name": "banks_bank_id_index",
-          "columns": [
-            {
-              "expression": "bank_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "where": "\"banks\".\"tombstone\" IS FALSE",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    }
-  },
+  "tables": {},
   "enums": {},
-  "schemas": {},
+  "schemas": {
+    "actual": "actual"
+  },
   "sequences": {},
   "roles": {},
   "policies": {},

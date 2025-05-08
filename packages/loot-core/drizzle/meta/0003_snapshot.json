@@ -1,12 +1,12 @@
 {
-  "id": "c0ab8cdc-6893-46e9-96e9-afd5295bf383",
-  "prevId": "66c1c40a-0b41-4f6a-b258-c9ca969d6989",
+  "id": "27a9d355-31a5-4642-b223-9aea1ad72eef",
+  "prevId": "dd7d985d-d4f0-4427-8ad5-377f46507848",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.accounts": {
+    "actual.accounts": {
       "name": "accounts",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -120,7 +120,7 @@
             }
           ],
           "isUnique": false,
-          "where": "\"accounts\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"accounts\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -136,7 +136,7 @@
             }
           ],
           "isUnique": false,
-          "where": "\"accounts\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"accounts\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -168,12 +168,9 @@
           "name": "accounts_bank_banks_id_fk",
           "tableFrom": "accounts",
           "tableTo": "banks",
-          "columnsFrom": [
-            "bank"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "schemaTo": "actual",
+          "columnsFrom": ["bank"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -184,9 +181,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.banks": {
+    "actual.banks": {
       "name": "banks",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -226,7 +223,7 @@
             }
           ],
           "isUnique": false,
-          "where": "\"banks\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"banks\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -239,156 +236,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.categories": {
-      "name": "categories",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(36)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_income": {
-          "name": "is_income",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "cat_group": {
-          "name": "cat_group",
-          "type": "varchar(36)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "sort_order": {
-          "name": "sort_order",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "hidden": {
-          "name": "hidden",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "goal_def": {
-          "name": "goal_def",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tombstone": {
-          "name": "tombstone",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        }
-      },
-      "indexes": {
-        "categories_name_index": {
-          "name": "categories_name_index",
-          "columns": [
-            {
-              "expression": "name",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "where": "\"categories\".\"tombstone\" IS FALSE",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "categories_cat_group_index": {
-          "name": "categories_cat_group_index",
-          "columns": [
-            {
-              "expression": "cat_group",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "where": "\"categories\".\"tombstone\" IS FALSE",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "categories_sort_order_id_index": {
-          "name": "categories_sort_order_id_index",
-          "columns": [
-            {
-              "expression": "sort_order",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "categories_goal_def_index": {
-          "name": "categories_goal_def_index",
-          "columns": [
-            {
-              "expression": "goal_def",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "first"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "categories_cat_group_category_groups_id_fk": {
-          "name": "categories_cat_group_category_groups_id_fk",
-          "tableFrom": "categories",
-          "tableTo": "category_groups",
-          "columnsFrom": [
-            "cat_group"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.category_groups": {
+    "actual.category_groups": {
       "name": "category_groups",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -442,7 +292,7 @@
             }
           ],
           "isUnique": false,
-          "where": "\"category_groups\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"category_groups\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -505,7 +355,9 @@
     }
   },
   "enums": {},
-  "schemas": {},
+  "schemas": {
+    "actual": "actual"
+  },
   "sequences": {},
   "roles": {},
   "policies": {},

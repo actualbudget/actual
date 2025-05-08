@@ -1,6 +1,6 @@
 {
-  "id": "800fe09c-b7d1-438d-b381-bc1fc808582e",
-  "prevId": "f85188d9-9299-4c07-a9a8-af27c9d1977b",
+  "id": "64ee5e49-093f-40c9-96d9-40e78dc1ab31",
+  "prevId": "342f772a-f1fc-4ac9-b689-e5a615870742",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -169,8 +169,12 @@
           "tableFrom": "accounts",
           "tableTo": "banks",
           "schemaTo": "actual",
-          "columnsFrom": ["bank"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "bank"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -368,8 +372,12 @@
           "tableFrom": "categories",
           "tableTo": "category_groups",
           "schemaTo": "actual",
-          "columnsFrom": ["cat_group"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "cat_group"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -537,8 +545,12 @@
           "tableFrom": "category_mapping",
           "tableTo": "categories",
           "schemaTo": "actual",
-          "columnsFrom": ["id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -547,12 +559,291 @@
           "tableFrom": "category_mapping",
           "tableTo": "categories",
           "schemaTo": "actual",
-          "columnsFrom": ["transfer_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "transfer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "actual.custom_reports": {
+      "name": "custom_reports",
+      "schema": "actual",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(36)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date_static": {
+          "name": "date_static",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date_range": {
+          "name": "date_range",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "mode": {
+          "name": "mode",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "group_by": {
+          "name": "group_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "balance_type": {
+          "name": "balance_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "show_empty": {
+          "name": "show_empty",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "show_offbudget": {
+          "name": "show_offbudget",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "show_hidden": {
+          "name": "show_hidden",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "show_uncategorized": {
+          "name": "show_uncategorized",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "selected_categories": {
+          "name": "selected_categories",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "graph_type": {
+          "name": "graph_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "conditions": {
+          "name": "conditions",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "conditions_op": {
+          "name": "conditions_op",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "interval": {
+          "name": "interval",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "color_scheme": {
+          "name": "color_scheme",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "include_current": {
+          "name": "include_current",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "sort_by": {
+          "name": "sort_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tombstone": {
+          "name": "tombstone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        }
+      },
+      "indexes": {
+        "custom_reports_name_index": {
+          "name": "custom_reports_name_index",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"actual\".\"custom_reports\".\"tombstone\" IS FALSE",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "custom_reports_conditions_index": {
+          "name": "custom_reports_conditions_index",
+          "columns": [
+            {
+              "expression": "conditions",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"actual\".\"custom_reports\".\"tombstone\" IS FALSE",
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "actual.dashboard": {
+      "name": "dashboard",
+      "schema": "actual",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(36)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "width": {
+          "name": "width",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "height": {
+          "name": "height",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "x": {
+          "name": "x",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "y": {
+          "name": "y",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "meta": {
+          "name": "meta",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tombstone": {
+          "name": "tombstone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        }
+      },
+      "indexes": {
+        "dashboard_y_x_index": {
+          "name": "dashboard_y_x_index",
+          "columns": [
+            {
+              "expression": "y",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            },
+            {
+              "expression": "x",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"actual\".\"dashboard\".\"tombstone\" IS FALSE",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -599,8 +890,12 @@
           "tableFrom": "kv_cache_key",
           "tableTo": "kv_cache",
           "schemaTo": "actual",
-          "columnsFrom": ["key"],
-          "columnsTo": ["key"],
+          "columnsFrom": [
+            "key"
+          ],
+          "columnsTo": [
+            "key"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -857,8 +1152,12 @@
           "tableFrom": "payee_mapping",
           "tableTo": "payees",
           "schemaTo": "actual",
-          "columnsFrom": ["id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -867,8 +1166,12 @@
           "tableFrom": "payee_mapping",
           "tableTo": "payees",
           "schemaTo": "actual",
-          "columnsFrom": ["target_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "target_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -975,12 +1278,41 @@
           "tableFrom": "payees",
           "tableTo": "accounts",
           "schemaTo": "actual",
-          "columnsFrom": ["transfer_acct"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "transfer_acct"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "actual.preferences": {
+      "name": "preferences",
+      "schema": "actual",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -1064,8 +1396,12 @@
           "tableFrom": "reflect_budgets",
           "tableTo": "categories",
           "schemaTo": "actual",
-          "columnsFrom": ["category"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "category"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1215,8 +1551,12 @@
           "tableFrom": "schedules_json_paths",
           "tableTo": "schedules",
           "schemaTo": "actual",
-          "columnsFrom": ["schedule_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "schedule_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1282,8 +1622,12 @@
           "tableFrom": "schedules_next_date",
           "tableTo": "schedules",
           "schemaTo": "actual",
-          "columnsFrom": ["schedule_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "schedule_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1293,7 +1637,9 @@
         "schedules_next_date_scheduleId_unique": {
           "name": "schedules_next_date_scheduleId_unique",
           "nullsNotDistinct": false,
-          "columns": ["schedule_id"]
+          "columns": [
+            "schedule_id"
+          ]
         }
       },
       "policies": {},
@@ -1407,12 +1753,93 @@
           "tableFrom": "schedules",
           "tableTo": "rules",
           "schemaTo": "actual",
-          "columnsFrom": ["rule"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "rule"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "actual.transaction_filters": {
+      "name": "transaction_filters",
+      "schema": "actual",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(36)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "conditions": {
+          "name": "conditions",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "conditions_op": {
+          "name": "conditions_op",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tombstone": {
+          "name": "tombstone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        }
+      },
+      "indexes": {
+        "transaction_filters_name_index": {
+          "name": "transaction_filters_name_index",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"actual\".\"transaction_filters\".\"tombstone\" IS FALSE",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "transaction_filters_conditions_index": {
+          "name": "transaction_filters_conditions_index",
+          "columns": [
+            {
+              "expression": "conditions",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"actual\".\"transaction_filters\".\"tombstone\" IS FALSE",
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -1663,8 +2090,12 @@
           "tableFrom": "transactions",
           "tableTo": "accounts",
           "schemaTo": "actual",
-          "columnsFrom": ["acct"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "acct"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1673,8 +2104,12 @@
           "tableFrom": "transactions",
           "tableTo": "categories",
           "schemaTo": "actual",
-          "columnsFrom": ["category"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "category"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1683,8 +2118,12 @@
           "tableFrom": "transactions",
           "tableTo": "transactions",
           "schemaTo": "actual",
-          "columnsFrom": ["parent_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1693,8 +2132,12 @@
           "tableFrom": "transactions",
           "tableTo": "transactions",
           "schemaTo": "actual",
-          "columnsFrom": ["transferred_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "transferred_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1703,12 +2146,41 @@
           "tableFrom": "transactions",
           "tableTo": "schedules",
           "schemaTo": "actual",
-          "columnsFrom": ["schedule"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "schedule"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "actual.zero_budget_months": {
+      "name": "zero_budget_months",
+      "schema": "actual",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "buffered": {
+          "name": "buffered",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -1792,8 +2264,12 @@
           "tableFrom": "zero_budgets",
           "tableTo": "categories",
           "schemaTo": "actual",
-          "columnsFrom": ["category"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "category"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1812,7 +2288,584 @@
   "sequences": {},
   "roles": {},
   "policies": {},
-  "views": {},
+  "views": {
+    "actual.v_categories": {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(36)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isIncome": {
+          "name": "isIncome",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "hidden": {
+          "name": "hidden",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "sortOrder": {
+          "name": "sortOrder",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tombstone": {
+          "name": "tombstone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        }
+      },
+      "definition": "select \"id\", \"name\", \"is_income\", \"hidden\", \"cat_group\" as \"group\", \"sort_order\", \"tombstone\" from \"actual\".\"categories\"",
+      "name": "v_categories",
+      "schema": "actual",
+      "isExisting": false,
+      "materialized": false
+    },
+    "actual.v_payees": {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(36)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "transferAcct": {
+          "name": "transferAcct",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "favorite": {
+          "name": "favorite",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "learnCategories": {
+          "name": "learnCategories",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "tombstone": {
+          "name": "tombstone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        }
+      },
+      "definition": "select \"actual\".\"payees\".\"id\", COALESCE(\"actual\".\"accounts\".\"name\", \"actual\".\"payees\".\"name\") as \"name\", \"actual\".\"payees\".\"transfer_acct\", \"actual\".\"payees\".\"favorite\", \"actual\".\"payees\".\"learn_categories\", \"actual\".\"payees\".\"tombstone\" from \"actual\".\"payees\" left join \"actual\".\"accounts\" on (\"actual\".\"payees\".\"transfer_acct\" = \"actual\".\"accounts\".\"id\" and \"actual\".\"accounts\".\"tombstone\" IS FALSE) where (\"actual\".\"payees\".\"transfer_acct\" is null or \"actual\".\"accounts\".\"id\" is not null)",
+      "name": "v_payees",
+      "schema": "actual",
+      "isExisting": false,
+      "materialized": false
+    },
+    "actual.v_schedules": {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rule": {
+          "name": "rule",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nextDate": {
+          "name": "nextDate",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "completed": {
+          "name": "completed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "postsTransaction": {
+          "name": "postsTransaction",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tombstone": {
+          "name": "tombstone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_payee": {
+          "name": "_payee",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_account": {
+          "name": "_account",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_amount": {
+          "name": "_amount",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_amountOp": {
+          "name": "_amountOp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_date": {
+          "name": "_date",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_conditions": {
+          "name": "_conditions",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_actions": {
+          "name": "_actions",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "\n    WITH parsed_rule_conditions AS (\n      SELECT\n        \"actual\".\"rules\".\"id\" AS rule_id,\n        jsonb_extract_path_text(condition, 'value') AS value,\n        condition ->> 'field' AS field,\n        condition ->> 'op' AS op\n      FROM\n        \"actual\".\"rules\"\n      CROSS JOIN\n        jsonb_array_elements(\"actual\".\"rules\".\"conditions\"::jsonb) AS condition\n    )\n    SELECT\n        \"actual\".\"schedules\".\"id\",\n        \"actual\".\"schedules\".\"name\",\n        \"actual\".\"schedules\".\"rule\",\n        CASE\n            WHEN \"actual\".\"schedules_next_date\".\"local_next_date_ts\" = \"actual\".\"schedules_next_date\".\"base_next_date_ts\" THEN \"actual\".\"schedules_next_date\".\"local_next_date\"\n            ELSE \"actual\".\"schedules_next_date\".\"base_next_date\"\n        END AS next_date,\n        \"actual\".\"schedules\".\"completed\",\n        \"actual\".\"schedules\".\"posts_transaction\",\n        \"actual\".\"schedules\".\"tombstone\",\n        \"actual\".\"payee_mapping\".\"target_id\" AS _payee,\n        account_condition.value AS _account,\n        amount_condition.value AS _amount,\n        amount_condition.op AS _amount_op,\n        date_condition.value AS _date,\n        \"actual\".\"rules\".\"conditions\" AS _conditions,\n        \"actual\".\"rules\".\"actions\" AS _actions\n    FROM\n        \"actual\".\"schedules\"\n    LEFT JOIN\n        \"actual\".\"schedules_next_date\" ON \"actual\".\"schedules_next_date\".\"schedule_id\" = \"actual\".\"schedules\".\"id\"\n    LEFT JOIN\n        \"actual\".\"rules\" ON \"actual\".\"rules\".\"id\" = \"actual\".\"schedules\".\"rule\"\n    LEFT JOIN\n        parsed_rule_conditions payee_condition\n          ON payee_condition.rule_id = \"actual\".\"rules\".\"id\"\n            AND payee_condition.field = 'payee'\n    LEFT JOIN\n        \"actual\".\"payee_mapping\" ON \"actual\".\"payee_mapping\".\"id\" = payee_condition.value\n    LEFT JOIN\n        parsed_rule_conditions account_condition\n          ON account_condition.rule_id = \"actual\".\"rules\".\"id\"\n            AND account_condition.field = 'account'\n    LEFT JOIN\n        parsed_rule_conditions amount_condition\n          ON amount_condition.rule_id = \"actual\".\"rules\".\"id\"\n            AND amount_condition.field = 'amount'\n    LEFT JOIN\n        parsed_rule_conditions date_condition\n          ON date_condition.rule_id = \"actual\".\"rules\".\"id\"\n            AND date_condition.field = 'date'\n  ",
+      "name": "v_schedules",
+      "schema": "actual",
+      "isExisting": false,
+      "materialized": false
+    },
+    "actual.v_transactions_internal": {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isParent": {
+          "name": "isParent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isChild": {
+          "name": "isChild",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentId": {
+          "name": "parentId",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "account": {
+          "name": "account",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "category": {
+          "name": "category",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "amount": {
+          "name": "amount",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payee": {
+          "name": "payee",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "importedId": {
+          "name": "importedId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "error": {
+          "name": "error",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "importedPayee": {
+          "name": "importedPayee",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "startingBalanceFlag": {
+          "name": "startingBalanceFlag",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "transferId": {
+          "name": "transferId",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "schedule": {
+          "name": "schedule",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cleared": {
+          "name": "cleared",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reconciled": {
+          "name": "reconciled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tombstone": {
+          "name": "tombstone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sortOrder": {
+          "name": "sortOrder",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "\n    SELECT\n      \"actual\".\"transactions\".\"id\",\n      \"actual\".\"transactions\".\"is_parent\",\n      \"actual\".\"transactions\".\"is_child\",\n      CASE WHEN \"actual\".\"transactions\".\"is_child\" IS FALSE THEN NULL ELSE \"actual\".\"transactions\".\"parent_id\" END AS parent_id,\n      \"actual\".\"transactions\".\"acct\" AS account,\n      CASE WHEN \"actual\".\"transactions\".\"is_parent\" IS TRUE THEN NULL ELSE \"actual\".\"category_mapping\".\"transfer_id\" END AS category,\n      COALESCE(\"actual\".\"transactions\".\"amount\", 0) AS amount,\n      \"actual\".\"payee_mapping\".\"target_id\" AS payee,\n      \"actual\".\"transactions\".\"notes\",\n      \"actual\".\"transactions\".\"date\",\n      \"actual\".\"transactions\".\"financial_id\" AS imported_id,\n      \"actual\".\"transactions\".\"error\",\n      \"actual\".\"transactions\".\"imported_description\" AS imported_payee,\n      \"actual\".\"transactions\".\"starting_balance_flag\",\n      \"actual\".\"transactions\".\"transferred_id\" AS transfer_id,\n      \"actual\".\"transactions\".\"schedule\",\n      \"actual\".\"transactions\".\"cleared\",\n      \"actual\".\"transactions\".\"reconciled\",\n      \"actual\".\"transactions\".\"tombstone\",\n      \"actual\".\"transactions\".\"sort_order\"\n    FROM\n      \"actual\".\"transactions\"\n    LEFT JOIN\n      \"actual\".\"category_mapping\"\n        ON \"actual\".\"transactions\".\"category\" = \"actual\".\"category_mapping\".\"id\"\n    LEFT JOIN\n      \"actual\".\"payee_mapping\"\n        ON \"actual\".\"transactions\".\"description\" = \"actual\".\"payee_mapping\".\"id\"\n    WHERE\n      \"actual\".\"transactions\".\"date\" IS NOT NULL\n      AND \"actual\".\"transactions\".\"acct\" IS NOT NULL\n      AND (\"actual\".\"transactions\".\"is_child\" IS FALSE OR \"actual\".\"transactions\".\"parent_id\" IS NOT NULL)\n  ",
+      "name": "v_transactions_internal",
+      "schema": "actual",
+      "isExisting": false,
+      "materialized": false
+    },
+    "actual.v_transactions_internal_alive": {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isParent": {
+          "name": "isParent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isChild": {
+          "name": "isChild",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentId": {
+          "name": "parentId",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "account": {
+          "name": "account",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "category": {
+          "name": "category",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "amount": {
+          "name": "amount",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payee": {
+          "name": "payee",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "importedId": {
+          "name": "importedId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "error": {
+          "name": "error",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "importedPayee": {
+          "name": "importedPayee",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "startingBalanceFlag": {
+          "name": "startingBalanceFlag",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "transferId": {
+          "name": "transferId",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "schedule": {
+          "name": "schedule",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cleared": {
+          "name": "cleared",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reconciled": {
+          "name": "reconciled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tombstone": {
+          "name": "tombstone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sortOrder": {
+          "name": "sortOrder",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "\n    SELECT\n      \"actual\".\"v_transactions_internal\".*\n    FROM\n      \"actual\".\"v_transactions_internal\"\n    LEFT JOIN\n      \"actual\".\"transactions\"\n        ON (\"actual\".\"transactions\".\"is_child\" IS TRUE\n        AND \"actual\".\"transactions\".\"id\" = \"v_transactions_internal\".\"parent_id\")\n    WHERE\n      COALESCE(\"actual\".\"transactions\".\"tombstone\", FALSE) IS FALSE\n      AND (\"v_transactions_internal\".\"is_child\" IS FALSE OR \"actual\".\"transactions\".\"tombstone\" IS FALSE)\n  ",
+      "name": "v_transactions_internal_alive",
+      "schema": "actual",
+      "isExisting": false,
+      "materialized": false
+    },
+    "actual.v_transactions": {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isParent": {
+          "name": "isParent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isChild": {
+          "name": "isChild",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "parentId": {
+          "name": "parentId",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "account": {
+          "name": "account",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "category": {
+          "name": "category",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "amount": {
+          "name": "amount",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payee": {
+          "name": "payee",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "importedId": {
+          "name": "importedId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "error": {
+          "name": "error",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "importedPayee": {
+          "name": "importedPayee",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "startingBalanceFlag": {
+          "name": "startingBalanceFlag",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "transferId": {
+          "name": "transferId",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "schedule": {
+          "name": "schedule",
+          "type": "varchar(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cleared": {
+          "name": "cleared",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reconciled": {
+          "name": "reconciled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tombstone": {
+          "name": "tombstone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sortOrder": {
+          "name": "sortOrder",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "definition": "\n    SELECT\n      \"v_transactions_internal_alive\".\"id\",\n      \"v_transactions_internal_alive\".\"is_parent\",\n      \"v_transactions_internal_alive\".\"is_child\",\n      \"v_transactions_internal_alive\".\"parent_id\",\n      \"actual\".\"accounts\".\"id\" AS account,\n      \"actual\".\"categories\".\"id\" AS category,\n      \"v_transactions_internal_alive\".\"amount\",\n      \"actual\".\"payees\".\"id\" AS payee,\n      \"v_transactions_internal_alive\".\"notes\",\n      \"v_transactions_internal_alive\".\"date\",\n      \"v_transactions_internal_alive\".\"imported_id\",\n      \"v_transactions_internal_alive\".\"error\",\n      \"v_transactions_internal_alive\".\"imported_payee\",\n      \"v_transactions_internal_alive\".\"starting_balance_flag\",\n      \"v_transactions_internal_alive\".\"transfer_id\",\n      \"v_transactions_internal_alive\".\"sort_order\",\n      \"v_transactions_internal_alive\".\"cleared\",\n      \"v_transactions_internal_alive\".\"reconciled\",\n      \"v_transactions_internal_alive\".\"tombstone\",\n      \"v_transactions_internal_alive\".\"schedule\"\n    FROM\n      \"actual\".\"v_transactions_internal_alive\"\n    LEFT JOIN\n      \"actual\".\"payees\"\n        ON (\"actual\".\"payees\".\"id\" = \"v_transactions_internal_alive\".\"payee\"\n        AND \"actual\".\"payees\".\"tombstone\" IS FALSE)\n    LEFT JOIN\n      \"actual\".\"categories\"\n        ON (\"actual\".\"categories\".\"id\" = \"v_transactions_internal_alive\".\"category\"\n        AND \"actual\".\"categories\".\"tombstone\" IS FALSE)\n    LEFT JOIN\n      \"actual\".\"accounts\"\n        ON (\"actual\".\"accounts\".\"id\" = \"v_transactions_internal_alive\".\"account\"\n        AND \"actual\".\"accounts\".\"tombstone\" IS FALSE)\n    ORDER BY\n      \"v_transactions_internal_alive\".\"date\" DESC,\n      \"v_transactions_internal_alive\".\"starting_balance_flag\",\n      \"v_transactions_internal_alive\".\"sort_order\" DESC,\n      \"v_transactions_internal_alive\".\"id\"\n  ",
+      "name": "v_transactions",
+      "schema": "actual",
+      "isExisting": false,
+      "materialized": false
+    }
+  },
   "_meta": {
     "columns": {},
     "schemas": {},

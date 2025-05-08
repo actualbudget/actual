@@ -1,5 +1,5 @@
-/* eslint-disable rulesdir/typography */
-import { and, Column, eq, isNotNull, isNull, or, sql } from 'drizzle-orm';
+import { Clock, deserializeClock, serializeClock } from '@actual-app/crdt';
+import { and, eq, isNotNull, isNull, or, sql } from 'drizzle-orm';
 import {
   AnyPgColumn,
   bigint,
@@ -9,8 +9,7 @@ import {
   index,
   integer,
   jsonb,
-  pgTable,
-  pgView,
+  pgSchema,
   QueryBuilder,
   serial,
   text,
@@ -18,6 +17,8 @@ import {
 } from 'drizzle-orm/pg-core';
 
 import drizzleConfig from '../../../../drizzle.config';
+import { Template } from '../../budget/types/templates';
+import { isFalse, lower } from '../util';
 
 const bytea = customType<{
   // data: Buffer;
@@ -29,18 +30,9 @@ const bytea = customType<{
   },
 });
 
-function isFalse(column: Column) {
-  return sql`${column} IS FALSE`;
-}
+export const actualSchema = pgSchema('actual');
 
-export function excluded(column: Column | string) {
-  if (typeof column === 'string') {
-    return sql`excluded.${sql.identifier(column)}`;
-  }
-  return sql`excluded.${column}`;
-}
-
-export const banksTable = pgTable(
+export const banksTable = actualSchema.table(
   'banks',
   {
     id: varchar({ length: 36 }).primaryKey(),
@@ -51,7 +43,7 @@ export const banksTable = pgTable(
   table => [index().on(table.bankId).where(isFalse(table.tombstone))],
 );
 
-export const accountsTable = pgTable(
+export const accountsTable = actualSchema.table(
   'accounts',
   {
     id: varchar({ length: 36 }).primaryKey(),
@@ -59,6 +51,7 @@ export const accountsTable = pgTable(
     offbudget: boolean().default(false),
     closed: boolean().default(false),
     sortOrder: bigint({ mode: 'number' }),
+    // This is UUID but with some prefix.
     accountId: text(),
     balanceCurrent: bigint({ mode: 'number' }),
     balanceAvailable: bigint({ mode: 'number' }),
@@ -68,7 +61,9 @@ export const accountsTable = pgTable(
     type: text(),
     subtype: text(),
     bank: varchar({ length: 36 }).references(() => banksTable.id),
-    accountSyncSource: text(),
+    accountSyncSource: text({
+      enum: ['simpleFin', 'goCardless', 'pluggyai'],
+    }),
     tombstone: boolean().default(false),
   },
   table => [
@@ -79,7 +74,7 @@ export const accountsTable = pgTable(
   ],
 );
 
-export const categoryGroupsTable = pgTable(
+export const categoryGroupsTable = actualSchema.table(
   'category_groups',
   {
     id: varchar({ length: 36 }).primaryKey(),
@@ -97,7 +92,7 @@ export const categoryGroupsTable = pgTable(
   ],
 );
 
-export const categoriesTable = pgTable(
+export const categoriesTable = actualSchema.table(
   'categories',
   {
     id: varchar({ length: 36 }).primaryKey(),
@@ -106,7 +101,7 @@ export const categoriesTable = pgTable(
     catGroup: varchar({ length: 36 }).references(() => categoryGroupsTable.id),
     sortOrder: bigint({ mode: 'number' }),
     hidden: boolean().default(false),
-    goalDef: jsonb(),
+    goalDef: jsonb().$type<Template[]>(),
     tombstone: boolean().default(false),
   },
   table => [
@@ -118,7 +113,7 @@ export const categoriesTable = pgTable(
   ],
 );
 
-export const categoryMappingTable = pgTable(
+export const categoryMappingTable = actualSchema.table(
   'category_mapping',
   {
     id: varchar({ length: 36 })
@@ -130,12 +125,12 @@ export const categoryMappingTable = pgTable(
   table => [index().on(table.transferId)],
 );
 
-export const kvCacheTable = pgTable('kv_cache', {
+export const kvCacheTable = actualSchema.table('kv_cache', {
   key: text().primaryKey(),
   value: text(),
 });
 
-export const kvCacheKeyTable = pgTable(
+export const kvCacheKeyTable = actualSchema.table(
   'kv_cache_key',
   {
     id: varchar({ length: 36 }).primaryKey(),
@@ -144,16 +139,28 @@ export const kvCacheKeyTable = pgTable(
   table => [index().on(table.key)],
 );
 
-export const messagesClockTable = pgTable(
+const clockJsonb = customType<{ data: Clock; driverData: string }>({
+  dataType() {
+    return 'jsonb';
+  },
+  toDriver(clock: Clock): string {
+    return serializeClock(clock);
+  },
+  fromDriver(clock: string): Clock {
+    return deserializeClock(clock);
+  },
+});
+
+export const messagesClockTable = actualSchema.table(
   'messages_clock',
   {
     id: integer().primaryKey(),
-    clock: jsonb(),
+    clock: clockJsonb(),
   },
   table => [index().using('gin', table.clock)],
 );
 
-export const messagesCrdtTable = pgTable(
+export const messagesCrdtTable = actualSchema.table(
   'messages_crdt',
   {
     id: serial().primaryKey(),
@@ -169,12 +176,16 @@ export const messagesCrdtTable = pgTable(
   ],
 );
 
-export const notesTable = pgTable('notes', {
-  id: varchar({ length: 36 }).primaryKey(),
-  note: text(),
-});
+export const notesTable = actualSchema.table(
+  'notes',
+  {
+    id: varchar({ length: 36 }).primaryKey(),
+    note: text(),
+  },
+  table => [index().using('gin', table.note.op('gin_trgm_ops'))],
+);
 
-export const payeesTable = pgTable(
+export const payeesTable = actualSchema.table(
   'payees',
   {
     id: varchar({ length: 36 }).primaryKey(),
@@ -188,11 +199,14 @@ export const payeesTable = pgTable(
   },
   table => [
     index().on(table.name).where(isFalse(table.tombstone)),
-    index().on(table.transferAcct.nullsFirst()).where(isFalse(table.tombstone)),
+    // Sorting indeces
+    index('payees_transfer_acct_name_index')
+      .on(table.transferAcct.nullsFirst().desc(), lower(table.name))
+      .where(isFalse(table.tombstone)),
   ],
 );
 
-export const payeeMappingTable = pgTable(
+export const payeeMappingTable = actualSchema.table(
   'payee_mapping',
   {
     id: varchar({ length: 36 })
@@ -204,7 +218,7 @@ export const payeeMappingTable = pgTable(
   table => [index().on(table.targetId)],
 );
 
-export const rulesTable = pgTable(
+export const rulesTable = actualSchema.table(
   'rules',
   {
     id: varchar({ length: 36 }).primaryKey(),
@@ -221,7 +235,7 @@ export const rulesTable = pgTable(
   ],
 );
 
-export const schedulesTable = pgTable(
+export const schedulesTable = actualSchema.table(
   'schedules',
   {
     id: varchar({ length: 36 }).primaryKey(),
@@ -243,29 +257,35 @@ export const schedulesTable = pgTable(
  * This may no longer be needed since postgresql natively
  * supports querying jsonb columns.
  */
-export const schedulesJsonPathTable = pgTable('schedules_json_paths', {
-  scheduleId: varchar({ length: 36 })
-    .primaryKey()
-    .references(() => schedulesTable.id),
-  payee: text(),
-  account: text(),
-  amount: text(),
-  date: text(),
-});
+export const schedulesJsonPathTable = actualSchema.table(
+  'schedules_json_paths',
+  {
+    scheduleId: varchar({ length: 36 })
+      .primaryKey()
+      .references(() => schedulesTable.id),
+    payee: text(),
+    account: text(),
+    amount: text(),
+    date: text(),
+  },
+);
 
-export const schedulesNextDateTable = pgTable('schedules_next_date', {
-  id: varchar({ length: 36 }).primaryKey(),
-  scheduleId: varchar({ length: 36 })
-    .unique()
-    .references(() => schedulesTable.id),
-  localNextDate: date(),
-  localNextDateTs: bigint({ mode: 'number' }),
-  baseNextDate: date(),
-  baseNextDateTs: bigint({ mode: 'number' }),
-  tombstone: boolean().default(false),
-});
+export const schedulesNextDateTable = actualSchema.table(
+  'schedules_next_date',
+  {
+    id: varchar({ length: 36 }).primaryKey(),
+    scheduleId: varchar({ length: 36 })
+      .unique()
+      .references(() => schedulesTable.id),
+    localNextDate: date(),
+    localNextDateTs: bigint({ mode: 'number' }),
+    baseNextDate: date(),
+    baseNextDateTs: bigint({ mode: 'number' }),
+    tombstone: boolean().default(false),
+  },
+);
 
-export const transactionsTable = pgTable(
+export const transactionsTable = actualSchema.table(
   'transactions',
   {
     id: varchar({ length: 36 }).primaryKey(),
@@ -317,7 +337,7 @@ export const transactionsTable = pgTable(
   ],
 );
 
-export const reflectBudgetsTable = pgTable(
+export const reflectBudgetsTable = actualSchema.table(
   'reflect_budgets',
   {
     id: text().primaryKey(),
@@ -331,7 +351,7 @@ export const reflectBudgetsTable = pgTable(
   table => [index().on(table.month, table.category)],
 );
 
-export const zeroBudgetsTable = pgTable(
+export const zeroBudgetsTable = actualSchema.table(
   'zero_budgets',
   {
     id: text().primaryKey(),
@@ -345,12 +365,12 @@ export const zeroBudgetsTable = pgTable(
   table => [index().on(table.month, table.category)],
 );
 
-export const zeroBudgetMonthsTable = pgTable('zero_budget_months', {
+export const zeroBudgetMonthsTable = actualSchema.table('zero_budget_months', {
   id: text().primaryKey(),
   buffered: bigint({ mode: 'number' }),
 });
 
-export const transactionFiltersTable = pgTable(
+export const transactionFiltersTable = actualSchema.table(
   'transaction_filters',
   {
     id: varchar({ length: 36 }).primaryKey(),
@@ -366,12 +386,12 @@ export const transactionFiltersTable = pgTable(
   ],
 );
 
-export const preferencesTable = pgTable('preferences', {
+export const preferencesTable = actualSchema.table('preferences', {
   id: text().primaryKey(),
   value: text(),
 });
 
-export const customReportsTable = pgTable(
+export const customReportsTable = actualSchema.table(
   'custom_reports',
   {
     id: varchar({ length: 36 }).primaryKey(),
@@ -405,7 +425,7 @@ export const customReportsTable = pgTable(
   ],
 );
 
-export const dashboardTable = pgTable(
+export const dashboardTable = actualSchema.table(
   'dashboard',
   {
     id: varchar({ length: 36 }).primaryKey(),
@@ -414,7 +434,7 @@ export const dashboardTable = pgTable(
     height: integer(),
     x: integer(),
     y: integer(),
-    meta: jsonb(),
+    meta: jsonb().$type<Record<string, unknown>>(),
     tombstone: boolean().default(false),
   },
   table => [
@@ -446,11 +466,10 @@ const transactionsInternalViewColumns = {
   sortOrder: bigint({ mode: 'number' }),
 };
 
-export const transactionsInternalView = pgView(
-  'v_transactions_internal',
-  transactionsInternalViewColumns,
-).as(
-  sql`
+export const transactionsInternalView = actualSchema
+  .view('v_transactions_internal', transactionsInternalViewColumns)
+  .as(
+    sql`
     SELECT
       ${transactionsTable.id},
       ${transactionsTable.isParent},
@@ -485,13 +504,12 @@ export const transactionsInternalView = pgView(
       AND ${transactionsTable.acct} IS NOT NULL
       AND (${transactionsTable.isChild} IS FALSE OR ${transactionsTable.parentId} IS NOT NULL)
   `,
-);
+  );
 
-export const transactionsInternalViewAlive = pgView(
-  'v_transactions_internal_alive',
-  transactionsInternalViewColumns,
-).as(
-  sql`
+export const transactionsInternalViewAlive = actualSchema
+  .view('v_transactions_internal_alive', transactionsInternalViewColumns)
+  .as(
+    sql`
     SELECT
       ${transactionsInternalView}.*
     FROM
@@ -504,13 +522,12 @@ export const transactionsInternalViewAlive = pgView(
       COALESCE(${transactionsTable.tombstone}, FALSE) IS FALSE
       AND (${transactionsInternalView.isChild} IS FALSE OR ${transactionsTable.tombstone} IS FALSE)
   `,
-);
+  );
 
-export const transactionsView = pgView(
-  'v_transactions',
-  transactionsInternalViewColumns,
-).as(
-  sql`
+export const transactionsView = actualSchema
+  .view('v_transactions', transactionsInternalViewColumns)
+  .as(
+    sql`
     SELECT
       ${transactionsInternalViewAlive.id},
       ${transactionsInternalViewAlive.isParent},
@@ -552,14 +569,14 @@ export const transactionsView = pgView(
       ${transactionsInternalViewAlive.sortOrder} DESC,
       ${transactionsInternalViewAlive.id}
   `,
-);
+  );
 
 // https://github.com/drizzle-team/drizzle-orm/issues/3332
 const snakeCaseQueryBuilder = new QueryBuilder({
   casing: drizzleConfig.casing,
 });
 
-export const categoriesView = pgView('v_categories').as(
+export const categoriesView = actualSchema.view('v_categories').as(
   snakeCaseQueryBuilder
     .select({
       id: categoriesTable.id,
@@ -573,7 +590,7 @@ export const categoriesView = pgView('v_categories').as(
     .from(categoriesTable),
 );
 
-export const payeesView = pgView('v_payees').as(
+export const payeesView = actualSchema.view('v_payees').as(
   snakeCaseQueryBuilder
     .select({
       id: payeesTable.id,
@@ -598,24 +615,27 @@ export const payeesView = pgView('v_payees').as(
     .where(or(isNull(payeesTable.transferAcct), isNotNull(accountsTable.id))),
 );
 
-export const schedulesView = pgView('v_schedules', {
-  id: varchar({ length: 36 }),
-  name: text(),
-  rule: varchar({ length: 36 }),
-  nextDate: date(),
-  completed: boolean(),
-  postsTransaction: boolean(),
-  active: boolean(),
-  tombstone: boolean(),
-  _payee: varchar({ length: 36 }),
-  _account: varchar({ length: 36 }),
-  _amount: text(),
-  _amountOp: text(),
-  _date: jsonb(),
-  _conditions: jsonb(),
-  _actions: jsonb(),
-}).as(
-  sql`
+export const schedulesView = actualSchema
+  .view('v_schedules', {
+    id: varchar({ length: 36 }),
+    name: text(),
+    rule: varchar({ length: 36 }),
+    nextDate: date(),
+    completed: boolean(),
+    postsTransaction: boolean(),
+    active: boolean(),
+    tombstone: boolean(),
+    _payee: varchar({ length: 36 }),
+    _account: varchar({ length: 36 }),
+    _amount: text(),
+    _amountOp: text(),
+    _date: jsonb(),
+    _conditions: jsonb(),
+    _actions: jsonb(),
+  })
+  .as(
+    /* eslint-disable rulesdir/typography */
+    sql`
     WITH parsed_rule_conditions AS (
       SELECT
         ${rulesTable.id} AS rule_id,
@@ -670,4 +690,5 @@ export const schedulesView = pgView('v_schedules', {
           ON date_condition.rule_id = ${rulesTable.id}
             AND date_condition.field = 'date'
   `,
-);
+    /* eslint-enable rulesdir/typography */
+  );

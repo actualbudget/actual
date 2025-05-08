@@ -1,12 +1,12 @@
 {
-  "id": "a52fda29-bfd1-4f7d-b633-db5426032028",
-  "prevId": "4609b908-1e0d-4ba7-a68a-43eaffed1095",
+  "id": "3881d4f5-5242-408d-a63a-02354b0b5bab",
+  "prevId": "6c844b2c-45e9-47ed-b0c6-a4b93c0f89f8",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.accounts": {
+    "actual.accounts": {
       "name": "accounts",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -120,7 +120,7 @@
             }
           ],
           "isUnique": false,
-          "where": "\"accounts\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"accounts\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -136,7 +136,7 @@
             }
           ],
           "isUnique": false,
-          "where": "\"accounts\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"accounts\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -168,12 +168,9 @@
           "name": "accounts_bank_banks_id_fk",
           "tableFrom": "accounts",
           "tableTo": "banks",
-          "columnsFrom": [
-            "bank"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "schemaTo": "actual",
+          "columnsFrom": ["bank"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -184,9 +181,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.banks": {
+    "actual.banks": {
       "name": "banks",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -226,7 +223,7 @@
             }
           ],
           "isUnique": false,
-          "where": "\"banks\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"banks\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -239,9 +236,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.categories": {
+    "actual.categories": {
       "name": "categories",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -307,7 +304,7 @@
             }
           ],
           "isUnique": false,
-          "where": "\"categories\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"categories\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -323,7 +320,7 @@
             }
           ],
           "isUnique": false,
-          "where": "\"categories\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"categories\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -370,12 +367,9 @@
           "name": "categories_cat_group_category_groups_id_fk",
           "tableFrom": "categories",
           "tableTo": "category_groups",
-          "columnsFrom": [
-            "cat_group"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "schemaTo": "actual",
+          "columnsFrom": ["cat_group"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -386,9 +380,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.category_groups": {
+    "actual.category_groups": {
       "name": "category_groups",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -442,7 +436,7 @@
             }
           ],
           "isUnique": false,
-          "where": "\"category_groups\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"category_groups\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -503,9 +497,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.category_mapping": {
+    "actual.category_mapping": {
       "name": "category_mapping",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -542,12 +536,9 @@
           "name": "category_mapping_id_categories_id_fk",
           "tableFrom": "category_mapping",
           "tableTo": "categories",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "schemaTo": "actual",
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -555,12 +546,9 @@
           "name": "category_mapping_transfer_id_categories_id_fk",
           "tableFrom": "category_mapping",
           "tableTo": "categories",
-          "columnsFrom": [
-            "transfer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "schemaTo": "actual",
+          "columnsFrom": ["transfer_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -571,9 +559,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.kv_cache_key": {
+    "actual.kv_cache_key": {
       "name": "kv_cache_key",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -610,12 +598,9 @@
           "name": "kv_cache_key_key_kv_cache_key_fk",
           "tableFrom": "kv_cache_key",
           "tableTo": "kv_cache",
-          "columnsFrom": [
-            "key"
-          ],
-          "columnsTo": [
-            "key"
-          ],
+          "schemaTo": "actual",
+          "columnsFrom": ["key"],
+          "columnsTo": ["key"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -626,9 +611,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.kv_cache": {
+    "actual.kv_cache": {
       "name": "kv_cache",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "key": {
           "name": "key",
@@ -650,51 +635,12 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
-    },
-    "public.messages_clock": {
-      "name": "messages_clock",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "clock": {
-          "name": "clock",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "messages_clock_clock_index": {
-          "name": "messages_clock_clock_index",
-          "columns": [
-            {
-              "expression": "clock",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "gin",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
     }
   },
   "enums": {},
-  "schemas": {},
+  "schemas": {
+    "actual": "actual"
+  },
   "sequences": {},
   "roles": {},
   "policies": {},

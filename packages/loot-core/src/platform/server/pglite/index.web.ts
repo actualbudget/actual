@@ -1,12 +1,48 @@
-import { PGlite, types } from '@electric-sql/pglite';
+import { PGlite, PGliteOptions, types } from '@electric-sql/pglite';
+import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm';
+import { live } from '@electric-sql/pglite/live';
 import { drizzle } from 'drizzle-orm/pglite';
 
 import drizzleConfig from '../../../../drizzle.config';
 import * as schema from '../../../server/db/schema';
+import * as prefs from '../../../server/prefs';
 
 import { PgliteDatabase } from '.';
 
-export async function openDatabase(dataDir?: string): Promise<PgliteDatabase> {
+const serializers: PGliteOptions['serializers'] = {
+  [types.BOOL]: value => {
+    switch (value) {
+      case null:
+      case 0:
+        return 'FALSE';
+      case 1:
+        return 'TRUE';
+      default:
+        return value;
+    }
+  },
+};
+
+const parsers: PGliteOptions['parsers'] = {
+  [types.BOOL]: value => {
+    switch (value) {
+      case null:
+      case 'f':
+        return 0;
+      case 't':
+        return 1;
+      default:
+        return value;
+    }
+  },
+};
+
+const extensions: PGliteOptions['extensions'] = {
+  live,
+  pg_trgm,
+};
+
+export async function openDatabase(id?: string): Promise<PgliteDatabase> {
   // if (dataDir) {
   //   const indexedDb = idb.openDatabase();
   //   return await PGlite.create({
@@ -14,47 +50,41 @@ export async function openDatabase(dataDir?: string): Promise<PgliteDatabase> {
   //     relaxedDurability: true,
   //   });
   // }
-  if (dataDir && !dataDir.startsWith('idb://')) {
-    throw new Error('Only idb:// dataDir is supported.');
+  // if (id && !id.startsWith('idb://')) {
+  //   throw new Error('Only idb:// dataDir is supported.');
+  // }
+
+  let dataDir: string;
+  if (id) {
+    dataDir = `idb://${id}`;
+  } else {
+    const currentPrefs = prefs.getPrefs();
+    dataDir = currentPrefs?.id ? `idb://${currentPrefs.id}` : null;
   }
 
-  const db = await PGlite.create(dataDir || 'idb://my-pgdata', {
+  if (!dataDir) {
+    return null;
+  }
+
+  const db = await PGlite.create(dataDir, {
     relaxedDurability: true,
+    extensions,
     // Maintain compatibility with the sqlite schema for now.
-    serializers: {
-      [types.BOOL]: value => {
-        switch (value) {
-          case null:
-          case 0:
-            return 'FALSE';
-          case 1:
-            return 'TRUE';
-          default:
-            return value;
-        }
-      },
-    },
-    parsers: {
-      [types.BOOL]: value => {
-        switch (value) {
-          case null:
-          case 'f':
-            return 0;
-          case 't':
-            return 1;
-          default:
-            return value;
-        }
-      },
-    },
+    serializers,
+    parsers,
   });
 
-  return drizzle({
+  const drizzleDb = drizzle({
     client: db,
     logger: true,
     schema,
     casing: drizzleConfig.casing,
   });
+
+  // Enable extensions as needed.
+  await drizzleDb.execute('CREATE EXTENSION IF NOT EXISTS pg_trgm');
+
+  return drizzleDb;
 }
 
 export async function exportDatabase(db: PGlite): Promise<Uint8Array> {
