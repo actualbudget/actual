@@ -1,4 +1,4 @@
-CREATE TABLE "schedules_next_date" (
+CREATE TABLE "actual"."schedules_next_date" (
 	"id" varchar(36) PRIMARY KEY NOT NULL,
 	"schedule_id" varchar(36),
 	"local_next_date" date,
@@ -9,4 +9,4 @@ CREATE TABLE "schedules_next_date" (
 	CONSTRAINT "schedules_next_date_scheduleId_unique" UNIQUE("schedule_id")
 );
 --> statement-breakpoint
-ALTER TABLE "schedules_next_date" ADD CONSTRAINT "schedules_next_date_schedule_id_schedules_id_fk" FOREIGN KEY ("schedule_id") REFERENCES "public"."schedules"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "actual"."schedules_next_date" ADD CONSTRAINT "schedules_next_date_schedule_id_schedules_id_fk" FOREIGN KEY ("schedule_id") REFERENCES "actual"."schedules"("id") ON DELETE no action ON UPDATE no action;

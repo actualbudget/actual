@@ -1,0 +1,12 @@
+CREATE TABLE "actual"."zero_budgets" (
+	"id" text PRIMARY KEY NOT NULL,
+	"month" date,
+	"category" varchar(36),
+	"amount" bigint,
+	"carryover" boolean DEFAULT false,
+	"goal" bigint,
+	"long_goal" bigint
+);
+--> statement-breakpoint
+ALTER TABLE "actual"."zero_budgets" ADD CONSTRAINT "zero_budgets_category_categories_id_fk" FOREIGN KEY ("category") REFERENCES "actual"."categories"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "zero_budgets_month_category_index" ON "actual"."zero_budgets" USING btree ("month","category");

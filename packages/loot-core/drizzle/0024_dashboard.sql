@@ -1,4 +1,4 @@
-CREATE TABLE "dashboard" (
+CREATE TABLE "actual"."dashboard" (
 	"id" varchar(36) PRIMARY KEY NOT NULL,
 	"type" text,
 	"width" integer,
@@ -9,4 +9,4 @@ CREATE TABLE "dashboard" (
 	"tombstone" boolean DEFAULT false
 );
 --> statement-breakpoint
-CREATE INDEX "dashboard_y_x_index" ON "dashboard" USING btree ("y" DESC NULLS LAST,"x" DESC NULLS LAST) WHERE "dashboard"."tombstone" IS FALSE;
+CREATE INDEX "dashboard_y_x_index" ON "actual"."dashboard" USING btree ("y" DESC NULLS LAST,"x" DESC NULLS LAST) WHERE "actual"."dashboard"."tombstone" IS FALSE;

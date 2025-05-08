@@ -97,6 +97,7 @@ export default pluginTypescript.config(
       'packages/loot-core/**/node_modules/*',
       'packages/loot-core/**/lib-dist/*',
       'packages/loot-core/**/proto/*',
+      'packages/loot-core/drizzle/**/*',
       'packages/sync-server/build/',
       '.yarn/*',
       '.github/*',

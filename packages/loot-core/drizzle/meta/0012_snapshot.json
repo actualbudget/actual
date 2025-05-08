@@ -1,12 +1,12 @@
 {
-  "id": "03897616-2263-4619-9d17-679a0b218a90",
-  "prevId": "f2bd79af-debf-4e00-ba45-cd397c0a6a6f",
+  "id": "9a4825c2-56f4-4c08-ac65-fc587acc31e6",
+  "prevId": "9d1e21ae-f333-4fa0-8a93-7c1b89703f2f",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.accounts": {
+    "actual.accounts": {
       "name": "accounts",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -120,7 +120,7 @@
             }
           ],
           "isUnique": false,
-          "where": "\"accounts\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"accounts\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -136,7 +136,7 @@
             }
           ],
           "isUnique": false,
-          "where": "\"accounts\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"accounts\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -168,12 +168,9 @@
           "name": "accounts_bank_banks_id_fk",
           "tableFrom": "accounts",
           "tableTo": "banks",
-          "columnsFrom": [
-            "bank"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "schemaTo": "actual",
+          "columnsFrom": ["bank"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -184,9 +181,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.banks": {
+    "actual.banks": {
       "name": "banks",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -226,7 +223,7 @@
             }
           ],
           "isUnique": false,
-          "where": "\"banks\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"banks\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -239,9 +236,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.categories": {
+    "actual.categories": {
       "name": "categories",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -307,7 +304,7 @@
             }
           ],
           "isUnique": false,
-          "where": "\"categories\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"categories\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -323,7 +320,7 @@
             }
           ],
           "isUnique": false,
-          "where": "\"categories\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"categories\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -370,12 +367,9 @@
           "name": "categories_cat_group_category_groups_id_fk",
           "tableFrom": "categories",
           "tableTo": "category_groups",
-          "columnsFrom": [
-            "cat_group"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "schemaTo": "actual",
+          "columnsFrom": ["cat_group"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -386,9 +380,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.category_groups": {
+    "actual.category_groups": {
       "name": "category_groups",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -442,7 +436,7 @@
             }
           ],
           "isUnique": false,
-          "where": "\"category_groups\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"category_groups\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -503,9 +497,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.category_mapping": {
+    "actual.category_mapping": {
       "name": "category_mapping",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -542,12 +536,9 @@
           "name": "category_mapping_id_categories_id_fk",
           "tableFrom": "category_mapping",
           "tableTo": "categories",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "schemaTo": "actual",
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -555,12 +546,9 @@
           "name": "category_mapping_transfer_id_categories_id_fk",
           "tableFrom": "category_mapping",
           "tableTo": "categories",
-          "columnsFrom": [
-            "transfer_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "schemaTo": "actual",
+          "columnsFrom": ["transfer_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -571,9 +559,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.kv_cache_key": {
+    "actual.kv_cache_key": {
       "name": "kv_cache_key",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -610,12 +598,9 @@
           "name": "kv_cache_key_key_kv_cache_key_fk",
           "tableFrom": "kv_cache_key",
           "tableTo": "kv_cache",
-          "columnsFrom": [
-            "key"
-          ],
-          "columnsTo": [
-            "key"
-          ],
+          "schemaTo": "actual",
+          "columnsFrom": ["key"],
+          "columnsTo": ["key"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -626,9 +611,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.kv_cache": {
+    "actual.kv_cache": {
       "name": "kv_cache",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "key": {
           "name": "key",
@@ -651,9 +636,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.messages_clock": {
+    "actual.messages_clock": {
       "name": "messages_clock",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -692,9 +677,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.messages_crdt": {
+    "actual.messages_crdt": {
       "name": "messages_crdt",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -790,9 +775,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.notes": {
+    "actual.notes": {
       "name": "notes",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -807,7 +792,24 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "notes_note_index": {
+          "name": "notes_note_index",
+          "columns": [
+            {
+              "expression": "note",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last",
+              "opclass": "gin_trgm_ops"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -815,9 +817,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.payee_mapping": {
+    "actual.payee_mapping": {
       "name": "payee_mapping",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -854,12 +856,9 @@
           "name": "payee_mapping_id_payees_id_fk",
           "tableFrom": "payee_mapping",
           "tableTo": "payees",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "schemaTo": "actual",
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -867,12 +866,9 @@
           "name": "payee_mapping_target_id_payees_id_fk",
           "tableFrom": "payee_mapping",
           "tableTo": "payees",
-          "columnsFrom": [
-            "target_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "schemaTo": "actual",
+          "columnsFrom": ["target_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -883,9 +879,9 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.payees": {
+    "actual.payees": {
       "name": "payees",
-      "schema": "",
+      "schema": "actual",
       "columns": {
         "id": {
           "name": "id",
@@ -945,23 +941,29 @@
             }
           ],
           "isUnique": false,
-          "where": "\"payees\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"payees\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
         },
-        "payees_transfer_acct_index": {
-          "name": "payees_transfer_acct_index",
+        "payees_transfer_acct_name_index": {
+          "name": "payees_transfer_acct_name_index",
           "columns": [
             {
               "expression": "transfer_acct",
               "isExpression": false,
-              "asc": true,
+              "asc": false,
               "nulls": "first"
+            },
+            {
+              "expression": "LOWER(\"name\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
             }
           ],
           "isUnique": false,
-          "where": "\"payees\".\"tombstone\" IS FALSE",
+          "where": "\"actual\".\"payees\".\"tombstone\" IS FALSE",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -972,12 +974,9 @@
           "name": "payees_transfer_acct_accounts_id_fk",
           "tableFrom": "payees",
           "tableTo": "accounts",
-          "columnsFrom": [
-            "transfer_acct"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "schemaTo": "actual",
+          "columnsFrom": ["transfer_acct"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -987,107 +986,12 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
-    },
-    "public.rules": {
-      "name": "rules",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(36)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "stage": {
-          "name": "stage",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "conditions": {
-          "name": "conditions",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "actions": {
-          "name": "actions",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tombstone": {
-          "name": "tombstone",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "conditions_op": {
-          "name": "conditions_op",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "rules_stage_index": {
-          "name": "rules_stage_index",
-          "columns": [
-            {
-              "expression": "stage",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "where": "\"rules\".\"tombstone\" IS FALSE",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "rules_conditions_index": {
-          "name": "rules_conditions_index",
-          "columns": [
-            {
-              "expression": "conditions",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "gin",
-          "with": {}
-        },
-        "rules_actions_index": {
-          "name": "rules_actions_index",
-          "columns": [
-            {
-              "expression": "actions",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "gin",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
     }
   },
   "enums": {},
-  "schemas": {},
+  "schemas": {
+    "actual": "actual"
+  },
   "sequences": {},
   "roles": {},
   "policies": {},

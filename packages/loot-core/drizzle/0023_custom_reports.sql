@@ -1,4 +1,4 @@
-CREATE TABLE "custom_reports" (
+CREATE TABLE "actual"."custom_reports" (
 	"id" varchar(36) PRIMARY KEY NOT NULL,
 	"name" text,
 	"start_date" date,
@@ -24,5 +24,5 @@ CREATE TABLE "custom_reports" (
 	"tombstone" boolean DEFAULT false
 );
 --> statement-breakpoint
-CREATE INDEX "custom_reports_name_index" ON "custom_reports" USING btree ("name") WHERE "custom_reports"."tombstone" IS FALSE;--> statement-breakpoint
-CREATE INDEX "custom_reports_conditions_index" ON "custom_reports" USING gin ("conditions") WHERE "custom_reports"."tombstone" IS FALSE;
+CREATE INDEX "custom_reports_name_index" ON "actual"."custom_reports" USING btree ("name") WHERE "actual"."custom_reports"."tombstone" IS FALSE;--> statement-breakpoint
+CREATE INDEX "custom_reports_conditions_index" ON "actual"."custom_reports" USING gin ("conditions") WHERE "actual"."custom_reports"."tombstone" IS FALSE;
