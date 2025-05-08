@@ -14,7 +14,9 @@ type InitialFocusProps = {
   /**
    * The child element to focus when the component mounts. This can be either a single React element or a function that returns a React element.
    */
-  children: ReactElement | ((node: Ref<HTMLElement>) => ReactElement);
+  children:
+    | ReactElement<{ ref: Ref<HTMLElement> }>
+    | ((node: Ref<HTMLElement>) => ReactElement);
 };
 
 /**
