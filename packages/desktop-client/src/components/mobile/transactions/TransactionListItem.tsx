@@ -74,11 +74,13 @@ const getScheduleIconStyle = ({ isPreview }: { isPreview: boolean }) => ({
 type TransactionListItemProps = ComponentPropsWithoutRef<
   typeof ListBoxItem<TransactionEntity>
 > & {
+  balance: number | null;
   onPress: (transaction: TransactionEntity) => void;
   onLongPress: (transaction: TransactionEntity) => void;
 };
 
 export function TransactionListItem({
+  balance,
   onPress,
   onLongPress,
   ...props
@@ -292,6 +294,17 @@ export function TransactionListItem({
                 >
                   {integerToCurrency(amount)}
                 </Text>
+                {balance != null && (
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      fontWeight: '400',
+                      ...makeAmountFullStyle(balance || 0),
+                    }}
+                  >
+                    {integerToCurrency(balance)}
+                  </Text>
+                )}
               </View>
             </View>
           </Button>
