@@ -19,6 +19,7 @@ CREATE TABLE "actual"."transactions" (
 	"tombstone" boolean DEFAULT false,
 	"cleared" boolean DEFAULT true,
 	"reconciled" boolean DEFAULT false,
+	"raw_synced_data" jsonb,
 	"pending" boolean,
 	"location" text,
 	"type" text

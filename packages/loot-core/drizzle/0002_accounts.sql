@@ -14,8 +14,8 @@ CREATE TABLE "actual"."accounts" (
 	"subtype" text,
 	"bank" varchar(36),
 	"account_sync_source" text,
-	"last_sync" timestamp,
-	"last_reconciled" timestamp,
+	"last_sync" bigint,
+	"last_reconciled" bigint,
 	"tombstone" boolean DEFAULT false
 );
 --> statement-breakpoint

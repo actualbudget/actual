@@ -1,6 +1,6 @@
 {
-  "id": "8fe6d26f-d393-442a-868f-26f1074c1a93",
-  "prevId": "6a3e6ea9-8945-4a64-af4a-9629bd2bb959",
+  "id": "dfd56490-a3a9-4c1a-9808-f915eaa4ab87",
+  "prevId": "8ce816bc-fae3-4a5d-9476-d6ae4698a825",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -102,13 +102,13 @@
         },
         "last_sync": {
           "name": "last_sync",
-          "type": "timestamp",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": false
         },
         "last_reconciled": {
           "name": "last_reconciled",
-          "type": "timestamp",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": false
         },

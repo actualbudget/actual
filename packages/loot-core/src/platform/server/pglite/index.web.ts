@@ -9,6 +9,8 @@ import * as prefs from '../../../server/prefs';
 
 import { PgliteDatabase } from '.';
 
+let db: PgliteDatabase = null;
+
 const serializers: PGliteOptions['serializers'] = {
   [types.BOOL]: value => {
     switch (value) {
@@ -54,19 +56,18 @@ export async function openDatabase(id?: string): Promise<PgliteDatabase> {
   //   throw new Error('Only idb:// dataDir is supported.');
   // }
 
-  let dataDir: string;
-  if (id) {
-    dataDir = `idb://${id}`;
-  } else {
-    const currentPrefs = prefs.getPrefs();
-    dataDir = currentPrefs?.id ? `idb://${currentPrefs.id}` : null;
+  const dataDir = ensureDataDir(id);
+
+  if (db) {
+    if (db.$client.dataDir === dataDir) {
+      return db;
+    } else {
+      db.$client.close();
+      db = null;
+    }
   }
 
-  if (!dataDir) {
-    return null;
-  }
-
-  const db = await PGlite.create(dataDir, {
+  const client = await PGlite.create(dataDir, {
     relaxedDurability: true,
     extensions,
     // Maintain compatibility with the sqlite schema for now.
@@ -74,17 +75,26 @@ export async function openDatabase(id?: string): Promise<PgliteDatabase> {
     parsers,
   });
 
-  const drizzleDb = drizzle({
-    client: db,
+  db = drizzle({
+    client,
     logger: true,
     schema,
     casing: drizzleConfig.casing,
   });
 
   // Enable extensions as needed.
-  await drizzleDb.execute('CREATE EXTENSION IF NOT EXISTS pg_trgm');
+  await db.execute('CREATE EXTENSION IF NOT EXISTS pg_trgm');
 
-  return drizzleDb;
+  const results = await db.execute(
+    `SELECT table_name, column_name, data_type
+      FROM information_schema.columns
+      WHERE table_schema = 'actual'
+      ORDER BY table_name, ordinal_position;
+    `,
+  );
+  console.log('PGlite columns:', JSON.stringify(results));
+
+  return db;
 }
 
 export async function exportDatabase(db: PGlite): Promise<Uint8Array> {
@@ -124,4 +134,16 @@ function blobToUint8Array(blob: Blob): Promise<Uint8Array> {
       })
       .catch(reject);
   });
+}
+
+function ensureDataDir(id: string) {
+  if (!id) {
+    const currentPrefs = prefs.getPrefs();
+    if (!currentPrefs || !currentPrefs.id) {
+      throw new Error('No id provided and there is not budgeted currently open.');
+    }
+    return `idb://${currentPrefs.id}`;
+  }
+
+  return `idb://${id}`;
 }
