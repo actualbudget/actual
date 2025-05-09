@@ -1,3 +1,6 @@
+// This is temporary until we move all loot-core/client over to desktop-client.
+// eslint-disable-next-line no-restricted-imports
+import { resetApp, setAppState } from '@actual-app/web/src/app/appSlice';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { send } from '../../platform/client/fetch';
@@ -17,7 +20,6 @@ import {
   type NewUserEntity,
   type NoteEntity,
 } from '../../types/models';
-import { resetApp, setAppState } from '../app/appSlice';
 import { createAppAsyncThunk } from '../redux';
 import { signOut } from '../users/usersSlice';
 

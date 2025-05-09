@@ -13,10 +13,10 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { sync } from 'loot-core/client/app/appSlice';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import * as undo from 'loot-core/platform/client/undo';
 
+import { sync } from '../app/appSlice';
 import { ProtectedRoute } from '../auth/ProtectedRoute';
 import { Permissions } from '../auth/types';
 import { useSelector, useDispatch } from '../redux';
