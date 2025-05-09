@@ -39,7 +39,10 @@ export function html2Plain(value) {
 }
 
 async function parseXml(content) {
-  return await parseStringPromise(content, { explicitArray: false });
+  return await parseStringPromise(content, {
+    explicitArray: false,
+    trim: true,
+  });
 }
 
 function getStmtTrn(data) {
