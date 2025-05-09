@@ -308,7 +308,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                     category: category.id,
                   });
                   showUndoNotification({
-                    message: t(`Budget set to last month’s budget.`),
+                    message: t(`Budget set to last month‘s budget.`),
                   });
                 }}
                 onSetMonthsAverage={numberOfMonths => {
@@ -492,36 +492,89 @@ type IncomeCategoryMonthProps = {
   isLast: boolean;
   month: string;
   onShowActivity: (id: CategoryEntity['id'], month: string) => void;
+  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
 };
 export function IncomeCategoryMonth({
   category,
   isLast,
   month,
   onShowActivity,
+  onBudgetAction,
 }: IncomeCategoryMonthProps) {
+  const carryover = useEnvelopeSheetValue(
+    envelopeBudget.catCarryover(category.id),
+  );
+
   return (
     <View style={{ flex: 1 }}>
       <Field
         name="received"
         width="flex"
         style={{
-          paddingRight: styles.monthRightPadding,
           textAlign: 'right',
           ...(isLast && { borderBottomWidth: 0 }),
           backgroundColor: monthUtils.isCurrentMonth(month)
             ? theme.budgetCurrentMonth
             : theme.budgetOtherMonth,
+          '& .hover-visible': {
+            opacity: 0,
+          },
+          '&:hover .hover-visible': {
+            opacity: 1,
+          },
         }}
       >
-        <span onClick={() => onShowActivity(category.id, month)}>
-          <BalanceWithCarryover
-            carryover={envelopeBudget.catCarryover(category.id)}
-            balance={envelopeBudget.catSumAmount(category.id)}
-            goal={envelopeBudget.catGoal(category.id)}
-            budgeted={envelopeBudget.catBudgeted(category.id)}
-            longGoal={envelopeBudget.catLongGoal(category.id)}
-          />
-        </span>
+        <View
+          name="received with button"
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            position: 'relative',
+          }}
+        >
+          <View style={{ flexShrink: 0, marginRight: 10 }}>
+            <Button
+              variant="bare"
+              className="hover-visible"
+              onPress={() => {
+                if (!carryover) {
+                  onBudgetAction(month, 'reset-hold');
+                }
+                onBudgetAction(month, 'carryover', {
+                  category: category.id,
+                  flag: !carryover,
+                });
+              }}
+              style={{
+                padding: 3,
+                border: `1px solid ${theme.buttonMenuBorder}`,
+                borderRadius: 4,
+              }}
+            >
+              <Text style={{ fontSize: 12 }}>
+                {carryover ? (
+                  <Trans>Disable Auto Hold</Trans>
+                ) : (
+                  <Trans>Enable Auto Hold</Trans>
+                )}
+              </Text>
+            </Button>
+          </View>
+          <span
+            onClick={() => onShowActivity(category.id, month)}
+            style={{ paddingRight: styles.monthRightPadding }}
+          >
+            <BalanceWithCarryover
+              carryover={envelopeBudget.catCarryover(category.id)}
+              balance={envelopeBudget.catSumAmount(category.id)}
+              goal={envelopeBudget.catGoal(category.id)}
+              budgeted={envelopeBudget.catBudgeted(category.id)}
+              longGoal={envelopeBudget.catLongGoal(category.id)}
+            />
+          </span>
+        </View>
       </Field>
     </View>
   );

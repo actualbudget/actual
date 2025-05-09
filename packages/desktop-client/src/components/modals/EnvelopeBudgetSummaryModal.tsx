@@ -137,6 +137,7 @@ export function EnvelopeBudgetSummaryModal({
               close();
             },
             onHoldBuffer,
+            onBudgetAction,
           },
         },
       }),
