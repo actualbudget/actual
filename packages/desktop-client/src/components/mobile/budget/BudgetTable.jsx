@@ -338,7 +338,7 @@ export function BudgetTable({
     'budget.showHiddenCategories',
   );
 
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
   return (
     <Page
@@ -681,7 +681,7 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
 
 function Banners({ month, onBudgetAction }) {
   const { t } = useTranslation();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
   return (
     <GridList
@@ -690,7 +690,7 @@ function Banners({ month, onBudgetAction }) {
     >
       <UncategorizedTransactionsBanner />
       <OverspendingBanner month={month} onBudgetAction={onBudgetAction} />
-      {budgetType === 'rollover' && (
+      {budgetType === 'envelope' && (
         <OverbudgetedBanner month={month} onBudgetAction={onBudgetAction} />
       )}
     </GridList>
@@ -706,7 +706,7 @@ function BudgetTableHeader({
 }) {
   const { t } = useTranslation();
   const format = useFormat();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const buttonStyle = {
     padding: 0,
     backgroundColor: 'transparent',
@@ -747,7 +747,7 @@ function BudgetTableHeader({
           alignItems: 'center',
         }}
       >
-        {budgetType === 'report' ? (
+        {budgetType === 'tracking' ? (
           <Saved
             projected={month >= monthUtils.currentMonth()}
             onPress={onShowBudgetSummary}
@@ -771,7 +771,7 @@ function BudgetTableHeader({
         {(show3Columns || !showSpentColumn) && (
           <CellValue
             binding={
-              budgetType === 'report'
+              budgetType === 'tracking'
                 ? trackingBudget.totalBudgetedExpense
                 : envelopeBudget.totalBudgeted
             }
@@ -819,7 +819,7 @@ function BudgetTableHeader({
                         }}
                       >
                         {format(
-                          budgetType === 'report' ? value : -value,
+                          budgetType === 'tracking' ? value : -value,
                           formatType,
                         )}
                       </AutoTextSize>
@@ -833,7 +833,7 @@ function BudgetTableHeader({
         {(show3Columns || showSpentColumn) && (
           <CellValue
             binding={
-              budgetType === 'report'
+              budgetType === 'tracking'
                 ? trackingBudget.totalSpent
                 : envelopeBudget.totalSpent
             }
@@ -891,7 +891,7 @@ function BudgetTableHeader({
         )}
         <CellValue
           binding={
-            budgetType === 'report'
+            budgetType === 'tracking'
               ? trackingBudget.totalLeftover
               : envelopeBudget.totalBalance
           }

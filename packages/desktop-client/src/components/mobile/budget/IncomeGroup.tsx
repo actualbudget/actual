@@ -49,7 +49,7 @@ export function IncomeGroup({
 }: IncomeGroupProps) {
   const { t } = useTranslation();
   const columnWidth = getColumnWidth();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
   const categories = useMemo(
     () =>
@@ -78,7 +78,7 @@ export function IncomeGroup({
           marginRight: 15,
         }}
       >
-        {budgetType === 'report' && (
+        {budgetType === 'tracking' && (
           <Label title={t('Budgeted')} style={{ width: columnWidth }} />
         )}
         <Label title={t('Received')} style={{ width: columnWidth }} />
@@ -239,14 +239,14 @@ type IncomeGroupCellsProps = {
 };
 
 function IncomeGroupCells({ group }: IncomeGroupCellsProps) {
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const format = useFormat();
 
   const budgeted =
-    budgetType === 'report' ? trackingBudget.groupBudgeted(group.id) : null;
+    budgetType === 'tracking' ? trackingBudget.groupBudgeted(group.id) : null;
 
   const balance =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.groupSumAmount(group.id)
       : envelopeBudget.groupSumAmount(group.id);
 

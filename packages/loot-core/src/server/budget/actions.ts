@@ -49,8 +49,8 @@ export function isReflectBudget(): boolean {
     `SELECT value FROM preferences WHERE id = ?`,
     ['budgetType'],
   );
-  const val = budgetType ? budgetType.value : 'rollover';
-  return val === 'report';
+  const val = budgetType ? budgetType.value : 'envelope';
+  return val === 'tracking';
 }
 
 function dbMonth(month: string): number {

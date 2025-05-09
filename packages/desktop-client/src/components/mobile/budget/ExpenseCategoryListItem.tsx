@@ -11,6 +11,7 @@ import { View } from '@actual-app/components/view';
 
 import { collapseModals, pushModal } from 'loot-core/client/modals/modalsSlice';
 import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
+import { type BudgetType } from 'loot-core/server/prefs';
 import * as monthUtils from 'loot-core/shared/months';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
@@ -121,20 +122,20 @@ function ExpenseCategoryCells({
     show3Columns,
     isSidebar: false,
   });
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
   const budgeted =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.catBudgeted(category.id)
       : envelopeBudget.catBudgeted(category.id);
 
   const spent =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.catSumAmount(category.id)
       : envelopeBudget.catSumAmount(category.id);
 
   const balance =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.catBalance(category.id)
       : envelopeBudget.catBalance(category.id);
 
@@ -222,10 +223,10 @@ export function ExpenseCategoryListItem({
   const { value: category } = props;
 
   const { t } = useTranslation();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
-  const modalBudgetType = budgetType === 'rollover' ? 'envelope' : 'tracking';
-  const balanceMenuModalName = `${modalBudgetType}-balance-menu` as const;
+  const balanceMenuModalName =
+    `${budgetType as BudgetType}-balance-menu` as const;
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   const { list: categories } = useCategories();
@@ -249,7 +250,7 @@ export function ExpenseCategoryListItem({
     'envelope-budget' | 'tracking-budget',
     'leftover'
   >(
-    budgetType === 'rollover'
+    budgetType === 'envelope'
       ? envelopeBudget.catBalance(category?.id)
       : trackingBudget.catBalance(category?.id),
   );

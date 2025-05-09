@@ -14,7 +14,7 @@ import * as report from './report';
 
 export function getBudgetType() {
   const meta = sheet.get().meta();
-  return meta.budgetType || 'rollover';
+  return meta.budgetType || 'envelope';
 }
 
 export function getBudgetRange(start: string, end: string) {
@@ -57,7 +57,7 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
     },
   });
 
-  if (getBudgetType() === 'rollover') {
+  if (getBudgetType() === 'envelope') {
     envelopeBudget.createCategory(cat, sheetName, prevSheetName);
   } else {
     report.createCategory(cat, sheetName, prevSheetName);
@@ -173,7 +173,7 @@ export function triggerBudgetChanges(oldValues, newValues) {
         } else if (table === 'category_mapping') {
           handleCategoryMappingChange(createdMonths, oldValue, newValue);
         } else if (table === 'categories') {
-          if (budgetType === 'rollover') {
+          if (budgetType === 'envelope') {
             envelopeBudget.handleCategoryChange(
               createdMonths,
               oldValue,
@@ -183,7 +183,7 @@ export function triggerBudgetChanges(oldValues, newValues) {
             report.handleCategoryChange(createdMonths, oldValue, newValue);
           }
         } else if (table === 'category_groups') {
-          if (budgetType === 'rollover') {
+          if (budgetType === 'envelope') {
             envelopeBudget.handleCategoryGroupChange(
               createdMonths,
               oldValue,
@@ -237,7 +237,7 @@ export async function createBudget(months) {
 
   const budgetType = getBudgetType();
 
-  if (budgetType === 'rollover') {
+  if (budgetType === 'envelope') {
     envelopeBudget.createBudget(meta, categories, months);
   }
 
@@ -252,14 +252,14 @@ export async function createBudget(months) {
         createCategory(cat, sheetName, prevSheetName, start, end);
       });
       groups.forEach(group => {
-        if (budgetType === 'rollover') {
+        if (budgetType === 'envelope') {
           envelopeBudget.createCategoryGroup(group, sheetName);
         } else {
           report.createCategoryGroup(group, sheetName);
         }
       });
 
-      if (budgetType === 'rollover') {
+      if (budgetType === 'envelope') {
         envelopeBudget.createSummary(
           groups,
           categories,

@@ -67,7 +67,7 @@ describe('Base budget', () => {
 
   it('Excludes hidden categories from group totals in Report Budget', async () => {
     await sheet.loadSpreadsheet(db);
-    sheet.get().meta().budgetType = 'report';
+    sheet.get().meta().budgetType = 'tracking';
 
     // Create a group with multiple categories
     await db.insertCategoryGroup({ id: 'group1', name: 'Test Group' });
@@ -143,7 +143,7 @@ describe('Base budget', () => {
 
   it('Excludes hidden category groups from budget totals in Report Budget', async () => {
     await sheet.loadSpreadsheet(db);
-    sheet.get().meta().budgetType = 'report';
+    sheet.get().meta().budgetType = 'tracking';
 
     // Create two expense groups - one visible, one hidden
     await db.insertCategoryGroup({
@@ -231,7 +231,7 @@ describe('Base budget', () => {
   it('Includes hidden categories in group totals for Rollover Budget', async () => {
     await sheet.loadSpreadsheet(db);
     // Rollover is the default, but explicit for clarity
-    sheet.get().meta().budgetType = 'rollover';
+    sheet.get().meta().budgetType = 'envelope';
 
     // Create a group with multiple categories
     await db.insertCategoryGroup({ id: 'group1', name: 'Test Group' });
@@ -283,7 +283,7 @@ describe('Base budget', () => {
   it('Includes hidden category groups in budget totals for Rollover Budget', async () => {
     await sheet.loadSpreadsheet(db);
     // Rollover is the default, but explicit for clarity
-    sheet.get().meta().budgetType = 'rollover';
+    sheet.get().meta().budgetType = 'envelope';
 
     // Create two expense groups - one visible, one hidden
     await db.insertCategoryGroup({
