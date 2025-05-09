@@ -20,22 +20,21 @@ Below is an example `Caddyfile` that you can use to configure Caddy and Actual S
 ```yaml title="docker-compose.yml"
 services:
   caddy:
-    container_name: caddy
     image: caddy:alpine
+    container_name: caddy
+    restart: unless-stopped
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./caddy/data:/data
       - ./caddy/config:/config
     ports:
       - "80:80"
-      - '443:443'
+      - "443:443"
 
   actual-server:
     image: actualbudget/actual-server:latest
     container_name: actual_server
     restart: unless-stopped
-    ports:
-      - '5006:5006'
     volumes:
       - ./actual-data:/data
 ```
