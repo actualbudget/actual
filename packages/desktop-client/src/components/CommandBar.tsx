@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
+import { css } from '@emotion/css';
 import { Command } from 'cmdk';
 
 import { useAccounts } from '../hooks/useAccounts';
@@ -38,12 +39,13 @@ export function CommandBar() {
 
   return (
     <Command.Dialog
+      vimBindings={true}
       open={open}
       onOpenChange={setOpen}
       label="Global Command Menu"
       aria-label="Command Menu"
       shouldFilter={false}
-      style={{
+      className={css({
         position: 'fixed',
         top: '30%',
         left: '50%',
@@ -57,13 +59,13 @@ export function CommandBar() {
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
         overflow: 'hidden',
         zIndex: 1001,
-      }}
+      })}
     >
       <Command.Input
         placeholder="Search accounts..."
         value={search}
         onValueChange={setSearch}
-        style={{
+        className={css({
           width: '100%',
           padding: '12px 16px',
           fontSize: '1rem',
@@ -72,22 +74,25 @@ export function CommandBar() {
           backgroundColor: 'transparent',
           color: 'var(--color-pageText)',
           outline: 'none',
-        }}
+          '&::placeholder': {
+            color: 'var(--color-pageTextSubdued)',
+          },
+        })}
       />
       <Command.List
-        style={{
+        className={css({
           maxHeight: '300px',
           overflowY: 'auto',
           padding: '8px 0',
-        }}
+        })}
       >
         <Command.Empty
-          style={{
+          className={css({
             padding: '16px',
             textAlign: 'center',
             fontSize: '0.9rem',
             color: 'var(--color-pageTextSubdued)',
-          }}
+          })}
         >
           No results found.
         </Command.Empty>
@@ -95,22 +100,33 @@ export function CommandBar() {
         {filteredAccounts.length > 0 && (
           <Command.Group
             heading="Accounts"
-            style={{
+            className={css({
               padding: '0 8px',
-            }}
+              '& [cmdk-group-heading]': {
+                padding: '8px 8px 4px',
+                fontSize: '0.8rem',
+                fontWeight: 500,
+                color: 'var(--color-pageTextSubdued)',
+                textTransform: 'uppercase',
+              },
+            })}
           >
             {filteredAccounts.map(account => (
               <Command.Item
                 key={account.id}
                 onSelect={() => handleAccountSelect(account.id)}
                 value={account.name}
-                style={{
+                className={css({
                   padding: '8px 16px',
                   cursor: 'pointer',
                   fontSize: '0.9rem',
                   borderRadius: '4px',
                   margin: '0 8px',
-                }}
+                  "&:hover, &[data-selected='true']": {
+                    backgroundColor: 'var(--color-menuItemBackgroundHover)',
+                    color: 'var(--color-menuItemTextHover)',
+                  },
+                })}
               >
                 {account.name}
               </Command.Item>
