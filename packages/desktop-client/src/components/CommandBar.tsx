@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { css } from '@emotion/css';
 import { Command } from 'cmdk';
 
 import { useAccounts } from '../hooks/useAccounts';
+import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
 
 export function CommandBar() {
@@ -13,24 +14,25 @@ export function CommandBar() {
   const [search, setSearch] = useState('');
   const allAccounts = useAccounts();
   const navigate = useNavigate();
+  const [budgetName] = useMetadataPref('budgetName');
 
   const accounts = allAccounts.filter(acc => !acc.closed);
 
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setOpen(open => !open);
-      }
-    };
-
-    document.addEventListener('keydown', down);
-    return () => document.removeEventListener('keydown', down);
+  const openEventListener = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      setOpen(true);
+    }
   }, []);
 
+  useEffect(() => {
+    document.addEventListener('keydown', openEventListener);
+    return () => document.removeEventListener('keydown', openEventListener);
+  }, [openEventListener]);
+
   const handleAccountSelect = (accountId: string) => {
-    navigate(`/accounts/${accountId}`);
     setOpen(false);
+    navigate(`/accounts/${accountId}`);
   };
 
   const filteredAccounts = accounts.filter(acc =>
@@ -62,7 +64,7 @@ export function CommandBar() {
       })}
     >
       <Command.Input
-        placeholder="Search accounts..."
+        placeholder={`Search ${budgetName}...`}
         value={search}
         onValueChange={setSearch}
         className={css({
@@ -97,7 +99,7 @@ export function CommandBar() {
           No results found.
         </Command.Empty>
 
-        {filteredAccounts.length > 0 && (
+        {!!filteredAccounts.length && (
           <Command.Group
             heading="Accounts"
             className={css({
