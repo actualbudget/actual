@@ -14,8 +14,8 @@ import {
   serial,
   text,
   varchar,
-  timestamp,
   doublePrecision,
+  smallint,
 } from 'drizzle-orm/pg-core';
 
 import drizzleConfig from '../../../../drizzle.config';
@@ -66,8 +66,9 @@ export const accountsTable = actualSchema.table(
     accountSyncSource: text({
       enum: ['simpleFin', 'goCardless', 'pluggyai'],
     }),
-    lastSync: timestamp({ mode: 'string' }),
-    lastReconciled: timestamp({ mode: 'string' }),
+    // These are texts in sqlite but bigint in pglite
+    lastSync: bigint({ mode: 'number' }),
+    lastReconciled: bigint({ mode: 'number' }),
     tombstone: boolean().default(false),
   },
   table => [
@@ -137,10 +138,9 @@ export const kvCacheTable = actualSchema.table('kvcache', {
 export const kvCacheKeyTable = actualSchema.table(
   'kvcache_key',
   {
-    id: varchar({ length: 36 }).primaryKey(),
+    id: smallint().primaryKey(),
     key: doublePrecision(),
   },
-  table => [index().on(table.key)],
 );
 
 const clockJsonb = customType<{ data: Clock; driverData: string }>({
@@ -282,9 +282,9 @@ export const schedulesNextDateTable = actualSchema.table(
       .unique()
       .references(() => schedulesTable.id),
     localNextDate: date({ mode: 'string' }),
-    localNextDateTs: timestamp({ mode: 'string' }),
+    localNextDateTs: bigint({ mode: 'number' }),
     baseNextDate: date({ mode: 'string' }),
-    baseNextDateTs: timestamp({ mode: 'string' }),
+    baseNextDateTs: bigint({ mode: 'number' }),
     tombstone: boolean().default(false),
   },
 );
@@ -322,6 +322,7 @@ export const transactionsTable = actualSchema.table(
     tombstone: boolean().default(false),
     cleared: boolean().default(true),
     reconciled: boolean().default(false),
+    rawSyncedData: jsonb(),
     // Unused in codebase. Can this be removed?
     pending: boolean(),
     location: text(),

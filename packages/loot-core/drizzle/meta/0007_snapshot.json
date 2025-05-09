@@ -1,6 +1,6 @@
 {
-  "id": "fc15614f-3a8d-4e06-b95e-7aa757d2c29e",
-  "prevId": "5b5cc129-d955-4e41-9834-394694abd2c6",
+  "id": "fa5286ef-f600-4d3b-9b22-9499d204f746",
+  "prevId": "b992c78c-07f8-49c0-b884-2cd84826bc5e",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -102,13 +102,13 @@
         },
         "last_sync": {
           "name": "last_sync",
-          "type": "timestamp",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": false
         },
         "last_reconciled": {
           "name": "last_reconciled",
-          "type": "timestamp",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": false
         },
@@ -593,7 +593,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar(36)",
+          "type": "smallint",
           "primaryKey": true,
           "notNull": true
         },
@@ -604,23 +604,7 @@
           "notNull": false
         }
       },
-      "indexes": {
-        "kvcache_key_key_index": {
-          "name": "kvcache_key_key_index",
-          "columns": [
-            {
-              "expression": "key",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},

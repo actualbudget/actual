@@ -2,9 +2,9 @@ CREATE TABLE "actual"."schedules_next_date" (
 	"id" varchar(36) PRIMARY KEY NOT NULL,
 	"schedule_id" varchar(36),
 	"local_next_date" date,
-	"local_next_date_ts" timestamp,
+	"local_next_date_ts" bigint,
 	"base_next_date" date,
-	"base_next_date_ts" timestamp,
+	"base_next_date_ts" bigint,
 	"tombstone" boolean DEFAULT false,
 	CONSTRAINT "schedules_next_date_scheduleId_unique" UNIQUE("schedule_id")
 );

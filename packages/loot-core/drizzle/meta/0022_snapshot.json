@@ -1,6 +1,6 @@
 {
-  "id": "ff989187-6c2b-4ae1-a300-a9d3f69b459b",
-  "prevId": "80b7be4c-ab77-44ad-99a2-53f522c11c6d",
+  "id": "0802bcda-2695-4547-8863-4fd13e1d451c",
+  "prevId": "ea141e89-2afb-4c63-b13d-f51ab3d76d83",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -102,13 +102,13 @@
         },
         "last_sync": {
           "name": "last_sync",
-          "type": "timestamp",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": false
         },
         "last_reconciled": {
           "name": "last_reconciled",
-          "type": "timestamp",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": false
         },
@@ -593,7 +593,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar(36)",
+          "type": "smallint",
           "primaryKey": true,
           "notNull": true
         },
@@ -604,23 +604,7 @@
           "notNull": false
         }
       },
-      "indexes": {
-        "kvcache_key_key_index": {
-          "name": "kvcache_key_key_index",
-          "columns": [
-            {
-              "expression": "key",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -1313,7 +1297,7 @@
         },
         "local_next_date_ts": {
           "name": "local_next_date_ts",
-          "type": "timestamp",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": false
         },
@@ -1325,7 +1309,7 @@
         },
         "base_next_date_ts": {
           "name": "base_next_date_ts",
-          "type": "timestamp",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": false
         },
@@ -1697,6 +1681,12 @@
           "primaryKey": false,
           "notNull": false,
           "default": false
+        },
+        "raw_synced_data": {
+          "name": "raw_synced_data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
         },
         "pending": {
           "name": "pending",
