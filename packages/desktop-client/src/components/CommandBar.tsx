@@ -1,22 +1,43 @@
-'use client';
+/* eslint-disable rulesdir/typography */
 
 import { useCallback, useEffect, useState } from 'react';
 
 import { css } from '@emotion/css';
 import { Command } from 'cmdk';
 
+import { useReports } from 'loot-core/client/data-hooks/reports';
+
 import { useAccounts } from '../hooks/useAccounts';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
 
+type SearchableItem = {
+  id: string;
+  name: string;
+};
+
+type SearchSection = {
+  key: string;
+  heading: string;
+  items: ReadonlyArray<SearchableItem>;
+  onSelect: (item: SearchableItem) => void;
+};
+
 export function CommandBar() {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const allAccounts = useAccounts();
   const navigate = useNavigate();
   const [budgetName] = useMetadataPref('budgetName');
 
+  const allAccounts = useAccounts();
+  const { data: reportsData, isLoading: isReportsLoading } = useReports();
+  useEffect(
+    () => console.log('reports', reportsData, isReportsLoading),
+    [reportsData, isReportsLoading],
+  );
+
   const accounts = allAccounts.filter(acc => !acc.closed);
+  const reports = reportsData || [];
 
   const openEventListener = useCallback((e: KeyboardEvent) => {
     if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
@@ -30,14 +51,29 @@ export function CommandBar() {
     return () => document.removeEventListener('keydown', openEventListener);
   }, [openEventListener]);
 
-  const handleAccountSelect = (accountId: string) => {
+  const handleNavigate = (path: string) => {
     setOpen(false);
-    navigate(`/accounts/${accountId}`);
+    navigate(path);
   };
 
-  const filteredAccounts = accounts.filter(acc =>
-    acc.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  const sections: SearchSection[] = [
+    {
+      key: 'accounts',
+      heading: 'Accounts',
+      items: accounts,
+      onSelect: (item: SearchableItem) =>
+        handleNavigate(`/accounts/${item.id}`),
+    },
+    {
+      key: 'reports',
+      heading: 'Reports',
+      items: reports,
+      onSelect: (item: SearchableItem) => handleNavigate(`/reports/${item.id}`),
+    },
+    // Future sections can be added here
+  ];
+
+  let hasResults = false;
 
   return (
     <Command.Dialog
@@ -88,52 +124,64 @@ export function CommandBar() {
           padding: '8px 0',
         })}
       >
-        <Command.Empty
-          className={css({
-            padding: '16px',
-            textAlign: 'center',
-            fontSize: '0.9rem',
-            color: 'var(--color-pageTextSubdued)',
-          })}
-        >
-          No results found.
-        </Command.Empty>
+        {sections.map(section => {
+          const filteredItems = section.items.filter(item =>
+            item.name.toLowerCase().includes(search.toLowerCase()),
+          );
 
-        {!!filteredAccounts.length && (
-          <Command.Group
-            heading="Accounts"
-            className={css({
-              padding: '0 8px',
-              '& [cmdk-group-heading]': {
-                padding: '8px 8px 4px',
-                fontSize: '0.8rem',
-                fontWeight: 500,
-                color: 'var(--color-pageTextSubdued)',
-                textTransform: 'uppercase',
-              },
-            })}
-          >
-            {filteredAccounts.map(account => (
-              <Command.Item
-                key={account.id}
-                onSelect={() => handleAccountSelect(account.id)}
-                value={account.name}
+          if (filteredItems.length > 0) {
+            hasResults = true;
+            return (
+              <Command.Group
+                key={section.key}
+                heading={section.heading}
                 className={css({
-                  padding: '8px 16px',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  borderRadius: '4px',
-                  margin: '0 8px',
-                  "&:hover, &[data-selected='true']": {
-                    backgroundColor: 'var(--color-menuItemBackgroundHover)',
-                    color: 'var(--color-menuItemTextHover)',
+                  padding: '0 8px',
+                  '& [cmdk-group-heading]': {
+                    padding: '8px 8px 4px',
+                    fontSize: '0.8rem',
+                    fontWeight: 500,
+                    color: 'var(--color-pageTextSubdued)',
+                    textTransform: 'uppercase',
                   },
                 })}
               >
-                {account.name}
-              </Command.Item>
-            ))}
-          </Command.Group>
+                {filteredItems.map(item => (
+                  <Command.Item
+                    key={item.id}
+                    onSelect={() => section.onSelect(item)}
+                    value={item.name}
+                    className={css({
+                      padding: '8px 16px',
+                      cursor: 'pointer',
+                      fontSize: '0.9rem',
+                      borderRadius: '4px',
+                      margin: '0 8px',
+                      "&:hover, &[data-selected='true']": {
+                        backgroundColor: 'var(--color-menuItemBackgroundHover)',
+                        color: 'var(--color-menuItemTextHover)',
+                      },
+                    })}
+                  >
+                    {item.name}
+                  </Command.Item>
+                ))}
+              </Command.Group>
+            );
+          }
+          return null;
+        })}
+        {!hasResults && (
+          <Command.Empty
+            className={css({
+              padding: '16px',
+              textAlign: 'center',
+              fontSize: '0.9rem',
+              color: 'var(--color-pageTextSubdued)',
+            })}
+          >
+            No results found.
+          </Command.Empty>
         )}
       </Command.List>
     </Command.Dialog>
