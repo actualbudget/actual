@@ -417,7 +417,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
       {op === 'set' ? (
         <>
           <OpSelect
-            ops={['set', 'prepend-notes', 'append-notes']}
+            ops={['set', 'prepend-notes', 'append-notes', 'delete-transaction']}
             value={op}
             onChange={onChange}
           />
@@ -507,7 +507,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
       ) : op === 'prepend-notes' || op === 'append-notes' ? (
         <>
           <OpSelect
-            ops={['set', 'prepend-notes', 'append-notes']}
+            ops={['set', 'prepend-notes', 'append-notes', 'delete-transaction']}
             value={op}
             onChange={onChange}
           />
@@ -523,17 +523,28 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
             />
           </View>
         </>
+      ) : op === 'delete-transaction' ? (
+        <OpSelect
+          ops={['set', 'prepend-notes', 'append-notes', 'delete-transaction']}
+          value={op}
+          onChange={onChange}
+        />
       ) : null}
 
-      <Stack direction="row">
-        <EditorButtons
-          onAdd={onAdd}
-          onDelete={
-            (op === 'set' || op === 'prepend-notes' || op === 'append-notes') &&
-            onDelete
-          }
-        />
-      </Stack>
+      {op !== 'delete-transaction' && (
+        <Stack direction="row">
+          <EditorButtons
+            onAdd={onAdd}
+            onDelete={
+              (op === 'set' ||
+                op === 'prepend-notes' ||
+                op === 'append-notes' ||
+                op === 'delete-transaction') &&
+              onDelete
+            }
+          />
+        </Stack>
+      )}
     </Editor>
   );
 }
@@ -1207,6 +1218,7 @@ export function EditRuleModal({
                                   'link-schedule',
                                   'prepend-notes',
                                   'append-notes',
+                                  'delete-transaction',
                                 ]}
                                 action={action}
                                 editorStyle={styles.editorPill}
