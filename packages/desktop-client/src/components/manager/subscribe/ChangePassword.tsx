@@ -9,10 +9,10 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 
-import { useNavigate } from '../../../hooks/useNavigate';
-
 import { Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
+
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 export function ChangePassword() {
   const { t } = useTranslation();

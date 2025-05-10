@@ -25,15 +25,10 @@ export async function getLatestVersion(): Promise<string | 'unknown'> {
 
   try {
     const response = await fetch(
-      'https://api.github.com/repos/actualbudget/actual/tags',
+      'https://api.github.com/repos/actualbudget/actual/releases/latest',
     );
     const json = await response.json();
-    const tags = json
-      .map(t => t.name)
-      .concat([`v${window.Actual.ACTUAL_VERSION}`]);
-    tags.sort(cmpSemanticVersion);
-
-    return tags[tags.length - 1];
+    return json?.tag_name ?? 'unknown';
   } catch {
     // Rate limit exceeded? Or perhaps GitHub is down?
     return 'unknown';

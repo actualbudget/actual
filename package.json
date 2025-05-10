@@ -31,7 +31,7 @@
     "start:browser": "npm-run-all --parallel 'start:browser-*'",
     "start:browser-backend": "yarn workspace loot-core watch:browser",
     "start:browser-frontend": "yarn workspace @actual-app/web start:browser",
-    "build:server": "yarn build:browser",
+    "build:server": "yarn build:browser && yarn workspace @actual-app/sync-server build",
     "build:browser": "./bin/package-browser",
     "build:desktop": "./bin/package-electron",
     "build:api": "yarn workspace @actual-app/api build",
@@ -80,7 +80,7 @@
     "typescript-strict-plugin": "^2.4.4"
   },
   "resolutions": {
-    "rollup": "4.9.4"
+    "rollup": "4.40.1"
   },
   "engines": {
     "node": ">=18.0.0"

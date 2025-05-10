@@ -24,8 +24,6 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
-import { useNavigate } from '../../hooks/useNavigate';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useDispatch } from '../../redux';
 import { type TableHandleRef } from '../table';
 
@@ -33,6 +31,9 @@ import {
   TransactionTable,
   type TransactionTableProps,
 } from './TransactionsTable';
+
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 // When data changes, there are two ways to update the UI:
 //

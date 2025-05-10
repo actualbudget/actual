@@ -31,13 +31,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useModalState } from '../hooks/useModalState';
-import {
-  AvoidRefocusScrollProvider,
-  useProperFocus,
-} from '../hooks/useProperFocus';
-import { useSelectedItems } from '../hooks/useSelected';
-
 import { FixedSizeList } from './FixedSizeList';
 import {
   ConditionalPrivacyFilter,
@@ -51,6 +44,13 @@ import {
 } from './spreadsheet';
 import { type FormatType, useFormat } from './spreadsheet/useFormat';
 import { useSheetValue } from './spreadsheet/useSheetValue';
+
+import { useModalState } from '@desktop-client/hooks/useModalState';
+import {
+  AvoidRefocusScrollProvider,
+  useProperFocus,
+} from '@desktop-client/hooks/useProperFocus';
+import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 
 export const ROW_HEIGHT = 32;
 

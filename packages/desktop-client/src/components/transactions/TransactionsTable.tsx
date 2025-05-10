@@ -62,7 +62,11 @@ import {
   ungroupTransactions,
   updateTransaction,
 } from 'loot-core/shared/transactions';
-import { integerToCurrency, titleFirst } from 'loot-core/shared/util';
+import {
+  amountToCurrency,
+  integerToCurrency,
+  titleFirst,
+} from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type CategoryEntity,
@@ -1543,7 +1547,7 @@ const Transaction = memo(function Transaction({
         name="debit"
         exposed={focusedField === 'debit'}
         focused={focusedField === 'debit'}
-        value={debit === '' && credit === '' ? '0.00' : debit}
+        value={debit === '' && credit === '' ? amountToCurrency(0) : debit}
         valueStyle={valueStyle}
         textAlign="right"
         title={debit}
@@ -1554,7 +1558,7 @@ const Transaction = memo(function Transaction({
           ...amountStyle,
         }}
         inputProps={{
-          value: debit === '' && credit === '' ? '0.00' : debit,
+          value: debit === '' && credit === '' ? amountToCurrency(0) : debit,
           onUpdate: onUpdate.bind(null, 'debit'),
         }}
         privacyFilter={{

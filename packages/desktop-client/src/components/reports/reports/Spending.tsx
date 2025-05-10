@@ -26,9 +26,6 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { useFilters } from '../../../hooks/useFilters';
-import { useLocale } from '../../../hooks/useLocale';
-import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { AppliedFilters } from '../../filters/AppliedFilters';
@@ -44,6 +41,10 @@ import { calculateSpendingReportTimeRange } from '../reportRanges';
 import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
+
+import { useFilters } from '@desktop-client/hooks/useFilters';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 export function Spending() {
   const params = useParams();
@@ -516,17 +517,17 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         style={{ marginBottom: 5, minWidth: 210 }}
                         left={
                           <Block>
-                            {compare === monthUtils.currentMonth()
+                            {compareTo === monthUtils.currentMonth()
                               ? t('Spent {{monthYearFormatted}} MTD:', {
                                   monthYearFormatted: monthUtils.format(
-                                    compare,
+                                    compareTo,
                                     'MMM, yyyy',
                                     locale,
                                   ),
                                 })
                               : t('Spent {{monthYearFormatted}}:', {
                                   monthYearFormatted: monthUtils.format(
-                                    compare,
+                                    compareTo,
                                     'MMM, yyyy',
                                     locale,
                                   ),

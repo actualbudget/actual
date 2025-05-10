@@ -15,9 +15,6 @@ import { loadPrefs } from 'loot-core/client/prefs/prefsSlice';
 import { listen } from 'loot-core/platform/client/fetch';
 import { isElectron } from 'loot-core/shared/environment';
 
-import { useGlobalPref } from '../../hooks/useGlobalPref';
-import { useIsOutdated, useLatestVersion } from '../../hooks/useLatestVersion';
-import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useDispatch } from '../../redux';
 import { Link } from '../common/Link';
 import { FormField, FormLabel } from '../forms';
@@ -37,6 +34,13 @@ import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
+
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import {
+  useIsOutdated,
+  useLatestVersion,
+} from '@desktop-client/hooks/useLatestVersion';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 function About() {
   const version = useServerVersion();

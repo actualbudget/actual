@@ -14,13 +14,14 @@ import {
   type CategoryEntity,
 } from 'loot-core/types/models';
 
-import { useContextMenu } from '../../hooks/useContextMenu';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useGlobalPref } from '../../hooks/useGlobalPref';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 
 import { CategoryAutomationButton } from './goals/CategoryAutomationButton';
+
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 type SidebarCategoryProps = {
   innerRef: Ref<HTMLDivElement>;
