@@ -19,6 +19,9 @@ jobs:
       - name: Build Web
         run: yarn build:server
 
+      - name: Check that the built CLI works
+        run: node packages/sync-server/build/bin/actual-server.js --version
+
       - name: Pack the web and server packages
         run: |
           yarn workspace @actual-app/web pack --filename @actual-app/web.tgz
