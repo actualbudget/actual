@@ -1,8 +1,8 @@
 // This file needs to be js and not ts because it is used in the electron-builder config
 // It's easier not to build this to js - if we did that we'd need to monitor the structure of the build folder
-const { Arch } = require('@electron/builder');
 const { rebuild } = require('@electron/rebuild');
 const copyFiles = require('copyfiles');
+const { Arch } = require('electron-builder');
 
 /* The beforePackHook runs before packing the Electron app for an architecture
 We hook in here to build anything architecture dependent - such as beter-sqlite3
