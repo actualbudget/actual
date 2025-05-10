@@ -27,7 +27,7 @@
       "!build/client-build/sql-wasm.wasm",
       "!build/loot-core/lib-dist/electron/{browser,bundle.mobile*}"
     ],
-    "beforePack": "./beforePackHook.ts",
+    "beforePack": "./build/beforePackHook.js",
     "mac": {
       "category": "public.app-category.finance",
       "icon": "icons/icon.icns",
