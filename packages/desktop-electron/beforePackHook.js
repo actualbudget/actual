@@ -1,12 +1,14 @@
-import { rebuild } from '@electron/rebuild';
-import copyFiles from 'copyfiles';
-import { Arch, AfterPackContext } from 'electron-builder';
+// This file needs to be js and not ts
+// It's because it is used in the electron-builder config which does not support ts
+
+const { rebuild } = require('@electron/rebuild');
+const copyFiles = require('copyfiles');
 
 /* The beforePackHook runs before packing the Electron app for an architecture
 We hook in here to build anything architecture dependent - such as beter-sqlite3
 To build, we call @electron/rebuild on the better-sqlite3 module */
-const beforePackHook = async (context: AfterPackContext) => {
-  const arch: string = Arch[context.arch];
+const beforePackHook = async context => {
+  const arch = context.arch.toString();
   const buildPath = context.packager.projectDir;
   const projectRootPath = buildPath + '/../../';
   const electronVersion = context.packager.config.electronVersion;
@@ -43,5 +45,4 @@ const beforePackHook = async (context: AfterPackContext) => {
   }
 };
 
-// eslint-disable-next-line import/no-default-export
-export default beforePackHook;
+module.exports = beforePackHook;
