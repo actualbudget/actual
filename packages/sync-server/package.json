@@ -15,7 +15,7 @@
   "scripts": {
     "start": "yarn build && node build/app",
     "start-monitor": "nodemon --exec 'tsc && node build/app' --ignore './build/**/*' --ext 'ts,js' build/app",
-    "build": "tsc",
+    "build": "tsc && cp -r src/sql build/src/sql",
     "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --trace-warnings' vitest",
     "db:migrate": "yarn build && cross-env NODE_ENV=development node build/src/scripts/run-migrations.js up",
     "db:downgrade": "yarn build && cross-env NODE_ENV=development node build/src/scripts/run-migrations.js down",
