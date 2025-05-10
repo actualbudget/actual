@@ -9118,6 +9118,7 @@ __metadata:
     electron: "npm:30.0.6"
     electron-builder: "npm:24.13.3"
     fs-extra: "npm:^11.3.0"
+    loot-core: "workspace:*"
     promise-retry: "npm:^2.0.1"
     typescript: "npm:^5.8.2"
   languageName: unknown
