@@ -31,6 +31,7 @@ export function BankFactory(institutionId) {
 }
 
 export const BANKS_WITH_LIMITED_HISTORY = [
+  'ABANCA_CAGLESMM',
   'AIRBANK_AIRACZPP',
   'BANCA_AIDEXA_AIDXITMM',
   'BANCA_PATRIMONI_SENVITT1',
