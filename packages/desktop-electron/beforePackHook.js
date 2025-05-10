@@ -1,6 +1,6 @@
-// This file needs to be js and not ts
-// It's because it is used in the electron-builder config which does not support ts
-
+// This file needs to be js and not ts because it is used in the electron-builder config
+// It's easier not to build this to js - if we did that we'd need to monitor the structure of the build folder
+const { Arch } = require('@electron/builder');
 const { rebuild } = require('@electron/rebuild');
 const copyFiles = require('copyfiles');
 
@@ -8,7 +8,8 @@ const copyFiles = require('copyfiles');
 We hook in here to build anything architecture dependent - such as beter-sqlite3
 To build, we call @electron/rebuild on the better-sqlite3 module */
 const beforePackHook = async context => {
-  const arch = context.arch.toString();
+  const arch = Arch[context.arch];
+  console.info({ arch });
   const buildPath = context.packager.projectDir;
   const projectRootPath = buildPath + '/../../';
   const electronVersion = context.packager.config.electronVersion;
