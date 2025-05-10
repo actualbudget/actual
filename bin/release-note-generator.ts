@@ -36,10 +36,10 @@ async function run() {
       message: 'Release Note Type',
       type: 'select',
       choices: [
-        { title: 'Features', value: 'Features' },
-        { title: 'Enhancements', value: 'Enhancements' },
-        { title: 'Bugfix', value: 'Bugfix' },
-        { title: 'Maintenance', value: 'Maintenance' },
+        { title: '✨ Features', value: 'Features' },
+        { title: '👍 Enhancements', value: 'Enhancements' },
+        { title: '🐛 Bugfix', value: 'Bugfix' },
+        { title: '⚙️  Maintenance', value: 'Maintenance' },
       ],
     },
     {
