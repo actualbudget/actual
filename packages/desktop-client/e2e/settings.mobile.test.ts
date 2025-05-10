@@ -1,8 +1,8 @@
 import { type Page } from '@playwright/test';
 
-import { expect, test } from './fixtures';
-import { ConfigurationPage } from './page-models/configuration-page';
-import { MobileNavigation } from './page-models/mobile-navigation';
+import { expect, test } from '@desktop-client/e2e/fixtures';
+import { ConfigurationPage } from '@desktop-client/e2e/page-models/configuration-page';
+import { MobileNavigation } from '@desktop-client/e2e/page-models/mobile-navigation';
 
 test.describe('Mobile Settings', () => {
   let page: Page;

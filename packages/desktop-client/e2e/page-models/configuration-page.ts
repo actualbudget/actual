@@ -1,7 +1,7 @@
 import { type Locator, type Page } from '@playwright/test';
 
-import { AccountPage } from './account-page';
-import { BudgetPage } from './budget-page';
+import { AccountPage } from '@desktop-client/e2e/page-models/account-page';
+import { BudgetPage } from '@desktop-client/e2e/page-models/budget-page';
 
 export class ConfigurationPage {
   readonly page: Page;

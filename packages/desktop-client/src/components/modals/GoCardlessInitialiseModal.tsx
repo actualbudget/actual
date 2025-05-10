@@ -12,15 +12,15 @@ import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getSecretsError } from 'loot-core/shared/errors';
 
-import { Error } from '../alerts';
-import { Link } from '../common/Link';
+import { Error } from '@desktop-client/components/alerts';
+import { Link } from '@desktop-client/components/common/Link';
 import {
   Modal,
   ModalButtons,
   ModalCloseButton,
   ModalHeader,
-} from '../common/Modal';
-import { FormField, FormLabel } from '../forms';
+} from '@desktop-client/components/common/Modal';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
 
 type GoCardlessInitialiseModalProps = Extract<
   ModalType,

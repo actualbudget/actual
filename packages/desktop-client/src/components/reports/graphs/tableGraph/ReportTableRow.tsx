@@ -21,9 +21,8 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { Row, Cell } from '../../../table';
-import { showActivity } from '../showActivity';
-
+import { showActivity } from '@desktop-client/components/reports/graphs/showActivity';
+import { Row, Cell } from '@desktop-client/components/table';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';

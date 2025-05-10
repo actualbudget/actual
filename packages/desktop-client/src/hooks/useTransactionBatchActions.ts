@@ -19,7 +19,7 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { useDispatch } from '../redux';
+import { useDispatch } from '@desktop-client/redux';
 
 type BatchEditProps = {
   name: keyof TransactionEntity;

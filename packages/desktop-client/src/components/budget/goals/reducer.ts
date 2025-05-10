@@ -1,7 +1,10 @@
 import { type Template } from 'loot-core/server/budget/types/templates';
 
-import { type Action } from './actions';
-import { type ReducerState, type DisplayTemplateType } from './constants';
+import { type Action } from '@desktop-client/components/budget/goals/actions';
+import {
+  type ReducerState,
+  type DisplayTemplateType,
+} from '@desktop-client/components/budget/goals/constants';
 
 export const getInitialState = (template: Template | null): ReducerState => {
   const type = template?.type;

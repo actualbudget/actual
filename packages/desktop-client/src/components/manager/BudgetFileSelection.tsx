@@ -58,11 +58,10 @@ import {
   type SyncedLocalFile,
 } from 'loot-core/types/file';
 
-import { useSelector, useDispatch } from '../../redux';
-import { useMultiuserEnabled } from '../ServerContext';
-
+import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
 import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 function getFileDescription(file: File, t: (key: string) => string) {
   if (file.state === 'unknown') {

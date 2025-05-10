@@ -1,6 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 
-import { CloseAccountModal } from './close-account-modal';
+import { CloseAccountModal } from '@desktop-client/e2e/page-models/close-account-modal';
 
 type TransactionEntry = {
   debit?: string;

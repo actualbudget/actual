@@ -8,13 +8,12 @@ import {
   categoryLists,
   type QueryDataEntity,
   ReportOptions,
-} from '../ReportOptions';
-
-import { type createCustomSpreadsheetProps } from './custom-spreadsheet';
-import { filterEmptyRows } from './filterEmptyRows';
-import { makeQuery } from './makeQuery';
-import { recalculate } from './recalculate';
-import { sortData } from './sortData';
+} from '@desktop-client/components/reports/ReportOptions';
+import { type createCustomSpreadsheetProps } from '@desktop-client/components/reports/spreadsheets/custom-spreadsheet';
+import { filterEmptyRows } from '@desktop-client/components/reports/spreadsheets/filterEmptyRows';
+import { makeQuery } from '@desktop-client/components/reports/spreadsheets/makeQuery';
+import { recalculate } from '@desktop-client/components/reports/spreadsheets/recalculate';
+import { sortData } from '@desktop-client/components/reports/spreadsheets/sortData';
 
 export function createGroupedSpreadsheet({
   startDate,

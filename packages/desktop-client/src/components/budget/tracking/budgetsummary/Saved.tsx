@@ -11,10 +11,10 @@ import { css } from '@emotion/css';
 
 import { trackingBudget } from 'loot-core/client/queries';
 
-import { PrivacyFilter } from '../../../PrivacyFilter';
-import { useFormat } from '../../../spreadsheet/useFormat';
-import { makeAmountFullStyle } from '../../util';
-import { useTrackingSheetValue } from '../TrackingBudgetComponents';
+import { useTrackingSheetValue } from '@desktop-client/components/budget/tracking/TrackingBudgetComponents';
+import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 
 type SavedProps = {
   projected: boolean;

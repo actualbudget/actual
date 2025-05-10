@@ -1,6 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 
-import { EditNotesModal } from './mobile-edit-notes-modal';
+import { EditNotesModal } from '@desktop-client/e2e/page-models/mobile-edit-notes-modal';
 
 export class CategoryMenuModal {
   readonly page: Page;

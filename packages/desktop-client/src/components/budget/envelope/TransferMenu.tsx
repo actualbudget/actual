@@ -10,9 +10,11 @@ import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
-import { addToBeBudgetedGroup, removeCategoriesFromGroups } from '../util';
-
+import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
+import {
+  addToBeBudgetedGroup,
+  removeCategoriesFromGroups,
+} from '@desktop-client/components/budget/util';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 
 type TransferMenuProps = {

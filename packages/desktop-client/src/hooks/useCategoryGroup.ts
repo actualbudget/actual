@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { useCategories } from './useCategories';
+import { useCategories } from '@desktop-client/hooks/useCategories';
 
 export function useCategoryGroup(id: string) {
   const { grouped: categoryGroups } = useCategories();

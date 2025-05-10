@@ -30,10 +30,8 @@ import {
   type WithRequired,
 } from 'loot-core/types/util';
 
-import { Checkbox } from '../forms';
-
-import { DateSelect } from './DateSelect';
-
+import { Checkbox } from '@desktop-client/components/forms';
+import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 

@@ -2,10 +2,10 @@ import { join } from 'path';
 
 import { type Page } from '@playwright/test';
 
-import { expect, test } from './fixtures';
-import { type AccountPage } from './page-models/account-page';
-import { ConfigurationPage } from './page-models/configuration-page';
-import { Navigation } from './page-models/navigation';
+import { expect, test } from '@desktop-client/e2e/fixtures';
+import { type AccountPage } from '@desktop-client/e2e/page-models/account-page';
+import { ConfigurationPage } from '@desktop-client/e2e/page-models/configuration-page';
+import { Navigation } from '@desktop-client/e2e/page-models/navigation';
 
 test.describe('Accounts', () => {
   let page: Page;

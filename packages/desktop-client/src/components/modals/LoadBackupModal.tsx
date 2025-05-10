@@ -12,11 +12,14 @@ import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { send, listen } from 'loot-core/platform/client/fetch';
 import { type Backup } from 'loot-core/server/budgetfiles/backups';
 
-import { useDispatch } from '../../redux';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Row, Cell } from '../table';
-
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { Row, Cell } from '@desktop-client/components/table';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useDispatch } from '@desktop-client/redux';
 
 type BackupTableProps = {
   backups: Backup[];

@@ -10,7 +10,7 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import { type Handlers } from 'loot-core/types/handlers';
 
-import { Setting } from './UI';
+import { Setting } from '@desktop-client/components/settings/UI';
 
 type Results = Awaited<ReturnType<Handlers['tools/fix-split-transactions']>>;
 

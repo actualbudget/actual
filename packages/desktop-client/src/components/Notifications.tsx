@@ -26,9 +26,8 @@ import {
   type NotificationWithId,
 } from 'loot-core/client/notifications/notificationsSlice';
 
-import { useSelector, useDispatch } from '../redux';
-
-import { Link } from './common/Link';
+import { Link } from '@desktop-client/components/common/Link';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 function compileMessage(
   message: string,

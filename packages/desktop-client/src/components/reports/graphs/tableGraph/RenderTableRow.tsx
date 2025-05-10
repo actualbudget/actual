@@ -4,7 +4,7 @@ import { View } from '@actual-app/components/view';
 
 import { type GroupedEntity } from 'loot-core/types/models';
 
-import { type renderRowProps } from './ReportTable';
+import { type renderRowProps } from '@desktop-client/components/reports/graphs/tableGraph/ReportTable';
 
 type RenderTableRowProps = {
   index: number;

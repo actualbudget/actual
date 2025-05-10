@@ -1,13 +1,13 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 
-import { Overview } from './Overview';
-import { Calendar } from './reports/Calendar';
-import { CashFlow } from './reports/CashFlow';
-import { CustomReport } from './reports/CustomReport';
-import { NetWorth } from './reports/NetWorth';
-import { Spending } from './reports/Spending';
-import { Summary } from './reports/Summary';
+import { Overview } from '@desktop-client/components/reports/Overview';
+import { Calendar } from '@desktop-client/components/reports/reports/Calendar';
+import { CashFlow } from '@desktop-client/components/reports/reports/CashFlow';
+import { CustomReport } from '@desktop-client/components/reports/reports/CustomReport';
+import { NetWorth } from '@desktop-client/components/reports/reports/NetWorth';
+import { Spending } from '@desktop-client/components/reports/reports/Spending';
+import { Summary } from '@desktop-client/components/reports/reports/Summary';
 
 export function ReportRouter() {
   return (

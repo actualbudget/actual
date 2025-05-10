@@ -21,14 +21,14 @@ import { loadGlobalPrefs } from 'loot-core/client/prefs/prefsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getCreateKeyError } from 'loot-core/shared/errors';
 
-import { useDispatch } from '../../redux';
-import { Link } from '../common/Link';
+import { Link } from '@desktop-client/components/common/Link';
 import {
   Modal,
   ModalButtons,
   ModalCloseButton,
   ModalHeader,
-} from '../common/Modal';
+} from '@desktop-client/components/common/Modal';
+import { useDispatch } from '@desktop-client/redux';
 
 type CreateEncryptionKeyModalProps = Extract<
   ModalType,

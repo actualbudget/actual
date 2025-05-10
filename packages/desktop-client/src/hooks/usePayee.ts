@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { usePayees } from './usePayees';
+import { usePayees } from '@desktop-client/hooks/usePayees';
 
 export function usePayee(id: string) {
   const payees = usePayees();

@@ -56,15 +56,17 @@ import {
   groupById,
 } from 'loot-core/shared/util';
 
-import { useSelector, useDispatch } from '../../../redux';
-import { MobilePageHeader, Page } from '../../Page';
-import { AmountInput } from '../../util/AmountInput';
-import { MobileBackButton } from '../MobileBackButton';
-import { FieldLabel, TapField, InputField, ToggleField } from '../MobileForms';
-import { getPrettyPayee } from '../utils';
-
-import { FocusableAmountInput } from './FocusableAmountInput';
-
+import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
+import {
+  FieldLabel,
+  TapField,
+  InputField,
+  ToggleField,
+} from '@desktop-client/components/mobile/MobileForms';
+import { FocusableAmountInput } from '@desktop-client/components/mobile/transactions/FocusableAmountInput';
+import { getPrettyPayee } from '@desktop-client/components/mobile/utils';
+import { MobilePageHeader, Page } from '@desktop-client/components/Page';
+import { AmountInput } from '@desktop-client/components/util/AmountInput';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
@@ -75,6 +77,7 @@ import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
 } from '@desktop-client/hooks/useSingleActiveEditForm';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;

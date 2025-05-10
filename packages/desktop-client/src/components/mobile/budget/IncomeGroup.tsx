@@ -17,13 +17,14 @@ import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
 import * as monthUtils from 'loot-core/shared/months';
 import { type CategoryGroupEntity } from 'loot-core/types/models';
 
-import { PrivacyFilter } from '../../PrivacyFilter';
-import { CellValue } from '../../spreadsheet/CellValue';
-import { useFormat } from '../../spreadsheet/useFormat';
-
-import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
-import { IncomeCategoryList } from './IncomeCategoryList';
-
+import {
+  getColumnWidth,
+  ROW_HEIGHT,
+} from '@desktop-client/components/mobile/budget/BudgetTable';
+import { IncomeCategoryList } from '@desktop-client/components/mobile/budget/IncomeCategoryList';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type IncomeGroupProps = {

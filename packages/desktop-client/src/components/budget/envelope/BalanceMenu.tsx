@@ -5,7 +5,7 @@ import { Menu } from '@actual-app/components/menu';
 
 import { envelopeBudget } from 'loot-core/client/queries';
 
-import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
+import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
 
 type BalanceMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,

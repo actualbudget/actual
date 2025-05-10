@@ -21,22 +21,24 @@ import {
 } from 'loot-core/client/queries/queriesSlice';
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { useDispatch } from '../../redux';
-import { Link } from '../common/Link';
-import { Notes } from '../Notes';
+import { Link } from '@desktop-client/components/common/Link';
+import { Notes } from '@desktop-client/components/Notes';
 import {
   useDraggable,
   useDroppable,
   DropHighlight,
   type OnDragChangeCallback,
   type OnDropCallback,
-} from '../sort';
-import { type SheetFields, type Binding } from '../spreadsheet';
-import { CellValue } from '../spreadsheet/CellValue';
-
+} from '@desktop-client/components/sort';
+import {
+  type SheetFields,
+  type Binding,
+} from '@desktop-client/components/spreadsheet';
+import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
 import { useNotes } from '@desktop-client/hooks/useNotes';
+import { useDispatch } from '@desktop-client/redux';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,

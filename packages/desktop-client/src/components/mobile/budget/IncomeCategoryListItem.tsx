@@ -13,10 +13,12 @@ import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
 import * as monthUtils from 'loot-core/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { BalanceCell } from './BalanceCell';
-import { BudgetCell } from './BudgetCell';
-import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
-
+import { BalanceCell } from '@desktop-client/components/mobile/budget/BalanceCell';
+import { BudgetCell } from '@desktop-client/components/mobile/budget/BudgetCell';
+import {
+  getColumnWidth,
+  ROW_HEIGHT,
+} from '@desktop-client/components/mobile/budget/BudgetTable';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 

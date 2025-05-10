@@ -9,9 +9,9 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { useAccounts } from './useAccounts';
-import { usePayee } from './usePayee';
-import { usePayees } from './usePayees';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { usePayee } from '@desktop-client/hooks/usePayee';
+import { usePayees } from '@desktop-client/hooks/usePayees';
 
 type Counts = {
   counts: Record<PayeeEntity['id'], number>;

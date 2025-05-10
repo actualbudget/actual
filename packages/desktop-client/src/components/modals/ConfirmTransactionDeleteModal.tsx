@@ -10,7 +10,11 @@ import { View } from '@actual-app/components/view';
 
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
 
 type ConfirmTransactionDeleteModalProps = Extract<
   ModalType,

@@ -12,9 +12,8 @@ import { useToggle } from 'usehooks-ts';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
-import { useDispatch } from '../redux';
-
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useDispatch } from '@desktop-client/redux';
 
 const getPageDocs = (page: string) => {
   switch (page) {

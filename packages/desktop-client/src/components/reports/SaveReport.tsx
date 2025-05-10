@@ -10,10 +10,10 @@ import { useReports } from 'loot-core/client/data-hooks/reports';
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
 import { type CustomReportEntity } from 'loot-core/types/models';
 
-import { SaveReportChoose } from './SaveReportChoose';
-import { SaveReportDelete } from './SaveReportDelete';
-import { SaveReportMenu } from './SaveReportMenu';
-import { SaveReportName } from './SaveReportName';
+import { SaveReportChoose } from '@desktop-client/components/reports/SaveReportChoose';
+import { SaveReportDelete } from '@desktop-client/components/reports/SaveReportDelete';
+import { SaveReportMenu } from '@desktop-client/components/reports/SaveReportMenu';
+import { SaveReportName } from '@desktop-client/components/reports/SaveReportName';
 
 type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
   customReportItems: T;

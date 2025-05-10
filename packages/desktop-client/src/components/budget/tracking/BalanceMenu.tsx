@@ -5,7 +5,7 @@ import { Menu } from '@actual-app/components/menu';
 
 import { trackingBudget } from 'loot-core/client/queries';
 
-import { useTrackingSheetValue } from './TrackingBudgetComponents';
+import { useTrackingSheetValue } from '@desktop-client/components/budget/tracking/TrackingBudgetComponents';
 
 type BalanceMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,

@@ -3,8 +3,8 @@ import React, { type ComponentProps } from 'react';
 import { useReports } from 'loot-core/client/data-hooks/reports';
 import { type CustomReportEntity } from 'loot-core/types/models';
 
-import { Autocomplete } from './Autocomplete';
-import { ReportList } from './ReportList';
+import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
+import { ReportList } from '@desktop-client/components/autocomplete/ReportList';
 
 type ReportAutocompleteProps = {
   embedded?: boolean;

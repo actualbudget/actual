@@ -10,8 +10,8 @@ import { Block } from '@actual-app/components/block';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { accountNameStyle } from './Account';
-import { ItemContent } from './ItemContent';
+import { accountNameStyle } from '@desktop-client/components/sidebar/Account';
+import { ItemContent } from '@desktop-client/components/sidebar/ItemContent';
 
 const fontWeight = 600;
 

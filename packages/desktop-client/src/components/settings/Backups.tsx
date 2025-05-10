@@ -3,7 +3,7 @@ import { Trans } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
 
-import { Setting } from './UI';
+import { Setting } from '@desktop-client/components/settings/UI';
 
 export function Backups() {
   const BACKUP_FREQUENCY_MINS = 15;

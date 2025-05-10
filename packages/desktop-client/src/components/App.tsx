@@ -23,24 +23,26 @@ import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import { signOut } from 'loot-core/client/users/usersSlice';
 import { init as initConnection, send } from 'loot-core/platform/client/fetch';
 
-import { handleGlobalEvents } from '../global-events';
-import { setI18NextLanguage } from '../i18n';
-import { installPolyfills } from '../polyfills';
-import { useDispatch, useSelector, useStore } from '../redux';
-import { hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
-import { ExposeNavigate } from '../util/router-tools';
-
-import { AppBackground } from './AppBackground';
-import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
-import { DevelopmentTopBar } from './DevelopmentTopBar';
-import { FatalError } from './FatalError';
-import { FinancesApp } from './FinancesApp';
-import { ManagementApp } from './manager/ManagementApp';
-import { Modals } from './Modals';
-import { SidebarProvider } from './sidebar/SidebarProvider';
-import { UpdateNotification } from './UpdateNotification';
-
+import { AppBackground } from '@desktop-client/components/AppBackground';
+import { BudgetMonthCountProvider } from '@desktop-client/components/budget/BudgetMonthCountContext';
+import { DevelopmentTopBar } from '@desktop-client/components/DevelopmentTopBar';
+import { FatalError } from '@desktop-client/components/FatalError';
+import { FinancesApp } from '@desktop-client/components/FinancesApp';
+import { ManagementApp } from '@desktop-client/components/manager/ManagementApp';
+import { Modals } from '@desktop-client/components/Modals';
+import { SidebarProvider } from '@desktop-client/components/sidebar/SidebarProvider';
+import { UpdateNotification } from '@desktop-client/components/UpdateNotification';
+import { handleGlobalEvents } from '@desktop-client/global-events';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { setI18NextLanguage } from '@desktop-client/i18n';
+import { installPolyfills } from '@desktop-client/polyfills';
+import { useDispatch, useSelector, useStore } from '@desktop-client/redux';
+import {
+  hasHiddenScrollbars,
+  ThemeStyle,
+  useTheme,
+} from '@desktop-client/style';
+import { ExposeNavigate } from '@desktop-client/util/router-tools';
 
 function AppInner() {
   const [budgetId] = useMetadataPref('id');

@@ -9,9 +9,8 @@ import { View } from '@actual-app/components/view';
 
 import { setAppState, updateApp } from 'loot-core/client/app/appSlice';
 
-import { useSelector, useDispatch } from '../redux';
-
-import { Link } from './common/Link';
+import { Link } from '@desktop-client/components/common/Link';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 export function UpdateNotification() {
   const { t } = useTranslation();

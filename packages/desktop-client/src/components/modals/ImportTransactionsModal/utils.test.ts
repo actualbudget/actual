@@ -1,4 +1,4 @@
-import { parseDate } from './utils';
+import { parseDate } from '@desktop-client/components/modals/ImportTransactionsModal/utils';
 
 describe('Import transactions', () => {
   describe('date parsing', () => {

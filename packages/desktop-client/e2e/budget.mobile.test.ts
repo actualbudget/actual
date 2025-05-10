@@ -3,10 +3,10 @@ import { type Page } from '@playwright/test';
 import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency, currencyToAmount } from 'loot-core/shared/util';
 
-import { expect, test } from './fixtures';
-import { ConfigurationPage } from './page-models/configuration-page';
-import { type MobileBudgetPage } from './page-models/mobile-budget-page';
-import { MobileNavigation } from './page-models/mobile-navigation';
+import { expect, test } from '@desktop-client/e2e/fixtures';
+import { ConfigurationPage } from '@desktop-client/e2e/page-models/configuration-page';
+import { type MobileBudgetPage } from '@desktop-client/e2e/page-models/mobile-budget-page';
+import { MobileNavigation } from '@desktop-client/e2e/page-models/mobile-navigation';
 
 const copyLastMonthBudget = async (
   budgetPage: MobileBudgetPage,

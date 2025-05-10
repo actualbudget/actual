@@ -12,7 +12,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { ItemContent } from './ItemContent';
+import { ItemContent } from '@desktop-client/components/sidebar/ItemContent';
 
 type ItemProps = {
   title: string;

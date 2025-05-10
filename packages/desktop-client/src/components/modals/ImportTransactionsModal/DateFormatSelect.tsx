@@ -3,13 +3,12 @@ import React from 'react';
 import { Select } from '@actual-app/components/select';
 import { View } from '@actual-app/components/view';
 
-import { SectionLabel } from '../../forms';
-
+import { SectionLabel } from '@desktop-client/components/forms';
 import {
   dateFormats,
   type ImportTransaction,
   type FieldMapping,
-} from './utils';
+} from '@desktop-client/components/modals/ImportTransactionsModal/utils';
 
 type DateFormatSelectProps = {
   transactions: ImportTransaction[];

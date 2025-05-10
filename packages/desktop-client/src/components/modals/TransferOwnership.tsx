@@ -21,11 +21,14 @@ import { type Budget } from 'loot-core/types/budget';
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 import { type Handlers } from 'loot-core/types/handlers';
 
-import { useDispatch, useSelector } from '../../redux';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { FormField, FormLabel } from '../forms';
-
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 type TransferOwnershipProps = Extract<
   ModalType,

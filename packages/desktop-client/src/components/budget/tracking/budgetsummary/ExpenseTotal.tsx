@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { trackingBudget } from 'loot-core/client/queries';
 
-import { BudgetTotal } from './BudgetTotal';
-import { ExpenseProgress } from './ExpenseProgress';
+import { BudgetTotal } from '@desktop-client/components/budget/tracking/budgetsummary/BudgetTotal';
+import { ExpenseProgress } from '@desktop-client/components/budget/tracking/budgetsummary/ExpenseProgress';
 
 type ExpenseTotalProps = {
   style?: CSSProperties;

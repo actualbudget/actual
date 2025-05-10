@@ -8,18 +8,20 @@ import React, {
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 
-import { PrivacyFilter } from '../PrivacyFilter';
-
-import { type FormatType, useFormat } from './useFormat';
-import { useSheetName } from './useSheetName';
-import { useSheetValue } from './useSheetValue';
-
 import {
   type Binding,
   type SheetNames,
   type SheetFields,
   type Spreadsheets,
 } from '.';
+
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import {
+  type FormatType,
+  useFormat,
+} from '@desktop-client/components/spreadsheet/useFormat';
+import { useSheetName } from '@desktop-client/components/spreadsheet/useSheetName';
+import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
 
 type CellValueProps<
   SheetName extends SheetNames,

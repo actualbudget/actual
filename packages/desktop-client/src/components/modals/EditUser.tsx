@@ -20,9 +20,17 @@ import { send } from 'loot-core/platform/client/fetch';
 import { PossibleRoles } from 'loot-core/shared/user';
 import { type NewUserEntity, type UserEntity } from 'loot-core/types/models';
 
-import { useDispatch } from '../../redux';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Checkbox, FormField, FormLabel } from '../forms';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import {
+  Checkbox,
+  FormField,
+  FormLabel,
+} from '@desktop-client/components/forms';
+import { useDispatch } from '@desktop-client/redux';
 
 type User = UserEntity;
 type NewUser = NewUserEntity;

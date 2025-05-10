@@ -31,9 +31,8 @@ import {
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal';
-import { Notes } from '../Notes';
-
+} from '@desktop-client/components/common/Modal';
+import { Notes } from '@desktop-client/components/Notes';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useNotes } from '@desktop-client/hooks/useNotes';
 

@@ -14,14 +14,22 @@ import {
   linkAccountPluggyAi,
   linkAccountSimpleFin,
   unlinkAccount,
-} from '../../accounts/accountsSlice';
-import { useDispatch } from '../../redux';
-import { Autocomplete } from '../autocomplete/Autocomplete';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { PrivacyFilter } from '../PrivacyFilter';
-import { TableHeader, Table, Row, Field } from '../table';
-
+} from '@desktop-client/accounts/accountsSlice';
+import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import {
+  TableHeader,
+  Table,
+  Row,
+  Field,
+} from '@desktop-client/components/table';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useDispatch } from '@desktop-client/redux';
 
 function useAddBudgetAccountOptions() {
   const { t } = useTranslation();

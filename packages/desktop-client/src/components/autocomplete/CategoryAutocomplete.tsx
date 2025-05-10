@@ -29,13 +29,14 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
-import { makeAmountFullStyle } from '../budget/util';
-import { useSheetValue } from '../spreadsheet/useSheetValue';
-
-import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
-import { ItemHeader } from './ItemHeader';
-
+import {
+  Autocomplete,
+  defaultFilterSuggestion,
+} from '@desktop-client/components/autocomplete/Autocomplete';
+import { ItemHeader } from '@desktop-client/components/autocomplete/ItemHeader';
+import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
+import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
+import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 

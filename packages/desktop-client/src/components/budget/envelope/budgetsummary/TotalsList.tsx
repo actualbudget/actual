@@ -9,9 +9,9 @@ import { View } from '@actual-app/components/view';
 
 import { envelopeBudget } from 'loot-core/client/queries';
 
-import { CellValueText } from '../../../spreadsheet/CellValue';
-import { useFormat } from '../../../spreadsheet/useFormat';
-import { EnvelopeCellValue } from '../EnvelopeBudgetComponents';
+import { EnvelopeCellValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
+import { CellValueText } from '@desktop-client/components/spreadsheet/CellValue';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 
 type TotalsListProps = {
   prevMonthName: string;

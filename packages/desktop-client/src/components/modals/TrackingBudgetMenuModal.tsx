@@ -11,16 +11,15 @@ import * as Platform from 'loot-core/client/platform';
 import { trackingBudget } from 'loot-core/client/queries';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
-import { BudgetMenu } from '../budget/tracking/BudgetMenu';
-import { useTrackingSheetValue } from '../budget/tracking/TrackingBudgetComponents';
+import { BudgetMenu } from '@desktop-client/components/budget/tracking/BudgetMenu';
+import { useTrackingSheetValue } from '@desktop-client/components/budget/tracking/TrackingBudgetComponents';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal';
-import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
-
+} from '@desktop-client/components/common/Modal';
+import { FocusableAmountInput } from '@desktop-client/components/mobile/transactions/FocusableAmountInput';
 import { useCategory } from '@desktop-client/hooks/useCategory';
 
 type TrackingBudgetMenuModalProps = Omit<

@@ -7,13 +7,11 @@ import { theme } from '@actual-app/components/theme';
 
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 
-import { useDispatch } from '../../redux';
-import { Link } from '../common/Link';
-import { useServerURL } from '../ServerContext';
-
-import { Setting } from './UI';
-
+import { Link } from '@desktop-client/components/common/Link';
+import { useServerURL } from '@desktop-client/components/ServerContext';
+import { Setting } from '@desktop-client/components/settings/UI';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useDispatch } from '@desktop-client/redux';
 
 export function EncryptionSettings() {
   const dispatch = useDispatch();

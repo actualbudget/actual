@@ -8,11 +8,11 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { AppliedFilters } from './AppliedFilters';
+import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
 import {
   type SavedFilter,
   SavedFilterMenuButton,
-} from './SavedFilterMenuButton';
+} from '@desktop-client/components/filters/SavedFilterMenuButton';
 
 export function FiltersStack({
   conditions,

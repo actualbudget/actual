@@ -8,7 +8,7 @@ import {
 } from 'loot-core/client/notifications/notificationsSlice';
 import { redo, undo } from 'loot-core/client/undo';
 
-import { useDispatch } from '../redux';
+import { useDispatch } from '@desktop-client/redux';
 
 type UndoActions = {
   undo: () => void;

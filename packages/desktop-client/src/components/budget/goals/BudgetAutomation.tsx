@@ -9,10 +9,13 @@ import {
   type ScheduleEntity,
 } from 'loot-core/types/models';
 
-import { type Action } from './actions';
-import { BudgetAutomationEditor } from './BudgetAutomationEditor';
-import { BudgetAutomationReadOnly } from './BudgetAutomationReadOnly';
-import { getInitialState, templateReducer } from './reducer';
+import { type Action } from '@desktop-client/components/budget/goals/actions';
+import { BudgetAutomationEditor } from '@desktop-client/components/budget/goals/BudgetAutomationEditor';
+import { BudgetAutomationReadOnly } from '@desktop-client/components/budget/goals/BudgetAutomationReadOnly';
+import {
+  getInitialState,
+  templateReducer,
+} from '@desktop-client/components/budget/goals/reducer';
 
 type BudgetAutomationProps = {
   categories: CategoryGroupEntity[];

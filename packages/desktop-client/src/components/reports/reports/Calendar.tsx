@@ -41,26 +41,28 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { useDispatch } from '../../../redux';
-import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
-import { MobileBackButton } from '../../mobile/MobileBackButton';
-import { TransactionList as TransactionListMobile } from '../../mobile/transactions/TransactionList';
-import { MobilePageHeader, Page, PageHeader } from '../../Page';
-import { PrivacyFilter } from '../../PrivacyFilter';
-import { TransactionList } from '../../transactions/TransactionList';
-import { chartTheme } from '../chart-theme';
-import { DateRange } from '../DateRange';
-import { CalendarGraph } from '../graphs/CalendarGraph';
-import { Header } from '../Header';
-import { LoadingIndicator } from '../LoadingIndicator';
-import { calculateTimeRange } from '../reportRanges';
+import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
+import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
+import { TransactionList as TransactionListMobile } from '@desktop-client/components/mobile/transactions/TransactionList';
+import {
+  MobilePageHeader,
+  Page,
+  PageHeader,
+} from '@desktop-client/components/Page';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { chartTheme } from '@desktop-client/components/reports/chart-theme';
+import { DateRange } from '@desktop-client/components/reports/DateRange';
+import { CalendarGraph } from '@desktop-client/components/reports/graphs/CalendarGraph';
+import { Header } from '@desktop-client/components/reports/Header';
+import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import {
   type CalendarDataType,
   calendarSpreadsheet,
-} from '../spreadsheets/calendar-spreadsheet';
-import { useReport } from '../useReport';
-import { fromDateRepr } from '../util';
-
+} from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
+import { useReport } from '@desktop-client/components/reports/useReport';
+import { fromDateRepr } from '@desktop-client/components/reports/util';
+import { TransactionList } from '@desktop-client/components/transactions/TransactionList';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
@@ -73,6 +75,7 @@ import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
 import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useDispatch } from '@desktop-client/redux';
 
 const CHEVRON_HEIGHT = 42;
 const SUMMARY_HEIGHT = 140;

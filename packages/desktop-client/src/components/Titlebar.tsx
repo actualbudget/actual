@@ -28,23 +28,21 @@ import {
   isElectron,
 } from 'loot-core/shared/environment';
 
-import { useDispatch } from '../redux';
-
-import { AccountSyncCheck } from './accounts/AccountSyncCheck';
-import { AnimatedRefresh } from './AnimatedRefresh';
-import { MonthCountSelector } from './budget/MonthCountSelector';
-import { Link } from './common/Link';
-import { HelpMenu } from './HelpMenu';
-import { LoggedInUser } from './LoggedInUser';
-import { useServerURL } from './ServerContext';
-import { useSidebar } from './sidebar/SidebarProvider';
-import { useSheetValue } from './spreadsheet/useSheetValue';
-import { ThemeSelector } from './ThemeSelector';
-
+import { AccountSyncCheck } from '@desktop-client/components/accounts/AccountSyncCheck';
+import { AnimatedRefresh } from '@desktop-client/components/AnimatedRefresh';
+import { MonthCountSelector } from '@desktop-client/components/budget/MonthCountSelector';
+import { Link } from '@desktop-client/components/common/Link';
+import { HelpMenu } from '@desktop-client/components/HelpMenu';
+import { LoggedInUser } from '@desktop-client/components/LoggedInUser';
+import { useServerURL } from '@desktop-client/components/ServerContext';
+import { useSidebar } from '@desktop-client/components/sidebar/SidebarProvider';
+import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
+import { ThemeSelector } from '@desktop-client/components/ThemeSelector';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useDispatch } from '@desktop-client/redux';
 
 function UncategorizedButton() {
   const count: number | null = useSheetValue(queries.uncategorizedCount());

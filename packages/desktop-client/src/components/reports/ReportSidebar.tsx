@@ -22,15 +22,23 @@ import {
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { Information } from '../alerts';
-
-import { CategorySelector } from './CategorySelector';
-import { defaultsList, disabledList } from './disabledList';
-import { getLiveRange } from './getLiveRange';
-import { ModeButton } from './ModeButton';
-import { type dateRangeProps, ReportOptions } from './ReportOptions';
-import { validateEnd, validateStart } from './reportRanges';
-import { setSessionReport } from './setSessionReport';
+import { Information } from '@desktop-client/components/alerts';
+import { CategorySelector } from '@desktop-client/components/reports/CategorySelector';
+import {
+  defaultsList,
+  disabledList,
+} from '@desktop-client/components/reports/disabledList';
+import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';
+import { ModeButton } from '@desktop-client/components/reports/ModeButton';
+import {
+  type dateRangeProps,
+  ReportOptions,
+} from '@desktop-client/components/reports/ReportOptions';
+import {
+  validateEnd,
+  validateStart,
+} from '@desktop-client/components/reports/reportRanges';
+import { setSessionReport } from '@desktop-client/components/reports/setSessionReport';
 
 type ReportSidebarProps = {
   customReportItems: CustomReportEntity;

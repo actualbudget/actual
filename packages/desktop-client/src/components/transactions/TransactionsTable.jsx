@@ -69,13 +69,12 @@ import {
   amountToCurrency,
 } from 'loot-core/shared/util';
 
-import { useDispatch } from '../../redux';
-import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
-import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
-import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
-import { getStatusProps } from '../schedules/StatusBadge';
-import { DateSelect } from '../select/DateSelect';
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
+import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
+import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
+import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
+import { getStatusProps } from '@desktop-client/components/schedules/StatusBadge';
+import { DateSelect } from '@desktop-client/components/select/DateSelect';
+import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
 import {
   Cell,
   Field,
@@ -88,10 +87,8 @@ import {
   useTableNavigator,
   Table,
   UnexposedCellContent,
-} from '../table';
-
-import { TransactionMenu } from './TransactionMenu';
-
+} from '@desktop-client/components/table';
+import { TransactionMenu } from '@desktop-client/components/transactions/TransactionMenu';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
@@ -102,6 +99,7 @@ import {
   useSelectedItems,
 } from '@desktop-client/hooks/useSelected';
 import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
+import { useDispatch } from '@desktop-client/redux';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';

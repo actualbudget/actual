@@ -32,7 +32,8 @@
     "paths": {
       // TEMPORARY: Until we can fix the "exports" in the loot-core package.json
       "loot-core/*": ["./packages/loot-core/src/*"],
-      "@desktop-client/*": ["./packages/desktop-client/src/*"]
+      "@desktop-client/*": ["./packages/desktop-client/src/*"],
+      "@desktop-client/e2e/*": ["./packages/desktop-client/e2e/*"]
     },
     "plugins": [
       {

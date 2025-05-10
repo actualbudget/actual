@@ -1,12 +1,12 @@
 // @ts-strict-ignore
-import { parse as parseDate, isValid as isDateValid } from 'date-fns';
-
 import {
   parametrizedField,
   type SheetFields,
   type Binding,
   type SheetNames,
-} from '../../../desktop-client/src/components/spreadsheet';
+} from '@desktop-client/components/spreadsheet';
+import { parse as parseDate, isValid as isDateValid } from 'date-fns';
+
 import {
   dayFromDate,
   getDayMonthRegex,

@@ -13,10 +13,8 @@ import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { Link } from '../common/Link';
-
-import { type MonthBounds } from './MonthsContext';
-
+import { type MonthBounds } from '@desktop-client/components/budget/MonthsContext';
+import { Link } from '@desktop-client/components/common/Link';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 

@@ -7,8 +7,8 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { useAccounts } from './useAccounts';
-import { usePayees } from './usePayees';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { usePayees } from '@desktop-client/hooks/usePayees';
 
 type UseAccountPreviewTransactionsProps = {
   accountId?: AccountEntity['id'] | undefined;

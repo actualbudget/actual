@@ -4,7 +4,10 @@ import { Trans } from 'react-i18next';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 
-import { formatDate, parseDate } from './utils';
+import {
+  formatDate,
+  parseDate,
+} from '@desktop-client/components/modals/ImportTransactionsModal/utils';
 
 type ParsedDateProps = {
   parseDateFormat?: Parameters<typeof parseDate>[1];

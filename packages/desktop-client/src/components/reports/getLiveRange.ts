@@ -2,8 +2,11 @@ import * as monthUtils from 'loot-core/shared/months';
 import { type TimeFrame } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { ReportOptions } from './ReportOptions';
-import { getSpecificRange, validateRange } from './reportRanges';
+import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
+import {
+  getSpecificRange,
+  validateRange,
+} from '@desktop-client/components/reports/reportRanges';
 
 export function getLiveRange(
   cond: string,

@@ -1,6 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 
-import { MobileAccountPage } from './mobile-account-page';
+import { MobileAccountPage } from '@desktop-client/e2e/page-models/mobile-account-page';
 
 export class MobileAccountsPage {
   readonly page: Page;

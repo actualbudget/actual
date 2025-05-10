@@ -16,15 +16,16 @@ import { listen } from 'loot-core/platform/client/fetch';
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
-import { useAuth } from '../auth/AuthProvider';
-import { Permissions } from '../auth/types';
-import { useSelector, useDispatch } from '../redux';
-
-import { PrivacyFilter } from './PrivacyFilter';
-import { useMultiuserEnabled, useServerURL } from './ServerContext';
-
+import { useAuth } from '@desktop-client/auth/AuthProvider';
+import { Permissions } from '@desktop-client/auth/types';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import {
+  useMultiuserEnabled,
+  useServerURL,
+} from '@desktop-client/components/ServerContext';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;

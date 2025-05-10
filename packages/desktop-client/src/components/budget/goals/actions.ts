@@ -1,6 +1,6 @@
 import { type Template } from 'loot-core/server/budget/types/templates';
 
-import { type DisplayTemplateType } from './constants';
+import { type DisplayTemplateType } from '@desktop-client/components/budget/goals/constants';
 
 type SET_TYPE = {
   type: 'set-type';

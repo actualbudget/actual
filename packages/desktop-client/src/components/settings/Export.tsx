@@ -9,8 +9,7 @@ import { format } from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 
-import { Setting } from './UI';
-
+import { Setting } from '@desktop-client/components/settings/UI';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 export function ExportBudget() {

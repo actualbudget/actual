@@ -17,10 +17,10 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { ReportTableHeader } from './ReportTableHeader';
-import { ReportTableList } from './ReportTableList';
-import { ReportTableRow } from './ReportTableRow';
-import { ReportTableTotals } from './ReportTableTotals';
+import { ReportTableHeader } from '@desktop-client/components/reports/graphs/tableGraph/ReportTableHeader';
+import { ReportTableList } from '@desktop-client/components/reports/graphs/tableGraph/ReportTableList';
+import { ReportTableRow } from '@desktop-client/components/reports/graphs/tableGraph/ReportTableRow';
+import { ReportTableTotals } from '@desktop-client/components/reports/graphs/tableGraph/ReportTableTotals';
 
 type ReportTableProps = {
   saveScrollWidth: (value: number) => void;

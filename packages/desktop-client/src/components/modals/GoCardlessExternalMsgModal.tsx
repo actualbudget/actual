@@ -18,15 +18,18 @@ import {
   type GoCardlessToken,
 } from 'loot-core/types/models';
 
-import { useDispatch } from '../../redux';
-import { Error, Warning } from '../alerts';
-import { Autocomplete } from '../autocomplete/Autocomplete';
-import { Link } from '../common/Link';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { FormField, FormLabel } from '../forms';
-import { COUNTRY_OPTIONS } from '../util/countries';
-
+import { Error, Warning } from '@desktop-client/components/alerts';
+import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
+import { Link } from '@desktop-client/components/common/Link';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { COUNTRY_OPTIONS } from '@desktop-client/components/util/countries';
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
+import { useDispatch } from '@desktop-client/redux';
 
 function useAvailableBanks(country: string) {
   const [banks, setBanks] = useState<GoCardlessInstitution[]>([]);

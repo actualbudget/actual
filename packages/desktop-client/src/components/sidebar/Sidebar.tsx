@@ -12,18 +12,16 @@ import { Resizable } from 're-resizable';
 import { replaceModal } from 'loot-core/client/modals/modalsSlice';
 import * as Platform from 'loot-core/client/platform';
 
-import { useDispatch } from '../../redux';
-
-import { Accounts } from './Accounts';
-import { BudgetName } from './BudgetName';
-import { PrimaryButtons } from './PrimaryButtons';
-import { SecondaryButtons } from './SecondaryButtons';
-import { useSidebar } from './SidebarProvider';
-import { ToggleButton } from './ToggleButton';
-
+import { Accounts } from '@desktop-client/components/sidebar/Accounts';
+import { BudgetName } from '@desktop-client/components/sidebar/BudgetName';
+import { PrimaryButtons } from '@desktop-client/components/sidebar/PrimaryButtons';
+import { SecondaryButtons } from '@desktop-client/components/sidebar/SecondaryButtons';
+import { useSidebar } from '@desktop-client/components/sidebar/SidebarProvider';
+import { ToggleButton } from '@desktop-client/components/sidebar/ToggleButton';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
+import { useDispatch } from '@desktop-client/redux';
 
 export function Sidebar() {
   const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';

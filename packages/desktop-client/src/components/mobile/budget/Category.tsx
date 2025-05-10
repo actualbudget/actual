@@ -3,8 +3,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { CategoryTransactions } from './CategoryTransactions';
-
+import { CategoryTransactions } from '@desktop-client/components/mobile/budget/CategoryTransactions';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 

@@ -15,9 +15,8 @@ import {
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { type DropPosition } from '../sort';
-
-import { getValidMonthBounds } from './MonthsContext';
+import { getValidMonthBounds } from '@desktop-client/components/budget/MonthsContext';
+import { type DropPosition } from '@desktop-client/components/sort';
 
 export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
   return [

@@ -5,7 +5,7 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 
-import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
+import { NON_DRAGGABLE_AREA_CLASS_NAME } from '@desktop-client/components/reports/constants';
 
 type ReportCardNameProps = {
   name: string;

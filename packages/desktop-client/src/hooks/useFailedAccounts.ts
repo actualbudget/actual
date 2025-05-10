@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { useSelector } from '../redux';
+import { useSelector } from '@desktop-client/redux';
 
 export function useFailedAccounts() {
   const failedAccounts = useSelector(state => state.account.failedAccounts);

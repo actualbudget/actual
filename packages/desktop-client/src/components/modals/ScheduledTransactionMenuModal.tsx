@@ -25,8 +25,7 @@ import {
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal';
-
+} from '@desktop-client/components/common/Modal';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type ScheduledTransactionMenuModalProps = Extract<

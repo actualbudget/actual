@@ -18,28 +18,33 @@ import {
 import { send } from 'loot-core/platform/client/fetch';
 import { amountToInteger } from 'loot-core/shared/util';
 
-import { useDispatch } from '../../../redux';
-import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
-import { SectionLabel } from '../../forms';
-import { TableHeader, TableWithNavigator } from '../../table';
-
-import { CheckboxOption } from './CheckboxOption';
-import { DateFormatSelect } from './DateFormatSelect';
-import { FieldMappings } from './FieldMappings';
-import { InOutOption } from './InOutOption';
-import { MultiplierOption } from './MultiplierOption';
-import { Transaction } from './Transaction';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { SectionLabel } from '@desktop-client/components/forms';
+import { CheckboxOption } from '@desktop-client/components/modals/ImportTransactionsModal/CheckboxOption';
+import { DateFormatSelect } from '@desktop-client/components/modals/ImportTransactionsModal/DateFormatSelect';
+import { FieldMappings } from '@desktop-client/components/modals/ImportTransactionsModal/FieldMappings';
+import { InOutOption } from '@desktop-client/components/modals/ImportTransactionsModal/InOutOption';
+import { MultiplierOption } from '@desktop-client/components/modals/ImportTransactionsModal/MultiplierOption';
+import { Transaction } from '@desktop-client/components/modals/ImportTransactionsModal/Transaction';
 import {
   applyFieldMappings,
   dateFormats,
   parseAmountFields,
   parseDate,
   stripCsvImportTransaction,
-} from './utils';
-
+} from '@desktop-client/components/modals/ImportTransactionsModal/utils';
+import {
+  TableHeader,
+  TableWithNavigator,
+} from '@desktop-client/components/table';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useSyncedPrefs } from '@desktop-client/hooks/useSyncedPrefs';
+import { useDispatch } from '@desktop-client/redux';
 
 function getFileType(filepath) {
   const m = filepath.match(/\.([^.]*)$/);

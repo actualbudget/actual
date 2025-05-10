@@ -2,9 +2,11 @@ import { useTranslation } from 'react-i18next';
 
 import { type Modal } from 'loot-core/client/modals/modalsSlice';
 
-import { ModalHeader, ModalTitle } from '../common/Modal';
-
-import { SingleInputModal } from './SingleInputModal';
+import {
+  ModalHeader,
+  ModalTitle,
+} from '@desktop-client/components/common/Modal';
+import { SingleInputModal } from '@desktop-client/components/modals/SingleInputModal';
 
 type NewCategoryModalProps = Extract<
   Modal,

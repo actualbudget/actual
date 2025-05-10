@@ -27,25 +27,27 @@ import {
   type Widget,
 } from 'loot-core/types/models';
 
-import { useDispatch } from '../../redux';
-import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
-import { MobilePageHeader, Page, PageHeader } from '../Page';
-
-import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
-import { LoadingIndicator } from './LoadingIndicator';
-import { CalendarCard } from './reports/CalendarCard';
-import { CashFlowCard } from './reports/CashFlowCard';
-import { CustomReportListCards } from './reports/CustomReportListCards';
-import { MarkdownCard } from './reports/MarkdownCard';
-import { NetWorthCard } from './reports/NetWorthCard';
-import { SpendingCard } from './reports/SpendingCard';
-import './overview.scss';
-import { SummaryCard } from './reports/SummaryCard';
-
+import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
+import {
+  MobilePageHeader,
+  Page,
+  PageHeader,
+} from '@desktop-client/components/Page';
+import { NON_DRAGGABLE_AREA_CLASS_NAME } from '@desktop-client/components/reports/constants';
+import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { CalendarCard } from '@desktop-client/components/reports/reports/CalendarCard';
+import { CashFlowCard } from '@desktop-client/components/reports/reports/CashFlowCard';
+import { CustomReportListCards } from '@desktop-client/components/reports/reports/CustomReportListCards';
+import { MarkdownCard } from '@desktop-client/components/reports/reports/MarkdownCard';
+import { NetWorthCard } from '@desktop-client/components/reports/reports/NetWorthCard';
+import { SpendingCard } from '@desktop-client/components/reports/reports/SpendingCard';
+import '@desktop-client/components/reports/overview.scss';
+import { SummaryCard } from '@desktop-client/components/reports/reports/SummaryCard';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import { useDispatch } from '@desktop-client/redux';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 

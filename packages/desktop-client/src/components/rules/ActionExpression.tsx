@@ -19,8 +19,8 @@ import {
   type PrependNoteRuleActionEntity,
 } from 'loot-core/types/models';
 
-import { ScheduleValue } from './ScheduleValue';
-import { Value } from './Value';
+import { ScheduleValue } from '@desktop-client/components/rules/ScheduleValue';
+import { Value } from '@desktop-client/components/rules/Value';
 
 const valueStyle = {
   color: theme.pillTextHighlighted,

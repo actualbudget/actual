@@ -6,8 +6,12 @@ import { useLocation } from 'react-router-dom';
 import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { isNonProductionEnvironment } from 'loot-core/shared/environment';
 
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { ManageRules } from '../ManageRules';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { ManageRules } from '@desktop-client/components/ManageRules';
 
 type ManageRulesModalProps = Extract<
   ModalType,

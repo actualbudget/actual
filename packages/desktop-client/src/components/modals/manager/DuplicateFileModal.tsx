@@ -15,13 +15,13 @@ import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 
-import { useDispatch } from '../../../redux';
 import {
   Modal,
   ModalButtons,
   ModalCloseButton,
   ModalHeader,
-} from '../../common/Modal';
+} from '@desktop-client/components/common/Modal';
+import { useDispatch } from '@desktop-client/redux';
 
 type DuplicateFileModalProps = Extract<
   ModalType,

@@ -18,9 +18,13 @@ import { signOut } from 'loot-core/client/users/usersSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 
-import { useDispatch } from '../../redux';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { FormField, FormLabel } from '../forms';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { useDispatch } from '@desktop-client/redux';
 
 type EditUserAccessProps = Extract<
   ModalType,

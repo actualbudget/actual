@@ -1,11 +1,11 @@
 import { type Locator, type Page } from '@playwright/test';
 
-import { MobileAccountPage } from './mobile-account-page';
-import { MobileAccountsPage } from './mobile-accounts-page';
-import { MobileBudgetPage } from './mobile-budget-page';
-import { MobileReportsPage } from './mobile-reports-page';
-import { MobileTransactionEntryPage } from './mobile-transaction-entry-page';
-import { SettingsPage } from './settings-page';
+import { MobileAccountPage } from '@desktop-client/e2e/page-models/mobile-account-page';
+import { MobileAccountsPage } from '@desktop-client/e2e/page-models/mobile-accounts-page';
+import { MobileBudgetPage } from '@desktop-client/e2e/page-models/mobile-budget-page';
+import { MobileReportsPage } from '@desktop-client/e2e/page-models/mobile-reports-page';
+import { MobileTransactionEntryPage } from '@desktop-client/e2e/page-models/mobile-transaction-entry-page';
+import { SettingsPage } from '@desktop-client/e2e/page-models/settings-page';
 
 const NAVBAR_ROWS = 3;
 const NAV_LINKS_HIDDEN_BY_DEFAULT = [

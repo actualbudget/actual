@@ -8,9 +8,8 @@ import {
 import {
   type UncategorizedEntity,
   type QueryDataEntity,
-} from '../ReportOptions';
-
-import { filterHiddenItems } from './filterHiddenItems';
+} from '@desktop-client/components/reports/ReportOptions';
+import { filterHiddenItems } from '@desktop-client/components/reports/spreadsheets/filterHiddenItems';
 
 type recalculateProps = {
   item: UncategorizedEntity;

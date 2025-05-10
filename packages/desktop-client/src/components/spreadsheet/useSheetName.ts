@@ -1,9 +1,9 @@
 // @ts-strict-ignore
 import { useContext } from 'react';
 
-import { NamespaceContext } from './NamespaceContext';
-
 import { type SheetNames, type SheetFields, type Binding } from '.';
+
+import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
 
 function unresolveName(name) {
   const idx = name.indexOf('!');

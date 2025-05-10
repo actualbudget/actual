@@ -14,10 +14,9 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useGlobalPref } from '../../hooks/useGlobalPref';
-
-import { RenderMonths } from './RenderMonths';
-import { getScrollbarWidth } from './util';
+import { RenderMonths } from '@desktop-client/components/budget/RenderMonths';
+import { getScrollbarWidth } from '@desktop-client/components/budget/util';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 type BudgetTotalsProps = {
   MonthComponent: ComponentProps<typeof RenderMonths>['component'];

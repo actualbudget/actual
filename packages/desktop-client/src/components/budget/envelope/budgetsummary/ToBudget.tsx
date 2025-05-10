@@ -10,14 +10,12 @@ import { View } from '@actual-app/components/view';
 
 import { envelopeBudget } from 'loot-core/client/queries';
 
-import { CoverMenu } from '../CoverMenu';
-import { useEnvelopeSheetValue } from '../EnvelopeBudgetComponents';
-import { HoldMenu } from '../HoldMenu';
-import { TransferMenu } from '../TransferMenu';
-
-import { ToBudgetAmount } from './ToBudgetAmount';
-import { ToBudgetMenu } from './ToBudgetMenu';
-
+import { ToBudgetAmount } from '@desktop-client/components/budget/envelope/budgetsummary/ToBudgetAmount';
+import { ToBudgetMenu } from '@desktop-client/components/budget/envelope/budgetsummary/ToBudgetMenu';
+import { CoverMenu } from '@desktop-client/components/budget/envelope/CoverMenu';
+import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
+import { HoldMenu } from '@desktop-client/components/budget/envelope/HoldMenu';
+import { TransferMenu } from '@desktop-client/components/budget/envelope/TransferMenu';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 
 type ToBudgetProps = {

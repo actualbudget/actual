@@ -18,9 +18,9 @@ import {
 
 import { amountToCurrencyNoDecimal } from 'loot-core/shared/util';
 
-import { PrivacyFilter } from '../../PrivacyFilter';
-import { Container } from '../Container';
-import { numberFormatterTooltip } from '../numberFormatter';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { Container } from '@desktop-client/components/reports/Container';
+import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 
 type PayloadItem = {
   payload: {

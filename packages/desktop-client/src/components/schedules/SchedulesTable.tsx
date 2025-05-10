@@ -21,12 +21,16 @@ import { getScheduledAmount } from 'loot-core/shared/schedules';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type ScheduleEntity } from 'loot-core/types/models';
 
-import { PrivacyFilter } from '../PrivacyFilter';
-import { Table, TableHeader, Row, Field, Cell } from '../table';
-import { DisplayId } from '../util/DisplayId';
-
-import { StatusBadge } from './StatusBadge';
-
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { StatusBadge } from '@desktop-client/components/schedules/StatusBadge';
+import {
+  Table,
+  TableHeader,
+  Row,
+  Field,
+  Cell,
+} from '@desktop-client/components/table';
+import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';

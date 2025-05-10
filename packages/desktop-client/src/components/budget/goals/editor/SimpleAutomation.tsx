@@ -2,9 +2,12 @@ import { useTranslation } from 'react-i18next';
 
 import type { SimpleTemplate } from 'loot-core/server/budget/types/templates';
 
-import { FormField, FormLabel } from '../../../forms';
-import { AmountInput } from '../../../util/AmountInput';
-import { type Action, updateTemplate } from '../actions';
+import {
+  type Action,
+  updateTemplate,
+} from '@desktop-client/components/budget/goals/actions';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { AmountInput } from '@desktop-client/components/util/AmountInput';
 
 type SimpleAutomationProps = {
   template: SimpleTemplate;

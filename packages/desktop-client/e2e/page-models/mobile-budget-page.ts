@@ -1,11 +1,11 @@
 import { type Locator, type Page } from '@playwright/test';
 
-import { MobileAccountPage } from './mobile-account-page';
-import { BalanceMenuModal } from './mobile-balance-menu-modal';
-import { BudgetMenuModal } from './mobile-budget-menu-modal';
-import { CategoryMenuModal } from './mobile-category-menu-modal';
-import { EnvelopeBudgetSummaryModal } from './mobile-envelope-budget-summary-modal';
-import { TrackingBudgetSummaryModal } from './mobile-tracking-budget-summary-modal';
+import { MobileAccountPage } from '@desktop-client/e2e/page-models/mobile-account-page';
+import { BalanceMenuModal } from '@desktop-client/e2e/page-models/mobile-balance-menu-modal';
+import { BudgetMenuModal } from '@desktop-client/e2e/page-models/mobile-budget-menu-modal';
+import { CategoryMenuModal } from '@desktop-client/e2e/page-models/mobile-category-menu-modal';
+import { EnvelopeBudgetSummaryModal } from '@desktop-client/e2e/page-models/mobile-envelope-budget-summary-modal';
+import { TrackingBudgetSummaryModal } from '@desktop-client/e2e/page-models/mobile-tracking-budget-summary-modal';
 
 export class MobileBudgetPage {
   readonly MONTH_HEADER_DATE_FORMAT = 'MMMM ‘yy';

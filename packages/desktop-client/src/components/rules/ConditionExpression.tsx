@@ -6,7 +6,7 @@ import { View } from '@actual-app/components/view';
 
 import { mapField, friendlyOp } from 'loot-core/shared/rules';
 
-import { Value } from './Value';
+import { Value } from '@desktop-client/components/rules/Value';
 
 const valueStyle = {
   color: theme.pillTextHighlighted,

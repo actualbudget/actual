@@ -14,11 +14,10 @@ import {
 import { send } from 'loot-core/platform/client/fetch';
 import { type PayeeEntity } from 'loot-core/types/models';
 
-import { useSelector, useDispatch } from '../../redux';
-import { Information } from '../alerts';
-import { Modal, ModalButtons } from '../common/Modal';
-
+import { Information } from '@desktop-client/components/alerts';
+import { Modal, ModalButtons } from '@desktop-client/components/common/Modal';
 import { usePayees } from '@desktop-client/hooks/usePayees';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 const highlightStyle = { color: theme.pageTextPositive };
 

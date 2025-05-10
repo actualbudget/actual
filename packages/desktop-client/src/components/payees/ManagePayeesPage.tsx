@@ -4,9 +4,8 @@ import { useLocation } from 'react-router-dom';
 
 import { type PayeeEntity } from 'loot-core/types/models';
 
-import { Page } from '../Page';
-
-import { ManagePayeesWithData } from './ManagePayeesWithData';
+import { Page } from '@desktop-client/components/Page';
+import { ManagePayeesWithData } from '@desktop-client/components/payees/ManagePayeesWithData';
 
 export function ManagePayeesPage() {
   const { t } = useTranslation();

@@ -13,7 +13,7 @@ import { View } from '@actual-app/components/view';
 
 import { type GroupedEntity, type DataEntity } from 'loot-core/types/models';
 
-import { type renderTotalsProps } from './ReportTable';
+import { type renderTotalsProps } from '@desktop-client/components/reports/graphs/tableGraph/ReportTable';
 
 type RenderTotalsRowProps = {
   metadata: GroupedEntity;

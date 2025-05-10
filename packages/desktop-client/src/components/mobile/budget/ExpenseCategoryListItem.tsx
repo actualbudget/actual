@@ -15,17 +15,19 @@ import * as monthUtils from 'loot-core/shared/months';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { useCategories } from '../../../hooks/useCategories';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { useUndo } from '../../../hooks/useUndo';
-import { useDispatch } from '../../../redux';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
-
-import { BalanceCell } from './BalanceCell';
-import { BudgetCell } from './BudgetCell';
-import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
-import { SpentCell } from './SpentCell';
+import { BalanceCell } from '@desktop-client/components/mobile/budget/BalanceCell';
+import { BudgetCell } from '@desktop-client/components/mobile/budget/BudgetCell';
+import {
+  getColumnWidth,
+  ROW_HEIGHT,
+} from '@desktop-client/components/mobile/budget/BudgetTable';
+import { SpentCell } from '@desktop-client/components/mobile/budget/SpentCell';
+import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useUndo } from '@desktop-client/hooks/useUndo';
+import { useDispatch } from '@desktop-client/redux';
 
 type ExpenseCategoryNameProps = {
   category: CategoryEntity;
