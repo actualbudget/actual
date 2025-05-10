@@ -18,8 +18,19 @@ import { type ScheduleStatusType } from 'loot-core/client/data-hooks/schedules';
 import { titleFirst } from 'loot-core/shared/util';
 
 // Consists of Schedule Statuses + Transaction statuses
-type StatusTypes = ScheduleStatusType | 'cleared' | 'pending' | 'reconciled';
-export function getStatusProps(status: StatusTypes) {
+export type StatusTypes =
+  | ScheduleStatusType
+  | 'cleared'
+  | 'pending'
+  | 'reconciled';
+
+export const defaultStatusProps = {
+  color: theme.buttonNormalDisabledText,
+  backgroundColor: theme.tableRowHeaderBackground,
+  Icon: SvgCheckCircleHollow,
+};
+
+export function getStatusProps(status: StatusTypes | null | undefined) {
   switch (status) {
     case 'missed':
       return {
@@ -76,11 +87,7 @@ export function getStatusProps(status: StatusTypes) {
         Icon: SvgLockClosed,
       };
     default:
-      return {
-        color: theme.buttonNormalDisabledText,
-        backgroundColor: theme.tableRowHeaderBackground,
-        Icon: SvgCheckCircleHollow,
-      };
+      return defaultStatusProps;
   }
 }
 
