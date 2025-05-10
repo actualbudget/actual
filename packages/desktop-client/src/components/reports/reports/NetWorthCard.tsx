@@ -6,13 +6,13 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type NetWorthWidget,
 } from 'loot-core/types/models';
 
 import { PrivacyFilter } from '../../PrivacyFilter';
+import { useFormat } from '../../spreadsheet/useFormat';
 import { Change } from '../Change';
 import { DateRange } from '../DateRange';
 import { NetWorthGraph } from '../graphs/NetWorthGraph';
@@ -47,6 +47,7 @@ export function NetWorthCard({
   const { isNarrowWidth } = useResponsive();
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
+  const format = useFormat();
 
   const [start, end] = calculateTimeRange(meta?.timeFrame);
   const [isCardHovered, setIsCardHovered] = useState(false);
@@ -62,8 +63,17 @@ export function NetWorthCard({
         meta?.conditions,
         meta?.conditionsOp,
         locale,
+        format,
       ),
-    [start, end, accounts, meta?.conditions, meta?.conditionsOp, locale],
+    [
+      start,
+      end,
+      accounts,
+      meta?.conditions,
+      meta?.conditionsOp,
+      locale,
+      format,
+    ],
   );
   const data = useReport('net_worth', params);
 
@@ -126,7 +136,7 @@ export function NetWorthCard({
                 }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  {integerToCurrency(data.netWorth)}
+                  {format(data.netWorth, 'financial')}
                 </PrivacyFilter>
               </Block>
               <PrivacyFilter activationFilters={[!isCardHovered]}>

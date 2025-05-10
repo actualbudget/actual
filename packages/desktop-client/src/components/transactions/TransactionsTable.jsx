@@ -50,6 +50,7 @@ import {
   getCategoriesById,
 } from 'loot-core/client/queries/queriesSlice';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import { getCurrency } from 'loot-core/shared/currencies';
 import { currentDay } from 'loot-core/shared/months';
 import * as monthUtils from 'loot-core/shared/months';
 import {
@@ -63,10 +64,11 @@ import {
   isPreviewId,
 } from 'loot-core/shared/transactions';
 import {
+  getNumberFormat,
+  parseNumberFormat,
   integerToCurrency,
   amountToInteger,
   titleFirst,
-  amountToCurrency,
 } from 'loot-core/shared/util';
 
 import { useDispatch } from '../../redux';
@@ -76,6 +78,7 @@ import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { getStatusProps } from '../schedules/StatusBadge';
 import { DateSelect } from '../select/DateSelect';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
+import { useFormat } from '../spreadsheet/useFormat';
 import {
   Cell,
   Field,
@@ -102,6 +105,7 @@ import {
   useSelectedItems,
 } from '@desktop-client/hooks/useSelected';
 import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -134,12 +138,16 @@ function serializeTransaction(transaction, showZeroInDeposit) {
   return {
     ...transaction,
     date,
-    debit: debit != null ? integerToCurrency(debit) : '',
-    credit: credit != null ? integerToCurrency(credit) : '',
+    debit: debit != null ? debit : '',
+    credit: credit != null ? credit : '',
   };
 }
 
-function deserializeTransaction(transaction, originalTransaction) {
+function deserializeTransaction(
+  transaction,
+  originalTransaction,
+  decimalPlaces,
+) {
   const { debit, credit, date: originalDate, ...realTransaction } = transaction;
 
   let amount;
@@ -151,7 +159,9 @@ function deserializeTransaction(transaction, originalTransaction) {
   }
 
   amount =
-    amount != null ? amountToInteger(amount) : originalTransaction.amount;
+    amount != null
+      ? amountToInteger(amount, decimalPlaces)
+      : originalTransaction.amount;
 
   let date = originalDate;
   if (date == null) {
@@ -831,6 +841,8 @@ const Transaction = memo(function Transaction({
   listContainerRef,
   showSelection,
   allowSplitTransaction,
+  formatter,
+  format,
 }) {
   const dispatch = useDispatch();
   const dispatchSelected = useSelectedDispatch();
@@ -864,7 +876,6 @@ const Transaction = memo(function Transaction({
     // click off of the cell manually after confirming your change post modal for example. The last
     // row seems to have more issues than others but the combination of tab, return, and clicking out
     // of the cell all have different implications as well.
-
     if (transaction[name] !== value) {
       if (
         transaction.reconciled === true &&
@@ -955,6 +966,7 @@ const Transaction = memo(function Transaction({
       const deserialized = deserializeTransaction(
         newTransaction,
         originalTransaction,
+        formatter.resolvedOptions().maximumFractionDigits,
       );
       // Run the transaction through the formatting so that we know
       // it's always showing the formatted result
@@ -1284,9 +1296,10 @@ const Transaction = memo(function Transaction({
         valueStyle={valueStyle}
         formatter={value => notesTagFormatter(value, onNotesTagClick)}
         onExpose={name => !isPreview && onEdit(id, name)}
+        onUpdate={onUpdate.bind(null, 'notes')}
         inputProps={{
           value: notes || '',
-          onUpdate: onUpdate.bind(null, 'notes'),
+          // onUpdate: onUpdate.bind(null, 'notes'),
         }}
       />
 
@@ -1485,25 +1498,29 @@ const Transaction = memo(function Transaction({
 
       <InputCell
         /* Debit field for all transactions */
-        type="input"
+        type="financial"
         width={100}
         name="debit"
         exposed={focusedField === 'debit'}
         focused={focusedField === 'debit'}
-        value={debit === '' && credit === '' ? amountToCurrency(0) : debit}
+        value={debit === '' && credit === '' ? 0 : debit}
         valueStyle={valueStyle}
         textAlign="right"
-        title={debit}
+        title={format(debit, 'financial')}
         onExpose={name => !isPreview && onEdit(id, name)}
         style={{
           ...(isParent && { fontStyle: 'italic' }),
           ...styles.tnum,
           ...amountStyle,
         }}
-        inputProps={{
-          value: debit === '' && credit === '' ? amountToCurrency(0) : debit,
-          onUpdate: onUpdate.bind(null, 'debit'),
+        formatter={format}
+        formatExpr={expr => {
+          if (expr === '') {
+            return '';
+          }
+          return integerToCurrency(expr, formatter);
         }}
+        onUpdate={onUpdate.bind(null, 'debit')}
         privacyFilter={{
           activationFilters: [!isTemporaryId(transaction.id)],
         }}
@@ -1511,7 +1528,7 @@ const Transaction = memo(function Transaction({
 
       <InputCell
         /* Credit field for all transactions */
-        type="input"
+        type="financial"
         width={100}
         name="credit"
         exposed={focusedField === 'credit'}
@@ -1519,17 +1536,22 @@ const Transaction = memo(function Transaction({
         value={credit}
         valueStyle={valueStyle}
         textAlign="right"
-        title={credit}
+        title={format(credit, 'financial')}
         onExpose={name => !isPreview && onEdit(id, name)}
         style={{
           ...(isParent && { fontStyle: 'italic' }),
           ...styles.tnum,
           ...amountStyle,
         }}
-        inputProps={{
-          value: credit,
-          onUpdate: onUpdate.bind(null, 'credit'),
+        formatter={format}
+        formatExpr={expr => {
+          if (expr === '') {
+            return '';
+          }
+
+          return integerToCurrency(expr, formatter);
         }}
+        onUpdate={onUpdate.bind(null, 'credit')}
         privacyFilter={{
           activationFilters: [!isTemporaryId(transaction.id)],
         }}
@@ -1542,7 +1564,7 @@ const Transaction = memo(function Transaction({
           value={
             runningBalance == null || isChild
               ? ''
-              : integerToCurrency(runningBalance)
+              : format(runningBalance, 'financial')
           }
           valueStyle={{
             color: runningBalance < 0 ? theme.errorText : theme.noticeTextLight,
@@ -1682,6 +1704,8 @@ function NewTransaction({
   onNavigateToSchedule,
   onNotesTagClick,
   balance,
+  formatter,
+  format,
 }) {
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
@@ -1744,6 +1768,8 @@ function NewTransaction({
           balance={balance}
           showSelection={true}
           allowSplitTransaction={true}
+          formatter={formatter}
+          format={format}
         />
       ))}
       <View
@@ -1797,6 +1823,8 @@ function TransactionTableInner({
   newNavigator,
   renderEmpty,
   onScroll,
+  formatter,
+  format,
   ...props
 }) {
   const containerRef = createRef();
@@ -1958,6 +1986,8 @@ function TransactionTableInner({
         listContainerRef={listContainerRef}
         showSelection={showSelection}
         allowSplitTransaction={allowSplitTransaction}
+        formatter={formatter}
+        format={format}
       />
     );
   };
@@ -2025,6 +2055,8 @@ function TransactionTableInner({
                   ? (props.balances?.[props.transactions[0]?.id]?.balance ?? 0)
                   : 0
               }
+              formatter={formatter}
+              format={format}
             />
           </View>
         )}
@@ -2076,6 +2108,29 @@ export const TransactionTable = forwardRef((props, ref) => {
   const splitsExpanded = useSplitsExpanded();
   const splitsExpandedDispatch = splitsExpanded.dispatch;
   const prevSplitsExpanded = useRef(null);
+
+  const [numberFormat] = useSyncedPref('numberFormat');
+  const [hideFraction] = useSyncedPref('hideFraction');
+  const [currencyCode] = useSyncedPref('currencyCode');
+  const currency = getCurrency(currencyCode);
+  const decimalPlaces = currency.decimalPlaces;
+
+  const config = useMemo(
+    () => parseNumberFormat({ format: numberFormat, hideFraction }),
+    [numberFormat, hideFraction],
+  );
+
+  const { formatter } = useMemo(
+    () =>
+      getNumberFormat({
+        format: config.format,
+        hideFraction: config.hideFraction,
+        decimalPlaces,
+      }),
+    [config, decimalPlaces],
+  );
+
+  const format = useFormat();
 
   const tableRef = useRef(null);
   const listContainerRef = useRef(null);
@@ -2645,6 +2700,8 @@ export const TransactionTable = forwardRef((props, ref) => {
       newNavigator={newNavigator}
       showSelection={props.showSelection}
       allowSplitTransaction={props.allowSplitTransaction}
+      formatter={formatter}
+      format={format}
     />
   );
 });

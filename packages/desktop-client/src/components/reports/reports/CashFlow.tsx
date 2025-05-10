@@ -16,7 +16,6 @@ import { useWidget } from 'loot-core/client/data-hooks/widget';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type CashFlowWidget,
   type RuleConditionEntity,
@@ -28,6 +27,7 @@ import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
+import { useFormat } from '../../spreadsheet/useFormat';
 import { Change } from '../Change';
 import { CashFlowGraph } from '../graphs/CashFlowGraph';
 import { Header } from '../Header';
@@ -69,6 +69,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   const locale = useLocale();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const format = useFormat();
 
   const {
     conditions,
@@ -108,8 +109,16 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
 
   const params = useMemo(
     () =>
-      cashFlowByDate(start, end, isConcise, conditions, conditionsOp, locale),
-    [start, end, isConcise, conditions, conditionsOp, locale],
+      cashFlowByDate(
+        start,
+        end,
+        isConcise,
+        conditions,
+        conditionsOp,
+        locale,
+        format,
+      ),
+    [start, end, isConcise, conditions, conditionsOp, locale, format],
   );
   const data = useReport('cash_flow', params);
 
@@ -284,7 +293,9 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
             }
             right={
               <Text style={{ fontWeight: 600 }}>
-                <PrivacyFilter>{integerToCurrency(totalIncome)}</PrivacyFilter>
+                <PrivacyFilter>
+                  {format(totalIncome, 'financial')}
+                </PrivacyFilter>
               </Text>
             }
           />
@@ -299,7 +310,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
             right={
               <Text style={{ fontWeight: 600 }}>
                 <PrivacyFilter>
-                  {integerToCurrency(totalExpenses)}
+                  {format(totalExpenses, 'financial')}
                 </PrivacyFilter>
               </Text>
             }
@@ -315,7 +326,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
             right={
               <Text style={{ fontWeight: 600 }}>
                 <PrivacyFilter>
-                  {integerToCurrency(totalTransfers)}
+                  {format(totalTransfers, 'financial')}
                 </PrivacyFilter>
               </Text>
             }

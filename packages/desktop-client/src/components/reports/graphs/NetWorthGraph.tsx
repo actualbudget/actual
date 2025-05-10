@@ -16,11 +16,12 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import { amountToCurrencyNoDecimal } from 'loot-core/shared/util';
-
 import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
 
+import { computePadding } from './computePadding';
+
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type NetWorthGraphProps = {
@@ -51,11 +52,12 @@ export function NetWorthGraph({
 }: NetWorthGraphProps) {
   const { t } = useTranslation();
   const privacyMode = usePrivacyMode();
+  const format = useFormat();
 
   const tickFormatter = tick => {
     const res = privacyMode
       ? '...'
-      : `${amountToCurrencyNoDecimal(Math.round(tick))}`; // Formats the tick values as strings with commas
+      : `${format(Math.round(tick), 'financial')}`; // Formats the tick values as strings with commas
 
     return res;
   };
@@ -152,7 +154,12 @@ export function NetWorthGraph({
                 margin={{
                   top: 0,
                   right: 0,
-                  left: compact ? 0 : computePadding(graphData.data),
+                  left: compact
+                    ? 0
+                    : computePadding(
+                        graphData.data.map(item => item.y),
+                        value => format(value, 'financial'),
+                      ),
                   bottom: 0,
                 }}
               >
@@ -212,23 +219,4 @@ export function NetWorthGraph({
       }
     </Container>
   );
-}
-
-/**
- * Add left padding for Y-axis for when large amounts get clipped
- * @param netWorthData
- * @returns left padding for Net worth graph
- */
-function computePadding(netWorthData: Array<{ y: number }>) {
-  /**
-   * Convert to string notation, get longest string length
-   */
-  const maxLength = Math.max(
-    ...netWorthData.map(({ y }) => {
-      return amountToCurrencyNoDecimal(Math.round(y)).length;
-    }),
-  );
-
-  // No additional left padding is required for upto 5 characters
-  return Math.max(0, (maxLength - 5) * 5);
 }
