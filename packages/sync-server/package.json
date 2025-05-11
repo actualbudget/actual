@@ -37,7 +37,6 @@
     "date-fns": "^2.30.0",
     "debug": "^4.4.0",
     "express": "4.21.2",
-    "express-actuator": "1.8.4",
     "express-rate-limit": "^7.5.0",
     "express-response-size": "^0.0.3",
     "express-winston": "^4.2.0",

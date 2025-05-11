@@ -1,3 +1,4 @@
+import { createRequire } from 'module';
 import fs, { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -5,7 +6,6 @@ import { fileURLToPath } from 'node:url';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
-import actuator from 'express-actuator';
 import rateLimit from 'express-rate-limit';
 
 import { bootstrap } from './account-db.js';
@@ -69,21 +69,31 @@ app.get('/mode', (req, res) => {
   res.send(config.get('mode'));
 });
 
-app.get('/info', (req, res) => {
-  const __dirname = dirname(fileURLToPath(import.meta.url));
-  const packageJsonPath = resolve(__dirname, '../package.json');
+app.get('/info', (_req, res) => {
+  const require = createRequire(import.meta.url);
+  const packageJsonPath = require.resolve(
+    '@actual-app/sync-server/package.json',
+  );
   const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+
   res.status(200).json({
     build: {
       name: packageJson.name,
-      description: packageJson.description,
-      version: packageJson.version,
+      version: process.env.npm_package_version,
     },
-    git: {},
   });
 });
 
-app.use(actuator()); // Provides /health, /metrics, /info
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'UP' });
+});
+
+app.get('/metrics', (_req, res) => {
+  res.status(200).json({
+    mem: process.memoryUsage(),
+    uptime: process.uptime(),
+  });
+});
 
 // The web frontend
 app.use((req, res, next) => {
