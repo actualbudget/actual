@@ -77,6 +77,7 @@ app.get('/info', (_req, res) => {
   res.status(200).json({
     build: {
       name: packageJson.name,
+      description: packageJson.description,
       version: process.env.npm_package_version,
     },
   });
