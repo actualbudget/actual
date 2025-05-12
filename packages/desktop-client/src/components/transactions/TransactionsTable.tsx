@@ -2813,7 +2813,7 @@ export const TransactionTable = forwardRef(
           t => t.amount === 0,
         );
         if (!parentTransaction) {
-          console.warn(
+          console.error(
             'Parent transaction not found for transaction',
             transaction,
           );
