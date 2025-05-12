@@ -8,7 +8,6 @@ import { subDays } from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { resetTracer, tracer } from 'loot-core/shared/test-helpers';
 
-import { aqlQuery } from './aqlQuery';
 import { pagedQuery } from './pagedQuery';
 
 function wait(n) {
@@ -136,8 +135,15 @@ describe('pagedQuery', () => {
     tracer.start();
 
     const query = q('transactions').select('*');
-    const { data } = await aqlQuery(query);
-    expect(data).toEqual(query.serialize());
+    pagedQuery(query, { onData: data => tracer.event('data', data) });
+
+    await tracer.expect('server-query');
+    await tracer.expect('data', ['*']);
+
+    serverPush('sync-event', { type: 'success', tables: ['transactions'] });
+
+    await tracer.expect('server-query');
+    await tracer.expect('data', ['*']);
   });
 
   it(`runs but ignores applied events (onlySync: true)`, async () => {
