@@ -3,10 +3,6 @@ import crypto from 'crypto';
 
 const ENCRYPTION_ALGORITHM = 'aes-256-gcm' as const;
 
-export async function sha256String(str) {
-  return crypto.createHash('sha256').update(str).digest('base64');
-}
-
 export function randomBytes(n) {
   return crypto.randomBytes(n);
 }

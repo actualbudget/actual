@@ -1,4 +1,4 @@
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 
 import * as bcrypt from 'bcrypt';
 
@@ -11,7 +11,7 @@ let _accountDb;
 
 export function getAccountDb() {
   if (_accountDb === undefined) {
-    const dbPath = join(config.get('serverFiles'), 'account.sqlite');
+    const dbPath = join(resolve(config.get('serverFiles')), 'account.sqlite');
     _accountDb = openDatabase(dbPath);
   }
 

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Learning categories updates rules correctly even if multiple rules exist 1`] = `
+exports[`Learning categories > updates rules correctly even if multiple rules exist 1`] = `
 [
   Rule {
     "actions": [
@@ -86,7 +86,7 @@ exports[`Learning categories updates rules correctly even if multiple rules exis
 ]
 `;
 
-exports[`Learning categories updates rules correctly even if multiple rules exist 2`] = `
+exports[`Learning categories > updates rules correctly even if multiple rules exist 2`] = `
 [
   Rule {
     "actions": [

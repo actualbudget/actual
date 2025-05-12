@@ -52,14 +52,37 @@ if (values.help) {
 
 if (values.version) {
   const __dirname = dirname(fileURLToPath(import.meta.url));
-  const packageJsonPath = resolve(__dirname, '../package.json');
+  const packageJsonPath = resolve(__dirname, '../../package.json');
   const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
 
   console.log('v' + packageJson.version);
   process.exit();
 }
 
-// Read the config argument if specified
+const setupDataDir = (dataDir = undefined) => {
+  if (process.env.ACTUAL_DATA_DIR) {
+    return; // Env variables must not be overwritten
+  }
+
+  if (dataDir) {
+    process.env.ACTUAL_DATA_DIR = dataDir; // Use the dir specified
+  } else {
+    // Setup defaults
+    if (existsSync('./data')) {
+      // The default data directory exists - use it
+      console.info('Found existing data directory');
+      process.env.ACTUAL_DATA_DIR = resolve('./data');
+    } else {
+      console.info(
+        'Using default data directory. You can specify a custom config with --config',
+      );
+      process.env.ACTUAL_DATA_DIR = resolve('./');
+    }
+
+    console.info(`Data directory: ${process.env.ACTUAL_DATA_DIR}`);
+  }
+};
+
 if (values.config) {
   const configExists = existsSync(values.config);
 
@@ -69,19 +92,25 @@ if (values.config) {
     );
 
     process.exit();
-  } else if (values.config) {
+  } else {
     console.log(`Loading config from ${values.config}`);
+    const configJson = JSON.parse(readFileSync(values.config, 'utf-8'));
     process.env.ACTUAL_CONFIG_PATH = values.config;
+    setupDataDir(configJson.dataDir);
   }
 } else {
-  // No config specified, use reasonable defaults
-  console.info(
-    'Using default config. You can specify a custom config with --config',
-  );
-  process.env.ACTUAL_DATA_DIR = './';
-  console.info(
-    'user-files and server-files will be created in the current directory',
-  );
+  // If no config is specified, check for a default config in the current directory
+  const defaultConfigJsonFile = './config.json';
+  const configExists = existsSync(defaultConfigJsonFile);
+
+  if (configExists) {
+    console.info('Found config.json in the current directory');
+    const configJson = JSON.parse(readFileSync(defaultConfigJsonFile, 'utf-8'));
+    process.env.ACTUAL_CONFIG_PATH = defaultConfigJsonFile;
+    setupDataDir(configJson.dataDir);
+  } else {
+    setupDataDir(); // No default config exists - setup data dir with defaults
+  }
 }
 
 // start the sync server

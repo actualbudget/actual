@@ -50,25 +50,37 @@ export const removeItem: T.RemoveItem = async function (key) {
 
 export async function multiGet<K extends readonly (keyof GlobalPrefsJson)[]>(
   keys: K,
-) {
+): Promise<{ [P in K[number]]: GlobalPrefsJson[P] }> {
   const db = await getDatabase();
 
   const transaction = db.transaction(['asyncStorage'], 'readonly');
   const objectStore = transaction.objectStore('asyncStorage');
 
-  const promise = Promise.all(
+  const results = await Promise.all(
     keys.map(key => {
-      return new Promise<[string, string]>((resolve, reject) => {
-        const req = objectStore.get(key);
-        req.onerror = e => reject(e);
-        // @ts-expect-error fix me
-        req.onsuccess = e => resolve([key, e.target.result]);
-      });
+      return new Promise<[K[number], GlobalPrefsJson[K[number]]]>(
+        (resolve, reject) => {
+          const req = objectStore.get(key);
+          req.onerror = e => reject(e);
+          req.onsuccess = e => {
+            const target = e.target as IDBRequest<GlobalPrefsJson[K[number]]>;
+            resolve([key, target.result]);
+          };
+        },
+      );
     }),
   );
 
   transaction.commit();
-  return promise;
+
+  // Convert the array of tuples to an object with properly typed properties
+  return results.reduce(
+    (acc, [key, value]) => {
+      acc[key] = value;
+      return acc;
+    },
+    {} as { [P in K[number]]: GlobalPrefsJson[P] },
+  );
 }
 
 export const multiSet: T.MultiSet = async function (keyValues) {

@@ -1,12 +1,10 @@
-import { jest } from '@jest/globals';
-
 import SskDusseldorfDussdeddxxx from '../ssk_dusseldorf_dussdeddxxx.js';
 
 describe('ssk_dusseldorf_dussdeddxxx', () => {
   let consoleSpy;
 
   beforeEach(() => {
-    consoleSpy = jest.spyOn(console, 'debug');
+    consoleSpy = vi.spyOn(console, 'debug');
   });
 
   afterEach(() => {

@@ -1,21 +1,19 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "ES2022",
     // DOM for URL global in Node 16+
     "lib": ["ES2021"],
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "resolveJsonModule": true,
-    "downlevelIteration": true,
-    "skipLibCheck": true,
-    "jsx": "preserve",
-    // Check JS files too
-    "allowJs": true,
-    "moduleResolution": "node16",
     "module": "node16",
+    "moduleResolution": "node16",
+    "noEmit": false,
     "outDir": "build"
   },
-  "include": ["src/**/*.js", "types/global.d.ts"],
-  "exclude": ["node_modules", "build", "./app-plaid.js", "coverage"]
+  "include": [
+    "src/**/*",
+    "migrations/**/*",
+    "types/**/*",
+    "app.ts",
+    "bin/**/*"
+  ],
+  "exclude": ["node_modules", "build", "coverage"]
 }

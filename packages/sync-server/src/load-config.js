@@ -10,7 +10,9 @@ const require = createRequire(import.meta.url);
 const debug = createDebug('actual:config');
 const debugSensitive = createDebug('actual-sensitive:config');
 
-const projectRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const projectRoot = path.dirname(__dirname).replace(/[\\/]build$/, '');
 const defaultDataDir = process.env.ACTUAL_DATA_DIR
   ? process.env.ACTUAL_DATA_DIR
   : fs.existsSync('/data')
@@ -19,7 +21,7 @@ const defaultDataDir = process.env.ACTUAL_DATA_DIR
 
 debug(`Project root: '${projectRoot}'`);
 
-export const sqlDir = path.join(projectRoot, 'src', 'sql');
+export const sqlDir = path.join(__dirname, 'sql');
 
 const actualAppWebBuildPath = path.join(
   path.dirname(require.resolve('@actual-app/web/package.json')),

@@ -24,8 +24,6 @@ import {
   type CategoryEntity,
 } from 'loot-core/types/models';
 
-import { useContextMenu } from '../../../hooks/useContextMenu';
-import { useUndo } from '../../../hooks/useUndo';
 import { type Binding, type SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetName } from '../../spreadsheet/useSheetName';
@@ -36,6 +34,9 @@ import { makeAmountGrey } from '../util';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
+
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 
 export function useEnvelopeSheetName<
   FieldName extends SheetFields<'envelope-budget'>,
@@ -513,21 +514,13 @@ export function IncomeCategoryMonth({
         }}
       >
         <span onClick={() => onShowActivity(category.id, month)}>
-          <EnvelopeCellValue
-            binding={envelopeBudget.catSumAmount(category.id)}
-            type="financial"
-          >
-            {props => (
-              <CellValueText
-                {...props}
-                className={css({
-                  cursor: 'pointer',
-                  ':hover': { textDecoration: 'underline' },
-                  ...makeAmountGrey(props.value),
-                })}
-              />
-            )}
-          </EnvelopeCellValue>
+          <BalanceWithCarryover
+            carryover={envelopeBudget.catCarryover(category.id)}
+            balance={envelopeBudget.catSumAmount(category.id)}
+            goal={envelopeBudget.catGoal(category.id)}
+            budgeted={envelopeBudget.catBudgeted(category.id)}
+            longGoal={envelopeBudget.catLongGoal(category.id)}
+          />
         </span>
       </Field>
     </View>

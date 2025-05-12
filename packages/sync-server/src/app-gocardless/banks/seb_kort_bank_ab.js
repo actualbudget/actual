@@ -10,6 +10,7 @@ export default {
     'SEB_KORT_AB_NO_SKHSFI21',
     'SEB_KORT_AB_SE_SKHSFI21',
     'SEB_CARD_ESSESESS',
+    'NORDIC_CHOICE_CLUB_NO_SKHSFI21',
   ],
 
   /**

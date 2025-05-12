@@ -4,21 +4,22 @@ import { useTranslation } from 'react-i18next';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { moveAccount } from 'loot-core/client/accounts/accountsSlice';
 import * as queries from 'loot-core/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { useAccounts } from '../../hooks/useAccounts';
-import { useClosedAccounts } from '../../hooks/useClosedAccounts';
-import { useFailedAccounts } from '../../hooks/useFailedAccounts';
-import { useLocalPref } from '../../hooks/useLocalPref';
-import { useOffBudgetAccounts } from '../../hooks/useOffBudgetAccounts';
-import { useOnBudgetAccounts } from '../../hooks/useOnBudgetAccounts';
-import { useUpdatedAccounts } from '../../hooks/useUpdatedAccounts';
+import { moveAccount } from '../../accounts/accountsSlice';
 import { useSelector, useDispatch } from '../../redux';
 
 import { Account } from './Account';
 import { SecondaryItem } from './SecondaryItem';
+
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useClosedAccounts } from '@desktop-client/hooks/useClosedAccounts';
+import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useOffBudgetAccounts } from '@desktop-client/hooks/useOffBudgetAccounts';
+import { useOnBudgetAccounts } from '@desktop-client/hooks/useOnBudgetAccounts';
+import { useUpdatedAccounts } from '@desktop-client/hooks/useUpdatedAccounts';
 
 const fontWeight = 600;
 

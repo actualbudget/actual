@@ -41,18 +41,6 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useCategories } from '../../../hooks/useCategories';
-import { useDateFormat } from '../../../hooks/useDateFormat';
-import { useFilters } from '../../../hooks/useFilters';
-import { useLocale } from '../../../hooks/useLocale';
-import { useMergedRefs } from '../../../hooks/useMergedRefs';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { usePayees } from '../../../hooks/usePayees';
-import { useResizeObserver } from '../../../hooks/useResizeObserver';
-import { SelectedProviderWithItems } from '../../../hooks/useSelected';
-import { SplitsExpandedProvider } from '../../../hooks/useSplitsExpanded';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useDispatch } from '../../../redux';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
@@ -72,6 +60,19 @@ import {
 } from '../spreadsheets/calendar-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
+
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFilters } from '@desktop-client/hooks/useFilters';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { usePayees } from '@desktop-client/hooks/usePayees';
+import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
+import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
+import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 const CHEVRON_HEIGHT = 42;
 const SUMMARY_HEIGHT = 140;

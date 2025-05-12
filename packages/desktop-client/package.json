@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "25.4.0",
+  "version": "25.5.0",
   "license": "MIT",
   "files": [
     "build"
@@ -41,6 +41,7 @@
     "i18next-parser": "^9.0.2",
     "i18next-resources-to-backend": "^1.2.1",
     "inter-ui": "^3.19.3",
+    "jsdom": "^26.1.0",
     "lodash": "^4.17.21",
     "loot-core": "workspace:*",
     "mdast-util-newline-to-break": "^2.0.0",
@@ -77,10 +78,10 @@
     "terser-webpack-plugin": "^5.3.14",
     "usehooks-ts": "^3.1.1",
     "uuid": "^9.0.1",
-    "vite": "^5.2.14",
-    "vite-plugin-pwa": "^0.20.5",
+    "vite": "^6.3.5",
+    "vite-plugin-pwa": "^1.0.0",
     "vite-tsconfig-paths": "^4.3.2",
-    "vitest": "^1.6.1",
+    "vitest": "^3.0.2",
     "webpack": "^5.98.0",
     "webpack-bundle-analyzer": "^4.10.2",
     "xml2js": "^0.6.2"

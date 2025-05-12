@@ -6,10 +6,9 @@ import * as api from './index';
 
 const budgetName = 'test-budget';
 
-beforeEach(async () => {
-  // we need real datetime if we are going to mix new timestamps with our mock data
-  global.restoreDateNow();
+global.IS_TESTING = true;
 
+beforeEach(async () => {
   const budgetPath = path.join(__dirname, '/mocks/budgets/', budgetName);
   await fs.rm(budgetPath, { force: true, recursive: true });
 

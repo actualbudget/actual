@@ -14,12 +14,14 @@ import {
   type CategoryEntity,
 } from 'loot-core/types/models';
 
-import { useContextMenu } from '../../hooks/useContextMenu';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
 
 import { CategoryAutomationButton } from './goals/CategoryAutomationButton';
+
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 type SidebarCategoryProps = {
   innerRef: Ref<HTMLDivElement>;
@@ -55,6 +57,8 @@ export function SidebarCategory({
 }: SidebarCategoryProps) {
   const { t } = useTranslation();
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
+  const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
+  const categoryExpandedState = categoryExpandedStatePref ?? 0;
 
   const temporary = category.id === 'new';
   const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
@@ -157,7 +161,7 @@ export function SidebarCategory({
     <View
       innerRef={innerRef}
       style={{
-        width: 200,
+        width: 200 + 100 * categoryExpandedState,
         overflow: 'hidden',
         '& .hover-visible': {
           display: 'none',

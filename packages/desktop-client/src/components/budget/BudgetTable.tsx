@@ -13,8 +13,6 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { useCategories } from '../../hooks/useCategories';
-import { useLocalPref } from '../../hooks/useLocalPref';
 import { type DropPosition } from '../sort';
 
 import { BudgetCategories } from './BudgetCategories';
@@ -27,6 +25,10 @@ import {
   getScrollbarWidth,
   separateGroups,
 } from './util';
+
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 
 type BudgetTableProps = {
   type: string;
@@ -85,6 +87,8 @@ export function BudgetTable(props: BudgetTableProps) {
   const [showHiddenCategories, setShowHiddenCategoriesPef] = useLocalPref(
     'budget.showHiddenCategories',
   );
+  const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
+  const categoryExpandedState = categoryExpandedStatePref ?? 0;
   const [editing, setEditing] = useState<{ id: string; cell: string } | null>(
     null,
   );
@@ -249,7 +253,7 @@ export function BudgetTable(props: BudgetTableProps) {
           paddingRight: 5 + getScrollbarWidth(),
         }}
       >
-        <View style={{ width: 200 }} />
+        <View style={{ width: 200 + 100 * categoryExpandedState }} />
         <MonthsProvider
           startMonth={prewarmStartMonth}
           numMonths={numMonths}

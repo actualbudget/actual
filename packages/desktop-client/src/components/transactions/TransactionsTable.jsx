@@ -66,15 +66,9 @@ import {
   integerToCurrency,
   amountToInteger,
   titleFirst,
+  amountToCurrency,
 } from 'loot-core/shared/util';
 
-import { useContextMenu } from '../../hooks/useContextMenu';
-import { useDisplayPayee } from '../../hooks/useDisplayPayee';
-import { useMergedRefs } from '../../hooks/useMergedRefs';
-import { usePrevious } from '../../hooks/usePrevious';
-import { useProperFocus } from '../../hooks/useProperFocus';
-import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
-import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
 import { useDispatch } from '../../redux';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
@@ -97,6 +91,17 @@ import {
 } from '../table';
 
 import { TransactionMenu } from './TransactionMenu';
+
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { usePrevious } from '@desktop-client/hooks/usePrevious';
+import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
+import {
+  useSelectedDispatch,
+  useSelectedItems,
+} from '@desktop-client/hooks/useSelected';
+import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
 
 function getDisplayValue(obj, name) {
   return obj ? obj[name] : '';
@@ -1485,7 +1490,7 @@ const Transaction = memo(function Transaction({
         name="debit"
         exposed={focusedField === 'debit'}
         focused={focusedField === 'debit'}
-        value={debit === '' && credit === '' ? '0.00' : debit}
+        value={debit === '' && credit === '' ? amountToCurrency(0) : debit}
         valueStyle={valueStyle}
         textAlign="right"
         title={debit}
@@ -1496,7 +1501,7 @@ const Transaction = memo(function Transaction({
           ...amountStyle,
         }}
         inputProps={{
-          value: debit === '' && credit === '' ? '0.00' : debit,
+          value: debit === '' && credit === '' ? amountToCurrency(0) : debit,
           onUpdate: onUpdate.bind(null, 'debit'),
         }}
         privacyFilter={{

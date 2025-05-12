@@ -4,6 +4,8 @@ import { Trans } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { View } from '@actual-app/components/view';
 
+import { useGlobalPref } from '../../hooks/useGlobalPref';
+
 import { RenderMonths } from './RenderMonths';
 
 type IncomeHeaderProps = {
@@ -15,11 +17,13 @@ export function IncomeHeader({
   MonthComponent,
   onShowNewGroup,
 }: IncomeHeaderProps) {
+  const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
+  const categoryExpandedState = categoryExpandedStatePref ?? 0;
   return (
     <View style={{ flexDirection: 'row', flex: 1 }}>
       <View
         style={{
-          width: 200,
+          width: 200 + 100 * categoryExpandedState,
           alignItems: 'flex-start',
           justifyContent: 'flex-start',
         }}
