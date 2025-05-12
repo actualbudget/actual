@@ -1008,7 +1008,11 @@ const Transaction = memo(function Transaction({
 
     // Don't save a temporary value (a new payee) which will be
     // filled in with a real id later
-    if (name === 'payee' && value && (value as string).startsWith('new:')) {
+    if (
+      name === 'payee' &&
+      value &&
+      (value as TransactionEntity['payee'])?.startsWith('new:')
+    ) {
       setTransaction(newTransaction);
     } else {
       const deserialized = deserializeTransaction(
