@@ -206,7 +206,7 @@ export interface ApiHandlers {
     resetNextDate?: boolean;
   }) => Promise<ScheduleEntity['id']>;
 
-  'api/schedule-delete': (id: string) => Promise<void>;
+  'api/schedule-delete': (id: ScheduleEntity['id']) => Promise<void>;
 
   'api/schedule-skip-next-date': (id: string) => Promise<void>;
 
