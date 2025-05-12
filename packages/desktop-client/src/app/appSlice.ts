@@ -1,19 +1,18 @@
-// This is temporary until we move all loot-core/client over to desktop-client.
-// eslint-disable-next-line no-restricted-imports
-import { syncAccounts } from '@actual-app/web/src/accounts/accountsSlice';
 import {
   createAction,
   createSlice,
   type PayloadAction,
 } from '@reduxjs/toolkit';
 
-import { send } from '../../platform/client/fetch';
-import { getUploadError } from '../../shared/errors';
-import { type AccountEntity } from '../../types/models';
-import { type AtLeastOne } from '../../types/util';
-import { pushModal } from '../modals/modalsSlice';
-import { loadPrefs } from '../prefs/prefsSlice';
-import { createAppAsyncThunk } from '../redux';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import { loadPrefs } from 'loot-core/client/prefs/prefsSlice';
+import { createAppAsyncThunk } from 'loot-core/client/redux';
+import { send } from 'loot-core/platform/client/fetch';
+import { getUploadError } from 'loot-core/shared/errors';
+import { type AccountEntity } from 'loot-core/types/models';
+import { type AtLeastOne } from 'loot-core/types/util';
+
+import { syncAccounts } from '../accounts/accountsSlice';
 
 const sliceName = 'app';
 

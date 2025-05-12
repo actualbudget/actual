@@ -16,7 +16,6 @@ import { debounce } from 'debounce';
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import { useFilters } from 'loot-core/client/data-hooks/filters';
 import {
   SchedulesProvider,
@@ -67,6 +66,7 @@ import {
 } from 'loot-core/types/models';
 
 import { unlinkAccount } from '../../accounts/accountsSlice';
+import { syncAndDownload } from '../../app/appSlice';
 import { useSelector, useDispatch } from '../../redux';
 import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { TransactionList } from '../transactions/TransactionList';

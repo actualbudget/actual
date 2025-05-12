@@ -1,4 +1,7 @@
 // @ts-strict-ignore
+// This is temporary until we move all loot-core/client over to desktop-client.
+// eslint-disable-next-line no-restricted-imports
+import { resetApp } from '@actual-app/web/src/app/appSlice';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
@@ -12,7 +15,6 @@ import {
   type AccountEntity,
   type PayeeEntity,
 } from '../../types/models';
-import { resetApp } from '../app/appSlice';
 import {
   addGenericErrorNotification,
   addNotification,
