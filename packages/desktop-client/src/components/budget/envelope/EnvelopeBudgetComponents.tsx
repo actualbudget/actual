@@ -510,6 +510,7 @@ export function IncomeCategoryMonth({
       <Field
         name="received"
         width="flex"
+        truncate={false}
         style={{
           textAlign: 'right',
           ...(isLast && { borderBottomWidth: 0 }),
