@@ -24,7 +24,7 @@ import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 const RADIAN = Math.PI / 180;
 
-const isTouchDevice = () => window.matchMedia('(pointer: coarse)').matches;
+const isTouchDevice = () => window.navigator.maxTouchPoints > 0;
 
 const ActiveShapeMobile = props => {
   const {
@@ -282,9 +282,11 @@ export function DonutGraph({
                     endAngle={-270}
                     onMouseLeave={() => setPointer('')}
                     onMouseEnter={(_, index) => {
-                      setActiveIndex(index);
-                      if (!['Group', 'Interval'].includes(groupBy)) {
-                        setPointer('pointer');
+                      if (!isTouchDevice()) {
+                        setActiveIndex(index);
+                        if (!['Group', 'Interval'].includes(groupBy)) {
+                          setPointer('pointer');
+                        }
                       }
                     }}
                     onClick={(item, index) => {
