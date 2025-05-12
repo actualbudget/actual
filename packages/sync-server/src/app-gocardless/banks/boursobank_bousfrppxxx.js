@@ -21,7 +21,7 @@ export default {
     const editedTrans = { ...transaction };
 
     editedTrans.remittanceInformationUnstructuredArray =
-      // Remove the backaslashes that are sometimes present
+      // Remove the backslashes that are sometimes present
       transaction.remittanceInformationUnstructuredArray
         .map(line => line.replace(/\\ ?/g, ' '))
         // Remove an unwanted line that pollutes the remittance information
