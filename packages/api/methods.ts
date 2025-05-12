@@ -259,7 +259,7 @@ export function deleteSchedule(scheduleId: ScheduleEntity['id']) {
   return send('api/schedule-delete', scheduleId);
 }
 
-export function skipNextScheduleDate(scheduleId: string) {
+export function skipNextScheduleDate(id: ScheduleEntity['id']) {
   return send('api/schedule-skip-next-date', scheduleId);
 }
 
