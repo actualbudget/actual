@@ -277,7 +277,7 @@ function ExpenseGroupCells({
   show3Columns,
   showBudgetedColumn,
 }: ExpenseGroupCellsProps) {
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const format = useFormat();
 
   const columnWidth = getColumnWidth({ show3Columns });
@@ -291,17 +291,17 @@ function ExpenseGroupCells({
   };
 
   const budgeted =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.groupBudgeted(group.id)
       : envelopeBudget.groupBudgeted(group.id);
 
   const spent =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.groupSumAmount(group.id)
       : envelopeBudget.groupSumAmount(group.id);
 
   const balance =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.groupBalance(group.id)
       : envelopeBudget.groupBalance(group.id);
 

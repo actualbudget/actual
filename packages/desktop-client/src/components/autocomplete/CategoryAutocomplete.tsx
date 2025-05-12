@@ -386,10 +386,10 @@ function CategoryItem({
         borderTop: `1px solid ${theme.pillBorder}`,
       }
     : {};
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
   const balanceBinding =
-    budgetType === 'rollover'
+    budgetType === 'envelope'
       ? envelopeBudget.catBalance(item.id)
       : trackingBudget.catBalance(item.id);
   const balance = useSheetValue<

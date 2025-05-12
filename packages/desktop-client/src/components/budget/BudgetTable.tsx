@@ -184,7 +184,7 @@ export function BudgetTable(props: BudgetTableProps) {
           nextIdx += dir;
           continue;
         } else if (
-          type === 'report' ||
+          type === 'tracking' ||
           ('is_income' in next && !next.is_income)
         ) {
           onEditMonth(next.id, editing.cell);
