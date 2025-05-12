@@ -210,7 +210,7 @@ export interface ApiHandlers {
 
   'api/schedule-skip-next-date': (id: ScheduleEntity['id']) => Promise<void>;
 
-  'api/schedule-post-transaction': (id: string) => Promise<void>;
+  'api/schedule-post-transaction': (id: ScheduleEntity['id']) => Promise<void>;
 
   'api/schedule-get-upcoming-dates': (arg: {
     config: RecurConfig;
