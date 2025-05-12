@@ -54,6 +54,7 @@ export function serializeTransaction(
     // the data. This allows the user to go through and see empty
     // dates and manually fix them.
     console.error(`Date ‘${date}’ is not valid.`);
+    // TODO: the fact that the date type is not nullable but we are setting it to null needs to be changed
     date = null as unknown as string;
   }
 
@@ -132,6 +133,7 @@ export function makeTemporaryTransactions(
       account: (currentAccountId || null) as string,
       category: currentCategoryId || undefined,
       cleared: false,
+      // TODO: either make this nullable or find a way to make this not null
       amount: null as unknown as number,
     },
   ];
