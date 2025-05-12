@@ -263,7 +263,7 @@ export function skipNextScheduleDate(id: ScheduleEntity['id']) {
   return send('api/schedule-skip-next-date', scheduleId);
 }
 
-export function postScheduleTransaction(scheduleId: string) {
+export function postScheduleTransaction(id: ScheduleEntity['id']) {
   return send('api/schedule-post-transaction', scheduleId);
 }
 
