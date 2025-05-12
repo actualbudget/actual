@@ -23,6 +23,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { AutoTextSize } from 'auto-text-size';
 
+import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
 import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   envelopeBudget,
@@ -30,6 +31,7 @@ import {
   uncategorizedCount,
 } from 'loot-core/client/queries';
 import * as monthUtils from 'loot-core/shared/months';
+import { q } from 'loot-core/shared/query';
 import { groupById } from 'loot-core/shared/util';
 
 import { useDispatch } from '../../../redux';
@@ -340,6 +342,8 @@ export function BudgetTable({
 
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
+  const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
+
   return (
     <Page
       padding={0}
@@ -404,17 +408,19 @@ export function BudgetTable({
             paddingBottom: MOBILE_NAV_HEIGHT,
           }}
         >
-          <BudgetGroups
-            type={budgetType}
-            categoryGroups={categoryGroups}
-            showBudgetedColumn={!showSpentColumn}
-            show3Columns={show3Columns}
-            showHiddenCategories={showHiddenCategories}
-            month={month}
-            onEditCategoryGroup={onEditCategoryGroup}
-            onEditCategory={onEditCategory}
-            onBudgetAction={onBudgetAction}
-          />
+          <SchedulesProvider query={schedulesQuery}>
+            <BudgetGroups
+              type={budgetType}
+              categoryGroups={categoryGroups}
+              showBudgetedColumn={!showSpentColumn}
+              show3Columns={show3Columns}
+              showHiddenCategories={showHiddenCategories}
+              month={month}
+              onEditCategoryGroup={onEditCategoryGroup}
+              onEditCategory={onEditCategory}
+              onBudgetAction={onBudgetAction}
+            />
+          </SchedulesProvider>
         </View>
       </PullToRefresh>
     </Page>
