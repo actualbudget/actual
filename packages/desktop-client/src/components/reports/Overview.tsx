@@ -82,18 +82,51 @@ export function Overview() {
   const location = useLocation();
   sessionStorage.setItem('url', location.pathname);
 
-  const baseLayout = widgets.map(widget => ({
-    i: widget.id,
-    w: widget.width,
-    h: widget.height,
-    minW:
-      isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 2 : 3,
-    minH:
-      isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 1 : 2,
-    ...widget,
-  }));
+  const mobileLayout = useMemo(() => {
+    if (!widgets || widgets.length === 0) {
+      return [];
+    }
 
-  const layout = baseLayout;
+    const sortedDesktopItems = [...widgets];
+
+    // Sort to ensure that items are ordered top-to-bottom, and for items on the same row, left-to-right
+    sortedDesktopItems.sort((a, b) => {
+      if (a.y < b.y) return -1;
+      if (a.y > b.y) return 1;
+      if (a.x < b.x) return -1;
+      if (a.x > b.x) return 1;
+      return 0;
+    });
+
+    let currentY = 0;
+    return sortedDesktopItems.map(widget => {
+      const itemY = currentY;
+      currentY += widget.height;
+
+      return {
+        ...widget,
+        i: widget.id,
+        x: 0,
+        y: itemY, // Calculate correct y co-ordinate to prevent react-grid-layout's auto-compacting behaviour
+        w: 1,
+        h: widget.height,
+      };
+    });
+  }, [widgets]);
+
+  const desktopLayout = useMemo(() => {
+    if (!widgets) return [];
+    return widgets.map(widget => ({
+      i: widget.id,
+      w: widget.width,
+      h: widget.height,
+      minW:
+        isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 2 : 3,
+      minH:
+        isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 1 : 2,
+      ...widget,
+    }));
+  }, [widgets]);
 
   const closeNotifications = () => {
     dispatch(removeNotification({ id: 'import' }));
@@ -185,7 +218,7 @@ export function Overview() {
 
     const data = {
       version: 1,
-      widgets: layout.map(item => {
+      widgets: desktopLayout.map(item => {
         const widget = widgetMap.get(item.i);
 
         if (!widget) {
@@ -491,7 +524,7 @@ export function Overview() {
         <View data-testid="reports-overview" style={{ userSelect: 'none' }}>
           <ResponsiveGridLayout
             breakpoints={{ desktop: breakpoints.medium, mobile: 1 }}
-            layouts={{ desktop: layout, mobile: layout }}
+            layouts={{ desktop: desktopLayout, mobile: mobileLayout }}
             onLayoutChange={
               currentBreakpoint === 'desktop' ? onLayoutChange : undefined
             }
@@ -502,7 +535,7 @@ export function Overview() {
             isDraggable={currentBreakpoint === 'desktop' && isEditing}
             isResizable={currentBreakpoint === 'desktop' && isEditing}
           >
-            {layout.map(item => (
+            {desktopLayout.map(item => (
               <div key={item.i}>
                 {item.type === 'net-worth-card' ? (
                   <NetWorthCard

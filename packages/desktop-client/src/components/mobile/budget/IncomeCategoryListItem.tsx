@@ -1,4 +1,4 @@
-import { type ComponentPropsWithoutRef } from 'react';
+import { useCallback, type ComponentPropsWithoutRef } from 'react';
 import { GridListItem } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
@@ -8,19 +8,17 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { AutoTextSize } from 'auto-text-size';
 
 import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
 import * as monthUtils from 'loot-core/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { PrivacyFilter } from '../../PrivacyFilter';
-import { CellValue } from '../../spreadsheet/CellValue';
-import { useFormat } from '../../spreadsheet/useFormat';
-
+import { BalanceCell } from './BalanceCell';
 import { BudgetCell } from './BudgetCell';
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
+
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type IncomeCategoryNameProps = {
   category: CategoryEntity;
@@ -92,20 +90,23 @@ type IncomeCategoryCellsProps = {
   category: CategoryEntity;
   month: string;
   onBudgetAction: (month: string, action: string, args: unknown) => void;
+  onShowActivity: () => void;
 };
 
 function IncomeCategoryCells({
   category,
   month,
   onBudgetAction,
+  onShowActivity,
 }: IncomeCategoryCellsProps) {
   const { t } = useTranslation();
-  const format = useFormat();
   const columnWidth = getColumnWidth();
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
 
   const budgeted =
-    budgetType === 'report' ? trackingBudget.catBudgeted(category.id) : null;
+    budgetType === 'report'
+      ? trackingBudget.catBudgeted(category.id)
+      : envelopeBudget.catBudgeted(category.id);
 
   const balance =
     budgetType === 'report'
@@ -120,7 +121,7 @@ function IncomeCategoryCells({
         alignItems: 'center',
       }}
     >
-      {budgeted && (
+      {budgetType === 'report' && (
         <View
           style={{
             width: columnWidth,
@@ -137,37 +138,22 @@ function IncomeCategoryCells({
           />
         </View>
       )}
-      <CellValue<'envelope-budget' | 'tracking-budget', 'sum-amount'>
-        binding={balance}
-        type="financial"
-        aria-label={t('Balance for {{categoryName}} category', {
-          categoryName: category.name,
-        })} // Translated aria-label
+      <View
+        style={{
+          width: columnWidth,
+          justifyContent: 'center',
+          alignItems: 'flex-end',
+        }}
       >
-        {({ type, value }) => (
-          <View>
-            <PrivacyFilter>
-              <AutoTextSize
-                key={value}
-                as={Text}
-                minFontSizePx={6}
-                maxFontSizePx={12}
-                mode="oneline"
-                style={{
-                  width: columnWidth,
-                  justifyContent: 'center',
-                  alignItems: 'flex-end',
-                  textAlign: 'right',
-                  fontSize: 12,
-                  paddingRight: 5,
-                }}
-              >
-                {format(value, type)}
-              </AutoTextSize>
-            </PrivacyFilter>
-          </View>
-        )}
-      </CellValue>
+        <BalanceCell
+          binding={balance}
+          category={category}
+          onPress={onShowActivity}
+          aria-label={t('Show transactions for {{categoryName}} category', {
+            categoryName: category.name,
+          })}
+        />
+      </View>
     </View>
   );
 }
@@ -187,6 +173,14 @@ export function IncomeCategoryListItem({
   ...props
 }: IncomeCategoryListItemProps) {
   const { value: category } = props;
+  const navigate = useNavigate();
+
+  const onShowActivity = useCallback(() => {
+    if (!category) {
+      return;
+    }
+    navigate(`/categories/${category.id}?month=${month}`);
+  }, [category, month, navigate]);
 
   if (!category) {
     return null;
@@ -219,6 +213,7 @@ export function IncomeCategoryListItem({
           category={category}
           month={month}
           onBudgetAction={onBudgetAction}
+          onShowActivity={onShowActivity}
         />
       </View>
     </GridListItem>
