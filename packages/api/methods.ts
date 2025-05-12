@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import type { Handlers } from 'loot-core/types/handlers';
 import {
+  AccountEntity,
   RecurConfig,
   RuleConditionEntity,
   ScheduleEntity,
@@ -44,7 +45,7 @@ export async function sync() {
   return send('api/sync');
 }
 
-export async function runBankSync(args?: { accountId: string }) {
+export async function runBankSync(args?: { accountId: AccountEntity['id'] }) {
   return send('api/bank-sync', args);
 }
 
@@ -259,11 +260,11 @@ export function deleteSchedule(scheduleId: ScheduleEntity['id']) {
   return send('api/schedule-delete', scheduleId);
 }
 
-export function skipNextScheduleDate(id: ScheduleEntity['id']) {
+export function skipNextScheduleDate(scheduleId: ScheduleEntity['id']) {
   return send('api/schedule-skip-next-date', scheduleId);
 }
 
-export function postScheduleTransaction(id: ScheduleEntity['id']) {
+export function postScheduleTransaction(scheduleId: ScheduleEntity['id']) {
   return send('api/schedule-post-transaction', scheduleId);
 }
 
