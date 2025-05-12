@@ -4,7 +4,6 @@ import { subDays } from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { resetTracer, tracer } from 'loot-core/shared/test-helpers';
 
-import { aqlQuery } from './aqlQuery';
 import { pagedQuery } from './pagedQuery';
 
 function wait(n) {
