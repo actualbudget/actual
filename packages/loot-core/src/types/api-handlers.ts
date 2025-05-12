@@ -208,7 +208,7 @@ export interface ApiHandlers {
 
   'api/schedule-delete': (id: ScheduleEntity['id']) => Promise<void>;
 
-  'api/schedule-skip-next-date': (id: string) => Promise<void>;
+  'api/schedule-skip-next-date': (id: ScheduleEntity['id']) => Promise<void>;
 
   'api/schedule-post-transaction': (id: string) => Promise<void>;
 
