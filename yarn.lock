@@ -105,7 +105,6 @@ __metadata:
     date-fns: "npm:^2.30.0"
     debug: "npm:^4.4.0"
     express: "npm:4.21.2"
-    express-actuator: "npm:1.8.4"
     express-rate-limit: "npm:^7.5.0"
     express-response-size: "npm:^0.0.3"
     express-winston: "npm:^4.2.0"
@@ -8828,13 +8827,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dayjs@npm:^1.11.3":
-  version: 1.11.13
-  resolution: "dayjs@npm:1.11.13"
-  checksum: 10/7374d63ab179b8d909a95e74790def25c8986e329ae989840bacb8b1888be116d20e1c4eee75a69ea0dfbae13172efc50ef85619d304ee7ca3c01d5878b704f5
-  languageName: node
-  linkType: hard
-
 "debounce@npm:^1.2.1":
   version: 1.2.1
   resolution: "debounce@npm:1.2.1"
@@ -10479,16 +10471,6 @@ __metadata:
   version: 3.1.1
   resolution: "exponential-backoff@npm:3.1.1"
   checksum: 10/2d9bbb6473de7051f96790d5f9a678f32e60ed0aa70741dc7fdc96fec8d631124ec3374ac144387604f05afff9500f31a1d45bd9eee4cdc2e4f9ad2d9b9d5dbd
-  languageName: node
-  linkType: hard
-
-"express-actuator@npm:1.8.4":
-  version: 1.8.4
-  resolution: "express-actuator@npm:1.8.4"
-  dependencies:
-    dayjs: "npm:^1.11.3"
-    properties-reader: "npm:^2.2.0"
-  checksum: 10/5f55418bfd660e8781a777bf48c7eeda2d0a38fa11b2f4670555123380f522eed5bb884df297fb420904663bd2057834227c0eea68d6f852432ac3bc77842c09
   languageName: node
   linkType: hard
 
@@ -16178,15 +16160,6 @@ __metadata:
     object-assign: "npm:^4.1.1"
     react-is: "npm:^16.13.1"
   checksum: 10/7d959caec002bc964c86cdc461ec93108b27337dabe6192fb97d69e16a0c799a03462713868b40749bfc1caf5f57ef80ac3e4ffad3effa636ee667582a75e2c0
-  languageName: node
-  linkType: hard
-
-"properties-reader@npm:^2.2.0":
-  version: 2.3.0
-  resolution: "properties-reader@npm:2.3.0"
-  dependencies:
-    mkdirp: "npm:^1.0.4"
-  checksum: 10/0b41eb4136dc278ae0d97968ccce8de2d48d321655b319192e31f2424f1c6e052182204671e65aa8967216360cb3e7cbd9129830062e058fe9d6a1d74964c29a
   languageName: node
   linkType: hard
 
