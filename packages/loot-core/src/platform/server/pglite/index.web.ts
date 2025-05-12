@@ -85,6 +85,7 @@ export async function openDatabase(id?: string): Promise<PgliteDatabase> {
   // Enable extensions as needed.
   await db.execute('CREATE EXTENSION IF NOT EXISTS pg_trgm');
 
+  /* eslint-disable rulesdir/typography */
   const results = await db.execute(
     `SELECT table_name, column_name, data_type
       FROM information_schema.columns
@@ -92,6 +93,8 @@ export async function openDatabase(id?: string): Promise<PgliteDatabase> {
       ORDER BY table_name, ordinal_position;
     `,
   );
+  /* eslint-enable rulesdir/typography */
+
   console.log('PGlite columns:', JSON.stringify(results));
 
   return db;
@@ -136,13 +139,13 @@ function blobToUint8Array(blob: Blob): Promise<Uint8Array> {
   });
 }
 
-function ensureDataDir(id: string) {
+function ensureDataDir(id?: string) {
   if (!id) {
     const currentPrefs = prefs.getPrefs();
     if (!currentPrefs || !currentPrefs.id) {
-      throw new Error('No id provided and there is not budgeted currently open.');
+      throw new Error('No id provided and there is no budget file currently open.');
     }
-    return `idb://${currentPrefs.id}`;
+    id = currentPrefs.id;
   }
 
   return `idb://${id}`;
