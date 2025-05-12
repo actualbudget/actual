@@ -4,7 +4,7 @@ Many of the build scripts are bash scripts and not natively invocable in Windows
 
 1. Install [Git & Git Bash for Windows](https://git-scm.com/downloads).
 2. Ensure you have activated [Developer Mode](https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development).
-3. Install Node v18.x or greater.
+3. Install Node v20.x or greater.
 4. Clone this repo.
 5. Using Git Bash (run as administrator), change to the root of this repo.
 6. From inside the bash shell, run `yarn install`.
