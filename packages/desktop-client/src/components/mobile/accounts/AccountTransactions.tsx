@@ -434,13 +434,9 @@ function TransactionListWithPreviews({
       previewTransactions.concat(transactions.filter(t => !t.is_child))
     : transactions;
 
-  if (!hasInitialBalances) {
-    return null;
-  }
-
   return (
     <TransactionListWithBalances
-      isLoading={isLoading}
+      isLoading={isLoading || !hasInitialBalances}
       transactions={transactionsToDisplay}
       balance={balanceQueries.balance}
       balanceCleared={balanceQueries.cleared}
