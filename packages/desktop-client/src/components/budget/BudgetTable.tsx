@@ -1,6 +1,7 @@
 import React, {
   type ComponentPropsWithoutRef,
   type KeyboardEvent,
+  useMemo,
   useState,
 } from 'react';
 
@@ -8,6 +9,8 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
+import { q } from 'loot-core/shared/query';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
@@ -227,6 +230,8 @@ export function BudgetTable(props: BudgetTableProps) {
     onCollapse(categoryGroups.map(g => g.id));
   };
 
+  const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
+
   return (
     <View
       data-testid="budget-table"
@@ -291,23 +296,25 @@ export function BudgetTable(props: BudgetTableProps) {
             }}
             onKeyDown={onKeyDown}
           >
-            <BudgetCategories
-              // @ts-expect-error Fix when migrating BudgetCategories to ts
-              categoryGroups={categoryGroups}
-              editingCell={editing}
-              dataComponents={dataComponents}
-              onEditMonth={onEditMonth}
-              onEditName={onEditName}
-              onSaveCategory={onSaveCategory}
-              onSaveGroup={onSaveGroup}
-              onDeleteCategory={onDeleteCategory}
-              onDeleteGroup={onDeleteGroup}
-              onReorderCategory={_onReorderCategory}
-              onReorderGroup={_onReorderGroup}
-              onBudgetAction={onBudgetAction}
-              onShowActivity={onShowActivity}
-              onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
-            />
+            <SchedulesProvider query={schedulesQuery}>
+              <BudgetCategories
+                // @ts-expect-error Fix when migrating BudgetCategories to ts
+                categoryGroups={categoryGroups}
+                editingCell={editing}
+                dataComponents={dataComponents}
+                onEditMonth={onEditMonth}
+                onEditName={onEditName}
+                onSaveCategory={onSaveCategory}
+                onSaveGroup={onSaveGroup}
+                onDeleteCategory={onDeleteCategory}
+                onDeleteGroup={onDeleteGroup}
+                onReorderCategory={_onReorderCategory}
+                onReorderGroup={_onReorderGroup}
+                onBudgetAction={onBudgetAction}
+                onShowActivity={onShowActivity}
+                onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
+              />
+            </SchedulesProvider>
           </View>
         </View>
       </MonthsProvider>

@@ -228,6 +228,10 @@ export function isCurrentMonth(month: DateLike): boolean {
   return month === currentMonth();
 }
 
+export function isCurrentDay(day: DateLike): boolean {
+  return day === currentDay();
+}
+
 // TODO: This doesn't really fit in this module anymore, should
 // probably live elsewhere
 export function bounds(month: DateLike): { start: number; end: number } {
@@ -403,6 +407,18 @@ export function format(
   locale?: Locale,
 ): string {
   return d.format(_parse(month), format, { locale });
+}
+
+export function formatDistance(
+  date1: DateLike,
+  date2: DateLike,
+  locale?: Locale,
+  options?: { addSuffix?: boolean; includeSeconds?: boolean },
+): string {
+  return d.formatDistance(_parse(date1), _parse(date2), {
+    locale,
+    ...options,
+  });
 }
 
 export const getDateFormatRegex = memoizeOne((format: string) => {
