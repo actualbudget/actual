@@ -131,8 +131,6 @@ async function fixSplitTransactions(): Promise<{
     SELECT id FROM transactions WHERE isParent = 1 AND category IS NOT NULL
   `);
 
-  console.log('parentTransactionsWithCategory', parentTransactionsWithCategory);
-
   await runMutator(async () => {
     const updated = parentTransactionsWithCategory.map(({ id }) => ({
       id,
