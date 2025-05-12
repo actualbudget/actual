@@ -53,7 +53,6 @@ export function InitialFocus({ children }: InitialFocusProps) {
 
   const child = Children.only(children);
   if (isValidElement(child)) {
-    // @ts-ignore `ref` is not a valid prop for the type that `cloneElement` expects, but this feature doesn't work without it.
     return cloneElement(child, { ref: node });
   }
   throw new Error(
