@@ -18,7 +18,10 @@ import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { type Binding } from '@desktop-client/components/spreadsheet';
 import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { envelopeBudget, trackingBudget } from '@desktop-client/queries/queries';
+import {
+  envelopeBudget,
+  trackingBudget,
+} from '@desktop-client/queries/queries';
 
 type BalanceCellProps = {
   binding: Binding<
