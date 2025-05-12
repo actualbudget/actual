@@ -72,9 +72,7 @@ export function useCategoryScheduleGoalTemplateIndicator({
           locale,
         });
       })
-      .reduce((acc, tooltip) => {
-        return `${acc}\n${tooltip}`;
-      }, '');
+      .join('\n');
 
     const schedule = schedulesToDisplay[0] || null;
     const scheduleStatus =
