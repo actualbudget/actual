@@ -2,11 +2,12 @@
 
 :::info
 
-Installing Actual by building it from source is a highly technical process. We recommend this approach primarily for power users and contributors.
+Installing Actual by building it from source is a highly technical process. We recommend this approach primarily for contributors.
 
-For non-technical users, we suggest opting for one of the simpler alternatives:
+For most cases, we suggest opting for one of the simpler alternatives:
 - [Pikapods](/docs/install/pikapods)
 - [Desktop Client](/download)
+- [CLI tool](/docs/install/cli-tool)
 - [Docker](/docs/install/docker)
 
 :::

@@ -159,3 +159,39 @@ Apache HTTP server can serve as a reverse proxy using [VirtualHosts](https://htt
 </VirtualHost>
 ```
 
+## Ngrok
+
+[Ngrok](https://ngrok.com/) offers a reverse proxy and a static domain for [free](https://ngrok.com/docs/pricing-limits/free-plan-limits/). You'll need to create an account with them and follow the instructions on their [dashboard](https://dashboard.ngrok.com/) getting started section. The instructions will guide you through configuring ngrok.
+
+Creating a free Ngrok domain is very simple: just navigate to the Domains section of the site. For more information, check out the [custom domain docs](https://ngrok.com/docs/guides/other-guides/how-to-set-up-a-custom-domain/).
+
+Once that's all done, you can expose Actual to the internet with your custom domain and free SSL with a simple command:
+
+```
+ngrok http --url=your-custom-domain.ngrok-free.app 5006
+```
+
+If running Actual on your PC, you may find it helpful to run this command when your computer starts up. There are many ways to do this. The below is not a complete list:
+
+- On Windows, you can use the [Task Scheduler](https://www.technipages.com/scheduled-task-windows/)
+  - Create a *Basic Task*, give it a name then set the trigger to *At system startup*
+  - Under *Action*, select the program as ngrok.exe, and add arguments ```http --url=your-custom-domain.ngrok-free.app 5006```.
+  - Once complete, you can choose to run this silently in the background by navigating to *properties*, selecting *Run whether user is logged on or not*, and ticking the *Hidden* box.
+
+- On Linux, you can use [systemd](https://systemd.io/)
+  - Navigate to the directory: `/etc/systemd/system/` and create a service file `expose-actual-server.service`
+  - Add the following content (and change to suit your needs):
+    ```
+    [Unit]
+    Description=Run my Bash script at startup
+    After=network.target
+
+    [Service]
+    ExecStart=ngrok http --url=<your-custom-domain>.ngrok-free.app 5006
+    Restart=always
+    User=<your user>
+
+    [Install]
+    WantedBy=multi-user.target
+    ```
+  - Enable the service with ```sudo systemctl enable expose-actual-server.service```
