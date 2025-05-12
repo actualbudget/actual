@@ -356,7 +356,6 @@ function TransactionListWithPreviews({
           tables.includes('payee_mapping')
         ) {
           reloadTransactions();
-          // Also reload balances when transactions change
           reloadBalances();
         }
       }
