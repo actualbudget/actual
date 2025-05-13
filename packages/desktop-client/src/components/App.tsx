@@ -14,8 +14,6 @@ import { BrowserRouter } from 'react-router-dom';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { setAppState, sync } from 'loot-core/client/app/appSlice';
-import { closeBudget, loadBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import * as Platform from 'loot-core/client/platform';
 import { loadGlobalPrefs } from 'loot-core/client/prefs/prefsSlice';
@@ -23,6 +21,8 @@ import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import { signOut } from 'loot-core/client/users/usersSlice';
 import { init as initConnection, send } from 'loot-core/platform/client/fetch';
 
+import { setAppState, sync } from '../app/appSlice';
+import { closeBudget, loadBudget } from '../budgets/budgetsSlice';
 import { handleGlobalEvents } from '../global-events';
 import { setI18NextLanguage } from '../i18n';
 import { installPolyfills } from '../polyfills';

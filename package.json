@@ -83,7 +83,7 @@
     "rollup": "4.40.1"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,md,json,yml}": [

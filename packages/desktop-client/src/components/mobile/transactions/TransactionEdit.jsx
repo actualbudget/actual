@@ -482,6 +482,13 @@ const TransactionEditInner = memo(function TransactionEditInner({
   );
   const { grouped: categoryGroups } = useCategories();
 
+  useEffect(() => {
+    if (window.history.length === 1) {
+      window.history.replaceState(null, 'Actual Budget', '/');
+      window.history.pushState(null, 'Add Transaction', '/transactions/new');
+    }
+  }, []);
+
   const [transaction, ...childTransactions] = transactions;
 
   const { editingField, onRequestActiveEdit, onClearActiveEdit } =
@@ -985,11 +992,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
               onFocus={() =>
                 onRequestActiveEdit(getFieldName(transaction.id, 'date'))
               }
-              onUpdate={value =>
+              onChange={event =>
                 onUpdateInner(
                   transaction,
                   'date',
-                  formatDate(parseISO(value), dateFormat),
+                  formatDate(parseISO(event.target.value), dateFormat),
                 )
               }
             />
@@ -1022,7 +1029,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
             onFocus={() => {
               onRequestActiveEdit(getFieldName(transaction.id, 'notes'));
             }}
-            onUpdate={value => onUpdateInner(transaction, 'notes', value)}
+            onChange={event =>
+              onUpdateInner(transaction, 'notes', event.target.value)
+            }
           />
         </View>
 

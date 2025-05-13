@@ -6,6 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
@@ -56,7 +57,7 @@ export function SidebarCategory({
   onHideNewCategory,
 }: SidebarCategoryProps) {
   const { t } = useTranslation();
-  const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
+  const isGoalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
 
@@ -79,17 +80,7 @@ export function SidebarCategory({
       ref={triggerRef}
       onContextMenu={handleContextMenu}
     >
-      <div
-        data-testid="category-name"
-        style={{
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          minWidth: 0,
-        }}
-      >
-        {category.name}
-      </div>
+      <TextOneLine data-testid="category-name">{category.name}</TextOneLine>
       <View style={{ flexShrink: 0, marginLeft: 5 }}>
         <Button
           variant="bare"
@@ -139,7 +130,7 @@ export function SidebarCategory({
         </Popover>
       </View>
       <View style={{ flex: 1 }} />
-      {!goalsShown && goalTemplatesUIEnabled && (
+      {!goalsShown && isGoalTemplatesUIEnabled && (
         <View style={{ flexShrink: 0 }}>
           <CategoryAutomationButton
             style={dragging && { color: 'currentColor' }}

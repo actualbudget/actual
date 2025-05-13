@@ -74,7 +74,7 @@ export function EnvelopeBalanceMenuModal({
             </Text>
             <BalanceWithCarryover
               isDisabled
-              isMobileEnvelopeModal
+              shouldInlineGoalStatus
               carryover={envelopeBudget.catCarryover(categoryId)}
               balance={envelopeBudget.catBalance(categoryId)}
               goal={envelopeBudget.catGoal(categoryId)}
