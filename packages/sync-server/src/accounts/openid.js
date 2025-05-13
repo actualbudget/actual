@@ -1,4 +1,4 @@
-import { generators, Issuer } from 'openid-client';
+import { custom, generators, Issuer } from 'openid-client';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -28,6 +28,10 @@ export async function bootstrapOpenId(configParameter) {
   if (!('server_hostname' in configParameter)) {
     return { error: 'missing-server-hostname' };
   }
+
+  custom.setHttpOptionsDefaults({
+    timeout: 20 * 1000, // 20 seconds
+  });
 
   try {
     //FOR BACKWARD COMPATIBLITY:
