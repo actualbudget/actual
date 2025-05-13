@@ -8,6 +8,8 @@ Custom reports allow analyzing transaction data by using charts or a data table 
 4. Area Graph
 5. Donut Graph
 
+![Custom Report Dashboard example](/img/reports/cr-fancy-example.png)
+
 ## Left Menu
 
 The **Type** menu can be used to change the display of transactions shown in the report:
