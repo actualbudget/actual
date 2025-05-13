@@ -4,9 +4,9 @@ import { Trans } from 'react-i18next';
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 
-import { resetSync } from 'loot-core/client/app/appSlice';
 import { send } from 'loot-core/platform/client/fetch';
 
+import { resetSync } from '../../app/appSlice';
 import { useDispatch } from '../../redux';
 
 import { Setting } from './UI';

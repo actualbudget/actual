@@ -39,7 +39,7 @@ export function BalanceCell({
   'aria-label': ariaLabel,
 }: BalanceCellProps) {
   const { t } = useTranslation();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const columnWidth = getColumnWidth({
     show3Columns,
   });

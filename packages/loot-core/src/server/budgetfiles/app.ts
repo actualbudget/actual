@@ -595,7 +595,7 @@ async function _loadBudget(id: Budget['id']): Promise<{
   }
 
   // This is a bit leaky, but we need to set the initial budget type
-  const { value: budgetType = 'rollover' } =
+  const { value: budgetType = 'envelope' } =
     (await db.first<Pick<db.DbPreference, 'value'>>(
       'SELECT value from preferences WHERE id = ?',
       ['budgetType'],

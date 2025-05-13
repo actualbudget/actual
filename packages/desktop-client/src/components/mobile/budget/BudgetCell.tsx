@@ -50,11 +50,11 @@ export function BudgetCell<
   const dispatch = useDispatch();
   const format = useFormat();
   const { showUndoNotification } = useUndo();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const categoryNotes = useNotes(category.id);
 
   const onOpenCategoryBudgetMenu = useCallback(() => {
-    const modalBudgetType = budgetType === 'rollover' ? 'envelope' : 'tracking';
+    const modalBudgetType = budgetType === 'envelope' ? 'envelope' : 'tracking';
     const categoryBudgetMenuModal = `${modalBudgetType}-budget-menu` as const;
     dispatch(
       pushModal({

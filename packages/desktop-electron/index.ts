@@ -32,12 +32,14 @@ import {
 
 import './security';
 
+const BUILD_ROOT = `${__dirname}/..`;
+
 const isPlaywrightTest = process.env.EXECUTION_CONTEXT === 'playwright';
 const isDev = !isPlaywrightTest && !app.isPackaged; // dev mode if not packaged and not playwright
 
 process.env.lootCoreScript = isDev
   ? 'loot-core/lib-dist/electron/bundle.desktop.js' // serve from local output in development (provides hot-reloading)
-  : path.resolve(__dirname, 'loot-core/lib-dist/electron/bundle.desktop.js'); // serve from build in production
+  : path.resolve(BUILD_ROOT, 'loot-core/lib-dist/electron/bundle.desktop.js'); // serve from build in production
 
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly
@@ -488,13 +490,13 @@ app.on('ready', async () => {
 
     const pathname = parsedUrl.pathname;
 
-    let filePath = path.normalize(`${__dirname}/client-build/index.html`); // default web path
+    let filePath = path.normalize(`${BUILD_ROOT}/client-build/index.html`); // default web path
 
     if (pathname.startsWith('/static')) {
       // static assets
-      filePath = path.normalize(`${__dirname}/client-build${pathname}`);
+      filePath = path.normalize(`${BUILD_ROOT}/client-build${pathname}`);
       const resolvedPath = path.resolve(filePath);
-      const clientBuildPath = path.resolve(__dirname, 'client-build');
+      const clientBuildPath = path.resolve(BUILD_ROOT, 'client-build');
 
       // Ensure filePath is within client-build directory - prevents directory traversal vulnerability
       if (!resolvedPath.startsWith(clientBuildPath)) {
