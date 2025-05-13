@@ -25,9 +25,6 @@ export const baseInputStyle = {
 const defaultInputClassName = css({
   ...baseInputStyle,
   color: theme.formInputText,
-  '&[data-disabled]': {
-    color: theme.formInputTextPlaceholder,
-  },
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   flexShrink: 0,
@@ -35,10 +32,13 @@ const defaultInputClassName = css({
     border: '1px solid ' + theme.formInputBorderSelected,
     boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
     '::selection': {
-      backgroundColor: theme.formInputTextSelected,
+      backgroundColor: theme.formInputTextReadOnlySelection,
     },
   },
-  '::placeholder': { color: theme.formInputTextPlaceholder },
+  '&[data-disabled]': {
+    color: theme.formInputTextPlaceholder,
+    '::placeholder': { color: theme.formInputTextPlaceholder },
+  },
   ...styles.smallText,
 });
 
