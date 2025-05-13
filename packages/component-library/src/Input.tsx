@@ -34,6 +34,9 @@ const defaultInputClassName = css({
   '&[data-focused]': {
     border: '1px solid ' + theme.formInputBorderSelected,
     boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
+    '::selection': {
+      backgroundColor: theme.formInputTextSelected,
+    },
   },
   '::placeholder': { color: theme.formInputTextPlaceholder },
   ...styles.smallText,
