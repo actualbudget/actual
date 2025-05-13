@@ -50,13 +50,44 @@ The following require a transaction to have been selected first:
 
 In the top left of the budget, you will see this control:
 
-![](/img/tips-tricks/months-selector.png)
+![Months selector](/img/tips-tricks/months-selector.png)
 
 This sets the maximum amount of months to render at once, and defaults to 1. If you want to view multiple months on the same page, click the boxes to increase the number.
 
 :::note
 This only controls the _maximum_ number of months. If the app is too small to render all of them it will only render the months that fit on the screen.
 :::
+
+## Scramble and Hide Data
+
+Actual Budget has a built-in privacy filter which help you
+hide your data from prying eyes.
+
+To do this: click on the eye icon in the top right corner of the app.
+
+![Top right corner](/static/img/a-tour-of-actual/tour-overview-top-right.png)
+
+This will scramble all of your data, including payees, categories, and
+transactions.
+
+This is useful if you want to create a screenshot of your data without
+showing your actual data. This is useful when you need to show your
+budget to someone else, like other Actual users in our Discord.
+
+![Top right corner](/static/img/tips-tricks/scrambled-clear-view.png)
+
+
+:::note
+This only hide data - no data is lost or encrypted.
+:::
+
+To unhide the data, click on the eye icon again. This will show the data in
+its original form.
+
+![Top right corner](/static/img/tips-tricks/scrambled-scrambled-view.png)
+
+
+
 
 ## Show Running Balance
 
@@ -70,4 +101,4 @@ To enable this:
 
 A new column should appear which shows the balance of the account after each transaction:
 
-![](/img/tips-tricks/running-balance.png)
+![Show running balance](/img/tips-tricks/running-balance.png)
