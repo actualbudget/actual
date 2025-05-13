@@ -1,16 +1,15 @@
-import { initServer, clearServer } from 'loot-core/platform/client/fetch';
+import * as fetch from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 
 import { aqlQuery } from './aqlQuery';
 
 describe('aqlQuery', () => {
-  beforeEach(() => {
-    clearServer();
-  });
-
   it('runs an AQL query', async () => {
-    initServer({
-      query: query => Promise.resolve({ data: query, dependencies: [] }),
+    vi.spyOn(fetch, 'send').mockImplementation((name, args) => {
+      if (name === 'query') {
+        return Promise.resolve({ data: args, dependencies: [] });
+      }
+      return Promise.reject(new Error(`Unknown command: ${name}`));
     });
 
     const query = q('transactions').select('*');
