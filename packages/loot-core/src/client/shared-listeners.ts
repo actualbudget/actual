@@ -6,16 +6,16 @@ import {
   closeAndDownloadBudget,
   uploadBudget,
 } from '@actual-app/web/src/budgets/budgetsSlice';
+import { pushModal } from '@actual-app/web/src/modals/modalsSlice';
+import {
+  addNotification,
+  type Notification,
+} from '@actual-app/web/src/notifications/notificationsSlice';
 /* eslint-enable no-restricted-imports */
 import { t } from 'i18next';
 
 import { listen, send } from '../platform/client/fetch';
 
-import { pushModal } from './modals/modalsSlice';
-import {
-  addNotification,
-  type Notification,
-} from './notifications/notificationsSlice';
 import { loadPrefs } from './prefs/prefsSlice';
 import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
 import { type AppStore } from './store';

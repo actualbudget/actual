@@ -449,7 +449,7 @@ function calculateRunningBalancesBottomUp(
           acc.set(transaction.id, transaction.amount);
           return acc;
         }
-        const previousTransaction = arr[index + 1];
+        const previousTransaction = arr[previousTransactionIndex];
         const previousRunningBalance = acc.get(previousTransaction.id) ?? 0;
         const currentRunningBalance =
           previousRunningBalance + transaction.amount;

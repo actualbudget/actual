@@ -13,17 +13,17 @@ import {
   name as budgetsSliceName,
   reducer as budgetsSliceReducer,
 } from '@actual-app/web/src/budgets/budgetsSlice';
-/* eslint-enable */
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
-
 import {
   name as modalsSliceName,
   reducer as modalsSliceReducer,
-} from '../modals/modalsSlice';
+} from '@actual-app/web/src/modals/modalsSlice';
 import {
   name as notificationsSliceName,
   reducer as notificationsSliceReducer,
-} from '../notifications/notificationsSlice';
+} from '@actual-app/web/src/notifications/notificationsSlice';
+/* eslint-enable */
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
+
 import {
   name as prefsSliceName,
   reducer as prefsSliceReducer,

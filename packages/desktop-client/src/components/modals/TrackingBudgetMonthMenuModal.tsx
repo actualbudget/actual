@@ -13,9 +13,9 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import * as monthUtils from 'loot-core/shared/months';
 
+import { type Modal as ModalType } from '../../modals/modalsSlice';
 import { BudgetMonthMenu } from '../budget/tracking/budgetsummary/BudgetMonthMenu';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Notes } from '../Notes';

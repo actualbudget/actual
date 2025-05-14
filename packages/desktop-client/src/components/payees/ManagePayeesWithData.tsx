@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   getPayees,
   initiallyLoadPayees,
@@ -11,6 +10,7 @@ import { type UndoState } from 'loot-core/server/undo';
 import { applyChanges, type Diff } from 'loot-core/shared/util';
 import { type NewRuleEntity, type PayeeEntity } from 'loot-core/types/models';
 
+import { pushModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 
 import { ManagePayees } from './ManagePayees';

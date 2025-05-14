@@ -1,7 +1,8 @@
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { type AppDispatch } from 'loot-core/client/store';
 import { send } from 'loot-core/platform/client/fetch';
 import { type GoCardlessToken } from 'loot-core/types/models';
+
+import { pushModal } from './modals/modalsSlice';
 
 function _authorize(
   dispatch: AppDispatch,

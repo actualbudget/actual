@@ -6,10 +6,10 @@ import { type CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { AutoTextSize } from 'auto-text-size';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
+import { pushModal } from '../../../modals/modalsSlice';
 import { useDispatch } from '../../../redux';
 import { makeAmountGrey } from '../../budget/util';
 import { PrivacyFilter } from '../../PrivacyFilter';

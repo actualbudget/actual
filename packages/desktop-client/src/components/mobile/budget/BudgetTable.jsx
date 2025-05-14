@@ -24,7 +24,6 @@ import { View } from '@actual-app/components/view';
 import { AutoTextSize } from 'auto-text-size';
 
 import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   envelopeBudget,
   trackingBudget,
@@ -34,6 +33,7 @@ import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { groupById } from 'loot-core/shared/util';
 
+import { pushModal } from '../../../modals/modalsSlice';
 import { useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
