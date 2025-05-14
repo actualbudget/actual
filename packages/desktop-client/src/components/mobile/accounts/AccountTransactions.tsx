@@ -283,7 +283,7 @@ function TransactionListWithPreviews({
       runningBalances &&
       showBalances === 'true'
     ) {
-      let lastBalance = runningBalances.get(transactions[0].id);
+      let lastBalance = runningBalances.get(transactions[0].id) || 0;
 
       [...previewTransactions].reverse().forEach(t => {
         lastBalance += t.amount;
