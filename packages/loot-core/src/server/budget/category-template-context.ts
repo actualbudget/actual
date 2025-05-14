@@ -500,16 +500,16 @@ export class CategoryTemplateContext {
 
   static runWeek(
     template: WeekTemplate,
-    categoryTemplate: CategoryTemplateContext,
+    templateContext: CategoryTemplateContext,
   ): number {
     let toBudget = 0;
     const amount = amountToInteger(template.amount);
     const weeks = template.weeks != null ? Math.round(template.weeks) : 1;
     let w = template.starting;
-    const nextMonth = monthUtils.addMonths(categoryTemplate.month, 1);
+    const nextMonth = monthUtils.addMonths(templateContext.month, 1);
 
     while (w < nextMonth) {
-      if (w >= categoryTemplate.month) {
+      if (w >= templateContext.month) {
         toBudget += amount;
       }
       w = monthUtils.addWeeks(w, weeks);
