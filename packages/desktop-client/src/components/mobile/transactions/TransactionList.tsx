@@ -29,7 +29,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { setNotificationInset } from 'loot-core/client/notifications/notificationsSlice';
 import { validForTransfer } from 'loot-core/client/transfer';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
@@ -39,6 +38,7 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
+import { setNotificationInset } from '../../../notifications/notificationsSlice';
 import { useDispatch } from '../../../redux';
 import { useScrollListener } from '../../ScrollProvider';
 import { FloatingActionBar } from '../FloatingActionBar';

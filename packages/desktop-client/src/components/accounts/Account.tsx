@@ -21,7 +21,6 @@ import {
   SchedulesProvider,
   accountSchedulesQuery,
 } from 'loot-core/client/data-hooks/schedules';
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import * as queries from 'loot-core/client/queries';
 import {
   createPayee,
@@ -67,6 +66,7 @@ import {
   pushModal,
   replaceModal,
 } from '../../modals/modalsSlice';
+import { addNotification } from '../../notifications/notificationsSlice';
 import { useSelector, useDispatch } from '../../redux';
 import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { TransactionList } from '../transactions/TransactionList';

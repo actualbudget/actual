@@ -9,7 +9,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type Budget } from 'loot-core/types/budget';
@@ -18,6 +17,7 @@ import { type Handlers } from 'loot-core/types/handlers';
 
 import { closeAndLoadBudget } from '../../budgets/budgetsSlice';
 import { type Modal as ModalType, popModal } from '../../modals/modalsSlice';
+import { addNotification } from '../../notifications/notificationsSlice';
 import { useDispatch, useSelector } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FormField, FormLabel } from '../forms';
