@@ -276,7 +276,9 @@ function TransactionListWithPreviews({
   });
 
   const allBalances = useMemo(() => {
-    const map = new Map<TransactionEntity['id'], IntegerAmount>();
+    const map = new Map<TransactionEntity['id'], IntegerAmount>([
+      ...runningBalances,
+    ]);
     if (
       !isLoading &&
       !isLoadingMore &&
@@ -290,10 +292,7 @@ function TransactionListWithPreviews({
         map.set(t.id, lastBalance);
       });
     }
-    return new Map<TransactionEntity['id'], IntegerAmount>([
-      ...runningBalances,
-      ...map,
-    ]);
+    return map;
   }, [
     showBalances,
     transactions,
