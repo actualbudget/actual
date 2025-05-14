@@ -5,9 +5,9 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import * as monthUtils from 'loot-core/shared/months';
 
+import { type Modal as ModalType } from '../../modals/modalsSlice';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import {
   ModalCloseButton,

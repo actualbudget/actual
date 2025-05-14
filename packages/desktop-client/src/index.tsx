@@ -13,7 +13,6 @@ import { Provider } from 'react-redux';
 import { bindActionCreators } from '@reduxjs/toolkit';
 import { createRoot } from 'react-dom/client';
 
-import * as modalsSlice from 'loot-core/client/modals/modalsSlice';
 import * as notificationsSlice from 'loot-core/client/notifications/notificationsSlice';
 import * as prefsSlice from 'loot-core/client/prefs/prefsSlice';
 import * as queriesSlice from 'loot-core/client/queries/queriesSlice';
@@ -33,6 +32,7 @@ import * as budgetsSlice from './budgets/budgetsSlice';
 import 'focus-visible';
 import { App } from './components/App';
 import { ServerProvider } from './components/ServerContext';
+import * as modalsSlice from './modals/modalsSlice';
 
 const boundActions = bindActionCreators(
   {

@@ -42,7 +42,6 @@ import {
 } from 'date-fns';
 
 import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import {
   getAccountsById,
@@ -69,6 +68,7 @@ import {
   amountToCurrency,
 } from 'loot-core/shared/util';
 
+import { pushModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
