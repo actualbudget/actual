@@ -31,7 +31,7 @@ class TestCategoryTemplateContext extends CategoryTemplateContext {
   }
 }
 
-describe('CategoryTemplate', () => {
+describe('CategoryTemplateContext', () => {
   describe('runSimple', () => {
     it('should return monthly amount when provided', () => {
       const template: Template = {
