@@ -131,7 +131,10 @@ export class CategoryTemplateContext {
       let newBudget = 0;
       switch (template.type) {
         case 'simple': {
-          newBudget = CategoryTemplateContext.runSimple(template, this.limitAmount);
+          newBudget = CategoryTemplateContext.runSimple(
+            template,
+            this.limitAmount,
+          );
           break;
         }
         case 'copy': {
@@ -410,7 +413,11 @@ export class CategoryTemplateContext {
   }
 
   private checkLimit() {
-    for (const template of this.templates.filter(t => t.type ==='simple' || t.type === 'week' || t.type === 'remainder').filter(t => t.limit)) {
+    for (const template of this.templates
+      .filter(
+        t => t.type === 'simple' || t.type === 'week' || t.type === 'remainder',
+      )
+      .filter(t => t.limit)) {
       if (this.limitCheck) {
         throw new Error('Only one `up to` allowed per category');
       }
