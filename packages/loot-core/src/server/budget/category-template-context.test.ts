@@ -19,7 +19,7 @@ vi.mock('../db', () => ({
 }));
 
 // Test helper class to access constructor and methods
-class TestCategoryTemplate extends CategoryTemplateContext {
+class TestCategoryTemplateContext extends CategoryTemplateContext {
   public constructor(
     templates: Template[],
     category: CategoryEntity,
@@ -76,7 +76,7 @@ describe('CategoryTemplate', () => {
         directive: 'template',
         priority: 1,
       };
-      const instance = new TestCategoryTemplate(
+      const instance = new TestCategoryTemplateContext(
         [template],
         category,
         '2024-01',
@@ -100,7 +100,7 @@ describe('CategoryTemplate', () => {
         directive: 'template',
         priority: 1,
       };
-      const instance = new TestCategoryTemplate(
+      const instance = new TestCategoryTemplateContext(
         [template],
         category,
         '2024-01',
@@ -113,7 +113,7 @@ describe('CategoryTemplate', () => {
   });
 
   describe('runCopy', () => {
-    let instance: TestCategoryTemplate;
+    let instance: TestCategoryTemplateContext;
 
     beforeEach(() => {
       const category: CategoryEntity = {
@@ -122,7 +122,7 @@ describe('CategoryTemplate', () => {
         group: 'test-group',
         is_income: false,
       };
-      instance = new TestCategoryTemplate([], category, '2024-01', 0, 0);
+      instance = new TestCategoryTemplateContext([], category, '2024-01', 0, 0);
       vi.clearAllMocks();
     });
 
@@ -170,7 +170,7 @@ describe('CategoryTemplate', () => {
   });
 
   describe('runWeek', () => {
-    let instance: TestCategoryTemplate;
+    let instance: TestCategoryTemplateContext;
 
     beforeEach(() => {
       const category: CategoryEntity = {
@@ -179,7 +179,7 @@ describe('CategoryTemplate', () => {
         group: 'test-group',
         is_income: false,
       };
-      instance = new TestCategoryTemplate([], category, '2024-01', 0, 0);
+      instance = new TestCategoryTemplateContext([], category, '2024-01', 0, 0);
     });
 
     //5 mondays in January 2024
@@ -227,7 +227,7 @@ describe('CategoryTemplate', () => {
   });
 
   describe('runSpend', () => {
-    let instance: TestCategoryTemplate;
+    let instance: TestCategoryTemplateContext;
 
     beforeEach(() => {
       const category: CategoryEntity = {
@@ -236,7 +236,7 @@ describe('CategoryTemplate', () => {
         group: 'test-group',
         is_income: false,
       };
-      instance = new TestCategoryTemplate([], category, '2024-01', 0, 0);
+      instance = new TestCategoryTemplateContext([], category, '2024-01', 0, 0);
       vi.clearAllMocks();
     });
 
@@ -296,7 +296,7 @@ describe('CategoryTemplate', () => {
   });
 
   describe('runPercentage', () => {
-    let instance: TestCategoryTemplate;
+    let instance: TestCategoryTemplateContext;
 
     beforeEach(() => {
       const category: CategoryEntity = {
@@ -305,7 +305,7 @@ describe('CategoryTemplate', () => {
         group: 'test-group',
         is_income: false,
       };
-      instance = new TestCategoryTemplate([], category, '2024-01', 0, 0);
+      instance = new TestCategoryTemplateContext([], category, '2024-01', 0, 0);
       vi.clearAllMocks();
     });
 
@@ -404,7 +404,7 @@ describe('CategoryTemplate', () => {
   });
 
   describe('runAverage', () => {
-    let instance: TestCategoryTemplate;
+    let instance: TestCategoryTemplateContext;
 
     beforeEach(() => {
       const category: CategoryEntity = {
@@ -413,7 +413,7 @@ describe('CategoryTemplate', () => {
         group: 'test-group',
         is_income: false,
       };
-      instance = new TestCategoryTemplate([], category, '2024-01', 0, 0);
+      instance = new TestCategoryTemplateContext([], category, '2024-01', 0, 0);
       vi.clearAllMocks();
     });
 
@@ -479,7 +479,7 @@ describe('CategoryTemplate', () => {
   });
 
   describe('runBy', () => {
-    let instance: TestCategoryTemplate;
+    let instance: TestCategoryTemplateContext;
 
     beforeEach(() => {
       const category: CategoryEntity = {
@@ -488,7 +488,7 @@ describe('CategoryTemplate', () => {
         group: 'test-group',
         is_income: false,
       };
-      instance = new TestCategoryTemplate(
+      instance = new TestCategoryTemplateContext(
         [
           {
             type: 'by',
@@ -518,7 +518,7 @@ describe('CategoryTemplate', () => {
     });
 
     it('should handle repeating targets', () => {
-      instance = new TestCategoryTemplate(
+      instance = new TestCategoryTemplateContext(
         [
           {
             type: 'by',
@@ -548,7 +548,7 @@ describe('CategoryTemplate', () => {
     });
 
     it('should handle existing balance', () => {
-      instance = new TestCategoryTemplate(
+      instance = new TestCategoryTemplateContext(
         [
           {
             type: 'by',
@@ -598,7 +598,7 @@ describe('CategoryTemplate', () => {
           priority: 1,
         },
       ];
-      const instance = new TestCategoryTemplate(
+      const instance = new TestCategoryTemplateContext(
         templates,
         category,
         '2024-01',
@@ -627,7 +627,7 @@ describe('CategoryTemplate', () => {
           priority: 1,
         },
       ];
-      const instance = new TestCategoryTemplate(
+      const instance = new TestCategoryTemplateContext(
         templates,
         category,
         '2024-01',
@@ -654,7 +654,7 @@ describe('CategoryTemplate', () => {
           priority: 1,
         },
       ];
-      const instance = new TestCategoryTemplate(
+      const instance = new TestCategoryTemplateContext(
         templates,
         category,
         '2024-01',
@@ -681,7 +681,7 @@ describe('CategoryTemplate', () => {
           priority: 1,
         },
       ];
-      const instance = new TestCategoryTemplate(
+      const instance = new TestCategoryTemplateContext(
         templates,
         category,
         '2024-01',
@@ -708,7 +708,7 @@ describe('CategoryTemplate', () => {
           directive: 'template',
         },
       ];
-      const instance = new TestCategoryTemplate(
+      const instance = new TestCategoryTemplateContext(
         templates,
         category,
         '2024-01',
@@ -733,7 +733,7 @@ describe('CategoryTemplate', () => {
           directive: 'template',
         },
       ];
-      const instance = new TestCategoryTemplate(
+      const instance = new TestCategoryTemplateContext(
         templates,
         category,
         '2024-01',
@@ -758,7 +758,7 @@ describe('CategoryTemplate', () => {
           directive: 'template',
         },
       ];
-      const instance = new TestCategoryTemplate(
+      const instance = new TestCategoryTemplateContext(
         templates,
         category,
         '2024-01',
