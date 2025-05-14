@@ -23,11 +23,6 @@ import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
-import { useCategories } from '../../hooks/useCategories';
-import { useGlobalPref } from '../../hooks/useGlobalPref';
-import { useLocalPref } from '../../hooks/useLocalPref';
-import { useNavigate } from '../../hooks/useNavigate';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { useDispatch } from '../../redux';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
@@ -37,6 +32,12 @@ import { EnvelopeBudgetProvider } from './envelope/EnvelopeBudgetContext';
 import * as trackingBudget from './tracking/TrackingBudgetComponents';
 import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
 import { prewarmAllMonths, prewarmMonth } from './util';
+
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type TrackingReportComponents = {
   SummaryComponent: typeof trackingBudget.BudgetSummary;
@@ -79,7 +80,7 @@ function BudgetInner(props: BudgetInnerProps) {
     start: startMonth,
     end: startMonth,
   });
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const [maxMonthsPref] = useGlobalPref('maxMonths');
   const maxMonths = maxMonthsPref || 1;
   const [initialized, setInitialized] = useState(false);
@@ -331,7 +332,7 @@ function BudgetInner(props: BudgetInnerProps) {
   }
 
   let table;
-  if (budgetType === 'report') {
+  if (budgetType === 'tracking') {
     table = (
       <TrackingBudgetProvider
         summaryCollapsed={summaryCollapsed}

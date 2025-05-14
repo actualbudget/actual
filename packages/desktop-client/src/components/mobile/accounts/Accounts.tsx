@@ -27,17 +27,12 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import { replaceModal } from 'loot-core/client/modals/modalsSlice';
 import * as queries from 'loot-core/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { moveAccount } from '../../../accounts/accountsSlice';
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
-import { useLocalPref } from '../../../hooks/useLocalPref';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
+import { syncAndDownload } from '../../../app/appSlice';
 import { useDispatch, useSelector } from '../../../redux';
 import { makeAmountFullStyle } from '../../budget/util';
 import { MobilePageHeader, Page } from '../../Page';
@@ -45,6 +40,12 @@ import { type Binding, type SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
+
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type AccountHeaderProps<SheetFieldName extends SheetFields<'account'>> = {
   id: string;

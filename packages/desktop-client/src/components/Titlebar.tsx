@@ -19,7 +19,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { sync } from 'loot-core/client/app/appSlice';
 import * as Platform from 'loot-core/client/platform';
 import * as queries from 'loot-core/client/queries';
 import { listen } from 'loot-core/platform/client/fetch';
@@ -28,10 +27,7 @@ import {
   isElectron,
 } from 'loot-core/shared/environment';
 
-import { useGlobalPref } from '../hooks/useGlobalPref';
-import { useMetadataPref } from '../hooks/useMetadataPref';
-import { useNavigate } from '../hooks/useNavigate';
-import { useSyncedPref } from '../hooks/useSyncedPref';
+import { sync } from '../app/appSlice';
 import { useDispatch } from '../redux';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
@@ -44,6 +40,11 @@ import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar/SidebarProvider';
 import { useSheetValue } from './spreadsheet/useSheetValue';
 import { ThemeSelector } from './ThemeSelector';
+
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 function UncategorizedButton() {
   const count: number | null = useSheetValue(queries.uncategorizedCount());

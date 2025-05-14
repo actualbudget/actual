@@ -4,7 +4,7 @@
   "license": "MIT",
   "description": "An API for Actual",
   "engines": {
-    "node": ">=18.12.0"
+    "node": ">=20"
   },
   "main": "dist/index.js",
   "types": "@types/index.d.ts",

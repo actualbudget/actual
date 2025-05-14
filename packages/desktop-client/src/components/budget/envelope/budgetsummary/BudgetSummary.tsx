@@ -15,8 +15,6 @@ import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { useLocale } from '../../../../hooks/useLocale';
-import { useUndo } from '../../../../hooks/useUndo';
 import { NotesButton } from '../../../NotesButton';
 import { NamespaceContext } from '../../../spreadsheet/NamespaceContext';
 import { useEnvelopeBudget } from '../EnvelopeBudgetContext';
@@ -24,6 +22,9 @@ import { useEnvelopeBudget } from '../EnvelopeBudgetContext';
 import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ToBudget } from './ToBudget';
 import { TotalsList } from './TotalsList';
+
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 
 type BudgetSummaryProps = {
   month: string;

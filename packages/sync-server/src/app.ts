@@ -1,9 +1,9 @@
-import fs from 'node:fs';
+import { createRequire } from 'module';
+import fs, { readFileSync } from 'node:fs';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
-import actuator from 'express-actuator';
 import rateLimit from 'express-rate-limit';
 
 import { bootstrap } from './account-db.js';
@@ -67,7 +67,32 @@ app.get('/mode', (req, res) => {
   res.send(config.get('mode'));
 });
 
-app.use(actuator()); // Provides /health, /metrics, /info
+app.get('/info', (_req, res) => {
+  const require = createRequire(import.meta.url);
+  const packageJsonPath = require.resolve(
+    '@actual-app/sync-server/package.json',
+  );
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+
+  res.status(200).json({
+    build: {
+      name: packageJson.name,
+      description: packageJson.description,
+      version: packageJson.version,
+    },
+  });
+});
+
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'UP' });
+});
+
+app.get('/metrics', (_req, res) => {
+  res.status(200).json({
+    mem: process.memoryUsage(),
+    uptime: process.uptime(),
+  });
+});
 
 // The web frontend
 app.use((req, res, next) => {
@@ -88,7 +113,6 @@ if (process.env.NODE_ENV === 'development') {
       target: 'http://localhost:3001',
       changeOrigin: true,
       ws: true,
-      logLevel: 'debug',
     }),
   );
 } else {
@@ -100,7 +124,7 @@ if (process.env.NODE_ENV === 'development') {
   );
 }
 
-function parseHTTPSConfig(value) {
+function parseHTTPSConfig(value: string) {
   if (value.startsWith('-----BEGIN')) {
     return value;
   }
@@ -108,9 +132,13 @@ function parseHTTPSConfig(value) {
 }
 
 export async function run() {
+  const portVal = config.get('port');
+  const port = typeof portVal === 'string' ? parseInt(portVal) : portVal;
+  const hostname = config.get('hostname');
   const openIdConfig = config?.getProperties()?.openId;
   if (
     openIdConfig?.discoveryURL ||
+    // @ts-expect-error FIXME no types for config yet
     openIdConfig?.issuer?.authorization_endpoint
   ) {
     console.log('OpenID configuration found. Preparing server to use it');
@@ -129,18 +157,17 @@ export async function run() {
   if (config.get('https.key') && config.get('https.cert')) {
     const https = await import('node:https');
     const httpsOptions = {
-      ...config.https,
+      ...config.get('https'),
       key: parseHTTPSConfig(config.get('https.key')),
       cert: parseHTTPSConfig(config.get('https.cert')),
     };
-    https
-      .createServer(httpsOptions, app)
-      .listen(config.get('port'), config.get('hostname'));
+    https.createServer(httpsOptions, app).listen(port, hostname);
   } else {
-    app.listen(config.get('port'), config.get('hostname'));
+    app.listen(port, hostname);
   }
 
   // Signify to any parent process that the server has started. Used in electron desktop app
+  // @ts-ignore-error electron types
   process.parentPort?.postMessage({ type: 'server-started' });
 
   console.log(

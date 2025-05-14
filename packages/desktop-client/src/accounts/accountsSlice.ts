@@ -1,6 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { resetApp } from 'loot-core/client/app/appSlice';
 import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import {
   getAccounts,
@@ -18,6 +17,8 @@ import {
   type SyncServerSimpleFinAccount,
   type SyncServerPluggyAiAccount,
 } from 'loot-core/types/models';
+
+import { resetApp } from '../app/appSlice';
 
 const sliceName = 'account';
 

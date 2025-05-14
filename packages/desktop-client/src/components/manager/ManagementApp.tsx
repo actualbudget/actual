@@ -7,12 +7,11 @@ import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
-import { setAppState } from 'loot-core/client/app/appSlice';
 import { loggedIn } from 'loot-core/client/users/usersSlice';
 
+import { setAppState } from '../../app/appSlice';
 import { ProtectedRoute } from '../../auth/ProtectedRoute';
 import { Permissions } from '../../auth/types';
-import { useMetaThemeColor } from '../../hooks/useMetaThemeColor';
 import { useSelector, useDispatch } from '../../redux';
 import {
   BackToFileListButton,
@@ -32,6 +31,8 @@ import { Error } from './subscribe/Error';
 import { Login } from './subscribe/Login';
 import { OpenIdCallback } from './subscribe/OpenIdCallback';
 import { WelcomeScreen } from './WelcomeScreen';
+
+import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
 
 function Version() {
   const version = useServerVersion();

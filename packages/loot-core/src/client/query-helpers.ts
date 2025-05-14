@@ -3,7 +3,7 @@ import { listen, send } from '../platform/client/fetch';
 import { once } from '../shared/async';
 import { getPrimaryOrderBy, type Query } from '../shared/query';
 
-export async function runQuery(query: Query) {
+export async function aqlQuery(query: Query) {
   return send('query', query.serialize());
 }
 
@@ -146,7 +146,7 @@ export class LiveQuery<TResponse = unknown> {
 
   run = () => {
     this.subscribe();
-    return this.fetchData(() => runQuery(this._query));
+    return this.fetchData(() => aqlQuery(this._query));
   };
 
   static runLiveQuery = <TResponse>(
@@ -205,7 +205,7 @@ export class LiveQuery<TResponse = unknown> {
   };
 
   protected fetchData = async (
-    runQuery: () => Promise<{
+    aqlQuery: () => Promise<{
       data: Data<TResponse>;
       dependencies: string[];
     }>,
@@ -218,7 +218,7 @@ export class LiveQuery<TResponse = unknown> {
     this.inflightRequestId = reqId;
 
     try {
-      const { data, dependencies } = await runQuery();
+      const { data, dependencies } = await aqlQuery();
 
       // Regardless if this request was cancelled or not, save the
       // dependencies. The query can't change so all requests will
@@ -278,7 +278,7 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
   }
 
   private fetchCount = () => {
-    return runQuery(this.query.calculate({ $count: '*' })).then(({ data }) => {
+    return aqlQuery(this.query.calculate({ $count: '*' })).then(({ data }) => {
       this._totalCount = data;
     });
   };
@@ -294,7 +294,7 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
 
       // If data is null, we haven't fetched anything yet so just
       // fetch the first page
-      return runQuery(
+      return aqlQuery(
         this.query.limit(
           this.data == null
             ? this._pageCount
@@ -338,7 +338,7 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
 
       const { field, order } = orderDesc;
 
-      let result = await runQuery(this.query.filter({ id }).select(field));
+      let result = await aqlQuery(this.query.filter({ id }).select(field));
       if (result.data.length === 0) {
         // This row is not part of this set anymore, we can't do
         // this. We stop early to avoid possibly pulling in a ton of
@@ -347,7 +347,7 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
       }
       const fullRow = result.data[0];
 
-      result = await runQuery(
+      result = await aqlQuery(
         this.query.filter({
           [field]: {
             [order === 'asc' ? '$lte' : '$gte']: fullRow[field],
@@ -358,7 +358,7 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
 
       // Load in an extra page to make room for the UI to show some
       // data after it
-      result = await runQuery(
+      result = await aqlQuery(
         this.query
           .filter({
             [field]: {
@@ -391,7 +391,7 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
     const previousData = this.data;
 
     if (!this._hasReachedEnd) {
-      const { data } = await runQuery(
+      const { data } = await aqlQuery(
         this.query.limit(this._pageCount).offset(previousData.length),
       );
 

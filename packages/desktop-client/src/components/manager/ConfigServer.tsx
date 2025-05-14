@@ -9,7 +9,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { saveGlobalPrefs } from 'loot-core/client/prefs/prefsSlice';
 import { loggedIn, signOut } from 'loot-core/client/users/usersSlice';
 import {
@@ -17,13 +16,15 @@ import {
   isElectron,
 } from 'loot-core/shared/environment';
 
-import { useGlobalPref } from '../../hooks/useGlobalPref';
-import { useNavigate } from '../../hooks/useNavigate';
+import { createBudget } from '../../budgets/budgetsSlice';
 import { useDispatch } from '../../redux';
 import { Link } from '../common/Link';
 import { useServerURL, useSetServerURL } from '../ServerContext';
 
 import { Title } from './subscribe/common';
+
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 export function ElectronServerConfig({
   onDoNotUseServer,

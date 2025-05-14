@@ -13,7 +13,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import {
   accountSchedulesQuery,
   SchedulesProvider,
@@ -41,15 +40,17 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { useAccountPreviewTransactions } from '../../../hooks/useAccountPreviewTransactions';
-import { useDateFormat } from '../../../hooks/useDateFormat';
-import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
-import { useNavigate } from '../../../hooks/useNavigate';
+import { syncAndDownload } from '../../../app/appSlice';
 import { useSelector, useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
+
+import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 export function AccountTransactions({
   account,

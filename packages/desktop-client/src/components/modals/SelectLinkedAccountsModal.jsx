@@ -15,12 +15,13 @@ import {
   linkAccountSimpleFin,
   unlinkAccount,
 } from '../../accounts/accountsSlice';
-import { useAccounts } from '../../hooks/useAccounts';
 import { useDispatch } from '../../redux';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { TableHeader, Table, Row, Field } from '../table';
+
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
 
 function useAddBudgetAccountOptions() {
   const { t } = useTranslation();
