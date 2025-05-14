@@ -16,14 +16,13 @@ vi.mock('../schedules/app', async () => {
   };
 });
 
-describe('goalsSchedule', () => {
+describe('runSchedule', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('should return correct budget when recurring schedule set', async () => {
     // Given
-    const scheduleFlag = false;
     const template_lines = [
       {
         type: 'schedule',
@@ -76,7 +75,6 @@ describe('goalsSchedule', () => {
 
     // When
     const result = await runSchedule(
-      scheduleFlag,
       template_lines,
       current_month,
       balance,
@@ -91,12 +89,10 @@ describe('goalsSchedule', () => {
     expect(result.to_budget).toBe(10000);
     expect(result.errors).toHaveLength(0);
     expect(result.remainder).toBe(0);
-    expect(result.scheduleFlag).toBe(true);
   });
 
   it('should return correct budget when yearly recurring schedule set and balance is greater than target', async () => {
     // Given
-    const scheduleFlag = false;
     const template_lines = [
       {
         type: 'schedule',
@@ -149,7 +145,6 @@ describe('goalsSchedule', () => {
 
     // When
     const result = await runSchedule(
-      scheduleFlag,
       template_lines,
       current_month,
       balance,
@@ -164,6 +159,5 @@ describe('goalsSchedule', () => {
     expect(result.to_budget).toBe(1000);
     expect(result.errors).toHaveLength(0);
     expect(result.remainder).toBe(0);
-    expect(result.scheduleFlag).toBe(true);
   });
 });
