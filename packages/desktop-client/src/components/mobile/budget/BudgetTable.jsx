@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { GridList, GridListItem } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -28,15 +22,13 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { AutoTextSize } from 'auto-text-size';
-import memoizeOne from 'memoize-one';
 
-import { collapseModals, pushModal } from 'loot-core/client/modals/modalsSlice';
+import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   envelopeBudget,
   trackingBudget,
   uncategorizedCount,
 } from 'loot-core/client/queries';
-import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import * as monthUtils from 'loot-core/shared/months';
 import { groupById } from 'loot-core/shared/util';
 
@@ -44,14 +36,13 @@ import { useCategories } from '../../../hooks/useCategories';
 import { useLocale } from '../../../hooks/useLocale';
 import { useLocalPref } from '../../../hooks/useLocalPref';
 import { useNavigate } from '../../../hooks/useNavigate';
-import { usePrevious } from '../../../hooks/usePrevious';
+import { useOverspentCategories } from '../../../hooks/useOverspentCategories';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useUndo } from '../../../hooks/useUndo';
 import { useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { CellValue } from '../../spreadsheet/CellValue';
-import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 import { useFormat } from '../../spreadsheet/useFormat';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
@@ -240,7 +231,7 @@ function Saved({ projected, onPress, show3Columns }) {
 
 function BudgetGroups({
   categoryGroups,
-  onEditGroup,
+  onEditCategoryGroup,
   onEditCategory,
   month,
   onBudgetAction,
@@ -248,14 +239,16 @@ function BudgetGroups({
   show3Columns,
   showHiddenCategories,
 }) {
-  const separateGroups = memoizeOne(groups => {
+  const { incomeGroup, expenseGroups } = useMemo(() => {
+    const categoryGroupsToDisplay = categoryGroups.filter(
+      group => !group.hidden || showHiddenCategories,
+    );
     return {
-      incomeGroup: groups.find(group => group.is_income),
-      expenseGroups: groups.filter(group => !group.is_income),
+      incomeGroup: categoryGroupsToDisplay.find(group => group.is_income),
+      expenseGroups: categoryGroupsToDisplay.filter(group => !group.is_income),
     };
-  });
+  }, [categoryGroups, showHiddenCategories]);
 
-  const { incomeGroup, expenseGroups } = separateGroups(categoryGroups);
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
 
@@ -283,10 +276,10 @@ function BudgetGroups({
       style={{ flex: '1 0 auto', overflowY: 'auto', paddingBottom: 15 }}
     >
       <ExpenseGroupList
-        groups={expenseGroups}
+        categoryGroups={expenseGroups}
         showBudgetedColumn={showBudgetedColumn}
         month={month}
-        onEditGroup={onEditGroup}
+        onEditCategoryGroup={onEditCategoryGroup}
         onEditCategory={onEditCategory}
         onBudgetAction={onBudgetAction}
         show3Columns={show3Columns}
@@ -297,10 +290,10 @@ function BudgetGroups({
 
       {incomeGroup && (
         <IncomeGroup
-          group={incomeGroup}
+          categoryGroup={incomeGroup}
           month={month}
           showHiddenCategories={showHiddenCategories}
-          onEditGroup={onEditGroup}
+          onEditCategoryGroup={onEditCategoryGroup}
           onEditCategory={onEditCategory}
           onBudgetAction={onBudgetAction}
           isCollapsed={isCollapsed}
@@ -321,7 +314,7 @@ export function BudgetTable({
   onShowBudgetSummary,
   onBudgetAction,
   onRefresh,
-  onEditGroup,
+  onEditCategoryGroup,
   onEditCategory,
   onOpenBudgetPageMenu,
   onOpenBudgetMonthMenu,
@@ -417,7 +410,7 @@ export function BudgetTable({
             show3Columns={show3Columns}
             showHiddenCategories={showHiddenCategories}
             month={month}
-            onEditGroup={onEditGroup}
+            onEditCategoryGroup={onEditCategoryGroup}
             onEditCategory={onEditCategory}
             onBudgetAction={onBudgetAction}
           />
@@ -574,100 +567,19 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
   const { list: categories, grouped: categoryGroups } = useCategories();
   const categoriesById = groupById(categories);
 
-  const categoryBalanceBindings = useMemo(
-    () =>
-      categories.map(category => [
-        category.id,
-        envelopeBudget.catBalance(category.id),
-      ]),
-    [categories],
-  );
-
-  const categoryCarryoverBindings = useMemo(
-    () =>
-      categories.map(category => [
-        category.id,
-        envelopeBudget.catCarryover(category.id),
-      ]),
-    [categories],
-  );
-
-  const [overspentByCategory, setOverspentByCategory] = useState({});
-  const [carryoverFlagByCategory, setCarryoverFlagByCategory] = useState({});
-  const sheetName = useContext(NamespaceContext);
-  const spreadsheet = useSpreadsheet();
-
-  useEffect(() => {
-    const unbindList = [];
-    for (const [categoryId, carryoverBinding] of categoryCarryoverBindings) {
-      const unbind = spreadsheet.bind(sheetName, carryoverBinding, result => {
-        const isRolloverEnabled = Boolean(result.value);
-        if (isRolloverEnabled) {
-          setCarryoverFlagByCategory(prev => ({
-            ...prev,
-            [categoryId]: result.value,
-          }));
-        } else {
-          // Update to remove covered category.
-          setCarryoverFlagByCategory(prev => {
-            const { [categoryId]: _, ...rest } = prev;
-            return rest;
-          });
-        }
-      });
-      unbindList.push(unbind);
-    }
-
-    return () => {
-      unbindList.forEach(unbind => unbind());
-    };
-  }, [categoryCarryoverBindings, sheetName, spreadsheet]);
-
-  useEffect(() => {
-    const unbindList = [];
-    for (const [categoryId, balanceBinding] of categoryBalanceBindings) {
-      const unbind = spreadsheet.bind(sheetName, balanceBinding, result => {
-        if (result.value < 0) {
-          setOverspentByCategory(prev => ({
-            ...prev,
-            [categoryId]: result.value,
-          }));
-        } else if (result.value === 0) {
-          // Update to remove covered category.
-          setOverspentByCategory(prev => {
-            const { [categoryId]: _, ...rest } = prev;
-            return rest;
-          });
-        }
-      });
-      unbindList.push(unbind);
-    }
-
-    return () => {
-      unbindList.forEach(unbind => unbind());
-    };
-  }, [categoryBalanceBindings, sheetName, spreadsheet]);
-
   const dispatch = useDispatch();
 
-  // Ignore those that has rollover enabled.
-  const overspentCategoryIds = Object.keys(overspentByCategory).filter(
-    id => !carryoverFlagByCategory[id],
-  );
+  const overspentCategories = useOverspentCategories({ month });
 
   const categoryGroupsToShow = useMemo(
     () =>
       categoryGroups
-        .filter(g =>
-          g.categories?.some(c => overspentCategoryIds.includes(c.id)),
-        )
+        .filter(g => overspentCategories.some(c => c.group === g.id))
         .map(g => ({
           ...g,
-          categories:
-            g.categories?.filter(c => overspentCategoryIds.includes(c.id)) ||
-            [],
+          categories: overspentCategories.filter(c => c.group === g.id),
         })),
-    [categoryGroups, overspentCategoryIds],
+    [categoryGroups, overspentCategories],
   );
 
   const { showUndoNotification } = useUndo();
@@ -728,29 +640,7 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
     );
   }, [categoryGroupsToShow, dispatch, month, onOpenCoverCategoryModal, t]);
 
-  const numberOfOverspentCategories = overspentCategoryIds.length;
-  const previousNumberOfOverspentCategories = usePrevious(
-    numberOfOverspentCategories,
-  );
-
-  useEffect(() => {
-    if (numberOfOverspentCategories < previousNumberOfOverspentCategories) {
-      // Re-render the modal when the overspent categories are covered.
-      dispatch(collapseModals({ rootModalName: 'category-autocomplete' }));
-      onOpenCategorySelectionModal();
-
-      // All overspent categories have been covered.
-      if (numberOfOverspentCategories === 0) {
-        dispatch(collapseModals({ rootModalName: 'category-autocomplete' }));
-      }
-    }
-  }, [
-    dispatch,
-    onOpenCategorySelectionModal,
-    numberOfOverspentCategories,
-    previousNumberOfOverspentCategories,
-  ]);
-
+  const numberOfOverspentCategories = overspentCategories.length;
   if (numberOfOverspentCategories === 0) {
     return null;
   }
@@ -792,11 +682,6 @@ function Banners({ month, onBudgetAction }) {
   const { t } = useTranslation();
   const [budgetType = 'rollover'] = useSyncedPref('budgetType');
 
-  // Limit to rollover for now.
-  if (budgetType !== 'rollover') {
-    return null;
-  }
-
   return (
     <GridList
       aria-label={t('Banners')}
@@ -804,7 +689,9 @@ function Banners({ month, onBudgetAction }) {
     >
       <UncategorizedTransactionsBanner />
       <OverspendingBanner month={month} onBudgetAction={onBudgetAction} />
-      <OverbudgetedBanner month={month} onBudgetAction={onBudgetAction} />
+      {budgetType === 'rollover' && (
+        <OverbudgetedBanner month={month} onBudgetAction={onBudgetAction} />
+      )}
     </GridList>
   );
 }

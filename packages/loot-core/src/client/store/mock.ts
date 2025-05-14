@@ -1,9 +1,11 @@
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
-
+// This is temporary until we move all loot-core/client over to desktop-client.
+// eslint-disable-next-line no-restricted-imports
 import {
   name as accountsSliceName,
   reducer as accountsSliceReducer,
-} from '../accounts/accountsSlice';
+} from '@actual-app/web/src/accounts/accountsSlice';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
+
 import {
   name as appSliceName,
   reducer as appSliceReducer,

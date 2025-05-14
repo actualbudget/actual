@@ -528,7 +528,7 @@ export function Budget() {
             onCurrentMonth={onCurrentMonth}
             onBudgetAction={onBudgetAction}
             onRefresh={onRefresh}
-            onEditGroup={onOpenCategoryGroupMenuModal}
+            onEditCategoryGroup={onOpenCategoryGroupMenuModal}
             onEditCategory={onOpenCategoryMenuModal}
             onOpenBudgetPageMenu={onOpenBudgetPageMenu}
             onOpenBudgetMonthMenu={onOpenBudgetMonthMenu}
