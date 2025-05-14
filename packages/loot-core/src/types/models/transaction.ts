@@ -1,3 +1,5 @@
+import { IntegerAmount } from '../../shared/util';
+
 import { AccountEntity } from './account';
 import { CategoryEntity } from './category';
 import { PayeeEntity } from './payee';
@@ -10,7 +12,7 @@ export interface TransactionEntity {
   parent_id?: TransactionEntity['id'];
   account: AccountEntity['id'];
   category?: CategoryEntity['id'];
-  amount: number;
+  amount: IntegerAmount;
   payee?: PayeeEntity['id'];
   notes?: string;
   date: string;
