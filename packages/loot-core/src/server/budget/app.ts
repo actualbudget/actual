@@ -15,7 +15,7 @@ import { undoable } from '../undo';
 import * as actions from './actions';
 import * as budget from './base';
 import * as cleanupActions from './cleanup-template';
-import * as goalActions from './goal-templates';
+import * as goalActions from './goal-template';
 
 export interface BudgetHandlers {
   'budget/budget-amount': typeof actions.setBudget;
