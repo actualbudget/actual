@@ -410,9 +410,10 @@ function isForPreview(schedule: ScheduleEntity, statuses: ScheduleStatuses) {
   );
 }
 
-function getCalculateRunningBalancesFn(options: UseTransactionsProps['options']) {
-  const calculateRunningBalances =
-    options?.calculateRunningBalances ?? false;
+function getCalculateRunningBalancesFn(
+  options: UseTransactionsProps['options'],
+) {
+  const calculateRunningBalances = options?.calculateRunningBalances ?? false;
   return calculateRunningBalances === true
     ? calculateRunningBalancesBottomUp
     : typeof calculateRunningBalances === 'function'
