@@ -247,6 +247,16 @@ function TransactionListWithPreviews({
   readonly accountName: AccountEntity['name'] | string;
 }) {
   const { t } = useTranslation();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const onRefresh = useCallback(() => {
+    if (accountId) {
+      dispatch(syncAndDownload({ accountId }));
+    }
+  }, [accountId, dispatch]);
+
   const baseTransactionsQuery = useCallback(
     () =>
       queries.transactions(accountId).options({ splits: 'all' }).select('*'),
@@ -271,6 +281,12 @@ function TransactionListWithPreviews({
     },
   });
 
+  const { isSearching, search: onSearch } = useTransactionsSearch({
+    updateQuery: setTransactionsQuery,
+    resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
+    dateFormat,
+  });
+
   const { previewTransactions } = useAccountPreviewTransactions({
     accountId: account?.id || '',
   });
@@ -282,6 +298,7 @@ function TransactionListWithPreviews({
     if (
       !isLoading &&
       !isLoadingMore &&
+      !isSearching &&
       runningBalances &&
       showBalances === 'true'
     ) {
@@ -292,25 +309,16 @@ function TransactionListWithPreviews({
         map.set(t.id, lastBalance);
       });
     }
-    return map;
+    return isSearching ? undefined : map;
   }, [
     showBalances,
     transactions,
     runningBalances,
     isLoading,
     isLoadingMore,
+    isSearching,
     previewTransactions,
   ]);
-
-  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  const onRefresh = useCallback(() => {
-    if (accountId) {
-      dispatch(syncAndDownload({ accountId }));
-    }
-  }, [accountId, dispatch]);
 
   useEffect(() => {
     if (accountId) {
@@ -332,12 +340,6 @@ function TransactionListWithPreviews({
       }
     });
   }, [dispatch, reloadTransactions]);
-
-  const { isSearching, search: onSearch } = useTransactionsSearch({
-    updateQuery: setTransactionsQuery,
-    resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
-    dateFormat,
-  });
 
   const onOpenTransaction = useCallback(
     (transaction: TransactionEntity) => {
