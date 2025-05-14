@@ -4,7 +4,7 @@ import { Rule } from '../rules';
 import { getRuleForSchedule } from '../schedules/app';
 
 import { isReflectBudget } from './actions';
-import { goalsSchedule } from './goalsSchedule';
+import { runSchedule } from './schedule-template';
 
 vi.mock('../db');
 vi.mock('./actions');
@@ -75,7 +75,7 @@ describe('goalsSchedule', () => {
     vi.mocked(isReflectBudget).mockReturnValue(false);
 
     // When
-    const result = await goalsSchedule(
+    const result = await runSchedule(
       scheduleFlag,
       template_lines,
       current_month,
@@ -148,7 +148,7 @@ describe('goalsSchedule', () => {
     vi.mocked(isReflectBudget).mockReturnValue(false);
 
     // When
-    const result = await goalsSchedule(
+    const result = await runSchedule(
       scheduleFlag,
       template_lines,
       current_month,

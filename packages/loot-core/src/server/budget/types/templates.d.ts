@@ -38,7 +38,8 @@ interface SpendTemplate extends BaseTemplate {
   amount: number;
   month: string;
   from: string;
-  repeat?: { annual: boolean; repeat?: number };
+  annual?: boolean;
+  repeat?: number;
 }
 
 interface SimpleTemplate extends BaseTemplate {

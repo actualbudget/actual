@@ -12,20 +12,32 @@ import { getRuleForSchedule } from '../schedules/app';
 import { isReflectBudget } from './actions';
 import { ScheduleTemplate, Template } from './types/templates';
 
+type ScheduleTemplateTarget = {
+  name: string;
+  target: number;
+  next_date_string: string;
+  target_interval: number;
+  target_frequency: string;
+  num_months: number;
+  completed: number;
+  full: boolean;
+  repeat: boolean;
+};
+
 async function createScheduleList(
-  template: ScheduleTemplate[],
+  templates: ScheduleTemplate[],
   current_month: string,
   category: CategoryEntity,
 ) {
-  const t = [];
-  const errors = [];
+  const t: Array<ScheduleTemplateTarget> = [];
+  const errors: string[] = [];
 
-  for (let ll = 0; ll < template.length; ll++) {
-    const { id: sid, completed: complete } = await db.first<
+  for (const template of templates) {
+    const { id: sid, completed } = await db.first<
       Pick<db.DbSchedule, 'id' | 'completed'>
     >(
       'SELECT id, completed FROM schedules WHERE TRIM(name) = ? AND tombstone = 0',
-      [template[ll].name.trim()],
+      [template.name],
     );
     const rule = await getRuleForSchedule(sid);
     const conditions = rule.serialize().conditions;
@@ -37,8 +49,8 @@ async function createScheduleList(
           2
         : amountCondition.value;
     // Apply adjustment percentage if specified
-    if (template[ll].adjustment) {
-      const adjustmentFactor = 1 + template[ll].adjustment / 100;
+    if (template.adjustment) {
+      const adjustmentFactor = 1 + template.adjustment / 100;
       scheduleAmount = Math.round(scheduleAmount * adjustmentFactor);
     }
     const { amount: postRuleAmount, subtransactions } = rule.execActions({
@@ -75,7 +87,7 @@ async function createScheduleList(
     );
     if (num_months < 0) {
       //non-repeating schedules could be negative
-      errors.push(`Schedule ${template[ll].name} is in the Past.`);
+      errors.push(`Schedule ${template.name} is in the Past.`);
     } else {
       t.push({
         target,
@@ -83,13 +95,13 @@ async function createScheduleList(
         target_interval,
         target_frequency,
         num_months,
-        completed: complete,
+        completed,
         //started,
-        full: template[ll].full === null ? false : template[ll].full,
+        full: template.full === null ? false : template.full,
         repeat: isRepeating,
-        name: template[ll].name,
+        name: template.name,
       });
-      if (!complete) {
+      if (!completed) {
         if (isRepeating) {
           let monthlyTarget = 0;
           const nextMonth = monthUtils.addMonths(
@@ -139,7 +151,7 @@ async function createScheduleList(
         }
       } else {
         errors.push(
-          `Schedule ${t[ll].name} is not active during the month in question.`,
+          `Schedule ${template.name} is not active during the month in question.`,
         );
       }
     }
@@ -147,22 +159,28 @@ async function createScheduleList(
   return { t: t.filter(c => c.completed === 0), errors };
 }
 
-async function getPayMonthOfTotal(t) {
+async function getPayMonthOfTotal(t: ScheduleTemplateTarget[]) {
   //return the contribution amounts of full or every month type schedules
   let total = 0;
   const schedules = t.filter(c => c.num_months === 0);
-  for (let ll = 0; ll < schedules.length; ll++) {
-    total += schedules[ll].target;
+  for (const schedule of schedules) {
+    total += schedule.target;
   }
   return total;
 }
 
-async function getSinkingContributionTotal(t, remainder, last_month_balance) {
+async function getSinkingContributionTotal(
+  t: ScheduleTemplateTarget[],
+  remainder: number,
+  last_month_balance: number,
+) {
   //return the contribution amount if there is a balance carried in the category
   let total = 0;
-  for (let ll = 0; ll < t.length; ll++) {
+  for (const [index, schedule] of t.entries()) {
     remainder =
-      ll === 0 ? t[ll].target - last_month_balance : t[ll].target - remainder;
+      index === 0
+        ? schedule.target - last_month_balance
+        : schedule.target - remainder;
     let tg = 0;
     if (remainder >= 0) {
       tg = remainder;
@@ -171,17 +189,17 @@ async function getSinkingContributionTotal(t, remainder, last_month_balance) {
       tg = 0;
       remainder = Math.abs(remainder);
     }
-    total += tg / (t[ll].num_months + 1);
+    total += tg / (schedule.num_months + 1);
   }
   return total;
 }
 
-async function getSinkingBaseContributionTotal(t) {
+async function getSinkingBaseContributionTotal(t: ScheduleTemplateTarget[]) {
   //return only the base contribution of each schedule
   let total = 0;
-  for (let ll = 0; ll < t.length; ll++) {
-    let monthlyAmount = t[ll].target / t[ll].target_interval;
-    if (t[ll].target_frequency === 'yearly') {
+  for (const schedule of t) {
+    let monthlyAmount = schedule.target / schedule.target_interval;
+    if (schedule.target_frequency === 'yearly') {
       monthlyAmount /= 12;
     }
     total += monthlyAmount;
@@ -189,17 +207,16 @@ async function getSinkingBaseContributionTotal(t) {
   return total;
 }
 
-async function getSinkingTotal(t) {
+async function getSinkingTotal(t: ScheduleTemplateTarget[]) {
   //sum the total of all upcoming schedules
   let total = 0;
-  for (let ll = 0; ll < t.length; ll++) {
-    total += t[ll].target;
+  for (const schedule of t) {
+    total += schedule.target;
   }
   return total;
 }
 
-export async function goalsSchedule(
-  scheduleFlag: boolean,
+export async function runSchedule(
   template_lines: Template[],
   current_month: string,
   balance: number,
@@ -209,54 +226,51 @@ export async function goalsSchedule(
   errors: string[],
   category: CategoryEntity,
 ) {
-  if (!scheduleFlag) {
-    scheduleFlag = true;
-    const scheduleTemplates = template_lines.filter(t => t.type === 'schedule');
-    //in the case of multiple templates per category, schedules may have wrong priority level
+  const scheduleTemplates = template_lines.filter(t => t.type === 'schedule');
+  //in the case of multiple templates per category, schedules may have wrong priority level
 
-    const t = await createScheduleList(
-      scheduleTemplates,
-      current_month,
-      category,
+  const t = await createScheduleList(
+    scheduleTemplates,
+    current_month,
+    category,
+  );
+  errors = errors.concat(t.errors);
+
+  const isPayMonthOf = c =>
+    c.full ||
+    (c.target_frequency === 'monthly' &&
+      c.target_interval === 1 &&
+      c.num_months === 0) ||
+    (c.target_frequency === 'weekly' &&
+      c.target_interval >= 0 &&
+      c.num_months === 0) ||
+    c.target_frequency === 'daily' ||
+    isReflectBudget();
+
+  const t_payMonthOf = t.t.filter(isPayMonthOf);
+  const t_sinking = t.t
+    .filter(c => !isPayMonthOf(c))
+    .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
+  const totalPayMonthOf = await getPayMonthOfTotal(t_payMonthOf);
+  const totalSinking = await getSinkingTotal(t_sinking);
+  const totalSinkingBaseContribution =
+    await getSinkingBaseContributionTotal(t_sinking);
+
+  if (balance >= totalSinking + totalPayMonthOf) {
+    to_budget += Math.round(totalPayMonthOf + totalSinkingBaseContribution);
+  } else {
+    const totalSinkingContribution = await getSinkingContributionTotal(
+      t_sinking,
+      remainder,
+      last_month_balance,
     );
-    errors = errors.concat(t.errors);
-
-    const isPayMonthOf = c =>
-      c.full ||
-      (c.target_frequency === 'monthly' &&
-        c.target_interval === 1 &&
-        c.num_months === 0) ||
-      (c.target_frequency === 'weekly' &&
-        c.target_interval >= 0 &&
-        c.num_months === 0) ||
-      c.target_frequency === 'daily' ||
-      isReflectBudget();
-
-    const t_payMonthOf = t.t.filter(isPayMonthOf);
-    const t_sinking = t.t
-      .filter(c => !isPayMonthOf(c))
-      .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
-    const totalPayMonthOf = await getPayMonthOfTotal(t_payMonthOf);
-    const totalSinking = await getSinkingTotal(t_sinking);
-    const totalSinkingBaseContribution =
-      await getSinkingBaseContributionTotal(t_sinking);
-
-    if (balance >= totalSinking + totalPayMonthOf) {
-      to_budget += Math.round(totalPayMonthOf + totalSinkingBaseContribution);
+    if (t_sinking.length === 0) {
+      to_budget +=
+        Math.round(totalPayMonthOf + totalSinkingContribution) -
+        last_month_balance;
     } else {
-      const totalSinkingContribution = await getSinkingContributionTotal(
-        t_sinking,
-        remainder,
-        last_month_balance,
-      );
-      if (t_sinking.length === 0) {
-        to_budget +=
-          Math.round(totalPayMonthOf + totalSinkingContribution) -
-          last_month_balance;
-      } else {
-        to_budget += Math.round(totalPayMonthOf + totalSinkingContribution);
-      }
+      to_budget += Math.round(totalPayMonthOf + totalSinkingContribution);
     }
   }
-  return { to_budget, errors, remainder, scheduleFlag };
+  return { to_budget, errors, remainder };
 }
