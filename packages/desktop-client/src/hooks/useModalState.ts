@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 
-import { type Modal, popModal } from 'loot-core/client/modals/modalsSlice';
-
+import { type Modal, popModal } from '../modals/modalsSlice';
 import { useSelector, useDispatch } from '../redux';
 
 type ModalState = {

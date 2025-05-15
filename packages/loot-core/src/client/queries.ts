@@ -134,31 +134,31 @@ export function transactionsSearch(
   });
 }
 
-export function accountBalance(acct: AccountEntity) {
+export function accountBalance(accountId: AccountEntity['id']) {
   return {
-    name: accountParametrizedField('balance')(acct.id),
+    name: accountParametrizedField('balance')(accountId),
     query: q('transactions')
-      .filter({ account: acct.id })
+      .filter({ account: accountId })
       .options({ splits: 'none' })
       .calculate({ $sum: '$amount' }),
   } satisfies Binding<'account', 'balance'>;
 }
 
-export function accountBalanceCleared(acct: AccountEntity) {
+export function accountBalanceCleared(accountId: AccountEntity['id']) {
   return {
-    name: accountParametrizedField('balanceCleared')(acct.id),
+    name: accountParametrizedField('balanceCleared')(accountId),
     query: q('transactions')
-      .filter({ account: acct.id, cleared: true })
+      .filter({ account: accountId, cleared: true })
       .options({ splits: 'none' })
       .calculate({ $sum: '$amount' }),
   } satisfies Binding<'account', 'balanceCleared'>;
 }
 
-export function accountBalanceUncleared(acct: AccountEntity) {
+export function accountBalanceUncleared(accountId: AccountEntity['id']) {
   return {
-    name: accountParametrizedField('balanceUncleared')(acct.id),
+    name: accountParametrizedField('balanceUncleared')(accountId),
     query: q('transactions')
-      .filter({ account: acct.id, cleared: false })
+      .filter({ account: accountId, cleared: false })
       .options({ splits: 'none' })
       .calculate({ $sum: '$amount' }),
   } satisfies Binding<'account', 'balanceUncleared'>;
@@ -200,12 +200,15 @@ export function closedAccountBalance() {
   } satisfies Binding<'account', 'closed-accounts-balance'>;
 }
 
-export function categoryBalance(category: CategoryEntity, month: string) {
+export function categoryBalance(
+  categoryId: CategoryEntity['id'],
+  month: string,
+) {
   return {
-    name: categoryParametrizedField('balance')(category.id),
+    name: categoryParametrizedField('balance')(categoryId),
     query: q('transactions')
       .filter({
-        category: category.id,
+        category: categoryId,
         date: { $transform: '$month', $eq: month },
       })
       .options({ splits: 'inline' })
@@ -214,14 +217,14 @@ export function categoryBalance(category: CategoryEntity, month: string) {
 }
 
 export function categoryBalanceCleared(
-  category: CategoryEntity,
+  categoryId: CategoryEntity['id'],
   month: string,
 ) {
   return {
-    name: categoryParametrizedField('balanceCleared')(category.id),
+    name: categoryParametrizedField('balanceCleared')(categoryId),
     query: q('transactions')
       .filter({
-        category: category.id,
+        category: categoryId,
         date: { $transform: '$month', $eq: month },
         cleared: true,
       })
@@ -231,14 +234,14 @@ export function categoryBalanceCleared(
 }
 
 export function categoryBalanceUncleared(
-  category: CategoryEntity,
+  categoryId: CategoryEntity['id'],
   month: string,
 ) {
   return {
-    name: categoryParametrizedField('balanceUncleared')(category.id),
+    name: categoryParametrizedField('balanceUncleared')(categoryId),
     query: q('transactions')
       .filter({
-        category: category.id,
+        category: categoryId,
         date: { $transform: '$month', $eq: month },
         cleared: false,
       })

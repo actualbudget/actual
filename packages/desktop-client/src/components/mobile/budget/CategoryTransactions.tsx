@@ -134,9 +134,9 @@ function TransactionListWithPreviews({
     [navigate],
   );
 
-  const balance = queries.categoryBalance(category, month);
-  const balanceCleared = queries.categoryBalanceCleared(category, month);
-  const balanceUncleared = queries.categoryBalanceUncleared(category, month);
+  const balance = queries.categoryBalance(category.id, month);
+  const balanceCleared = queries.categoryBalanceCleared(category.id, month);
+  const balanceUncleared = queries.categoryBalanceUncleared(category.id, month);
 
   const { previewTransactions } = useCategoryPreviewTransactions({
     categoryId: category.id,
@@ -144,8 +144,7 @@ function TransactionListWithPreviews({
   });
 
   const transactionsToDisplay = !isSearching
-    ? // Do not render child transactions in the list, unless searching
-      previewTransactions.concat(transactions.filter(t => !t.is_child))
+    ? previewTransactions.concat(transactions)
     : transactions;
 
   return (

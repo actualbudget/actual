@@ -6,20 +6,23 @@ import {
   closeAndDownloadBudget,
   uploadBudget,
 } from '@actual-app/web/src/budgets/budgetsSlice';
+import { pushModal } from '@actual-app/web/src/modals/modalsSlice';
+import {
+  addNotification,
+  type Notification,
+} from '@actual-app/web/src/notifications/notificationsSlice';
+import { loadPrefs } from '@actual-app/web/src/prefs/prefsSlice';
+import {
+  getAccounts,
+  getCategories,
+  getPayees,
+} from '@actual-app/web/src/queries/queriesSlice';
+import { type AppStore } from '@actual-app/web/src/redux/store';
+import { signOut } from '@actual-app/web/src/users/usersSlice';
 /* eslint-enable no-restricted-imports */
 import { t } from 'i18next';
 
 import { listen, send } from '../platform/client/fetch';
-
-import { pushModal } from './modals/modalsSlice';
-import {
-  addNotification,
-  type Notification,
-} from './notifications/notificationsSlice';
-import { loadPrefs } from './prefs/prefsSlice';
-import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
-import { type AppStore } from './store';
-import { signOut } from './users/usersSlice';
 
 export function listenForSyncEvent(store: AppStore) {
   // TODO: Should this run on mobile too?

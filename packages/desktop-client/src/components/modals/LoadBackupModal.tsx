@@ -7,11 +7,11 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { send, listen } from 'loot-core/platform/client/fetch';
 import { type Backup } from 'loot-core/server/budgetfiles/backups';
 
 import { loadBackup, makeBackup } from '../../budgets/budgetsSlice';
+import { type Modal as ModalType } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { Row, Cell } from '../table';

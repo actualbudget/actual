@@ -8,10 +8,10 @@ import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 
-import { popModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { type PayeeEntity } from 'loot-core/types/models';
 
+import { popModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { DisplayId } from '../util/DisplayId';

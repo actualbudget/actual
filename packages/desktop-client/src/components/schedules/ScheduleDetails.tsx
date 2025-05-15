@@ -10,11 +10,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { t } from 'i18next';
 
-import {
-  type Modal as ModalType,
-  pushModal,
-} from 'loot-core/client/modals/modalsSlice';
-import { getPayeesById } from 'loot-core/client/queries/queriesSlice';
 import { aqlQuery, liveQuery } from 'loot-core/client/query-helpers';
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -27,6 +22,8 @@ import {
   type RecurConfig,
 } from 'loot-core/types/models';
 
+import { type Modal as ModalType, pushModal } from '../../modals/modalsSlice';
+import { getPayeesById } from '../../queries/queriesSlice';
 import { useDispatch } from '../../redux';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';

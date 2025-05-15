@@ -42,13 +42,6 @@ import {
 } from 'date-fns';
 
 import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
-import {
-  getAccountsById,
-  getPayeesById,
-  getCategoriesById,
-} from 'loot-core/client/queries/queriesSlice';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { currentDay } from 'loot-core/shared/months';
 import * as monthUtils from 'loot-core/shared/months';
@@ -69,6 +62,13 @@ import {
   amountToCurrency,
 } from 'loot-core/shared/util';
 
+import { pushModal } from '../../modals/modalsSlice';
+import { addNotification } from '../../notifications/notificationsSlice';
+import {
+  getAccountsById,
+  getPayeesById,
+  getCategoriesById,
+} from '../../queries/queriesSlice';
 import { useDispatch } from '../../redux';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';

@@ -4,15 +4,15 @@ import {
   type PayloadAction,
 } from '@reduxjs/toolkit';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
-import { loadPrefs } from 'loot-core/client/prefs/prefsSlice';
-import { createAppAsyncThunk } from 'loot-core/client/redux';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUploadError } from 'loot-core/shared/errors';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type AtLeastOne } from 'loot-core/types/util';
 
 import { syncAccounts } from '../accounts/accountsSlice';
+import { pushModal } from '../modals/modalsSlice';
+import { loadPrefs } from '../prefs/prefsSlice';
+import { createAppAsyncThunk } from '../redux';
 
 const sliceName = 'app';
 

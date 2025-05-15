@@ -6,11 +6,11 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { useSchedules } from 'loot-core/client/data-hooks/schedules';
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 import { type ScheduleEntity } from 'loot-core/types/models';
 
+import { pushModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { Search } from '../common/Search';
 import { Page } from '../Page';

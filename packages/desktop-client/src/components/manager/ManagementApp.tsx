@@ -7,12 +7,11 @@ import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
-import { loggedIn } from 'loot-core/client/users/usersSlice';
-
 import { setAppState } from '../../app/appSlice';
 import { ProtectedRoute } from '../../auth/ProtectedRoute';
 import { Permissions } from '../../auth/types';
 import { useSelector, useDispatch } from '../../redux';
+import { loggedIn } from '../../users/usersSlice';
 import {
   BackToFileListButton,
   UserDirectoryPage,
