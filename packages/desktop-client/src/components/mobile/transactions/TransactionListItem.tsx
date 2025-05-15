@@ -31,14 +31,14 @@ import {
 
 import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
-import { integerToCurrency } from 'loot-core/shared/util';
+import { type IntegerAmount, integerToCurrency } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type TransactionEntity,
 } from 'loot-core/types/models';
 
 import { useSelector } from '../../../redux';
-import { makeAmountFullStyle } from '../../budget/util';
+import { makeAmountFullStyle, makeBalanceAmountStyle } from '../../budget/util';
 
 import { lookupName, Status } from './TransactionEdit';
 
@@ -285,7 +285,7 @@ export function TransactionListItem({
                   </TextOneLine>
                 )}
               </View>
-              <View style={{ justifyContent: 'center' }}>
+              <View style={{ textAlign: 'right' }}>
                 <Text
                   style={{
                     ...textStyle,
@@ -299,7 +299,7 @@ export function TransactionListItem({
                     style={{
                       fontSize: 11,
                       fontWeight: '400',
-                      ...makeAmountFullStyle(balance || 0),
+                      ...makeBalanceAmountStyle(balance || 0),
                     }}
                   >
                     {integerToCurrency(balance)}

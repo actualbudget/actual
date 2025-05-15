@@ -154,6 +154,7 @@ function TransactionListWithPreviews({
       balance={balance}
       balanceCleared={balanceCleared}
       balanceUncleared={balanceUncleared}
+      runningBalances={undefined}
       searchPlaceholder={`Search ${category.name}`}
       onSearch={onSearch}
       isLoadingMore={isLoadingMore}
