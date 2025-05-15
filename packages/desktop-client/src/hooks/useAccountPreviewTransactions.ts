@@ -14,10 +14,9 @@ type UseAccountPreviewTransactionsProps = {
   accountId?: AccountEntity['id'] | undefined;
 };
 
-type UseAccountPreviewTransactionsResult = {
-  isLoading: ReturnType<typeof usePreviewTransactions>['isLoading'];
-  previewTransactions: ReturnType<typeof usePreviewTransactions>['data'];
-};
+type UseAccountPreviewTransactionsResult = ReturnType<
+  typeof usePreviewTransactions
+>;
 
 /**
  * Preview transactions for a given account. This will invert the payees, accounts,
@@ -26,19 +25,28 @@ type UseAccountPreviewTransactionsResult = {
 export function useAccountPreviewTransactions({
   accountId,
 }: UseAccountPreviewTransactionsProps): UseAccountPreviewTransactionsResult {
-  const { data: originalPreviewTransactions, isLoading } =
-    usePreviewTransactions();
+  const {
+    previewTransactions: allPreviewTransactions,
+    runningBalances: allRunningBalances,
+    isLoading,
+    error,
+  } = usePreviewTransactions();
   const accounts = useAccounts();
   const payees = usePayees();
 
-  const previewTransactions = useMemo(() => {
+  return useMemo(() => {
     if (!accountId) {
-      return originalPreviewTransactions;
+      return {
+        previewTransactions: [],
+        runningBalances: new Map(),
+        isLoading: false,
+        error: undefined,
+      };
     }
 
-    return accountPreview({
+    const previewTransactions = accountPreview({
       accountId,
-      transactions: originalPreviewTransactions,
+      transactions: allPreviewTransactions,
       getPayeeByTransferAccount: transferAccountId =>
         payees.find(p => p.transfer_acct === transferAccountId),
       getTransferAccountByPayee: payeeId =>
@@ -46,12 +54,30 @@ export function useAccountPreviewTransactions({
           a => a.id === payees.find(p => p.id === payeeId)?.transfer_acct,
         ),
     });
-  }, [accountId, accounts, originalPreviewTransactions, payees]);
 
-  return {
+    const transactionIds = new Set(previewTransactions.map(t => t.id));
+    const runningBalances = allRunningBalances;
+    for (const transactionId of runningBalances.keys()) {
+      if (!transactionIds.has(transactionId)) {
+        runningBalances.delete(transactionId);
+      }
+    }
+
+    return {
+      isLoading,
+      previewTransactions,
+      runningBalances,
+      error,
+    };
+  }, [
+    accountId,
+    accounts,
+    allPreviewTransactions,
+    allRunningBalances,
+    error,
     isLoading,
-    previewTransactions,
-  };
+    payees,
+  ]);
 }
 
 type AccountPreviewProps = {

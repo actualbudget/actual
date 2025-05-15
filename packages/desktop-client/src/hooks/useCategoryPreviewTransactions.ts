@@ -12,15 +12,24 @@ type UseCategoryPreviewTransactionsProps = {
   month: string;
 };
 
+type UseCategoryPreviewTransactionsResult = ReturnType<
+  typeof usePreviewTransactions
+>;
+
 export function useCategoryPreviewTransactions({
   categoryId,
   month,
-}: UseCategoryPreviewTransactionsProps) {
+}: UseCategoryPreviewTransactionsProps): UseCategoryPreviewTransactionsResult {
   const category = useCategory(categoryId);
   const { schedules } = useCategoryScheduleGoalTemplates({
     category,
   });
-  const { data: allPreviewTransactions, isLoading } = usePreviewTransactions();
+  const {
+    previewTransactions: allPreviewTransactions,
+    runningBalances: allRunningBalances,
+    isLoading,
+    error,
+  } = usePreviewTransactions();
 
   return useMemo(() => {
     const schedulesToPreview = new Set(
@@ -32,16 +41,38 @@ export function useCategoryPreviewTransactions({
     if (!category || !schedulesToPreview.size) {
       return {
         previewTransactions: [],
+        runningBalances: new Map(),
         isLoading: false,
+        error: undefined,
       };
     }
 
+    const previewTransactions = allPreviewTransactions.filter(
+      transaction =>
+        transaction.schedule && schedulesToPreview.has(transaction.schedule),
+    );
+
+    const transactionIds = new Set(previewTransactions.map(t => t.id));
+    const runningBalances = allRunningBalances;
+    for (const transactionId of runningBalances.keys()) {
+      if (!transactionIds.has(transactionId)) {
+        runningBalances.delete(transactionId);
+      }
+    }
+
     return {
-      previewTransactions: allPreviewTransactions.filter(
-        transaction =>
-          transaction.schedule && schedulesToPreview.has(transaction.schedule),
-      ),
+      previewTransactions,
+      runningBalances,
       isLoading,
+      error,
     };
-  }, [allPreviewTransactions, category, isLoading, month, schedules]);
+  }, [
+    allPreviewTransactions,
+    allRunningBalances,
+    category,
+    error,
+    isLoading,
+    month,
+    schedules,
+  ]);
 }

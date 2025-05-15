@@ -265,7 +265,7 @@ function TransactionListWithPreviews({
   });
 
   const { previewTransactions } = useAccountPreviewTransactions({
-    accountId: account?.id || '',
+    accountId: account?.id,
   });
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
