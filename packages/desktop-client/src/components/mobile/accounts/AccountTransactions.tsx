@@ -22,11 +22,6 @@ import {
   useTransactionsSearch,
 } from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
-import {
-  markAccountRead,
-  reopenAccount,
-  updateAccount,
-} from 'loot-core/client/queries/queriesSlice';
 import { listen, send } from 'loot-core/platform/client/fetch';
 import { type Query } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
@@ -41,6 +36,11 @@ import {
   openAccountCloseModal,
   pushModal,
 } from '../../../modals/modalsSlice';
+import {
+  markAccountRead,
+  reopenAccount,
+  updateAccount,
+} from '../../../queries/queriesSlice';
 import { useSelector, useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
