@@ -288,7 +288,7 @@ function TransactionListWithPreviews({
   });
 
   const { previewTransactions } = useAccountPreviewTransactions({
-    accountId: account?.id || '',
+    accountId: account?.id,
   });
 
   const allBalances = useMemo(() => {
@@ -443,9 +443,9 @@ function queriesFromAccountId(
     default:
       return entity
         ? {
-            balance: queries.accountBalance(entity),
-            cleared: queries.accountBalanceCleared(entity),
-            uncleared: queries.accountBalanceUncleared(entity),
+            balance: queries.accountBalance(entity.id),
+            cleared: queries.accountBalanceCleared(entity.id),
+            uncleared: queries.accountBalanceUncleared(entity.id),
           }
         : { balance: queries.allAccountBalance() };
   }
