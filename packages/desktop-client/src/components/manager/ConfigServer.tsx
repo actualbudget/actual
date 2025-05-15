@@ -8,6 +8,7 @@ import { Label } from '@actual-app/components/label';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { css } from '@emotion/css';
 
 import {
   isNonProductionEnvironment,
@@ -25,7 +26,6 @@ import { Title } from './subscribe/common';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { saveGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
-import { css } from '@emotion/css';
 
 export function ElectronServerConfig({
   onDoNotUseServer,
