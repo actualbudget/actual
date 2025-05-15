@@ -7,7 +7,7 @@ import debounce from 'lodash/debounce';
 
 import { send } from '../../platform/client/fetch';
 import { currentDay, addDays, parseDate } from '../../shared/months';
-import { type QueryState, type Query } from '../../shared/query';
+import { type Query } from '../../shared/query';
 import {
   getScheduledAmount,
   extractScheduleConds,
@@ -25,6 +25,16 @@ import * as queries from '../queries';
 import { type PagedQuery, pagedQuery } from '../query-helpers';
 
 import { type ScheduleStatuses, useCachedSchedules } from './schedules';
+
+// Mirrors the `splits` AQL option from the server
+type TransactionSplitsOption = 'all' | 'inline' | 'grouped' | 'none';
+
+type CalculateRunningBalancesOption =
+  | ((
+      transactions: TransactionEntity[],
+      splits: TransactionSplitsOption,
+    ) => Map<TransactionEntity['id'], IntegerAmount>)
+  | boolean;
 
 type UseTransactionsProps = {
   /**
@@ -58,12 +68,7 @@ type UseTransactionsProps = {
      * a custom `calculateRunningBalances` function should be used instead.
      * @default false
      */
-    calculateRunningBalances?:
-      | ((
-          transactions: TransactionEntity[],
-          queryState: QueryState,
-        ) => Map<TransactionEntity['id'], IntegerAmount>)
-      | boolean;
+    calculateRunningBalances?: CalculateRunningBalancesOption;
   };
 };
 
@@ -150,9 +155,16 @@ export function useTransactions({
         if (!isUnmounted) {
           setTransactions(data);
 
-          const calculateFn = getCalculateRunningBalancesFn(optionsRef.current);
+          const calculateFn = getCalculateRunningBalancesFn(
+            optionsRef.current?.calculateRunningBalances,
+          );
           if (calculateFn) {
-            setRunningBalances(calculateFn(data, query.state));
+            setRunningBalances(
+              calculateFn(
+                data,
+                query.state.tableOptions?.splits as TransactionSplitsOption,
+              ),
+            );
           }
 
           setIsLoading(false);
@@ -200,13 +212,27 @@ export function useTransactions({
   };
 }
 
+type UsePreviewTransactionsProps = {
+  filter?: (schedule: ScheduleEntity) => boolean;
+  options?: {
+    /**
+     * The starting balance to start the running balance calculation from.
+     */
+    startingBalance?: IntegerAmount;
+  };
+};
+
 type UsePreviewTransactionsResult = {
-  data: ReadonlyArray<TransactionEntity>;
+  previewTransactions: ReadonlyArray<TransactionEntity>;
+  runningBalances: Map<TransactionEntity['id'], IntegerAmount>;
   isLoading: boolean;
   error?: Error;
 };
 
-export function usePreviewTransactions(): UsePreviewTransactionsResult {
+export function usePreviewTransactions({
+  filter,
+  options,
+}: UsePreviewTransactionsProps = {}): UsePreviewTransactionsResult {
   const [previewTransactions, setPreviewTransactions] = useState<
     TransactionEntity[]
   >([]);
@@ -218,18 +244,26 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
   } = useCachedSchedules();
   const [isLoading, setIsLoading] = useState(isSchedulesLoading);
   const [error, setError] = useState<Error | undefined>(undefined);
+  const [runningBalances, setRunningBalances] = useState<
+    Map<TransactionEntity['id'], IntegerAmount>
+  >(new Map());
 
   const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
+
+  // We don't want to re-render if options changes.
+  // Putting options in a ref will prevent that and
+  // allow us to use the latest options on next render.
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
 
   const scheduleTransactions = useMemo(() => {
     if (isSchedulesLoading) {
       return [];
     }
 
-    // Kick off an async rules application
-    const schedulesForPreview = schedules.filter(s =>
-      isForPreview(s, statuses),
-    );
+    const schedulesForPreview = schedules
+      .filter(s => isForPreview(s, statuses))
+      .filter(filter ? filter : () => true);
 
     const today = d.startOfDay(parseDate(currentDay()));
 
@@ -297,7 +331,7 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
           parseDate(b.date).getTime() - parseDate(a.date).getTime() ||
           a.amount - b.amount,
       );
-  }, [isSchedulesLoading, schedules, statuses, upcomingLength]);
+  }, [filter, isSchedulesLoading, schedules, statuses, upcomingLength]);
 
   useEffect(() => {
     let isUnmounted = false;
@@ -313,6 +347,7 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
 
     Promise.all(
       scheduleTransactions.map(transaction =>
+        // Kick off an async rules application
         send('rules-run', { transaction }),
       ),
     )
@@ -331,7 +366,22 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
             ),
           }));
 
-          setPreviewTransactions(ungroupTransactions(withDefaults));
+          const ungroupedTransactions = ungroupTransactions(withDefaults);
+          setPreviewTransactions(ungroupedTransactions);
+
+          setRunningBalances(
+            // We always use the bottom up calculation for preview transactions
+            // because the hook controls the order of the transactions. We don't
+            // need to provide a custom way for consumers to calculate the running
+            // balances, at least as of writing.
+            calculateRunningBalancesBottomUp(
+              ungroupedTransactions,
+              // Preview transactions are behaves like 'all' splits
+              'all',
+              optionsRef.current?.startingBalance,
+            ),
+          );
+
           setIsLoading(false);
         }
       })
@@ -349,7 +399,8 @@ export function usePreviewTransactions(): UsePreviewTransactionsResult {
 
   const returnError = error || scheduleQueryError;
   return {
-    data: previewTransactions,
+    previewTransactions,
+    runningBalances,
     isLoading: isLoading || isSchedulesLoading,
     ...(returnError && { error: returnError }),
   };
@@ -411,9 +462,8 @@ function isForPreview(schedule: ScheduleEntity, statuses: ScheduleStatuses) {
 }
 
 function getCalculateRunningBalancesFn(
-  options: UseTransactionsProps['options'],
+  calculateRunningBalances: CalculateRunningBalancesOption = false,
 ) {
-  const calculateRunningBalances = options?.calculateRunningBalances ?? false;
   return calculateRunningBalances === true
     ? calculateRunningBalancesBottomUp
     : typeof calculateRunningBalances === 'function'
@@ -421,14 +471,14 @@ function getCalculateRunningBalancesFn(
       : undefined;
 }
 
-function calculateRunningBalancesBottomUp(
+export function calculateRunningBalancesBottomUp(
   transactions: TransactionEntity[],
-  queryState: QueryState,
+  splits: TransactionSplitsOption,
+  startingBalance: IntegerAmount = 0,
 ) {
   return (
     transactions
       .filter(t => {
-        const splits = queryState.tableOptions?.splits;
         switch (splits) {
           case 'all':
             // Only calculate parent/non-split amounts
@@ -445,8 +495,8 @@ function calculateRunningBalancesBottomUp(
         const previousTransactionIndex = index + 1;
         if (previousTransactionIndex >= arr.length) {
           // This is the last transaction in the list,
-          // so we set the running balance to the amount of the transaction
-          acc.set(transaction.id, transaction.amount);
+          // so we set the running balance to the starting balance + the amount of the transaction
+          acc.set(transaction.id, startingBalance + transaction.amount);
           return acc;
         }
         const previousTransaction = arr[previousTransactionIndex];

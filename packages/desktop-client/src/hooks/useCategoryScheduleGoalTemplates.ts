@@ -73,12 +73,22 @@ export function useCategoryScheduleGoalTemplates({
     const schedules = allSchedules.filter(s =>
       scheduleGoalDefinitions.some(g => g.name === s.name),
     );
-    const statuses = new Map(
-      [...allStatuses].filter(([id]) => schedules.some(s => s.id === id)),
-    );
-    const statusLabels = new Map(
-      [...allStatusLabels].filter(([id]) => schedules.some(s => s.id === id)),
-    );
+
+    const scheduleIds = new Set(schedules.map(s => s.id));
+
+    const statuses = allStatuses;
+    for (const scheduleId of statuses.keys()) {
+      if (!scheduleIds.has(scheduleId)) {
+        statuses.delete(scheduleId);
+      }
+    }
+
+    const statusLabels = allStatusLabels;
+    for (const scheduleId of statusLabels.keys()) {
+      if (!scheduleIds.has(scheduleId)) {
+        statusLabels.delete(scheduleId);
+      }
+    }
 
     return {
       schedules,

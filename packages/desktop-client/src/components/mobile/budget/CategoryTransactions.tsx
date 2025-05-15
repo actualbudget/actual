@@ -134,9 +134,9 @@ function TransactionListWithPreviews({
     [navigate],
   );
 
-  const balance = queries.categoryBalance(category, month);
-  const balanceCleared = queries.categoryBalanceCleared(category, month);
-  const balanceUncleared = queries.categoryBalanceUncleared(category, month);
+  const balance = queries.categoryBalance(category.id, month);
+  const balanceCleared = queries.categoryBalanceCleared(category.id, month);
+  const balanceUncleared = queries.categoryBalanceUncleared(category.id, month);
 
   const { previewTransactions } = useCategoryPreviewTransactions({
     categoryId: category.id,

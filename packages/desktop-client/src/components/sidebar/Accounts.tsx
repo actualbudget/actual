@@ -123,7 +123,7 @@ export function Accounts() {
             failed={failedAccounts.has(account.id)}
             updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
-            query={queries.accountBalance(account)}
+            query={queries.accountBalance(account.id)}
             onDragChange={onDragChange}
             onDrop={onReorder}
             outerStyle={makeDropPadding(i)}
@@ -154,7 +154,7 @@ export function Accounts() {
             failed={failedAccounts.has(account.id)}
             updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
-            query={queries.accountBalance(account)}
+            query={queries.accountBalance(account.id)}
             onDragChange={onDragChange}
             onDrop={onReorder}
             outerStyle={makeDropPadding(i)}
@@ -181,7 +181,7 @@ export function Accounts() {
               name={account.name}
               account={account}
               to={getAccountPath(account)}
-              query={queries.accountBalance(account)}
+              query={queries.accountBalance(account.id)}
               onDragChange={onDragChange}
               onDrop={onReorder}
             />
