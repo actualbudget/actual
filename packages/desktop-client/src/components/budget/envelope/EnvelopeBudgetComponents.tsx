@@ -567,6 +567,7 @@ export function IncomeCategoryMonth({
         name="received"
         width="flex"
         truncate={false}
+        ref={incomeMenuTriggerRef}
         style={{
           textAlign: 'right',
           ...(isLast && { borderBottomWidth: 0 }),
