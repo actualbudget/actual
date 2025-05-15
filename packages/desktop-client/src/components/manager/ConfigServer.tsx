@@ -22,7 +22,6 @@ import { useServerURL, useSetServerURL } from '../ServerContext';
 
 import { Title } from './subscribe/common';
 
-import { saveGlobalPrefs } from '@actual-app/web/src/prefs/prefsSlice';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { saveGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
