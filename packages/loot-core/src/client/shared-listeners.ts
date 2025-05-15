@@ -17,13 +17,13 @@ import {
   getCategories,
   getPayees,
 } from '@actual-app/web/src/queries/queriesSlice';
+import { signOut } from '@actual-app/web/src/users/usersSlice';
 /* eslint-enable no-restricted-imports */
 import { t } from 'i18next';
 
 import { listen, send } from '../platform/client/fetch';
 
 import { type AppStore } from './store';
-import { signOut } from './users/usersSlice';
 
 export function listenForSyncEvent(store: AppStore) {
   // TODO: Should this run on mobile too?

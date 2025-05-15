@@ -29,6 +29,10 @@ import {
   name as queriesSliceName,
   reducer as queriesSliceReducer,
 } from '@actual-app/web/src/queries/queriesSlice';
+import {
+  name as usersSliceName,
+  reducer as usersSliceReducer,
+} from '@actual-app/web/src/users/usersSlice';
 /* eslint-enable no-restricted-imports */
 import {
   combineReducers,
@@ -36,11 +40,6 @@ import {
   createListenerMiddleware,
   isRejected,
 } from '@reduxjs/toolkit';
-
-import {
-  name as usersSliceName,
-  reducer as usersSliceReducer,
-} from '../users/usersSlice';
 
 const rootReducer = combineReducers({
   [accountsSliceName]: accountsSliceReducer,
