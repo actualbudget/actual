@@ -80,7 +80,7 @@ type TransactionListWithBalancesProps = {
   balanceUncleared?:
     | Binding<'category', 'balanceUncleared'>
     | Binding<'account', 'balanceUncleared'>;
-  runningBalances?: Map<TransactionEntity['id'], number>;
+  runningBalances: Map<TransactionEntity['id'], number>;
   searchPlaceholder: string;
   onSearch: (searchText: string) => void;
   isLoadingMore: boolean;
