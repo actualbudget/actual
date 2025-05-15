@@ -23,7 +23,10 @@ import { useCachedSchedules } from './useCachedSchedules';
 import { type ScheduleStatuses } from './useSchedules';
 import { useSyncedPref } from './useSyncedPref';
 
-import { pagedQuery, type PagedQuery } from '@desktop-client/queries/pagedQuery';
+import {
+  pagedQuery,
+  type PagedQuery,
+} from '@desktop-client/queries/pagedQuery';
 
 // Mirrors the `splits` AQL option from the server
 type TransactionSplitsOption = 'all' | 'inline' | 'grouped' | 'none';
