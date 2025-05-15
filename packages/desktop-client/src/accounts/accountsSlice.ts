@@ -1,7 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { createAppAsyncThunk } from 'loot-core/client/redux';
-import { type AppDispatch } from 'loot-core/client/store';
 import { send } from 'loot-core/platform/client/fetch';
 import { type SyncResponseWithErrors } from 'loot-core/server/accounts/app';
 import {
@@ -19,6 +17,8 @@ import {
   getPayees,
   setNewTransactions,
 } from '../queries/queriesSlice';
+import { createAppAsyncThunk } from '../redux';
+import { type AppDispatch } from '../redux/store';
 
 const sliceName = 'account';
 
