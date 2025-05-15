@@ -1,4 +1,3 @@
-import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
@@ -23,15 +22,12 @@ export function IncomeMenu({
   onShowActivity,
   onClose = () => {},
 }: IncomeMenuProps) {
-  const ref = useRef<HTMLSpanElement>(null);
-
   const { t } = useTranslation();
   const carryover = useEnvelopeSheetValue(
     envelopeBudget.catCarryover(categoryId),
   );
 
   return (
-    //<span tabIndex={-1} ref={ref}>
     <span>
       <Menu
         onMenuSelect={name => {
