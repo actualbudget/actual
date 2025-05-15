@@ -38,6 +38,7 @@ import { makeAmountGrey } from '../util';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
+import { IncomeMenu } from './IncomeMenu';
 
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
@@ -551,9 +552,14 @@ export function IncomeCategoryMonth({
   onShowActivity,
   onBudgetAction,
 }: IncomeCategoryMonthProps) {
-  const carryover = useEnvelopeSheetValue(
-    envelopeBudget.catCarryover(category.id),
-  );
+  const incomeMenuTriggerRef = useRef(null);
+  const {
+    setMenuOpen: setIncomeMenuOpen,
+    menuOpen: incomeMenuOpen,
+    handleContextMenu: handleIncomeContextMenu,
+    resetPosition: resetIncomePosition,
+    position: incomePosition,
+  } = useContextMenu();
 
   return (
     <View style={{ flex: 1 }}>
@@ -576,7 +582,7 @@ export function IncomeCategoryMonth({
         }}
       >
         <View
-          name="received with button"
+          name="received"
           style={{
             display: 'flex',
             flexDirection: 'row',
@@ -585,36 +591,20 @@ export function IncomeCategoryMonth({
             position: 'relative',
           }}
         >
-          <View style={{ flexShrink: 0, marginRight: 10 }}>
-            <Button
-              variant="bare"
-              className="hover-visible"
-              onPress={() => {
-                if (!carryover) {
-                  onBudgetAction(month, 'reset-hold');
-                }
-                onBudgetAction(month, 'carryover', {
-                  category: category.id,
-                  flag: !carryover,
-                });
-              }}
-              style={{
-                padding: 3,
-                border: `1px solid ${theme.buttonMenuBorder}`,
-                borderRadius: 4,
-              }}
-            >
-              <Text style={{ fontSize: 12 }}>
-                {carryover ? (
-                  <Trans>Disable Auto Hold</Trans>
-                ) : (
-                  <Trans>Enable Auto Hold</Trans>
-                )}
-              </Text>
-            </Button>
-          </View>
           <span
-            onClick={() => onShowActivity(category.id, month)}
+            onClick={() => {
+              resetIncomePosition(-6, -4);
+              setIncomeMenuOpen(true);
+            }}
+            onContextMenu={e => {
+              handleIncomeContextMenu(e);
+              // We need to calculate differently from the hook ue to being aligned to the right
+              const rect = e.currentTarget.getBoundingClientRect();
+              resetIncomePosition(
+                e.clientX - rect.right + 200 - 8,
+                e.clientY - rect.bottom - 8,
+              );
+            }}
             style={{ paddingRight: styles.monthRightPadding }}
           >
             <BalanceWithCarryover
@@ -625,6 +615,23 @@ export function IncomeCategoryMonth({
               longGoal={envelopeBudget.catLongGoal(category.id)}
             />
           </span>
+          <Popover
+            triggerRef={incomeMenuTriggerRef}
+            placement="bottom end"
+            isOpen={incomeMenuOpen}
+            onOpenChange={() => setIncomeMenuOpen(false)}
+            style={{ margin: 1 }}
+            isNonModal
+            {...incomePosition}
+          >
+            <IncomeMenu
+              categoryId={category.id}
+              month={month}
+              onBudgetAction={onBudgetAction}
+              onShowActivity={onShowActivity}
+              onClose={() => setIncomeMenuOpen(false)}
+            />
+          </Popover>
         </View>
       </Field>
     </View>
