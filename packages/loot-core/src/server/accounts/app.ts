@@ -1067,7 +1067,7 @@ async function simpleFinBatchSync({
   return retVal;
 }
 
-type ImportTransactionsResult = bankSync.ReconcileTransactionsResult & {
+export type ImportTransactionsResult = bankSync.ReconcileTransactionsResult & {
   errors: Array<{
     message: string;
   }>;
