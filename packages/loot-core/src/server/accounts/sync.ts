@@ -954,7 +954,20 @@ async function processBankSyncDownload(
       useStrictIdChecking,
     );
 
-    if (accountBalance) await updateAccountBalance(id, accountBalance);
+    if (accountBalance) {
+      let balance = accountBalance;
+      if (
+        acctRow.account_sync_source === 'simpleFin' &&
+        Array.isArray(accountBalance)
+      ) {
+        const expectedBalance = accountBalance.find(
+          b => b.balanceType === 'expected',
+        );
+        balance = expectedBalance.balanceAmount.amount;
+      }
+
+      await updateAccountBalance(id, balance);
+    }
 
     return result;
   });
