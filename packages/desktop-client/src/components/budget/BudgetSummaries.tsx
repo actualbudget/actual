@@ -76,7 +76,6 @@ export function BudgetSummaries({ SummaryComponent }: BudgetSummariesProps) {
       ])}
       ref={containerRef}
     >
-      {/* @ts-expect-error react-spring types currently do not support React v19 (but they soon will..) */}
       <animated.div
         className="view"
         style={{
