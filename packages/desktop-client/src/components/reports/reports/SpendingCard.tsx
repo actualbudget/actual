@@ -7,10 +7,10 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
-import { amountToCurrency } from 'loot-core/shared/util';
 import { type SpendingWidget } from 'loot-core/types/models';
 
 import { PrivacyFilter } from '../../PrivacyFilter';
+import { useFormat } from '../../spreadsheet/useFormat';
 import { DateRange } from '../DateRange';
 import { SpendingGraph } from '../graphs/SpendingGraph';
 import { LoadingIndicator } from '../LoadingIndicator';
@@ -43,6 +43,8 @@ export function SpendingCard({
   const spendingReportMode = meta?.mode ?? 'single-month';
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
+
+  const format = useFormat();
 
   const selection =
     spendingReportMode === 'single-month' ? 'compareTo' : spendingReportMode;
@@ -137,7 +139,7 @@ export function SpendingCard({
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
                   {data &&
                     (difference && difference > 0 ? '+' : '') +
-                      amountToCurrency(difference || 0)}
+                      format(difference || 0, 'financial')}
                 </PrivacyFilter>
               </Block>
             </View>

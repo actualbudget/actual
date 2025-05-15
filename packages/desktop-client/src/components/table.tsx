@@ -388,25 +388,49 @@ type InputCellProps = ComponentProps<typeof Cell> & {
   onUpdate?: ComponentProps<typeof InputValue>['onUpdate'];
   onBlur?: ComponentProps<typeof InputValue>['onBlur'];
   textAlign?: CSSProperties['textAlign'];
+  type?: FormatType;
+  formatExpr?: (value: string) => string;
+  unformatExpr?: (value: string) => string;
 };
 export function InputCell({
   inputProps,
   onUpdate,
   onBlur,
   textAlign,
+  type = 'string',
+  formatExpr,
+  unformatExpr,
   ...props
 }: InputCellProps) {
   return (
-    <Cell textAlign={textAlign} {...props}>
-      {() => (
-        <InputValue
-          value={props.value}
-          onUpdate={onUpdate}
-          onBlur={onBlur}
-          style={{ textAlign, ...(inputProps && inputProps.style) }}
-          {...inputProps}
-        />
-      )}
+    <Cell
+      textAlign={textAlign}
+      {...props}
+      formatter={value => {
+        if (value === '' || value === null || value === undefined) {
+          return '';
+        }
+
+        return props.formatter ? props.formatter(value, type) : value;
+      }}
+    >
+      {() => {
+        const formattedForEdit: string = formatExpr
+          ? formatExpr(props.value)
+          : props.value;
+
+        return (
+          <InputValue
+            {...inputProps}
+            value={formattedForEdit}
+            onUpdate={value => {
+              onUpdate?.(unformatExpr ? unformatExpr(value) : value);
+            }}
+            onBlur={onBlur}
+            style={{ textAlign, ...(inputProps && inputProps.style) }}
+          />
+        );
+      }}
     </Cell>
   );
 }
@@ -726,6 +750,7 @@ export function SheetCell<
       inputProps.onBlur();
     }
   });
+
   const format = useFormat();
 
   return (
@@ -738,9 +763,11 @@ export function SheetCell<
       textAlign={textAlign}
       {...props}
       value={String(sheetValue ?? '')}
-      formatter={value =>
-        props.formatter ? props.formatter(value, type) : format(value, type)
-      }
+      formatter={value => {
+        return props.formatter
+          ? props.formatter(value, type)
+          : format(value, type);
+      }}
       privacyFilter={
         privacyFilter != null
           ? privacyFilter
@@ -751,9 +778,13 @@ export function SheetCell<
       data-cellname={sheetValue}
     >
       {() => {
+        const formattedForEdit: string = formatExpr
+          ? formatExpr(sheetValue)
+          : String(sheetValue ?? '');
+
         return (
           <InputValue
-            value={formatExpr ? formatExpr(sheetValue) : sheetValue.toString()}
+            value={formattedForEdit}
             onUpdate={value => {
               onSave(unformatExpr ? unformatExpr(value) : value);
             }}

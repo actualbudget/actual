@@ -7,9 +7,11 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
+import { getCurrency } from 'loot-core/shared/currencies';
 import { amountToCurrency } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { Checkbox } from '../../forms';
 import { Row, Field } from '../../table';
 
@@ -53,6 +55,9 @@ export function Transaction({
   onCheckTransaction,
   reconcile,
 }: TransactionProps) {
+  const [currencyCode] = useSyncedPref('currencyCode');
+  const currency = getCurrency(currencyCode || '');
+
   const categoryList = categories.map(category => category.name);
   const transaction = useMemo(
     () =>
@@ -80,6 +85,7 @@ export function Transaction({
       outValue,
       flipAmount,
       multiplierAmount,
+      currency.decimalPlaces,
     );
   }, [
     rawTransaction,
@@ -89,6 +95,7 @@ export function Transaction({
     outValue,
     flipAmount,
     multiplierAmount,
+    currency?.decimalPlaces,
   ]);
 
   return (

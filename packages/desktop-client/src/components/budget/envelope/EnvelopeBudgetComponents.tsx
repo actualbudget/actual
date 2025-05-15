@@ -2,6 +2,7 @@ import React, {
   type ComponentProps,
   type CSSProperties,
   memo,
+  useMemo,
   useRef,
 } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
@@ -21,8 +22,14 @@ import { css } from '@emotion/css';
 
 import { envelopeBudget } from 'loot-core/client/queries';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import { getCurrency } from 'loot-core/shared/currencies';
 import * as monthUtils from 'loot-core/shared/months';
-import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
+import {
+  integerToCurrency,
+  amountToInteger,
+  getNumberFormat,
+  parseNumberFormat,
+} from 'loot-core/shared/util';
 import {
   type CategoryGroupEntity,
   type CategoryEntity,
@@ -42,6 +49,7 @@ import { BudgetMenu } from './BudgetMenu';
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 
 export function useEnvelopeSheetName<
@@ -233,6 +241,23 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
     position: balancePosition,
   } = useContextMenu();
 
+  const [numberFormat] = useSyncedPref('numberFormat');
+  const [hideFraction] = useSyncedPref('hideFraction');
+  const [currencyCode] = useSyncedPref('currencyCode');
+  const currency = getCurrency(currencyCode || '');
+  const decimalPlaces = currency ? currency.decimalPlaces : 2;
+
+  const config = useMemo(
+    () => parseNumberFormat({ format: numberFormat, hideFraction }),
+    [numberFormat, hideFraction],
+  );
+
+  const { formatter } = getNumberFormat({
+    format: config.format,
+    hideFraction: config.hideFraction,
+    decimalPlaces,
+  });
+
   const onMenuAction = (...args: Parameters<typeof onBudgetAction>) => {
     onBudgetAction(...args);
     setBudgetMenuOpen(false);
@@ -381,10 +406,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             type: 'financial',
             getValueStyle: makeAmountGrey,
             formatExpr: expr => {
-              return integerToCurrency(expr);
+              return integerToCurrency(expr, formatter);
             },
             unformatExpr: expr => {
-              return amountToInteger(evalArithmetic(expr, 0));
+              return amountToInteger(evalArithmetic(expr, 0), decimalPlaces);
             },
           }}
           inputProps={{

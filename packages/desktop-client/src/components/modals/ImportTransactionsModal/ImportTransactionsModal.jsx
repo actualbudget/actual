@@ -16,6 +16,7 @@ import {
   importTransactions,
 } from 'loot-core/client/queries/queriesSlice';
 import { send } from 'loot-core/platform/client/fetch';
+import { getCurrency } from 'loot-core/shared/currencies';
 import { amountToInteger } from 'loot-core/shared/util';
 
 import { useDispatch } from '../../../redux';
@@ -39,6 +40,7 @@ import {
 
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useSyncedPrefs } from '@desktop-client/hooks/useSyncedPrefs';
 
 function getFileType(filepath) {
@@ -166,6 +168,9 @@ export function ImportTransactionsModal({
   const [reconcile, setReconcile] = useState(true);
   const [importNotes, setImportNotes] = useState(true);
 
+  const [currencyCode] = useSyncedPref('currencyCode');
+  const currency = getCurrency(currencyCode);
+
   // This cannot be set after parsing the file, because changing it
   // requires re-parsing the file. This is different from the other
   // options which are simple post-processing. That means if you
@@ -243,6 +248,7 @@ export function ImportTransactionsModal({
           outValue,
           flipAmount,
           multiplierAmount,
+          currency.decimalPlaces,
         );
         if (amount == null) {
           console.log(`Transaction on ${trans.date} has no amount`);
@@ -321,7 +327,13 @@ export function ImportTransactionsModal({
           return next;
         }, []);
     },
-    [accountId, categories.list, clearOnImport, dispatch],
+    [
+      accountId,
+      categories.list,
+      clearOnImport,
+      dispatch,
+      currency?.decimalPlaces,
+    ],
   );
 
   const parse = useCallback(
@@ -584,6 +596,7 @@ export function ImportTransactionsModal({
         outValue,
         flipAmount,
         multiplierAmount,
+        currency.decimalPlaces,
       );
       if (amount == null) {
         errorMessage = `Transaction on ${trans.date} has no amount`;
