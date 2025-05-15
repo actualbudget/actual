@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { getAccountBalance } from '@actual-app/api';
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -287,28 +288,19 @@ function TransactionListWithPreviews({
     dateFormat,
   });
 
-  const { previewTransactions } = useAccountPreviewTransactions({
-    accountId: account?.id,
-  });
+  const { previewTransactions, runningBalances: previewRunningBalances } =
+    useAccountPreviewTransactions({
+      accountId: account?.id,
+      options: {
+        startingBalance: runningBalances.get(transactions[0]?.id),
+      },
+    });
 
   const allBalances = useMemo(() => {
     const map = new Map<TransactionEntity['id'], IntegerAmount>([
       ...runningBalances,
+      ...previewRunningBalances,
     ]);
-    if (
-      !isLoading &&
-      !isLoadingMore &&
-      !isSearching &&
-      runningBalances &&
-      showBalances === 'true'
-    ) {
-      let lastBalance = runningBalances.get(transactions[0].id) || 0;
-
-      [...previewTransactions].reverse().forEach(t => {
-        lastBalance += t.amount;
-        map.set(t.id, lastBalance);
-      });
-    }
     return isSearching ? undefined : map;
   }, [
     showBalances,
