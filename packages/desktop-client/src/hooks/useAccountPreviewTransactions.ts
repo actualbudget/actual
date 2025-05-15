@@ -17,7 +17,6 @@ import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetVa
 
 type UseAccountPreviewTransactionsProps = {
   accountId?: AccountEntity['id'] | undefined;
-  options?: { startingBalance: number };
 };
 
 type UseAccountPreviewTransactionsResult = ReturnType<
