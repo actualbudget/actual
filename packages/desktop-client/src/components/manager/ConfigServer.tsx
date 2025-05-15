@@ -25,6 +25,7 @@ import { Title } from './subscribe/common';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { saveGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
+import { css } from '@emotion/css';
 
 export function ElectronServerConfig({
   onDoNotUseServer,
@@ -156,12 +157,12 @@ export function ElectronServerConfig({
               value="localhost"
               disabled
               type="text"
-              style={{
+              className={css({
                 '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
                   WebkitAppearance: 'none',
                   margin: 0,
                 },
-              }}
+              })}
             />
           </View>
 
@@ -175,14 +176,14 @@ export function ElectronServerConfig({
               value={String(electronServerPort)}
               aria-label={t('Port')}
               type="number"
-              style={{
+              className={css({
                 '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
                   WebkitAppearance: 'none',
                   margin: 0,
                 },
                 width: '7ch',
                 textAlign: 'center',
-              }}
+              })}
               autoFocus={true}
               maxLength={5}
               onChange={event =>
