@@ -290,9 +290,6 @@ function TransactionListWithPreviews({
   const { previewTransactions, runningBalances: previewRunningBalances } =
     useAccountPreviewTransactions({
       accountId: account?.id,
-      options: {
-        startingBalance: runningBalances.get(transactions[0]?.id) || 0,
-      },
     });
 
   const allBalances = useMemo(() => {
