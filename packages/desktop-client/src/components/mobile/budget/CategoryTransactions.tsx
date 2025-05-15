@@ -144,8 +144,7 @@ function TransactionListWithPreviews({
   });
 
   const transactionsToDisplay = !isSearching
-    ? // Do not render child transactions in the list, unless searching
-      previewTransactions.concat(transactions.filter(t => !t.is_child))
+    ? previewTransactions.concat(transactions)
     : transactions;
 
   return (
