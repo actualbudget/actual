@@ -7,7 +7,6 @@ import React, {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { getAccountBalance } from '@actual-app/api';
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
