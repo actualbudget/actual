@@ -1,10 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import {
-  getAccounts,
-  getPayees,
-  setNewTransactions,
-} from 'loot-core/client/queries/queriesSlice';
 import { createAppAsyncThunk } from 'loot-core/client/redux';
 import { type AppDispatch } from 'loot-core/client/store';
 import { send } from 'loot-core/platform/client/fetch';
@@ -19,6 +14,11 @@ import {
 
 import { resetApp } from '../app/appSlice';
 import { addNotification } from '../notifications/notificationsSlice';
+import {
+  getAccounts,
+  getPayees,
+  setNewTransactions,
+} from '../queries/queriesSlice';
 
 const sliceName = 'account';
 
