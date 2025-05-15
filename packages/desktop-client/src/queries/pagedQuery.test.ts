@@ -94,7 +94,7 @@ function mockListen(name, listener): () => void {
     const arr = eventListeners.get(name);
     eventListeners.set(
       name,
-      arr.filter(l => l !== listener)
+      arr.filter(l => l !== listener),
     );
   };
 }
@@ -122,7 +122,7 @@ async function mockSend(name, args, { delay }) {
     default:
       throw new Error(`Command not implemented: ${name}`);
   }
-};
+}
 
 function mockServer({ send = mockSend, listen = mockListen }) {
   vi.spyOn(fetch, 'send').mockImplementation((name, args) => {
@@ -191,7 +191,10 @@ describe('pagedQuery', () => {
     await tracer.expect('data', ['*']);
 
     // Simulate a sync event
-    mockPublishEvent('sync-event', { type: 'success', tables: ['transactions'] });
+    mockPublishEvent('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
 
     await tracer.expect('server-query');
     await tracer.expect('data', ['*']);
@@ -210,7 +213,10 @@ describe('pagedQuery', () => {
     await tracer.expect('server-query');
     await tracer.expect('data', ['*']);
     // Simulate a sync event
-    mockPublishEvent('sync-event', { type: 'applied', tables: ['transactions'] });
+    mockPublishEvent('sync-event', {
+      type: 'applied',
+      tables: ['transactions'],
+    });
 
     const p = Promise.race([tracer.wait('server-query'), wait(100)]);
     expect(await p).toEqual('wait(100)');
@@ -229,7 +235,10 @@ describe('pagedQuery', () => {
     await tracer.expect('server-query');
     await tracer.expect('data', ['*']);
     // Simulate a sync event
-    mockPublishEvent('sync-event', { type: 'success', tables: ['transactions'] });
+    mockPublishEvent('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
     await tracer.expect('server-query');
     await tracer.expect('data', ['*']);
   });
@@ -291,7 +300,10 @@ describe('pagedQuery', () => {
 
     // Simulate a sync event
     // Send a push in the middle of the query running for the first run
-    mockPublishEvent('sync-event', { type: 'success', tables: ['transactions'] });
+    mockPublishEvent('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
     // The first request should get handled, but there should be no
     // `data` event
     await tracer.expect('server-query');
@@ -319,8 +331,14 @@ describe('pagedQuery', () => {
 
     // Simulate a sync event
     // Send two pushes in a row
-    mockPublishEvent('sync-event', { type: 'success', tables: ['transactions'] });
-    mockPublishEvent('sync-event', { type: 'success', tables: ['transactions'] });
+    mockPublishEvent('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
+    mockPublishEvent('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
 
     // Two requests will be made to the server, but the first one
     // should be ignored and we only get one data back
@@ -344,7 +362,10 @@ describe('pagedQuery', () => {
     lq.unsubscribe();
 
     // Simulate a sync event
-    mockPublishEvent('sync-event', { type: 'success', tables: ['transactions'] });
+    mockPublishEvent('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
 
     // Wait a bit and make sure nothing comes through
     const p = Promise.race([tracer.expect('server-query'), wait(100)]);
@@ -486,7 +507,10 @@ describe('pagedQuery', () => {
     });
 
     // Simulate a sync event
-    mockPublishEvent('sync-event', { type: 'success', tables: ['transactions'] });
+    mockPublishEvent('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
 
     await tracer.expect('server-query', [{ result: { $count: '*' } }]);
     await tracer.expect('server-query', ['id']);
@@ -515,7 +539,10 @@ describe('pagedQuery', () => {
 
     await wait(1);
     // Simulate a sync event
-    mockPublishEvent('sync-event', { type: 'success', tables: ['transactions'] });
+    mockPublishEvent('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
 
     // This is from the paged request, but it ignores the new data
     await tracer.expect('server-query', ['id']);

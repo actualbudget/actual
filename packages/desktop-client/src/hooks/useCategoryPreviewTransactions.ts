@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from 'react';
 
-import { categoryBalance } from 'loot-core/client/queries';
 import * as monthUtils from 'loot-core/shared/months';
 import {
   type ScheduleEntity,
@@ -12,6 +11,7 @@ import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTempl
 import { usePreviewTransactions } from './usePreviewTransactions';
 
 import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
+import { categoryBalance } from '@desktop-client/queries/queries';
 
 type UseCategoryPreviewTransactionsProps = {
   categoryId: CategoryEntity['id'];
