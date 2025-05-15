@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
@@ -6,7 +6,6 @@ import { Menu } from '@actual-app/components/menu';
 import { envelopeBudget } from 'loot-core/client/queries';
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { BalanceMenu } from './BalanceMenu';
 import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
 
 type IncomeMenuProps = {
@@ -32,7 +31,8 @@ export function IncomeMenu({
   );
 
   return (
-    <span tabIndex={-1} ref={ref}>
+    //<span tabIndex={-1} ref={ref}>
+    <span>
       <Menu
         onMenuSelect={name => {
           switch (name) {
