@@ -291,7 +291,7 @@ function TransactionListWithPreviews({
     useAccountPreviewTransactions({
       accountId: account?.id,
       options: {
-        startingBalance: runningBalances.get(transactions[0]?.id),
+        startingBalance: runningBalances.get(transactions[0]?.id) || 0,
       },
     });
 
@@ -301,15 +301,7 @@ function TransactionListWithPreviews({
       ...previewRunningBalances,
     ]);
     return isSearching ? undefined : map;
-  }, [
-    showBalances,
-    transactions,
-    runningBalances,
-    isLoading,
-    isLoadingMore,
-    isSearching,
-    previewTransactions,
-  ]);
+  }, [runningBalances, isSearching, previewRunningBalances]);
 
   useEffect(() => {
     if (accountId) {
