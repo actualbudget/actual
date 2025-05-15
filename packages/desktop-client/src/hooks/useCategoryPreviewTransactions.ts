@@ -1,11 +1,17 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { usePreviewTransactions } from 'loot-core/client/data-hooks/transactions';
+import { categoryBalance } from 'loot-core/client/queries';
 import * as monthUtils from 'loot-core/shared/months';
-import { type CategoryEntity } from 'loot-core/types/models';
+import {
+  type ScheduleEntity,
+  type CategoryEntity,
+} from 'loot-core/types/models';
 
 import { useCategory } from './useCategory';
 import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTemplates';
+
+import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
 
 type UseCategoryPreviewTransactionsProps = {
   categoryId: CategoryEntity['id'];
@@ -24,20 +30,38 @@ export function useCategoryPreviewTransactions({
   const { schedules } = useCategoryScheduleGoalTemplates({
     category,
   });
+
+  const schedulesToPreview = useMemo(
+    () =>
+      new Set(
+        schedules
+          .filter(schedule => monthUtils.getMonth(schedule.next_date) === month)
+          .map(schedule => schedule.id),
+      ),
+    [month, schedules],
+  );
+  const categoryBalanceValue = useSheetValue<'category', 'balance'>(
+    categoryBalance(categoryId, month),
+  );
+
+  const categorySchedulesFilter = useCallback(
+    (schedule: ScheduleEntity) => schedulesToPreview.has(schedule.id),
+    [schedulesToPreview],
+  );
+
   const {
     previewTransactions: allPreviewTransactions,
     runningBalances: allRunningBalances,
     isLoading,
     error,
-  } = usePreviewTransactions();
+  } = usePreviewTransactions({
+    filter: categorySchedulesFilter,
+    options: {
+      startingBalance: categoryBalanceValue ?? 0,
+    },
+  });
 
   return useMemo(() => {
-    const schedulesToPreview = new Set(
-      schedules
-        .filter(schedule => monthUtils.getMonth(schedule.next_date) === month)
-        .map(schedule => schedule.id),
-    );
-
     if (!category || !schedulesToPreview.size) {
       return {
         previewTransactions: [],
@@ -72,7 +96,6 @@ export function useCategoryPreviewTransactions({
     category,
     error,
     isLoading,
-    month,
-    schedules,
+    schedulesToPreview,
   ]);
 }

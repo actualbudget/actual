@@ -1,7 +1,10 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { usePreviewTransactions } from 'loot-core/client/data-hooks/transactions';
+import { accountBalance } from 'loot-core/client/queries';
+import { groupById } from 'loot-core/shared/util';
 import {
+  type ScheduleEntity,
   type AccountEntity,
   type PayeeEntity,
   type TransactionEntity,
@@ -9,6 +12,8 @@ import {
 
 import { useAccounts } from './useAccounts';
 import { usePayees } from './usePayees';
+
+import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
 
 type UseAccountPreviewTransactionsProps = {
   accountId?: AccountEntity['id'] | undefined;
@@ -25,14 +30,54 @@ type UseAccountPreviewTransactionsResult = ReturnType<
 export function useAccountPreviewTransactions({
   accountId,
 }: UseAccountPreviewTransactionsProps): UseAccountPreviewTransactionsResult {
+  const accounts = useAccounts();
+  const accountsById = useMemo(() => groupById(accounts), [accounts]);
+  const payees = usePayees();
+  const payeesById = useMemo(() => groupById(payees), [payees]);
+
+  const getPayeeByTransferAccount = useCallback(
+    (transferAccountId?: AccountEntity['id']) =>
+      payees.find(p => p.transfer_acct === transferAccountId) || null,
+    [payees],
+  );
+
+  const getTransferAccountByPayee = useCallback(
+    (payeeId?: PayeeEntity['id']) => {
+      if (!payeeId) {
+        return null;
+      }
+
+      const transferAccountId = payeesById[payeeId]?.transfer_acct;
+      if (!transferAccountId) {
+        return null;
+      }
+      return accountsById[transferAccountId];
+    },
+    [accountsById, payeesById],
+  );
+
+  const accountSchedulesFilter = useCallback(
+    (schedule: ScheduleEntity) =>
+      schedule._account === accountId ||
+      getTransferAccountByPayee(schedule._payee)?.id === accountId,
+    [accountId, getTransferAccountByPayee],
+  );
+
+  const accountBalanceValue = useSheetValue<'account', 'balance'>(
+    accountBalance(accountId || ''),
+  );
+
   const {
     previewTransactions: allPreviewTransactions,
     runningBalances: allRunningBalances,
     isLoading,
     error,
-  } = usePreviewTransactions();
-  const accounts = useAccounts();
-  const payees = usePayees();
+  } = usePreviewTransactions({
+    filter: accountSchedulesFilter,
+    options: {
+      startingBalance: accountBalanceValue ?? 0,
+    },
+  });
 
   return useMemo(() => {
     if (!accountId) {
@@ -47,12 +92,8 @@ export function useAccountPreviewTransactions({
     const previewTransactions = accountPreview({
       accountId,
       transactions: allPreviewTransactions,
-      getPayeeByTransferAccount: transferAccountId =>
-        payees.find(p => p.transfer_acct === transferAccountId),
-      getTransferAccountByPayee: payeeId =>
-        accounts.find(
-          a => a.id === payees.find(p => p.id === payeeId)?.transfer_acct,
-        ),
+      getPayeeByTransferAccount,
+      getTransferAccountByPayee,
     });
 
     const transactionIds = new Set(previewTransactions.map(t => t.id));
@@ -71,12 +112,12 @@ export function useAccountPreviewTransactions({
     };
   }, [
     accountId,
-    accounts,
     allPreviewTransactions,
     allRunningBalances,
     error,
+    getPayeeByTransferAccount,
+    getTransferAccountByPayee,
     isLoading,
-    payees,
   ]);
 }
 
@@ -84,11 +125,11 @@ type AccountPreviewProps = {
   accountId?: AccountEntity['id'];
   transactions: readonly TransactionEntity[];
   getPayeeByTransferAccount: (
-    transferAccountId: PayeeEntity['transfer_acct'],
-  ) => PayeeEntity | undefined;
+    transferAccountId?: AccountEntity['id'],
+  ) => PayeeEntity | null;
   getTransferAccountByPayee: (
-    payeeId: TransactionEntity['payee'],
-  ) => AccountEntity | undefined;
+    payeeId?: PayeeEntity['id'],
+  ) => AccountEntity | null;
 };
 
 function accountPreview({

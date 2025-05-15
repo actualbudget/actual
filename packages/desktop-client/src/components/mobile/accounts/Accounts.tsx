@@ -134,7 +134,9 @@ type AccountListItemProps = ComponentPropsWithoutRef<
   isConnected: boolean;
   isPending: boolean;
   isFailed: boolean;
-  getBalanceQuery: (account: AccountEntity) => Binding<'account', 'balance'>;
+  getBalanceQuery: (
+    accountId: AccountEntity['id'],
+  ) => Binding<'account', 'balance'>;
   onSelect: (account: AccountEntity) => void;
 };
 
@@ -214,7 +216,7 @@ function AccountListItem({
               </TextOneLine>
             </View>
           </View>
-          <CellValue binding={getBalanceQuery(account)} type="financial">
+          <CellValue binding={getBalanceQuery(account.id)} type="financial">
             {props => (
               <CellValueText<'account', 'balance'>
                 {...props}
@@ -248,7 +250,9 @@ function EmptyMessage() {
 
 type AllAccountListProps = {
   accounts: AccountEntity[];
-  getAccountBalance: (account: AccountEntity) => Binding<'account', 'balance'>;
+  getAccountBalance: (
+    accountId: AccountEntity['id'],
+  ) => Binding<'account', 'balance'>;
   getOnBudgetBalance: () => Binding<'account', 'onbudget-accounts-balance'>;
   getOffBudgetBalance: () => Binding<'account', 'offbudget-accounts-balance'>;
   getClosedAccountsBalance: () => Binding<'account', 'closed-accounts-balance'>;
@@ -377,7 +381,9 @@ function AllAccountList({
 type AccountListProps = {
   'aria-label': string;
   accounts: AccountEntity[];
-  getAccountBalance: (account: AccountEntity) => Binding<'account', 'balance'>;
+  getAccountBalance: (
+    accountId: AccountEntity['id'],
+  ) => Binding<'account', 'balance'>;
   onOpenAccount: (account: AccountEntity) => void;
 };
 

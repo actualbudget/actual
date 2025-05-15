@@ -213,6 +213,7 @@ export function useTransactions({
 }
 
 type UsePreviewTransactionsProps = {
+  filter?: (schedule: ScheduleEntity) => boolean;
   options?: {
     /**
      * The starting balance to start the running balance calculation from.
@@ -229,6 +230,7 @@ type UsePreviewTransactionsResult = {
 };
 
 export function usePreviewTransactions({
+  filter,
   options,
 }: UsePreviewTransactionsProps = {}): UsePreviewTransactionsResult {
   const [previewTransactions, setPreviewTransactions] = useState<
@@ -259,10 +261,9 @@ export function usePreviewTransactions({
       return [];
     }
 
-    // Kick off an async rules application
-    const schedulesForPreview = schedules.filter(s =>
-      isForPreview(s, statuses),
-    );
+    const schedulesForPreview = schedules
+      .filter(s => isForPreview(s, statuses))
+      .filter(filter ? filter : () => true);
 
     const today = d.startOfDay(parseDate(currentDay()));
 
@@ -330,7 +331,7 @@ export function usePreviewTransactions({
           parseDate(b.date).getTime() - parseDate(a.date).getTime() ||
           a.amount - b.amount,
       );
-  }, [isSchedulesLoading, schedules, statuses, upcomingLength]);
+  }, [filter, isSchedulesLoading, schedules, statuses, upcomingLength]);
 
   useEffect(() => {
     let isUnmounted = false;
@@ -346,6 +347,7 @@ export function usePreviewTransactions({
 
     Promise.all(
       scheduleTransactions.map(transaction =>
+        // Kick off an async rules application
         send('rules-run', { transaction }),
       ),
     )
