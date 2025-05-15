@@ -2,7 +2,10 @@ import React, { useRef, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgArrowButtonRight1 } from '@actual-app/components/icons/v2';
+import {
+  SvgArrowButtonRight1,
+  SvgAlertTriangle,
+} from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -26,12 +29,14 @@ type DetailedBalanceProps = {
   name: string;
   balance: number;
   isExactBalance?: boolean;
+  color?: string;
 };
 
 function DetailedBalance({
   name,
   balance,
   isExactBalance = true,
+  color = theme.pillText,
 }: DetailedBalanceProps) {
   const format = useFormat();
   return (
@@ -40,7 +45,7 @@ function DetailedBalance({
         marginLeft: 15,
         borderRadius: 4,
         padding: '4px 6px',
-        color: theme.pillText,
+        color,
         backgroundColor: theme.pillBackground,
       }}
     >
@@ -146,9 +151,10 @@ function FilteredBalance({ filteredAmount }: FilteredBalanceProps) {
 
 type MoreBalancesProps = {
   balanceQuery: { name: `balance-query-${string}`; query: Query };
+  account?: AccountEntity;
 };
 
-function MoreBalances({ balanceQuery }: MoreBalancesProps) {
+function MoreBalances({ balanceQuery, account }: MoreBalancesProps) {
   const { t } = useTranslation();
 
   const cleared = useSheetValue<'balance', `balance-query-${string}-cleared`>({
@@ -164,8 +170,29 @@ function MoreBalances({ balanceQuery }: MoreBalancesProps) {
     query: balanceQuery.query.filter({ cleared: false }),
   });
 
+  const sum =
+    useSheetValue<'balance', `balance-query-${string}`>({
+      name: balanceQuery.name,
+      query: balanceQuery.query,
+    }) ?? 0;
+  const current = account?.balance_current ?? 0;
+
   return (
     <View style={{ flexDirection: 'row' }}>
+      {account && (
+        <>
+          <DetailedBalance
+            name={t('Synced balance:')}
+            balance={current}
+            color={sum === current ? undefined : theme.warningText}
+          />
+          <DetailedBalance
+            name={t('Out of sync balance:')}
+            balance={current - sum}
+            color={sum === current ? undefined : theme.warningText}
+          />
+        </>
+      )}
       <DetailedBalance name={t('Cleared total:')} balance={cleared ?? 0} />
       <DetailedBalance name={t('Uncleared total:')} balance={uncleared ?? 0} />
     </View>
@@ -222,19 +249,32 @@ export function Balances({
           type="financial"
         >
           {props => (
-            <CellValueText
-              {...props}
-              style={{
-                fontSize: 22,
-                fontWeight: 400,
-                color:
-                  props.value < 0
-                    ? theme.errorText
-                    : props.value > 0
-                      ? theme.noticeTextLight
-                      : theme.pageTextSubdued,
-              }}
-            />
+            <>
+              <CellValueText
+                {...props}
+                style={{
+                  fontSize: 22,
+                  fontWeight: 400,
+                  color:
+                    props.value < 0
+                      ? theme.errorText
+                      : props.value > 0
+                        ? theme.noticeTextLight
+                        : theme.pageTextSubdued,
+                }}
+              />
+              {account?.balance_current &&
+                props.value !== account.balance_current && (
+                  <SvgAlertTriangle
+                    style={{
+                      width: 15,
+                      height: 15,
+                      marginLeft: 10,
+                      color: theme.warningText,
+                    }}
+                  />
+                )}
+            </>
           )}
         </CellValue>
 
@@ -253,7 +293,9 @@ export function Balances({
         />
       </Button>
 
-      {showExtraBalances && <MoreBalances balanceQuery={balanceQuery} />}
+      {showExtraBalances && (
+        <MoreBalances balanceQuery={balanceQuery} account={account} />
+      )}
 
       {selectedItems.size > 0 && (
         <SelectedBalance selectedItems={selectedItems} account={account} />
