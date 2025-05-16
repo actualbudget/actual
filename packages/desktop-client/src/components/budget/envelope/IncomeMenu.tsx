@@ -54,7 +54,7 @@ export function IncomeMenu({
           },
           {
             name: 'view',
-            text: t('View Transactions'),
+            text: t('View transactions'),
           },
         ]}
       />
