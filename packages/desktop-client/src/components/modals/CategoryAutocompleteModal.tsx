@@ -7,6 +7,7 @@ import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
 
+import { NamespaceContext } from '../../hooks/NamespaceContext';
 import { type Modal as ModalType } from '../../modals/modalsSlice';
 import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import {
@@ -16,7 +17,6 @@ import {
   ModalHeader,
 } from '../common/Modal';
 import { SectionLabel } from '../forms';
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
 type CategoryAutocompleteModalProps = Extract<
   ModalType,

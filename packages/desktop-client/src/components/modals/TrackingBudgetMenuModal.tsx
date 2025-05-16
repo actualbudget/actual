@@ -10,7 +10,6 @@ import * as Platform from 'loot-core/shared/platform';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
 import { type Modal as ModalType } from '../../modals/modalsSlice';
-import { trackingBudget } from '../../queries/queries';
 import { BudgetMenu } from '../budget/tracking/BudgetMenu';
 import { useTrackingSheetValue } from '../budget/tracking/TrackingBudgetComponents';
 import {
@@ -22,6 +21,7 @@ import {
 import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
 
 import { useCategory } from '@desktop-client/hooks/useCategory';
+import { trackingBudget } from '@desktop-client/spreadsheet/bindings';
 
 type TrackingBudgetMenuModalProps = Omit<
   Extract<ModalType, { name: 'tracking-budget-menu' }>['options'],

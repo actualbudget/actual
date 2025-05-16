@@ -27,7 +27,7 @@ import {
 import * as Platform from 'loot-core/shared/platform';
 
 import { sync } from '../app/appSlice';
-import * as queries from '../queries/queries';
+import { useSheetValue } from '../hooks/useSheetValue';
 import { useDispatch } from '../redux';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
@@ -38,16 +38,16 @@ import { HelpMenu } from './HelpMenu';
 import { LoggedInUser } from './LoggedInUser';
 import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar/SidebarProvider';
-import { useSheetValue } from './spreadsheet/useSheetValue';
 import { ThemeSelector } from './ThemeSelector';
 
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 function UncategorizedButton() {
-  const count: number | null = useSheetValue(queries.uncategorizedCount());
+  const count: number | null = useSheetValue(bindings.uncategorizedCount());
   if (count === null || count <= 0) {
     return null;
   }

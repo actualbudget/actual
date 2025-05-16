@@ -27,7 +27,7 @@ import {
   openAccountCloseModal,
   pushModal,
 } from '../../../modals/modalsSlice';
-import * as queries from '../../../queries/queries';
+import * as queries from '../../../queries';
 import {
   markAccountRead,
   reopenAccount,
@@ -47,6 +47,7 @@ import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { accountSchedulesQuery } from '@desktop-client/hooks/useSchedules';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
+import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 export function AccountTransactions({
   account,
@@ -385,27 +386,27 @@ function queriesFromAccountId(
   switch (id) {
     case 'onbudget':
       return {
-        balance: queries.onBudgetAccountBalance(),
+        balance: bindings.onBudgetAccountBalance(),
       };
     case 'offbudget':
       return {
-        balance: queries.offBudgetAccountBalance(),
+        balance: bindings.offBudgetAccountBalance(),
       };
     case 'closed':
       return {
-        balance: queries.closedAccountBalance(),
+        balance: bindings.closedAccountBalance(),
       };
     case 'uncategorized':
       return {
-        balance: queries.uncategorizedBalance(),
+        balance: bindings.uncategorizedBalance(),
       };
     default:
       return entity
         ? {
-            balance: queries.accountBalance(entity.id),
-            cleared: queries.accountBalanceCleared(entity.id),
-            uncleared: queries.accountBalanceUncleared(entity.id),
+            balance: bindings.accountBalance(entity.id),
+            cleared: bindings.accountBalanceCleared(entity.id),
+            uncleared: bindings.accountBalanceUncleared(entity.id),
           }
-        : { balance: queries.allAccountBalance() };
+        : { balance: bindings.allAccountBalance() };
   }
 }

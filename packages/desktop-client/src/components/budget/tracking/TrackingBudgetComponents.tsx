@@ -29,10 +29,9 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { trackingBudget } from '../../../queries/queries';
-import { type Binding, type SheetFields } from '../../spreadsheet';
+import { useSheetValue } from '../../../hooks/useSheetValue';
+import { type Binding, type SheetFields } from '../../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Field, SheetCell, type SheetCellProps } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
@@ -43,6 +42,7 @@ import { BudgetMenu } from './BudgetMenu';
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import { trackingBudget } from '@desktop-client/spreadsheet/bindings';
 
 export const useTrackingSheetValue = <
   FieldName extends SheetFields<'tracking-budget'>,

@@ -9,6 +9,7 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
 import { sync } from '../../../app/appSlice';
+import { NamespaceContext } from '../../../hooks/NamespaceContext';
 import { collapseModals, pushModal } from '../../../modals/modalsSlice';
 import {
   applyBudgetAction,
@@ -21,7 +22,6 @@ import {
 } from '../../../queries/queriesSlice';
 import { useDispatch } from '../../../redux';
 import { prewarmMonth } from '../../budget/util';
-import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 import { SyncRefresh } from '../../SyncRefresh';
 
 import { BudgetTable } from './BudgetTable';

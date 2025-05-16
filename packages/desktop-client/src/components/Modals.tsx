@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
+import { NamespaceContext } from '../hooks/NamespaceContext';
 import { closeModal } from '../modals/modalsSlice';
 import { useDispatch } from '../redux';
 
@@ -76,7 +77,6 @@ import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleDetails } from './schedules/ScheduleDetails';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { UpcomingLength } from './schedules/UpcomingLength';
-import { NamespaceContext } from './spreadsheet/NamespaceContext';
 
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useModalState } from '@desktop-client/hooks/useModalState';

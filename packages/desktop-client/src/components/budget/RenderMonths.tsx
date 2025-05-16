@@ -11,7 +11,7 @@ import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
+import { NamespaceContext } from '../../hooks/NamespaceContext';
 
 import { MonthsContext } from './MonthsContext';
 

@@ -8,7 +8,6 @@ import React, {
 import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
 
-import { envelopeBudget } from '../../../../queries/queries';
 import { CoverMenu } from '../CoverMenu';
 import { useEnvelopeSheetValue } from '../EnvelopeBudgetComponents';
 import { HoldMenu } from '../HoldMenu';
@@ -18,6 +17,7 @@ import { ToBudgetAmount } from './ToBudgetAmount';
 import { ToBudgetMenu } from './ToBudgetMenu';
 
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type ToBudgetProps = {
   month: string;

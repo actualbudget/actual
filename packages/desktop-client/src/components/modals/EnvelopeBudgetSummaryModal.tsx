@@ -6,22 +6,22 @@ import { styles } from '@actual-app/components/styles';
 import { format, sheetForMonth, prevMonth } from 'loot-core/shared/months';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 
+import { NamespaceContext } from '../../hooks/NamespaceContext';
 import {
   collapseModals,
   type Modal as ModalType,
   pushModal,
 } from '../../modals/modalsSlice';
-import { envelopeBudget } from '../../queries/queries';
 import { useDispatch } from '../../redux';
 import { ToBudgetAmount } from '../budget/envelope/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '../budget/envelope/budgetsummary/TotalsList';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type EnvelopeBudgetSummaryModalProps = Extract<
   ModalType,

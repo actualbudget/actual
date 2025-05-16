@@ -69,6 +69,7 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
+import { NamespaceContext } from '../../hooks/NamespaceContext';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import {
   type SplitsExpandedContextValue,
@@ -80,7 +81,6 @@ import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
 import { getStatusProps, type StatusTypes } from '../schedules/StatusBadge';
 import { DateSelect } from '../select/DateSelect';
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 import {
   Cell,
   CellButton,

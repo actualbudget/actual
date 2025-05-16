@@ -7,7 +7,6 @@ import { View } from '@actual-app/components/view';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { moveAccount } from '../../accounts/accountsSlice';
-import * as queries from '../../queries/queries';
 import { useSelector, useDispatch } from '../../redux';
 
 import { Account } from './Account';
@@ -20,6 +19,7 @@ import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useOffBudgetAccounts } from '@desktop-client/hooks/useOffBudgetAccounts';
 import { useOnBudgetAccounts } from '@desktop-client/hooks/useOnBudgetAccounts';
 import { useUpdatedAccounts } from '@desktop-client/hooks/useUpdatedAccounts';
+import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 const fontWeight = 600;
 
@@ -95,7 +95,7 @@ export function Accounts() {
         <Account
           name={t('All accounts')}
           to="/accounts"
-          query={queries.allAccountBalance()}
+          query={bindings.allAccountBalance()}
           style={{ fontWeight, marginTop: 15 }}
         />
 
@@ -103,7 +103,7 @@ export function Accounts() {
           <Account
             name={t('On budget')}
             to="/accounts/onbudget"
-            query={queries.onBudgetAccountBalance()}
+            query={bindings.onBudgetAccountBalance()}
             style={{
               fontWeight,
               marginTop: 13,
@@ -123,7 +123,7 @@ export function Accounts() {
             failed={failedAccounts.has(account.id)}
             updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
-            query={queries.accountBalance(account.id)}
+            query={bindings.accountBalance(account.id)}
             onDragChange={onDragChange}
             onDrop={onReorder}
             outerStyle={makeDropPadding(i)}
@@ -134,7 +134,7 @@ export function Accounts() {
           <Account
             name={t('Off budget')}
             to="/accounts/offbudget"
-            query={queries.offBudgetAccountBalance()}
+            query={bindings.offBudgetAccountBalance()}
             style={{
               fontWeight,
               marginTop: 13,
@@ -154,7 +154,7 @@ export function Accounts() {
             failed={failedAccounts.has(account.id)}
             updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
-            query={queries.accountBalance(account.id)}
+            query={bindings.accountBalance(account.id)}
             onDragChange={onDragChange}
             onDrop={onReorder}
             outerStyle={makeDropPadding(i)}
@@ -181,7 +181,7 @@ export function Accounts() {
               name={account.name}
               account={account}
               to={getAccountPath(account)}
-              query={queries.accountBalance(account.id)}
+              query={bindings.accountBalance(account.id)}
               onDragChange={onDragChange}
               onDrop={onReorder}
             />

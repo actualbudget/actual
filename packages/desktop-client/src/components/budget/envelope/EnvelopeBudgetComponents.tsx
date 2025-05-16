@@ -27,11 +27,10 @@ import {
   type CategoryEntity,
 } from 'loot-core/types/models';
 
-import { envelopeBudget } from '../../../queries/queries';
-import { type Binding, type SheetFields } from '../../spreadsheet';
+import { useSheetName } from '../../../hooks/useSheetName';
+import { useSheetValue } from '../../../hooks/useSheetValue';
+import { type Binding, type SheetFields } from '../../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
-import { useSheetName } from '../../spreadsheet/useSheetName';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { Row, Field, SheetCell, type SheetCellProps } from '../../table';
 import { BalanceWithCarryover } from '../BalanceWithCarryover';
 import { makeAmountGrey } from '../util';
@@ -43,6 +42,7 @@ import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 export function useEnvelopeSheetName<
   FieldName extends SheetFields<'envelope-budget'>,

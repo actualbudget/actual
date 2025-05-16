@@ -8,6 +8,7 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
+import { NamespaceContext } from '../../hooks/NamespaceContext';
 import { pushModal } from '../../modals/modalsSlice';
 import { addNotification } from '../../notifications/notificationsSlice';
 import {
@@ -23,7 +24,6 @@ import {
   updateGroup,
 } from '../../queries/queriesSlice';
 import { useDispatch } from '../../redux';
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
 import { DynamicBudgetTable } from './DynamicBudgetTable';
 import * as envelopeBudget from './envelope/EnvelopeBudgetComponents';

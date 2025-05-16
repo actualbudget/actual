@@ -32,11 +32,10 @@ import { type AccountEntity } from 'loot-core/types/models';
 import { moveAccount } from '../../../accounts/accountsSlice';
 import { syncAndDownload } from '../../../app/appSlice';
 import { replaceModal } from '../../../modals/modalsSlice';
-import * as queries from '../../../queries/queries';
 import { useDispatch, useSelector } from '../../../redux';
+import { type Binding, type SheetFields } from '../../../spreadsheet';
 import { makeAmountFullStyle } from '../../budget/util';
 import { MobilePageHeader, Page } from '../../Page';
-import { type Binding, type SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
@@ -46,6 +45,7 @@ import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 type AccountHeaderProps<SheetFieldName extends SheetFields<'account'>> = {
   id: string;
@@ -523,10 +523,10 @@ export function Accounts() {
         // format changes
         key={numberFormat + hideFraction}
         accounts={accounts}
-        getAccountBalance={queries.accountBalance}
-        getOnBudgetBalance={queries.onBudgetAccountBalance}
-        getOffBudgetBalance={queries.offBudgetAccountBalance}
-        getClosedAccountsBalance={queries.closedAccountBalance}
+        getAccountBalance={bindings.accountBalance}
+        getOnBudgetBalance={bindings.onBudgetAccountBalance}
+        getOffBudgetBalance={bindings.offBudgetAccountBalance}
+        getClosedAccountsBalance={bindings.closedAccountBalance}
         onAddAccount={onAddAccount}
         onOpenAccount={onOpenAccount}
         onSync={onSync}

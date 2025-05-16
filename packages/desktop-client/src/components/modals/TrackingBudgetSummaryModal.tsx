@@ -7,12 +7,12 @@ import { styles } from '@actual-app/components/styles';
 import { sheetForMonth } from 'loot-core/shared/months';
 import * as monthUtils from 'loot-core/shared/months';
 
+import { NamespaceContext } from '../../hooks/NamespaceContext';
 import { type Modal as ModalType } from '../../modals/modalsSlice';
 import { ExpenseTotal } from '../budget/tracking/budgetsummary/ExpenseTotal';
 import { IncomeTotal } from '../budget/tracking/budgetsummary/IncomeTotal';
 import { Saved } from '../budget/tracking/budgetsummary/Saved';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
 type TrackingBudgetSummaryModalProps = Extract<
   ModalType,
