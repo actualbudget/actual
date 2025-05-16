@@ -2,6 +2,13 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
+import { currentDay } from 'loot-core/shared/months';
+import {
+  RecurConfig,
+  RuleConditionEntity,
+  ScheduleEntity,
+  TransactionEntity,
+} from 'loot-core/types/models';
 import * as api from './index';
 
 const budgetName = 'test-budget';
@@ -52,9 +59,24 @@ describe('API setup and teardown', () => {
 });
 
 describe('API CRUD operations', () => {
+  let accountId;
+  let payeeId;
+  let categoryId;
+
   beforeEach(async () => {
     // load test budget
     await api.loadBudget(budgetName);
+
+    // Setup for schedules, now part of the same describe block
+    accountId = await api.createAccount({ name: 'schedule-test-account' }, 0);
+    payeeId = await api.createPayee({ name: 'schedule-test-payee' });
+    const groupId = await api.createCategoryGroup({
+      name: 'schedule-test-group',
+    });
+    categoryId = await api.createCategory({
+      name: 'schedule-test-category',
+      group_id: groupId,
+    });
   });
 
   // api: getBudgets
@@ -655,7 +677,10 @@ describe('API CRUD operations', () => {
   });
 
   test('Transactions: import notes are preserved when importing', async () => {
-    const accountId = await api.createAccount({ name: 'test-account' }, 0);
+    const accountIdTest = await api.createAccount(
+      { name: 'test-account-notes' },
+      0,
+    );
 
     // Test with notes
     const transactionsWithNotes = [
@@ -668,7 +693,7 @@ describe('API CRUD operations', () => {
     ];
 
     const addResultWithNotes = await api.addTransactions(
-      accountId,
+      accountIdTest,
       transactionsWithNotes,
       {
         learnCategories: true,
@@ -678,7 +703,7 @@ describe('API CRUD operations', () => {
     expect(addResultWithNotes).toBe('ok');
 
     let transactions = await api.getTransactions(
-      accountId,
+      accountIdTest,
       '2023-11-01',
       '2023-11-30',
     );
@@ -693,7 +718,7 @@ describe('API CRUD operations', () => {
     ];
 
     const addResultWithoutNotes = await api.addTransactions(
-      accountId,
+      accountIdTest,
       transactionsWithoutNotes,
       {
         learnCategories: true,
@@ -703,10 +728,164 @@ describe('API CRUD operations', () => {
     expect(addResultWithoutNotes).toBe('ok');
 
     transactions = await api.getTransactions(
-      accountId,
+      accountIdTest,
       '2023-11-01',
       '2023-11-30',
     );
     expect(transactions[0].notes).toBeNull();
+  });
+
+  // SCHEDULES TESTS MOVED HERE
+  test('Schedules: createSchedule, updateSchedule, deleteSchedule', async () => {
+    const scheduleData: Partial<ScheduleEntity> = {
+      posts_transaction: true,
+      completed: false,
+    };
+
+    const initialConditions: Partial<RuleConditionEntity>[] = [
+      { field: 'date', op: 'is', value: '2025-01-01' },
+      { field: 'payee', op: 'is', value: payeeId, type: 'id' },
+      { field: 'account', op: 'is', value: accountId, type: 'id' },
+      { field: 'amount', op: 'gte', value: 50, type: 'number' },
+    ];
+
+    const scheduleId = await api.createSchedule(
+      scheduleData,
+      initialConditions,
+    );
+    expect(scheduleId).toBeDefined();
+
+    const schedule = await api.getSchedule(scheduleId);
+    expect(schedule).toMatchObject({
+      _account: accountId,
+      _actions: [
+        {
+          op: 'link-schedule',
+          value: scheduleId,
+        },
+      ],
+      _amount: null,
+      _amountOp: null,
+      _conditions: [
+        {
+          field: 'date',
+          op: 'is',
+          value: '2025-01-01',
+        },
+        {
+          field: 'description',
+          op: 'is',
+          type: 'id',
+          value: payeeId,
+        },
+        {
+          field: 'acct',
+          op: 'is',
+          type: 'id',
+          value: accountId,
+        },
+        {
+          field: 'amount',
+          op: 'gte',
+          type: 'number',
+          value: 50,
+        },
+      ],
+      _date: '2025-01-01',
+      _payee: payeeId,
+      completed: false,
+      id: scheduleId,
+      name: null,
+      next_date: '2025-01-01',
+      posts_transaction: true,
+      tombstone: false,
+    });
+
+    const newPayeeId = await api.createPayee({
+      name: 'schedule-test-payee-updated',
+    });
+    const updatedConditions: Partial<RuleConditionEntity>[] = [
+      { field: 'date', op: 'is', value: '2025-02-02' },
+      { field: 'payee', op: 'is', value: newPayeeId, type: 'id' },
+      { field: 'account', op: 'is', value: accountId, type: 'id' },
+      { field: 'amount', op: 'gte', value: 150, type: 'number' },
+    ];
+
+    await api.updateSchedule(scheduleId, updatedConditions, true);
+
+    await api.deleteSchedule(scheduleId);
+
+    expect(await api.getSchedule(scheduleId)).toBeUndefined();
+  });
+
+  test('Schedules: skipNextScheduleDate, postScheduleTransaction', async () => {
+    const scheduleData: Partial<ScheduleEntity> = {
+      posts_transaction: true,
+      completed: false,
+    };
+    const conditions: Partial<RuleConditionEntity>[] = [
+      {
+        field: 'date',
+        op: 'is',
+        value: { endMode: 'never', frequency: 'daily', start: '2025-01-01' },
+      },
+      { field: 'payee', op: 'is', value: payeeId, type: 'id' },
+      { field: 'account', op: 'is', value: accountId, type: 'id' },
+      { field: 'amount', op: 'is', value: 100, type: 'number' },
+    ];
+    const scheduleId = await api.createSchedule(scheduleData, conditions);
+
+    const schedule = await api.getSchedule(scheduleId);
+    expect(schedule.next_date).toBe('2025-01-01');
+
+    await api.skipNextScheduleDate(scheduleId);
+
+    const scheduleAfterSkip = await api.getSchedule(scheduleId);
+    expect(scheduleAfterSkip.next_date).toBe('2025-01-02');
+
+    await api.postScheduleTransaction(scheduleId);
+
+    const transactions = await api.getTransactions(
+      accountId,
+      currentDay(),
+      currentDay(),
+    );
+    expect(transactions).toHaveLength(1);
+    expect(transactions[0]).toMatchObject({
+      amount: 100,
+      payee: payeeId,
+      account: accountId,
+      schedule: scheduleId,
+    } as Partial<TransactionEntity>);
+
+    await api.deleteSchedule(scheduleId);
+  });
+
+  test('Schedules: getUpcomingScheduleDates', async () => {
+    const config: RecurConfig = {
+      start: '2024-07-15',
+      frequency: 'weekly',
+      skipWeekend: false,
+      weekendSolveMode: 'after',
+      endMode: 'after_n_occurrences',
+      endOccurrences: 3,
+    };
+    const dates = await api.getUpcomingScheduleDates(config, 3);
+    expect(dates).toEqual(['2024-07-15', '2024-07-22', '2024-07-29']);
+  });
+
+  test('Schedules: discoverSchedules', async () => {
+    // Create a transaction that looks like it could be a schedule
+    await api.addTransactions(
+      accountId,
+      [
+        { date: '2024-06-05', amount: -5000, payee: payeeId },
+        { date: '2024-07-05', amount: -5000, payee: payeeId },
+      ],
+      { runTransfers: false },
+    );
+
+    const discoveredSchedules = await api.discoverSchedules();
+    expect(Array.isArray(discoveredSchedules)).toBe(true);
   });
 });
