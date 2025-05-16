@@ -25,6 +25,7 @@ import * as queries from 'loot-core/client/queries';
 import { listen, send } from 'loot-core/platform/client/fetch';
 import { type Query } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
+import { type IntegerAmount } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type TransactionEntity,
@@ -51,6 +52,7 @@ import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountP
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function AccountTransactions({
   account,
@@ -245,29 +247,6 @@ function TransactionListWithPreviews({
   readonly accountName: AccountEntity['name'] | string;
 }) {
   const { t } = useTranslation();
-  const baseTransactionsQuery = useCallback(
-    () =>
-      queries.transactions(accountId).options({ splits: 'all' }).select('*'),
-    [accountId],
-  );
-
-  const [transactionsQuery, setTransactionsQuery] = useState<Query>(
-    baseTransactionsQuery(),
-  );
-  const {
-    transactions,
-    isLoading,
-    reload: reloadTransactions,
-    isLoadingMore,
-    loadMore: loadMoreTransactions,
-  } = useTransactions({
-    query: transactionsQuery,
-  });
-
-  const { previewTransactions } = useAccountPreviewTransactions({
-    accountId: account?.id,
-  });
-
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -277,6 +256,49 @@ function TransactionListWithPreviews({
       dispatch(syncAndDownload({ accountId }));
     }
   }, [accountId, dispatch]);
+
+  const baseTransactionsQuery = useCallback(
+    () =>
+      queries.transactions(accountId).options({ splits: 'all' }).select('*'),
+    [accountId],
+  );
+
+  const [showBalances] = useSyncedPref(`show-balances-${accountId}`);
+  const [transactionsQuery, setTransactionsQuery] = useState<Query>(
+    baseTransactionsQuery(),
+  );
+  const {
+    transactions,
+    runningBalances,
+    isLoading,
+    reload: reloadTransactions,
+    isLoadingMore,
+    loadMore: loadMoreTransactions,
+  } = useTransactions({
+    query: transactionsQuery,
+    options: {
+      calculateRunningBalances: showBalances === 'true',
+    },
+  });
+
+  const { isSearching, search: onSearch } = useTransactionsSearch({
+    updateQuery: setTransactionsQuery,
+    resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
+    dateFormat,
+  });
+
+  const { previewTransactions, runningBalances: previewRunningBalances } =
+    useAccountPreviewTransactions({
+      accountId: account?.id,
+    });
+
+  const allBalances = useMemo(() => {
+    const map = new Map<TransactionEntity['id'], IntegerAmount>([
+      ...runningBalances,
+      ...previewRunningBalances,
+    ]);
+    return isSearching ? undefined : map;
+  }, [runningBalances, isSearching, previewRunningBalances]);
 
   useEffect(() => {
     if (accountId) {
@@ -298,12 +320,6 @@ function TransactionListWithPreviews({
       }
     });
   }, [dispatch, reloadTransactions]);
-
-  const { isSearching, search: onSearch } = useTransactionsSearch({
-    updateQuery: setTransactionsQuery,
-    resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
-    dateFormat,
-  });
 
   const onOpenTransaction = useCallback(
     (transaction: TransactionEntity) => {
@@ -371,6 +387,7 @@ function TransactionListWithPreviews({
       balance={balanceQueries.balance}
       balanceCleared={balanceQueries.cleared}
       balanceUncleared={balanceQueries.uncleared}
+      runningBalances={allBalances}
       isLoadingMore={isLoadingMore}
       onLoadMore={loadMoreTransactions}
       searchPlaceholder={t('Search {{accountName}}', { accountName })}
