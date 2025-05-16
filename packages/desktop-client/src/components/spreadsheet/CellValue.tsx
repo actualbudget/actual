@@ -8,7 +8,6 @@ import React, {
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 
-
 import { type FormatType, useFormat } from '../../hooks/useFormat';
 import { useSheetName } from '../../hooks/useSheetName';
 import { useSheetValue } from '../../hooks/useSheetValue';
