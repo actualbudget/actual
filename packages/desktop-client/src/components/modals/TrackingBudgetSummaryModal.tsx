@@ -15,7 +15,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
-import { NamespaceContext } from '@desktop-client/hooks/NamespaceContext';
+import { NamespaceContext } from '@desktop-client/hooks/useSheetName';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type TrackingBudgetSummaryModalProps = Extract<
