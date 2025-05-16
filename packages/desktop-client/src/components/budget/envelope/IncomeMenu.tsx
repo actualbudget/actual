@@ -50,7 +50,7 @@ export function IncomeMenu({
         items={[
           {
             name: 'carryover',
-            text: carryover ? t('Disable auto-hold') : t('Enable auto-hold'),
+            text: carryover ? t('Disable auto hold') : t('Enable auto hold'),
           },
           {
             name: 'view',
