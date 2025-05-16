@@ -8,7 +8,7 @@ import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import {
   envelopeBudget,
   trackingBudget,
-} from '@desktop-client/queries/queries';
+} from '@desktop-client/spreadsheet/bindings';
 
 type UseOverspentCategoriesProps = {
   month: string;

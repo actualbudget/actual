@@ -9,13 +9,13 @@ import { AutoTextSize } from 'auto-text-size';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
+import { useFormat } from '../../../hooks/useFormat';
 import { pushModal } from '../../../modals/modalsSlice';
 import { useDispatch } from '../../../redux';
+import { type SheetFields } from '../../../spreadsheet';
 import { makeAmountGrey } from '../../budget/util';
 import { PrivacyFilter } from '../../PrivacyFilter';
-import { type SheetFields } from '../../spreadsheet';
 import { CellValue } from '../../spreadsheet/CellValue';
-import { useFormat } from '../../spreadsheet/useFormat';
 
 import { getColumnWidth, PILL_STYLE } from './BudgetTable';
 

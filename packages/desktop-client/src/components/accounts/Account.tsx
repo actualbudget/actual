@@ -47,9 +47,9 @@ import {
   replaceModal,
 } from '../../modals/modalsSlice';
 import { addNotification } from '../../notifications/notificationsSlice';
+import * as queries from '../../queries';
 import { aqlQuery } from '../../queries/aqlQuery';
 import { pagedQuery, type PagedQuery } from '../../queries/pagedQuery';
-import * as queries from '../../queries/queries';
 import {
   createPayee,
   initiallyLoadPayees,

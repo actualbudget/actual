@@ -7,7 +7,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { type Modal as ModalType } from '../../modals/modalsSlice';
-import { envelopeBudget } from '../../queries/queries';
 import {
   BalanceWithCarryover,
   CarryoverIndicator,
@@ -22,6 +21,7 @@ import {
 import { CellValueText } from '../spreadsheet/CellValue';
 
 import { useCategory } from '@desktop-client/hooks/useCategory';
+import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type EnvelopeBalanceMenuModalProps = Omit<
   Extract<ModalType, { name: 'envelope-balance-menu' }>['options'],

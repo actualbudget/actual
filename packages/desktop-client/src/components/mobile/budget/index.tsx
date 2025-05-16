@@ -21,7 +21,6 @@ import {
 } from '../../../queries/queriesSlice';
 import { useDispatch } from '../../../redux';
 import { prewarmMonth } from '../../budget/util';
-import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
 import { SyncRefresh } from '../../SyncRefresh';
 
 import { BudgetTable } from './BudgetTable';
@@ -29,6 +28,7 @@ import { BudgetTable } from './BudgetTable';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
@@ -509,7 +509,7 @@ export function Budget() {
   }
 
   return (
-    <NamespaceContext.Provider value={monthUtils.sheetForMonth(startMonth)}>
+    <SheetNameProvider name={monthUtils.sheetForMonth(startMonth)}>
       <SyncRefresh
         onSync={async () => {
           dispatch(sync());
@@ -536,6 +536,6 @@ export function Budget() {
           />
         )}
       </SyncRefresh>
-    </NamespaceContext.Provider>
+    </SheetNameProvider>
   );
 }

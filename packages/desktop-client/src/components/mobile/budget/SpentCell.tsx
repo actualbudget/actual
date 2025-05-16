@@ -16,10 +16,10 @@ import { getColumnWidth, PILL_STYLE } from './BudgetTable';
 
 import { makeAmountGrey } from '@desktop-client/components/budget/util';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { type Binding } from '@desktop-client/components/spreadsheet';
 import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
-import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import { type Binding } from '@desktop-client/spreadsheet';
 
 type SpentCellProps = {
   binding: Binding<'envelope-budget' | 'tracking-budget', 'sum-amount'>;

@@ -16,17 +16,21 @@ import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useCategories } from '../../../hooks/useCategories';
 import { useNavigate } from '../../../hooks/useNavigate';
+import { useSheetValue } from '../../../hooks/useSheetValue';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useUndo } from '../../../hooks/useUndo';
 import { collapseModals, pushModal } from '../../../modals/modalsSlice';
-import { envelopeBudget, trackingBudget } from '../../../queries/queries';
 import { useDispatch } from '../../../redux';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
 
 import { BalanceCell } from './BalanceCell';
 import { BudgetCell } from './BudgetCell';
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { SpentCell } from './SpentCell';
+
+import {
+  envelopeBudget,
+  trackingBudget,
+} from '@desktop-client/spreadsheet/bindings';
 
 type ExpenseCategoryNameProps = {
   category: CategoryEntity;

@@ -27,18 +27,13 @@ import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { groupById } from 'loot-core/shared/util';
 
+import { useFormat } from '../../../hooks/useFormat';
+import { useSheetValue } from '../../../hooks/useSheetValue';
 import { pushModal } from '../../../modals/modalsSlice';
-import {
-  envelopeBudget,
-  trackingBudget,
-  uncategorizedCount,
-} from '../../../queries/queries';
 import { useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { CellValue } from '../../spreadsheet/CellValue';
-import { useFormat } from '../../spreadsheet/useFormat';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
 import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
 import { PullToRefresh } from '../PullToRefresh';
 
@@ -53,6 +48,11 @@ import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useOverspentCategories } from '@desktop-client/hooks/useOverspentCategories';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import {
+  envelopeBudget,
+  trackingBudget,
+  uncategorizedCount,
+} from '@desktop-client/spreadsheet/bindings';
 
 export const ROW_HEIGHT = 50;
 

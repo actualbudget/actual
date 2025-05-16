@@ -7,10 +7,11 @@ import { styles } from '@actual-app/components/styles';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { envelopeBudget } from '../../../../queries/queries';
+import { useFormat } from '../../../../hooks/useFormat';
 import { CellValueText } from '../../../spreadsheet/CellValue';
-import { useFormat } from '../../../spreadsheet/useFormat';
 import { EnvelopeCellValue } from '../EnvelopeBudgetComponents';
+
+import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type TotalsListProps = {
   prevMonthName: string;

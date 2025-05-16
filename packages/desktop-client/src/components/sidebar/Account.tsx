@@ -19,6 +19,7 @@ import { type AccountEntity } from 'loot-core/types/models';
 import { openAccountCloseModal } from '../../modals/modalsSlice';
 import { reopenAccount, updateAccount } from '../../queries/queriesSlice';
 import { useDispatch } from '../../redux';
+import { type SheetFields, type Binding } from '../../spreadsheet';
 import { Link } from '../common/Link';
 import { Notes } from '../Notes';
 import {
@@ -28,7 +29,6 @@ import {
   type OnDragChangeCallback,
   type OnDropCallback,
 } from '../sort';
-import { type SheetFields, type Binding } from '../spreadsheet';
 import { CellValue } from '../spreadsheet/CellValue';
 
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';

@@ -2,7 +2,7 @@ import React from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
-import { type Binding } from '../../../spreadsheet';
+import { type Binding } from '../../../../spreadsheet';
 import { useTrackingSheetValue } from '../TrackingBudgetComponents';
 
 import { fraction } from './fraction';

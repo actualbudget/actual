@@ -9,11 +9,12 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { trackingBudget } from '../../../../queries/queries';
+import { useFormat } from '../../../../hooks/useFormat';
 import { PrivacyFilter } from '../../../PrivacyFilter';
-import { useFormat } from '../../../spreadsheet/useFormat';
 import { makeAmountFullStyle } from '../../util';
 import { useTrackingSheetValue } from '../TrackingBudgetComponents';
+
+import { trackingBudget } from '@desktop-client/spreadsheet/bindings';
 
 type SavedProps = {
   projected: boolean;

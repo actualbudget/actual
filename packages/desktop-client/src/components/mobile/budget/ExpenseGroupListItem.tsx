@@ -18,14 +18,18 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
+import { useFormat } from '../../../hooks/useFormat';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { envelopeBudget, trackingBudget } from '../../../queries/queries';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { CellValue } from '../../spreadsheet/CellValue';
-import { useFormat } from '../../spreadsheet/useFormat';
 
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { ExpenseCategoryList } from './ExpenseCategoryList';
+
+import {
+  envelopeBudget,
+  trackingBudget,
+} from '@desktop-client/spreadsheet/bindings';
 
 type ExpenseGroupListItemProps = ComponentPropsWithoutRef<
   typeof GridListItem<CategoryGroupEntity>

@@ -12,8 +12,8 @@ import type {
   TransactionEntity,
 } from 'loot-core/types/models';
 
+import { accountFilter } from '../queries';
 import { liveQuery, type LiveQuery } from '../queries/liveQuery';
-import { accountFilter } from '../queries/queries';
 
 import { useSyncedPref } from './useSyncedPref';
 

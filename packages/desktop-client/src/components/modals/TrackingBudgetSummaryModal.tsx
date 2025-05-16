@@ -12,7 +12,8 @@ import { ExpenseTotal } from '../budget/tracking/budgetsummary/ExpenseTotal';
 import { IncomeTotal } from '../budget/tracking/budgetsummary/IncomeTotal';
 import { Saved } from '../budget/tracking/budgetsummary/Saved';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
+
+import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 
 type TrackingBudgetSummaryModalProps = Extract<
   ModalType,
@@ -32,7 +33,7 @@ export function TrackingBudgetSummaryModal({
             title={t('Budget Summary')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
-          <NamespaceContext.Provider value={sheetForMonth(month)}>
+          <SheetNameProvider name={sheetForMonth(month)}>
             <Stack
               spacing={2}
               style={{
@@ -48,7 +49,7 @@ export function TrackingBudgetSummaryModal({
               projected={month >= currentMonth}
               style={{ ...styles.mediumText, marginTop: 20 }}
             />
-          </NamespaceContext.Provider>
+          </SheetNameProvider>
         </>
       )}
     </Modal>

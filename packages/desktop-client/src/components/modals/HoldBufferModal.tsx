@@ -7,11 +7,12 @@ import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import { type Modal as ModalType } from '../../modals/modalsSlice';
-import { envelopeBudget } from '../../queries/queries';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { FieldLabel } from '../mobile/MobileForms';
 import { AmountInput } from '../util/AmountInput';
+
+import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type HoldBufferModalProps = Extract<
   ModalType,
