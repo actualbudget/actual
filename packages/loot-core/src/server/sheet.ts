@@ -203,13 +203,13 @@ export async function loadUserBudgets(
   // TODO: Clear out the cache here so make sure future loads of the app
   // don't load any extra values that aren't set here
 
-  const { value: budgetType = 'rollover' } =
+  const { value: budgetType = 'envelope' } =
     (await db.first<Pick<DbPreference, 'value'>>(
       'SELECT value from preferences WHERE id = ?',
       ['budgetType'],
     )) ?? {};
 
-  const table = budgetType === 'report' ? 'reflect_budgets' : 'zero_budgets';
+  const table = budgetType === 'tracking' ? 'reflect_budgets' : 'zero_budgets';
   const budgets = await db.all<DbReflectBudget | DbZeroBudget>(`
       SELECT * FROM ${table} b
       LEFT JOIN categories c ON c.id = b.category
@@ -233,7 +233,7 @@ export async function loadUserBudgets(
   }
 
   // For zero-based budgets, load the buffered amounts
-  if (budgetType !== 'report') {
+  if (budgetType !== 'tracking') {
     const budgetMonths = await db.all<DbZeroBudgetMonth>(
       'SELECT * FROM zero_budget_months',
     );

@@ -1,9 +1,9 @@
-import fs from 'node:fs';
+import { createRequire } from 'module';
+import fs, { readFileSync } from 'node:fs';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
-import actuator from 'express-actuator';
 import rateLimit from 'express-rate-limit';
 
 import { bootstrap } from './account-db.js';
@@ -67,7 +67,32 @@ app.get('/mode', (req, res) => {
   res.send(config.get('mode'));
 });
 
-app.use(actuator()); // Provides /health, /metrics, /info
+app.get('/info', (_req, res) => {
+  const require = createRequire(import.meta.url);
+  const packageJsonPath = require.resolve(
+    '@actual-app/sync-server/package.json',
+  );
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+
+  res.status(200).json({
+    build: {
+      name: packageJson.name,
+      description: packageJson.description,
+      version: packageJson.version,
+    },
+  });
+});
+
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'UP' });
+});
+
+app.get('/metrics', (_req, res) => {
+  res.status(200).json({
+    mem: process.memoryUsage(),
+    uptime: process.uptime(),
+  });
+});
 
 // The web frontend
 app.use((req, res, next) => {

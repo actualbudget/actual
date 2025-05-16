@@ -44,13 +44,6 @@ import { css } from '@emotion/css';
 import { format as formatDate, parseISO } from 'date-fns';
 
 import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
-import {
-  getAccountsById,
-  getCategoriesById,
-  getPayeesById,
-} from 'loot-core/client/queries/queriesSlice';
 import * as monthUtils from 'loot-core/shared/months';
 import {
   addSplitTransaction,
@@ -122,6 +115,13 @@ import {
   type TransactionUpdateFunction,
 } from './table/utils';
 import { TransactionMenu } from './TransactionMenu';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import {
+  getAccountsById,
+  getPayeesById,
+  getCategoriesById,
+} from '@desktop-client/queries/queriesSlice';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;
@@ -535,7 +535,7 @@ function PayeeCell({
               modal: {
                 name: 'payee-autocomplete',
                 options: {
-                  onSelect: payeeId => {
+                  onSelect: (payeeId: PayeeEntity['id']) => {
                     onUpdate('payee', payeeId);
                   },
                 },

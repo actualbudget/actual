@@ -1,7 +1,8 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { send } from '../../platform/client/fetch';
-import { type Handlers } from '../../types/handlers';
+import { send } from 'loot-core/platform/client/fetch';
+import { type Handlers } from 'loot-core/types/handlers';
+
 import { resetApp } from '../app/appSlice';
 import { closeBudget, loadAllFiles } from '../budgets/budgetsSlice';
 import { loadGlobalPrefs } from '../prefs/prefsSlice';

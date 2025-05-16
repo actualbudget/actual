@@ -1,7 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { send } from '../../platform/client/fetch';
-import { type File } from '../../types/file';
+import { send } from 'loot-core/platform/client/fetch';
+import { type File } from 'loot-core/types/file';
 import {
   type AccountEntity,
   type AccountSyncSource,
@@ -16,7 +16,8 @@ import {
   type UserAccessEntity,
   type NewUserEntity,
   type NoteEntity,
-} from '../../types/models';
+} from 'loot-core/types/models';
+
 import { resetApp, setAppState } from '../app/appSlice';
 import { createAppAsyncThunk } from '../redux';
 import { signOut } from '../users/usersSlice';

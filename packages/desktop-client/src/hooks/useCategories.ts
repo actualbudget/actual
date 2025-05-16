@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 
-import { getCategories } from 'loot-core/client/queries/queriesSlice';
-
+import { getCategories } from '../queries/queriesSlice';
 import { useSelector, useDispatch } from '../redux';
 
 import { useInitialMount } from './useInitialMount';

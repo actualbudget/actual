@@ -13,7 +13,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import {
   accountSchedulesQuery,
   SchedulesProvider,
@@ -22,17 +21,7 @@ import {
   useTransactions,
   useTransactionsSearch,
 } from 'loot-core/client/data-hooks/transactions';
-import {
-  collapseModals,
-  openAccountCloseModal,
-  pushModal,
-} from 'loot-core/client/modals/modalsSlice';
 import * as queries from 'loot-core/client/queries';
-import {
-  markAccountRead,
-  reopenAccount,
-  updateAccount,
-} from 'loot-core/client/queries/queriesSlice';
 import { listen, send } from 'loot-core/platform/client/fetch';
 import { type Query } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
@@ -41,6 +30,17 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
+import { syncAndDownload } from '../../../app/appSlice';
+import {
+  collapseModals,
+  openAccountCloseModal,
+  pushModal,
+} from '../../../modals/modalsSlice';
+import {
+  markAccountRead,
+  reopenAccount,
+  updateAccount,
+} from '../../../queries/queriesSlice';
 import { useSelector, useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { MobileBackButton } from '../MobileBackButton';
@@ -265,7 +265,7 @@ function TransactionListWithPreviews({
   });
 
   const { previewTransactions } = useAccountPreviewTransactions({
-    accountId: account?.id || '',
+    accountId: account?.id,
   });
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
@@ -406,9 +406,9 @@ function queriesFromAccountId(
     default:
       return entity
         ? {
-            balance: queries.accountBalance(entity),
-            cleared: queries.accountBalanceCleared(entity),
-            uncleared: queries.accountBalanceUncleared(entity),
+            balance: queries.accountBalance(entity.id),
+            cleared: queries.accountBalanceCleared(entity.id),
+            uncleared: queries.accountBalanceUncleared(entity.id),
           }
         : { balance: queries.allAccountBalance() };
   }

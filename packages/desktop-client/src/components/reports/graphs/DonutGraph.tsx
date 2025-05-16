@@ -24,6 +24,8 @@ import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 const RADIAN = Math.PI / 180;
 
+const canDeviceHover = () => window.matchMedia('(hover: hover)').matches;
+
 const ActiveShapeMobile = props => {
   const {
     cx,
@@ -280,29 +282,39 @@ export function DonutGraph({
                     endAngle={-270}
                     onMouseLeave={() => setPointer('')}
                     onMouseEnter={(_, index) => {
-                      setActiveIndex(index);
-                      if (!['Group', 'Interval'].includes(groupBy)) {
-                        setPointer('pointer');
+                      if (canDeviceHover()) {
+                        setActiveIndex(index);
+                        if (!['Group', 'Interval'].includes(groupBy)) {
+                          setPointer('pointer');
+                        }
                       }
                     }}
-                    onClick={item =>
-                      ((compact && showTooltip) || !compact) &&
-                      !['Group', 'Interval'].includes(groupBy) &&
-                      showActivity({
-                        navigate,
-                        categories,
-                        accounts,
-                        balanceTypeOp,
-                        filters,
-                        showHiddenCategories,
-                        showOffBudget,
-                        type: 'totals',
-                        startDate: data.startDate,
-                        endDate: data.endDate,
-                        field: groupBy.toLowerCase(),
-                        id: item.id,
-                      })
-                    }
+                    onClick={(item, index) => {
+                      if (!canDeviceHover()) {
+                        setActiveIndex(index);
+                      }
+
+                      if (
+                        !['Group', 'Interval'].includes(groupBy) &&
+                        (canDeviceHover() || activeIndex === index) &&
+                        ((compact && showTooltip) || !compact)
+                      ) {
+                        showActivity({
+                          navigate,
+                          categories,
+                          accounts,
+                          balanceTypeOp,
+                          filters,
+                          showHiddenCategories,
+                          showOffBudget,
+                          type: 'totals',
+                          startDate: data.startDate,
+                          endDate: data.endDate,
+                          field: groupBy.toLowerCase(),
+                          id: item.id,
+                        });
+                      }
+                    }}
                   >
                     {data.legend.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />

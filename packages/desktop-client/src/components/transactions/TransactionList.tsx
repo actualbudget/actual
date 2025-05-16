@@ -4,7 +4,6 @@ import { useCallback, useLayoutEffect, useRef, type RefObject } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import {
   addSplitTransaction,
@@ -24,6 +23,7 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
+import { pushModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { type TableHandleRef } from '../table';
 

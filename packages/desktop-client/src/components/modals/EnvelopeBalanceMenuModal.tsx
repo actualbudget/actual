@@ -6,9 +6,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { envelopeBudget } from 'loot-core/client/queries';
 
+import { type Modal as ModalType } from '../../modals/modalsSlice';
 import {
   BalanceWithCarryover,
   CarryoverIndicator,
@@ -74,7 +74,7 @@ export function EnvelopeBalanceMenuModal({
             </Text>
             <BalanceWithCarryover
               isDisabled
-              isMobileEnvelopeModal
+              shouldInlineGoalStatus
               carryover={envelopeBudget.catCarryover(categoryId)}
               balance={envelopeBudget.catBalance(categoryId)}
               goal={envelopeBudget.catGoal(categoryId)}

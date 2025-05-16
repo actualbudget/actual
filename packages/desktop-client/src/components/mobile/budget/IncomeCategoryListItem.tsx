@@ -101,15 +101,15 @@ function IncomeCategoryCells({
 }: IncomeCategoryCellsProps) {
   const { t } = useTranslation();
   const columnWidth = getColumnWidth();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
   const budgeted =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.catBudgeted(category.id)
       : envelopeBudget.catBudgeted(category.id);
 
   const balance =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.catSumAmount(category.id)
       : envelopeBudget.catSumAmount(category.id);
 

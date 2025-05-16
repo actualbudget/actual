@@ -1,19 +1,28 @@
 // @ts-strict-ignore
-import { t } from 'i18next';
-
-import { listen, send } from '../platform/client/fetch';
-
-import { resetSync, sync } from './app/appSlice';
-import { closeAndDownloadBudget, uploadBudget } from './budgets/budgetsSlice';
-import { pushModal } from './modals/modalsSlice';
+// This is temporary until we move all loot-core/client over to desktop-client.
+/* eslint-disable no-restricted-imports */
+import { resetSync, sync } from '@actual-app/web/src/app/appSlice';
+import {
+  closeAndDownloadBudget,
+  uploadBudget,
+} from '@actual-app/web/src/budgets/budgetsSlice';
+import { pushModal } from '@actual-app/web/src/modals/modalsSlice';
 import {
   addNotification,
   type Notification,
-} from './notifications/notificationsSlice';
-import { loadPrefs } from './prefs/prefsSlice';
-import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
-import { type AppStore } from './store';
-import { signOut } from './users/usersSlice';
+} from '@actual-app/web/src/notifications/notificationsSlice';
+import { loadPrefs } from '@actual-app/web/src/prefs/prefsSlice';
+import {
+  getAccounts,
+  getCategories,
+  getPayees,
+} from '@actual-app/web/src/queries/queriesSlice';
+import { type AppStore } from '@actual-app/web/src/redux/store';
+import { signOut } from '@actual-app/web/src/users/usersSlice';
+/* eslint-enable no-restricted-imports */
+import { t } from 'i18next';
+
+import { listen, send } from '../platform/client/fetch';
 
 export function listenForSyncEvent(store: AppStore) {
   // TODO: Should this run on mobile too?

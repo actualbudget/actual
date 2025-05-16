@@ -1,15 +1,15 @@
-// eslint-disable-next-line no-restricted-imports -- fix me -- do not import @actual-app/web in loot-core
-import { setI18NextLanguage } from '@actual-app/web/src/i18n';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { send } from '../../platform/client/fetch';
-import { parseNumberFormat, setNumberFormat } from '../../shared/util';
+import { send } from 'loot-core/platform/client/fetch';
+import { parseNumberFormat, setNumberFormat } from 'loot-core/shared/util';
 import {
   type GlobalPrefs,
   type MetadataPrefs,
   type SyncedPrefs,
-} from '../../types/prefs';
+} from 'loot-core/types/prefs';
+
 import { resetApp } from '../app/appSlice';
+import { setI18NextLanguage } from '../i18n';
 import { closeModal } from '../modals/modalsSlice';
 import { createAppAsyncThunk } from '../redux';
 

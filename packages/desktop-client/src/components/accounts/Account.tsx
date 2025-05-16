@@ -16,33 +16,17 @@ import { debounce } from 'debounce';
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-import { syncAndDownload } from 'loot-core/client/app/appSlice';
 import { useFilters } from 'loot-core/client/data-hooks/filters';
 import {
   SchedulesProvider,
   accountSchedulesQuery,
 } from 'loot-core/client/data-hooks/schedules';
-import {
-  openAccountCloseModal,
-  pushModal,
-  replaceModal,
-} from 'loot-core/client/modals/modalsSlice';
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import * as queries from 'loot-core/client/queries';
-import {
-  createPayee,
-  initiallyLoadPayees,
-  markAccountRead,
-  reopenAccount,
-  updateAccount,
-  updateNewTransactions,
-} from 'loot-core/client/queries/queriesSlice';
 import {
   aqlQuery,
   pagedQuery,
   type PagedQuery,
 } from 'loot-core/client/query-helpers';
-import { type AppDispatch } from 'loot-core/client/store';
 import { send, listen } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type UndoState } from 'loot-core/server/undo';
@@ -67,7 +51,23 @@ import {
 } from 'loot-core/types/models';
 
 import { unlinkAccount } from '../../accounts/accountsSlice';
+import { syncAndDownload } from '../../app/appSlice';
+import {
+  openAccountCloseModal,
+  pushModal,
+  replaceModal,
+} from '../../modals/modalsSlice';
+import { addNotification } from '../../notifications/notificationsSlice';
+import {
+  createPayee,
+  initiallyLoadPayees,
+  markAccountRead,
+  reopenAccount,
+  updateAccount,
+  updateNewTransactions,
+} from '../../queries/queriesSlice';
 import { useSelector, useDispatch } from '../../redux';
+import { type AppDispatch } from '../../redux/store';
 import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { TransactionList } from '../transactions/TransactionList';
 import { validateAccountName } from '../util/accountValidation';
