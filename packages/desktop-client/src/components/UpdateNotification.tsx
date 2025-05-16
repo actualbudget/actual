@@ -7,10 +7,10 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { setAppState, updateApp } from '../app/appSlice';
-import { useSelector, useDispatch } from '../redux';
-
 import { Link } from './common/Link';
+
+import { setAppState, updateApp } from '@desktop-client/app/appSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 export function UpdateNotification() {
   const { t } = useTranslation();

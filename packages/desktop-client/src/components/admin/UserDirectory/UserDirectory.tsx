@@ -20,21 +20,20 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type NewUserEntity, type UserEntity } from 'loot-core/types/models';
 
-import { pushModal } from '../../../modals/modalsSlice';
-import { addNotification } from '../../../notifications/notificationsSlice';
-import { useDispatch } from '../../../redux';
-import { signOut } from '../../../users/usersSlice';
-import { InfiniteScrollWrapper } from '../../common/InfiniteScrollWrapper';
-import { Link } from '../../common/Link';
-import { Search } from '../../common/Search';
-
 import { UserDirectoryHeader } from './UserDirectoryHeader';
 import { UserDirectoryRow } from './UserDirectoryRow';
 
+import { InfiniteScrollWrapper } from '@desktop-client/components/common/InfiniteScrollWrapper';
+import { Link } from '@desktop-client/components/common/Link';
+import { Search } from '@desktop-client/components/common/Search';
 import {
   SelectedProvider,
   useSelected,
 } from '@desktop-client/hooks/useSelected';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
+import { signOut } from '@desktop-client/users/usersSlice';
 
 type ManageUserDirectoryContentProps = {
   isModal: boolean;

@@ -27,22 +27,32 @@ import {
   type CategoryEntity,
 } from 'loot-core/types/models';
 
-import { envelopeBudget } from '../../../queries/queries';
-import { type Binding, type SheetFields } from '../../spreadsheet';
-import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
-import { useSheetName } from '../../spreadsheet/useSheetName';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
-import { Row, Field, SheetCell, type SheetCellProps } from '../../table';
-import { BalanceWithCarryover } from '../BalanceWithCarryover';
-import { makeAmountGrey } from '../util';
-
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
 
+import { BalanceWithCarryover } from '@desktop-client/components/budget/BalanceWithCarryover';
+import { makeAmountGrey } from '@desktop-client/components/budget/util';
+import {
+  type Binding,
+  type SheetFields,
+} from '@desktop-client/components/spreadsheet';
+import {
+  CellValue,
+  CellValueText,
+} from '@desktop-client/components/spreadsheet/CellValue';
+import { useSheetName } from '@desktop-client/components/spreadsheet/useSheetName';
+import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
+import {
+  Row,
+  Field,
+  SheetCell,
+  type SheetCellProps,
+} from '@desktop-client/components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import { envelopeBudget } from '@desktop-client/queries/queries';
 
 export function useEnvelopeSheetName<
   FieldName extends SheetFields<'envelope-budget'>,

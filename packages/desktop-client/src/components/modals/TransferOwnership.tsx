@@ -15,14 +15,20 @@ import { type Budget } from 'loot-core/types/budget';
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 import { type Handlers } from 'loot-core/types/handlers';
 
-import { closeAndLoadBudget } from '../../budgets/budgetsSlice';
-import { type Modal as ModalType, popModal } from '../../modals/modalsSlice';
-import { addNotification } from '../../notifications/notificationsSlice';
-import { useDispatch, useSelector } from '../../redux';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { FormField, FormLabel } from '../forms';
-
+import { closeAndLoadBudget } from '@desktop-client/budgets/budgetsSlice';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import {
+  type Modal as ModalType,
+  popModal,
+} from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 type TransferOwnershipProps = Extract<
   ModalType,

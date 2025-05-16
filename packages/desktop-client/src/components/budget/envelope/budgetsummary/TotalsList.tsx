@@ -7,10 +7,10 @@ import { styles } from '@actual-app/components/styles';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { envelopeBudget } from '../../../../queries/queries';
-import { CellValueText } from '../../../spreadsheet/CellValue';
-import { useFormat } from '../../../spreadsheet/useFormat';
-import { EnvelopeCellValue } from '../EnvelopeBudgetComponents';
+import { EnvelopeCellValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
+import { CellValueText } from '@desktop-client/components/spreadsheet/CellValue';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
+import { envelopeBudget } from '@desktop-client/queries/queries';
 
 type TotalsListProps = {
   prevMonthName: string;

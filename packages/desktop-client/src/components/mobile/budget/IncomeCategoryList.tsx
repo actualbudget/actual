@@ -7,10 +7,10 @@ import { css } from '@emotion/css';
 
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { moveCategory } from '../../../queries/queriesSlice';
-import { useDispatch } from '../../../redux';
-
 import { IncomeCategoryListItem } from './IncomeCategoryListItem';
+
+import { moveCategory } from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type IncomeCategoryListProps = {
   categories: CategoryEntity[];

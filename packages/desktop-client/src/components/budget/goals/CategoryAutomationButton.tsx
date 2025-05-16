@@ -6,10 +6,9 @@ import { theme } from '@actual-app/components/theme';
 
 import { type Template } from 'loot-core/server/budget/types/templates';
 
-import { pushModal } from '../../../modals/modalsSlice';
-import { useDispatch } from '../../../redux';
-
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type CategoryAutomationButtonProps = {
   width?: number;

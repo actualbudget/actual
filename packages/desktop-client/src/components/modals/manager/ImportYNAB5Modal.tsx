@@ -9,12 +9,15 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { importBudget } from '../../../budgets/budgetsSlice';
-import { useDispatch } from '../../../redux';
-import { Link } from '../../common/Link';
-import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
-
+import { importBudget } from '@desktop-client/budgets/budgetsSlice';
+import { Link } from '@desktop-client/components/common/Link';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useDispatch } from '@desktop-client/redux';
 
 function getErrorMessage(error: string): string {
   switch (error) {

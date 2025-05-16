@@ -11,8 +11,7 @@ import {
   useSetLoginMethods,
   useSetMultiuserEnabled,
   useSetServerURL,
-} from '../../ServerContext';
-
+} from '@desktop-client/components/ServerContext';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 // There are two URLs that dance with each other: `/login` and

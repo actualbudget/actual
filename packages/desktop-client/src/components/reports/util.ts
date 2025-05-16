@@ -7,7 +7,7 @@ import type {
   PayeeEntity,
 } from 'loot-core/types/models';
 
-import { aqlQuery } from '../../queries/aqlQuery';
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 export function fromDateRepr(date: string): string {
   return date.slice(0, 7);

@@ -1,9 +1,12 @@
 import { useEffect } from 'react';
 
-import { getCommonPayees, getPayees } from '../queries/queriesSlice';
-import { useSelector, useDispatch } from '../redux';
-
 import { useInitialMount } from './useInitialMount';
+
+import {
+  getCommonPayees,
+  getPayees,
+} from '@desktop-client/queries/queriesSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 export function useCommonPayees() {
   const dispatch = useDispatch();

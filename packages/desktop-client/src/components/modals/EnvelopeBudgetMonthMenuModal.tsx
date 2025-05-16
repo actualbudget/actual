@@ -15,14 +15,17 @@ import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
-import { BudgetMonthMenu } from '../budget/envelope/budgetsummary/BudgetMonthMenu';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Notes } from '../Notes';
-
+import { BudgetMonthMenu } from '@desktop-client/components/budget/envelope/budgetsummary/BudgetMonthMenu';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { Notes } from '@desktop-client/components/Notes';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNotes } from '@desktop-client/hooks/useNotes';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type EnvelopeBudgetMonthMenuModalProps = Extract<
   ModalType,

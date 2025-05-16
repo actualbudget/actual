@@ -12,10 +12,10 @@ import type {
   TransactionEntity,
 } from 'loot-core/types/models';
 
-import { liveQuery, type LiveQuery } from '../queries/liveQuery';
-import { accountFilter } from '../queries/queries';
-
 import { useSyncedPref } from './useSyncedPref';
+
+import { liveQuery, type LiveQuery } from '@desktop-client/queries/liveQuery';
+import { accountFilter } from '@desktop-client/queries/queries';
 
 export type ScheduleStatusType = ReturnType<typeof getStatus>;
 export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;

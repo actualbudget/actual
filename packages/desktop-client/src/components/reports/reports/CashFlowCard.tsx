@@ -8,19 +8,19 @@ import { Bar, BarChart, LabelList, ResponsiveContainer } from 'recharts';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type CashFlowWidget } from 'loot-core/types/models';
 
-import { PrivacyFilter } from '../../PrivacyFilter';
-import { Change } from '../Change';
-import { chartTheme } from '../chart-theme';
-import { Container } from '../Container';
-import { DateRange } from '../DateRange';
-import { LoadingIndicator } from '../LoadingIndicator';
-import { ReportCard } from '../ReportCard';
-import { ReportCardName } from '../ReportCardName';
-import { calculateTimeRange } from '../reportRanges';
-import { simpleCashFlow } from '../spreadsheets/cash-flow-spreadsheet';
-import { useReport } from '../useReport';
-
 import { defaultTimeFrame } from './CashFlow';
+
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { Change } from '@desktop-client/components/reports/Change';
+import { chartTheme } from '@desktop-client/components/reports/chart-theme';
+import { Container } from '@desktop-client/components/reports/Container';
+import { DateRange } from '@desktop-client/components/reports/DateRange';
+import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { ReportCard } from '@desktop-client/components/reports/ReportCard';
+import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
+import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
+import { simpleCashFlow } from '@desktop-client/components/reports/spreadsheets/cash-flow-spreadsheet';
+import { useReport } from '@desktop-client/components/reports/useReport';
 
 type CustomLabelProps = {
   value?: number;

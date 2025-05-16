@@ -7,7 +7,11 @@ import { View } from '@actual-app/components/view';
 
 import * as Platform from 'loot-core/shared/platform';
 
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
 
 type KeyIconProps = {
   shortcut: string;

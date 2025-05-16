@@ -26,10 +26,6 @@ import {
 } from 'loot-core/shared/environment';
 import * as Platform from 'loot-core/shared/platform';
 
-import { sync } from '../app/appSlice';
-import * as queries from '../queries/queries';
-import { useDispatch } from '../redux';
-
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';
 import { MonthCountSelector } from './budget/MonthCountSelector';
@@ -41,10 +37,13 @@ import { useSidebar } from './sidebar/SidebarProvider';
 import { useSheetValue } from './spreadsheet/useSheetValue';
 import { ThemeSelector } from './ThemeSelector';
 
+import { sync } from '@desktop-client/app/appSlice';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import * as queries from '@desktop-client/queries/queries';
+import { useDispatch } from '@desktop-client/redux';
 
 function UncategorizedButton() {
   const count: number | null = useSheetValue(queries.uncategorizedCount());

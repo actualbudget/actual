@@ -21,16 +21,19 @@ import {
   type AccountEntity,
 } from 'loot-core/types/models';
 
-import { unlinkAccount } from '../../accounts/accountsSlice';
-import { pushModal } from '../../modals/modalsSlice';
-import { useDispatch } from '../../redux';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { CheckboxOption } from '../modals/ImportTransactionsModal/CheckboxOption';
-
 import { FieldMapping } from './FieldMapping';
 
+import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { CheckboxOption } from '@desktop-client/components/modals/ImportTransactionsModal/CheckboxOption';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 export type TransactionDirection = 'payment' | 'deposit';
 

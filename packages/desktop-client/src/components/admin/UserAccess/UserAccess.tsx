@@ -25,17 +25,16 @@ import {
   type UserAccessEntity,
 } from 'loot-core/types/models';
 
-import { pushModal } from '../../../modals/modalsSlice';
-import { addNotification } from '../../../notifications/notificationsSlice';
-import { useDispatch } from '../../../redux';
-import { InfiniteScrollWrapper } from '../../common/InfiniteScrollWrapper';
-import { Link } from '../../common/Link';
-import { Search } from '../../common/Search';
-
 import { UserAccessHeader } from './UserAccessHeader';
 import { UserAccessRow } from './UserAccessRow';
 
+import { InfiniteScrollWrapper } from '@desktop-client/components/common/InfiniteScrollWrapper';
+import { Link } from '@desktop-client/components/common/Link';
+import { Search } from '@desktop-client/components/common/Search';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type ManageUserAccessContentProps = {
   isModal: boolean;

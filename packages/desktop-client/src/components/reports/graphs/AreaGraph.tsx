@@ -24,11 +24,10 @@ import {
   type DataEntity,
 } from 'loot-core/types/models';
 
-import { Container } from '../Container';
-
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 
+import { Container } from '@desktop-client/components/reports/Container';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type PayloadItem = {

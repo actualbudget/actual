@@ -2,10 +2,10 @@ import React, { type ComponentProps } from 'react';
 
 import { type TransactionFilterEntity } from 'loot-core/types/models';
 
-import { useTransactionFilters } from '../../hooks/useTransactionFilters';
-
 import { Autocomplete } from './Autocomplete';
 import { FilterList } from './FilterList';
+
+import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
 
 export function FilterAutocomplete({
   embedded,

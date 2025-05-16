@@ -1,10 +1,10 @@
 import React, { type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { trackingBudget } from '../../../../queries/queries';
-
 import { BudgetTotal } from './BudgetTotal';
 import { ExpenseProgress } from './ExpenseProgress';
+
+import { trackingBudget } from '@desktop-client/queries/queries';
 
 type ExpenseTotalProps = {
   style?: CSSProperties;

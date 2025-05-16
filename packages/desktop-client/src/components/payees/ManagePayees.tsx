@@ -18,20 +18,23 @@ import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { type Diff, groupById } from 'loot-core/shared/util';
 import { type PayeeEntity } from 'loot-core/types/models';
 
-import { pushModal } from '../../modals/modalsSlice';
-import { useDispatch } from '../../redux';
-import { Search } from '../common/Search';
-import { TableHeader, Cell, SelectCell } from '../table';
-
 import { PayeeMenu } from './PayeeMenu';
 import { PayeeTable } from './PayeeTable';
 
+import { Search } from '@desktop-client/components/common/Search';
+import {
+  TableHeader,
+  Cell,
+  SelectCell,
+} from '@desktop-client/components/table';
 import {
   useSelected,
   SelectedProvider,
   useSelectedDispatch,
   useSelectedItems,
 } from '@desktop-client/hooks/useSelected';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 const getPayeesById = memoizeOne((payees: PayeeEntity[]) => groupById(payees));
 

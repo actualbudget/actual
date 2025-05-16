@@ -4,10 +4,9 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { View } from '@actual-app/components/view';
 
-import { Page } from '../../Page';
-
 import { UserDirectory } from './UserDirectory';
 
+import { Page } from '@desktop-client/components/Page';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 export function UserDirectoryPage({

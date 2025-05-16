@@ -16,14 +16,14 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import { getTestKeyError } from 'loot-core/shared/errors';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
-import { Link } from '../common/Link';
+import { Link } from '@desktop-client/components/common/Link';
 import {
   Modal,
   ModalButtons,
   ModalCloseButton,
   ModalHeader,
-} from '../common/Modal';
+} from '@desktop-client/components/common/Modal';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type FixEncryptionKeyModalProps = Extract<
   ModalType,

@@ -8,10 +8,13 @@ import { Menu } from '@actual-app/components/menu';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type BudgetPageMenuModalProps = Extract<
   ModalType,

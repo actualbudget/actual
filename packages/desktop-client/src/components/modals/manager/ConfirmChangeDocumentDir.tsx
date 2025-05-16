@@ -7,13 +7,16 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { addNotification } from '../../../notifications/notificationsSlice';
-import { useDispatch } from '../../../redux';
-import { Information } from '../../alerts';
-import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
-import { Checkbox } from '../../forms';
-
+import { Information } from '@desktop-client/components/alerts';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { Checkbox } from '@desktop-client/components/forms';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 function DirectoryDisplay({ directory }: { directory: string }) {
   return (

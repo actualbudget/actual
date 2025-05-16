@@ -6657,6 +6657,7 @@ __metadata:
     eslint-plugin-react: "npm:^7.37.4"
     eslint-plugin-react-hooks: "npm:^5.2.0"
     eslint-plugin-rulesdir: "npm:^0.2.2"
+    eslint-plugin-typescript-paths: "npm:^0.0.33"
     globals: "npm:^15.13.0"
     html-to-image: "npm:^1.11.11"
     husky: "npm:^9.1.7"
@@ -10153,6 +10154,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint-plugin-typescript-paths@npm:^0.0.33":
+  version: 0.0.33
+  resolution: "eslint-plugin-typescript-paths@npm:0.0.33"
+  dependencies:
+    jsonc-parser: "npm:^3.2.0"
+  peerDependencies:
+    eslint: ">=8"
+  checksum: 10/8689e339497c76f4da5b8bf64e19f5397855095535e5a90c09d392513c818fce7af700b16f6c90ca75da72ac5a80031ae1a590f8206f81f47bd0a80cf5915aa3
+  languageName: node
+  linkType: hard
+
 "eslint-scope@npm:5.1.1":
   version: 5.1.1
   resolution: "eslint-scope@npm:5.1.1"
@@ -13201,6 +13213,13 @@ __metadata:
   bin:
     json5: lib/cli.js
   checksum: 10/1db67b853ff0de3534085d630691d3247de53a2ed1390ba0ddff681ea43e9b3e30ecbdb65c5e9aab49435e44059c23dbd6fee8ee619419ba37465bb0dd7135da
+  languageName: node
+  linkType: hard
+
+"jsonc-parser@npm:^3.2.0":
+  version: 3.3.1
+  resolution: "jsonc-parser@npm:3.3.1"
+  checksum: 10/9b0dc391f20b47378f843ef1e877e73ec652a5bdc3c5fa1f36af0f119a55091d147a86c1ee86a232296f55c929bba174538c2bf0312610e0817a22de131cc3f4
   languageName: node
   linkType: hard
 

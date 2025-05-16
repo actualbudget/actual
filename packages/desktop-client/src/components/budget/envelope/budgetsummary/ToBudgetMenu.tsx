@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 
-import { envelopeBudget } from '../../../../queries/queries';
-import { useEnvelopeSheetValue } from '../EnvelopeBudgetComponents';
+import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
+import { envelopeBudget } from '@desktop-client/queries/queries';
 
 type ToBudgetMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { getIsOutdated, getLatestVersion } from '../util/versions';
+import { getIsOutdated, getLatestVersion } from '@desktop-client/util/versions';
 
 export function useIsOutdated(): boolean {
   const [isOutdated, setIsOutdated] = useState(false);

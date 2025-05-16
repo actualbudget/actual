@@ -69,18 +69,27 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import {
-  type SplitsExpandedContextValue,
-  useSplitsExpanded,
-} from '../../hooks/useSplitsExpanded';
-import { useDispatch } from '../../redux';
-import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
-import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
-import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
-import { getStatusProps, type StatusTypes } from '../schedules/StatusBadge';
-import { DateSelect } from '../select/DateSelect';
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
+  deserializeTransaction,
+  isLastChild,
+  makeTemporaryTransactions,
+  selectAscDesc,
+  type SerializedTransaction,
+  serializeTransaction,
+  type TransactionEditFunction,
+  type TransactionUpdateFunction,
+} from './table/utils';
+import { TransactionMenu } from './TransactionMenu';
+
+import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
+import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
+import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
+import {
+  getStatusProps,
+  type StatusTypes,
+} from '@desktop-client/components/schedules/StatusBadge';
+import { DateSelect } from '@desktop-client/components/select/DateSelect';
+import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
 import {
   Cell,
   CellButton,
@@ -96,26 +105,21 @@ import {
   type TableProps,
   UnexposedCellContent,
   useTableNavigator,
-} from '../table';
-
-import {
-  deserializeTransaction,
-  isLastChild,
-  makeTemporaryTransactions,
-  selectAscDesc,
-  type SerializedTransaction,
-  serializeTransaction,
-  type TransactionEditFunction,
-  type TransactionUpdateFunction,
-} from './table/utils';
-import { TransactionMenu } from './TransactionMenu';
-
+} from '@desktop-client/components/table';
 import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { usePrevious } from '@desktop-client/hooks/usePrevious';
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
+import {
+  useSelectedDispatch,
+  useSelectedItems,
+} from '@desktop-client/hooks/useSelected';
+import {
+  type SplitsExpandedContextValue,
+  useSplitsExpanded,
+} from '@desktop-client/hooks/useSplitsExpanded';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import {
@@ -123,6 +127,7 @@ import {
   getPayeesById,
   getCategoriesById,
 } from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;

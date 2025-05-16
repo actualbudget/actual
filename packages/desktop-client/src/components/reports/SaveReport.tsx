@@ -9,12 +9,12 @@ import { View } from '@actual-app/components/view';
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
 import { type CustomReportEntity } from 'loot-core/types/models';
 
-import { useReports } from '../../hooks/useReports';
-
 import { SaveReportChoose } from './SaveReportChoose';
 import { SaveReportDelete } from './SaveReportDelete';
 import { SaveReportMenu } from './SaveReportMenu';
 import { SaveReportName } from './SaveReportName';
+
+import { useReports } from '@desktop-client/hooks/useReports';
 
 type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
   customReportItems: T;

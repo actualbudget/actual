@@ -9,11 +9,11 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { trackingBudget } from '../../../../queries/queries';
-import { PrivacyFilter } from '../../../PrivacyFilter';
-import { useFormat } from '../../../spreadsheet/useFormat';
-import { makeAmountFullStyle } from '../../util';
-import { useTrackingSheetValue } from '../TrackingBudgetComponents';
+import { useTrackingSheetValue } from '@desktop-client/components/budget/tracking/TrackingBudgetComponents';
+import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
+import { trackingBudget } from '@desktop-client/queries/queries';
 
 type SavedProps = {
   projected: boolean;

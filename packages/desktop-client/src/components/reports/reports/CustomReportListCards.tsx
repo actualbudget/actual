@@ -12,20 +12,19 @@ import { send, sendCatch } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { type CustomReportEntity } from 'loot-core/types/models';
 
-import { addNotification } from '../../../notifications/notificationsSlice';
-import { useDispatch } from '../../../redux';
-import { DateRange } from '../DateRange';
-import { ReportCard } from '../ReportCard';
-import { ReportCardName } from '../ReportCardName';
-import { calculateHasWarning } from '../util';
-
 import { GetCardData } from './GetCardData';
 import { MissingReportCard } from './MissingReportCard';
 
+import { DateRange } from '@desktop-client/components/reports/DateRange';
+import { ReportCard } from '@desktop-client/components/reports/ReportCard';
+import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
+import { calculateHasWarning } from '@desktop-client/components/reports/util';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type CustomReportListCardsProps = {
   isEditing?: boolean;

@@ -13,8 +13,8 @@ import {
   type IntervalEntity,
 } from 'loot-core/types/models';
 
-import { Row, Cell } from '../../../table';
-import { ReportOptions } from '../../ReportOptions';
+import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
+import { Row, Cell } from '@desktop-client/components/table';
 
 type ReportTableHeaderProps = {
   groupBy: string;

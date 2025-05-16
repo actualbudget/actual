@@ -9,10 +9,10 @@ import { getUploadError } from 'loot-core/shared/errors';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type AtLeastOne } from 'loot-core/types/util';
 
-import { syncAccounts } from '../accounts/accountsSlice';
-import { pushModal } from '../modals/modalsSlice';
-import { loadPrefs } from '../prefs/prefsSlice';
-import { createAppAsyncThunk } from '../redux';
+import { syncAccounts } from '@desktop-client/accounts/accountsSlice';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { loadPrefs } from '@desktop-client/prefs/prefsSlice';
+import { createAppAsyncThunk } from '@desktop-client/redux';
 
 const sliceName = 'app';
 

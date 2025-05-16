@@ -21,13 +21,13 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
+import { Link } from './common/Link';
+
 import {
   removeNotification,
   type NotificationWithId,
-} from '../notifications/notificationsSlice';
-import { useSelector, useDispatch } from '../redux';
-
-import { Link } from './common/Link';
+} from '@desktop-client/notifications/notificationsSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 function compileMessage(
   message: string,

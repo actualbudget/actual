@@ -1,9 +1,12 @@
 import { useTranslation } from 'react-i18next';
 
-import { type Modal } from '../../modals/modalsSlice';
-import { ModalHeader, ModalTitle } from '../common/Modal';
-
 import { SingleInputModal } from './SingleInputModal';
+
+import {
+  ModalHeader,
+  ModalTitle,
+} from '@desktop-client/components/common/Modal';
+import { type Modal } from '@desktop-client/modals/modalsSlice';
 
 type NewCategoryGroupModalProps = Extract<
   Modal,

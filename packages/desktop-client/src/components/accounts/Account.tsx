@@ -39,34 +39,14 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
-import { unlinkAccount } from '../../accounts/accountsSlice';
-import { syncAndDownload } from '../../app/appSlice';
-import {
-  openAccountCloseModal,
-  pushModal,
-  replaceModal,
-} from '../../modals/modalsSlice';
-import { addNotification } from '../../notifications/notificationsSlice';
-import { aqlQuery } from '../../queries/aqlQuery';
-import { pagedQuery, type PagedQuery } from '../../queries/pagedQuery';
-import * as queries from '../../queries/queries';
-import {
-  createPayee,
-  initiallyLoadPayees,
-  markAccountRead,
-  reopenAccount,
-  updateAccount,
-  updateNewTransactions,
-} from '../../queries/queriesSlice';
-import { useSelector, useDispatch } from '../../redux';
-import { type AppDispatch } from '../../redux/store';
-import { type SavedFilter } from '../filters/SavedFilterMenuButton';
-import { TransactionList } from '../transactions/TransactionList';
-import { validateAccountName } from '../util/accountValidation';
-
 import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
 
+import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
+import { syncAndDownload } from '@desktop-client/app/appSlice';
+import { type SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
+import { TransactionList } from '@desktop-client/components/transactions/TransactionList';
+import { validateAccountName } from '@desktop-client/components/util/accountValidation';
 import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
@@ -87,6 +67,28 @@ import {
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useTransactionBatchActions } from '@desktop-client/hooks/useTransactionBatchActions';
 import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
+import {
+  openAccountCloseModal,
+  pushModal,
+  replaceModal,
+} from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+import {
+  pagedQuery,
+  type PagedQuery,
+} from '@desktop-client/queries/pagedQuery';
+import * as queries from '@desktop-client/queries/queries';
+import {
+  createPayee,
+  initiallyLoadPayees,
+  markAccountRead,
+  reopenAccount,
+  updateAccount,
+  updateNewTransactions,
+} from '@desktop-client/queries/queriesSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
+import { type AppDispatch } from '@desktop-client/redux/store';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
 

@@ -6,13 +6,15 @@ import { type UndoState } from 'loot-core/server/undo';
 import { applyChanges, type Diff } from 'loot-core/shared/util';
 import { type NewRuleEntity, type PayeeEntity } from 'loot-core/types/models';
 
-import { pushModal } from '../../modals/modalsSlice';
-import { getPayees, initiallyLoadPayees } from '../../queries/queriesSlice';
-import { useDispatch } from '../../redux';
-
 import { ManagePayees } from './ManagePayees';
 
 import { usePayees } from '@desktop-client/hooks/usePayees';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import {
+  getPayees,
+  initiallyLoadPayees,
+} from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type ManagePayeesWithDataProps = {
   initialSelectedIds: string[];

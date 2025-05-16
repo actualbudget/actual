@@ -7,23 +7,22 @@ import { View } from '@actual-app/components/view';
 import { getMonthYearFormat } from 'loot-core/shared/months';
 import { integerToAmount, amountToInteger } from 'loot-core/shared/util';
 
-import { useSelector } from '../../redux';
-import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
-import { Autocomplete } from '../autocomplete/Autocomplete';
-import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
-import { FilterAutocomplete } from '../autocomplete/FilterAutocomplete';
-import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
-import { ReportAutocomplete } from '../autocomplete/ReportAutocomplete';
-import { Checkbox } from '../forms';
-import { DateSelect } from '../select/DateSelect';
-import { RecurringSchedulePicker } from '../select/RecurringSchedulePicker';
-
 import { AmountInput } from './AmountInput';
 import { PercentInput } from './PercentInput';
 
+import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
+import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
+import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
+import { FilterAutocomplete } from '@desktop-client/components/autocomplete/FilterAutocomplete';
+import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
+import { ReportAutocomplete } from '@desktop-client/components/autocomplete/ReportAutocomplete';
+import { Checkbox } from '@desktop-client/components/forms';
+import { DateSelect } from '@desktop-client/components/select/DateSelect';
+import { RecurringSchedulePicker } from '@desktop-client/components/select/RecurringSchedulePicker';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useReports } from '@desktop-client/hooks/useReports';
+import { useSelector } from '@desktop-client/redux';
 
 export function GenericInput({
   field,

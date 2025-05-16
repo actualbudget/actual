@@ -5,15 +5,15 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
-import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
+import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
 import {
   ModalCloseButton,
   Modal,
   ModalTitle,
   ModalHeader,
-} from '../common/Modal';
-import { SectionLabel } from '../forms';
+} from '@desktop-client/components/common/Modal';
+import { SectionLabel } from '@desktop-client/components/forms';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type AccountAutocompleteModalProps = Extract<
   ModalType,

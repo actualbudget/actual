@@ -8,9 +8,12 @@ import type {
   AverageTemplate,
 } from 'loot-core/server/budget/types/templates';
 
-import { FormField, FormLabel } from '../../../forms';
-import { GenericInput } from '../../../util/GenericInput';
-import { type Action, updateTemplate } from '../actions';
+import {
+  type Action,
+  updateTemplate,
+} from '@desktop-client/components/budget/goals/actions';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { GenericInput } from '@desktop-client/components/util/GenericInput';
 
 type HistoricalAutomationProps = {
   template: CopyTemplate | AverageTemplate;

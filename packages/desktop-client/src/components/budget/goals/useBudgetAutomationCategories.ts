@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useCategories } from '../../../hooks/useCategories';
+import { useCategories } from '@desktop-client/hooks/useCategories';
 
 export function useBudgetAutomationCategories() {
   const { t } = useTranslation();

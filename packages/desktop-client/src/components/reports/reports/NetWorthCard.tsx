@@ -12,17 +12,16 @@ import {
   type NetWorthWidget,
 } from 'loot-core/types/models';
 
-import { PrivacyFilter } from '../../PrivacyFilter';
-import { Change } from '../Change';
-import { DateRange } from '../DateRange';
-import { NetWorthGraph } from '../graphs/NetWorthGraph';
-import { LoadingIndicator } from '../LoadingIndicator';
-import { ReportCard } from '../ReportCard';
-import { ReportCardName } from '../ReportCardName';
-import { calculateTimeRange } from '../reportRanges';
-import { createSpreadsheet as netWorthSpreadsheet } from '../spreadsheets/net-worth-spreadsheet';
-import { useReport } from '../useReport';
-
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { Change } from '@desktop-client/components/reports/Change';
+import { DateRange } from '@desktop-client/components/reports/DateRange';
+import { NetWorthGraph } from '@desktop-client/components/reports/graphs/NetWorthGraph';
+import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { ReportCard } from '@desktop-client/components/reports/ReportCard';
+import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
+import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
+import { createSpreadsheet as netWorthSpreadsheet } from '@desktop-client/components/reports/spreadsheets/net-worth-spreadsheet';
+import { useReport } from '@desktop-client/components/reports/useReport';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type NetWorthCardProps = {

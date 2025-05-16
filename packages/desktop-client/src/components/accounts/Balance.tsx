@@ -13,12 +13,14 @@ import { getScheduledAmount } from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { PrivacyFilter } from '../PrivacyFilter';
-import { type Binding } from '../spreadsheet';
-import { CellValue, CellValueText } from '../spreadsheet/CellValue';
-import { useFormat } from '../spreadsheet/useFormat';
-import { useSheetValue } from '../spreadsheet/useSheetValue';
-
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { type Binding } from '@desktop-client/components/spreadsheet';
+import {
+  CellValue,
+  CellValueText,
+} from '@desktop-client/components/spreadsheet/CellValue';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
+import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
 import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 

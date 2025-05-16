@@ -14,9 +14,8 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { aqlQuery } from '../../../queries/aqlQuery';
-
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 type Balance = {
   date: string;

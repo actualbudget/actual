@@ -10,15 +10,15 @@ import {
   type SyncServerPluggyAiAccount,
 } from 'loot-core/types/models';
 
-import { resetApp } from '../app/appSlice';
-import { addNotification } from '../notifications/notificationsSlice';
+import { resetApp } from '@desktop-client/app/appSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import {
   getAccounts,
   getPayees,
   setNewTransactions,
-} from '../queries/queriesSlice';
-import { createAppAsyncThunk } from '../redux';
-import { type AppDispatch } from '../redux/store';
+} from '@desktop-client/queries/queriesSlice';
+import { createAppAsyncThunk } from '@desktop-client/redux';
+import { type AppDispatch } from '@desktop-client/redux/store';
 
 const sliceName = 'account';
 

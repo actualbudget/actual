@@ -6,11 +6,14 @@ import { Label } from '@actual-app/components/label';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 
-import { pushModal } from '../../modals/modalsSlice';
-import { useDispatch } from '../../redux';
-import { useMultiuserEnabled, useLoginMethod } from '../ServerContext';
-
 import { Setting } from './UI';
+
+import {
+  useMultiuserEnabled,
+  useLoginMethod,
+} from '@desktop-client/components/ServerContext';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 export function AuthSettings() {
   const { t } = useTranslation();

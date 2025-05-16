@@ -7,7 +7,7 @@ import React, {
 import { type CSSProperties } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { Link } from '../common/Link';
+import { Link } from '@desktop-client/components/common/Link';
 
 type ItemContentProps = {
   style: ComponentProps<typeof View>['style'];

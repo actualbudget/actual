@@ -15,8 +15,6 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { type DropPosition } from '../sort';
-
 import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
@@ -28,6 +26,7 @@ import {
   separateGroups,
 } from './util';
 
+import { type DropPosition } from '@desktop-client/components/sort';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';

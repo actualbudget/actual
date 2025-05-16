@@ -55,14 +55,13 @@ import {
   downloadBudget,
   loadAllFiles,
   loadBudget,
-} from '../../budgets/budgetsSlice';
-import { pushModal } from '../../modals/modalsSlice';
-import { useSelector, useDispatch } from '../../redux';
-import { getUserData } from '../../users/usersSlice';
-import { useMultiuserEnabled } from '../ServerContext';
-
+} from '@desktop-client/budgets/budgetsSlice';
+import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
 import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
+import { getUserData } from '@desktop-client/users/usersSlice';
 
 function getFileDescription(file: File, t: (key: string) => string) {
   if (file.state === 'unknown') {

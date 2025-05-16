@@ -29,23 +29,28 @@ import { css } from '@emotion/css';
 
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { moveAccount } from '../../../accounts/accountsSlice';
-import { syncAndDownload } from '../../../app/appSlice';
-import { replaceModal } from '../../../modals/modalsSlice';
-import * as queries from '../../../queries/queries';
-import { useDispatch, useSelector } from '../../../redux';
-import { makeAmountFullStyle } from '../../budget/util';
-import { MobilePageHeader, Page } from '../../Page';
-import { type Binding, type SheetFields } from '../../spreadsheet';
-import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
-import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
-import { PullToRefresh } from '../PullToRefresh';
-
+import { moveAccount } from '@desktop-client/accounts/accountsSlice';
+import { syncAndDownload } from '@desktop-client/app/appSlice';
+import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
+import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
+import { PullToRefresh } from '@desktop-client/components/mobile/PullToRefresh';
+import { MobilePageHeader, Page } from '@desktop-client/components/Page';
+import {
+  type Binding,
+  type SheetFields,
+} from '@desktop-client/components/spreadsheet';
+import {
+  CellValue,
+  CellValueText,
+} from '@desktop-client/components/spreadsheet/CellValue';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { replaceModal } from '@desktop-client/modals/modalsSlice';
+import * as queries from '@desktop-client/queries/queries';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 type AccountHeaderProps<SheetFieldName extends SheetFields<'account'>> = {
   id: string;

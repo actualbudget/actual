@@ -11,9 +11,9 @@ import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
-
 import { MonthsContext } from './MonthsContext';
+
+import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
 
 type RenderMonthsProps = {
   component?: ComponentType<{ month: string; editing: boolean }>;

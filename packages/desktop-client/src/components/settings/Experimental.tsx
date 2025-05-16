@@ -7,11 +7,10 @@ import { View } from '@actual-app/components/view';
 
 import type { FeatureFlag } from 'loot-core/types/prefs';
 
-import { Link } from '../common/Link';
-import { Checkbox } from '../forms';
-
 import { Setting } from './UI';
 
+import { Link } from '@desktop-client/components/common/Link';
+import { Checkbox } from '@desktop-client/components/forms';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 

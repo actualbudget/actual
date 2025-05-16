@@ -29,20 +29,29 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { trackingBudget } from '../../../queries/queries';
-import { type Binding, type SheetFields } from '../../spreadsheet';
-import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
-import { Field, SheetCell, type SheetCellProps } from '../../table';
-import { BalanceWithCarryover } from '../BalanceWithCarryover';
-import { makeAmountGrey } from '../util';
-
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
 
+import { BalanceWithCarryover } from '@desktop-client/components/budget/BalanceWithCarryover';
+import { makeAmountGrey } from '@desktop-client/components/budget/util';
+import {
+  type Binding,
+  type SheetFields,
+} from '@desktop-client/components/spreadsheet';
+import {
+  CellValue,
+  CellValueText,
+} from '@desktop-client/components/spreadsheet/CellValue';
+import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
+import {
+  Field,
+  SheetCell,
+  type SheetCellProps,
+} from '@desktop-client/components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import { trackingBudget } from '@desktop-client/queries/queries';
 
 export const useTrackingSheetValue = <
   FieldName extends SheetFields<'tracking-budget'>,

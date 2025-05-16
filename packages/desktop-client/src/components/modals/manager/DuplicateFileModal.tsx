@@ -12,16 +12,16 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 
-import { duplicateBudget } from '../../../budgets/budgetsSlice';
-import { type Modal as ModalType } from '../../../modals/modalsSlice';
-import { addNotification } from '../../../notifications/notificationsSlice';
-import { useDispatch } from '../../../redux';
+import { duplicateBudget } from '@desktop-client/budgets/budgetsSlice';
 import {
   Modal,
   ModalButtons,
   ModalCloseButton,
   ModalHeader,
-} from '../../common/Modal';
+} from '@desktop-client/components/common/Modal';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type DuplicateFileModalProps = Extract<
   ModalType,

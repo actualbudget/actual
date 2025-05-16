@@ -17,15 +17,6 @@ import {
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { aqlQuery } from '../../../queries/aqlQuery';
-import {
-  categoryLists,
-  groupBySelections,
-  type QueryDataEntity,
-  ReportOptions,
-  type UncategorizedEntity,
-} from '../ReportOptions';
-
 import { calculateLegend } from './calculateLegend';
 import { filterEmptyRows } from './filterEmptyRows';
 import { filterHiddenItems } from './filterHiddenItems';
@@ -33,7 +24,15 @@ import { makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
 import { sortData } from './sortData';
 
+import {
+  categoryLists,
+  groupBySelections,
+  type QueryDataEntity,
+  ReportOptions,
+  type UncategorizedEntity,
+} from '@desktop-client/components/reports/ReportOptions';
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 export type createCustomSpreadsheetProps = {
   startDate: string;

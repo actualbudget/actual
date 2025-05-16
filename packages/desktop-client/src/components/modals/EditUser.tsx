@@ -14,12 +14,23 @@ import { send } from 'loot-core/platform/client/fetch';
 import { PossibleRoles } from 'loot-core/shared/user';
 import { type NewUserEntity, type UserEntity } from 'loot-core/types/models';
 
-import { type Modal as ModalType, popModal } from '../../modals/modalsSlice';
-import { addNotification } from '../../notifications/notificationsSlice';
-import { useDispatch } from '../../redux';
-import { signOut } from '../../users/usersSlice';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Checkbox, FormField, FormLabel } from '../forms';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import {
+  Checkbox,
+  FormField,
+  FormLabel,
+} from '@desktop-client/components/forms';
+import {
+  type Modal as ModalType,
+  popModal,
+} from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
+import { signOut } from '@desktop-client/users/usersSlice';
 
 type User = UserEntity;
 type NewUser = NewUserEntity;

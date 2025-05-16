@@ -3,9 +3,13 @@ import React, { type CSSProperties } from 'react';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
-import { ToBudgetMenu } from '../budget/envelope/budgetsummary/ToBudgetMenu';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
+import { ToBudgetMenu } from '@desktop-client/components/budget/envelope/budgetsummary/ToBudgetMenu';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type EnvelopeToBudgetMenuModalProps = Omit<
   Extract<ModalType, { name: 'envelope-summary-to-budget-menu' }>['options'],

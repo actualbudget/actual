@@ -16,24 +16,29 @@ import { css, cx } from '@emotion/css';
 import * as Platform from 'loot-core/shared/platform';
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { openAccountCloseModal } from '../../modals/modalsSlice';
-import { reopenAccount, updateAccount } from '../../queries/queriesSlice';
-import { useDispatch } from '../../redux';
-import { Link } from '../common/Link';
-import { Notes } from '../Notes';
+import { Link } from '@desktop-client/components/common/Link';
+import { Notes } from '@desktop-client/components/Notes';
 import {
   DropHighlight,
-  type OnDragChangeCallback,
-  type OnDropCallback,
   useDraggable,
   useDroppable,
-} from '../sort';
-import { type Binding, type SheetFields } from '../spreadsheet';
-import { CellValue } from '../spreadsheet/CellValue';
-
+  type OnDragChangeCallback,
+  type OnDropCallback,
+} from '@desktop-client/components/sort';
+import {
+  type SheetFields,
+  type Binding,
+} from '@desktop-client/components/spreadsheet';
+import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
 import { useNotes } from '@desktop-client/hooks/useNotes';
+import { openAccountCloseModal } from '@desktop-client/modals/modalsSlice';
+import {
+  reopenAccount,
+  updateAccount,
+} from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,

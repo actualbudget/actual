@@ -9,13 +9,12 @@ import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type UserAvailable } from 'loot-core/types/models';
 
-import { addNotification } from '../../../notifications/notificationsSlice';
-import { useDispatch } from '../../../redux';
-import { signOut } from '../../../users/usersSlice';
-import { Checkbox } from '../../forms';
-import { Row, Cell } from '../../table';
-
+import { Checkbox } from '@desktop-client/components/forms';
+import { Row, Cell } from '@desktop-client/components/table';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
+import { signOut } from '@desktop-client/users/usersSlice';
 
 type UserAccessProps = {
   access: UserAvailable;
