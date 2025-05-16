@@ -15,7 +15,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { SectionLabel } from '@desktop-client/components/forms';
-import { NamespaceContext } from '@desktop-client/hooks/useSheetName';
+import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type CategoryAutocompleteModalProps = Extract<
@@ -84,8 +84,8 @@ export function CategoryAutocompleteModal({
               />
             )}
             <View style={{ flex: 1 }}>
-              <NamespaceContext.Provider
-                value={month ? monthUtils.sheetForMonth(month) : ''}
+              <SheetNameProvider
+                name={month ? monthUtils.sheetForMonth(month) : ''}
               >
                 <CategoryAutocomplete
                   focused={true}
@@ -101,7 +101,7 @@ export function CategoryAutocompleteModal({
                   showHiddenCategories={showHiddenCategories}
                   value={null}
                 />
-              </NamespaceContext.Provider>
+              </SheetNameProvider>
             </View>
           </View>
         </>
