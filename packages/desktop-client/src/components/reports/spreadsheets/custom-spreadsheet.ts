@@ -17,7 +17,6 @@ import {
   type GroupedEntity,
   type IntervalEntity,
 } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import {
   categoryLists,

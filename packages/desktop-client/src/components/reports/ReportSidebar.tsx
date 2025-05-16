@@ -20,7 +20,6 @@ import {
   type CustomReportEntity,
   type sortByOpType,
 } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { Information } from '../alerts';
 
