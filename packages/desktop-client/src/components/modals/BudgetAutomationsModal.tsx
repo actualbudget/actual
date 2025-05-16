@@ -6,13 +6,14 @@ import { Stack } from '@actual-app/components/stack';
 import { theme } from '@actual-app/components/theme';
 import { uniqueId } from 'lodash';
 
-import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { type Template } from 'loot-core/server/budget/types/templates';
 import { q } from 'loot-core/shared/query';
 
 import { BudgetAutomation } from '../budget/goals/BudgetAutomation';
 import { useBudgetAutomationCategories } from '../budget/goals/useBudgetAutomationCategories';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
+
+import { useSchedules } from '@desktop-client/hooks/useSchedules';
 
 type TemplateWithId = Template & { id: string };
 

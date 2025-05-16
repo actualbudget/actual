@@ -3,11 +3,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { View } from '@actual-app/components/view';
 
-import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
-import {
-  useTransactions,
-  useTransactionsSearch,
-} from 'loot-core/client/data-hooks/transactions';
 import * as queries from 'loot-core/client/queries';
 import { listen } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -24,10 +19,13 @@ import { MobileBackButton } from '../MobileBackButton';
 import { AddTransactionButton } from '../transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
 
+import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategoryPreviewTransactions } from '@desktop-client/hooks/useCategoryPreviewTransactions';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useTransactions } from '@desktop-client/hooks/useTransactions';
+import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
 
 type CategoryTransactionsProps = {
   category: CategoryEntity;

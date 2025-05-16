@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useTransactions } from 'loot-core/client/data-hooks/transactions';
 import { q } from 'loot-core/shared/query';
 import {
   type AccountEntity,
@@ -12,6 +11,7 @@ import {
 import { useAccounts } from './useAccounts';
 import { usePayee } from './usePayee';
 import { usePayees } from './usePayees';
+import { useTransactions } from './useTransactions';
 
 type Counts = {
   counts: Record<PayeeEntity['id'], number>;

@@ -12,7 +12,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
-import { useWidget } from 'loot-core/client/data-hooks/widget';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { integerToCurrency } from 'loot-core/shared/util';
@@ -36,10 +35,11 @@ import { calculateTimeRange } from '../reportRanges';
 import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '../useReport';
 
-import { useFilters } from '@desktop-client/hooks/useFilters';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useWidget } from '@desktop-client/hooks/useWidget';
 
 export const defaultTimeFrame = {
   start: monthUtils.dayFromDate(monthUtils.currentMonth()),
@@ -77,7 +77,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
     onConditionsOpChange,
-  } = useFilters<RuleConditionEntity>(
+  } = useRuleConditionFilters<RuleConditionEntity>(
     widget?.meta?.conditions,
     widget?.meta?.conditionsOp,
   );

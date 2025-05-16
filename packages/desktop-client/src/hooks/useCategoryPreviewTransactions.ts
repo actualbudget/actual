@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from 'react';
 
-import { usePreviewTransactions } from 'loot-core/client/data-hooks/transactions';
 import { categoryBalance } from 'loot-core/client/queries';
 import * as monthUtils from 'loot-core/shared/months';
 import {
@@ -10,6 +9,7 @@ import {
 
 import { useCategory } from './useCategory';
 import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTemplates';
+import { usePreviewTransactions } from './usePreviewTransactions';
 
 import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
 

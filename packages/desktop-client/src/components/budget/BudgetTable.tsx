@@ -9,7 +9,6 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
 import { q } from 'loot-core/shared/query';
 import {
   type CategoryEntity,
@@ -29,6 +28,7 @@ import {
   separateGroups,
 } from './util';
 
+import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
