@@ -924,7 +924,7 @@ class AccountInternal extends PureComponent<
     return this.props.matchedTransactions.includes(id);
   };
 
-  onCreatePayee = (name: string) => {
+  onCreatePayee = async (name: string) => {
     const trimmed = name.trim();
     if (trimmed !== '') {
       return this.props.dispatch(createPayee({ name })).unwrap();
@@ -1460,7 +1460,7 @@ class AccountInternal extends PureComponent<
 
   onScheduleAction = async (
     name: 'skip' | 'post-transaction' | 'complete',
-    ids: string[],
+    ids: TransactionEntity['id'][],
   ) => {
     const scheduleIds = ids.map(id => id.split('/')[1]);
 
@@ -1797,6 +1797,7 @@ class AccountInternal extends PureComponent<
               <View style={{ flex: 1 }}>
                 <TransactionList
                   headerContent={undefined}
+                  // @ts-ignore TODO
                   tableRef={this.table}
                   account={account}
                   transactions={transactions}
@@ -1811,7 +1812,7 @@ class AccountInternal extends PureComponent<
                   balances={allBalances}
                   showBalances={!!allBalances}
                   showReconciled={showReconciled}
-                  showCleared={showCleared}
+                  showCleared={!!showCleared}
                   showAccount={
                     !accountId ||
                     accountId === 'offbudget' ||
@@ -1849,8 +1850,8 @@ class AccountInternal extends PureComponent<
                     ) : null
                   }
                   onSort={this.onSort}
-                  sortField={this.state.sort?.field}
-                  ascDesc={this.state.sort?.ascDesc}
+                  sortField={this.state.sort?.field ?? ''}
+                  ascDesc={this.state.sort?.ascDesc ?? 'asc'}
                   onChange={this.onTransactionsChange}
                   onBatchDelete={this.onBatchDelete}
                   onBatchDuplicate={this.onBatchDuplicate}

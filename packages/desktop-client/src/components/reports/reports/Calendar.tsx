@@ -1,14 +1,14 @@
-import React, {
-  useState,
+import {
+  type Ref,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
-  type Ref,
-  useCallback,
+  useState,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { useSpring, animated, config } from 'react-spring';
+import { animated, config, useSpring } from 'react-spring';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -34,8 +34,8 @@ import { q, type Query } from 'loot-core/shared/query';
 import { ungroupTransactions } from 'loot-core/shared/transactions';
 import { amountToCurrency } from 'loot-core/shared/util';
 import {
-  type RuleConditionEntity,
   type CalendarWidget,
+  type RuleConditionEntity,
   type TimeFrame,
   type TransactionEntity,
 } from 'loot-core/types/models';
@@ -47,6 +47,7 @@ import { MobileBackButton } from '../../mobile/MobileBackButton';
 import { TransactionList as TransactionListMobile } from '../../mobile/transactions/TransactionList';
 import { MobilePageHeader, Page, PageHeader } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
+import { type TableHandleRef } from '../../table';
 import { TransactionList } from '../../transactions/TransactionList';
 import { chartTheme } from '../chart-theme';
 import { DateRange } from '../DateRange';
@@ -190,7 +191,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   }, [start, end, conditions, conditionsOp, firstDayOfWeekIdx, dirty]);
 
   const [sortField, setSortField] = useState('');
-  const [ascDesc, setAscDesc] = useState('desc');
+  const [ascDesc, setAscDesc] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
@@ -286,7 +287,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
   const title = widget?.meta?.name || t('Calendar');
-  const table = useRef(null);
+  const table = useRef<TableHandleRef<TransactionEntity>>(null);
   const dateFormat = useDateFormat();
 
   const onSaveWidgetName = async (newName: string) => {
@@ -591,12 +592,12 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                 flexGrow: 1,
                 overflow: isNarrowWidth ? 'auto' : 'hidden',
               }}
-              ref={table}
+              // TODO: make TableHandleRef conform to HTMLDivEle
+              ref={table as unknown as Ref<HTMLDivElement>}
             >
               {!isNarrowWidth ? (
                 <SplitsExpandedProvider initialMode="collapse">
                   <TransactionList
-                    headerContent={undefined}
                     tableRef={table}
                     account={undefined}
                     transactions={transactionsGrouped}
@@ -614,7 +615,6 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     isAdding={false}
                     isNew={() => false}
                     isMatched={() => false}
-                    isFiltered={() => true}
                     dateFormat={dateFormat}
                     hideFraction={false}
                     renderEmpty={() => (
@@ -635,7 +635,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     onChange={() => {}}
                     onRefetch={() => setDirty(true)}
                     onCloseAddTransaction={() => {}}
-                    onCreatePayee={() => {}}
+                    onCreatePayee={async () => null}
                     onApplyFilter={() => {}}
                     onBatchDelete={() => {}}
                     onBatchDuplicate={() => {}}

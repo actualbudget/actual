@@ -70,8 +70,9 @@ const payees: PayeeEntity[] = [
   },
 ];
 vi.mock('../../hooks/usePayees', async importOriginal => {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-  const actual = await importOriginal<typeof import('../../hooks/usePayees')>();
+  const actual =
+    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+    await importOriginal<typeof import('../../hooks/usePayees')>();
   return {
     ...actual,
     usePayees: () => payees,
@@ -181,7 +182,7 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
     return diff.added[0].id;
   };
 
-  const onCreatePayee = () => 'id';
+  const onCreatePayee = async () => 'id';
 
   // It's important that these functions are they same instances
   // across renders. Doing so tests that the transaction table
@@ -200,9 +201,9 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
               <SplitsExpandedProvider>
                 <TransactionTable
                   {...props}
-                  // @ts-expect-error this will be auto-patched once TransactionTable is moved to TS
                   transactions={transactions}
                   loadMoreTransactions={() => {}}
+                  // @ts-ignore TODO:
                   commonPayees={[]}
                   payees={payees}
                   addNotification={console.log}
