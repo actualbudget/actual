@@ -196,7 +196,7 @@ async function processTemplate(
           availBudget += budgeted;
         }
         availBudget += templateContext.getLimitExcess();
-        priorities = [...templateContext.getPriorities()];
+        priorities = [...priorities, ...templateContext.getPriorities()];
         remainderWeight += templateContext.getRemainderWeight();
         templateContexts.push(templateContext);
       } catch (e) {
