@@ -12,8 +12,8 @@ import { BudgetTable } from './BudgetTable';
 
 import { sync } from '@desktop-client/app/appSlice';
 import { prewarmMonth } from '@desktop-client/components/budget/util';
-import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
 import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
+import { NamespaceContext } from '@desktop-client/hooks/NamespaceContext';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';

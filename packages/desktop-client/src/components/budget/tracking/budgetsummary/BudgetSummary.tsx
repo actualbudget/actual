@@ -24,7 +24,7 @@ import { Saved } from './Saved';
 
 import { useTrackingBudget } from '@desktop-client/components/budget/tracking/TrackingBudgetContext';
 import { NotesButton } from '@desktop-client/components/NotesButton';
-import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
+import { NamespaceContext } from '@desktop-client/hooks/NamespaceContext';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 

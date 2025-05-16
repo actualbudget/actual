@@ -14,7 +14,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
-import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
+import { NamespaceContext } from '@desktop-client/hooks/NamespaceContext';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useUndo } from '@desktop-client/hooks/useUndo';
@@ -23,8 +23,8 @@ import {
   type Modal as ModalType,
   pushModal,
 } from '@desktop-client/modals/modalsSlice';
-import { envelopeBudget } from '@desktop-client/queries/queries';
 import { useDispatch } from '@desktop-client/redux';
+import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type EnvelopeBudgetSummaryModalProps = Extract<
   ModalType,

@@ -20,7 +20,7 @@ import {
 import { FocusableAmountInput } from '@desktop-client/components/mobile/transactions/FocusableAmountInput';
 import { useCategory } from '@desktop-client/hooks/useCategory';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { trackingBudget } from '@desktop-client/queries/queries';
+import { trackingBudget } from '@desktop-client/spreadsheet/bindings';
 
 type TrackingBudgetMenuModalProps = Omit<
   Extract<ModalType, { name: 'tracking-budget-menu' }>['options'],

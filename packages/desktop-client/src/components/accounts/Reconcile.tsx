@@ -17,10 +17,10 @@ import { currencyToInteger, tsToRelativeTime } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
-import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
-import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
-import * as queries from '@desktop-client/queries/queries';
+import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
+import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 type ReconcilingMessageProps = {
   balanceQuery: { name: `balance-query-${string}`; query: Query };
@@ -128,7 +128,7 @@ export function ReconcileMenu({
   onReconcile,
   onClose,
 }: ReconcileMenuProps) {
-  const balanceQuery = queries.accountBalance(account.id);
+  const balanceQuery = bindings.accountBalance(account.id);
   const clearedBalance = useSheetValue<'account', `balance-${string}-cleared`>({
     name: (balanceQuery.name + '-cleared') as `balance-${string}-cleared`,
     value: null,

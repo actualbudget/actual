@@ -19,11 +19,11 @@ import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 import {
   envelopeBudget,
   trackingBudget,
-} from '@desktop-client/queries/queries';
-import { useDispatch } from '@desktop-client/redux';
+} from '@desktop-client/spreadsheet/bindings';
 
 type IncomeCategoryNameProps = {
   category: CategoryEntity;

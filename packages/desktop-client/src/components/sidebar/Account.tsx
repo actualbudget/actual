@@ -25,10 +25,6 @@ import {
   type OnDragChangeCallback,
   type OnDropCallback,
 } from '@desktop-client/components/sort';
-import {
-  type SheetFields,
-  type Binding,
-} from '@desktop-client/components/spreadsheet';
 import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
@@ -39,6 +35,10 @@ import {
   updateAccount,
 } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
+import {
+  type SheetFields,
+  type Binding,
+} from '@desktop-client/spreadsheet';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,
