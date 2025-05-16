@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from 'react';
 
-import { accountBalance } from 'loot-core/client/queries';
 import { groupById } from 'loot-core/shared/util';
 import {
   type ScheduleEntity,
@@ -14,6 +13,7 @@ import { usePayees } from './usePayees';
 import { usePreviewTransactions } from './usePreviewTransactions';
 
 import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
+import { accountBalance } from '@desktop-client/queries/queries';
 
 type UseAccountPreviewTransactionsProps = {
   accountId?: AccountEntity['id'] | undefined;

@@ -16,12 +16,6 @@ import { debounce } from 'debounce';
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-import * as queries from 'loot-core/client/queries';
-import {
-  aqlQuery,
-  pagedQuery,
-  type PagedQuery,
-} from 'loot-core/client/query-helpers';
 import { send, listen } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type UndoState } from 'loot-core/server/undo';
@@ -53,6 +47,9 @@ import {
   replaceModal,
 } from '../../modals/modalsSlice';
 import { addNotification } from '../../notifications/notificationsSlice';
+import { aqlQuery } from '../../queries/aqlQuery';
+import { pagedQuery, type PagedQuery } from '../../queries/pagedQuery';
+import * as queries from '../../queries/queries';
 import {
   createPayee,
   initiallyLoadPayees,

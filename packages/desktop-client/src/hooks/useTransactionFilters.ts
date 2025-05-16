@@ -1,9 +1,10 @@
 // @ts-strict-ignore
 import { useMemo } from 'react';
 
-import { useQuery } from 'loot-core/client/query-hooks';
 import { q } from 'loot-core/shared/query';
 import { type TransactionFilterEntity } from 'loot-core/types/models';
+
+import { useQuery } from './useQuery';
 
 function toJS(rows): TransactionFilterEntity[] {
   const filters = rows.map(row => {

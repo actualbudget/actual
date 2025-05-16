@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
-import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import * as monthUtils from 'loot-core/shared/months';
 
-import { useCategories } from './useCategories';
-import { useSyncedPref } from './useSyncedPref';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import {
+  envelopeBudget,
+  trackingBudget,
+} from '@desktop-client/queries/queries';
 
 type UseOverspentCategoriesProps = {
   month: string;

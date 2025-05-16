@@ -1,7 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 
-import { accountFilter } from 'loot-core/client/queries';
-import { liveQuery, type LiveQuery } from 'loot-core/client/query-helpers';
 import { q, type Query } from 'loot-core/shared/query';
 import {
   getStatus,
@@ -13,6 +11,9 @@ import type {
   ScheduleEntity,
   TransactionEntity,
 } from 'loot-core/types/models';
+
+import { liveQuery, type LiveQuery } from '../queries/liveQuery';
+import { accountFilter } from '../queries/queries';
 
 import { useSyncedPref } from './useSyncedPref';
 

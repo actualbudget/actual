@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 
 import * as d from 'date-fns';
 
-import { pagedQuery, type PagedQuery } from 'loot-core/client/query-helpers';
 import { send } from 'loot-core/platform/client/fetch';
 import { currentDay, addDays, parseDate } from 'loot-core/shared/months';
 import { type Query } from 'loot-core/shared/query';
@@ -23,6 +22,11 @@ import {
 import { useCachedSchedules } from './useCachedSchedules';
 import { type ScheduleStatuses } from './useSchedules';
 import { useSyncedPref } from './useSyncedPref';
+
+import {
+  pagedQuery,
+  type PagedQuery,
+} from '@desktop-client/queries/pagedQuery';
 
 // Mirrors the `splits` AQL option from the server
 type TransactionSplitsOption = 'all' | 'inline' | 'grouped' | 'none';

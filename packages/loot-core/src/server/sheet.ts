@@ -4,6 +4,7 @@ import { type Database } from '@jlongster/sql.js';
 import { captureBreadcrumb } from '../platform/exceptions';
 import * as sqlite from '../platform/server/sqlite';
 import { sheetForMonth } from '../shared/months';
+import * as Platform from '../shared/platform';
 
 import {
   DbPreference,
@@ -11,7 +12,6 @@ import {
   DbZeroBudget,
   DbZeroBudgetMonth,
 } from './db';
-import * as Platform from './platform';
 import { Spreadsheet } from './spreadsheet/spreadsheet';
 import { resolveName } from './spreadsheet/util';
 
@@ -105,7 +105,7 @@ export async function loadSpreadsheet(
   const mainDb = db.getDatabase();
   let cacheDb;
 
-  if (Platform.isDesktop && cacheEnabled) {
+  if (!Platform.isBrowser && cacheEnabled) {
     // Desktop apps use a separate database for the cache. This is because it is
     // much more likely to directly work with files on desktop, and this makes
     // it a lot clearer what the true filesize of the main db is (and avoid

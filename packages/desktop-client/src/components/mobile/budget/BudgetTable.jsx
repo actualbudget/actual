@@ -23,16 +23,16 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { AutoTextSize } from 'auto-text-size';
 
-import {
-  envelopeBudget,
-  trackingBudget,
-  uncategorizedCount,
-} from 'loot-core/client/queries';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { groupById } from 'loot-core/shared/util';
 
 import { pushModal } from '../../../modals/modalsSlice';
+import {
+  envelopeBudget,
+  trackingBudget,
+  uncategorizedCount,
+} from '../../../queries/queries';
 import { useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
