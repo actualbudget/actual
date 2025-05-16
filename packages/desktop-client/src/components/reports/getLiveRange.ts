@@ -42,8 +42,8 @@ export function getLiveRange(
           ['This month', 'This week'].includes(cond)
             ? null
             : rangeName - (includeCurrentInterval ? 0 : 1),
-          ReportOptions.dateRangeType.get(cond),
           firstDayOfWeekIdx,
+          ReportOptions.dateRangeType.get(cond),
         );
       } else {
         break;

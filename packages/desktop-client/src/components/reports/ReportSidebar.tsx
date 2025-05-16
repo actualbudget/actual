@@ -533,8 +533,8 @@ export function ReportSidebar({
                       earliestTransaction,
                       newValue,
                       customReportItems.endDate,
-                      customReportItems.interval,
                       firstDayOfWeekIdx,
+                      customReportItems.interval,
                     ),
                   )
                 }
@@ -565,8 +565,8 @@ export function ReportSidebar({
                       earliestTransaction,
                       customReportItems.startDate,
                       newValue,
-                      customReportItems.interval,
                       firstDayOfWeekIdx,
+                      customReportItems.interval,
                     ),
                   )
                 }

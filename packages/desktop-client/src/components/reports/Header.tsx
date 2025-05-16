@@ -121,6 +121,7 @@ export function Header({
                     allMonths[allMonths.length - 1].name,
                     newValue,
                     end,
+                    firstDayOfWeekIdx,
                   ),
                 )
               }
@@ -136,6 +137,7 @@ export function Header({
                     allMonths[allMonths.length - 1].name,
                     start,
                     newValue,
+                    firstDayOfWeekIdx,
                   ),
                 )
               }

@@ -18,7 +18,7 @@ export function useFirstDayOfWeek(): Day {
     }
 
     try {
-      const localeObj = new Intl.Locale(locale.code);
+      const localeObj = new Intl.Locale(locale.code || 'en');
       // @ts-expect-error https://github.com/microsoft/TypeScript/issues/61713
       const { firstDay } = localeObj.getWeekInfo();
       // `firstDay` is 1–7 (Monday–Sunday).
