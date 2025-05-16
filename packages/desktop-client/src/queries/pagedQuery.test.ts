@@ -131,6 +131,11 @@ function mockServer({ send = mockSend, listen = mockListen }) {
   vi.spyOn(fetch, 'listen').mockImplementation(listen);
 }
 
+function clearMockServer() {
+  clearEventListeners();
+  vi.clearAllMocks();
+}
+
 function mockBasicServer(delay?) {
   mockServer({
     send: (name, args) => {
@@ -176,8 +181,7 @@ function mockPagingServer(
 describe('pagedQuery', () => {
   beforeEach(() => {
     resetTracer();
-    clearEventListeners();
-    vi.clearAllMocks();
+    clearMockServer();
   });
 
   it(`runs and subscribes to a query`, async () => {
@@ -347,7 +351,7 @@ describe('pagedQuery', () => {
     await tracer.expect('data', ['*']);
   });
 
-  it(`unsubscribes correctly`, async () => {
+  it(`unsubscribes correctly`, () => async done => {
     mockBasicServer();
     tracer.start();
 
@@ -369,7 +373,8 @@ describe('pagedQuery', () => {
 
     // Wait a bit and make sure nothing comes through
     const p = Promise.race([tracer.expect('server-query'), wait(100)]);
-    expect(await p).toEqual('wait(100)');
+    await expect(p).resolves.toEqual('wait(100)');
+    done();
   });
 
   it('pagedQuery makes requests in pages', () => async done => {
