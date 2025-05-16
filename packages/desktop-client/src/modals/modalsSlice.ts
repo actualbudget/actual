@@ -387,6 +387,7 @@ export type Modal =
         onCover: () => void;
         onHoldBuffer: () => void;
         onResetHoldBuffer: () => void;
+        onBudgetAction: (month: string, action: string, arg?: unknown) => void;
       };
     }
   | {
