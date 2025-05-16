@@ -281,7 +281,7 @@ describe('liveQuery', () => {
 
     // Wait a bit and make sure nothing comes through
     const p = Promise.race([tracer.expect('server-query'), wait(100)]);
-    
+
     await expect(p).resolves.toEqual('wait(100)');
     done();
   });
