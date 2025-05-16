@@ -170,6 +170,7 @@ async function processTemplate(
   let priorities: number[] = [];
   let remainderWeight = 0;
   const errors: string[] = [];
+  const budgetList: TemplateBudget[] = [];
   const goalList: TemplateGoal[] = [];
   for (const category of categories) {
     const { id } = category;
@@ -252,34 +253,25 @@ async function processTemplate(
   // run remainder
   if (availBudget > 0 && remainderWeight) {
     const perWeight = availBudget / remainderWeight;
-    const remainders = templateContexts.reduce(
-      (total, context) => total + context.runRemainder(availBudget, perWeight),
-      0,
-    );
-    availBudget -= remainders;
+    templateContexts.forEach(context => {
+      availBudget -= context.runRemainder(availBudget, perWeight);
+    });
   }
   // finish
-  const { budgets, goals } = templateContexts.reduce(
-    (acc, templateContext) => {
-      const values = templateContext.getValues();
-      acc.budgets.push({
-        category: templateContext.category.id,
-        budgeted: values.budgeted,
-      });
-      acc.goals.push({
-        category: templateContext.category.id,
-        goal: values.goal,
-        longGoal: values.longGoal ? 1 : null,
-      });
-      return acc;
-    },
-    { budgets: [], goals: goalList } as {
-      budgets: TemplateBudget[];
-      goals: TemplateGoal[];
-    },
-  );
-  await setBudgets(month, budgets);
-  await setGoals(month, goals);
+  templateContexts.forEach(context => {
+    const values = context.getValues();
+    budgetList.push({
+      category: context.category.id,
+      budgeted: values.budgeted,
+    });
+    goalList.push({
+      category: context.category.id,
+      goal: values.goal,
+      longGoal: values.longGoal ? 1 : null,
+    });
+  });
+  await setBudgets(month, budgetList);
+  await setGoals(month, goalList);
 
   return {
     type: 'message',
