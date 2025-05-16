@@ -143,7 +143,7 @@ export function FixEncryptionKeyModal({
                     width: isNarrowWidth ? '100%' : '50%',
                     height: isNarrowWidth ? styles.mobileMinHeight : undefined,
                   }}
-                  onChange={e => setPassword(e.target.value)}
+                  onChangeValue={setPassword}
                 />
               </InitialFocus>
               <Text style={{ marginTop: 5 }}>

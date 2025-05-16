@@ -8,6 +8,7 @@ import { Label } from '@actual-app/components/label';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { css } from '@emotion/css';
 
 import {
   isNonProductionEnvironment,
@@ -156,12 +157,12 @@ export function ElectronServerConfig({
               value="localhost"
               disabled
               type="text"
-              style={{
+              className={css({
                 '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
                   WebkitAppearance: 'none',
                   margin: 0,
                 },
-              }}
+              })}
             />
           </View>
 
@@ -175,14 +176,14 @@ export function ElectronServerConfig({
               value={String(electronServerPort)}
               aria-label={t('Port')}
               type="number"
-              style={{
+              className={css({
                 '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
                   WebkitAppearance: 'none',
                   margin: 0,
                 },
                 width: '7ch',
                 textAlign: 'center',
-              }}
+              })}
               autoFocus={true}
               maxLength={5}
               onChange={event =>

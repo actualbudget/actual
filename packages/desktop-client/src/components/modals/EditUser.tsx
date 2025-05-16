@@ -205,7 +205,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
           <Input
             id="name-field"
             value={userName}
-            onChangeValue={text => setUserName(text)}
+            onChangeValue={setUserName}
             style={{
               borderColor: theme.buttonMenuBorder,
             }}
@@ -261,7 +261,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
           <Input
             id="displayname-field"
             value={displayName}
-            onChangeValue={text => setDisplayName(text)}
+            onChangeValue={setDisplayName}
             placeholder={t('(Optional)')}
             style={{
               borderColor: theme.buttonMenuBorder,
