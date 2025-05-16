@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { createContext, useContext } from 'react';
+import { createContext, type PropsWithChildren, useContext } from 'react';
 
 import {
   type SheetNames,
@@ -18,7 +18,17 @@ function unresolveName(name) {
   return { sheet: null, name };
 }
 
-export const NamespaceContext = createContext<string | undefined>(undefined);
+const SheetNameContext = createContext<string | undefined>(undefined);
+
+type SheetNameProviderProps = PropsWithChildren<{ name: string }>;
+
+export function SheetNameProvider({ children, name }: SheetNameProviderProps) {
+  return (
+    <SheetNameContext.Provider value={name}>
+      {children}
+    </SheetNameContext.Provider>
+  );
+}
 
 export function useSheetName<
   SheetName extends SheetNames,
@@ -42,7 +52,7 @@ export function useSheetName<
 
   // Get the current sheet name, and unresolve the binding name if
   // necessary (you might pass a fully resolved name like foo!name)
-  let sheetName = useContext(NamespaceContext) || '__global';
+  let sheetName = useContext(SheetNameContext) || '__global';
   const unresolved = unresolveName(bindingName);
   if (unresolved.sheet) {
     sheetName = unresolved.sheet;

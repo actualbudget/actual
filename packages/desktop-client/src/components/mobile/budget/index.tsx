@@ -28,7 +28,7 @@ import { BudgetTable } from './BudgetTable';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { NamespaceContext } from '@desktop-client/hooks/useSheetName';
+import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
@@ -509,7 +509,7 @@ export function Budget() {
   }
 
   return (
-    <NamespaceContext.Provider value={monthUtils.sheetForMonth(startMonth)}>
+    <SheetNameProvider name={monthUtils.sheetForMonth(startMonth)}>
       <SyncRefresh
         onSync={async () => {
           dispatch(sync());
@@ -536,6 +536,6 @@ export function Budget() {
           />
         )}
       </SyncRefresh>
-    </NamespaceContext.Provider>
+    </SheetNameProvider>
   );
 }

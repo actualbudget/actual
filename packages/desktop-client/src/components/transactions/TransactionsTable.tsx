@@ -115,7 +115,7 @@ import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { usePrevious } from '@desktop-client/hooks/usePrevious';
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
-import { NamespaceContext } from '@desktop-client/hooks/useSheetName';
+import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import {
@@ -1523,8 +1523,8 @@ const Transaction = memo(function Transaction({
             shouldSaveFromKey,
             inputStyle,
           }) => (
-            <NamespaceContext.Provider
-              value={monthUtils.sheetForMonth(
+            <SheetNameProvider
+              name={monthUtils.sheetForMonth(
                 monthUtils.monthFromDate(transaction.date),
               )}
             >
@@ -1540,7 +1540,7 @@ const Transaction = memo(function Transaction({
                 onSelect={onSave}
                 showHiddenCategories={false}
               />
-            </NamespaceContext.Provider>
+            </SheetNameProvider>
           )}
         </CustomCell>
       )}
