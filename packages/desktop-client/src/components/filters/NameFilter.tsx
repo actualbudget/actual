@@ -8,7 +8,7 @@ import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 
-import { FormField, FormLabel } from '../forms';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
 
 export function NameFilter({
   menuItem,

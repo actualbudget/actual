@@ -23,17 +23,16 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
-import { pushModal } from '../../modals/modalsSlice';
-import { useDispatch } from '../../redux';
-import { type TableHandleRef } from '../table';
-
 import {
   TransactionTable,
   type TransactionTableProps,
 } from './TransactionsTable';
 
+import { type TableHandleRef } from '@desktop-client/components/table';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 // When data changes, there are two ways to update the UI:
 //

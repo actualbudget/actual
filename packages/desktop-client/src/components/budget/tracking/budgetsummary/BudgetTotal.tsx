@@ -11,8 +11,14 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type SheetFields, type Binding } from '../../../spreadsheet';
-import { CellValue, CellValueText } from '../../../spreadsheet/CellValue';
+import {
+  type SheetFields,
+  type Binding,
+} from '@desktop-client/components/spreadsheet';
+import {
+  CellValue,
+  CellValueText,
+} from '@desktop-client/components/spreadsheet/CellValue';
 
 type BudgetTotalProps<
   CurrentField extends SheetFields<'tracking-budget'>,

@@ -1,8 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { SelectCell, Cell, TableHeader } from '../table';
-
+import {
+  SelectCell,
+  Cell,
+  TableHeader,
+} from '@desktop-client/components/table';
 import {
   useSelectedItems,
   useSelectedDispatch,

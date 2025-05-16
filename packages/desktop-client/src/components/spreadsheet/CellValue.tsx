@@ -8,8 +8,6 @@ import React, {
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 
-import { PrivacyFilter } from '../PrivacyFilter';
-
 import { type FormatType, useFormat } from './useFormat';
 import { useSheetName } from './useSheetName';
 import { useSheetValue } from './useSheetValue';
@@ -20,6 +18,8 @@ import {
   type SheetFields,
   type Spreadsheets,
 } from '.';
+
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 
 type CellValueProps<
   SheetName extends SheetNames,

@@ -8,8 +8,18 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
-import { sync } from '../../../app/appSlice';
-import { collapseModals, pushModal } from '../../../modals/modalsSlice';
+import { BudgetTable } from './BudgetTable';
+
+import { sync } from '@desktop-client/app/appSlice';
+import { prewarmMonth } from '@desktop-client/components/budget/util';
+import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
+import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
 import {
   applyBudgetAction,
   createCategory,
@@ -18,19 +28,8 @@ import {
   deleteGroup,
   updateCategory,
   updateGroup,
-} from '../../../queries/queriesSlice';
-import { useDispatch } from '../../../redux';
-import { prewarmMonth } from '../../budget/util';
-import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
-import { SyncRefresh } from '../../SyncRefresh';
-
-import { BudgetTable } from './BudgetTable';
-
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+} from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 function isBudgetType(input?: string): input is 'envelope' | 'tracking' {
   return ['envelope', 'tracking'].includes(input);

@@ -25,9 +25,6 @@ import { css, cx } from '@emotion/css';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { type AccountEntity, type PayeeEntity } from 'loot-core/types/models';
 
-import { createPayee, getActivePayees } from '../../queries/queriesSlice';
-import { useDispatch } from '../../redux';
-
 import {
   Autocomplete,
   defaultFilterSuggestion,
@@ -37,6 +34,11 @@ import { ItemHeader } from './ItemHeader';
 
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCommonPayees, usePayees } from '@desktop-client/hooks/usePayees';
+import {
+  createPayee,
+  getActivePayees,
+} from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 export type PayeeAutocompleteItem = PayeeEntity;
 

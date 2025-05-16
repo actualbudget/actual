@@ -18,16 +18,15 @@ import {
   extractScheduleConds,
 } from 'loot-core/shared/schedules';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal';
-
+} from '@desktop-client/components/common/Modal';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type ScheduledTransactionMenuModalProps = Extract<
   ModalType,

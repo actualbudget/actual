@@ -21,7 +21,7 @@ import {
   type SheetFields,
   type Binding,
   type SheetNames,
-} from '../components/spreadsheet';
+} from '@desktop-client/components/spreadsheet';
 
 type BudgetType<SheetName extends SheetNames> = Record<
   string,
