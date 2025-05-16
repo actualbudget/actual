@@ -22,7 +22,7 @@ import { TotalsList } from './TotalsList';
 import { useEnvelopeBudget } from '@desktop-client/components/budget/envelope/EnvelopeBudgetContext';
 import { NotesButton } from '@desktop-client/components/NotesButton';
 import { useLocale } from '@desktop-client/hooks/useLocale';
-import { NamespaceContext } from '@desktop-client/hooks/useSheetName';
+import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 
 type BudgetSummaryProps = {
@@ -88,7 +88,7 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
         },
       }}
     >
-      <NamespaceContext.Provider value={monthUtils.sheetForMonth(month)}>
+      <SheetNameProvider name={monthUtils.sheetForMonth(month)}>
         <View
           style={{
             padding: '0 13px',
@@ -287,7 +287,7 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
             </View>
           </>
         )}
-      </NamespaceContext.Provider>
+      </SheetNameProvider>
     </View>
   );
 });

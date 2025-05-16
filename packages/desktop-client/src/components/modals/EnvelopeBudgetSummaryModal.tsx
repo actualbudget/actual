@@ -16,7 +16,7 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
-import { NamespaceContext } from '@desktop-client/hooks/useSheetName';
+import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import {
   collapseModals,
@@ -155,7 +155,7 @@ export function EnvelopeBudgetSummaryModal({
             title={t('Budget Summary')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
-          <NamespaceContext.Provider value={sheetForMonth(month)}>
+          <SheetNameProvider name={sheetForMonth(month)}>
             <TotalsList
               prevMonthName={prevMonthName}
               style={{
@@ -174,7 +174,7 @@ export function EnvelopeBudgetSummaryModal({
               onClick={() => onClick({ close })}
               isTotalsListTooltipDisabled={true}
             />
-          </NamespaceContext.Provider>
+          </SheetNameProvider>
         </>
       )}
     </Modal>
