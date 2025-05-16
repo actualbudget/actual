@@ -1,4 +1,4 @@
-import React, { type Ref, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -54,7 +54,7 @@ export function CoverMenu({
         <Trans>Cover from a category:</Trans>
       </View>
 
-      <InitialFocus>
+      <InitialFocus<HTMLInputElement>>
         {node => (
           <CategoryAutocomplete
             categoryGroups={filteredCategoryGroups}
@@ -62,7 +62,7 @@ export function CoverMenu({
             openOnFocus={true}
             onSelect={(id: string | undefined) => setFromCategoryId(id || null)}
             inputProps={{
-              inputRef: node as Ref<HTMLInputElement>,
+              inputRef: node,
               onEnter: event => !event.defaultPrevented && submit(),
               placeholder: t('(none)'),
             }}
