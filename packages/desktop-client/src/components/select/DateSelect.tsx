@@ -34,8 +34,8 @@ import {
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
 
+import { useFirstDayOfWeek } from '@desktop-client/hooks/useFirstDayOfWeek';
 import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 const pickerStyles: CSSProperties = {
   '& .pika-single.actual-date-picker': {
@@ -117,7 +117,7 @@ function createPikadayLocale(dateFnsLocale: Locale): PikadayI18n {
 
 type DatePickerProps = {
   value: string;
-  firstDayOfWeekIdx: string;
+  firstDayOfWeekIdx: Day;
   dateFormat: string;
   onUpdate?: (selectedDate: Date) => void;
   onSelect: (selectedDate: Date | null) => void;
@@ -172,7 +172,7 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
       picker.current = new Pikaday({
         theme: 'actual-date-picker',
         keyboardInput: false,
-        firstDay: parseInt(firstDayOfWeekIdx),
+        firstDay: firstDayOfWeekIdx,
         defaultDate: value
           ? parse(value, dateFormat, currentDate())
           : currentDate(),
@@ -276,8 +276,7 @@ export function DateSelect({
   const [selectedValue, setSelectedValue] = useState(value);
   const userSelectedValue = useRef(selectedValue);
 
-  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
-  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const firstDayOfWeekIdx = useFirstDayOfWeek();
 
   useEffect(() => {
     userSelectedValue.current = value;

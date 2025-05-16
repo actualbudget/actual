@@ -62,7 +62,7 @@ type ReportSidebarProps = {
   defaultItems: (item: string) => void;
   defaultModeItems: (graph: string, item: string) => void;
   earliestTransaction: string;
-  firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'];
+  firstDayOfWeekIdx: Day;
   isComplexCategoryCondition?: boolean;
 };
 

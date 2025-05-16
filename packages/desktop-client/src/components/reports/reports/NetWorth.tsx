@@ -33,9 +33,9 @@ import { fromDateRepr } from '../util';
 
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useFilters } from '@desktop-client/hooks/useFilters';
+import { useFirstDayOfWeek } from '@desktop-client/hooks/useFirstDayOfWeek';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function NetWorth() {
   const params = useParams();
@@ -178,8 +178,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   };
 
   const [earliestTransaction, _] = useState('');
-  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
-  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const firstDayOfWeekIdx = useFirstDayOfWeek();
 
   if (!allMonths || !data) {
     return null;

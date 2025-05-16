@@ -59,11 +59,11 @@ import { fromDateRepr } from '../util';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFilters } from '@desktop-client/hooks/useFilters';
+import { useFirstDayOfWeek } from '@desktop-client/hooks/useFirstDayOfWeek';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 /**
  * Transform `selectedCategories` into `conditions`.
@@ -128,8 +128,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const { t } = useTranslation();
   const categories = useCategories();
   const { isNarrowWidth } = useResponsive();
-  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
-  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const firstDayOfWeekIdx = useFirstDayOfWeek();
 
   const [viewLegend = false, setViewLegendPref] =
     useLocalPref('reportsViewLegend');

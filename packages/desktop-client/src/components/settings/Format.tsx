@@ -68,9 +68,8 @@ export function FormatSettings() {
   const { t } = useTranslation();
 
   const sidebar = useSidebar();
-  const [_firstDayOfWeekIdx, setFirstDayOfWeekIdxPref] =
-    useSyncedPref('firstDayOfWeekIdx'); // Sunday;
-  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const [firstDayOfWeekIdx, setFirstDayOfWeekIdxPref] =
+    useSyncedPref('firstDayOfWeekIdx');
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [, setDateFormatPref] = useSyncedPref('dateFormat');
   const [_numberFormat, setNumberFormatPref] = useSyncedPref('numberFormat');
@@ -78,6 +77,9 @@ export function FormatSettings() {
   const [hideFraction, setHideFractionPref] = useSyncedPref('hideFraction');
 
   const { daysOfWeek } = useDaysOfWeek();
+  const firstDayOfWeekIdxOptions = [
+    { value: '', label: t('System default') },
+  ].concat(daysOfWeek);
 
   const selectButtonClassName = css({
     '&[data-hovered]': {
@@ -141,7 +143,7 @@ export function FormatSettings() {
             <Select
               value={firstDayOfWeekIdx}
               onChange={idx => setFirstDayOfWeekIdxPref(idx)}
-              options={daysOfWeek.map(f => [f.value, f.label])}
+              options={firstDayOfWeekIdxOptions.map(f => [f.value, f.label])}
               className={selectButtonClassName}
             />
           </Column>

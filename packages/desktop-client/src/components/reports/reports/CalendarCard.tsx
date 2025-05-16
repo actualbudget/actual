@@ -53,7 +53,7 @@ type CalendarCardProps = {
   meta?: CalendarWidget['meta'];
   onMetaChange: (newMeta: CalendarWidget['meta']) => void;
   onRemove: () => void;
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
+  firstDayOfWeekIdx: Day;
 };
 
 export function CalendarCard({
@@ -302,7 +302,7 @@ export function CalendarCard({
                 <CalendarCardInner
                   key={index}
                   calendar={calendar}
-                  firstDayOfWeekIdx={firstDayOfWeekIdx ?? '0'}
+                  firstDayOfWeekIdx={firstDayOfWeekIdx}
                   setMonthNameFormats={setMonthNameFormats}
                   selectedMonthNameFormat={selectedMonthNameFormat}
                   index={index}
@@ -328,7 +328,7 @@ type CalendarCardInnerProps = {
     totalExpense: number;
     totalIncome: number;
   };
-  firstDayOfWeekIdx: string;
+  firstDayOfWeekIdx: Day;
   setMonthNameFormats: Dispatch<SetStateAction<string[]>>;
   selectedMonthNameFormat: string;
   index: number;

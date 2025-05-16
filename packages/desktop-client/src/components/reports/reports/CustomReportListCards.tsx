@@ -24,8 +24,8 @@ import { MissingReportCard } from './MissingReportCard';
 
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFirstDayOfWeek } from '@desktop-client/hooks/useFirstDayOfWeek';
 import { usePayees } from '@desktop-client/hooks/usePayees';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type CustomReportListCardsProps = {
   isEditing?: boolean;
@@ -81,8 +81,7 @@ function CustomReportListCardsInner({
     accounts,
   });
 
-  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
-  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const firstDayOfWeekIdx = useFirstDayOfWeek();
 
   useEffect(() => {
     async function run() {

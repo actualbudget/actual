@@ -7,7 +7,7 @@ export function validateStart(
   start: string,
   end: string,
   interval?: string,
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
+  firstDayOfWeekIdx?: Day,
 ): [string, string, TimeFrame['mode']] {
   let addDays: number;
   let dateStart: string;
@@ -47,7 +47,7 @@ export function validateEnd(
   start: string,
   end: string,
   interval?: string,
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
+  firstDayOfWeekIdx?: Day,
 ): [string, string, TimeFrame['mode']] {
   let subDays: number;
   let dateEnd: string;
@@ -98,7 +98,7 @@ function boundedRange(
   start: string,
   end: string,
   interval?: string,
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
+  firstDayOfWeekIdx?: Day,
 ): [string, string, 'static'] {
   let latest: string;
   switch (interval) {
@@ -132,7 +132,7 @@ export function getSpecificRange(
   offset: number,
   addNumber: number | null,
   type?: string,
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
+  firstDayOfWeekIdx?: Day,
 ) {
   const currentDay = monthUtils.currentDay();
   const currentWeek = monthUtils.currentWeek(firstDayOfWeekIdx);

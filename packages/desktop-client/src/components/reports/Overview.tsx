@@ -43,8 +43,8 @@ import './overview.scss';
 import { SummaryCard } from './reports/SummaryCard';
 
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useFirstDayOfWeek } from '@desktop-client/hooks/useFirstDayOfWeek';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -56,8 +56,7 @@ function isCustomReportWidget(widget: Widget): widget is CustomReportWidget {
 export function Overview() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
-  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const firstDayOfWeekIdx = useFirstDayOfWeek();
 
   const [isImporting, setIsImporting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);

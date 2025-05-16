@@ -89,13 +89,9 @@ export function monthFromDate(date: DateLike): string {
   return d.format(_parse(date), 'yyyy-MM');
 }
 
-export function weekFromDate(
-  date: DateLike,
-  firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'],
-): string {
-  const converted = parseInt(firstDayOfWeekIdx || '0') as Day;
+export function weekFromDate(date: DateLike, firstDayOfWeekIdx: Day): string {
   return d.format(
-    _parse(d.startOfWeek(_parse(date), { weekStartsOn: converted })),
+    _parse(d.startOfWeek(_parse(date), { weekStartsOn: firstDayOfWeekIdx })),
     'yyyy-MM-dd',
   );
 }
@@ -120,15 +116,12 @@ export function currentMonth(): string {
   }
 }
 
-export function currentWeek(
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
-): string {
+export function currentWeek(firstDayOfWeekIdx: Day): string {
   if (global.IS_TESTING || Platform.isPlaywright) {
     return global.currentWeek || '2017-01-01';
   } else {
-    const converted = parseInt(firstDayOfWeekIdx || '0') as Day;
     return d.format(
-      _parse(d.startOfWeek(new Date(), { weekStartsOn: converted })),
+      _parse(d.startOfWeek(new Date(), { weekStartsOn: firstDayOfWeekIdx })),
       'yyyy-MM-dd',
     );
   }
@@ -269,7 +262,7 @@ export function _weekRange(
   start: DateLike,
   end: DateLike,
   inclusive = false,
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
+  firstDayOfWeekIdx: Day,
 ): string[] {
   const weeks: string[] = [];
   let week = weekFromDate(start, firstDayOfWeekIdx);
@@ -289,7 +282,7 @@ export function _weekRange(
 export function weekRangeInclusive(
   start: DateLike,
   end: DateLike,
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
+  firstDayOfWeekIdx: Day,
 ): string[] {
   return _weekRange(start, end, true, firstDayOfWeekIdx);
 }
@@ -374,13 +367,9 @@ export function getMonthEnd(day: string): string {
   return subDays(nextMonth(day.slice(0, 7)) + '-01', 1);
 }
 
-export function getWeekEnd(
-  date: DateLike,
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
-): string {
-  const converted = parseInt(firstDayOfWeekIdx || '0') as Day;
+export function getWeekEnd(date: DateLike, firstDayOfWeekIdx: Day): string {
   return d.format(
-    _parse(d.endOfWeek(_parse(date), { weekStartsOn: converted })),
+    _parse(d.endOfWeek(_parse(date), { weekStartsOn: firstDayOfWeekIdx })),
     'yyyy-MM-dd',
   );
 }

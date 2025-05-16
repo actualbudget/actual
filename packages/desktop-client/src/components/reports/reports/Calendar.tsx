@@ -66,6 +66,7 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFilters } from '@desktop-client/hooks/useFilters';
+import { useFirstDayOfWeek } from '@desktop-client/hooks/useFirstDayOfWeek';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
@@ -73,7 +74,6 @@ import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
 import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 const CHEVRON_HEIGHT = 42;
 const SUMMARY_HEIGHT = 140;
@@ -127,8 +127,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const payees = usePayees();
   const { grouped: categoryGroups } = useCategories();
 
-  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
-  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const firstDayOfWeekIdx = useFirstDayOfWeek();
   const {
     conditions,
     conditionsOp,
@@ -733,7 +732,7 @@ type CalendarWithHeaderProps = {
           id: RuleConditionEntity[];
         },
   ) => void;
-  firstDayOfWeekIdx: string;
+  firstDayOfWeekIdx: Day;
   conditions: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
 };

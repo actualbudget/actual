@@ -20,7 +20,7 @@ export function calendarSpreadsheet(
   end: string,
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
+  firstDayOfWeekIdx: Day,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -148,7 +148,7 @@ function recalculate(
   }>,
   months: Date[],
   start: string,
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
+  firstDayOfWeekIdx: Day,
 ) {
   const incomeDataMap = new Map<string, number>();
   incomeData.forEach(item => {
@@ -208,13 +208,7 @@ function recalculate(
 
     const firstDay = d.startOfMonth(month);
     const beginDay = d.startOfWeek(firstDay, {
-      weekStartsOn:
-        firstDayOfWeekIdx !== undefined &&
-        !Number.isNaN(parseInt(firstDayOfWeekIdx)) &&
-        parseInt(firstDayOfWeekIdx) >= 0 &&
-        parseInt(firstDayOfWeekIdx) <= 6
-          ? (parseInt(firstDayOfWeekIdx) as 0 | 1 | 2 | 3 | 4 | 5 | 6)
-          : 0,
+      weekStartsOn: firstDayOfWeekIdx,
     });
     let totalDays =
       d.differenceInDays(firstDay, beginDay) + d.getDaysInMonth(firstDay);

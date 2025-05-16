@@ -79,7 +79,7 @@ export function GetCardData({
   accounts: AccountEntity[];
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
   earliestTransaction: string;
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
+  firstDayOfWeekIdx: Day;
   showTooltip?: boolean;
 }) {
   const { isNarrowWidth } = useResponsive();

@@ -35,7 +35,7 @@ type HeaderProps = {
   show1Month?: boolean;
   allMonths: Array<{ name: string; pretty: string }>;
   earliestTransaction: string;
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
+  firstDayOfWeekIdx: Day;
   onChangeDates: (
     start: TimeFrame['start'],
     end: TimeFrame['end'],
