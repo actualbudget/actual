@@ -15,7 +15,6 @@ import {
   type PayeeEntity,
   type CustomReportEntity,
 } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { ChooseGraph } from '../ChooseGraph';
 import { getLiveRange } from '../getLiveRange';
@@ -79,7 +78,7 @@ export function GetCardData({
   accounts: AccountEntity[];
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
   earliestTransaction: string;
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
+  firstDayOfWeekIdx: Day;
   showTooltip?: boolean;
 }) {
   const { isNarrowWidth } = useResponsive();

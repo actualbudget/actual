@@ -20,7 +20,6 @@ import {
   type CustomReportEntity,
   type sortByOpType,
 } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { Information } from '../alerts';
 
@@ -62,7 +61,7 @@ type ReportSidebarProps = {
   defaultItems: (item: string) => void;
   defaultModeItems: (graph: string, item: string) => void;
   earliestTransaction: string;
-  firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'];
+  firstDayOfWeekIdx: Day;
   isComplexCategoryCondition?: boolean;
 };
 
@@ -534,8 +533,8 @@ export function ReportSidebar({
                       earliestTransaction,
                       newValue,
                       customReportItems.endDate,
-                      customReportItems.interval,
                       firstDayOfWeekIdx,
+                      customReportItems.interval,
                     ),
                   )
                 }
@@ -566,8 +565,8 @@ export function ReportSidebar({
                       earliestTransaction,
                       customReportItems.startDate,
                       newValue,
-                      customReportItems.interval,
                       firstDayOfWeekIdx,
+                      customReportItems.interval,
                     ),
                   )
                 }

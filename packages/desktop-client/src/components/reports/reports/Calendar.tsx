@@ -63,6 +63,7 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFirstDayOfWeek } from '@desktop-client/hooks/useFirstDayOfWeek';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
@@ -71,7 +72,6 @@ import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
 import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
 import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useWidget } from '@desktop-client/hooks/useWidget';
 
@@ -127,8 +127,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const payees = usePayees();
   const { grouped: categoryGroups } = useCategories();
 
-  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
-  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const firstDayOfWeekIdx = useFirstDayOfWeek();
   const {
     conditions,
     conditionsOp,
@@ -736,7 +735,7 @@ type CalendarWithHeaderProps = {
           id: RuleConditionEntity[];
         },
   ) => void;
-  firstDayOfWeekIdx: string;
+  firstDayOfWeekIdx: Day;
   conditions: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
 };

@@ -27,7 +27,6 @@ import { debounce } from 'debounce';
 import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
 import { type CalendarWidget } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { chartTheme } from '../chart-theme';
@@ -53,7 +52,7 @@ type CalendarCardProps = {
   meta?: CalendarWidget['meta'];
   onMetaChange: (newMeta: CalendarWidget['meta']) => void;
   onRemove: () => void;
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
+  firstDayOfWeekIdx: Day;
 };
 
 export function CalendarCard({
@@ -302,7 +301,7 @@ export function CalendarCard({
                 <CalendarCardInner
                   key={index}
                   calendar={calendar}
-                  firstDayOfWeekIdx={firstDayOfWeekIdx ?? '0'}
+                  firstDayOfWeekIdx={firstDayOfWeekIdx}
                   setMonthNameFormats={setMonthNameFormats}
                   selectedMonthNameFormat={selectedMonthNameFormat}
                   index={index}
@@ -328,7 +327,7 @@ type CalendarCardInnerProps = {
     totalExpense: number;
     totalIncome: number;
   };
-  firstDayOfWeekIdx: string;
+  firstDayOfWeekIdx: Day;
   setMonthNameFormats: Dispatch<SetStateAction<string[]>>;
   selectedMonthNameFormat: string;
   index: number;

@@ -17,7 +17,6 @@ import {
   type GroupedEntity,
   type IntervalEntity,
 } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import {
   categoryLists,
@@ -51,7 +50,7 @@ export type createCustomSpreadsheetProps = {
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   graphType?: string;
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
+  firstDayOfWeekIdx: Day;
   setDataCheck?: (value: boolean) => void;
 };
 
@@ -140,7 +139,7 @@ export function createCustomSpreadsheet({
         ? monthUtils.weekRangeInclusive(startDate, endDate, firstDayOfWeekIdx)
         : monthUtils[
             ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
-          ](startDate, endDate);
+          ](startDate, endDate, firstDayOfWeekIdx);
 
     let totalAssets = 0;
     let totalDebts = 0;

@@ -16,7 +16,6 @@ import {
 } from 'date-fns';
 
 import { amountToCurrency } from 'loot-core/shared/util';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { chartTheme } from '../chart-theme';
@@ -32,7 +31,7 @@ type CalendarGraphProps = {
     expenseSize: number;
   }[];
   start: Date;
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
+  firstDayOfWeekIdx: Day;
   isEditing?: boolean;
   onDayClick: (date: Date | null) => void;
 };
@@ -44,13 +43,7 @@ export function CalendarGraph({
   onDayClick,
 }: CalendarGraphProps) {
   const startingDate = startOfWeek(new Date(), {
-    weekStartsOn:
-      firstDayOfWeekIdx !== undefined &&
-      !Number.isNaN(parseInt(firstDayOfWeekIdx)) &&
-      parseInt(firstDayOfWeekIdx) >= 0 &&
-      parseInt(firstDayOfWeekIdx) <= 6
-        ? (parseInt(firstDayOfWeekIdx) as 0 | 1 | 2 | 3 | 4 | 5 | 6)
-        : 0,
+    weekStartsOn: firstDayOfWeekIdx,
   });
   const [fontSize, setFontSize] = useState(14);
 

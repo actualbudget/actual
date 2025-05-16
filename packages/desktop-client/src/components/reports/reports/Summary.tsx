@@ -42,10 +42,10 @@ import { summarySpreadsheet } from '../spreadsheets/summary-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
 
+import { useFirstDayOfWeek } from '@desktop-client/hooks/useFirstDayOfWeek';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useWidget } from '@desktop-client/hooks/useWidget';
 
 export function Summary() {
@@ -156,8 +156,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
   >([]);
 
   const [earliestTransaction, _] = useState('');
-  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
-  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const firstDayOfWeekIdx = useFirstDayOfWeek();
 
   useEffect(() => {
     async function run() {

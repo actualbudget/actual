@@ -12,7 +12,6 @@ import {
   type RuleConditionEntity,
   type TimeFrame,
 } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { AppliedFilters } from '../filters/AppliedFilters';
 import { FilterButton } from '../filters/FiltersMenu';
@@ -35,7 +34,7 @@ type HeaderProps = {
   show1Month?: boolean;
   allMonths: Array<{ name: string; pretty: string }>;
   earliestTransaction: string;
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
+  firstDayOfWeekIdx: Day;
   onChangeDates: (
     start: TimeFrame['start'],
     end: TimeFrame['end'],
@@ -122,6 +121,7 @@ export function Header({
                     allMonths[allMonths.length - 1].name,
                     newValue,
                     end,
+                    firstDayOfWeekIdx,
                   ),
                 )
               }
@@ -137,6 +137,7 @@ export function Header({
                     allMonths[allMonths.length - 1].name,
                     start,
                     newValue,
+                    firstDayOfWeekIdx,
                   ),
                 )
               }

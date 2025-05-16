@@ -1,13 +1,12 @@
 import * as monthUtils from 'loot-core/shared/months';
 import { type TimeFrame } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 export function validateStart(
   earliest: string,
   start: string,
   end: string,
+  firstDayOfWeekIdx: Day,
   interval?: string,
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
 ): [string, string, TimeFrame['mode']] {
   let addDays: number;
   let dateStart: string;
@@ -37,8 +36,8 @@ export function validateStart(
     earliest,
     dateStart,
     interval ? end : monthUtils.monthFromDate(end),
-    interval,
     firstDayOfWeekIdx,
+    interval,
   );
 }
 
@@ -46,8 +45,8 @@ export function validateEnd(
   earliest: string,
   start: string,
   end: string,
+  firstDayOfWeekIdx: Day,
   interval?: string,
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
 ): [string, string, TimeFrame['mode']] {
   let subDays: number;
   let dateEnd: string;
@@ -77,8 +76,8 @@ export function validateEnd(
     earliest,
     interval ? start : monthUtils.monthFromDate(start),
     dateEnd,
-    interval,
     firstDayOfWeekIdx,
+    interval,
   );
 }
 
@@ -97,8 +96,8 @@ function boundedRange(
   earliest: string,
   start: string,
   end: string,
+  firstDayOfWeekIdx: Day,
   interval?: string,
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
 ): [string, string, 'static'] {
   let latest: string;
   switch (interval) {
@@ -131,8 +130,8 @@ function boundedRange(
 export function getSpecificRange(
   offset: number,
   addNumber: number | null,
+  firstDayOfWeekIdx: Day,
   type?: string,
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
 ) {
   const currentDay = monthUtils.currentDay();
   const currentWeek = monthUtils.currentWeek(firstDayOfWeekIdx);

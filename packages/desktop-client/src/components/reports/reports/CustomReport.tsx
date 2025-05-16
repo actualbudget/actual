@@ -57,13 +57,13 @@ import { fromDateRepr } from '../util';
 
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFirstDayOfWeek } from '@desktop-client/hooks/useFirstDayOfWeek';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useReport as useCustomReport } from '@desktop-client/hooks/useReport';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 /**
  * Transform `selectedCategories` into `conditions`.
@@ -128,8 +128,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const { t } = useTranslation();
   const categories = useCategories();
   const { isNarrowWidth } = useResponsive();
-  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
-  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const firstDayOfWeekIdx = useFirstDayOfWeek();
 
   const [viewLegend = false, setViewLegendPref] =
     useLocalPref('reportsViewLegend');
@@ -336,7 +335,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
             )
           : monthUtils[
               ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
-            ](earliestInterval, currentInterval);
+            ](earliestInterval, currentInterval, firstDayOfWeekIdx);
 
       const allIntervalsMap = allIntervals
         .map((inter: string) => ({
@@ -392,7 +391,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       setIntervals(
         monthUtils[
           ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
-        ](start, end),
+        ](start, end, firstDayOfWeekIdx),
       );
     }
   }, [interval, startDate, endDate, firstDayOfWeekIdx]);

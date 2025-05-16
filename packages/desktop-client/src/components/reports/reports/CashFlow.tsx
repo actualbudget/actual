@@ -35,10 +35,10 @@ import { calculateTimeRange } from '../reportRanges';
 import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '../useReport';
 
+import { useFirstDayOfWeek } from '@desktop-client/hooks/useFirstDayOfWeek';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useWidget } from '@desktop-client/hooks/useWidget';
 
 export const defaultTimeFrame = {
@@ -195,8 +195,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   };
 
   const [earliestTransaction, _] = useState('');
-  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
-  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const firstDayOfWeekIdx = useFirstDayOfWeek();
 
   if (!allMonths || !data) {
     return null;
