@@ -5,7 +5,6 @@ import { useLocation } from 'react-router-dom';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
-import { NamespaceContext } from '../hooks/NamespaceContext';
 import { closeModal } from '../modals/modalsSlice';
 import { useDispatch } from '../redux';
 
@@ -80,6 +79,7 @@ import { UpcomingLength } from './schedules/UpcomingLength';
 
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useModalState } from '@desktop-client/hooks/useModalState';
+import { NamespaceContext } from '@desktop-client/hooks/useSheetName';
 
 export function Modals() {
   const location = useLocation();

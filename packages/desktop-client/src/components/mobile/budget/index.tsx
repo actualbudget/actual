@@ -9,7 +9,6 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
 import { sync } from '../../../app/appSlice';
-import { NamespaceContext } from '../../../hooks/NamespaceContext';
 import { collapseModals, pushModal } from '../../../modals/modalsSlice';
 import {
   applyBudgetAction,
@@ -29,6 +28,7 @@ import { BudgetTable } from './BudgetTable';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { NamespaceContext } from '@desktop-client/hooks/useSheetName';
 import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 

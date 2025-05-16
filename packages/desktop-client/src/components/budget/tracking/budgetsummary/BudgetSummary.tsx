@@ -17,7 +17,6 @@ import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { NamespaceContext } from '../../../../hooks/NamespaceContext';
 import { NotesButton } from '../../../NotesButton';
 import { useTrackingBudget } from '../TrackingBudgetContext';
 
@@ -27,6 +26,7 @@ import { IncomeTotal } from './IncomeTotal';
 import { Saved } from './Saved';
 
 import { useLocale } from '@desktop-client/hooks/useLocale';
+import { NamespaceContext } from '@desktop-client/hooks/useSheetName';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 
 type BudgetSummaryProps = {

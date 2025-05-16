@@ -6,7 +6,6 @@ import { styles } from '@actual-app/components/styles';
 import { format, sheetForMonth, prevMonth } from 'loot-core/shared/months';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 
-import { NamespaceContext } from '../../hooks/NamespaceContext';
 import {
   collapseModals,
   type Modal as ModalType,
@@ -20,6 +19,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
+import { NamespaceContext } from '@desktop-client/hooks/useSheetName';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
