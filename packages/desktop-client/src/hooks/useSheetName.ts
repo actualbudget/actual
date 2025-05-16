@@ -1,13 +1,11 @@
 // @ts-strict-ignore
-import { useContext } from 'react';
+import { createContext, useContext } from 'react';
 
 import {
   type SheetNames,
   type SheetFields,
   type Binding,
 } from '../spreadsheet';
-
-import { NamespaceContext } from './NamespaceContext';
 
 function unresolveName(name) {
   const idx = name.indexOf('!');
@@ -19,6 +17,8 @@ function unresolveName(name) {
   }
   return { sheet: null, name };
 }
+
+export const NamespaceContext = createContext<string | undefined>(undefined);
 
 export function useSheetName<
   SheetName extends SheetNames,

@@ -21,8 +21,8 @@ import { TotalsList } from './TotalsList';
 
 import { useEnvelopeBudget } from '@desktop-client/components/budget/envelope/EnvelopeBudgetContext';
 import { NotesButton } from '@desktop-client/components/NotesButton';
-import { NamespaceContext } from '@desktop-client/hooks/NamespaceContext';
 import { useLocale } from '@desktop-client/hooks/useLocale';
+import { NamespaceContext } from '@desktop-client/hooks/useSheetName';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 
 type BudgetSummaryProps = {

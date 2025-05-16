@@ -105,7 +105,6 @@ import {
   UnexposedCellContent,
   useTableNavigator,
 } from '@desktop-client/components/table';
-import { NamespaceContext } from '@desktop-client/hooks/NamespaceContext';
 import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
@@ -116,6 +115,7 @@ import {
   useSelectedDispatch,
   useSelectedItems,
 } from '@desktop-client/hooks/useSelected';
+import { NamespaceContext } from '@desktop-client/hooks/useSheetName';
 import {
   type SplitsExpandedContextValue,
   useSplitsExpanded,
