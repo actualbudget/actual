@@ -237,6 +237,10 @@ export function resetBudgetHold(month) {
   return send('api/budget-reset-hold', { month });
 }
 
+export function getSchedule(scheduleId: ScheduleEntity['id']) {
+  return send('api/schedule-get', scheduleId);
+}
+
 export function createSchedule(
   schedule: Partial<ScheduleEntity>,
   conditions: Partial<RuleConditionEntity>[],

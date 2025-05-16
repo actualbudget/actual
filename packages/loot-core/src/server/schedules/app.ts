@@ -184,7 +184,7 @@ async function checkIfScheduleExists(name, scheduleId) {
 
 export async function getSchedule(
   scheduleId: ScheduleEntity['id'],
-): Promise<ScheduleEntity | null> {
+): Promise<ScheduleEntity | undefined> {
   const {
     data: [row],
   } = await aqlQuery(q('schedules').filter({ id: scheduleId }).select('*'));
@@ -422,9 +422,9 @@ function onApplySync(oldValues, newValues) {
 // posts transactions
 
 async function postTransactionForSchedule({ id }: { id: string }) {
-  const { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
-  const schedule = data[0];
-  if (schedule == null || schedule._account == null) {
+  const schedule = await getSchedule(id);
+  if (!schedule?._account) {
+    console.log('schedule not found', schedule);
     return;
   }
 
@@ -436,6 +436,7 @@ async function postTransactionForSchedule({ id }: { id: string }) {
     schedule: schedule.id,
     cleared: false,
   };
+  console.log('adding transaction', transaction);
 
   if (transaction.account) {
     await addTransactions(transaction.account, [transaction]);

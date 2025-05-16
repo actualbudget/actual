@@ -766,6 +766,11 @@ handlers['api/rule-delete'] = withMutation(async function (id) {
   return handlers['rule-delete'](id);
 });
 
+handlers['api/schedule-get'] = async function (scheduleId) {
+  checkFileOpen();
+  return handlers['schedule/get'](scheduleId);
+};
+
 handlers['api/schedule-create'] = withMutation(async function ({
   schedule,
   conditions,

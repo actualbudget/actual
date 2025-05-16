@@ -195,6 +195,10 @@ export interface ApiHandlers {
 
   'api/rule-delete': (id: string) => Promise<boolean>;
 
+  'api/schedule-get': (
+    scheduleId: ScheduleEntity['id'],
+  ) => Promise<ScheduleEntity | undefined>;
+
   'api/schedule-create': (arg: {
     schedule: Partial<ScheduleEntity>;
     conditions: Partial<RuleConditionEntity>[];
