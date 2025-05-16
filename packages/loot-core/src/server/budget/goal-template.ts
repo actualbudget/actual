@@ -90,7 +90,7 @@ async function getCategories(): Promise<CategoryEntity[]> {
   const { data: categoryGroups }: { data: CategoryGroupEntity[] } =
     await aqlQuery(q('category_groups').filter({ hidden: false }).select('*'));
 
-  return categoryGroups.flatMap(g => g.categories || []);
+  return categoryGroups.flatMap(g => g.categories || []).filter(c => !c.hidden);
 }
 
 async function getTemplates(
