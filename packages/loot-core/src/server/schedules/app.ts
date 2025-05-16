@@ -182,6 +182,15 @@ async function checkIfScheduleExists(name, scheduleId) {
   return true;
 }
 
+export async function getSchedule(
+  scheduleId: ScheduleEntity['id'],
+): Promise<ScheduleEntity | null> {
+  const {
+    data: [row],
+  } = await aqlQuery(q('schedules').filter({ id: scheduleId }).select('*'));
+  return row;
+}
+
 export async function createSchedule({
   schedule = null,
   conditions = [],
@@ -517,6 +526,7 @@ async function advanceSchedulesService(syncSuccess) {
 }
 
 export type SchedulesHandlers = {
+  'schedule/get': typeof getSchedule;
   'schedule/create': typeof createSchedule;
   'schedule/update': typeof updateSchedule;
   'schedule/delete': typeof deleteSchedule;
@@ -530,6 +540,7 @@ export type SchedulesHandlers = {
 // Expose functions to the client
 export const app = createApp<SchedulesHandlers>();
 
+app.method('schedule/get', getSchedule);
 app.method('schedule/create', mutator(undoable(createSchedule)));
 app.method('schedule/update', mutator(undoable(updateSchedule)));
 app.method('schedule/delete', mutator(undoable(deleteSchedule)));

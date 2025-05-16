@@ -9,6 +9,7 @@ import { loadRules, updateRule } from '../transactions/transaction-rules';
 
 import {
   updateConditions,
+  getSchedule,
   createSchedule,
   updateSchedule,
   deleteSchedule,
@@ -99,9 +100,8 @@ describe('schedule app', () => {
         ],
       });
 
-      const {
-        data: [row],
-      } = await aqlQuery(q('schedules').filter({ id }).select('*'));
+      expect(id).toBeDefined();
+      const row = await getSchedule(id);
 
       expect(row).toBeTruthy();
       expect(row.rule).toBeTruthy();
@@ -133,12 +133,7 @@ describe('schedule app', () => {
         ],
       });
 
-      let res = await aqlQuery(
-        q('schedules')
-          .filter({ id })
-          .select(['next_date', 'posts_transaction']),
-      );
-      let row = res.data[0];
+      let row = await getSchedule(id);
 
       expect(row.next_date).toBe('2020-12-30');
       expect(row.posts_transaction).toBe(false);
@@ -163,12 +158,7 @@ describe('schedule app', () => {
         ],
       });
 
-      res = await aqlQuery(
-        q('schedules')
-          .filter({ id })
-          .select(['next_date', 'posts_transaction']),
-      );
-      row = res.data[0];
+      row = await getSchedule(id);
 
       // Updating the date condition updates `next_date`
       expect(row.next_date).toBe('2021-05-18');
@@ -242,17 +232,14 @@ describe('schedule app', () => {
         ],
       });
 
-      let res = await aqlQuery(
-        q('schedules').filter({ id }).select(['next_date']),
-      );
-      let row = res.data[0];
+      expect(id).toBeDefined();
+      let row = await getSchedule(id);
 
       expect(row.next_date).toBe('2020-12-30');
 
       await setNextDate({ id });
 
-      res = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
-      row = res.data[0];
+      row = await getSchedule(id);
 
       expect(row.next_date).toBe('2021-05-18');
     });
