@@ -10,8 +10,8 @@ import { useCategory } from './useCategory';
 import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTemplates';
 import { usePreviewTransactions } from './usePreviewTransactions';
 
-import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
-import { categoryBalance } from '@desktop-client/queries/queries';
+import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
+import { categoryBalance } from '@desktop-client/spreadsheet/bindings';
 
 type UseCategoryPreviewTransactionsProps = {
   categoryId: CategoryEntity['id'];

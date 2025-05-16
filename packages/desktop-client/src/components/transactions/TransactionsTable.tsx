@@ -89,7 +89,6 @@ import {
   type StatusTypes,
 } from '@desktop-client/components/schedules/StatusBadge';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
-import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
 import {
   Cell,
   CellButton,
@@ -106,6 +105,7 @@ import {
   UnexposedCellContent,
   useTableNavigator,
 } from '@desktop-client/components/table';
+import { NamespaceContext } from '@desktop-client/hooks/NamespaceContext';
 import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';

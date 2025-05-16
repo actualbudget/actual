@@ -15,7 +15,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { SectionLabel } from '@desktop-client/components/forms';
-import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
+import { NamespaceContext } from '@desktop-client/hooks/NamespaceContext';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type CategoryAutocompleteModalProps = Extract<

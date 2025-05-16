@@ -1,6 +1,8 @@
 import { useState, useRef, useLayoutEffect } from 'react';
 
+
 import { useSheetName } from './useSheetName';
+import { useSpreadsheet } from './useSpreadsheet';
 
 import {
   type Spreadsheets,
@@ -8,9 +10,8 @@ import {
   type SheetNames,
   type Binding,
   type BindingObject,
-} from '.';
+} from '@desktop-client/spreadsheet';
 
-import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 type SheetValueResult<
   SheetName extends SheetNames,
