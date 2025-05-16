@@ -5,7 +5,7 @@ import { type CategoryEntity } from '../../types/models';
 import * as db from '../db';
 
 import * as actions from './actions';
-import { CategoryTemplate } from './categoryTemplate';
+import { CategoryTemplateContext } from './category-template-context';
 import { type Template } from './types/templates';
 
 // Mock getSheetValue and getCategories
@@ -19,7 +19,7 @@ vi.mock('../db', () => ({
 }));
 
 // Test helper class to access constructor and methods
-class TestCategoryTemplate extends CategoryTemplate {
+class TestCategoryTemplateContext extends CategoryTemplateContext {
   public constructor(
     templates: Template[],
     category: CategoryEntity,
@@ -31,7 +31,7 @@ class TestCategoryTemplate extends CategoryTemplate {
   }
 }
 
-describe('CategoryTemplate', () => {
+describe('CategoryTemplateContext', () => {
   describe('runSimple', () => {
     it('should return monthly amount when provided', () => {
       const template: Template = {
@@ -42,7 +42,7 @@ describe('CategoryTemplate', () => {
       };
       const limit = 0;
 
-      const result = CategoryTemplate.runSimple(template, limit);
+      const result = CategoryTemplateContext.runSimple(template, limit);
       expect(result).toBe(amountToInteger(100));
     });
 
@@ -54,7 +54,7 @@ describe('CategoryTemplate', () => {
         priority: 1,
       };
 
-      const result = CategoryTemplate.runSimple(template, 500);
+      const result = CategoryTemplateContext.runSimple(template, 500);
       expect(result).toBe(500);
     });
 
@@ -76,7 +76,7 @@ describe('CategoryTemplate', () => {
         directive: 'template',
         priority: 1,
       };
-      const instance = new TestCategoryTemplate(
+      const instance = new TestCategoryTemplateContext(
         [template],
         category,
         '2024-01',
@@ -100,7 +100,7 @@ describe('CategoryTemplate', () => {
         directive: 'template',
         priority: 1,
       };
-      const instance = new TestCategoryTemplate(
+      const instance = new TestCategoryTemplateContext(
         [template],
         category,
         '2024-01',
@@ -113,7 +113,7 @@ describe('CategoryTemplate', () => {
   });
 
   describe('runCopy', () => {
-    let instance: TestCategoryTemplate;
+    let instance: TestCategoryTemplateContext;
 
     beforeEach(() => {
       const category: CategoryEntity = {
@@ -122,7 +122,7 @@ describe('CategoryTemplate', () => {
         group: 'test-group',
         is_income: false,
       };
-      instance = new TestCategoryTemplate([], category, '2024-01', 0, 0);
+      instance = new TestCategoryTemplateContext([], category, '2024-01', 0, 0);
       vi.clearAllMocks();
     });
 
@@ -136,7 +136,7 @@ describe('CategoryTemplate', () => {
 
       vi.mocked(actions.getSheetValue).mockResolvedValue(100);
 
-      const result = await CategoryTemplate.runCopy(template, instance);
+      const result = await CategoryTemplateContext.runCopy(template, instance);
       expect(result).toBe(100);
     });
 
@@ -150,7 +150,7 @@ describe('CategoryTemplate', () => {
 
       vi.mocked(actions.getSheetValue).mockResolvedValue(200);
 
-      const result = await CategoryTemplate.runCopy(template, instance);
+      const result = await CategoryTemplateContext.runCopy(template, instance);
       expect(result).toBe(200);
     });
 
@@ -164,13 +164,13 @@ describe('CategoryTemplate', () => {
 
       vi.mocked(actions.getSheetValue).mockResolvedValue(0);
 
-      const result = await CategoryTemplate.runCopy(template, instance);
+      const result = await CategoryTemplateContext.runCopy(template, instance);
       expect(result).toBe(0);
     });
   });
 
   describe('runWeek', () => {
-    let instance: TestCategoryTemplate;
+    let instance: TestCategoryTemplateContext;
 
     beforeEach(() => {
       const category: CategoryEntity = {
@@ -179,7 +179,7 @@ describe('CategoryTemplate', () => {
         group: 'test-group',
         is_income: false,
       };
-      instance = new TestCategoryTemplate([], category, '2024-01', 0, 0);
+      instance = new TestCategoryTemplateContext([], category, '2024-01', 0, 0);
     });
 
     //5 mondays in January 2024
@@ -193,7 +193,7 @@ describe('CategoryTemplate', () => {
         priority: 1,
       };
 
-      const result = CategoryTemplate.runWeek(template, instance);
+      const result = CategoryTemplateContext.runWeek(template, instance);
       expect(result).toBe(amountToInteger(500));
     });
 
@@ -207,7 +207,7 @@ describe('CategoryTemplate', () => {
         priority: 1,
       };
 
-      const result = CategoryTemplate.runWeek(template, instance);
+      const result = CategoryTemplateContext.runWeek(template, instance);
       expect(result).toBe(amountToInteger(300));
     });
 
@@ -221,13 +221,13 @@ describe('CategoryTemplate', () => {
         priority: 1,
       };
 
-      const result = CategoryTemplate.runWeek(template, instance);
+      const result = CategoryTemplateContext.runWeek(template, instance);
       expect(result).toBe(amountToInteger(100));
     });
   });
 
   describe('runSpend', () => {
-    let instance: TestCategoryTemplate;
+    let instance: TestCategoryTemplateContext;
 
     beforeEach(() => {
       const category: CategoryEntity = {
@@ -236,7 +236,7 @@ describe('CategoryTemplate', () => {
         group: 'test-group',
         is_income: false,
       };
-      instance = new TestCategoryTemplate([], category, '2024-01', 0, 0);
+      instance = new TestCategoryTemplateContext([], category, '2024-01', 0, 0);
       vi.clearAllMocks();
     });
 
@@ -255,7 +255,7 @@ describe('CategoryTemplate', () => {
         .mockResolvedValueOnce(20000) // leftover in Nov
         .mockResolvedValueOnce(10000); // budgeted in Dec
 
-      const result = await CategoryTemplate.runSpend(template, instance);
+      const result = await CategoryTemplateContext.runSpend(template, instance);
       expect(result).toBe(60000);
     });
 
@@ -276,7 +276,7 @@ describe('CategoryTemplate', () => {
         .mockResolvedValueOnce(20000)
         .mockResolvedValueOnce(10000);
 
-      const result = await CategoryTemplate.runSpend(template, instance);
+      const result = await CategoryTemplateContext.runSpend(template, instance);
       expect(result).toBe(33333);
     });
 
@@ -290,13 +290,13 @@ describe('CategoryTemplate', () => {
         priority: 1,
       };
 
-      const result = await CategoryTemplate.runSpend(template, instance);
+      const result = await CategoryTemplateContext.runSpend(template, instance);
       expect(result).toBe(0);
     });
   });
 
   describe('runPercentage', () => {
-    let instance: TestCategoryTemplate;
+    let instance: TestCategoryTemplateContext;
 
     beforeEach(() => {
       const category: CategoryEntity = {
@@ -305,7 +305,7 @@ describe('CategoryTemplate', () => {
         group: 'test-group',
         is_income: false,
       };
-      instance = new TestCategoryTemplate([], category, '2024-01', 0, 0);
+      instance = new TestCategoryTemplateContext([], category, '2024-01', 0, 0);
       vi.clearAllMocks();
     });
 
@@ -321,7 +321,7 @@ describe('CategoryTemplate', () => {
 
       vi.mocked(actions.getSheetValue).mockResolvedValue(10000);
 
-      const result = await CategoryTemplate.runPercentage(
+      const result = await CategoryTemplateContext.runPercentage(
         template,
         0,
         instance,
@@ -339,7 +339,7 @@ describe('CategoryTemplate', () => {
         priority: 1,
       };
 
-      const result = await CategoryTemplate.runPercentage(
+      const result = await CategoryTemplateContext.runPercentage(
         template,
         500,
         instance,
@@ -370,7 +370,7 @@ describe('CategoryTemplate', () => {
       ]);
       vi.mocked(actions.getSheetValue).mockResolvedValue(2000);
 
-      const result = await CategoryTemplate.runPercentage(
+      const result = await CategoryTemplateContext.runPercentage(
         template,
         0,
         instance,
@@ -390,7 +390,7 @@ describe('CategoryTemplate', () => {
 
       vi.mocked(actions.getSheetValue).mockResolvedValue(10000);
 
-      const result = await CategoryTemplate.runPercentage(
+      const result = await CategoryTemplateContext.runPercentage(
         template,
         0,
         instance,
@@ -404,7 +404,7 @@ describe('CategoryTemplate', () => {
   });
 
   describe('runAverage', () => {
-    let instance: TestCategoryTemplate;
+    let instance: TestCategoryTemplateContext;
 
     beforeEach(() => {
       const category: CategoryEntity = {
@@ -413,7 +413,7 @@ describe('CategoryTemplate', () => {
         group: 'test-group',
         is_income: false,
       };
-      instance = new TestCategoryTemplate([], category, '2024-01', 0, 0);
+      instance = new TestCategoryTemplateContext([], category, '2024-01', 0, 0);
       vi.clearAllMocks();
     });
 
@@ -430,7 +430,10 @@ describe('CategoryTemplate', () => {
         .mockResolvedValueOnce(-200) // Nov 2023
         .mockResolvedValueOnce(-300); // Oct 2023
 
-      const result = await CategoryTemplate.runAverage(template, instance);
+      const result = await CategoryTemplateContext.runAverage(
+        template,
+        instance,
+      );
       expect(result).toBe(200); // Average of -100, -200, -300
     });
 
@@ -447,7 +450,10 @@ describe('CategoryTemplate', () => {
         .mockResolvedValueOnce(0)
         .mockResolvedValueOnce(-300);
 
-      const result = await CategoryTemplate.runAverage(template, instance);
+      const result = await CategoryTemplateContext.runAverage(
+        template,
+        instance,
+      );
       expect(result).toBe(100);
     });
 
@@ -464,13 +470,16 @@ describe('CategoryTemplate', () => {
         .mockResolvedValueOnce(200)
         .mockResolvedValueOnce(-300);
 
-      const result = await CategoryTemplate.runAverage(template, instance);
+      const result = await CategoryTemplateContext.runAverage(
+        template,
+        instance,
+      );
       expect(result).toBe(67); // Average of -100, 200, -300
     });
   });
 
   describe('runBy', () => {
-    let instance: TestCategoryTemplate;
+    let instance: TestCategoryTemplateContext;
 
     beforeEach(() => {
       const category: CategoryEntity = {
@@ -479,7 +488,7 @@ describe('CategoryTemplate', () => {
         group: 'test-group',
         is_income: false,
       };
-      instance = new TestCategoryTemplate(
+      instance = new TestCategoryTemplateContext(
         [
           {
             type: 'by',
@@ -504,12 +513,12 @@ describe('CategoryTemplate', () => {
     });
 
     it('should calculate monthly amount needed for multiple targets', () => {
-      const result = CategoryTemplate.runBy(instance);
+      const result = CategoryTemplateContext.runBy(instance);
       expect(result).toBe(66667);
     });
 
     it('should handle repeating targets', () => {
-      instance = new TestCategoryTemplate(
+      instance = new TestCategoryTemplateContext(
         [
           {
             type: 'by',
@@ -534,12 +543,12 @@ describe('CategoryTemplate', () => {
         0,
       );
 
-      const result = CategoryTemplate.runBy(instance);
+      const result = CategoryTemplateContext.runBy(instance);
       expect(result).toBe(83333);
     });
 
     it('should handle existing balance', () => {
-      instance = new TestCategoryTemplate(
+      instance = new TestCategoryTemplateContext(
         [
           {
             type: 'by',
@@ -562,7 +571,7 @@ describe('CategoryTemplate', () => {
         0,
       );
 
-      const result = CategoryTemplate.runBy(instance);
+      const result = CategoryTemplateContext.runBy(instance);
       expect(result).toBe(66500); // (1000 + 2000 - 5) / 3
     });
   });
@@ -589,7 +598,7 @@ describe('CategoryTemplate', () => {
           priority: 1,
         },
       ];
-      const instance = new TestCategoryTemplate(
+      const instance = new TestCategoryTemplateContext(
         templates,
         category,
         '2024-01',
@@ -618,7 +627,7 @@ describe('CategoryTemplate', () => {
           priority: 1,
         },
       ];
-      const instance = new TestCategoryTemplate(
+      const instance = new TestCategoryTemplateContext(
         templates,
         category,
         '2024-01',
@@ -645,7 +654,7 @@ describe('CategoryTemplate', () => {
           priority: 1,
         },
       ];
-      const instance = new TestCategoryTemplate(
+      const instance = new TestCategoryTemplateContext(
         templates,
         category,
         '2024-01',
@@ -672,7 +681,7 @@ describe('CategoryTemplate', () => {
           priority: 1,
         },
       ];
-      const instance = new TestCategoryTemplate(
+      const instance = new TestCategoryTemplateContext(
         templates,
         category,
         '2024-01',
@@ -699,7 +708,7 @@ describe('CategoryTemplate', () => {
           directive: 'template',
         },
       ];
-      const instance = new TestCategoryTemplate(
+      const instance = new TestCategoryTemplateContext(
         templates,
         category,
         '2024-01',
@@ -724,7 +733,7 @@ describe('CategoryTemplate', () => {
           directive: 'template',
         },
       ];
-      const instance = new TestCategoryTemplate(
+      const instance = new TestCategoryTemplateContext(
         templates,
         category,
         '2024-01',
@@ -749,7 +758,7 @@ describe('CategoryTemplate', () => {
           directive: 'template',
         },
       ];
-      const instance = new TestCategoryTemplate(
+      const instance = new TestCategoryTemplateContext(
         templates,
         category,
         '2024-01',
@@ -794,7 +803,7 @@ describe('CategoryTemplate', () => {
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
 
       // Initialize the template
-      const instance = await CategoryTemplate.init(
+      const instance = await CategoryTemplateContext.init(
         templates,
         category,
         '2024-01',
@@ -857,7 +866,7 @@ describe('CategoryTemplate', () => {
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
 
       // Initialize the template
-      const instance = await CategoryTemplate.init(
+      const instance = await CategoryTemplateContext.init(
         templates,
         category,
         '2024-01',
@@ -909,7 +918,7 @@ describe('CategoryTemplate', () => {
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
 
       // Initialize the template
-      const instance = await CategoryTemplate.init(
+      const instance = await CategoryTemplateContext.init(
         templates,
         category,
         '2024-01',
@@ -967,7 +976,7 @@ describe('CategoryTemplate', () => {
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
 
       // Initialize the template
-      const instance = await CategoryTemplate.init(
+      const instance = await CategoryTemplateContext.init(
         templates,
         category,
         '2024-01',
@@ -985,7 +994,7 @@ describe('CategoryTemplate', () => {
       expect(values.budgeted).toBe(30000); // Should match the result
       expect(values.goal).toBe(100000); // Should be the goal amount
       expect(values.longGoal).toBe(true); // Should have a long goal
-      expect(instance.getGoalOnly()).toBe(false); // Should not be goal only
+      expect(instance.isGoalOnly()).toBe(false); // Should not be goal only
     });
 
     it('should handle goal-only template through the entire process', async () => {
@@ -1008,14 +1017,14 @@ describe('CategoryTemplate', () => {
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
 
       // Initialize the template
-      const instance = await CategoryTemplate.init(
+      const instance = await CategoryTemplateContext.init(
         templates,
         category,
         '2024-01',
         10000,
       );
 
-      expect(instance.getGoalOnly()).toBe(true); // Should be goal only
+      expect(instance.isGoalOnly()).toBe(true); // Should be goal only
       // Get the final values
       const values = instance.getValues();
 

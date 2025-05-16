@@ -4,7 +4,7 @@ import { Rule } from '../rules';
 import { getRuleForSchedule } from '../schedules/app';
 
 import { isReflectBudget } from './actions';
-import { goalsSchedule } from './goalsSchedule';
+import { runSchedule } from './schedule-template';
 
 vi.mock('../db');
 vi.mock('./actions');
@@ -16,14 +16,13 @@ vi.mock('../schedules/app', async () => {
   };
 });
 
-describe('goalsSchedule', () => {
+describe('runSchedule', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('should return correct budget when recurring schedule set', async () => {
     // Given
-    const scheduleFlag = false;
     const template_lines = [
       {
         type: 'schedule',
@@ -75,8 +74,7 @@ describe('goalsSchedule', () => {
     vi.mocked(isReflectBudget).mockReturnValue(false);
 
     // When
-    const result = await goalsSchedule(
-      scheduleFlag,
+    const result = await runSchedule(
       template_lines,
       current_month,
       balance,
@@ -91,12 +89,10 @@ describe('goalsSchedule', () => {
     expect(result.to_budget).toBe(10000);
     expect(result.errors).toHaveLength(0);
     expect(result.remainder).toBe(0);
-    expect(result.scheduleFlag).toBe(true);
   });
 
   it('should return correct budget when yearly recurring schedule set and balance is greater than target', async () => {
     // Given
-    const scheduleFlag = false;
     const template_lines = [
       {
         type: 'schedule',
@@ -148,8 +144,7 @@ describe('goalsSchedule', () => {
     vi.mocked(isReflectBudget).mockReturnValue(false);
 
     // When
-    const result = await goalsSchedule(
-      scheduleFlag,
+    const result = await runSchedule(
       template_lines,
       current_month,
       balance,
@@ -164,6 +159,5 @@ describe('goalsSchedule', () => {
     expect(result.to_budget).toBe(1000);
     expect(result.errors).toHaveLength(0);
     expect(result.remainder).toBe(0);
-    expect(result.scheduleFlag).toBe(true);
   });
 });
