@@ -91,7 +91,7 @@ export function createGroupedSpreadsheet({
         ? monthUtils.weekRangeInclusive(startDate, endDate, firstDayOfWeekIdx)
         : monthUtils[
             ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
-          ](startDate, endDate);
+          ](startDate, endDate, firstDayOfWeekIdx);
 
     const groupedData: GroupedEntity[] = categoryGroup.map(
       group => {

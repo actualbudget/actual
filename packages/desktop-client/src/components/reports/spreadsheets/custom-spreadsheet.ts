@@ -139,7 +139,7 @@ export function createCustomSpreadsheet({
         ? monthUtils.weekRangeInclusive(startDate, endDate, firstDayOfWeekIdx)
         : monthUtils[
             ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
-          ](startDate, endDate);
+          ](startDate, endDate, firstDayOfWeekIdx);
 
     let totalAssets = 0;
     let totalDebts = 0;

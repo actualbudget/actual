@@ -335,7 +335,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
             )
           : monthUtils[
               ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
-            ](earliestInterval, currentInterval);
+            ](earliestInterval, currentInterval, firstDayOfWeekIdx);
 
       const allIntervalsMap = allIntervals
         .map((inter: string) => ({
@@ -391,7 +391,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       setIntervals(
         monthUtils[
           ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
-        ](start, end),
+        ](start, end, firstDayOfWeekIdx),
       );
     }
   }, [interval, startDate, endDate, firstDayOfWeekIdx]);
