@@ -25,7 +25,7 @@ export async function applyTemplate({
 }): Promise<Notification> {
   await storeTemplates();
   const categoryTemplates = await getTemplates();
-  const ret = await processTemplate(month, false, categoryTemplates, null);
+  const ret = await processTemplate(month, false, categoryTemplates);
   return ret;
 }
 
@@ -36,7 +36,7 @@ export async function overwriteTemplate({
 }): Promise<Notification> {
   await storeTemplates();
   const categoryTemplates = await getTemplates();
-  const ret = await processTemplate(month, true, categoryTemplates, null);
+  const ret = await processTemplate(month, true, categoryTemplates);
   return ret;
 }
 
