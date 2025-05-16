@@ -1,30 +1,28 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 
-// eslint-disable-next-line no-restricted-imports -- fix me -- do not import @actual-app/web in loot-core
-import { useSyncedPref } from '@actual-app/web/src/hooks/useSyncedPref';
 import * as d from 'date-fns';
-import debounce from 'lodash/debounce';
 
-import { send } from '../../platform/client/fetch';
-import { currentDay, addDays, parseDate } from '../../shared/months';
-import { type Query } from '../../shared/query';
+import { pagedQuery, type PagedQuery } from 'loot-core/client/query-helpers';
+import { send } from 'loot-core/platform/client/fetch';
+import { currentDay, addDays, parseDate } from 'loot-core/shared/months';
+import { type Query } from 'loot-core/shared/query';
 import {
-  getScheduledAmount,
-  extractScheduleConds,
-  getNextDate,
   getUpcomingDays,
+  extractScheduleConds,
   scheduleIsRecurring,
-} from '../../shared/schedules';
-import { ungroupTransactions } from '../../shared/transactions';
-import { type IntegerAmount } from '../../shared/util';
+  getNextDate,
+  getScheduledAmount,
+} from 'loot-core/shared/schedules';
+import { ungroupTransactions } from 'loot-core/shared/transactions';
+import { type IntegerAmount } from 'loot-core/shared/util';
 import {
   type ScheduleEntity,
   type TransactionEntity,
-} from '../../types/models';
-import * as queries from '../queries';
-import { type PagedQuery, pagedQuery } from '../query-helpers';
+} from 'loot-core/types/models';
 
-import { type ScheduleStatuses, useCachedSchedules } from './schedules';
+import { useCachedSchedules } from './useCachedSchedules';
+import { type ScheduleStatuses } from './useSchedules';
+import { useSyncedPref } from './useSyncedPref';
 
 // Mirrors the `splits` AQL option from the server
 type TransactionSplitsOption = 'all' | 'inline' | 'grouped' | 'none';
@@ -406,54 +404,10 @@ export function usePreviewTransactions({
   };
 }
 
-type UseTransactionsSearchProps = {
-  updateQuery: (updateFn: (searchQuery: Query) => Query) => void;
-  resetQuery: () => void;
-  dateFormat: string;
-  delayMs?: number;
-};
-
-type UseTransactionsSearchResult = {
-  isSearching: boolean;
-  search: (searchText: string) => void;
-};
-
-export function useTransactionsSearch({
-  updateQuery,
-  resetQuery,
-  dateFormat,
-  delayMs = 150,
-}: UseTransactionsSearchProps): UseTransactionsSearchResult {
-  const [isSearching, setIsSearching] = useState(false);
-
-  const updateSearchQuery = useMemo(
-    () =>
-      debounce((searchText: string) => {
-        if (searchText === '') {
-          resetQuery();
-          setIsSearching(false);
-        } else if (searchText) {
-          resetQuery();
-          updateQuery(previousQuery =>
-            queries.transactionsSearch(previousQuery, searchText, dateFormat),
-          );
-          setIsSearching(true);
-        }
-      }, delayMs),
-    [dateFormat, delayMs, resetQuery, updateQuery],
-  );
-
-  useEffect(() => {
-    return () => updateSearchQuery.cancel();
-  }, [updateSearchQuery]);
-
-  return {
-    isSearching,
-    search: updateSearchQuery,
-  };
-}
-
-function isForPreview(schedule: ScheduleEntity, statuses: ScheduleStatuses) {
+export function isForPreview(
+  schedule: ScheduleEntity,
+  statuses: ScheduleStatuses,
+) {
   const status = statuses.get(schedule.id);
   return (
     !schedule.completed &&

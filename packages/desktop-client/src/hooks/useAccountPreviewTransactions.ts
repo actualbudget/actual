@@ -1,6 +1,5 @@
 import { useCallback, useMemo } from 'react';
 
-import { usePreviewTransactions } from 'loot-core/client/data-hooks/transactions';
 import { accountBalance } from 'loot-core/client/queries';
 import { groupById } from 'loot-core/shared/util';
 import {
@@ -12,6 +11,7 @@ import {
 
 import { useAccounts } from './useAccounts';
 import { usePayees } from './usePayees';
+import { usePreviewTransactions } from './usePreviewTransactions';
 
 import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
 

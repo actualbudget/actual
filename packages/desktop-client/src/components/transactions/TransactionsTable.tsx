@@ -43,7 +43,6 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { format as formatDate, parseISO } from 'date-fns';
 
-import { useCachedSchedules } from 'loot-core/client/data-hooks/schedules';
 import * as monthUtils from 'loot-core/shared/months';
 import {
   addSplitTransaction,
@@ -70,11 +69,6 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { useContextMenu } from '../../hooks/useContextMenu';
-import { useDisplayPayee } from '../../hooks/useDisplayPayee';
-import { useMergedRefs } from '../../hooks/useMergedRefs';
-import { usePrevious } from '../../hooks/usePrevious';
-import { useProperFocus } from '../../hooks/useProperFocus';
 import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import {
   type SplitsExpandedContextValue,
@@ -116,6 +110,12 @@ import {
 } from './table/utils';
 import { TransactionMenu } from './TransactionMenu';
 
+import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { usePrevious } from '@desktop-client/hooks/usePrevious';
+import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import {
