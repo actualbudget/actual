@@ -68,8 +68,9 @@ export function FormatSettings() {
   const { t } = useTranslation();
 
   const sidebar = useSidebar();
-  const [firstDayOfWeekIdx, setFirstDayOfWeekIdxPref] =
+  const [_firstDayOfWeekIdx, setFirstDayOfWeekIdxPref] =
     useSyncedPref('firstDayOfWeekIdx');
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '';
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [, setDateFormatPref] = useSyncedPref('dateFormat');
   const [_numberFormat, setNumberFormatPref] = useSyncedPref('numberFormat');
