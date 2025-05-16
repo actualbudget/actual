@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { type Ref, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -47,6 +47,7 @@ export function CoverMenu({
     }
     onClose();
   }
+
   return (
     <View style={{ padding: 10 }}>
       <View style={{ marginBottom: 5 }}>
@@ -61,7 +62,7 @@ export function CoverMenu({
             openOnFocus={true}
             onSelect={(id: string | undefined) => setFromCategoryId(id || null)}
             inputProps={{
-              inputRef: node,
+              inputRef: node as Ref<HTMLInputElement>,
               onEnter: event => !event.defaultPrevented && submit(),
               placeholder: t('(none)'),
             }}

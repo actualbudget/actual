@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
-export function useFilters<T extends RuleConditionEntity>(
+export function useRuleConditionFilters<T extends RuleConditionEntity>(
   initialConditions: T[] = [],
   initialConditionsOp: 'and' | 'or' = 'and',
 ) {

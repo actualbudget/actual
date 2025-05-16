@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 
 import { type TFunction } from 'i18next';
 
-import { type ScheduleStatusType } from 'loot-core/client/data-hooks/schedules';
 import * as monthUtils from 'loot-core/shared/months';
 import {
   type CategoryEntity,
@@ -12,6 +11,7 @@ import {
 
 import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTemplates';
 import { useLocale } from './useLocale';
+import { type ScheduleStatusType } from './useSchedules';
 
 type UseCategoryScheduleGoalTemplateProps = {
   category: CategoryEntity;

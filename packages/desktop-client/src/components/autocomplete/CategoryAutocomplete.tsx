@@ -21,7 +21,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
-import { trackingBudget, envelopeBudget } from 'loot-core/client/queries';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { integerToCurrency } from 'loot-core/shared/util';
 import {
@@ -29,6 +28,7 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
+import { trackingBudget, envelopeBudget } from '../../queries/queries';
 import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '../budget/util';
 import { useSheetValue } from '../spreadsheet/useSheetValue';

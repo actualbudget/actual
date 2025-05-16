@@ -1,19 +1,32 @@
 import {
-  type ReactElement,
-  type Ref,
+  Children,
   cloneElement,
+  isValidElement,
+  type ReactElement,
+  Ref,
   useEffect,
   useRef,
 } from 'react';
 
+type FocusableElement = HTMLElement;
+
 type InitialFocusProps = {
+  /**
+   * The child element to focus when the component mounts. This can be either a single React element or a function that returns a React element.
+   */
   children:
-    | ReactElement<{ inputRef: Ref<HTMLInputElement> }>
-    | ((node: Ref<HTMLInputElement>) => ReactElement);
+    | ReactElement<{ ref: Ref<HTMLElement> }>
+    | ((node: Ref<HTMLElement>) => ReactElement);
 };
 
+/**
+ * InitialFocus sets focus on its child element
+ * when it mounts.
+ * @param {Object} props - The component props.
+ * @param {ReactElement | function} props.children - A single React element or a function that returns a React element.
+ */
 export function InitialFocus({ children }: InitialFocusProps) {
-  const node = useRef<HTMLInputElement>(null);
+  const node = useRef<FocusableElement>(null);
 
   useEffect(() => {
     if (node.current) {
@@ -23,7 +36,12 @@ export function InitialFocus({ children }: InitialFocusProps) {
       setTimeout(() => {
         if (node.current) {
           node.current.focus();
-          node.current.setSelectionRange(0, 10000);
+          if (
+            node.current instanceof HTMLInputElement ||
+            node.current instanceof HTMLTextAreaElement
+          ) {
+            node.current.setSelectionRange(0, 10000);
+          }
         }
       }, 0);
     }
@@ -32,5 +50,12 @@ export function InitialFocus({ children }: InitialFocusProps) {
   if (typeof children === 'function') {
     return children(node);
   }
-  return cloneElement(children, { inputRef: node });
+
+  const child = Children.only(children);
+  if (isValidElement(child)) {
+    return cloneElement(child, { ref: node });
+  }
+  throw new Error(
+    'InitialFocus expects a single valid React element as its child.',
+  );
 }

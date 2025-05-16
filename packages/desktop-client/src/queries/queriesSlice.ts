@@ -838,21 +838,23 @@ export const getActivePayees = memoizeOne(
   },
 );
 
-export const getAccountsById = memoizeOne((accounts: AccountEntity[]) =>
-  groupById(accounts),
+export const getAccountsById = memoizeOne(
+  (accounts: AccountEntity[] | null | undefined) => groupById(accounts),
 );
-export const getPayeesById = memoizeOne((payees: PayeeEntity[]) =>
-  groupById(payees),
+export const getPayeesById = memoizeOne(
+  (payees: PayeeEntity[] | null | undefined) => groupById(payees),
 );
-export const getCategoriesById = memoizeOne(categoryGroups => {
-  const res = {};
-  categoryGroups.forEach(group => {
-    group.categories.forEach(cat => {
-      res[cat.id] = cat;
+export const getCategoriesById = memoizeOne(
+  (categoryGroups: CategoryGroupEntity[] | null | undefined) => {
+    const res: { [id: CategoryGroupEntity['id']]: CategoryEntity } = {};
+    categoryGroups?.forEach(group => {
+      group.categories.forEach(cat => {
+        res[cat.id] = cat;
+      });
     });
-  });
-  return res;
-});
+    return res;
+  },
+);
 
 // Slice exports
 

@@ -1,29 +1,21 @@
-// @ts-strict-ignore
-import React, {
-  createContext,
-  type PropsWithChildren,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { useState, useRef, useEffect } from 'react';
 
-// eslint-disable-next-line no-restricted-imports -- fix me -- do not import @actual-app/web in loot-core
-import { useSyncedPref } from '@actual-app/web/src/hooks/useSyncedPref';
-
-import { q, type Query } from '../../shared/query';
+import { q, type Query } from 'loot-core/shared/query';
 import {
-  getHasTransactionsQuery,
   getStatus,
   getStatusLabel,
-} from '../../shared/schedules';
-import {
-  type AccountEntity,
-  type ScheduleEntity,
-  type TransactionEntity,
-} from '../../types/models';
-import { accountFilter } from '../queries';
-import { type LiveQuery, liveQuery } from '../query-helpers';
+  getHasTransactionsQuery,
+} from 'loot-core/shared/schedules';
+import type {
+  AccountEntity,
+  ScheduleEntity,
+  TransactionEntity,
+} from 'loot-core/types/models';
+
+import { liveQuery, type LiveQuery } from '../queries/liveQuery';
+import { accountFilter } from '../queries/queries';
+
+import { useSyncedPref } from './useSyncedPref';
 
 export type ScheduleStatusType = ReturnType<typeof getStatus>;
 export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
@@ -33,12 +25,11 @@ export type ScheduleStatusLabels = Map<
   ScheduleEntity['id'],
   ScheduleStatusLabelType
 >;
-
 function loadStatuses(
   schedules: readonly ScheduleEntity[],
   onData: (data: ScheduleStatuses) => void,
   onError: (error: Error) => void,
-  upcomingLength: string,
+  upcomingLength: string = '7',
 ) {
   return liveQuery<TransactionEntity>(getHasTransactionsQuery(schedules), {
     onData: data => {
@@ -61,8 +52,7 @@ function loadStatuses(
     onError,
   });
 }
-
-type UseSchedulesProps = {
+export type UseSchedulesProps = {
   query?: Query;
 };
 type ScheduleData = {
@@ -70,7 +60,7 @@ type ScheduleData = {
   statuses: ScheduleStatuses;
   statusLabels: ScheduleStatusLabels;
 };
-type UseSchedulesResult = ScheduleData & {
+export type UseSchedulesResult = ScheduleData & {
   readonly isLoading: boolean;
   readonly error?: Error;
 };
@@ -126,7 +116,7 @@ export function useSchedules({
                 statusLabels: new Map(
                   [...statuses.keys()].map(key => [
                     key,
-                    getStatusLabel(statuses.get(key)),
+                    getStatusLabel(statuses.get(key) || ''),
                   ]),
                 ),
               });
@@ -153,36 +143,6 @@ export function useSchedules({
     ...data,
   };
 }
-
-type SchedulesContextValue = UseSchedulesResult;
-
-const SchedulesContext = createContext<SchedulesContextValue | undefined>(
-  undefined,
-);
-
-type SchedulesProviderProps = PropsWithChildren<{
-  query?: UseSchedulesProps['query'];
-}>;
-
-export function SchedulesProvider({ query, children }: SchedulesProviderProps) {
-  const data = useSchedules({ query });
-  return (
-    <SchedulesContext.Provider value={data}>
-      {children}
-    </SchedulesContext.Provider>
-  );
-}
-
-export function useCachedSchedules() {
-  const context = useContext(SchedulesContext);
-  if (!context) {
-    throw new Error(
-      'useCachedSchedules must be used within a SchedulesProvider',
-    );
-  }
-  return context;
-}
-
 export function accountSchedulesQuery(
   accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized',
 ) {

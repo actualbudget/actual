@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { styles } from '@actual-app/components/styles';
 
-import * as Platform from 'loot-core/client/platform';
+import * as Platform from 'loot-core/shared/platform';
 
 let hiddenScrollbars = false;
 

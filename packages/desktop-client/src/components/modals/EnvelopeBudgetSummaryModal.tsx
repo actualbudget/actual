@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 
-import { envelopeBudget } from 'loot-core/client/queries';
 import { format, sheetForMonth, prevMonth } from 'loot-core/shared/months';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 
@@ -12,6 +11,7 @@ import {
   type Modal as ModalType,
   pushModal,
 } from '../../modals/modalsSlice';
+import { envelopeBudget } from '../../queries/queries';
 import { useDispatch } from '../../redux';
 import { ToBudgetAmount } from '../budget/envelope/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '../budget/envelope/budgetsummary/TotalsList';

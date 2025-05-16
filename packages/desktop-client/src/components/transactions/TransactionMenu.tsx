@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 
-import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { q } from 'loot-core/shared/query';
 import {
   scheduleIsRecurring,
@@ -12,6 +11,7 @@ import {
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { type TransactionEntity } from 'loot-core/types/models';
 
+import { useSchedules } from '../../hooks/useSchedules';
 import { pushModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 
@@ -25,7 +25,10 @@ type BalanceMenuProps = Omit<
   onLinkSchedule: (id: string) => void;
   onUnlinkSchedule: (id: string) => void;
   onCreateRule: (id: string) => void;
-  onScheduleAction: (action: string, id: string) => void;
+  onScheduleAction: (
+    name: 'skip' | 'post-transaction' | 'complete',
+    id: TransactionEntity['id'],
+  ) => void;
   onMakeAsNonSplitTransactions: (id: string) => void;
   closeMenu: () => void;
 };
