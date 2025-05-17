@@ -29,6 +29,11 @@ export function CommandBar() {
   const navigate = useNavigate();
   const [budgetName] = useMetadataPref('budgetName');
 
+  // Reset search when closing the command bar
+  useEffect(() => {
+    if (!open) setSearch('');
+  }, [open]);
+
   const allAccounts = useAccounts();
   const { data: reportsData, isLoading: isReportsLoading } = useReports();
   useEffect(
