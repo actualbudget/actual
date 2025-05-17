@@ -152,7 +152,12 @@ export function CommandBar() {
                   fontSize: '0.9rem',
                   borderRadius: '4px',
                   margin: '0 8px',
-                  "&:hover, &[data-selected='true']": {
+                  // Avoid showing mouse hover styles when using keyboard navigation
+                  '[data-cmdk-list]:not([data-cmdk-list-nav-active]) &:hover': {
+                    backgroundColor: 'var(--color-menuItemBackgroundHover)',
+                    color: 'var(--color-menuItemTextHover)',
+                  },
+                  "&[data-selected='true']": {
                     backgroundColor: 'var(--color-menuItemBackgroundHover)',
                     color: 'var(--color-menuItemTextHover)',
                   },
@@ -197,7 +202,14 @@ export function CommandBar() {
                       fontSize: '0.9rem',
                       borderRadius: '4px',
                       margin: '0 8px',
-                      "&:hover, &[data-selected='true']": {
+                      // Avoid showing mouse hover styles when using keyboard navigation
+                      '[data-cmdk-list]:not([data-cmdk-list-nav-active]) &:hover':
+                        {
+                          backgroundColor:
+                            'var(--color-menuItemBackgroundHover)',
+                          color: 'var(--color-menuItemTextHover)',
+                        },
+                      "&[data-selected='true']": {
                         backgroundColor: 'var(--color-menuItemBackgroundHover)',
                         color: 'var(--color-menuItemTextHover)',
                       },
