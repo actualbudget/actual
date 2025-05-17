@@ -84,7 +84,7 @@
   },
   "engines": {
     "node": ">=20",
-    "yarn": ">=4.7.0"
+    "yarn": "^4.7.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,md,json,yml}": [
