@@ -39,6 +39,15 @@ export function CommandBar() {
   const accounts = allAccounts.filter(acc => !acc.closed);
   const reports = reportsData || [];
 
+  const navigationItems: ReadonlyArray<SearchableItem & { path: string }> = [
+    { id: 'budget', name: 'Budget', path: '/budget' },
+    { id: 'reports-nav', name: 'Reports', path: '/reports' },
+    { id: 'schedules', name: 'Schedules', path: '/schedules' },
+    { id: 'payees', name: 'Payees', path: '/payees' },
+    { id: 'rules', name: 'Rules', path: '/rules' },
+    { id: 'settings', name: 'Settings', path: '/settings' },
+  ];
+
   const openEventListener = useCallback((e: KeyboardEvent) => {
     if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
@@ -70,10 +79,16 @@ export function CommandBar() {
       items: reports,
       onSelect: (item: SearchableItem) => handleNavigate(`/reports/${item.id}`),
     },
-    // Future sections can be added here
   ];
 
   let hasResults = false;
+
+  // Filter navigation items based on search
+  const filteredNavigationItems = navigationItems.filter(item =>
+    item.name.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  if (!!filteredNavigationItems.length) hasResults = true;
 
   return (
     <Command.Dialog
@@ -124,6 +139,31 @@ export function CommandBar() {
           padding: '8px 0',
         })}
       >
+        {!!filteredNavigationItems.length && (
+          <Command.Group className={css({ padding: '0 8px' })}>
+            {filteredNavigationItems.map(item => (
+              <Command.Item
+                key={item.id}
+                onSelect={() => handleNavigate(item.path)}
+                value={item.name}
+                className={css({
+                  padding: '8px 16px',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  borderRadius: '4px',
+                  margin: '0 8px',
+                  "&:hover, &[data-selected='true']": {
+                    backgroundColor: 'var(--color-menuItemBackgroundHover)',
+                    color: 'var(--color-menuItemTextHover)',
+                  },
+                })}
+              >
+                {item.name}
+              </Command.Item>
+            ))}
+          </Command.Group>
+        )}
+
         {sections.map(section => {
           const filteredItems = section.items.filter(item =>
             item.name.toLowerCase().includes(search.toLowerCase()),
