@@ -153,6 +153,9 @@ export default defineConfig(async ({ mode }) => {
     resolve: {
       extensions: resolveExtensions,
     },
+    optimizeDeps: {
+      exclude: ['@electric-sql/pglite'],
+    },
     plugins: [
       // electron (desktop) builds do not support PWA
       mode === 'desktop'
@@ -165,7 +168,7 @@ export default defineConfig(async ({ mode }) => {
               ],
               ignoreURLParametersMatching: [/^v$/],
               navigateFallback: '/index.html',
-              maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+              maximumFileSizeToCacheInBytes: 8 * 1024 * 1024, // 8MB
               navigateFallbackDenylist: [
                 /^\/account\/.*$/,
                 /^\/admin\/.*$/,

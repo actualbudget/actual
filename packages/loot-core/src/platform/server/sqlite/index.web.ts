@@ -2,6 +2,7 @@
 import initSqlJS, { type SqlJsStatic, type Database } from '@jlongster/sql.js';
 
 import { normalise } from './normalise';
+import { pgliteSync } from './pgliteSync';
 import { unicodeLike } from './unicodeLike';
 
 let SQL: SqlJsStatic | null = null;
@@ -209,6 +210,7 @@ export async function openDatabase(pathOrBuffer?: string | Buffer) {
   db.create_function('UNICODE_LIKE', unicodeLike);
   db.create_function('REGEXP', regexp);
   db.create_function('NORMALISE', normalise);
+  db.create_function('PGLITE_SYNC', pgliteSync);
   return db;
 }
 
