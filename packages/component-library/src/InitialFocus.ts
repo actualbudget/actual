@@ -8,15 +8,11 @@ import {
   useRef,
 } from 'react';
 
-type FocusableElement = HTMLElement;
-
-type InitialFocusProps = {
+type InitialFocusProps<T extends HTMLElement> = {
   /**
    * The child element to focus when the component mounts. This can be either a single React element or a function that returns a React element.
    */
-  children:
-    | ReactElement<{ ref: Ref<HTMLElement> }>
-    | ((node: Ref<HTMLElement>) => ReactElement);
+  children: ReactElement<{ ref: Ref<T> }> | ((ref: Ref<T>) => ReactElement);
 };
 
 /**
@@ -25,22 +21,24 @@ type InitialFocusProps = {
  * @param {Object} props - The component props.
  * @param {ReactElement | function} props.children - A single React element or a function that returns a React element.
  */
-export function InitialFocus({ children }: InitialFocusProps) {
-  const node = useRef<FocusableElement>(null);
+export function InitialFocus<T extends HTMLElement = HTMLElement>({
+  children,
+}: InitialFocusProps<T>) {
+  const ref = useRef<T | null>(null);
 
   useEffect(() => {
-    if (node.current) {
+    if (ref.current) {
       // This is needed to avoid a strange interaction with
       // `ScopeTab`, which doesn't allow it to be focused at first for
       // some reason. Need to look into it.
       setTimeout(() => {
-        if (node.current) {
-          node.current.focus();
+        if (ref.current) {
+          ref.current.focus();
           if (
-            node.current instanceof HTMLInputElement ||
-            node.current instanceof HTMLTextAreaElement
+            ref.current instanceof HTMLInputElement ||
+            ref.current instanceof HTMLTextAreaElement
           ) {
-            node.current.setSelectionRange(0, 10000);
+            ref.current.setSelectionRange(0, 10000);
           }
         }
       }, 0);
@@ -48,12 +46,12 @@ export function InitialFocus({ children }: InitialFocusProps) {
   }, []);
 
   if (typeof children === 'function') {
-    return children(node);
+    return children(ref);
   }
 
   const child = Children.only(children);
   if (isValidElement(child)) {
-    return cloneElement(child, { ref: node });
+    return cloneElement(child, { ref });
   }
   throw new Error(
     'InitialFocus expects a single valid React element as its child.',
