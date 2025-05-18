@@ -131,7 +131,7 @@ __metadata:
   dependencies:
     "@actual-app/components": "workspace:*"
     "@emotion/css": "npm:^11.13.5"
-    "@fontsource/redacted-script": "npm:^5.0.22"
+    "@fontsource/redacted-script": "npm:^5.2.5"
     "@juggle/resize-observer": "npm:^3.4.0"
     "@playwright/test": "npm:1.52.0"
     "@rollup/plugin-inject": "npm:^5.0.5"
@@ -2504,7 +2504,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fontsource/redacted-script@npm:^5.0.22":
+"@fontsource/redacted-script@npm:^5.2.5":
   version: 5.2.5
   resolution: "@fontsource/redacted-script@npm:5.2.5"
   checksum: 10/f95beef86f4446772cfbbf1e2d5a499f5b23c0512fade3933a9d1f133e6d5f3148a80d52bcc519ce57735edf5cfd77cf3bf12f8a75bb77a646635c3737e62076
