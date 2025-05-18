@@ -55,11 +55,11 @@
   "devDependencies": {
     "@types/node": "^22.15.18",
     "@types/prompts": "^2.4.9",
-    "@typescript-eslint/parser": "^8.26.1",
+    "@typescript-eslint/parser": "^8.32.1",
     "cross-env": "^7.0.3",
-    "eslint": "^9.22.0",
+    "eslint": "^9.27.0",
     "eslint-config-prettier": "^10.1.5",
-    "eslint-import-resolver-typescript": "^4.2.7",
+    "eslint-import-resolver-typescript": "^4.3.5",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
@@ -76,7 +76,7 @@
     "source-map-support": "^0.5.21",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.26.1",
+    "typescript-eslint": "^8.32.1",
     "typescript-strict-plugin": "^2.4.4"
   },
   "resolutions": {
