@@ -47,7 +47,7 @@
     "@types/adm-zip": "^0.5.7",
     "@types/better-sqlite3": "^7.6.13",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
-    "@types/node": "^22.14.1",
+    "@types/node": "^22.15.18",
     "@types/pegjs": "^0.10.6",
     "@types/uuid": "^9.0.8",
     "@types/webpack": "^5.28.5",
