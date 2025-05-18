@@ -65,7 +65,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-rulesdir": "^0.2.2",
-    "globals": "^15.13.0",
+    "globals": "^15.15.0",
     "html-to-image": "^1.11.13",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.2",
