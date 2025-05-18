@@ -133,7 +133,7 @@ __metadata:
     "@emotion/css": "npm:^11.13.5"
     "@fontsource/redacted-script": "npm:^5.0.22"
     "@juggle/resize-observer": "npm:^3.4.0"
-    "@playwright/test": "npm:1.41.2"
+    "@playwright/test": "npm:1.52.0"
     "@rollup/plugin-inject": "npm:^5.0.5"
     "@swc/core": "npm:^1.11.24"
     "@swc/helpers": "npm:^0.5.17"
@@ -3114,14 +3114,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@playwright/test@npm:1.41.2":
-  version: 1.41.2
-  resolution: "@playwright/test@npm:1.41.2"
+"@playwright/test@npm:1.52.0":
+  version: 1.52.0
+  resolution: "@playwright/test@npm:1.52.0"
   dependencies:
-    playwright: "npm:1.41.2"
+    playwright: "npm:1.52.0"
   bin:
     playwright: cli.js
-  checksum: 10/e87405987fa024f75acc223c47fcb2da0a66b2fa0cd9a583ca5b02aac12be353d0c262bf6a22b9bc40550c86c8b7629e70cd27f508ec370d9c92bb72f74581e7
+  checksum: 10/e18a4eb626c7bc6cba212ff2e197cf9ae2e4da1c91bfdf08a744d62e27222751173e4b220fa27da72286a89a3b4dea7c09daf384d23708f284b64f98e9a63a88
   languageName: node
   linkType: hard
 
@@ -9773,7 +9773,7 @@ __metadata:
     "@actual-app/sync-server": "workspace:*"
     "@electron/notarize": "npm:2.5.0"
     "@electron/rebuild": "npm:3.7.2"
-    "@playwright/test": "npm:1.41.2"
+    "@playwright/test": "npm:1.52.0"
     "@types/copyfiles": "npm:^2"
     "@types/fs-extra": "npm:^11"
     better-sqlite3: "npm:^11.10.0"
@@ -16633,27 +16633,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:1.41.2":
-  version: 1.41.2
-  resolution: "playwright-core@npm:1.41.2"
+"playwright-core@npm:1.52.0":
+  version: 1.52.0
+  resolution: "playwright-core@npm:1.52.0"
   bin:
     playwright-core: cli.js
-  checksum: 10/77ff881ebb9cc0654edd00c5ff202f5f61aee7a5318e1f12a82e30a3636de21e8b5982fae6138e5bb90115ae509c15a640cf85b10b3e2daebb2bb286da54fd4c
+  checksum: 10/42e13f5f98dc25ebc95525fb338a215b9097b2ba39d41e99972a190bf75d79979f163f5bc07b1ca06847ee07acb2c9b487d070fab67e9cd55e33310fc05aca3c
   languageName: node
   linkType: hard
 
-"playwright@npm:1.41.2":
-  version: 1.41.2
-  resolution: "playwright@npm:1.41.2"
+"playwright@npm:1.52.0":
+  version: 1.52.0
+  resolution: "playwright@npm:1.52.0"
   dependencies:
     fsevents: "npm:2.3.2"
-    playwright-core: "npm:1.41.2"
+    playwright-core: "npm:1.52.0"
   dependenciesMeta:
     fsevents:
       optional: true
   bin:
     playwright: cli.js
-  checksum: 10/272399f622dc2df90fbef147b9b1cfab5d7a78cc364bdfa98d2bf08faa9894346f58629fe4fef41b108ca2cb203b3970d7886b7f392cb0399c75b521478e2920
+  checksum: 10/214175446089000c2ac997b925063b95f7d86d129c5d7c74caa5ddcb05bcad598dfd569d2133a10dc82d288bf67e7858877dcd099274b0b928b9c63db7d6ecec
   languageName: node
   linkType: hard
 
