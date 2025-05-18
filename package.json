@@ -80,7 +80,8 @@
     "typescript-strict-plugin": "^2.4.4"
   },
   "resolutions": {
-    "rollup": "4.40.1"
+    "rollup": "4.40.1",
+    "socks": ">=2.8.3"
   },
   "engines": {
     "node": ">=20",
