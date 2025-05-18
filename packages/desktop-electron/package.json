@@ -96,14 +96,14 @@
   },
   "devDependencies": {
     "@electron/notarize": "2.4.0",
-    "@electron/rebuild": "3.6.0",
+    "@electron/rebuild": "3.6.2",
     "@playwright/test": "1.41.2",
     "@types/copyfiles": "^2",
     "@types/fs-extra": "^11",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
-    "electron": "30.0.6",
+    "electron": "30.0.9",
     "electron-builder": "24.13.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.3"
   }
 }

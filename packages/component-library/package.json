@@ -13,10 +13,10 @@
   },
   "devDependencies": {
     "@svgr/cli": "^8.1.0",
-    "@types/react": "^19.1.0",
+    "@types/react": "^19.1.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "vitest": "^3.0.2"
+    "vitest": "^3.0.9"
   },
   "exports": {
     "./hooks/*": "./src/hooks/*.ts",
