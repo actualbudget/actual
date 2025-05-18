@@ -57,7 +57,7 @@
     "buffer": "^6.0.3",
     "cross-env": "^7.0.3",
     "fake-indexeddb": "^3.1.8",
-    "fast-check": "3.15.1",
+    "fast-check": "3.23.2",
     "i18next": "^23.11.5",
     "jest": "^29.7.0",
     "jsverify": "^0.8.4",

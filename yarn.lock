@@ -11256,12 +11256,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-check@npm:3.15.1":
-  version: 3.15.1
-  resolution: "fast-check@npm:3.15.1"
+"fast-check@npm:3.23.2":
+  version: 3.23.2
+  resolution: "fast-check@npm:3.23.2"
   dependencies:
-    pure-rand: "npm:^6.0.0"
-  checksum: 10/6486ca24154de0591b6550963a65e5c51e0bebbb75c48d6a9b82c4f34f2a706338b28c1d685febe377d64ce0f217ee63b26c285eacad5fb57efb575db882df18
+    pure-rand: "npm:^6.1.0"
+  checksum: 10/dab344146b778e8bc2973366ea55528d1b58d3e3037270262b877c54241e800c4d744957722c24705c787020d702aece11e57c9e3dbd5ea19c3e10926bf1f3fe
   languageName: node
   linkType: hard
 
@@ -14523,7 +14523,7 @@ __metadata:
     date-fns: "npm:^2.30.0"
     deep-equal: "npm:^2.2.3"
     fake-indexeddb: "npm:^3.1.8"
-    fast-check: "npm:3.15.1"
+    fast-check: "npm:3.23.2"
     handlebars: "npm:^4.7.8"
     i18next: "npm:^23.11.5"
     jest: "npm:^29.7.0"
@@ -16909,10 +16909,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pure-rand@npm:^6.0.0":
-  version: 6.0.2
-  resolution: "pure-rand@npm:6.0.2"
-  checksum: 10/d33f92dbac58eba65e851046905379ddd32b0af11daa49187bf2b44c4da6e5685cdcd8775388a3c706c126dcdb19bdcc0f736a0c432de25d68d21a762ff5f572
+"pure-rand@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "pure-rand@npm:6.1.0"
+  checksum: 10/256aa4bcaf9297256f552914e03cbdb0039c8fe1db11fa1e6d3f80790e16e563eb0a859a1e61082a95e224fc0c608661839439f8ecc6a3db4e48d46d99216ee4
   languageName: node
   linkType: hard
 
