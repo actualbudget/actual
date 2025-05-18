@@ -12,7 +12,7 @@
     "@juggle/resize-observer": "^3.4.0",
     "@playwright/test": "1.41.2",
     "@rollup/plugin-inject": "^5.0.5",
-    "@swc/core": "^1.5.29",
+    "@swc/core": "^1.11.24",
     "@swc/helpers": "^0.5.17",
     "@swc/plugin-react-remove-properties": "^1.5.121",
     "@testing-library/dom": "10.4.0",
