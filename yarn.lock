@@ -151,7 +151,7 @@ __metadata:
     "@types/uuid": "npm:^9.0.8"
     "@types/webpack-bundle-analyzer": "npm:^4.7.0"
     "@use-gesture/react": "npm:^10.3.1"
-    "@vitejs/plugin-basic-ssl": "npm:^1.1.0"
+    "@vitejs/plugin-basic-ssl": "npm:^1.2.0"
     "@vitejs/plugin-react-swc": "npm:^3.6.0"
     auto-text-size: "npm:^0.2.3"
     chokidar: "npm:^3.6.0"
@@ -7101,12 +7101,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitejs/plugin-basic-ssl@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@vitejs/plugin-basic-ssl@npm:1.1.0"
+"@vitejs/plugin-basic-ssl@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "@vitejs/plugin-basic-ssl@npm:1.2.0"
   peerDependencies:
-    vite: ^3.0.0 || ^4.0.0 || ^5.0.0
-  checksum: 10/2c0631d1202a1b5f198a96c761cbcdde3730cc03a9be565ea12c37b47c22dd22976dc4bd614a400c431a55be0270359cf59fbb0530e77fafc0e591b1f58858ef
+    vite: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0
+  checksum: 10/34def4ab7838901f1f51bbff21fefac5f56346331f4ff1a8a3059d68e4cd43b62e1581a5ad39971d5d908343ee3217e782a0b506d97e0653c3373e27757ecedf
   languageName: node
   linkType: hard
 
