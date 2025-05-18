@@ -197,7 +197,7 @@ export function Settings() {
               />
             </FormField>
             <Button onPress={onCloseBudget}>
-              <Trans>Close budget</Trans>
+              <Trans>Switch file</Trans>
             </Button>
           </View>
         )}
