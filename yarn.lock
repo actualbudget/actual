@@ -160,8 +160,8 @@ __metadata:
     debounce: "npm:^1.2.1"
     downshift: "npm:7.6.2"
     focus-visible: "npm:^4.1.5"
-    i18next: "npm:^23.11.5"
-    i18next-parser: "npm:^9.0.2"
+    i18next: "npm:^23.16.8"
+    i18next-parser: "npm:^9.3.0"
     i18next-resources-to-backend: "npm:^1.2.1"
     inter-ui: "npm:^3.19.3"
     jsdom: "npm:^26.1.0"
@@ -12484,7 +12484,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next-parser@npm:^9.0.2":
+"i18next-parser@npm:^9.3.0":
   version: 9.3.0
   resolution: "i18next-parser@npm:9.3.0"
   dependencies:
@@ -12520,12 +12520,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:^23.11.5":
-  version: 23.12.2
-  resolution: "i18next@npm:23.12.2"
+"i18next@npm:^23.16.8":
+  version: 23.16.8
+  resolution: "i18next@npm:23.16.8"
   dependencies:
     "@babel/runtime": "npm:^7.23.2"
-  checksum: 10/d7a743c54b83acc1203315e547bfe830bfe825dddd7706646aec2a49cb74254bcda70645b568d1bed55ee3610ba5e6f6012fb3c13f03080c1dd0f99db2c45478
+  checksum: 10/d5c38011de4d3b4aa466fac6773520eb28007b9d6138e03432bfbfc0d041c04df45e15c67d96f22cd660088cc9b24d3eda32cddc9fb4c6508c5afada6c2e6290
   languageName: node
   linkType: hard
 
@@ -14525,7 +14525,7 @@ __metadata:
     fake-indexeddb: "npm:^3.1.8"
     fast-check: "npm:3.23.2"
     handlebars: "npm:^4.7.8"
-    i18next: "npm:^23.11.5"
+    i18next: "npm:^23.16.8"
     jest: "npm:^29.7.0"
     jsverify: "npm:^0.8.4"
     lru-cache: "npm:^11.0.2"
@@ -16909,7 +16909,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pure-rand@npm:^6.1.0":
+"pure-rand@npm:^6.0.0, pure-rand@npm:^6.1.0":
   version: 6.1.0
   resolution: "pure-rand@npm:6.1.0"
   checksum: 10/256aa4bcaf9297256f552914e03cbdb0039c8fe1db11fa1e6d3f80790e16e563eb0a859a1e61082a95e224fc0c608661839439f8ecc6a3db4e48d46d99216ee4
