@@ -85,7 +85,7 @@
   },
   "engines": {
     "node": ">=20",
-    "yarn": "^4.7.0"
+    "yarn": "^4.9.1"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,md,json,yml}": [
@@ -93,7 +93,7 @@
       "prettier --write"
     ]
   },
-  "packageManager": "yarn@4.7.0",
+  "packageManager": "yarn@4.9.1",
   "browserslist": [
     "electron 24.0",
     "defaults"
