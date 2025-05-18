@@ -4,20 +4,20 @@ import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 
-import { useSchedules } from 'loot-core/client/data-hooks/schedules';
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
-import { validForTransfer } from 'loot-core/client/transfer';
 import { q } from 'loot-core/shared/query';
 import {
   scheduleIsRecurring,
   extractScheduleConds,
 } from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
+import { validForTransfer } from 'loot-core/shared/transfer';
 import { type TransactionEntity } from 'loot-core/types/models';
 
+import { pushModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { SelectedItemsButton } from '../table';
 
+import { useSchedules } from '@desktop-client/hooks/useSchedules';
 import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 
 type SelectedTransactionsButtonProps = {
@@ -43,7 +43,7 @@ type SelectedTransactionsButtonProps = {
   onSetTransfer: (selectedIds: string[]) => void;
   onScheduleAction: (
     action: 'post-transaction' | 'skip' | 'complete',
-    selectedIds: string[],
+    selectedIds: TransactionEntity['id'][],
   ) => void;
   showMakeTransfer: boolean;
   onMakeAsSplitTransaction: (selectedIds: string[]) => void;

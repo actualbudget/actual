@@ -10,15 +10,15 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
-import { getUserData, signOut } from 'loot-core/client/users/usersSlice';
 import { listen } from 'loot-core/platform/client/fetch';
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { useAuth } from '../auth/AuthProvider';
 import { Permissions } from '../auth/types';
+import { closeBudget } from '../budgets/budgetsSlice';
 import { useSelector, useDispatch } from '../redux';
+import { getUserData, signOut } from '../users/usersSlice';
 
 import { PrivacyFilter } from './PrivacyFilter';
 import { useMultiuserEnabled, useServerURL } from './ServerContext';

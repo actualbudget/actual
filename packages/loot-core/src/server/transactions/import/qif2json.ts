@@ -20,7 +20,7 @@ type QIFTransaction = {
 };
 
 export function qif2json(qif, options: { dateFormat?: string } = {}) {
-  const lines = qif.split('\n');
+  const lines = qif.split('\n').filter(Boolean);
   let line = lines.shift();
   const type = /!Type:([^$]*)$/.exec(line.trim());
   const data: {

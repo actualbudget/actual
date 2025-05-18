@@ -1,6 +1,3 @@
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
-import { aqlQuery } from 'loot-core/client/query-helpers';
-import { validForTransfer } from 'loot-core/client/transfer';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
@@ -11,6 +8,7 @@ import {
   ungroupTransactions,
   updateTransaction,
 } from 'loot-core/shared/transactions';
+import { validForTransfer } from 'loot-core/shared/transfer';
 import { applyChanges, type Diff } from 'loot-core/shared/util';
 import {
   type PayeeEntity,
@@ -19,6 +17,8 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
+import { pushModal } from '../modals/modalsSlice';
+import { aqlQuery } from '../queries/aqlQuery';
 import { useDispatch } from '../redux';
 
 type BatchEditProps = {

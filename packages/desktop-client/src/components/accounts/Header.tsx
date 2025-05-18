@@ -1,9 +1,9 @@
 import React, {
-  useState,
-  useRef,
+  type ComponentProps,
   Fragment,
   type ReactNode,
-  type ComponentProps,
+  useRef,
+  useState,
 } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -50,7 +50,7 @@ import { SelectedTransactionsButton } from '../transactions/SelectedTransactions
 
 import { type TableRef } from './Account';
 import { Balances } from './Balance';
-import { ReconcilingMessage, ReconcileMenu } from './Reconcile';
+import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
 
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';

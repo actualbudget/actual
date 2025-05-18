@@ -120,29 +120,33 @@ export class CategoryTemplate {
       let newBudget = 0;
       switch (t[i].type) {
         case 'simple': {
-          newBudget = this.runSimple(t[i], this.limitAmount);
+          newBudget = CategoryTemplate.runSimple(t[i], this.limitAmount);
           break;
         }
         case 'copy': {
-          newBudget = await this.runCopy(t[i]);
+          newBudget = await CategoryTemplate.runCopy(t[i], this);
           break;
         }
         case 'week': {
-          newBudget = this.runWeek(t[i]);
+          newBudget = CategoryTemplate.runWeek(t[i], this);
           break;
         }
         case 'spend': {
-          newBudget = await this.runSpend(t[i]);
+          newBudget = await CategoryTemplate.runSpend(t[i], this);
           break;
         }
         case 'percentage': {
-          newBudget = await this.runPercentage(t[i], availStart);
+          newBudget = await CategoryTemplate.runPercentage(
+            t[i],
+            availStart,
+            this,
+          );
           break;
         }
         case 'by': {
           // all by's get run at once
           if (!byFlag) {
-            newBudget = this.runBy();
+            newBudget = CategoryTemplate.runBy(this);
           } else {
             newBudget = 0;
           }
@@ -170,7 +174,7 @@ export class CategoryTemplate {
           break;
         }
         case 'average': {
-          newBudget = await this.runAverage(t[i]);
+          newBudget = await CategoryTemplate.runAverage(t[i], this);
           break;
         }
       }
@@ -206,16 +210,20 @@ export class CategoryTemplate {
   // run all of the 'remainder' type templates
   runRemainder(budgetAvail: number, perWeight: number) {
     if (this.remainder.length === 0) return 0;
-    const toBudget = Math.round(this.remainderWeight * perWeight);
+    let toBudget = Math.round(this.remainderWeight * perWeight);
     //check possible overbudget from rounding, 1cent leftover
     if (toBudget > budgetAvail) {
-      this.toBudgetAmount += budgetAvail;
+      toBudget = budgetAvail;
+      this.toBudgetAmount += toBudget;
+      return toBudget;
     } else if (budgetAvail - toBudget === 1) {
-      this.toBudgetAmount += toBudget + 1;
+      toBudget += 1;
+      this.toBudgetAmount += toBudget;
+      return toBudget;
     } else {
       this.toBudgetAmount += toBudget;
+      return toBudget;
     }
-    return toBudget;
   }
 
   getValues(): { budgeted; goal; longGoal } {
@@ -248,7 +256,7 @@ export class CategoryTemplate {
   private limitHold = false;
   readonly previouslyBudgeted: number = 0;
 
-  private constructor(
+  protected constructor(
     templates: Template[],
     category: CategoryEntity,
     month: string,
@@ -315,6 +323,12 @@ export class CategoryTemplate {
   //-----------------------------------------------------------------------------
   //  Template Validation
   static async checkByAndScheduleAndSpend(templates, month) {
+    if (
+      templates.filter(t => t.type === 'schedule' || t.type === 'by').length ===
+      0
+    ) {
+      return;
+    }
     //check schedule names
     const scheduleNames = (await getActiveSchedules()).map(({ name }) =>
       name.trim(),
@@ -442,7 +456,7 @@ export class CategoryTemplate {
   //-----------------------------------------------------------------------------
   //  Processor Functions
 
-  private runSimple(template, limit): number {
+  static runSimple(template, limit): number {
     if (template.monthly != null) {
       return amountToInteger(template.monthly);
     } else {
@@ -450,22 +464,22 @@ export class CategoryTemplate {
     }
   }
 
-  private async runCopy(template): Promise<number> {
+  static async runCopy(template, catObj: CategoryTemplate): Promise<number> {
     const sheetName = monthUtils.sheetForMonth(
-      monthUtils.subMonths(this.month, template.lookBack),
+      monthUtils.subMonths(catObj.month, template.lookBack),
     );
-    return await getSheetValue(sheetName, `budget-${this.category.id}`);
+    return await getSheetValue(sheetName, `budget-${catObj.category.id}`);
   }
 
-  private runWeek(template): number {
+  static runWeek(template, catObj: CategoryTemplate): number {
     let toBudget = 0;
     const amount = amountToInteger(template.amount);
     const weeks = template.weeks != null ? Math.round(template.weeks) : 1;
     let w = template.starting;
-    const nextMonth = monthUtils.addMonths(this.month, 1);
+    const nextMonth = monthUtils.addMonths(catObj.month, 1);
 
     while (w < nextMonth) {
-      if (w >= this.month) {
+      if (w >= catObj.month) {
         toBudget += amount;
       }
       w = monthUtils.addWeeks(w, weeks);
@@ -473,28 +487,28 @@ export class CategoryTemplate {
     return toBudget;
   }
 
-  private async runSpend(template): Promise<number> {
+  static async runSpend(template, catObj: CategoryTemplate): Promise<number> {
     let fromMonth = `${template.from}`;
     let toMonth = `${template.month}`;
-    let alreadyBudgeted = this.fromLastMonth;
+    let alreadyBudgeted = catObj.fromLastMonth;
     let firstMonth = true;
 
     //update months if needed
     const repeat = template.annual
       ? (template.repeat || 1) * 12
       : template.repeat;
-    let m = monthUtils.differenceInCalendarMonths(toMonth, this.month);
+    let m = monthUtils.differenceInCalendarMonths(toMonth, catObj.month);
     if (repeat && m < 0) {
       while (m < 0) {
         toMonth = monthUtils.addMonths(toMonth, repeat);
         fromMonth = monthUtils.addMonths(fromMonth, repeat);
-        m = monthUtils.differenceInCalendarMonths(toMonth, this.month);
+        m = monthUtils.differenceInCalendarMonths(toMonth, catObj.month);
       }
     }
 
     for (
       let m = fromMonth;
-      monthUtils.differenceInCalendarMonths(this.month, m) > 0;
+      monthUtils.differenceInCalendarMonths(catObj.month, m) > 0;
       m = monthUtils.addMonths(m, 1)
     ) {
       const sheetName = monthUtils.sheetForMonth(m);
@@ -502,25 +516,25 @@ export class CategoryTemplate {
         //TODO figure out if I already  found these values and can pass them in
         const spent = await getSheetValue(
           sheetName,
-          `sum-amount-${this.category.id}`,
+          `sum-amount-${catObj.category.id}`,
         );
         const balance = await getSheetValue(
           sheetName,
-          `leftover-${this.category.id}`,
+          `leftover-${catObj.category.id}`,
         );
         alreadyBudgeted = balance - spent;
         firstMonth = false;
       } else {
         alreadyBudgeted += await getSheetValue(
           sheetName,
-          `budget-${this.category.id}`,
+          `budget-${catObj.category.id}`,
         );
       }
     }
 
     const numMonths = monthUtils.differenceInCalendarMonths(
       toMonth,
-      this.month,
+      catObj.month,
     );
     const target = amountToInteger(template.amount);
     if (numMonths < 0) {
@@ -530,7 +544,11 @@ export class CategoryTemplate {
     }
   }
 
-  private async runPercentage(template, availableFunds): Promise<number> {
+  static async runPercentage(
+    template,
+    availableFunds,
+    catObj: CategoryTemplate,
+  ): Promise<number> {
     const percent = template.percent;
     const cat = template.category.toLowerCase();
     const prev = template.previous;
@@ -539,9 +557,11 @@ export class CategoryTemplate {
 
     //choose the sheet to find income for
     if (prev) {
-      sheetName = monthUtils.sheetForMonth(monthUtils.subMonths(this.month, 1));
+      sheetName = monthUtils.sheetForMonth(
+        monthUtils.subMonths(catObj.month, 1),
+      );
     } else {
-      sheetName = monthUtils.sheetForMonth(this.month);
+      sheetName = monthUtils.sheetForMonth(catObj.month);
     }
     if (cat === 'all income') {
       monthlyIncome = await getSheetValue(sheetName, `total-income`);
@@ -560,19 +580,19 @@ export class CategoryTemplate {
     return Math.max(0, Math.round(monthlyIncome * (percent / 100)));
   }
 
-  private async runAverage(template): Promise<number> {
+  static async runAverage(template, catObj: CategoryTemplate): Promise<number> {
     let sum = 0;
     for (let i = 1; i <= template.numMonths; i++) {
       const sheetName = monthUtils.sheetForMonth(
-        monthUtils.subMonths(this.month, i),
+        monthUtils.subMonths(catObj.month, i),
       );
-      sum += await getSheetValue(sheetName, `sum-amount-${this.category.id}`);
+      sum += await getSheetValue(sheetName, `sum-amount-${catObj.category.id}`);
     }
     return -Math.round(sum / template.numMonths);
   }
 
-  private runBy(): number {
-    const byTemplates = this.templates.filter(t => t.type === 'by');
+  static runBy(catObj: CategoryTemplate): number {
+    const byTemplates = catObj.templates.filter(t => t.type === 'by');
     const savedInfo = [];
     let totalNeeded = 0;
     let shortNumMonths;
@@ -587,13 +607,13 @@ export class CategoryTemplate {
           : null;
       let numMonths = monthUtils.differenceInCalendarMonths(
         targetMonth,
-        this.month,
+        catObj.month,
       );
       while (numMonths < 0 && period) {
         targetMonth = monthUtils.addMonths(targetMonth, period);
         numMonths = monthUtils.differenceInCalendarMonths(
           targetMonth,
-          this.month,
+          catObj.month,
         );
       }
       savedInfo.push({ numMonths, period });
@@ -626,7 +646,7 @@ export class CategoryTemplate {
       totalNeeded += amount;
     }
     return Math.round(
-      (totalNeeded - this.fromLastMonth) / (shortNumMonths + 1),
+      (totalNeeded - catObj.fromLastMonth) / (shortNumMonths + 1),
     );
   }
 }

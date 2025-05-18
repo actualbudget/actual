@@ -14,13 +14,13 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { sync } from 'loot-core/client/app/appSlice';
-import { loadAllFiles } from 'loot-core/client/budgets/budgetsSlice';
-import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
-import { loadGlobalPrefs } from 'loot-core/client/prefs/prefsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getCreateKeyError } from 'loot-core/shared/errors';
 
+import { sync } from '../../app/appSlice';
+import { loadAllFiles } from '../../budgets/budgetsSlice';
+import { type Modal as ModalType } from '../../modals/modalsSlice';
+import { loadGlobalPrefs } from '../../prefs/prefsSlice';
 import { useDispatch } from '../../redux';
 import { Link } from '../common/Link';
 import {

@@ -1,10 +1,17 @@
 // @ts-strict-ignore
-import { Notification } from '../../client/notifications/notificationsSlice';
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 
 import { setBudget, getSheetValue, setGoal } from './actions';
 import { parse } from './cleanup-template.pegjs';
+
+type Notification = {
+  type?: 'message' | 'error' | 'warning' | undefined;
+  pre?: string | undefined;
+  title?: string | undefined;
+  message: string;
+  sticky?: boolean | undefined;
+};
 
 export function cleanupTemplate({ month }: { month: string }) {
   return processCleanup(month);

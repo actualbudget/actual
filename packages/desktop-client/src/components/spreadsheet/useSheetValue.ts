@@ -1,6 +1,6 @@
 import { useState, useRef, useLayoutEffect } from 'react';
 
-import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
+import { useSpreadsheet } from '../../hooks/useSpreadsheet';
 
 import { useSheetName } from './useSheetName';
 

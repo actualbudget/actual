@@ -30,12 +30,9 @@ import {
   isValid as isValidDate,
 } from 'date-fns';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
-import * as Platform from 'loot-core/client/platform';
-import { setLastTransaction } from 'loot-core/client/queries/queriesSlice';
-import { aqlQuery } from 'loot-core/client/query-helpers';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
+import * as Platform from 'loot-core/shared/platform';
 import { q } from 'loot-core/shared/query';
 import {
   ungroupTransactions,
@@ -56,6 +53,9 @@ import {
   groupById,
 } from 'loot-core/shared/util';
 
+import { pushModal } from '../../../modals/modalsSlice';
+import { aqlQuery } from '../../../queries/aqlQuery';
+import { setLastTransaction } from '../../../queries/queriesSlice';
 import { useSelector, useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { AmountInput } from '../../util/AmountInput';
@@ -481,6 +481,13 @@ const TransactionEditInner = memo(function TransactionEditInner({
     [unserializedTransactions, dateFormat],
   );
   const { grouped: categoryGroups } = useCategories();
+
+  useEffect(() => {
+    if (window.history.length === 1) {
+      window.history.replaceState(null, 'Actual Budget', '/');
+      window.history.pushState(null, 'Add Transaction', '/transactions/new');
+    }
+  }, []);
 
   const [transaction, ...childTransactions] = transactions;
 
@@ -985,11 +992,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
               onFocus={() =>
                 onRequestActiveEdit(getFieldName(transaction.id, 'date'))
               }
-              onUpdate={value =>
+              onChange={event =>
                 onUpdateInner(
                   transaction,
                   'date',
-                  formatDate(parseISO(value), dateFormat),
+                  formatDate(parseISO(event.target.value), dateFormat),
                 )
               }
             />
@@ -1022,7 +1029,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
             onFocus={() => {
               onRequestActiveEdit(getFieldName(transaction.id, 'notes'));
             }}
-            onUpdate={value => onUpdateInner(transaction, 'notes', value)}
+            onChange={event =>
+              onUpdateInner(transaction, 'notes', event.target.value)
+            }
           />
         </View>
 

@@ -3,8 +3,7 @@ import React, { type CSSProperties } from 'react';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 
-import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
-
+import { type Modal as ModalType } from '../../modals/modalsSlice';
 import { ToBudgetMenu } from '../budget/envelope/budgetsummary/ToBudgetMenu';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 
