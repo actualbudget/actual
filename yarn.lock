@@ -14530,7 +14530,7 @@ __metadata:
     jsverify: "npm:^0.8.4"
     lru-cache: "npm:^11.1.0"
     md5: "npm:^2.3.0"
-    memfs: "npm:3.5.3"
+    memfs: "npm:3.6.0"
     memoize-one: "npm:^6.0.0"
     mitt: "npm:^3.0.1"
     mockdate: "npm:^3.0.5"
@@ -15001,12 +15001,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"memfs@npm:3.5.3":
-  version: 3.5.3
-  resolution: "memfs@npm:3.5.3"
+"memfs@npm:3.6.0":
+  version: 3.6.0
+  resolution: "memfs@npm:3.6.0"
   dependencies:
     fs-monkey: "npm:^1.0.4"
-  checksum: 10/7c9cdb453a6b06e87f11e2dbe6c518fd3c1c1581b370ffa24f42f3fd5b1db8c2203f596e43321a0032963f3e9b66400f2c3cf043904ac496d6ae33eafd0878fe
+  checksum: 10/9c0d5dac636ed933e39df95e4ecf5b503c01f234da87550530381b16e3999c938c76f5e85a2410cb07a75a9d2c4b7dd405ef73b004d3e78ed686c044f96f5c00
   languageName: node
   linkType: hard
 
