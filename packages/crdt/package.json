@@ -15,7 +15,7 @@
     "test": "vitest --globals"
   },
   "dependencies": {
-    "google-protobuf": "^3.12.4",
+    "google-protobuf": "^3.21.4",
     "murmurhash": "^2.0.1",
     "uuid": "^9.0.1"
   },
