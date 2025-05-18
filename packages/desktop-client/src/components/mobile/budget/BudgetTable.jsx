@@ -23,15 +23,16 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { AutoTextSize } from 'auto-text-size';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
+import * as monthUtils from 'loot-core/shared/months';
+import { q } from 'loot-core/shared/query';
+import { groupById } from 'loot-core/shared/util';
+
+import { pushModal } from '../../../modals/modalsSlice';
 import {
   envelopeBudget,
   trackingBudget,
   uncategorizedCount,
-} from 'loot-core/client/queries';
-import * as monthUtils from 'loot-core/shared/months';
-import { groupById } from 'loot-core/shared/util';
-
+} from '../../../queries/queries';
 import { useDispatch } from '../../../redux';
 import { MobilePageHeader, Page } from '../../Page';
 import { PrivacyFilter } from '../../PrivacyFilter';
@@ -44,6 +45,7 @@ import { PullToRefresh } from '../PullToRefresh';
 import { ExpenseGroupList } from './ExpenseGroupList';
 import { IncomeGroup } from './IncomeGroup';
 
+import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
@@ -338,7 +340,9 @@ export function BudgetTable({
     'budget.showHiddenCategories',
   );
 
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
+
+  const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
 
   return (
     <Page
@@ -404,17 +408,19 @@ export function BudgetTable({
             paddingBottom: MOBILE_NAV_HEIGHT,
           }}
         >
-          <BudgetGroups
-            type={budgetType}
-            categoryGroups={categoryGroups}
-            showBudgetedColumn={!showSpentColumn}
-            show3Columns={show3Columns}
-            showHiddenCategories={showHiddenCategories}
-            month={month}
-            onEditCategoryGroup={onEditCategoryGroup}
-            onEditCategory={onEditCategory}
-            onBudgetAction={onBudgetAction}
-          />
+          <SchedulesProvider query={schedulesQuery}>
+            <BudgetGroups
+              type={budgetType}
+              categoryGroups={categoryGroups}
+              showBudgetedColumn={!showSpentColumn}
+              show3Columns={show3Columns}
+              showHiddenCategories={showHiddenCategories}
+              month={month}
+              onEditCategoryGroup={onEditCategoryGroup}
+              onEditCategory={onEditCategory}
+              onBudgetAction={onBudgetAction}
+            />
+          </SchedulesProvider>
         </View>
       </PullToRefresh>
     </Page>
@@ -681,7 +687,7 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
 
 function Banners({ month, onBudgetAction }) {
   const { t } = useTranslation();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
   return (
     <GridList
@@ -690,7 +696,7 @@ function Banners({ month, onBudgetAction }) {
     >
       <UncategorizedTransactionsBanner />
       <OverspendingBanner month={month} onBudgetAction={onBudgetAction} />
-      {budgetType === 'rollover' && (
+      {budgetType === 'envelope' && (
         <OverbudgetedBanner month={month} onBudgetAction={onBudgetAction} />
       )}
     </GridList>
@@ -706,7 +712,7 @@ function BudgetTableHeader({
 }) {
   const { t } = useTranslation();
   const format = useFormat();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const buttonStyle = {
     padding: 0,
     backgroundColor: 'transparent',
@@ -747,7 +753,7 @@ function BudgetTableHeader({
           alignItems: 'center',
         }}
       >
-        {budgetType === 'report' ? (
+        {budgetType === 'tracking' ? (
           <Saved
             projected={month >= monthUtils.currentMonth()}
             onPress={onShowBudgetSummary}
@@ -771,7 +777,7 @@ function BudgetTableHeader({
         {(show3Columns || !showSpentColumn) && (
           <CellValue
             binding={
-              budgetType === 'report'
+              budgetType === 'tracking'
                 ? trackingBudget.totalBudgetedExpense
                 : envelopeBudget.totalBudgeted
             }
@@ -819,7 +825,7 @@ function BudgetTableHeader({
                         }}
                       >
                         {format(
-                          budgetType === 'report' ? value : -value,
+                          budgetType === 'tracking' ? value : -value,
                           formatType,
                         )}
                       </AutoTextSize>
@@ -833,7 +839,7 @@ function BudgetTableHeader({
         {(show3Columns || showSpentColumn) && (
           <CellValue
             binding={
-              budgetType === 'report'
+              budgetType === 'tracking'
                 ? trackingBudget.totalSpent
                 : envelopeBudget.totalSpent
             }
@@ -891,7 +897,7 @@ function BudgetTableHeader({
         )}
         <CellValue
           binding={
-            budgetType === 'report'
+            budgetType === 'tracking'
               ? trackingBudget.totalLeftover
               : envelopeBudget.totalBalance
           }

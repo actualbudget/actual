@@ -9,14 +9,14 @@
   "type": "module",
   "files": [
     "build",
-    "default-db.sqlite",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
     "start": "yarn build && node build/app",
     "start-monitor": "nodemon --exec 'tsc && node build/app' --ignore './build/**/*' --ext 'ts,js' build/app",
-    "build": "tsc",
+    "build": "tsc && yarn copy-static-assets",
+    "copy-static-assets": "rm -rf build/src/sql && cp -r src/sql build/src/sql",
     "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --trace-warnings' vitest",
     "db:migrate": "yarn build && cross-env NODE_ENV=development node build/src/scripts/run-migrations.js up",
     "db:downgrade": "yarn build && cross-env NODE_ENV=development node build/src/scripts/run-migrations.js down",
@@ -37,7 +37,6 @@
     "date-fns": "^2.30.0",
     "debug": "^4.4.0",
     "express": "4.21.2",
-    "express-actuator": "1.8.4",
     "express-rate-limit": "^7.5.0",
     "express-response-size": "^0.0.3",
     "express-winston": "^4.2.0",

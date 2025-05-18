@@ -1,14 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { resetApp } from 'loot-core/client/app/appSlice';
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
-import {
-  getAccounts,
-  getPayees,
-  setNewTransactions,
-} from 'loot-core/client/queries/queriesSlice';
-import { createAppAsyncThunk } from 'loot-core/client/redux';
-import { type AppDispatch } from 'loot-core/client/store';
 import { send } from 'loot-core/platform/client/fetch';
 import { type SyncResponseWithErrors } from 'loot-core/server/accounts/app';
 import {
@@ -18,6 +9,16 @@ import {
   type SyncServerSimpleFinAccount,
   type SyncServerPluggyAiAccount,
 } from 'loot-core/types/models';
+
+import { resetApp } from '../app/appSlice';
+import { addNotification } from '../notifications/notificationsSlice';
+import {
+  getAccounts,
+  getPayees,
+  setNewTransactions,
+} from '../queries/queriesSlice';
+import { createAppAsyncThunk } from '../redux';
+import { type AppDispatch } from '../redux/store';
 
 const sliceName = 'account';
 

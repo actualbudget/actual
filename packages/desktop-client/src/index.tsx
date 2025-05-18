@@ -13,26 +13,26 @@ import { Provider } from 'react-redux';
 import { bindActionCreators } from '@reduxjs/toolkit';
 import { createRoot } from 'react-dom/client';
 
-import * as appSlice from 'loot-core/client/app/appSlice';
-import * as budgetsSlice from 'loot-core/client/budgets/budgetsSlice';
-import * as modalsSlice from 'loot-core/client/modals/modalsSlice';
-import * as notificationsSlice from 'loot-core/client/notifications/notificationsSlice';
-import * as prefsSlice from 'loot-core/client/prefs/prefsSlice';
-import * as queriesSlice from 'loot-core/client/queries/queriesSlice';
-import { aqlQuery } from 'loot-core/client/query-helpers';
-import { store } from 'loot-core/client/store';
-import { redo, undo } from 'loot-core/client/undo';
-import * as usersSlice from 'loot-core/client/users/usersSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 
 import * as accountsSlice from './accounts/accountsSlice';
+import * as appSlice from './app/appSlice';
 import { AuthProvider } from './auth/AuthProvider';
+import * as budgetsSlice from './budgets/budgetsSlice';
 // See https://github.com/WICG/focus-visible. Only makes the blue
 // focus outline appear from keyboard events.
 import 'focus-visible';
 import { App } from './components/App';
 import { ServerProvider } from './components/ServerContext';
+import * as modalsSlice from './modals/modalsSlice';
+import * as notificationsSlice from './notifications/notificationsSlice';
+import * as prefsSlice from './prefs/prefsSlice';
+import { aqlQuery } from './queries/aqlQuery';
+import * as queriesSlice from './queries/queriesSlice';
+import { store } from './redux/store';
+import { redo, undo } from './undo';
+import * as usersSlice from './users/usersSlice';
 
 const boundActions = bindActionCreators(
   {

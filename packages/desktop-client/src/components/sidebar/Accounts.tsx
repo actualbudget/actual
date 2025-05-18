@@ -4,10 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import * as queries from 'loot-core/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { moveAccount } from '../../accounts/accountsSlice';
+import * as queries from '../../queries/queries';
 import { useSelector, useDispatch } from '../../redux';
 
 import { Account } from './Account';
@@ -123,7 +123,7 @@ export function Accounts() {
             failed={failedAccounts.has(account.id)}
             updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
-            query={queries.accountBalance(account)}
+            query={queries.accountBalance(account.id)}
             onDragChange={onDragChange}
             onDrop={onReorder}
             outerStyle={makeDropPadding(i)}
@@ -154,7 +154,7 @@ export function Accounts() {
             failed={failedAccounts.has(account.id)}
             updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
-            query={queries.accountBalance(account)}
+            query={queries.accountBalance(account.id)}
             onDragChange={onDragChange}
             onDrop={onReorder}
             outerStyle={makeDropPadding(i)}
@@ -181,7 +181,7 @@ export function Accounts() {
               name={account.name}
               account={account}
               to={getAccountPath(account)}
-              query={queries.accountBalance(account)}
+              query={queries.accountBalance(account.id)}
               onDragChange={onDragChange}
               onDrop={onReorder}
             />

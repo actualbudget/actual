@@ -2,15 +2,16 @@
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { closeModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
+import { closeModal } from '../modals/modalsSlice';
 import { useDispatch } from '../redux';
 
 import { EditSyncAccount } from './banksync/EditSyncAccount';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
+import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
 import { BudgetFileSelectionModal } from './modals/BudgetFileSelectionModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
@@ -99,6 +100,9 @@ export function Modals() {
       switch (name) {
         case 'goal-templates':
           return budgetId ? <GoalTemplateModal key={key} /> : null;
+
+        case 'category-automations-edit':
+          return budgetId ? <BudgetAutomationsModal key={name} /> : null;
 
         case 'keyboard-shortcuts':
           // don't show the hotkey help modal when a budget is not open

@@ -11,9 +11,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
-import * as Platform from 'loot-core/client/platform';
+import * as Platform from 'loot-core/shared/platform';
 
+import { closeBudget } from '../../budgets/budgetsSlice';
 import { useDispatch } from '../../redux';
 
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';

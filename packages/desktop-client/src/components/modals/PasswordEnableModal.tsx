@@ -7,14 +7,11 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
-import {
-  type Modal as ModalType,
-  popModal,
-} from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
 
+import { closeBudget } from '../../budgets/budgetsSlice';
+import { type Modal as ModalType, popModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { Error as ErrorAlert } from '../alerts';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';

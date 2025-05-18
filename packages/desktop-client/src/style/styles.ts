@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { styles } from '@actual-app/components/styles';
 
-import * as Platform from 'loot-core/client/platform';
+import * as Platform from 'loot-core/shared/platform';
 
 let hiddenScrollbars = false;
 
@@ -42,10 +42,13 @@ function onScrollbarChange() {
 
   styles.darkScrollbar = !hiddenScrollbars && {
     '& ::-webkit-scrollbar': {
-      width: 7,
+      width: 11,
       backgroundColor: 'rgba(0, 0, 0, 0)',
     },
     '& ::-webkit-scrollbar-thumb:vertical': {
+      width: 7,
+      borderRadius: 30,
+      backgroundClip: 'padding-box',
       backgroundColor: 'rgba(200, 200, 200, .5)',
     },
   };

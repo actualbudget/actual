@@ -80,10 +80,11 @@
     "typescript-strict-plugin": "^2.4.4"
   },
   "resolutions": {
-    "rollup": "4.9.4"
+    "rollup": "4.40.1"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20",
+    "yarn": "^4.7.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,md,json,yml}": [

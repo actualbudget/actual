@@ -4,13 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { type CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
-import { View } from '@actual-app/components/view';
 import { AutoTextSize } from 'auto-text-size';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
+import { pushModal } from '../../../modals/modalsSlice';
 import { useDispatch } from '../../../redux';
 import { makeAmountGrey } from '../../budget/util';
 import { PrivacyFilter } from '../../PrivacyFilter';
@@ -51,11 +50,11 @@ export function BudgetCell<
   const dispatch = useDispatch();
   const format = useFormat();
   const { showUndoNotification } = useUndo();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const categoryNotes = useNotes(category.id);
 
   const onOpenCategoryBudgetMenu = useCallback(() => {
-    const modalBudgetType = budgetType === 'rollover' ? 'envelope' : 'tracking';
+    const modalBudgetType = budgetType === 'envelope' ? 'envelope' : 'tracking';
     const categoryBudgetMenuModal = `${modalBudgetType}-budget-menu` as const;
     dispatch(
       pushModal({
@@ -147,24 +146,22 @@ export function BudgetCell<
               categoryName: category.name,
             })}
           >
-            <View>
-              <PrivacyFilter>
-                <AutoTextSize
-                  key={value}
-                  as={Text}
-                  minFontSizePx={6}
-                  maxFontSizePx={12}
-                  mode="oneline"
-                  style={{
-                    maxWidth: columnWidth,
-                    textAlign: 'right',
-                    fontSize: 12,
-                  }}
-                >
-                  {format(value, type)}
-                </AutoTextSize>
-              </PrivacyFilter>
-            </View>
+            <PrivacyFilter>
+              <AutoTextSize
+                key={value}
+                as={Text}
+                minFontSizePx={6}
+                maxFontSizePx={12}
+                mode="oneline"
+                style={{
+                  maxWidth: columnWidth,
+                  textAlign: 'right',
+                  fontSize: 12,
+                }}
+              >
+                {format(value, type)}
+              </AutoTextSize>
+            </PrivacyFilter>
           </Button>
         )
       }

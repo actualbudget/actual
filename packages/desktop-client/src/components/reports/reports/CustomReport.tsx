@@ -11,8 +11,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
-import { useReport as useCustomReport } from 'loot-core/client/data-hooks/reports';
-import { calculateHasWarning } from 'loot-core/client/reports';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
@@ -54,15 +52,16 @@ import { setSessionReport } from '../setSessionReport';
 import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
-import { fromDateRepr } from '../util';
+import { calculateHasWarning, fromDateRepr } from '../util';
 
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useFilters } from '@desktop-client/hooks/useFilters';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
+import { useReport as useCustomReport } from '@desktop-client/hooks/useReport';
+import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 /**
@@ -145,7 +144,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
     onConditionsOpChange,
-  } = useFilters();
+  } = useRuleConditionFilters();
 
   const location = useLocation();
 

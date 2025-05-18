@@ -11,10 +11,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  type ScheduleStatusType,
-  type ScheduleStatuses,
-} from 'loot-core/client/data-hooks/schedules';
 import { format as monthUtilFormat } from 'loot-core/shared/months';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { getScheduledAmount } from 'loot-core/shared/schedules';
@@ -31,6 +27,10 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { usePayees } from '@desktop-client/hooks/usePayees';
+import {
+  type ScheduleStatusType,
+  type ScheduleStatuses,
+} from '@desktop-client/hooks/useSchedules';
 
 type SchedulesTableProps = {
   isLoading?: boolean;

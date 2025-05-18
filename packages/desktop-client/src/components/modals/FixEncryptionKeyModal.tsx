@@ -13,10 +13,10 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getTestKeyError } from 'loot-core/shared/errors';
 
+import { type Modal as ModalType } from '../../modals/modalsSlice';
 import { Link } from '../common/Link';
 import {
   Modal,

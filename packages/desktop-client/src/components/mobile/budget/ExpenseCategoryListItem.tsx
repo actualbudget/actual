@@ -3,37 +3,30 @@ import { GridListItem } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import {
-  SvgArrowThickRight,
-  SvgCheveronRight,
-} from '@actual-app/components/icons/v1';
+import { SvgCheveronRight } from '@actual-app/components/icons/v1';
 import { styles, type CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { AutoTextSize } from 'auto-text-size';
 
-import { collapseModals, pushModal } from 'loot-core/client/modals/modalsSlice';
-import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
+import { type BudgetType } from 'loot-core/server/prefs';
 import * as monthUtils from 'loot-core/shared/months';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useCategories } from '../../../hooks/useCategories';
-import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { useNavigate } from '../../../hooks/useNavigate';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { useUndo } from '../../../hooks/useUndo';
+import { collapseModals, pushModal } from '../../../modals/modalsSlice';
+import { envelopeBudget, trackingBudget } from '../../../queries/queries';
 import { useDispatch } from '../../../redux';
-import { BalanceWithCarryover } from '../../budget/BalanceWithCarryover';
-import { makeAmountGrey, makeBalanceAmountStyle } from '../../budget/util';
-import { PrivacyFilter } from '../../PrivacyFilter';
-import { CellValue } from '../../spreadsheet/CellValue';
-import { useFormat } from '../../spreadsheet/useFormat';
 import { useSheetValue } from '../../spreadsheet/useSheetValue';
 
+import { BalanceCell } from './BalanceCell';
 import { BudgetCell } from './BudgetCell';
-import { getColumnWidth, PILL_STYLE, ROW_HEIGHT } from './BudgetTable';
+import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
+import { SpentCell } from './SpentCell';
 
 type ExpenseCategoryNameProps = {
   category: CategoryEntity;
@@ -50,6 +43,7 @@ function ExpenseCategoryName({
     show3Columns,
     isSidebar: true,
   });
+
   return (
     <View
       style={{
@@ -125,66 +119,26 @@ function ExpenseCategoryCells({
   onShowActivity,
 }: ExpenseCategoryCellsProps) {
   const { t } = useTranslation();
-  const format = useFormat();
   const columnWidth = getColumnWidth({
     show3Columns,
     isSidebar: false,
   });
-  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
-
-  const goal =
-    budgetType === 'report'
-      ? trackingBudget.catGoal(category.id)
-      : envelopeBudget.catGoal(category.id);
-
-  const longGoal =
-    budgetType === 'report'
-      ? trackingBudget.catLongGoal(category.id)
-      : envelopeBudget.catLongGoal(category.id);
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
   const budgeted =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.catBudgeted(category.id)
       : envelopeBudget.catBudgeted(category.id);
 
   const spent =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.catSumAmount(category.id)
       : envelopeBudget.catSumAmount(category.id);
 
   const balance =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.catBalance(category.id)
       : envelopeBudget.catBalance(category.id);
-
-  const carryover =
-    budgetType === 'report'
-      ? trackingBudget.catCarryover(category.id)
-      : envelopeBudget.catCarryover(category.id);
-
-  const goalTemp = useSheetValue<'envelope-budget' | 'tracking-budget', 'goal'>(
-    goal,
-  );
-  const goalValue = isGoalTemplatesEnabled ? goalTemp : null;
-
-  const budgetedtmp = useSheetValue<
-    'envelope-budget' | 'tracking-budget',
-    'budget'
-  >(budgeted);
-  const balancetmp = useSheetValue<
-    'envelope-budget' | 'tracking-budget',
-    'leftover'
-  >(balance);
-  const isLongGoal =
-    useSheetValue<'envelope-budget' | 'tracking-budget', 'long-goal'>(
-      longGoal,
-    ) === 1;
-  const budgetedValue = isGoalTemplatesEnabled
-    ? isLongGoal
-      ? balancetmp
-      : budgetedtmp
-    : null;
 
   return (
     <View
@@ -218,44 +172,13 @@ function ExpenseCategoryCells({
           alignItems: 'flex-end',
         }}
       >
-        <CellValue<'envelope-budget' | 'tracking-budget', 'sum-amount'>
+        <SpentCell
           binding={spent}
-          type="financial"
-          aria-label={t('Spent amount for {{categoryName}} category', {
-            categoryName: category.name,
-          })} // Translated aria-label
-        >
-          {({ type, value }) => (
-            <Button
-              variant="bare"
-              style={{
-                ...PILL_STYLE,
-              }}
-              onPress={onShowActivity}
-              aria-label={t('Show transactions for {{categoryName}} category', {
-                categoryName: category.name,
-              })} // Translated aria-label
-            >
-              <PrivacyFilter>
-                <AutoTextSize
-                  key={value}
-                  as={Text}
-                  minFontSizePx={6}
-                  maxFontSizePx={12}
-                  mode="oneline"
-                  style={{
-                    ...makeAmountGrey(value),
-                    maxWidth: columnWidth,
-                    textAlign: 'right',
-                    fontSize: 12,
-                  }}
-                >
-                  {format(value, type)}
-                </AutoTextSize>
-              </PrivacyFilter>
-            </Button>
-          )}
-        </CellValue>
+          category={category}
+          month={month}
+          show3Columns={show3Columns}
+          onPress={onShowActivity}
+        />
       </View>
       <View
         style={{
@@ -264,66 +187,15 @@ function ExpenseCategoryCells({
           alignItems: 'flex-end',
         }}
       >
-        <BalanceWithCarryover
-          aria-label={t('Balance for {{categoryName}} category', {
+        <BalanceCell
+          binding={balance}
+          category={category}
+          show3Columns={show3Columns}
+          onPress={onOpenBalanceMenu}
+          aria-label={t('Open balance menu for {{categoryName}} category', {
             categoryName: category.name,
-          })} // Translated aria-label
-          type="financial"
-          carryover={carryover}
-          balance={balance}
-          goal={goal}
-          budgeted={budgeted}
-          longGoal={longGoal}
-          CarryoverIndicator={({ style }) => (
-            <View
-              style={{
-                position: 'absolute',
-                right: '-3px',
-                top: '-5px',
-                borderRadius: '50%',
-                backgroundColor: style?.color ?? theme.pillText,
-              }}
-            >
-              <SvgArrowThickRight
-                width={11}
-                height={11}
-                style={{ color: theme.pillBackgroundLight }}
-              />
-            </View>
-          )}
-        >
-          {({ type, value }) => (
-            <Button
-              variant="bare"
-              style={{
-                ...PILL_STYLE,
-                maxWidth: columnWidth,
-              }}
-              onPress={onOpenBalanceMenu}
-              aria-label={t('Open balance menu for {{categoryName}} category', {
-                categoryName: category.name,
-              })} // Translated aria-label
-            >
-              <PrivacyFilter>
-                <AutoTextSize
-                  key={value}
-                  as={Text}
-                  minFontSizePx={6}
-                  maxFontSizePx={12}
-                  mode="oneline"
-                  style={{
-                    maxWidth: columnWidth,
-                    ...makeBalanceAmountStyle(value, goalValue, budgetedValue),
-                    textAlign: 'right',
-                    fontSize: 12,
-                  }}
-                >
-                  {format(value, type)}
-                </AutoTextSize>
-              </PrivacyFilter>
-            </Button>
-          )}
-        </BalanceWithCarryover>
+          })}
+        />
       </View>
     </View>
   );
@@ -353,10 +225,10 @@ export function ExpenseCategoryListItem({
   const { value: category } = props;
 
   const { t } = useTranslation();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
-  const modalBudgetType = budgetType === 'rollover' ? 'envelope' : 'tracking';
-  const balanceMenuModalName = `${modalBudgetType}-balance-menu` as const;
+  const balanceMenuModalName =
+    `${budgetType as BudgetType}-balance-menu` as const;
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   const { list: categories } = useCategories();
@@ -380,7 +252,7 @@ export function ExpenseCategoryListItem({
     'envelope-budget' | 'tracking-budget',
     'leftover'
   >(
-    budgetType === 'rollover'
+    budgetType === 'envelope'
       ? envelopeBudget.catBalance(category?.id)
       : trackingBudget.catBalance(category?.id),
   );

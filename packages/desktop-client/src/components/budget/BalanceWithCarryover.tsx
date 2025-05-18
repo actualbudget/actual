@@ -81,13 +81,20 @@ type BalanceWithCarryoverProps = Omit<
   'children' | 'binding'
 > & {
   children?: ChildrenWithClassName;
-  carryover: Binding<'envelope-budget', 'carryover'>;
-  balance: Binding<'envelope-budget', 'leftover'>;
-  goal: Binding<'envelope-budget', 'goal'>;
-  budgeted: Binding<'envelope-budget', 'budget'>;
-  longGoal: Binding<'envelope-budget', 'long-goal'>;
+  carryover: Binding<'envelope-budget' | 'tracking-budget', 'carryover'>;
+  /**
+   * Expense category balance binding is `leftover`,
+   * while income category balance binding is `sum-amount`.
+   */
+  balance: Binding<
+    'envelope-budget' | 'tracking-budget',
+    'leftover' | 'sum-amount'
+  >;
+  goal: Binding<'envelope-budget' | 'tracking-budget', 'goal'>;
+  budgeted: Binding<'envelope-budget' | 'tracking-budget', 'budget'>;
+  longGoal: Binding<'envelope-budget' | 'tracking-budget', 'long-goal'>;
   isDisabled?: boolean;
-  isMobileEnvelopeModal?: boolean;
+  shouldInlineGoalStatus?: boolean;
   CarryoverIndicator?: ComponentType<CarryoverIndicatorProps>;
 };
 
@@ -98,7 +105,7 @@ export function BalanceWithCarryover({
   budgeted,
   longGoal,
   isDisabled,
-  isMobileEnvelopeModal,
+  shouldInlineGoalStatus,
   CarryoverIndicator: CarryoverIndicatorComponent = CarryoverIndicator,
   children,
   ...props
@@ -275,7 +282,7 @@ export function BalanceWithCarryover({
               style={getBalanceAmountStyle(balanceValue)}
             />
           )}
-          {isMobileEnvelopeModal &&
+          {shouldInlineGoalStatus &&
             isGoalTemplatesEnabled &&
             goalValue !== null && (
               <>

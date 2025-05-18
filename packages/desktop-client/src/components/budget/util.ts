@@ -5,7 +5,6 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { t } from 'i18next';
 
-import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { type Handlers } from 'loot-core/types/handlers';
@@ -15,6 +14,7 @@ import {
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
+import { type useSpreadsheet } from '../../hooks/useSpreadsheet';
 import { type DropPosition } from '../sort';
 
 import { getValidMonthBounds } from './MonthsContext';
@@ -167,7 +167,9 @@ export async function prewarmMonth(
   month: string,
 ) {
   const method: keyof Handlers =
-    budgetType === 'report' ? 'tracking-budget-month' : 'envelope-budget-month';
+    budgetType === 'tracking'
+      ? 'tracking-budget-month'
+      : 'envelope-budget-month';
 
   const values = await send(method, { month });
 

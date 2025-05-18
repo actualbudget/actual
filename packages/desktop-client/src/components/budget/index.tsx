@@ -5,8 +5,11 @@ import { useTranslation } from 'react-i18next';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
+import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
+
+import { pushModal } from '../../modals/modalsSlice';
+import { addNotification } from '../../notifications/notificationsSlice';
 import {
   applyBudgetAction,
   createCategory,
@@ -18,11 +21,7 @@ import {
   moveCategoryGroup,
   updateCategory,
   updateGroup,
-} from 'loot-core/client/queries/queriesSlice';
-import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
-import { send } from 'loot-core/platform/client/fetch';
-import * as monthUtils from 'loot-core/shared/months';
-
+} from '../../queries/queriesSlice';
 import { useDispatch } from '../../redux';
 import { NamespaceContext } from '../spreadsheet/NamespaceContext';
 
@@ -37,6 +36,7 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type TrackingReportComponents = {
@@ -80,7 +80,7 @@ function BudgetInner(props: BudgetInnerProps) {
     start: startMonth,
     end: startMonth,
   });
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const [maxMonthsPref] = useGlobalPref('maxMonths');
   const maxMonths = maxMonthsPref || 1;
   const [initialized, setInitialized] = useState(false);
@@ -332,7 +332,7 @@ function BudgetInner(props: BudgetInnerProps) {
   }
 
   let table;
-  if (budgetType === 'report') {
+  if (budgetType === 'tracking') {
     table = (
       <TrackingBudgetProvider
         summaryCollapsed={summaryCollapsed}
