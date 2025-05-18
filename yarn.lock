@@ -114,7 +114,7 @@ __metadata:
     nodemon: "npm:^3.1.10"
     nordigen-node: "npm:^1.4.1"
     openid-client: "npm:^5.4.3"
-    pluggy-sdk: "npm:^0.68.1"
+    pluggy-sdk: "npm:^0.70.1"
     supertest: "npm:^6.3.4"
     typescript: "npm:^5.8.3"
     uuid: "npm:^9.0.1"
@@ -16677,13 +16677,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pluggy-sdk@npm:^0.68.1":
-  version: 0.68.1
-  resolution: "pluggy-sdk@npm:0.68.1"
+"pluggy-sdk@npm:^0.70.1":
+  version: 0.70.1
+  resolution: "pluggy-sdk@npm:0.70.1"
   dependencies:
     got: "npm:11.8.6"
     jsonwebtoken: "npm:^9.0.2"
-  checksum: 10/1e36681d07ec134515e54f191a820c30fa242297f2cf2269de877be94dddee43de92af385e1f2f7a2db9d7b5e9db8e650fd02b7312dd72d18e10471e927905f9
+  checksum: 10/c88f624616eba490906a5b8c9be7acef0acf8c49b647abe060212a048300ada9794be9ee7d81ddec7cba3594c4d3f099f785133b277ffadcd9df27435db4a316
   languageName: node
   linkType: hard
 
