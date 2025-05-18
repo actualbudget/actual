@@ -24,7 +24,7 @@
     "@rschedule/standard-date-adapter": "^1.5.0",
     "absurd-sql": "0.0.54",
     "adm-zip": "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch",
-    "better-sqlite3": "^11.9.1",
+    "better-sqlite3": "^11.10.0",
     "csv-parse": "^4.16.3",
     "csv-stringify": "^5.6.5",
     "date-fns": "^2.30.0",

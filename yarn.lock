@@ -25,7 +25,7 @@ __metadata:
   dependencies:
     "@actual-app/crdt": "workspace:^"
     "@types/uuid": "npm:^9.0.8"
-    better-sqlite3: "npm:^11.9.1"
+    better-sqlite3: "npm:^11.10.0"
     compare-versions: "npm:^6.1.1"
     node-fetch: "npm:^3.3.2"
     tsc-alias: "npm:^1.8.16"
@@ -98,7 +98,7 @@ __metadata:
     "@types/uuid": "npm:^9.0.8"
     "@vitest/coverage-v8": "npm:3.1.3"
     bcrypt: "npm:^5.1.1"
-    better-sqlite3: "npm:^11.9.1"
+    better-sqlite3: "npm:^11.10.0"
     body-parser: "npm:^1.20.3"
     convict: "npm:^6.2.4"
     cors: "npm:^2.8.5"
@@ -8080,14 +8080,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@npm:^11.9.1":
-  version: 11.9.1
-  resolution: "better-sqlite3@npm:11.9.1"
+"better-sqlite3@npm:^11.10.0":
+  version: 11.10.0
+  resolution: "better-sqlite3@npm:11.10.0"
   dependencies:
     bindings: "npm:^1.5.0"
     node-gyp: "npm:latest"
     prebuild-install: "npm:^7.1.1"
-  checksum: 10/bfd820e7a32d6f8bbc43607ccb3a27d89ce20923118bf5c5f6c1550b55e8ce3b1c69db2273131791d866a078be66d3b15e6fedea96824cd3aeac3e492c61d1e1
+  checksum: 10/5e4c7437c4fe6033335a79c82974d7ab29f33c51c36f48b73e87e087d21578468575de1c56a7badd4f76f17255e25abefddaeacf018e5eeb9e0cb8d6e3e4a5e1
   languageName: node
   linkType: hard
 
@@ -9776,7 +9776,7 @@ __metadata:
     "@playwright/test": "npm:1.41.2"
     "@types/copyfiles": "npm:^2"
     "@types/fs-extra": "npm:^11"
-    better-sqlite3: "npm:^11.9.1"
+    better-sqlite3: "npm:^11.10.0"
     copyfiles: "npm:^2.4.1"
     cross-env: "npm:^7.0.3"
     electron: "npm:30.5.1"
@@ -14514,7 +14514,7 @@ __metadata:
     absurd-sql: "npm:0.0.54"
     adm-zip: "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch"
     assert: "npm:^2.1.0"
-    better-sqlite3: "npm:^11.9.1"
+    better-sqlite3: "npm:^11.10.0"
     browserify-zlib: "npm:^0.2.0"
     buffer: "npm:^6.0.3"
     cross-env: "npm:^7.0.3"
