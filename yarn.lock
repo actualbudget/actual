@@ -172,7 +172,7 @@ __metadata:
     pikaday: "npm:1.8.2"
     promise-retry: "npm:^2.0.1"
     prop-types: "npm:^15.8.1"
-    re-resizable: "npm:^6.9.18"
+    re-resizable: "npm:^6.11.2"
     react: "npm:19.1.0"
     react-aria: "npm:^3.39.0"
     react-aria-components: "npm:^1.8.0"
@@ -17193,7 +17193,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"re-resizable@npm:^6.9.18":
+"re-resizable@npm:^6.11.2":
   version: 6.11.2
   resolution: "re-resizable@npm:6.11.2"
   peerDependencies:
