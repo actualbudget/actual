@@ -113,7 +113,7 @@ __metadata:
     migrate: "npm:^2.1.0"
     nodemon: "npm:^3.1.10"
     nordigen-node: "npm:^1.4.1"
-    openid-client: "npm:^5.4.3"
+    openid-client: "npm:^5.7.1"
     pluggy-sdk: "npm:^0.70.1"
     supertest: "npm:^6.3.4"
     typescript: "npm:^5.8.3"
@@ -16234,7 +16234,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openid-client@npm:^5.4.3":
+"openid-client@npm:^5.7.1":
   version: 5.7.1
   resolution: "openid-client@npm:5.7.1"
   dependencies:
