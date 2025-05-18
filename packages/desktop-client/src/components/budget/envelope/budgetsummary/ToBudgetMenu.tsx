@@ -31,7 +31,8 @@ export function ToBudgetMenu({
 
   const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
   const forNextMonth = useEnvelopeSheetValue(envelopeBudget.forNextMonth) ?? 0;
-  const buffered = useEnvelopeSheetValue(envelopeBudget.manualBuffered) ?? 0;
+  const manualBuffered =
+    useEnvelopeSheetValue(envelopeBudget.manualBuffered) ?? 0;
   const autoBuffered = useEnvelopeSheetValue(envelopeBudget.autoBuffered) ?? 0;
   const items = [
     ...(toBudget > 0
@@ -58,7 +59,7 @@ export function ToBudgetMenu({
           },
         ]
       : []),
-    ...(forNextMonth > 0 && buffered === 0
+    ...(forNextMonth > 0 && manualBuffered === 0
       ? [
           {
             name: 'disable-auto-buffer',
@@ -66,7 +67,7 @@ export function ToBudgetMenu({
           },
         ]
       : []),
-    ...(forNextMonth > 0 && buffered !== 0
+    ...(forNextMonth > 0 && manualBuffered !== 0
       ? [
           {
             name: 'reset-buffer',

@@ -483,7 +483,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           }}
           onContextMenu={e => {
             handleBalanceContextMenu(e);
-            // We need to calculate differently from the hook ue to being aligned to the right
+            // We need to calculate differently from the hook due to being aligned to the right
             const rect = e.currentTarget.getBoundingClientRect();
             resetBalancePosition(
               e.clientX - rect.right + 200 - 8,
@@ -584,12 +584,6 @@ export function IncomeCategoryMonth({
           backgroundColor: monthUtils.isCurrentMonth(month)
             ? theme.budgetCurrentMonth
             : theme.budgetOtherMonth,
-          '& .hover-visible': {
-            opacity: 0,
-          },
-          '&:hover .hover-visible': {
-            opacity: 1,
-          },
         }}
       >
         <View
@@ -609,7 +603,7 @@ export function IncomeCategoryMonth({
             }}
             onContextMenu={e => {
               handleIncomeContextMenu(e);
-              // We need to calculate differently from the hook ue to being aligned to the right
+              // We need to calculate differently from the hook due to being aligned to the right
               const rect = e.currentTarget.getBoundingClientRect();
               resetIncomePosition(
                 e.clientX - rect.right + 200 - 8,
