@@ -66,6 +66,6 @@
     "nodemon": "^3.1.10",
     "supertest": "^6.3.4",
     "typescript": "^5.8.3",
-    "vitest": "^3.0.9"
+    "vitest": "^3.1.3"
   }
 }
