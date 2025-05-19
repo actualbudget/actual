@@ -36,7 +36,8 @@ export type SyncedPrefs = Partial<
     | `ofx-fallback-missing-payee-${string}`
     | `flip-amount-${string}-${'csv' | 'qif'}`
     | `flags.${FeatureFlag}`
-    | `learn-categories`,
+    | `learn-categories`
+    | 'tags',
     string
   >
 >;
@@ -87,7 +88,6 @@ export type GlobalPrefs = Partial<{
   keyId?: string;
   language: string;
   theme: Theme;
-  tags: Record<string, string>;
   preferredDarkTheme: DarkTheme;
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
@@ -115,7 +115,6 @@ export type GlobalPrefsJson = Partial<{
   'encrypt-key'?: string;
   language?: GlobalPrefs['language'];
   theme?: GlobalPrefs['theme'];
-  tags?: string;
   'preferred-dark-theme'?: GlobalPrefs['preferredDarkTheme'];
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
   syncServerConfig?: GlobalPrefs['syncServerConfig'];
