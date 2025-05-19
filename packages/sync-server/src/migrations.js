@@ -18,7 +18,7 @@ export function run(direction = 'up') {
         stateStore: `${path.join(config.get('dataDir'), '.migrate')}${
           config.get('mode') === 'test' ? '-test' : ''
         }`,
-        migrationsDirectory: path.join(__dirname, 'migrations'),
+        migrationsDirectory: path.join(__dirname, '../migrations'),
       },
       (err, set) => {
         if (err) {
