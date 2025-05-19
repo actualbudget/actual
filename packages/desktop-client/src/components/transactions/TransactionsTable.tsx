@@ -1353,7 +1353,9 @@ const Transaction = memo(function Transaction({
         focused={focusedField === 'notes'}
         value={notes || ''}
         valueStyle={valueStyle}
-        formatter={value => NotesTagFormatter({notes: value, onNotesTagClick})}
+        formatter={value =>
+          NotesTagFormatter({ notes: value, onNotesTagClick })
+        }
         onExpose={name => !isPreview && onEdit(id, name)}
         inputProps={{
           value: notes || '',
