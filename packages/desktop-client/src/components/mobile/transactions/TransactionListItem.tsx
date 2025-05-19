@@ -279,7 +279,7 @@ export function TransactionListItem({
                       opacity: 0.85,
                     }}
                   >
-                    <NotesTagFormatter notes={notes}/>
+                    <NotesTagFormatter notes={notes} />
                   </TextOneLine>
                 )}
               </View>

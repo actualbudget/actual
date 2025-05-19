@@ -69,7 +69,7 @@ export function TagsSettings() {
                 variant="bare"
                 onPress={() => onTrashTag(tag)}
                 style={{
-                  height: "100%",
+                  height: '100%',
                   borderWidth: 0,
                   backgroundColor: 'transparent',
                 }}

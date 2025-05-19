@@ -12,7 +12,7 @@ import { useTheme } from './theme';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 export function useTags() {
-  const [tags, setTagsPref] = useGlobalPref('tags');
+  const [tags = {}, setTagsPref] = useGlobalPref('tags');
   return [tags, setTagsPref] as const;
 }
 
@@ -60,7 +60,17 @@ export function useTagCSS() {
   };
 }
 
-function DesktopTaggedNotes({ content, onPress, tag, separator }) {
+function DesktopTaggedNotes({
+  content,
+  onPress,
+  tag,
+  separator,
+}: {
+  content: string;
+  onPress?: (content: string) => void;
+  tag: string;
+  separator: string;
+}) {
   const getTagCSS = useTagCSS();
   return (
     <span>
@@ -78,7 +88,15 @@ function DesktopTaggedNotes({ content, onPress, tag, separator }) {
   );
 }
 
-function MobileTaggedNotes({ content, tag, separator }) {
+function MobileTaggedNotes({
+  content,
+  tag,
+  separator,
+}: {
+  content: string;
+  tag: string;
+  separator: string;
+}) {
   const getTagCSS = useTagCSS();
   return (
     <>
