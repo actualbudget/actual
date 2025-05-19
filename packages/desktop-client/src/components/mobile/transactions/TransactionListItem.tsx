@@ -45,6 +45,7 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
 import { usePayee } from '@desktop-client/hooks/usePayee';
 import { useSelector } from '@desktop-client/redux';
+import { NotesTagFormatter } from '@desktop-client/style/tags';
 
 const ROW_HEIGHT = 60;
 
@@ -278,7 +279,7 @@ export function TransactionListItem({
                       opacity: 0.85,
                     }}
                   >
-                    {notes}
+                    <NotesTagFormatter notes={notes}/>
                   </TextOneLine>
                 )}
               </View>

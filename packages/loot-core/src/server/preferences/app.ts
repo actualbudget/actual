@@ -87,6 +87,9 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
   if (prefs.theme !== undefined) {
     await asyncStorage.setItem('theme', prefs.theme);
   }
+  if (prefs.tags !== undefined) {
+    await asyncStorage.setItem('tags', JSON.stringify(prefs.tags));
+  }
   if (prefs.preferredDarkTheme !== undefined) {
     await asyncStorage.setItem(
       'preferred-dark-theme',
@@ -114,6 +117,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     'encrypt-key': encryptKey,
     language,
     theme,
+    tags,
     'preferred-dark-theme': preferredDarkTheme,
     'server-self-signed-cert': serverSelfSignedCert,
     syncServerConfig,
@@ -125,6 +129,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     'encrypt-key',
     'language',
     'theme',
+    'tags',
     'preferred-dark-theme',
     'server-self-signed-cert',
     'syncServerConfig',
@@ -148,6 +153,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
       preferredDarkTheme === 'dark' || preferredDarkTheme === 'midnight'
         ? preferredDarkTheme
         : 'dark',
+    tags: tags ? JSON.parse(tags) : {},
     serverSelfSignedCert: serverSelfSignedCert || undefined,
     syncServerConfig: syncServerConfig || undefined,
   };
