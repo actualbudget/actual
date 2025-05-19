@@ -35,13 +35,18 @@ export function TagsSettings() {
   };
 
   const onAddTagColor = () => {
+    if (!newTag.trim()) {
+      setErrorMsg(t('Tag name cannot be empty'));
+      return;
+    }
+
     if (!newColor.match(/^#(?:[0-9a-f]{3}){1,2}$/i)) {
       setErrorMsg(t('Invalid HEX color'));
       return;
     }
 
     setErrorMsg('');
-    setTagsPref({ ...tags, [newTag]: newColor });
+    setTagsPref({ ...tags, [newTag.trim()]: newColor });
     setNewTag('');
     setNewColor('');
   };
@@ -74,11 +79,15 @@ export function TagsSettings() {
               * {errorMsg}
             </FormError>
           )}
-          <div
+          <form
             style={{
               display: 'flex',
               flexDirection: isNarrowWidth ? 'column' : 'row',
               gap: '1em',
+            }}
+            onSubmit={e => {
+              e.preventDefault();
+              onAddTagColor();
             }}
           >
             <Input
@@ -88,14 +97,14 @@ export function TagsSettings() {
               onChangeValue={setNewTag}
             />
             <Input
-              id="colo-field"
+              id="color-field"
               placeholder="#hexcolor"
               value={newColor}
               onChangeValue={setNewColor}
             />
             <Button
               variant="bare"
-              onPress={() => onAddTagColor()}
+              type="submit"
               style={{
                 borderWidth: 0,
                 backgroundColor: 'transparent',
@@ -103,27 +112,23 @@ export function TagsSettings() {
             >
               <SvgAdd width={10} height={10} />
             </Button>
-          </div>
+          </form>
           <span>
-            <Button variant="bare" className={getTagCSS('')} onPress={() => {}}>
+            <Button variant="bare" className={getTagCSS('')}>
               #Default
             </Button>
           </span>
 
-          {Object.keys(tags).map((tag, index) => (
+          {Object.keys(tags).map(tag => (
             <div
-              key={index}
+              key={tag}
               style={{
                 display: 'flex',
                 flexDirection: 'row',
               }}
             >
               <span>
-                <Button
-                  variant="bare"
-                  className={getTagCSS(tag)}
-                  onPress={() => {}}
-                >
+                <Button variant="bare" className={getTagCSS(tag)}>
                   #{tag}
                 </Button>
               </span>

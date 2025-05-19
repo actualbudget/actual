@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -11,9 +11,14 @@ import { useTheme } from './theme';
 
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
+type TagColors = Record<string, string>;
+
 export function useTags() {
   const [tags = '{}', setTagsPref] = useSyncedPref('tags');
-  return [JSON.parse(tags), (tags: Record<string, string>) => setTagsPref(JSON.stringify(tags))] as const;
+  return [
+    JSON.parse(tags) as TagColors,
+    (tags: TagColors) => setTagsPref(JSON.stringify(tags)),
+  ] as const;
 }
 
 function getTagColors(theme: Theme, color?: string) {
@@ -39,25 +44,28 @@ export function useTagCSS() {
   const [theme] = useTheme();
   const { isNarrowWidth } = useResponsive();
 
-  return (tag: string) => {
-    const [color, backgroundColor, backgroundColorHovered] = getTagColors(
-      theme,
-      tagsColors[tag],
-    );
+  return useCallback(
+    (tag: string) => {
+      const [color, backgroundColor, backgroundColorHovered] = getTagColors(
+        theme,
+        tagsColors[tag],
+      );
 
-    return css({
-      display: 'inline-flex',
-      padding: isNarrowWidth ? '0px 7px' : '3px 7px',
-      borderRadius: 16,
-      userSelect: 'none',
-      backgroundColor,
-      color,
-      cursor: 'pointer',
-      '&[data-hovered]': {
-        backgroundColor: backgroundColorHovered,
-      },
-    });
-  };
+      return css({
+        display: 'inline-flex',
+        padding: isNarrowWidth ? '0px 7px' : '3px 7px',
+        borderRadius: 16,
+        userSelect: 'none',
+        backgroundColor,
+        color,
+        cursor: 'pointer',
+        '&[data-hovered]': {
+          backgroundColor: backgroundColorHovered,
+        },
+      });
+    },
+    [theme, tagsColors, isNarrowWidth],
+  );
 }
 
 function DesktopTaggedNotes({
@@ -111,7 +119,6 @@ export function NotesTagFormatter({
   onNotesTagClick,
 }: {
   notes: string;
-  mobile?: boolean;
   onNotesTagClick?: (tag: string) => void;
 }) {
   const { isNarrowWidth } = useResponsive();
