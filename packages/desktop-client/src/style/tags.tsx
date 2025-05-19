@@ -9,11 +9,11 @@ import { type Theme } from 'loot-core/types/prefs';
 
 import { useTheme } from './theme';
 
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function useTags() {
-  const [tags = {}, setTagsPref] = useGlobalPref('tags');
-  return [tags, setTagsPref] as const;
+  const [tags = '{}', setTagsPref] = useSyncedPref('tags');
+  return [JSON.parse(tags), (tags: Record<string, string>) => setTagsPref(JSON.stringify(tags))] as const;
 }
 
 function getTagColors(theme: Theme, color?: string) {
