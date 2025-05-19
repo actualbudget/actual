@@ -1,10 +1,10 @@
 // @ts-strict-ignore
-import { initServer, serverPush } from '../platform/client/fetch';
-import { subDays } from '../shared/months';
-import { q } from '../shared/query';
-import { tracer } from '../shared/test-helpers';
+import * as fetch from 'loot-core/platform/client/fetch';
+import { subDays } from 'loot-core/shared/months';
+import { q } from 'loot-core/shared/query';
+import { resetTracer, tracer } from 'loot-core/shared/test-helpers';
 
-import { aqlQuery, liveQuery, pagedQuery } from './query-helpers';
+import { pagedQuery } from './pagedQuery';
 
 function wait(n) {
   return new Promise(resolve => setTimeout(() => resolve(`wait(${n})`), n));
@@ -78,9 +78,40 @@ function runPagedQuery(query, data) {
   throw new Error('Unable to execute query: ' + JSON.stringify(query, null, 2));
 }
 
-function initBasicServer(delay?) {
-  initServer({
-    query: async query => {
+const eventListeners = new Map();
+
+function clearEventListeners() {
+  eventListeners.clear();
+}
+
+function mockListen(name, listener): () => void {
+  if (!eventListeners.get(name)) {
+    eventListeners.set(name, []);
+  }
+  eventListeners.get(name).push(listener);
+
+  return () => {
+    const arr = eventListeners.get(name);
+    eventListeners.set(
+      name,
+      arr.filter(l => l !== listener),
+    );
+  };
+}
+
+function mockPublishEvent(name, args) {
+  const listeners = eventListeners.get(name);
+  if (listeners) {
+    listeners.forEach(listener => {
+      listener(args);
+    });
+  }
+}
+
+async function mockSend(name, args, { delay }) {
+  switch (name) {
+    case 'query':
+      const query = args;
       if (!isCountQuery(query)) {
         tracer.event('server-query');
       }
@@ -88,11 +119,32 @@ function initBasicServer(delay?) {
         await wait(delay);
       }
       return { data: query.selectExpressions, dependencies: ['transactions'] };
+    default:
+      throw new Error(`Command not implemented: ${name}`);
+  }
+}
+
+function mockServer({ send = mockSend, listen = mockListen }) {
+  vi.spyOn(fetch, 'send').mockImplementation((name, args) => {
+    return send(name, args, { delay: 0 });
+  });
+  vi.spyOn(fetch, 'listen').mockImplementation(listen);
+}
+
+function clearMockServer() {
+  clearEventListeners();
+  vi.clearAllMocks();
+}
+
+function mockBasicServer(delay?) {
+  mockServer({
+    send: (name, args) => {
+      return mockSend(name, args, { delay });
     },
   });
 }
 
-function initPagingServer(
+function mockPagingServer(
   dataLength,
   { delay, eventType = 'select' }: { delay?: number; eventType?: string } = {},
 ) {
@@ -101,202 +153,232 @@ function initPagingServer(
     data.push({ id: i, date: subDays('2020-05-01', Math.floor(i / 5)) });
   }
 
-  initServer({
-    query: async query => {
-      tracer.event(
-        'server-query',
-        eventType === 'select' ? query.selectExpressions : query,
-      );
-      if (delay) {
-        await wait(delay);
+  mockServer({
+    send: async (name, args) => {
+      switch (name) {
+        case 'query':
+          const query = args;
+          tracer.event(
+            'server-query',
+            eventType === 'select' ? query.selectExpressions : query,
+          );
+          if (delay) {
+            await wait(delay);
+          }
+          return {
+            data: runPagedQuery(query, data),
+            dependencies: ['transactions'],
+          };
+        default:
+          throw new Error(`Command not implemented: ${name}`);
       }
-      return {
-        data: runPagedQuery(query, data),
-        dependencies: ['transactions'],
-      };
     },
   });
 
   return data;
 }
 
-describe('query helpers', () => {
-  it('aqlQuery runs a query', async () => {
-    initServer({
-      query: query => Promise.resolve({ data: query, dependencies: [] }),
-    });
-
-    const query = q('transactions').select('*');
-    const { data } = await aqlQuery(query);
-    expect(data).toEqual(query.serialize());
+describe('pagedQuery', () => {
+  beforeEach(() => {
+    resetTracer();
+    clearMockServer();
   });
 
-  ['liveQuery', 'pagedQuery'].forEach(queryType => {
-    const doQuery = queryType === 'liveQuery' ? liveQuery : pagedQuery;
+  it(`runs and subscribes to a query`, async () => {
+    mockBasicServer();
+    tracer.start();
 
-    it(`${queryType} runs and subscribes to a query`, async () => {
-      initBasicServer();
-      tracer.start();
+    const query = q('transactions').select('*');
+    pagedQuery(query, { onData: data => tracer.event('data', data) });
 
-      const query = q('transactions').select('*');
-      doQuery(query, { onData: data => tracer.event('data', data) });
+    await tracer.expect('server-query');
+    await tracer.expect('data', ['*']);
 
-      await tracer.expect('server-query');
-      await tracer.expect('data', ['*']);
-
-      serverPush('sync-event', { type: 'success', tables: ['transactions'] });
-
-      await tracer.expect('server-query');
-      await tracer.expect('data', ['*']);
+    // Simulate a sync event
+    mockPublishEvent('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
     });
 
-    it(`${queryType} runs but ignores applied events (onlySync: true)`, async () => {
-      initBasicServer();
-      tracer.start();
+    await tracer.expect('server-query');
+    await tracer.expect('data', ['*']);
+  });
 
-      const query = q('transactions').select('*');
-      doQuery(query, {
-        onData: data => tracer.event('data', data),
-        options: { onlySync: true },
-      });
+  it(`runs but ignores applied events (onlySync: true)`, async () => {
+    mockBasicServer();
+    tracer.start();
 
-      await tracer.expect('server-query');
-      await tracer.expect('data', ['*']);
-      serverPush('sync-event', { type: 'applied', tables: ['transactions'] });
-
-      const p = Promise.race([tracer.wait('server-query'), wait(100)]);
-      expect(await p).toEqual('wait(100)');
+    const query = q('transactions').select('*');
+    pagedQuery(query, {
+      onData: data => tracer.event('data', data),
+      options: { onlySync: true },
     });
 
-    it(`${queryType} runs and updates with sync events (onlySync: true)`, async () => {
-      initBasicServer();
-      tracer.start();
-
-      const query = q('transactions').select('*');
-      doQuery(query, {
-        onData: data => tracer.event('data', data),
-        options: { onlySync: true },
-      });
-
-      await tracer.expect('server-query');
-      await tracer.expect('data', ['*']);
-      serverPush('sync-event', { type: 'success', tables: ['transactions'] });
-      await tracer.expect('server-query');
-      await tracer.expect('data', ['*']);
+    await tracer.expect('server-query');
+    await tracer.expect('data', ['*']);
+    // Simulate a sync event
+    mockPublishEvent('sync-event', {
+      type: 'applied',
+      tables: ['transactions'],
     });
 
-    it(`${queryType} cancels existing requests`, async () => {
-      let requestId = 0;
-      initServer({
-        query: async query => {
-          if (!isCountQuery(query)) {
-            requestId++;
-          }
-          await wait(500);
-          return { data: requestId, dependencies: ['transactions'] };
-        },
-      });
+    const p = Promise.race([tracer.wait('server-query'), wait(100)]);
+    expect(await p).toEqual('wait(100)');
+  });
 
-      tracer.start();
-      const query = q('transactions').select('*');
-      const lq = doQuery(query, {
-        onData: data => tracer.event('data', data),
-        options: { onlySync: true },
-      });
+  it(`runs and updates with sync events (onlySync: true)`, async () => {
+    mockBasicServer();
+    tracer.start();
 
-      // Users should never call `run` manually but we'll do it to
-      // test
-
-      lq.run();
-      await wait(0);
-      lq.run();
-      await wait(0);
-      lq.run();
-      await wait(0);
-      lq.run();
-      await wait(0);
-      lq.run();
-
-      // Wait for the same delay the server has
-      await wait(500);
-      // Data should only be returned once
-      await tracer.expect('data', 6);
+    const query = q('transactions').select('*');
+    pagedQuery(query, {
+      onData: data => tracer.event('data', data),
+      options: { onlySync: true },
     });
 
-    it(`${queryType} cancels requests when server pushes`, async () => {
-      initBasicServer();
-      tracer.start();
+    await tracer.expect('server-query');
+    await tracer.expect('data', ['*']);
+    // Simulate a sync event
+    mockPublishEvent('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
+    await tracer.expect('server-query');
+    await tracer.expect('data', ['*']);
+  });
 
-      const query = q('transactions').select('*');
-
-      doQuery(query, {
-        onData: data => tracer.event('data', data),
-        options: { onlySync: true },
-      });
-
-      // Send a push in the middle of the query running for the first run
-      serverPush('sync-event', { type: 'success', tables: ['transactions'] });
-      // The first request should get handled, but there should be no
-      // `data` event
-      await tracer.expect('server-query');
-
-      // The live query simply reruns the query, ignoring the first result
-      await tracer.expect('server-query');
-
-      // And we have data!
-      await tracer.expect('data', ['*']);
+  it(`cancels existing requests`, async () => {
+    let requestId = 0;
+    mockServer({
+      send: async (name, args) => {
+        switch (name) {
+          case 'query':
+            const query = args;
+            if (!isCountQuery(query)) {
+              requestId++;
+            }
+            await wait(500);
+            return { data: requestId, dependencies: ['transactions'] };
+          default:
+            throw new Error(`Command not implemented: ${name}`);
+        }
+      },
     });
 
-    it(`${queryType} reruns if data changes in the middle of *any* request`, async () => {
-      initBasicServer(500);
-      tracer.start();
-
-      const query = q('transactions').select('*');
-
-      doQuery(query, {
-        onData: data => tracer.event('data', data),
-        options: { onlySync: true },
-      });
-
-      await tracer.expect('server-query');
-      await tracer.expect('data', ['*']);
-
-      // Send two pushes in a row
-      serverPush('sync-event', { type: 'success', tables: ['transactions'] });
-      serverPush('sync-event', { type: 'success', tables: ['transactions'] });
-
-      // Two requests will be made to the server, but the first one
-      // should be ignored and we only get one data back
-      await tracer.expect('server-query');
-      await tracer.expect('server-query');
-      await tracer.expect('data', ['*']);
+    tracer.start();
+    const query = q('transactions').select('*');
+    const lq = pagedQuery(query, {
+      onData: data => tracer.event('data', data),
+      options: { onlySync: true },
     });
 
-    it(`${queryType} unsubscribes correctly`, () => async done => {
-      initBasicServer();
-      tracer.start();
+    // Users should never call `run` manually but we'll do it to
+    // test
 
-      const query = q('transactions').select('*');
+    lq.run();
+    await wait(0);
+    lq.run();
+    await wait(0);
+    lq.run();
+    await wait(0);
+    lq.run();
+    await wait(0);
+    lq.run();
 
-      const lq = doQuery(query, {
-        onData: data => tracer.event('data', data),
-      });
+    // Wait for the same delay the server has
+    await wait(500);
+    // Data should only be returned once
+    await tracer.expect('data', 6);
+  });
 
-      await tracer.expect('server-query');
-      await tracer.expect('data', ['*']);
-      lq.unsubscribe();
+  it(`cancels requests when server pushes`, async () => {
+    mockBasicServer();
+    tracer.start();
 
-      serverPush('sync-event', { type: 'success', tables: ['transactions'] });
+    const query = q('transactions').select('*');
 
-      // Wait a bit and make sure nothing comes through
-      const p = Promise.race([tracer.expect('server-query'), wait(100)]);
-      expect(await p).toEqual('wait(100)');
-      done();
+    pagedQuery(query, {
+      onData: data => tracer.event('data', data),
+      options: { onlySync: true },
     });
+
+    // Simulate a sync event
+    // Send a push in the middle of the query running for the first run
+    mockPublishEvent('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
+    // The first request should get handled, but there should be no
+    // `data` event
+    await tracer.expect('server-query');
+
+    // The live query simply reruns the query, ignoring the first result
+    await tracer.expect('server-query');
+
+    // And we have data!
+    await tracer.expect('data', ['*']);
+  });
+
+  it(`reruns if data changes in the middle of *any* request`, async () => {
+    mockBasicServer(500);
+    tracer.start();
+
+    const query = q('transactions').select('*');
+
+    pagedQuery(query, {
+      onData: data => tracer.event('data', data),
+      options: { onlySync: true },
+    });
+
+    await tracer.expect('server-query');
+    await tracer.expect('data', ['*']);
+
+    // Simulate a sync event
+    // Send two pushes in a row
+    mockPublishEvent('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
+    mockPublishEvent('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
+
+    // Two requests will be made to the server, but the first one
+    // should be ignored and we only get one data back
+    await tracer.expect('server-query');
+    await tracer.expect('server-query');
+    await tracer.expect('data', ['*']);
+  });
+
+  it(`unsubscribes correctly`, () => async done => {
+    mockBasicServer();
+    tracer.start();
+
+    const query = q('transactions').select('*');
+
+    const lq = pagedQuery(query, {
+      onData: data => tracer.event('data', data),
+    });
+
+    await tracer.expect('server-query');
+    await tracer.expect('data', ['*']);
+    lq.unsubscribe();
+
+    // Simulate a sync event
+    mockPublishEvent('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
+
+    // Wait a bit and make sure nothing comes through
+    const p = Promise.race([tracer.expect('server-query'), wait(100)]);
+    await expect(p).resolves.toEqual('wait(100)');
+    done();
   });
 
   it('pagedQuery makes requests in pages', () => async done => {
-    const data = initPagingServer(1502);
+    const data = mockPagingServer(1502);
     tracer.start();
 
     const query = q('transactions').select('id');
@@ -358,7 +440,7 @@ describe('query helpers', () => {
   });
 
   it('pagedQuery allows customizing page count', async () => {
-    const data = initPagingServer(50);
+    const data = mockPagingServer(50);
     tracer.start();
 
     const query = q('transactions').select('id');
@@ -375,7 +457,7 @@ describe('query helpers', () => {
   });
 
   it('pagedQuery only runs `fetchNext` once at a time', () => async done => {
-    initPagingServer(1000, { delay: 200 });
+    mockPagingServer(1000, { delay: 200 });
     tracer.start();
 
     const query = q('transactions').select('id');
@@ -402,7 +484,7 @@ describe('query helpers', () => {
   });
 
   it('pagedQuery refetches all paged data on update', async () => {
-    const data = initPagingServer(500, { delay: 200 });
+    const data = mockPagingServer(500, { delay: 200 });
     tracer.start();
 
     const query = q('transactions').select('id');
@@ -429,7 +511,11 @@ describe('query helpers', () => {
       expect(d.length).toBe(40);
     });
 
-    serverPush('sync-event', { type: 'success', tables: ['transactions'] });
+    // Simulate a sync event
+    mockPublishEvent('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
 
     await tracer.expect('server-query', [{ result: { $count: '*' } }]);
     await tracer.expect('server-query', ['id']);
@@ -440,7 +526,7 @@ describe('query helpers', () => {
   });
 
   it('pagedQuery reruns `fetchNext` if data changed underneath it', async () => {
-    const data = initPagingServer(500, { delay: 10 });
+    const data = mockPagingServer(500, { delay: 10 });
     const query = q('transactions').select('id');
     const paged = pagedQuery(query, {
       onData: data => tracer.event('data', data),
@@ -457,7 +543,11 @@ describe('query helpers', () => {
     });
 
     await wait(1);
-    serverPush('sync-event', { type: 'success', tables: ['transactions'] });
+    // Simulate a sync event
+    mockPublishEvent('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
 
     // This is from the paged request, but it ignores the new data
     await tracer.expect('server-query', ['id']);
@@ -484,7 +574,7 @@ describe('query helpers', () => {
   });
 
   it('pagedQuery fetches up to a specific row', async () => {
-    const data = initPagingServer(500, { delay: 10, eventType: 'all' });
+    const data = mockPagingServer(500, { delay: 10, eventType: 'all' });
     const query = q('transactions').select(['id', 'date']);
     const paged = pagedQuery(query, {
       onData: data => tracer.event('data', data),

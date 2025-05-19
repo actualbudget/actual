@@ -47,13 +47,14 @@ export function CoverMenu({
     }
     onClose();
   }
+
   return (
     <View style={{ padding: 10 }}>
       <View style={{ marginBottom: 5 }}>
         <Trans>Cover from a category:</Trans>
       </View>
 
-      <InitialFocus>
+      <InitialFocus<HTMLInputElement>>
         {node => (
           <CategoryAutocomplete
             categoryGroups={filteredCategoryGroups}

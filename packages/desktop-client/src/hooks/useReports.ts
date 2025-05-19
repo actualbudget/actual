@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
 
-import { q } from '../../shared/query';
+import { q } from 'loot-core/shared/query';
 import {
   type CustomReportData,
   type CustomReportEntity,
-} from '../../types/models';
-import { useQuery } from '../query-hooks';
+} from 'loot-core/types/models';
+
+import { useQuery } from './useQuery';
 
 function toJS(rows: CustomReportData[]) {
   const reports: CustomReportEntity[] = rows.map(row => {
@@ -60,13 +61,4 @@ export function useReports() {
     }),
     [isLoading, queryData],
   );
-}
-
-export function useReport(id: string) {
-  const { data, isLoading } = useReports();
-
-  return {
-    data: data.find(report => report.id === id),
-    isLoading,
-  };
 }

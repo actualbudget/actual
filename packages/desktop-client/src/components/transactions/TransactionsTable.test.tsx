@@ -5,8 +5,6 @@ import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
-import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
-import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import {
   generateTransaction,
   generateAccount,
@@ -33,8 +31,10 @@ import { TestProvider } from '../../redux/mock';
 
 import { TransactionTable } from './TransactionsTable';
 
+import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
 import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
+import { SpreadsheetProvider } from '@desktop-client/hooks/useSpreadsheet';
 
 vi.mock('loot-core/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => ({

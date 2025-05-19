@@ -1,16 +1,16 @@
 import { useMemo } from 'react';
 
 import {
-  type ScheduleStatuses,
-  type ScheduleStatusLabels,
-  useCachedSchedules,
-} from 'loot-core/client/data-hooks/schedules';
-import {
   type ScheduleEntity,
   type CategoryEntity,
 } from 'loot-core/types/models';
 
+import { useCachedSchedules } from './useCachedSchedules';
 import { useFeatureFlag } from './useFeatureFlag';
+import {
+  type ScheduleStatuses,
+  type ScheduleStatusLabels,
+} from './useSchedules';
 
 type ScheduleGoalDefinition = {
   type: 'schedule';

@@ -7,6 +7,7 @@ import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';
 import * as fs from '../../platform/server/fs';
 import { logger } from '../../platform/server/log';
+import * as Platform from '../../shared/platform';
 import { Budget } from '../../types/budget';
 import { createApp } from '../app';
 import * as budget from '../budget/base';
@@ -16,7 +17,6 @@ import * as mappings from '../db/mappings';
 import { handleBudgetImport, ImportableBudgetType } from '../importers';
 import { app as mainApp } from '../main-app';
 import { mutator } from '../mutators';
-import * as Platform from '../platform';
 import * as prefs from '../prefs';
 import { getServer } from '../server-config';
 import * as sheet from '../sheet';
@@ -578,11 +578,7 @@ async function _loadBudget(id: Budget['id']): Promise<{
     await prefs.savePrefs({ resetClock: false });
   }
 
-  if (
-    !Platform.isWeb &&
-    !Platform.isMobile &&
-    process.env.NODE_ENV !== 'test'
-  ) {
+  if (!Platform.isBrowser && process.env.NODE_ENV !== 'test') {
     await startBackupService(id);
   }
 
@@ -624,10 +620,7 @@ async function _loadBudget(id: Budget['id']): Promise<{
 
       await asyncStorage.setItem('lastBudget', id);
 
-      // Only upload periodically on desktop
-      if (!Platform.isMobile) {
-        await cloudStorage.possiblyUpload();
-      }
+      await cloudStorage.possiblyUpload();
     }
   }
 
@@ -643,7 +636,7 @@ async function uploadFileWeb({
   filename: string;
   contents: ArrayBuffer;
 }) {
-  if (!Platform.isWeb) {
+  if (!Platform.isBrowser) {
     return null;
   }
 

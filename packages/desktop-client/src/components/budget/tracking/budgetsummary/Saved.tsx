@@ -9,8 +9,7 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { trackingBudget } from 'loot-core/client/queries';
-
+import { trackingBudget } from '../../../../queries/queries';
 import { PrivacyFilter } from '../../../PrivacyFilter';
 import { useFormat } from '../../../spreadsheet/useFormat';
 import { makeAmountFullStyle } from '../../util';

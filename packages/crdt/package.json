@@ -22,7 +22,7 @@
   "devDependencies": {
     "@types/uuid": "^9.0.8",
     "ts-protoc-gen": "^0.15.0",
-    "typescript": "^5.8.2",
-    "vitest": "^3.0.2"
+    "typescript": "^5.8.3",
+    "vitest": "^3.0.9"
   }
 }

@@ -16,17 +16,6 @@ import { debounce } from 'debounce';
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-import { useFilters } from 'loot-core/client/data-hooks/filters';
-import {
-  SchedulesProvider,
-  accountSchedulesQuery,
-} from 'loot-core/client/data-hooks/schedules';
-import * as queries from 'loot-core/client/queries';
-import {
-  aqlQuery,
-  pagedQuery,
-  type PagedQuery,
-} from 'loot-core/client/query-helpers';
 import { send, listen } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type UndoState } from 'loot-core/server/undo';
@@ -58,6 +47,9 @@ import {
   replaceModal,
 } from '../../modals/modalsSlice';
 import { addNotification } from '../../notifications/notificationsSlice';
+import { aqlQuery } from '../../queries/aqlQuery';
+import { pagedQuery, type PagedQuery } from '../../queries/pagedQuery';
+import * as queries from '../../queries/queries';
 import {
   createPayee,
   initiallyLoadPayees,
@@ -77,11 +69,13 @@ import { AccountHeader } from './Header';
 
 import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { usePayees } from '@desktop-client/hooks/usePayees';
+import { accountSchedulesQuery } from '@desktop-client/hooks/useSchedules';
 import {
   SelectedProviderWithItems,
   type Actions,
@@ -92,6 +86,7 @@ import {
 } from '@desktop-client/hooks/useSplitsExpanded';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useTransactionBatchActions } from '@desktop-client/hooks/useTransactionBatchActions';
+import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
 
@@ -1948,7 +1943,7 @@ export function Account() {
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
   const filterConditions = location?.state?.filterConditions || [];
 
-  const savedFiters = useFilters();
+  const savedFiters = useTransactionFilters();
 
   const schedulesQuery = useMemo(
     () => accountSchedulesQuery(params.id),

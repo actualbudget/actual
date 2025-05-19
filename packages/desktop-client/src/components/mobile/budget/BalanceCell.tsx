@@ -9,7 +9,6 @@ import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
-import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { getColumnWidth, PILL_STYLE } from './BudgetTable';
@@ -19,6 +18,10 @@ import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { type Binding } from '@desktop-client/components/spreadsheet';
 import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import {
+  envelopeBudget,
+  trackingBudget,
+} from '@desktop-client/queries/queries';
 
 type BalanceCellProps = {
   binding: Binding<
