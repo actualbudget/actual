@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { type ReactNode, useState, useEffect, useMemo } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
@@ -38,7 +38,7 @@ type NetWorthComponentProps = {
     conditions: RuleConditionEntity[];
     conditionsOp: 'and' | 'or';
     timeFrame: TimeFrame;
-  }) => React.ReactNode;
+  }) => ReactNode;
 };
 
 export function NetWorthComponent({
