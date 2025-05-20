@@ -51,7 +51,7 @@
     "@types/pegjs": "^0.10.6",
     "@types/uuid": "^9.0.8",
     "@types/webpack": "^5.28.5",
-    "@types/webpack-bundle-analyzer": "^4.6.4",
+    "@types/webpack-bundle-analyzer": "^4.7.0",
     "assert": "^2.1.0",
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
@@ -76,7 +76,7 @@
     "typescript": "^5.8.3",
     "vite-plugin-peggy-loader": "^2.0.1",
     "vitest": "^3.0.9",
-    "webpack": "^5.94.0",
+    "webpack": "^5.99.8",
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^5.1.4",
     "yargs": "^17.7.2"
