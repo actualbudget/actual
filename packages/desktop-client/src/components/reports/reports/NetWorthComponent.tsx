@@ -81,7 +81,7 @@ export function NetWorthComponent({
         conditionsOp,
         locale,
       ),
-    [start, end, accounts, locale],
+    [start, end, accounts, conditions, conditionsOp, locale],
   );
   const data = useReport('net_worth', reportParams);
   useEffect(() => {
