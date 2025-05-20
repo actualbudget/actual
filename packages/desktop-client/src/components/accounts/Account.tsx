@@ -927,13 +927,10 @@ class AccountInternal extends PureComponent<
     switch (this.props.accountId) {
       case 'onbudget':
         return this.props.accounts.filter(account => !account.offbudget);
-        break;
       case 'offbudget':
         return this.props.accounts.filter(account => account.offbudget);
-        break;
       case 'uncategorized':
         return [];
-        break;
       default: {
         if (typeof this.props.accountId === 'string') {
           const account = this.props.accounts.find(
