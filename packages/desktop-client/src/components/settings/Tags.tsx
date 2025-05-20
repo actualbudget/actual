@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BlockPicker } from 'react-color';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -20,14 +21,79 @@ import { Setting } from './UI';
 
 import { useTagCSS, useTags } from '@desktop-client/style/tags';
 
+function ColorPickerPopover({
+  onChange,
+  onExit,
+  hexColor,
+}: {
+  onChange: (color: string) => void;
+  onExit: () => void;
+  hexColor: string;
+}) {
+  const [color, setColor] = useState(hexColor);
+  // colors from https://materialui.co/colors
+  const colors = [
+    '#F44336',
+    '#E91E63',
+    '#9C27B0',
+    '#673AB7',
+    '#3F51B5',
+    '#2196F3',
+    '#03A9F4',
+    '#00BCD4',
+    '#009688',
+    '#4CAF50',
+    '#8BC34A',
+    '#CDDC39',
+    '#FFEB3B',
+    '#FFC107',
+    '#FF9800',
+    '#FF5722',
+    '#795548',
+    '#9E9E9E',
+    '#607D8B',
+  ];
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        zIndex: '2',
+      }}
+    >
+      <div
+        style={{
+          position: 'fixed',
+          top: '0px',
+          right: '0px',
+          bottom: '0px',
+          left: '0px',
+        }}
+        onClick={onExit}
+      />
+      <div style={{ position: 'relative', left: '-25%', top: '10px' }}>
+        <BlockPicker
+          color={color}
+          colors={colors}
+          onChange={color => {
+            setColor(color.hex);
+            onChange(color.hex);
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function TagsSettings() {
   const sidebar = useSidebar();
   const [tags, setTagsPref] = useTags();
   const getTagCSS = useTagCSS();
   const [newTag, setNewTag] = useState('');
-  const [newColor, setNewColor] = useState('');
+  const [newColor, setNewColor] = useState('#000000');
   const [errorMsg, setErrorMsg] = useState('');
   const { isNarrowWidth } = useResponsive();
+  const [displayColorPicker, setDisplayColorPicker] = useState(false);
 
   const onTrashTag = (tag: string) => {
     const { [tag]: _, ...newTags } = tags;
@@ -48,7 +114,6 @@ export function TagsSettings() {
     setErrorMsg('');
     setTagsPref({ ...tags, [newTag.trim()]: newColor });
     setNewTag('');
-    setNewColor('');
   };
 
   return (
@@ -96,12 +161,23 @@ export function TagsSettings() {
               value={newTag}
               onChangeValue={setNewTag}
             />
-            <Input
-              id="color-field"
-              placeholder="#hexcolor"
-              value={newColor}
-              onChangeValue={setNewColor}
-            />
+            <span style={{ margin: 'auto 0' }}>
+              <Button
+                type="button"
+                variant="bare"
+                className={getTagCSS('', newColor)}
+                onPress={() => setDisplayColorPicker(prev => !prev)}
+              >
+                <Trans>Pick Color</Trans>
+              </Button>
+              {displayColorPicker ? (
+                <ColorPickerPopover
+                  onChange={setNewColor}
+                  onExit={() => setDisplayColorPicker(false)}
+                  hexColor={newColor}
+                />
+              ) : null}
+            </span>
             <Button
               variant="bare"
               type="submit"
