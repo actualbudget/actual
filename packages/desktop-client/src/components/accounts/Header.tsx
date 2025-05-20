@@ -46,6 +46,7 @@ import { FilterButton } from '../filters/FiltersMenu';
 import { FiltersStack } from '../filters/FiltersStack';
 import { type SavedFilter } from '../filters/SavedFilterMenuButton';
 import { NotesButton } from '../NotesButton';
+import { NetWorthComponent } from '../reports/reports/NetWorthComponent';
 import { SelectedTransactionsButton } from '../transactions/SelectedTransactionsButton';
 
 import { type TableRef } from './Account';
@@ -293,7 +294,6 @@ export function AccountHeader({
             />
           </View>
         </View>
-
         <Balances
           balanceQuery={balanceQuery}
           showExtraBalances={showExtraBalances}
@@ -302,7 +302,7 @@ export function AccountHeader({
           isFiltered={isFiltered}
           filteredAmount={filteredAmount}
         />
-
+        {accounts.length && <NetWorthComponent accounts={accounts} />}
         <Stack
           spacing={2}
           direction="row"
@@ -512,7 +512,6 @@ export function AccountHeader({
             </View>
           )}
         </Stack>
-
         {filterConditions?.length > 0 && (
           <FiltersStack
             conditions={filterConditions}

@@ -1897,6 +1897,28 @@ function AccountHack(props: AccountHackProps) {
     onSetTransfer,
   } = useTransactionBatchActions();
 
+  const filteredAccounts = useMemo(() => {
+    switch (props.accountId) {
+      case 'onbudget':
+        return props.accounts.filter(account => !account.offbudget);
+      case 'offbudget':
+        return props.accounts.filter(account => account.offbudget);
+      case 'uncategorized':
+        return [];
+      default: {
+        if (typeof props.accountId === 'string') {
+          const account = props.accounts.find(
+            account => account.id === props.accountId,
+          );
+          if (account) {
+            return [account];
+          }
+        }
+        return props.accounts;
+      }
+    }
+  }, [props.accounts, props.accountId]);
+
   return (
     <AccountInternal
       dispatch={dispatch}
@@ -1908,6 +1930,7 @@ function AccountHack(props: AccountHackProps) {
       onBatchDelete={onBatchDelete}
       onSetTransfer={onSetTransfer}
       {...props}
+      accounts={filteredAccounts}
     />
   );
 }
