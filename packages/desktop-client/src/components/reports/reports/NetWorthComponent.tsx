@@ -30,6 +30,7 @@ import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type NetWorthComponentProps = {
   accounts: AccountEntity[];
+  hideFilters?: boolean;
   filterConditions?: RuleConditionEntity[];
   filterConditionsOp?: 'and' | 'or';
   initialTimeFrame?: TimeFrame;
@@ -42,6 +43,7 @@ type NetWorthComponentProps = {
 
 export function NetWorthComponent({
   accounts,
+  hideFilters = false,
   filterConditions,
   filterConditionsOp,
   initialTimeFrame,
@@ -137,7 +139,7 @@ export function NetWorthComponent({
         firstDayOfWeekIdx={firstDayOfWeekIdx}
         mode={mode}
         onChangeDates={onChangeDates}
-        filters={conditions}
+        filters={hideFilters ? undefined : conditions}
         onApply={onApplyFilter}
         onUpdateFilter={onUpdateFilter}
         onDeleteFilter={onDeleteFilter}

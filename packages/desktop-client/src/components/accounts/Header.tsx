@@ -302,7 +302,9 @@ export function AccountHeader({
           isFiltered={isFiltered}
           filteredAmount={filteredAmount}
         />
-        {accounts.length && <NetWorthComponent accounts={accounts} />}
+        {accounts.length && (
+          <NetWorthComponent hideFilters accounts={accounts} />
+        )}
         <Stack
           spacing={2}
           direction="row"
