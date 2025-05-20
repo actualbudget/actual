@@ -95,7 +95,7 @@ async function getCategories(): Promise<CategoryEntity[]> {
 
 async function getTemplates(
   filter: (category: CategoryEntity) => boolean = () => true,
-): Promise<Template[]> {
+): Promise<Record<CategoryEntity['id'], Template[]>> {
   //retrieves template definitions from the database
   const { data: categoriesWithGoalDef }: { data: CategoryEntity[] } =
     await aqlQuery(
@@ -104,13 +104,13 @@ async function getTemplates(
         .select('*'),
     );
 
-  const templates: Template[] = [];
+  const categoryTemplates: Record<CategoryEntity['id'], Template[]> = {};
   for (const categoryWithGoalDef of categoriesWithGoalDef.filter(filter)) {
-    templates[categoryWithGoalDef.id] = JSON.parse(
+    categoryTemplates[categoryWithGoalDef.id] = JSON.parse(
       categoryWithGoalDef.goal_def,
     );
   }
-  return templates;
+  return categoryTemplates;
 }
 
 type TemplateBudget = {
@@ -152,7 +152,7 @@ async function setGoals(month: string, templateGoal: TemplateGoal[]) {
 async function processTemplate(
   month: string,
   force: boolean,
-  categoryTemplates: Template[],
+  categoryTemplates: Record<CategoryEntity['id'], Template[]>,
   categories: CategoryEntity[] = [],
 ): Promise<Notification> {
   // setup categories
