@@ -45,10 +45,10 @@ export function useTagCSS() {
   const { isNarrowWidth } = useResponsive();
 
   return useCallback(
-    (tag: string) => {
+    (tag: string, forcedColor?: string) => {
       const [color, backgroundColor, backgroundColorHovered] = getTagColors(
         theme,
-        tagsColors[tag],
+        forcedColor ?? tagsColors[tag],
       );
 
       return css({
