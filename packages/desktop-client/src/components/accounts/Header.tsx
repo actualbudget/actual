@@ -64,6 +64,7 @@ type AccountHeaderProps = {
   workingHard: boolean;
   accountName: string;
   account?: AccountEntity;
+  selectedAccounts: AccountEntity[];
   filterId?: SavedFilter;
   savedFilters: TransactionFilterEntity[];
   accountsSyncing: string[];
@@ -139,6 +140,7 @@ export function AccountHeader({
   workingHard,
   accountName,
   account,
+  selectedAccounts,
   filterId,
   savedFilters,
   accountsSyncing,
@@ -302,8 +304,8 @@ export function AccountHeader({
           isFiltered={isFiltered}
           filteredAmount={filteredAmount}
         />
-        {accounts.length && (
-          <NetWorthComponent hideFilters accounts={accounts} />
+        {selectedAccounts.length && (
+          <NetWorthComponent hideFilters accounts={selectedAccounts} />
         )}
         <Stack
           spacing={2}
