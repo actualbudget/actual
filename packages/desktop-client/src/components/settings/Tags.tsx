@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Form } from 'react-aria-components';
-import { BlockPicker } from 'react-color';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -16,85 +15,22 @@ import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { t } from 'i18next';
 
+import { ColorPicker } from '../../../../component-library/src/ColorPicker';
 import { useSidebar } from '../sidebar/SidebarProvider';
 
 import { Setting } from './UI';
 
-import { useTagCSS, useTags } from '@desktop-client/style/tags';
-
-function ColorPickerPopover({
-  onChange,
-  onExit,
-  hexColor,
-}: {
-  onChange: (color: string) => void;
-  onExit: () => void;
-  hexColor: string;
-}) {
-  const [color, setColor] = useState(hexColor);
-  // colors from https://materialui.co/colors
-  const colors = [
-    '#F44336',
-    '#E91E63',
-    '#9C27B0',
-    '#673AB7',
-    '#3F51B5',
-    '#2196F3',
-    '#03A9F4',
-    '#00BCD4',
-    '#009688',
-    '#4CAF50',
-    '#8BC34A',
-    '#CDDC39',
-    '#FFEB3B',
-    '#FFC107',
-    '#FF9800',
-    '#FF5722',
-    '#795548',
-    '#9E9E9E',
-    '#607D8B',
-  ];
-
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        zIndex: '2',
-      }}
-    >
-      <div
-        style={{
-          position: 'fixed',
-          top: '0px',
-          right: '0px',
-          bottom: '0px',
-          left: '0px',
-        }}
-        onClick={onExit}
-      />
-      <div style={{ position: 'relative', left: '-25%', top: '10px' }}>
-        <BlockPicker
-          color={color}
-          colors={colors}
-          onChange={color => {
-            setColor(color.hex);
-            onChange(color.hex);
-          }}
-        />
-      </div>
-    </div>
-  );
-}
+import { useTagColor, useTagCSS, useTags } from '@desktop-client/style/tags';
 
 export function TagsSettings() {
   const sidebar = useSidebar();
   const [tags, setTagsPref] = useTags();
   const getTagCSS = useTagCSS();
+  const getTagColor = useTagColor();
   const [newTag, setNewTag] = useState('');
   const [newColor, setNewColor] = useState('#000000');
   const [errorMsg, setErrorMsg] = useState('');
   const { isNarrowWidth } = useResponsive();
-  const [displayColorPicker, setDisplayColorPicker] = useState(false);
 
   const onTrashTag = (tag: string) => {
     const { [tag]: _, ...newTags } = tags;
@@ -163,21 +99,14 @@ export function TagsSettings() {
               onChangeValue={setNewTag}
             />
             <View style={{ margin: 'auto 0' }}>
-              <Button
-                type="button"
-                variant="bare"
-                className={getTagCSS('', newColor)}
-                onPress={() => setDisplayColorPicker(prev => !prev)}
+              <ColorPicker
+                value={newColor}
+                onChange={color => setNewColor(color.toString('hex'))}
               >
-                <Trans>Pick Color</Trans>
-              </Button>
-              {displayColorPicker ? (
-                <ColorPickerPopover
-                  onChange={setNewColor}
-                  onExit={() => setDisplayColorPicker(false)}
-                  hexColor={newColor}
-                />
-              ) : null}
+                <Text className={getTagCSS('', newColor)}>
+                  <Trans>Pick Color</Trans>
+                </Text>
+              </ColorPicker>
             </View>
             <Button
               variant="bare"
@@ -191,9 +120,7 @@ export function TagsSettings() {
             </Button>
           </Form>
           <View style={{ display: 'inline' }}>
-            <Button variant="bare" className={getTagCSS('')}>
-              #Default
-            </Button>
+            <Text className={getTagCSS('')}>#Default</Text>
           </View>
 
           {Object.keys(tags).map(tag => (
@@ -204,9 +131,14 @@ export function TagsSettings() {
                 flexDirection: 'row',
               }}
             >
-              <Button variant="bare" className={getTagCSS(tag)}>
-                #{tag}
-              </Button>
+              <ColorPicker
+                value={getTagColor(tag)}
+                onChange={color =>
+                  setTagsPref({ ...tags, [tag]: color.toString('hex') })
+                }
+              >
+                <Text className={getTagCSS(tag)}>#{tag}</Text>
+              </ColorPicker>
 
               <Button
                 variant="bare"

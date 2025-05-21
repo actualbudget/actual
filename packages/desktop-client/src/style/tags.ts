@@ -66,3 +66,14 @@ export function useTagCSS() {
     [theme, tagsColors, isNarrowWidth],
   );
 }
+
+export function useTagColor() {
+  const [tagsColors] = useTags();
+
+  return useCallback(
+    (tag: string) => {
+      return tagsColors[tag];
+    },
+    [tagsColors],
+  );
+}
