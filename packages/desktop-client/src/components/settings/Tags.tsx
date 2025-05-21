@@ -20,6 +20,7 @@ import { useSidebar } from '../sidebar/SidebarProvider';
 
 import { Setting } from './UI';
 
+import { purple700 } from '@desktop-client/style/palette';
 import { useTagColor, useTagCSS, useTags } from '@desktop-client/style/tags';
 
 export function TagsSettings() {
@@ -28,7 +29,7 @@ export function TagsSettings() {
   const getTagCSS = useTagCSS();
   const getTagColor = useTagColor();
   const [newTag, setNewTag] = useState('');
-  const [newColor, setNewColor] = useState('#000000');
+  const [newColor, setNewColor] = useState(purple700);
   const [errorMsg, setErrorMsg] = useState('');
   const { isNarrowWidth } = useResponsive();
 
@@ -76,6 +77,7 @@ export function TagsSettings() {
                 paddingTop: 5,
                 marginLeft: styles.mobileEditingPadding,
                 marginRight: styles.mobileEditingPadding,
+                color: theme.errorText,
               }}
             >
               * {errorMsg}
