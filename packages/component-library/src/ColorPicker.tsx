@@ -65,6 +65,7 @@ function ColorSwatchPicker() {
                 borderRadius: '4px',
                 width: 'fit-content',
                 forcedColorAdjust: 'none',
+                cursor: 'pointer',
 
                 '&[data-selected]::after': {
                   // eslint-disable-next-line rulesdir/typography
