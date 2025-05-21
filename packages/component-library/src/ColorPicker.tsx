@@ -9,11 +9,18 @@ import {
   ColorSwatchProps,
   ColorSwatchPicker as AriaColorSwatchPicker,
   ColorSwatchPickerItem,
+  ColorField,
+  Input,
 } from 'react-aria-components';
 
-import { Popover } from './Popover';
-
 import './colorpicker.scss';
+import { css } from '@emotion/css';
+
+import { SvgRefresh } from './icons/v1';
+import { defaultInputStyle } from './Input';
+import { Popover } from './Popover';
+import { styles } from './styles';
+import { theme } from './theme';
 
 function ColorSwatch(props: ColorSwatchProps) {
   return (
@@ -62,6 +69,34 @@ export function ColorPicker({ children, ...props }: ColorPickerProps) {
         <Popover placement="bottom">
           <Dialog className="color-picker-dialog">
             <ColorSwatchPicker />
+            <ColorField>
+              <Input
+                className={css(
+                  defaultInputStyle,
+                  {
+                    color: theme.formInputText,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    flexShrink: 0,
+                    ':focus': {
+                      border: '1px solid ' + theme.formInputBorderSelected,
+                      boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
+                    },
+                    width: '100px',
+                  },
+                  styles.smallText,
+                )}
+              />
+              <Button
+                style={{
+                  borderWidth: 0,
+                  backgroundColor: 'transparent',
+                  margin: 'auto',
+                }}
+              >
+                <SvgRefresh width={15} height={15} />
+              </Button>
+            </ColorField>
           </Dialog>
         </Popover>
       </DialogTrigger>
