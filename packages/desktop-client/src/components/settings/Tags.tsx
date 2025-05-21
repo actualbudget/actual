@@ -4,7 +4,6 @@ import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { FormError } from '@actual-app/components/form-error';
-import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
   SvgAdd,
   SvgClose,
@@ -83,7 +82,6 @@ export function TagsSettings() {
   const [newTag, setNewTag] = useState('');
   const [newColor, setNewColor] = useState(purple700);
   const [errorMsg, setErrorMsg] = useState('');
-  const { isNarrowWidth } = useResponsive();
   const [trashMode, setTrashMode] = useState(false);
 
   const onAddTagColor = () => {

@@ -12,7 +12,6 @@ import {
   Input,
 } from 'react-aria-components';
 
-import './colorpicker.scss';
 import { css } from '@emotion/css';
 
 import { SvgRefresh } from './icons/v1';
@@ -27,6 +26,10 @@ function ColorSwatch(props: ColorSwatchProps) {
       {...props}
       style={({ color }) => ({
         background: color.toString('hex'),
+        width: '32px',
+        height: '32px',
+        borderRadius: '4px',
+        boxShadow: 'inset 0 0 0 1px rgba(0, 0, 0, 0.1)',
       })}
     />
   );
@@ -44,9 +47,37 @@ function ColorSwatchPicker() {
   return (
     <>
       {colorsets.map((colors, idx) => (
-        <AriaColorSwatchPicker key={`colorset-${idx}`}>
+        <AriaColorSwatchPicker
+          key={`colorset-${idx}`}
+          style={{
+            display: 'flex',
+            gap: '8px',
+            flexWrap: 'wrap',
+          }}
+        >
           {colors.map(color => (
-            <ColorSwatchPickerItem key={color} color={color}>
+            <ColorSwatchPickerItem
+              key={color}
+              color={color}
+              className={css({
+                position: 'relative',
+                outline: 'none',
+                borderRadius: '4px',
+                width: 'fit-content',
+                forcedColorAdjust: 'none',
+
+                '&[data-selected]::after': {
+                  // eslint-disable-next-line rulesdir/typography
+                  content: "''",
+                  position: 'absolute',
+                  inset: 0,
+                  border: '2px solid black',
+                  outline: '2px solid white',
+                  outlineOffset: '-4px',
+                  borderRadius: 'inherit',
+                },
+              })}
+            >
               <ColorSwatch />
             </ColorSwatchPickerItem>
           ))}
@@ -66,7 +97,19 @@ export function ColorPicker({ children, ...props }: ColorPickerProps) {
       <DialogTrigger>
         {children}
         <Popover placement="bottom">
-          <Dialog className="color-picker-dialog">
+          <Dialog
+            style={{
+              outline: 'none',
+              padding: '15px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              minWidth: '192px',
+              maxHeight: 'inherit',
+              boxSizing: 'border-box',
+              overflow: 'auto',
+            }}
+          >
             <ColorSwatchPicker />
             <ColorField>
               <Input
