@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Form } from 'react-aria-components';
 import { BlockPicker } from 'react-color';
 import { Trans } from 'react-i18next';
 
@@ -144,7 +145,7 @@ export function TagsSettings() {
               * {errorMsg}
             </FormError>
           )}
-          <form
+          <Form
             style={{
               display: 'flex',
               flexDirection: isNarrowWidth ? 'column' : 'row',
@@ -161,7 +162,7 @@ export function TagsSettings() {
               value={newTag}
               onChangeValue={setNewTag}
             />
-            <span style={{ margin: 'auto 0' }}>
+            <View style={{ margin: 'auto 0' }}>
               <Button
                 type="button"
                 variant="bare"
@@ -177,7 +178,7 @@ export function TagsSettings() {
                   hexColor={newColor}
                 />
               ) : null}
-            </span>
+            </View>
             <Button
               variant="bare"
               type="submit"
@@ -188,26 +189,24 @@ export function TagsSettings() {
             >
               <SvgAdd width={10} height={10} />
             </Button>
-          </form>
-          <span>
+          </Form>
+          <View style={{ display: 'inline' }}>
             <Button variant="bare" className={getTagCSS('')}>
               #Default
             </Button>
-          </span>
+          </View>
 
           {Object.keys(tags).map(tag => (
-            <div
+            <View
               key={tag}
               style={{
                 display: 'flex',
                 flexDirection: 'row',
               }}
             >
-              <span>
-                <Button variant="bare" className={getTagCSS(tag)}>
-                  #{tag}
-                </Button>
-              </span>
+              <Button variant="bare" className={getTagCSS(tag)}>
+                #{tag}
+              </Button>
 
               <Button
                 variant="bare"
@@ -224,7 +223,7 @@ export function TagsSettings() {
                   style={{ color: theme.errorText }}
                 />
               </Button>
-            </div>
+            </View>
           ))}
         </View>
       }
