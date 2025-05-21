@@ -1,12 +1,12 @@
 // @ts-strict-ignore
-import { type ReactElement, useEffect, useRef } from 'react';
+import React, { type ReactElement, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Navigate,
   Route,
   Routes,
-  useHref,
+  Navigate,
   useLocation,
+  useHref,
 } from 'react-router-dom';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -18,12 +18,8 @@ import * as undo from 'loot-core/platform/client/undo';
 import { sync } from '../app/appSlice';
 import { ProtectedRoute } from '../auth/ProtectedRoute';
 import { Permissions } from '../auth/types';
-import { useAccounts } from '../hooks/useAccounts';
-import { useLocalPref } from '../hooks/useLocalPref';
-import { useMetaThemeColor } from '../hooks/useMetaThemeColor';
-import { useNavigate } from '../hooks/useNavigate';
 import { addNotification } from '../notifications/notificationsSlice';
-import { useDispatch, useSelector } from '../redux';
+import { useSelector, useDispatch } from '../redux';
 import { getIsOutdated, getLatestVersion } from '../util/versions';
 
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
@@ -46,6 +42,12 @@ import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { Titlebar } from './Titlebar';
+
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+
 
 function NarrowNotSupported({
   redirectTo = '/budget',
