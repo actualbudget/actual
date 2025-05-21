@@ -1,0 +1,4 @@
+CREATE TABLE "actual"."preferences" (
+	"id" text PRIMARY KEY NOT NULL,
+	"value" text
+);
