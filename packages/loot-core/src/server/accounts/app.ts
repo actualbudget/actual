@@ -848,7 +848,7 @@ function handleSyncError(
   if (err instanceof BankSyncError || (err as any)?.type === 'BankSyncError') {
     const error = err as BankSyncError;
 
-    var syncError = {
+    const syncError = {
       type: 'SyncError',
       accountId: acct.id,
       message: 'Failed syncing account “' + acct.name + '.”',
@@ -856,14 +856,14 @@ function handleSyncError(
       code: error.code,
     };
 
-    if(error.category === 'RATE_LIMIT_EXCEEDED') {
+    if (error.category === 'RATE_LIMIT_EXCEEDED') {
       return {
         ...syncError,
-        message: `Failed syncing account ${acct.name}. Rate limit exceeded. Please try again later.`, 
-      }  
+        message: `Failed syncing account ${acct.name}. Rate limit exceeded. Please try again later.`,
+      };
     }
 
-    return syncError
+    return syncError;
   }
 
   if (err instanceof PostError && err.reason !== 'internal') {
