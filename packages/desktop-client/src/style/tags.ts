@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
 
-import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme as themeStyle } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
@@ -41,19 +40,18 @@ function getTagColors(theme: Theme, color?: string) {
 export function useTagCSS() {
   const [tagsColors] = useTags();
   const [theme] = useTheme();
-  const { isNarrowWidth } = useResponsive();
 
   return useCallback(
-    (tag: string, forcedColor?: string) => {
+    (tag: string, options: { color?: string; compact?: boolean } = {}) => {
       const [color, backgroundColor, backgroundColorHovered] = getTagColors(
         theme,
-        // fallback strategy: forced > tag color > default color > theme color (undefined)
-        forcedColor ?? tagsColors[tag] ?? tagsColors['*'],
+        // fallback strategy: options color > tag color > default color > theme color (undefined)
+        options.color ?? tagsColors[tag] ?? tagsColors['*'],
       );
 
       return css({
         display: 'inline-flex',
-        padding: isNarrowWidth ? '0px 7px' : '3px 7px',
+        padding: options.compact ? '0px 7px' : '3px 7px',
         borderRadius: 16,
         userSelect: 'none',
         backgroundColor,
@@ -67,7 +65,7 @@ export function useTagCSS() {
         },
       });
     },
-    [theme, tagsColors, isNarrowWidth],
+    [theme, tagsColors],
   );
 }
 

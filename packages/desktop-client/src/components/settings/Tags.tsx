@@ -16,7 +16,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
 import { t } from 'i18next';
 
 import { ColorPicker } from '../../../../component-library/src/ColorPicker';
@@ -166,7 +165,9 @@ export function TagsSettings() {
                 >
                   <Button
                     variant="bare"
-                    className={css(getTagCSS('', newColor))}
+                    className={getTagCSS('', {
+                      color: newColor,
+                    })}
                   >
                     <Trans>Pick Color</Trans>
                   </Button>
