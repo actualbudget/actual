@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
 import {
-  Button,
   ColorPicker as AriaColorPicker,
   ColorPickerProps as AriaColorPickerProps,
   Dialog,
@@ -71,6 +70,7 @@ export function ColorPicker({ children, ...props }: ColorPickerProps) {
             <ColorSwatchPicker />
             <ColorField>
               <Input
+                placeholder="#RRGGBB"
                 className={css(
                   defaultInputStyle,
                   {
@@ -87,15 +87,8 @@ export function ColorPicker({ children, ...props }: ColorPickerProps) {
                   styles.smallText,
                 )}
               />
-              <Button
-                style={{
-                  borderWidth: 0,
-                  backgroundColor: 'transparent',
-                  margin: 'auto',
-                }}
-              >
-                <SvgRefresh width={15} height={15} />
-              </Button>
+              &nbsp;
+              <SvgRefresh width={13} height={13} />
             </ColorField>
           </Dialog>
         </Popover>

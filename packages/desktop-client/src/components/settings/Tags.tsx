@@ -17,6 +17,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
+import { css } from '@emotion/css';
 import { t } from 'i18next';
 
 import { ColorPicker } from '../../../../component-library/src/ColorPicker';
@@ -41,6 +42,8 @@ const TagEditor = ({ tag, mode }: TagEditorProps) => {
     setTagsPref(newTags);
   };
 
+  const formattedTag = <>#{tag === '*' ? t('Default') : tag}</>;
+
   if (mode === 'edit') {
     return (
       <ColorPicker
@@ -50,7 +53,7 @@ const TagEditor = ({ tag, mode }: TagEditorProps) => {
         }
       >
         <Button variant="bare" className={getTagCSS(tag)}>
-          #{tag === '*' ? t('Default') : tag}
+          {formattedTag}
         </Button>
       </ColorPicker>
     );
@@ -61,7 +64,7 @@ const TagEditor = ({ tag, mode }: TagEditorProps) => {
         className={getTagCSS(tag)}
         onPress={() => onTrashTag(tag)}
       >
-        #{tag === '*' ? t('Default') : tag}
+        {formattedTag}
         &nbsp;
         {tag !== '*' ? (
           <SvgClose width={10} height={10} />
@@ -97,6 +100,12 @@ export function TagsSettings() {
     setErrorMsg('');
     setTagsPref({ ...tags, [newTag.trim()]: newColor });
     setNewTag('');
+  };
+
+  const actionButtonStyle = {
+    borderWidth: 0,
+    backgroundColor: 'transparent',
+    marginLeft: 'auto',
   };
 
   return (
@@ -157,30 +166,21 @@ export function TagsSettings() {
                   value={newColor}
                   onChange={color => setNewColor(color.toString('hex'))}
                 >
-                  <Text className={getTagCSS('', newColor)}>
+                  <Button
+                    variant="bare"
+                    className={css(getTagCSS('', newColor))}
+                  >
                     <Trans>Pick Color</Trans>
-                  </Text>
+                  </Button>
                 </ColorPicker>
               </View>
-              <Button
-                variant="bare"
-                type="submit"
-                style={{
-                  borderWidth: 0,
-                  backgroundColor: 'transparent',
-                  marginLeft: 'auto',
-                }}
-              >
+              <Button variant="bare" type="submit" style={actionButtonStyle}>
                 <SvgAdd width={13} height={13} />
               </Button>
               <Button
                 variant="bare"
                 type="button"
-                style={{
-                  borderWidth: 0,
-                  backgroundColor: 'transparent',
-                  marginLeft: 'auto',
-                }}
+                style={actionButtonStyle}
                 onPress={() => setTrashMode(!trashMode)}
               >
                 <SvgTrash
