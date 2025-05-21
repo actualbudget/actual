@@ -140,7 +140,7 @@ export function TagsSettings() {
           <Form
             style={{
               display: 'flex',
-              flexDirection: isNarrowWidth ? 'column' : 'row',
+              flexDirection: 'row',
               gap: '1em',
             }}
             onSubmit={e => {
@@ -177,19 +177,19 @@ export function TagsSettings() {
               <Button variant="bare" type="submit" style={actionButtonStyle}>
                 <SvgAdd width={13} height={13} />
               </Button>
-              <Button
-                variant="bare"
-                type="button"
-                style={actionButtonStyle}
-                onPress={() => setTrashMode(!trashMode)}
-              >
-                <SvgTrash
-                  width={13}
-                  height={13}
-                  style={trashMode ? { color: theme.errorText } : {}}
-                />
-              </Button>
             </View>
+            <Button
+              variant="bare"
+              type="button"
+              style={actionButtonStyle}
+              onPress={() => setTrashMode(!trashMode)}
+            >
+              <SvgTrash
+                width={13}
+                height={13}
+                style={trashMode ? { color: theme.errorText } : {}}
+              />
+            </Button>
           </Form>
           <View
             style={{
