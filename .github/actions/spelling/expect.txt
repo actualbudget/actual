@@ -102,6 +102,7 @@ tada
 templating
 ubuntu
 userinfo
+Userscripts
 vrt
 VUB
 websecure

@@ -64,6 +64,8 @@ Actual currently has official support for migrating budgets from YNAB4 and nYNAB
    - *Prometheus metrics exporter and Grafana Dashboard.*
 * **Actual Budget Auto Sync** - https://github.com/seriouslag/actual-auto-sync
    - *A background service that automatically syncs your Actual Budget accounts on a scheduled basis.*
+* **Actual Userscripts** - https://github.com/pogman-code/actual-userscripts
+   - *A collection of JavaScript/CSS Userscripts for Actual Budget.*
 
 
 ## Others
