@@ -143,10 +143,18 @@ export function TagsSettings() {
             }}
           >
             <View style={{ display: 'inline' }}>
-              <Text className={getTagCSS('')}>#Default</Text>
+              <ColorPicker
+                value={getTagColor('*')}
+                onChange={color =>
+                  setTagsPref({ ...tags, '*': color.toString('hex') })
+                }
+              >
+                <Text className={getTagCSS('*')}>#Default</Text>
+              </ColorPicker>
             </View>
 
             {Object.keys(tags)
+              .filter(tag => tag !== '*')
               .sort()
               .map(tag => (
                 <View
