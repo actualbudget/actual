@@ -47,7 +47,8 @@ export function useTagCSS() {
     (tag: string, forcedColor?: string) => {
       const [color, backgroundColor, backgroundColorHovered] = getTagColors(
         theme,
-        forcedColor ?? tagsColors[tag],
+        // fallback strategy: forced > tag color > default color > theme color (undefined)
+        forcedColor ?? tagsColors[tag] ?? tagsColors['*'],
       );
 
       return css({
