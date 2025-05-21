@@ -65,7 +65,7 @@ export function ColorPicker({ children, ...props }: ColorPickerProps) {
   return (
     <AriaColorPicker {...props}>
       <DialogTrigger>
-        <Button className="color-picker">{children}</Button>
+        {children}
         <Popover placement="bottom">
           <Dialog className="color-picker-dialog">
             <ColorSwatchPicker />

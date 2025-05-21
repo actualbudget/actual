@@ -5,7 +5,12 @@ import { Trans } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { FormError } from '@actual-app/components/form-error';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { SvgAdd, SvgTrash } from '@actual-app/components/icons/v1';
+import {
+  SvgAdd,
+  SvgClose,
+  SvgRefresh,
+  SvgTrash,
+} from '@actual-app/components/icons/v1';
 import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -22,20 +27,61 @@ import { Setting } from './UI';
 import { purple700 } from '@desktop-client/style/palette';
 import { useTagColor, useTagCSS, useTags } from '@desktop-client/style/tags';
 
-export function TagsSettings() {
-  const sidebar = useSidebar();
+type TagEditorProps = {
+  tag: string;
+  mode: 'trash' | 'edit';
+};
+const TagEditor = ({ tag, mode }: TagEditorProps) => {
+  const getTagColor = useTagColor();
   const [tags, setTagsPref] = useTags();
   const getTagCSS = useTagCSS();
-  const getTagColor = useTagColor();
-  const [newTag, setNewTag] = useState('');
-  const [newColor, setNewColor] = useState(purple700);
-  const [errorMsg, setErrorMsg] = useState('');
-  const { isNarrowWidth } = useResponsive();
 
   const onTrashTag = (tag: string) => {
     const { [tag]: _, ...newTags } = tags;
     setTagsPref(newTags);
   };
+
+  if (mode === 'edit') {
+    return (
+      <ColorPicker
+        value={getTagColor(tag)}
+        onChange={color =>
+          setTagsPref({ ...tags, [tag]: color.toString('hex') })
+        }
+      >
+        <Button variant="bare" className={getTagCSS(tag)}>
+          #{tag === '*' ? t('Default') : tag}
+        </Button>
+      </ColorPicker>
+    );
+  } else {
+    return (
+      <Button
+        variant="bare"
+        className={getTagCSS(tag)}
+        onPress={() => onTrashTag(tag)}
+      >
+        #{tag === '*' ? t('Default') : tag}
+        &nbsp;
+        {tag !== '*' ? (
+          <SvgClose width={10} height={10} />
+        ) : (
+          <SvgRefresh width={10} height={10} />
+        )}
+      </Button>
+    );
+  }
+};
+
+export function TagsSettings() {
+  const sidebar = useSidebar();
+  const [tags, setTagsPref] = useTags();
+  const getTagCSS = useTagCSS();
+  const [newTag, setNewTag] = useState('');
+  const [newColor, setNewColor] = useState(purple700);
+  const [errorMsg, setErrorMsg] = useState('');
+  const { isNarrowWidth } = useResponsive();
+  const [trashMode, setTrashMode] = useState(false);
 
   const onAddTagColor = () => {
     if (!newTag.trim()) {
@@ -127,6 +173,22 @@ export function TagsSettings() {
               >
                 <SvgAdd width={13} height={13} />
               </Button>
+              <Button
+                variant="bare"
+                type="button"
+                style={{
+                  borderWidth: 0,
+                  backgroundColor: 'transparent',
+                  marginLeft: 'auto',
+                }}
+                onPress={() => setTrashMode(!trashMode)}
+              >
+                <SvgTrash
+                  width={13}
+                  height={13}
+                  style={trashMode ? { color: theme.errorText } : {}}
+                />
+              </Button>
             </View>
           </Form>
           <View
@@ -142,14 +204,7 @@ export function TagsSettings() {
             }}
           >
             <View style={{ display: 'inline' }}>
-              <ColorPicker
-                value={getTagColor('*')}
-                onChange={color =>
-                  setTagsPref({ ...tags, '*': color.toString('hex') })
-                }
-              >
-                <Text className={getTagCSS('*')}>#Default</Text>
-              </ColorPicker>
+              <TagEditor tag="*" mode={trashMode ? 'trash' : 'edit'} />
             </View>
 
             {Object.keys(tags)
@@ -163,30 +218,7 @@ export function TagsSettings() {
                     flexDirection: 'row',
                   }}
                 >
-                  <ColorPicker
-                    value={getTagColor(tag)}
-                    onChange={color =>
-                      setTagsPref({ ...tags, [tag]: color.toString('hex') })
-                    }
-                  >
-                    <Text className={getTagCSS(tag)}>#{tag}</Text>
-                  </ColorPicker>
-
-                  <Button
-                    variant="bare"
-                    onPress={() => onTrashTag(tag)}
-                    style={{
-                      height: '100%',
-                      borderWidth: 0,
-                      backgroundColor: 'transparent',
-                    }}
-                  >
-                    <SvgTrash
-                      width={13}
-                      height={13}
-                      style={{ color: theme.errorText }}
-                    />
-                  </Button>
+                  <TagEditor tag={tag} mode={trashMode ? 'trash' : 'edit'} />
                 </View>
               ))}
           </View>

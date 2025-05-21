@@ -62,6 +62,9 @@ export function useTagCSS() {
         '&[data-hovered]': {
           backgroundColor: backgroundColorHovered,
         },
+        '&[data-pressed]': {
+          backgroundColor: backgroundColorHovered,
+        },
       });
     },
     [theme, tagsColors, isNarrowWidth],
