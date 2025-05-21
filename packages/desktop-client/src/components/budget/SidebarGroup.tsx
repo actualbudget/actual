@@ -16,10 +16,12 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { useContextMenu } from '../../hooks/useContextMenu';
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
 import { NotesButton } from '../NotesButton';
 import { InputCell } from '../table';
+
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 type SidebarGroupProps = {
   group: CategoryGroupEntity;
@@ -56,6 +58,8 @@ export function SidebarGroup({
 }: SidebarGroupProps) {
   const { t } = useTranslation();
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
+  const categoryExpandedState = categoryExpandedStatePref ?? 0;
 
   const temporary = group.id === 'new';
   const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
@@ -180,7 +184,7 @@ export function SidebarGroup({
       innerRef={innerRef}
       style={{
         ...style,
-        width: 200,
+        width: 200 + 100 * categoryExpandedState,
         backgroundColor: theme.tableRowHeaderBackground,
         overflow: 'hidden',
         '& .hover-visible': {

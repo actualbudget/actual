@@ -5,14 +5,18 @@ import { useTranslation } from 'react-i18next';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
-import { moveCategory } from 'loot-core/client/queries/queriesSlice';
-import { type CategoryEntity } from 'loot-core/types/models';
+import {
+  type CategoryGroupEntity,
+  type CategoryEntity,
+} from 'loot-core/types/models';
 
+import { moveCategory } from '../../../queries/queriesSlice';
 import { useDispatch } from '../../../redux';
 
 import { ExpenseCategoryListItem } from './ExpenseCategoryListItem';
 
 type ExpenseCategoryListProps = {
+  categoryGroup: CategoryGroupEntity;
   categories: CategoryEntity[];
   shouldHideCategory: (category: CategoryEntity) => boolean;
   month: string;
@@ -23,6 +27,7 @@ type ExpenseCategoryListProps = {
 };
 
 export function ExpenseCategoryList({
+  categoryGroup,
   categories,
   month,
   onEditCategory,
@@ -115,7 +120,9 @@ export function ExpenseCategoryList({
 
   return (
     <GridList
-      aria-label={t('Expense categories')}
+      aria-label={t('{{categoryGroupName}} expense group categories', {
+        categoryGroupName: categoryGroup.name,
+      })}
       items={categories}
       dragAndDropHooks={dragAndDropHooks}
       dependencies={[
@@ -132,7 +139,7 @@ export function ExpenseCategoryList({
           key={category.id}
           value={category}
           month={month}
-          onEdit={onEditCategory}
+          onEditCategory={onEditCategory}
           onBudgetAction={onBudgetAction}
           isHidden={shouldHideCategory(category)}
           show3Columns={show3Columns}

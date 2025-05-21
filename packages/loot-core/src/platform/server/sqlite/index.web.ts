@@ -6,12 +6,14 @@ import { unicodeLike } from './unicodeLike';
 
 let SQL: SqlJsStatic | null = null;
 
-export async function init() {
+export async function init({
+  baseURL = process.env.PUBLIC_URL,
+}: { baseURL?: string } = {}) {
   // `initSqlJS` doesn't actually return a real promise, so make sure
   // we're returning a real one for correct semantics
   return new Promise((resolve, reject) => {
     initSqlJS({
-      locateFile: file => process.env.PUBLIC_URL + file,
+      locateFile: file => baseURL + file,
     }).then(
       sql => {
         SQL = sql;

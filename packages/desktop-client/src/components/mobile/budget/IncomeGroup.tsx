@@ -13,24 +13,24 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
-import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
 import * as monthUtils from 'loot-core/shared/months';
 import { type CategoryGroupEntity } from 'loot-core/types/models';
 
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
+import { envelopeBudget, trackingBudget } from '../../../queries/queries';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
 
-import { getColumnWidth } from './BudgetTable';
+import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { IncomeCategoryList } from './IncomeCategoryList';
-import { ListItem } from './ListItem';
+
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type IncomeGroupProps = {
-  group: CategoryGroupEntity;
+  categoryGroup: CategoryGroupEntity;
   month: string;
   showHiddenCategories: boolean;
-  onEditGroup: (id: CategoryGroupEntity['id']) => void;
+  onEditCategoryGroup: (id: CategoryGroupEntity['id']) => void;
   onEditCategory: (id: string) => void;
   onBudgetAction: (month: string, action: string, args: unknown) => void;
   isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
@@ -38,10 +38,10 @@ type IncomeGroupProps = {
 };
 
 export function IncomeGroup({
-  group,
+  categoryGroup,
   month,
   showHiddenCategories,
-  onEditGroup,
+  onEditCategoryGroup,
   onEditCategory,
   onBudgetAction,
   isCollapsed,
@@ -49,16 +49,21 @@ export function IncomeGroup({
 }: IncomeGroupProps) {
   const { t } = useTranslation();
   const columnWidth = getColumnWidth();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
   const categories = useMemo(
     () =>
-      isCollapsed(group.id)
+      isCollapsed(categoryGroup.id)
         ? []
-        : (group.categories?.filter(
+        : (categoryGroup.categories?.filter(
             category => !category.hidden || showHiddenCategories,
           ) ?? []),
-    [group.categories, group.id, isCollapsed, showHiddenCategories],
+    [
+      categoryGroup.categories,
+      categoryGroup.id,
+      isCollapsed,
+      showHiddenCategories,
+    ],
   );
 
   return (
@@ -73,7 +78,7 @@ export function IncomeGroup({
           marginRight: 15,
         }}
       >
-        {budgetType === 'report' && (
+        {budgetType === 'tracking' && (
           <Label title={t('Budgeted')} style={{ width: columnWidth }} />
         )}
         <Label title={t('Received')} style={{ width: columnWidth }} />
@@ -81,10 +86,10 @@ export function IncomeGroup({
 
       <Card style={{ marginTop: 0 }}>
         <IncomeGroupHeader
-          group={group}
+          group={categoryGroup}
           month={month}
-          onEdit={onEditGroup}
-          isCollapsed={isCollapsed(group.id)}
+          onEdit={onEditCategoryGroup}
+          isCollapsed={isCollapsed}
           onToggleCollapse={onToggleCollapse}
         />
         <IncomeCategoryList
@@ -102,7 +107,7 @@ type IncomeGroupHeaderProps = {
   group: CategoryGroupEntity;
   month: string;
   onEdit: (id: CategoryGroupEntity['id']) => void;
-  isCollapsed: boolean;
+  isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
   style?: CSSProperties;
 };
@@ -116,13 +121,17 @@ function IncomeGroupHeader({
   style,
 }: IncomeGroupHeaderProps) {
   return (
-    <ListItem
+    <View
       style={{
+        height: ROW_HEIGHT,
+        borderBottomWidth: 1,
+        borderColor: theme.tableBorder,
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingLeft: 5,
+        paddingRight: 5,
         opacity: !!group.hidden ? 0.5 : undefined,
-        paddingLeft: 0,
         backgroundColor: monthUtils.isCurrentMonth(month)
           ? theme.budgetHeaderCurrentMonth
           : theme.budgetHeaderOtherMonth,
@@ -137,14 +146,14 @@ function IncomeGroupHeader({
         onToggleCollapse={onToggleCollapse}
       />
       <IncomeGroupCells group={group} />
-    </ListItem>
+    </View>
   );
 }
 
 type IncomeGroupNameProps = {
   group: CategoryGroupEntity;
   onEdit: (id: CategoryGroupEntity['id']) => void;
-  isCollapsed: boolean;
+  isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
 };
 
@@ -175,6 +184,7 @@ function IncomeGroupName({
           '&[data-pressed]': {
             backgroundColor: 'transparent',
           },
+          marginLeft: -5,
         })}
         onPress={() => onToggleCollapse(group.id)}
       >
@@ -184,7 +194,7 @@ function IncomeGroupName({
           style={{
             flexShrink: 0,
             transition: 'transform .1s',
-            transform: isCollapsed ? 'rotate(-90deg)' : '',
+            transform: isCollapsed(group.id) ? 'rotate(-90deg)' : '',
           }}
         />
       </Button>
@@ -229,14 +239,14 @@ type IncomeGroupCellsProps = {
 };
 
 function IncomeGroupCells({ group }: IncomeGroupCellsProps) {
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const format = useFormat();
 
   const budgeted =
-    budgetType === 'report' ? trackingBudget.groupBudgeted(group.id) : null;
+    budgetType === 'tracking' ? trackingBudget.groupBudgeted(group.id) : null;
 
   const balance =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.groupSumAmount(group.id)
       : envelopeBudget.groupSumAmount(group.id);
 

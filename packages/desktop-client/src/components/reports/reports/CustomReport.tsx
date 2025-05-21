@@ -11,8 +11,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
-import { useReport as useCustomReport } from 'loot-core/client/data-hooks/reports';
-import { calculateHasWarning } from 'loot-core/client/reports';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
@@ -26,14 +24,6 @@ import {
 } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useCategories } from '../../../hooks/useCategories';
-import { useFilters } from '../../../hooks/useFilters';
-import { useLocale } from '../../../hooks/useLocale';
-import { useLocalPref } from '../../../hooks/useLocalPref';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { usePayees } from '../../../hooks/usePayees';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { Warning } from '../../alerts';
 import { AppliedFilters } from '../../filters/AppliedFilters';
 import { MobileBackButton } from '../../mobile/MobileBackButton';
@@ -62,7 +52,17 @@ import { setSessionReport } from '../setSessionReport';
 import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
 import { useReport } from '../useReport';
-import { fromDateRepr } from '../util';
+import { calculateHasWarning, fromDateRepr } from '../util';
+
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { usePayees } from '@desktop-client/hooks/usePayees';
+import { useReport as useCustomReport } from '@desktop-client/hooks/useReport';
+import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 /**
  * Transform `selectedCategories` into `conditions`.
@@ -144,7 +144,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
     onConditionsOpChange,
-  } = useFilters();
+  } = useRuleConditionFilters();
 
   const location = useLocation();
 
@@ -270,12 +270,24 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   useEffect(() => {
     async function run() {
       onApplyFilter(null);
-      report.conditions?.forEach((condition: RuleConditionEntity) =>
+
+      const filtersToApply =
+        savedStatus !== 'saved' ? conditions : report.conditions;
+      const conditionsOpToApply =
+        savedStatus !== 'saved' ? conditionsOp : report.conditionsOp;
+
+      filtersToApply?.forEach((condition: RuleConditionEntity) =>
         onApplyFilter(condition),
       );
-      onConditionsOpChange(report.conditionsOp);
-      const trans = await send('get-earliest-transaction');
-      setEarliestTransaction(trans ? trans.date : monthUtils.currentDay());
+      onConditionsOpChange(conditionsOpToApply);
+
+      const earliestTransaction = await send('get-earliest-transaction');
+      setEarliestTransaction(
+        earliestTransaction
+          ? earliestTransaction.date
+          : monthUtils.currentDay(),
+      );
+
       const fromDate =
         interval === 'Weekly'
           ? 'dayFromDate'
@@ -295,14 +307,23 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         interval === 'Weekly'
           ? monthUtils.currentWeek(firstDayOfWeekIdx)
           : monthUtils[currentDate]();
+
       const earliestInterval =
         interval === 'Weekly'
           ? monthUtils.weekFromDate(
-              d.parseISO(fromDateRepr(trans.date || monthUtils.currentDay())),
+              d.parseISO(
+                fromDateRepr(
+                  earliestTransaction.date || monthUtils.currentDay(),
+                ),
+              ),
               firstDayOfWeekIdx,
             )
           : monthUtils[fromDate](
-              d.parseISO(fromDateRepr(trans.date || monthUtils.currentDay())),
+              d.parseISO(
+                fromDateRepr(
+                  earliestTransaction.date || monthUtils.currentDay(),
+                ),
+              ),
             );
 
       const allIntervals =
@@ -332,7 +353,9 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       if (!isDateStatic) {
         const [dateStart, dateEnd] = getLiveRange(
           dateRange,
-          trans ? trans.date : monthUtils.currentDay(),
+          earliestTransaction
+            ? earliestTransaction.date
+            : monthUtils.currentDay(),
           includeCurrentInterval,
           firstDayOfWeekIdx,
         );
@@ -340,7 +363,10 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         setEndDate(dateEnd);
       }
     }
+
     run();
+    // omitted `conditions` and `conditionsOp` from dependencies to avoid infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     interval,
     dateRange,
@@ -352,6 +378,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     report.conditionsOp,
     includeCurrentInterval,
     locale,
+    savedStatus,
   ]);
 
   useEffect(() => {

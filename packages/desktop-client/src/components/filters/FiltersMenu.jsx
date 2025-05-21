@@ -20,7 +20,6 @@ import {
   isValid as isDateValid,
 } from 'date-fns';
 
-import { useFilters } from 'loot-core/client/data-hooks/filters';
 import { send } from 'loot-core/platform/client/fetch';
 import { getMonthYearFormat } from 'loot-core/shared/months';
 import {
@@ -33,7 +32,6 @@ import {
 } from 'loot-core/shared/rules';
 import { titleFirst } from 'loot-core/shared/util';
 
-import { useDateFormat } from '../../hooks/useDateFormat';
 import { GenericInput } from '../util/GenericInput';
 
 import { CompactFiltersButton } from './CompactFiltersButton';
@@ -42,6 +40,9 @@ import { OpButton } from './OpButton';
 import { subfieldFromFilter } from './subfieldFromFilter';
 import { subfieldToOptions } from './subfieldToOptions';
 import { updateFilterReducer } from './updateFilterReducer';
+
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
 
 let isDatepickerClick = false;
 
@@ -259,7 +260,7 @@ function ConfigureField({
 
 export function FilterButton({ onApply, compact, hover, exclude }) {
   const { t } = useTranslation();
-  const filters = useFilters();
+  const filters = useTransactionFilters();
   const triggerRef = useRef(null);
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';

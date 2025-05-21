@@ -12,15 +12,15 @@ import {
   linkAccountPluggyAi,
   linkAccountSimpleFin,
   unlinkAccount,
-} from 'loot-core/client/accounts/accountsSlice';
-import { closeModal } from 'loot-core/client/modals/modalsSlice';
-
-import { useAccounts } from '../../hooks/useAccounts';
+} from '../../accounts/accountsSlice';
+import { closeModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { Autocomplete } from '../autocomplete/Autocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { TableHeader, Table, Row, Field } from '../table';
+
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
 
 function useAddBudgetAccountOptions() {
   const { t } = useTranslation();

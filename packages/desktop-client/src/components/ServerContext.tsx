@@ -9,10 +9,10 @@ import React, {
 
 import { t } from 'i18next';
 
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { type Handlers } from 'loot-core/types/handlers';
 
+import { addNotification } from '../notifications/notificationsSlice';
 import { useDispatch } from '../redux';
 
 type LoginMethod = {

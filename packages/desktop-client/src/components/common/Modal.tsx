@@ -31,7 +31,7 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
-import { useModalState } from '../../hooks/useModalState';
+import { useModalState } from '@desktop-client/hooks/useModalState';
 
 type ModalProps = ComponentPropsWithRef<typeof ReactAriaModal> & {
   name: string;

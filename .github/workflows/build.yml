@@ -57,7 +57,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Web
-        run: ./bin/package-browser
+        run: yarn build:browser
       - name: Upload Build
         uses: actions/upload-artifact@v4
         with:
@@ -76,7 +76,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Server
-        run: cd packages/sync-server && yarn build
+        run: yarn workspace @actual-app/sync-server build
       - name: Upload Build
         uses: actions/upload-artifact@v4
         with:

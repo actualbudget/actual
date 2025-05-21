@@ -2,7 +2,7 @@ import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-th
 // eslint-disable-next-line import/no-unresolved
 import { registerSW } from 'virtual:pwa-register';
 
-import * as Platform from 'loot-core/client/platform';
+import * as Platform from 'loot-core/shared/platform';
 
 import packageJson from '../package.json';
 
@@ -85,6 +85,12 @@ global.Actual = {
         window.location.reload();
       });
   },
+
+  startSyncServer: () => {},
+
+  stopSyncServer: () => {},
+
+  isSyncServerRunning: () => false,
 
   startOAuthServer: () => {
     return '';

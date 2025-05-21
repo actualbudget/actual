@@ -1,8 +1,6 @@
 // @ts-strict-ignore
 import keyBy from 'lodash/keyBy';
 
-import { runQuery } from 'loot-core/client/query-helpers';
-import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
@@ -13,7 +11,11 @@ import {
   type SpendingEntity,
 } from 'loot-core/types/models';
 
+import { aqlQuery } from '../../../queries/aqlQuery';
+
 import { makeQuery } from './makeQuery';
+
+import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 type createSpendingSpreadsheetProps = {
   conditions?: RuleConditionEntity[];
@@ -59,7 +61,7 @@ export function createSpendingSpreadsheet({
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
     const [assets, debts] = await Promise.all([
-      runQuery(
+      aqlQuery(
         makeQuery(
           'assets',
           startDate,
@@ -69,7 +71,7 @@ export function createSpendingSpreadsheet({
           filters,
         ),
       ).then(({ data }) => data),
-      runQuery(
+      aqlQuery(
         makeQuery(
           'debts',
           startDate,
@@ -82,7 +84,7 @@ export function createSpendingSpreadsheet({
     ]);
 
     const [assetsTo, debtsTo] = await Promise.all([
-      runQuery(
+      aqlQuery(
         makeQuery(
           'assets',
           startDateTo,
@@ -92,7 +94,7 @@ export function createSpendingSpreadsheet({
           filters,
         ),
       ).then(({ data }) => data),
-      runQuery(
+      aqlQuery(
         makeQuery(
           'debts',
           startDateTo,
@@ -114,7 +116,7 @@ export function createSpendingSpreadsheet({
 
     const budgetMonth = parseInt(compare.replace('-', ''));
     const [budgets] = await Promise.all([
-      runQuery(
+      aqlQuery(
         q('zero_budgets')
           .filter({
             $and: [{ month: { $eq: budgetMonth } }],

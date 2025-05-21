@@ -16,8 +16,6 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
-import { useWidget } from 'loot-core/client/data-hooks/widget';
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
@@ -26,9 +24,7 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { useFilters } from '../../../hooks/useFilters';
-import { useLocale } from '../../../hooks/useLocale';
-import { useNavigate } from '../../../hooks/useNavigate';
+import { addNotification } from '../../../notifications/notificationsSlice';
 import { useDispatch } from '../../../redux';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { AppliedFilters } from '../../filters/AppliedFilters';
@@ -44,6 +40,11 @@ import { calculateSpendingReportTimeRange } from '../reportRanges';
 import { createSpendingSpreadsheet } from '../spreadsheets/spending-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
+
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
+import { useWidget } from '@desktop-client/hooks/useWidget';
 
 export function Spending() {
   const params = useParams();
@@ -75,7 +76,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
     onConditionsOpChange,
-  } = useFilters<RuleConditionEntity>(
+  } = useRuleConditionFilters<RuleConditionEntity>(
     widget?.meta?.conditions,
     widget?.meta?.conditionsOp,
   );
@@ -516,17 +517,17 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         style={{ marginBottom: 5, minWidth: 210 }}
                         left={
                           <Block>
-                            {compare === monthUtils.currentMonth()
+                            {compareTo === monthUtils.currentMonth()
                               ? t('Spent {{monthYearFormatted}} MTD:', {
                                   monthYearFormatted: monthUtils.format(
-                                    compare,
+                                    compareTo,
                                     'MMM, yyyy',
                                     locale,
                                   ),
                                 })
                               : t('Spent {{monthYearFormatted}}:', {
                                   monthYearFormatted: monthUtils.format(
-                                    compare,
+                                    compareTo,
                                     'MMM, yyyy',
                                     locale,
                                   ),

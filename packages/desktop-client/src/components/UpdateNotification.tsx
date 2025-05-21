@@ -7,8 +7,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { setAppState, updateApp } from 'loot-core/client/app/appSlice';
-
+import { setAppState, updateApp } from '../app/appSlice';
 import { useSelector, useDispatch } from '../redux';
 
 import { Link } from './common/Link';

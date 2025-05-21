@@ -81,8 +81,9 @@ export async function batchUpdateTransactions({
     if (added) {
       addedIds = await Promise.all(
         added.map(async t => {
+          // Offbudget account transactions and parent transactions should not have categories.
           const account = accounts.find(acct => acct.id === t.account);
-          if (account.offbudget === 1) {
+          if (t.is_parent || account.offbudget === 1) {
             t.category = null;
           }
           return db.insertTransaction(t);
@@ -107,9 +108,9 @@ export async function batchUpdateTransactions({
         updated.map(async t => {
           if (t.account) {
             // Moving transactions off budget should always clear the
-            // category
+            // category. Parent transactions should not have categories.
             const account = accounts.find(acct => acct.id === t.account);
-            if (account.offbudget === 1) {
+            if (t.is_parent || account.offbudget === 1) {
               t.category = null;
             }
           }
@@ -187,5 +188,6 @@ export async function batchUpdateTransactions({
   return {
     added: resultAdded,
     updated: runTransfers ? transfersUpdated : resultUpdated,
+    deleted: allDeleted,
   };
 }

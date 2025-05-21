@@ -151,8 +151,11 @@ export function diffItems<T extends { id: string }>(
 }
 
 export function groupById<T extends { id: string }>(
-  data: T[],
+  data: T[] | null | undefined,
 ): Record<string, T> {
+  if (!data) {
+    return {};
+  }
   const res: { [key: string]: T } = {};
   for (let i = 0; i < data.length; i++) {
     const item = data[i];
@@ -204,7 +207,10 @@ export function fastSetMerge<T>(set1: Set<T>, set2: Set<T>) {
   return finalSet;
 }
 
-export function titleFirst(str: string) {
+export function titleFirst(str: string | null | undefined) {
+  if (!str || str.length <= 1) {
+    return str?.toUpperCase() ?? '';
+  }
   return str[0].toUpperCase() + str.slice(1);
 }
 

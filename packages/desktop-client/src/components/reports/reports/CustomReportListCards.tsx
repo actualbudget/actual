@@ -8,23 +8,24 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
-import { calculateHasWarning } from 'loot-core/client/reports';
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { type CustomReportEntity } from 'loot-core/types/models';
 
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useCategories } from '../../../hooks/useCategories';
-import { usePayees } from '../../../hooks/usePayees';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
+import { addNotification } from '../../../notifications/notificationsSlice';
 import { useDispatch } from '../../../redux';
 import { DateRange } from '../DateRange';
 import { ReportCard } from '../ReportCard';
 import { ReportCardName } from '../ReportCardName';
+import { calculateHasWarning } from '../util';
 
 import { GetCardData } from './GetCardData';
 import { MissingReportCard } from './MissingReportCard';
+
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { usePayees } from '@desktop-client/hooks/usePayees';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type CustomReportListCardsProps = {
   isEditing?: boolean;

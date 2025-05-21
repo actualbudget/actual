@@ -7,17 +7,18 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  type Modal as ModalType,
-  replaceModal,
-} from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { type PayeeEntity } from 'loot-core/types/models';
 
-import { usePayees } from '../../hooks/usePayees';
+import {
+  type Modal as ModalType,
+  replaceModal,
+} from '../../modals/modalsSlice';
 import { useSelector, useDispatch } from '../../redux';
 import { Information } from '../alerts';
 import { Modal, ModalButtons } from '../common/Modal';
+
+import { usePayees } from '@desktop-client/hooks/usePayees';
 
 const highlightStyle = { color: theme.pageTextPositive };
 

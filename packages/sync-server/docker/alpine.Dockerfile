@@ -53,9 +53,8 @@ ENV NODE_ENV=production
 
 # Pull in only the necessary artifacts (built node_modules, server files, etc.)
 COPY --from=builder /app/node_modules /app/node_modules
-COPY --from=builder /app/packages/sync-server/package.json /app/packages/sync-server/app.js ./
-COPY --from=builder /app/packages/sync-server/src ./src
-COPY --from=builder /app/packages/sync-server/migrations ./migrations
+COPY --from=builder /app/packages/sync-server/package.json ./
+COPY --from=builder /app/packages/sync-server/build ./
 
 ENTRYPOINT ["/sbin/tini","-g",  "--"]
 EXPOSE 5006

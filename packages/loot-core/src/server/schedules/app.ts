@@ -19,7 +19,7 @@ import {
 import { ScheduleEntity } from '../../types/models';
 import { addTransactions } from '../accounts/sync';
 import { createApp } from '../app';
-import { runQuery as aqlQuery } from '../aql';
+import { aqlQuery } from '../aql';
 import * as db from '../db';
 import { toDateRepr } from '../models';
 import { mutator, runMutator } from '../mutators';
@@ -36,6 +36,7 @@ import { undoable } from '../undo';
 import { Schedule as RSchedule } from '../util/rschedule';
 
 import { findSchedules } from './find-schedules';
+
 // Utilities
 
 function zip(arr1, arr2) {
@@ -422,7 +423,7 @@ async function postTransactionForSchedule({ id }: { id: string }) {
     payee: schedule._payee,
     account: schedule._account,
     amount: getScheduledAmount(schedule._amount),
-    date: schedule.next_date,
+    date: currentDay(),
     schedule: schedule.id,
     cleared: false,
   };

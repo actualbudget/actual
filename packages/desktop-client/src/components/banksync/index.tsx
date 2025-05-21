@@ -5,20 +5,21 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   type BankSyncProviders,
   type AccountEntity,
 } from 'loot-core/types/models';
 
-import { useAccounts } from '../../hooks/useAccounts';
-import { useGlobalPref } from '../../hooks/useGlobalPref';
+import { pushModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
 import { Page } from '../Page';
 
 import { AccountsHeader } from './AccountsHeader';
 import { AccountsList } from './AccountsList';
+
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 type SyncProviders = BankSyncProviders | 'unlinked';
 

@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import { Notification } from '../../client/notifications/notificationsSlice';
 import * as monthUtils from '../../shared/months';
 import * as db from '../db';
 import { batchMessages } from '../sync';
@@ -7,6 +6,14 @@ import { batchMessages } from '../sync';
 import { isReflectBudget, getSheetValue, setGoal, setBudget } from './actions';
 import { CategoryTemplate } from './categoryTemplate';
 import { checkTemplates, storeTemplates } from './template-notes';
+
+type Notification = {
+  type?: 'message' | 'error' | 'warning' | undefined;
+  pre?: string | undefined;
+  title?: string | undefined;
+  message: string;
+  sticky?: boolean | undefined;
+};
 
 export async function applyTemplate({ month }): Promise<Notification> {
   await storeTemplates();

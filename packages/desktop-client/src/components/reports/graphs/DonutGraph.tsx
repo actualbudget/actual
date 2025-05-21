@@ -11,9 +11,6 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useCategories } from '../../../hooks/useCategories';
-import { useNavigate } from '../../../hooks/useNavigate';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { Container } from '../Container';
 
@@ -21,7 +18,13 @@ import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+
 const RADIAN = Math.PI / 180;
+
+const canDeviceHover = () => window.matchMedia('(hover: hover)').matches;
 
 const ActiveShapeMobile = props => {
   const {
@@ -279,29 +282,39 @@ export function DonutGraph({
                     endAngle={-270}
                     onMouseLeave={() => setPointer('')}
                     onMouseEnter={(_, index) => {
-                      setActiveIndex(index);
-                      if (!['Group', 'Interval'].includes(groupBy)) {
-                        setPointer('pointer');
+                      if (canDeviceHover()) {
+                        setActiveIndex(index);
+                        if (!['Group', 'Interval'].includes(groupBy)) {
+                          setPointer('pointer');
+                        }
                       }
                     }}
-                    onClick={item =>
-                      ((compact && showTooltip) || !compact) &&
-                      !['Group', 'Interval'].includes(groupBy) &&
-                      showActivity({
-                        navigate,
-                        categories,
-                        accounts,
-                        balanceTypeOp,
-                        filters,
-                        showHiddenCategories,
-                        showOffBudget,
-                        type: 'totals',
-                        startDate: data.startDate,
-                        endDate: data.endDate,
-                        field: groupBy.toLowerCase(),
-                        id: item.id,
-                      })
-                    }
+                    onClick={(item, index) => {
+                      if (!canDeviceHover()) {
+                        setActiveIndex(index);
+                      }
+
+                      if (
+                        !['Group', 'Interval'].includes(groupBy) &&
+                        (canDeviceHover() || activeIndex === index) &&
+                        ((compact && showTooltip) || !compact)
+                      ) {
+                        showActivity({
+                          navigate,
+                          categories,
+                          accounts,
+                          balanceTypeOp,
+                          filters,
+                          showHiddenCategories,
+                          showOffBudget,
+                          type: 'totals',
+                          startDate: data.startDate,
+                          endDate: data.endDate,
+                          field: groupBy.toLowerCase(),
+                          id: item.id,
+                        });
+                      }
+                    }}
                   >
                     {data.legend.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />

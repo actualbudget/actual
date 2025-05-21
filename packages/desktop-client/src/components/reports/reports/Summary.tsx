@@ -15,8 +15,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { parseISO } from 'date-fns';
 
-import { useWidget } from 'loot-core/client/data-hooks/widget';
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
@@ -26,10 +24,7 @@ import {
   type TimeFrame,
 } from 'loot-core/types/models';
 
-import { useFilters } from '../../../hooks/useFilters';
-import { useLocale } from '../../../hooks/useLocale';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
+import { addNotification } from '../../../notifications/notificationsSlice';
 import { useDispatch } from '../../../redux';
 import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
 import { AppliedFilters } from '../../filters/AppliedFilters';
@@ -46,6 +41,12 @@ import { calculateTimeRange } from '../reportRanges';
 import { summarySpreadsheet } from '../spreadsheets/summary-spreadsheet';
 import { useReport } from '../useReport';
 import { fromDateRepr } from '../util';
+
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useWidget } from '@desktop-client/hooks/useWidget';
 
 export function Summary() {
   const params = useParams();
@@ -65,7 +66,7 @@ type SummaryInnerProps = {
   widget?: SummaryWidget;
 };
 
-type FilterObject = ReturnType<typeof useFilters>;
+type FilterObject = ReturnType<typeof useRuleConditionFilters>;
 
 function SummaryInner({ widget }: SummaryInnerProps) {
   const locale = useLocale();
@@ -82,7 +83,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
   const [end, setEnd] = useState(initialEnd);
   const [mode, setMode] = useState(initialMode);
 
-  const dividendFilters: FilterObject = useFilters(
+  const dividendFilters: FilterObject = useRuleConditionFilters(
     widget?.meta?.conditions ?? [],
     widget?.meta?.conditionsOp ?? 'and',
   );
@@ -110,7 +111,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         },
   );
 
-  const divisorFilters = useFilters(
+  const divisorFilters = useRuleConditionFilters(
     content.type === 'percentage' ? (content?.divisorConditions ?? []) : [],
     content.type === 'percentage'
       ? (content?.divisorConditionsOp ?? 'and')

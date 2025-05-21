@@ -1,7 +1,5 @@
 import * as d from 'date-fns';
 
-import { runQuery } from 'loot-core/client/query-helpers';
-import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { integerToAmount } from 'loot-core/shared/util';
@@ -19,6 +17,7 @@ import {
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
+import { aqlQuery } from '../../../queries/aqlQuery';
 import {
   categoryLists,
   groupBySelections,
@@ -33,6 +32,8 @@ import { filterHiddenItems } from './filterHiddenItems';
 import { makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
 import { sortData } from './sortData';
+
+import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 export type createCustomSpreadsheetProps = {
   startDate: string;
@@ -98,7 +99,7 @@ export function createCustomSpreadsheet({
     let assets: QueryDataEntity[];
     let debts: QueryDataEntity[];
     [assets, debts] = await Promise.all([
-      runQuery(
+      aqlQuery(
         makeQuery(
           'assets',
           startDate,
@@ -108,7 +109,7 @@ export function createCustomSpreadsheet({
           filters,
         ),
       ).then(({ data }) => data),
-      runQuery(
+      aqlQuery(
         makeQuery(
           'debts',
           startDate,

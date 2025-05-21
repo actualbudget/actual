@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Database transactions are sorted by date 1`] = `
+exports[`Database > transactions are sorted by date 1`] = `
 [
   {
     "amount": -23,
@@ -55,7 +55,7 @@ exports[`Database transactions are sorted by date 1`] = `
 ]
 `;
 
-exports[`Database transactions are sorted by id as a last resort 1`] = `
+exports[`Database > transactions are sorted by id as a last resort 1`] = `
 [
   {
     "amount": -23,
@@ -100,7 +100,7 @@ exports[`Database transactions are sorted by id as a last resort 1`] = `
 ]
 `;
 
-exports[`Database transactions are sorted by sort order 1`] = `
+exports[`Database > transactions are sorted by sort order 1`] = `
 [
   {
     "amount": -23,
@@ -155,7 +155,7 @@ exports[`Database transactions are sorted by sort order 1`] = `
 ]
 `;
 
-exports[`Database transactions are sorted by starting balance flag 1`] = `
+exports[`Database > transactions are sorted by starting balance flag 1`] = `
 [
   {
     "amount": -23,
@@ -200,7 +200,7 @@ exports[`Database transactions are sorted by starting balance flag 1`] = `
 ]
 `;
 
-exports[`Database transactions don’t show orphaned child transactions 1`] = `
+exports[`Database > transactions don’t show orphaned child transactions 1`] = `
 [
   {
     "amount": -23,
@@ -215,7 +215,7 @@ exports[`Database transactions don’t show orphaned child transactions 1`] = `
 ]
 `;
 
-exports[`Database transactions get child transactions in the right order 1`] = `
+exports[`Database > transactions get child transactions in the right order 1`] = `
 [
   {
     "amount": -23,

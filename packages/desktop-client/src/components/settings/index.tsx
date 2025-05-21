@@ -10,14 +10,11 @@ import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
-import { loadPrefs } from 'loot-core/client/prefs/prefsSlice';
 import { listen } from 'loot-core/platform/client/fetch';
 import { isElectron } from 'loot-core/shared/environment';
 
-import { useGlobalPref } from '../../hooks/useGlobalPref';
-import { useIsOutdated, useLatestVersion } from '../../hooks/useLatestVersion';
-import { useMetadataPref } from '../../hooks/useMetadataPref';
+import { closeBudget } from '../../budgets/budgetsSlice';
+import { loadPrefs } from '../../prefs/prefsSlice';
 import { useDispatch } from '../../redux';
 import { Link } from '../common/Link';
 import { FormField, FormLabel } from '../forms';
@@ -37,6 +34,13 @@ import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
+
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import {
+  useIsOutdated,
+  useLatestVersion,
+} from '@desktop-client/hooks/useLatestVersion';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 function About() {
   const version = useServerVersion();
@@ -193,7 +197,7 @@ export function Settings() {
               />
             </FormField>
             <Button onPress={onCloseBudget}>
-              <Trans>Close budget</Trans>
+              <Trans>Switch file</Trans>
             </Button>
           </View>
         )}

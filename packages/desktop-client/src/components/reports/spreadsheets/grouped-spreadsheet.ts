@@ -1,9 +1,8 @@
-import { runQuery } from 'loot-core/client/query-helpers';
-import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { type GroupedEntity } from 'loot-core/types/models';
 
+import { aqlQuery } from '../../../queries/aqlQuery';
 import {
   categoryLists,
   type QueryDataEntity,
@@ -15,6 +14,8 @@ import { filterEmptyRows } from './filterEmptyRows';
 import { makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
 import { sortData } from './sortData';
+
+import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 export function createGroupedSpreadsheet({
   startDate,
@@ -49,7 +50,7 @@ export function createGroupedSpreadsheet({
     let assets: QueryDataEntity[];
     let debts: QueryDataEntity[];
     [assets, debts] = await Promise.all([
-      runQuery(
+      aqlQuery(
         makeQuery(
           'assets',
           startDate,
@@ -59,7 +60,7 @@ export function createGroupedSpreadsheet({
           filters,
         ),
       ).then(({ data }) => data),
-      runQuery(
+      aqlQuery(
         makeQuery(
           'debts',
           startDate,

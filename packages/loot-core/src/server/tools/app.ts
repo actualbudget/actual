@@ -2,7 +2,7 @@
 import { q } from '../../shared/query';
 import { TransactionEntity } from '../../types/models';
 import { createApp } from '../app';
-import { runQuery } from '../aql';
+import { aqlQuery } from '../aql';
 import * as db from '../db';
 import { runMutator } from '../mutators';
 import { batchUpdateTransactions } from '../transactions';
@@ -21,6 +21,7 @@ async function fixSplitTransactions(): Promise<{
   numDeleted: number;
   numTransfersFixed: number;
   numNonParentErrorsFixed: number;
+  numParentTransactionsWithCategoryFixed: number;
   mismatchedSplits: TransactionEntity[];
 }> {
   // 1. Check for child transactions that have a blank payee, and set
@@ -76,7 +77,7 @@ async function fixSplitTransactions(): Promise<{
   });
 
   const splitTransactions = (
-    await runQuery(
+    await aqlQuery(
       q('transactions')
         .options({ splits: 'grouped' })
         .filter({
@@ -123,12 +124,29 @@ async function fixSplitTransactions(): Promise<{
     await batchUpdateTransactions({ updated });
   });
 
+  // 7. Clear categories of parent transactions
+  const parentTransactionsWithCategory = await db.all<
+    Pick<db.DbViewTransactionInternal, 'id'>
+  >(`
+    SELECT id FROM transactions WHERE isParent = 1 AND category IS NOT NULL
+  `);
+
+  await runMutator(async () => {
+    const updated = parentTransactionsWithCategory.map(({ id }) => ({
+      id,
+      category: null,
+    }));
+    await batchUpdateTransactions({ updated });
+  });
+
   return {
     numBlankPayees: blankPayeeRows.length,
     numCleared: clearedRows.length,
     numDeleted: deletedRows.length,
     numTransfersFixed: brokenTransfers.length,
     numNonParentErrorsFixed: errorRows.length,
+    numParentTransactionsWithCategoryFixed:
+      parentTransactionsWithCategory.length,
     mismatchedSplits,
   };
 }

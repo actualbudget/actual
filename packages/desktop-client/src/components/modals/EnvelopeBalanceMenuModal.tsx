@@ -6,10 +6,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
-import { envelopeBudget } from 'loot-core/client/queries';
-
-import { useCategory } from '../../hooks/useCategory';
+import { type Modal as ModalType } from '../../modals/modalsSlice';
+import { envelopeBudget } from '../../queries/queries';
 import {
   BalanceWithCarryover,
   CarryoverIndicator,
@@ -22,6 +20,8 @@ import {
   ModalTitle,
 } from '../common/Modal';
 import { CellValueText } from '../spreadsheet/CellValue';
+
+import { useCategory } from '@desktop-client/hooks/useCategory';
 
 type EnvelopeBalanceMenuModalProps = Omit<
   Extract<ModalType, { name: 'envelope-balance-menu' }>['options'],
@@ -73,7 +73,7 @@ export function EnvelopeBalanceMenuModal({
             </Text>
             <BalanceWithCarryover
               isDisabled
-              isMobileEnvelopeModal
+              shouldInlineGoalStatus
               carryover={envelopeBudget.catCarryover(categoryId)}
               balance={envelopeBudget.catBalance(categoryId)}
               goal={envelopeBudget.catGoal(categoryId)}

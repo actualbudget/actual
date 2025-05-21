@@ -31,11 +31,11 @@ import {
   currentDate,
 } from 'loot-core/shared/months';
 
-import { useLocale } from '../../hooks/useLocale';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
-
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
+
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 const pickerStyles: CSSProperties = {
   '& .pika-single.actual-date-picker': {

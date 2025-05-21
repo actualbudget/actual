@@ -1,0 +1,78 @@
+name: Publish npm packages
+
+# # Npm packages are published for every new tag
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-pack:
+    runs-on: ubuntu-latest
+    name: Build and pack npm packages
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+
+      - name: Build Web
+        run: yarn build:server
+
+      - name: Pack the web and server packages
+        run: |
+          yarn workspace @actual-app/web pack --filename @actual-app/web.tgz
+          yarn workspace @actual-app/sync-server pack --filename @actual-app/sync-server.tgz
+
+      - name: Build API
+        run: yarn build:api
+
+      - name: Pack the api package
+        run: |
+          yarn workspace @actual-app/api pack --filename @actual-app/api.tgz
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-packages
+          path: |
+            packages/desktop-client/@actual-app/web.tgz
+            packages/sync-server/@actual-app/sync-server.tgz
+            packages/api/@actual-app/api.tgz
+
+  publish:
+    runs-on: ubuntu-latest
+    name: Publish npm packages
+    needs: build-and-pack
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Download the artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: npm-packages
+
+      - name: Setup node and npm registry
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish Web
+        run: |
+          npm publish desktop-client/@actual-app/web.tgz --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish Sync-Server
+        run: |
+          npm publish sync-server/@actual-app/sync-server.tgz --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish API
+        run: |
+          npm publish api/@actual-app/api.tgz --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
