@@ -15,9 +15,11 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { type CurveType } from 'recharts/types/shape/Curve';
 
 import { amountToCurrencyNoDecimal } from 'loot-core/shared/util';
 
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
 
@@ -51,6 +53,7 @@ export function NetWorthGraph({
 }: NetWorthGraphProps) {
   const { t } = useTranslation();
   const privacyMode = usePrivacyMode();
+  const [rechartGraphType] = useSyncedPref('rechart-graph-type');
 
   const tickFormatter = tick => {
     const res = privacyMode
@@ -196,7 +199,7 @@ export function NetWorthGraph({
                 </defs>
 
                 <Area
-                  type="linear"
+                  type={rechartGraphType as CurveType}
                   dot={false}
                   activeDot={false}
                   animationDuration={0}
