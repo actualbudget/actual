@@ -98,67 +98,89 @@ export function TagsSettings() {
               value={newTag}
               onChangeValue={setNewTag}
             />
-            <View style={{ margin: 'auto 0' }}>
-              <ColorPicker
-                value={newColor}
-                onChange={color => setNewColor(color.toString('hex'))}
-              >
-                <Text className={getTagCSS('', newColor)}>
-                  <Trans>Pick Color</Trans>
-                </Text>
-              </ColorPicker>
-            </View>
-            <Button
-              variant="bare"
-              type="submit"
+            <View
               style={{
-                borderWidth: 0,
-                backgroundColor: 'transparent',
+                display: 'flex',
+                flexDirection: 'row',
+                gap: '8px',
               }}
             >
-              <SvgAdd width={10} height={10} />
-            </Button>
-          </Form>
-          <View style={{ display: 'inline' }}>
-            <Text className={getTagCSS('')}>#Default</Text>
-          </View>
-
-          {Object.keys(tags)
-            .sort()
-            .map(tag => (
-              <View
-                key={tag}
+              <View style={{ margin: 'auto 0' }}>
+                <ColorPicker
+                  value={newColor}
+                  onChange={color => setNewColor(color.toString('hex'))}
+                >
+                  <Text className={getTagCSS('', newColor)}>
+                    <Trans>Pick Color</Trans>
+                  </Text>
+                </ColorPicker>
+              </View>
+              <Button
+                variant="bare"
+                type="submit"
                 style={{
-                  display: 'flex',
-                  flexDirection: 'row',
+                  borderWidth: 0,
+                  backgroundColor: 'transparent',
+                  marginLeft: 'auto',
                 }}
               >
-                <ColorPicker
-                  value={getTagColor(tag)}
-                  onChange={color =>
-                    setTagsPref({ ...tags, [tag]: color.toString('hex') })
-                  }
-                >
-                  <Text className={getTagCSS(tag)}>#{tag}</Text>
-                </ColorPicker>
+                <SvgAdd width={13} height={13} />
+              </Button>
+            </View>
+          </Form>
+          <View
+            style={{
+              padding: '15px',
+              border: '1px solid ' + theme.pillBorderDark,
+              borderRadius: '4px',
+              background: theme.tableBackground,
+              display: 'flex',
+              flexDirection: 'row',
+              flexFlow: 'row wrap',
+              gap: '8px',
+            }}
+          >
+            <View style={{ display: 'inline' }}>
+              <Text className={getTagCSS('')}>#Default</Text>
+            </View>
 
-                <Button
-                  variant="bare"
-                  onPress={() => onTrashTag(tag)}
+            {Object.keys(tags)
+              .sort()
+              .map(tag => (
+                <View
+                  key={tag}
                   style={{
-                    height: '100%',
-                    borderWidth: 0,
-                    backgroundColor: 'transparent',
+                    display: 'flex',
+                    flexDirection: 'row',
                   }}
                 >
-                  <SvgTrash
-                    width={10}
-                    height={10}
-                    style={{ color: theme.errorText }}
-                  />
-                </Button>
-              </View>
-            ))}
+                  <ColorPicker
+                    value={getTagColor(tag)}
+                    onChange={color =>
+                      setTagsPref({ ...tags, [tag]: color.toString('hex') })
+                    }
+                  >
+                    <Text className={getTagCSS(tag)}>#{tag}</Text>
+                  </ColorPicker>
+
+                  <Button
+                    variant="bare"
+                    onPress={() => onTrashTag(tag)}
+                    style={{
+                      height: '100%',
+                      borderWidth: 0,
+                      backgroundColor: 'transparent',
+                    }}
+                  >
+                    <SvgTrash
+                      width={13}
+                      height={13}
+                      style={{ color: theme.errorText }}
+                    />
+                  </Button>
+                </View>
+              ))}
+          </View>
         </View>
       }
     >
