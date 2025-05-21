@@ -123,40 +123,42 @@ export function TagsSettings() {
             <Text className={getTagCSS('')}>#Default</Text>
           </View>
 
-          {Object.keys(tags).map(tag => (
-            <View
-              key={tag}
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-              }}
-            >
-              <ColorPicker
-                value={getTagColor(tag)}
-                onChange={color =>
-                  setTagsPref({ ...tags, [tag]: color.toString('hex') })
-                }
-              >
-                <Text className={getTagCSS(tag)}>#{tag}</Text>
-              </ColorPicker>
-
-              <Button
-                variant="bare"
-                onPress={() => onTrashTag(tag)}
+          {Object.keys(tags)
+            .sort()
+            .map(tag => (
+              <View
+                key={tag}
                 style={{
-                  height: '100%',
-                  borderWidth: 0,
-                  backgroundColor: 'transparent',
+                  display: 'flex',
+                  flexDirection: 'row',
                 }}
               >
-                <SvgTrash
-                  width={10}
-                  height={10}
-                  style={{ color: theme.errorText }}
-                />
-              </Button>
-            </View>
-          ))}
+                <ColorPicker
+                  value={getTagColor(tag)}
+                  onChange={color =>
+                    setTagsPref({ ...tags, [tag]: color.toString('hex') })
+                  }
+                >
+                  <Text className={getTagCSS(tag)}>#{tag}</Text>
+                </ColorPicker>
+
+                <Button
+                  variant="bare"
+                  onPress={() => onTrashTag(tag)}
+                  style={{
+                    height: '100%',
+                    borderWidth: 0,
+                    backgroundColor: 'transparent',
+                  }}
+                >
+                  <SvgTrash
+                    width={10}
+                    height={10}
+                    style={{ color: theme.errorText }}
+                  />
+                </Button>
+              </View>
+            ))}
         </View>
       }
     >
