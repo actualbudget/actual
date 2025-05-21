@@ -5,14 +5,14 @@ import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
-
-import { useMetadataPref } from '../../hooks/useMetadataPref';
+import { pushModal } from '../../modals/modalsSlice';
 import { useDispatch } from '../../redux';
 import { Link } from '../common/Link';
 import { useServerURL } from '../ServerContext';
 
 import { Setting } from './UI';
+
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 export function EncryptionSettings() {
   const dispatch = useDispatch();

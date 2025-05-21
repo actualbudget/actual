@@ -1,6 +1,3 @@
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
-import { runQuery } from 'loot-core/client/query-helpers';
-import { validForTransfer } from 'loot-core/client/transfer';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
@@ -11,6 +8,7 @@ import {
   ungroupTransactions,
   updateTransaction,
 } from 'loot-core/shared/transactions';
+import { validForTransfer } from 'loot-core/shared/transfer';
 import { applyChanges, type Diff } from 'loot-core/shared/util';
 import {
   type PayeeEntity,
@@ -19,6 +17,8 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
+import { pushModal } from '../modals/modalsSlice';
+import { aqlQuery } from '../queries/aqlQuery';
 import { useDispatch } from '../redux';
 
 type BatchEditProps = {
@@ -60,7 +60,7 @@ export function useTransactionBatchActions() {
   const dispatch = useDispatch();
 
   const onBatchEdit = async ({ name, ids, onSuccess }: BatchEditProps) => {
-    const { data } = await runQuery(
+    const { data } = await aqlQuery(
       q('transactions')
         .filter({ id: { $oneof: ids } })
         .select('*')
@@ -267,7 +267,7 @@ export function useTransactionBatchActions() {
 
   const onBatchDuplicate = async ({ ids, onSuccess }: BatchDuplicateProps) => {
     const onConfirmDuplicate = async (ids: Array<TransactionEntity['id']>) => {
-      const { data } = await runQuery(
+      const { data } = await aqlQuery(
         q('transactions')
           .filter({ id: { $oneof: ids } })
           .select('*')
@@ -316,7 +316,7 @@ export function useTransactionBatchActions() {
                   ? `Are you sure you want to delete these ${ids.length} transaction${ids.length > 1 ? 's' : ''}?`
                   : undefined,
               onConfirm: async () => {
-                const { data } = await runQuery(
+                const { data } = await aqlQuery(
                   q('transactions')
                     .filter({ id: { $oneof: ids } })
                     .select('*')
@@ -386,7 +386,7 @@ export function useTransactionBatchActions() {
     account,
     onSuccess,
   }: BatchLinkScheduleProps) => {
-    const { data: transactions } = await runQuery(
+    const { data: transactions } = await aqlQuery(
       q('transactions')
         .filter({ id: { $oneof: ids } })
         .select('*')
@@ -429,7 +429,7 @@ export function useTransactionBatchActions() {
     confirmReason: string,
     onConfirm: (ids: Array<TransactionEntity['id']>) => void,
   ) => {
-    const { data } = await runQuery(
+    const { data } = await aqlQuery(
       q('transactions')
         .filter({ id: { $oneof: ids }, reconciled: true })
         .select('*')
@@ -461,7 +461,7 @@ export function useTransactionBatchActions() {
     onSuccess: (ids: string[]) => void,
   ) => {
     const onConfirmTransfer = async (ids: string[]) => {
-      const { data: transactions } = await runQuery(
+      const { data: transactions } = await aqlQuery(
         q('transactions')
           .filter({ id: { $oneof: ids } })
           .select('*'),

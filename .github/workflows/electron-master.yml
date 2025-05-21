@@ -77,13 +77,68 @@ jobs:
           name: actual-electron-${{ matrix.os }}-appx
           path: |
             packages/desktop-electron/dist/*.appx
-      - name: Add to Release
+      - name: Process release version
+        id: process_version
+        run: |
+          echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+      - name: Add to new release
         uses: softprops/action-gh-release@v2
         with:
           draft: true
+          body: |
+            :link: [View release notes](https://actualbudget.org/blog/release-${{ steps.process_version.outputs.version }})
+
+            ## Desktop releases
+            Please note: Microsoft store updates can sometimes lag behind the main release by a couple of days while they verify the new version.
+
+            <a href="https://apps.microsoft.com/detail/9p2hmlhsdbrm?cid=Github+Releases&mode=direct">
+              <img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
+            </a>
           files: |
             packages/desktop-electron/dist/*.dmg
             packages/desktop-electron/dist/*.exe
             !packages/desktop-electron/dist/Actual-windows.exe
             packages/desktop-electron/dist/*.AppImage
             packages/desktop-electron/dist/*.flatpak
+
+  publish-microsoft-store:
+    needs: build
+    runs-on: windows-latest
+    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
+    steps:
+      - name: Install StoreBroker
+        shell: powershell
+        run: |
+          Install-Module -Name StoreBroker -AcceptLicense -Force -Scope CurrentUser -Verbose
+
+      - name: Download Microsoft Store artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: actual-electron-windows-latest-appx
+
+      - name: Submit to Microsoft Store
+        shell: powershell
+        run: |
+          # Disable telemetry
+          $global:SBDisableTelemetry = $true
+
+          # Authenticate against the store
+          $pass = ConvertTo-SecureString -String '${{ secrets.MICROSOFT_STORE_CLIENT_SECRET }}' -AsPlainText -Force
+          $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList ${{ secrets.MICROSOFT_STORE_CLIENT_ID }},$pass
+          Set-StoreBrokerAuthentication -TenantId '${{ secrets.MICROSOFT_STORE_TENANT_ID }}' -Credential $cred
+
+          # Zip and create metadata files
+          $artifacts = Get-ChildItem -Path . -Filter *.appx | Select-Object -ExpandProperty FullName
+          New-StoreBrokerConfigFile -Path "$PWD/config.json" -AppId ${{ secrets.MICROSOFT_STORE_PRODUCT_ID }}
+          New-SubmissionPackage -ConfigPath "$PWD/config.json" -DisableAutoPackageNameFormatting -AppxPath $artifacts -OutPath "$PWD" -OutName submission
+
+          # Submit the app
+          # See https://github.com/microsoft/StoreBroker/blob/master/Documentation/USAGE.md#the-easy-way
+          Update-ApplicationSubmission `
+            -AppId ${{ secrets.MICROSOFT_STORE_PRODUCT_ID }} `
+            -SubmissionDataPath "submission.json" `
+            -PackagePath "submission.zip" `
+            -ReplacePackages `
+            -NoStatus `
+            -AutoCommit `
+            -Force

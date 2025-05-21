@@ -2,7 +2,7 @@ import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
 import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
 import { createApp } from '../app';
-import { runQuery as aqlQuery } from '../aql';
+import { aqlQuery } from '../aql';
 import * as db from '../db';
 import { APIError } from '../errors';
 import { categoryGroupModel, categoryModel } from '../models';
@@ -15,7 +15,7 @@ import { undoable } from '../undo';
 import * as actions from './actions';
 import * as budget from './base';
 import * as cleanupActions from './cleanup-template';
-import * as goalActions from './goaltemplates';
+import * as goalActions from './goal-template';
 
 export interface BudgetHandlers {
   'budget/budget-amount': typeof actions.setBudget;

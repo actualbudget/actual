@@ -11,25 +11,26 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  type ScheduleStatusType,
-  type ScheduleStatuses,
-} from 'loot-core/client/data-hooks/schedules';
 import { format as monthUtilFormat } from 'loot-core/shared/months';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { getScheduledAmount } from 'loot-core/shared/schedules';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type ScheduleEntity } from 'loot-core/types/models';
 
-import { useAccounts } from '../../hooks/useAccounts';
-import { useContextMenu } from '../../hooks/useContextMenu';
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { usePayees } from '../../hooks/usePayees';
 import { PrivacyFilter } from '../PrivacyFilter';
 import { Table, TableHeader, Row, Field, Cell } from '../table';
 import { DisplayId } from '../util/DisplayId';
 
 import { StatusBadge } from './StatusBadge';
+
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { usePayees } from '@desktop-client/hooks/usePayees';
+import {
+  type ScheduleStatusType,
+  type ScheduleStatuses,
+} from '@desktop-client/hooks/useSchedules';
 
 type SchedulesTableProps = {
   isLoading?: boolean;

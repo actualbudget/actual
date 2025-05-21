@@ -12,7 +12,6 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
-import { envelopeBudget, trackingBudget } from 'loot-core/client/queries';
 import * as monthUtils from 'loot-core/shared/months';
 import {
   type CategoryEntity,
@@ -20,6 +19,7 @@ import {
 } from 'loot-core/types/models';
 
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
+import { envelopeBudget, trackingBudget } from '../../../queries/queries';
 import { PrivacyFilter } from '../../PrivacyFilter';
 import { CellValue } from '../../spreadsheet/CellValue';
 import { useFormat } from '../../spreadsheet/useFormat';
@@ -277,7 +277,7 @@ function ExpenseGroupCells({
   show3Columns,
   showBudgetedColumn,
 }: ExpenseGroupCellsProps) {
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const format = useFormat();
 
   const columnWidth = getColumnWidth({ show3Columns });
@@ -291,17 +291,17 @@ function ExpenseGroupCells({
   };
 
   const budgeted =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.groupBudgeted(group.id)
       : envelopeBudget.groupBudgeted(group.id);
 
   const spent =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.groupSumAmount(group.id)
       : envelopeBudget.groupSumAmount(group.id);
 
   const balance =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.groupBalance(group.id)
       : envelopeBudget.groupBalance(group.id);
 

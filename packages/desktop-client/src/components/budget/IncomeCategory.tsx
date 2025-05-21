@@ -3,7 +3,6 @@ import React, { type ComponentProps } from 'react';
 
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { useDragRef } from '../../hooks/useDragRef';
 import {
   useDraggable,
   useDroppable,
@@ -15,6 +14,8 @@ import { Row } from '../table';
 
 import { RenderMonths } from './RenderMonths';
 import { SidebarCategory } from './SidebarCategory';
+
+import { useDragRef } from '@desktop-client/hooks/useDragRef';
 
 type IncomeCategoryProps = {
   cat: CategoryEntity;

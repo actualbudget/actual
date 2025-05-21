@@ -15,9 +15,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useSchedules } from 'loot-core/client/data-hooks/schedules';
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
-import { initiallyLoadPayees } from 'loot-core/client/queries/queriesSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
@@ -26,10 +23,8 @@ import { mapField, friendlyOp } from 'loot-core/shared/rules';
 import { describeSchedule } from 'loot-core/shared/schedules';
 import { type RuleEntity, type NewRuleEntity } from 'loot-core/types/models';
 
-import { useAccounts } from '../hooks/useAccounts';
-import { useCategories } from '../hooks/useCategories';
-import { usePayees } from '../hooks/usePayees';
-import { useSelected, SelectedProvider } from '../hooks/useSelected';
+import { pushModal } from '../modals/modalsSlice';
+import { initiallyLoadPayees } from '../queries/queriesSlice';
 import { useDispatch } from '../redux';
 
 import { InfiniteScrollWrapper } from './common/InfiniteScrollWrapper';
@@ -37,6 +32,15 @@ import { Link } from './common/Link';
 import { Search } from './common/Search';
 import { RulesHeader } from './rules/RulesHeader';
 import { RulesList } from './rules/RulesList';
+
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { usePayees } from '@desktop-client/hooks/usePayees';
+import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import {
+  useSelected,
+  SelectedProvider,
+} from '@desktop-client/hooks/useSelected';
 
 function mapValue(
   field,

@@ -37,16 +37,6 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import {
-  closeAndDownloadBudget,
-  closeAndLoadBudget,
-  createBudget,
-  downloadBudget,
-  loadAllFiles,
-  loadBudget,
-} from 'loot-core/client/budgets/budgetsSlice';
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
-import { getUserData } from 'loot-core/client/users/usersSlice';
-import {
   isElectron,
   isNonProductionEnvironment,
 } from 'loot-core/shared/environment';
@@ -58,10 +48,21 @@ import {
   type SyncedLocalFile,
 } from 'loot-core/types/file';
 
-import { useInitialMount } from '../../hooks/useInitialMount';
-import { useMetadataPref } from '../../hooks/useMetadataPref';
+import {
+  closeAndDownloadBudget,
+  closeAndLoadBudget,
+  createBudget,
+  downloadBudget,
+  loadAllFiles,
+  loadBudget,
+} from '../../budgets/budgetsSlice';
+import { pushModal } from '../../modals/modalsSlice';
 import { useSelector, useDispatch } from '../../redux';
+import { getUserData } from '../../users/usersSlice';
 import { useMultiuserEnabled } from '../ServerContext';
+
+import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 function getFileDescription(file: File, t: (key: string) => string) {
   if (file.state === 'unknown') {

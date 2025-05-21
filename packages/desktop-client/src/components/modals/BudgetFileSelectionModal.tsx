@@ -4,10 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { useMetadataPref } from '../../hooks/useMetadataPref';
 import { useSelector } from '../../redux';
 import { Modal, ModalHeader, ModalCloseButton } from '../common/Modal';
 import { BudgetFileSelection } from '../manager/BudgetFileSelection';
+
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 export function BudgetFileSelectionModal() {
   const { t } = useTranslation();

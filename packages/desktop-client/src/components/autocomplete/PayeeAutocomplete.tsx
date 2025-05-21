@@ -22,15 +22,10 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
-import {
-  createPayee,
-  getActivePayees,
-} from 'loot-core/client/queries/queriesSlice';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { type AccountEntity, type PayeeEntity } from 'loot-core/types/models';
 
-import { useAccounts } from '../../hooks/useAccounts';
-import { useCommonPayees, usePayees } from '../../hooks/usePayees';
+import { createPayee, getActivePayees } from '../../queries/queriesSlice';
 import { useDispatch } from '../../redux';
 
 import {
@@ -39,6 +34,9 @@ import {
   AutocompleteFooter,
 } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
+
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCommonPayees, usePayees } from '@desktop-client/hooks/usePayees';
 
 export type PayeeAutocompleteItem = PayeeEntity;
 

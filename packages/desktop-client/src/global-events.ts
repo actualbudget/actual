@@ -1,25 +1,18 @@
 // @ts-strict-ignore
-import { setAppState } from 'loot-core/client/app/appSlice';
-import { closeBudgetUI } from 'loot-core/client/budgets/budgetsSlice';
-import {
-  closeModal,
-  pushModal,
-  replaceModal,
-} from 'loot-core/client/modals/modalsSlice';
+import { listen } from 'loot-core/platform/client/fetch';
+import * as undo from 'loot-core/platform/client/undo';
+
+import { setAppState } from './app/appSlice';
+import { closeBudgetUI } from './budgets/budgetsSlice';
+import { closeModal, pushModal, replaceModal } from './modals/modalsSlice';
 import {
   addGenericErrorNotification,
   addNotification,
-} from 'loot-core/client/notifications/notificationsSlice';
-import { loadPrefs } from 'loot-core/client/prefs/prefsSlice';
-import {
-  getAccounts,
-  getCategories,
-  getPayees,
-} from 'loot-core/client/queries/queriesSlice';
-import * as sharedListeners from 'loot-core/client/shared-listeners';
-import { type AppStore } from 'loot-core/client/store';
-import { listen } from 'loot-core/platform/client/fetch';
-import * as undo from 'loot-core/platform/client/undo';
+} from './notifications/notificationsSlice';
+import { loadPrefs } from './prefs/prefsSlice';
+import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
+import { type AppStore } from './redux/store';
+import * as syncEvents from './sync-events';
 
 export function handleGlobalEvents(store: AppStore) {
   const unlistenServerError = listen('server-error', () => {
@@ -50,7 +43,7 @@ export function handleGlobalEvents(store: AppStore) {
     );
   });
 
-  const unlistenSync = sharedListeners.listenForSyncEvent(store);
+  const unlistenSync = syncEvents.listenForSyncEvent(store);
 
   const unlistenUndo = listen('undo-event', undoState => {
     const { tables, undoTag } = undoState;

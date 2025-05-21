@@ -7,9 +7,10 @@ import { View } from '@actual-app/components/view';
 
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { useCategories } from '../../../hooks/useCategories';
 import { CategoryAutocomplete } from '../../autocomplete/CategoryAutocomplete';
 import { addToBeBudgetedGroup, removeCategoriesFromGroups } from '../util';
+
+import { useCategories } from '@desktop-client/hooks/useCategories';
 
 type CoverMenuProps = {
   showToBeBudgeted?: boolean;
@@ -46,13 +47,14 @@ export function CoverMenu({
     }
     onClose();
   }
+
   return (
     <View style={{ padding: 10 }}>
       <View style={{ marginBottom: 5 }}>
         <Trans>Cover from a category:</Trans>
       </View>
 
-      <InitialFocus>
+      <InitialFocus<HTMLInputElement>>
         {node => (
           <CategoryAutocomplete
             categoryGroups={filteredCategoryGroups}

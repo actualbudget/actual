@@ -4,7 +4,7 @@
   "license": "MIT",
   "description": "An API for Actual",
   "engines": {
-    "node": ">=18.12.0"
+    "node": ">=20"
   },
   "main": "dist/index.js",
   "types": "@types/index.d.ts",
@@ -31,8 +31,8 @@
   },
   "devDependencies": {
     "@types/uuid": "^9.0.8",
-    "tsc-alias": "^1.8.11",
-    "typescript": "^5.8.2",
-    "vitest": "^3.0.2"
+    "tsc-alias": "^1.8.16",
+    "typescript": "^5.8.3",
+    "vitest": "^3.0.9"
   }
 }

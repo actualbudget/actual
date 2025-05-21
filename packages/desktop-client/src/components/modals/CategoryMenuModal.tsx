@@ -18,11 +18,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
-
-import { useCategory } from '../../hooks/useCategory';
-import { useCategoryGroup } from '../../hooks/useCategoryGroup';
-import { useNotes } from '../../hooks/useNotes';
+import { type Modal as ModalType } from '../../modals/modalsSlice';
 import {
   Modal,
   ModalCloseButton,
@@ -30,6 +26,10 @@ import {
   ModalTitle,
 } from '../common/Modal';
 import { Notes } from '../Notes';
+
+import { useCategory } from '@desktop-client/hooks/useCategory';
+import { useCategoryGroup } from '@desktop-client/hooks/useCategoryGroup';
+import { useNotes } from '@desktop-client/hooks/useNotes';
 
 type CategoryMenuModalProps = Extract<
   ModalType,

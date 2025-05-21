@@ -13,7 +13,7 @@ import { Handlers } from '../types/handlers';
 import { app as accountsApp } from './accounts/app';
 import { app as adminApp } from './admin/app';
 import { installAPI } from './api';
-import { runQuery as aqlQuery } from './aql';
+import { aqlQuery } from './aql';
 import { app as authApp } from './auth/app';
 import { app as budgetApp } from './budget/app';
 import { app as budgetFilesApp } from './budgetfiles/app';
@@ -26,7 +26,6 @@ import { app } from './main-app';
 import { mutator, runHandler } from './mutators';
 import { app as notesApp } from './notes/app';
 import { app as payeesApp } from './payees/app';
-import * as Platform from './platform';
 import { get } from './post';
 import { app as preferencesApp } from './preferences/app';
 import * as prefs from './prefs';
@@ -151,13 +150,6 @@ app.combine(
 );
 
 export function getDefaultDocumentDir() {
-  if (Platform.isMobile) {
-    // On mobile, unfortunately we need to be backwards compatible
-    // with the old folder structure which does not store files inside
-    // of an `Actual` directory. In the future, if we really care, we
-    // can migrate them, but for now just return the documents dir
-    return process.env.ACTUAL_DOCUMENT_DIR;
-  }
   return fs.join(process.env.ACTUAL_DOCUMENT_DIR, 'Actual');
 }
 

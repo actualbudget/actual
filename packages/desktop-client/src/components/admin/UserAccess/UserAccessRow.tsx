@@ -5,16 +5,17 @@ import { useTranslation } from 'react-i18next';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
-import { signOut } from 'loot-core/client/users/usersSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type UserAvailable } from 'loot-core/types/models';
 
-import { useMetadataPref } from '../../../hooks/useMetadataPref';
+import { addNotification } from '../../../notifications/notificationsSlice';
 import { useDispatch } from '../../../redux';
+import { signOut } from '../../../users/usersSlice';
 import { Checkbox } from '../../forms';
 import { Row, Cell } from '../../table';
+
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 
 type UserAccessProps = {
   access: UserAvailable;

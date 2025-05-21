@@ -8,6 +8,10 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
+import {
+  SvgArrowsSynchronize,
+  SvgCalendar3,
+} from '@actual-app/components/icons/v2';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -15,7 +19,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { envelopeBudget } from 'loot-core/client/queries';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import * as monthUtils from 'loot-core/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
@@ -24,8 +27,7 @@ import {
   type CategoryEntity,
 } from 'loot-core/types/models';
 
-import { useContextMenu } from '../../../hooks/useContextMenu';
-import { useUndo } from '../../../hooks/useUndo';
+import { envelopeBudget } from '../../../queries/queries';
 import { type Binding, type SheetFields } from '../../spreadsheet';
 import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
 import { useSheetName } from '../../spreadsheet/useSheetName';
@@ -36,6 +38,11 @@ import { makeAmountGrey } from '../util';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
+
+import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 
 export function useEnvelopeSheetName<
   FieldName extends SheetFields<'envelope-budget'>,
@@ -233,6 +240,16 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
 
   const { showUndoNotification } = useUndo();
 
+  const navigate = useNavigate();
+
+  const { schedule, scheduleStatus, isScheduleRecurring, description } =
+    useCategoryScheduleGoalTemplateIndicator({
+      category,
+      month,
+    });
+
+  const showScheduleIndicator = schedule && scheduleStatus;
+
   return (
     <View
       style={{
@@ -387,10 +404,44 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         />
       </View>
       <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
-        <span
+        <View
           data-testid="category-month-spent"
           onClick={() => onShowActivity(category.id, month)}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: showScheduleIndicator
+              ? 'space-between'
+              : 'flex-end',
+            gap: 2,
+          }}
         >
+          {showScheduleIndicator && (
+            <View title={description}>
+              <Button
+                variant="bare"
+                style={{
+                  color:
+                    scheduleStatus === 'missed'
+                      ? theme.errorText
+                      : scheduleStatus === 'due'
+                        ? theme.warningText
+                        : theme.upcomingText,
+                }}
+                onPress={() =>
+                  schedule._account
+                    ? navigate(`/accounts/${schedule._account}`)
+                    : navigate('/accounts')
+                }
+              >
+                {isScheduleRecurring ? (
+                  <SvgArrowsSynchronize style={{ width: 12, height: 12 }} />
+                ) : (
+                  <SvgCalendar3 style={{ width: 12, height: 12 }} />
+                )}
+              </Button>
+            </View>
+          )}
           <EnvelopeCellValue
             binding={envelopeBudget.catSumAmount(category.id)}
             type="financial"
@@ -406,7 +457,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               />
             )}
           </EnvelopeCellValue>
-        </span>
+        </View>
       </Field>
       <Field
         ref={balanceMenuTriggerRef}
@@ -513,21 +564,13 @@ export function IncomeCategoryMonth({
         }}
       >
         <span onClick={() => onShowActivity(category.id, month)}>
-          <EnvelopeCellValue
-            binding={envelopeBudget.catSumAmount(category.id)}
-            type="financial"
-          >
-            {props => (
-              <CellValueText
-                {...props}
-                className={css({
-                  cursor: 'pointer',
-                  ':hover': { textDecoration: 'underline' },
-                  ...makeAmountGrey(props.value),
-                })}
-              />
-            )}
-          </EnvelopeCellValue>
+          <BalanceWithCarryover
+            carryover={envelopeBudget.catCarryover(category.id)}
+            balance={envelopeBudget.catSumAmount(category.id)}
+            goal={envelopeBudget.catGoal(category.id)}
+            budgeted={envelopeBudget.catBudgeted(category.id)}
+            longGoal={envelopeBudget.catLongGoal(category.id)}
+          />
         </span>
       </Field>
     </View>

@@ -9,11 +9,11 @@
     "update-client": "bin/update-client",
     "build": "yarn build:dist && electron-builder",
     "build:dist": "tsc --p tsconfig.dist.json && yarn copy-static-assets",
-    "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* build",
+    "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* build/desktop-electron",
     "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron .",
     "e2e": "npx playwright test"
   },
-  "main": "build/index.js",
+  "main": "build/desktop-electron/index.js",
   "build": {
     "appId": "com.actualbudget.actual",
     "files": [
@@ -27,7 +27,7 @@
       "!build/client-build/sql-wasm.wasm",
       "!build/loot-core/lib-dist/electron/{browser,bundle.mobile*}"
     ],
-    "beforePack": "./build/beforePackHook.js",
+    "beforePack": "./build/desktop-electron/beforePackHook.js",
     "mac": {
       "category": "public.app-category.finance",
       "icon": "icons/icon.icns",
@@ -95,15 +95,15 @@
     "promise-retry": "^2.0.1"
   },
   "devDependencies": {
-    "@electron/notarize": "2.4.0",
-    "@electron/rebuild": "3.6.0",
+    "@electron/notarize": "2.5.0",
+    "@electron/rebuild": "3.7.2",
     "@playwright/test": "1.41.2",
     "@types/copyfiles": "^2",
     "@types/fs-extra": "^11",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
-    "electron": "30.0.6",
+    "electron": "30.5.1",
     "electron-builder": "24.13.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.3"
   }
 }

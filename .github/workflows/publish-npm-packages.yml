@@ -17,7 +17,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Build Web
-        run: yarn build:browser
+        run: yarn build:server
 
       - name: Pack the web and server packages
         run: |
@@ -56,7 +56,7 @@ jobs:
       - name: Setup node and npm registry
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: 20
           registry-url: 'https://registry.npmjs.org'
 
       - name: Publish Web

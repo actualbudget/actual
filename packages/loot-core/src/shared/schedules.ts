@@ -12,7 +12,7 @@ export function getStatus(
   nextDate: string,
   completed: boolean,
   hasTrans: boolean,
-  upcomingLength: string,
+  upcomingLength: string = '7',
 ) {
   const upcomingDays = getUpcomingDays(upcomingLength);
   const today = monthUtils.currentDay();

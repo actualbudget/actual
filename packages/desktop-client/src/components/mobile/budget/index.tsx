@@ -5,8 +5,11 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { sync } from 'loot-core/client/app/appSlice';
-import { collapseModals, pushModal } from 'loot-core/client/modals/modalsSlice';
+import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
+
+import { sync } from '../../../app/appSlice';
+import { collapseModals, pushModal } from '../../../modals/modalsSlice';
 import {
   applyBudgetAction,
   createCategory,
@@ -15,15 +18,7 @@ import {
   deleteGroup,
   updateCategory,
   updateGroup,
-} from 'loot-core/client/queries/queriesSlice';
-import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
-import { send } from 'loot-core/platform/client/fetch';
-import * as monthUtils from 'loot-core/shared/months';
-
-import { useCategories } from '../../../hooks/useCategories';
-import { useLocale } from '../../../hooks/useLocale';
-import { useLocalPref } from '../../../hooks/useLocalPref';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
+} from '../../../queries/queriesSlice';
 import { useDispatch } from '../../../redux';
 import { prewarmMonth } from '../../budget/util';
 import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
@@ -31,15 +26,21 @@ import { SyncRefresh } from '../../SyncRefresh';
 
 import { BudgetTable } from './BudgetTable';
 
-function isBudgetType(input?: string): input is 'rollover' | 'report' {
-  return ['rollover', 'report'].includes(input);
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+
+function isBudgetType(input?: string): input is 'envelope' | 'tracking' {
+  return ['envelope', 'tracking'].includes(input);
 }
 
 export function Budget() {
   const locale = useLocale();
   const { list: categories, grouped: categoryGroups } = useCategories();
   const [budgetTypePref] = useSyncedPref('budgetType');
-  const budgetType = isBudgetType(budgetTypePref) ? budgetTypePref : 'rollover';
+  const budgetType = isBudgetType(budgetTypePref) ? budgetTypePref : 'envelope';
   const spreadsheet = useSpreadsheet();
 
   const currMonth = monthUtils.currentMonth();
@@ -77,7 +78,7 @@ export function Budget() {
   );
 
   const onShowBudgetSummary = useCallback(() => {
-    if (budgetType === 'report') {
+    if (budgetType === 'tracking') {
       dispatch(
         pushModal({
           modal: {
@@ -288,7 +289,7 @@ export function Budget() {
   //     'Copy last month’s budget',
   //     'Set budgets to zero',
   //     'Set budgets to 3 month average',
-  //     budgetType === 'report' && 'Apply to all future budgets',
+  //     budgetType === 'tracking' && 'Apply to all future budgets',
   //   ].filter(Boolean);
 
   //   props.showActionSheetWithOptions(
@@ -312,7 +313,7 @@ export function Budget() {
   //           onBudgetAction('set-3-avg');
   //           break;
   //         case 4:
-  //           if (budgetType === 'report') {
+  //           if (budgetType === 'tracking') {
   //             onBudgetAction('set-all-future');
   //           }
   //           break;
@@ -458,7 +459,7 @@ export function Budget() {
       dispatch(
         pushModal({
           modal: {
-            name: `${budgetType === 'report' ? 'tracking' : 'envelope'}-budget-month-menu`,
+            name: `${budgetType}-budget-month-menu`,
             options: {
               month,
               onBudgetAction,

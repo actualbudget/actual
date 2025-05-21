@@ -15,19 +15,20 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { loggedIn } from 'loot-core/client/users/usersSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { isElectron } from 'loot-core/shared/environment';
 import { type OpenIdConfig } from 'loot-core/types/models';
 
-import { useNavigate } from '../../../hooks/useNavigate';
 import { useDispatch } from '../../../redux';
 import { warningBackground } from '../../../style/themes/dark';
+import { loggedIn } from '../../../users/usersSlice';
 import { Link } from '../../common/Link';
 import { useAvailableLoginMethods, useLoginMethod } from '../../ServerContext';
 
 import { useBootstrapped, Title } from './common';
 import { OpenIdForm } from './OpenIdForm';
+
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 function PasswordLogin({ setError, dispatch }) {
   const [password, setPassword] = useState('');

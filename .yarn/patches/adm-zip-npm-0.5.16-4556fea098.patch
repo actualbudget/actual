@@ -1,0 +1,10 @@
+diff --git a/methods/inflater.js b/methods/inflater.js
+index 8769e66e82b25541aba80b1ac6429199c9a8179f..1d4402402f0e1aaf64062c1f004c3d6e6fe93e76 100644
+--- a/methods/inflater.js
++++ b/methods/inflater.js
+@@ -1,4 +1,4 @@
+-const version = +(process.versions ? process.versions.node : "").split(".")[0] || 0;
++const version = +(process?.versions?.node ?? "").split(".")[0] || 0;
+ 
+ module.exports = function (/*Buffer*/ inbuf, /*number*/ expectedLength) {
+     var zlib = require("zlib");

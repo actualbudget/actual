@@ -10,12 +10,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { t } from 'i18next';
 
-import {
-  type Modal as ModalType,
-  pushModal,
-} from 'loot-core/client/modals/modalsSlice';
-import { getPayeesById } from 'loot-core/client/queries/queriesSlice';
-import { runQuery, liveQuery } from 'loot-core/client/query-helpers';
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
@@ -27,10 +21,10 @@ import {
   type RecurConfig,
 } from 'loot-core/types/models';
 
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { useLocale } from '../../hooks/useLocale';
-import { usePayees } from '../../hooks/usePayees';
-import { useSelected, SelectedProvider } from '../../hooks/useSelected';
+import { type Modal as ModalType, pushModal } from '../../modals/modalsSlice';
+import { aqlQuery } from '../../queries/aqlQuery';
+import { liveQuery } from '../../queries/liveQuery';
+import { getPayeesById } from '../../queries/queriesSlice';
 import { useDispatch } from '../../redux';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
@@ -43,6 +37,14 @@ import { SelectedItemsButton } from '../table';
 import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable';
 import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
 import { GenericInput } from '../util/GenericInput';
+
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { usePayees } from '@desktop-client/hooks/usePayees';
+import {
+  useSelected,
+  SelectedProvider,
+} from '@desktop-client/hooks/useSelected';
 
 type Fields = {
   payee: null | string;
@@ -316,7 +318,7 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
   );
 
   async function loadSchedule() {
-    const { data } = await runQuery(q('schedules').filter({ id }).select('*'));
+    const { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
     return data[0];
   }
 
@@ -480,7 +482,7 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
   async function onSave(close: () => void, schedule: Partial<ScheduleEntity>) {
     dispatch({ type: 'form-error', error: null });
     if (state.fields.name) {
-      const { data: sameName } = await runQuery(
+      const { data: sameName } = await aqlQuery(
         q('schedules').filter({ name: state.fields.name }).select('id'),
       );
       if (sameName.length > 0 && sameName[0].id !== schedule.id) {
