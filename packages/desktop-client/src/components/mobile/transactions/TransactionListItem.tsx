@@ -38,6 +38,7 @@ import {
 
 import { lookupName, Status } from './TransactionEdit';
 
+import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
@@ -45,7 +46,6 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
 import { usePayee } from '@desktop-client/hooks/usePayee';
 import { useSelector } from '@desktop-client/redux';
-import { NotesTagFormatter } from '@desktop-client/style/tags';
 
 const ROW_HEIGHT = 60;
 

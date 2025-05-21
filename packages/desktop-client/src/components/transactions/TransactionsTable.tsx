@@ -83,6 +83,7 @@ import { TransactionMenu } from './TransactionMenu';
 import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
+import { NotesTagFormatter } from '../../notes/NotesTagFormatter';
 import {
   getStatusProps,
   type StatusTypes,
@@ -127,7 +128,6 @@ import {
   getCategoriesById,
 } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
-import { NotesTagFormatter } from '@desktop-client/style/tags';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;
