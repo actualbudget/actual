@@ -1,7 +1,7 @@
 import React, { type ReactNode, useState, useEffect, useMemo } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { styles } from '@actual-app/components/styles';
+import { type CSSProperties, styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
@@ -30,6 +30,8 @@ import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type NetWorthComponentProps = {
   accounts: AccountEntity[];
+  style?: CSSProperties;
+  hideNetWorth?: boolean;
   hideFilters?: boolean;
   filterConditions?: RuleConditionEntity[];
   filterConditionsOp?: 'and' | 'or';
@@ -43,6 +45,8 @@ type NetWorthComponentProps = {
 
 export function NetWorthComponent({
   accounts,
+  style,
+  hideNetWorth = false,
   hideFilters = false,
   filterConditions,
   filterConditionsOp,
@@ -130,7 +134,13 @@ export function NetWorthComponent({
   }
 
   return (
-    <View>
+    <View
+      style={{
+        height: '100%',
+        display: 'flex',
+        ...style,
+      }}
+    >
       <Header
         allMonths={allMonths}
         start={start}
@@ -160,8 +170,8 @@ export function NetWorthComponent({
       <View
         style={{
           backgroundColor: theme.tableBackground,
-          padding: 20,
-          paddingTop: 0,
+          paddingBottom: 20,
+          paddingRight: 20,
           flex: '1 0 auto',
           overflowY: 'auto',
         }}
@@ -172,17 +182,20 @@ export function NetWorthComponent({
             paddingTop: 20,
           }}
         >
-          <View
-            style={{ ...styles.largeText, fontWeight: 400, marginBottom: 5 }}
-          >
-            <PrivacyFilter>{integerToCurrency(data.netWorth)}</PrivacyFilter>
-          </View>
+          {!hideNetWorth && (
+            <View
+              style={{ ...styles.largeText, fontWeight: 400, marginBottom: 5 }}
+            >
+              <PrivacyFilter>{integerToCurrency(data.netWorth)}</PrivacyFilter>
+            </View>
+          )}
           <PrivacyFilter>
             <Change amount={data.totalChange} />
           </PrivacyFilter>
         </View>
 
         <NetWorthGraph
+          style={{ flex: 1 }}
           graphData={data.graphData}
           showTooltip={!isNarrowWidth}
         />

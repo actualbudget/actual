@@ -40,6 +40,7 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
+import { useSyncedPref } from '../../hooks/useSyncedPref';
 import { AnimatedRefresh } from '../AnimatedRefresh';
 import { Search } from '../common/Search';
 import { FilterButton } from '../filters/FiltersMenu';
@@ -202,6 +203,9 @@ export function AccountHeader({
   const isUsingServer = syncServerStatus !== 'no-server';
   const isServerOffline = syncServerStatus === 'offline';
   const [_, setExpandSplitsPref] = useLocalPref('expand-splits');
+  const [showAccountNetWorthPref] = useSyncedPref(
+    'show-account-net-worth-chart',
+  );
 
   const locale = useLocale();
 
@@ -271,42 +275,60 @@ export function AccountHeader({
     <>
       <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
         <View
-          style={{ marginTop: 2, marginBottom: 10, alignItems: 'flex-start' }}
+          style={{
+            flexDirection: 'column',
+            marginTop: 2,
+            justifyContent: 'space-between',
+            gap: 10,
+          }}
         >
           <View
             style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 3,
+              alignItems: 'flex-start',
+              gap: 10,
             }}
           >
-            {!!account?.bank && (
-              <AccountSyncSidebar
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 3,
+              }}
+            >
+              {!!account?.bank && (
+                <AccountSyncSidebar
+                  account={account}
+                  failedAccounts={failedAccounts}
+                  accountsSyncing={accountsSyncing}
+                />
+              )}
+              <AccountNameField
                 account={account}
-                failedAccounts={failedAccounts}
-                accountsSyncing={accountsSyncing}
+                accountName={accountName}
+                isNameEditable={isNameEditable}
+                saveNameError={saveNameError}
+                onSaveName={onSaveName}
               />
-            )}
-            <AccountNameField
+            </View>
+
+            <Balances
+              balanceQuery={balanceQuery}
+              showExtraBalances={showExtraBalances}
+              onToggleExtraBalances={onToggleExtraBalances}
               account={account}
-              accountName={accountName}
-              isNameEditable={isNameEditable}
-              saveNameError={saveNameError}
-              onSaveName={onSaveName}
+              isFiltered={isFiltered}
+              filteredAmount={filteredAmount}
             />
           </View>
+          {showAccountNetWorthPref === 'true' && selectedAccounts.length && (
+            <NetWorthComponent
+              hideNetWorth
+              hideFilters
+              accounts={selectedAccounts}
+              style={{ height: '30vh', minHeight: '250px', maxHeight: '400px' }}
+            />
+          )}
         </View>
-        <Balances
-          balanceQuery={balanceQuery}
-          showExtraBalances={showExtraBalances}
-          onToggleExtraBalances={onToggleExtraBalances}
-          account={account}
-          isFiltered={isFiltered}
-          filteredAmount={filteredAmount}
-        />
-        {selectedAccounts.length && (
-          <NetWorthComponent hideFilters accounts={selectedAccounts} />
-        )}
         <Stack
           spacing={2}
           direction="row"
