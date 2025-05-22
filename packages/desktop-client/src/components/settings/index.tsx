@@ -29,6 +29,7 @@ import { EncryptionSettings } from './Encryption';
 import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
 import { FormatSettings } from './Format';
+import { GraphSettings } from './Graph';
 import { LanguageSettings } from './LanguageSettings';
 import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
@@ -204,6 +205,7 @@ export function Settings() {
         <About />
         <ThemeSettings />
         <FormatSettings />
+        <GraphSettings />
         <LanguageSettings />
         <AuthSettings />
         <EncryptionSettings />

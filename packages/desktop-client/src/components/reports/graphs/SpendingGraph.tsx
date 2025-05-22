@@ -14,6 +14,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { type CurveType } from 'recharts/types/shape/Curve';
 
 import {
   amountToCurrency,
@@ -21,6 +22,7 @@ import {
 } from 'loot-core/shared/util';
 import { type SpendingEntity } from 'loot-core/types/models';
 
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { Container } from '../Container';
 import { numberFormatterTooltip } from '../numberFormatter';
 
@@ -145,6 +147,8 @@ export function SpendingGraph({
   compareTo,
 }: SpendingGraphProps) {
   const privacyMode = usePrivacyMode();
+  const [rechartGraphType] = useSyncedPref('rechart-graph-type');
+
   const balanceTypeOp = 'cumulative';
 
   const selection = mode === 'single-month' ? compareTo : mode;
@@ -285,7 +289,7 @@ export function SpendingGraph({
                 </defs>
 
                 <Area
-                  type="linear"
+                  type={rechartGraphType as CurveType}
                   dot={false}
                   activeDot={{
                     fill: theme.reportsGreen,
@@ -300,7 +304,7 @@ export function SpendingGraph({
                   fillOpacity={1}
                 />
                 <Area
-                  type="linear"
+                  type={rechartGraphType as CurveType}
                   dot={false}
                   activeDot={false}
                   animationDuration={0}

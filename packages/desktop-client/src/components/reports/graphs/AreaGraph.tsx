@@ -14,6 +14,7 @@ import {
   LabelList,
   ResponsiveContainer,
 } from 'recharts';
+import { type CurveType } from 'recharts/types/shape/Curve';
 
 import {
   amountToCurrency,
@@ -24,6 +25,7 @@ import {
   type DataEntity,
 } from 'loot-core/types/models';
 
+import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { Container } from '../Container';
 
 import { adjustTextSize } from './adjustTextSize';
@@ -168,6 +170,8 @@ export function AreaGraph({
   showTooltip = true,
 }: AreaGraphProps) {
   const privacyMode = usePrivacyMode();
+  const [rechartGraphType] = useSyncedPref('rechart-graph-type');
+
   const dataMax = Math.max(...data.intervalData.map(i => i[balanceTypeOp]));
   const dataMin = Math.min(...data.intervalData.map(i => i[balanceTypeOp]));
 
@@ -300,7 +304,7 @@ export function AreaGraph({
                 </defs>
 
                 <Area
-                  type="linear"
+                  type={rechartGraphType as CurveType}
                   dot={false}
                   activeDot={false}
                   animationDuration={0}
