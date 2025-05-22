@@ -9,8 +9,8 @@ import {
 import { useCategory } from './useCategory';
 import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTemplates';
 import { usePreviewTransactions } from './usePreviewTransactions';
+import { useSheetValue } from './useSheetValue';
 
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { categoryBalance } from '@desktop-client/spreadsheet/bindings';
 
 type UseCategoryPreviewTransactionsProps = {

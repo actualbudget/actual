@@ -5,7 +5,7 @@ import {
   type SheetNames,
   type SheetFields,
   type Binding,
-} from '../spreadsheet';
+} from '@desktop-client/spreadsheet';
 
 function unresolveName(name) {
   const idx = name.indexOf('!');

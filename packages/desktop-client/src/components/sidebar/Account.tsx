@@ -35,10 +35,7 @@ import {
   updateAccount,
 } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
-import {
-  type SheetFields,
-  type Binding,
-} from '@desktop-client/spreadsheet';
+import { type SheetFields, type Binding } from '@desktop-client/spreadsheet';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,

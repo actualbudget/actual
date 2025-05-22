@@ -11,8 +11,8 @@ import {
 import { useAccounts } from './useAccounts';
 import { usePayees } from './usePayees';
 import { usePreviewTransactions } from './usePreviewTransactions';
+import { useSheetValue } from './useSheetValue';
 
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { accountBalance } from '@desktop-client/spreadsheet/bindings';
 
 type UseAccountPreviewTransactionsProps = {

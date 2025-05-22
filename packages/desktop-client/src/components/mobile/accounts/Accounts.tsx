@@ -46,10 +46,7 @@ import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { replaceModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
-import {
-  type Binding,
-  type SheetFields,
-} from '@desktop-client/spreadsheet';
+import { type Binding, type SheetFields } from '@desktop-client/spreadsheet';
 import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 type AccountHeaderProps<SheetFieldName extends SheetFields<'account'>> = {
