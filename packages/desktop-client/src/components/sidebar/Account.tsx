@@ -194,9 +194,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
                         width: '100%',
                       }}
                       onBlur={() => setIsEditing(false)}
-                      onEnter={e => {
-                        const inputEl = e.target as HTMLInputElement;
-                        const newAccountName = inputEl.value;
+                      onEnter={newAccountName => {
                         if (newAccountName.trim() !== '') {
                           dispatch(
                             updateAccount({

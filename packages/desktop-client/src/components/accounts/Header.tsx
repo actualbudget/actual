@@ -1,6 +1,5 @@
 import React, {
   type ComponentProps,
-  Fragment,
   type ReactNode,
   useRef,
   useState,
@@ -355,6 +354,9 @@ export function AccountHeader({
             value={search}
             onChange={onSearch}
             inputRef={searchInput}
+            // Remove marginRight magically being added by Stack...
+            // We need to refactor the Stack component
+            style={{ marginRight: 0 }}
           />
           {workingHard ? (
             <View>
@@ -598,12 +600,12 @@ function AccountNameField({
 
   if (editingName) {
     return (
-      <Fragment>
+      <>
         <InitialFocus>
           <Input
             defaultValue={accountName}
-            onEnter={e => handleSave(e.currentTarget.value)}
-            onBlur={e => handleSave(e.target.value)}
+            onEnter={handleSave}
+            onUpdate={handleSave}
             onEscape={() => setEditingName(false)}
             style={{
               fontSize: 25,
@@ -620,7 +622,7 @@ function AccountNameField({
         {saveNameError && (
           <View style={{ color: theme.warningText }}>{saveNameError}</View>
         )}
-      </Fragment>
+      </>
     );
   } else {
     if (isNameEditable) {

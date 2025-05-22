@@ -390,7 +390,7 @@ export function DateSelect({
       <Input
         id={id}
         {...inputProps}
-        inputRef={inputRef}
+        ref={inputRef}
         value={value}
         onPointerUp={() => {
           if (!embedded) {

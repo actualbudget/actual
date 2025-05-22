@@ -368,7 +368,7 @@ export function PayeeAutocomplete({
           setPayeeFieldFocused(false);
         },
         onFocus: () => setPayeeFieldFocused(true),
-        onChange: setRawPayee,
+        onChangeValue: setRawPayee,
       }}
       onUpdate={(id, inputValue) => onUpdate?.(id, makeNew(id, inputValue))}
       onSelect={handleSelect}

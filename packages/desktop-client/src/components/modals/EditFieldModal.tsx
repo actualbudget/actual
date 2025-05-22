@@ -203,10 +203,10 @@ export function EditFieldModal({
             </Button>
           </View>
           <Input
-            inputRef={noteInputRef}
+            ref={noteInputRef}
             autoFocus
-            onEnter={e => {
-              onSelectNote(e.currentTarget.value, noteAmend);
+            onEnter={value => {
+              onSelectNote(value, noteAmend);
               close();
             }}
             style={inputStyle}
@@ -219,8 +219,8 @@ export function EditFieldModal({
       label = t('Amount');
       editor = ({ close }) => (
         <Input
-          onEnter={e => {
-            onSelect(e.currentTarget.value);
+          onEnter={value => {
+            onSelect(value);
             close();
           }}
           style={inputStyle}

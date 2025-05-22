@@ -73,7 +73,7 @@ export function SaveReportName({
               <Input
                 value={name}
                 id="name-field"
-                inputRef={inputRef}
+                ref={inputRef}
                 onChangeValue={setName}
                 style={{ marginTop: 10 }}
               />

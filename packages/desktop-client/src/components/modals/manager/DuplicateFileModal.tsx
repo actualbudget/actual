@@ -150,8 +150,8 @@ export function DuplicateFileModal({
                   value={newName}
                   aria-label={t('New Budget Name')}
                   aria-invalid={nameError ? 'true' : 'false'}
-                  onChange={event => setNewName(event.target.value)}
-                  onBlur={event => validateAndSetName(event.target.value)}
+                  onChangeValue={setNewName}
+                  onUpdate={validateAndSetName}
                   style={{ flex: 1 }}
                 />
               </InitialFocus>

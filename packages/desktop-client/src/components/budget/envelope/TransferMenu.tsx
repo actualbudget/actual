@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { Form } from 'react-aria-components';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -57,52 +58,53 @@ export function TransferMenu({
   };
 
   return (
-    <View style={{ padding: 10 }}>
-      <View style={{ marginBottom: 5 }}>
-        <Trans>Transfer this amount:</Trans>
-      </View>
-      <View>
-        <InitialFocus>
-          <Input
-            defaultValue={_initialAmount}
-            onUpdate={value => setAmount(value)}
-            onEnter={() => _onSubmit(amount, toCategoryId)}
-          />
-        </InitialFocus>
-      </View>
-      <View style={{ margin: '10px 0 5px 0' }}>To:</View>
+    <Form
+      onSubmit={e => {
+        e.preventDefault();
+        _onSubmit(amount, toCategoryId);
+      }}
+    >
+      <View style={{ padding: 10 }}>
+        <View style={{ marginBottom: 5 }}>
+          <Trans>Transfer this amount:</Trans>
+        </View>
+        <View>
+          <InitialFocus>
+            <Input defaultValue={_initialAmount} onUpdate={setAmount} />
+          </InitialFocus>
+        </View>
+        <View style={{ margin: '10px 0 5px 0' }}>To:</View>
 
-      <CategoryAutocomplete
-        categoryGroups={filteredCategoryGroups}
-        value={null}
-        openOnFocus={true}
-        onSelect={(id: string | undefined) => setToCategoryId(id || null)}
-        inputProps={{
-          onEnter: event =>
-            !event.defaultPrevented && _onSubmit(amount, toCategoryId),
-          placeholder: '(none)',
-        }}
-        showHiddenCategories={true}
-      />
-
-      <View
-        style={{
-          alignItems: 'flex-end',
-          marginTop: 10,
-        }}
-      >
-        <Button
-          variant="primary"
-          style={{
-            fontSize: 12,
-            paddingTop: 3,
-            paddingBottom: 3,
+        <CategoryAutocomplete
+          categoryGroups={filteredCategoryGroups}
+          value={null}
+          openOnFocus={true}
+          onSelect={(id: string | undefined) => setToCategoryId(id || null)}
+          inputProps={{
+            placeholder: '(none)',
           }}
-          onPress={() => _onSubmit(amount, toCategoryId)}
+          showHiddenCategories={true}
+        />
+
+        <View
+          style={{
+            alignItems: 'flex-end',
+            marginTop: 10,
+          }}
         >
-          <Trans>Transfer</Trans>
-        </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            style={{
+              fontSize: 12,
+              paddingTop: 3,
+              paddingBottom: 3,
+            }}
+          >
+            <Trans>Transfer</Trans>
+          </Button>
+        </View>
       </View>
-    </View>
+    </Form>
   );
 }
