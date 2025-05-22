@@ -31,14 +31,11 @@ const defaultInputClassName = css({
   '&[data-focused]': {
     border: '1px solid ' + theme.formInputBorderSelected,
     boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
-    '::selection': {
-      backgroundColor: theme.formInputTextReadOnlySelection,
-    },
   },
   '&[data-disabled]': {
     color: theme.formInputTextPlaceholder,
-    '::placeholder': { color: theme.formInputTextPlaceholder },
   },
+  '::placeholder': { color: theme.formInputTextPlaceholder },
   ...styles.smallText,
 });
 
