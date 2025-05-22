@@ -1,4 +1,4 @@
-import d from 'date-fns';
+import * as d from 'date-fns';
 
 import Fallback from './integration-bank.js';
 

@@ -3,6 +3,7 @@ import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
+import { type Locale } from 'date-fns';
 
 import { tsToRelativeTime } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';

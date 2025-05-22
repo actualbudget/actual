@@ -1,6 +1,7 @@
 import React, { type JSX } from 'react';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
+import { type Locale } from 'date-fns';
 import * as d from 'date-fns';
 import { t } from 'i18next';
 
