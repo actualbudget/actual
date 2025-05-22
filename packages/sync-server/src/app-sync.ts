@@ -372,9 +372,7 @@ app.get('/get-user-file-info', (req, res) => {
 });
 
 app.post('/delete-user-file', (req, res) => {
-  const { fileId } = req.body;
-
-  if (!fileId) {
+  if (!req.body?.fileId) {
     res.status(422).send({
       details: 'fileId-required',
       reason: 'unprocessable-entity',
@@ -382,6 +380,8 @@ app.post('/delete-user-file', (req, res) => {
     });
     return;
   }
+
+  const { fileId } = req.body;
 
   const filesService = new FilesService(getAccountDb());
   if (!verifyFileExists(fileId, filesService, res, 'file-not-found')) {
