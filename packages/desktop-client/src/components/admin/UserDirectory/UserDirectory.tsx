@@ -108,6 +108,8 @@ function UserDirectoryContent({
     ).slice(0, 100 + page * 50);
   }, [allUsers, filter, page]);
   const selectedInst = useSelected('manage-users', allUsers, []);
+  const selectedCount = selectedInst.items.size;
+
   const [hoveredUser, setHoveredUser] = useState(null);
 
   const onSearchChange = useCallback(
@@ -327,7 +329,9 @@ function UserDirectoryContent({
           <Stack direction="row" align="center" justify="flex-end" spacing={2}>
             {selectedInst.items.size > 0 && (
               <Button onPress={onDeleteSelected}>
-                <Trans>Delete {{ count: selectedInst.items.size }} users</Trans>
+                <Trans count={selectedCount}>
+                  Delete {{ selectedCount }} users
+                </Trans>
               </Button>
             )}
             <Button variant="primary" onPress={onAddUser}>
