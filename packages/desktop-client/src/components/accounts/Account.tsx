@@ -261,6 +261,7 @@ type AccountInternalProps = {
 };
 type AccountInternalState = {
   search: string;
+  selectedAccounts: AccountEntity[];
   filterConditions: ConditionEntity[];
   filterId?: SavedFilter | undefined;
   filterConditionsOp: 'and' | 'or';
@@ -329,6 +330,7 @@ class AccountInternal extends PureComponent<
       isAdding: false,
       sort: null,
       filteredAmount: null,
+      selectedAccounts: this.getSelectedAccounts(),
     };
   }
 
@@ -421,6 +423,16 @@ class AccountInternal extends PureComponent<
     //Resest sort/filter/search on account change
     if (this.props.accountId !== prevProps.accountId) {
       this.setState({ sort: null, search: '', filterConditions: [] });
+    }
+
+    // If the accounts change, we need to recompute the list of selected accounts
+    if (
+      (prevProps.accounts.length === 0 && this.props.accounts.length > 0) ||
+      this.props.accountId !== prevProps.accountId
+    ) {
+      this.setState({
+        selectedAccounts: this.getSelectedAccounts(),
+      });
     }
   }
 
@@ -909,6 +921,32 @@ class AccountInternal extends PureComponent<
       this.paged.query.calculate({ $sum: '$amount' }),
     );
     return amount;
+  };
+
+  getSelectedAccounts = (): AccountEntity[] => {
+    switch (this.props.accountId) {
+      case 'onbudget':
+        return this.props.accounts.filter(account => !account.offbudget);
+      case 'offbudget':
+        return this.props.accounts.filter(account => account.offbudget);
+      case 'uncategorized':
+        return [];
+      default: {
+        if (typeof this.props.accountId === 'string') {
+          const account = this.props.accounts.find(
+            account => account.id === this.props.accountId,
+          );
+          if (account) {
+            return [account];
+          } else {
+            console.warn('Account not found');
+            return [];
+          }
+        } else {
+          return this.props.accounts;
+        }
+      }
+    }
   };
 
   isNew = (id: TransactionEntity['id']) => {
@@ -1733,6 +1771,7 @@ class AccountInternal extends PureComponent<
                 isNameEditable={isNameEditable ?? false}
                 workingHard={workingHard ?? false}
                 account={account}
+                selectedAccounts={this.state.selectedAccounts}
                 filterId={filterId}
                 savedFilters={this.props.savedFilters}
                 accountName={accountName}

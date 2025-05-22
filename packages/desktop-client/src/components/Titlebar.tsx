@@ -5,7 +5,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { SvgArrowLeft } from '@actual-app/components/icons/v1';
+import { SvgArrowLeft, SvgChart } from '@actual-app/components/icons/v1';
 import {
   SvgAlertTriangle,
   SvgNavigationMenu,
@@ -16,6 +16,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles, type CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
@@ -36,6 +37,7 @@ import { MonthCountSelector } from './budget/MonthCountSelector';
 import { Link } from './common/Link';
 import { HelpMenu } from './HelpMenu';
 import { LoggedInUser } from './LoggedInUser';
+import { ModeButton } from './reports/ModeButton';
 import { useServerURL } from './ServerContext';
 import { useSidebar } from './sidebar/SidebarProvider';
 import { useSheetValue } from './spreadsheet/useSheetValue';
@@ -63,6 +65,37 @@ function UncategorizedButton() {
     >
       {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
     </Link>
+  );
+}
+
+function NetWorthButton() {
+  const [showAccountNetWorthPref, setShowAccountNetWorthPref] = useSyncedPref(
+    'show-account-net-worth-chart',
+  );
+  const showAccountNetWorth = String(showAccountNetWorthPref) === 'true';
+
+  return (
+    <Tooltip
+      placement="bottom start"
+      content={<Text>{showAccountNetWorth ? 'Hide' : 'Show'} Net Worth</Text>}
+      style={{ ...styles.tooltip, lineHeight: 1.5, padding: '6px 10px' }}
+    >
+      <ModeButton
+        selected={showAccountNetWorth}
+        onSelect={() =>
+          setShowAccountNetWorthPref(String(!showAccountNetWorth))
+        }
+        style={{
+          color: theme.buttonPrimaryText,
+          backgroundColor: theme.buttonBareBackground,
+          width: 26,
+          height: 26,
+          padding: '5px 6px',
+        }}
+      >
+        <SvgChart />
+      </ModeButton>
+    </Tooltip>
   );
 }
 
@@ -346,6 +379,9 @@ export function Titlebar({ style }: TitlebarProps) {
         <UncategorizedButton />
         {isDevelopmentEnvironment() && !Platform.isPlaywright && (
           <ThemeSelector />
+        )}
+        {/^\/accounts(?!\/uncategorized)/.test(window.location.pathname) && (
+          <NetWorthButton />
         )}
         <PrivacyButton />
         {serverURL ? <SyncButton /> : null}

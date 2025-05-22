@@ -17,6 +17,7 @@ export type SyncedPrefs = Partial<
     | 'numberFormat'
     | 'hideFraction'
     | 'isPrivacyEnabled'
+    | 'show-account-net-worth-chart'
     | `show-balances-${string}`
     | `show-extra-balances-${string}`
     | `hide-cleared-${string}`
