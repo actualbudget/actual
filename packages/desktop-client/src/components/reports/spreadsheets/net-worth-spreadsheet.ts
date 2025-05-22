@@ -1,4 +1,5 @@
 import * as d from 'date-fns';
+import { type Locale } from 'date-fns';
 import keyBy from 'lodash/keyBy';
 
 import { send } from 'loot-core/platform/client/fetch';
