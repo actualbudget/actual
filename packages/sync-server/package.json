@@ -36,7 +36,7 @@
     "cors": "^2.8.5",
     "date-fns": "^2.30.0",
     "debug": "^4.4.1",
-    "express": "4.21.2",
+    "express": "5.1.0",
     "express-rate-limit": "^7.5.0",
     "express-response-size": "^0.0.3",
     "express-winston": "^4.2.0",
