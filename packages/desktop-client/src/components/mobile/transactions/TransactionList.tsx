@@ -38,13 +38,10 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { setNotificationInset } from '../../../notifications/notificationsSlice';
-import { useDispatch } from '../../../redux';
-import { useScrollListener } from '../../ScrollProvider';
-import { FloatingActionBar } from '../FloatingActionBar';
-
 import { TransactionListItem } from './TransactionListItem';
 
+import { FloatingActionBar } from '@desktop-client/components/mobile/FloatingActionBar';
+import { useScrollListener } from '@desktop-client/components/ScrollProvider';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
@@ -56,6 +53,8 @@ import {
 } from '@desktop-client/hooks/useSelected';
 import { useTransactionBatchActions } from '@desktop-client/hooks/useTransactionBatchActions';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import { setNotificationInset } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 const NOTIFICATION_BOTTOM_INSET = 75;
 

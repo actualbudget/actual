@@ -102,7 +102,7 @@ __metadata:
     body-parser: "npm:^1.20.3"
     convict: "npm:^6.2.4"
     cors: "npm:^2.8.5"
-    date-fns: "npm:^2.30.0"
+    date-fns: "npm:^4.1.0"
     debug: "npm:^4.4.1"
     express: "npm:5.1.0"
     express-rate-limit: "npm:^7.5.0"
@@ -156,7 +156,7 @@ __metadata:
     auto-text-size: "npm:^0.2.3"
     chokidar: "npm:^3.6.0"
     cross-env: "npm:^7.0.3"
-    date-fns: "npm:^2.30.0"
+    date-fns: "npm:^4.1.0"
     debounce: "npm:^1.2.1"
     downshift: "npm:7.6.2"
     focus-visible: "npm:^4.1.5"
@@ -1787,7 +1787,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.14.8, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.23.2, @babel/runtime@npm:^7.23.9, @babel/runtime@npm:^7.25.0, @babel/runtime@npm:^7.26.10, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
+"@babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.14.8, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.23.2, @babel/runtime@npm:^7.23.9, @babel/runtime@npm:^7.25.0, @babel/runtime@npm:^7.26.10, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
   version: 7.27.0
   resolution: "@babel/runtime@npm:7.27.0"
   dependencies:
@@ -7502,6 +7502,7 @@ __metadata:
     eslint-plugin-react: "npm:^7.37.5"
     eslint-plugin-react-hooks: "npm:^5.2.0"
     eslint-plugin-rulesdir: "npm:^0.2.2"
+    eslint-plugin-typescript-paths: "npm:^0.0.33"
     globals: "npm:^15.15.0"
     html-to-image: "npm:^1.11.13"
     husky: "npm:^9.1.7"
@@ -9693,12 +9694,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns@npm:^2.30.0":
-  version: 2.30.0
-  resolution: "date-fns@npm:2.30.0"
-  dependencies:
-    "@babel/runtime": "npm:^7.21.0"
-  checksum: 10/70b3e8ea7aaaaeaa2cd80bd889622a4bcb5d8028b4de9162cbcda359db06e16ff6e9309e54eead5341e71031818497f19aaf9839c87d1aba1e27bb4796e758a9
+"date-fns@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "date-fns@npm:4.1.0"
+  checksum: 10/d5f6e9de5bbc52310f786099e18609289ed5e30af60a71e0646784c8185ddd1d0eebcf7c96b7faaaefc4a8366f3a3a4244d099b6d0866ee2bec80d1361e64342
   languageName: node
   linkType: hard
 
@@ -10979,6 +10978,17 @@ __metadata:
   version: 0.2.2
   resolution: "eslint-plugin-rulesdir@npm:0.2.2"
   checksum: 10/aac282554e5eb5b1fb3944dd43a08be5fd3e0bc33a00738f525df08344bc1d54f4abe3303118582d86776b3146ddb9e09d3fd1af502d484b3354da2bfee2ce24
+  languageName: node
+  linkType: hard
+
+"eslint-plugin-typescript-paths@npm:^0.0.33":
+  version: 0.0.33
+  resolution: "eslint-plugin-typescript-paths@npm:0.0.33"
+  dependencies:
+    jsonc-parser: "npm:^3.2.0"
+  peerDependencies:
+    eslint: ">=8"
+  checksum: 10/8689e339497c76f4da5b8bf64e19f5397855095535e5a90c09d392513c818fce7af700b16f6c90ca75da72ac5a80031ae1a590f8206f81f47bd0a80cf5915aa3
   languageName: node
   linkType: hard
 
@@ -14233,6 +14243,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jsonc-parser@npm:^3.2.0":
+  version: 3.3.1
+  resolution: "jsonc-parser@npm:3.3.1"
+  checksum: 10/9b0dc391f20b47378f843ef1e877e73ec652a5bdc3c5fa1f36af0f119a55091d147a86c1ee86a232296f55c929bba174538c2bf0312610e0817a22de131cc3f4
+  languageName: node
+  linkType: hard
+
 "jsonfile@npm:^4.0.0":
   version: 4.0.0
   resolution: "jsonfile@npm:4.0.0"
@@ -14687,7 +14704,7 @@ __metadata:
     cross-env: "npm:^7.0.3"
     csv-parse: "npm:^4.16.3"
     csv-stringify: "npm:^5.6.5"
-    date-fns: "npm:^2.30.0"
+    date-fns: "npm:^4.1.0"
     deep-equal: "npm:^2.2.3"
     fake-indexeddb: "npm:^3.1.8"
     fast-check: "npm:3.23.2"

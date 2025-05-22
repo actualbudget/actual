@@ -1,4 +1,4 @@
-import d from 'date-fns';
+import * as d from 'date-fns';
 
 import { formatPayeeName } from '../../util/payee-name.js';
 import { title } from '../../util/title/index.js';
