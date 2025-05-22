@@ -10,9 +10,6 @@ import { View } from '@actual-app/components/view';
 import { amountToCurrency } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { Checkbox } from '../../forms';
-import { Row, Field } from '../../table';
-
 import { ParsedDate } from './ParsedDate';
 import {
   applyFieldMappings,
@@ -21,6 +18,9 @@ import {
   type ImportTransaction,
   parseAmountFields,
 } from './utils';
+
+import { Checkbox } from '@desktop-client/components/forms';
+import { Row, Field } from '@desktop-client/components/table';
 
 type TransactionProps = {
   transaction: ImportTransaction;

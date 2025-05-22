@@ -9,10 +9,13 @@ import { uniqueId } from 'lodash';
 import { type Template } from 'loot-core/server/budget/types/templates';
 import { q } from 'loot-core/shared/query';
 
-import { BudgetAutomation } from '../budget/goals/BudgetAutomation';
-import { useBudgetAutomationCategories } from '../budget/goals/useBudgetAutomationCategories';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-
+import { BudgetAutomation } from '@desktop-client/components/budget/goals/BudgetAutomation';
+import { useBudgetAutomationCategories } from '@desktop-client/components/budget/goals/useBudgetAutomationCategories';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
 
 type TemplateWithId = Template & { id: string };

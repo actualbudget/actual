@@ -11,12 +11,15 @@ import { theme } from '@actual-app/components/theme';
 import { send } from 'loot-core/platform/client/fetch';
 import { type PayeeEntity } from 'loot-core/types/models';
 
-import { popModal } from '../../modals/modalsSlice';
-import { useDispatch } from '../../redux';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { DisplayId } from '../util/DisplayId';
-
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useFormatList } from '@desktop-client/hooks/useFormatList';
+import { popModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 export function PostsOfflineNotification() {
   const { t, i18n } = useTranslation();

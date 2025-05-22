@@ -10,8 +10,8 @@ import { q } from 'loot-core/shared/query';
 import { integerToCurrency, integerToAmount } from 'loot-core/shared/util';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
-import { type useSpreadsheet } from '../../../hooks/useSpreadsheet';
-import { runAll, indexCashFlow } from '../util';
+import { runAll, indexCashFlow } from '@desktop-client/components/reports/util';
+import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 export function simpleCashFlow(
   startMonth: string,

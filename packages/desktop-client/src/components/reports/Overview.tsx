@@ -21,14 +21,6 @@ import {
   type Widget,
 } from 'loot-core/types/models';
 
-import {
-  addNotification,
-  removeNotification,
-} from '../../notifications/notificationsSlice';
-import { useDispatch } from '../../redux';
-import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
-import { MobilePageHeader, Page, PageHeader } from '../Page';
-
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { LoadingIndicator } from './LoadingIndicator';
 import { CalendarCard } from './reports/CalendarCard';
@@ -40,12 +32,23 @@ import { SpendingCard } from './reports/SpendingCard';
 import './overview.scss';
 import { SummaryCard } from './reports/SummaryCard';
 
+import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
+import {
+  MobilePageHeader,
+  Page,
+  PageHeader,
+} from '@desktop-client/components/Page';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useDashboard } from '@desktop-client/hooks/useDashboard';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useReports } from '@desktop-client/hooks/useReports';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import {
+  addNotification,
+  removeNotification,
+} from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 

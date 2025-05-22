@@ -17,9 +17,9 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { Checkbox } from '../forms';
-
 import { GraphButton } from './GraphButton';
+
+import { Checkbox } from '@desktop-client/components/forms';
 
 type CategorySelectorProps = {
   categoryGroups: Array<CategoryGroupEntity>;

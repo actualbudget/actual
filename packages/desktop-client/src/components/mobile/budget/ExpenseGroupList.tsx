@@ -10,13 +10,13 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { moveCategoryGroup } from '../../../queries/queriesSlice';
-import { useDispatch } from '../../../redux';
-
 import {
   ExpenseGroupHeader,
   ExpenseGroupListItem,
 } from './ExpenseGroupListItem';
+
+import { moveCategoryGroup } from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type ExpenseGroupListProps = {
   categoryGroups: CategoryGroupEntity[];

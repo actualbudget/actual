@@ -13,12 +13,11 @@ import { View } from '@actual-app/components/view';
 
 import * as Platform from 'loot-core/shared/platform';
 
-import { closeBudget } from '../../budgets/budgetsSlice';
-import { useDispatch } from '../../redux';
-
+import { closeBudget } from '@desktop-client/budgets/budgetsSlice';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useDispatch } from '@desktop-client/redux';
 
 type BudgetNameProps = {
   children?: ReactNode;

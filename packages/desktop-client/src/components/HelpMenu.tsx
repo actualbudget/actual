@@ -10,10 +10,9 @@ import { Popover } from '@actual-app/components/popover';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { useToggle } from 'usehooks-ts';
 
-import { pushModal } from '../modals/modalsSlice';
-import { useDispatch } from '../redux';
-
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 const getPageDocs = (page: string) => {
   switch (page) {

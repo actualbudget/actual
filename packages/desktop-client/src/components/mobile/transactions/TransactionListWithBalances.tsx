@@ -11,14 +11,20 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { Search } from '../../common/Search';
-import type { Binding, SheetNames, SheetFields } from '../../spreadsheet';
-import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
-import { PullToRefresh } from '../PullToRefresh';
-
 import { TransactionList } from './TransactionList';
 
+import { Search } from '@desktop-client/components/common/Search';
+import { PullToRefresh } from '@desktop-client/components/mobile/PullToRefresh';
+import type {
+  Binding,
+  SheetNames,
+  SheetFields,
+} from '@desktop-client/components/spreadsheet';
+import {
+  CellValue,
+  CellValueText,
+} from '@desktop-client/components/spreadsheet/CellValue';
+import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
 import {
   SelectedProvider,
   useSelected,
