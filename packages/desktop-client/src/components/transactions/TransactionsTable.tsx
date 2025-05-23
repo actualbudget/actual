@@ -80,11 +80,9 @@ import {
 } from './table/utils';
 import { TransactionMenu } from './TransactionMenu';
 
-import { NotesTagFormatter } from '../../notes/NotesTagFormatter';
 import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
-import { NotesTagFormatter } from '../../notes/NotesTagFormatter';
 import {
   getStatusProps,
   type StatusTypes,
@@ -122,6 +120,7 @@ import {
   useSplitsExpanded,
 } from '@desktop-client/hooks/useSplitsExpanded';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import {
   getAccountsById,
