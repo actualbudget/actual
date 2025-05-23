@@ -23,87 +23,41 @@ For example:
 - `v23.3.2` - another bugfix launched later in the month of March;
 - `v23.4.0` - first release launched on 9th of April, 2023;
 
-## Setting up the PRs
+## Set up the PRs
 Pull requests will need to be opened in two repositories - [docs](https://github.com/actualbudget/docs), [actual](https://github.com/actualbudget/actual).
 
-Make sure to name the branch `release/X.Y.Z` where `X.Y.Z` is the version number. This will trigger the release notes tooling, which will comment on your PR with the generated release notes. You can then copy-paste the release notes into the `Release-Notes.md` file in the `docs ` repository.
-
-This automation will also delete all the outdated release note files from the `upcoming-release-notes` directory. Make sure you have merged the latest `master` into the release branch and allowed the automation to run before you merge the release PR so all of the files get properly cleaned up.
-
 ### actual
-1. Bump the versions in
-   - `packages/api/package.json`
-   - `packages/desktop-client/package.json`
-   - `packages/desktop-electron/package.json`
-   - `packages/sync-server/package.json`
-2. Open the pull request, the release notes workflow will run and collate the release notes into a comment in the PR.
-3. The PR can now be marked as ready for review.
+- [ ] Run [this GitHub Action](https://github.com/actualbudget/actual/actions/workflows/generate-release-pr.yml) to generate a release PR (for a regular monthly release, leave the arguments set to their default values).
+- [ ] Open the generated PR and ensure the release notes workflow has started to collate the release notes into a comment in the PR. You may need to push an empty commit in order to trigger CI.
+- [ ] Remove `[WIP]` from the PR title to mark it as ready for review, and share in the release channel on Discord.
 
 ### docs
-After the release notes workflows in the actual PR has been run, copy the collated notes into a new blog post using a previous release as a template. The release notes will also need adding to the `docs/releases.md` file.
+- [ ] Open an empty PR. Make sure to name the branch `release/X.Y.Z` where `X.Y.Z` is the version number.
+- [ ] After the release notes workflows in the `actual` PR has been run, copy the collated notes into a new blog post using a previous release as a template. The release notes will also need adding to the `docs/releases.md` file.
 
-## GitHub Tags and Releases
+## Trigger the release pipeline
 
-Once the release has been merged, it needs to be tagged. When the tag is pushed to `actual` it will trigger the Docker stable image and all NPM packages to be built and published.
+Once the release PRs have been merged, the commit in `actual` needs to be tagged. When the tag is pushed, it will trigger the Docker stable image, all NPM packages, and the Windows Store app to be built and published.
 
-Run the below in each repository, or use the GitHub UI.
-```bash
-git tag vX.Y.Z
-git push vX.Y.Z
-```
+- [ ] Run the below in the `actual` repository, or use the GitHub UI.
+    ```bash
+    git tag vX.Y.Z
+    git push vX.Y.Z
+    ```
 
 All NPM packages should be automatically released and pushed to the NPM registry. Check them here:
 - [@actual-app/api](https://www.npmjs.com/package/@actual-app/api)
 - [@actual-app/web](https://www.npmjs.com/package/@actual-app/web)
 - [@actual-app/sync-server](https://www.npmjs.com/package/@actual-app/sync-server)
 
-A GitHub release should be automatically generated on push in [actual](https://github.com/actualbudget/actual). Un-mark it as a draft and change the text to the below
+A Windows Store update should be automatically generated and submitted for certification. The certification process can take up to 3 business days; once complete the app will be in the Store. You can check the update status [here](https://partner.microsoft.com/en-us/dashboard) if you have permission. Note that the Store UI will not correctly reflect the submission status for about 30 minutes after submission.
 
-```markdown
-:link: [View release notes](https://actualbudget.org/blog/release-25.2.0)
+Finally, a draft GitHub release should be automatically created [here](https://github.com/actualbudget/actual/releases).
 
-## Desktop releases
+## Finalize the release
 
-<a href="https://apps.microsoft.com/detail/9p2hmlhsdbrm?cid=Github+Releases&mode=direct">
-  <img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
-</a>
-```
-
-## Windows Store Releases
-
-The Windows Store release process consists of: logging in, uploading the packages, updating the store listing, and submitting for certification.
-
-It's a relatively straight forward process - Microsoft provide a lot of [documentation for it](https://learn.microsoft.com/en-gb/windows/apps/publish/publish-your-app/msix/create-app-submission).
-
-The steps involved in releasing Actual to the Windows Store are detailed below.
-
-**Login to the Microsoft Partner Center:**
-
-1. Visit the [Microsoft Partner Center](https://partner.microsoft.com/en-us/dashboard)
-2. Log in using your Actual Budget account (if you don't have one, ask a core contributor)
-3. Navigate to "Apps and Games" and select "Actual Budget"
-
-**Upload the Packages:**
-
-1. Click "Start update" to create a draft release.
-2. Under "Product Update", choose "Packages".
-3. Delete all of the packages listed for the previous app version.
-4. Upload the new Appx Packages and save (artifacts available on the [Release PR](#release-prs)).
-
-**Update the Store Listing:**
-
-1. Under "Product update", select "Store listings".
-2. Choose "English" for the english listing.
-3. Under "What's new in this version" briefly describe the "Notable improvements" of the release notes.
-
-**Submit to the Store**
-
-When all of the above steps are complete, select "Submit to the Store" to progress to the "Certification" stage.
-
-During the "Certification" stage the app is checked by Microsoft to ensure quality. The certification process can take up to 3 business days, once complete the app will be in the Store.
-
-## Announcement
-
-After the release is out on `actual` - remember to deploy it and do a quick smoke test to verify things still work as expected. If they do: continue with sending an announcement on Discord and Twitter.
+- [ ] After the Docker image for the release is ready and pushed to Docker Hub, remember to deploy it and do a quick smoke test to verify things still work as expected.
+- [ ] Un-draft the GitHub release which will send announcement notifications to all apps.
+- [ ] Wrap up by sending an announcement on Discord and Twitter.
 
 :tada:
