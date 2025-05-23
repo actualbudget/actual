@@ -144,9 +144,10 @@ server {
 
 ## Apache httpd
 
-Apache HTTP server can serve as a reverse proxy using [VirtualHosts](https://httpd.apache.org/docs/2.4/vhosts/examples.html). This snippet would be added to the bottom of httpd.conf. Certbot is supported on httpd but is not used in this example
+Apache HTTP server can serve as a reverse proxy using [VirtualHosts](https://httpd.apache.org/docs/2.4/vhosts/examples.html). This snippet would be added to the bottom of httpd.conf or in a new site.conf in the sites-available folder. Certbot is supported on httpd but is not used in this example
 
-```<VirtualHost *:443>
+```
+<VirtualHost *:443>
   ServerName budget.example.com
   SSLProxyCheckPeerName off
 	SSLProxyVerify none
@@ -154,8 +155,8 @@ Apache HTTP server can serve as a reverse proxy using [VirtualHosts](https://htt
   SSLProxyEngine on
   SSLCertificateFile /etc/letsencrypt/live/example.com/fullchain.pem
   SSLCertificateKeyFile /etc/letsencrypt/live/example.com/privkey.pem
-  ProxyPass / https://127.0.0.1:5006 # this can be a remote host, or a container IP
-  ProxyPassReverse / https://127.0.0.1:5006
+  ProxyPass / http://127.0.0.1:5006 # this can be a remote host, or a container IP
+  ProxyPassReverse / http://127.0.0.1:5006
 </VirtualHost>
 ```
 
