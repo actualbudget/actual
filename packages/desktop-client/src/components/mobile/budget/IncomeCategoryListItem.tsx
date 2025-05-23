@@ -265,22 +265,15 @@ export function IncomeCategoryListItem({
         }}
       >
         <IncomeCategoryName category={category} onEdit={onEdit} />
-        {budgetType === 'envelope' && (
-          <IncomeCategoryCells
-            category={category}
-            month={month}
-            onBudgetAction={onBudgetAction}
-            onPress={onOpenBalanceMenu}
-          />
-        )}
-        {budgetType !== 'envelope' && (
-          <IncomeCategoryCells
-            category={category}
-            month={month}
-            onBudgetAction={onBudgetAction}
-            onPress={onShowActivity}
-          />
-        )}
+        <IncomeCategoryCells
+          key={`${category.id}`}
+          category={category}
+          month={month}
+          onBudgetAction={onBudgetAction}
+          onPress={
+            budgetType === 'envelope' ? onOpenBalanceMenu : onShowActivity
+          }
+        />
       </View>
     </GridListItem>
   );
