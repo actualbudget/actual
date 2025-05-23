@@ -15,13 +15,13 @@ import { getColumnWidth, PILL_STYLE } from './BudgetTable';
 
 import { BalanceWithCarryover } from '@desktop-client/components/budget/BalanceWithCarryover';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { type Binding } from '@desktop-client/components/spreadsheet';
-import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { type Binding } from '@desktop-client/spreadsheet';
 import {
   envelopeBudget,
   trackingBudget,
-} from '@desktop-client/queries/queries';
+} from '@desktop-client/spreadsheet/bindings';
 
 type BalanceCellProps = {
   binding: Binding<

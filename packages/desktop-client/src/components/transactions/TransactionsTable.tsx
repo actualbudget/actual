@@ -89,7 +89,6 @@ import {
   type StatusTypes,
 } from '@desktop-client/components/schedules/StatusBadge';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
-import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
 import {
   Cell,
   CellButton,
@@ -116,6 +115,7 @@ import {
   useSelectedDispatch,
   useSelectedItems,
 } from '@desktop-client/hooks/useSelected';
+import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import {
   type SplitsExpandedContextValue,
   useSplitsExpanded,
@@ -1528,8 +1528,8 @@ const Transaction = memo(function Transaction({
             shouldSaveFromKey,
             inputStyle,
           }) => (
-            <NamespaceContext.Provider
-              value={monthUtils.sheetForMonth(
+            <SheetNameProvider
+              name={monthUtils.sheetForMonth(
                 monthUtils.monthFromDate(transaction.date),
               )}
             >
@@ -1545,7 +1545,7 @@ const Transaction = memo(function Transaction({
                 onSelect={onSave}
                 showHiddenCategories={false}
               />
-            </NamespaceContext.Provider>
+            </SheetNameProvider>
           )}
         </CustomCell>
       )}

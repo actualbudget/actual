@@ -39,13 +39,14 @@ import {
   openAccountCloseModal,
   pushModal,
 } from '@desktop-client/modals/modalsSlice';
-import * as queries from '@desktop-client/queries/queries';
+import * as queries from '@desktop-client/queries';
 import {
   markAccountRead,
   reopenAccount,
   updateAccount,
 } from '@desktop-client/queries/queriesSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
+import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 export function AccountTransactions({
   account,
@@ -384,27 +385,27 @@ function queriesFromAccountId(
   switch (id) {
     case 'onbudget':
       return {
-        balance: queries.onBudgetAccountBalance(),
+        balance: bindings.onBudgetAccountBalance(),
       };
     case 'offbudget':
       return {
-        balance: queries.offBudgetAccountBalance(),
+        balance: bindings.offBudgetAccountBalance(),
       };
     case 'closed':
       return {
-        balance: queries.closedAccountBalance(),
+        balance: bindings.closedAccountBalance(),
       };
     case 'uncategorized':
       return {
-        balance: queries.uncategorizedBalance(),
+        balance: bindings.uncategorizedBalance(),
       };
     default:
       return entity
         ? {
-            balance: queries.accountBalance(entity.id),
-            cleared: queries.accountBalanceCleared(entity.id),
-            uncleared: queries.accountBalanceUncleared(entity.id),
+            balance: bindings.accountBalance(entity.id),
+            cleared: bindings.accountBalanceCleared(entity.id),
+            uncleared: bindings.accountBalanceUncleared(entity.id),
           }
-        : { balance: queries.allAccountBalance() };
+        : { balance: bindings.allAccountBalance() };
   }
 }

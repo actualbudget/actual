@@ -23,8 +23,8 @@ import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
-import * as queries from '@desktop-client/queries/queries';
 import { useDispatch } from '@desktop-client/redux';
+import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 type CategoryTransactionsProps = {
   category: CategoryEntity;
@@ -131,9 +131,12 @@ function TransactionListWithPreviews({
     [navigate],
   );
 
-  const balance = queries.categoryBalance(category.id, month);
-  const balanceCleared = queries.categoryBalanceCleared(category.id, month);
-  const balanceUncleared = queries.categoryBalanceUncleared(category.id, month);
+  const balance = bindings.categoryBalance(category.id, month);
+  const balanceCleared = bindings.categoryBalanceCleared(category.id, month);
+  const balanceUncleared = bindings.categoryBalanceUncleared(
+    category.id,
+    month,
+  );
 
   const { previewTransactions } = useCategoryPreviewTransactions({
     categoryId: category.id,

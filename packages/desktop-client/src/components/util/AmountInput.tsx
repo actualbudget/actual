@@ -20,7 +20,7 @@ import { css, cx } from '@emotion/css';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { amountToInteger, appendDecimals } from 'loot-core/shared/util';
 
-import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 

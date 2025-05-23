@@ -10,7 +10,7 @@ import { View } from '@actual-app/components/view';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
 
-import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
+import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 
 type HoldMenuProps = {
   onSubmit: (amount: number) => void;
