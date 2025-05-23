@@ -106,6 +106,7 @@ export function EnvelopeIncomeBalanceMenuModal({
             </BalanceWithCarryover>
           </View>
           <Menu
+            //style={defaultMenuItemStyle}
             onMenuSelect={name => {
               switch (name) {
                 case 'carryover':

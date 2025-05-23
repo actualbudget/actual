@@ -1,7 +1,6 @@
 import { useCallback, type ComponentPropsWithoutRef } from 'react';
 import { GridListItem } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheveronRight } from '@actual-app/components/icons/v1';
@@ -20,11 +19,12 @@ import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
 import {
   envelopeBudget,
   trackingBudget,
 } from '@desktop-client/queries/queries';
+import { useDispatch } from '@desktop-client/redux';
 
 type IncomeCategoryNameProps = {
   category: CategoryEntity;
@@ -95,7 +95,6 @@ function IncomeCategoryName({ category, onEdit }: IncomeCategoryNameProps) {
 type IncomeCategoryCellsProps = {
   category: CategoryEntity;
   month: string;
-  isEnvelopeBudget: boolean;
   onBudgetAction: (month: string, action: string, args: unknown) => void;
   onPress: () => void;
 };
@@ -103,7 +102,6 @@ type IncomeCategoryCellsProps = {
 function IncomeCategoryCells({
   category,
   month,
-  isEnvelopeBudget,
   onBudgetAction,
   onPress,
 }: IncomeCategoryCellsProps) {
@@ -158,7 +156,7 @@ function IncomeCategoryCells({
           category={category}
           onPress={onPress}
           aria-label={
-            isEnvelopeBudget
+            budgetType === 'envelope'
               ? t('Open balance menu for {{categoryName}} category', {
                   categoryName: category.name,
                 })
@@ -190,17 +188,29 @@ export function IncomeCategoryListItem({
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
-  const balanceMenuModalName = `envelope-income-balance-menu` as const;
-  const carryover = useEnvelopeSheetValue(
-    envelopeBudget.catCarryover(category.id),
-  );
+  const balanceMenuModalName = `envelope-income-balance-menu`;
 
   const onShowActivity = useCallback(() => {
     if (!category) {
       return null;
     }
+
     navigate(`/categories/${category.id}?month=${month}`);
   }, [category, month, navigate]);
+
+  const onCarryover = useCallback(
+    (carryover: boolean) => {
+      if (!category) {
+        return;
+      }
+      onBudgetAction(month, 'carryover', {
+        category: category.id,
+        flag: carryover,
+      });
+      dispatch(collapseModals({ rootModalName: balanceMenuModalName }));
+    },
+    [category, onBudgetAction, month, dispatch, balanceMenuModalName],
+  );
 
   const onOpenBalanceMenu = useCallback(() => {
     if (!category) {
@@ -213,13 +223,20 @@ export function IncomeCategoryListItem({
           options: {
             month,
             categoryId: category.id,
-            onCarryover: () => onBudgetAction(month, 'carryover', !carryover),
+            onCarryover,
             onShowActivity,
           },
         },
       }),
     );
-  }, [category, balanceMenuModalName, dispatch, month]);
+  }, [
+    category,
+    balanceMenuModalName,
+    dispatch,
+    month,
+    onShowActivity,
+    onCarryover,
+  ]);
 
   if (!category) {
     return null;
@@ -252,16 +269,14 @@ export function IncomeCategoryListItem({
           <IncomeCategoryCells
             category={category}
             month={month}
-            isEnvelopeBudget={true}
             onBudgetAction={onBudgetAction}
             onPress={onOpenBalanceMenu}
           />
         )}
-        {budgetType === 'tracking' && (
+        {budgetType !== 'envelope' && (
           <IncomeCategoryCells
             category={category}
             month={month}
-            isEnvelopeBudget={false}
             onBudgetAction={onBudgetAction}
             onPress={onShowActivity}
           />
