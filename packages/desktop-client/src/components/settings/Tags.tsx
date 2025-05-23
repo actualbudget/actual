@@ -3,6 +3,7 @@ import { Form } from 'react-aria-components';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { ColorPicker } from '@actual-app/components/color-picker';
 import { FormError } from '@actual-app/components/form-error';
 import {
   SvgAdd,
@@ -18,11 +19,9 @@ import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { t } from 'i18next';
 
-import { ColorPicker } from '../../../../component-library/src/ColorPicker';
-import { useSidebar } from '../sidebar/SidebarProvider';
-
 import { Setting } from './UI';
 
+import { useSidebar } from '@desktop-client/components/sidebar/SidebarProvider';
 import { purple700 } from '@desktop-client/style/palette';
 import { useTagColor, useTagCSS, useTags } from '@desktop-client/style/tags';
 
