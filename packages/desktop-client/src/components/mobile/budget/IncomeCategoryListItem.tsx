@@ -1,6 +1,7 @@
 import { useCallback, type ComponentPropsWithoutRef } from 'react';
 import { GridListItem } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
+import { useDispatch } from 'react-redux';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheveronRight } from '@actual-app/components/icons/v1';
@@ -16,8 +17,10 @@ import { BalanceCell } from './BalanceCell';
 import { BudgetCell } from './BudgetCell';
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 
+import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
 import {
   envelopeBudget,
   trackingBudget,
@@ -92,15 +95,17 @@ function IncomeCategoryName({ category, onEdit }: IncomeCategoryNameProps) {
 type IncomeCategoryCellsProps = {
   category: CategoryEntity;
   month: string;
+  isEnvelopeBudget: boolean;
   onBudgetAction: (month: string, action: string, args: unknown) => void;
-  onShowActivity: () => void;
+  onPress: () => void;
 };
 
 function IncomeCategoryCells({
   category,
   month,
+  isEnvelopeBudget,
   onBudgetAction,
-  onShowActivity,
+  onPress,
 }: IncomeCategoryCellsProps) {
   const { t } = useTranslation();
   const columnWidth = getColumnWidth();
@@ -151,10 +156,16 @@ function IncomeCategoryCells({
         <BalanceCell
           binding={balance}
           category={category}
-          onPress={onShowActivity}
-          aria-label={t('Show transactions for {{categoryName}} category', {
-            categoryName: category.name,
-          })}
+          onPress={onPress}
+          aria-label={
+            isEnvelopeBudget
+              ? t('Open balance menu for {{categoryName}} category', {
+                  categoryName: category.name,
+                })
+              : t('Show transactions for {{categoryName}} category', {
+                  categoryName: category.name,
+                })
+          }
         />
       </View>
     </View>
@@ -176,14 +187,39 @@ export function IncomeCategoryListItem({
   ...props
 }: IncomeCategoryListItemProps) {
   const { value: category } = props;
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
+  const balanceMenuModalName = `envelope-income-balance-menu` as const;
+  const carryover = useEnvelopeSheetValue(
+    envelopeBudget.catCarryover(category.id),
+  );
 
   const onShowActivity = useCallback(() => {
     if (!category) {
-      return;
+      return null;
     }
     navigate(`/categories/${category.id}?month=${month}`);
   }, [category, month, navigate]);
+
+  const onOpenBalanceMenu = useCallback(() => {
+    if (!category) {
+      return;
+    }
+    dispatch(
+      pushModal({
+        modal: {
+          name: balanceMenuModalName,
+          options: {
+            month,
+            categoryId: category.id,
+            onCarryover: () => onBudgetAction(month, 'carryover', !carryover),
+            onShowActivity,
+          },
+        },
+      }),
+    );
+  }, [category, balanceMenuModalName, dispatch, month]);
 
   if (!category) {
     return null;
@@ -212,12 +248,24 @@ export function IncomeCategoryListItem({
         }}
       >
         <IncomeCategoryName category={category} onEdit={onEdit} />
-        <IncomeCategoryCells
-          category={category}
-          month={month}
-          onBudgetAction={onBudgetAction}
-          onShowActivity={onShowActivity}
-        />
+        {budgetType === 'envelope' && (
+          <IncomeCategoryCells
+            category={category}
+            month={month}
+            isEnvelopeBudget={true}
+            onBudgetAction={onBudgetAction}
+            onPress={onOpenBalanceMenu}
+          />
+        )}
+        {budgetType === 'tracking' && (
+          <IncomeCategoryCells
+            category={category}
+            month={month}
+            isEnvelopeBudget={false}
+            onBudgetAction={onBudgetAction}
+            onPress={onShowActivity}
+          />
+        )}
       </View>
     </GridListItem>
   );
