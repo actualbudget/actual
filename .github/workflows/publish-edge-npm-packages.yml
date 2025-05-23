@@ -21,10 +21,12 @@ jobs:
 
       - name: Update package versions
         run: |
+          # e.g. 25.6.0-edge.23 if todays date is 2025-05-23
+          # e.g. 26.1.0-edge.12 if todays date is 2025-12-12
           EDGE_VERSION=$(date -d "+1 month" +%y.%-m.0-edge.%-d)
-          yarn workspace @actual-app/web version $EDGE_VERSION
-          yarn workspace @actual-app/sync-server version $EDGE_VERSION
-          yarn workspace @actual-app/api version $EDGE_VERSION
+          npm version $EDGE_VERSION --no-git-tag-version --workspace=@actual-app/web --no-workspaces-update
+          npm version $EDGE_VERSION --no-git-tag-version --workspace=@actual-app/sync-server --no-workspaces-update
+          npm version $EDGE_VERSION --no-git-tag-version --workspace=@actual-app/api --no-workspaces-update
 
       - name: Yarn install
         run: |
