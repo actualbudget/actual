@@ -28,5 +28,5 @@ echo "Running VRT tests with the following parameters:"
 echo "E2E_START_URL: $E2E_START_URL"
 echo "VRT_ARGS: $VRT_ARGS"
 
-MSYS_NO_PATHCONV=1 docker run --rm --network host -v "$(pwd)":/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.41.1-jammy /bin/bash \
+MSYS_NO_PATHCONV=1 docker run --rm --network host -v "$(pwd)":/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.52.0-jammy /bin/bash \
   -c "E2E_START_URL=$E2E_START_URL yarn vrt $VRT_ARGS"

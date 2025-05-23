@@ -6,10 +6,14 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { deleteBudget } from '../../../budgets/budgetsSlice';
-import { type Modal as ModalType } from '../../../modals/modalsSlice';
-import { useDispatch } from '../../../redux';
-import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
+import { deleteBudget } from '@desktop-client/budgets/budgetsSlice';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type DeleteFileModalProps = Extract<
   ModalType,

@@ -16,7 +16,7 @@ import { View } from '@actual-app/components/view';
 
 import { titleFirst } from 'loot-core/shared/util';
 
-import { type ScheduleStatusType } from '../../hooks/useSchedules';
+import { type ScheduleStatusType } from '@desktop-client/hooks/useSchedules';
 
 // Consists of Schedule Statuses + Transaction statuses
 export type StatusTypes =

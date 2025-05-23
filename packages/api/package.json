@@ -24,15 +24,15 @@
   },
   "dependencies": {
     "@actual-app/crdt": "workspace:^",
-    "better-sqlite3": "^11.9.1",
+    "better-sqlite3": "^11.10.0",
     "compare-versions": "^6.1.1",
     "node-fetch": "^3.3.2",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/uuid": "^9.0.8",
-    "tsc-alias": "^1.8.11",
-    "typescript": "^5.8.2",
-    "vitest": "^3.0.2"
+    "tsc-alias": "^1.8.16",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.3"
   }
 }

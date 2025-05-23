@@ -26,7 +26,7 @@ export const ReportCardName = ({
         <Input
           className={NON_DRAGGABLE_AREA_CLASS_NAME}
           defaultValue={name}
-          onEnter={e => onChange(e.currentTarget.value)}
+          onEnter={onChange}
           onUpdate={onChange}
           onEscape={onClose}
           style={{

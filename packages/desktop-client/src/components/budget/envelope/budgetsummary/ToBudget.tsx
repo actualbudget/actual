@@ -8,16 +8,15 @@ import React, {
 import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
 
-import { envelopeBudget } from '../../../../queries/queries';
-import { CoverMenu } from '../CoverMenu';
-import { useEnvelopeSheetValue } from '../EnvelopeBudgetComponents';
-import { HoldMenu } from '../HoldMenu';
-import { TransferMenu } from '../TransferMenu';
-
 import { ToBudgetAmount } from './ToBudgetAmount';
 import { ToBudgetMenu } from './ToBudgetMenu';
 
+import { CoverMenu } from '@desktop-client/components/budget/envelope/CoverMenu';
+import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
+import { HoldMenu } from '@desktop-client/components/budget/envelope/HoldMenu';
+import { TransferMenu } from '@desktop-client/components/budget/envelope/TransferMenu';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { envelopeBudget } from '@desktop-client/queries/queries';
 
 type ToBudgetProps = {
   month: string;

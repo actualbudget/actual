@@ -42,7 +42,7 @@ app.post('/status', async (req, res) => {
 app.post(
   '/create-web-token',
   handleError(async (req, res) => {
-    const { institutionId } = req.body;
+    const { institutionId } = req.body || {};
     const { origin } = req.headers;
 
     const { link, requisitionId } = await goCardlessService.createRequisition({
@@ -63,7 +63,7 @@ app.post(
 app.post(
   '/get-accounts',
   handleError(async (req, res) => {
-    const { requisitionId } = req.body;
+    const { requisitionId } = req.body || {};
 
     try {
       const { requisition, accounts } =
@@ -98,7 +98,7 @@ app.post(
 app.post(
   '/get-banks',
   handleError(async (req, res) => {
-    const { country, showDemo = false } = req.body;
+    const { country, showDemo = false } = req.body || {};
 
     await goCardlessService.setToken();
     const data = await goCardlessService.getInstitutions(country);
@@ -121,7 +121,7 @@ app.post(
 app.post(
   '/remove-account',
   handleError(async (req, res) => {
-    const { requisitionId } = req.body;
+    const { requisitionId } = req.body || {};
 
     const data = await goCardlessService.deleteRequisition(requisitionId);
     if (data.summary === 'Requisition deleted') {
@@ -150,7 +150,7 @@ app.post(
       endDate,
       accountId,
       includeBalance = true,
-    } = req.body;
+    } = req.body || {};
 
     try {
       if (includeBalance) {
