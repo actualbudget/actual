@@ -15,7 +15,7 @@ import {
 import { css } from '@emotion/css';
 
 import { SvgRefresh } from './icons/v1';
-import { defaultInputStyle } from './Input';
+import { defaultInputClassName } from './Input';
 import { Popover } from './Popover';
 import { styles } from './styles';
 import { theme } from './theme';
@@ -116,7 +116,7 @@ export function ColorPicker({ children, ...props }: ColorPickerProps) {
               <Input
                 placeholder="#RRGGBB"
                 className={css(
-                  defaultInputStyle,
+                  defaultInputClassName,
                   {
                     color: theme.formInputText,
                     whiteSpace: 'nowrap',
