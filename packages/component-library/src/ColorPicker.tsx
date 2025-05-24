@@ -9,16 +9,13 @@ import {
   ColorSwatchPicker as AriaColorSwatchPicker,
   ColorSwatchPickerItem,
   ColorField,
-  Input,
 } from 'react-aria-components';
 
 import { css } from '@emotion/css';
 
 import { SvgRefresh } from './icons/v1';
-import { defaultInputClassName } from './Input';
+import { Input } from './Input';
 import { Popover } from './Popover';
-import { styles } from './styles';
-import { theme } from './theme';
 
 function ColorSwatch(props: ColorSwatchProps) {
   return (
@@ -113,24 +110,7 @@ export function ColorPicker({ children, ...props }: ColorPickerProps) {
           >
             <ColorSwatchPicker />
             <ColorField>
-              <Input
-                placeholder="#RRGGBB"
-                className={css(
-                  defaultInputClassName,
-                  {
-                    color: theme.formInputText,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    flexShrink: 0,
-                    ':focus': {
-                      border: '1px solid ' + theme.formInputBorderSelected,
-                      boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
-                    },
-                    width: '100px',
-                  },
-                  styles.smallText,
-                )}
-              />
+              <Input placeholder="#RRGGBB" style={{ width: '100px' }} />
               &nbsp;
               <SvgRefresh width={13} height={13} />
             </ColorField>
