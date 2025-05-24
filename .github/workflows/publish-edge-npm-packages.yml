@@ -1,6 +1,6 @@
-name: Publish Edge npm packages
+name: Publish nightly npm packages
 
-# Edge npm packages are built daily
+# Nightly npm packages are built daily
 on:
   push:
     branches:
@@ -21,12 +21,15 @@ jobs:
 
       - name: Update package versions
         run: |
-          # e.g. 25.6.0-edge.23 if todays date is 2025-05-23
-          # e.g. 26.1.0-edge.12 if todays date is 2025-12-12
-          EDGE_VERSION=$(date -d "+1 month" +%y.%-m.0-edge.%-d)
-          npm version $EDGE_VERSION --no-git-tag-version --workspace=@actual-app/web --no-workspaces-update
-          npm version $EDGE_VERSION --no-git-tag-version --workspace=@actual-app/sync-server --no-workspaces-update
-          npm version $EDGE_VERSION --no-git-tag-version --workspace=@actual-app/api --no-workspaces-update
+          # Get new nightly versions
+          NEW_WEB_VERSION=$(node.exe ./.github/actions/get-next-package-version.js --package-json ./packages/sync-server/package.json --type nightly)
+          NEW_SYNC_VERSION=$(node.exe ./.github/actions/get-next-package-version.js --package-json ./packages/sync-server/package.json --type nightly)
+          NEW_API_VERSION=$(node.exe ./.github/actions/get-next-package-version.js --package-json ./packages/sync-server/package.json --type nightly)
+
+          # Set package versions
+          npm version $NEW_WEB_VERSION --no-git-tag-version --workspace=@actual-app/web --no-workspaces-update
+          npm version $NEW_SYNC_VERSION --no-git-tag-version --workspace=@actual-app/sync-server --no-workspaces-update
+          npm version $NEW_API_VERSION --no-git-tag-version --workspace=@actual-app/api --no-workspaces-update
 
       - name: Yarn install
         run: |
@@ -58,7 +61,7 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
-    name: Publish Edge npm packages
+    name: Publish Nightly npm packages
     needs: build-and-pack
     permissions:
       contents: read
@@ -77,18 +80,18 @@ jobs:
 
       - name: Publish Web
         run: |
-          npm publish desktop-client/@actual-app/web.tgz --access public --tag edge
+          npm publish desktop-client/@actual-app/web.tgz --access public --tag nightly
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish Sync-Server
         run: |
-          npm publish sync-server/@actual-app/sync-server.tgz --access public --tag edge
+          npm publish sync-server/@actual-app/sync-server.tgz --access public --tag nightly
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish API
         run: |
-          npm publish api/@actual-app/api.tgz --access public --tag edge
+          npm publish api/@actual-app/api.tgz --access public --tag nightly
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
