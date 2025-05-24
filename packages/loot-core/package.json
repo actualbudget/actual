@@ -37,7 +37,7 @@
     "reselect": "^4.1.8",
     "slash": "3.0.0",
     "ua-parser-js": "^2.0.3",
-    "uuid": "^9.0.1"
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@actual-app/api": "workspace:^",
@@ -49,7 +49,7 @@
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
     "@types/node": "^22.15.18",
     "@types/pegjs": "^0.10.6",
-    "@types/uuid": "^9.0.8",
+    "@types/uuid": "^10.0.0",
     "@types/webpack": "^5.28.5",
     "@types/webpack-bundle-analyzer": "^4.7.0",
     "assert": "^2.1.0",

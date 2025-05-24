@@ -24,13 +24,13 @@ __metadata:
   resolution: "@actual-app/api@workspace:packages/api"
   dependencies:
     "@actual-app/crdt": "workspace:^"
-    "@types/uuid": "npm:^9.0.8"
+    "@types/uuid": "npm:^10.0.0"
     better-sqlite3: "npm:^11.10.0"
     compare-versions: "npm:^6.1.1"
     node-fetch: "npm:^3.3.2"
     tsc-alias: "npm:^1.8.16"
     typescript: "npm:^5.8.3"
-    uuid: "npm:^9.0.1"
+    uuid: "npm:^11.1.0"
     vitest: "npm:^3.1.3"
   languageName: unknown
   linkType: soft
@@ -68,12 +68,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/crdt@workspace:packages/crdt"
   dependencies:
-    "@types/uuid": "npm:^9.0.8"
+    "@types/uuid": "npm:^10.0.0"
     google-protobuf: "npm:^3.21.4"
     murmurhash: "npm:^2.0.1"
     ts-protoc-gen: "npm:^0.15.0"
     typescript: "npm:^5.8.3"
-    uuid: "npm:^9.0.1"
+    uuid: "npm:^11.1.0"
     vitest: "npm:^3.1.3"
   languageName: unknown
   linkType: soft
@@ -95,7 +95,7 @@ __metadata:
     "@types/express-actuator": "npm:^1.8.3"
     "@types/node": "npm:^22.15.18"
     "@types/supertest": "npm:^2.0.16"
-    "@types/uuid": "npm:^9.0.8"
+    "@types/uuid": "npm:^10.0.0"
     "@vitest/coverage-v8": "npm:3.1.3"
     bcrypt: "npm:^5.1.1"
     better-sqlite3: "npm:^11.10.0"
@@ -117,7 +117,7 @@ __metadata:
     pluggy-sdk: "npm:^0.70.1"
     supertest: "npm:^6.3.4"
     typescript: "npm:^5.8.3"
-    uuid: "npm:^9.0.1"
+    uuid: "npm:^11.1.0"
     vitest: "npm:^3.1.3"
     winston: "npm:^3.17.0"
   bin:
@@ -148,7 +148,7 @@ __metadata:
     "@types/react-dom": "npm:^19.1.5"
     "@types/react-grid-layout": "npm:^1"
     "@types/react-modal": "npm:^3.16.3"
-    "@types/uuid": "npm:^9.0.8"
+    "@types/uuid": "npm:^10.0.0"
     "@types/webpack-bundle-analyzer": "npm:^4.7.0"
     "@use-gesture/react": "npm:^10.3.1"
     "@vitejs/plugin-basic-ssl": "npm:^1.2.0"
@@ -200,7 +200,7 @@ __metadata:
     swc-loader: "npm:^0.2.6"
     terser-webpack-plugin: "npm:^5.3.14"
     usehooks-ts: "npm:^3.1.1"
-    uuid: "npm:^9.0.1"
+    uuid: "npm:^11.1.0"
     vite: "npm:^6.3.5"
     vite-plugin-pwa: "npm:^1.0.0"
     vite-tsconfig-paths: "npm:^4.3.2"
@@ -6782,10 +6782,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/uuid@npm:^9.0.8":
-  version: 9.0.8
-  resolution: "@types/uuid@npm:9.0.8"
-  checksum: 10/b8c60b7ba8250356b5088302583d1704a4e1a13558d143c549c408bf8920535602ffc12394ede77f8a8083511b023704bc66d1345792714002bfa261b17c5275
+"@types/uuid@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "@types/uuid@npm:10.0.0"
+  checksum: 10/e3958f8b0fe551c86c14431f5940c3470127293280830684154b91dc7eb3514aeb79fe3216968833cf79d4d1c67f580f054b5be2cd562bebf4f728913e73e944
   languageName: node
   linkType: hard
 
@@ -14692,7 +14692,7 @@ __metadata:
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/node": "npm:^22.15.18"
     "@types/pegjs": "npm:^0.10.6"
-    "@types/uuid": "npm:^9.0.8"
+    "@types/uuid": "npm:^10.0.0"
     "@types/webpack": "npm:^5.28.5"
     "@types/webpack-bundle-analyzer": "npm:^4.7.0"
     absurd-sql: "npm:0.0.54"
@@ -14732,7 +14732,7 @@ __metadata:
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.8.3"
     ua-parser-js: "npm:^2.0.3"
-    uuid: "npm:^9.0.1"
+    uuid: "npm:^11.1.0"
     vite-plugin-peggy-loader: "npm:^2.0.1"
     vitest: "npm:^3.1.3"
     webpack: "npm:^5.99.8"
@@ -20772,7 +20772,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:^9.0.0, uuid@npm:^9.0.1":
+"uuid@npm:^11.1.0":
+  version: 11.1.0
+  resolution: "uuid@npm:11.1.0"
+  bin:
+    uuid: dist/esm/bin/uuid
+  checksum: 10/d2da43b49b154d154574891ced66d0c83fc70caaad87e043400cf644423b067542d6f3eb641b7c819224a7cd3b4c2f21906acbedd6ec9c6a05887aa9115a9cf5
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^9.0.0":
   version: 9.0.1
   resolution: "uuid@npm:9.0.1"
   bin:
