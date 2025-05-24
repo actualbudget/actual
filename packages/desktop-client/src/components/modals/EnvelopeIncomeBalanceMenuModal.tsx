@@ -52,7 +52,7 @@ export function EnvelopeIncomeBalanceMenuModal({
   }
 
   return (
-    <Modal name="envelope-balance-menu">
+    <Modal name="envelope-income-balance-menu">
       {({ state: { close } }) => (
         <>
           <ModalHeader
