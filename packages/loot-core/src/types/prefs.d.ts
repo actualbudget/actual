@@ -94,6 +94,7 @@ export type GlobalPrefs = Partial<{
     // Electron only
     autoStart?: boolean;
     port?: number;
+    hostname?: string;
   };
 }>;
 
