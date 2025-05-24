@@ -12,9 +12,9 @@ type BalanceMenuProps = Omit<
   'onMenuSelect' | 'items'
 > & {
   categoryId: string;
-  onTransfer: () => void | undefined;
-  onCarryover: (carryOver: boolean) => void | undefined;
-  onCover: () => void | undefined;
+  onTransfer?: () => void;
+  onCarryover?: (carryOver: boolean) => void;
+  onCover?: () => void;
 };
 
 export function BalanceMenu({
