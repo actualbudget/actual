@@ -8,7 +8,8 @@ import { send } from 'loot-core/platform/client/fetch';
 import { type Handlers } from 'loot-core/types/handlers';
 
 import {
-  useSetLoginMethods,
+  useSetAvailableLoginMethods,
+  useSetLoginMethod,
   useSetMultiuserEnabled,
   useSetServerURL,
 } from '@desktop-client/components/ServerContext';
@@ -29,7 +30,8 @@ export function useBootstrapped(redirect = true) {
   const location = useLocation();
   const setServerURL = useSetServerURL();
   const setMultiuserEnabled = useSetMultiuserEnabled();
-  const setLoginMethods = useSetLoginMethods();
+  const setAvailableLoginMethods = useSetAvailableLoginMethods();
+  const setLoginMethod = useSetLoginMethod();
 
   useEffect(() => {
     async function run() {
@@ -63,7 +65,8 @@ export function useBootstrapped(redirect = true) {
         await setServerURL(serverURL, { validate: false });
 
         setMultiuserEnabled(result.multiuser);
-        setLoginMethods(result.availableLoginMethods);
+        setAvailableLoginMethods(result.availableLoginMethods);
+        setLoginMethod(result.loginMethod);
 
         if (result.bootstrapped) {
           ensure(`/login`);
@@ -82,7 +85,8 @@ export function useBootstrapped(redirect = true) {
 
           if ('hasServer' in result && result.hasServer) {
             setMultiuserEnabled(result.multiuser);
-            setLoginMethods(result.availableLoginMethods);
+            setAvailableLoginMethods(result.availableLoginMethods);
+            setLoginMethod(result.loginMethod);
           }
         } else {
           ensure('/bootstrap');

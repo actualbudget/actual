@@ -66,7 +66,7 @@ async function needsBootstrap({ url }: { url?: string } = {}) {
     status: 'ok';
     data: {
       bootstrapped: boolean;
-      loginMethod: 'password' | 'openid' | string;
+      loginMethod: 'header' | 'password' | 'openid' | string;
       availableLoginMethods: Array<{
         method: string;
         displayName: string;
@@ -87,6 +87,7 @@ async function needsBootstrap({ url }: { url?: string } = {}) {
     availableLoginMethods: res.data.availableLoginMethods || [
       { method: 'password', active: true, displayName: 'Password' },
     ],
+    loginMethod: res.data.loginMethod || 'password',
     multiuser: res.data.multiuser || false,
     hasServer: true,
   };
