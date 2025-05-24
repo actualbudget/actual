@@ -329,7 +329,7 @@ export const goCardlessService = {
         userLanguage: 'en',
         ssn: null,
         redirectImmediate: false,
-        accountSelection: false,
+        accountSelection: true,
       });
     } catch (error) {
       handleGoCardlessError(error);
