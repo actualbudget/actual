@@ -33,12 +33,12 @@ export function EnvelopeIncomeBalanceMenuModal({
   onCarryover,
   onShowActivity,
 }: EnvelopeIncomeBalanceMenuModalProps) {
-  //const defaultMenuItemStyle: CSSProperties = {
-  //  ...styles.mobileMenuItem,
-  //  color: theme.menuItemText,
-  //  borderRadius: 0,
-  //  borderTop: `1px solid ${theme.pillBorder}`,
-  //};
+  const defaultMenuItemStyle: CSSProperties = {
+    ...styles.mobileMenuItem,
+    color: theme.menuItemText,
+    borderRadius: 0,
+    borderTop: `1px solid ${theme.pillBorder}`,
+  };
 
   const { t } = useTranslation();
   const category = useCategory(categoryId);
@@ -106,7 +106,7 @@ export function EnvelopeIncomeBalanceMenuModal({
             </BalanceWithCarryover>
           </View>
           <Menu
-            //style={defaultMenuItemStyle}
+            getItemStyle={() => defaultMenuItemStyle}
             onMenuSelect={name => {
               switch (name) {
                 case 'carryover':
