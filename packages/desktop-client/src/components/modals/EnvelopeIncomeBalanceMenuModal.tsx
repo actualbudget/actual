@@ -1,5 +1,5 @@
 import React, { type CSSProperties } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 import { styles } from '@actual-app/components/styles';
@@ -72,7 +72,7 @@ export function EnvelopeIncomeBalanceMenuModal({
                 fontWeight: 400,
               }}
             >
-              {t('Balance')}
+              <Trans>Balance</Trans>
             </Text>
             <BalanceWithCarryover
               isDisabled
