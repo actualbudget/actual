@@ -160,6 +160,11 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
   const onToggleRunningBalance = useCallback(() => {
     const newVal = showBalances === 'true' ? 'false' : 'true';
     setBalances(newVal);
+    dispatch(
+      collapseModals({
+        rootModalName: 'scheduled-transaction-menu',
+      }),
+    );
   }, [account.id, showBalances, setBalances]);
 
   const onClick = useCallback(() => {
@@ -307,8 +312,8 @@ function TransactionListWithPreviews({
       ...runningBalances,
       ...previewRunningBalances,
     ]);
-    return isSearching ? undefined : map;
-  }, [runningBalances, isSearching, previewRunningBalances]);
+    return showBalances === 'true' ? (isSearching ? undefined : map) : null;
+  }, [runningBalances, isSearching, previewRunningBalances, showBalances]);
 
   useEffect(() => {
     if (accountId) {
