@@ -60,7 +60,7 @@ try {
       process.stdout.write(newVersion); // return the new version to stdout
       return;
     case 'hotfix':
-      const bugfixVersion = `${nextVersionYear}.${nextVersionMonth}.${versionHotfix + 1}`;
+      const bugfixVersion = `${versionYear}.${versionMonth}.${versionHotfix + 1}`;
       process.stdout.write(bugfixVersion); // return the bugfix version to stdout
       return;
     case 'monthly':
