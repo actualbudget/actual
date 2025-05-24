@@ -261,7 +261,10 @@ export function BalanceWithCarryover({
             triggerProps={{
               delay: 750,
               isDisabled:
-                !isGoalTemplatesEnabled || goalValue == null || isNarrowWidth || tooltipDisabled ,
+                !isGoalTemplatesEnabled ||
+                goalValue == null ||
+                isNarrowWidth ||
+                tooltipDisabled,
             }}
           >
             {children ? (
