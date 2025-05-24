@@ -29,6 +29,7 @@ import {
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
+import { IncomeMenu } from './IncomeMenu';
 
 import { BalanceWithCarryover } from '@desktop-client/components/budget/BalanceWithCarryover';
 import { makeAmountGrey } from '@desktop-client/components/budget/util';
@@ -334,7 +335,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                     category: category.id,
                   });
                   showUndoNotification({
-                    message: t(`Budget set to last month’s budget.`),
+                    message: t(`Budget set to last month‘s budget.`),
                   });
                 }}
                 onSetMonthsAverage={numberOfMonths => {
@@ -482,7 +483,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           }}
           onContextMenu={e => {
             handleBalanceContextMenu(e);
-            // We need to calculate differently from the hook ue to being aligned to the right
+            // We need to calculate differently from the hook due to being aligned to the right
             const rect = e.currentTarget.getBoundingClientRect();
             resetBalancePosition(
               e.clientX - rect.right + 200 - 8,
@@ -553,20 +554,32 @@ type IncomeCategoryMonthProps = {
   isLast: boolean;
   month: string;
   onShowActivity: (id: CategoryEntity['id'], month: string) => void;
+  onBudgetAction: (month: string, action: string, arg?: unknown) => void;
 };
 export function IncomeCategoryMonth({
   category,
   isLast,
   month,
   onShowActivity,
+  onBudgetAction,
 }: IncomeCategoryMonthProps) {
+  const incomeMenuTriggerRef = useRef(null);
+  const {
+    setMenuOpen: setIncomeMenuOpen,
+    menuOpen: incomeMenuOpen,
+    handleContextMenu: handleIncomeContextMenu,
+    resetPosition: resetIncomePosition,
+    position: incomePosition,
+  } = useContextMenu();
+
   return (
     <View style={{ flex: 1 }}>
       <Field
         name="received"
         width="flex"
+        truncate={false}
+        ref={incomeMenuTriggerRef}
         style={{
-          paddingRight: styles.monthRightPadding,
           textAlign: 'right',
           ...(isLast && { borderBottomWidth: 0 }),
           backgroundColor: monthUtils.isCurrentMonth(month)
@@ -574,15 +587,58 @@ export function IncomeCategoryMonth({
             : theme.budgetOtherMonth,
         }}
       >
-        <span onClick={() => onShowActivity(category.id, month)}>
-          <BalanceWithCarryover
-            carryover={envelopeBudget.catCarryover(category.id)}
-            balance={envelopeBudget.catSumAmount(category.id)}
-            goal={envelopeBudget.catGoal(category.id)}
-            budgeted={envelopeBudget.catBudgeted(category.id)}
-            longGoal={envelopeBudget.catLongGoal(category.id)}
-          />
-        </span>
+        <View
+          name="received"
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            position: 'relative',
+          }}
+        >
+          <span
+            onClick={() => {
+              resetIncomePosition(-6, -4);
+              setIncomeMenuOpen(true);
+            }}
+            onContextMenu={e => {
+              handleIncomeContextMenu(e);
+              // We need to calculate differently from the hook due to being aligned to the right
+              const rect = e.currentTarget.getBoundingClientRect();
+              resetIncomePosition(
+                e.clientX - rect.right + 200 - 8,
+                e.clientY - rect.bottom - 8,
+              );
+            }}
+            style={{ paddingRight: styles.monthRightPadding }}
+          >
+            <BalanceWithCarryover
+              carryover={envelopeBudget.catCarryover(category.id)}
+              balance={envelopeBudget.catSumAmount(category.id)}
+              goal={envelopeBudget.catGoal(category.id)}
+              budgeted={envelopeBudget.catBudgeted(category.id)}
+              longGoal={envelopeBudget.catLongGoal(category.id)}
+            />
+          </span>
+          <Popover
+            triggerRef={incomeMenuTriggerRef}
+            placement="bottom end"
+            isOpen={incomeMenuOpen}
+            onOpenChange={() => setIncomeMenuOpen(false)}
+            style={{ margin: 1 }}
+            isNonModal
+            {...incomePosition}
+          >
+            <IncomeMenu
+              categoryId={category.id}
+              month={month}
+              onBudgetAction={onBudgetAction}
+              onShowActivity={onShowActivity}
+              onClose={() => setIncomeMenuOpen(false)}
+            />
+          </Popover>
+        </View>
       </Field>
     </View>
   );

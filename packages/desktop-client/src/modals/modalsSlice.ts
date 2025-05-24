@@ -374,9 +374,18 @@ export type Modal =
       options: {
         categoryId: CategoryEntity['id'];
         month: string;
+        onCarryover?: (carryover: boolean) => void;
+        onTransfer?: () => void;
+        onCover?: () => void;
+      };
+    }
+  | {
+      name: 'envelope-income-balance-menu';
+      options: {
+        categoryId: CategoryEntity['id'];
+        month: string;
         onCarryover: (carryover: boolean) => void;
-        onTransfer: () => void;
-        onCover: () => void;
+        onShowActivity: () => void;
       };
     }
   | {
@@ -387,6 +396,7 @@ export type Modal =
         onCover: () => void;
         onHoldBuffer: () => void;
         onResetHoldBuffer: () => void;
+        onBudgetAction: (month: string, action: string, arg?: unknown) => void;
       };
     }
   | {
