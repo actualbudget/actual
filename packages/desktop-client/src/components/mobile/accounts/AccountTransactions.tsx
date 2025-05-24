@@ -154,6 +154,14 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     dispatch(reopenAccount({ id: account.id }));
   }, [account.id, dispatch]);
 
+  const [showBalances, setBalances] = useSyncedPref(
+    `show-balances-${account.id}`,
+  );
+  const onToggleRunningBalance = useCallback(() => {
+    const newVal = showBalances === 'true' ? 'false' : 'true';
+    setBalances(newVal);
+  }, [account.id, showBalances, setBalances]);
+
   const onClick = useCallback(() => {
     dispatch(
       pushModal({
@@ -165,6 +173,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
             onEditNotes,
             onCloseAccount,
             onReopenAccount,
+            onToggleRunningBalance,
           },
         },
       }),
@@ -176,6 +185,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     onEditNotes,
     onReopenAccount,
     onSave,
+    onToggleRunningBalance,
   ]);
 
   return (
