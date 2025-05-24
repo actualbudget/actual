@@ -58,15 +58,15 @@ try {
     case 'nightly':
       const newVersion = `${nextVersionYear}.${nextVersionMonth}.0-nightly.${day}`;
       process.stdout.write(newVersion); // return the new version to stdout
-      return;
+      process.exit(1);
     case 'hotfix':
       const bugfixVersion = `${versionYear}.${versionMonth}.${versionHotfix + 1}`;
       process.stdout.write(bugfixVersion); // return the bugfix version to stdout
-      return;
+      process.exit(1);
     case 'monthly':
       const stableVersion = `${nextVersionYear}.${nextVersionMonth}.0`;
       process.stdout.write(stableVersion); // return the stable version to stdout
-      return;
+      process.exit(1);
     default:
       console.error('Invalid type specified. Use "nightly", "hotfix", or "monthly".');
       process.exit(1);

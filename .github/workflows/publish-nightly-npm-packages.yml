@@ -22,9 +22,9 @@ jobs:
       - name: Update package versions
         run: |
           # Get new nightly versions
-          NEW_WEB_VERSION=$(node.exe ./.github/actions/get-next-package-version.js --package-json ./packages/sync-server/package.json --type nightly)
-          NEW_SYNC_VERSION=$(node.exe ./.github/actions/get-next-package-version.js --package-json ./packages/sync-server/package.json --type nightly)
-          NEW_API_VERSION=$(node.exe ./.github/actions/get-next-package-version.js --package-json ./packages/sync-server/package.json --type nightly)
+          NEW_WEB_VERSION=$(node ./.github/actions/get-next-package-version.js --package-json ./packages/sync-server/package.json --type nightly)
+          NEW_SYNC_VERSION=$(node ./.github/actions/get-next-package-version.js --package-json ./packages/sync-server/package.json --type nightly)
+          NEW_API_VERSION=$(node ./.github/actions/get-next-package-version.js --package-json ./packages/sync-server/package.json --type nightly)
 
           # Set package versions
           npm version $NEW_WEB_VERSION --no-git-tag-version --workspace=@actual-app/web --no-workspaces-update
