@@ -5,11 +5,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/css';
 import { Command } from 'cmdk';
 
-import { useReports } from 'loot-core/client/data-hooks/reports';
-
 import { useAccounts } from '../hooks/useAccounts';
 import { useMetadataPref } from '../hooks/useMetadataPref';
 import { useNavigate } from '../hooks/useNavigate';
+import { useReports } from '../hooks/useReports';
 
 type SearchableItem = {
   id: string;
@@ -36,17 +35,13 @@ export function CommandBar() {
 
   const allAccounts = useAccounts();
   const { data: reportsData, isLoading: isReportsLoading } = useReports();
-  useEffect(
-    () => console.log('reports', reportsData, isReportsLoading),
-    [reportsData, isReportsLoading],
-  );
 
   const accounts = allAccounts.filter(acc => !acc.closed);
   const reports = reportsData || [];
 
   const navigationItems: ReadonlyArray<SearchableItem & { path: string }> = [
     { id: 'budget', name: 'Budget', path: '/budget' },
-    { id: 'reports-nav', name: 'Reports', path: '/reports' },
+    { id: 'reports', name: 'Reports', path: '/reports' },
     { id: 'schedules', name: 'Schedules', path: '/schedules' },
     { id: 'payees', name: 'Payees', path: '/payees' },
     { id: 'rules', name: 'Rules', path: '/rules' },
