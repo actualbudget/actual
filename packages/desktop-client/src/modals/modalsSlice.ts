@@ -18,9 +18,9 @@ import {
   type NoteEntity,
 } from 'loot-core/types/models';
 
-import { resetApp, setAppState } from '../app/appSlice';
-import { createAppAsyncThunk } from '../redux';
-import { signOut } from '../users/usersSlice';
+import { resetApp, setAppState } from '@desktop-client/app/appSlice';
+import { createAppAsyncThunk } from '@desktop-client/redux';
+import { signOut } from '@desktop-client/users/usersSlice';
 
 const sliceName = 'modals';
 

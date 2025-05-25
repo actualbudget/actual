@@ -22,8 +22,6 @@ import {
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { Information } from '../alerts';
-
 import { CategorySelector } from './CategorySelector';
 import { defaultsList, disabledList } from './disabledList';
 import { getLiveRange } from './getLiveRange';
@@ -31,6 +29,8 @@ import { ModeButton } from './ModeButton';
 import { type dateRangeProps, ReportOptions } from './ReportOptions';
 import { validateEnd, validateStart } from './reportRanges';
 import { setSessionReport } from './setSessionReport';
+
+import { Information } from '@desktop-client/components/alerts';
 
 type ReportSidebarProps = {
   customReportItems: CustomReportEntity;

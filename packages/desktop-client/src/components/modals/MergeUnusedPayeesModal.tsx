@@ -10,15 +10,14 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import { type PayeeEntity } from 'loot-core/types/models';
 
+import { Information } from '@desktop-client/components/alerts';
+import { Modal, ModalButtons } from '@desktop-client/components/common/Modal';
+import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
   type Modal as ModalType,
   replaceModal,
-} from '../../modals/modalsSlice';
-import { useSelector, useDispatch } from '../../redux';
-import { Information } from '../alerts';
-import { Modal, ModalButtons } from '../common/Modal';
-
-import { usePayees } from '@desktop-client/hooks/usePayees';
+} from '@desktop-client/modals/modalsSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 const highlightStyle = { color: theme.pageTextPositive };
 

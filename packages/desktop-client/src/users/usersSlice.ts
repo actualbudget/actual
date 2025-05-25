@@ -3,10 +3,13 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { send } from 'loot-core/platform/client/fetch';
 import { type Handlers } from 'loot-core/types/handlers';
 
-import { resetApp } from '../app/appSlice';
-import { closeBudget, loadAllFiles } from '../budgets/budgetsSlice';
-import { loadGlobalPrefs } from '../prefs/prefsSlice';
-import { createAppAsyncThunk } from '../redux';
+import { resetApp } from '@desktop-client/app/appSlice';
+import {
+  closeBudget,
+  loadAllFiles,
+} from '@desktop-client/budgets/budgetsSlice';
+import { loadGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
+import { createAppAsyncThunk } from '@desktop-client/redux';
 
 const sliceName = 'user';
 

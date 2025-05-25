@@ -8,15 +8,15 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { envelopeBudget } from '../../../../queries/queries';
-import { PrivacyFilter } from '../../../PrivacyFilter';
-import { useFormat } from '../../../spreadsheet/useFormat';
+import { TotalsList } from './TotalsList';
+
 import {
   useEnvelopeSheetName,
   useEnvelopeSheetValue,
-} from '../EnvelopeBudgetComponents';
-
-import { TotalsList } from './TotalsList';
+} from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
+import { envelopeBudget } from '@desktop-client/queries/queries';
 
 type ToBudgetAmountProps = {
   prevMonthName: string;

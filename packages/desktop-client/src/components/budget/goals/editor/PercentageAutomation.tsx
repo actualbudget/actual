@@ -10,10 +10,13 @@ import type {
   CategoryEntity,
 } from 'loot-core/types/models';
 
-import { CategoryAutocomplete } from '../../../autocomplete/CategoryAutocomplete';
-import { FormField, FormLabel } from '../../../forms';
-import { PercentInput } from '../../../util/PercentInput';
-import { type Action, updateTemplate } from '../actions';
+import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
+import {
+  type Action,
+  updateTemplate,
+} from '@desktop-client/components/budget/goals/actions';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { PercentInput } from '@desktop-client/components/util/PercentInput';
 
 type PercentageAutomationProps = {
   dispatch: (action: Action) => void;

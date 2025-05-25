@@ -52,7 +52,7 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
   ({ disabled, style, onUpdate, ...props }, ref) => {
     return (
       <Input
-        inputRef={ref}
+        ref={ref}
         autoCorrect="false"
         autoCapitalize="none"
         disabled={disabled}
