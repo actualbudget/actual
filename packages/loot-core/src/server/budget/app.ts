@@ -370,10 +370,12 @@ async function createCategoryGroup({
   name,
   isIncome,
   hidden,
+  parentId
 }: {
   name: CategoryGroupEntity['name'];
   isIncome?: CategoryGroupEntity['is_income'];
   hidden?: CategoryGroupEntity['hidden'];
+  parentId?: CategoryGroupEntity['parent_id'];
 }): Promise<CategoryGroupEntity['id']> {
   return await db.insertCategoryGroup({
     name,

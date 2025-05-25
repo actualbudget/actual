@@ -244,12 +244,13 @@ export const getAccounts = createAppAsyncThunk(
 
 type CreateCategoryGroupPayload = {
   name: CategoryGroupEntity['name'];
+  parentId?: CategoryGroupEntity['parent_id'];
 };
 
 export const createGroup = createAppAsyncThunk(
   `${sliceName}/createGroup`,
-  async ({ name }: CreateCategoryGroupPayload) => {
-    const id = await send('category-group-create', { name });
+  async ({ name, parentId, }: CreateCategoryGroupPayload) => {
+    const id = await send('category-group-create', { name, parentId });
     return id;
   },
 );
@@ -839,11 +840,19 @@ export const getPayeesById = memoizeOne(
 export const getCategoriesById = memoizeOne(
   (categoryGroups: CategoryGroupEntity[] | null | undefined) => {
     const res: { [id: CategoryGroupEntity['id']]: CategoryEntity } = {};
-    categoryGroups?.forEach(group => {
-      group.categories.forEach(cat => {
-        res[cat.id] = cat;
+
+    function addGroups(groups) {
+      groups?.forEach(group => {
+        group.categories.forEach(cat => {
+          res[cat.id] = cat;
+        });
+        if (group.children) {
+          addGroups(group.children);
+        }
       });
-    });
+    }
+
+    addGroups(categoryGroups);
     return res;
   },
 );

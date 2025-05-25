@@ -144,7 +144,7 @@ export interface ApiHandlers {
 
   'api/category-groups-get': () => Promise<APICategoryGroupEntity[]>;
 
-  'api/category-group-create': (arg: { group }) => Promise<string>;
+  'api/category-group-create': (arg: { group, parentId?: string }) => Promise<string>;
 
   'api/category-group-update': (arg: { id; fields }) => Promise<unknown>;
 

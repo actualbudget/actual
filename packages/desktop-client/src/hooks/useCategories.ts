@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { useInitialMount } from './useInitialMount';
 
@@ -16,5 +16,12 @@ export function useCategories() {
     }
   }, [categoriesLoaded, dispatch, isInitialMount]);
 
-  return useSelector(state => state.queries.categories);
+  const selector = useSelector(state => state.queries.categories);
+  return useMemo(
+    () => ({
+      ...selector,
+      groupedHierarchy: selector.grouped.filter(g => g.parent_id === null),
+    }),
+    [selector],
+  );
 }

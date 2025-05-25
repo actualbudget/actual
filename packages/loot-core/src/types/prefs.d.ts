@@ -3,7 +3,8 @@ export type FeatureFlag =
   | 'goalTemplatesUIEnabled'
   | 'actionTemplating'
   | 'contextMenus'
-  | 'pluggyAiBankSync';
+  | 'pluggyAiBankSync'
+  | 'subCategoryGroups';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.

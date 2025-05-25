@@ -217,7 +217,7 @@ function BudgetInner(props: BudgetInnerProps) {
 
   const onSaveGroup = group => {
     if (group.id === 'new') {
-      dispatch(createGroup({ name: group.name }));
+      dispatch(createGroup({ name: group.name})); //, parentId: group.parentId 
     } else {
       dispatch(updateGroup({ group }));
     }

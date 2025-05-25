@@ -43,41 +43,53 @@ export const BudgetCategories = memo(
 
     const [isAddingGroup, setIsAddingGroup] = useState(false);
     const [newCategoryForGroup, setNewCategoryForGroup] = useState(null);
+    const [newGroupForGroup, setNewGroupForGroup] = useState(null);
     const items = useMemo(() => {
       const [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
 
-      let items = Array.prototype.concat.apply(
-        [],
-        expenseGroups.map(group => {
-          if (group.hidden && !showHiddenCategories) {
-            return [];
-          }
+      function expandGroup(group, depth = 0, type = 'expense') {
+        if (group.hidden && !showHiddenCategories) {
+          return [];
+        }
 
-          const groupCategories = group.categories.filter(
-            cat => showHiddenCategories || !cat.hidden,
-          );
+        const groupCategories = group.categories.filter(
+          cat => showHiddenCategories || !cat.hidden,
+        );
 
-          const items = [{ type: 'expense-group', value: { ...group } }];
+        const groupChildren = group.children.filter(
+          child => showHiddenCategories || !child.hidden,
+        );
 
-          if (newCategoryForGroup === group.id) {
-            items.push({ type: 'new-category' });
-          }
+        const items = [{ type: `${type}-group`, value: { ...group }, depth }];
 
-          return [
-            ...items,
-            ...(collapsedGroupIds.includes(group.id)
-              ? []
-              : groupCategories
-            ).map(cat => ({
-              type: 'expense-category',
+        if (newCategoryForGroup === group.id) {
+          items.push({ type: 'new-category', depth });
+        }
+
+        if (isAddingGroup && newGroupForGroup === group.id) {
+          items.push({ type: 'new-group' });
+        }
+
+        return [
+          ...items,
+          ...(collapsedGroupIds.includes(group.id)
+            ? []
+            : groupChildren
+          ).flatMap(child => expandGroup(child, depth + 1, type)),
+          ...(collapsedGroupIds.includes(group.id) ? [] : groupCategories).map(
+            cat => ({
+              type: `${type}-category`,
               value: cat,
               group,
-            })),
-          ];
-        }),
-      );
+              depth,
+            }),
+          ),
+        ];
+      }
 
-      if (isAddingGroup) {
+      let items = expenseGroups.flatMap(group => expandGroup(group, 0));
+
+      if (isAddingGroup && newGroupForGroup == null) {
         items.push({ type: 'new-group' });
       }
 
@@ -85,17 +97,7 @@ export const BudgetCategories = memo(
         items = items.concat(
           [
             { type: 'income-separator' },
-            { type: 'income-group', value: incomeGroup },
-            newCategoryForGroup === incomeGroup.id && { type: 'new-category' },
-            ...(collapsedGroupIds.includes(incomeGroup.id)
-              ? []
-              : incomeGroup.categories.filter(
-                  cat => showHiddenCategories || !cat.hidden,
-                )
-            ).map(cat => ({
-              type: 'income-category',
-              value: cat,
-            })),
+            ...expandGroup(incomeGroup, 0, 'income'),
           ].filter(x => x),
         );
       }
@@ -151,12 +153,14 @@ export const BudgetCategories = memo(
       }
     }
 
-    function onShowNewGroup() {
+    function onShowNewGroup(parentId) {
       setIsAddingGroup(true);
+      setNewGroupForGroup(parentId);
     }
 
     function onHideNewGroup() {
       setIsAddingGroup(false);
+      setNewGroupForGroup(null);
     }
 
     function _onSaveGroup(group) {
@@ -202,7 +206,7 @@ export const BudgetCategories = memo(
                   style={{ backgroundColor: theme.tableRowHeaderBackground }}
                 >
                   <SidebarGroup
-                    group={{ id: 'new', name: '' }}
+                    group={{ id: 'new', name: '', parent_id: newGroupForGroup }}
                     editing={true}
                     onSave={_onSaveGroup}
                     onHideNewGroup={onHideNewGroup}
@@ -248,6 +252,8 @@ export const BudgetCategories = memo(
                   onReorderCategory={onReorderCategory}
                   onToggleCollapse={onToggleCollapse}
                   onShowNewCategory={onShowNewCategory}
+                  onShowNewGroup={onShowNewGroup}
+                  depth={item.depth}
                   onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
                 />
               );
@@ -268,6 +274,7 @@ export const BudgetCategories = memo(
                   onReorder={onReorderCategory}
                   onBudgetAction={onBudgetAction}
                   onShowActivity={onShowActivity}
+                  depth={item.depth}
                 />
               );
               break;
@@ -297,6 +304,8 @@ export const BudgetCategories = memo(
                   onSave={_onSaveGroup}
                   onToggleCollapse={onToggleCollapse}
                   onShowNewCategory={onShowNewCategory}
+                  onShowNewGroup={onShowNewGroup}
+                  depth={item.depth}
                 />
               );
               break;
@@ -315,6 +324,7 @@ export const BudgetCategories = memo(
                   onReorder={onReorderCategory}
                   onBudgetAction={onBudgetAction}
                   onShowActivity={onShowActivity}
+                  depth={item.depth}
                 />
               );
               break;

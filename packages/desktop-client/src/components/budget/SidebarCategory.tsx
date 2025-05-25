@@ -38,6 +38,7 @@ type SidebarCategoryProps = {
   onSave: (category: CategoryEntity) => void;
   onDelete: (id: CategoryEntity['id']) => Promise<void>;
   onHideNewCategory?: () => void;
+  depth?: number;
 };
 
 export function SidebarCategory({
@@ -54,6 +55,7 @@ export function SidebarCategory({
   onSave,
   onDelete,
   onHideNewCategory,
+  depth,
 }: SidebarCategoryProps) {
   const { t } = useTranslation();
   const isGoalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
@@ -199,7 +201,10 @@ export function SidebarCategory({
           }
         }}
         onBlur={() => onEditName(null)}
-        style={{ paddingLeft: 13, ...(isLast && { borderBottomWidth: 0 }) }}
+        style={{
+          paddingLeft: 13 + (depth ?? 0) * 13 - (depth ? 5 : 0),
+          ...(isLast && { borderBottomWidth: 0 }),
+        }}
         inputProps={{
           placeholder: temporary ? t('New category name') : '',
         }}

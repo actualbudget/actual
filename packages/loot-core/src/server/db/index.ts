@@ -319,6 +319,7 @@ export async function getCategories(
 
 export async function getCategoriesGrouped(
   ids?: Array<DbCategoryGroup['id']>,
+  hierarchical: boolean = false,
 ): Promise<
   Array<
     DbCategoryGroup & {
@@ -346,10 +347,30 @@ export async function getCategoriesGrouped(
     ? await all<DbCategory>(categoryQuery, [...ids])
     : await all<DbCategory>(categoryQuery);
 
-  return groups.map(group => ({
-    ...group,
-    categories: categories.filter(c => c.cat_group === group.id),
-  }));
+  const mappedGroups = groups.map(group => {
+    return {
+      ...group,
+      categories: categories.filter(c => c.cat_group === group.id),
+      children: [],
+    };
+  });
+
+  for (const group of mappedGroups) {
+    if (group.parent_id) {
+      const parent = mappedGroups.find(g => g.id === group.parent_id);
+      if (parent) {
+        parent.children.push(group);
+      }
+    }
+  }
+
+  return mappedGroups.filter(g => !hierarchical || !g.parent_id);
+}
+
+export async function getCategoriesGroupedHierarchical(
+  ids?: Array<CategoryGroupEntity['id']>,
+): Promise<Array<CategoryGroupEntity>> {
+  return getCategoriesGrouped(ids, true);
 }
 
 export async function insertCategoryGroup(
@@ -373,7 +394,7 @@ export async function insertCategoryGroup(
   `);
   const sort_order = (lastGroup ? lastGroup.sort_order : 0) + SORT_INCREMENT;
 
-  group = {
+  const validated = {
     ...categoryGroupModel.validate(group),
     sort_order,
   };
@@ -410,10 +431,19 @@ export async function deleteCategoryGroup(
   group: Pick<DbCategoryGroup, 'id'>,
   transferId?: DbCategory['id'],
 ) {
-  const categories = await all<DbCategory>(
-    'SELECT * FROM categories WHERE cat_group = ?',
+    const children = await all(
+    'SELECT * FROM category_groups WHERE parent_id = ?',
     [group.id],
   );
+
+  // Delete all the children
+  await Promise.all(
+    children.map(child => deleteCategoryGroup(child, transferId)),
+  );
+
+  const categories = await all('SELECT * FROM categories WHERE cat_group = ?', [
+    group.id,
+  ]);
 
   // Delete all the categories within a group
   await Promise.all(categories.map(cat => deleteCategory(cat, transferId)));

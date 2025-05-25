@@ -29,6 +29,7 @@ type IncomeCategoryProps = {
   onBudgetAction: (month: string, action: string, arg: unknown) => void;
   onReorder: OnDropCallback;
   onShowActivity: (id: CategoryEntity['id'], month: string) => void;
+  depth?: number;
 };
 
 export function IncomeCategory({
@@ -44,6 +45,7 @@ export function IncomeCategory({
   onBudgetAction,
   onReorder,
   onShowActivity,
+  depth,
 }: IncomeCategoryProps) {
   const { dragRef } = useDraggable({
     type: 'income-category',
@@ -81,6 +83,7 @@ export function IncomeCategory({
         onEditName={onEditName}
         onSave={onSave}
         onDelete={onDelete}
+        depth={depth}
       />
       <RenderMonths
         component={MonthComponent}
