@@ -29,6 +29,7 @@ import { CustomReportListCards } from './reports/CustomReportListCards';
 import { MarkdownCard } from './reports/MarkdownCard';
 import { NetWorthCard } from './reports/NetWorthCard';
 import { SpendingCard } from './reports/SpendingCard';
+import { RecurringPaymentsCard } from './reports/RecurringPaymentsCard';
 import './overview.scss';
 import { SummaryCard } from './reports/SummaryCard';
 
@@ -433,6 +434,14 @@ export function Overview() {
                               text: t('Calendar card'),
                             },
                             {
+                              name: 'recurring-payments-card' as const,
+                              text: t('Recurring payments graph'),
+                            },
+                            {
+                              name: 'recurring-payments-card' as const,
+                              text: t('Recurring payments'),
+                            },
+                            {
                               name: 'custom-report' as const,
                               text: t('New custom report'),
                             },
@@ -592,6 +601,14 @@ export function Overview() {
                     isEditing={isEditing}
                     meta={item.meta}
                     firstDayOfWeekIdx={firstDayOfWeekIdx}
+                    onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                    onRemove={() => onRemoveWidget(item.i)}
+                  />
+                ) : item.type === 'recurring-payments-card' ? (
+                  <RecurringPaymentsCard
+                    widgetId={item.i}
+                    isEditing={isEditing}
+                    meta={item.meta}
                     onMetaChange={newMeta => onMetaChange(item, newMeta)}
                     onRemove={() => onRemoveWidget(item.i)}
                   />
