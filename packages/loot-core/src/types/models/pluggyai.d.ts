@@ -10,9 +10,10 @@ export type PluggyAiAccount = {
 };
 
 export type SyncServerPluggyAiAccount = {
+  balance: number;
   account_id: string;
   institution?: string;
-  orgDomain?: string;
+  orgDomain?: string | null;
   orgId?: string;
   name: string;
 };
