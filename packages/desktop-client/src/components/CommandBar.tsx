@@ -1,25 +1,44 @@
 /* eslint-disable rulesdir/typography */
 
-import { useCallback, useEffect, useState } from 'react';
+import {
+  type ComponentType,
+  type SVGProps,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 
+import {
+  SvgCog,
+  SvgPiggyBank,
+  SvgReports,
+  SvgStoreFront,
+  SvgTuning,
+  SvgWallet,
+} from '@actual-app/components/icons/v1';
+import {
+  SvgCalendar3,
+  SvgNotesPaperText,
+} from '@actual-app/components/icons/v2';
 import { css } from '@emotion/css';
 import { Command } from 'cmdk';
 
-import { useAccounts } from '../hooks/useAccounts';
-import { useMetadataPref } from '../hooks/useMetadataPref';
-import { useNavigate } from '../hooks/useNavigate';
-import { useReports } from '../hooks/useReports';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useReports } from '@desktop-client/hooks/useReports';
 
 type SearchableItem = {
   id: string;
   name: string;
+  Icon: ComponentType<SVGProps<SVGSVGElement>>;
 };
 
 type SearchSection = {
   key: string;
   heading: string;
   items: ReadonlyArray<SearchableItem>;
-  onSelect: (item: SearchableItem) => void;
+  onSelect: (item: Pick<SearchableItem, 'id'>) => void;
 };
 
 export function CommandBar() {
@@ -34,18 +53,22 @@ export function CommandBar() {
   }, [open]);
 
   const allAccounts = useAccounts();
-  const { data: reportsData, isLoading: isReportsLoading } = useReports();
+  const { data: customReports } = useReports();
 
   const accounts = allAccounts.filter(acc => !acc.closed);
-  const reports = reportsData || [];
 
   const navigationItems: ReadonlyArray<SearchableItem & { path: string }> = [
-    { id: 'budget', name: 'Budget', path: '/budget' },
-    { id: 'reports', name: 'Reports', path: '/reports' },
-    { id: 'schedules', name: 'Schedules', path: '/schedules' },
-    { id: 'payees', name: 'Payees', path: '/payees' },
-    { id: 'rules', name: 'Rules', path: '/rules' },
-    { id: 'settings', name: 'Settings', path: '/settings' },
+    { id: 'budget', name: 'Budget', path: '/budget', Icon: SvgWallet },
+    { id: 'reports-nav', name: 'Reports', path: '/reports', Icon: SvgReports },
+    {
+      id: 'schedules',
+      name: 'Schedules',
+      path: '/schedules',
+      Icon: SvgCalendar3,
+    },
+    { id: 'payees', name: 'Payees', path: '/payees', Icon: SvgStoreFront },
+    { id: 'rules', name: 'Rules', path: '/rules', Icon: SvgTuning },
+    { id: 'settings', name: 'Settings', path: '/settings', Icon: SvgCog },
   ];
 
   const openEventListener = useCallback((e: KeyboardEvent) => {
@@ -69,15 +92,20 @@ export function CommandBar() {
     {
       key: 'accounts',
       heading: 'Accounts',
-      items: accounts,
-      onSelect: (item: SearchableItem) =>
-        handleNavigate(`/accounts/${item.id}`),
+      items: accounts.map(account => ({
+        ...account,
+        Icon: SvgPiggyBank,
+      })),
+      onSelect: ({ id }) => handleNavigate(`/accounts/${id}`),
     },
     {
-      key: 'reports',
-      heading: 'Reports',
-      items: reports,
-      onSelect: (item: SearchableItem) => handleNavigate(`/reports/${item.id}`),
+      key: 'reports-custom',
+      heading: 'Custom Reports',
+      items: customReports.map(report => ({
+        ...report,
+        Icon: SvgNotesPaperText,
+      })),
+      onSelect: ({ id }) => handleNavigate(`/reports/${id}`),
     },
   ];
 
@@ -141,17 +169,20 @@ export function CommandBar() {
       >
         {!!filteredNavigationItems.length && (
           <Command.Group className={css({ padding: '0 8px' })}>
-            {filteredNavigationItems.map(item => (
+            {filteredNavigationItems.map(({ id, path, name, Icon }) => (
               <Command.Item
-                key={item.id}
-                onSelect={() => handleNavigate(item.path)}
-                value={item.name}
+                key={id}
+                onSelect={() => handleNavigate(path)}
+                value={name}
                 className={css({
                   padding: '8px 16px',
                   cursor: 'pointer',
                   fontSize: '0.9rem',
                   borderRadius: '4px',
-                  margin: '0 8px',
+                  margin: '0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
                   // Avoid showing mouse hover styles when using keyboard navigation
                   '[data-cmdk-list]:not([data-cmdk-list-nav-active]) &:hover': {
                     backgroundColor: 'var(--color-menuItemBackgroundHover)',
@@ -163,15 +194,16 @@ export function CommandBar() {
                   },
                 })}
               >
-                {item.name}
+                <Icon width={16} height={16} />
+                {name}
               </Command.Item>
             ))}
           </Command.Group>
         )}
 
         {sections.map(section => {
-          const filteredItems = section.items.filter(item =>
-            item.name.toLowerCase().includes(search.toLowerCase()),
+          const filteredItems = section.items.filter(({ name }) =>
+            name.toLowerCase().includes(search.toLowerCase()),
           );
 
           if (filteredItems.length > 0) {
@@ -191,17 +223,20 @@ export function CommandBar() {
                   },
                 })}
               >
-                {filteredItems.map(item => (
+                {filteredItems.map(({ id, name, Icon }) => (
                   <Command.Item
-                    key={item.id}
-                    onSelect={() => section.onSelect(item)}
-                    value={item.name}
+                    key={id}
+                    onSelect={() => section.onSelect({ id })}
+                    value={name}
                     className={css({
                       padding: '8px 16px',
                       cursor: 'pointer',
                       fontSize: '0.9rem',
                       borderRadius: '4px',
-                      margin: '0 8px',
+                      margin: '0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
                       // Avoid showing mouse hover styles when using keyboard navigation
                       '[data-cmdk-list]:not([data-cmdk-list-nav-active]) &:hover':
                         {
@@ -215,7 +250,8 @@ export function CommandBar() {
                       },
                     })}
                   >
-                    {item.name}
+                    <Icon width={16} height={16} />
+                    {name}
                   </Command.Item>
                 ))}
               </Command.Group>
