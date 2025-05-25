@@ -354,7 +354,7 @@ function TableRow({
     useAddBudgetAccountOptions();
 
   const availableAccountOptions: AutocompleteItem[] = [...unlinkedAccounts];
-  if (chosenAccount?.id === addOnBudgetAccountOption.id) {
+  if (chosenAccount && chosenAccount.id !== addOnBudgetAccountOption.id) {
     availableAccountOptions.push(chosenAccount);
   }
   availableAccountOptions.push(
