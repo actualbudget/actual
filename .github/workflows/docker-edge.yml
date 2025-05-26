@@ -91,7 +91,7 @@ jobs:
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
       - name: Test that the docker image boots
         run: |
-          docker run --detach --publish=5006:5006 --network=host actual-test-${{ matrix.os }}
+          docker run --detach --network=host actual-test-${{ matrix.os }}
           sleep 5
           curl --fail -sS -LI -w '%{http_code}\n' --retry 10 --retry-delay 1 --retry-connrefused localhost:5006
 
