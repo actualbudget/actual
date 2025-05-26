@@ -37,9 +37,23 @@ type SearchableItem = {
 type SearchSection = {
   key: string;
   heading: string;
-  items: ReadonlyArray<SearchableItem>;
+  items: Readonly<SearchableItem[]>;
   onSelect: (item: Pick<SearchableItem, 'id'>) => void;
 };
+
+const navigationItems: Readonly<(SearchableItem & { path: string })[]> = [
+  { id: 'budget', name: 'Budget', path: '/budget', Icon: SvgWallet },
+  { id: 'reports-nav', name: 'Reports', path: '/reports', Icon: SvgReports },
+  {
+    id: 'schedules',
+    name: 'Schedules',
+    path: '/schedules',
+    Icon: SvgCalendar3,
+  },
+  { id: 'payees', name: 'Payees', path: '/payees', Icon: SvgStoreFront },
+  { id: 'rules', name: 'Rules', path: '/rules', Icon: SvgTuning },
+  { id: 'settings', name: 'Settings', path: '/settings', Icon: SvgCog },
+];
 
 export function CommandBar() {
   const [open, setOpen] = useState(false);
@@ -57,20 +71,6 @@ export function CommandBar() {
 
   const accounts = allAccounts.filter(acc => !acc.closed);
 
-  const navigationItems: ReadonlyArray<SearchableItem & { path: string }> = [
-    { id: 'budget', name: 'Budget', path: '/budget', Icon: SvgWallet },
-    { id: 'reports-nav', name: 'Reports', path: '/reports', Icon: SvgReports },
-    {
-      id: 'schedules',
-      name: 'Schedules',
-      path: '/schedules',
-      Icon: SvgCalendar3,
-    },
-    { id: 'payees', name: 'Payees', path: '/payees', Icon: SvgStoreFront },
-    { id: 'rules', name: 'Rules', path: '/rules', Icon: SvgTuning },
-    { id: 'settings', name: 'Settings', path: '/settings', Icon: SvgCog },
-  ];
-
   const openEventListener = useCallback((e: KeyboardEvent) => {
     if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
@@ -83,12 +83,28 @@ export function CommandBar() {
     return () => document.removeEventListener('keydown', openEventListener);
   }, [openEventListener]);
 
-  const handleNavigate = (path: string) => {
-    setOpen(false);
-    navigate(path);
-  };
+  const handleNavigate = useCallback(
+    (path: string) => {
+      setOpen(false);
+      navigate(path);
+    },
+    [navigate],
+  );
 
   const sections: SearchSection[] = [
+    {
+      key: 'navigation',
+      heading: 'Navigation',
+      items: navigationItems.map(({ id, name, Icon }) => ({
+        id,
+        name,
+        Icon,
+      })),
+      onSelect: ({ id }) => {
+        const item = navigationItems.find(item => item.id === id);
+        if (!!item) handleNavigate(item.path);
+      },
+    },
     {
       key: 'accounts',
       heading: 'Accounts',
@@ -105,18 +121,18 @@ export function CommandBar() {
         ...report,
         Icon: SvgNotesPaperText,
       })),
-      onSelect: ({ id }) => handleNavigate(`/reports/${id}`),
+      onSelect: ({ id }) => handleNavigate(`/reports/custom/${id}`),
     },
   ];
 
-  let hasResults = false;
-
-  // Filter navigation items based on search
-  const filteredNavigationItems = navigationItems.filter(item =>
-    item.name.toLowerCase().includes(search.toLowerCase()),
-  );
-
-  if (!!filteredNavigationItems.length) hasResults = true;
+  const searchLower = search.toLowerCase();
+  const filteredSections = sections.map(section => ({
+    ...section,
+    items: section.items.filter(item =>
+      item.name.toLowerCase().includes(searchLower),
+    ),
+  }));
+  const hasResults = filteredSections.some(section => !!section.items.length);
 
   return (
     <Command.Dialog
@@ -167,48 +183,9 @@ export function CommandBar() {
           padding: '8px 0',
         })}
       >
-        {!!filteredNavigationItems.length && (
-          <Command.Group className={css({ padding: '0 8px' })}>
-            {filteredNavigationItems.map(({ id, path, name, Icon }) => (
-              <Command.Item
-                key={id}
-                onSelect={() => handleNavigate(path)}
-                value={name}
-                className={css({
-                  padding: '8px 16px',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  borderRadius: '4px',
-                  margin: '0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  // Avoid showing mouse hover styles when using keyboard navigation
-                  '[data-cmdk-list]:not([data-cmdk-list-nav-active]) &:hover': {
-                    backgroundColor: 'var(--color-menuItemBackgroundHover)',
-                    color: 'var(--color-menuItemTextHover)',
-                  },
-                  "&[data-selected='true']": {
-                    backgroundColor: 'var(--color-menuItemBackgroundHover)',
-                    color: 'var(--color-menuItemTextHover)',
-                  },
-                })}
-              >
-                <Icon width={16} height={16} />
-                {name}
-              </Command.Item>
-            ))}
-          </Command.Group>
-        )}
-
-        {sections.map(section => {
-          const filteredItems = section.items.filter(({ name }) =>
-            name.toLowerCase().includes(search.toLowerCase()),
-          );
-
-          if (filteredItems.length > 0) {
-            hasResults = true;
-            return (
+        {filteredSections.map(
+          section =>
+            !!section.items.length && (
               <Command.Group
                 key={section.key}
                 heading={section.heading}
@@ -223,7 +200,7 @@ export function CommandBar() {
                   },
                 })}
               >
-                {filteredItems.map(({ id, name, Icon }) => (
+                {section.items.map(({ id, name, Icon }) => (
                   <Command.Item
                     key={id}
                     onSelect={() => section.onSelect({ id })}
@@ -255,10 +232,9 @@ export function CommandBar() {
                   </Command.Item>
                 ))}
               </Command.Group>
-            );
-          }
-          return null;
-        })}
+            ),
+        )}
+
         {!hasResults && (
           <Command.Empty
             className={css({
