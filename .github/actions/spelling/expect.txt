@@ -4,6 +4,7 @@ Activo
 AESUDEF
 ALZEY
 Anglais
+AUR
 Authentik
 BANKA
 BANKINTER
