@@ -23,16 +23,20 @@ function getTagColors(theme: Theme, color?: string) {
   if (theme === 'light') {
     return [
       color ? `${color} !important` : themeStyle.noteTagText,
-      color ? `rgb(from ${color} r g b / 0.15)` : themeStyle.noteTagBackground,
       color
-        ? `rgb(from ${color} r g b / 0.25)`
+        ? `color-mix(in srgb, ${color} 15%, white)`
+        : themeStyle.noteTagBackground,
+      color
+        ? `color-mix(in srgb, ${color} 25%, white)`
         : themeStyle.noteTagBackgroundHover,
     ];
   } else {
     return [
       themeStyle.noteTagText,
-      color ? `rgb(from ${color} r g b / 0.75)` : themeStyle.noteTagBackground,
-      color ? `rgb(from ${color} r g b)` : themeStyle.noteTagBackgroundHover,
+      color ?? themeStyle.noteTagBackground,
+      color
+        ? `color-mix(in srgb, ${color} 85%, white)`
+        : themeStyle.noteTagBackgroundHover,
     ];
   }
 }
