@@ -4,10 +4,9 @@ import { Trans } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 
-import { Link } from '../common/Link';
-
 import { Setting } from './UI';
 
+import { Link } from '@desktop-client/components/common/Link';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function BudgetTypeSettings() {

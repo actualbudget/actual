@@ -5,9 +5,9 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
   addNotification,
   type Notification,
-} from '../notifications/notificationsSlice';
-import { useDispatch } from '../redux';
-import { redo, undo } from '../undo';
+} from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
+import { redo, undo } from '@desktop-client/undo';
 
 type UndoActions = {
   undo: () => void;

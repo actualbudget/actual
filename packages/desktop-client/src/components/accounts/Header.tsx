@@ -1,6 +1,5 @@
 import React, {
   type ComponentProps,
-  Fragment,
   type ReactNode,
   useRef,
   useState,
@@ -40,18 +39,17 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
-import { AnimatedRefresh } from '../AnimatedRefresh';
-import { Search } from '../common/Search';
-import { FilterButton } from '../filters/FiltersMenu';
-import { FiltersStack } from '../filters/FiltersStack';
-import { type SavedFilter } from '../filters/SavedFilterMenuButton';
-import { NotesButton } from '../NotesButton';
-import { SelectedTransactionsButton } from '../transactions/SelectedTransactionsButton';
-
 import { type TableRef } from './Account';
 import { Balances } from './Balance';
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
 
+import { AnimatedRefresh } from '@desktop-client/components/AnimatedRefresh';
+import { Search } from '@desktop-client/components/common/Search';
+import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
+import { FiltersStack } from '@desktop-client/components/filters/FiltersStack';
+import { type SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
+import { NotesButton } from '@desktop-client/components/NotesButton';
+import { SelectedTransactionsButton } from '@desktop-client/components/transactions/SelectedTransactionsButton';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
@@ -355,6 +353,9 @@ export function AccountHeader({
             value={search}
             onChange={onSearch}
             inputRef={searchInput}
+            // Remove marginRight magically being added by Stack...
+            // We need to refactor the Stack component
+            style={{ marginRight: 0 }}
           />
           {workingHard ? (
             <View>
@@ -598,12 +599,12 @@ function AccountNameField({
 
   if (editingName) {
     return (
-      <Fragment>
+      <>
         <InitialFocus>
           <Input
             defaultValue={accountName}
-            onEnter={e => handleSave(e.currentTarget.value)}
-            onBlur={e => handleSave(e.target.value)}
+            onEnter={handleSave}
+            onUpdate={handleSave}
             onEscape={() => setEditingName(false)}
             style={{
               fontSize: 25,
@@ -620,7 +621,7 @@ function AccountNameField({
         {saveNameError && (
           <View style={{ color: theme.warningText }}>{saveNameError}</View>
         )}
-      </Fragment>
+      </>
     );
   } else {
     if (isNameEditable) {

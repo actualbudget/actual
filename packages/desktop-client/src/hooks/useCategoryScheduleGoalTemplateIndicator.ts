@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { type Locale } from 'date-fns';
 import { type TFunction } from 'i18next';
 
 import * as monthUtils from 'loot-core/shared/months';

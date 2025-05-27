@@ -21,23 +21,28 @@ import {
   type RecurConfig,
 } from 'loot-core/types/models';
 
-import { type Modal as ModalType, pushModal } from '../../modals/modalsSlice';
-import { aqlQuery } from '../../queries/aqlQuery';
-import { liveQuery } from '../../queries/liveQuery';
-import { getPayeesById } from '../../queries/queriesSlice';
-import { useDispatch } from '../../redux';
-import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
-import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { FormField, FormLabel, Checkbox } from '../forms';
-import { OpSelect } from '../modals/EditRuleModal';
-import { DateSelect } from '../select/DateSelect';
-import { RecurringSchedulePicker } from '../select/RecurringSchedulePicker';
-import { SelectedItemsButton } from '../table';
-import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable';
-import { AmountInput, BetweenAmountInput } from '../util/AmountInput';
-import { GenericInput } from '../util/GenericInput';
-
+import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
+import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import {
+  FormField,
+  FormLabel,
+  Checkbox,
+} from '@desktop-client/components/forms';
+import { OpSelect } from '@desktop-client/components/modals/EditRuleModal';
+import { DateSelect } from '@desktop-client/components/select/DateSelect';
+import { RecurringSchedulePicker } from '@desktop-client/components/select/RecurringSchedulePicker';
+import { SelectedItemsButton } from '@desktop-client/components/table';
+import { SimpleTransactionsTable } from '@desktop-client/components/transactions/SimpleTransactionsTable';
+import {
+  AmountInput,
+  BetweenAmountInput,
+} from '@desktop-client/components/util/AmountInput';
+import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { usePayees } from '@desktop-client/hooks/usePayees';
@@ -45,6 +50,14 @@ import {
   useSelected,
   SelectedProvider,
 } from '@desktop-client/hooks/useSelected';
+import {
+  type Modal as ModalType,
+  pushModal,
+} from '@desktop-client/modals/modalsSlice';
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+import { liveQuery } from '@desktop-client/queries/liveQuery';
+import { getPayeesById } from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type Fields = {
   payee: null | string;

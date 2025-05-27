@@ -119,7 +119,7 @@ if (process.env.NODE_ENV === 'development') {
   console.log('Running in production mode - Serving static React app');
 
   app.use(express.static(config.get('webRoot'), { index: false }));
-  app.get('/*', (req, res) =>
+  app.get('/{*splat}', (req, res) =>
     res.sendFile(config.get('webRoot') + '/index.html'),
   );
 }

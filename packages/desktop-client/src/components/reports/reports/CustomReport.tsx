@@ -24,36 +24,42 @@ import {
 } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
-import { Warning } from '../../alerts';
-import { AppliedFilters } from '../../filters/AppliedFilters';
-import { MobileBackButton } from '../../mobile/MobileBackButton';
-import { MobilePageHeader, Page, PageHeader } from '../../Page';
-import { PrivacyFilter } from '../../PrivacyFilter';
-import { ChooseGraph } from '../ChooseGraph';
+import { Warning } from '@desktop-client/components/alerts';
+import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
+import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
+import {
+  MobilePageHeader,
+  Page,
+  PageHeader,
+} from '@desktop-client/components/Page';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { ChooseGraph } from '@desktop-client/components/reports/ChooseGraph';
 import {
   defaultsGraphList,
   defaultsList,
   disabledGraphList,
   disabledLegendLabel,
   disabledList,
-} from '../disabledList';
-import { getLiveRange } from '../getLiveRange';
-import { LoadingIndicator } from '../LoadingIndicator';
-import { ReportLegend } from '../ReportLegend';
+} from '@desktop-client/components/reports/disabledList';
+import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';
+import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { ReportLegend } from '@desktop-client/components/reports/ReportLegend';
 import {
   ReportOptions,
   defaultReport,
   type dateRangeProps,
-} from '../ReportOptions';
-import { ReportSidebar } from '../ReportSidebar';
-import { ReportSummary } from '../ReportSummary';
-import { ReportTopbar } from '../ReportTopbar';
-import { setSessionReport } from '../setSessionReport';
-import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
-import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
-import { useReport } from '../useReport';
-import { calculateHasWarning, fromDateRepr } from '../util';
-
+} from '@desktop-client/components/reports/ReportOptions';
+import { ReportSidebar } from '@desktop-client/components/reports/ReportSidebar';
+import { ReportSummary } from '@desktop-client/components/reports/ReportSummary';
+import { ReportTopbar } from '@desktop-client/components/reports/ReportTopbar';
+import { setSessionReport } from '@desktop-client/components/reports/setSessionReport';
+import { createCustomSpreadsheet } from '@desktop-client/components/reports/spreadsheets/custom-spreadsheet';
+import { createGroupedSpreadsheet } from '@desktop-client/components/reports/spreadsheets/grouped-spreadsheet';
+import { useReport } from '@desktop-client/components/reports/useReport';
+import {
+  calculateHasWarning,
+  fromDateRepr,
+} from '@desktop-client/components/reports/util';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';

@@ -21,25 +21,28 @@ import {
   type TimeFrame,
 } from 'loot-core/types/models';
 
-import { addNotification } from '../../../notifications/notificationsSlice';
-import { useDispatch } from '../../../redux';
-import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
-import { MobileBackButton } from '../../mobile/MobileBackButton';
-import { MobilePageHeader, Page, PageHeader } from '../../Page';
-import { PrivacyFilter } from '../../PrivacyFilter';
-import { Change } from '../Change';
-import { CashFlowGraph } from '../graphs/CashFlowGraph';
-import { Header } from '../Header';
-import { LoadingIndicator } from '../LoadingIndicator';
-import { calculateTimeRange } from '../reportRanges';
-import { cashFlowByDate } from '../spreadsheets/cash-flow-spreadsheet';
-import { useReport } from '../useReport';
-
+import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
+import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
+import {
+  MobilePageHeader,
+  Page,
+  PageHeader,
+} from '@desktop-client/components/Page';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { Change } from '@desktop-client/components/reports/Change';
+import { CashFlowGraph } from '@desktop-client/components/reports/graphs/CashFlowGraph';
+import { Header } from '@desktop-client/components/reports/Header';
+import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
+import { cashFlowByDate } from '@desktop-client/components/reports/spreadsheets/cash-flow-spreadsheet';
+import { useReport } from '@desktop-client/components/reports/useReport';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useWidget } from '@desktop-client/hooks/useWidget';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 export const defaultTimeFrame = {
   start: monthUtils.dayFromDate(monthUtils.currentMonth()),

@@ -27,24 +27,16 @@ import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { groupById } from 'loot-core/shared/util';
 
-import { pushModal } from '../../../modals/modalsSlice';
-import {
-  envelopeBudget,
-  trackingBudget,
-  uncategorizedCount,
-} from '../../../queries/queries';
-import { useDispatch } from '../../../redux';
-import { MobilePageHeader, Page } from '../../Page';
-import { PrivacyFilter } from '../../PrivacyFilter';
-import { CellValue } from '../../spreadsheet/CellValue';
-import { useFormat } from '../../spreadsheet/useFormat';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
-import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
-import { PullToRefresh } from '../PullToRefresh';
-
 import { ExpenseGroupList } from './ExpenseGroupList';
 import { IncomeGroup } from './IncomeGroup';
 
+import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
+import { PullToRefresh } from '@desktop-client/components/mobile/PullToRefresh';
+import { MobilePageHeader, Page } from '@desktop-client/components/Page';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
+import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
@@ -53,6 +45,13 @@ import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useOverspentCategories } from '@desktop-client/hooks/useOverspentCategories';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import {
+  envelopeBudget,
+  trackingBudget,
+  uncategorizedCount,
+} from '@desktop-client/queries/queries';
+import { useDispatch } from '@desktop-client/redux';
 
 export const ROW_HEIGHT = 50;
 

@@ -8,23 +8,26 @@ import { Label } from '@actual-app/components/label';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { css } from '@emotion/css';
 
 import {
   isNonProductionEnvironment,
   isElectron,
 } from 'loot-core/shared/environment';
 
-import { createBudget } from '../../budgets/budgetsSlice';
-import { useDispatch } from '../../redux';
-import { loggedIn, signOut } from '../../users/usersSlice';
-import { Link } from '../common/Link';
-import { useServerURL, useSetServerURL } from '../ServerContext';
-
 import { Title } from './subscribe/common';
 
+import { createBudget } from '@desktop-client/budgets/budgetsSlice';
+import { Link } from '@desktop-client/components/common/Link';
+import {
+  useServerURL,
+  useSetServerURL,
+} from '@desktop-client/components/ServerContext';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { saveGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
+import { useDispatch } from '@desktop-client/redux';
+import { loggedIn, signOut } from '@desktop-client/users/usersSlice';
 
 export function ElectronServerConfig({
   onDoNotUseServer,
@@ -156,12 +159,12 @@ export function ElectronServerConfig({
               value="localhost"
               disabled
               type="text"
-              style={{
+              className={css({
                 '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
                   WebkitAppearance: 'none',
                   margin: 0,
                 },
-              }}
+              })}
             />
           </View>
 
@@ -175,14 +178,14 @@ export function ElectronServerConfig({
               value={String(electronServerPort)}
               aria-label={t('Port')}
               type="number"
-              style={{
+              className={css({
                 '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
                   WebkitAppearance: 'none',
                   margin: 0,
                 },
                 width: '7ch',
                 textAlign: 'center',
-              }}
+              })}
               autoFocus={true}
               maxLength={5}
               onChange={event =>

@@ -8,36 +8,36 @@ import {
 import {
   name as accountsSliceName,
   reducer as accountsSliceReducer,
-} from '../accounts/accountsSlice';
+} from '@desktop-client/accounts/accountsSlice';
 import {
   name as appSliceName,
   reducer as appSliceReducer,
-} from '../app/appSlice';
+} from '@desktop-client/app/appSlice';
 import {
   name as budgetsSliceName,
   reducer as budgetsSliceReducer,
-} from '../budgets/budgetsSlice';
+} from '@desktop-client/budgets/budgetsSlice';
 import {
   name as modalsSliceName,
   reducer as modalsSliceReducer,
-} from '../modals/modalsSlice';
+} from '@desktop-client/modals/modalsSlice';
 import {
   name as notificationsSliceName,
   reducer as notificationsSliceReducer,
   addNotification,
-} from '../notifications/notificationsSlice';
+} from '@desktop-client/notifications/notificationsSlice';
 import {
   name as prefsSliceName,
   reducer as prefsSliceReducer,
-} from '../prefs/prefsSlice';
+} from '@desktop-client/prefs/prefsSlice';
 import {
   name as queriesSliceName,
   reducer as queriesSliceReducer,
-} from '../queries/queriesSlice';
+} from '@desktop-client/queries/queriesSlice';
 import {
   name as usersSliceName,
   reducer as usersSliceReducer,
-} from '../users/usersSlice';
+} from '@desktop-client/users/usersSlice';
 
 const rootReducer = combineReducers({
   [accountsSliceName]: accountsSliceReducer,

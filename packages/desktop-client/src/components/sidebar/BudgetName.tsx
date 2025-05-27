@@ -13,12 +13,11 @@ import { View } from '@actual-app/components/view';
 
 import * as Platform from 'loot-core/shared/platform';
 
-import { closeBudget } from '../../budgets/budgetsSlice';
-import { useDispatch } from '../../redux';
-
+import { closeBudget } from '@desktop-client/budgets/budgetsSlice';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useDispatch } from '@desktop-client/redux';
 
 type BudgetNameProps = {
   children?: ReactNode;
@@ -84,7 +83,7 @@ function EditableBudgetName() {
   const items = [
     { name: 'rename', text: t('Rename budget') },
     { name: 'settings', text: t('Settings') },
-    { name: 'close', text: t('Close file') },
+    { name: 'close', text: t('Switch file') },
   ];
 
   if (editing) {
@@ -97,9 +96,7 @@ function EditableBudgetName() {
             fontWeight: 500,
           }}
           defaultValue={budgetName}
-          onEnter={e => {
-            const inputEl = e.target as HTMLInputElement;
-            const newBudgetName = inputEl.value;
+          onEnter={newBudgetName => {
             if (newBudgetName.trim() !== '') {
               setBudgetNamePref(newBudgetName);
               setEditing(false);

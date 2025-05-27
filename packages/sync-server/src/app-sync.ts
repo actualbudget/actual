@@ -117,7 +117,7 @@ app.post('/sync', async (req, res): Promise<void> => {
 app.post('/user-get-key', (req, res) => {
   if (!res.locals) return;
 
-  const { fileId } = req.body;
+  const { fileId } = req.body || {};
 
   const filesService = new FilesService(getAccountDb());
   const file = verifyFileExists(fileId, filesService, res, 'file-not-found');
@@ -137,7 +137,7 @@ app.post('/user-get-key', (req, res) => {
 });
 
 app.post('/user-create-key', (req, res) => {
-  const { fileId, keyId, keySalt, testContent } = req.body;
+  const { fileId, keyId, keySalt, testContent } = req.body || {};
 
   const filesService = new FilesService(getAccountDb());
 
@@ -158,7 +158,7 @@ app.post('/user-create-key', (req, res) => {
 });
 
 app.post('/reset-user-file', async (req, res) => {
-  const { fileId } = req.body;
+  const { fileId } = req.body || {};
 
   const filesService = new FilesService(getAccountDb());
   const file = verifyFileExists(
@@ -300,7 +300,7 @@ app.get('/download-user-file', async (req, res) => {
 });
 
 app.post('/update-user-filename', (req, res) => {
-  const { fileId, name } = req.body;
+  const { fileId, name } = req.body || {};
 
   const filesService = new FilesService(getAccountDb());
 
@@ -372,7 +372,7 @@ app.get('/get-user-file-info', (req, res) => {
 });
 
 app.post('/delete-user-file', (req, res) => {
-  const { fileId } = req.body;
+  const { fileId } = req.body || {};
 
   if (!fileId) {
     res.status(422).send({

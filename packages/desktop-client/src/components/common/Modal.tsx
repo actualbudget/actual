@@ -413,7 +413,7 @@ export function ModalTitle({
 
   return isEditing ? (
     <Input
-      inputRef={inputRef}
+      ref={inputRef}
       style={{
         fontSize: 25,
         fontWeight: 700,
@@ -422,11 +422,9 @@ export function ModalTitle({
       }}
       defaultValue={title}
       onUpdate={_onTitleUpdate}
-      onKeyDown={e => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          _onTitleUpdate?.(e.currentTarget.value);
-        }
+      onEnter={(value, e) => {
+        e.preventDefault();
+        _onTitleUpdate?.(value);
       }}
     />
   ) : (
