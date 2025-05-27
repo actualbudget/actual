@@ -23,10 +23,6 @@ import { mapField, friendlyOp } from 'loot-core/shared/rules';
 import { describeSchedule } from 'loot-core/shared/schedules';
 import { type RuleEntity, type NewRuleEntity } from 'loot-core/types/models';
 
-import { pushModal } from '../modals/modalsSlice';
-import { initiallyLoadPayees } from '../queries/queriesSlice';
-import { useDispatch } from '../redux';
-
 import { InfiniteScrollWrapper } from './common/InfiniteScrollWrapper';
 import { Link } from './common/Link';
 import { Search } from './common/Search';
@@ -41,6 +37,9 @@ import {
   useSelected,
   SelectedProvider,
 } from '@desktop-client/hooks/useSelected';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { initiallyLoadPayees } from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 function mapValue(
   field,

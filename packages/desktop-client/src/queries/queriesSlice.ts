@@ -13,12 +13,12 @@ import {
   type PayeeEntity,
 } from 'loot-core/types/models';
 
-import { resetApp } from '../app/appSlice';
+import { resetApp } from '@desktop-client/app/appSlice';
 import {
   addGenericErrorNotification,
   addNotification,
-} from '../notifications/notificationsSlice';
-import { createAppAsyncThunk } from '../redux';
+} from '@desktop-client/notifications/notificationsSlice';
+import { createAppAsyncThunk } from '@desktop-client/redux';
 
 const sliceName = 'queries';
 

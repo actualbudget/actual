@@ -11,9 +11,9 @@ import {
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { type TransactionEntity } from 'loot-core/types/models';
 
-import { useSchedules } from '../../hooks/useSchedules';
-import { pushModal } from '../../modals/modalsSlice';
-import { useDispatch } from '../../redux';
+import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type BalanceMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,

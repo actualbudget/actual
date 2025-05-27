@@ -8,11 +8,14 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
-import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-
+import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type ConfirmCategoryDeleteModalProps = Extract<
   ModalType,

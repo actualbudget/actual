@@ -6,22 +6,21 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
-import { trackingBudget } from '../../queries/queries';
 import {
   BalanceWithCarryover,
   CarryoverIndicator,
-} from '../budget/BalanceWithCarryover';
-import { BalanceMenu } from '../budget/tracking/BalanceMenu';
+} from '@desktop-client/components/budget/BalanceWithCarryover';
+import { BalanceMenu } from '@desktop-client/components/budget/tracking/BalanceMenu';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal';
-import { CellValueText } from '../spreadsheet/CellValue';
-
+} from '@desktop-client/components/common/Modal';
+import { CellValueText } from '@desktop-client/components/spreadsheet/CellValue';
 import { useCategory } from '@desktop-client/hooks/useCategory';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { trackingBudget } from '@desktop-client/queries/queries';
 
 type TrackingBalanceMenuModalProps = Omit<
   Extract<ModalType, { name: 'tracking-balance-menu' }>['options'],

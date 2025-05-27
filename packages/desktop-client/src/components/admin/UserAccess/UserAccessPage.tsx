@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Page } from '../../Page';
-
 import { UserAccess } from './UserAccess';
+
+import { Page } from '@desktop-client/components/Page';
 
 export function UserAccessPage() {
   const { t } = useTranslation();

@@ -8,8 +8,12 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type ConfirmTransactionDeleteModalProps = Extract<
   ModalType,

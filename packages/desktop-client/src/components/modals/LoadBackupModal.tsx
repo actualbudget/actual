@@ -10,13 +10,16 @@ import { View } from '@actual-app/components/view';
 import { send, listen } from 'loot-core/platform/client/fetch';
 import { type Backup } from 'loot-core/server/budgetfiles/backups';
 
-import { loadBackup, makeBackup } from '../../budgets/budgetsSlice';
-import { type Modal as ModalType } from '../../modals/modalsSlice';
-import { useDispatch } from '../../redux';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Row, Cell } from '../table';
-
+import { loadBackup, makeBackup } from '@desktop-client/budgets/budgetsSlice';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { Row, Cell } from '@desktop-client/components/table';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type BackupTableProps = {
   backups: Backup[];

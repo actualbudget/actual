@@ -13,12 +13,11 @@ import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
 import { type TransactionEntity } from 'loot-core/types/models';
 
-import { pushModal } from '../../modals/modalsSlice';
-import { useDispatch } from '../../redux';
-import { SelectedItemsButton } from '../table';
-
+import { SelectedItemsButton } from '@desktop-client/components/table';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
 import { useSelectedItems } from '@desktop-client/hooks/useSelected';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type SelectedTransactionsButtonProps = {
   getTransaction: (id: string) => TransactionEntity | undefined;

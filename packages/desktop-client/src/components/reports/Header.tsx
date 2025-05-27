@@ -14,9 +14,6 @@ import {
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { AppliedFilters } from '../filters/AppliedFilters';
-import { FilterButton } from '../filters/FiltersMenu';
-
 import { getLiveRange } from './getLiveRange';
 import {
   calculateTimeRange,
@@ -26,6 +23,8 @@ import {
   validateStart,
 } from './reportRanges';
 
+import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
+import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type HeaderProps = {
