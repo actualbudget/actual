@@ -313,7 +313,8 @@ export const goCardlessService = {
     await goCardlessService.setToken();
 
     const institution = await goCardlessService.getInstitution(institutionId);
-    const accountSelection = institution.supported_features?.includes('account_selection') ?? false;
+    const accountSelection =
+      institution.supported_features?.includes('account_selection') ?? false;
 
     let response;
     try {
