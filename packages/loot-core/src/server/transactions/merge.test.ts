@@ -69,6 +69,16 @@ async function prepareDatabase() {
   await db.insertAccount({ id: 'one', name: 'one' });
   await db.insertAccount({ id: 'two', name: 'two' });
   await db.insertAccount({ id: 'three', name: 'three', offbudget: 1 });
+  await db.insertPayee({
+    id: 'transfer1',
+    name: 'transferone',
+    transfer_acct: 'one',
+  });
+  await db.insertPayee({
+    id: 'transfer2',
+    name: 'transfertwo',
+    transfer_acct: 'two',
+  });
   await db.insertPayee({ id: 'payee1', name: 'one' });
   await db.insertPayee({ id: 'payee2', name: 'two' });
   await db.insertPayee({ id: 'payee3', name: 'three' });
@@ -281,6 +291,160 @@ describe('Merging success', () => {
       amount: 5,
       date: 20250101,
       imported_id: 'imported_1',
+    });
+  });
+});
+
+describe('Merging with transfers', () => {
+  beforeEach(global.emptyDatabase());
+  beforeEach(prepareDatabase);
+  afterEach(global.emptyDatabase());
+  it('keep with payee, drop with transfer', async () => {
+    const keep = await db.insertTransaction({
+      account: 'one',
+      amount: 5,
+      date: '2025-01-01',
+      payee: 'payee1',
+      imported_id: 'imported_1',
+    });
+    const drop = await db.insertTransaction({
+      account: 'one',
+      amount: 5,
+      date: '2025-01-01',
+    });
+    const dropTransfer = await db.insertTransaction({
+      account: 'two',
+      amount: -5,
+      date: '2025-01-01',
+      transfer_id: drop,
+      payee: 'transfer1',
+    });
+    await db.updateTransaction({
+      id: drop,
+      transfer_id: dropTransfer,
+      payee: 'transfer2',
+    });
+
+    expect(await mergeTransactions([{ id: keep }, { id: drop }])).toBe(keep);
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(1);
+    expect(transactions[0]).toMatchObject({
+      id: keep,
+      account: 'one',
+      payee: 'payee1',
+      transfer_id: null,
+      amount: 5,
+      date: 20250101,
+      imported_id: 'imported_1',
+    });
+  });
+  it('keep without payee, drop with transfer', async () => {
+    const keep = await db.insertTransaction({
+      account: 'one',
+      amount: 5,
+      date: '2025-01-01',
+      category: '1',
+      imported_id: 'imported_1',
+    });
+    const drop = await db.insertTransaction({
+      account: 'one',
+      amount: 5,
+      date: '2025-01-01',
+    });
+    const dropTransfer = await db.insertTransaction({
+      account: 'two',
+      amount: -5,
+      date: '2025-01-01',
+      transfer_id: drop,
+      payee: 'transfer1',
+    });
+    await db.updateTransaction({
+      id: drop,
+      transfer_id: dropTransfer,
+      payee: 'transfer2',
+    });
+
+    expect(await mergeTransactions([{ id: keep }, { id: drop }])).toBe(keep);
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(2);
+    expect(transactions[0]).toMatchObject({
+      id: keep,
+      account: 'one',
+      payee: 'transfer2',
+      category: null,
+      transfer_id: dropTransfer,
+      amount: 5,
+      date: 20250101,
+      imported_id: 'imported_1',
+    });
+    expect(transactions[1]).toMatchObject({
+      id: dropTransfer,
+      account: 'two',
+      payee: 'transfer1',
+      transfer_id: keep,
+      amount: -5,
+      date: 20250101,
+      imported_id: null,
+    });
+  });
+  it('keep with transfer, drop with transfer', async () => {
+    const keep = await db.insertTransaction({
+      account: 'one',
+      amount: 5,
+      date: '2025-01-01',
+      imported_id: 'imported_1',
+    });
+    const keepTransfer = await db.insertTransaction({
+      account: 'two',
+      amount: -5,
+      date: '2025-01-01',
+      transfer_id: keep,
+      payee: 'transfer1',
+    });
+    await db.updateTransaction({
+      id: keep,
+      transfer_id: keepTransfer,
+      payee: 'transfer2',
+    });
+
+    const drop = await db.insertTransaction({
+      account: 'one',
+      amount: 5,
+      date: '2025-01-01',
+    });
+    const dropTransfer = await db.insertTransaction({
+      account: 'two',
+      amount: -5,
+      date: '2025-01-01',
+      transfer_id: drop,
+      payee: 'transfer1',
+    });
+    await db.updateTransaction({
+      id: drop,
+      transfer_id: dropTransfer,
+      payee: 'transfer2',
+    });
+
+    expect(await mergeTransactions([{ id: keep }, { id: drop }])).toBe(keep);
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(2);
+    expect(transactions[0]).toMatchObject({
+      id: keep,
+      account: 'one',
+      payee: 'transfer2',
+      transfer_id: keepTransfer,
+      amount: 5,
+      date: 20250101,
+      imported_id: 'imported_1',
+    });
+    expect(transactions[1]).toMatchObject({
+      id: keepTransfer,
+      account: 'two',
+      payee: 'transfer1',
+      transfer_id: keep,
+      amount: -5,
+      date: 20250101,
+      imported_id: null,
     });
   });
 });
