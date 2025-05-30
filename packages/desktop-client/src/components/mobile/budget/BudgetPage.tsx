@@ -582,7 +582,6 @@ export function BudgetPage() {
         />
       }
     >
-      <Banners month={startMonth} onBudgetAction={onBudgetAction} />
       <NamespaceContext.Provider value={monthUtils.sheetForMonth(startMonth)}>
         <SyncRefresh
           onSync={async () => {
@@ -590,18 +589,21 @@ export function BudgetPage() {
           }}
         >
           {({ onRefresh }) => (
-            <BudgetTable
-              // This key forces the whole table rerender when the number
-              // format changes
-              key={`${numberFormat}${hideFraction}`}
-              categoryGroups={categoryGroups}
-              month={startMonth}
-              onShowBudgetSummary={onShowBudgetSummary}
-              onBudgetAction={onBudgetAction}
-              onRefresh={onRefresh}
-              onEditCategoryGroup={onOpenCategoryGroupMenuModal}
-              onEditCategory={onOpenCategoryMenuModal}
-            />
+            <>
+              <Banners month={startMonth} onBudgetAction={onBudgetAction} />
+              <BudgetTable
+                // This key forces the whole table rerender when the number
+                // format changes
+                key={`${numberFormat}${hideFraction}`}
+                categoryGroups={categoryGroups}
+                month={startMonth}
+                onShowBudgetSummary={onShowBudgetSummary}
+                onBudgetAction={onBudgetAction}
+                onRefresh={onRefresh}
+                onEditCategoryGroup={onOpenCategoryGroupMenuModal}
+                onEditCategory={onOpenCategoryMenuModal}
+              />
+            </>
           )}
         </SyncRefresh>
       </NamespaceContext.Provider>
