@@ -585,14 +585,16 @@ export function BudgetPage() {
             </Button>
           }
           rightContent={
-            !monthUtils.isCurrentMonth(startMonth) && <Button
-              variant="bare"
-              onPress={onCurrentMonth}
-              aria-label={t('Today')}
-              style={{ margin: 10 }}
-            >
-              <SvgCalendar width={20} height={20} />
-            </Button>
+            !monthUtils.isCurrentMonth(startMonth) && (
+              <Button
+                variant="bare"
+                onPress={onCurrentMonth}
+                aria-label={t('Today')}
+                style={{ margin: 10 }}
+              >
+                <SvgCalendar width={20} height={20} />
+              </Button>
+            )
           }
         />
       }
@@ -842,7 +844,7 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
                       toCategoryName: category.name,
                       fromCategoryName:
                         fromCategoryId === 'to-budget'
-                          ? 'To Budget'
+                          ? t('To Budget')
                           : categoriesById[fromCategoryId].name,
                     },
                   ),
