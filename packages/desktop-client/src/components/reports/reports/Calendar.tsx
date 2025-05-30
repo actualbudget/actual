@@ -712,7 +712,6 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                       transactions={allTransactions}
                       onOpenTransaction={onOpenTransaction}
                       isLoadingMore={false}
-                      account={undefined}
                     />
                   </View>
                 </animated.div>
