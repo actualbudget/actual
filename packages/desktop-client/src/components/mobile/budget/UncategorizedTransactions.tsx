@@ -1,16 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { listen } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
-import {
-  type CategoryEntity,
-  type TransactionEntity,
-} from 'loot-core/types/models';
+import { type TransactionEntity } from 'loot-core/types/models';
 
 import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
-import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
-import { useCategoryPreviewTransactions } from '@desktop-client/hooks/useCategoryPreviewTransactions';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
@@ -18,33 +13,7 @@ import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSear
 import { useDispatch } from '@desktop-client/redux';
 import * as bindings from '@desktop-client/spreadsheet/bindings';
 
-type CategoryTransactionsProps = {
-  category: CategoryEntity;
-  month: string;
-};
-
-export function CategoryTransactions({
-  category,
-  month,
-}: CategoryTransactionsProps) {
-  const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
-
-  return (
-    <SchedulesProvider query={schedulesQuery}>
-      <TransactionListWithPreviews category={category} month={month} />
-    </SchedulesProvider>
-  );
-}
-
-type TransactionListWithPreviewsProps = {
-  category: CategoryEntity;
-  month: string;
-};
-
-function TransactionListWithPreviews({
-  category,
-  month,
-}: TransactionListWithPreviewsProps) {
+export function UncategorizedTransactions() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -52,9 +21,9 @@ function TransactionListWithPreviews({
     () =>
       q('transactions')
         .options({ splits: 'inline' })
-        .filter(getCategoryMonthFilter(category, month))
+        .filter({ category: null })
         .select('*'),
-    [category, month],
+    [],
   );
 
   const [transactionsQuery, setTransactionsQuery] = useState(
@@ -87,7 +56,7 @@ function TransactionListWithPreviews({
     });
   }, [dispatch, reloadTransactions]);
 
-  const { isSearching, search: onSearch } = useTransactionsSearch({
+  const { search: onSearch } = useTransactionsSearch({
     updateQuery: setTransactionsQuery,
     resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
     dateFormat,
@@ -103,41 +72,18 @@ function TransactionListWithPreviews({
     [navigate],
   );
 
-  const balance = bindings.categoryBalance(category.id, month);
-  const balanceCleared = bindings.categoryBalanceCleared(category.id, month);
-  const balanceUncleared = bindings.categoryBalanceUncleared(
-    category.id,
-    month,
-  );
-
-  const { previewTransactions } = useCategoryPreviewTransactions({
-    categoryId: category.id,
-    month,
-  });
-
-  const transactionsToDisplay = !isSearching
-    ? previewTransactions.concat(transactions)
-    : transactions;
+  const balance = bindings.uncategorizedBalance();
 
   return (
     <TransactionListWithBalances
       isLoading={isLoading}
-      transactions={transactionsToDisplay}
+      transactions={transactions}
       balance={balance}
-      balanceCleared={balanceCleared}
-      balanceUncleared={balanceUncleared}
-      searchPlaceholder={`Search ${category.name}`}
+      searchPlaceholder="Search uncategorized transactions"
       onSearch={onSearch}
       isLoadingMore={isLoadingMore}
       onLoadMore={loadMoreTransactions}
       onOpenTransaction={onOpenTransaction}
     />
   );
-}
-
-function getCategoryMonthFilter(category: CategoryEntity, month: string) {
-  return {
-    category: category.id,
-    date: { $transform: '$month', $eq: month },
-  };
 }
