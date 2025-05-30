@@ -69,9 +69,7 @@ export function AccountPage() {
             )
           }
           leftContent={<MobileBackButton />}
-          rightContent={
-            <AddTransactionButton accountId={account?.id} />
-          }
+          rightContent={<AddTransactionButton accountId={account?.id} />}
         />
       }
       padding={0}
