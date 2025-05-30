@@ -27,6 +27,16 @@ jobs:
         uses: ./.github/actions/setup
       - name: Typecheck
         run: yarn typecheck
+  validate-cli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Build Web
+        run: yarn build:server
+      - name: Check that the built CLI works
+        run: node packages/sync-server/build/bin/actual-server.js --version
   test:
     runs-on: ubuntu-latest
     steps:
