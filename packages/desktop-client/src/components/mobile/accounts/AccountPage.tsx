@@ -38,7 +38,7 @@ export function AccountPage() {
 
   const { id: accountIdParam } = useParams();
 
-  const account = useAccount(accountIdParam!);
+  const account = useAccount(accountIdParam || '');
 
   return (
     <Page
@@ -53,7 +53,7 @@ export function AccountPage() {
           }
           leftContent={<MobileBackButton />}
           rightContent={
-            <AddTransactionButton accountId={account?.id ?? undefined} />
+            <AddTransactionButton accountId={account?.id} />
           }
         />
       }
@@ -159,7 +159,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
       }}
     >
       {account.bank && (
-        <div
+        <View
           style={{
             margin: 'auto',
             marginRight: 5,
