@@ -30,6 +30,7 @@ export type NetWorthWidget = AbstractWidget<
     timeFrame?: TimeFrame;
   } | null
 >;
+
 export type CashFlowWidget = AbstractWidget<
   'cash-flow-card',
   {
@@ -40,6 +41,7 @@ export type CashFlowWidget = AbstractWidget<
     showBalance?: boolean;
   } | null
 >;
+
 export type SpendingWidget = AbstractWidget<
   'spending-card',
   {
@@ -52,44 +54,16 @@ export type SpendingWidget = AbstractWidget<
     mode?: 'single-month' | 'budget' | 'average';
   } | null
 >;
+
 export type CustomReportWidget = AbstractWidget<
   'custom-report',
   { id: string }
 >;
+
 export type MarkdownWidget = AbstractWidget<
   'markdown-card',
   { content: string; text_align?: 'left' | 'right' | 'center' }
 >;
-
-type SpecializedWidget =
-  | NetWorthWidget
-  | CashFlowWidget
-  | SpendingWidget
-  | MarkdownWidget
-  | SummaryWidget
-  | CalendarWidget;
-export type Widget = SpecializedWidget | CustomReportWidget;
-export type NewWidget = Omit<Widget, 'id' | 'tombstone'>;
-
-// Exported/imported (json) widget definition
-export type ExportImportCustomReportWidget = Omit<
-  CustomReportWidget,
-  'id' | 'meta' | 'tombstone'
-> & {
-  meta: Omit<CustomReportEntity, 'tombstone'>;
-};
-export type ExportImportDashboardWidget = Omit<
-  ExportImportCustomReportWidget | SpecializedWidget,
-  'tombstone'
->;
-
-export type ExportImportDashboard = {
-  // Dashboard exports can be versioned; currently we support
-  // only a single version, but lets account for multiple
-  // future versions
-  version: 1;
-  widgets: ExportImportDashboardWidget[];
-};
 
 export type SummaryWidget = AbstractWidget<
   'summary-card',
@@ -126,3 +100,52 @@ export type CalendarWidget = AbstractWidget<
     timeFrame?: TimeFrame;
   } | null
 >;
+
+// ADD YOUR NEW WIDGET TYPE HERE
+export type RecurringPaymentsWidget = AbstractWidget<
+  'recurring-payments-card',
+  {
+    name?: string;
+    conditions?: RuleConditionEntity[];
+    conditionsOp?: 'and' | 'or';
+    timeFrame?: TimeFrame;
+    showCount?: number;
+    sortBy?: 'amount' | 'frequency' | 'name';
+    includeInactive?: boolean;
+  } | null
+>;
+
+// UPDATE THIS TYPE TO INCLUDE YOUR WIDGET
+type SpecializedWidget =
+  | NetWorthWidget
+  | CashFlowWidget
+  | SpendingWidget
+  | MarkdownWidget
+  | SummaryWidget
+  | CalendarWidget
+  | RecurringPaymentsWidget;  // ADD THIS LINE
+
+export type Widget = SpecializedWidget | CustomReportWidget;
+
+export type NewWidget = Omit<Widget, 'id' | 'tombstone'>;
+
+// Exported/imported (json) widget definition
+export type ExportImportCustomReportWidget = Omit<
+  CustomReportWidget,
+  'id' | 'meta' | 'tombstone'
+> & {
+  meta: Omit<CustomReportEntity, 'tombstone'>;
+};
+
+export type ExportImportDashboardWidget = Omit<
+  ExportImportCustomReportWidget | SpecializedWidget,
+  'tombstone'
+>;
+
+export type ExportImportDashboard = {
+  // Dashboard exports can be versioned; currently we support
+  // only a single version, but lets account for multiple
+  // future versions
+  version: 1;
+  widgets: ExportImportDashboardWidget[];
+};
