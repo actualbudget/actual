@@ -48,7 +48,7 @@ export function CategoryPage() {
             )
           }
           leftContent={<MobileBackButton />}
-          rightContent={<AddTransactionButton categoryId={category.id} />}
+          rightContent={<AddTransactionButton categoryId={category?.id} />}
         />
       }
       padding={0}

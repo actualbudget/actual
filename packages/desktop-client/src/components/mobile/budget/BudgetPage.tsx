@@ -568,15 +568,13 @@ export function BudgetPage() {
             </Button>
           }
           rightContent={
-            <Button
+            !monthUtils.isCurrentMonth(startMonth) && <Button
               variant="bare"
               onPress={onCurrentMonth}
               aria-label={t('Today')}
               style={{ margin: 10 }}
             >
-              {!monthUtils.isCurrentMonth(startMonth) && (
-                <SvgCalendar width={20} height={20} />
-              )}
+              <SvgCalendar width={20} height={20} />
             </Button>
           }
         />
