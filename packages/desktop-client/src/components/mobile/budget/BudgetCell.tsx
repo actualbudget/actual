@@ -13,14 +13,14 @@ import { getColumnWidth, PILL_STYLE } from './BudgetTable';
 
 import { makeAmountGrey } from '@desktop-client/components/budget/util';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { type SheetFields } from '@desktop-client/components/spreadsheet';
 import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
-import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useNotes } from '@desktop-client/hooks/useNotes';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { type SheetFields } from '@desktop-client/spreadsheet';
 
 type BudgetCellProps<
   SheetFieldName extends SheetFields<'envelope-budget' | 'tracking-budget'>,
