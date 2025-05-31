@@ -19,6 +19,7 @@ export interface SimpleFinBatchSyncResponse {
 }
 
 export type SyncServerSimpleFinAccount = {
+  balance: number;
   account_id: string;
   institution?: string;
   orgDomain?: string;
