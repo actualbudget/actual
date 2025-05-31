@@ -395,7 +395,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               return integerToCurrency(expr);
             },
             unformatExpr: expr => {
-              return amountToInteger(evalArithmetic(expr, 0));
+              return amountToInteger(evalArithmetic(expr, 0) || 0);
             },
           }}
           inputProps={{
