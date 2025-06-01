@@ -2,13 +2,13 @@
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
 import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
+import { Template } from '../../types/models/templates';
 import { aqlQuery } from '../aql';
 import { batchMessages } from '../sync';
 
 import { isReflectBudget, getSheetValue, setGoal, setBudget } from './actions';
 import { CategoryTemplateContext } from './category-template-context';
 import { checkTemplates, storeTemplates } from './template-notes';
-import { Template } from './types/templates';
 
 type Notification = {
   type?: 'message' | 'error' | 'warning' | undefined;

@@ -3,11 +3,11 @@ import { useCallback, useMemo, useReducer, useState } from 'react';
 import { Stack } from '@actual-app/components/stack';
 import { type CSSProperties } from '@actual-app/components/styles';
 
-import { type Template } from 'loot-core/server/budget/types/templates';
 import {
   type CategoryGroupEntity,
   type ScheduleEntity,
 } from 'loot-core/types/models';
+import { type Template } from 'loot-core/types/models/templates';
 
 import { type Action } from './actions';
 import { BudgetAutomationEditor } from './BudgetAutomationEditor';

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import type { SimpleTemplate } from 'loot-core/server/budget/types/templates';
+import type { SimpleTemplate } from 'loot-core/types/models/templates';
 
 import {
   type Action,
