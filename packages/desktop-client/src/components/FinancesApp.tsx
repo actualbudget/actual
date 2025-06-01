@@ -47,7 +47,6 @@ import { addNotification } from '@desktop-client/notifications/notificationsSlic
 import { useSelector, useDispatch } from '@desktop-client/redux';
 import { getIsOutdated, getLatestVersion } from '@desktop-client/util/versions';
 
-
 function NarrowNotSupported({
   redirectTo = '/budget',
   children,
