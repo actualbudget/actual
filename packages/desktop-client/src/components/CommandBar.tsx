@@ -181,6 +181,13 @@ export function CommandBar() {
           maxHeight: '300px',
           overflowY: 'auto',
           padding: '8px 0',
+          // Hide the scrollbar
+          scrollbarWidth: 'none',
+          '&::-webkit-scrollbar': {
+            display: 'none',
+          },
+          // Ensure content is still scrollable
+          '-ms-overflow-style': 'none',
         })}
       >
         {filteredSections.map(
