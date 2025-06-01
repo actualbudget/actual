@@ -68,7 +68,9 @@ Content contained on external links is not managed or maintained by the Actual B
 - [Google Cloud always free tier](https://github.com/eatonc/actual-gcp)
 - [Google Cloud Run (serverless)](https://github.com/daniefdz/actual-run)
 - [Home Assistant](https://github.com/sztupy/hassio-actualbudget/blob/main/README.md)
-- [Synology NAS](https://mariushosting.com/how-to-install-actual-on-your-synology-nas/)
+- Synology NAS
+  - [Marius Bogdan Lixandru's guide](https://mariushosting.com/how-to-install-actual-on-your-synology-nas/)
+  - [Adam Millerchip's guide](https://adamu.jp/blog/actual_budget_nas)
 - [UnRAID SSL Setup](https://discord.com/channels/937901803608096828/1158941114603155477) - this guide is found at our Discord
 - Arch Linux AUR packages:
   - [actual-appimage](https://aur.archlinux.org/packages/actual-appimage) - Desktop App, based on GitHub AppImage release.
