@@ -12,7 +12,6 @@ import * as d from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { integerToCurrency } from 'loot-core/shared/util';
 import { type TimeFrame, type NetWorthWidget } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
@@ -32,6 +31,7 @@ import { createSpreadsheet as netWorthSpreadsheet } from '@desktop-client/compon
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
@@ -62,6 +62,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const locale = useLocale();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const format = useFormat();
 
   const accounts = useAccounts();
   const {
@@ -97,8 +98,9 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         conditions,
         conditionsOp,
         locale,
+        format,
       ),
-    [start, end, accounts, conditions, conditionsOp, locale],
+    [start, end, accounts, conditions, conditionsOp, locale, format],
   );
   const data = useReport('net_worth', reportParams);
   useEffect(() => {
@@ -258,7 +260,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
           <View
             style={{ ...styles.largeText, fontWeight: 400, marginBottom: 5 }}
           >
-            <PrivacyFilter>{integerToCurrency(data.netWorth)}</PrivacyFilter>
+            <PrivacyFilter>{format(data.netWorth, 'financial')}</PrivacyFilter>
           </View>
           <PrivacyFilter>
             <Change amount={data.totalChange} />
