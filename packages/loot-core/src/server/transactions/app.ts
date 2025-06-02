@@ -22,6 +22,7 @@ export type TransactionHandlers = {
   'transaction-update': typeof updateTransaction;
   'transaction-delete': typeof deleteTransaction;
   'transactions-parse-file': typeof parseTransactionsFile;
+  //TODO: Can this handler be removed?
   'transactions-export': typeof exportTransactions;
   'transactions-export-query': typeof exportTransactionsQuery;
   'transactions-merge': typeof mergeTransactions;
@@ -74,21 +75,31 @@ async function exportTransactions({
   accounts,
   categoryGroups,
   payees,
+  currencyCode,
 }: {
   transactions: TransactionEntity[];
   accounts: AccountEntity[];
   categoryGroups: CategoryGroupEntity[];
   payees: PayeeEntity[];
+  currencyCode: string;
 }) {
-  return exportToCSV(transactions, accounts, categoryGroups, payees);
+  return exportToCSV(
+    transactions,
+    accounts,
+    categoryGroups,
+    payees,
+    currencyCode,
+  );
 }
 
 async function exportTransactionsQuery({
   query: queryState,
+  currencyCode,
 }: {
   query: QueryState;
+  currencyCode: string;
 }) {
-  return exportQueryToCSV(new Query(queryState));
+  return exportQueryToCSV(new Query(queryState), currencyCode);
 }
 
 async function getEarliestTransaction() {

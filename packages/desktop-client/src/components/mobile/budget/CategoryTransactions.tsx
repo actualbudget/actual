@@ -19,6 +19,7 @@ import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategoryPreviewTransactions } from '@desktop-client/hooks/useCategoryPreviewTransactions';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
@@ -75,6 +76,7 @@ function TransactionListWithPreviews({
 }: TransactionListWithPreviewsProps) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const format = useFormat();
 
   const baseTransactionsQuery = useCallback(
     () =>
@@ -119,6 +121,7 @@ function TransactionListWithPreviews({
     updateQuery: setTransactionsQuery,
     resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
     dateFormat,
+    currency: format.currency,
   });
 
   const onOpenTransaction = useCallback(

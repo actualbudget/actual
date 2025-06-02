@@ -5,7 +5,6 @@ import { Trans } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgCheckCircle1 } from '@actual-app/components/icons/v2';
 import { InitialFocus } from '@actual-app/components/initial-focus';
-import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -13,10 +12,11 @@ import { View } from '@actual-app/components/view';
 import { t } from 'i18next';
 
 import { type Query } from 'loot-core/shared/query';
-import { currencyToInteger, tsToRelativeTime } from 'loot-core/shared/util';
+import { type IntegerAmount, tsToRelativeTime } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
+import { FinancialInput } from '@desktop-client/components/util/FinancialInput';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
@@ -138,26 +138,22 @@ export function ReconcileMenu({
   const format = useFormat();
   const locale = useLocale();
 
-  const [inputValue, setInputValue] = useState<string | null>();
-  // useEffect is needed here. clearedBalance does not work as a default value for inputValue and
-  // to use a button to update inputValue we can't use defaultValue in the input form below
+  const [inputValue, setInputValue] = useState<IntegerAmount | null>(null);
+
   useEffect(() => {
-    if (clearedBalance != null) {
-      setInputValue(format(clearedBalance, 'financial'));
+    if (clearedBalance !== null && inputValue === null) {
+      setInputValue(clearedBalance);
     }
-  }, [clearedBalance, format]);
+  }, [clearedBalance, inputValue]);
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if (inputValue === '') {
+    if (inputValue === null) {
       return;
     }
 
-    const amount =
-      inputValue != null ? currencyToInteger(inputValue) : clearedBalance;
-
-    onReconcile(amount);
+    onReconcile(inputValue);
     onClose();
   }
 
@@ -171,8 +167,8 @@ export function ReconcileMenu({
           </Trans>
         </Text>
         <InitialFocus>
-          <Input
-            value={inputValue ?? ''}
+          <FinancialInput
+            value={inputValue ?? 0}
             onChangeValue={setInputValue}
             style={{ margin: '7px 0' }}
           />
@@ -184,9 +180,8 @@ export function ReconcileMenu({
               {format(lastSyncedBalance, 'financial')}
             </Text>
             <Button
-              onPress={() =>
-                setInputValue(format(lastSyncedBalance, 'financial'))
-              }
+              variant="menu"
+              onPress={() => setInputValue(lastSyncedBalance)}
               style={{ marginBottom: 7 }}
             >
               <Trans>Use last synced total</Trans>

@@ -22,7 +22,6 @@ import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
 import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
@@ -34,6 +33,7 @@ import { ItemHeader } from './ItemHeader';
 import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import {
@@ -381,6 +381,8 @@ function CategoryItem({
 }: CategoryItemProps) {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
+  const format = useFormat();
+
   const narrowStyle = isNarrowWidth
     ? {
         ...styles.mobileMenuItem,
@@ -444,10 +446,10 @@ function CategoryItem({
         >
           {isToBudgetItem
             ? toBudget != null
-              ? ` ${integerToCurrency(toBudget || 0)}`
+              ? ` ${format(toBudget || 0, 'financial')}`
               : null
             : balance != null
-              ? ` ${integerToCurrency(balance || 0)}`
+              ? ` ${format(balance || 0, 'financial')}`
               : null}
         </TextOneLine>
       </View>

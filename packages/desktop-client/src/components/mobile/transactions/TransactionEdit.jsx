@@ -45,9 +45,6 @@ import {
 } from 'loot-core/shared/transactions';
 import {
   titleFirst,
-  integerToCurrency,
-  integerToAmount,
-  amountToInteger,
   getChangedValues,
   diffItems,
   groupById,
@@ -68,6 +65,7 @@ import { AmountInput } from '@desktop-client/components/util/AmountInput';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
@@ -89,7 +87,7 @@ function serializeTransaction(transaction, dateFormat) {
   return {
     ...transaction,
     date: formatDate(parseISO(date), dateFormat),
-    amount: integerToAmount(amount || 0),
+    amount: amount || 0,
   };
 }
 
@@ -126,7 +124,7 @@ function deserializeTransaction(transaction, originalTransaction, dateFormat) {
       monthUtils.currentDay();
   }
 
-  return { ...realTransaction, date, amount: amountToInteger(amount || 0) };
+  return { ...realTransaction, date, amount: amount || 0 };
 }
 
 export function lookupName(items, id) {
@@ -181,6 +179,7 @@ function Footer({
   editingField,
   onEditField,
 }) {
+  const format = useFormat();
   const [transaction, ...childTransactions] = transactions;
   const emptySplitTransaction = childTransactions.find(t => t.amount === 0);
   const onClickRemainingSplit = () => {
@@ -226,10 +225,11 @@ function Footer({
               <Trans>
                 Add new split -{' '}
                 {{
-                  amount: integerToCurrency(
+                  amount: format(
                     transaction.amount > 0
                       ? transaction.error.difference
                       : -transaction.error.difference,
+                    'financial',
                   ),
                 }}{' '}
                 left
@@ -238,10 +238,11 @@ function Footer({
               <Trans>
                 Amount left:{' '}
                 {{
-                  amount: integerToCurrency(
+                  amount: format(
                     transaction.amount > 0
                       ? transaction.error.difference
                       : -transaction.error.difference,
+                    'financial',
                   ),
                 }}
               </Trans>
@@ -369,7 +370,7 @@ const ChildTransactionEdit = forwardRef(
                 editingField !== getFieldName(transaction.id, 'amount')
               }
               focused={amountFocused}
-              value={amountToInteger(transaction.amount)}
+              value={transaction.amount}
               zeroSign={amountSign}
               style={{ marginRight: 8 }}
               inputStyle={{
@@ -381,9 +382,8 @@ const ChildTransactionEdit = forwardRef(
                 onRequestActiveEdit(getFieldName(transaction.id, 'amount'))
               }
               onUpdate={value => {
-                const amount = integerToAmount(value);
-                if (transaction.amount !== amount) {
-                  onUpdate(transaction, 'amount', amount);
+                if (transaction.amount !== value) {
+                  onUpdate(transaction, 'amount', value);
                 } else {
                   onClearActiveEdit();
                 }
@@ -620,7 +620,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const onTotalAmountUpdate = useCallback(
     value => {
       if (transaction.amount !== value) {
-        onUpdateInner(transaction, 'amount', value.toString());
+        onUpdateInner(transaction, 'amount', value);
       }
     },
     [onUpdateInner, transaction],

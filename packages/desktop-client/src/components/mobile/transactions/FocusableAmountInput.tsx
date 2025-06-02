@@ -16,13 +16,12 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import {
-  amountToCurrency,
   appendDecimals,
-  currencyToAmount,
   reapplyThousandSeparators,
 } from 'loot-core/shared/util';
 
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
@@ -50,7 +49,9 @@ const AmountInput = memo(function AmountInput({
   const [text, setText] = useState('');
   const [value, setValue] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  // TODO: Check as this was not required anymore
   const [hideFraction] = useSyncedPref('hideFraction');
+  const format = useFormat();
 
   const mergedInputRef = useMergedRefs<HTMLInputElement>(
     props.inputRef,
@@ -83,7 +84,7 @@ const AmountInput = memo(function AmountInput({
   };
 
   const applyText = () => {
-    const parsed = currencyToAmount(text) || 0;
+    const parsed = format.fromEdit(text, 0) ?? 0;
     const newValue = editing ? parsed : value;
 
     setValue(Math.abs(newValue));
@@ -117,8 +118,20 @@ const AmountInput = memo(function AmountInput({
     text = reapplyThousandSeparators(text);
     text = appendDecimals(text, String(hideFraction) === 'true');
     setEditing(true);
-    setText(text);
-    props.onChangeValue?.(text);
+
+    const digits = text.replace(/\D/g, '');
+
+    if (digits === '') {
+      setText('');
+      props.onChangeValue?.('');
+      return;
+    }
+
+    const intValue = parseInt(digits, 10);
+    const formattedText = format.forEdit(intValue);
+
+    setText(formattedText);
+    props.onChangeValue?.(formattedText);
   };
 
   const input = (
@@ -158,7 +171,7 @@ const AmountInput = memo(function AmountInput({
         }}
         data-testid="amount-input-text"
       >
-        {editing ? text : amountToCurrency(value)}
+        {editing ? text : format.forEdit(value)}
       </Text>
     </View>
   );
@@ -189,6 +202,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
   ...props
 }: FocusableAmountInputProps) {
   const [isNegative, setIsNegative] = useState(true);
+  const format = useFormat();
 
   const maybeApplyNegative = (amount: number, negative: boolean) => {
     const absValue = Math.abs(amount);
@@ -283,7 +297,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
                 ...textStyle,
               }}
             >
-              {amountToCurrency(Math.abs(value))}
+              {format(Math.abs(value), 'financial')}
             </Text>
           </View>
         </Button>

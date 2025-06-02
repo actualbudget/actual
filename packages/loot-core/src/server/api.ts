@@ -15,7 +15,6 @@ import {
   updateTransaction,
   deleteTransaction,
 } from '../shared/transactions';
-import { integerToAmount } from '../shared/util';
 import { Handlers } from '../types/handlers';
 import { AccountEntity, CategoryGroupEntity } from '../types/models';
 import { ServerHandlers } from '../types/server-handlers';
@@ -466,6 +465,7 @@ handlers['api/transactions-export'] = async function ({
   categoryGroups,
   payees,
   accounts,
+  currencyCode,
 }) {
   checkFileOpen();
   return handlers['transactions-export']({
@@ -473,6 +473,7 @@ handlers['api/transactions-export'] = async function ({
     categoryGroups,
     payees,
     accounts,
+    currencyCode,
   });
 };
 
@@ -573,9 +574,7 @@ handlers['api/account-create'] = withMutation(async function ({
     name: account.name,
     offBudget: account.offbudget,
     closed: account.closed,
-    // Current the API expects an amount but it really should expect
-    // an integer
-    balance: initialBalance != null ? integerToAmount(initialBalance) : null,
+    balance: initialBalance,
   });
 });
 
