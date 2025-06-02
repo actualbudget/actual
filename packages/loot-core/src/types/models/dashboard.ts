@@ -123,7 +123,7 @@ type SpecializedWidget =
   | MarkdownWidget
   | SummaryWidget
   | CalendarWidget
-  | RecurringPaymentsWidget;  // ADD THIS LINE
+  | RecurringPaymentsWidget; // ADD THIS LINE
 
 export type Widget = SpecializedWidget | CustomReportWidget;
 
