@@ -9,11 +9,7 @@ import {
   makeChild as makeChildTransaction,
   recalculateSplit,
 } from '../../shared/transactions';
-import {
-  hasFieldsChanged,
-  amountToInteger,
-  integerToAmount,
-} from '../../shared/util';
+import { hasFieldsChanged, amountToInteger } from '../../shared/util';
 import {
   AccountEntity,
   BankSyncResponse,
@@ -522,6 +518,13 @@ export async function reconcileTransactions(
         date: db.fromDateRepr(match.date),
       };
 
+      if (existing.notes === '' && trans.notes == null) {
+        trans.notes = '';
+      }
+
+      console.log(`existing notes: ${existing.notes}`);
+      console.log(`trans notes ${trans.notes}`);
+
       // Update the transaction
       const updates = {
         imported_id: trans.imported_id || null,
@@ -543,6 +546,9 @@ export async function reconcileTransactions(
         return true;
       });
 
+      if (updates.notes == null) updates.notes = '';
+      if (existing.notes == null) existing.notes = '';
+
       if (hasFieldsChanged(existing, updates, fieldsToMarkUpdated)) {
         updated.push({ id: existing.id, ...updates });
         if (!existingPayeeMap.has(existing.payee)) {
@@ -550,7 +556,6 @@ export async function reconcileTransactions(
           existingPayeeMap.set(existing.payee, payee?.name);
         }
         existing.payee_name = existingPayeeMap.get(existing.payee);
-        existing.amount = integerToAmount(existing.amount);
         updatedPreview.push({ transaction: trans, existing });
       } else {
         updatedPreview.push({ transaction: trans, ignored: true });

@@ -1,11 +1,10 @@
-import React, { type FormEvent, useState } from 'react';
+import React, { type FormEvent, useEffect, useState } from 'react';
 import { Form } from 'react-aria-components';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheckCircle1 } from '@actual-app/components/icons/v2';
 import { InitialFocus } from '@actual-app/components/initial-focus';
-import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -13,10 +12,11 @@ import { View } from '@actual-app/components/view';
 import { t } from 'i18next';
 
 import { type Query } from 'loot-core/shared/query';
-import { currencyToInteger, tsToRelativeTime } from 'loot-core/shared/util';
+import { type IntegerAmount, tsToRelativeTime } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
+import { FinancialInput } from '@desktop-client/components/util/FinancialInput';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
@@ -134,21 +134,24 @@ export function ReconcileMenu({
     value: null,
     query: balanceQuery.query.filter({ cleared: true }),
   });
-  const format = useFormat();
+
   const locale = useLocale();
-  const [inputValue, setInputValue] = useState<string | null>(null);
+  const [inputValue, setInputValue] = useState<IntegerAmount | null>(null);
+
+  useEffect(() => {
+    if (clearedBalance !== null && inputValue === null) {
+      setInputValue(clearedBalance);
+    }
+  }, [clearedBalance, inputValue]);
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if (inputValue === '') {
+    if (inputValue === null) {
       return;
     }
 
-    const amount =
-      inputValue != null ? currencyToInteger(inputValue) : clearedBalance;
-
-    onReconcile(amount);
+    onReconcile(inputValue);
     onClose();
   }
 
@@ -163,8 +166,8 @@ export function ReconcileMenu({
         </Text>
         {clearedBalance != null && (
           <InitialFocus>
-            <Input
-              defaultValue={format(clearedBalance, 'financial')}
+            <FinancialInput
+              value={inputValue ?? 0}
               onChangeValue={setInputValue}
               style={{ margin: '7px 0' }}
             />

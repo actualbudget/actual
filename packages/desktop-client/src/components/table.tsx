@@ -321,7 +321,7 @@ type InputValueProps = Omit<
   onUpdate?: (newValue: string) => void;
 };
 
-function InputValue({
+export function InputValue({
   value: defaultValue,
   onUpdate,
   onBlur,
@@ -759,9 +759,13 @@ export function SheetCell<
       data-cellname={sheetValue}
     >
       {() => {
+        const formattedForEdit: string = formatExpr
+          ? formatExpr(sheetValue)
+          : String(sheetValue ?? '');
+
         return (
           <InputValue
-            value={formatExpr ? formatExpr(sheetValue) : sheetValue.toString()}
+            value={formattedForEdit}
             onUpdate={value => {
               onSave(unformatExpr ? unformatExpr(value) : value);
             }}
