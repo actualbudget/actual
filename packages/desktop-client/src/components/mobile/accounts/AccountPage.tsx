@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { Fragment, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -74,20 +74,18 @@ export function AccountPage() {
       }
       padding={0}
     >
-      {account ? (
-        <AccountTransactions
-          // This key forces the whole table rerender when the number
-          // format changes
-          key={numberFormat + hideFraction}
-          account={account}
-        />
-      ) : accountIdParam === 'onbudget' ? (
-        <OnBudgetAccountTransactions />
-      ) : accountIdParam === 'offbudget' ? (
-        <OffBudgetAccountTransactions />
-      ) : (
-        <AllAccountTransactions />
-      )}
+      {/* This key forces the whole table rerender when the number format changes */}
+      <Fragment key={numberFormat + hideFraction}>
+        {account ? (
+          <AccountTransactions account={account} />
+        ) : accountIdParam === 'onbudget' ? (
+          <OnBudgetAccountTransactions />
+        ) : accountIdParam === 'offbudget' ? (
+          <OffBudgetAccountTransactions />
+        ) : (
+          <AllAccountTransactions />
+        )}
+      </Fragment>
     </Page>
   );
 }

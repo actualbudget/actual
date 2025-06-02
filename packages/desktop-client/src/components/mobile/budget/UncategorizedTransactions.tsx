@@ -6,6 +6,7 @@ import { isPreviewId } from 'loot-core/shared/transactions';
 import { type TransactionEntity } from 'loot-core/types/models';
 
 import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
+import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
@@ -21,7 +22,7 @@ export function UncategorizedTransactions() {
     () =>
       q('transactions')
         .options({ splits: 'inline' })
-        .filter({ category: null })
+        .filter({ $and: [{ category: null }, { 'account.offbudget': false }] })
         .select('*'),
     [],
   );
@@ -75,15 +76,17 @@ export function UncategorizedTransactions() {
   const balance = bindings.uncategorizedBalance();
 
   return (
-    <TransactionListWithBalances
-      isLoading={isLoading}
-      transactions={transactions}
-      balance={balance}
-      searchPlaceholder="Search uncategorized transactions"
-      onSearch={onSearch}
-      isLoadingMore={isLoadingMore}
-      onLoadMore={loadMoreTransactions}
-      onOpenTransaction={onOpenTransaction}
-    />
+    <SchedulesProvider>
+      <TransactionListWithBalances
+        isLoading={isLoading}
+        transactions={transactions}
+        balance={balance}
+        searchPlaceholder="Search uncategorized transactions"
+        onSearch={onSearch}
+        isLoadingMore={isLoadingMore}
+        onLoadMore={loadMoreTransactions}
+        onOpenTransaction={onOpenTransaction}
+      />
+    </SchedulesProvider>
   );
 }

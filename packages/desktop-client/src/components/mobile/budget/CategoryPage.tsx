@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Trans } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router';
 
@@ -53,17 +53,14 @@ export function CategoryPage() {
       }
       padding={0}
     >
-      {category ? (
-        <CategoryTransactions
-          // This key forces the whole table rerender when the number
-          // format changes
-          key={numberFormat + hideFraction}
-          category={category}
-          month={month}
-        />
-      ) : (
-        <UncategorizedTransactions />
-      )}
+      {/* This key forces the whole table rerender when the number format changes */}
+      <Fragment key={numberFormat + hideFraction}>
+        {category ? (
+          <CategoryTransactions category={category} month={month} />
+        ) : (
+          <UncategorizedTransactions />
+        )}
+      </Fragment>
     </Page>
   );
 }
