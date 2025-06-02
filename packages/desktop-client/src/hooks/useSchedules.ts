@@ -144,7 +144,7 @@ export function useSchedules({
   };
 }
 export function accountSchedulesQuery(
-  accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized',
+  accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget',
 ) {
   const filterByAccount = accountFilter(accountId, '_account');
   const filterByPayee = accountFilter(accountId, '_payee.transfer_acct');
@@ -156,13 +156,9 @@ export function accountSchedulesQuery(
     });
 
   if (accountId) {
-    if (accountId === 'uncategorized') {
-      query = query.filter({ next_date: null });
-    } else {
-      query = query.filter({
-        $or: [filterByAccount, filterByPayee],
-      });
-    }
+    query = query.filter({
+      $or: [filterByAccount, filterByPayee],
+    });
   }
 
   return query.orderBy({ next_date: 'desc' });

@@ -695,7 +695,7 @@ function UncategorizedTransactionsBanner(props) {
             You have {{ count }} uncategorized transactions
           </Trans>
           <Button
-            onPress={() => navigate('/accounts/uncategorized')}
+            onPress={() => navigate('/categories/uncategorized')}
             style={PILL_STYLE}
           >
             <Text>
