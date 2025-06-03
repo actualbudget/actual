@@ -13,7 +13,6 @@ import * as d from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { amountToCurrency } from 'loot-core/shared/util';
 import {
   type CategoryEntity,
   type balanceTypeOpType,
@@ -62,6 +61,7 @@ import {
 } from '@desktop-client/components/reports/util';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
@@ -131,6 +131,8 @@ type CustomReportInnerProps = {
 function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const locale = useLocale();
   const { t } = useTranslation();
+  const format = useFormat();
+
   const categories = useCategories();
   const { isNarrowWidth } = useResponsive();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
@@ -913,7 +915,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
                       right={
                         <Text>
                           <PrivacyFilter>
-                            {amountToCurrency(data[balanceTypeOp])}
+                            {format(data[balanceTypeOp], 'financial')}
                           </PrivacyFilter>
                         </Text>
                       }
