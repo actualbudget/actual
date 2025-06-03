@@ -29,7 +29,6 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q, type Query } from 'loot-core/shared/query';
 import { ungroupTransactions } from 'loot-core/shared/transactions';
-import { amountToCurrency } from 'loot-core/shared/util';
 import {
   type CalendarWidget,
   type RuleConditionEntity,
@@ -64,6 +63,7 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
@@ -104,6 +104,8 @@ type CalendarInnerProps = {
 function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const locale = useLocale();
   const { t } = useTranslation();
+  const formatFunc = useFormat();
+
   const [initialStart, initialEnd, initialMode] = calculateTimeRange(
     widget?.meta?.timeFrame,
     {
@@ -569,6 +571,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     firstDayOfWeekIdx={firstDayOfWeekIdx}
                     conditions={conditions}
                     conditionsOp={conditionsOp}
+                    formatFunc={formatFunc}
                   />
                 ))}
               </View>
@@ -579,6 +582,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
               totalExpense={totalExpense}
               totalIncome={totalIncome}
               isNarrowWidth={isNarrowWidth}
+              formatFunc={formatFunc}
             />
           </View>
         </View>
@@ -743,6 +747,7 @@ type CalendarWithHeaderProps = {
   firstDayOfWeekIdx: string;
   conditions: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
+  formatFunc: (value: unknown, type: FormatType) => string;
 };
 
 function CalendarWithHeader({
@@ -751,6 +756,7 @@ function CalendarWithHeader({
   firstDayOfWeekIdx,
   conditions,
   conditionsOp,
+  formatFunc,
 }: CalendarWithHeaderProps) {
   const { t } = useTranslation();
 
@@ -828,7 +834,7 @@ function CalendarWithHeader({
             aria-label={t('Income')}
           >
             <PrivacyFilter>
-              {amountToCurrency(calendar.totalIncome)}
+              {formatFunc(calendar.totalIncome, 'financial')}
             </PrivacyFilter>
           </View>
           <SvgArrowThickDown
@@ -846,7 +852,7 @@ function CalendarWithHeader({
             aria-label={t('Expenses')}
           >
             <PrivacyFilter>
-              {amountToCurrency(calendar.totalExpense)}
+              {formatFunc(calendar.totalExpense, 'financial')}
             </PrivacyFilter>
           </View>
         </View>
@@ -890,6 +896,7 @@ type CalendarCardHeaderProps = {
   totalIncome: number;
   totalExpense: number;
   isNarrowWidth: boolean;
+  formatFunc: (value: unknown, type: FormatType) => string;
 };
 
 function CalendarCardHeader({
@@ -898,6 +905,7 @@ function CalendarCardHeader({
   totalIncome,
   totalExpense,
   isNarrowWidth,
+  formatFunc,
 }: CalendarCardHeaderProps) {
   return (
     <View
@@ -937,7 +945,9 @@ function CalendarCardHeader({
               <Trans>Income:</Trans>
             </View>
             <View style={{ color: chartTheme.colors.blue }}>
-              <PrivacyFilter>{amountToCurrency(totalIncome)}</PrivacyFilter>
+              <PrivacyFilter>
+                {formatFunc(totalIncome, 'financial')}
+              </PrivacyFilter>
             </View>
 
             <View
@@ -949,7 +959,9 @@ function CalendarCardHeader({
               <Trans>Expenses:</Trans>
             </View>
             <View style={{ color: chartTheme.colors.red }}>
-              <PrivacyFilter>{amountToCurrency(totalExpense)}</PrivacyFilter>
+              <PrivacyFilter>
+                {formatFunc(totalExpense, 'financial')}
+              </PrivacyFilter>
             </View>
           </View>
         </View>
