@@ -15,11 +15,11 @@ import {
   startOfWeek,
 } from 'date-fns';
 
-import { amountToCurrency } from 'loot-core/shared/util';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { chartTheme } from '@desktop-client/components/reports/chart-theme';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 type CalendarGraphProps = {
@@ -42,6 +42,8 @@ export function CalendarGraph({
   isEditing,
   onDayClick,
 }: CalendarGraphProps) {
+  const formatFunc = useFormat();
+
   const startingDate = startOfWeek(new Date(), {
     weekStartsOn:
       firstDayOfWeekIdx !== undefined &&
@@ -141,7 +143,7 @@ export function CalendarGraph({
                       >
                         {day.incomeValue !== 0 ? (
                           <PrivacyFilter>
-                            {amountToCurrency(day.incomeValue)}
+                            {formatFunc(day.incomeValue, 'financial')}
                           </PrivacyFilter>
                         ) : (
                           ''
@@ -170,7 +172,7 @@ export function CalendarGraph({
                       >
                         {day.expenseValue !== 0 ? (
                           <PrivacyFilter>
-                            {amountToCurrency(day.expenseValue)}
+                            {formatFunc(day.expenseValue, 'financial')}
                           </PrivacyFilter>
                         ) : (
                           ''
