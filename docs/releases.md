@@ -1,5 +1,27 @@
 # Release Notes
 
+## 25.6.1
+
+Release date: 2025-06-04
+
+This release contains the following improvements:
+- Ensures the server version is accurately displayed when deploying using Docker
+- Fixes a rare crash when selecting dates
+- Upgrades the Docker image to use Node.js version 20
+
+<!--truncate-->
+
+**Docker tag: 25.6.1**
+
+#### Bugfix
+
+- [#5093](https://github.com/actualbudget/actual/pull/5093) Fix server version display on docker images — thanks @MikesGlitch
+- [#5095](https://github.com/actualbudget/actual/pull/5095) Fix crash when datepicker deselected with no date set — thanks @matt-fidd
+
+#### Maintenance
+
+- [#5091](https://github.com/actualbudget/actual/pull/5091) Update Dockerfiles to use Node.js 20 — thanks @matt-fidd
+
 ## 25.6.0
 
 Release date: 2025-06-03
