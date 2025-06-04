@@ -251,7 +251,7 @@ function TransactionListWithPreviews({
   );
   const {
     transactions,
-    isLoading,
+    isLoading: isTransactionsLoading,
     reload: reloadTransactions,
     isLoadingMore,
     loadMore: loadMoreTransactions,
@@ -259,9 +259,10 @@ function TransactionListWithPreviews({
     query: transactionsQuery,
   });
 
-  const { previewTransactions } = useAccountPreviewTransactions({
-    accountId: account?.id,
-  });
+  const { previewTransactions, isLoading: isPreviewTransactionsLoading } =
+    useAccountPreviewTransactions({
+      accountId: account?.id,
+    });
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
@@ -361,7 +362,9 @@ function TransactionListWithPreviews({
 
   return (
     <TransactionListWithBalances
-      isLoading={isLoading}
+      isLoading={
+        isSearching ? isTransactionsLoading : isPreviewTransactionsLoading
+      }
       transactions={transactionsToDisplay}
       balance={balanceQueries.balance}
       balanceCleared={balanceQueries.cleared}

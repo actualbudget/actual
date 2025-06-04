@@ -341,6 +341,7 @@ export function usePreviewTransactions({
     setError(undefined);
 
     if (scheduleTransactions.length === 0) {
+      setIsLoading(false);
       setPreviewTransactions([]);
       return;
     }

@@ -69,7 +69,7 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
   if (prefs.maxMonths !== undefined) {
     await asyncStorage.setItem('max-months', '' + prefs.maxMonths);
   }
-  if (prefs.categoryExpandedState) {
+  if (prefs.categoryExpandedState !== undefined) {
     await asyncStorage.setItem(
       'category-expanded-state',
       '' + prefs.categoryExpandedState,
