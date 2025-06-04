@@ -412,13 +412,6 @@ export function amountToCurrency(amount: Amount): CurrencyAmount {
   return getNumberFormat().formatter.format(amount);
 }
 
-export function amountToCurrencyNoDecimal(amount: Amount): CurrencyAmount {
-  return getNumberFormat({
-    ...numberFormatConfig,
-    hideFraction: true,
-  }).formatter.format(amount);
-}
-
 export function currencyToAmount(currencyAmount: string): Amount | null {
   let integer, fraction;
 
