@@ -1,5 +1,7 @@
 import { createRequire } from 'module';
 import fs, { readFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -68,15 +70,35 @@ app.get('/mode', (req, res) => {
 });
 
 app.get('/info', (_req, res) => {
-  const require = createRequire(import.meta.url);
-  const packageJsonPath = require.resolve(
-    '@actual-app/sync-server/package.json',
-  );
-  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+  function findPackageJson(startDir: string) {
+    // find the nearest package.json file while traversing up the directory tree
+    let currentPath = startDir;
+    let directoriesSearched = 0;
+    const pathRoot = resolve(currentPath, '/');
+    while (currentPath !== pathRoot && directoriesSearched < 5) {
+      const packageJsonPath = resolve(currentPath, 'package.json');
+      if (fs.existsSync(packageJsonPath)) {
+        return packageJsonPath;
+      }
+
+      currentPath = resolve(join(currentPath, '..')); // Move up one directory
+      directoriesSearched++;
+    }
+
+    return null;
+  }
+
+  const dirname = resolve(fileURLToPath(import.meta.url), '../');
+  const packageJsonPath = findPackageJson(dirname);
+  let packageJson = undefined;
+
+  if (packageJsonPath) {
+    packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+  }
 
   res.status(200).json({
     build: {
-      name: packageJson.name,
+      name: packageJson?.name,
       description: packageJson.description,
       version: packageJson.version,
     },
