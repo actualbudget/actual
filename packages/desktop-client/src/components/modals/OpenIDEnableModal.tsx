@@ -7,21 +7,25 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { closeBudget } from 'loot-core/client/budgets/budgetsSlice';
-import {
-  type Modal as ModalType,
-  popModal,
-} from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
 import { getOpenIdErrors } from 'loot-core/shared/errors';
 import { type OpenIdConfig } from 'loot-core/types/models';
 
-import { useDispatch } from '../../redux';
-import { Error } from '../alerts';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { OpenIdForm } from '../manager/subscribe/OpenIdForm';
-import { useRefreshLoginMethods } from '../ServerContext';
+import { closeBudget } from '@desktop-client/budgets/budgetsSlice';
+import { Error } from '@desktop-client/components/alerts';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { OpenIdForm } from '@desktop-client/components/manager/subscribe/OpenIdForm';
+import { useRefreshLoginMethods } from '@desktop-client/components/ServerContext';
+import {
+  type Modal as ModalType,
+  popModal,
+} from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type OpenIDEnableModalProps = Extract<
   ModalType,

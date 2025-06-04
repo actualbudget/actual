@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
 
-import { savePrefs } from 'loot-core/client/prefs/prefsSlice';
 import { type MetadataPrefs } from 'loot-core/types/prefs';
 
-import { useSelector, useDispatch } from '../redux';
+import { savePrefs } from '@desktop-client/prefs/prefsSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 type SetMetadataPrefAction<K extends keyof MetadataPrefs> = (
   value: MetadataPrefs[K],

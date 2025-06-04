@@ -15,8 +15,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { parseISO } from 'date-fns';
 
-import { useWidget } from 'loot-core/client/data-hooks/widget';
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency } from 'loot-core/shared/util';
@@ -26,26 +24,32 @@ import {
   type TimeFrame,
 } from 'loot-core/types/models';
 
-import { useFilters } from '../../../hooks/useFilters';
-import { useLocale } from '../../../hooks/useLocale';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { useDispatch } from '../../../redux';
-import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
-import { AppliedFilters } from '../../filters/AppliedFilters';
-import { FilterButton } from '../../filters/FiltersMenu';
-import { Checkbox } from '../../forms';
-import { MobileBackButton } from '../../mobile/MobileBackButton';
-import { FieldSelect } from '../../modals/EditRuleModal';
-import { MobilePageHeader, Page, PageHeader } from '../../Page';
-import { PrivacyFilter } from '../../PrivacyFilter';
-import { chartTheme } from '../chart-theme';
-import { Header } from '../Header';
-import { LoadingIndicator } from '../LoadingIndicator';
-import { calculateTimeRange } from '../reportRanges';
-import { summarySpreadsheet } from '../spreadsheets/summary-spreadsheet';
-import { useReport } from '../useReport';
-import { fromDateRepr } from '../util';
+import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
+import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
+import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
+import { Checkbox } from '@desktop-client/components/forms';
+import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
+import { FieldSelect } from '@desktop-client/components/modals/EditRuleModal';
+import {
+  MobilePageHeader,
+  Page,
+  PageHeader,
+} from '@desktop-client/components/Page';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { chartTheme } from '@desktop-client/components/reports/chart-theme';
+import { Header } from '@desktop-client/components/reports/Header';
+import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
+import { summarySpreadsheet } from '@desktop-client/components/reports/spreadsheets/summary-spreadsheet';
+import { useReport } from '@desktop-client/components/reports/useReport';
+import { fromDateRepr } from '@desktop-client/components/reports/util';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useWidget } from '@desktop-client/hooks/useWidget';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 export function Summary() {
   const params = useParams();
@@ -65,7 +69,7 @@ type SummaryInnerProps = {
   widget?: SummaryWidget;
 };
 
-type FilterObject = ReturnType<typeof useFilters>;
+type FilterObject = ReturnType<typeof useRuleConditionFilters>;
 
 function SummaryInner({ widget }: SummaryInnerProps) {
   const locale = useLocale();
@@ -82,7 +86,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
   const [end, setEnd] = useState(initialEnd);
   const [mode, setMode] = useState(initialMode);
 
-  const dividendFilters: FilterObject = useFilters(
+  const dividendFilters: FilterObject = useRuleConditionFilters(
     widget?.meta?.conditions ?? [],
     widget?.meta?.conditionsOp ?? 'and',
   );
@@ -110,7 +114,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         },
   );
 
-  const divisorFilters = useFilters(
+  const divisorFilters = useRuleConditionFilters(
     content.type === 'percentage' ? (content?.divisorConditions ?? []) : [],
     content.type === 'percentage'
       ? (content?.divisorConditionsOp ?? 'and')

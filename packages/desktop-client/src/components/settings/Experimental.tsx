@@ -7,12 +7,12 @@ import { View } from '@actual-app/components/view';
 
 import type { FeatureFlag } from 'loot-core/types/prefs';
 
-import { useFeatureFlag } from '../../hooks/useFeatureFlag';
-import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { Link } from '../common/Link';
-import { Checkbox } from '../forms';
-
 import { Setting } from './UI';
+
+import { Link } from '@desktop-client/components/common/Link';
+import { Checkbox } from '@desktop-client/components/forms';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type FeatureToggleProps = {
   flag: FeatureFlag;
@@ -104,12 +104,6 @@ export function ExperimentalFeatures() {
               feedbackLink="https://github.com/actualbudget/actual/issues/3706"
             >
               <Trans>Context menus</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="openidAuth"
-              feedbackLink="https://github.com/actualbudget/actual/issues/4029"
-            >
-              <Trans>OpenID authentication method</Trans>
             </FeatureToggle>
             <FeatureToggle
               flag="pluggyAiBankSync"

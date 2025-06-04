@@ -3,24 +3,28 @@ import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 
+import { format, sheetForMonth, prevMonth } from 'loot-core/shared/months';
+import { groupById, integerToCurrency } from 'loot-core/shared/util';
+
+import { ToBudgetAmount } from '@desktop-client/components/budget/envelope/budgetsummary/ToBudgetAmount';
+import { TotalsList } from '@desktop-client/components/budget/envelope/budgetsummary/TotalsList';
+import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 import {
   collapseModals,
   type Modal as ModalType,
   pushModal,
-} from 'loot-core/client/modals/modalsSlice';
-import { envelopeBudget } from 'loot-core/client/queries';
-import { format, sheetForMonth, prevMonth } from 'loot-core/shared/months';
-import { groupById, integerToCurrency } from 'loot-core/shared/util';
-
-import { useCategories } from '../../hooks/useCategories';
-import { useLocale } from '../../hooks/useLocale';
-import { useUndo } from '../../hooks/useUndo';
-import { useDispatch } from '../../redux';
-import { ToBudgetAmount } from '../budget/envelope/budgetsummary/ToBudgetAmount';
-import { TotalsList } from '../budget/envelope/budgetsummary/TotalsList';
-import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
+} from '@desktop-client/modals/modalsSlice';
+import { envelopeBudget } from '@desktop-client/queries/queries';
+import { useDispatch } from '@desktop-client/redux';
 
 type EnvelopeBudgetSummaryModalProps = Extract<
   ModalType,

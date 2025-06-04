@@ -9,9 +9,6 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { unlinkAccount } from 'loot-core/client/accounts/accountsSlice';
-import { useTransactions } from 'loot-core/client/data-hooks/transactions';
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
 import {
   defaultMappings,
   type Mappings,
@@ -24,12 +21,19 @@ import {
   type AccountEntity,
 } from 'loot-core/types/models';
 
-import { useSyncedPref } from '../../hooks/useSyncedPref';
-import { useDispatch } from '../../redux';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { CheckboxOption } from '../modals/ImportTransactionsModal/CheckboxOption';
-
 import { FieldMapping } from './FieldMapping';
+
+import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { CheckboxOption } from '@desktop-client/components/modals/ImportTransactionsModal/CheckboxOption';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useTransactions } from '@desktop-client/hooks/useTransactions';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 export type TransactionDirection = 'payment' | 'deposit';
 

@@ -4,6 +4,7 @@ import { type Database } from '@jlongster/sql.js';
 import { captureBreadcrumb } from '../platform/exceptions';
 import * as sqlite from '../platform/server/sqlite';
 import { sheetForMonth } from '../shared/months';
+import * as Platform from '../shared/platform';
 
 import {
   DbPreference,
@@ -11,7 +12,6 @@ import {
   DbZeroBudget,
   DbZeroBudgetMonth,
 } from './db';
-import * as Platform from './platform';
 import { Spreadsheet } from './spreadsheet/spreadsheet';
 import { resolveName } from './spreadsheet/util';
 
@@ -105,7 +105,7 @@ export async function loadSpreadsheet(
   const mainDb = db.getDatabase();
   let cacheDb;
 
-  if (Platform.isDesktop && cacheEnabled) {
+  if (!Platform.isBrowser && cacheEnabled) {
     // Desktop apps use a separate database for the cache. This is because it is
     // much more likely to directly work with files on desktop, and this makes
     // it a lot clearer what the true filesize of the main db is (and avoid
@@ -203,13 +203,13 @@ export async function loadUserBudgets(
   // TODO: Clear out the cache here so make sure future loads of the app
   // don't load any extra values that aren't set here
 
-  const { value: budgetType = 'rollover' } =
+  const { value: budgetType = 'envelope' } =
     (await db.first<Pick<DbPreference, 'value'>>(
       'SELECT value from preferences WHERE id = ?',
       ['budgetType'],
     )) ?? {};
 
-  const table = budgetType === 'report' ? 'reflect_budgets' : 'zero_budgets';
+  const table = budgetType === 'tracking' ? 'reflect_budgets' : 'zero_budgets';
   const budgets = await db.all<DbReflectBudget | DbZeroBudget>(`
       SELECT * FROM ${table} b
       LEFT JOIN categories c ON c.id = b.category
@@ -233,7 +233,7 @@ export async function loadUserBudgets(
   }
 
   // For zero-based budgets, load the buffered amounts
-  if (budgetType !== 'report') {
+  if (budgetType !== 'tracking') {
     const budgetMonths = await db.all<DbZeroBudgetMonth>(
       'SELECT * FROM zero_budget_months',
     );

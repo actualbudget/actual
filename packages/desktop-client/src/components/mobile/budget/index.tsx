@@ -5,43 +5,41 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { sync } from 'loot-core/client/app/appSlice';
-import { collapseModals, pushModal } from 'loot-core/client/modals/modalsSlice';
+import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
+
+import { BudgetTable } from './BudgetTable';
+
+import { sync } from '@desktop-client/app/appSlice';
+import { prewarmMonth } from '@desktop-client/components/budget/util';
+import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
+import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
 import {
   applyBudgetAction,
   createCategory,
   createGroup,
   deleteCategory,
   deleteGroup,
-  moveCategory,
-  moveCategoryGroup,
   updateCategory,
   updateGroup,
-} from 'loot-core/client/queries/queriesSlice';
-import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
-import { send } from 'loot-core/platform/client/fetch';
-import * as monthUtils from 'loot-core/shared/months';
+} from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
 
-import { useCategories } from '../../../hooks/useCategories';
-import { useLocale } from '../../../hooks/useLocale';
-import { useLocalPref } from '../../../hooks/useLocalPref';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { useDispatch } from '../../../redux';
-import { prewarmMonth } from '../../budget/util';
-import { NamespaceContext } from '../../spreadsheet/NamespaceContext';
-import { SyncRefresh } from '../../SyncRefresh';
-
-import { BudgetTable } from './BudgetTable';
-
-function isBudgetType(input?: string): input is 'rollover' | 'report' {
-  return ['rollover', 'report'].includes(input);
+function isBudgetType(input?: string): input is 'envelope' | 'tracking' {
+  return ['envelope', 'tracking'].includes(input);
 }
 
 export function Budget() {
   const locale = useLocale();
   const { list: categories, grouped: categoryGroups } = useCategories();
   const [budgetTypePref] = useSyncedPref('budgetType');
-  const budgetType = isBudgetType(budgetTypePref) ? budgetTypePref : 'rollover';
+  const budgetType = isBudgetType(budgetTypePref) ? budgetTypePref : 'envelope';
   const spreadsheet = useSpreadsheet();
 
   const currMonth = monthUtils.currentMonth();
@@ -79,7 +77,7 @@ export function Budget() {
   );
 
   const onShowBudgetSummary = useCallback(() => {
-    if (budgetType === 'report') {
+    if (budgetType === 'tracking') {
       dispatch(
         pushModal({
           modal: {
@@ -265,52 +263,6 @@ export function Budget() {
     [categories, dispatch, onSaveCategory],
   );
 
-  const onReorderCategory = useCallback(
-    (id, { inGroup, aroundCategory }) => {
-      let groupId, targetId;
-
-      if (inGroup) {
-        groupId = inGroup;
-      } else if (aroundCategory) {
-        const { id: originalCatId, position } = aroundCategory;
-
-        let catId = originalCatId;
-        const group = categoryGroups.find(group =>
-          group.categories?.find(cat => cat.id === catId),
-        );
-
-        if (position === 'bottom') {
-          const idx =
-            group?.categories?.findIndex(cat => cat.id === catId) ?? -1;
-          catId = group?.categories
-            ? idx < group.categories.length - 1
-              ? group.categories[idx + 1].id
-              : null
-            : null;
-        }
-
-        groupId = group?.id;
-        targetId = catId;
-      }
-
-      dispatch(moveCategory({ id, groupId, targetId }));
-    },
-    [categoryGroups, dispatch],
-  );
-
-  const onReorderGroup = useCallback(
-    (id, targetId, position) => {
-      if (position === 'bottom') {
-        const idx = categoryGroups.findIndex(group => group.id === targetId);
-        targetId =
-          idx < categoryGroups.length - 1 ? categoryGroups[idx + 1].id : null;
-      }
-
-      dispatch(moveCategoryGroup({ id, targetId }));
-    },
-    [categoryGroups, dispatch],
-  );
-
   const onPrevMonth = useCallback(async () => {
     const month = monthUtils.subMonths(startMonth, 1);
     await prewarmMonth(budgetType, spreadsheet, month);
@@ -336,7 +288,7 @@ export function Budget() {
   //     'Copy last month’s budget',
   //     'Set budgets to zero',
   //     'Set budgets to 3 month average',
-  //     budgetType === 'report' && 'Apply to all future budgets',
+  //     budgetType === 'tracking' && 'Apply to all future budgets',
   //   ].filter(Boolean);
 
   //   props.showActionSheetWithOptions(
@@ -360,7 +312,7 @@ export function Budget() {
   //           onBudgetAction('set-3-avg');
   //           break;
   //         case 4:
-  //           if (budgetType === 'report') {
+  //           if (budgetType === 'tracking') {
   //             onBudgetAction('set-all-future');
   //           }
   //           break;
@@ -506,7 +458,7 @@ export function Budget() {
       dispatch(
         pushModal({
           modal: {
-            name: `${budgetType === 'report' ? 'tracking' : 'envelope'}-budget-month-menu`,
+            name: `${budgetType}-budget-month-menu`,
             options: {
               month,
               onBudgetAction,
@@ -568,24 +520,15 @@ export function Budget() {
             // format changes
             key={`${numberFormat}${hideFraction}`}
             categoryGroups={categoryGroups}
-            type={budgetType}
             month={startMonth}
             monthBounds={bounds}
-            // editMode={editMode}
             onShowBudgetSummary={onShowBudgetSummary}
             onPrevMonth={onPrevMonth}
             onNextMonth={onNextMonth}
             onCurrentMonth={onCurrentMonth}
-            onSaveGroup={onSaveGroup}
-            onDeleteGroup={onDeleteGroup}
-            onAddCategory={onOpenNewCategoryModal}
-            onSaveCategory={onSaveCategory}
-            onDeleteCategory={onDeleteCategory}
-            onReorderCategory={onReorderCategory}
-            onReorderGroup={onReorderGroup}
             onBudgetAction={onBudgetAction}
             onRefresh={onRefresh}
-            onEditGroup={onOpenCategoryGroupMenuModal}
+            onEditCategoryGroup={onOpenCategoryGroupMenuModal}
             onEditCategory={onOpenCategoryMenuModal}
             onOpenBudgetPageMenu={onOpenBudgetPageMenu}
             onOpenBudgetMonthMenu={onOpenBudgetMonthMenu}

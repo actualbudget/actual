@@ -12,11 +12,11 @@ import { css } from '@emotion/css';
 
 import { addMonths, subMonths } from 'loot-core/shared/months';
 
-import { useResizeObserver } from '../../hooks/useResizeObserver';
-
 import { type BudgetSummary as EnvelopeBudgetSummary } from './envelope/budgetsummary/BudgetSummary';
 import { MonthsContext } from './MonthsContext';
 import { type BudgetSummary as TrackingBudgetSummary } from './tracking/budgetsummary/BudgetSummary';
+
+import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 type BudgetSummariesProps = {
   SummaryComponent: typeof TrackingBudgetSummary | typeof EnvelopeBudgetSummary;
@@ -76,7 +76,6 @@ export function BudgetSummaries({ SummaryComponent }: BudgetSummariesProps) {
       ])}
       ref={containerRef}
     >
-      {/* @ts-expect-error react-spring types currently do not support React v19 (but they soon will..) */}
       <animated.div
         className="view"
         style={{

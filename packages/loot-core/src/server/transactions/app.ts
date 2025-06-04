@@ -6,12 +6,13 @@ import {
   TransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
-import { runQuery } from '../aql';
+import { aqlQuery } from '../aql';
 import { mutator } from '../mutators';
 import { undoable } from '../undo';
 
 import { exportQueryToCSV, exportToCSV } from './export/export-to-csv';
 import { parseFile, ParseFileOptions } from './import/parse-file';
+import { mergeTransactions } from './merge';
 
 import { batchUpdateTransactions } from '.';
 
@@ -23,6 +24,7 @@ export type TransactionHandlers = {
   'transactions-parse-file': typeof parseTransactionsFile;
   'transactions-export': typeof exportTransactions;
   'transactions-export-query': typeof exportTransactionsQuery;
+  'transactions-merge': typeof mergeTransactions;
   'get-earliest-transaction': typeof getEarliestTransaction;
 };
 
@@ -90,7 +92,7 @@ async function exportTransactionsQuery({
 }
 
 async function getEarliestTransaction() {
-  const { data } = await runQuery(
+  const { data } = await aqlQuery(
     q('transactions')
       .options({ splits: 'none' })
       .orderBy({ date: 'asc' })
@@ -106,6 +108,7 @@ app.method(
   'transactions-batch-update',
   mutator(undoable(handleBatchUpdateTransactions)),
 );
+app.method('transactions-merge', mutator(undoable(mergeTransactions)));
 
 app.method('transaction-add', mutator(addTransaction));
 app.method('transaction-update', mutator(updateTransaction));

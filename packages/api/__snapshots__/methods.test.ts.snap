@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`API setup and teardown successfully loads budget 1`] = `
+exports[`API setup and teardown > successfully loads budget 1`] = `
 [
   "2016-10",
   "2016-11",

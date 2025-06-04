@@ -31,7 +31,7 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
-import { useModalState } from '../../hooks/useModalState';
+import { useModalState } from '@desktop-client/hooks/useModalState';
 
 type ModalProps = ComponentPropsWithRef<typeof ReactAriaModal> & {
   name: string;
@@ -413,7 +413,7 @@ export function ModalTitle({
 
   return isEditing ? (
     <Input
-      inputRef={inputRef}
+      ref={inputRef}
       style={{
         fontSize: 25,
         fontWeight: 700,
@@ -422,11 +422,9 @@ export function ModalTitle({
       }}
       defaultValue={title}
       onUpdate={_onTitleUpdate}
-      onKeyDown={e => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          _onTitleUpdate?.(e.currentTarget.value);
-        }
+      onEnter={(value, e) => {
+        e.preventDefault();
+        _onTitleUpdate?.(value);
       }}
     />
   ) : (

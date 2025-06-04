@@ -7,9 +7,9 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { useSelector } from '../redux';
-
 import { Background } from './Background';
+
+import { useSelector } from '@desktop-client/redux';
 
 type AppBackgroundProps = {
   isLoading?: boolean;
@@ -31,7 +31,6 @@ export function AppBackground({ isLoading }: AppBackgroundProps) {
 
       {showLoading &&
         transitions((style, item) => (
-          // @ts-expect-error react-spring types currently do not support React v19 (but they soon will..)
           <animated.div key={item} style={style}>
             <View
               className={css({

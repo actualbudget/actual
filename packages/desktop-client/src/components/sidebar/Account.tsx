@@ -13,29 +13,32 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
-import { openAccountCloseModal } from 'loot-core/client/modals/modalsSlice';
-import * as Platform from 'loot-core/client/platform';
+import * as Platform from 'loot-core/shared/platform';
+import { type AccountEntity } from 'loot-core/types/models';
+
+import { Link } from '@desktop-client/components/common/Link';
+import { Notes } from '@desktop-client/components/Notes';
+import {
+  DropHighlight,
+  useDraggable,
+  useDroppable,
+  type OnDragChangeCallback,
+  type OnDropCallback,
+} from '@desktop-client/components/sort';
+import {
+  type SheetFields,
+  type Binding,
+} from '@desktop-client/components/spreadsheet';
+import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useDragRef } from '@desktop-client/hooks/useDragRef';
+import { useNotes } from '@desktop-client/hooks/useNotes';
+import { openAccountCloseModal } from '@desktop-client/modals/modalsSlice';
 import {
   reopenAccount,
   updateAccount,
-} from 'loot-core/client/queries/queriesSlice';
-import { type AccountEntity } from 'loot-core/types/models';
-
-import { useContextMenu } from '../../hooks/useContextMenu';
-import { useDragRef } from '../../hooks/useDragRef';
-import { useNotes } from '../../hooks/useNotes';
-import { useDispatch } from '../../redux';
-import { Link } from '../common/Link';
-import { Notes } from '../Notes';
-import {
-  useDraggable,
-  useDroppable,
-  DropHighlight,
-  type OnDragChangeCallback,
-  type OnDropCallback,
-} from '../sort';
-import { type SheetFields, type Binding } from '../spreadsheet';
-import { CellValue } from '../spreadsheet/CellValue';
+} from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,
@@ -196,9 +199,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
                         width: '100%',
                       }}
                       onBlur={() => setIsEditing(false)}
-                      onEnter={e => {
-                        const inputEl = e.target as HTMLInputElement;
-                        const newAccountName = inputEl.value;
+                      onEnter={newAccountName => {
                         if (newAccountName.trim() !== '') {
                           dispatch(
                             updateAccount({

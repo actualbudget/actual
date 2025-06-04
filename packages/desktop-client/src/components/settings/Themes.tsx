@@ -10,15 +10,15 @@ import { css } from '@emotion/css';
 
 import { type DarkTheme, type Theme } from 'loot-core/types/prefs';
 
+import { Setting } from './UI';
+
+import { useSidebar } from '@desktop-client/components/sidebar/SidebarProvider';
 import {
   themeOptions,
   useTheme,
   usePreferredDarkTheme,
   darkThemeOptions,
-} from '../../style';
-import { useSidebar } from '../sidebar/SidebarProvider';
-
-import { Setting } from './UI';
+} from '@desktop-client/style';
 
 function Column({ title, children }: { title: string; children: ReactNode }) {
   return (

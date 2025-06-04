@@ -25,7 +25,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { useDrag } from '@use-gesture/react';
 
-import { useScrollListener } from '../ScrollProvider';
+import { useScrollListener } from '@desktop-client/components/ScrollProvider';
 
 const COLUMN_COUNT = 3;
 const PILL_HEIGHT = 15;
@@ -195,7 +195,6 @@ export function MobileNavTabs() {
   );
 
   return (
-    // @ts-expect-error react-spring types currently do not support React v19 (but they soon will..)
     <animated.div
       role="navigation"
       {...bind()}

@@ -8,19 +8,19 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getSecretsError } from 'loot-core/shared/errors';
 
-import { Error } from '../alerts';
-import { Link } from '../common/Link';
+import { Error } from '@desktop-client/components/alerts';
+import { Link } from '@desktop-client/components/common/Link';
 import {
   Modal,
   ModalButtons,
   ModalCloseButton,
   ModalHeader,
-} from '../common/Modal';
-import { FormField, FormLabel } from '../forms';
+} from '@desktop-client/components/common/Modal';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type PluggyAiInitialiseProps = Extract<
   ModalType,

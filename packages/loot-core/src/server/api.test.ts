@@ -2,8 +2,8 @@ import { getBankSyncError } from '../shared/errors';
 import { ServerHandlers } from '../types/server-handlers';
 
 import { installAPI } from './api';
-jest.mock('../shared/errors', () => ({
-  getBankSyncError: jest.fn(error => `Bank sync error: ${error}`),
+vi.mock('../shared/errors', () => ({
+  getBankSyncError: vi.fn(error => `Bank sync error: ${error}`),
 }));
 
 describe('API handlers', () => {
@@ -11,7 +11,7 @@ describe('API handlers', () => {
 
   describe('api/bank-sync', () => {
     it('should sync a single account when accountId is provided', async () => {
-      handlers['accounts-bank-sync'] = jest
+      handlers['accounts-bank-sync'] = vi
         .fn()
         .mockResolvedValue({ errors: [] });
 
@@ -22,7 +22,7 @@ describe('API handlers', () => {
     });
 
     it('should handle errors in non batch sync', async () => {
-      handlers['accounts-bank-sync'] = jest.fn().mockResolvedValue({
+      handlers['accounts-bank-sync'] = vi.fn().mockResolvedValue({
         errors: ['connection-failed'],
       });
 

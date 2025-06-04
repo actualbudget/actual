@@ -19,7 +19,7 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "jsx": "preserve",
-    "types": ["vite/client", "jest", "vitest/globals"],
+    "types": ["vite/client", "vitest/globals"],
     // Check JS files too
     "allowJs": true,
     "checkJs": false,
@@ -31,7 +31,9 @@
     "noEmit": true,
     "paths": {
       // TEMPORARY: Until we can fix the "exports" in the loot-core package.json
-      "loot-core/*": ["./packages/loot-core/src/*"]
+      "loot-core/*": ["./packages/loot-core/src/*"],
+      "@desktop-client/*": ["./packages/desktop-client/src/*"],
+      "@desktop-client/e2e/*": ["./packages/desktop-client/e2e/*"]
     },
     "plugins": [
       {

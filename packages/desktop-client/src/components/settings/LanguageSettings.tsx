@@ -6,11 +6,11 @@ import { Select, type SelectOption } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { type TFunction } from 'i18next';
 
-import { useGlobalPref } from '../../hooks/useGlobalPref';
-import { availableLanguages, setI18NextLanguage } from '../../i18n';
-import { Link } from '../common/Link';
-
 import { Setting } from './UI';
+
+import { Link } from '@desktop-client/components/common/Link';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { availableLanguages, setI18NextLanguage } from '@desktop-client/i18n';
 
 const languageDisplayNameOverride: { [key: string]: string } = {
   'pt-BR': 'Português (Brasil)',
@@ -79,7 +79,7 @@ export function LanguageSettings() {
             the instructions{' '}
             <Link
               variant="external"
-              to="https://actualbudget.org/docs/install/local#translations"
+              to="https://actualbudget.org/docs/install/build-from-source#translations"
             >
               here
             </Link>{' '}

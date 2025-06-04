@@ -1,9 +1,8 @@
 import React, {
-  useState,
-  useRef,
-  Fragment,
-  type ReactNode,
   type ComponentProps,
+  type ReactNode,
+  useRef,
+  useState,
 } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -40,25 +39,24 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
-import { useLocale } from '../../hooks/useLocale';
-import { useLocalPref } from '../../hooks/useLocalPref';
-import { useSplitsExpanded } from '../../hooks/useSplitsExpanded';
-import { useSyncServerStatus } from '../../hooks/useSyncServerStatus';
-import { AnimatedRefresh } from '../AnimatedRefresh';
-import { Search } from '../common/Search';
-import { FilterButton } from '../filters/FiltersMenu';
-import { FiltersStack } from '../filters/FiltersStack';
-import { type SavedFilter } from '../filters/SavedFilterMenuButton';
-import { NotesButton } from '../NotesButton';
-import { SelectedTransactionsButton } from '../transactions/SelectedTransactionsButton';
-
 import { type TableRef } from './Account';
 import { Balances } from './Balance';
-import { ReconcilingMessage, ReconcileMenu } from './Reconcile';
+import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
+
+import { AnimatedRefresh } from '@desktop-client/components/AnimatedRefresh';
+import { Search } from '@desktop-client/components/common/Search';
+import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
+import { FiltersStack } from '@desktop-client/components/filters/FiltersStack';
+import { type SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
+import { NotesButton } from '@desktop-client/components/NotesButton';
+import { SelectedTransactionsButton } from '@desktop-client/components/transactions/SelectedTransactionsButton';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
+import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 type AccountHeaderProps = {
   tableRef: TableRef;
-  editingName: boolean;
   isNameEditable: boolean;
   workingHard: boolean;
   accountName: string;
@@ -97,7 +95,6 @@ type AccountHeaderProps = {
   >['onToggleExtraBalances'];
   onSaveName: AccountNameFieldProps['onSaveName'];
   saveNameError: AccountNameFieldProps['saveNameError'];
-  onExposeName: (isExposed: boolean) => void;
   onSync: () => void;
   onImport: () => void;
   onMenuSelect: AccountMenuProps['onMenuSelect'];
@@ -122,6 +119,7 @@ type AccountHeaderProps = {
   | 'onSetTransfer'
   | 'onMakeAsSplitTransaction'
   | 'onMakeAsNonSplitTransactions'
+  | 'onMergeTransactions'
 > &
   Pick<
     ComponentProps<typeof FiltersStack>,
@@ -134,7 +132,6 @@ type AccountHeaderProps = {
 
 export function AccountHeader({
   tableRef,
-  editingName,
   isNameEditable,
   workingHard,
   accountName,
@@ -167,7 +164,6 @@ export function AccountHeader({
   onToggleExtraBalances,
   onSaveName,
   saveNameError,
-  onExposeName,
   onSync,
   onImport,
   onMenuSelect,
@@ -189,6 +185,7 @@ export function AccountHeader({
   onRunRules,
   onMakeAsSplitTransaction,
   onMakeAsNonSplitTransactions,
+  onMergeTransactions,
 }: AccountHeaderProps) {
   const { t } = useTranslation();
 
@@ -289,10 +286,8 @@ export function AccountHeader({
               account={account}
               accountName={accountName}
               isNameEditable={isNameEditable}
-              editingName={editingName}
               saveNameError={saveNameError}
               onSaveName={onSaveName}
-              onExposeName={onExposeName}
             />
           </View>
         </View>
@@ -358,6 +353,9 @@ export function AccountHeader({
             value={search}
             onChange={onSearch}
             inputRef={searchInput}
+            // Remove marginRight magically being added by Stack...
+            // We need to refactor the Stack component
+            style={{ marginRight: 0 }}
           />
           {workingHard ? (
             <View>
@@ -379,6 +377,7 @@ export function AccountHeader({
               showMakeTransfer={showMakeTransfer}
               onMakeAsSplitTransaction={onMakeAsSplitTransaction}
               onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
+              onMergeTransactions={onMergeTransactions}
             />
           )}
           <View style={{ flex: '0 0 auto', marginLeft: 10 }}>
@@ -579,32 +578,34 @@ type AccountNameFieldProps = {
   account?: AccountEntity;
   accountName: string;
   isNameEditable: boolean;
-  editingName: boolean;
   saveNameError?: ReactNode;
   onSaveName: (newName: string) => void;
-  onExposeName: (isExposed: boolean) => void;
 };
 
 function AccountNameField({
   account,
   accountName,
   isNameEditable,
-  editingName,
   saveNameError,
   onSaveName,
-  onExposeName,
 }: AccountNameFieldProps) {
   const { t } = useTranslation();
+  const [editingName, setEditingName] = useState(false);
+
+  const handleSave = (newName: string) => {
+    onSaveName(newName);
+    setEditingName(false);
+  };
 
   if (editingName) {
     return (
-      <Fragment>
+      <>
         <InitialFocus>
           <Input
             defaultValue={accountName}
-            onEnter={e => onSaveName(e.currentTarget.value)}
-            onBlur={e => onSaveName(e.target.value)}
-            onEscape={() => onExposeName(false)}
+            onEnter={handleSave}
+            onUpdate={handleSave}
+            onEscape={() => setEditingName(false)}
             style={{
               fontSize: 25,
               fontWeight: 500,
@@ -620,7 +621,7 @@ function AccountNameField({
         {saveNameError && (
           <View style={{ color: theme.warningText }}>{saveNameError}</View>
         )}
-      </Fragment>
+      </>
     );
   } else {
     if (isNameEditable) {
@@ -663,7 +664,7 @@ function AccountNameField({
             variant="bare"
             aria-label={t('Edit account name')}
             className="hover-visible"
-            onPress={() => onExposeName(true)}
+            onPress={() => setEditingName(true)}
           >
             <SvgPencil1
               style={{

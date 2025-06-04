@@ -10,9 +10,6 @@ import { View } from '@actual-app/components/view';
 import { amountToCurrency } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { Checkbox } from '../../forms';
-import { Row, Field } from '../../table';
-
 import { ParsedDate } from './ParsedDate';
 import {
   applyFieldMappings,
@@ -22,6 +19,9 @@ import {
   parseAmountFields,
 } from './utils';
 
+import { Checkbox } from '@desktop-client/components/forms';
+import { Row, Field } from '@desktop-client/components/table';
+
 type TransactionProps = {
   transaction: ImportTransaction;
   fieldMappings: FieldMapping;
@@ -30,7 +30,7 @@ type TransactionProps = {
   dateFormat: ComponentProps<typeof ParsedDate>['dateFormat'];
   splitMode: boolean;
   inOutMode: boolean;
-  outValue: number;
+  outValue: string;
   flipAmount: boolean;
   multiplierAmount: string;
   categories: CategoryEntity[];
@@ -208,6 +208,19 @@ export function Transaction({
       >
         {categoryList.includes(transaction.category) && transaction.category}
       </Field>
+      {inOutMode && (
+        <Field
+          width={90}
+          contentStyle={{ textAlign: 'left', ...styles.tnum }}
+          title={
+            transaction.inOut === undefined
+              ? undefined
+              : String(transaction.inOut)
+          }
+        >
+          {transaction.inOut}
+        </Field>
+      )}
       {splitMode ? (
         <>
           <Field
@@ -246,36 +259,21 @@ export function Transaction({
           </Field>
         </>
       ) : (
-        <>
-          {inOutMode && (
-            <Field
-              width={90}
-              contentStyle={{ textAlign: 'left', ...styles.tnum }}
-              title={
-                transaction.inOut === undefined
-                  ? undefined
-                  : String(transaction.inOut)
-              }
-            >
-              {transaction.inOut}
-            </Field>
-          )}
-          <Field
-            width={90}
-            contentStyle={{
-              textAlign: 'right',
-              ...styles.tnum,
-              ...(amount === null ? { color: theme.errorText } : {}),
-            }}
-            title={
-              amount === null
-                ? `Invalid: unable to parse the value (${transaction.amount})`
-                : amountToCurrency(amount)
-            }
-          >
-            {amountToCurrency(amount || 0)}
-          </Field>
-        </>
+        <Field
+          width={90}
+          contentStyle={{
+            textAlign: 'right',
+            ...styles.tnum,
+            ...(amount === null ? { color: theme.errorText } : {}),
+          }}
+          title={
+            amount === null
+              ? `Invalid: unable to parse the value (${transaction.amount})`
+              : amountToCurrency(amount)
+          }
+        >
+          {amountToCurrency(amount || 0)}
+        </Field>
       )}
     </Row>
   );

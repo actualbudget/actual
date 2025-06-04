@@ -2,17 +2,13 @@
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { closeModal } from 'loot-core/client/modals/modalsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-
-import { useMetadataPref } from '../hooks/useMetadataPref';
-import { useModalState } from '../hooks/useModalState';
-import { useDispatch } from '../redux';
 
 import { EditSyncAccount } from './banksync/EditSyncAccount';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
+import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
 import { BudgetFileSelectionModal } from './modals/BudgetFileSelectionModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
@@ -79,6 +75,11 @@ import { ScheduleLink } from './schedules/ScheduleLink';
 import { UpcomingLength } from './schedules/UpcomingLength';
 import { NamespaceContext } from './spreadsheet/NamespaceContext';
 
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useModalState } from '@desktop-client/hooks/useModalState';
+import { closeModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
+
 export function Modals() {
   const location = useLocation();
   const dispatch = useDispatch();
@@ -98,6 +99,9 @@ export function Modals() {
       switch (name) {
         case 'goal-templates':
           return budgetId ? <GoalTemplateModal key={key} /> : null;
+
+        case 'category-automations-edit':
+          return budgetId ? <BudgetAutomationsModal key={name} /> : null;
 
         case 'keyboard-shortcuts':
           // don't show the hotkey help modal when a budget is not open

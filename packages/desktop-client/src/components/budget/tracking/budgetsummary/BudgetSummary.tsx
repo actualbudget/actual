@@ -17,16 +17,16 @@ import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { useLocale } from '../../../../hooks/useLocale';
-import { useUndo } from '../../../../hooks/useUndo';
-import { NotesButton } from '../../../NotesButton';
-import { NamespaceContext } from '../../../spreadsheet/NamespaceContext';
-import { useTrackingBudget } from '../TrackingBudgetContext';
-
 import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ExpenseTotal } from './ExpenseTotal';
 import { IncomeTotal } from './IncomeTotal';
 import { Saved } from './Saved';
+
+import { useTrackingBudget } from '@desktop-client/components/budget/tracking/TrackingBudgetContext';
+import { NotesButton } from '@desktop-client/components/NotesButton';
+import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 
 type BudgetSummaryProps = {
   month: string;

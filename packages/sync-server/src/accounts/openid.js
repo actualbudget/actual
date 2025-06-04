@@ -1,7 +1,11 @@
-import { generators, Issuer } from 'openid-client';
+import { custom, generators, Issuer } from 'openid-client';
 import { v4 as uuidv4 } from 'uuid';
 
-import { clearExpiredSessions, getAccountDb } from '../account-db.js';
+import {
+  clearExpiredSessions,
+  getAccountDb,
+  listLoginMethods,
+} from '../account-db.js';
 import { config } from '../load-config.js';
 import {
   getUserByUsername,
@@ -24,6 +28,10 @@ export async function bootstrapOpenId(configParameter) {
   if (!('server_hostname' in configParameter)) {
     return { error: 'missing-server-hostname' };
   }
+
+  custom.setHttpOptionsDefaults({
+    timeout: 20 * 1000, // 20 seconds
+  });
 
   try {
     //FOR BACKWARD COMPATIBLITY:
@@ -99,10 +107,13 @@ export async function loginWithOpenIdSetup(
     [''],
   );
   if (countUsersWithUserName === 0) {
-    const valid = checkPassword(firstTimeLoginPassword);
+    const methods = listLoginMethods();
+    if (methods.some(authMethod => authMethod.method === 'password')) {
+      const valid = checkPassword(firstTimeLoginPassword);
 
-    if (!valid) {
-      return { error: 'invalid-password' };
+      if (!valid) {
+        return { error: 'invalid-password' };
+      }
     }
   }
 

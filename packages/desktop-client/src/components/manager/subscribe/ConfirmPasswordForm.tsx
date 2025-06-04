@@ -6,6 +6,7 @@ import { ButtonWithLoading } from '@actual-app/components/button';
 import { BigInput } from '@actual-app/components/input';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { css } from '@emotion/css';
 
 type ConfirmPasswordFormProps = {
   buttons: ReactNode;
@@ -137,12 +138,12 @@ export function ConfirmOldPasswordForm({
           setPassword(e.target.value)
         }
         onEnter={onSubmit}
-        style={{
+        className={css({
           borderColor: theme.buttonMenuBorder,
           borderWidth: 1,
           borderStyle: 'solid',
-          ':focus': {},
-        }}
+          '&[data-focused]': {},
+        })}
       />
 
       <View

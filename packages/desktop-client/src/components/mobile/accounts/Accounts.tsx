@@ -27,24 +27,30 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { moveAccount } from 'loot-core/client/accounts/accountsSlice';
-import { syncAndDownload } from 'loot-core/client/app/appSlice';
-import { replaceModal } from 'loot-core/client/modals/modalsSlice';
-import * as queries from 'loot-core/client/queries';
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
-import { useLocalPref } from '../../../hooks/useLocalPref';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { useSyncedPref } from '../../../hooks/useSyncedPref';
-import { useDispatch, useSelector } from '../../../redux';
-import { makeAmountFullStyle } from '../../budget/util';
-import { MobilePageHeader, Page } from '../../Page';
-import { type Binding, type SheetFields } from '../../spreadsheet';
-import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
-import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
-import { PullToRefresh } from '../PullToRefresh';
+import { moveAccount } from '@desktop-client/accounts/accountsSlice';
+import { syncAndDownload } from '@desktop-client/app/appSlice';
+import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
+import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
+import { PullToRefresh } from '@desktop-client/components/mobile/PullToRefresh';
+import { MobilePageHeader, Page } from '@desktop-client/components/Page';
+import {
+  type Binding,
+  type SheetFields,
+} from '@desktop-client/components/spreadsheet';
+import {
+  CellValue,
+  CellValueText,
+} from '@desktop-client/components/spreadsheet/CellValue';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { replaceModal } from '@desktop-client/modals/modalsSlice';
+import * as queries from '@desktop-client/queries/queries';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 type AccountHeaderProps<SheetFieldName extends SheetFields<'account'>> = {
   id: string;
@@ -133,7 +139,9 @@ type AccountListItemProps = ComponentPropsWithoutRef<
   isConnected: boolean;
   isPending: boolean;
   isFailed: boolean;
-  getBalanceQuery: (account: AccountEntity) => Binding<'account', 'balance'>;
+  getBalanceQuery: (
+    accountId: AccountEntity['id'],
+  ) => Binding<'account', 'balance'>;
   onSelect: (account: AccountEntity) => void;
 };
 
@@ -213,7 +221,7 @@ function AccountListItem({
               </TextOneLine>
             </View>
           </View>
-          <CellValue binding={getBalanceQuery(account)} type="financial">
+          <CellValue binding={getBalanceQuery(account.id)} type="financial">
             {props => (
               <CellValueText<'account', 'balance'>
                 {...props}
@@ -247,7 +255,9 @@ function EmptyMessage() {
 
 type AllAccountListProps = {
   accounts: AccountEntity[];
-  getAccountBalance: (account: AccountEntity) => Binding<'account', 'balance'>;
+  getAccountBalance: (
+    accountId: AccountEntity['id'],
+  ) => Binding<'account', 'balance'>;
   getOnBudgetBalance: () => Binding<'account', 'onbudget-accounts-balance'>;
   getOffBudgetBalance: () => Binding<'account', 'offbudget-accounts-balance'>;
   getClosedAccountsBalance: () => Binding<'account', 'closed-accounts-balance'>;
@@ -376,7 +386,9 @@ function AllAccountList({
 type AccountListProps = {
   'aria-label': string;
   accounts: AccountEntity[];
-  getAccountBalance: (account: AccountEntity) => Binding<'account', 'balance'>;
+  getAccountBalance: (
+    accountId: AccountEntity['id'],
+  ) => Binding<'account', 'balance'>;
   onOpenAccount: (account: AccountEntity) => void;
 };
 

@@ -13,11 +13,11 @@ import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { useLocale } from '../../hooks/useLocale';
-import { useResizeObserver } from '../../hooks/useResizeObserver';
-import { Link } from '../common/Link';
-
 import { type MonthBounds } from './MonthsContext';
+
+import { Link } from '@desktop-client/components/common/Link';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 type MonthPickerProps = {
   startMonth: string;

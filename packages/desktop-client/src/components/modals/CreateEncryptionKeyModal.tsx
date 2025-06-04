@@ -14,21 +14,21 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { sync } from 'loot-core/client/app/appSlice';
-import { loadAllFiles } from 'loot-core/client/budgets/budgetsSlice';
-import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
-import { loadGlobalPrefs } from 'loot-core/client/prefs/prefsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getCreateKeyError } from 'loot-core/shared/errors';
 
-import { useDispatch } from '../../redux';
-import { Link } from '../common/Link';
+import { sync } from '@desktop-client/app/appSlice';
+import { loadAllFiles } from '@desktop-client/budgets/budgetsSlice';
+import { Link } from '@desktop-client/components/common/Link';
 import {
   Modal,
   ModalButtons,
   ModalCloseButton,
   ModalHeader,
-} from '../common/Modal';
+} from '@desktop-client/components/common/Modal';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { loadGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type CreateEncryptionKeyModalProps = Extract<
   ModalType,
@@ -202,7 +202,7 @@ export function CreateEncryptionKeyModal({
                     width: isNarrowWidth ? '100%' : '50%',
                     height: isNarrowWidth ? styles.mobileMinHeight : undefined,
                   }}
-                  onChange={e => setPassword(e.target.value)}
+                  onChangeValue={setPassword}
                 />
               </InitialFocus>
               <Text style={{ marginTop: 5 }}>

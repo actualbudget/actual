@@ -9,6 +9,7 @@ import pluginReact from 'eslint-plugin-react';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
 import pluginRulesDir from 'eslint-plugin-rulesdir';
 import pluginTypescript from 'typescript-eslint';
+import pluginTypescriptPaths from 'eslint-plugin-typescript-paths';
 
 import tsParser from '@typescript-eslint/parser';
 
@@ -84,8 +85,7 @@ const confusingBrowserGlobals = [
   'top',
 ];
 
-/** @type {import('eslint').Linter.Config[]} */
-export default [
+export default pluginTypescript.config(
   {
     ignores: [
       'packages/api/app/bundle.api.js',
@@ -118,6 +118,26 @@ export default [
     ],
   },
   {
+    // Temporary until the sync-server is migrated to TypeScript
+    files: [
+      'packages/sync-server/**/*.spec.{js,jsx}',
+      'packages/sync-server/**/*.test.{js,jsx}',
+    ],
+    languageOptions: {
+      globals: {
+        vi: true,
+        describe: true,
+        expect: true,
+        it: true,
+        beforeAll: true,
+        beforeEach: true,
+        afterAll: true,
+        afterEach: true,
+        test: true,
+      },
+    },
+  },
+  {
     linterOptions: {
       reportUnusedDisableDirectives: true,
     },
@@ -125,7 +145,6 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.commonjs,
-        ...globals.jest,
         ...globals.node,
         globalThis: false,
         vi: true,
@@ -145,13 +164,14 @@ export default [
   },
   pluginReact.configs.flat.recommended,
   pluginReact.configs.flat['jsx-runtime'],
-  ...pluginTypescript.configs.recommended,
+  pluginTypescript.configs.recommended,
   pluginImport.flatConfigs.recommended,
   {
     plugins: {
       'react-hooks': pluginReactHooks,
       'jsx-a11y': pluginJSXA11y,
       rulesdir: pluginRulesDir,
+      'typescript-paths': pluginTypescriptPaths,
     },
   },
   {
@@ -520,7 +540,7 @@ export default [
     },
   },
   {
-    files: ['**/*.ts?(x)'],
+    files: ['**/*.{ts,tsx}'],
 
     languageOptions: {
       parser: tsParser,
@@ -586,6 +606,16 @@ export default [
 
       'no-useless-constructor': 'off',
       '@typescript-eslint/no-useless-constructor': 'warn',
+    },
+  },
+  {
+    files: ['packages/desktop-client/**/*.{js,ts,jsx,tsx}'],
+    rules: {
+      'typescript-paths/absolute-parent-import': [
+        'error',
+        { preferPathOverBaseUrl: true },
+      ],
+      'typescript-paths/absolute-import': ['error', { enableAlias: false }],
     },
   },
   {
@@ -752,6 +782,16 @@ export default [
       'import/no-unresolved': 'off',
     },
   },
+
+  // Allow configuring vitest with default exports (recommended as per vitest docs)
+  {
+    files: ['**/vitest.config.ts', '**/vitest.web.config.ts'],
+    rules: {
+      'import/no-anonymous-default-export': 'off',
+      'import/no-default-export': 'off',
+    },
+  },
+
   {},
   {
     // TODO: fix the issues in these files
@@ -843,4 +883,4 @@ export default [
       '@typescript-eslint/no-unused-vars': 'off',
     },
   },
-];
+);

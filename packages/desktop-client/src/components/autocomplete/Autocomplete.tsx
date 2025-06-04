@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import React, {
-  type ChangeEvent,
   type ComponentProps,
   type HTMLProps,
   type KeyboardEvent,
@@ -24,16 +23,14 @@ import Downshift, { type StateChangeTypes } from 'downshift';
 
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 
-import { useProperFocus } from '../../hooks/useProperFocus';
+import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 
 type CommonAutocompleteProps<T extends Item> = {
   focused?: boolean;
   embedded?: boolean;
   containerProps?: HTMLProps<HTMLDivElement>;
   labelProps?: { id?: string };
-  inputProps?: Omit<ComponentProps<typeof Input>, 'onChange'> & {
-    onChange?: (value: string) => void;
-  };
+  inputProps?: ComponentProps<typeof Input>;
   suggestions?: T[];
   renderInput?: (props: ComponentProps<typeof Input>) => ReactNode;
   renderItems?: (
@@ -461,7 +458,7 @@ function SingleAutocomplete<T extends Item>({
           <View ref={triggerRef} style={{ flexShrink: 0 }}>
             {renderInput(
               getInputProps({
-                inputRef,
+                ref: inputRef,
                 ...inputProps,
                 onFocus: e => {
                   inputProps.onFocus?.(e);
@@ -568,10 +565,6 @@ function SingleAutocomplete<T extends Item>({
                     }
                   }
                 },
-                onChange: (e: ChangeEvent<HTMLInputElement>) => {
-                  const { onChange } = inputProps || {};
-                  onChange?.(e.target.value);
-                },
               }),
             )}
           </View>
@@ -649,6 +642,13 @@ function MultiItem({ name, onRemove }: MultiItemProps) {
   );
 }
 
+const defaultMultiAutocompleteInputClassName = css({
+  flex: 1,
+  minWidth: 30,
+  border: 0,
+  '&[data-focused]': { border: 0, boxShadow: 'none' },
+});
+
 type MultiAutocompleteProps<T extends Item> = CommonAutocompleteProps<T> & {
   type: 'multi';
   onSelect: (ids: T['id'][], id?: T['id']) => void;
@@ -704,7 +704,7 @@ function MultiAutocomplete<T extends Item>({
       onSelect={onAddItem}
       highlightFirst
       strict={strict}
-      renderInput={inputProps => (
+      renderInput={({ className: inputClassName, ...inputProps }) => (
         <View
           style={{
             display: 'flex',
@@ -734,7 +734,7 @@ function MultiAutocomplete<T extends Item>({
           })}
           <Input
             {...inputProps}
-            inputRef={inputRef}
+            ref={inputRef}
             onKeyDown={e => onKeyDown(e, inputProps.onKeyDown)}
             onFocus={e => {
               setFocused(true);
@@ -744,13 +744,15 @@ function MultiAutocomplete<T extends Item>({
               setFocused(false);
               inputProps.onBlur(e);
             }}
-            style={{
-              flex: 1,
-              minWidth: 30,
-              border: 0,
-              ':focus': { border: 0, boxShadow: 'none' },
-              ...inputProps.style,
-            }}
+            className={
+              typeof inputClassName === 'function'
+                ? renderProps =>
+                    cx(
+                      defaultMultiAutocompleteInputClassName,
+                      inputClassName(renderProps),
+                    )
+                : cx(defaultMultiAutocompleteInputClassName, inputClassName)
+            }
           />
         </View>
       )}

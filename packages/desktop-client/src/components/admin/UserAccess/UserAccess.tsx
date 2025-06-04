@@ -17,8 +17,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type Handlers } from 'loot-core/types/handlers';
@@ -27,14 +25,16 @@ import {
   type UserAccessEntity,
 } from 'loot-core/types/models';
 
-import { useMetadataPref } from '../../../hooks/useMetadataPref';
-import { useDispatch } from '../../../redux';
-import { InfiniteScrollWrapper } from '../../common/InfiniteScrollWrapper';
-import { Link } from '../../common/Link';
-import { Search } from '../../common/Search';
-
 import { UserAccessHeader } from './UserAccessHeader';
 import { UserAccessRow } from './UserAccessRow';
+
+import { InfiniteScrollWrapper } from '@desktop-client/components/common/InfiniteScrollWrapper';
+import { Link } from '@desktop-client/components/common/Link';
+import { Search } from '@desktop-client/components/common/Search';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type ManageUserAccessContentProps = {
   isModal: boolean;

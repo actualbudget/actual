@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import { q } from '../../shared/query';
-import { runQuery } from '../aql';
+import { aqlQuery } from '../aql';
 import * as db from '../db';
 import { loadMappings } from '../db/mappings';
 
@@ -29,7 +29,7 @@ beforeEach(async () => {
 
 async function getMatchingTransactions(conds) {
   const { filters } = conditionsToAQL(conds);
-  const { data } = await runQuery(
+  const { data } = await aqlQuery(
     q('transactions').filter({ $and: filters }).select('*'),
   );
   return data;
@@ -37,7 +37,7 @@ async function getMatchingTransactions(conds) {
 
 describe('Transaction rules', () => {
   test('makeRule validates rule data', () => {
-    const spy = jest.spyOn(console, 'warn').mockImplementation();
+    const spy = vi.spyOn(console, 'warn').mockImplementation(() => null);
 
     // Parse errors
     expect(makeRule({ conditions: '{', actions: '[]' })).toBe(null);
@@ -113,7 +113,7 @@ describe('Transaction rules', () => {
     expect((await db.all<db.DbRule>('SELECT * FROM rules')).length).toBe(2);
     expect(getRules().length).toBe(2);
 
-    const spy = jest.spyOn(console, 'warn').mockImplementation();
+    const spy = vi.spyOn(console, 'warn').mockImplementation(() => null);
 
     // Try to insert an invalid rule (don't use `insertRule` because
     // that will validate the input)

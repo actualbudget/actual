@@ -848,13 +848,22 @@ function handleSyncError(
   if (err instanceof BankSyncError || (err as any)?.type === 'BankSyncError') {
     const error = err as BankSyncError;
 
-    return {
+    const syncError = {
       type: 'SyncError',
       accountId: acct.id,
       message: 'Failed syncing account “' + acct.name + '.”',
       category: error.category,
       code: error.code,
     };
+
+    if (error.category === 'RATE_LIMIT_EXCEEDED') {
+      return {
+        ...syncError,
+        message: `Failed syncing account ${acct.name}. Rate limit exceeded. Please try again later.`,
+      };
+    }
+
+    return syncError;
   }
 
   if (err instanceof PostError && err.reason !== 'internal') {
@@ -883,10 +892,8 @@ async function accountsBankSync({
 }: {
   ids: Array<AccountEntity['id']>;
 }): Promise<SyncResponseWithErrors> {
-  const [[, userId], [, userKey]] = await asyncStorage.multiGet([
-    'user-id',
-    'user-key',
-  ]);
+  const { 'user-id': userId, 'user-key': userKey } =
+    await asyncStorage.multiGet(['user-id', 'user-key']);
 
   const accounts = await db.runQuery<
     db.DbAccount & { bankId: db.DbBank['bank_id'] }

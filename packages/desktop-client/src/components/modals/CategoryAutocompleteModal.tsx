@@ -5,18 +5,18 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
 import * as monthUtils from 'loot-core/shared/months';
 
-import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
+import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import {
   ModalCloseButton,
   Modal,
   ModalTitle,
   ModalHeader,
-} from '../common/Modal';
-import { SectionLabel } from '../forms';
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
+} from '@desktop-client/components/common/Modal';
+import { SectionLabel } from '@desktop-client/components/forms';
+import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type CategoryAutocompleteModalProps = Extract<
   ModalType,

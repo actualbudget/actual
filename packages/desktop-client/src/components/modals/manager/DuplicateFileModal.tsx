@@ -10,18 +10,18 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { duplicateBudget } from 'loot-core/client/budgets/budgetsSlice';
-import { type Modal as ModalType } from 'loot-core/client/modals/modalsSlice';
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 
-import { useDispatch } from '../../../redux';
+import { duplicateBudget } from '@desktop-client/budgets/budgetsSlice';
 import {
   Modal,
   ModalButtons,
   ModalCloseButton,
   ModalHeader,
-} from '../../common/Modal';
+} from '@desktop-client/components/common/Modal';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type DuplicateFileModalProps = Extract<
   ModalType,
@@ -150,8 +150,8 @@ export function DuplicateFileModal({
                   value={newName}
                   aria-label={t('New Budget Name')}
                   aria-invalid={nameError ? 'true' : 'false'}
-                  onChange={event => setNewName(event.target.value)}
-                  onBlur={event => validateAndSetName(event.target.value)}
+                  onChangeValue={setNewName}
+                  onUpdate={validateAndSetName}
                   style={{ flex: 1 }}
                 />
               </InitialFocus>

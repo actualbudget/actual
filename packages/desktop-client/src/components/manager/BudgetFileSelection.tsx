@@ -37,16 +37,6 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import {
-  closeAndDownloadBudget,
-  closeAndLoadBudget,
-  createBudget,
-  downloadBudget,
-  loadAllFiles,
-  loadBudget,
-} from 'loot-core/client/budgets/budgetsSlice';
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
-import { getUserData } from 'loot-core/client/users/usersSlice';
-import {
   isElectron,
   isNonProductionEnvironment,
 } from 'loot-core/shared/environment';
@@ -58,10 +48,20 @@ import {
   type SyncedLocalFile,
 } from 'loot-core/types/file';
 
-import { useInitialMount } from '../../hooks/useInitialMount';
-import { useMetadataPref } from '../../hooks/useMetadataPref';
-import { useSelector, useDispatch } from '../../redux';
-import { useMultiuserEnabled } from '../ServerContext';
+import {
+  closeAndDownloadBudget,
+  closeAndLoadBudget,
+  createBudget,
+  downloadBudget,
+  loadAllFiles,
+  loadBudget,
+} from '@desktop-client/budgets/budgetsSlice';
+import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
+import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
+import { getUserData } from '@desktop-client/users/usersSlice';
 
 function getFileDescription(file: File, t: (key: string) => string) {
   if (file.state === 'unknown') {

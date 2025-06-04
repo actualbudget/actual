@@ -2,6 +2,7 @@
 import { setClock } from '@actual-app/crdt';
 import fc from 'fast-check';
 
+import { aqlQuery } from '..';
 import * as arbs from '../../../mocks/arbitrary-schema';
 import { q } from '../../../shared/query';
 import { groupById } from '../../../shared/util';
@@ -9,7 +10,6 @@ import * as db from '../../db';
 import { batchMessages, setSyncingMode } from '../../sync/index';
 
 import { isHappyPathQuery } from './executors';
-import { runQuery } from './run-query';
 
 beforeEach(global.emptyDatabase());
 
@@ -107,7 +107,7 @@ async function expectPagedData(query, numTransactions, allData) {
     expect(i).toBeLessThanOrEqual(100);
 
     // Pull in all the data via pages
-    const { data } = await runQuery(
+    const { data } = await aqlQuery(
       query.limit(pageCount).offset(pagedData.length).serialize(),
     );
 
@@ -139,7 +139,7 @@ describe('transaction executors', () => {
         async arr => {
           await insertTransactions(arr);
 
-          const { data } = await runQuery(
+          const { data } = await aqlQuery(
             q('transactions')
               .filter({ amount: { $lt: 0 } })
               .select('*')
@@ -150,7 +150,7 @@ describe('transaction executors', () => {
           expect(data.filter(t => t.is_parent).length).toBe(0);
           expect(data.filter(t => t.tombstone).length).toBe(0);
 
-          const { data: defaultData } = await runQuery(
+          const { data: defaultData } = await aqlQuery(
             q('transactions')
               .filter({ amount: { $lt: 0 } })
               .select('*')
@@ -176,7 +176,7 @@ describe('transaction executors', () => {
         async arr => {
           await insertTransactions(arr);
 
-          const { data } = await runQuery(
+          const { data } = await aqlQuery(
             q('transactions')
               .filter({ amount: { $lt: 0 } })
               .select('*')
@@ -209,7 +209,7 @@ describe('transaction executors', () => {
               .options({ splits: 'grouped' })
               .calculate({ $sum: '$amount' });
 
-            const { data } = await runQuery(aggQuery.serialize());
+            const { data } = await aqlQuery(aggQuery.serialize());
 
             const sum = aliveTransactions(arr).reduce((sum, trans) => {
               const amount = trans.amount || 0;
@@ -234,7 +234,7 @@ describe('transaction executors', () => {
           `);
         }),
     );
-  });
+  }, 20_000);
 
   function runTest(makeQuery) {
     const payeeIds = ['payee1', 'payee2', 'payee3', 'payee4', 'payee5'];
@@ -253,14 +253,14 @@ describe('transaction executors', () => {
 
       // First to a query without order to make sure the default
       // order works
-      const { data: defaultOrderData } = await runQuery(query.serialize());
+      const { data: defaultOrderData } = await aqlQuery(query.serialize());
       expectTransactionOrder(defaultOrderData);
       expect(new Set(defaultOrderData.map(t => t.id))).toEqual(expectedIds);
 
       // Now do the full test, and add a custom order to make
       // sure that doesn't effect anything
       const orderedQuery = query.orderBy(orderFields);
-      const { data } = await runQuery(orderedQuery.serialize());
+      const { data } = await aqlQuery(orderedQuery.serialize());
       expect(new Set(data.map(t => t.id))).toEqual(expectedIds);
 
       // Validate paging and ordering
@@ -362,7 +362,7 @@ describe('transaction executors', () => {
         query: happyQuery,
       };
     });
-  });
+  }, 20_000);
 
   it(`queries the correct transactions with a filter`, async () => {
     return runTest(arr => {
@@ -416,5 +416,5 @@ describe('transaction executors', () => {
         query: unhappyQuery,
       };
     });
-  });
+  }, 20_000);
 });

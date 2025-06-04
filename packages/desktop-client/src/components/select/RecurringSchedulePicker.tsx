@@ -30,11 +30,11 @@ import {
   type WithRequired,
 } from 'loot-core/types/util';
 
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { useLocale } from '../../hooks/useLocale';
-import { Checkbox } from '../forms';
-
 import { DateSelect } from './DateSelect';
+
+import { Checkbox } from '@desktop-client/components/forms';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 // ex: There is no 6th Friday of the Month
 const MAX_DAY_OF_WEEK_INTERVAL = 5;
@@ -456,7 +456,7 @@ function RecurringScheduleTooltip({
               style={{ width: 40 }}
               type="number"
               min={1}
-              onChange={e => updateField('endOccurrences', e.target.value)}
+              onChangeValue={value => updateField('endOccurrences', value)}
               defaultValue={config.endOccurrences || 1}
             />
             {config.endOccurrences === '1' ? (
@@ -490,7 +490,7 @@ function RecurringScheduleTooltip({
           style={{ width: 40 }}
           type="number"
           min={1}
-          onChange={e => updateField('interval', e.target.value)}
+          onChangeValue={value => updateField('interval', value)}
           defaultValue={config.interval || 1}
         />
         <Select

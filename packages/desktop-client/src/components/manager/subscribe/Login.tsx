@@ -15,19 +15,22 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { loggedIn } from 'loot-core/client/users/usersSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { isElectron } from 'loot-core/shared/environment';
 import { type OpenIdConfig } from 'loot-core/types/models';
 
-import { useNavigate } from '../../../hooks/useNavigate';
-import { useDispatch } from '../../../redux';
-import { warningBackground } from '../../../style/themes/dark';
-import { Link } from '../../common/Link';
-import { useAvailableLoginMethods, useLoginMethod } from '../../ServerContext';
-
 import { useBootstrapped, Title } from './common';
 import { OpenIdForm } from './OpenIdForm';
+
+import { Link } from '@desktop-client/components/common/Link';
+import {
+  useAvailableLoginMethods,
+  useLoginMethod,
+} from '@desktop-client/components/ServerContext';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useDispatch } from '@desktop-client/redux';
+import { warningBackground } from '@desktop-client/style/themes/dark';
+import { loggedIn } from '@desktop-client/users/usersSlice';
 
 function PasswordLogin({ setError, dispatch }) {
   const [password, setPassword] = useState('');
@@ -67,7 +70,7 @@ function PasswordLogin({ setError, dispatch }) {
         autoFocus={true}
         placeholder={t('Password')}
         type="password"
-        onChangeValue={newValue => setPassword(newValue)}
+        onChangeValue={setPassword}
         style={{ flex: 1 }}
         onEnter={onSubmitPassword}
       />
@@ -91,6 +94,8 @@ function OpenIdLogin({ setError }) {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const [warnMasterCreation, setWarnMasterCreation] = useState(false);
+  const loginMethods = useAvailableLoginMethods();
+  const [askForPassword, setAskForPassword] = useState(false);
   const [reviewOpenIdConfiguration, setReviewOpenIdConfiguration] =
     useState(false);
   const navigate = useNavigate();
@@ -111,6 +116,14 @@ function OpenIdLogin({ setError }) {
   useEffect(() => {
     send('owner-created').then(created => setWarnMasterCreation(!created));
   }, []);
+
+  useEffect(() => {
+    if (loginMethods.some(method => method.method === 'password')) {
+      setAskForPassword(true);
+    } else {
+      setAskForPassword(false);
+    }
+  }, [loginMethods]);
 
   async function onSubmitOpenId() {
     const { error, redirectUrl } = await send('subscribe-sign-in', {
@@ -144,7 +157,7 @@ function OpenIdLogin({ setError }) {
               gap: '1rem',
             }}
           >
-            {warnMasterCreation && (
+            {warnMasterCreation && askForPassword && (
               <ResponsiveInput
                 autoFocus={true}
                 placeholder={t('Enter server password')}
@@ -165,7 +178,11 @@ function OpenIdLogin({ setError }) {
                   width: 170,
                 }
               }
-              isDisabled={firstLoginPassword === '' && warnMasterCreation}
+              isDisabled={
+                firstLoginPassword === '' &&
+                askForPassword &&
+                warnMasterCreation
+              }
             >
               {warnMasterCreation ? (
                 <Trans>Start using OpenID</Trans>
@@ -183,29 +200,31 @@ function OpenIdLogin({ setError }) {
                   can&apos;t be changed using UI.
                 </Trans>
               </label>
-              <Button
-                variant="bare"
-                isDisabled={firstLoginPassword === '' && warnMasterCreation}
-                onPress={() => {
-                  send('get-openid-config', {
-                    password: firstLoginPassword,
-                  }).then(config => {
-                    if ('error' in config) {
-                      setError(config.error);
-                    } else if ('openId' in config) {
-                      setError(null);
-                      setOpenIdConfig(config.openId);
-                      setReviewOpenIdConfiguration(true);
-                    }
-                  });
-                }}
-                style={{
-                  marginTop: 5,
-                  ...(isNarrowWidth ? { padding: 10 } : null),
-                }}
-              >
-                <Trans>Review OpenID configuration</Trans>
-              </Button>
+              {askForPassword && (
+                <Button
+                  variant="bare"
+                  isDisabled={firstLoginPassword === '' && warnMasterCreation}
+                  onPress={() => {
+                    send('get-openid-config', {
+                      password: firstLoginPassword,
+                    }).then(config => {
+                      if ('error' in config) {
+                        setError(config.error);
+                      } else if ('openId' in config) {
+                        setError(null);
+                        setOpenIdConfig(config.openId);
+                        setReviewOpenIdConfiguration(true);
+                      }
+                    });
+                  }}
+                  style={{
+                    marginTop: 5,
+                    ...(isNarrowWidth ? { padding: 10 } : null),
+                  }}
+                >
+                  <Trans>Review OpenID configuration</Trans>
+                </Button>
+              )}
             </>
           )}
         </>

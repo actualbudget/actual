@@ -9,22 +9,26 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { closeAndLoadBudget } from 'loot-core/client/budgets/budgetsSlice';
-import {
-  type Modal as ModalType,
-  popModal,
-} from 'loot-core/client/modals/modalsSlice';
-import { addNotification } from 'loot-core/client/notifications/notificationsSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { getUserAccessErrors } from 'loot-core/shared/errors';
 import { type Budget } from 'loot-core/types/budget';
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 import { type Handlers } from 'loot-core/types/handlers';
 
-import { useMetadataPref } from '../../hooks/useMetadataPref';
-import { useDispatch, useSelector } from '../../redux';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { FormField, FormLabel } from '../forms';
+import { closeAndLoadBudget } from '@desktop-client/budgets/budgetsSlice';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import {
+  type Modal as ModalType,
+  popModal,
+} from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 type TransferOwnershipProps = Extract<
   ModalType,

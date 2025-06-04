@@ -22,16 +22,8 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
-import {
-  createPayee,
-  getActivePayees,
-} from 'loot-core/client/queries/queriesSlice';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { type AccountEntity, type PayeeEntity } from 'loot-core/types/models';
-
-import { useAccounts } from '../../hooks/useAccounts';
-import { useCommonPayees, usePayees } from '../../hooks/usePayees';
-import { useDispatch } from '../../redux';
 
 import {
   Autocomplete,
@@ -39,6 +31,14 @@ import {
   AutocompleteFooter,
 } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
+
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCommonPayees, usePayees } from '@desktop-client/hooks/usePayees';
+import {
+  createPayee,
+  getActivePayees,
+} from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 export type PayeeAutocompleteItem = PayeeEntity;
 
@@ -370,7 +370,7 @@ export function PayeeAutocomplete({
           setPayeeFieldFocused(false);
         },
         onFocus: () => setPayeeFieldFocused(true),
-        onChange: setRawPayee,
+        onChangeValue: setRawPayee,
       }}
       onUpdate={(id, inputValue) => onUpdate?.(id, makeNew(id, inputValue))}
       onSelect={handleSelect}

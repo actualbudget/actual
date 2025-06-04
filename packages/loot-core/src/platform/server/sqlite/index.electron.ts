@@ -106,19 +106,14 @@ export function openDatabase(pathOrBuffer: string | Buffer) {
   const db = new SQL(pathOrBuffer);
   // Define Unicode-aware LOWER, UPPER, and LIKE implementation.
   // This is necessary because better-sqlite3 uses SQLite build without ICU support.
-  // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
   db.function('UNICODE_LOWER', { deterministic: true }, (arg: string | null) =>
     arg?.toLowerCase(),
   );
-  // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
   db.function('UNICODE_UPPER', { deterministic: true }, (arg: string | null) =>
     arg?.toUpperCase(),
   );
-  // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
   db.function('UNICODE_LIKE', { deterministic: true }, unicodeLike);
-  // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
   db.function('REGEXP', { deterministic: true }, regexp);
-  // @ts-expect-error @types/better-sqlite3 does not support setting strict 3rd argument
   db.function('NORMALISE', { deterministic: true }, normalise);
   return db;
 }

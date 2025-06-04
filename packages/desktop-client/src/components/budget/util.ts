@@ -5,7 +5,6 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { t } from 'i18next';
 
-import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { type Handlers } from 'loot-core/types/handlers';
@@ -15,9 +14,10 @@ import {
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { type DropPosition } from '../sort';
-
 import { getValidMonthBounds } from './MonthsContext';
+
+import { type DropPosition } from '@desktop-client/components/sort';
+import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
   return [
@@ -68,8 +68,8 @@ export function makeAmountGrey(value: number | string): CSSProperties {
 
 export function makeBalanceAmountStyle(
   value: number,
-  goalValue?: number,
-  budgetedValue?: number,
+  goalValue?: number | null,
+  budgetedValue?: number | null,
 ) {
   if (value < 0) {
     return { color: theme.errorText };
@@ -167,7 +167,9 @@ export async function prewarmMonth(
   month: string,
 ) {
   const method: keyof Handlers =
-    budgetType === 'report' ? 'tracking-budget-month' : 'envelope-budget-month';
+    budgetType === 'tracking'
+      ? 'tracking-budget-month'
+      : 'envelope-budget-month';
 
   const values = await send(method, { month });
 

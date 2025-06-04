@@ -20,14 +20,19 @@ export const removeItem: T.RemoveItem = async function (key) {
 
 export async function multiGet<K extends readonly (keyof GlobalPrefsJson)[]>(
   keys: K,
-) {
-  return new Promise(function (resolve) {
-    return resolve(
-      keys.map(function (key) {
-        return [key, store[key]];
-      }) as { [P in keyof K]: [K[P], GlobalPrefsJson[K[P]]] },
-    );
-  });
+): Promise<{ [P in K[number]]: GlobalPrefsJson[P] }> {
+  const results = keys.map(key => [key, store[key]]) as {
+    [P in keyof K]: [K[P], GlobalPrefsJson[K[P]]];
+  };
+
+  // Convert the array of tuples to an object with properly typed properties
+  return results.reduce(
+    (acc, [key, value]) => {
+      acc[key] = value;
+      return acc;
+    },
+    {} as { [P in K[number]]: GlobalPrefsJson[P] },
+  );
 }
 
 export const multiSet: T.MultiSet = async function (keyValues) {

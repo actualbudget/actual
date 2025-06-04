@@ -5,8 +5,6 @@ import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
-import { SchedulesProvider } from 'loot-core/client/data-hooks/schedules';
-import { SpreadsheetProvider } from 'loot-core/client/SpreadsheetProvider';
 import {
   generateTransaction,
   generateAccount,
@@ -28,12 +26,14 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { AuthProvider } from '../../auth/AuthProvider';
-import { SelectedProviderWithItems } from '../../hooks/useSelected';
-import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
-import { TestProvider } from '../../redux/mock';
-
 import { TransactionTable } from './TransactionsTable';
+
+import { AuthProvider } from '@desktop-client/auth/AuthProvider';
+import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
+import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
+import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
+import { SpreadsheetProvider } from '@desktop-client/hooks/useSpreadsheet';
+import { TestProvider } from '@desktop-client/redux/mock';
 
 vi.mock('loot-core/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => ({
@@ -69,8 +69,9 @@ const payees: PayeeEntity[] = [
   },
 ];
 vi.mock('../../hooks/usePayees', async importOriginal => {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-  const actual = await importOriginal<typeof import('../../hooks/usePayees')>();
+  const actual =
+    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+    await importOriginal<typeof import('../../hooks/usePayees')>();
   return {
     ...actual,
     usePayees: () => payees,
@@ -180,7 +181,7 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
     return diff.added[0].id;
   };
 
-  const onCreatePayee = () => 'id';
+  const onCreatePayee = async () => 'id';
 
   // It's important that these functions are they same instances
   // across renders. Doing so tests that the transaction table
@@ -199,9 +200,9 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
               <SplitsExpandedProvider>
                 <TransactionTable
                   {...props}
-                  // @ts-expect-error this will be auto-patched once TransactionTable is moved to TS
                   transactions={transactions}
                   loadMoreTransactions={() => {}}
+                  // @ts-ignore TODO:
                   commonPayees={[]}
                   payees={payees}
                   addNotification={console.log}

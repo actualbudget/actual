@@ -8,16 +8,16 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { createBudget } from 'loot-core/client/budgets/budgetsSlice';
 import { send } from 'loot-core/platform/client/fetch';
-
-import { useNavigate } from '../../../hooks/useNavigate';
-import { useDispatch } from '../../../redux';
-import { Link } from '../../common/Link';
-import { useRefreshLoginMethods } from '../../ServerContext';
 
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
+
+import { createBudget } from '@desktop-client/budgets/budgetsSlice';
+import { Link } from '@desktop-client/components/common/Link';
+import { useRefreshLoginMethods } from '@desktop-client/components/ServerContext';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useDispatch } from '@desktop-client/redux';
 
 export function Bootstrap() {
   const { t } = useTranslation();

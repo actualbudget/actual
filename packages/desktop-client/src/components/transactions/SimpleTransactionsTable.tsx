@@ -20,12 +20,21 @@ import * as monthUtils from 'loot-core/shared/months';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type TransactionEntity } from 'loot-core/types/models';
 
-import { useAccount } from '../../hooks/useAccount';
-import { useCategory } from '../../hooks/useCategory';
-import { useDateFormat } from '../../hooks/useDateFormat';
-import { useSelectedItems, useSelectedDispatch } from '../../hooks/useSelected';
-import { Cell, Field, Row, SelectCell, Table } from '../table';
-import { DisplayId } from '../util/DisplayId';
+import {
+  Cell,
+  Field,
+  Row,
+  SelectCell,
+  Table,
+} from '@desktop-client/components/table';
+import { DisplayId } from '@desktop-client/components/util/DisplayId';
+import { useAccount } from '@desktop-client/hooks/useAccount';
+import { useCategory } from '@desktop-client/hooks/useCategory';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import {
+  useSelectedItems,
+  useSelectedDispatch,
+} from '@desktop-client/hooks/useSelected';
 
 function serializeTransaction(
   transaction: TransactionEntity,

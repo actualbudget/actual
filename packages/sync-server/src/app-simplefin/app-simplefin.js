@@ -68,7 +68,7 @@ app.post(
 app.post(
   '/transactions',
   handleError(async (req, res) => {
-    const { accountId, startDate } = req.body;
+    const { accountId, startDate } = req.body || {};
 
     const accessKey = secretsService.get(SecretName.simplefin_accessKey);
 
@@ -352,67 +352,54 @@ async function getAccounts(
   noTransactions = false,
 ) {
   const sfin = parseAccessKey(accessKey);
-  const options = {
-    headers: {
-      Authorization: `Basic ${Buffer.from(
-        `${sfin.username}:${sfin.password}`,
-      ).toString('base64')}`,
-    },
+
+  const headers = {
+    Authorization: `Basic ${Buffer.from(
+      `${sfin.username}:${sfin.password}`,
+    ).toString('base64')}`,
   };
-  const params = [];
+
+  const params = new URLSearchParams();
   if (!noTransactions) {
     if (startDate) {
-      params.push(`start-date=${normalizeDate(startDate)}`);
+      params.append('start-date', normalizeDate(startDate));
     }
     if (endDate) {
-      params.push(`end-date=${normalizeDate(endDate)}`);
+      params.append('end-date', normalizeDate(endDate));
     }
-
-    params.push(`pending=1`);
+    params.append('pending', '1');
   } else {
-    params.push(`balances-only=1`);
+    params.append('balances-only', '1');
   }
 
   if (accounts) {
-    accounts.forEach(id => {
-      params.push(`account=${encodeURIComponent(id)}`);
-    });
+    for (const id of accounts) {
+      params.append('account', id);
+    }
   }
 
-  let queryString = '';
-  if (params.length > 0) {
-    queryString += '?' + params.join('&');
-  }
-  return new Promise((resolve, reject) => {
-    const req = https.request(
-      new URL(`${sfin.baseUrl}/accounts${queryString}`),
-      options,
-      res => {
-        let data = '';
-        res.on('data', d => {
-          data += d;
-        });
-        res.on('end', () => {
-          if (res.statusCode === 403) {
-            reject(new Error('Forbidden'));
-          } else {
-            try {
-              const results = JSON.parse(data);
-              results.sferrors = results.errors;
-              results.hasError = false;
-              results.errors = {};
-              resolve(results);
-            } catch (e) {
-              console.log(`Error parsing JSON response: ${data}`);
-              reject(e);
-            }
-          }
-        });
-      },
-    );
-    req.on('error', e => {
-      reject(e);
-    });
-    req.end();
+  const url = new URL(`${sfin.baseUrl}/accounts`);
+  url.search = params.toString();
+
+  const response = await fetch(url.toString(), {
+    method: 'GET',
+    headers,
+    redirect: 'follow',
   });
+
+  if (response.status === 403) {
+    throw new Error('Forbidden');
+  }
+
+  const text = await response.text();
+  try {
+    const results = JSON.parse(text);
+    results.sferrors = results.errors;
+    results.hasError = false;
+    results.errors = {};
+    return results;
+  } catch (e) {
+    console.log(`Error parsing JSON response: ${text}`);
+    throw e;
+  }
 }

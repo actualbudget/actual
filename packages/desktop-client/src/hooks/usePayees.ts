@@ -1,13 +1,12 @@
 import { useEffect } from 'react';
 
+import { useInitialMount } from './useInitialMount';
+
 import {
   getCommonPayees,
   getPayees,
-} from 'loot-core/client/queries/queriesSlice';
-
-import { useSelector, useDispatch } from '../redux';
-
-import { useInitialMount } from './useInitialMount';
+} from '@desktop-client/queries/queriesSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 export function useCommonPayees() {
   const dispatch = useDispatch();

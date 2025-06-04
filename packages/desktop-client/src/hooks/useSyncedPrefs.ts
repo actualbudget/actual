@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
 
-import { saveSyncedPrefs } from 'loot-core/client/prefs/prefsSlice';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { useSelector, useDispatch } from '../redux';
+import { saveSyncedPrefs } from '@desktop-client/prefs/prefsSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 type SetSyncedPrefsAction = (value: Partial<SyncedPrefs>) => void;
 

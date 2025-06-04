@@ -13,26 +13,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { syncAndDownload } from 'loot-core/client/app/appSlice';
-import {
-  accountSchedulesQuery,
-  SchedulesProvider,
-} from 'loot-core/client/data-hooks/schedules';
-import {
-  useTransactions,
-  useTransactionsSearch,
-} from 'loot-core/client/data-hooks/transactions';
-import {
-  collapseModals,
-  openAccountCloseModal,
-  pushModal,
-} from 'loot-core/client/modals/modalsSlice';
-import * as queries from 'loot-core/client/queries';
-import {
-  markAccountRead,
-  reopenAccount,
-  updateAccount,
-} from 'loot-core/client/queries/queriesSlice';
 import { listen, send } from 'loot-core/platform/client/fetch';
 import { type Query } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
@@ -41,15 +21,31 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { useAccountPreviewTransactions } from '../../../hooks/useAccountPreviewTransactions';
-import { useDateFormat } from '../../../hooks/useDateFormat';
-import { useFailedAccounts } from '../../../hooks/useFailedAccounts';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { useSelector, useDispatch } from '../../../redux';
-import { MobilePageHeader, Page } from '../../Page';
-import { MobileBackButton } from '../MobileBackButton';
-import { AddTransactionButton } from '../transactions/AddTransactionButton';
-import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
+import { syncAndDownload } from '@desktop-client/app/appSlice';
+import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
+import { AddTransactionButton } from '@desktop-client/components/mobile/transactions/AddTransactionButton';
+import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
+import { MobilePageHeader, Page } from '@desktop-client/components/Page';
+import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
+import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { accountSchedulesQuery } from '@desktop-client/hooks/useSchedules';
+import { useTransactions } from '@desktop-client/hooks/useTransactions';
+import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
+import {
+  collapseModals,
+  openAccountCloseModal,
+  pushModal,
+} from '@desktop-client/modals/modalsSlice';
+import * as queries from '@desktop-client/queries/queries';
+import {
+  markAccountRead,
+  reopenAccount,
+  updateAccount,
+} from '@desktop-client/queries/queriesSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 export function AccountTransactions({
   account,
@@ -255,7 +251,7 @@ function TransactionListWithPreviews({
   );
   const {
     transactions,
-    isLoading,
+    isLoading: isTransactionsLoading,
     reload: reloadTransactions,
     isLoadingMore,
     loadMore: loadMoreTransactions,
@@ -263,9 +259,10 @@ function TransactionListWithPreviews({
     query: transactionsQuery,
   });
 
-  const { previewTransactions } = useAccountPreviewTransactions({
-    accountId: account?.id || '',
-  });
+  const { previewTransactions, isLoading: isPreviewTransactionsLoading } =
+    useAccountPreviewTransactions({
+      accountId: account?.id,
+    });
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
@@ -365,7 +362,9 @@ function TransactionListWithPreviews({
 
   return (
     <TransactionListWithBalances
-      isLoading={isLoading}
+      isLoading={
+        isSearching ? isTransactionsLoading : isPreviewTransactionsLoading
+      }
       transactions={transactionsToDisplay}
       balance={balanceQueries.balance}
       balanceCleared={balanceQueries.cleared}
@@ -405,9 +404,9 @@ function queriesFromAccountId(
     default:
       return entity
         ? {
-            balance: queries.accountBalance(entity),
-            cleared: queries.accountBalanceCleared(entity),
-            uncleared: queries.accountBalanceUncleared(entity),
+            balance: queries.accountBalance(entity.id),
+            cleared: queries.accountBalanceCleared(entity.id),
+            uncleared: queries.accountBalanceUncleared(entity.id),
           }
         : { balance: queries.allAccountBalance() };
   }

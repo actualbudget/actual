@@ -18,9 +18,9 @@ import {
 
 import { amountToCurrencyNoDecimal } from 'loot-core/shared/util';
 
-import { usePrivacyMode } from '../../../hooks/usePrivacyMode';
-import { Container } from '../Container';
-import { numberFormatterTooltip } from '../numberFormatter';
+import { Container } from '@desktop-client/components/reports/Container';
+import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
+import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type NetWorthGraphProps = {
   style?: CSSProperties;

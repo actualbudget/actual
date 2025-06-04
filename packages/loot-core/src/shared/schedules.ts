@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import type { IRuleOptions } from '@rschedule/core';
 import * as d from 'date-fns';
+import { Locale } from 'date-fns';
 import { t } from 'i18next';
 
 import { Condition } from '../server/rules';
@@ -12,7 +13,7 @@ export function getStatus(
   nextDate: string,
   completed: boolean,
   hasTrans: boolean,
-  upcomingLength: string,
+  upcomingLength: string = '7',
 ) {
   const upcomingDays = getUpcomingDays(upcomingLength);
   const today = monthUtils.currentDay();

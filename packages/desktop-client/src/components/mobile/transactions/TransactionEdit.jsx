@@ -30,12 +30,9 @@ import {
   isValid as isValidDate,
 } from 'date-fns';
 
-import { pushModal } from 'loot-core/client/modals/modalsSlice';
-import * as Platform from 'loot-core/client/platform';
-import { setLastTransaction } from 'loot-core/client/queries/queriesSlice';
-import { runQuery } from 'loot-core/client/query-helpers';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
+import * as Platform from 'loot-core/shared/platform';
 import { q } from 'loot-core/shared/query';
 import {
   ungroupTransactions,
@@ -56,24 +53,32 @@ import {
   groupById,
 } from 'loot-core/shared/util';
 
-import { useAccounts } from '../../../hooks/useAccounts';
-import { useCategories } from '../../../hooks/useCategories';
-import { useDateFormat } from '../../../hooks/useDateFormat';
-import { useInitialMount } from '../../../hooks/useInitialMount';
-import { useNavigate } from '../../../hooks/useNavigate';
-import { usePayees } from '../../../hooks/usePayees';
+import { FocusableAmountInput } from './FocusableAmountInput';
+
+import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
+import {
+  FieldLabel,
+  TapField,
+  InputField,
+  ToggleField,
+} from '@desktop-client/components/mobile/MobileForms';
+import { getPrettyPayee } from '@desktop-client/components/mobile/utils';
+import { MobilePageHeader, Page } from '@desktop-client/components/Page';
+import { AmountInput } from '@desktop-client/components/util/AmountInput';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
-} from '../../../hooks/useSingleActiveEditForm';
-import { useSelector, useDispatch } from '../../../redux';
-import { MobilePageHeader, Page } from '../../Page';
-import { AmountInput } from '../../util/AmountInput';
-import { MobileBackButton } from '../MobileBackButton';
-import { FieldLabel, TapField, InputField, ToggleField } from '../MobileForms';
-import { getPrettyPayee } from '../utils';
-
-import { FocusableAmountInput } from './FocusableAmountInput';
+} from '@desktop-client/hooks/useSingleActiveEditForm';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+import { setLastTransaction } from '@desktop-client/queries/queriesSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;
@@ -480,6 +485,13 @@ const TransactionEditInner = memo(function TransactionEditInner({
     [unserializedTransactions, dateFormat],
   );
   const { grouped: categoryGroups } = useCategories();
+
+  useEffect(() => {
+    if (window.history.length === 1) {
+      window.history.replaceState(null, 'Actual Budget', '/');
+      window.history.pushState(null, 'Add Transaction', '/transactions/new');
+    }
+  }, []);
 
   const [transaction, ...childTransactions] = transactions;
 
@@ -984,11 +996,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
               onFocus={() =>
                 onRequestActiveEdit(getFieldName(transaction.id, 'date'))
               }
-              onUpdate={value =>
+              onChange={event =>
                 onUpdateInner(
                   transaction,
                   'date',
-                  formatDate(parseISO(value), dateFormat),
+                  formatDate(parseISO(event.target.value), dateFormat),
                 )
               }
             />
@@ -1021,7 +1033,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
             onFocus={() => {
               onRequestActiveEdit(getFieldName(transaction.id, 'notes'));
             }}
-            onUpdate={value => onUpdateInner(transaction, 'notes', value)}
+            onChange={event =>
+              onUpdateInner(transaction, 'notes', event.target.value)
+            }
           />
         </View>
 
@@ -1107,7 +1121,7 @@ function TransactionEditUnconnected({
       // The edit item components expect to work with a flat array of
       // transactions when handling splits, so we call ungroupTransactions to
       // flatten parent and children into one array.
-      const { data } = await runQuery(
+      const { data } = await aqlQuery(
         q('transactions')
           .filter({ id: transactionId })
           .select('*')
