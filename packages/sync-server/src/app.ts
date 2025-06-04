@@ -75,7 +75,7 @@ app.get('/info', (_req, res) => {
   );
   const packageJsonPath = require.resolve('./package.json');
 
-  let packageJson = {};
+  let packageJson;
   try {
     packageJson = JSON.parse(readFileSync(serverPackageJsonPath, 'utf-8'));
   } catch {
