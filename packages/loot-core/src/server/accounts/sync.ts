@@ -64,7 +64,8 @@ function getAccountBalance(account) {
 
 async function updateAccountBalance(id, balance) {
   await db.runQuery('UPDATE accounts SET balance_current = ? WHERE id = ?', [
-    amountToInteger(balance),
+    // For now it is assumed that imported transactions always have 2 decimal places
+    amountToInteger(balance, 2),
     id,
   ]);
 }
@@ -435,7 +436,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     normalized.push({
       payee_name: payeeName,
       trans: {
-        amount: amountToInteger(trans.amount),
+        amount: amountToInteger(trans.amount, 2),
         payee: trans.payee,
         account: trans.account,
         date,

@@ -57,7 +57,7 @@ async function importFileWithRealTime(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     transactions = (transactions as any[]).map(trans => ({
       ...trans,
-      amount: amountToInteger(trans.amount),
+      amount: amountToInteger(trans.amount, 2),
       date: dateFormat
         ? d.format(d.parse(trans.date, dateFormat, new Date()), 'yyyy-MM-dd')
         : trans.date,

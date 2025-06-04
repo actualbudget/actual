@@ -68,7 +68,7 @@ function format(
     case 'financial': {
       let localValue = value;
       if (localValue == null || localValue === '' || localValue === 0) {
-        return integerToCurrency(0, formatter, decimalPlaces);
+        return integerToCurrency(0, decimalPlaces, formatter);
       } else if (typeof localValue === 'string') {
         const parsed = parseFloat(localValue);
         localValue = isNaN(parsed) ? 0 : parsed;
@@ -80,7 +80,7 @@ function format(
         );
       }
 
-      return integerToCurrency(localValue, formatter, decimalPlaces);
+      return integerToCurrency(localValue, decimalPlaces, formatter);
     }
     default:
       throw new Error('Unknown format type: ' + type);

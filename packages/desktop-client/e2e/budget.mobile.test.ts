@@ -273,7 +273,7 @@ budgetTypes.forEach(budgetType => {
         await budgetPage.getButtonForBudgeted(categoryName);
 
       await expect(budgetedButton).toHaveText(
-        integerToCurrency(amountToInteger(budgetAmount, 2), undefined, 2),
+        integerToCurrency(amountToInteger(budgetAmount, 2), 2, undefined),
       );
       await expect(page).toMatchThemeScreenshots();
     });
@@ -326,8 +326,8 @@ budgetTypes.forEach(budgetType => {
         await expect(budgetedButton).toHaveText(
           integerToCurrency(
             amountToInteger(Math.abs(averageSpent), 2),
-            undefined,
             2,
+            undefined,
           ),
         );
         await expect(page).toMatchThemeScreenshots();
@@ -358,7 +358,7 @@ budgetTypes.forEach(budgetType => {
       await budgetMenuModal.close();
 
       await expect(budgetedButton).toHaveText(
-        integerToCurrency(amountToInteger(amountToTemplate, 2), undefined, 2),
+        integerToCurrency(amountToInteger(amountToTemplate, 2), 2, undefined),
       );
       const notification = page.getByRole('alert').first();
       await expect(notification).toContainText(templateNotes);
