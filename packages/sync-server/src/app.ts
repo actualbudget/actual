@@ -69,10 +69,22 @@ app.get('/mode', (req, res) => {
 
 app.get('/info', (_req, res) => {
   const require = createRequire(import.meta.url);
-  const packageJsonPath = require.resolve(
+
+  const serverPackageJsonPath = require.resolve(
     '@actual-app/sync-server/package.json',
   );
-  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+  const packageJsonPath = require.resolve('./package.json');
+
+  let packageJson = {};
+  try {
+    packageJson = JSON.parse(readFileSync(serverPackageJsonPath, 'utf-8'));
+  } catch {
+    packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+  }
+
+  if (packageJson.name !== '@actual-app/sync-server' || !packageJson.version) {
+    throw new Error('Unable to find sync-server version');
+  }
 
   res.status(200).json({
     build: {
