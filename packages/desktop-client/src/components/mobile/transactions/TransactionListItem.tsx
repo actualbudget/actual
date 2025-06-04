@@ -308,7 +308,8 @@ export function TransactionListItem({
                       ...makeBalanceAmountStyle(balance || 0),
                     }}
                   >
-                    {integerToCurrency(balance || 0)}
+                    {/*TODO: fix hard number*/}
+                    {integerToCurrency(balance || 0, 2)}
                   </Text>
                 )}
               </View>

@@ -591,8 +591,8 @@ async function addMovementNotes({
   const currency = getCurrency(currencyCode);
   const displayAmount = integerToCurrency(
     amount,
-    undefined,
     currency.decimalPlaces,
+    undefined,
   );
 
   const monthBudgetNotesId = `budget-${month}`;

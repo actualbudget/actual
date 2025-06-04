@@ -435,7 +435,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     normalized.push({
       payee_name: payeeName,
       trans: {
-        amount: amountToInteger(trans.amount),
+        amount: amountToInteger(trans.amount, 2),
         payee: trans.payee,
         account: trans.account,
         date,

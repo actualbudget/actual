@@ -57,7 +57,7 @@ describe('CategoryTemplateContext', () => {
       );
 
       const result = CategoryTemplateContext.runSimple(template, instance);
-      expect(result).toBe(amountToInteger(100));
+      expect(result).toBe(amountToInteger(100, 2));
     });
 
     it('should return limit when monthly is not provided', () => {
@@ -87,7 +87,7 @@ describe('CategoryTemplateContext', () => {
       );
 
       const result = CategoryTemplateContext.runSimple(template, instance);
-      expect(result).toBe(amountToInteger(500));
+      expect(result).toBe(amountToInteger(500, 2));
     });
 
     it('should handle weekly limit', async () => {
@@ -226,7 +226,7 @@ describe('CategoryTemplateContext', () => {
       };
 
       const result = CategoryTemplateContext.runWeek(template, instance);
-      expect(result).toBe(amountToInteger(500));
+      expect(result).toBe(amountToInteger(500, 2));
     });
 
     it('should calculate weekly amount for multiple weeks', () => {
@@ -240,7 +240,7 @@ describe('CategoryTemplateContext', () => {
       };
 
       const result = CategoryTemplateContext.runWeek(template, instance);
-      expect(result).toBe(amountToInteger(300));
+      expect(result).toBe(amountToInteger(300, 2));
     });
 
     it('should handle weeks spanning multiple months', () => {
@@ -254,7 +254,7 @@ describe('CategoryTemplateContext', () => {
       };
 
       const result = CategoryTemplateContext.runWeek(template, instance);
-      expect(result).toBe(amountToInteger(100));
+      expect(result).toBe(amountToInteger(100, 2));
     });
   });
 

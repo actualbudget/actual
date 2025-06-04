@@ -96,8 +96,8 @@ function format(
         numericValue: localValue,
         formattedString: integerToCurrency(
           localValue,
-          formatter,
           decimalPlaces,
+          formatter,
         ),
       };
     }
