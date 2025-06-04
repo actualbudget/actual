@@ -1713,6 +1713,14 @@ class AccountInternal extends PureComponent<
 
     const balanceQuery = this.getBalanceQuery(accountId);
 
+    const selectAllFilter = (item: TransactionEntity) => {
+      if (item.is_parent) {
+        const children = transactions.filter(t => t.parent_id === item.id);
+        return children.every(t => selectAllFilter(t));
+      }
+      return !item._unmatched;
+    };
+
     return (
       <AllTransactions
         account={account}
@@ -1727,7 +1735,7 @@ class AccountInternal extends PureComponent<
             items={allTransactions}
             fetchAllIds={this.fetchAllIds}
             registerDispatch={dispatch => (this.dispatchSelected = dispatch)}
-            selectAllFilter={item => !item._unmatched && !item.is_parent}
+            selectAllFilter={selectAllFilter}
           >
             <View style={styles.page}>
               <AccountHeader
