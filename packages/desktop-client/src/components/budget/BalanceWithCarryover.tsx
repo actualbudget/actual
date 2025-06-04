@@ -98,6 +98,7 @@ type BalanceWithCarryoverProps = Omit<
   isDisabled?: boolean;
   shouldInlineGoalStatus?: boolean;
   CarryoverIndicator?: ComponentType<CarryoverIndicatorProps>;
+  tooltipDisabled?: boolean;
 };
 
 export function BalanceWithCarryover({
@@ -109,6 +110,7 @@ export function BalanceWithCarryover({
   isDisabled,
   shouldInlineGoalStatus,
   CarryoverIndicator: CarryoverIndicatorComponent = CarryoverIndicator,
+  tooltipDisabled,
   children,
   ...props
 }: BalanceWithCarryoverProps) {
@@ -259,7 +261,10 @@ export function BalanceWithCarryover({
             triggerProps={{
               delay: 750,
               isDisabled:
-                !isGoalTemplatesEnabled || goalValue == null || isNarrowWidth,
+                !isGoalTemplatesEnabled ||
+                goalValue == null ||
+                isNarrowWidth ||
+                tooltipDisabled,
             }}
           >
             {children ? (
