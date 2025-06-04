@@ -203,7 +203,7 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
     }, []);
 
     useEffect(() => {
-      if (picker.current.getDate() !== value) {
+      if (value && picker.current.getDate() !== value) {
         picker.current.setDate(parse(value, dateFormat, new Date()), true);
       }
     }, [value, dateFormat]);
