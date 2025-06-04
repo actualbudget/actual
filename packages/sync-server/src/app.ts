@@ -74,26 +74,31 @@ app.get('/info', (_req, res) => {
     let currentPath = startDir;
     let directoriesSearched = 0;
     const pathRoot = resolve(currentPath, '/');
-    while (currentPath !== pathRoot && directoriesSearched < 5) {
-      const packageJsonPath = resolve(currentPath, 'package.json');
-      if (fs.existsSync(packageJsonPath)) {
-        return packageJsonPath;
-      }
+    try {
+      while (currentPath !== pathRoot && directoriesSearched < 5) {
+        const packageJsonPath = resolve(currentPath, 'package.json');
+        if (fs.existsSync(packageJsonPath)) {
+          const packageJson = JSON.parse(
+            readFileSync(packageJsonPath, 'utf-8'),
+          );
 
-      currentPath = resolve(join(currentPath, '..')); // Move up one directory
-      directoriesSearched++;
+          if (packageJson.name === '@actual-app/sync-server') {
+            return packageJson;
+          }
+        }
+
+        currentPath = resolve(join(currentPath, '..')); // Move up one directory
+        directoriesSearched++;
+      }
+    } catch (error) {
+      console.error('Error while searching for package.json:', error);
     }
 
     return null;
   }
 
   const dirname = resolve(fileURLToPath(import.meta.url), '../');
-  const packageJsonPath = findPackageJson(dirname);
-  let packageJson = undefined;
-
-  if (packageJsonPath) {
-    packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
-  }
+  const packageJson = findPackageJson(dirname);
 
   res.status(200).json({
     build: {
