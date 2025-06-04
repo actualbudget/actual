@@ -1713,7 +1713,7 @@ class AccountInternal extends PureComponent<
 
     const balanceQuery = this.getBalanceQuery(accountId);
 
-    const selectAllFilter = (item: TransactionEntity) => {
+    const selectAllFilter = (item: TransactionEntity): boolean => {
       if (item.is_parent) {
         const children = transactions.filter(t => t.parent_id === item.id);
         return children.every(t => selectAllFilter(t));
