@@ -87,8 +87,10 @@ const sidebars = {
               items: [
                 'config/index',
                 'config/https',
-                'advanced/http-header-auth',
                 'config/reverse-proxies',
+                'config/oauth-auth',
+                'config/multi-user',
+                'advanced/http-header-auth',
               ],
             },
           ],
@@ -212,8 +214,6 @@ const sidebars = {
           items: [
             'experimental/goal-templates',
             'experimental/monthly-cleanup',
-            'experimental/oauth-auth',
-            'experimental/multi-user',
             'experimental/rule-templating',
             'experimental/pluggyai',
           ],
