@@ -46,6 +46,12 @@ type ReportTableRowProps = {
   totalScrollRef?: RefObject<HTMLDivElement | null>;
   handleScroll?: UIEventHandler<HTMLDivElement>;
   height?: number;
+  colorized?: boolean;
+};
+
+const getAmountColor = (amount: number) => {
+  if (amount === 0) return theme.warningText;
+  return amount > 0 ? theme.noticeTextLight : theme.errorText;
 };
 
 export const ReportTableRow = memo(
@@ -68,6 +74,7 @@ export const ReportTableRow = memo(
     handleScroll,
     height,
     interval,
+    colorized,
   }: ReportTableRowProps) => {
     const average = amountToInteger(item[balanceTypeOp]) / intervalsCount;
     const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
@@ -135,6 +142,9 @@ export const ReportTableRow = memo(
                     key={index}
                     style={{
                       minWidth: compact ? 50 : 85,
+                      ...(colorized && {
+                        color: getAmountColor(intervalItem[balanceTypeOp]),
+                      }),
                     }}
                     unexposedContent={({ value }) => (
                       <Text style={hoverUnderline}>{value}</Text>
@@ -185,6 +195,9 @@ export const ReportTableRow = memo(
                     privacyFilter
                     style={{
                       minWidth: compact ? 50 : 85,
+                      ...(colorized && {
+                        color: getAmountColor(item.totalAssets),
+                      }),
                     }}
                     unexposedContent={({ value }) => (
                       <Text style={hoverUnderline}>{value}</Text>
@@ -222,6 +235,9 @@ export const ReportTableRow = memo(
                     privacyFilter
                     style={{
                       minWidth: compact ? 50 : 85,
+                      ...(colorized && {
+                        color: getAmountColor(item.totalDebts),
+                      }),
                     }}
                     unexposedContent={({ value }) => (
                       <Text style={hoverUnderline}>{value}</Text>
@@ -260,6 +276,7 @@ export const ReportTableRow = memo(
             style={{
               fontWeight: 600,
               minWidth: compact ? 50 : 85,
+              ...(colorized && { color: getAmountColor(item[balanceTypeOp]) }),
             }}
             unexposedContent={({ value }) => (
               <Text style={hoverUnderline}>{value}</Text>
@@ -298,6 +315,7 @@ export const ReportTableRow = memo(
             style={{
               fontWeight: 600,
               minWidth: compact ? 50 : 85,
+              ...(colorized && { color: getAmountColor(average) }),
             }}
             valueStyle={compactStyle}
             width="flex"
