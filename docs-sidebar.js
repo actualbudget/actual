@@ -68,7 +68,7 @@ const sidebars = {
               items: [
                 'install/docker',
                 'install/cli-tool',
-                { type: 'link', label: 'Desktop app', href: '/download' },
+                'install/desktop-app',
                 'install/build-from-source',
               ],
             },
