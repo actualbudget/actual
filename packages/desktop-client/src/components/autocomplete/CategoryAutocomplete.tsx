@@ -33,13 +33,13 @@ import { ItemHeader } from './ItemHeader';
 
 import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
-import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import {
   trackingBudget,
   envelopeBudget,
-} from '@desktop-client/queries/queries';
+} from '@desktop-client/spreadsheet/bindings';
 
 type CategoryAutocompleteItem = Omit<CategoryEntity, 'group'> & {
   group?: CategoryGroupEntity;

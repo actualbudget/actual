@@ -6,7 +6,7 @@ import { fraction } from './fraction';
 import { PieProgress } from './PieProgress';
 
 import { type CellValue } from '@desktop-client/components/spreadsheet/CellValue';
-import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
+import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 
 type IncomeProgressProps = {
   current: ComponentProps<typeof CellValue>['binding'];

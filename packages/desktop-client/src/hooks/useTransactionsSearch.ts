@@ -4,7 +4,7 @@ import { debounce } from 'lodash';
 
 import type { Query } from 'loot-core/shared/query';
 
-import * as queries from '@desktop-client/queries/queries';
+import * as queries from '@desktop-client/queries';
 
 type UseTransactionsSearchProps = {
   updateQuery: (updateFn: (searchQuery: Query) => Query) => void;

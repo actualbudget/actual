@@ -15,7 +15,7 @@ import {
 import { FieldLabel } from '@desktop-client/components/mobile/MobileForms';
 import { AmountInput } from '@desktop-client/components/util/AmountInput';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { envelopeBudget } from '@desktop-client/queries/queries';
+import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type HoldBufferModalProps = Extract<
   ModalType,

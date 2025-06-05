@@ -21,12 +21,12 @@ import { IncomeCategoryList } from './IncomeCategoryList';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
-import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import {
   envelopeBudget,
   trackingBudget,
-} from '@desktop-client/queries/queries';
+} from '@desktop-client/spreadsheet/bindings';
 
 type IncomeGroupProps = {
   categoryGroup: CategoryGroupEntity;
