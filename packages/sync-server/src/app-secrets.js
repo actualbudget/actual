@@ -29,7 +29,7 @@ app.post('/', async (req, res) => {
       details: 'Failed to validate authentication method',
     });
   }
-  const { name, value } = req.body;
+  const { name, value } = req.body || {};
 
   if (method === 'openid') {
     const canSaveSecrets = isAdmin(res.locals.user_id);

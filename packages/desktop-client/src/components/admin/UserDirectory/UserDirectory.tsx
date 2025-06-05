@@ -16,25 +16,24 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { signOut } from 'loot-core/client/users/usersSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type NewUserEntity, type UserEntity } from 'loot-core/types/models';
 
-import { pushModal } from '../../../modals/modalsSlice';
-import { addNotification } from '../../../notifications/notificationsSlice';
-import { useDispatch } from '../../../redux';
-import { InfiniteScrollWrapper } from '../../common/InfiniteScrollWrapper';
-import { Link } from '../../common/Link';
-import { Search } from '../../common/Search';
-
 import { UserDirectoryHeader } from './UserDirectoryHeader';
 import { UserDirectoryRow } from './UserDirectoryRow';
 
+import { InfiniteScrollWrapper } from '@desktop-client/components/common/InfiniteScrollWrapper';
+import { Link } from '@desktop-client/components/common/Link';
+import { Search } from '@desktop-client/components/common/Search';
 import {
   SelectedProvider,
   useSelected,
 } from '@desktop-client/hooks/useSelected';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
+import { signOut } from '@desktop-client/users/usersSlice';
 
 type ManageUserDirectoryContentProps = {
   isModal: boolean;
@@ -108,6 +107,8 @@ function UserDirectoryContent({
     ).slice(0, 100 + page * 50);
   }, [allUsers, filter, page]);
   const selectedInst = useSelected('manage-users', allUsers, []);
+  const selectedCount = selectedInst.items.size;
+
   const [hoveredUser, setHoveredUser] = useState(null);
 
   const onSearchChange = useCallback(
@@ -327,7 +328,9 @@ function UserDirectoryContent({
           <Stack direction="row" align="center" justify="flex-end" spacing={2}>
             {selectedInst.items.size > 0 && (
               <Button onPress={onDeleteSelected}>
-                <Trans>Delete {{ count: selectedInst.items.size }} users</Trans>
+                <Trans count={selectedCount}>
+                  Delete {{ selectedCount }} users
+                </Trans>
               </Button>
             )}
             <Button variant="primary" onPress={onAddUser}>

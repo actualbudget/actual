@@ -9,10 +9,7 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { Resizable } from 're-resizable';
 
-import * as Platform from 'loot-core/client/platform';
-
-import { replaceModal } from '../../modals/modalsSlice';
-import { useDispatch } from '../../redux';
+import * as Platform from 'loot-core/shared/platform';
 
 import { Accounts } from './Accounts';
 import { BudgetName } from './BudgetName';
@@ -24,6 +21,8 @@ import { ToggleButton } from './ToggleButton';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
+import { replaceModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 export function Sidebar() {
   const hasWindowButtons = !Platform.isBrowser && Platform.OS === 'mac';

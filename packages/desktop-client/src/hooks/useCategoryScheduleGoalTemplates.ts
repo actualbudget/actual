@@ -1,16 +1,16 @@
 import { useMemo } from 'react';
 
 import {
-  type ScheduleStatuses,
-  type ScheduleStatusLabels,
-  useCachedSchedules,
-} from 'loot-core/client/data-hooks/schedules';
-import {
   type ScheduleEntity,
   type CategoryEntity,
 } from 'loot-core/types/models';
 
+import { useCachedSchedules } from './useCachedSchedules';
 import { useFeatureFlag } from './useFeatureFlag';
+import {
+  type ScheduleStatuses,
+  type ScheduleStatusLabels,
+} from './useSchedules';
 
 type ScheduleGoalDefinition = {
   type: 'schedule';
@@ -76,19 +76,12 @@ export function useCategoryScheduleGoalTemplates({
 
     const scheduleIds = new Set(schedules.map(s => s.id));
 
-    const statuses = allStatuses;
-    for (const scheduleId of statuses.keys()) {
-      if (!scheduleIds.has(scheduleId)) {
-        statuses.delete(scheduleId);
-      }
-    }
-
-    const statusLabels = allStatusLabels;
-    for (const scheduleId of statusLabels.keys()) {
-      if (!scheduleIds.has(scheduleId)) {
-        statusLabels.delete(scheduleId);
-      }
-    }
+    const statuses = new Map(
+      [...allStatuses].filter(([id]) => scheduleIds.has(id)),
+    );
+    const statusLabels = new Map(
+      [...allStatusLabels].filter(([id]) => scheduleIds.has(id)),
+    );
 
     return {
       schedules,

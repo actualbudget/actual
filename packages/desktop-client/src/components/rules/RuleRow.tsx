@@ -16,11 +16,10 @@ import { v4 as uuid } from 'uuid';
 import { friendlyOp } from 'loot-core/shared/rules';
 import { type RuleEntity } from 'loot-core/types/models';
 
-import { SelectCell, Row, Field, Cell } from '../table';
-
 import { ActionExpression } from './ActionExpression';
 import { ConditionExpression } from './ConditionExpression';
 
+import { SelectCell, Row, Field, Cell } from '@desktop-client/components/table';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
 

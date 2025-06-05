@@ -12,10 +12,10 @@ import { mapField, friendlyOp } from 'loot-core/shared/rules';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
-import { Value } from '../rules/Value';
-
 import { FilterEditor } from './FiltersMenu';
 import { subfieldFromFilter } from './subfieldFromFilter';
+
+import { Value } from '@desktop-client/components/rules/Value';
 
 let isDatepickerClick = false;
 

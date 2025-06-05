@@ -1,7 +1,5 @@
 import { useState, useRef, useLayoutEffect } from 'react';
 
-import { useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
-
 import { useSheetName } from './useSheetName';
 
 import {
@@ -11,6 +9,8 @@ import {
   type Binding,
   type BindingObject,
 } from '.';
+
+import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 type SheetValueResult<
   SheetName extends SheetNames,

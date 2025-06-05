@@ -13,10 +13,6 @@ import { Provider } from 'react-redux';
 import { bindActionCreators } from '@reduxjs/toolkit';
 import { createRoot } from 'react-dom/client';
 
-import { aqlQuery } from 'loot-core/client/query-helpers';
-import { store } from 'loot-core/client/store';
-import { redo, undo } from 'loot-core/client/undo';
-import * as usersSlice from 'loot-core/client/users/usersSlice';
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 
@@ -32,7 +28,11 @@ import { ServerProvider } from './components/ServerContext';
 import * as modalsSlice from './modals/modalsSlice';
 import * as notificationsSlice from './notifications/notificationsSlice';
 import * as prefsSlice from './prefs/prefsSlice';
+import { aqlQuery } from './queries/aqlQuery';
 import * as queriesSlice from './queries/queriesSlice';
+import { store } from './redux/store';
+import { redo, undo } from './undo';
+import * as usersSlice from './users/usersSlice';
 
 const boundActions = bindActionCreators(
   {

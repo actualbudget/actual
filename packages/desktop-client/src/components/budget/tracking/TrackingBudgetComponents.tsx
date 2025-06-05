@@ -21,7 +21,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { trackingBudget } from 'loot-core/client/queries';
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import * as monthUtils from 'loot-core/shared/months';
 import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
@@ -30,19 +29,29 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { type Binding, type SheetFields } from '../../spreadsheet';
-import { CellValue, CellValueText } from '../../spreadsheet/CellValue';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
-import { Field, SheetCell, type SheetCellProps } from '../../table';
-import { BalanceWithCarryover } from '../BalanceWithCarryover';
-import { makeAmountGrey } from '../util';
-
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
 
+import { BalanceWithCarryover } from '@desktop-client/components/budget/BalanceWithCarryover';
+import { makeAmountGrey } from '@desktop-client/components/budget/util';
+import {
+  type Binding,
+  type SheetFields,
+} from '@desktop-client/components/spreadsheet';
+import {
+  CellValue,
+  CellValueText,
+} from '@desktop-client/components/spreadsheet/CellValue';
+import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
+import {
+  Field,
+  SheetCell,
+  type SheetCellProps,
+} from '@desktop-client/components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import { trackingBudget } from '@desktop-client/queries/queries';
 
 export const useTrackingSheetValue = <
   FieldName extends SheetFields<'tracking-budget'>,

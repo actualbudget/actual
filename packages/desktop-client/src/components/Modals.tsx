@@ -5,9 +5,6 @@ import { useLocation } from 'react-router-dom';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
-import { closeModal } from '../modals/modalsSlice';
-import { useDispatch } from '../redux';
-
 import { EditSyncAccount } from './banksync/EditSyncAccount';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
@@ -34,6 +31,7 @@ import { EnvelopeBalanceMenuModal } from './modals/EnvelopeBalanceMenuModal';
 import { EnvelopeBudgetMenuModal } from './modals/EnvelopeBudgetMenuModal';
 import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuModal';
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
+import { EnvelopeIncomeBalanceMenuModal } from './modals/EnvelopeIncomeBalanceMenuModal';
 import { EnvelopeToBudgetMenuModal } from './modals/EnvelopeToBudgetMenuModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
 import { GoalTemplateModal } from './modals/GoalTemplateModal';
@@ -80,6 +78,8 @@ import { NamespaceContext } from './spreadsheet/NamespaceContext';
 
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useModalState } from '@desktop-client/hooks/useModalState';
+import { closeModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 export function Modals() {
   const location = useLocation();
@@ -272,6 +272,16 @@ export function Modals() {
               value={monthUtils.sheetForMonth(modal.options.month)}
             >
               <EnvelopeBalanceMenuModal {...modal.options} />
+            </NamespaceContext.Provider>
+          );
+
+        case 'envelope-income-balance-menu':
+          return (
+            <NamespaceContext.Provider
+              key={key}
+              value={monthUtils.sheetForMonth(modal.options.month)}
+            >
+              <EnvelopeIncomeBalanceMenuModal {...modal.options} />
             </NamespaceContext.Provider>
           );
 

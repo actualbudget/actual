@@ -5,7 +5,6 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { t } from 'i18next';
 
-import { type useSpreadsheet } from 'loot-core/client/SpreadsheetProvider';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { type Handlers } from 'loot-core/types/handlers';
@@ -15,9 +14,10 @@ import {
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { type DropPosition } from '../sort';
-
 import { getValidMonthBounds } from './MonthsContext';
+
+import { type DropPosition } from '@desktop-client/components/sort';
+import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
   return [
@@ -60,7 +60,7 @@ export function separateGroups(categoryGroups: CategoryGroupEntity[]) {
   ] as const;
 }
 
-export function makeAmountGrey(value: number | string): CSSProperties {
+export function makeAmountGrey(value: number | string | null): CSSProperties {
   return value === 0 || value === '0' || value === '' || value == null
     ? { color: theme.tableTextSubdued }
     : null;

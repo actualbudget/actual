@@ -15,13 +15,6 @@ import { View } from '@actual-app/components/view';
 
 import * as undo from 'loot-core/platform/client/undo';
 
-import { sync } from '../app/appSlice';
-import { ProtectedRoute } from '../auth/ProtectedRoute';
-import { Permissions } from '../auth/types';
-import { addNotification } from '../notifications/notificationsSlice';
-import { useSelector, useDispatch } from '../redux';
-import { getIsOutdated, getLatestVersion } from '../util/versions';
-
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
 import { BankSync } from './banksync';
 import { BankSyncStatus } from './BankSyncStatus';
@@ -42,10 +35,16 @@ import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { Titlebar } from './Titlebar';
 
+import { sync } from '@desktop-client/app/appSlice';
+import { ProtectedRoute } from '@desktop-client/auth/ProtectedRoute';
+import { Permissions } from '@desktop-client/auth/types';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
+import { getIsOutdated, getLatestVersion } from '@desktop-client/util/versions';
 
 function NarrowNotSupported({
   redirectTo = '/budget',

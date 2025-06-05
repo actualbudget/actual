@@ -8,14 +8,15 @@
   },
   "dependencies": {
     "@emotion/css": "^11.13.5",
-    "react-aria-components": "^1.7.1",
+    "react-aria-components": "^1.8.0",
     "usehooks-ts": "^3.1.1"
   },
   "devDependencies": {
     "@svgr/cli": "^8.1.0",
-    "@types/react": "^19.1.0",
+    "@types/react": "^19.1.4",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "vitest": "^3.1.3"
   },
   "exports": {
     "./hooks/*": "./src/hooks/*.ts",
@@ -50,6 +51,8 @@
     "./view": "./src/View.tsx"
   },
   "scripts": {
-    "generate:icons": "rm src/icons/*/*.tsx; cd src/icons && svgr --template template.ts --index-template index-template.ts --typescript --expand-props start -d . ."
+    "generate:icons": "rm src/icons/*/*.tsx; cd src/icons && svgr --template template.ts --index-template index-template.ts --typescript --expand-props start -d . .",
+    "test": "npm-run-all -cp 'test:*'",
+    "test:web": "ENV=web vitest -c vitest.web.config.ts"
   }
 }

@@ -2,7 +2,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-import { resetApp } from '../app/appSlice';
+import { resetApp } from '@desktop-client/app/appSlice';
 
 const sliceName = 'notifications';
 

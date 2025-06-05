@@ -3,7 +3,6 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
 
-import { createAppAsyncThunk } from 'loot-core/client/redux';
 import { send } from 'loot-core/platform/client/fetch';
 import { groupById } from 'loot-core/shared/util';
 import {
@@ -14,11 +13,12 @@ import {
   type PayeeEntity,
 } from 'loot-core/types/models';
 
-import { resetApp } from '../app/appSlice';
+import { resetApp } from '@desktop-client/app/appSlice';
 import {
   addGenericErrorNotification,
   addNotification,
-} from '../notifications/notificationsSlice';
+} from '@desktop-client/notifications/notificationsSlice';
+import { createAppAsyncThunk } from '@desktop-client/redux';
 
 const sliceName = 'queries';
 
@@ -528,6 +528,11 @@ type ApplyBudgetActionPayload =
       };
     }
   | {
+      type: 'reset-income-carryover';
+      month: string;
+      args: never;
+    }
+  | {
       type: 'apply-single-category-template';
       month: string;
       args: {
@@ -681,6 +686,9 @@ export const applyBudgetAction = createAppAsyncThunk(
         });
         break;
       }
+      case 'reset-income-carryover':
+        await send('budget/reset-income-carryover', { month });
+        break;
       case 'apply-multiple-templates':
         dispatch(
           addNotification({
@@ -830,21 +838,23 @@ export const getActivePayees = memoizeOne(
   },
 );
 
-export const getAccountsById = memoizeOne((accounts: AccountEntity[]) =>
-  groupById(accounts),
+export const getAccountsById = memoizeOne(
+  (accounts: AccountEntity[] | null | undefined) => groupById(accounts),
 );
-export const getPayeesById = memoizeOne((payees: PayeeEntity[]) =>
-  groupById(payees),
+export const getPayeesById = memoizeOne(
+  (payees: PayeeEntity[] | null | undefined) => groupById(payees),
 );
-export const getCategoriesById = memoizeOne(categoryGroups => {
-  const res = {};
-  categoryGroups.forEach(group => {
-    group.categories.forEach(cat => {
-      res[cat.id] = cat;
+export const getCategoriesById = memoizeOne(
+  (categoryGroups: CategoryGroupEntity[] | null | undefined) => {
+    const res: { [id: CategoryGroupEntity['id']]: CategoryEntity } = {};
+    categoryGroups?.forEach(group => {
+      group.categories.forEach(cat => {
+        res[cat.id] = cat;
+      });
     });
-  });
-  return res;
-});
+    return res;
+  },
+);
 
 // Slice exports
 

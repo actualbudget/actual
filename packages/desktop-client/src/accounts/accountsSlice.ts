@@ -1,7 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { createAppAsyncThunk } from 'loot-core/client/redux';
-import { type AppDispatch } from 'loot-core/client/store';
 import { send } from 'loot-core/platform/client/fetch';
 import { type SyncResponseWithErrors } from 'loot-core/server/accounts/app';
 import {
@@ -12,13 +10,15 @@ import {
   type SyncServerPluggyAiAccount,
 } from 'loot-core/types/models';
 
-import { resetApp } from '../app/appSlice';
-import { addNotification } from '../notifications/notificationsSlice';
+import { resetApp } from '@desktop-client/app/appSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import {
   getAccounts,
   getPayees,
   setNewTransactions,
-} from '../queries/queriesSlice';
+} from '@desktop-client/queries/queriesSlice';
+import { createAppAsyncThunk } from '@desktop-client/redux';
+import { type AppDispatch } from '@desktop-client/redux/store';
 
 const sliceName = 'account';
 

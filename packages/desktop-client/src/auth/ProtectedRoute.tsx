@@ -4,12 +4,11 @@ import { View } from '@actual-app/components/view';
 
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 
-import { useSelector } from '../redux';
-
 import { useAuth } from './AuthProvider';
 import { type Permissions } from './types';
 
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useSelector } from '@desktop-client/redux';
 
 type ProtectedRouteProps = {
   permission: Permissions;

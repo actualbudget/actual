@@ -68,7 +68,7 @@ app.post(
 app.post(
   '/transactions',
   handleError(async (req, res) => {
-    const { accountId, startDate } = req.body;
+    const { accountId, startDate } = req.body || {};
 
     const accessKey = secretsService.get(SecretName.simplefin_accessKey);
 

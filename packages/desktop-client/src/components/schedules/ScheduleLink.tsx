@@ -8,16 +8,23 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 
-import { type Modal as ModalType, pushModal } from '../../modals/modalsSlice';
-import { useDispatch } from '../../redux';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Search } from '../common/Search';
-
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
+
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { Search } from '@desktop-client/components/common/Search';
+import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import {
+  type Modal as ModalType,
+  pushModal,
+} from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type ScheduleLinkProps = Extract<
   ModalType,

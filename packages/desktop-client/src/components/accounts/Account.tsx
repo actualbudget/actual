@@ -16,18 +16,6 @@ import { debounce } from 'debounce';
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-import { useFilters } from 'loot-core/client/data-hooks/filters';
-import {
-  SchedulesProvider,
-  accountSchedulesQuery,
-} from 'loot-core/client/data-hooks/schedules';
-import * as queries from 'loot-core/client/queries';
-import {
-  aqlQuery,
-  pagedQuery,
-  type PagedQuery,
-} from 'loot-core/client/query-helpers';
-import { type AppDispatch } from 'loot-core/client/store';
 import { send, listen } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type UndoState } from 'loot-core/server/undo';
@@ -51,37 +39,23 @@ import {
   type TransactionFilterEntity,
 } from 'loot-core/types/models';
 
-import { unlinkAccount } from '../../accounts/accountsSlice';
-import { syncAndDownload } from '../../app/appSlice';
-import {
-  openAccountCloseModal,
-  pushModal,
-  replaceModal,
-} from '../../modals/modalsSlice';
-import { addNotification } from '../../notifications/notificationsSlice';
-import {
-  createPayee,
-  initiallyLoadPayees,
-  markAccountRead,
-  reopenAccount,
-  updateAccount,
-  updateNewTransactions,
-} from '../../queries/queriesSlice';
-import { useSelector, useDispatch } from '../../redux';
-import { type SavedFilter } from '../filters/SavedFilterMenuButton';
-import { TransactionList } from '../transactions/TransactionList';
-import { validateAccountName } from '../util/accountValidation';
-
 import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
 
+import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
+import { syncAndDownload } from '@desktop-client/app/appSlice';
+import { type SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
+import { TransactionList } from '@desktop-client/components/transactions/TransactionList';
+import { validateAccountName } from '@desktop-client/components/util/accountValidation';
 import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { usePayees } from '@desktop-client/hooks/usePayees';
+import { accountSchedulesQuery } from '@desktop-client/hooks/useSchedules';
 import {
   SelectedProviderWithItems,
   type Actions,
@@ -92,6 +66,29 @@ import {
 } from '@desktop-client/hooks/useSplitsExpanded';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useTransactionBatchActions } from '@desktop-client/hooks/useTransactionBatchActions';
+import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
+import {
+  openAccountCloseModal,
+  pushModal,
+  replaceModal,
+} from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+import {
+  pagedQuery,
+  type PagedQuery,
+} from '@desktop-client/queries/pagedQuery';
+import * as queries from '@desktop-client/queries/queries';
+import {
+  createPayee,
+  initiallyLoadPayees,
+  markAccountRead,
+  reopenAccount,
+  updateAccount,
+  updateNewTransactions,
+} from '@desktop-client/queries/queriesSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
+import { type AppDispatch } from '@desktop-client/redux/store';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
 
@@ -924,7 +921,7 @@ class AccountInternal extends PureComponent<
     return this.props.matchedTransactions.includes(id);
   };
 
-  onCreatePayee = (name: string) => {
+  onCreatePayee = async (name: string) => {
     const trimmed = name.trim();
     if (trimmed !== '') {
       return this.props.dispatch(createPayee({ name })).unwrap();
@@ -1460,7 +1457,7 @@ class AccountInternal extends PureComponent<
 
   onScheduleAction = async (
     name: 'skip' | 'post-transaction' | 'complete',
-    ids: string[],
+    ids: TransactionEntity['id'][],
   ) => {
     const scheduleIds = ids.map(id => id.split('/')[1]);
 
@@ -1716,6 +1713,14 @@ class AccountInternal extends PureComponent<
 
     const balanceQuery = this.getBalanceQuery(accountId);
 
+    const selectAllFilter = (item: TransactionEntity): boolean => {
+      if (item.is_parent) {
+        const children = transactions.filter(t => t.parent_id === item.id);
+        return children.every(t => selectAllFilter(t));
+      }
+      return !item._unmatched;
+    };
+
     return (
       <AllTransactions
         account={account}
@@ -1730,7 +1735,7 @@ class AccountInternal extends PureComponent<
             items={allTransactions}
             fetchAllIds={this.fetchAllIds}
             registerDispatch={dispatch => (this.dispatchSelected = dispatch)}
-            selectAllFilter={item => !item._unmatched && !item.is_parent}
+            selectAllFilter={selectAllFilter}
           >
             <View style={styles.page}>
               <AccountHeader
@@ -1797,6 +1802,7 @@ class AccountInternal extends PureComponent<
               <View style={{ flex: 1 }}>
                 <TransactionList
                   headerContent={undefined}
+                  // @ts-ignore TODO
                   tableRef={this.table}
                   account={account}
                   transactions={transactions}
@@ -1811,7 +1817,7 @@ class AccountInternal extends PureComponent<
                   balances={allBalances}
                   showBalances={!!allBalances}
                   showReconciled={showReconciled}
-                  showCleared={showCleared}
+                  showCleared={!!showCleared}
                   showAccount={
                     !accountId ||
                     accountId === 'offbudget' ||
@@ -1849,8 +1855,8 @@ class AccountInternal extends PureComponent<
                     ) : null
                   }
                   onSort={this.onSort}
-                  sortField={this.state.sort?.field}
-                  ascDesc={this.state.sort?.ascDesc}
+                  sortField={this.state.sort?.field ?? ''}
+                  ascDesc={this.state.sort?.ascDesc ?? 'asc'}
                   onChange={this.onTransactionsChange}
                   onBatchDelete={this.onBatchDelete}
                   onBatchDuplicate={this.onBatchDuplicate}
@@ -1947,7 +1953,7 @@ export function Account() {
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
   const filterConditions = location?.state?.filterConditions || [];
 
-  const savedFiters = useFilters();
+  const savedFiters = useTransactionFilters();
 
   const schedulesQuery = useMemo(
     () => accountSchedulesQuery(params.id),

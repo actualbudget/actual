@@ -21,7 +21,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
-import { trackingBudget, envelopeBudget } from 'loot-core/client/queries';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { integerToCurrency } from 'loot-core/shared/util';
 import {
@@ -29,15 +28,18 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
-import { makeAmountFullStyle } from '../budget/util';
-import { useSheetValue } from '../spreadsheet/useSheetValue';
-
 import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
 
+import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
+import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
+import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import {
+  trackingBudget,
+  envelopeBudget,
+} from '@desktop-client/queries/queries';
 
 type CategoryAutocompleteItem = Omit<CategoryEntity, 'group'> & {
   group?: CategoryGroupEntity;

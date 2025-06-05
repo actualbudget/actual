@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { formatDistanceToNow } from 'date-fns';
+import { type Locale, formatDistanceToNow } from 'date-fns';
 
 export function last<T>(arr: Array<T>) {
   return arr[arr.length - 1];
@@ -151,8 +151,11 @@ export function diffItems<T extends { id: string }>(
 }
 
 export function groupById<T extends { id: string }>(
-  data: T[],
+  data: T[] | null | undefined,
 ): Record<string, T> {
+  if (!data) {
+    return {};
+  }
   const res: { [key: string]: T } = {};
   for (let i = 0; i < data.length; i++) {
     const item = data[i];

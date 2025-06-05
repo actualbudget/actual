@@ -5,17 +5,17 @@ import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useSchedules } from 'loot-core/client/data-hooks/schedules';
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
 import { type ScheduleEntity } from 'loot-core/types/models';
 
-import { pushModal } from '../../modals/modalsSlice';
-import { useDispatch } from '../../redux';
-import { Search } from '../common/Search';
-import { Page } from '../Page';
-
 import { type ScheduleItemAction, SchedulesTable } from './SchedulesTable';
+
+import { Search } from '@desktop-client/components/common/Search';
+import { Page } from '@desktop-client/components/Page';
+import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 export function Schedules() {
   const { t } = useTranslation();

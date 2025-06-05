@@ -15,14 +15,13 @@ import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { NotesButton } from '../../../NotesButton';
-import { NamespaceContext } from '../../../spreadsheet/NamespaceContext';
-import { useEnvelopeBudget } from '../EnvelopeBudgetContext';
-
 import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ToBudget } from './ToBudget';
 import { TotalsList } from './TotalsList';
 
+import { useEnvelopeBudget } from '@desktop-client/components/budget/envelope/EnvelopeBudgetContext';
+import { NotesButton } from '@desktop-client/components/NotesButton';
+import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 
