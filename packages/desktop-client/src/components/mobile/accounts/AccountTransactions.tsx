@@ -160,7 +160,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
         rootModalName: 'scheduled-transaction-menu',
       }),
     );
-  }, [account.id, showBalances, setBalances]);
+  }, [account.id, showBalances, setBalances, dispatch]);
 
   const onClick = useCallback(() => {
     dispatch(
