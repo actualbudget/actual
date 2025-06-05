@@ -22,8 +22,8 @@ import {
 
 import { useCachedSchedules } from './useCachedSchedules';
 import type { ScheduleStatuses } from './useSchedules';
+import { useSyncedPref } from './useSyncedPref';
 
-import { useSyncedPref } from '@actual-app/web/src/hooks/useSyncedPref';
 import {
   type PagedQuery,
   pagedQuery,
