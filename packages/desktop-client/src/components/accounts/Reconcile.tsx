@@ -141,10 +141,9 @@ export function ReconcileMenu({
   const [inputValue, setInputValue] = useState<string | null>();
   // useEffect is needed here. clearedBalance does not work as a default value for inputValue and
   // to use a button to update inputValue we can't use defaultValue in the input form below
-  useEffect(()=> {
+  useEffect(() => {
     if (clearedBalance != null) {
-
-    setInputValue(format(clearedBalance, 'financial'));
+      setInputValue(format(clearedBalance, 'financial'));
     }
   }, [clearedBalance, format]);
 
@@ -172,16 +171,18 @@ export function ReconcileMenu({
           </Trans>
         </Text>
         <InitialFocus>
-            <Input
-              value={inputValue ?? ''}
-              onChangeValue={setInputValue}
-              style={{ margin: '7px 0' }}
-            />
-          </InitialFocus>
+          <Input
+            value={inputValue ?? ''}
+            onChangeValue={setInputValue}
+            style={{ margin: '7px 0' }}
+          />
+        </InitialFocus>
         {lastSyncedBalance != null && (
           <Button
             variant="menu"
-            onPress={() => setInputValue(format(lastSyncedBalance, 'financial'))}
+            onPress={() =>
+              setInputValue(format(lastSyncedBalance, 'financial'))
+            }
             style={{ marginBottom: 7 }}
           >
             <Trans>Use last synced total</Trans>
