@@ -160,7 +160,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
         rootModalName: 'scheduled-transaction-menu',
       }),
     );
-  }, [account.id, showBalances, setBalances, dispatch]);
+  }, [showBalances, setBalances, dispatch]);
 
   const onClick = useCallback(() => {
     dispatch(
@@ -310,7 +310,11 @@ function TransactionListWithPreviews({
       ...runningBalances,
       ...previewRunningBalances,
     ]);
-    return showBalances === 'true' ? (isSearching ? undefined : map) : null;
+    return showBalances === 'true'
+      ? isSearching
+        ? undefined
+        : map
+      : undefined;
   }, [runningBalances, isSearching, previewRunningBalances, showBalances]);
 
   useEffect(() => {
