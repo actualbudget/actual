@@ -4,7 +4,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { subMonths, format, eachMonthOfInterval } from 'date-fns';
+import { subMonths, format, eachMonthOfInterval, endOfMonth } from 'date-fns';
 import {
   LineChart,
   Line,
@@ -54,7 +54,7 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
         months.map(async date => {
           const balance = await send('api/account-balance', {
             id: accountId,
-            cutoff: date,
+            cutoff: endOfMonth(date),
           });
           return {
             date: format(date, 'MMM yyyy'),
@@ -88,34 +88,32 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
           justifyContent: 'space-between',
         }}
       >
-        <ResponsiveContainer width={CHART_WIDTH} height={CHART_HEIGHT}>
-          <LineChart data={balanceData}>
-            <YAxis domain={['dataMin', 'dataMax']} hide={true} />
-            <RechartsTooltip
-              contentStyle={{
-                display: 'none',
-              }}
-              labelFormatter={(label, items) => {
-                const data = items[0]?.payload;
-                if (data) {
-                  setHoveredValue(data);
-                }
-                return '';
-              }}
-              isAnimationActive={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="balance"
-              stroke={
-                percentageChange >= 0 ? theme.noticeTextLight : theme.errorText
+        <LineChart data={balanceData} width={CHART_WIDTH} height={CHART_HEIGHT}>
+          <YAxis domain={['dataMin', 'dataMax']} hide={true} />
+          <RechartsTooltip
+            contentStyle={{
+              display: 'none',
+            }}
+            labelFormatter={(label, items) => {
+              const data = items[0]?.payload;
+              if (data) {
+                setHoveredValue(data);
               }
-              strokeWidth={2}
-              dot={false}
-              animationDuration={0}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+              return '';
+            }}
+            isAnimationActive={false}
+          />
+          <Line
+            type="monotone"
+            dataKey="balance"
+            stroke={
+              percentageChange >= 0 ? theme.noticeTextLight : theme.errorText
+            }
+            strokeWidth={2}
+            dot={false}
+            animationDuration={0}
+          />
+        </LineChart>
 
         <SpaceBetween
           direction="vertical"
