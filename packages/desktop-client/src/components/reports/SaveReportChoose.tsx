@@ -24,7 +24,7 @@ export function SaveReportChoose({ onApply }: SaveReportChooseProps) {
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  });
+  }, []);
 
   return (
     <>
