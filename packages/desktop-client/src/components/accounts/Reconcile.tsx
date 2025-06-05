@@ -178,15 +178,21 @@ export function ReconcileMenu({
           />
         </InitialFocus>
         {lastSyncedBalance != null && (
-          <Button
-            variant="menu"
-            onPress={() =>
-              setInputValue(format(lastSyncedBalance, 'financial'))
-            }
-            style={{ marginBottom: 7 }}
-          >
-            <Trans>Use last synced total</Trans>
-          </Button>
+          <View>
+            <Text>
+              <Trans>Last Balance from Bank: </Trans>
+              {format(lastSyncedBalance, 'financial')}
+            </Text>
+            <Button
+              variant="menu"
+              onPress={() =>
+                setInputValue(format(lastSyncedBalance, 'financial'))
+              }
+              style={{ marginBottom: 7 }}
+            >
+              <Trans>Use last synced total</Trans>
+            </Button>
+          </View>
         )}
         <Text style={{ color: theme.pageTextSubdued, paddingBottom: 6 }}>
           {account?.last_reconciled

@@ -148,10 +148,9 @@ function FilteredBalance({ filteredAmount }: FilteredBalanceProps) {
 
 type MoreBalancesProps = {
   balanceQuery: { name: `balance-query-${string}`; query: Query };
-  currentBalance?: AccountEntity['balance_current'];
 };
 
-function MoreBalances({ balanceQuery, currentBalance }: MoreBalancesProps) {
+function MoreBalances({ balanceQuery }: MoreBalancesProps) {
   const { t } = useTranslation();
 
   const cleared = useSheetValue<'balance', `balance-query-${string}-cleared`>({
@@ -171,9 +170,6 @@ function MoreBalances({ balanceQuery, currentBalance }: MoreBalancesProps) {
     <View style={{ flexDirection: 'row' }}>
       <DetailedBalance name={t('Cleared total:')} balance={cleared ?? 0} />
       <DetailedBalance name={t('Uncleared total:')} balance={uncleared ?? 0} />
-      {currentBalance && (
-        <DetailedBalance name={t('Synced total:')} balance={currentBalance} />
-      )}
     </View>
   );
 }
@@ -259,12 +255,7 @@ export function Balances({
         />
       </Button>
 
-      {showExtraBalances && (
-        <MoreBalances
-          balanceQuery={balanceQuery}
-          currentBalance={account?.balance_current}
-        />
-      )}
+      {showExtraBalances && <MoreBalances balanceQuery={balanceQuery} />}
 
       {selectedItems.size > 0 && (
         <SelectedBalance selectedItems={selectedItems} account={account} />
