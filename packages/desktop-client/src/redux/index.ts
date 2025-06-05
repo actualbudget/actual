@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-imports */
 import {
   useDispatch as useReduxDispatch,
   useSelector as useReduxSelector,
