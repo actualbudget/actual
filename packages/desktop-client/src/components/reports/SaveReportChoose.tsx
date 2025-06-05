@@ -1,4 +1,4 @@
-import React, { createRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
@@ -15,7 +15,7 @@ type SaveReportChooseProps = {
 };
 
 export function SaveReportChoose({ onApply }: SaveReportChooseProps) {
-  const inputRef = createRef<HTMLInputElement>();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [err, setErr] = useState('');
   const [value, setValue] = useState('');
   const { t } = useTranslation();
