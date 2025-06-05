@@ -284,8 +284,6 @@ export function Account<FieldName extends SheetFields<'account'>>({
           <Text
             style={{
               fontWeight: 'bold',
-              borderBottom: accountNote ? `1px solid ${theme.tableBorder}` : 0,
-              marginBottom: accountNote ? '0.5rem' : 0,
             }}
           >
             {name}
@@ -295,6 +293,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
             <Notes
               getStyle={() => ({
                 padding: 0,
+                marginTop: '0.5rem',
               })}
               notes={accountNote}
             />
