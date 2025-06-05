@@ -5,13 +5,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { subMonths, format, eachMonthOfInterval, endOfMonth } from 'date-fns';
-import {
-  LineChart,
-  Line,
-  YAxis,
-  Tooltip as RechartsTooltip,
-  ResponsiveContainer,
-} from 'recharts';
+import { LineChart, Line, YAxis, Tooltip as RechartsTooltip } from 'recharts';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { integerToCurrency } from 'loot-core/shared/util';
