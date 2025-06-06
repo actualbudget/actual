@@ -231,6 +231,7 @@ function ConfigureField({
                 ? 'string'
                 : type
             }
+            numberFormatType="currency"
             value={value}
             multi={op === 'oneOf' || op === 'notOneOf'}
             op={op}
