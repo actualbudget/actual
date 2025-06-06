@@ -6,7 +6,6 @@ import { type CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { AutoTextSize } from 'auto-text-size';
 
-import { integerToCurrency } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { getColumnWidth, PILL_STYLE } from './BudgetTable';
@@ -68,7 +67,7 @@ export function BudgetCell<
                 amount,
               });
               showUndoNotification({
-                message: `${category.name} budget has been updated to ${integerToCurrency(amount)}.`,
+                message: `${category.name} budget has been updated to ${format(amount, 'financial')}.`,
               });
             },
             onCopyLastMonthAverage: () => {
@@ -116,6 +115,7 @@ export function BudgetCell<
     month,
     onBudgetAction,
     showUndoNotification,
+    format,
   ]);
 
   return (
