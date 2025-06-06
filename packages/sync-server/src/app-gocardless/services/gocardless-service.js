@@ -414,10 +414,19 @@ export const goCardlessService = {
       handleGoCardlessError(error);
     }
 
-    return {
-      ...detailedAccount.account,
-      ...metadataAccount,
-    };
+    // Some banks provide additional data in both fields, but can do yucky things like have an empty
+    // string in one place but not the other. We'll fix this by merging the two objects, but preferring truthy values
+    // from the metadata object over the details object.
+    const mergedAccount = {};
+    const uniqueKeys = new Set([
+      ...Object.keys(detailedAccount.account),
+      ...Object.keys(metadataAccount),
+    ]);
+    for (const key of uniqueKeys) {
+      mergedAccount[key] = metadataAccount[key] || detailedAccount.account[key];
+    }
+
+    return mergedAccount;
   },
 
   /**
