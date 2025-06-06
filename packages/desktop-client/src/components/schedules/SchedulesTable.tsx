@@ -14,12 +14,15 @@ import { View } from '@actual-app/components/view';
 import { format as monthUtilFormat } from 'loot-core/shared/months';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { getScheduledAmount } from 'loot-core/shared/schedules';
-import { integerToCurrency } from 'loot-core/shared/util';
 import { type ScheduleEntity } from 'loot-core/types/models';
 
 import { StatusBadge } from './StatusBadge';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import {
+  useFormat,
+  type FormatType,
+} from '@desktop-client/components/spreadsheet/useFormat';
 import {
   Table,
   TableHeader,
@@ -117,14 +120,16 @@ function OverflowMenu({
 export function ScheduleAmountCell({
   amount,
   op,
+  formatFunc,
 }: {
   amount: ScheduleEntity['_amount'];
   op: ScheduleEntity['_amountOp'];
+  formatFunc: (value: unknown, type: FormatType) => string;
 }) {
   const { t } = useTranslation();
 
   const num = getScheduledAmount(amount);
-  const currencyAmount = integerToCurrency(Math.abs(num || 0));
+  const currencyAmount = formatFunc(Math.abs(num || 0), 'financial');
   const isApprox = op === 'isapprox' || op === 'isbetween';
 
   return (
@@ -185,7 +190,12 @@ function ScheduleRow({
   minimal,
   statuses,
   dateFormat,
-}: { schedule: ScheduleEntity; dateFormat: string } & Pick<
+  formatFunc,
+}: {
+  schedule: ScheduleEntity;
+  dateFormat: string;
+  formatFunc: (value: unknown, type: FormatType) => string;
+} & Pick<
   SchedulesTableProps,
   'onSelect' | 'onAction' | 'minimal' | 'statuses'
 >) {
@@ -263,7 +273,11 @@ function ScheduleRow({
       <Field width={120} name="status" style={{ alignItems: 'flex-start' }}>
         <StatusBadge status={statuses.get(schedule.id)} />
       </Field>
-      <ScheduleAmountCell amount={schedule._amount} op={schedule._amountOp} />
+      <ScheduleAmountCell
+        amount={schedule._amount}
+        op={schedule._amountOp}
+        formatFunc={formatFunc}
+      />
       {!minimal && (
         <Field width={80} style={{ textAlign: 'center' }}>
           {schedule._date && schedule._date.frequency && (
@@ -309,6 +323,7 @@ export function SchedulesTable({
   tableStyle,
 }: SchedulesTableProps) {
   const { t } = useTranslation();
+  const format = useFormat();
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [showCompleted, setShowCompleted] = useState(false);
@@ -335,7 +350,7 @@ export function SchedulesTable({
           ? '~'
           : '') +
         (amount > 0 ? '+' : '') +
-        integerToCurrency(Math.abs(amount || 0));
+        format(Math.abs(amount || 0), 'financial');
       const dateStr = schedule.next_date
         ? monthUtilFormat(schedule.next_date, dateFormat)
         : null;
@@ -397,6 +412,7 @@ export function SchedulesTable({
     return (
       <ScheduleRow
         schedule={item as ScheduleEntity}
+        formatFunc={format}
         {...{ statuses, dateFormat, onSelect, onAction, minimal }}
       />
     );
