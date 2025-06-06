@@ -29,6 +29,7 @@ import {
 } from '@desktop-client/components/table';
 import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import {
   useSelected,
@@ -49,6 +50,7 @@ function DiscoverSchedulesTable({
   loading: boolean;
 }) {
   const { t } = useTranslation();
+  const format = useFormat();
 
   const selectedItems = useSelectedItems();
   const dispatchSelected = useSelectedDispatch();
@@ -111,7 +113,11 @@ function DiscoverSchedulesTable({
         <Field width="auto" title={recurDescription} style={{ flex: 1.5 }}>
           {recurDescription}
         </Field>
-        <ScheduleAmountCell amount={item.amount} op={amountOp} />
+        <ScheduleAmountCell
+          amount={item.amount}
+          op={amountOp}
+          formatFunc={format}
+        />
       </Row>
     );
   }
