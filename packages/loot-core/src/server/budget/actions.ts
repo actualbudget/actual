@@ -1,5 +1,7 @@
 // @ts-strict-ignore
 
+import { getCurrency } from 'loot-core/shared/currencies';
+
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import { getLocale } from '../../shared/locale';
 import * as monthUtils from '../../shared/months';
@@ -407,10 +409,12 @@ export async function coverOverspending({
   month,
   to,
   from,
+  currencyCode,
 }: {
   month: string;
   to: CategoryEntity['id'] | 'to-budget';
   from: CategoryEntity['id'] | 'to-budget' | 'overbudgeted';
+  currencyCode: string;
 }): Promise<void> {
   const sheetName = monthUtils.sheetForMonth(month);
   const toBudgeted = await getSheetValue(sheetName, 'budget-' + to);
@@ -448,6 +452,7 @@ export async function coverOverspending({
       amount: amountCovered,
       to,
       from,
+      currencyCode,
     });
   });
 }
@@ -472,9 +477,11 @@ export async function transferAvailable({
 export async function coverOverbudgeted({
   month,
   category,
+  currencyCode,
 }: {
   month: string;
   category: string;
+  currencyCode: string;
 }): Promise<void> {
   const sheetName = monthUtils.sheetForMonth(month);
   const toBudget = await getSheetValue(sheetName, 'to-budget');
@@ -489,6 +496,7 @@ export async function coverOverbudgeted({
       amount: -toBudget,
       from: category,
       to: 'overbudgeted',
+      currencyCode,
     });
   });
 }
@@ -498,11 +506,13 @@ export async function transferCategory({
   amount,
   from,
   to,
+  currencyCode,
 }: {
   month: string;
   amount: number;
   to: CategoryEntity['id'] | 'to-budget';
   from: CategoryEntity['id'] | 'to-budget';
+  currencyCode: string;
 }): Promise<void> {
   const sheetName = monthUtils.sheetForMonth(month);
   const fromBudgeted = await getSheetValue(sheetName, 'budget-' + from);
@@ -522,6 +532,7 @@ export async function transferCategory({
       amount,
       to,
       from,
+      currencyCode,
     });
   });
 }
@@ -554,13 +565,20 @@ async function addMovementNotes({
   amount,
   to,
   from,
+  currencyCode,
 }: {
   month: string;
   amount: number;
   to: CategoryEntity['id'] | 'to-budget' | 'overbudgeted';
   from: CategoryEntity['id'] | 'to-budget';
+  currencyCode: string;
 }) {
-  const displayAmount = integerToCurrency(amount);
+  const currency = getCurrency(currencyCode);
+  const displayAmount = integerToCurrency(
+    amount,
+    undefined,
+    currency.decimalPlaces,
+  );
 
   const monthBudgetNotesId = `budget-${month}`;
   const existingMonthBudgetNotes = addNewLine(

@@ -493,6 +493,7 @@ type ApplyBudgetActionPayload =
       args: {
         to: CategoryEntity['id'];
         from: CategoryEntity['id'];
+        currencyCode: string;
       };
     }
   | {
@@ -508,6 +509,7 @@ type ApplyBudgetActionPayload =
       month: string;
       args: {
         category: CategoryEntity['id'];
+        currencyCode: string;
       };
     }
   | {
@@ -517,6 +519,7 @@ type ApplyBudgetActionPayload =
         amount: number;
         from: CategoryEntity['id'];
         to: CategoryEntity['id'];
+        currencyCode: string;
       };
     }
   | {
@@ -655,6 +658,7 @@ export const applyBudgetAction = createAppAsyncThunk(
           month,
           to: args.to,
           from: args.from,
+          currencyCode: args.currencyCode,
         });
         break;
       case 'transfer-available':
@@ -668,6 +672,7 @@ export const applyBudgetAction = createAppAsyncThunk(
         await send('budget/cover-overbudgeted', {
           month,
           category: args.category,
+          currencyCode: args.currencyCode,
         });
         break;
       case 'transfer-category':
@@ -676,6 +681,7 @@ export const applyBudgetAction = createAppAsyncThunk(
           amount: args.amount,
           from: args.from,
           to: args.to,
+          currencyCode: args.currencyCode,
         });
         break;
       case 'carryover': {

@@ -1,7 +1,11 @@
 import { type Page } from '@playwright/test';
 
 import * as monthUtils from 'loot-core/shared/months';
-import { amountToCurrency, currencyToAmount } from 'loot-core/shared/util';
+import {
+  amountToInteger,
+  currencyToAmount,
+  integerToCurrency,
+} from 'loot-core/shared/util';
 
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
@@ -268,7 +272,9 @@ budgetTypes.forEach(budgetType => {
       const budgetedButton =
         await budgetPage.getButtonForBudgeted(categoryName);
 
-      await expect(budgetedButton).toHaveText(amountToCurrency(budgetAmount));
+      await expect(budgetedButton).toHaveText(
+        integerToCurrency(amountToInteger(budgetAmount, 2), undefined, 2),
+      );
       await expect(page).toMatchThemeScreenshots();
     });
 
@@ -318,7 +324,11 @@ budgetTypes.forEach(budgetType => {
           await budgetPage.getButtonForBudgeted(categoryName);
 
         await expect(budgetedButton).toHaveText(
-          amountToCurrency(Math.abs(averageSpent)),
+          integerToCurrency(
+            amountToInteger(Math.abs(averageSpent), 2),
+            undefined,
+            2,
+          ),
         );
         await expect(page).toMatchThemeScreenshots();
       });
@@ -348,7 +358,7 @@ budgetTypes.forEach(budgetType => {
       await budgetMenuModal.close();
 
       await expect(budgetedButton).toHaveText(
-        amountToCurrency(amountToTemplate),
+        integerToCurrency(amountToInteger(amountToTemplate, 2), undefined, 2),
       );
       const notification = page.getByRole('alert').first();
       await expect(notification).toContainText(templateNotes);
