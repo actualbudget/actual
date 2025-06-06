@@ -268,6 +268,7 @@ export function ImportTransactionsModal({
           ignored,
           selected,
           selected_merge,
+          tombstone,
           ...finalTransaction
         } = trans;
         previewTransactions.push({
@@ -302,6 +303,8 @@ export function ImportTransactionsModal({
           // if the transaction is an update that will be ignored
           // (reconciled transactions or no change detected)
           current_trx.ignored = entry?.ignored || false;
+
+          current_trx.tombstone = entry?.tombstone || false;
 
           current_trx.selected = !current_trx.ignored;
           current_trx.selected_merge = current_trx.existing;
@@ -1090,7 +1093,10 @@ export function ImportTransactionsModal({
                 autoFocus
                 isDisabled={
                   transactions?.filter(
-                    trans => !trans.isMatchedTransaction && trans.selected,
+                    trans =>
+                      !trans.isMatchedTransaction &&
+                      trans.selected &&
+                      !trans.tombstone,
                   ).length === 0
                 }
                 isLoading={loadingState === 'importing'}
@@ -1101,7 +1107,10 @@ export function ImportTransactionsModal({
                 Import{' '}
                 {
                   transactions?.filter(
-                    trans => !trans.isMatchedTransaction && trans.selected,
+                    trans =>
+                      !trans.isMatchedTransaction &&
+                      trans.selected &&
+                      !trans.tombstone,
                   ).length
                 }{' '}
                 {t('transactions')}
