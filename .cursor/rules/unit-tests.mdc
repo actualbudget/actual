@@ -1,0 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+When running unit tests, always include the flag `--watch=false` to prevent watch mode.
+
+To run unit tests for a specific package in the monorepo, use the following command:
+
+`yarn workspace <workspaceNameFromPackageJson> run test <pathToTest>`
+
+Note: The test runner may be either Vite or Jest, depending on the package. Check the `package.json` file in the relevant package to determine which test runner is used.
+
+Recommendation: Minimize the number of dependencies you mock. The fewer dependencies you mock, the better.
