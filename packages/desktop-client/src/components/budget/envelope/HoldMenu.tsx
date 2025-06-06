@@ -4,32 +4,23 @@ import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
-import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
 
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
+import { type IntegerAmount } from 'loot-core/shared/util';
 
 import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
+import { FinancialInput } from '@desktop-client/components/util/FinancialInput';
 
 type HoldMenuProps = {
   onSubmit: (amount: number) => void;
   onClose: () => void;
 };
 export function HoldMenu({ onSubmit, onClose }: HoldMenuProps) {
-  const [amount, setAmount] = useState<string | null>(null);
+  const [amount, setAmount] = useState<IntegerAmount | null>(null);
 
   useSheetValue<'envelope-budget', 'to-budget'>('to-budget', ({ value }) => {
-    setAmount(integerToCurrency(Math.max(value || 0, 0)));
+    setAmount(Math.max(value || 0, 0));
   });
-
-  function _onSubmit(newAmount: string) {
-    const parsedAmount = evalArithmetic(newAmount);
-    if (parsedAmount) {
-      onSubmit(amountToInteger(parsedAmount));
-    }
-    onClose();
-  }
 
   if (amount === null) {
     // See `TransferMenu` for more info about this
@@ -40,7 +31,8 @@ export function HoldMenu({ onSubmit, onClose }: HoldMenuProps) {
     <Form
       onSubmit={e => {
         e.preventDefault();
-        _onSubmit(amount);
+        onSubmit(amount);
+        onClose();
       }}
     >
       <View style={{ padding: 10 }}>
@@ -49,7 +41,7 @@ export function HoldMenu({ onSubmit, onClose }: HoldMenuProps) {
         </View>
         <View>
           <InitialFocus>
-            <Input value={amount} onChangeValue={setAmount} />
+            <FinancialInput value={amount} onChangeValue={setAmount} />
           </InitialFocus>
         </View>
         <View

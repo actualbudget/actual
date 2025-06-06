@@ -19,9 +19,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import * as monthUtils from 'loot-core/shared/months';
-import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
 import {
   type CategoryGroupEntity,
   type CategoryEntity,
@@ -41,6 +39,7 @@ import {
   CellValue,
   CellValueText,
 } from '@desktop-client/components/spreadsheet/CellValue';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { useSheetName } from '@desktop-client/components/spreadsheet/useSheetName';
 import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
 import {
@@ -227,6 +226,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
 }: ExpenseCategoryMonthProps) {
   const { t } = useTranslation();
 
+  const format = useFormat();
+
   const budgetMenuTriggerRef = useRef(null);
   const balanceMenuTriggerRef = useRef(null);
   const {
@@ -391,12 +392,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             binding: envelopeBudget.catBudgeted(category.id),
             type: 'financial',
             getValueStyle: makeAmountGrey,
-            formatExpr: expr => {
-              return integerToCurrency(expr);
-            },
-            unformatExpr: expr => {
-              return amountToInteger(evalArithmetic(expr, 0) || 0);
-            },
+            formatExpr: format.forEdit,
+            unformatExpr: format.fromEdit,
           }}
           inputProps={{
             onBlur: () => {
@@ -406,10 +403,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               backgroundColor: theme.tableBackground,
             },
           }}
-          onSave={amount => {
+          onSave={(parsedIntegerAmount: number | null) => {
             onBudgetAction(month, 'budget-amount', {
               category: category.id,
-              amount,
+              amount: parsedIntegerAmount ?? 0,
             });
           }}
         />
