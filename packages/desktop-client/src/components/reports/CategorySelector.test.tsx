@@ -2,7 +2,6 @@ import React from 'react';
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { vi } from 'vitest';
 
 import type {
   CategoryEntity,
@@ -10,53 +9,59 @@ import type {
 } from 'loot-core/types/models';
 
 import { CategorySelector } from './CategorySelector';
-import '@testing-library/jest-dom';
 
-// Mock i18n
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
-
-function makeCategory(
-  id: string,
-  name: string,
+function makeCategory({
+  id,
+  name,
   hidden = false,
-): CategoryEntity {
-  return { id, name, hidden } as CategoryEntity;
+  group = '',
+}: {
+  id: string;
+  name: string;
+  hidden?: boolean;
+  group?: string;
+}): CategoryEntity {
+  return { id, name, hidden, group } satisfies CategoryEntity;
 }
 
-function makeCategoryGroup(
-  id: string,
-  name: string,
-  categories: CategoryEntity[],
-): CategoryGroupEntity {
-  return { id, name, categories } as CategoryGroupEntity;
+function makeCategoryGroup({
+  id,
+  name,
+  categories,
+}: {
+  id: string;
+  name: string;
+  categories: CategoryEntity[];
+}): CategoryGroupEntity {
+  return { id, name, categories } satisfies CategoryGroupEntity;
 }
+
+const cat1 = makeCategory({ id: 'cat1', name: 'Category 1' });
+const cat2 = makeCategory({ id: 'cat2', name: 'Category 2' });
+const cat3 = makeCategory({ id: 'cat3', name: 'Category 3', hidden: true });
+const group1 = makeCategoryGroup({
+  id: 'group1',
+  name: 'Group 1',
+  categories: [cat1, cat2, cat3],
+});
+const cat4 = makeCategory({ id: 'cat4', name: 'Category 4' });
+const group2 = makeCategoryGroup({
+  id: 'group2',
+  name: 'Group 2',
+  categories: [cat4],
+});
+const categoryGroups = [group1, group2];
+
+const defaultProps = {
+  categoryGroups,
+  selectedCategories: [],
+  setSelectedCategories: vi.fn(),
+  showHiddenCategories: true,
+};
 
 describe('CategorySelector', () => {
-  const cat1 = makeCategory('cat1', 'Category 1');
-  const cat2 = makeCategory('cat2', 'Category 2');
-  const cat3 = makeCategory('cat3', 'Category 3', true);
-  const group1 = makeCategoryGroup('group1', 'Group 1', [cat1, cat2, cat3]);
-  const cat4 = makeCategory('cat4', 'Category 4');
-  const group2 = makeCategoryGroup('group2', 'Group 2', [cat4]);
-  const categoryGroups = [group1, group2];
-
-  function setup(selected: CategoryEntity[] = []) {
-    const setSelectedCategories = vi.fn();
-    render(
-      <CategorySelector
-        categoryGroups={categoryGroups}
-        selectedCategories={selected}
-        setSelectedCategories={setSelectedCategories}
-        showHiddenCategories={true}
-      />,
-    );
-    return { setSelectedCategories };
-  }
-
   it('renders category group and category checkboxes', () => {
-    setup();
+    render(<CategorySelector {...defaultProps} />);
     expect(screen.getByLabelText('Group 1')).toBeInTheDocument();
     expect(screen.getByLabelText('Category 1')).toBeInTheDocument();
     expect(screen.getByLabelText('Category 2')).toBeInTheDocument();
@@ -66,23 +71,38 @@ describe('CategorySelector', () => {
   });
 
   it('calls setSelectedCategories when a category is selected', async () => {
-    const { setSelectedCategories } = setup();
-    const cat1Checkbox = screen.getByLabelText('Category 1');
-    await userEvent.click(cat1Checkbox);
+    const setSelectedCategories = vi.fn();
+    render(
+      <CategorySelector
+        {...defaultProps}
+        setSelectedCategories={setSelectedCategories}
+      />,
+    );
+    await userEvent.click(screen.getByLabelText('Category 1'));
     expect(setSelectedCategories).toHaveBeenCalled();
   });
 
   it('calls setSelectedCategories when a group is selected', async () => {
-    const { setSelectedCategories } = setup();
-    const group1Checkbox = screen.getByLabelText('Group 1');
-    await userEvent.click(group1Checkbox);
+    const setSelectedCategories = vi.fn();
+    render(
+      <CategorySelector
+        {...defaultProps}
+        setSelectedCategories={setSelectedCategories}
+      />,
+    );
+    await userEvent.click(screen.getByLabelText('Group 1'));
     expect(setSelectedCategories).toHaveBeenCalled();
   });
 
   it('selects all categories when Select All is clicked', async () => {
-    const { setSelectedCategories } = setup();
-    const selectAllButton = screen.getByRole('button', { name: 'Select All' });
-    await userEvent.click(selectAllButton);
+    const setSelectedCategories = vi.fn();
+    render(
+      <CategorySelector
+        {...defaultProps}
+        setSelectedCategories={setSelectedCategories}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Select All' }));
     expect(setSelectedCategories).toHaveBeenCalledWith([
       cat1,
       cat2,
@@ -92,11 +112,15 @@ describe('CategorySelector', () => {
   });
 
   it('unselects all categories when Unselect All is clicked', async () => {
-    const { setSelectedCategories } = setup([cat1, cat2, cat3, cat4]);
-    const unselectAllButton = screen.getByRole('button', {
-      name: 'Unselect All',
-    });
-    await userEvent.click(unselectAllButton);
+    const setSelectedCategories = vi.fn();
+    render(
+      <CategorySelector
+        {...defaultProps}
+        selectedCategories={[cat1, cat2, cat3, cat4]}
+        setSelectedCategories={setSelectedCategories}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Unselect All' }));
     expect(setSelectedCategories).toHaveBeenCalledWith([]);
   });
 });
