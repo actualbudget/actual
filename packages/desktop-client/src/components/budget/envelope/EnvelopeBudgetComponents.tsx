@@ -33,6 +33,7 @@ import { IncomeMenu } from './IncomeMenu';
 
 import { BalanceWithCarryover } from '@desktop-client/components/budget/BalanceWithCarryover';
 import { makeAmountGrey } from '@desktop-client/components/budget/util';
+import { NotesButton } from '@desktop-client/components/NotesButton';
 import {
   type Binding,
   type SheetFields,
@@ -302,6 +303,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               borderColor: theme.tableBorder,
             }}
           >
+            <NotesButton
+              id={`${month}-${category.id}`}
+              defaultColor={theme.pageTextLight}
+            />
             <Button
               variant="bare"
               onPress={() => {
