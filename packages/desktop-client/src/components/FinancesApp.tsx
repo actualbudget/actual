@@ -20,7 +20,7 @@ import { BankSync } from './banksync';
 import { BankSyncStatus } from './BankSyncStatus';
 import { GlobalKeys } from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
-import { Category } from './mobile/budget/Category';
+import { CategoryPage } from './mobile/budget/CategoryPage';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Notifications } from './Notifications';
@@ -291,7 +291,7 @@ export function FinancesApp() {
                   path="/categories/:id"
                   element={
                     <WideNotSupported>
-                      <Category />
+                      <CategoryPage />
                     </WideNotSupported>
                   }
                 />

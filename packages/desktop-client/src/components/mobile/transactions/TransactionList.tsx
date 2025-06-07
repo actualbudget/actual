@@ -33,10 +33,7 @@ import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type TransactionEntity,
-} from 'loot-core/types/models';
+import { type TransactionEntity } from 'loot-core/types/models';
 
 import { TransactionListItem } from './TransactionListItem';
 
@@ -86,7 +83,7 @@ type TransactionListProps = {
   onOpenTransaction?: (transaction: TransactionEntity) => void;
   isLoadingMore: boolean;
   onLoadMore: () => void;
-  account?: AccountEntity;
+  showMakeTransfer?: boolean;
 };
 
 export function TransactionList({
@@ -95,7 +92,7 @@ export function TransactionList({
   onOpenTransaction,
   isLoadingMore,
   onLoadMore,
-  account,
+  showMakeTransfer = false,
 }: TransactionListProps) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -224,7 +221,7 @@ export function TransactionList({
       {selectedTransactions.size > 0 && (
         <SelectedTransactionsFloatingActionBar
           transactions={transactions}
-          showMakeTransfer={!account}
+          showMakeTransfer={showMakeTransfer}
         />
       )}
     </>
