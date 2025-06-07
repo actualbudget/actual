@@ -313,6 +313,7 @@ const sidebars = {
           collapsible: false,
           items: [
             'contributing/leadership/funding',
+            'contributing/leadership/triaging-issues',
             'contributing/leadership/new-core-contributors-guide',
           ],
         },
