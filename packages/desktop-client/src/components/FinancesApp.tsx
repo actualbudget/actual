@@ -18,6 +18,7 @@ import * as undo from 'loot-core/platform/client/undo';
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
 import { BankSync } from './banksync';
 import { BankSyncStatus } from './BankSyncStatus';
+import { CommandBar } from './CommandBar';
 import { GlobalKeys } from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
 import { Category } from './mobile/budget/Category';
@@ -176,7 +177,7 @@ export function FinancesApp() {
     <View style={{ height: '100%' }}>
       <RouterBehaviors />
       <GlobalKeys />
-
+      <CommandBar />
       <View
         style={{
           flexDirection: 'row',
