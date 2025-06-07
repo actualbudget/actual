@@ -282,6 +282,7 @@ export type Modal =
         onReopenAccount: (accountId: AccountEntity['id']) => void;
         onEditNotes: (id: NoteEntity['id']) => void;
         onClose?: () => void;
+        onToggleRunningBalance?: () => void;
       };
     }
   | {
