@@ -3,6 +3,8 @@ import React, {
   ComponentPropsWithRef,
   type KeyboardEvent,
   type FocusEvent,
+  forwardRef,
+  ForwardedRef,
 } from 'react';
 import { Input as ReactAriaInput } from 'react-aria-components';
 
@@ -49,15 +51,10 @@ export type InputProps = ComponentPropsWithRef<typeof ReactAriaInput> & {
   onUpdate?: (newValue: string, event: FocusEvent<HTMLInputElement>) => void;
 };
 
-export function Input({
-  ref,
-  onEnter,
-  onEscape,
-  onChangeValue,
-  onUpdate,
-  className,
-  ...props
-}: InputProps) {
+export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
+  { onEnter, onEscape, onChangeValue, onUpdate, className, ...props },
+  ref: ForwardedRef<HTMLInputElement>,
+) {
   return (
     <ReactAriaInput
       ref={ref}
@@ -88,7 +85,7 @@ export function Input({
       }}
     />
   );
-}
+});
 
 const defaultBigInputClassName = css({
   padding: 10,

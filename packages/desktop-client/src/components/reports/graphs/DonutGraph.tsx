@@ -4,7 +4,6 @@ import React, { useState, type CSSProperties } from 'react';
 import { theme } from '@actual-app/components/theme';
 import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
 
-import { amountToCurrency } from 'loot-core/shared/util';
 import {
   type balanceTypeOpType,
   type DataEntity,
@@ -17,6 +16,7 @@ import { showActivity } from './showActivity';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { Container } from '@desktop-client/components/reports/Container';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
@@ -37,6 +37,7 @@ const ActiveShapeMobile = props => {
     payload,
     percent,
     value,
+    formatFunc,
   } = props;
   const yAxis = payload.name ?? payload.date;
 
@@ -63,7 +64,7 @@ const ActiveShapeMobile = props => {
           textAnchor="end"
           fill={fill}
         >
-          {`${amountToCurrency(value)}`}
+          {`${formatFunc(value, 'financial')}`}
         </text>
         <text
           x={cx + outerRadius * Math.cos(-RADIAN * 330) + 10}
@@ -97,6 +98,10 @@ const ActiveShapeMobile = props => {
   );
 };
 
+const ActiveShapeMobileWithFormat = props => (
+  <ActiveShapeMobile {...props} formatFunc={props.formatFunc} />
+);
+
 const ActiveShape = props => {
   const {
     cx,
@@ -110,6 +115,7 @@ const ActiveShape = props => {
     payload,
     percent,
     value,
+    formatFunc,
   } = props;
   const yAxis = payload.name ?? payload.date;
   const sin = Math.sin(-RADIAN * midAngle);
@@ -161,7 +167,7 @@ const ActiveShape = props => {
           dy={18}
           textAnchor={textAnchor}
           fill={fill}
-        >{`${amountToCurrency(value)}`}</text>
+        >{`${formatFunc(value, 'financial')}`}</text>
         <text
           x={ex + (cos <= 0 ? 1 : -1) * 16}
           y={ey}
@@ -175,6 +181,10 @@ const ActiveShape = props => {
     </g>
   );
 };
+
+const ActiveShapeWithFormat = props => (
+  <ActiveShape {...props} formatFunc={props.formatFunc} />
+);
 
 const customLabel = props => {
   const radius =
@@ -225,6 +235,8 @@ export function DonutGraph({
   showOffBudget,
   showTooltip = true,
 }: DonutGraphProps) {
+  const format = useFormat();
+
   const yAxis = groupBy === 'Interval' ? 'date' : 'name';
   const splitData = groupBy === 'Interval' ? 'intervalData' : 'data';
 
@@ -264,8 +276,18 @@ export function DonutGraph({
                       width < 220 || height < 130
                         ? undefined
                         : compact
-                          ? ActiveShapeMobile
-                          : ActiveShape
+                          ? props => (
+                              <ActiveShapeMobileWithFormat
+                                {...props}
+                                formatFunc={format}
+                              />
+                            )
+                          : props => (
+                              <ActiveShapeWithFormat
+                                {...props}
+                                formatFunc={format}
+                              />
+                            )
                     }
                     dataKey={val => getVal(val)}
                     nameKey={yAxis}

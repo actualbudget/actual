@@ -20,6 +20,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import {
   Table,
   TableHeader,
@@ -49,6 +50,7 @@ function DiscoverSchedulesTable({
   loading: boolean;
 }) {
   const { t } = useTranslation();
+  const format = useFormat();
 
   const selectedItems = useSelectedItems();
   const dispatchSelected = useSelectedDispatch();
@@ -111,7 +113,11 @@ function DiscoverSchedulesTable({
         <Field width="auto" title={recurDescription} style={{ flex: 1.5 }}>
           {recurDescription}
         </Field>
-        <ScheduleAmountCell amount={item.amount} op={amountOp} />
+        <ScheduleAmountCell
+          amount={item.amount}
+          op={amountOp}
+          formatFunc={format}
+        />
       </Row>
     );
   }

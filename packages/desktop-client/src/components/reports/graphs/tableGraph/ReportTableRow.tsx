@@ -11,17 +11,13 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
-  amountToCurrency,
-  amountToInteger,
-  integerToCurrency,
-} from 'loot-core/shared/util';
-import {
   type balanceTypeOpType,
   type GroupedEntity,
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
 import { showActivity } from '@desktop-client/components/reports/graphs/showActivity';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { Row, Cell } from '@desktop-client/components/table';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -69,8 +65,9 @@ export const ReportTableRow = memo(
     height,
     interval,
   }: ReportTableRowProps) => {
-    const average = amountToInteger(item[balanceTypeOp]) / intervalsCount;
+    const average = item[balanceTypeOp] / intervalsCount;
     const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
+    const format = useFormat();
 
     const navigate = useNavigate();
     const { isNarrowWidth } = useResponsive();
@@ -140,10 +137,10 @@ export const ReportTableRow = memo(
                       <Text style={hoverUnderline}>{value}</Text>
                     )}
                     valueStyle={compactStyle}
-                    value={amountToCurrency(intervalItem[balanceTypeOp])}
+                    value={format(intervalItem[balanceTypeOp], 'financial')}
                     title={
                       Math.abs(intervalItem[balanceTypeOp]) > 100000
-                        ? amountToCurrency(intervalItem[balanceTypeOp])
+                        ? format(intervalItem[balanceTypeOp], 'financial')
                         : undefined
                     }
                     onClick={() =>
@@ -175,10 +172,10 @@ export const ReportTableRow = memo(
             : balanceTypeOp === 'totalTotals' && (
                 <>
                   <Cell
-                    value={amountToCurrency(item.totalAssets)}
+                    value={format(item.totalAssets, 'financial')}
                     title={
                       Math.abs(item.totalAssets) > 100000
-                        ? amountToCurrency(item.totalAssets)
+                        ? format(item.totalAssets, 'financial')
                         : undefined
                     }
                     width="flex"
@@ -212,10 +209,10 @@ export const ReportTableRow = memo(
                     }
                   />
                   <Cell
-                    value={amountToCurrency(item.totalDebts)}
+                    value={format(item.totalDebts, 'financial')}
                     title={
                       Math.abs(item.totalDebts) > 100000
-                        ? amountToCurrency(item.totalDebts)
+                        ? format(item.totalDebts, 'financial')
                         : undefined
                     }
                     width="flex"
@@ -251,10 +248,10 @@ export const ReportTableRow = memo(
                 </>
               )}
           <Cell
-            value={amountToCurrency(item[balanceTypeOp])}
+            value={format(item[balanceTypeOp], 'financial')}
             title={
               Math.abs(item[balanceTypeOp]) > 100000
-                ? amountToCurrency(item[balanceTypeOp])
+                ? format(item[balanceTypeOp], 'financial')
                 : undefined
             }
             style={{
@@ -289,10 +286,10 @@ export const ReportTableRow = memo(
             privacyFilter
           />
           <Cell
-            value={integerToCurrency(Math.round(average))}
+            value={format(Math.round(average), 'financial')}
             title={
               Math.abs(Math.round(average / 100)) > 100000
-                ? integerToCurrency(Math.round(average))
+                ? format(Math.round(average), 'financial')
                 : undefined
             }
             style={{

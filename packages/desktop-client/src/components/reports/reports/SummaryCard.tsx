@@ -36,6 +36,7 @@ export function SummaryCard({
 }: SummaryCardProps) {
   const locale = useLocale();
   const { t } = useTranslation();
+
   const [start, end] = calculateTimeRange(meta?.timeFrame, {
     start: monthUtils.dayFromDate(monthUtils.currentMonth()),
     end: monthUtils.currentDay(),
@@ -131,6 +132,7 @@ export function SummaryCard({
           {data ? (
             <SummaryNumber
               value={data?.total ?? 0}
+              contentType={content.type}
               suffix={content.type === 'percentage' ? '%' : ''}
               loading={!data}
               initialFontSize={content.fontSize}
