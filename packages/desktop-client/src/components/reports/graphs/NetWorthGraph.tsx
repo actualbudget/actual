@@ -195,7 +195,7 @@ export function NetWorthGraph({
                 </defs>
 
                 <Area
-                  type="linear"
+                  type="monotone"
                   dot={false}
                   activeDot={false}
                   animationDuration={0}
