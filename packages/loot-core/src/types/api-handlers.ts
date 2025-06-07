@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import { ImportTransactionsOpts } from '@actual-app/api';
 
+import type { ImportTransactionsResult } from '../server/accounts/app';
 import type {
   APIAccountEntity,
   APICategoryEntity,
@@ -85,11 +86,7 @@ export interface ApiHandlers {
     transactions;
     isPreview?;
     opts?: ImportTransactionsOpts;
-  }) => Promise<{
-    errors?: { message: string }[];
-    added;
-    updated;
-  }>;
+  }) => Promise<ImportTransactionsResult>;
 
   'api/transactions-add': (arg: {
     accountId;
