@@ -25,6 +25,7 @@ import { Command } from 'cmdk';
 
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useModalState } from '@desktop-client/hooks/useModalState';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useReports } from '@desktop-client/hooks/useReports';
 
@@ -60,6 +61,7 @@ export function CommandBar() {
   const [search, setSearch] = useState('');
   const navigate = useNavigate();
   const [budgetName] = useMetadataPref('budgetName');
+  const { modalStack } = useModalState();
 
   // Reset search when closing the command bar
   useEffect(() => {
@@ -71,12 +73,17 @@ export function CommandBar() {
 
   const accounts = allAccounts.filter(acc => !acc.closed);
 
-  const openEventListener = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      setOpen(true);
-    }
-  }, []);
+  const openEventListener = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        // Do not open CommandBar if a modal is already open
+        if (modalStack.length > 0) return;
+        setOpen(true);
+      }
+    },
+    [modalStack.length],
+  );
 
   useEffect(() => {
     document.addEventListener('keydown', openEventListener);
@@ -155,7 +162,7 @@ export function CommandBar() {
         borderRadius: '8px',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
         overflow: 'hidden',
-        zIndex: 1001,
+        zIndex: 3001,
       })}
     >
       <Command.Input
