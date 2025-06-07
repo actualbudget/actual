@@ -84,14 +84,14 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          push: false
           load: true
           file: packages/sync-server/docker/${{ matrix.os }}.Dockerfile
-          tags: actual-test=${{ matrix.os }}
-          build-args: |
-            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          tags: actualbudget/actual-server-testing
+
       - name: Test that the docker image boots
         run: |
-          docker run --detach --network=host actual-test-${{ matrix.os }}
+          docker run --detach --network=host actualbudget/actual-server-testing
           sleep 5
           curl --fail -sS -LI -w '%{http_code}\n' --retry 10 --retry-delay 1 --retry-connrefused localhost:5006
 
