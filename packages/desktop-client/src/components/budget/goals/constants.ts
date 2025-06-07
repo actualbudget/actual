@@ -5,7 +5,7 @@ import {
   type ScheduleTemplate,
   type SimpleTemplate,
   type WeekTemplate,
-} from 'loot-core/server/budget/types/templates';
+} from 'loot-core/types/models/templates';
 
 export const displayTemplateTypes = [
   ['simple', 'Fixed (monthly)'] as const,
