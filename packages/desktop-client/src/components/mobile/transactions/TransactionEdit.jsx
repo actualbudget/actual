@@ -202,6 +202,7 @@ function Footer({
         backgroundColor: theme.tableHeaderBackground,
         borderTopWidth: 1,
         borderColor: theme.tableBorder,
+        marginBottom: 10,
       }}
     >
       {transaction.error?.type === 'SplitTransactionError' ? (
