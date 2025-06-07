@@ -42,3 +42,10 @@ When this happens we usually follow this framework:
 1. The two people having a disagreement try to come to an agreement first.
 2. If they cannot come to an agreement - they bring it to the contributor team for discussion.
 3. If the bigger contributor team cannot agree - we bring it to a public vote.
+
+## Extras
+### Cursor Subscription
+
+As a core contributor, you are eligible for a sponsored [Cursor] subscription. The process is simple: purchase your [Cursor] subscription, and then submit the expense to OpenCollective for reimbursement. To minimize administrative overhead, we encourage you to submit expenses quarterly rather than monthly. This benefit has been pre-approved for all core contributors, so there's no need to request permission - simply follow the reimbursement process through OpenCollective.
+
+[Cursor]: https://www.cursor.com
