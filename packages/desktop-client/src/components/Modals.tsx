@@ -31,6 +31,7 @@ import { EnvelopeBalanceMenuModal } from './modals/EnvelopeBalanceMenuModal';
 import { EnvelopeBudgetMenuModal } from './modals/EnvelopeBudgetMenuModal';
 import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuModal';
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
+import { EnvelopeIncomeBalanceMenuModal } from './modals/EnvelopeIncomeBalanceMenuModal';
 import { EnvelopeToBudgetMenuModal } from './modals/EnvelopeToBudgetMenuModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
 import { GoalTemplateModal } from './modals/GoalTemplateModal';
@@ -271,6 +272,16 @@ export function Modals() {
               value={monthUtils.sheetForMonth(modal.options.month)}
             >
               <EnvelopeBalanceMenuModal {...modal.options} />
+            </NamespaceContext.Provider>
+          );
+
+        case 'envelope-income-balance-menu':
+          return (
+            <NamespaceContext.Provider
+              key={key}
+              value={monthUtils.sheetForMonth(modal.options.month)}
+            >
+              <EnvelopeIncomeBalanceMenuModal {...modal.options} />
             </NamespaceContext.Provider>
           );
 
