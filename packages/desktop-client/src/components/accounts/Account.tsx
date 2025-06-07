@@ -583,7 +583,7 @@ class AccountInternal extends PureComponent<
     const account = this.props.accounts.find(acct => acct.id === accountId);
 
     await this.props.dispatch(
-      syncAndDownload({ accountId: account ? account.id : undefined }),
+      syncAndDownload({ accountId: account ? account.id : accountId }),
     );
   };
 
