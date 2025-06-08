@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React from 'react';
+import React, { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -50,6 +50,7 @@ export function NetWorthGraph({
 }: NetWorthGraphProps) {
   const { t } = useTranslation();
   const privacyMode = usePrivacyMode();
+  const id = useId();
 
   const tickFormatter = tick => {
     const res = privacyMode
@@ -180,7 +181,13 @@ export function NetWorthGraph({
                   />
                 )}
                 <defs>
-                  <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient
+                    id={`splitColor-${id}`}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
                     <stop
                       offset={off}
                       stopColor={theme.reportsBlue}
@@ -201,7 +208,7 @@ export function NetWorthGraph({
                   animationDuration={0}
                   dataKey="y"
                   stroke={theme.reportsBlue}
-                  fill="url(#splitColor)"
+                  fill={`url(#splitColor-${id})`}
                   fillOpacity={1}
                 />
               </AreaChart>
