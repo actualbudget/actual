@@ -198,11 +198,10 @@ function Footer({
         paddingLeft: styles.mobileEditingPadding,
         paddingRight: styles.mobileEditingPadding,
         paddingTop: 10,
-        paddingBottom: 10,
+        paddingBottom: 'env(safe-area-inset-bottom, 10)',
         backgroundColor: theme.tableHeaderBackground,
         borderTopWidth: 1,
         borderColor: theme.tableBorder,
-        marginBottom: 10,
       }}
     >
       {transaction.error?.type === 'SplitTransactionError' ? (
