@@ -27,6 +27,7 @@ Here are some initial guidelines for how contributions will be treated:
 
 (sorted alphabetically)
 
+- @alecbakholdin
 - @jfdoming
 - @joel-jeremy
 - @lelemm
@@ -85,6 +86,7 @@ When you open a PR please remember to do the following:
 ### Writing Good Release Notes
 
 Before creating your pull request, run the command `yarn generate:release-notes`. This will guide you through the steps necessary for creating a release note for your change. You will be asked the following questions:
+
 1. Comma-separated GitHub username(s) - your GitHub username, or if multiple people are involved, you can specify them all (e.g. `username1, username2`)
 2. PR Number - Auto-filled with the next available PR number. If you've already created a PR, then fill this in with that PR number.
 3. Release Note Type - this will give you a select field with 4 options from the "Valid categories" section below
