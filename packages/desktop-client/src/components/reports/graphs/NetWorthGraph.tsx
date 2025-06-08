@@ -75,6 +75,7 @@ export function NetWorthGraph({
   };
 
   const off = gradientOffset();
+  const gradientId = `splitColor-${id}`;
 
   type PayloadItem = {
     payload: {
@@ -181,13 +182,7 @@ export function NetWorthGraph({
                   />
                 )}
                 <defs>
-                  <linearGradient
-                    id={`splitColor-${id}`}
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
+                  <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                     <stop
                       offset={off}
                       stopColor={theme.reportsBlue}
@@ -208,7 +203,7 @@ export function NetWorthGraph({
                   animationDuration={0}
                   dataKey="y"
                   stroke={theme.reportsBlue}
-                  fill={`url(#splitColor-${id})`}
+                  fill={`url(#${gradientId})`}
                   fillOpacity={1}
                 />
               </AreaChart>
