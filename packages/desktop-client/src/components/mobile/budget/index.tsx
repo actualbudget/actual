@@ -14,6 +14,7 @@ import { sync } from '@desktop-client/app/appSlice';
 import { prewarmMonth } from '@desktop-client/components/budget/util';
 import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
@@ -41,6 +42,7 @@ export function Budget() {
   const [budgetTypePref] = useSyncedPref('budgetType');
   const budgetType = isBudgetType(budgetTypePref) ? budgetTypePref : 'envelope';
   const spreadsheet = useSpreadsheet();
+  const format = useFormat();
 
   const currMonth = monthUtils.currentMonth();
   const [startMonth = currMonth, setStartMonthPref] =
@@ -71,9 +73,13 @@ export function Budget() {
 
   const onBudgetAction = useCallback(
     async (month, type, args) => {
-      dispatch(applyBudgetAction({ month, type, args }));
+      const newArgs = {
+        ...(args || {}),
+        currencyCode: format.currency.code,
+      };
+      dispatch(applyBudgetAction({ month, type, args: newArgs }));
     },
-    [dispatch],
+    [dispatch, format],
   );
 
   const onShowBudgetSummary = useCallback(() => {
