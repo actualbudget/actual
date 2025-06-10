@@ -102,7 +102,7 @@ describe('storeTemplates', () => {
       ],
       expectedTemplates: [
         {
-          type: 'simple',
+          type: 'goal',
           amount: 10,
           priority: null,
           directive: 'goal',
