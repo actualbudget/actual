@@ -40,7 +40,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
 import { format as formatDate, parseISO } from 'date-fns';
 
 import * as monthUtils from 'loot-core/shared/months';
@@ -121,6 +120,7 @@ import {
   useSplitsExpanded,
 } from '@desktop-client/hooks/useSplitsExpanded';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import {
   getAccountsById,
@@ -1361,7 +1361,9 @@ const Transaction = memo(function Transaction({
         focused={focusedField === 'notes'}
         value={notes || ''}
         valueStyle={valueStyle}
-        formatter={value => notesTagFormatter(value, onNotesTagClick)}
+        formatter={value =>
+          NotesTagFormatter({ notes: value, onNotesTagClick })
+        }
         onExpose={name => !isPreview && onEdit(id, name)}
         inputProps={{
           value: notes || '',
@@ -2927,67 +2929,3 @@ export const TransactionTable = forwardRef(
 );
 
 TransactionTable.displayName = 'TransactionTable';
-
-function notesTagFormatter(
-  notes: string,
-  onNotesTagClick: (tag: string) => void,
-) {
-  const words = notes.split(' ');
-  return (
-    <>
-      {words.map((word, i, arr) => {
-        const separator = arr.length - 1 === i ? '' : ' ';
-        if (word.includes('#') && word.length > 1) {
-          let lastEmptyTag = -1;
-          // Treat tags in a single word as separate tags.
-          // #tag1#tag2 => (#tag1)(#tag2)
-          // not-a-tag#tag2#tag3 => not-a-tag(#tag2)(#tag3)
-          return word.split('#').map((tag, ti) => {
-            if (ti === 0) {
-              return tag;
-            }
-
-            if (!tag) {
-              lastEmptyTag = ti;
-              return '#';
-            }
-
-            if (lastEmptyTag === ti - 1) {
-              return `${tag} `;
-            }
-            lastEmptyTag = -1;
-
-            const validTag = `#${tag}`;
-            return (
-              <span key={`${validTag}${ti}`}>
-                <Button
-                  variant="bare"
-                  key={i}
-                  className={css({
-                    display: 'inline-flex',
-                    padding: '3px 7px',
-                    borderRadius: 16,
-                    userSelect: 'none',
-                    backgroundColor: theme.noteTagBackground,
-                    color: theme.noteTagText,
-                    cursor: 'pointer',
-                    '&[data-hovered]': {
-                      backgroundColor: theme.noteTagBackgroundHover,
-                    },
-                  })}
-                  onPress={() => {
-                    onNotesTagClick?.(validTag);
-                  }}
-                >
-                  {validTag}
-                </Button>
-                {separator}
-              </span>
-            );
-          });
-        }
-        return `${word}${separator}`;
-      })}
-    </>
-  );
-}
