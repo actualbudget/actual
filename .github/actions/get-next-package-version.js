@@ -51,12 +51,12 @@ try {
   const nextVersionYear = nextVersionMonthDate.getFullYear().toString().slice(-2);
   const nextVersionMonth = nextVersionMonthDate.getMonth() + 1; // Convert back to 1-indexed
 
-  // Get current day
-  const day = new Date().getDate();
+  // Get current date string
+  const currentDate = new Date().toISOString().split('T')[0].replaceAll('-', '');
 
   switch (values.type) {
     case 'nightly': {
-      const newVersion = `${nextVersionYear}.${nextVersionMonth}.0-nightly.${day}`;
+      const newVersion = `${nextVersionYear}.${nextVersionMonth}.0-nightly.${currentDate}`;
       process.stdout.write(newVersion); // return the new version to stdout
       process.exit();
     }
