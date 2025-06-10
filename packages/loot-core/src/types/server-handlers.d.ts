@@ -251,4 +251,13 @@ export interface ServerHandlers {
     pluginId: string; 
     key: string; 
   }) => Promise<any>;
+
+  'plugin-aql-query': (params: {
+    pluginId: string;
+    query: Query;
+    options?: {
+      target?: 'plugin' | 'host';
+      params?: Record<string, any>;
+    };
+  }) => Promise<{ data: any; dependencies: string[] }>;
 }

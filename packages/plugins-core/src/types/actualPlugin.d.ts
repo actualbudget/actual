@@ -1,4 +1,5 @@
 import type { BasicModalProps } from '@actual-app/components/props/modalProps';
+import { PluginQuery, PluginQueryBuilder, HostQueryBuilder } from './query';
 
 export type SidebarLocations =
   | 'main-menu'
@@ -23,6 +24,24 @@ export interface PluginDatabase {
   setMetadata(key: string, value: string): Promise<void>;
   
   getMetadata(key: string): Promise<string | null>;
+  
+  /**
+   * Execute an AQL (Actual Query Language) query.
+   * This provides a higher-level abstraction over SQL that's consistent with Actual Budget's query system.
+   * 
+   * @param query - The AQL query (can be a PluginQuery object or serialized PluginQueryState)
+   * @param options - Optional parameters for the query
+   * @param options.target - Target database: 'plugin' for plugin tables, 'host' for main app tables. Defaults to 'plugin'
+   * @param options.params - Named parameters for the query
+   * @returns Promise that resolves to the query result with data and dependencies
+   */
+  aql(
+    query: PluginQuery,
+    options?: {
+      target?: 'plugin' | 'host';
+      params?: Record<string, any>;
+    }
+  ): Promise<{ data: any; dependencies: string[] }>;
 }
 
 export type PluginMigration = [
@@ -46,6 +65,7 @@ export interface ActualPlugin {
       pushModal: (element: JSX.Element, modalProps?: BasicModalProps) => void;
       registerRoute: (path: string, routeElement: JSX.Element) => string;
       db?: PluginDatabase;
+      q: PluginQueryBuilder;
     },
   ) => void;
 }
@@ -83,4 +103,7 @@ export interface HostContext {
     eventType: K,
     callback: (data: ContextEvent[K]) => void,
   ) => void;
+
+  // Query builder provided by host (loot-core's q function)
+  q: HostQueryBuilder;
 }

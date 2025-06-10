@@ -33,6 +33,7 @@ export type { BasicModalProps } from '@actual-app/components/props/modalProps';
 export type {
   ActualPlugin,
   ActualPluginInitialized,
+  PluginDatabase,
 } from './types/actualPlugin';
 export type { ActualPluginEntry } from './types/actualPluginEntry';
 
@@ -49,3 +50,15 @@ export {
   ModalHeader,
   ModalCloseButton,
 } from './BasicModalComponents';
+
+// Export plugin-specific query types and utilities
+export type { 
+  PluginQuery, 
+  PluginQueryState, 
+  PluginQueryBuilder,
+  HostQueryBuilder,
+  LootCoreQuery,
+  LootCoreQueryBuilder,
+  LootCoreQueryState
+} from './types/query';
+export { convertPluginQueryToLootCore } from './middleware';

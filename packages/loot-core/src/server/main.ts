@@ -563,7 +563,7 @@ handlers['download-budget'] = async function ({ fileId }) {
   return { id };
 };
 
-// open and sync, but don’t close
+// open and sync, but don't close
 handlers['sync-budget'] = async function () {
   setSyncingMode('enabled');
   const result = await initialFullSync();
@@ -838,38 +838,6 @@ handlers['enable-openid'] = async function (loginConfig) {
     return { error: err.reason || 'network-failure' };
   }
   return {};
-};
-
-handlers['enable-password'] = async function (loginConfig) {
-  try {
-    const userToken = await asyncStorage.getItem('user-token');
-
-    if (!userToken) {
-      return { error: 'unauthorized' };
-    }
-
-    await post(getServer().BASE_SERVER + '/openid/disable', loginConfig, {
-      'X-ACTUAL-TOKEN': userToken,
-    });
-  } catch (err) {
-    return { error: err.reason || 'network-failure' };
-  }
-  return {};
-};
-
-handlers['get-openid-config'] = async function () {
-  try {
-    const res = await get(getServer().BASE_SERVER + '/openid/config');
-
-    if (res) {
-      const config = JSON.parse(res) as OpenIdConfig;
-      return { openId: config };
-    }
-
-    return null;
-  } catch (err) {
-    return { error: 'config-fetch-failed' };
-  }
 };
 
 handlers['enable-password'] = async function (loginConfig) {
@@ -1320,6 +1288,199 @@ handlers['plugin-database-get-metadata'] = async function ({ pluginId, key }) {
   } catch (error) {
     console.error(`Plugin ${pluginId} getMetadata error:`, error);
     throw error;
+  }
+};
+
+// Plugin schema introspection and AQL support
+const pluginSchemas = new Map<string, any>();
+
+async function introspectPluginSchema(pluginId: string): Promise<any> {
+  // Check if we already have the schema cached
+  if (pluginSchemas.has(pluginId)) {
+    return pluginSchemas.get(pluginId);
+  }
+
+  const db = pluginDatabases.get(pluginId);
+  if (!db) {
+    throw new Error(`Database not found for plugin: ${pluginId}`);
+  }
+
+  try {
+    // Get all tables in the plugin database
+    const tables = sqlite.runQuery(
+      db,
+      "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE '__plugin_%'",
+      [],
+      true
+    ) as { name: string }[];
+
+    const schema = {};
+
+    // For each table, get its schema
+    for (const table of tables) {
+      const tableInfo = sqlite.runQuery(
+        db,
+        `PRAGMA table_info(${table.name})`,
+        [],
+        true
+      ) as Array<{
+        cid: number;
+        name: string;
+        type: string;
+        notnull: number;
+        dflt_value: any;
+        pk: number;
+      }>;
+
+      const tableSchema = {};
+      
+      for (const column of tableInfo) {
+        const fieldType = mapSQLiteTypeToAQL(column.type.toUpperCase());
+        tableSchema[column.name] = {
+          type: fieldType,
+          required: column.notnull === 1 && column.dflt_value === null,
+          ...(column.dflt_value !== null && { default: column.dflt_value })
+        };
+      }
+
+      schema[table.name] = tableSchema;
+    }
+
+    // Cache the schema
+    pluginSchemas.set(pluginId, schema);
+    return schema;
+  } catch (error) {
+    console.error(`Plugin ${pluginId} schema introspection error:`, error);
+    throw error;
+  }
+}
+
+function mapSQLiteTypeToAQL(sqliteType: string): string {
+  // Map SQLite types to AQL field types
+  switch (sqliteType) {
+    case 'TEXT':
+      return 'string';
+    case 'INTEGER':
+      return 'integer';
+    case 'REAL':
+    case 'NUMERIC':
+      return 'float';
+    case 'BOOLEAN':
+      return 'boolean';
+    case 'DATE':
+      return 'date';
+    case 'DATETIME':
+      return 'string';
+    case 'JSON':
+      return 'json';
+    default:
+      // Default to string for unknown types
+      return 'string';
+  }
+}
+
+handlers['plugin-aql-query'] = async function ({ pluginId, query, options = {} }) {
+  const { target = 'plugin', params = {} } = options;
+
+  if (target === 'host') {
+    // For host queries, use the main database and schema
+    return aqlQuery(query._lootCorequery._lootCoreQuery.state, { params });
+  } else {
+    // For plugin queries, use the plugin database and introspected schema
+    const db = pluginDatabases.get(pluginId);
+    if (!db) {
+      throw new Error(`Database not found for plugin: ${pluginId}`);
+    }
+
+    try {
+      // Normalize the query object to ensure all required properties exist
+      const normalizedQuery = {
+        table: query._lootCoreQuery.state.table,
+        tableOptions: query._lootCoreQuery.state.tableOptions || {},
+        filterExpressions: query._lootCoreQuery.state.filterExpressions || query._lootCoreQuery.state.filter ? [query._lootCoreQuery.state.filter] : [],
+        selectExpressions: query._lootCoreQuery.state.selectExpressions || query._lootCoreQuery.state.select || ['*'],
+        groupExpressions: query._lootCoreQuery.state.groupExpressions || query._lootCoreQuery.state.groupBy || [],
+        orderExpressions: query._lootCoreQuery.state.orderExpressions || query._lootCoreQuery.state.orderBy || [],
+        calculation: query._lootCoreQuery.state.calculation || false,
+        rawMode: query._lootCoreQuery.state.rawMode || false,
+        withDead: query._lootCoreQuery.state.withDead || false,
+        validateRefs: query._lootCoreQuery.state.validateRefs !== false,
+        limit: query._lootCoreQuery.state.limit || null,
+        offset: query._lootCoreQuery.state.offset || null
+      };
+
+      // Get or create the plugin schema
+      const pluginSchema = await introspectPluginSchema(pluginId);
+      
+      // Create a custom schema config for the plugin with proper customizeQuery
+      const pluginSchemaConfig = {
+        tableViews: {},
+        tableFilters: () => [],
+        customizeQuery: (queryState) => {
+          // Ensure default ordering if none specified
+          const orderExpressions = queryState.orderExpressions && queryState.orderExpressions.length > 0
+            ? queryState.orderExpressions.concat(['id']) // Add id for deterministic sorting
+            : ['id']; // Default to id sorting
+
+          return {
+            ...queryState,
+            orderExpressions
+          };
+        },
+        views: {}
+      };
+
+      // Import the required functions from AQL - using correct paths
+      const { compileQuery } = await import('./aql');
+      const { defaultConstructQuery } = await import('./aql/compiler');
+      const { convertInputType, convertOutputType } = await import('./aql/schema-helpers');
+      
+      // Compile the query using the plugin schema
+      const { sqlPieces, state } = compileQuery(normalizedQuery, pluginSchema, pluginSchemaConfig);
+      
+      // Convert parameters to the correct types
+      const paramArray = state.namedParameters.map(param => {
+        const name = param.paramName;
+        if (params[name] === undefined) {
+          throw new Error(`Parameter ${name} not provided to query`);
+        }
+        return convertInputType(params[name], param.paramType);
+      });
+      
+      // Generate the final SQL
+      const sql = defaultConstructQuery(normalizedQuery, state, sqlPieces);
+      
+      // Execute directly on the plugin database (same pattern as db/index.ts)
+      let data = sqlite.runQuery(db, sql, paramArray, true);
+      
+      // Apply output type conversions
+      if (Array.isArray(data)) {
+        for (let i = 0; i < data.length; i++) {
+          const item = data[i];
+          Object.keys(item).forEach(name => {
+            if (state.outputTypes.has(name)) {
+              item[name] = convertOutputType(item[name], state.outputTypes.get(name));
+            }
+          });
+        }
+      }
+
+      // Handle calculation queries (single value results)
+      if (normalizedQuery.calculation) {
+        if (Array.isArray(data) && data.length > 0) {
+          const row = data[0];
+          const k = Object.keys(row)[0];
+          data = row[k] || 0;
+        } else {
+          data = null;
+        }
+      }
+
+      return { data, dependencies: state.dependencies };
+    } catch (error) {
+      console.error(`Plugin ${pluginId} AQL query error:`, error);
+      throw error;
+    }
   }
 };
 

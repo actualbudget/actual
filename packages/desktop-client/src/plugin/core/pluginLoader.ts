@@ -8,7 +8,10 @@ import { init, loadRemote } from '@module-federation/enhanced/runtime';
 import {
   type ActualPluginEntry,
   type ActualPluginInitialized,
+  type PluginQuery,
+  type HostQueryBuilder,
 } from 'plugins-core/index';
+import { q } from 'loot-core/shared/query';
 import type { Dispatch } from 'redux';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -104,7 +107,7 @@ export async function loadPlugins({
       }
     }
 
-    await rawPlugin.activate({ ...hostContext, db });
+    await rawPlugin.activate({ ...hostContext, db, q });
     loadedList.push(rawPlugin);
   }
 
@@ -221,6 +224,7 @@ function generateContext(
     navigate: (path: string) => {
       navigateBase(path);
     },
+    q: q as HostQueryBuilder,
   };
 }
 
@@ -330,10 +334,16 @@ interface PluginDatabase {
   runQuery<T = any>(sql: string, params?: any[], fetchAll?: boolean): Promise<T>;
   execQuery(sql: string): Promise<void>;
   transaction<T>(fn: () => T): Promise<T>;
-  migrate(id: string, sql: string): Promise<void>;
   getMigrationState(): Promise<string[]>;
   setMetadata(key: string, value: any): Promise<void>;
   getMetadata(key: string): Promise<any>;
+  aql(
+    query: PluginQuery,
+    options?: {
+      target?: 'plugin' | 'host';
+      params?: Record<string, any>;
+    }
+  ): Promise<{ data: any; dependencies: string[] }>;
 }
 
 async function createPluginDatabase(pluginId: string): Promise<PluginDatabase> {
@@ -394,8 +404,6 @@ async function createPluginDatabase(pluginId: string): Promise<PluginDatabase> {
       }
     },
 
-
-
     async getMigrationState(): Promise<string[]> {
       try {
         return await send('plugin-database-get-migrations', { pluginId });
@@ -419,6 +427,21 @@ async function createPluginDatabase(pluginId: string): Promise<PluginDatabase> {
         return await send('plugin-database-get-metadata', { pluginId, key });
       } catch (error) {
         console.error(`Plugin ${pluginId} getMetadata error:`, error);
+        throw error;
+      }
+    },
+
+    async aql(
+      query: any,
+      options?: {
+        target?: 'plugin' | 'host';
+        params?: Record<string, any>;
+      }
+    ): Promise<{ data: any; dependencies: string[] }> {
+      try {
+        return await send('plugin-aql-query', { pluginId, query, options });
+      } catch (error) {
+        console.error(`Plugin ${pluginId} AQL query error:`, error);
         throw error;
       }
     }
