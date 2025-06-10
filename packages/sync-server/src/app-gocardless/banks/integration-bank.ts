@@ -7,6 +7,8 @@ import {
   sortByBookingDateOrValueDate,
 } from '../utils.js';
 
+import { IBank } from './bank.interface.js';
+
 const SORTED_BALANCE_TYPE_LIST = [
   'closingBooked',
   'expected',
@@ -17,7 +19,7 @@ const SORTED_BALANCE_TYPE_LIST = [
   'openingBooked',
 ];
 
-/** @type {import('./bank.interface.js').IBank} */
+// eslint-disable-next-line import/no-default-export
 export default {
   institutionIds: ['IntegrationBank'],
 
@@ -44,7 +46,7 @@ export default {
     };
   },
 
-  normalizeTransaction(transaction, _booked, editedTransaction = null) {
+  normalizeTransaction(transaction, _booked, editedTransaction = undefined) {
     const trans = editedTransaction ?? transaction;
 
     const date =
@@ -112,4 +114,4 @@ export default {
       amountToInteger(currentBalance?.balanceAmount?.amount || 0),
     );
   },
-};
+} satisfies IBank;

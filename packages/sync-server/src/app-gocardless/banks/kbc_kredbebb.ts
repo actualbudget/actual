@@ -1,7 +1,8 @@
+import { IBank } from './bank.interface.js';
 import Fallback from './integration-bank.js';
 import { extractPayeeNameFromRemittanceInfo } from './util/extract-payeeName-from-remittanceInfo.js';
 
-/** @type {import('./bank.interface.js').IBank} */
+// eslint-disable-next-line import/no-default-export
 export default {
   ...Fallback,
 
@@ -30,4 +31,4 @@ export default {
 
     return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
-};
+} satisfies IBank;
