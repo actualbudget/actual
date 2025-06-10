@@ -26,7 +26,7 @@ expr
     { return { type: 'average', numMonths: +amount, priority: template.priority, directive: template.directive }}
   / template: template _ 'copy from'i _ lookBack: positive _ 'months ago'i limit:limit?
     { return { type: 'copy', priority: template.priority, directive: template.directive, lookBack: +lookBack, limit }}
-  / goal: goal amount: amount { return {type: 'simple', amount: amount, priority: null, directive: goal }}
+  / goal: goal amount: amount { return {type: 'goal', amount: amount, priority: null, directive: goal }}
 
 modifiers = _ '[' modifier:modifier ']' { return modifier }
 

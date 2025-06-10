@@ -35,3 +35,8 @@ jobs:
           days-before-stale: -1
           days-before-close: 7
           close-issue-message: 'This issue has been automatically closed because there have been no comments for 7 days after the "needs info" label was added. If you still need help, please feel free to reopen the issue with the requested information.'
+          remove-stale-when-updated: false
+          stale-pr-message: ''  # Disable PR processing
+          close-pr-message: ''  # Disable PR processing
+          days-before-pr-stale: -1  # Disable PR processing
+          days-before-pr-close: -1  # Disable PR processing
