@@ -1,3 +1,6 @@
+import { MockInstance } from 'vitest';
+
+import { Balance, Transaction } from '../../gocardless-node.types.js';
 import {
   mockExtendAccountsAboutInstitutions,
   mockInstitution,
@@ -5,7 +8,7 @@ import {
 import IntegrationBank from '../integration-bank.js';
 
 describe('IntegrationBank', () => {
-  let consoleSpy;
+  let consoleSpy: MockInstance<(typeof console)['debug']>;
 
   beforeEach(() => {
     consoleSpy = vi.spyOn(console, 'debug');
@@ -30,6 +33,7 @@ describe('IntegrationBank', () => {
     it('should return a normalized account object with masked value "0000" when no iban property is provided', () => {
       const normalizedAccount = IntegrationBank.normalizeAccount({
         ...account,
+        // @ts-ignore TODO: check if undefined should be allowed in GoCardlessAccountMetadata
         iban: undefined,
       });
       expect(normalizedAccount).toEqual({
@@ -105,7 +109,6 @@ describe('IntegrationBank', () => {
   });
 
   describe('calculateStartingBalance', () => {
-    /** @type {import('../../gocardless-node.types.js').Transaction[]} */
     const transactions = [
       {
         bookingDate: '2022-01-01',
@@ -119,15 +122,14 @@ describe('IntegrationBank', () => {
         bookingDate: '2022-03-01',
         transactionAmount: { amount: '100', currency: 'EUR' },
       },
-    ];
+    ] satisfies Transaction[];
 
-    /** @type {import('../../gocardless-node.types.js').Balance[]} */
     const balances = [
       {
         balanceAmount: { amount: '1000.00', currency: 'EUR' },
         balanceType: 'interimBooked',
       },
-    ];
+    ] satisfies Balance[];
 
     it('should return 0 when no transactions or balances are provided', () => {
       const startingBalance = IntegrationBank.calculateStartingBalance([], []);

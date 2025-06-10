@@ -13,7 +13,8 @@ describe('kbc_kredbebb', () => {
         transaction,
         true,
       );
-      expect(normalizedTransaction.payeeName).toEqual(
+      expect(normalizedTransaction).not.toBeNull();
+      expect(normalizedTransaction!.payeeName).toEqual(
         'CARREFOUR ST GIL BE1060 BRUXELLES',
       );
     });
@@ -30,7 +31,8 @@ describe('kbc_kredbebb', () => {
         transaction,
         true,
       );
-      expect(normalizedTransaction.payeeName).toEqual(
+      expect(normalizedTransaction).not.toBeNull();
+      expect(normalizedTransaction!.payeeName).toEqual(
         'CARREFOUR ST GIL BE1060 BRUXELLES',
       );
     });
