@@ -49,6 +49,9 @@ export function initializePlugin(
       const wrappedContext = {
         ...context,
 
+        // Database provided by host
+        db: context.db,
+
         registerMenu(position, element: JSX.Element) {
           return context.registerMenu(position, container => {
             const root = getOrCreateRoot(container, pluginId);

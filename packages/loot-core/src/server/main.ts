@@ -3,6 +3,7 @@ import './polyfills';
 
 import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
+import { type Database } from '@jlongster/sql.js';
 import { v4 as uuidv4 } from 'uuid';
 
 import { createTestBudget } from '../mocks/budget';
@@ -1093,6 +1094,233 @@ handlers['plugin-files'] = async function ({ pluginUrl }) {
     name: keyValue[0].toString(),
     content: keyValue[1].toString(),
   }));
+};
+
+// Plugin database management
+const pluginDatabases = new Map<string, Database>();
+
+handlers['plugin-create-database'] = async function ({ pluginId }) {
+  // Check if database already exists
+  if (pluginDatabases.has(pluginId)) {
+    return { success: true };
+  }
+
+  try {
+    // Use the documents directory pattern that Actual Budget uses for databases
+    // This automatically handles IndexedDB storage and symlinks to blocked filesystem
+    const dbPath = `/documents/plugin-${pluginId}.sqlite`;
+    
+    // Open/create the database using existing SQLite infrastructure
+    // This will automatically create the proper database file with correct structure
+    const db = await sqlite.openDatabase(dbPath);
+
+    // Initialize plugin infrastructure tables
+    await sqlite.execQuery(db, `
+      CREATE TABLE IF NOT EXISTS __plugin_migrations__ (
+        id TEXT PRIMARY KEY,
+        applied_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+      
+      CREATE TABLE IF NOT EXISTS __plugin_metadata__ (
+        key TEXT PRIMARY KEY,
+        value TEXT
+      );
+    `);
+
+    // Store database reference
+    pluginDatabases.set(pluginId, db);
+    
+    console.log(`✅ Plugin database created for: ${pluginId} at ${dbPath}`);
+    return { success: true };
+  } catch (error) {
+    console.error(`Failed to create plugin database for ${pluginId}:`, error);
+    throw error;
+  }
+};
+
+handlers['plugin-database-query'] = async function ({ pluginId, sql, params = [], fetchAll = false }) {
+  const db = pluginDatabases.get(pluginId);
+  if (!db) {
+    throw new Error(`Database not found for plugin: ${pluginId}`);
+  }
+
+  try {
+    if (fetchAll) {
+      return sqlite.runQuery(db, sql, params, true);
+    } else {
+      return sqlite.runQuery(db, sql, params, false);
+    }
+  } catch (error) {
+    console.error(`Plugin ${pluginId} database query error:`, error);
+    throw error;
+  }
+};
+
+handlers['plugin-database-exec'] = async function ({ pluginId, sql }) {
+  const db = pluginDatabases.get(pluginId);
+  if (!db) {
+    throw new Error(`Database not found for plugin: ${pluginId}`);
+  }
+
+  try {
+    sqlite.execQuery(db, sql);
+    return { success: true };
+  } catch (error) {
+    console.error(`Plugin ${pluginId} database exec error:`, error);
+    throw error;
+  }
+};
+
+handlers['plugin-database-transaction'] = async function ({ pluginId, operations }) {
+  const db = pluginDatabases.get(pluginId);
+  if (!db) {
+    throw new Error(`Database not found for plugin: ${pluginId}`);
+  }
+
+  try {
+    return sqlite.transaction(db, () => {
+      const results = [];
+      for (const op of operations) {
+        if (op.type === 'exec') {
+          sqlite.execQuery(db, op.sql);
+          results.push({ success: true });
+        } else if (op.type === 'query') {
+          if (op.fetchAll) {
+            const result = sqlite.runQuery(db, op.sql, op.params || [], true);
+            results.push(result);
+          } else {
+            const result = sqlite.runQuery(db, op.sql, op.params || [], false);
+            results.push(result);
+          }
+        }
+      }
+      return results;
+    });
+  } catch (error) {
+    console.error(`Plugin ${pluginId} database transaction error:`, error);
+    throw error;
+  }
+};
+
+handlers['plugin-run-migrations'] = async function ({ pluginId, migrations }) {
+  const db = pluginDatabases.get(pluginId);
+  if (!db) {
+    throw new Error(`Database not found for plugin: ${pluginId}`);
+  }
+
+  try {
+    // Get currently applied migrations
+    const appliedMigrations = sqlite.runQuery(
+      db,
+      'SELECT id FROM __plugin_migrations__ ORDER BY applied_at',
+      [],
+      true
+    ) as { id: string }[];
+    const appliedIds = new Set(appliedMigrations.map(row => row.id));
+
+    const results = [];
+    
+    // Sort migrations by timestamp to ensure proper order
+    const sortedMigrations = migrations.sort((a, b) => a[0] - b[0]);
+    
+    for (const migration of sortedMigrations) {
+      const [timestamp, name, upCommand, downCommand] = migration;
+      const migrationId = `${timestamp}_${name}`;
+      
+      if (appliedIds.has(migrationId)) {
+        console.log(`Plugin ${pluginId}: Migration ${migrationId} already applied`);
+        results.push({ migrationId, status: 'already_applied' });
+        continue;
+      }
+
+      try {
+        sqlite.transaction(db, () => {
+          // Execute migration
+          sqlite.execQuery(db, upCommand);
+          
+          // Record migration
+          sqlite.runQuery(
+            db,
+            'INSERT INTO __plugin_migrations__ (id) VALUES (?)',
+            [migrationId]
+          );
+        });
+        
+        console.log(`Plugin ${pluginId}: Applied migration ${migrationId}`);
+        results.push({ migrationId, status: 'applied' });
+      } catch (error) {
+        console.error(`Plugin ${pluginId} migration ${migrationId} failed:`, error);
+        results.push({ migrationId, status: 'failed', error: error.message });
+        // Stop processing further migrations on failure
+        break;
+      }
+    }
+    
+    return { success: true, results };
+  } catch (error) {
+    console.error(`Plugin ${pluginId} migrations failed:`, error);
+    throw error;
+  }
+};
+
+handlers['plugin-database-get-migrations'] = async function ({ pluginId }) {
+  const db = pluginDatabases.get(pluginId);
+  if (!db) {
+    throw new Error(`Database not found for plugin: ${pluginId}`);
+  }
+
+  try {
+    const rows = sqlite.runQuery(
+      db,
+      'SELECT id FROM __plugin_migrations__ ORDER BY applied_at',
+      [],
+      true
+    ) as { id: string }[];
+    return rows.map(row => row.id);
+  } catch (error) {
+    console.error(`Plugin ${pluginId} getMigrationState error:`, error);
+    throw error;
+  }
+};
+
+handlers['plugin-database-set-metadata'] = async function ({ pluginId, key, value }) {
+  const db = pluginDatabases.get(pluginId);
+  if (!db) {
+    throw new Error(`Database not found for plugin: ${pluginId}`);
+  }
+
+  try {
+    const serializedValue = JSON.stringify(value);
+    sqlite.runQuery(
+      db,
+      'INSERT OR REPLACE INTO __plugin_metadata__ (key, value) VALUES (?, ?)',
+      [key, serializedValue]
+    );
+    return { success: true };
+  } catch (error) {
+    console.error(`Plugin ${pluginId} setMetadata error:`, error);
+    throw error;
+  }
+};
+
+handlers['plugin-database-get-metadata'] = async function ({ pluginId, key }) {
+  const db = pluginDatabases.get(pluginId);
+  if (!db) {
+    throw new Error(`Database not found for plugin: ${pluginId}`);
+  }
+
+  try {
+    const row = sqlite.runQuery(
+      db,
+      'SELECT value FROM __plugin_metadata__ WHERE key = ?',
+      [key],
+      false
+    ) as unknown as { value: string } | null;
+    return row ? JSON.parse(row.value) : null;
+  } catch (error) {
+    console.error(`Plugin ${pluginId} getMetadata error:`, error);
+    throw error;
+  }
 };
 
 handlers = installAPI(handlers) as Handlers;

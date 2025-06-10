@@ -23,6 +23,9 @@ import {
   SidebarLocations,
 } from 'plugins-core/types/actualPlugin';
 
+// Import send function to communicate with backend
+import { send } from 'loot-core/platform/client/fetch';
+
 export type PluginModalModel = {
   name: string;
   modal: HTMLElement;
@@ -81,8 +84,27 @@ export async function loadPlugins({
       setEvents,
     );
 
+    // Create database for the plugin
+    const db = await createPluginDatabase(pluginId);
+
     const rawPlugin = pluginEntry();
-    await rawPlugin.activate(hostContext);
+    
+    // Run migrations if the plugin defines them
+    if (rawPlugin.migrations) {
+      try {
+        const migrations = rawPlugin.migrations();
+        if (migrations.length > 0) {
+          console.log(`Running ${migrations.length} migrations for plugin ${pluginId}`);
+          const result = await send('plugin-run-migrations', { pluginId, migrations });
+          console.log(`Migration results for plugin ${pluginId}:`, result);
+        }
+      } catch (error) {
+        console.error(`Failed to run migrations for plugin ${pluginId}:`, error);
+        // Continue with activation even if migrations fail for now
+      }
+    }
+
+    await rawPlugin.activate({ ...hostContext, db });
     loadedList.push(rawPlugin);
   }
 
@@ -299,4 +321,112 @@ function joinRelativePaths(...parts) {
     .map(p => p.replace(/(^\/+|\/+$)/g, ''))
     .filter(Boolean)
     .join('/');
+}
+
+// Plugin database management
+const pluginDatabases = new Map<string, any>();
+
+interface PluginDatabase {
+  runQuery<T = any>(sql: string, params?: any[], fetchAll?: boolean): Promise<T>;
+  execQuery(sql: string): Promise<void>;
+  transaction<T>(fn: () => T): Promise<T>;
+  migrate(id: string, sql: string): Promise<void>;
+  getMigrationState(): Promise<string[]>;
+  setMetadata(key: string, value: any): Promise<void>;
+  getMetadata(key: string): Promise<any>;
+}
+
+async function createPluginDatabase(pluginId: string): Promise<PluginDatabase> {
+  // Check if database already exists
+  if (pluginDatabases.has(pluginId)) {
+    return pluginDatabases.get(pluginId);
+  }
+
+  // Create database via backend
+  await send('plugin-create-database', { pluginId });
+
+  // Create database interface that communicates with backend
+  const dbInterface: PluginDatabase = {
+    async runQuery<T = any>(sql: string, params: any[] = [], fetchAll = false): Promise<T> {
+      try {
+        return await send('plugin-database-query', { pluginId, sql, params, fetchAll });
+      } catch (error) {
+        console.error(`Plugin ${pluginId} database query error:`, error);
+        throw error;
+      }
+    },
+
+    async execQuery(sql: string): Promise<void> {
+      try {
+        await send('plugin-database-exec', { pluginId, sql });
+      } catch (error) {
+        console.error(`Plugin ${pluginId} database exec error:`, error);
+        throw error;
+      }
+    },
+
+    async transaction<T>(fn: () => T): Promise<T> {
+      // For transactions, we need to collect operations and send them as a batch
+      const operations: any[] = [];
+      let result: T;
+      
+      // Create a proxy context for the transaction function
+      const transactionContext = {
+        execQuery: (sql: string) => {
+          operations.push({ type: 'exec', sql });
+        },
+        runQuery: (sql: string, params: any[] = [], fetchAll = false) => {
+          operations.push({ type: 'query', sql, params, fetchAll });
+        }
+      };
+      
+      try {
+        // Execute the function to collect operations
+        result = fn.call(transactionContext);
+        
+        // Send all operations as a transaction to backend
+        await send('plugin-database-transaction', { pluginId, operations });
+        
+        return result;
+      } catch (error) {
+        console.error(`Plugin ${pluginId} database transaction error:`, error);
+        throw error;
+      }
+    },
+
+
+
+    async getMigrationState(): Promise<string[]> {
+      try {
+        return await send('plugin-database-get-migrations', { pluginId });
+      } catch (error) {
+        console.error(`Plugin ${pluginId} getMigrationState error:`, error);
+        throw error;
+      }
+    },
+
+    async setMetadata(key: string, value: any): Promise<void> {
+      try {
+        await send('plugin-database-set-metadata', { pluginId, key, value });
+      } catch (error) {
+        console.error(`Plugin ${pluginId} setMetadata error:`, error);
+        throw error;
+      }
+    },
+
+    async getMetadata(key: string): Promise<any> {
+      try {
+        return await send('plugin-database-get-metadata', { pluginId, key });
+      } catch (error) {
+        console.error(`Plugin ${pluginId} getMetadata error:`, error);
+        throw error;
+      }
+    }
+  };
+
+  // Cache the database interface
+  pluginDatabases.set(pluginId, dbInterface);
+  
+  console.log(`Plugin ${pluginId}: Database interface created`);
+  return dbInterface;
 }

@@ -7,10 +7,36 @@ export type SidebarLocations =
   | 'after-accounts'
   | 'topbar';
 
+export interface PluginDatabase {
+  runQuery<T = any>(
+    sql: string,
+    params?: (string | number)[],
+    fetchAll?: boolean
+  ): Promise<T[] | { changes: number; insertId?: number }>;
+  
+  execQuery(sql: string): void;
+  
+  transaction(fn: () => void): void;
+  
+  getMigrationState(): Promise<string[]>;
+  
+  setMetadata(key: string, value: string): Promise<void>;
+  
+  getMetadata(key: string): Promise<string | null>;
+}
+
+export type PluginMigration = [
+  timestamp: number,
+  name: string,
+  upCommand: string,
+  downCommand: string
+];
+
 export interface ActualPlugin {
   name: string;
   version: string;
   uninstall: () => void;
+  migrations?: () => PluginMigration[];
   activate: (
     context: Omit<HostContext, 'registerMenu' | 'pushModal' | 'registerRoute'> & {
       registerMenu: (
@@ -19,13 +45,14 @@ export interface ActualPlugin {
       ) => string;
       pushModal: (element: JSX.Element, modalProps?: BasicModalProps) => void;
       registerRoute: (path: string, routeElement: JSX.Element) => string;
+      db?: PluginDatabase;
     },
   ) => void;
 }
 
 export type ActualPluginInitialized = Omit<ActualPlugin, 'activate'> & {
   initialized: true;
-  activate: (context: HostContext) => void;
+  activate: (context: HostContext & { db: PluginDatabase }) => void;
 };
 
 export interface ContextEvent {

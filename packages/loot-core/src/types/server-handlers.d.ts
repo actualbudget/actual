@@ -200,4 +200,55 @@ export interface ServerHandlers {
   >;
 
   'plugin-files': (arg: { pluginUrl: string }) => Promise<PluginFile[]>;
+
+  'plugin-create-database': (arg: { pluginId: string }) => Promise<{ success: boolean }>;
+  
+  'plugin-database-query': (arg: { 
+    pluginId: string; 
+    sql: string; 
+    params?: any[]; 
+    fetchAll?: boolean; 
+  }) => Promise<any>;
+  
+  'plugin-database-exec': (arg: { 
+    pluginId: string; 
+    sql: string; 
+  }) => Promise<{ success: boolean }>;
+  
+  'plugin-database-transaction': (arg: { 
+    pluginId: string; 
+    operations: Array<{
+      type: 'exec' | 'query';
+      sql: string;
+      params?: any[];
+      fetchAll?: boolean;
+    }>; 
+  }) => Promise<any[]>;
+  
+  'plugin-run-migrations': (arg: { 
+    pluginId: string; 
+    migrations: Array<[number, string, string, string]>; 
+  }) => Promise<{ 
+    success: boolean; 
+    results: Array<{
+      migrationId: string;
+      status: 'applied' | 'already_applied' | 'failed';
+      error?: string;
+    }>; 
+  }>;
+  
+  'plugin-database-get-migrations': (arg: { 
+    pluginId: string; 
+  }) => Promise<string[]>;
+  
+  'plugin-database-set-metadata': (arg: { 
+    pluginId: string; 
+    key: string; 
+    value: any; 
+  }) => Promise<{ success: boolean }>;
+  
+  'plugin-database-get-metadata': (arg: { 
+    pluginId: string; 
+    key: string; 
+  }) => Promise<any>;
 }
