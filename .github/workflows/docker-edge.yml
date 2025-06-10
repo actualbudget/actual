@@ -80,7 +80,24 @@ jobs:
       - name: Build Web
         run: yarn build:server
 
-      - name: Build and push image
+      - name: Build image for testing
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          load: true
+          file: packages/sync-server/docker/${{ matrix.os }}.Dockerfile
+          tags: actualbudget/actual-server-testing
+
+      - name: Test that the docker image boots
+        run: |
+          docker run --detach --network=host actualbudget/actual-server-testing
+          sleep 5
+          curl --fail -sS -LI -w '%{http_code}\n' --retry 10 --retry-delay 1 --retry-connrefused localhost:5006
+
+      # This will use the cache from the earlier build step and not rebuild the image
+      # https://docs.docker.com/build/ci/github-actions/test-before-push/
+      - name: Build and push images
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -90,3 +107,5 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           build-args: |
             GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+
+

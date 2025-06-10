@@ -568,8 +568,20 @@ describe('API CRUD operations', () => {
     const accountId = await api.createAccount({ name: 'test-account' }, 0);
 
     let newTransaction = [
-      { date: '2023-11-03', imported_id: '11', amount: 100, notes: 'notes' },
-      { date: '2023-11-03', imported_id: '12', amount: 100, notes: '' },
+      {
+        account: accountId,
+        date: '2023-11-03',
+        imported_id: '11',
+        amount: 100,
+        notes: 'notes',
+      },
+      {
+        account: accountId,
+        date: '2023-11-03',
+        imported_id: '12',
+        amount: 100,
+        notes: '',
+      },
     ];
 
     const addResult = await api.addTransactions(accountId, newTransaction, {
@@ -597,9 +609,27 @@ describe('API CRUD operations', () => {
     expect(transactions).toHaveLength(2);
 
     newTransaction = [
-      { date: '2023-12-03', imported_id: '11', amount: 100, notes: 'notes' },
-      { date: '2023-12-03', imported_id: '12', amount: 100, notes: 'notes' },
-      { date: '2023-12-03', imported_id: '22', amount: 200, notes: '' },
+      {
+        account: accountId,
+        date: '2023-12-03',
+        imported_id: '11',
+        amount: 100,
+        notes: 'notes',
+      },
+      {
+        account: accountId,
+        date: '2023-12-03',
+        imported_id: '12',
+        amount: 100,
+        notes: 'notes',
+      },
+      {
+        account: accountId,
+        date: '2023-12-03',
+        imported_id: '22',
+        amount: 200,
+        notes: '',
+      },
     ];
 
     const reconciled = await api.importTransactions(accountId, newTransaction);

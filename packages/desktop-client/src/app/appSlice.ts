@@ -121,7 +121,9 @@ export const syncAndDownload = createAppAsyncThunk(
       return { error: syncState.error };
     }
 
-    const hasDownloaded = await dispatch(syncAccounts({ id: accountId }));
+    const hasDownloaded = await dispatch(
+      syncAccounts({ id: accountId }),
+    ).unwrap();
 
     if (hasDownloaded) {
       // Sync again afterwards if new transactions were created
