@@ -95,6 +95,12 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
       prefs.serverSelfSignedCert,
     );
   }
+  if (prefs.pluginThemes) {
+    await asyncStorage.setItem(
+      'plugin-themes',
+      JSON.stringify(prefs.pluginThemes),
+    );
+  }
   return 'ok';
 }
 
@@ -107,6 +113,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     [, language],
     [, theme],
     [, preferredDarkTheme],
+    [, pluginThemes],
     [, serverSelfSignedCert],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
@@ -116,6 +123,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     'language',
     'theme',
     'preferred-dark-theme',
+    'plugin-themes',
     'server-self-signed-cert',
   ] as const);
   return {
@@ -131,11 +139,12 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
       theme === 'development' ||
       theme === 'midnight'
         ? theme
-        : 'auto',
+        : theme || 'auto',
     preferredDarkTheme:
       preferredDarkTheme === 'dark' || preferredDarkTheme === 'midnight'
         ? preferredDarkTheme
         : 'dark',
+    pluginThemes: pluginThemes ? JSON.parse(pluginThemes) : {},
     serverSelfSignedCert: serverSelfSignedCert || undefined,
   };
 }

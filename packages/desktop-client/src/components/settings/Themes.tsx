@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import React, { type ReactNode, useState, useEffect } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
@@ -11,12 +11,14 @@ import { css } from '@emotion/css';
 import { type DarkTheme, type Theme } from 'loot-core/types/prefs';
 
 import {
-  themeOptions,
+  getThemeOptions,
   useTheme,
   usePreferredDarkTheme,
   darkThemeOptions,
 } from '../../style';
 import { useSidebar } from '../sidebar/SidebarProvider';
+import { useActualPlugins } from '../../plugin/ActualPluginsProvider';
+import { useGlobalPref } from '../../hooks/useGlobalPref';
 
 import { Setting } from './UI';
 
@@ -41,6 +43,32 @@ export function ThemeSettings() {
   const sidebar = useSidebar();
   const [theme, switchTheme] = useTheme();
   const [darkTheme, switchDarkTheme] = usePreferredDarkTheme();
+  
+  // Get saved plugin themes
+  const [savedPluginThemes] = useGlobalPref('pluginThemes');
+  
+  // Get theme options including plugin themes
+  const [themeOptions, setThemeOptions] = useState(() => getThemeOptions(undefined, savedPluginThemes));
+  
+  // Try to get plugin context for dynamic updates
+  let plugins;
+  try {
+    plugins = useActualPlugins();
+  } catch {
+    plugins = null;
+  }
+  
+  // Update theme options when plugins change or saved themes change
+  useEffect(() => {
+    if (plugins) {
+      const options = getThemeOptions(plugins.getPluginThemes, savedPluginThemes);
+      setThemeOptions(options);
+    } else {
+      // No plugins loaded, use saved themes only
+      const options = getThemeOptions(undefined, savedPluginThemes);
+      setThemeOptions(options);
+    }
+  }, [plugins?.pluginThemes, plugins?.themeOverrides, savedPluginThemes]);
 
   return (
     <Setting
@@ -60,9 +88,9 @@ export function ThemeSettings() {
           }}
         >
           <Column title={t('Theme')}>
-            <Select<Theme>
+            <Select<string>
               onChange={value => {
-                switchTheme(value);
+                switchTheme(value as Theme);
               }}
               value={theme}
               options={themeOptions}

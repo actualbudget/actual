@@ -206,9 +206,9 @@ export interface ServerHandlers {
   'plugin-database-query': (arg: { 
     pluginId: string; 
     sql: string; 
-    params?: any[]; 
+    params?: (string | number)[]; 
     fetchAll?: boolean; 
-  }) => Promise<any>;
+  }) => Promise<unknown[] | { changes: number; insertId?: number }>;
   
   'plugin-database-exec': (arg: { 
     pluginId: string; 
@@ -220,10 +220,10 @@ export interface ServerHandlers {
     operations: Array<{
       type: 'exec' | 'query';
       sql: string;
-      params?: any[];
+      params?: (string | number)[];
       fetchAll?: boolean;
     }>; 
-  }) => Promise<any[]>;
+  }) => Promise<Array<{ success: boolean } | unknown[] | { changes: number; insertId?: number }>>;
   
   'plugin-run-migrations': (arg: { 
     pluginId: string; 
@@ -244,20 +244,20 @@ export interface ServerHandlers {
   'plugin-database-set-metadata': (arg: { 
     pluginId: string; 
     key: string; 
-    value: any; 
+    value: string; 
   }) => Promise<{ success: boolean }>;
   
   'plugin-database-get-metadata': (arg: { 
     pluginId: string; 
     key: string; 
-  }) => Promise<any>;
+  }) => Promise<string | null>;
 
   'plugin-aql-query': (params: {
     pluginId: string;
     query: Query;
     options?: {
       target?: 'plugin' | 'host';
-      params?: Record<string, any>;
+      params?: Record<string, unknown>;
     };
-  }) => Promise<{ data: any; dependencies: string[] }>;
+  }) => Promise<{ data: unknown; dependencies: string[] }>;
 }

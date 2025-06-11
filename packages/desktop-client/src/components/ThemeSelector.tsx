@@ -13,7 +13,9 @@ import { Popover } from '@actual-app/components/popover';
 
 import type { Theme } from 'loot-core/types/prefs';
 
-import { themeOptions, useTheme } from '../style';
+import { getThemeOptions, useTheme } from '../style';
+import { useActualPlugins } from '../plugin/ActualPluginsProvider';
+import { useGlobalPref } from '../hooks/useGlobalPref';
 
 type ThemeSelectorProps = {
   style?: CSSProperties;
@@ -26,6 +28,18 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
 
   const { isNarrowWidth } = useResponsive();
   const { t } = useTranslation();
+
+  // Get saved plugin themes
+  const [savedPluginThemes] = useGlobalPref('pluginThemes');
+
+  // Get theme options including plugin themes
+  let themeOptions = getThemeOptions(undefined, savedPluginThemes);
+  try {
+    const plugins = useActualPlugins();
+    themeOptions = getThemeOptions(plugins.getPluginThemes, savedPluginThemes);
+  } catch {
+    // Fallback to built-in themes + saved plugin themes only
+  }
 
   const themeIcons = {
     light: SvgSun,
@@ -40,7 +54,7 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
     switchTheme(newTheme);
   }
 
-  const Icon = themeIcons[theme] || SvgSun;
+  const Icon = themeIcons[theme as keyof typeof themeIcons] || SvgSun;
 
   if (isNarrowWidth) {
     return null;

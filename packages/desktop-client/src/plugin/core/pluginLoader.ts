@@ -24,7 +24,9 @@ import { BasicModalProps } from '../../../../component-library/src/props/modalPr
 import {
   ContextEvent,
   SidebarLocations,
+  type ThemeColorOverrides,
 } from 'plugins-core/types/actualPlugin';
+import type { HostContext } from 'plugins-core/types/actualPlugin';
 
 // Import send function to communicate with backend
 import { send } from 'loot-core/platform/client/fetch';
@@ -50,6 +52,9 @@ export async function loadPlugins({
   setSidebarItems,
   navigateBase,
   setEvents,
+  addPluginTheme,
+  overrideTheme,
+  removePluginThemes,
 }: {
   pluginsEntries: Map<string, ActualPluginEntry>;
   dispatch: Dispatch;
@@ -67,10 +72,28 @@ export async function loadPlugins({
       [K in keyof ContextEvent]?: Array<(data: ContextEvent[K]) => void>;
     }>
   >;
+  addPluginTheme: (
+    pluginName: string,
+    themeId: string,
+    displayName: string,
+    colorOverrides: ThemeColorOverrides,
+    options?: {
+      baseTheme?: 'light' | 'dark' | 'midnight';
+      description?: string;
+    }
+  ) => void;
+  overrideTheme: (
+    pluginName: string,
+    themeId: 'light' | 'dark' | 'midnight' | string,
+    colorOverrides: ThemeColorOverrides
+  ) => void;
+  removePluginThemes: (pluginName: string) => void;
 }) {
   const loadedList: ActualPluginInitialized[] = [];
 
   for (const [pluginId, entryModule] of pluginsEntries.entries()) {
+    // Clean up any existing themes from this plugin
+    removePluginThemes(pluginId);
     // the entry module is actually a function that returns an object with name, version, activate.
     const pluginEntry =
       (entryModule as unknown as { default: ActualPluginEntry }).default ||
@@ -85,6 +108,9 @@ export async function loadPlugins({
       pluginId,
       navigateBase,
       setEvents,
+      addPluginTheme,
+      overrideTheme,
+      removePluginThemes,
     );
 
     // Create database for the plugin
@@ -107,7 +133,7 @@ export async function loadPlugins({
       }
     }
 
-    await rawPlugin.activate({ ...hostContext, db, q });
+    await rawPlugin.activate({ ...hostContext, db, q } as HostContext & { db: PluginDatabase });
     loadedList.push(rawPlugin);
   }
 
@@ -123,7 +149,7 @@ function generateContext(
       Record<SidebarLocations, Map<string, PluginSidebarRegistrationFn>>
     >
   >,
-  dispatch,
+  dispatch: Dispatch,
   pluginId: string,
   navigateBase: (path: string) => void,
   setEvents: ReactDispatch<
@@ -131,6 +157,22 @@ function generateContext(
       [K in keyof ContextEvent]?: Array<(data: ContextEvent[K]) => void>;
     }>
   >,
+  addPluginTheme: (
+    pluginName: string,
+    themeId: string,
+    displayName: string,
+    colorOverrides: ThemeColorOverrides,
+    options?: {
+      baseTheme?: 'light' | 'dark' | 'midnight';
+      description?: string;
+    }
+  ) => void,
+  overrideTheme: (
+    pluginName: string,
+    themeId: 'light' | 'dark' | 'midnight' | string,
+    colorOverrides: ThemeColorOverrides
+  ) => void,
+  removePluginThemes: (pluginName: string) => void,
 ) {
   return {
     registerRoute: (
@@ -225,6 +267,19 @@ function generateContext(
       navigateBase(path);
     },
     q: q as HostQueryBuilder,
+    addTheme: (
+      themeId: string,
+      displayName: string,
+      colorOverrides: ThemeColorOverrides,
+      options?: {
+        baseTheme?: 'light' | 'dark' | 'midnight';
+        description?: string;
+      }
+    ) => addPluginTheme(pluginId, themeId, displayName, colorOverrides, options),
+    overrideTheme: (
+      themeId: 'light' | 'dark' | 'midnight' | string,
+      colorOverrides: ThemeColorOverrides
+    ) => overrideTheme(pluginId, themeId, colorOverrides),
   };
 }
 
@@ -320,7 +375,7 @@ async function injectIntoGlobalHook(pluginName: string, pluginEntry: string) {
   }
 }
 
-function joinRelativePaths(...parts) {
+function joinRelativePaths(...parts: string[]) {
   return parts
     .map(p => p.replace(/(^\/+|\/+$)/g, ''))
     .filter(Boolean)
@@ -331,19 +386,19 @@ function joinRelativePaths(...parts) {
 const pluginDatabases = new Map<string, any>();
 
 interface PluginDatabase {
-  runQuery<T = any>(sql: string, params?: any[], fetchAll?: boolean): Promise<T>;
+  runQuery<T = any>(sql: string, params?: (string | number)[], fetchAll?: boolean): Promise<T[] | { changes: number; insertId?: number }>;
   execQuery(sql: string): Promise<void>;
   transaction<T>(fn: () => T): Promise<T>;
   getMigrationState(): Promise<string[]>;
-  setMetadata(key: string, value: any): Promise<void>;
-  getMetadata(key: string): Promise<any>;
+  setMetadata(key: string, value: string): Promise<void>;
+  getMetadata(key: string): Promise<string | null>;
   aql(
     query: PluginQuery,
     options?: {
       target?: 'plugin' | 'host';
-      params?: Record<string, any>;
+      params?: Record<string, unknown>;
     }
-  ): Promise<{ data: any; dependencies: string[] }>;
+  ): Promise<{ data: unknown; dependencies: string[] }>;
 }
 
 async function createPluginDatabase(pluginId: string): Promise<PluginDatabase> {
@@ -357,9 +412,9 @@ async function createPluginDatabase(pluginId: string): Promise<PluginDatabase> {
 
   // Create database interface that communicates with backend
   const dbInterface: PluginDatabase = {
-    async runQuery<T = any>(sql: string, params: any[] = [], fetchAll = false): Promise<T> {
+    async runQuery<T = any>(sql: string, params: (string | number)[] = [], fetchAll = false): Promise<T[] | { changes: number; insertId?: number }> {
       try {
-        return await send('plugin-database-query', { pluginId, sql, params, fetchAll });
+        return await send('plugin-database-query', { pluginId, sql, params, fetchAll }) as T[] | { changes: number; insertId?: number };
       } catch (error) {
         console.error(`Plugin ${pluginId} database query error:`, error);
         throw error;
@@ -377,7 +432,12 @@ async function createPluginDatabase(pluginId: string): Promise<PluginDatabase> {
 
     async transaction<T>(fn: () => T): Promise<T> {
       // For transactions, we need to collect operations and send them as a batch
-      const operations: any[] = [];
+      const operations: Array<{
+        type: 'exec' | 'query';
+        sql: string;
+        params?: (string | number)[];
+        fetchAll?: boolean;
+      }> = [];
       let result: T;
       
       // Create a proxy context for the transaction function
@@ -385,7 +445,7 @@ async function createPluginDatabase(pluginId: string): Promise<PluginDatabase> {
         execQuery: (sql: string) => {
           operations.push({ type: 'exec', sql });
         },
-        runQuery: (sql: string, params: any[] = [], fetchAll = false) => {
+        runQuery: (sql: string, params: (string | number)[] = [], fetchAll = false) => {
           operations.push({ type: 'query', sql, params, fetchAll });
         }
       };
@@ -413,7 +473,7 @@ async function createPluginDatabase(pluginId: string): Promise<PluginDatabase> {
       }
     },
 
-    async setMetadata(key: string, value: any): Promise<void> {
+    async setMetadata(key: string, value: string): Promise<void> {
       try {
         await send('plugin-database-set-metadata', { pluginId, key, value });
       } catch (error) {
@@ -422,7 +482,7 @@ async function createPluginDatabase(pluginId: string): Promise<PluginDatabase> {
       }
     },
 
-    async getMetadata(key: string): Promise<any> {
+    async getMetadata(key: string): Promise<string | null> {
       try {
         return await send('plugin-database-get-metadata', { pluginId, key });
       } catch (error) {
@@ -432,12 +492,12 @@ async function createPluginDatabase(pluginId: string): Promise<PluginDatabase> {
     },
 
     async aql(
-      query: any,
+      query: PluginQuery,
       options?: {
         target?: 'plugin' | 'host';
-        params?: Record<string, any>;
+        params?: Record<string, unknown>;
       }
-    ): Promise<{ data: any; dependencies: string[] }> {
+    ): Promise<{ data: unknown; dependencies: string[] }> {
       try {
         return await send('plugin-aql-query', { pluginId, query, options });
       } catch (error) {

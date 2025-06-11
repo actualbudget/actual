@@ -34,6 +34,7 @@ export type {
   ActualPlugin,
   ActualPluginInitialized,
   PluginDatabase,
+  ThemeColorOverrides,
 } from './types/actualPlugin';
 export type { ActualPluginEntry } from './types/actualPluginEntry';
 
@@ -62,3 +63,6 @@ export type {
   LootCoreQueryState
 } from './types/query';
 export { convertPluginQueryToLootCore } from './middleware';
+
+
+

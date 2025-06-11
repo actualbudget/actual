@@ -1114,9 +1114,9 @@ handlers['plugin-database-query'] = async function ({ pluginId, sql, params = []
 
   try {
     if (fetchAll) {
-      return sqlite.runQuery(db, sql, params, true);
+      return sqlite.runQuery(db, sql, params, true) as unknown[];
     } else {
-      return sqlite.runQuery(db, sql, params, false);
+      return sqlite.runQuery(db, sql, params, false) as { changes: number; insertId?: number };
     }
   } catch (error) {
     console.error(`Plugin ${pluginId} database query error:`, error);
@@ -1146,8 +1146,9 @@ handlers['plugin-database-transaction'] = async function ({ pluginId, operations
   }
 
   try {
-    return sqlite.transaction(db, () => {
-      const results = [];
+    const results: Array<{ success: boolean } | unknown[] | { changes: number; insertId?: number }> = [];
+    
+    sqlite.transaction(db, () => {
       for (const op of operations) {
         if (op.type === 'exec') {
           sqlite.execQuery(db, op.sql);
@@ -1155,15 +1156,16 @@ handlers['plugin-database-transaction'] = async function ({ pluginId, operations
         } else if (op.type === 'query') {
           if (op.fetchAll) {
             const result = sqlite.runQuery(db, op.sql, op.params || [], true);
-            results.push(result);
+            results.push(result as unknown[]);
           } else {
             const result = sqlite.runQuery(db, op.sql, op.params || [], false);
-            results.push(result);
+            results.push(result as { changes: number; insertId?: number });
           }
         }
       }
-      return results;
     });
+    
+    return results;
   } catch (error) {
     console.error(`Plugin ${pluginId} database transaction error:`, error);
     throw error;

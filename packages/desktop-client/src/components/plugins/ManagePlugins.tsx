@@ -229,7 +229,9 @@ export function ManagePlugins() {
         <Button
           variant="primary"
           onPress={() => {
-            refreshPluginStore(devPlugin.current.value);
+            if (devPlugin.current) {
+              refreshPluginStore(devPlugin.current.value);
+            }
           }}
         >Enable Dev Plugin</Button>
       </View>

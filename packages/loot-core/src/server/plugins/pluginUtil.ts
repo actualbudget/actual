@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 
-export async function extractZipToMap(zipBlob) {
+export async function extractZipToMap(zipBlob: ArrayBuffer | Uint8Array | Blob) {
   const zip = await JSZip.loadAsync(zipBlob);
   const fileMap = new Map();
 

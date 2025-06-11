@@ -78,7 +78,7 @@ export type LocalPrefs = Partial<{
   'mobile.showSpentColumn': boolean;
 }>;
 
-export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';
+export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development' | string;
 export type DarkTheme = 'dark' | 'midnight';
 
 // GlobalPrefs are the parsed global-store.json values
@@ -89,6 +89,13 @@ export type GlobalPrefs = Partial<{
   language: string;
   theme: Theme;
   preferredDarkTheme: DarkTheme;
+  pluginThemes: Record<string, {
+    id: string;
+    displayName: string;
+    description?: string;
+    baseTheme?: 'light' | 'dark' | 'midnight';
+    colors: Record<string, string>;
+  }>; // Complete plugin theme metadata
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
   syncServerConfig?: {
@@ -119,6 +126,7 @@ export type GlobalPrefsJson = Partial<{
   language?: GlobalPrefs['language'];
   theme?: GlobalPrefs['theme'];
   'preferred-dark-theme'?: GlobalPrefs['preferredDarkTheme'];
+  'plugin-themes'?: string; // JSON string of complete plugin themes
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
   syncServerConfig?: GlobalPrefs['syncServerConfig'];
 }>;

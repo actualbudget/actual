@@ -14,10 +14,12 @@ import {
 } from 'plugins-core/index';
 
 import { type ActualPluginStored } from 'loot-core/types/models/actual-plugin-stored';
+import { type ThemeColorOverrides } from 'plugins-core/types/actualPlugin';
 
 import { useFeatureFlag } from '../hooks/useFeatureFlag';
 import { useNavigate } from '../hooks/useNavigate';
 import { useDispatch, useSelector } from '../redux';
+import { useGlobalPref } from '../hooks/useGlobalPref';
 
 import {
   loadPlugins,
@@ -43,6 +45,40 @@ export type ActualPluginsContextType = {
     SidebarLocations,
     Map<string, PluginSidebarRegistrationFn>
   >;
+  // Theme management
+  pluginThemes: Map<string, {
+    id: string;
+    displayName: string;
+    colorOverrides: ThemeColorOverrides;
+    baseTheme?: 'light' | 'dark' | 'midnight';
+    description?: string;
+    pluginName: string;
+  }>;
+  themeOverrides: Map<string, {
+    colorOverrides: ThemeColorOverrides;
+    pluginName: string;
+  }>;
+  addPluginTheme: (
+    pluginName: string,
+    themeId: string,
+    displayName: string,
+    colorOverrides: ThemeColorOverrides,
+    options?: {
+      baseTheme?: 'light' | 'dark' | 'midnight';
+      description?: string;
+    }
+  ) => void;
+  overrideTheme: (
+    pluginName: string,
+    themeId: 'light' | 'dark' | 'midnight' | string,
+    colorOverrides: ThemeColorOverrides
+  ) => void;
+  getPluginThemes: () => Array<{ value: string; label: string }>;
+  getThemeColors: (
+    themeId: string,
+    baseColors: Record<string, string>
+  ) => Record<string, string>;
+  removePluginThemes: (pluginName: string) => void;
 };
 
 // Create the context
@@ -59,6 +95,24 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
   const [events, setEvents] = useState<{
     [K in keyof ContextEvent]?: Array<(data: ContextEvent[K]) => void>;
   }>({});
+
+  // Global preference for storing plugin theme metadata
+  const [savedPluginThemes, setSavedPluginThemes] = useGlobalPref('pluginThemes');
+
+  // Runtime theme management state  
+  const [runtimePluginThemes, setRuntimePluginThemes] = useState<Map<string, {
+    id: string;
+    displayName: string;
+    colorOverrides: ThemeColorOverrides;
+    baseTheme?: 'light' | 'dark' | 'midnight';
+    description?: string;
+    pluginName: string;
+  }>>(new Map());
+  
+  const [themeOverrides, setThemeOverrides] = useState<Map<string, {
+    colorOverrides: ThemeColorOverrides;
+    pluginName: string;
+  }>>(new Map());
 
   useEventDispatcher(
     'payess',
@@ -97,6 +151,149 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
   const dispatch = useDispatch();
   const navigateBase = useNavigate();
 
+  // Theme management functions
+  const addPluginTheme = useCallback((
+    pluginName: string,
+    themeId: string,
+    displayName: string,
+    colorOverrides: ThemeColorOverrides,
+    options?: {
+      baseTheme?: 'light' | 'dark' | 'midnight';
+      description?: string;
+    }
+  ) => {
+    setRuntimePluginThemes(prev => {
+      const newMap = new Map(prev);
+      newMap.set(themeId, {
+        id: themeId,
+        displayName,
+        colorOverrides,
+        baseTheme: options?.baseTheme || 'light',
+        description: options?.description,
+        pluginName,
+      });
+      return newMap;
+    });
+
+    // Save theme metadata to global preferences for immediate loading
+    setSavedPluginThemes({
+      ...savedPluginThemes,
+      [themeId]: {
+        id: themeId,
+        displayName,
+        description: options?.description,
+        baseTheme: options?.baseTheme || 'light',
+        colors: colorOverrides,
+      },
+    });
+  }, [savedPluginThemes, setSavedPluginThemes]);
+
+  const overrideTheme = useCallback((
+    pluginName: string,
+    themeId: 'light' | 'dark' | 'midnight' | string,
+    colorOverrides: ThemeColorOverrides
+  ) => {
+    const overrideKey = `${pluginName}:${themeId}`;
+    setThemeOverrides(prev => {
+      const newMap = new Map(prev);
+      newMap.set(overrideKey, {
+        colorOverrides,
+        pluginName,
+      });
+      return newMap;
+    });
+  }, []);
+
+  const getPluginThemes = useCallback((): Array<{ value: string; label: string }> => {
+    // Get themes from runtime (loaded plugins)
+    const runtimeThemes = Array.from(runtimePluginThemes.values()).map(theme => ({
+      value: theme.id,
+      label: theme.displayName,
+    }));
+
+    // Get themes from saved preferences (may not be loaded yet)
+    const savedThemes = savedPluginThemes ? Object.values(savedPluginThemes)
+      .filter(theme => !runtimeThemes.some(rt => rt.value === theme.id))
+      .map(theme => ({
+        value: theme.id,
+        label: theme.displayName,
+      })) : [];
+
+    return [...runtimeThemes, ...savedThemes];
+  }, [runtimePluginThemes, savedPluginThemes]);
+
+  const getThemeColors = useCallback((
+    themeId: string,
+    baseColors: Record<string, string>
+  ): Record<string, string> => {
+    let colors = { ...baseColors };
+    
+    // If it's a plugin theme, start with base theme and apply overrides
+    const runtimePluginTheme = runtimePluginThemes.get(themeId);
+    if (runtimePluginTheme) {
+      colors = {
+        ...colors,
+        ...runtimePluginTheme.colorOverrides,
+      };
+    } else {
+      // Check saved themes as fallback
+      const savedTheme = savedPluginThemes?.[themeId];
+      if (savedTheme) {
+        colors = {
+          ...colors,
+          ...savedTheme.colors,
+        };
+      }
+    }
+    
+    // Apply any theme overrides
+    for (const [overrideKey, override] of themeOverrides) {
+      const [, targetThemeId] = overrideKey.split(':');
+      if (targetThemeId === themeId) {
+        colors = {
+          ...colors,
+          ...override.colorOverrides,
+        };
+      }
+    }
+    
+    return colors;
+  }, [runtimePluginThemes, savedPluginThemes, themeOverrides]);
+
+  const removePluginThemes = useCallback((pluginName: string) => {
+    const themesToRemove: string[] = [];
+    
+    setRuntimePluginThemes(prev => {
+      const newMap = new Map(prev);
+      for (const [themeId, theme] of newMap) {
+        if (theme.pluginName === pluginName) {
+          themesToRemove.push(themeId);
+          newMap.delete(themeId);
+        }
+      }
+      return newMap;
+    });
+
+    setThemeOverrides(prev => {
+      const newMap = new Map(prev);
+      for (const [overrideKey, override] of newMap) {
+        if (override.pluginName === pluginName) {
+          newMap.delete(overrideKey);
+        }
+      }
+      return newMap;
+    });
+
+    // Remove saved themes from global preferences
+    if (themesToRemove.length > 0) {
+      const updatedSavedThemes = { ...savedPluginThemes };
+      for (const themeId of themesToRemove) {
+        delete updatedSavedThemes[themeId];
+      }
+      setSavedPluginThemes(updatedSavedThemes);
+    }
+  }, [savedPluginThemes, setSavedPluginThemes]);
+
   // The function that actually registers and activates plugin code
   const handleLoadPlugins = useCallback(
     async (pluginsEntries: Map<string, ActualPluginEntry>) => {
@@ -112,6 +309,9 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
         setSidebarItems,
         navigateBase,
         setEvents,
+        addPluginTheme,
+        overrideTheme,
+        removePluginThemes,
       });
 
       dispatchEvent('payess', events, {
@@ -125,7 +325,7 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
         accounts: store.getState().queries.accounts,
       });
     },
-    [dispatch, navigateBase, pluginsEnabled],
+    [dispatch, navigateBase, pluginsEnabled, addPluginTheme, overrideTheme, removePluginThemes],
   );
 
   // The function that loads plugin scripts (the remote modules) and calls handleLoadPlugins
@@ -168,6 +368,13 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
     modalMap: modalMap.current,
     pluginsRoutes,
     sidebarItems,
+    pluginThemes: runtimePluginThemes,
+    themeOverrides,
+    addPluginTheme,
+    overrideTheme,
+    getPluginThemes,
+    getThemeColors,
+    removePluginThemes,
   };
 
   return (
