@@ -857,11 +857,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
               }),
             }}
             value={title}
-            onClick={console.log}
-            onPress={e => {
-              console.log(e);
-              return onEditFieldInner(transaction.id, 'payee');
-            }}
+            onPress={() => onEditFieldInner(transaction.id, 'payee')}
             data-testid="payee-field"
           />
         </View>
