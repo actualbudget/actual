@@ -197,7 +197,7 @@ function Footer({
         paddingLeft: styles.mobileEditingPadding,
         paddingRight: styles.mobileEditingPadding,
         paddingTop: 10,
-        paddingBottom: 10,
+        paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
         backgroundColor: theme.tableHeaderBackground,
         borderTopWidth: 1,
         borderColor: theme.tableBorder,
