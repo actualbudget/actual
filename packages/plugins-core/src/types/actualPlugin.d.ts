@@ -8,6 +8,27 @@ export type SidebarLocations =
   | 'after-accounts'
   | 'topbar';
 
+// Define condition value types for filtering
+export type PluginConditionValue = 
+  | string 
+  | number 
+  | boolean 
+  | null 
+  | Array<string | number>
+  | { num1: number; num2: number };
+
+export type PluginFilterCondition = {
+  field: string;
+  op: string;
+  value: PluginConditionValue;
+  type?: string;
+  customName?: string;
+};
+
+export type PluginFilterResult = {
+  filters: Record<string, unknown>;
+};
+
 // Simple color mapping type for theme methods
 export type ThemeColorOverrides = {
   // Page colors
@@ -290,9 +311,52 @@ export interface PluginDatabase {
     query: PluginQuery,
     options?: {
       target?: 'plugin' | 'host';
-      params?: Record<string, any>;
+      params?: Record<string, unknown>;
     }
-  ): Promise<{ data: any; dependencies: string[] }>;
+  ): Promise<{ data: unknown; dependencies: string[] }>;
+}
+
+export type PluginBinding = string | { name: string; query?: PluginQuery };
+
+export type PluginCellValue = { name: string; value: unknown | null };
+
+export interface PluginSpreadsheet {
+  /**
+   * Bind to a cell and observe changes
+   * @param sheetName - Name of the sheet (optional, defaults to global)
+   * @param binding - Cell binding (string name or object with name and optional query)
+   * @param callback - Function called when cell value changes
+   * @returns Cleanup function to stop observing
+   */
+  bind(
+    sheetName: string | undefined,
+    binding: PluginBinding,
+    callback: (node: PluginCellValue) => void,
+  ): () => void;
+
+  /**
+   * Get a cell value directly
+   * @param sheetName - Name of the sheet
+   * @param name - Cell name
+   * @returns Promise that resolves to the cell value
+   */
+  get(sheetName: string, name: string): Promise<PluginCellValue>;
+
+  /**
+   * Get all cell names in a sheet
+   * @param sheetName - Name of the sheet
+   * @returns Promise that resolves to array of cell names
+   */
+  getCellNames(sheetName: string): Promise<string[]>;
+
+  /**
+   * Create a query in a sheet
+   * @param sheetName - Name of the sheet
+   * @param name - Query name
+   * @param query - The query to create
+   * @returns Promise that resolves when query is created
+   */
+  createQuery(sheetName: string, name: string, query: PluginQuery): Promise<void>;
 }
 
 export type PluginMigration = [
@@ -308,13 +372,26 @@ export interface ActualPlugin {
   uninstall: () => void;
   migrations?: () => PluginMigration[];
   activate: (
-    context: Omit<HostContext, 'registerMenu' | 'pushModal' | 'registerRoute'> & {
+    context: Omit<HostContext, 'registerMenu' | 'pushModal' | 'registerRoute' | 'registerDashboardWidget'> & {
       registerMenu: (
         location: SidebarLocations,
         element: JSX.Element,
       ) => string;
       pushModal: (element: JSX.Element, modalProps?: BasicModalProps) => void;
       registerRoute: (path: string, routeElement: JSX.Element) => string;
+      
+      // Dashboard widget registration - wrapped for JSX elements
+      registerDashboardWidget: (
+        widgetType: string,
+        displayName: string,
+        element: JSX.Element,
+        options?: {
+          defaultWidth?: number;
+          defaultHeight?: number;
+          minWidth?: number;
+          minHeight?: number;
+        }
+      ) => string;
       
       // Theme methods - simple and direct
       addTheme: (
@@ -334,6 +411,11 @@ export interface ActualPlugin {
       
       db?: PluginDatabase;
       q: PluginQueryBuilder;
+
+      // Report and spreadsheet utilities
+      createSpreadsheet: () => PluginSpreadsheet;
+      
+      makeFilters: (conditions: Array<PluginFilterCondition>) => Promise<PluginFilterResult>;
     },
   ) => void;
 }
@@ -372,6 +454,20 @@ export interface HostContext {
     callback: (data: ContextEvent[K]) => void,
   ) => void;
 
+  // Dashboard widget methods
+  registerDashboardWidget: (
+    widgetType: string,
+    displayName: string,
+    renderWidget: (container: HTMLDivElement) => void,
+    options?: {
+      defaultWidth?: number;
+      defaultHeight?: number;
+      minWidth?: number;
+      minHeight?: number;
+    }
+  ) => string;
+  unregisterDashboardWidget: (id: string) => void;
+
   // Theme methods
   addTheme: (
     themeId: string,
@@ -388,6 +484,11 @@ export interface HostContext {
     colorOverrides: ThemeColorOverrides
   ) => void;
 
-  // Query builder provided by host (loot-core's q function)
+  // Query builder provided by host (loot-core's q function)  
   q: HostQueryBuilder;
+
+  // Report and spreadsheet utilities for dashboard widgets
+  createSpreadsheet: () => PluginSpreadsheet;
+  
+  makeFilters: (conditions: Array<PluginFilterCondition>) => Promise<PluginFilterResult>;
 }

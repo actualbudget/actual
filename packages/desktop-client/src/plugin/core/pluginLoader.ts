@@ -6,10 +6,16 @@ import {
 
 import { init, loadRemote } from '@module-federation/enhanced/runtime';
 import {
+  type ActualPlugin,
   type ActualPluginEntry,
   type ActualPluginInitialized,
   type PluginQuery,
   type HostQueryBuilder,
+  type PluginDatabase,
+  type PluginFilterCondition,
+  type PluginFilterResult,
+  type PluginBinding,
+  type PluginCellValue,
 } from 'plugins-core/index';
 import { q } from 'loot-core/shared/query';
 import type { Dispatch } from 'redux';
@@ -27,6 +33,7 @@ import {
   type ThemeColorOverrides,
 } from 'plugins-core/types/actualPlugin';
 import type { HostContext } from 'plugins-core/types/actualPlugin';
+import { type PluginDashboardWidget } from '../ActualPluginsProvider';
 
 // Import send function to communicate with backend
 import { send } from 'loot-core/platform/client/fetch';
@@ -50,6 +57,7 @@ export async function loadPlugins({
   modalMap,
   setPluginsRoutes,
   setSidebarItems,
+  setPluginRegisteredWidgets,
   navigateBase,
   setEvents,
   addPluginTheme,
@@ -65,6 +73,9 @@ export async function loadPlugins({
     SetStateAction<
       Record<SidebarLocations, Map<string, PluginSidebarRegistrationFn>>
     >
+  >;
+  setPluginRegisteredWidgets: ReactDispatch<
+    SetStateAction<Map<string, PluginDashboardWidget>>
   >;
   navigateBase: (path: string) => void;
   setEvents: ReactDispatch<
@@ -92,49 +103,74 @@ export async function loadPlugins({
   const loadedList: ActualPluginInitialized[] = [];
 
   for (const [pluginId, entryModule] of pluginsEntries.entries()) {
-    // Clean up any existing themes from this plugin
-    removePluginThemes(pluginId);
-    // the entry module is actually a function that returns an object with name, version, activate.
-    const pluginEntry =
-      (entryModule as unknown as { default: ActualPluginEntry }).default ||
-      entryModule;
+    try {
+      // Clean up any existing themes from this plugin
+      removePluginThemes(pluginId);
+      
+      // the entry module is actually a function that returns an object with name, version, activate.
+      const pluginEntry =
+        (entryModule as unknown as { default: ActualPluginEntry }).default ||
+        entryModule;
 
-    // The host context is how the plugin interacts with the app.
-    const hostContext = generateContext(
-      modalMap,
-      setPluginsRoutes,
-      setSidebarItems,
-      dispatch,
-      pluginId,
-      navigateBase,
-      setEvents,
-      addPluginTheme,
-      overrideTheme,
-      removePluginThemes,
-    );
-
-    // Create database for the plugin
-    const db = await createPluginDatabase(pluginId);
-
-    const rawPlugin = pluginEntry();
-    
-    // Run migrations if the plugin defines them
-    if (rawPlugin.migrations) {
-      try {
-        const migrations = rawPlugin.migrations();
-        if (migrations.length > 0) {
-          console.log(`Running ${migrations.length} migrations for plugin ${pluginId}`);
-          const result = await send('plugin-run-migrations', { pluginId, migrations });
-          console.log(`Migration results for plugin ${pluginId}:`, result);
-        }
-      } catch (error) {
-        console.error(`Failed to run migrations for plugin ${pluginId}:`, error);
-        // Continue with activation even if migrations fail for now
+      if (!pluginEntry || typeof pluginEntry !== 'function') {
+        console.error(`Plugin ${pluginId}: Invalid plugin entry module`);
+        continue;
       }
-    }
 
-    await rawPlugin.activate({ ...hostContext, db, q } as HostContext & { db: PluginDatabase });
-    loadedList.push(rawPlugin);
+      // The host context is how the plugin interacts with the app.
+      const hostContext = generateContext(
+        modalMap,
+        setPluginsRoutes,
+        setSidebarItems,
+        setPluginRegisteredWidgets,
+        dispatch,
+        pluginId,
+        navigateBase,
+        setEvents,
+        addPluginTheme,
+        overrideTheme,
+        removePluginThemes,
+      );
+
+      // Create database for the plugin
+      let db: PluginDatabase;
+      try {
+        db = await createPluginDatabase(pluginId);
+      } catch (error) {
+        console.error(`Plugin ${pluginId}: Failed to create database:`, error);
+        continue;
+      }
+
+      const rawPlugin = pluginEntry();
+      
+      // Run migrations if the plugin defines them
+      if (rawPlugin.migrations) {
+        try {
+          const migrations = rawPlugin.migrations();
+          if (migrations.length > 0) {
+            console.log(`Running ${migrations.length} migrations for plugin ${pluginId}`);
+            const result = await send('plugin-run-migrations', { pluginId, migrations });
+            console.log(`Migration results for plugin ${pluginId}:`, result);
+          }
+        } catch (error) {
+          console.error(`Failed to run migrations for plugin ${pluginId}:`, error);
+          // Continue with activation even if migrations fail for now
+        }
+      }
+
+      await rawPlugin.activate({ ...hostContext, db, q } as HostContext & { db: PluginDatabase });
+      
+      // Mark plugin as initialized and push to list
+      const initializedPlugin: ActualPluginInitialized = {
+        ...rawPlugin,
+        initialized: true,
+        activate: rawPlugin.activate as (context: HostContext & { db: PluginDatabase }) => void,
+      };
+      loadedList.push(initializedPlugin);
+    } catch (error) {
+      console.error(`Plugin ${pluginId}: Unexpected error during loading:`, error);
+      continue;
+    }
   }
 
   // store them in state so the rest of the app can use them.
@@ -148,6 +184,9 @@ function generateContext(
     SetStateAction<
       Record<SidebarLocations, Map<string, PluginSidebarRegistrationFn>>
     >
+  >,
+  setPluginRegisteredWidgets: ReactDispatch<
+    SetStateAction<Map<string, PluginDashboardWidget>>
   >,
   dispatch: Dispatch,
   pluginId: string,
@@ -280,6 +319,77 @@ function generateContext(
       themeId: 'light' | 'dark' | 'midnight' | string,
       colorOverrides: ThemeColorOverrides
     ) => overrideTheme(pluginId, themeId, colorOverrides),
+    registerDashboardWidget: (
+      widgetType: string,
+      displayName: string,
+      renderWidget: (container: HTMLDivElement) => void,
+      options?: {
+        defaultWidth?: number;
+        defaultHeight?: number;
+        minWidth?: number;
+        minHeight?: number;
+      }
+    ) => {
+      const id = `${pluginId}_${widgetType}`;
+      setPluginRegisteredWidgets(prev => {
+        const newMap = new Map(prev);
+        newMap.set(id, {
+          pluginId,
+          widgetType,
+          displayName,
+          renderWidget,
+          defaultWidth: options?.defaultWidth ?? 4,
+          defaultHeight: options?.defaultHeight ?? 2,
+          minWidth: options?.minWidth ?? 2,
+          minHeight: options?.minHeight ?? 1,
+        });
+        return newMap;
+      });
+      return id;
+    },
+    unregisterDashboardWidget: (id: string) => {
+      setPluginRegisteredWidgets(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(id);
+        return newMap;
+      });
+    },
+    makeFilters: async (conditions: Array<PluginFilterCondition>): Promise<PluginFilterResult> => {
+      const result = await send('make-filters-from-conditions', {
+        conditions: conditions.filter(cond => !cond.customName),
+      });
+      return result as unknown as PluginFilterResult;
+    },
+    createSpreadsheet: () => {
+      return createPluginSpreadsheetInterface();
+    },
+  };
+}
+
+function createPluginSpreadsheetInterface() {
+  return {
+    bind: (
+      sheetName: string | undefined,
+      binding: PluginBinding,
+      callback: (node: PluginCellValue) => void,
+    ) => {
+      // Binding is not available through send - plugins would need to use React context for this
+      console.warn('Plugin spreadsheet bind is not supported - use React context with useSpreadsheet hook instead');
+      return () => {}; // Return empty cleanup function
+    },
+    get: async (sheetName: string, name: string): Promise<PluginCellValue> => {
+      return await send('get-cell', { sheetName, name });
+    },
+    getCellNames: async (sheetName: string): Promise<string[]> => {
+      return await send('get-cell-names', { sheetName });
+    },
+    createQuery: async (sheetName: string, name: string, query: PluginQuery): Promise<void> => {
+      await send('create-query', {
+        sheetName,
+        name,
+        query: query.serialize(),
+      });
+    },
   };
 }
 
@@ -385,22 +495,6 @@ function joinRelativePaths(...parts: string[]) {
 // Plugin database management
 const pluginDatabases = new Map<string, any>();
 
-interface PluginDatabase {
-  runQuery<T = any>(sql: string, params?: (string | number)[], fetchAll?: boolean): Promise<T[] | { changes: number; insertId?: number }>;
-  execQuery(sql: string): Promise<void>;
-  transaction<T>(fn: () => T): Promise<T>;
-  getMigrationState(): Promise<string[]>;
-  setMetadata(key: string, value: string): Promise<void>;
-  getMetadata(key: string): Promise<string | null>;
-  aql(
-    query: PluginQuery,
-    options?: {
-      target?: 'plugin' | 'host';
-      params?: Record<string, unknown>;
-    }
-  ): Promise<{ data: unknown; dependencies: string[] }>;
-}
-
 async function createPluginDatabase(pluginId: string): Promise<PluginDatabase> {
   // Check if database already exists
   if (pluginDatabases.has(pluginId)) {
@@ -421,16 +515,13 @@ async function createPluginDatabase(pluginId: string): Promise<PluginDatabase> {
       }
     },
 
-    async execQuery(sql: string): Promise<void> {
-      try {
-        await send('plugin-database-exec', { pluginId, sql });
-      } catch (error) {
+    execQuery(sql: string): void {
+      send('plugin-database-exec', { pluginId, sql }).catch(error => {
         console.error(`Plugin ${pluginId} database exec error:`, error);
-        throw error;
-      }
+      });
     },
 
-    async transaction<T>(fn: () => T): Promise<T> {
+    transaction(fn: () => void): void {
       // For transactions, we need to collect operations and send them as a batch
       const operations: Array<{
         type: 'exec' | 'query';
@@ -438,7 +529,6 @@ async function createPluginDatabase(pluginId: string): Promise<PluginDatabase> {
         params?: (string | number)[];
         fetchAll?: boolean;
       }> = [];
-      let result: T;
       
       // Create a proxy context for the transaction function
       const transactionContext = {
@@ -452,15 +542,14 @@ async function createPluginDatabase(pluginId: string): Promise<PluginDatabase> {
       
       try {
         // Execute the function to collect operations
-        result = fn.call(transactionContext);
+        fn.call(transactionContext);
         
         // Send all operations as a transaction to backend
-        await send('plugin-database-transaction', { pluginId, operations });
-        
-        return result;
+        send('plugin-database-transaction', { pluginId, operations }).catch(error => {
+          console.error(`Plugin ${pluginId} database transaction error:`, error);
+        });
       } catch (error) {
         console.error(`Plugin ${pluginId} database transaction error:`, error);
-        throw error;
       }
     },
 

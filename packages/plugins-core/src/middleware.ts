@@ -10,6 +10,7 @@ import {
   PluginQueryBuilder,
   LootCoreQuery,
   LootCoreQueryBuilder,
+  ObjectExpression,
 } from './types/query';
 import { BasicModalProps } from '@actual-app/components/props/modalProps';
 
@@ -68,27 +69,27 @@ class PluginQueryImpl implements PluginQuery {
     };
   }
 
-  filter(expr: any): PluginQuery {
+  filter(expr: ObjectExpression): PluginQuery {
     return new PluginQueryImpl(this._lootCoreQuery.filter(expr));
   }
 
-  unfilter(exprs?: Array<keyof any>): PluginQuery {
+  unfilter(exprs?: Array<keyof ObjectExpression>): PluginQuery {
     return new PluginQueryImpl(this._lootCoreQuery.unfilter(exprs));
   }
 
-  select(exprs: any): PluginQuery {
+  select(exprs: ObjectExpression | string | Array<ObjectExpression | string> | '*' | ['*']): PluginQuery {
     return new PluginQueryImpl(this._lootCoreQuery.select(exprs));
   }
 
-  calculate(expr: any): PluginQuery {
+  calculate(expr: ObjectExpression | string): PluginQuery {
     return new PluginQueryImpl(this._lootCoreQuery.calculate(expr));
   }
 
-  groupBy(exprs: any): PluginQuery {
+  groupBy(exprs: ObjectExpression | string | Array<ObjectExpression | string>): PluginQuery {
     return new PluginQueryImpl(this._lootCoreQuery.groupBy(exprs));
   }
 
-  orderBy(exprs: any): PluginQuery {
+  orderBy(exprs: ObjectExpression | string | Array<ObjectExpression | string>): PluginQuery {
     return new PluginQueryImpl(this._lootCoreQuery.orderBy(exprs));
   }
 
@@ -135,7 +136,7 @@ class PluginQueryImpl implements PluginQuery {
  */
 export function convertPluginQueryToLootCore(pluginQuery: PluginQuery, lootCoreQ?: LootCoreQueryBuilder): LootCoreQuery {
   if (pluginQuery instanceof PluginQueryImpl) {
-    return (pluginQuery as any)._lootCoreQuery;
+    return (pluginQuery as unknown as { _lootCoreQuery: LootCoreQuery })._lootCoreQuery;
   }
   
   // If it's a serialized query state, reconstruct it using loot-core's q function
@@ -159,7 +160,7 @@ export function convertPluginQueryToLootCore(pluginQuery: PluginQuery, lootCoreQ
     if (state.calculation) {
       query = query.calculate(state.selectExpressions[0]);
     } else {
-      query = query.select(state.selectExpressions);
+      query = query.select(state.selectExpressions as Array<ObjectExpression | string>);
     }
   }
   
@@ -246,9 +247,35 @@ export function initializePlugin(
           });
         },
 
+        registerDashboardWidget(
+          widgetType: string,
+          displayName: string,
+          element: JSX.Element,
+          options?: {
+            defaultWidth?: number;
+            defaultHeight?: number;
+            minWidth?: number;
+            minHeight?: number;
+          }
+        ) {
+          return context.registerDashboardWidget(
+            widgetType,
+            displayName,
+            container => {
+              const root = getOrCreateRoot(container, pluginId);
+              root.render(element);
+            },
+            options
+          );
+        },
+
         // Theme methods - passed through from host context
         addTheme: context.addTheme,
         overrideTheme: context.overrideTheme,
+
+        // Report and spreadsheet utilities - passed through from host context
+        createSpreadsheet: context.createSpreadsheet,
+        makeFilters: context.makeFilters,
       };
 
       originalActivate(wrappedContext);

@@ -35,6 +35,17 @@ import {
 } from 'plugins-core/types/actualPlugin';
 import { store } from 'loot-core/client/store';
 
+export type PluginDashboardWidget = {
+  pluginId: string;
+  widgetType: string;
+  displayName: string;
+  renderWidget: (container: HTMLDivElement) => void;
+  defaultWidth?: number;
+  defaultHeight?: number;
+  minWidth?: number;
+  minHeight?: number;
+};
+
 export type ActualPluginsContextType = {
   plugins: ActualPluginInitialized[];
   pluginStore: ActualPluginStored[];
@@ -45,6 +56,7 @@ export type ActualPluginsContextType = {
     SidebarLocations,
     Map<string, PluginSidebarRegistrationFn>
   >;
+  pluginRegisteredWidgets: Map<string, PluginDashboardWidget>;
   // Theme management
   pluginThemes: Map<string, {
     id: string;
@@ -147,6 +159,9 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
     'after-accounts': new Map(),
     topbar: new Map(),
   });
+  const [pluginRegisteredWidgets, setPluginRegisteredWidgets] = useState<
+    Map<string, PluginDashboardWidget>
+  >(new Map());
 
   const dispatch = useDispatch();
   const navigateBase = useNavigate();
@@ -294,6 +309,24 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
     }
   }, [savedPluginThemes, setSavedPluginThemes]);
 
+  const removePluginWidgets = useCallback((pluginName: string) => {
+    setPluginRegisteredWidgets(prev => {
+      const newMap = new Map(prev);
+      for (const [key] of newMap.entries()) {
+        if (key.startsWith(`${pluginName}_`)) {
+          newMap.delete(key);
+        }
+      }
+      return newMap;
+    });
+  }, []);
+
+  // Enhanced cleanup function that removes both themes and widgets
+  const cleanupPlugin = useCallback((pluginName: string) => {
+    removePluginThemes(pluginName);
+    removePluginWidgets(pluginName);
+  }, [removePluginThemes, removePluginWidgets]);
+
   // The function that actually registers and activates plugin code
   const handleLoadPlugins = useCallback(
     async (pluginsEntries: Map<string, ActualPluginEntry>) => {
@@ -307,6 +340,7 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
         modalMap,
         setPluginsRoutes,
         setSidebarItems,
+        setPluginRegisteredWidgets,
         navigateBase,
         setEvents,
         addPluginTheme,
@@ -368,6 +402,7 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
     modalMap: modalMap.current,
     pluginsRoutes,
     sidebarItems,
+    pluginRegisteredWidgets,
     pluginThemes: runtimePluginThemes,
     themeOverrides,
     addPluginTheme,

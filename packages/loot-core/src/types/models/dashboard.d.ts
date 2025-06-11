@@ -61,6 +61,15 @@ export type MarkdownWidget = AbstractWidget<
   { content: string; text_align?: 'left' | 'right' | 'center' }
 >;
 
+export type PluginWidget = AbstractWidget<
+  `plugin-${string}`,
+  {
+    pluginId: string;
+    pluginWidgetType: string;
+    [key: string]: unknown;
+  }
+>;
+
 type SpecializedWidget =
   | NetWorthWidget
   | CashFlowWidget
@@ -68,7 +77,7 @@ type SpecializedWidget =
   | MarkdownWidget
   | SummaryWidget
   | CalendarWidget;
-export type Widget = SpecializedWidget | CustomReportWidget;
+export type Widget = SpecializedWidget | CustomReportWidget | PluginWidget;
 export type NewWidget = Omit<Widget, 'id' | 'tombstone'>;
 
 // Exported/imported (json) widget definition
@@ -79,7 +88,7 @@ export type ExportImportCustomReportWidget = Omit<
   meta: Omit<CustomReportEntity, 'tombstone'>;
 };
 export type ExportImportDashboardWidget = Omit<
-  ExportImportCustomReportWidget | SpecializedWidget,
+  ExportImportCustomReportWidget | SpecializedWidget | PluginWidget,
   'tombstone'
 >;
 

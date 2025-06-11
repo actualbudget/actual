@@ -80,7 +80,8 @@ const exportModel = {
           'markdown-card',
           'summary-card',
           'calendar-card',
-        ].includes(widget.type)
+        ].includes(widget.type) &&
+        !widget.type.startsWith('plugin-')
       ) {
         throw new ValidationError(
           `Invalid widget.${idx}.type value ${widget.type}.`,

@@ -5,8 +5,24 @@
  * without direct dependencies on loot-core.
  */
 
-type ObjectExpression = {
-  [key: string]: ObjectExpression | unknown;
+// Define value types that can be used in expressions
+export type PluginExpressionValue = 
+  | string 
+  | number 
+  | boolean 
+  | null 
+  | Date
+  | Array<string | number>
+  | { num1: number; num2: number } // for "isbetween" operations
+  | { $gte: string | number | Date }
+  | { $lte: string | number | Date }  
+  | { $gt: string | number | Date }
+  | { $lt: string | number | Date }
+  | { $oneof: Array<string | number> }
+  | { [operator: string]: PluginExpressionValue };
+
+export type ObjectExpression = {
+  [key: string]: ObjectExpression | PluginExpressionValue;
 };
 
 /**
@@ -60,18 +76,18 @@ export interface PluginQuery {
 }
 
 /**
- * Plugin-specific query builder function type
+ * Plugin-specific query builder function
  */
 export interface PluginQueryBuilder {
   (table: string): PluginQuery;
 }
 
 /**
- * Host-provided query builder function type (loot-core's q function)
- * This is what the host application provides in the context
+ * Host-provided query builder for plugins
+ * This wraps loot-core's query builder for plugin use
  */
 export interface HostQueryBuilder {
-  (table: string): LootCoreQuery;
+  (table: string): PluginQuery;
 }
 
 /**
@@ -88,10 +104,10 @@ export interface LootCoreQueryBuilder {
 export interface LootCoreQueryState {
   table: string;
   tableOptions: Record<string, unknown>;
-  filterExpressions: ReadonlyArray<any>;
-  selectExpressions: ReadonlyArray<any>;
-  groupExpressions: ReadonlyArray<any>;
-  orderExpressions: ReadonlyArray<any>;
+  filterExpressions: ReadonlyArray<ObjectExpression>;
+  selectExpressions: ReadonlyArray<ObjectExpression | string | '*'>;
+  groupExpressions: ReadonlyArray<ObjectExpression | string>;
+  orderExpressions: ReadonlyArray<ObjectExpression | string>;
   calculation: boolean;
   rawMode: boolean;
   withDead: boolean;
@@ -106,12 +122,12 @@ export interface LootCoreQueryState {
  */
 export interface LootCoreQuery {
   state: LootCoreQueryState;
-  filter(expr: any): LootCoreQuery;
-  unfilter(exprs?: Array<keyof any>): LootCoreQuery;
-  select(exprs: any): LootCoreQuery;
-  calculate(expr: any): LootCoreQuery;
-  groupBy(exprs: any): LootCoreQuery;
-  orderBy(exprs: any): LootCoreQuery;
+  filter(expr: ObjectExpression): LootCoreQuery;
+  unfilter(exprs?: Array<keyof ObjectExpression>): LootCoreQuery;
+  select(exprs: ObjectExpression | string | Array<ObjectExpression | string> | '*' | ['*']): LootCoreQuery;
+  calculate(expr: ObjectExpression | string): LootCoreQuery;
+  groupBy(exprs: ObjectExpression | string | Array<ObjectExpression | string>): LootCoreQuery;
+  orderBy(exprs: ObjectExpression | string | Array<ObjectExpression | string>): LootCoreQuery;
   limit(num: number): LootCoreQuery;
   offset(num: number): LootCoreQuery;
   raw(): LootCoreQuery;
@@ -119,6 +135,6 @@ export interface LootCoreQuery {
   withoutValidatedRefs(): LootCoreQuery;
   options(opts: Record<string, unknown>): LootCoreQuery;
   reset(): LootCoreQuery;
-  serialize(): any;
+  serialize(): LootCoreQueryState;
   serializeAsString(): string;
 } 
