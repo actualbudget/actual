@@ -75,7 +75,6 @@ export function SingleActiveEditFormProvider({
       clearActiveEditDelayMs?: number;
     },
   ) => {
-    console.log(editingField, field);
     if (editingField === field) {
       // Already active.
       return;

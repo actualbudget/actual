@@ -473,8 +473,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const [transaction, ...childTransactions] = transactions;
 
-  const { editingField, onRequestActiveEdit, onClearActiveEdit } =
-    useSingleActiveEditForm();
+  const { onRequestActiveEdit, onClearActiveEdit } = useSingleActiveEditForm();
   const [totalAmountFocused, setTotalAmountFocused] = useState(
     // iOS does not support automatically opening up the keyboard for the
     // total amount field. Hence we should not focus on it on page render.
@@ -813,7 +812,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
           onSplit={onSplit}
           onAddSplit={onAddSplit}
           onEmptySplitFound={onEmptySplitFound}
-          editingField={editingField}
           onEditField={onEditFieldInner}
         />
       }
