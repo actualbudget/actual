@@ -96,7 +96,7 @@ async function countContributorPoints(repo) {
       owner,
       repo,
       state: 'closed',
-      sort: 'merged',
+      sort: 'updated',
       direction: 'desc',
       per_page: 100,
     },
