@@ -53,6 +53,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@octokit/rest": "^22.0.0",
     "@types/node": "^22.15.18",
     "@types/prompts": "^2.4.9",
     "@typescript-eslint/parser": "^8.32.1",
@@ -89,7 +90,7 @@
     "yarn": "^4.9.1"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,md,json,yml}": [
+    "*.{js,mjs,jsx,ts,tsx,md,json,yml}": [
       "eslint --fix",
       "prettier --write"
     ]
