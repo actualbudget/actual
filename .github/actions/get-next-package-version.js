@@ -13,7 +13,7 @@ const options = {
     type: 'string',
     short: 'p',
   },
-  'type': {
+  type: {
     type: 'string', // nightly, hotfix, monthly
     short: 't',
   },
@@ -25,8 +25,10 @@ const { values } = parseArgs({
   allowPositionals: true,
 });
 
-if (!values["package-json"]) {
-  console.error('Please specify the path to package.json using --package-json or -p option.');
+if (!values['package-json']) {
+  console.error(
+    'Please specify the path to package.json using --package-json or -p option.',
+  );
   process.exit(1);
 }
 
@@ -45,14 +47,24 @@ try {
 
   // Create date and add 1 month
   const versionDate = new Date(2000 + versionYear, versionMonth - 1, 1); // month is 0-indexed
-  const nextVersionMonthDate = new Date(versionDate.getFullYear(), versionDate.getMonth() + 1, 1);
+  const nextVersionMonthDate = new Date(
+    versionDate.getFullYear(),
+    versionDate.getMonth() + 1,
+    1,
+  );
 
   // Format back to YY.M format
-  const nextVersionYear = nextVersionMonthDate.getFullYear().toString().slice(-2);
+  const nextVersionYear = nextVersionMonthDate
+    .getFullYear()
+    .toString()
+    .slice(-2);
   const nextVersionMonth = nextVersionMonthDate.getMonth() + 1; // Convert back to 1-indexed
 
   // Get current date string
-  const currentDate = new Date().toISOString().split('T')[0].replaceAll('-', '');
+  const currentDate = new Date()
+    .toISOString()
+    .split('T')[0]
+    .replaceAll('-', '');
 
   switch (values.type) {
     case 'nightly': {
@@ -71,7 +83,9 @@ try {
       process.exit();
     }
     default:
-      console.error('Invalid type specified. Use "nightly", "hotfix", or "monthly".');
+      console.error(
+        'Invalid type specified. Use "nightly", "hotfix", or "monthly".',
+      );
       process.exit(1);
   }
 } catch (error) {
