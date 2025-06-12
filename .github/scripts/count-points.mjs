@@ -1,4 +1,5 @@
 import { Octokit } from '@octokit/rest';
+import { minimatch } from 'minimatch';
 
 /** The repositories to analyze. */
 const ENABLED_REPOSITORIES = ['actual', 'docs'];
@@ -17,7 +18,11 @@ const PR_REVIEW_POINT_TIERS = [
 ];
 
 /** Files to exclude from PR line count calculations. */
-const EXCLUDED_FILES = ['yarn.lock', '.yarn/**/*'];
+const EXCLUDED_FILES = [
+  'yarn.lock',
+  '.yarn/**/*',
+  'packages/component-library/src/icons/**/*',
+];
 
 /**
  * Used for calculating the monthly points each core contributor has earned.
@@ -143,11 +148,7 @@ async function countContributorPoints(repo) {
     const totalChanges = modifiedFiles
       .filter(
         file =>
-          !EXCLUDED_FILES.some(pattern =>
-            pattern.includes('**')
-              ? file.filename.startsWith(pattern.replace('**/*', ''))
-              : file.filename.endsWith(pattern),
-          ),
+          !EXCLUDED_FILES.some(pattern => minimatch(file.filename, pattern)),
       )
       .reduce((sum, file) => sum + file.additions + file.deletions, 0);
 
