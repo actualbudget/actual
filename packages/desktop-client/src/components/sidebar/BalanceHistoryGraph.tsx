@@ -13,9 +13,10 @@ import { integerToCurrency } from 'loot-core/shared/util';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 
 const CHART_HEIGHT = 70;
-const CHART_WIDTH = 150;
+const CHART_WIDTH = 280;
 const LABEL_WIDTH = 70;
 const TOTAL_WIDTH = CHART_WIDTH + LABEL_WIDTH;
+
 type BalanceHistoryGraphProps = {
   accountId: string;
 };
