@@ -184,18 +184,8 @@ async function countContributorPoints(repo) {
       per_page: 100,
       since: since.toISOString(),
     },
-    (response, done) => {
-      const issues = response.data.filter(
-        issue => new Date(issue.updated_at) <= until,
-      );
-
-      // If we found issues older than until or got less than 100 issues, stop pagination
-      if (issues.length < response.data.length || response.data.length < 100) {
-        done();
-      }
-
-      return issues;
-    },
+    (response, done) =>
+      response.data.filter(issue => new Date(issue.updated_at) <= until),
   );
 
   // Get label events for each issue
