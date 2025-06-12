@@ -1,10 +1,20 @@
 import { Octokit } from '@octokit/rest';
 
-/**
- * The repositories to analyze.
- * @type {string[]}
- */
+/** The repositories to analyze. */
 const ENABLED_REPOSITORIES = ['actual', 'docs'];
+
+/** Points awarded for removing the "needs triage" label. */
+const POINTS_PER_ISSUE_TRIAGE_ACTION = 1;
+
+/** Points awarded for closing an issue. */
+const POINTS_PER_ISSUE_CLOSING_ACTION = 1;
+
+/** Point tiers for PR reviews based on total changes. */
+const PR_REVIEW_POINT_TIERS = [
+  { minChanges: 1000, points: 6 },
+  { minChanges: 100, points: 4 },
+  { minChanges: 0, points: 2 },
+];
 
 /**
  * Used for calculating the monthly points each core contributor has earned.
@@ -107,14 +117,9 @@ async function countContributorPoints(repo) {
 
     // Calculate points based on PR size
     const totalChanges = prDetails.additions + prDetails.deletions;
-    let prPoints = 0;
-    if (totalChanges > 1000) {
-      prPoints = 6;
-    } else if (totalChanges > 100) {
-      prPoints = 4;
-    } else {
-      prPoints = 2;
-    }
+    const prPoints = PR_REVIEW_POINT_TIERS.find(
+      tier => totalChanges > tier.minChanges,
+    ).points;
 
     // Add points to the reviewers
     const uniqueReviewers = new Set();
@@ -164,14 +169,14 @@ async function countContributorPoints(repo) {
           const remover = event.actor.login;
           const userStats = stats.get(remover);
           userStats.labelRemovals++;
-          userStats.points++;
+          userStats.points += POINTS_PER_ISSUE_TRIAGE_ACTION;
         }
 
         if (event.event === 'closed') {
           const closer = event.actor.login;
           const userStats = stats.get(closer);
           userStats.issueClosings++;
-          userStats.points++;
+          userStats.points += POINTS_PER_ISSUE_CLOSING_ACTION;
         }
       });
   }
