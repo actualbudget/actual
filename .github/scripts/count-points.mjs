@@ -16,6 +16,9 @@ const PR_REVIEW_POINT_TIERS = [
   { minChanges: 0, points: 2 },
 ];
 
+/** Files to exclude from PR line count calculations. */
+const EXCLUDED_FILES = ['yarn.lock', '.yarn/**/*'];
+
 /**
  * Used for calculating the monthly points each core contributor has earned.
  * These are used for payouts depending.
@@ -115,8 +118,25 @@ async function countContributorPoints(repo) {
       pull_number: pr.number,
     });
 
-    // Calculate points based on PR size
-    const totalChanges = prDetails.additions + prDetails.deletions;
+    // Get list of modified files
+    const { data: modifiedFiles } = await octokit.pulls.listFiles({
+      owner,
+      repo,
+      pull_number: pr.number,
+    });
+
+    // Calculate points based on PR size, excluding specified files
+    const totalChanges = modifiedFiles
+      .filter(
+        file =>
+          !EXCLUDED_FILES.some(pattern =>
+            pattern.includes('**')
+              ? file.filename.startsWith(pattern.replace('**/*', ''))
+              : file.filename.endsWith(pattern),
+          ),
+      )
+      .reduce((sum, file) => sum + file.additions + file.deletions, 0);
+
     const prPoints = PR_REVIEW_POINT_TIERS.find(
       tier => totalChanges > tier.minChanges,
     ).points;
