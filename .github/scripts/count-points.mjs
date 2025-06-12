@@ -68,9 +68,9 @@ async function countContributorPoints(repo) {
     Array.from(orgMemberLogins).map(login => [
       login,
       {
-        reviews: 0,
-        labelRemovals: 0,
-        issueClosings: 0,
+        reviews: [],
+        labelRemovals: [],
+        issueClosings: [],
         points: 0,
       },
     ]),
@@ -169,7 +169,7 @@ async function countContributorPoints(repo) {
       .forEach(({ user: { login: reviewer } }) => {
         uniqueReviewers.add(reviewer);
         const userStats = stats.get(reviewer);
-        userStats.reviews++;
+        userStats.reviews.push(pr.number.toString());
         userStats.points += prPoints;
       });
   }
@@ -214,14 +214,14 @@ async function countContributorPoints(repo) {
         ) {
           const remover = event.actor.login;
           const userStats = stats.get(remover);
-          userStats.labelRemovals++;
+          userStats.labelRemovals.push(issue.number.toString());
           userStats.points += POINTS_PER_ISSUE_TRIAGE_ACTION;
         }
 
         if (event.event === 'closed') {
           const closer = event.actor.login;
           const userStats = stats.get(closer);
-          userStats.issueClosings++;
+          userStats.issueClosings.push(issue.number.toString());
           userStats.points += POINTS_PER_ISSUE_CLOSING_ACTION;
         }
       });
@@ -230,18 +230,21 @@ async function countContributorPoints(repo) {
   // Print all statistics
   printStats(
     `PR Review Statistics (${repo})`,
-    stats => stats.reviews,
-    (user, count) => `${user}: ${count}`,
+    stats => stats.reviews.length,
+    (user, count) =>
+      `${user}: ${count} (PRs: ${stats.get(user).reviews.join(', ')})`,
   );
   printStats(
     `"Needs Triage" Label Removal Statistics (${repo})`,
-    stats => stats.labelRemovals,
-    (user, count) => `${user}: ${count}`,
+    stats => stats.labelRemovals.length,
+    (user, count) =>
+      `${user}: ${count} (Issues: ${stats.get(user).labelRemovals.join(', ')})`,
   );
   printStats(
     `Issue Closing Statistics (${repo})`,
-    stats => stats.issueClosings,
-    (user, count) => `${user}: ${count}`,
+    stats => stats.issueClosings.length,
+    (user, count) =>
+      `${user}: ${count} (Issues: ${stats.get(user).issueClosings.join(', ')})`,
   );
 
   // Print points summary
