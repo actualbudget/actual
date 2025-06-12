@@ -35,7 +35,6 @@ Here are some initial guidelines for how contributions will be treated:
 - @matt-fidd
 - @MikesGlitch
 - @RubenOlsen
-- @teprifer
 - @youngcw
 
 ### Alumni
@@ -48,9 +47,10 @@ Here are some initial guidelines for how contributions will be treated:
 - @jlongster
 - @Kidglove57
 - @rich-howell
-- @shall0pass
-- @trevdor
 - @shaankhosla
+- @shall0pass
+- @teprifer
+- @trevdor
 - @twk3
 - @UnderKoen
 
