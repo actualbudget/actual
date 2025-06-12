@@ -577,8 +577,13 @@ const TransactionEditInner = memo(function TransactionEditInner({
     }
   }, [isAdding, dispatch, navigate, onSave, unserializedTransactions]);
 
-  const onUpdateInner = useCallback(
-    async (serializedTransaction, name, value) => {
+  const _onUpdateInner = useRef(async () => {});
+  const onUpdateInner = _onUpdateInner.current;
+  useEffect(() => {
+    console.log('effect', transactions);
+    _onUpdateInner.current = async ({ id }, name, value) => {
+      const serializedTransaction = transactions.find(t => t.id === id);
+      console.log('update', transactions);
       const newTransaction = { ...serializedTransaction, [name]: value };
       await onUpdate(newTransaction, name);
       onClearActiveEdit();
@@ -586,9 +591,8 @@ const TransactionEditInner = memo(function TransactionEditInner({
       if (name === 'account') {
         hasAccountChanged.current = serializedTransaction.account !== value;
       }
-    },
-    [onClearActiveEdit, onUpdate],
-  );
+    };
+  }, [onClearActiveEdit, onUpdate, transactions]);
 
   const onTotalAmountUpdate = useCallback(
     value => {
@@ -620,7 +624,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
                       unserializedTransaction.date,
                     ),
                     onSelect: categoryId => {
-                      onUpdateInner(transactionToEdit, name, categoryId);
+                      _onUpdateInner.current(
+                        transactionToEdit,
+                        name,
+                        categoryId,
+                      );
                     },
                     onClose: () => {
                       onClearActiveEdit();
@@ -637,7 +645,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   name: 'account-autocomplete',
                   options: {
                     onSelect: accountId => {
-                      onUpdateInner(transactionToEdit, name, accountId);
+                      _onUpdateInner.current(
+                        transactionToEdit,
+                        name,
+                        accountId,
+                      );
                     },
                     onClose: () => {
                       onClearActiveEdit();
@@ -654,7 +666,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   name: 'payee-autocomplete',
                   options: {
                     onSelect: payeeId => {
-                      onUpdateInner(transactionToEdit, name, payeeId);
+                      _onUpdateInner.current(transactionToEdit, name, payeeId);
                     },
                     onClose: () => {
                       onClearActiveEdit();
@@ -675,7 +687,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                       unserializedTransaction.date,
                     ),
                     onSubmit: (name, value) => {
-                      onUpdateInner(transactionToEdit, name, value);
+                      _onUpdateInner.current(transactionToEdit, name, value);
                     },
                     onClose: () => {
                       onClearActiveEdit();
@@ -691,7 +703,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
     [
       categoryGroups,
       dispatch,
-      onUpdateInner,
+      _onUpdateInner,
       onClearActiveEdit,
       onRequestActiveEdit,
       transaction.id,
