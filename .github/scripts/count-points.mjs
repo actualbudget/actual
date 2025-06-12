@@ -110,11 +110,16 @@ async function countContributorPoints() {
     }
 
     // Add points to the reviewers
+    const uniqueReviewers = new Set();
     reviews
       .filter(
-        review => stats.has(review.user?.login) && review.state === 'APPROVED',
+        review =>
+          stats.has(review.user?.login) &&
+          review.state === 'APPROVED' &&
+          !uniqueReviewers.has(review.user?.login),
       )
       .forEach(({ user: { login: reviewer } }) => {
+        uniqueReviewers.add(reviewer);
         const userStats = stats.get(reviewer);
         userStats.reviews++;
         userStats.points += prPoints;
