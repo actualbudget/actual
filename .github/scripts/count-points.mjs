@@ -1,13 +1,20 @@
 import { Octokit } from '@octokit/rest';
 
 /**
+ * The repositories to analyze.
+ * @type {string[]}
+ */
+const ENABLED_REPOSITORIES = ['actual', 'docs'];
+
+/**
  * Used for calculating the monthly points each core contributor has earned.
  * These are used for payouts depending.
+ * @param {string} repo - The repository to analyze ('actual' or 'docs')
+ * @returns {number} The total points earned for the repository
  */
-async function countContributorPoints() {
+async function countContributorPoints(repo) {
   const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
   const owner = 'actualbudget';
-  const repo = 'actual';
 
   // Get data relating to the last month
   const now = new Date();
@@ -171,24 +178,24 @@ async function countContributorPoints() {
 
   // Print all statistics
   printStats(
-    'PR Review Statistics',
+    `PR Review Statistics (${repo})`,
     stats => stats.reviews,
     (user, count) => `${user}: ${count}`,
   );
   printStats(
-    '"Needs Triage" Label Removal Statistics',
+    `"Needs Triage" Label Removal Statistics (${repo})`,
     stats => stats.labelRemovals,
     (user, count) => `${user}: ${count}`,
   );
   printStats(
-    'Issue Closing Statistics',
+    `Issue Closing Statistics (${repo})`,
     stats => stats.issueClosings,
     (user, count) => `${user}: ${count}`,
   );
 
   // Print points summary
   printStats(
-    'Points Summary',
+    `Points Summary (${repo})`,
     stats => stats.points,
     (user, userPoints) => `${user}: ${userPoints}`,
   );
@@ -198,11 +205,66 @@ async function countContributorPoints() {
     (sum, userStats) => sum + userStats.points,
     0,
   );
-  console.log('\nTotal points earned: ' + totalPoints);
+  console.log(`\nTotal points earned for ${repo}: ${totalPoints}`);
+
+  // Return the points
+  return new Map(
+    Array.from(stats.entries()).map(([login, userStats]) => [
+      login,
+      userStats.points,
+    ]),
+  );
 }
 
 /**
- * Used for calculating the monthly points each core contributor has earned.
- * These are used for payouts depending.
+ * Calculate the points for both repositories and print cumulative results
  */
-countContributorPoints().catch(console.error);
+async function calculateCumulativePoints() {
+  // Get stats for each repository
+  const repoPointsResults = await Promise.all(
+    ENABLED_REPOSITORIES.map(countContributorPoints),
+  );
+
+  // Calculate cumulative stats
+  const cumulativeStats = new Map(repoPointsResults[0]);
+
+  // Combine stats from all repositories
+  for (let i = 1; i < repoPointsResults.length; i++) {
+    for (const [login, points] of repoPointsResults[i].entries()) {
+      if (!cumulativeStats.has(login)) {
+        cumulativeStats.set(login, 0);
+      }
+
+      cumulativeStats.set(login, cumulativeStats.get(login) + points);
+    }
+  }
+
+  // Print cumulative statistics
+  console.log('\n\nCUMULATIVE STATISTICS ACROSS ALL REPOSITORIES');
+  console.log('='.repeat(50));
+
+  console.log('\nCumulative Points Summary:');
+  console.log('='.repeat('Cumulative Points Summary'.length + 1));
+
+  const entries = Array.from(cumulativeStats.entries())
+    .filter(([, count]) => count > 0)
+    .sort((a, b) => b[1] - a[1]);
+
+  if (entries.length === 0) {
+    console.log('No cumulative points summary found.');
+  } else {
+    entries.forEach(([user, points]) => {
+      console.log(`${user}: ${points}`);
+    });
+  }
+
+  // Calculate and print total cumulative points
+  const totalCumulativePoints = Array.from(cumulativeStats.values()).reduce(
+    (sum, points) => sum + points,
+    0,
+  );
+  console.log('\nTotal cumulative points earned: ' + totalCumulativePoints);
+}
+
+// Run the calculations
+calculateCumulativePoints().catch(console.error);
