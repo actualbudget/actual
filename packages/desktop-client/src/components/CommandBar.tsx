@@ -235,7 +235,7 @@ export function CommandBar() {
             display: 'none',
           },
           // Ensure content is still scrollable
-          '-ms-overflow-style': 'none',
+          msOverflowStyle: 'none',
         })}
       >
         {filteredSections.map(
