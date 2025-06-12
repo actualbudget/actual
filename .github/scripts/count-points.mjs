@@ -217,7 +217,8 @@ async function countContributorPoints(repo) {
       .forEach(event => {
         if (
           event.event === 'unlabeled' &&
-          event.label?.name === 'needs triage'
+          event.label &&
+          event.label.name.toLowerCase() === 'needs triage'
         ) {
           const remover = event.actor.login;
           const userStats = stats.get(remover);
