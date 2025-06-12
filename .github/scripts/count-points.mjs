@@ -40,6 +40,17 @@ async function countContributorPoints(repo) {
     ? new Date(process.env.START_DATE)
     : firstDayOfLastMonth;
 
+  // Calculate the end of the month for the since date
+  const until = new Date(
+    since.getFullYear(),
+    since.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+    999,
+  );
+
   // Get organization members
   const { data: orgMembers } = await octokit.orgs.listMembers({
     org: owner,
@@ -91,7 +102,10 @@ async function countContributorPoints(repo) {
     },
     (response, done) => {
       const prs = response.data.filter(
-        pr => pr.merged_at && new Date(pr.merged_at) > since,
+        pr =>
+          pr.merged_at &&
+          new Date(pr.merged_at) > since &&
+          new Date(pr.merged_at) <= until,
       );
 
       // If we found PRs older than a month or got less than 100 PRs, stop pagination
@@ -179,7 +193,9 @@ async function countContributorPoints(repo) {
     events
       .filter(
         event =>
-          new Date(event.created_at) > since && stats.has(event.actor?.login),
+          new Date(event.created_at) > since &&
+          new Date(event.created_at) <= until &&
+          stats.has(event.actor?.login),
       )
       .forEach(event => {
         if (
