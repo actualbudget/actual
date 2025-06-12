@@ -173,13 +173,30 @@ async function countContributorPoints(repo) {
   }
 
   // Get all issues with label events in the last month
-  const { data: issues } = await octokit.issues.listForRepo({
-    owner,
-    repo,
-    state: 'all',
-    per_page: 100,
-    since: since.toISOString(),
-  });
+  const issues = await octokit.paginate(
+    octokit.issues.listForRepo,
+    {
+      owner,
+      repo,
+      state: 'all',
+      sort: 'updated',
+      direction: 'desc',
+      per_page: 100,
+      since: since.toISOString(),
+    },
+    (response, done) => {
+      const issues = response.data.filter(
+        issue => new Date(issue.updated_at) <= until,
+      );
+
+      // If we found issues older than until or got less than 100 issues, stop pagination
+      if (issues.length < response.data.length || response.data.length < 100) {
+        done();
+      }
+
+      return issues;
+    },
+  );
 
   // Get label events for each issue
   for (const issue of issues) {
