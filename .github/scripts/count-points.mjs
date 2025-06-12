@@ -22,6 +22,7 @@ const EXCLUDED_FILES = [
   'yarn.lock',
   '.yarn/**/*',
   'packages/component-library/src/icons/**/*',
+  'release-notes/**/*',
 ];
 
 /**
