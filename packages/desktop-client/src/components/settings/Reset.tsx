@@ -81,6 +81,7 @@ export function ResetSync() {
         <Text>
           <Trans>
             <strong>Reset sync</strong> is only available when syncing is
+            enabled.
           </Trans>
         </Text>
       )}
