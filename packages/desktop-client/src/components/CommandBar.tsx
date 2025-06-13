@@ -5,8 +5,10 @@ import {
   type SVGProps,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   SvgCog,
@@ -42,26 +44,35 @@ type SearchSection = {
   onSelect: (item: Pick<SearchableItem, 'id'>) => void;
 };
 
-const navigationItems: Readonly<(SearchableItem & { path: string })[]> = [
-  { id: 'budget', name: 'Budget', path: '/budget', Icon: SvgWallet },
-  { id: 'reports-nav', name: 'Reports', path: '/reports', Icon: SvgReports },
-  {
-    id: 'schedules',
-    name: 'Schedules',
-    path: '/schedules',
-    Icon: SvgCalendar3,
-  },
-  { id: 'payees', name: 'Payees', path: '/payees', Icon: SvgStoreFront },
-  { id: 'rules', name: 'Rules', path: '/rules', Icon: SvgTuning },
-  { id: 'settings', name: 'Settings', path: '/settings', Icon: SvgCog },
-];
-
 export function CommandBar() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const navigate = useNavigate();
   const [budgetName] = useMetadataPref('budgetName');
   const { modalStack } = useModalState();
+
+  const navigationItems = useMemo(
+    () => [
+      { id: 'budget', name: t('Budget'), path: '/budget', Icon: SvgWallet },
+      {
+        id: 'reports-nav',
+        name: t('Reports'),
+        path: '/reports',
+        Icon: SvgReports,
+      },
+      {
+        id: 'schedules',
+        name: t('Schedules'),
+        path: '/schedules',
+        Icon: SvgCalendar3,
+      },
+      { id: 'payees', name: t('Payees'), path: '/payees', Icon: SvgStoreFront },
+      { id: 'rules', name: t('Rules'), path: '/rules', Icon: SvgTuning },
+      { id: 'settings', name: t('Settings'), path: '/settings', Icon: SvgCog },
+    ],
+    [t],
+  );
 
   useEffect(() => {
     // Reset search when closing
@@ -101,7 +112,7 @@ export function CommandBar() {
   const sections: SearchSection[] = [
     {
       key: 'navigation',
-      heading: 'Navigation',
+      heading: t('Navigation'),
       items: navigationItems.map(({ id, name, Icon }) => ({
         id,
         name,
@@ -114,7 +125,7 @@ export function CommandBar() {
     },
     {
       key: 'accounts',
-      heading: 'Accounts',
+      heading: t('Accounts'),
       items: accounts.map(account => ({
         ...account,
         Icon: SvgPiggyBank,
@@ -123,7 +134,7 @@ export function CommandBar() {
     },
     {
       key: 'reports-custom',
-      heading: 'Custom Reports',
+      heading: t('Custom Reports'),
       items: customReports.map(report => ({
         ...report,
         Icon: SvgNotesPaperText,
@@ -146,8 +157,8 @@ export function CommandBar() {
       vimBindings
       open={open}
       onOpenChange={setOpen}
-      label="Global Command Menu"
-      aria-label="Command Menu"
+      label={t('Command Bar')}
+      aria-label={t('Command Bar')}
       shouldFilter={false}
       className={css({
         position: 'fixed',
@@ -167,7 +178,7 @@ export function CommandBar() {
     >
       <Command.Input
         autoFocus
-        placeholder={`Search ${budgetName}...`}
+        placeholder={t('Search {{budgetName}}...', { budgetName })}
         value={search}
         onValueChange={setSearch}
         className={css({
@@ -259,7 +270,7 @@ export function CommandBar() {
               color: 'var(--color-pageTextSubdued)',
             })}
           >
-            No results found.
+            {t('No results found')}
           </Command.Empty>
         )}
       </Command.List>
