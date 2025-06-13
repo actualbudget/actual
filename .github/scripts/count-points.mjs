@@ -90,7 +90,7 @@ async function countContributorPoints(repo) {
     Array.from(orgMemberLogins).map(login => [
       login,
       {
-        reviews: [],
+        reviews: [], // Will store objects with PR number and points
         labelRemovals: [],
         issueClosings: [],
         points: 0,
@@ -193,7 +193,7 @@ async function countContributorPoints(repo) {
       .forEach(({ user: { login: reviewer } }) => {
         uniqueReviewers.add(reviewer);
         const userStats = stats.get(reviewer);
-        userStats.reviews.push(pr.number.toString());
+        userStats.reviews.push({ pr: pr.number.toString(), points: prPoints });
         userStats.points += prPoints;
       });
   }
@@ -256,7 +256,10 @@ async function countContributorPoints(repo) {
     `PR Review Statistics (${repo})`,
     stats => stats.reviews.length,
     (user, count) =>
-      `${user}: ${count} (PRs: ${stats.get(user).reviews.join(', ')})`,
+      `${user}: ${count} (PRs: ${stats
+        .get(user)
+        .reviews.map(r => `#${r.pr} (${r.points}pts)`)
+        .join(', ')})`,
   );
   printStats(
     `"Needs Triage" Label Removal Statistics (${repo})`,
