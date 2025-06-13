@@ -31,6 +31,7 @@
     "@vitejs/plugin-react-swc": "^3.6.0",
     "auto-text-size": "^0.2.3",
     "chokidar": "^3.6.0",
+    "cmdk": "^1.1.1",
     "cross-env": "^7.0.3",
     "date-fns": "^4.1.0",
     "debounce": "^1.2.1",
