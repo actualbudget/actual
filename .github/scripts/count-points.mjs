@@ -119,32 +119,16 @@ async function countContributorPoints(repo) {
     }
   };
 
-  // Get all PRs using pagination
+  // Get all PRs using search
+  const searchQuery = `repo:${owner}/${repo} is:pr is:merged merged:${since.toISOString()}..${until.toISOString()}`;
   const recentPRs = await octokit.paginate(
-    octokit.pulls.list,
+    octokit.search.issuesAndPullRequests,
     {
-      owner,
-      repo,
-      state: 'closed',
-      sort: 'updated',
-      direction: 'desc',
+      q: searchQuery,
       per_page: 100,
+      advanced_search: true,
     },
-    (response, done) => {
-      const prs = response.data.filter(
-        pr =>
-          pr.merged_at &&
-          new Date(pr.merged_at) > since &&
-          new Date(pr.merged_at) <= until,
-      );
-
-      // If we found PRs older than a month or got less than 100 PRs, stop pagination
-      if (prs.length < response.data.length || response.data.length < 100) {
-        done();
-      }
-
-      return prs;
-    },
+    response => response.data,
   );
 
   // Get reviews and PR details for each PR
