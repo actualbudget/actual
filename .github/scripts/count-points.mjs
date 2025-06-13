@@ -26,15 +26,10 @@ const EXCLUDED_FILES = [
 ];
 
 /**
- * Used for calculating the monthly points each core contributor has earned.
- * These are used for payouts depending.
- * @param {string} repo - The repository to analyze ('actual' or 'docs')
- * @returns {number} The total points earned for the repository
+ * Get the start and end dates for the last month.
+ * @returns {Object} An object containing the start and end dates.
  */
-async function countContributorPoints(repo) {
-  const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-  const owner = 'actualbudget';
-
+function getLastMonthDates() {
   // Get data relating to the last month
   const now = new Date();
   const firstDayOfLastMonth = new Date(
@@ -56,6 +51,21 @@ async function countContributorPoints(repo) {
     59,
     999,
   );
+
+  return { since, until };
+}
+
+/**
+ * Used for calculating the monthly points each core contributor has earned.
+ * These are used for payouts depending.
+ * @param {string} repo - The repository to analyze ('actual' or 'docs')
+ * @returns {number} The total points earned for the repository
+ */
+async function countContributorPoints(repo) {
+  const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+  const owner = 'actualbudget';
+
+  const { since, until } = getLastMonthDates();
 
   // Get organization members
   const { data: orgMembers } = await octokit.orgs.listMembers({
