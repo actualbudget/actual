@@ -292,7 +292,9 @@ export function Account<FieldName extends SheetFields<'account'>>({
           {accountNote && (
             <Notes
               getStyle={() => ({
+                borderTop: `1px solid ${theme.tableBorder}`,
                 padding: 0,
+                paddingTop: '0.5rem',
                 marginTop: '0.5rem',
               })}
               notes={accountNote}
