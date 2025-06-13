@@ -11,7 +11,7 @@ import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePreviewTransactions } from '@desktop-client/hooks/usePreviewTransactions';
-import { accountSchedulesQuery } from '@desktop-client/hooks/useSchedules';
+import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
@@ -19,7 +19,7 @@ import * as queries from '@desktop-client/queries/queries';
 import { useDispatch } from '@desktop-client/redux';
 
 export function AllAccountTransactions() {
-  const schedulesQuery = useMemo(() => accountSchedulesQuery(), []);
+  const schedulesQuery = useMemo(() => getSchedulesQuery(), []);
 
   return (
     <SchedulesProvider query={schedulesQuery}>

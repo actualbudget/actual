@@ -15,7 +15,7 @@ import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountP
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { accountSchedulesQuery } from '@desktop-client/hooks/useSchedules';
+import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
@@ -29,7 +29,7 @@ export function AccountTransactions({
   readonly account: AccountEntity;
 }) {
   const schedulesQuery = useMemo(
-    () => accountSchedulesQuery(account.id),
+    () => getSchedulesQuery(account.id),
     [account.id],
   );
 
@@ -157,14 +157,11 @@ function TransactionListWithPreviews({
   );
 
   const balanceQueries = useMemo(
-    () =>
-      account
-        ? {
-            balance: queries.accountBalance(account.id),
-            cleared: queries.accountBalanceCleared(account.id),
-            uncleared: queries.accountBalanceUncleared(account.id),
-          }
-        : { balance: queries.allAccountBalance() },
+    () => ({
+      balance: queries.accountBalance(account.id),
+      cleared: queries.accountBalanceCleared(account.id),
+      uncleared: queries.accountBalanceUncleared(account.id),
+    }),
     [account],
   );
 

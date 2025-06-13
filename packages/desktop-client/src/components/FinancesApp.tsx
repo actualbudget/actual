@@ -21,7 +21,6 @@ import { BankSyncStatus } from './BankSyncStatus';
 import { CommandBar } from './CommandBar';
 import { GlobalKeys } from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
-import { CategoryPage } from './mobile/budget/CategoryPage';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Notifications } from './Notifications';
@@ -290,11 +289,7 @@ export function FinancesApp() {
 
                 <Route
                   path="/categories/:id"
-                  element={
-                    <WideNotSupported>
-                      <CategoryPage />
-                    </WideNotSupported>
-                  }
+                  element={<NarrowAlternate name="Category" />}
                 />
                 {multiuserEnabled && (
                   <Route
