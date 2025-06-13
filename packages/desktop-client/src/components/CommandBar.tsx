@@ -64,49 +64,8 @@ export function CommandBar() {
   const { modalStack } = useModalState();
 
   useEffect(() => {
-    // ---- Reset search when closing ----
-    if (!open) return setSearch('');
-
-    // ---- When opening, temporarily disable existing focus traps ----
-    const originalStates: {
-      element: Element;
-      attribute: 'data-focus-trap' | 'inert';
-      value: string | null;
-    }[] = [];
-
-    for (const element of document.querySelectorAll(
-      '[data-focus-trap="true"], [role="dialog"]:not([aria-label*="Command"])',
-    )) {
-      // Store original state
-      const focusTrapValue = element.getAttribute('data-focus-trap');
-      if (focusTrapValue !== null) {
-        originalStates.push({
-          element,
-          attribute: 'data-focus-trap',
-          value: focusTrapValue,
-        });
-        element.setAttribute('data-focus-trap', 'false');
-      }
-
-      // Temporarily set inert to prevent interaction
-      const inertValue = element.getAttribute('inert');
-      if (inertValue === null) {
-        originalStates.push({
-          element,
-          attribute: 'inert',
-          value: null,
-        });
-        element.setAttribute('inert', '');
-      }
-    }
-
-    // Cleanup function to restore original states
-    return () => {
-      for (const { element, attribute, value } of originalStates) {
-        if (!value) element.removeAttribute(attribute);
-        else element.setAttribute(attribute, value);
-      }
-    };
+    // Reset search when closing
+    if (!open) setSearch('');
   }, [open]);
 
   const allAccounts = useAccounts();
@@ -184,7 +143,7 @@ export function CommandBar() {
 
   return (
     <Command.Dialog
-      vimBindings={true}
+      vimBindings
       open={open}
       onOpenChange={setOpen}
       label="Global Command Menu"
@@ -207,6 +166,7 @@ export function CommandBar() {
       })}
     >
       <Command.Input
+        autoFocus
         placeholder={`Search ${budgetName}...`}
         value={search}
         onValueChange={setSearch}
