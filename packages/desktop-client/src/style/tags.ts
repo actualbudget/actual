@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import { theme as themeStyle } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
@@ -7,19 +7,24 @@ import { type Theme } from 'loot-core/types/prefs';
 
 import { useTheme } from './theme';
 
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-
-type TagColors = Record<string, string>;
+import { getTagsColors } from '@desktop-client/queries/queriesSlice';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 export function useTags() {
-  const [tags = '{}', setTagsPref] = useSyncedPref('tags');
-  return [
-    JSON.parse(tags) as TagColors,
-    (tags: TagColors) => setTagsPref(JSON.stringify(tags)),
-  ] as const;
+  const dispatch = useDispatch();
+  const tagsColors = useSelector(state => state.queries.tagsColors);
+  const tagsColorsLoaded = useSelector(state => state.queries.tagsColorsLoaded);
+
+  useEffect(() => {
+    if (!tagsColorsLoaded) {
+      dispatch(getTagsColors());
+    }
+  }, [tagsColorsLoaded, dispatch]);
+
+  return tagsColors;
 }
 
-function getTagColors(theme: Theme, color?: string) {
+function getTagCSSColors(theme: Theme, color?: string) {
   if (theme === 'light') {
     return [
       color ? `${color} !important` : themeStyle.noteTagText,
@@ -42,15 +47,17 @@ function getTagColors(theme: Theme, color?: string) {
 }
 
 export function useTagCSS() {
-  const [tagsColors] = useTags();
+  const tagsColors = useTags();
   const [theme] = useTheme();
 
   return useCallback(
     (tag: string, options: { color?: string; compact?: boolean } = {}) => {
-      const [color, backgroundColor, backgroundColorHovered] = getTagColors(
+      const [color, backgroundColor, backgroundColorHovered] = getTagCSSColors(
         theme,
         // fallback strategy: options color > tag color > default color > theme color (undefined)
-        options.color ?? tagsColors[tag] ?? tagsColors['*'],
+        options.color ??
+          tagsColors.find(t => t.tag === tag)?.color ??
+          tagsColors.find(t => t.tag === '*')?.color,
       );
 
       return css({
@@ -70,16 +77,5 @@ export function useTagCSS() {
       });
     },
     [theme, tagsColors],
-  );
-}
-
-export function useTagColor() {
-  const [tagsColors] = useTags();
-
-  return useCallback(
-    (tag: string) => {
-      return tagsColors[tag];
-    },
-    [tagsColors],
   );
 }
