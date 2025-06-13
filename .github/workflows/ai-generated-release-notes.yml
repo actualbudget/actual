@@ -1,0 +1,396 @@
+name: Generate Release Notes from CodeRabbit summary
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  generate-release-notes:
+    # Only run on PR comments from CodeRabbit bot
+    if: github.event.issue.pull_request && github.event.comment.user.login == 'coderabbitai[bot]'
+    runs-on: ubuntu-latest
+    continue-on-error: true  # Never block PR merges
+    permissions:
+      contents: write
+      pull-requests: read
+      issues: read
+
+    steps:
+      - name: Check if this is CodeRabbit's first comment
+        id: check-first-comment
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number
+              });
+              
+              const coderabbitComments = comments.filter(comment => 
+                comment.user.login === 'coderabbitai[bot]'
+              );
+              
+              const isFirstComment = coderabbitComments.length === 1 && 
+                coderabbitComments[0].id === context.payload.comment.id;
+              
+              console.log(`CodeRabbit comments found: ${coderabbitComments.length}`);
+              console.log(`Is first comment: ${isFirstComment}`);
+              
+              return isFirstComment;
+            } catch (error) {
+              console.log('Error checking CodeRabbit comment:', error.message);
+              return false; // Fail gracefully
+            }
+
+      - name: Get PR details
+        if: steps.check-first-comment.outputs.result == 'true'
+        id: pr-details
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number
+              });
+              
+              return {
+                number: pr.number,
+                author: pr.user.login,
+                title: pr.title
+              };
+            } catch (error) {
+              console.log('Error getting PR details:', error.message);
+              return null; // Fail gracefully
+            }
+
+      - name: Check if release notes file already exists
+        if: steps.check-first-comment.outputs.result == 'true' && steps.pr-details.outputs.result != 'null'
+        id: check-release-notes-exists
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              const prDetails = JSON.parse('${{ steps.pr-details.outputs.result }}');
+              if (!prDetails) {
+                console.log('No PR details available, skipping file check');
+                return false;
+              }
+              
+              const fileName = `upcoming-release-notes/${prDetails.number}.md`;
+              
+              // Get PR head SHA to check file on the PR branch, not default branch
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number
+              });
+              
+              const prHeadSha = pr.head.sha;
+              console.log(`Checking for file on PR branch: ${pr.head.ref} (${prHeadSha})`);
+              
+              try {
+                await github.rest.repos.getContent({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  path: fileName,
+                  ref: prHeadSha
+                });
+                console.log(`Release notes file already exists on PR branch: ${fileName}`);
+                return true;
+              } catch (error) {
+                if (error.status === 404) {
+                  console.log(`No existing release notes file found on PR branch: ${fileName}`);
+                  return false;
+                } else {
+                  console.log('Error checking file existence:', error.message);
+                  return false; // Fail gracefully
+                }
+              }
+            } catch (error) {
+              console.log('Error in file existence check:', error.message);
+              return false; // Fail gracefully
+            }
+
+      - name: Generate summary with OpenAI
+        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false'
+        id: generate-summary
+        continue-on-error: true
+        uses: actions/github-script@v7
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        with:
+          script: |
+            try {
+              const commentBody = context.payload.comment.body;
+              const prDetails = JSON.parse('${{ steps.pr-details.outputs.result }}');
+              
+              if (!prDetails) {
+                console.log('No PR details available, cannot generate summary');
+                return null;
+              }
+              
+              console.log('CodeRabbit comment body:', commentBody);
+              
+              const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  model: 'gpt-4o-mini',
+                  messages: [
+                    {
+                      role: 'system',
+                      content: 'You are a technical writer helping to create concise release notes. Generate a maximum 15-word summary that describes what this PR does. Focus on the user-facing changes or bug fixes. Do not include "This PR" or similar phrases - just describe the change directly.'
+                    },
+                    {
+                      role: 'user',
+                      content: `PR Title: ${prDetails.title}\n\nCodeRabbit Analysis:\n${commentBody}\n\nPlease provide a concise summary (max 15 words) of what this PR accomplishes.`
+                    }
+                  ],
+                  max_tokens: 50,
+                  temperature: 0.3
+                })
+              });
+              
+              if (!response.ok) {
+                console.log(`OpenAI API error: ${response.status} ${response.statusText}`);
+                return null;
+              }
+              
+              const data = await response.json();
+              const summary = data.choices[0].message.content.trim();
+              
+              console.log('Generated summary:', summary);
+              
+              return {
+                summary: summary,
+                prNumber: prDetails.number,
+                author: prDetails.author
+              };
+            } catch (error) {
+              console.log('Error generating summary:', error.message);
+              return null;
+            }
+
+      - name: Determine category with OpenAI
+        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null'
+        id: determine-category
+        continue-on-error: true
+        uses: actions/github-script@v7
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        with:
+          script: |
+            try {
+              const commentBody = context.payload.comment.body;
+              const prDetails = JSON.parse('${{ steps.pr-details.outputs.result }}');
+              const summaryData = JSON.parse('${{ steps.generate-summary.outputs.result }}');
+              
+              if (!summaryData || !prDetails) {
+                console.log('Missing data for categorization');
+                return null;
+              }
+              
+              const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  model: 'gpt-4o-mini',
+                  messages: [
+                    {
+                      role: 'system',
+                      content: 'You are categorizing pull requests for release notes. You must respond with exactly one of these categories: "Feature", "Bugfix", "Enhancement", or "Maintenance". No other text or explanation.'
+                    },
+                    {
+                      role: 'user',
+                      content: `PR Title: ${prDetails.title}\n\nGenerated Summary: ${summaryData.summary}\n\nCodeRabbit Analysis:\n${commentBody}\n\nCategories:\n- Feature: New functionality or capabilities\n- Bugfix: Fixes for broken or incorrect behavior\n- Enhancement: Improvements to existing functionality\n- Maintenance: Code cleanup, refactoring, dependencies, etc.\n\nWhat category does this PR belong to?`
+                    }
+                  ],
+                  max_tokens: 10,
+                  temperature: 0.1
+                })
+              });
+              
+              if (!response.ok) {
+                console.log('OpenAI API error for categorization');
+                return null;
+              }
+              
+              const data = await response.json();
+              console.log('OpenAI raw response:', JSON.stringify(data, null, 2));
+              
+              const rawContent = data.choices[0].message.content.trim();
+              console.log('Raw content from OpenAI:', rawContent);
+              
+              let category;
+              try {
+                category = JSON.parse(rawContent);
+                console.log('Parsed category:', category);
+              } catch (parseError) {
+                console.log('JSON parse error, using raw content:', parseError.message);
+                category = rawContent;
+              }
+              
+              // Validate the category response
+              const validCategories = ['Feature', 'Bugfix', 'Enhancement', 'Maintenance'];
+              if (validCategories.includes(category)) {
+                console.log('OpenAI categorized as:', category);
+                return category;
+              } else {
+                console.log('Invalid category from OpenAI:', category);
+                console.log('Valid categories are:', validCategories);
+                return null;
+              }
+            } catch (error) {
+              console.log('Error in categorization:', error.message);
+              return null;
+            }
+
+      - name: Create and commit release notes file via GitHub API
+        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              const summaryData = JSON.parse('${{ steps.generate-summary.outputs.result }}');
+              const category = '${{ steps.determine-category.outputs.result }}';
+              
+              console.log('Debug - Category value:', category);
+              console.log('Debug - Category type:', typeof category);
+              console.log('Debug - Category JSON stringified:', JSON.stringify(category));
+              
+              if (!summaryData) {
+                console.log('No summary data available, cannot create file');
+                return;
+              }
+              
+              if (!category || category === 'null') {
+                console.log('No valid category available, cannot create file');
+                return;  
+              }
+              
+               // Create file content - ensure category is not quoted
+               const cleanCategory = typeof category === 'string' ? category.replace(/^["']|["']$/g, '') : category;
+               console.log('Debug - Clean category:', cleanCategory);
+               
+               const fileContent = `---
+            category: ${cleanCategory}
+            authors: [${summaryData.author}]
+            ---
+             
+            ${summaryData.summary}
+            `;
+              
+              const fileName = `upcoming-release-notes/${summaryData.prNumber}.md`;
+              
+              console.log(`Creating release notes file: ${fileName}`);
+              console.log('File content:');
+              console.log(fileContent);
+              
+              // Get PR branch info
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number
+              });
+              
+              const prBranch = pr.head.ref;
+              const headOwner = pr.head.repo.owner.login;
+              const headRepo = pr.head.repo.name;
+              
+              console.log(`Committing to PR branch: ${headOwner}/${headRepo}:${prBranch}`);
+              
+              // Create the file via GitHub API on the PR branch
+              await github.rest.repos.createOrUpdateFileContents({
+                owner: headOwner,
+                repo: headRepo,
+                path: fileName,
+                message: `Add release notes for PR #${summaryData.prNumber}`,
+                content: Buffer.from(fileContent).toString('base64'),
+                branch: prBranch,
+                committer: {
+                  name: 'github-actions[bot]',
+                  email: 'github-actions[bot]@users.noreply.github.com'
+                },
+                author: {
+                  name: 'github-actions[bot]',
+                  email: 'github-actions[bot]@users.noreply.github.com'
+                }
+              });
+              
+              console.log(`✅ Successfully created release notes file: ${fileName}`);
+            } catch (error) {
+              console.log('Error creating release notes file:', error.message);
+              // Fail gracefully - don't block the workflow
+            }
+
+      - name: Comment on PR
+        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              const summaryData = JSON.parse('${{ steps.generate-summary.outputs.result }}');
+              const category = '${{ steps.determine-category.outputs.result }}';
+              
+              if (!summaryData) {
+                console.log('No summary data available, skipping comment');
+                return;
+              }
+              
+              if (!category || category === 'null') {
+                console.log('No valid category available, skipping comment');
+                return;
+              }
+              
+              // Clean category for display
+              const cleanCategory = typeof category === 'string' ? category.replace(/^["']|["']$/g, '') : category;
+              
+              // Get PR branch info for the file URL
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number
+              });
+              
+              const prBranch = pr.head.ref;
+              const headOwner = pr.head.repo.owner.login;
+              const headRepo = pr.head.repo.name;
+              const fileUrl = `https://github.com/${headOwner}/${headRepo}/blob/${prBranch}/upcoming-release-notes/${summaryData.prNumber}.md`;
+              
+              const commentBody = [
+                '🤖 **Auto-generated Release Notes**',
+                '',
+                `Hey @${summaryData.author}! I've automatically created a release notes file based on CodeRabbit's analysis:`,
+                '',
+                `**Category:** ${cleanCategory}`,
+                `**Summary:** ${summaryData.summary}`,
+                `**File:** [upcoming-release-notes/${summaryData.prNumber}.md](${fileUrl})`,
+                '',
+                'The release notes file has been committed to the repository. You can edit it if needed before the merging.'
+              ].join('\n');
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+            } catch (error) {
+              console.log('Error commenting on PR:', error.message);
+              // Fail gracefully - comment is not critical
+            } 
