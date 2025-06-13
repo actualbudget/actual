@@ -1,5 +1,3 @@
-/* eslint-disable rulesdir/typography */
-
 import {
   type ComponentType,
   type SVGProps,
@@ -247,6 +245,7 @@ export function CommandBar() {
                             'var(--color-menuItemBackgroundHover)',
                           color: 'var(--color-menuItemTextHover)',
                         },
+                      // eslint-disable-next-line rulesdir/typography
                       "&[data-selected='true']": {
                         backgroundColor: 'var(--color-menuItemBackgroundHover)',
                         color: 'var(--color-menuItemTextHover)',
