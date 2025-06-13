@@ -19,37 +19,58 @@ import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { t } from 'i18next';
 
+import { type TagColor } from 'loot-core/types/models';
+
 import { Setting } from './UI';
 
 import { useSidebar } from '@desktop-client/components/sidebar/SidebarProvider';
+import {
+  createTagColor,
+  deleteTagColor,
+  updateTagColor,
+} from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
 import { purple700 } from '@desktop-client/style/palette';
-import { useTagColor, useTagCSS, useTags } from '@desktop-client/style/tags';
+import { useTagCSS, useTags } from '@desktop-client/style/tags';
 
 type TagEditorProps = {
-  tag: string;
+  tagColor?: TagColor;
   mode: 'trash' | 'edit';
 };
-const TagEditor = ({ tag, mode }: TagEditorProps) => {
-  const getTagColor = useTagColor();
-  const [tags, setTagsPref] = useTags();
-  const getTagCSS = useTagCSS();
 
-  const onTrashTag = (tag: string) => {
-    const { [tag]: _, ...newTags } = tags;
-    setTagsPref(newTags);
+const defaultTagColor: TagColor = {
+  id: '',
+  tag: '*',
+  color: purple700,
+};
+const TagEditor = ({ tagColor = defaultTagColor, mode }: TagEditorProps) => {
+  const getTagCSS = useTagCSS();
+  const dispatch = useDispatch();
+
+  const onTrashTag = (tag: TagColor) => {
+    dispatch(deleteTagColor(tag));
   };
 
-  const formattedTag = <>#{tag === '*' ? t('Default') : tag}</>;
+  const formattedTag = (
+    <>#{tagColor.tag === '*' ? t('Default') : tagColor.tag}</>
+  );
 
   if (mode === 'edit') {
     return (
       <ColorPicker
-        value={getTagColor(tag)}
-        onChange={color =>
-          setTagsPref({ ...tags, [tag]: color.toString('hex') })
-        }
+        value={tagColor.color}
+        onChange={color => {
+          dispatch(
+            tagColor.id
+              ? updateTagColor({ ...tagColor, color: color.toString('hex') })
+              : createTagColor({
+                  tag: tagColor.tag,
+                  color: color.toString('hex'),
+                }),
+          );
+        }}
       >
-        <Button variant="bare" className={getTagCSS(tag)}>
+        <Button variant="bare" className={getTagCSS(tagColor.tag)}>
           {formattedTag}
         </Button>
       </ColorPicker>
@@ -58,12 +79,12 @@ const TagEditor = ({ tag, mode }: TagEditorProps) => {
     return (
       <Button
         variant="bare"
-        className={getTagCSS(tag)}
-        onPress={() => onTrashTag(tag)}
+        className={getTagCSS(tagColor.tag)}
+        onPress={() => onTrashTag(tagColor)}
       >
         {formattedTag}
         &nbsp;
-        {tag !== '*' ? (
+        {tagColor.tag !== '*' ? (
           <SvgClose width={10} height={10} />
         ) : (
           <SvgRefresh width={10} height={10} />
@@ -75,12 +96,13 @@ const TagEditor = ({ tag, mode }: TagEditorProps) => {
 
 export function TagsSettings() {
   const sidebar = useSidebar();
-  const [tags, setTagsPref] = useTags();
+  const tagsColors = useTags();
   const getTagCSS = useTagCSS();
   const [newTag, setNewTag] = useState('');
   const [newColor, setNewColor] = useState(purple700);
   const [errorMsg, setErrorMsg] = useState('');
   const [trashMode, setTrashMode] = useState(false);
+  const dispatch = useDispatch();
 
   const onAddTagColor = () => {
     if (!newTag.trim()) {
@@ -93,8 +115,13 @@ export function TagsSettings() {
       return;
     }
 
+    if (tagsColors.some(tc => tc.tag === newTag)) {
+      setErrorMsg(t('Tag already exists'));
+      return;
+    }
+
     setErrorMsg('');
-    setTagsPref({ ...tags, [newTag.trim()]: newColor });
+    dispatch(createTagColor({ tag: newTag, color: newColor }));
     setNewTag('');
   };
 
@@ -202,21 +229,26 @@ export function TagsSettings() {
             }}
           >
             <View style={{ display: 'inline' }}>
-              <TagEditor tag="*" mode={trashMode ? 'trash' : 'edit'} />
+              <TagEditor
+                tagColor={tagsColors.find(tc => tc.tag === '*')}
+                mode={trashMode ? 'trash' : 'edit'}
+              />
             </View>
 
-            {Object.keys(tags)
-              .filter(tag => tag !== '*')
-              .sort()
-              .map(tag => (
+            {tagsColors
+              .filter(tc => tc.tag !== '*')
+              .map(tc => (
                 <View
-                  key={tag}
+                  key={tc.tag}
                   style={{
                     display: 'flex',
                     flexDirection: 'row',
                   }}
                 >
-                  <TagEditor tag={tag} mode={trashMode ? 'trash' : 'edit'} />
+                  <TagEditor
+                    tagColor={tc}
+                    mode={trashMode ? 'trash' : 'edit'}
+                  />
                 </View>
               ))}
           </View>
