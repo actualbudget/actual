@@ -8,6 +8,7 @@ const REPOSITORY_CONFIG = new Map([
     {
       POINTS_PER_ISSUE_TRIAGE_ACTION: 1,
       POINTS_PER_ISSUE_CLOSING_ACTION: 1,
+      POINTS_PER_RELEASE_PR: 0,
       PR_REVIEW_POINT_TIERS: [
         { minChanges: 1000, points: 6 },
         { minChanges: 100, points: 4 },
@@ -26,6 +27,7 @@ const REPOSITORY_CONFIG = new Map([
     {
       POINTS_PER_ISSUE_TRIAGE_ACTION: 1,
       POINTS_PER_ISSUE_CLOSING_ACTION: 1,
+      POINTS_PER_RELEASE_PR: 4,
       PR_REVIEW_POINT_TIERS: [
         { minChanges: 1000, points: 6 },
         { minChanges: 100, points: 4 },
@@ -177,6 +179,10 @@ async function countContributorPoints(repo) {
       )
       .reduce((sum, file) => sum + file.additions + file.deletions, 0);
 
+    // Check if this is a release PR
+    const isReleasePR = pr.title.match(/^🔖 \(\d+\.\d+\.\d+\)/);
+
+    // Calculate points for reviewers based on PR size
     const prPoints = config.PR_REVIEW_POINT_TIERS.find(
       tier => totalChanges > tier.minChanges,
     ).points;
@@ -196,6 +202,17 @@ async function countContributorPoints(repo) {
         userStats.reviews.push({ pr: pr.number.toString(), points: prPoints });
         userStats.points += prPoints;
       });
+
+    // Award points to the PR creator if it's a release PR
+    if (isReleasePR && stats.has(pr.user.login)) {
+      const creatorStats = stats.get(pr.user.login);
+      creatorStats.reviews.push({
+        pr: pr.number.toString(),
+        points: config.POINTS_PER_RELEASE_PR,
+        isReleaseCreator: true,
+      });
+      creatorStats.points += config.POINTS_PER_RELEASE_PR;
+    }
   }
 
   // Get all issues with label events in the last month
@@ -258,7 +275,12 @@ async function countContributorPoints(repo) {
     (user, count) =>
       `${user}: ${count} (PRs: ${stats
         .get(user)
-        .reviews.map(r => `#${r.pr} (${r.points}pts)`)
+        .reviews.map(r => {
+          if (r.isReleaseCreator) {
+            return `#${r.pr} (${r.points}pts - Release Creator)`;
+          }
+          return `#${r.pr} (${r.points}pts)`;
+        })
         .join(', ')})`,
   );
   printStats(
