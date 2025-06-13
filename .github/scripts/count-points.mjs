@@ -139,13 +139,6 @@ async function countContributorPoints(repo) {
       pull_number: pr.number,
     });
 
-    // Get PR details to calculate points
-    const { data: prDetails } = await octokit.pulls.get({
-      owner,
-      repo,
-      pull_number: pr.number,
-    });
-
     // Get list of modified files
     const { data: modifiedFiles } = await octokit.pulls.listFiles({
       owner,
