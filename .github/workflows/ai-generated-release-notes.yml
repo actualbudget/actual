@@ -9,7 +9,7 @@ jobs:
     # Only run on PR comments from CodeRabbit bot
     if: github.event.issue.pull_request && github.event.comment.user.login == 'coderabbitai[bot]'
     runs-on: ubuntu-latest
-    continue-on-error: true  # Never block PR merges
+    timeout-minutes: 5  # Prevent long-running jobs
     permissions:
       contents: write
       pull-requests: read
@@ -18,7 +18,6 @@ jobs:
     steps:
       - name: Check if this is CodeRabbit's first comment
         id: check-first-comment
-        continue-on-error: true
         uses: actions/github-script@v7
         with:
           script: |
@@ -48,7 +47,6 @@ jobs:
       - name: Get PR details
         if: steps.check-first-comment.outputs.result == 'true'
         id: pr-details
-        continue-on-error: true
         uses: actions/github-script@v7
         with:
           script: |
@@ -72,7 +70,6 @@ jobs:
       - name: Check if release notes file already exists
         if: steps.check-first-comment.outputs.result == 'true' && steps.pr-details.outputs.result != 'null'
         id: check-release-notes-exists
-        continue-on-error: true
         uses: actions/github-script@v7
         with:
           script: |
@@ -121,7 +118,6 @@ jobs:
       - name: Generate summary with OpenAI
         if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false'
         id: generate-summary
-        continue-on-error: true
         uses: actions/github-script@v7
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -184,7 +180,6 @@ jobs:
       - name: Determine category with OpenAI
         if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null'
         id: determine-category
-        continue-on-error: true
         uses: actions/github-script@v7
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -260,7 +255,6 @@ jobs:
 
       - name: Create and commit release notes file via GitHub API
         if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
-        continue-on-error: true
         uses: actions/github-script@v7
         with:
           script: |
@@ -338,7 +332,6 @@ jobs:
 
       - name: Comment on PR
         if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
-        continue-on-error: true
         uses: actions/github-script@v7
         with:
           script: |
