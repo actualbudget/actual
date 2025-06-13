@@ -1,29 +1,40 @@
 import { Octokit } from '@octokit/rest';
 import { minimatch } from 'minimatch';
 
-/** The repositories to analyze. */
-const ENABLED_REPOSITORIES = ['actual', 'docs'];
-
-/** Points awarded for removing the "needs triage" label. */
-const POINTS_PER_ISSUE_TRIAGE_ACTION = 1;
-
-/** Points awarded for closing an issue. */
-const POINTS_PER_ISSUE_CLOSING_ACTION = 1;
-
-/** Point tiers for PR reviews based on total changes. */
-const PR_REVIEW_POINT_TIERS = [
-  { minChanges: 1000, points: 6 },
-  { minChanges: 100, points: 4 },
-  { minChanges: 0, points: 2 },
-];
-
-/** Files to exclude from PR line count calculations. */
-const EXCLUDED_FILES = [
-  'yarn.lock',
-  '.yarn/**/*',
-  'packages/component-library/src/icons/**/*',
-  'release-notes/**/*',
-];
+/** Repository-specific configuration for points calculation */
+const REPOSITORY_CONFIG = new Map([
+  [
+    'actual',
+    {
+      POINTS_PER_ISSUE_TRIAGE_ACTION: 1,
+      POINTS_PER_ISSUE_CLOSING_ACTION: 1,
+      PR_REVIEW_POINT_TIERS: [
+        { minChanges: 1000, points: 6 },
+        { minChanges: 100, points: 4 },
+        { minChanges: 0, points: 2 },
+      ],
+      EXCLUDED_FILES: [
+        'yarn.lock',
+        '.yarn/**/*',
+        'packages/component-library/src/icons/**/*',
+        'release-notes/**/*',
+      ],
+    },
+  ],
+  [
+    'docs',
+    {
+      POINTS_PER_ISSUE_TRIAGE_ACTION: 1,
+      POINTS_PER_ISSUE_CLOSING_ACTION: 1,
+      PR_REVIEW_POINT_TIERS: [
+        { minChanges: 1000, points: 6 },
+        { minChanges: 100, points: 4 },
+        { minChanges: 0, points: 2 },
+      ],
+      EXCLUDED_FILES: ['yarn.lock', '.yarn/**/*'],
+    },
+  ],
+]);
 
 /**
  * Get the start and end dates for the last month.
@@ -64,6 +75,7 @@ function getLastMonthDates() {
 async function countContributorPoints(repo) {
   const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
   const owner = 'actualbudget';
+  const config = REPOSITORY_CONFIG.get(repo);
 
   const { since, until } = getLastMonthDates();
 
@@ -159,11 +171,13 @@ async function countContributorPoints(repo) {
     const totalChanges = modifiedFiles
       .filter(
         file =>
-          !EXCLUDED_FILES.some(pattern => minimatch(file.filename, pattern)),
+          !config.EXCLUDED_FILES.some(pattern =>
+            minimatch(file.filename, pattern),
+          ),
       )
       .reduce((sum, file) => sum + file.additions + file.deletions, 0);
 
-    const prPoints = PR_REVIEW_POINT_TIERS.find(
+    const prPoints = config.PR_REVIEW_POINT_TIERS.find(
       tier => totalChanges > tier.minChanges,
     ).points;
 
@@ -225,14 +239,14 @@ async function countContributorPoints(repo) {
           const remover = event.actor.login;
           const userStats = stats.get(remover);
           userStats.labelRemovals.push(issue.number.toString());
-          userStats.points += POINTS_PER_ISSUE_TRIAGE_ACTION;
+          userStats.points += config.POINTS_PER_ISSUE_TRIAGE_ACTION;
         }
 
         if (event.event === 'closed') {
           const closer = event.actor.login;
           const userStats = stats.get(closer);
           userStats.issueClosings.push(issue.number.toString());
-          userStats.points += POINTS_PER_ISSUE_CLOSING_ACTION;
+          userStats.points += config.POINTS_PER_ISSUE_CLOSING_ACTION;
         }
       });
   }
@@ -286,7 +300,7 @@ async function countContributorPoints(repo) {
 async function calculateCumulativePoints() {
   // Get stats for each repository
   const repoPointsResults = await Promise.all(
-    ENABLED_REPOSITORIES.map(countContributorPoints),
+    Array.from(REPOSITORY_CONFIG.keys()).map(countContributorPoints),
   );
 
   // Calculate cumulative stats
