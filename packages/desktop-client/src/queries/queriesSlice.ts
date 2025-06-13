@@ -11,6 +11,7 @@ import {
   type TransactionEntity,
   type AccountEntity,
   type PayeeEntity,
+  type TagColor,
 } from 'loot-core/types/models';
 
 import { resetApp } from '@desktop-client/app/appSlice';
@@ -40,6 +41,8 @@ type QueriesState = {
   commonPayees: PayeeEntity[];
   payees: PayeeEntity[];
   payeesLoaded: boolean;
+  tagsColors: TagColor[];
+  tagsColorsLoaded: boolean;
 };
 
 const initialState: QueriesState = {
@@ -58,6 +61,8 @@ const initialState: QueriesState = {
   commonPayeesLoaded: false,
   payees: [],
   payeesLoaded: false,
+  tagsColors: [],
+  tagsColorsLoaded: false,
 };
 
 type SetNewTransactionsPayload = {
@@ -160,6 +165,28 @@ const queriesSlice = createSlice({
     // App
 
     builder.addCase(resetApp, () => initialState);
+
+    // Tags
+
+    builder.addCase(getTagsColors.fulfilled, (state, action) => {
+      state.tagsColors = action.payload;
+      state.tagsColorsLoaded = true;
+    });
+
+    builder.addCase(createTagColor.fulfilled, (state, action) => {
+      state.tagsColors.push(action.payload);
+    });
+
+    builder.addCase(deleteTagColor.fulfilled, (state, action) => {
+      state.tagsColors = state.tagsColors.filter(
+        tag => tag.id !== action.payload,
+      );
+    });
+
+    builder.addCase(updateTagColor.fulfilled, (state, action) => {
+      state.tagsColors.find(tag => tag.id === action.payload.id).color =
+        action.payload.color;
+    });
   },
 });
 
@@ -416,6 +443,43 @@ export const getPayees = createAppAsyncThunk(
   async () => {
     const payees: PayeeEntity[] = await send('payees-get');
     return payees;
+  },
+);
+
+export const getTagsColors = createAppAsyncThunk(
+  `${sliceName}/getTagsColors`,
+  async () => {
+    const tags: TagColor[] = await send('tags-colors-get');
+    return tags;
+  },
+);
+
+type CreateTagColorPayload = {
+  tag: TagColor['tag'];
+  color: TagColor['color'];
+};
+
+export const createTagColor = createAppAsyncThunk(
+  `${sliceName}/createTagColor`,
+  async ({ tag, color }: CreateTagColorPayload) => {
+    const id = await send('tags-colors-create', { tag, color });
+    return id;
+  },
+);
+
+export const deleteTagColor = createAppAsyncThunk(
+  `${sliceName}/deleteTagColor`,
+  async (tag: TagColor) => {
+    const id = await send('tags-colors-delete', tag);
+    return id;
+  },
+);
+
+export const updateTagColor = createAppAsyncThunk(
+  `${sliceName}/updateTagColor`,
+  async (tag: TagColor) => {
+    const id = await send('tags-colors-update', tag);
+    return id;
   },
 );
 
@@ -882,6 +946,7 @@ export const actions = {
   moveCategory,
   moveCategoryGroup,
   initiallyLoadPayees,
+  getTagsColors,
 };
 
 export const {

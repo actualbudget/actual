@@ -94,7 +94,7 @@ export function ColorPicker({ children, ...props }: ColorPickerProps) {
     <AriaColorPicker {...props}>
       <DialogTrigger>
         {children}
-        <Popover placement="bottom">
+        <Popover>
           <Dialog
             style={{
               outline: 'none',
