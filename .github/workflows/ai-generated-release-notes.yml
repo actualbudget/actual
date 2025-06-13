@@ -149,7 +149,7 @@ jobs:
                   messages: [
                     {
                       role: 'system',
-                      content: 'You are a technical writer helping to create concise release notes. Generate a maximum 15-word summary that describes what this PR does. Focus on the user-facing changes or bug fixes. Do not include "This PR" or similar phrases - just describe the change directly.'
+                      content: 'You are a technical writer helping to create concise release notes. Generate a maximum 15-word summary that describes what this PR does. Focus on the user-facing changes or bug fixes. Do not include "This PR" or similar phrases - just describe the change directly. Start with a base form verb (e.g., "Add" not "Adds", "Fix" not "Fixes", "Introduce" not "Introduces").'
                     },
                     {
                       role: 'user',
@@ -291,8 +291,7 @@ jobs:
             authors: [${summaryData.author}]
             ---
              
-            ${summaryData.summary}
-            `;
+            ${summaryData.summary}`;
               
               const fileName = `upcoming-release-notes/${summaryData.prNumber}.md`;
               
@@ -319,7 +318,7 @@ jobs:
                 repo: headRepo,
                 path: fileName,
                 message: `Add release notes for PR #${summaryData.prNumber}`,
-                content: Buffer.from(fileContent).toString('base64'),
+                content: Buffer.from(`${fileContent}\n\n`).toString('base64'),
                 branch: prBranch,
                 committer: {
                   name: 'github-actions[bot]',
