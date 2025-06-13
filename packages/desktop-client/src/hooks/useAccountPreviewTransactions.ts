@@ -13,7 +13,7 @@ import { usePayees } from './usePayees';
 import { usePreviewTransactions } from './usePreviewTransactions';
 import { useSheetValue } from './useSheetValue';
 
-import { accountBalance } from '@desktop-client/spreadsheet/bindings';
+import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 type UseAccountPreviewTransactionsProps = {
   accountId?: AccountEntity['id'] | undefined;
@@ -24,8 +24,9 @@ type UseAccountPreviewTransactionsResult = ReturnType<
 >;
 
 /**
- * Preview transactions for a given account. This will invert the payees, accounts,
- * and amounts depending on which account the preview transactions are being viewed from.
+ * Preview transactions for a given account or all accounts if no `accountId` is provided.
+ * This will invert the payees, accounts, and amounts accordingly depending on which account
+ * the preview transactions are being viewed from.
  */
 export function useAccountPreviewTransactions({
   accountId,
@@ -64,9 +65,10 @@ export function useAccountPreviewTransactions({
     [accountId, getTransferAccountByPayee],
   );
 
-  const accountBalanceValue = useSheetValue<'account', 'balance'>(
-    accountBalance(accountId || ''),
-  );
+  const accountBalanceValue = useSheetValue<
+    'account',
+    'balance' | 'accounts-balance'
+  >(accountId ? bindings.accountBalance(accountId) : bindings.allAccountBalance());
 
   const {
     previewTransactions: allPreviewTransactions,
@@ -90,7 +92,7 @@ export function useAccountPreviewTransactions({
       };
     }
 
-    const previewTransactions = accountPreview({
+    const previewTransactions = inverseIfRequired({
       accountId,
       transactions: allPreviewTransactions,
       getPayeeByTransferAccount,
@@ -123,7 +125,7 @@ export function useAccountPreviewTransactions({
 }
 
 type AccountPreviewProps = {
-  accountId?: AccountEntity['id'];
+  accountId?: AccountEntity['id'] | undefined;
   transactions: readonly TransactionEntity[];
   getPayeeByTransferAccount: (
     transferAccountId?: AccountEntity['id'],
@@ -133,14 +135,14 @@ type AccountPreviewProps = {
   ) => AccountEntity | null;
 };
 
-function accountPreview({
+function inverseIfRequired({
   accountId,
   transactions,
   getPayeeByTransferAccount,
   getTransferAccountByPayee,
 }: AccountPreviewProps): TransactionEntity[] {
   return transactions.map(transaction => {
-    const inverse = transaction.account !== accountId;
+    const inverse = accountId && transaction.account !== accountId;
     const subtransactions = transaction.subtransactions?.map(st => ({
       ...st,
       amount: inverse ? -st.amount : st.amount,
