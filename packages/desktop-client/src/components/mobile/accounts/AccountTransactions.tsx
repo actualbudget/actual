@@ -15,7 +15,7 @@ import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountP
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { accountSchedulesQuery } from '@desktop-client/hooks/useSchedules';
+import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
@@ -30,7 +30,7 @@ export function AccountTransactions({
   readonly account: AccountEntity;
 }) {
   const schedulesQuery = useMemo(
-    () => accountSchedulesQuery(account.id),
+    () => getSchedulesQuery(account.id),
     [account.id],
   );
 
@@ -161,15 +161,12 @@ function TransactionListWithPreviews({
     [dispatch, navigate],
   );
 
-  const balanceQueries = useMemo(
-    () =>
-      account
-        ? {
-            balance: bindings.accountBalance(account.id),
-            cleared: bindings.accountBalanceCleared(account.id),
-            uncleared: bindings.accountBalanceUncleared(account.id),
-          }
-        : { balance: bindings.allAccountBalance() },
+  const balanceBindings = useMemo(
+    () => ({
+      balance: bindings.accountBalance(account.id),
+      cleared: bindings.accountBalanceCleared(account.id),
+      uncleared: bindings.accountBalanceUncleared(account.id),
+    }),
     [account],
   );
 
@@ -184,9 +181,9 @@ function TransactionListWithPreviews({
         isSearching ? isTransactionsLoading : isPreviewTransactionsLoading
       }
       transactions={transactionsToDisplay}
-      balance={balanceQueries.balance}
-      balanceCleared={balanceQueries.cleared}
-      balanceUncleared={balanceQueries.uncleared}
+      balance={balanceBindings.balance}
+      balanceCleared={balanceBindings.cleared}
+      balanceUncleared={balanceBindings.uncleared}
       isLoadingMore={isLoadingMore}
       onLoadMore={loadMoreTransactions}
       searchPlaceholder={t('Search {{accountName}}', {
