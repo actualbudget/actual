@@ -3,7 +3,7 @@ description:
 globs: 
 alwaysApply: true
 ---
-Vite test runner is used for unit tests.
+Vitest test runner is used for unit tests.
 
 When running unit tests, always include the flag `--watch=false` to prevent watch mode.
 
