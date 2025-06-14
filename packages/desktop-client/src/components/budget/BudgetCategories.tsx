@@ -1,9 +1,18 @@
-import React, { memo, useState, useMemo } from 'react';
+import React, { memo, useState, useMemo, ComponentPropsWithoutRef, ReactComponentElement, ReactElement } from 'react';
 
-import { styles } from '@actual-app/components/styles';
-import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/types/models';
 
+import { useLocalPref } from '../../hooks/useLocalPref';
+import { theme, styles } from '../../style';
+import { View } from '../common/View';
+import { DropHighlightPosContext, DropPosition, OnDropCallback } from '../sort';
+import { Row } from '../table';
+
+import { BudgetSummaries } from './BudgetSummaries';
+import { BudgetTotals } from './BudgetTotals';
 import { ExpenseCategory } from './ExpenseCategory';
 import { ExpenseGroup } from './ExpenseGroup';
 import { IncomeCategory } from './IncomeCategory';
@@ -13,11 +22,28 @@ import { SidebarCategory } from './SidebarCategory';
 import { SidebarGroup } from './SidebarGroup';
 import { separateGroups } from './util';
 
-import { DropHighlightPosContext } from '@desktop-client/components/sort';
-import { Row } from '@desktop-client/components/table';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+type BudgetCategoriesProps = {
+  categoryGroups: CategoryGroupEntity[],
+  editingCell: { id: string; cell: string } | null,
+  dataComponents: {
+    SummaryComponent: ComponentPropsWithoutRef<typeof BudgetSummaries>["SummaryComponent"];
+    BudgetTotalsComponent: ComponentPropsWithoutRef<typeof BudgetTotals>["MonthComponent"];
+},
+  onBudgetAction: (month: string, action: string, args: unknown) => void,
+  onShowActivity: (id: CategoryEntity["id"], month?: string) => void,
+  onEditName: (id: string) => void,
+  onEditMonth: (id: string, month: string) => void,
+  onSaveCategory: (category: CategoryEntity) => void,
+  onSaveGroup: (group: CategoryGroupEntity) => void,
+  onDeleteCategory: (id: CategoryEntity["id"]) => Promise<void>,
+  onDeleteGroup: (id: CategoryGroupEntity["id"]) => void,
+  onApplyBudgetTemplatesInGroup: (groupId: CategoryGroupEntity["id"]) => void,
+  onReorderCategory: OnDropCallback,
+  onReorderGroup: OnDropCallback,
 
-export const BudgetCategories = memo(
+}
+
+export const BudgetCategories = memo<BudgetCategoriesProps>(
   ({
     categoryGroups,
     editingCell,
@@ -42,7 +68,7 @@ export const BudgetCategories = memo(
     }
 
     const [isAddingGroup, setIsAddingGroup] = useState(false);
-    const [newCategoryForGroup, setNewCategoryForGroup] = useState(null);
+    const [newCategoryForGroup, setNewCategoryForGroup] = useState<string | null>(null);
     const items = useMemo(() => {
       const [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
 
@@ -143,7 +169,7 @@ export const BudgetCategories = memo(
       }
     }
 
-    function onToggleCollapse(id) {
+    function onToggleCollapse(id: string) {
       if (collapsedGroupIds.includes(id)) {
         onCollapse(collapsedGroupIds.filter(id_ => id_ !== id));
       } else {
@@ -166,7 +192,7 @@ export const BudgetCategories = memo(
       }
     }
 
-    function onShowNewCategory(groupId) {
+    function onShowNewCategory(groupId: string) {
       onCollapse(collapsedGroupIds.filter(c => c !== groupId));
       setNewCategoryForGroup(groupId);
     }
@@ -217,7 +243,7 @@ export const BudgetCategories = memo(
                   <SidebarCategory
                     category={{
                       name: '',
-                      group: newCategoryForGroup,
+                      cat_group: newCategoryForGroup,
                       is_income:
                         newCategoryForGroup ===
                         categoryGroups.find(g => g.is_income).id,
@@ -225,6 +251,7 @@ export const BudgetCategories = memo(
                     }}
                     editing={true}
                     onSave={_onSaveCategory}
+                    onDelete={onDeleteGroup}
                     onHideNewCategory={onHideNewCategory}
                     onEditName={onEditName}
                   />
