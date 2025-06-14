@@ -6,8 +6,9 @@ import {
 } from 'loot-core/types/models';
 
 import { useLocalPref } from '../../hooks/useLocalPref';
-import { theme, styles } from '../../style';
-import { View } from '../common/View';
+import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 import { DropHighlightPosContext, DropPosition, OnDropCallback } from '../sort';
 import { Row } from '../table';
 
