@@ -22,15 +22,15 @@ jobs:
     steps:
       - name: Repository Checkout
         uses: actions/checkout@v4
-    
+
       - name: Set up environment
         uses: ./.github/actions/setup
-    
+
       - name: Install Netlify
         run: npm install netlify-cli@17.10.1 -g
-    
+
       - name: Build Actual
-        run: yarn build:browser 
+        run: yarn build:browser
 
       - name: Deploy to Netlify
         id: netlify_deploy
