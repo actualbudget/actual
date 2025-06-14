@@ -91,7 +91,7 @@ export function PercentInput({
 
   function fireUpdate() {
     const clampedValue = clampToPercent(
-      evalArithmetic(value.replace('%', '')) ?? 0,
+      evalArithmetic(value.replace('%', ''), 0) ?? 0,
     );
     onUpdatePercent?.(clampedValue);
     onInputTextChange(String(clampedValue));

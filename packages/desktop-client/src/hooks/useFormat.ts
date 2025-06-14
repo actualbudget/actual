@@ -33,20 +33,25 @@ export type UseFormatResult = {
   currency: Currency;
 };
 
+export type FormatResult = {
+  numericValue?: number;
+  formattedString: string;
+};
+
 function format(
   value: unknown,
   type: FormatType,
   formatter: Intl.NumberFormat,
   decimalPlaces: number,
-): string {
+): FormatResult {
   switch (type) {
     case 'string': {
       const val = JSON.stringify(value);
       // eslint-disable-next-line rulesdir/typography
       if (val.charAt(0) === '"' && val.charAt(val.length - 1) === '"') {
-        return val.slice(1, -1);
+        return { formattedString: val.slice(1, -1) };
       }
-      return val;
+      return { formattedString: val };
     }
     case 'number':
       if (typeof value !== 'number') {
@@ -54,24 +59,31 @@ function format(
           'Value is not a number (' + typeof value + '): ' + value,
         );
       }
-      return formatter.format(value);
+      return { numericValue: value, formattedString: formatter.format(value) };
     case 'percentage':
-      return value + '%';
-    case 'financial-with-sign': {
-      const formatted = format(value, 'financial', formatter, decimalPlaces);
-      if (typeof value === 'number' && value >= 0) {
-        return '+' + formatted;
-      }
-      return formatted;
-    }
+      return { formattedString: value + '%' };
+    case 'financial-with-sign':
     case 'financial-no-decimals':
     case 'financial': {
       let localValue = value;
-      if (localValue == null || localValue === '' || localValue === 0) {
-        return integerToCurrency(0, formatter, decimalPlaces);
+      if (localValue == null || localValue === '') {
+        localValue = 0;
       } else if (typeof localValue === 'string') {
-        const parsed = parseFloat(localValue);
-        localValue = isNaN(parsed) ? 0 : parsed;
+        // This case is generally flawed, but we need to support it for
+        // backwards compatibility for now.
+        // For example, it is not clear how the string might look like
+        // The Budget sends 12300, if ther user inputs 123.00, but
+        // there might be other components that send 123 with the same user input.
+        // Ideally the string case will be removed in the future. We should always
+        // use the IntegerAmount.
+        // The parseInt with the replace is a workaround for the case and looks like
+        // the "least wrong" solution.
+        const integerString = localValue.replace(/[^\d-]/g, '');
+        const parsed = parseInt(integerString, 10);
+        if (isNaN(parsed)) {
+          throw new Error(`Invalid numeric value: ${localValue}`);
+        }
+        localValue = parsed;
       }
 
       if (typeof localValue !== 'number') {
@@ -80,7 +92,14 @@ function format(
         );
       }
 
-      return integerToCurrency(localValue, formatter, decimalPlaces);
+      return {
+        numericValue: localValue,
+        formattedString: integerToCurrency(
+          localValue,
+          formatter,
+          decimalPlaces,
+        ),
+      };
     }
     default:
       throw new Error('Unknown format type: ' + type);
@@ -123,12 +142,22 @@ export function useFormat(): UseFormatResult {
         return formattedNumericValue;
       }
 
+      let sign = '';
+      let valueWithoutSign = formattedNumericValue;
+      if (formattedNumericValue.startsWith('-')) {
+        sign = '-';
+        valueWithoutSign = formattedNumericValue.slice(1);
+      }
+
       const space = spaceEnabledPref === 'true' ? '\u00A0' : '';
       const position = symbolPositionPref || 'before';
 
-      return position === 'after'
-        ? `${formattedNumericValue}${space}${currencySymbol}`
-        : `${currencySymbol}${space}${formattedNumericValue}`;
+      const styledAmount =
+        position === 'after'
+          ? `${valueWithoutSign}${space}${currencySymbol}`
+          : `${currencySymbol}${space}${valueWithoutSign}`;
+
+      return sign + styledAmount;
     },
     [symbolPositionPref, spaceEnabledPref],
   );
@@ -155,18 +184,29 @@ export function useFormat(): UseFormatResult {
         decimalPlaces: displayDecimalPlaces,
       }).formatter;
 
-      const baseFormattedValue = format(
+      const { numericValue, formattedString } = format(
         value,
         type,
         intlFormatter,
         activeCurrency.decimalPlaces,
       );
 
+      let styledValue = formattedString;
       if (isFinancialType && activeCurrency && activeCurrency.code !== '') {
-        return applyCurrencyStyling(baseFormattedValue, activeCurrency.symbol);
+        styledValue = applyCurrencyStyling(
+          formattedString,
+          activeCurrency.symbol,
+        );
       }
 
-      return baseFormattedValue;
+      if (
+        type === 'financial-with-sign' &&
+        numericValue != null &&
+        numericValue >= 0
+      ) {
+        return '+' + styledValue;
+      }
+      return styledValue;
     },
     [
       activeCurrency,
