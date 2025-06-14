@@ -197,14 +197,14 @@ export const scheduleModel = {
       completed: schedule.completed as boolean,
       posts_transaction: schedule.posts_transaction,
       tombstone: false,
-      _payee: schedule.payee,
-      _account: schedule.account,
+      _payee: schedule.payee as string,
+      _account: schedule.account as string,
       _amount: schedule.amount,
       _amountOp: schedule.amountOp, // e.g. 'isapprox', 'is', etc.
       _date: schedule.date,
       _conditions: [
-        { op: 'is', field: 'payee', value: schedule.payee },
-        { op: 'is', field: 'account', value: schedule.account },
+        { op: 'is', field: 'payee', value: schedule.payee as string },
+        { op: 'is', field: 'account', value: schedule.account as string },
         { op: 'isapprox', field: 'date', value: schedule.date },
         { op: schedule.amountOp, field: 'amount', value: schedule.amount },
       ],
