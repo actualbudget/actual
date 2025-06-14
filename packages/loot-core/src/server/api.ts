@@ -17,11 +17,7 @@ import {
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
 import { Handlers } from '../types/handlers';
-import {
-  AccountEntity,
-  CategoryGroupEntity,
-  ScheduleEntity,
-} from '../types/models';
+import { AccountEntity, CategoryGroupEntity, ScheduleEntity } from '../types/models';
 import { ServerHandlers } from '../types/server-handlers';
 
 import { addTransactions } from './accounts/sync';
@@ -777,27 +773,26 @@ handlers['api/schedules-get'] = withMutation(async function () {
   checkFileOpen();
   const { data } = await aqlQuery(
     q('schedules')
-      .select('*')
-      .filter({
-        $and: [{ '_account.closed': false }],
-      }),
+    .select('*')
+    .filter({
+      $and: [{ '_account.closed': false }],
+    })
   );
-  const schedules = data as ScheduleEntity[];
+  const schedules = data as ScheduleEntity[]; 
 
-  return schedules.map(schedule => scheduleModel.toExternal(schedule));
+ return schedules.map( schedule => scheduleModel.toExternal(schedule));
 });
 
 handlers['api/schedule-create'] = withMutation(async function (schedule) {
   checkFileOpen();
   const internalSchedule = scheduleModel.fromExternal(schedule);
-  const partialSchedule = {
-    name: internalSchedule.name,
-    posts_transaction: internalSchedule.posts_transaction,
-  };
-  return handlers['schedule/create']({
-    schedule: partialSchedule,
-    conditions: internalSchedule._conditions,
-  });
+  const partialSchedule = {name: internalSchedule.name , posts_transaction: internalSchedule.posts_transaction}
+  return handlers['schedule/create'](
+    {
+      schedule: partialSchedule,
+      conditions: internalSchedule._conditions
+    }
+  );
 });
 
 handlers['api/schedule-update'] = withMutation(async function ({
@@ -806,77 +801,83 @@ handlers['api/schedule-update'] = withMutation(async function ({
   resetNextDate,
 }) {
   checkFileOpen();
-  const { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
+  const { data } = await aqlQuery(
+        q('schedules')
+          .filter({ id })
+          .select('*'),
+      );
   let sched = data[0] as ScheduleEntity;
   let conditionsUpdated = false as boolean;
 
   for (const key in fields) {
-    const typedKey = key as keyof APIScheduleEntity;
-    const value = fields[typedKey];
+      const typedKey = key as keyof APIScheduleEntity;
+      const value = fields[typedKey];
 
-    switch (typedKey) {
-      case 'name':
-        sched.name = value as string;
-        conditionsUpdated = true;
-        break;
-      case 'rule':
-        console.warn('Editing `rule` is not allowed via schedule-update.');
-        break;
+      switch (typedKey) {
 
-      case 'next_date':
-      case 'completed':
-        console.warn(
-          `Field '${typedKey}' is system-managed and not user-editable.`,
-        );
-        break;
+        case 'name':
+          sched.name = value as string;
+          conditionsUpdated = true;
+          break;
+        case 'rule':
+          console.warn('Editing `rule` is not allowed via schedule-update.');
+          break;
 
-      case 'posts_transaction':
-        sched.posts_transaction = value as boolean;
-        conditionsUpdated = true;
-        break;
+        case 'next_date':
+        case 'completed':
+          console.warn(`Field '${typedKey}' is system-managed and not user-editable.`);
+          break;
 
-      case 'payee':
-        sched._conditions[0].value = value;
-        conditionsUpdated = true;
-        break;
+        case 'posts_transaction':
+          sched.posts_transaction = value as boolean;
+          conditionsUpdated = true;
+          break;
 
-      case 'account':
-        sched._conditions[1].value = value;
-        conditionsUpdated = true;
-        break;
+        case 'payee':
+          sched._conditions[0].value = value;
+          conditionsUpdated = true;
+          break;
 
-      case 'amountOp':
-        sched._conditions[3].op = value as AmountOPType;
-        conditionsUpdated = true;
-        break;
+        case 'account':
+          sched._conditions[1].value = value;
+          conditionsUpdated = true;
+          break;
 
-      case 'amount':
-        sched._conditions[3].value = value;
-        conditionsUpdated = true;
-        break;
+        case 'amountOp':
+          sched._conditions[3].op = value as AmountOPType;
+          conditionsUpdated = true;
+          break;
 
-      case 'date':
-        sched._conditions[2].value = value;
-        conditionsUpdated = true;
-        break;
+        case 'amount':
+          sched._conditions[3].value = value;
+          conditionsUpdated = true;
+          break;
 
-      default:
-        console.warn(`Unhandled field: ${typedKey}`);
-        break;
+        case 'date':
+          sched._conditions[2].value = value;
+          conditionsUpdated = true;
+          break;
+
+        default:
+          console.warn(`Unhandled field: ${typedKey}`);
+          break;
+      }
     }
+  if (conditionsUpdated)
+  {
+  return handlers['c']({
+    schedule: { 
+          id: sched.id,
+          posts_transaction: sched.posts_transaction,
+          name: sched.name,
+     },
+    conditions: sched._conditions,
+    resetNextDate,
+  });
   }
-  if (conditionsUpdated) {
-    return handlers['schedule/update']({
-      schedule: {
-        id: sched.id,
-        posts_transaction: sched.posts_transaction,
-        name: sched.name,
-      },
-      conditions: sched._conditions,
-      resetNextDate,
-    });
-  } else {
-    return null;
+  else
+  {
+  return null;
   }
 });
 
@@ -899,8 +900,15 @@ handlers['api/schedule-post-transaction'] = withMutation(async function (
   return handlers['schedule/post-transaction']({ id });
 });
 
-handlers['api/get-id-by-name'] = withMutation(async function ({ type, name }) {
-  const { data } = await aqlQuery(q(type).filter({ name }).select('*'));
+handlers['api/get-id-by-name'] = withMutation(async function ({
+  type,
+  name,
+}) {
+  const { data } = await aqlQuery(
+        q(type)
+          .filter({ name })
+          .select('*'),
+      );
   return data[0].id;
 });
 
