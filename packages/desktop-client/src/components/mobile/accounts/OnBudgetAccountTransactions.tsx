@@ -5,51 +5,39 @@ import { listen, send } from 'loot-core/platform/client/fetch';
 import { type Query } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import {
-  type AccountEntity,
+  type ScheduleEntity,
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { syncAndDownload } from '@desktop-client/app/appSlice';
 import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
-import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useOnBudgetAccounts } from '@desktop-client/hooks/useOnBudgetAccounts';
+import { usePreviewTransactions } from '@desktop-client/hooks/usePreviewTransactions';
 import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
 import * as queries from '@desktop-client/queries/queries';
-import { markAccountRead } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
-export function AccountTransactions({
-  account,
-}: {
-  readonly account: AccountEntity;
-}) {
-  const schedulesQuery = useMemo(
-    () => getSchedulesQuery(account.id),
-    [account.id],
-  );
+export function OnBudgetAccountTransactions() {
+  const schedulesQuery = useMemo(() => getSchedulesQuery('onbudget'), []);
 
   return (
     <SchedulesProvider query={schedulesQuery}>
-      <TransactionListWithPreviews account={account} />
+      <TransactionListWithPreviews />
     </SchedulesProvider>
   );
 }
 
-function TransactionListWithPreviews({
-  account,
-}: {
-  readonly account: AccountEntity;
-}) {
+function TransactionListWithPreviews() {
   const { t } = useTranslation();
   const baseTransactionsQuery = useCallback(
     () =>
-      queries.transactions(account.id).options({ splits: 'all' }).select('*'),
-    [account.id],
+      queries.transactions('onbudget').options({ splits: 'all' }).select('*'),
+    [],
   );
 
   const [transactionsQuery, setTransactionsQuery] = useState<Query>(
@@ -57,34 +45,27 @@ function TransactionListWithPreviews({
   );
   const {
     transactions,
-    isLoading: isTransactionsLoading,
+    isLoading,
     reload: reloadTransactions,
     isLoadingMore,
     loadMore: loadMoreTransactions,
   } = useTransactions({
     query: transactionsQuery,
   });
+  const onBudgetAccounts = useOnBudgetAccounts();
+  const onBudgetAccountsFilter = useCallback(
+    (schedule: ScheduleEntity) =>
+      onBudgetAccounts.some(a => a.id === schedule._account),
+    [onBudgetAccounts],
+  );
 
-  const { previewTransactions, isLoading: isPreviewTransactionsLoading } =
-    useAccountPreviewTransactions({
-      accountId: account?.id,
-    });
+  const { previewTransactions } = usePreviewTransactions({
+    filter: onBudgetAccountsFilter,
+  });
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  const onRefresh = useCallback(() => {
-    if (account.id) {
-      dispatch(syncAndDownload({ accountId: account.id }));
-    }
-  }, [account.id, dispatch]);
-
-  useEffect(() => {
-    if (account.id) {
-      dispatch(markAccountRead({ id: account.id }));
-    }
-  }, [account.id, dispatch]);
 
   useEffect(() => {
     return listen('sync-event', event => {
@@ -158,11 +139,9 @@ function TransactionListWithPreviews({
 
   const balanceQueries = useMemo(
     () => ({
-      balance: queries.accountBalance(account.id),
-      cleared: queries.accountBalanceCleared(account.id),
-      uncleared: queries.accountBalanceUncleared(account.id),
+      balance: queries.onBudgetAccountBalance(),
     }),
-    [account],
+    [],
   );
 
   const transactionsToDisplay = !isSearching
@@ -172,21 +151,15 @@ function TransactionListWithPreviews({
 
   return (
     <TransactionListWithBalances
-      isLoading={
-        isSearching ? isTransactionsLoading : isPreviewTransactionsLoading
-      }
+      isLoading={isLoading}
       transactions={transactionsToDisplay}
       balance={balanceQueries.balance}
-      balanceCleared={balanceQueries.cleared}
-      balanceUncleared={balanceQueries.uncleared}
       isLoadingMore={isLoadingMore}
       onLoadMore={loadMoreTransactions}
-      searchPlaceholder={t('Search {{accountName}}', {
-        accountName: account.name,
-      })}
+      searchPlaceholder={t('Search On Budget Accounts')}
       onSearch={onSearch}
       onOpenTransaction={onOpenTransaction}
-      onRefresh={onRefresh}
+      showMakeTransfer={true}
     />
   );
 }
