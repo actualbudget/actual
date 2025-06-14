@@ -34,15 +34,9 @@ import { IncomeMenu } from './IncomeMenu';
 import { BalanceWithCarryover } from '@desktop-client/components/budget/BalanceWithCarryover';
 import { makeAmountGrey } from '@desktop-client/components/budget/util';
 import {
-  type Binding,
-  type SheetFields,
-} from '@desktop-client/components/spreadsheet';
-import {
   CellValue,
   CellValueText,
 } from '@desktop-client/components/spreadsheet/CellValue';
-import { useSheetName } from '@desktop-client/components/spreadsheet/useSheetName';
-import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
 import {
   Row,
   Field,
@@ -52,8 +46,11 @@ import {
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSheetName } from '@desktop-client/hooks/useSheetName';
+import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useUndo } from '@desktop-client/hooks/useUndo';
-import { envelopeBudget } from '@desktop-client/queries/queries';
+import { type Binding, type SheetFields } from '@desktop-client/spreadsheet';
+import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 export function useEnvelopeSheetName<
   FieldName extends SheetFields<'envelope-budget'>,

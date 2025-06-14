@@ -12,8 +12,8 @@ import { css } from '@emotion/css';
 import { useTrackingSheetValue } from '@desktop-client/components/budget/tracking/TrackingBudgetComponents';
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
-import { trackingBudget } from '@desktop-client/queries/queries';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import { trackingBudget } from '@desktop-client/spreadsheet/bindings';
 
 type SavedProps = {
   projected: boolean;
