@@ -16,6 +16,8 @@ import { css, cx } from '@emotion/css';
 import * as Platform from 'loot-core/shared/platform';
 import { type AccountEntity } from 'loot-core/types/models';
 
+import { BalanceHistoryGraph } from './BalanceHistoryGraph';
+
 import { Link } from '@desktop-client/components/common/Link';
 import { Notes } from '@desktop-client/components/Notes';
 import {
@@ -282,16 +284,18 @@ export function Account<FieldName extends SheetFields<'account'>>({
           <Text
             style={{
               fontWeight: 'bold',
-              borderBottom: accountNote ? `1px solid ${theme.tableBorder}` : 0,
-              marginBottom: accountNote ? '0.5rem' : 0,
             }}
           >
             {name}
           </Text>
+          {account && <BalanceHistoryGraph accountId={account.id} />}
           {accountNote && (
             <Notes
               getStyle={() => ({
+                borderTop: `1px solid ${theme.tableBorder}`,
                 padding: 0,
+                paddingTop: '0.5rem',
+                marginTop: '0.5rem',
               })}
               notes={accountNote}
             />
