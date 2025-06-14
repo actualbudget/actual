@@ -54,8 +54,7 @@ exports[`Transfer > split transfers are retained on child transactions 1`] = `
 `;
 
 exports[`Transfer > split transfers are retained on child transactions 2`] = `
-"Snapshot Diff:
-- First value
+"- First value
 + Second value
 
 @@ -8,11 +8,11 @@
@@ -74,8 +73,7 @@ exports[`Transfer > split transfers are retained on child transactions 2`] = `
 `;
 
 exports[`Transfer > split transfers are retained on child transactions 3`] = `
-"Snapshot Diff:
-- First value
+"- First value
 + Second value
 
 @@ -22,10 +22,58 @@
@@ -169,8 +167,7 @@ exports[`Transfer > transfers are properly de-categorized 1`] = `
 `;
 
 exports[`Transfer > transfers are properly de-categorized 2`] = `
-"Snapshot Diff:
-- First value
+"- First value
 + Second value
 
 @@ -9,18 +9,42 @@
@@ -223,8 +220,7 @@ exports[`Transfer > transfers are properly de-categorized 2`] = `
 `;
 
 exports[`Transfer > transfers are properly de-categorized 3`] = `
-"Snapshot Diff:
-- First value
+"- First value
 + Second value
 
 @@ -1,32 +1,32 @@
@@ -295,8 +291,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 1`] = `
 `;
 
 exports[`Transfer > transfers are properly inserted/updated/deleted 2`] = `
-"Snapshot Diff:
-- First value
+"- First value
 + Second value
 
 @@ -21,6 +21,54 @@
@@ -357,8 +352,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 2`] = `
 `;
 
 exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
-"Snapshot Diff:
-- First value
+"- First value
 + Second value
 
 @@ -2,73 +2,73 @@
@@ -459,8 +453,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
 `;
 
 exports[`Transfer > transfers are properly inserted/updated/deleted 4`] = `
-"Snapshot Diff:
-- First value
+"- First value
 + Second value
 
 @@ -11,22 +11,22 @@
@@ -491,8 +484,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 4`] = `
 `;
 
 exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
-"Snapshot Diff:
-- First value
+"- First value
 + Second value
 
 @@ -11,43 +11,19 @@
@@ -545,8 +537,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
 `;
 
 exports[`Transfer > transfers are properly inserted/updated/deleted 6`] = `
-"Snapshot Diff:
-- First value
+"- First value
 + Second value
 
 @@ -11,19 +11,43 @@
@@ -599,8 +590,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 6`] = `
 `;
 
 exports[`Transfer > transfers are properly inserted/updated/deleted 7`] = `
-"Snapshot Diff:
-- First value
+"- First value
 + Second value
 
 @@ -2,58 +2,10 @@

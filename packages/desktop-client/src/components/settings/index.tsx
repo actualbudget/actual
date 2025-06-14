@@ -170,7 +170,6 @@ export function Settings() {
       header={t('Settings')}
       style={{
         marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
-        paddingBottom: MOBILE_NAV_HEIGHT,
       }}
     >
       <View
@@ -180,6 +179,7 @@ export function Settings() {
           flexShrink: 0,
           maxWidth: 530,
           gap: 30,
+          paddingBottom: MOBILE_NAV_HEIGHT,
         }}
       >
         {isNarrowWidth && (

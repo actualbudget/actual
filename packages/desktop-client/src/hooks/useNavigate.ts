@@ -5,6 +5,7 @@ import {
   type NavigateOptions,
   type To,
   useLocation,
+  // eslint-disable-next-line no-restricted-imports
   useNavigate as useNavigateReactRouter,
 } from 'react-router-dom';
 

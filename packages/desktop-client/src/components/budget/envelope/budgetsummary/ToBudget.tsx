@@ -102,6 +102,8 @@ export function ToBudget({
                 onBudgetAction(month, 'reset-hold');
                 setMenuOpen(false);
               }}
+              month={month}
+              onBudgetAction={onBudgetAction}
             />
           )}
           {menuStep === 'buffer' && (

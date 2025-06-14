@@ -1,0 +1,23 @@
+name: autofix.ci
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  autofix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Format code
+        run: yarn lint:fix
+      - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27

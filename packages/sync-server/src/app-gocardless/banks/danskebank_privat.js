@@ -6,7 +6,9 @@ import Fallback from './integration-bank.js';
 export default {
   ...Fallback,
 
-  institutionIds: ['DANSKEBANK_DABANO22'],
+  // TODO: Add other Danske Bank BICs?
+  // https://danskeci.com/ci/transaction-banking/bank-identifier-code
+  institutionIds: ['DANSKEBANK_DABADKKK', 'DANSKEBANK_DABANO22'],
 
   normalizeTransaction(transaction, booked) {
     const editedTrans = { ...transaction };

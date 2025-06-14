@@ -16,7 +16,7 @@ type UndoState = {
 };
 
 type UndoStateWithId = UndoState & {
-  id?: ReturnType<typeof uuidv4>;
+  id?: string;
 };
 
 // List of recently used states. We don't use a true MRU structure

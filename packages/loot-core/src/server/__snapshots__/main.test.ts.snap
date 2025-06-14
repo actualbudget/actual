@@ -58,8 +58,7 @@ exports[`Accounts > Transfers are properly updated 1`] = `
 `;
 
 exports[`Accounts > Transfers are properly updated 2`] = `
-"Snapshot Diff:
-- First value
+"- First value
 + Second value
 
 @@ -2,12 +2,12 @@
@@ -98,8 +97,7 @@ exports[`Accounts > Transfers are properly updated 2`] = `
 `;
 
 exports[`Accounts > Transfers are properly updated 3`] = `
-"Snapshot Diff:
-- First value
+"- First value
 + Second value
 
 @@ -19,12 +19,12 @@

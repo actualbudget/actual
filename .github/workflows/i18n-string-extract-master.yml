@@ -3,7 +3,7 @@ name: Extract and upload i18n strings
 on:
   schedule:
     # 4am UTC
-    - cron: "0 4 * * *"
+    - cron: '0 4 * * *'
   workflow_dispatch:
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
         uses: ./actual/.github/actions/setup
         with:
           working-directory: actual
-          download-translations: false  # As we'll manually clone instead
+          download-translations: false # As we'll manually clone instead
       - name: Configure Git config
         run: |
           git config --global user.name "github-actions[bot]"
@@ -78,7 +78,7 @@ jobs:
             actualbudget/actual
 
       - name: Unlock translations
-        if: always()  # Clean up even on failure
+        if: always() # Clean up even on failure
         run: |
           wlc \
             --url https://hosted.weblate.org/api/ \

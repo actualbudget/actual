@@ -233,25 +233,41 @@ export const syncAccounts = createAppAsyncThunk(
       return false;
     }
 
-    const batchSync = !id;
-
-    // Build an array of IDs for accounts to sync.. if no `id` provided
-    // then we assume that all accounts should be synced
-    const queriesState = getState().queries;
-    let accountIdsToSync = !batchSync
-      ? [id]
-      : queriesState.accounts
-          .filter(
-            ({ bank, closed, tombstone }) => !!bank && !closed && !tombstone,
-          )
-          .sort((a, b) =>
-            a.offbudget === b.offbudget
-              ? a.sort_order - b.sort_order
-              : a.offbudget - b.offbudget,
-          )
-          .map(({ id }) => id);
-
     const { setAccountsSyncing } = accountsSlice.actions;
+
+    if (id === 'uncategorized') {
+      // Sync no accounts
+      dispatch(setAccountsSyncing({ ids: [] }));
+      return false;
+    }
+
+    const queriesState = getState().queries;
+    let accountIdsToSync: string[];
+    if (id === 'offbudget' || id === 'onbudget') {
+      const targetOffbudget = id === 'offbudget' ? 1 : 0;
+      accountIdsToSync = queriesState.accounts
+        .filter(
+          ({ bank, closed, tombstone, offbudget }) =>
+            !!bank && !closed && !tombstone && offbudget === targetOffbudget,
+        )
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map(({ id }) => id);
+    } else if (id) {
+      accountIdsToSync = [id];
+    } else {
+      // Default: all accounts
+      accountIdsToSync = queriesState.accounts
+        .filter(
+          ({ bank, closed, tombstone }) => !!bank && !closed && !tombstone,
+        )
+        .sort((a, b) =>
+          a.offbudget === b.offbudget
+            ? a.sort_order - b.sort_order
+            : a.offbudget - b.offbudget,
+        )
+        .map(({ id }) => id);
+    }
+
     dispatch(setAccountsSyncing({ ids: accountIdsToSync }));
 
     // TODO: Force cast to AccountEntity.
@@ -260,7 +276,9 @@ export const syncAccounts = createAppAsyncThunk(
       'accounts-get',
     )) as unknown as AccountEntity[];
     const simpleFinAccounts = accountsData.filter(
-      a => a.account_sync_source === 'simpleFin',
+      a =>
+        a.account_sync_source === 'simpleFin' &&
+        accountIdsToSync.includes(a.id),
     );
 
     let isSyncSuccess = false;
@@ -268,7 +286,7 @@ export const syncAccounts = createAppAsyncThunk(
     const matchedTransactions: Array<TransactionEntity['id']> = [];
     const updatedAccounts: Array<AccountEntity['id']> = [];
 
-    if (batchSync && simpleFinAccounts.length > 0) {
+    if (simpleFinAccounts.length > 0) {
       console.log('Using SimpleFin batch sync');
 
       const res = await send('simplefin-batch-sync', {

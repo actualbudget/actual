@@ -11,16 +11,18 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
-type EnvelopeToBudgetMenuModalProps = Omit<
-  Extract<ModalType, { name: 'envelope-summary-to-budget-menu' }>['options'],
-  'month'
->;
+type EnvelopeToBudgetMenuModalProps = Extract<
+  ModalType,
+  { name: 'envelope-summary-to-budget-menu' }
+>['options'];
 
 export function EnvelopeToBudgetMenuModal({
   onTransfer,
   onCover,
   onHoldBuffer,
   onResetHoldBuffer,
+  onBudgetAction,
+  month,
 }: EnvelopeToBudgetMenuModalProps) {
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
@@ -43,6 +45,8 @@ export function EnvelopeToBudgetMenuModal({
             onCover={onCover}
             onHoldBuffer={onHoldBuffer}
             onResetHoldBuffer={onResetHoldBuffer}
+            onBudgetAction={onBudgetAction}
+            month={month}
           />
         </>
       )}
