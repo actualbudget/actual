@@ -189,7 +189,7 @@ export const scheduleModel = {
   //just an update
 
   fromExternal(schedule: APIScheduleEntity): ScheduleEntity {
-    let result: ScheduleEntity = {
+    const result: ScheduleEntity = {
       id: schedule.id,
       name: schedule.name,
       rule: schedule.rule,
