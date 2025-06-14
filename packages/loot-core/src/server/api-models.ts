@@ -192,9 +192,9 @@ export const scheduleModel = {
     const result: ScheduleEntity = {
       id: schedule.id,
       name: schedule.name,
-      rule: schedule.rule,
-      next_date: schedule.next_date,
-      completed: schedule.completed,
+      rule: schedule.rule as string,
+      next_date: schedule.next_date as string,
+      completed: schedule.completed as boolean,
       posts_transaction: schedule.posts_transaction,
       tombstone: false,
       _payee: schedule.payee,
