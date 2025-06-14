@@ -8,6 +8,8 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
+import { CategoryGroupEntity } from 'loot-core/types/models';
+
 import { DynamicBudgetTable } from './DynamicBudgetTable';
 import * as envelopeBudget from './envelope/EnvelopeBudgetComponents';
 import { EnvelopeBudgetProvider } from './envelope/EnvelopeBudgetContext';
@@ -215,7 +217,7 @@ function BudgetInner(props: BudgetInnerProps) {
     }
   };
 
-  const onSaveGroup = group => {
+  const onSaveGroup =  async (group: CategoryGroupEntity) => {
     if (group.id === 'new') {
       dispatch(createGroup({ name: group.name }));
     } else {
@@ -223,7 +225,7 @@ function BudgetInner(props: BudgetInnerProps) {
     }
   };
 
-  const onDeleteGroup = async id => {
+  const onDeleteGroup = async (id: string) => {
     const group = categoryGroups.find(g => g.id === id);
 
     let mustTransfer = false;
@@ -253,7 +255,7 @@ function BudgetInner(props: BudgetInnerProps) {
     }
   };
 
-  const onApplyBudgetTemplatesInGroup = async categories => {
+  const onApplyBudgetTemplatesInGroup = async (categories: string[]) => {
     dispatch(
       applyBudgetAction({
         month: startMonth,

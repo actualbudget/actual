@@ -38,7 +38,7 @@ type BudgetCategoriesProps = {
   onSaveGroup: (group: CategoryGroupEntity) => void,
   onDeleteCategory: (id: CategoryEntity["id"]) => Promise<void>,
   onDeleteGroup: (id: CategoryGroupEntity["id"]) => void,
-  onApplyBudgetTemplatesInGroup: (groupId: CategoryGroupEntity["id"]) => void,
+  onApplyBudgetTemplatesInGroup: (groupIds: CategoryGroupEntity["id"][]) => void,
   onReorderCategory: OnDropCallback,
   onReorderGroup: OnDropCallback,
 
