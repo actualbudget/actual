@@ -30,13 +30,13 @@ While this is called Desktop Client, this actually has nothing to do with the de
 
 ### Desktop Electron
 
-This is the source code for the Desktop application, in its current state it is not configured to work with the self hosted version of Actual Budget, however the source code is available for this to be completed.
+This is the source code for the Desktop application. It's a wrapper that allows for a stable use of the Actual Web App locally with or without the internet or a sync-server. It is unlikely you will need to make changes here.
 
 ### Loot Core
 
 The shared underlying functionality component used by both the web/desktop frontend and the in-browser database server.
 
-## Sync Server
+### Sync Server
 
 The Sync Server, also known as Actual Server, holds all of the code for the synchronization element of the Actual Budget application. Actual server has a dependency of Actual so when you deploy Actual Server to your hosting method of choice, be that Fly, Local etc. and run `yarn build:server` and `yarn install`, the Actual client will be installed as a dependency into the Actual Server deployment.
 
