@@ -740,3 +740,86 @@ describe('API CRUD operations', () => {
     expect(transactions[0].notes).toBeNull();
   });
 });
+
+
+
+  //apis: createSchedule, getSchedules, updateSchedule, deleteSchedule
+  test('Schedules: successfully complete account operators', async () => {
+    //test a schedule with a recuring configuration
+    const ScheduleId1 = await api.createSchedule(
+     {
+          name: 'test-schedule 1',
+          posts_transaction: true,
+          amount: -5000,
+          amountOp: 'is',
+            date: {
+              frequency: 'monthly',
+              interval: 1,
+              start: '2025-06-13',
+              patterns: [],
+              skipWeekend: false,
+              weekendSolveMode: 'after',
+              endMode: 'never',
+            }
+        }
+    );
+    //test the creation of non recurring schedule
+    const ScheduleId2 = await api.createSchedule(
+    { 
+          name: 'test-schedule 2',
+          posts_transaction: false,
+          amount: 4000,
+          amountOp: 'is',
+          date: '2025-06-13',
+         
+    });
+    let schedules = await api.getSchedules();
+
+    // Schedules successfully created
+    expect(schedules).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'test-schedule 1',
+          posts_transaction: true,
+          amount: -5000,
+          amountOp: 'is',
+            date: {
+              frequency: 'monthly',
+              interval: 1,
+              start: '2025-06-13',
+              patterns: [],
+              skipWeekend: false,
+              weekendSolveMode: 'after',
+              endMode: 'never',
+            }
+        }),
+        expect.objectContaining({
+          name: 'test-schedule 2',
+          posts_transaction: false,
+          amount: 4000,
+          amountOp: 'is',
+          date: '2025-06-13',
+          }),
+      ]),
+    );
+
+    expect(await api.getIDByName('schedules','test-schedule 1')).toEqual(ScheduleId1);
+    expect(await api.getIDByName('schedules','test-schedule 2')).toEqual(ScheduleId2);
+
+    await api.updateSchedule(ScheduleId1, { amount: -10000 });
+    await api.deleteSchedule(ScheduleId2);
+
+    // schedules successfully updated, and one of them deleted
+    schedules = await api.getSchedules();
+    expect(schedules).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: ScheduleId1,
+          name: 'test-account1',
+          closed: true,
+          offbudget: false,
+        }),
+        expect.not.objectContaining({ id: ScheduleId2 }),
+      ]),
+    );
+  });
