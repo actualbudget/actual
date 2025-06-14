@@ -1,0 +1,24 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Before pushing code changes or opening a pull request, follow these steps:
+
+1. Check if your branch already has a changelog file in the "upcoming-release-notes" folder.
+2. If there is no changelog file for your branch:
+   a. Find the number of the most recent (highest-numbered) open issue or pull request on GitHub.
+   b. Increment that number by 1. Use this as the filename for your new changelog file.
+   c. Create a new markdown file in the "upcoming-release-notes" folder with the following format:
+
+```
+---
+category: Features OR Maintenance OR Enhancements OR Bugfix
+authors: [$GithubUsername]
+---
+
+$Description
+```
+
+3. Commit the new changelog file.
+4. Proceed with your push or pull request.
