@@ -322,13 +322,13 @@ function AllAccountList({
         />
       }
       padding={0}
-      style={{
-        paddingBottom: MOBILE_NAV_HEIGHT,
-      }}
     >
       {accounts.length === 0 && <EmptyMessage />}
       <PullToRefresh onRefresh={onSync}>
-        <View aria-label={t('Account list')} style={{ margin: 10 }}>
+        <View
+          aria-label={t('Account list')}
+          style={{ margin: 10, paddingBottom: MOBILE_NAV_HEIGHT }}
+        >
           {onBudgetAccounts.length > 0 && (
             <AccountHeader
               id="onbudget"
