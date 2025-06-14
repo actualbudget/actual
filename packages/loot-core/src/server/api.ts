@@ -866,7 +866,7 @@ handlers['api/schedule-update'] = withMutation(async function ({
     }
   }
   if (conditionsUpdated) {
-    return handlers['c']({
+    return handlers['schedule/update']({
       schedule: {
         id: sched.id,
         posts_transaction: sched.posts_transaction,
