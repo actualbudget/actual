@@ -37,7 +37,7 @@ type BudgetCategoriesProps = {
   onSaveCategory: (category: CategoryEntity) => void,
   onSaveGroup: (group: CategoryGroupEntity) => void,
   onDeleteCategory: (id: CategoryEntity["id"]) => Promise<void>,
-  onDeleteGroup: (id: CategoryGroupEntity["id"]) => void,
+  onDeleteGroup: (id: CategoryGroupEntity["id"]) => Promise<void>,
   onApplyBudgetTemplatesInGroup: (groupIds: CategoryGroupEntity["id"][]) => void,
   onReorderCategory: OnDropCallback,
   onReorderGroup: OnDropCallback,
@@ -73,7 +73,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
     const items = useMemo(() => {
       const [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
 
-      let items = Array.prototype.concat.apply(
+      let items: {type: string, value?: CategoryEntity | CategoryGroupEntity}[] = Array.prototype.concat.apply(
         [],
         expenseGroups.map(group => {
           if (group.hidden && !showHiddenCategories) {
@@ -84,7 +84,9 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
             cat => showHiddenCategories || !cat.hidden,
           );
 
-          const items = [{ type: 'expense-group', value: { ...group } }];
+          const items: {type: string, value?: CategoryEntity | CategoryGroupEntity}[] = [
+            { type: 'expense-group', value: {...group} }
+          ];
 
           if (newCategoryForGroup === group.id) {
             items.push({ type: 'new-category' });
@@ -105,7 +107,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
       );
 
       if (isAddingGroup) {
-        items.push({ type: 'new-group' });
+        items.push({ type: 'new-group', value: {id: 'new', name: ''} });
       }
 
       if (incomeGroup) {
@@ -186,7 +188,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
       setIsAddingGroup(false);
     }
 
-    function _onSaveGroup(group) {
+    async function _onSaveGroup(group: CategoryGroupEntity) {
       onSaveGroup?.(group);
       if (group.id === 'new') {
         onHideNewGroup();
@@ -244,7 +246,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                   <SidebarCategory
                     category={{
                       name: '',
-                      cat_group: newCategoryForGroup,
+                      group: newCategoryForGroup,
                       is_income:
                         newCategoryForGroup ===
                         categoryGroups.find(g => g.is_income).id,
@@ -283,8 +285,8 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
             case 'expense-category':
               content = (
                 <ExpenseCategory
-                  cat={item.value}
-                  categoryGroup={item.group}
+                  cat={item.value as CategoryEntity}
+                  categoryGroup={item.value as CategoryGroupEntity}
                   editingCell={editingCell}
                   MonthComponent={dataComponents.ExpenseCategoryComponent}
                   dragState={dragState}
@@ -331,7 +333,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
             case 'income-category':
               content = (
                 <IncomeCategory
-                  cat={item.value}
+                  cat={item.value as CategoryEntity}
                   editingCell={editingCell}
                   isLast={idx === items.length - 1}
                   MonthComponent={dataComponents.IncomeCategoryComponent}
