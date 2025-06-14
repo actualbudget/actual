@@ -900,7 +900,14 @@ handlers['api/schedule-post-transaction'] = withMutation(async function (
 });
 
 handlers['api/get-id-by-name'] = withMutation(async function ({ type, name }) {
+  const allowedTypes = ['payees', 'categories', 'schedules', 'accounts'];
+  if (!allowedTypes.includes(type)) {
+    return 'Error: Provide a valid type'
+  }
   const { data } = await aqlQuery(q(type).filter({ name }).select('*'));
+  if (!data || data.length === 0) {
+    return 'Error: Not found';
+  }
   return data[0].id;
 });
 
