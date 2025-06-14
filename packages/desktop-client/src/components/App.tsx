@@ -71,7 +71,7 @@ function AppInner() {
     };
 
     async function init() {
-      const socketName = await maybeUpdate(() =>
+      const serverSocket = await maybeUpdate(() =>
         global.Actual.getServerSocket(),
       );
 
@@ -82,7 +82,7 @@ function AppInner() {
           ),
         }),
       );
-      await initConnection(socketName);
+      await initConnection(serverSocket);
 
       // Load any global prefs
       dispatch(

@@ -1,3 +1,4 @@
+import { Template } from '../../types/models/templates';
 import * as db from '../db';
 
 import { parse } from './goal-template.pegjs';
@@ -7,7 +8,6 @@ import {
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
-import { Template } from './types/templates';
 
 type Notification = {
   type?: 'message' | 'error' | 'warning' | undefined;
