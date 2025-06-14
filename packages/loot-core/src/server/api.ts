@@ -45,6 +45,7 @@ import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
 import { setSyncingMode, batchMessages } from './sync';
+import { getIDByName } from '@actual-app/api';
 
 let IMPORT_MODE = false;
 
@@ -817,7 +818,14 @@ handlers['api/schedule-update'] = withMutation(async function ({
     switch (typedKey) {
       case 'name':
         sched.name = value as string;
-        conditionsUpdated = true;
+        if (sched.name.length > 0 && sched.id !== await getIDByName('schedules', sched.name)) {
+          console.warn('There is already a schedule with this name');
+          return;
+        }
+        else
+        {
+          conditionsUpdated = true;
+        }
         break;
       case 'rule':
         console.warn('Editing `rule` is not allowed via schedule-update.');
