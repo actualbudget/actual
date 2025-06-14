@@ -807,7 +807,7 @@ handlers['api/schedule-update'] = withMutation(async function ({
 }) {
   checkFileOpen();
   const { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
-  let sched = data[0] as ScheduleEntity;
+  const sched = data[0] as ScheduleEntity;
   let conditionsUpdated = false as boolean;
 
   for (const key in fields) {
@@ -826,7 +826,7 @@ handlers['api/schedule-update'] = withMutation(async function ({
       case 'next_date':
       case 'completed':
         console.warn(
-          `Field '${typedKey}' is system-managed and not user-editable.`,
+          `Field ‘${typedKey}’ is system-managed and not user-editable.`,
         );
         break;
 
