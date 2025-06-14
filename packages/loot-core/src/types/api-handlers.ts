@@ -79,6 +79,7 @@ export interface ApiHandlers {
     categoryGroups;
     payees;
     accounts;
+    currencyCode;
   }) => Promise<unknown>;
 
   'api/transactions-import': (arg: {

@@ -105,6 +105,9 @@ export function ExperimentalFeatures() {
             >
               <Trans>Pluggy.ai Bank Sync (Brazilian banks only)</Trans>
             </FeatureToggle>
+            <FeatureToggle flag="currency">
+              <Trans>Currency support</Trans>
+            </FeatureToggle>
           </View>
         ) : (
           <Link

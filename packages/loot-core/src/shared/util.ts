@@ -214,24 +214,6 @@ export function titleFirst(str: string | null | undefined) {
   return str[0].toUpperCase() + str.slice(1);
 }
 
-export function appendDecimals(
-  amountText: string,
-  hideDecimals = false,
-): string {
-  const { decimalSeparator: separator } = getNumberFormat();
-  let result = amountText;
-  if (result.slice(-1) === separator) {
-    result = result.slice(0, -1);
-  }
-  if (!hideDecimals) {
-    result = result.replaceAll(/[,.]/g, '');
-    result = result.replace(/^0+(?!$)/, '');
-    result = result.padStart(3, '0');
-    result = result.slice(0, -2) + separator + result.slice(-2);
-  }
-  return amountToCurrency(currencyToAmount(result));
-}
-
 const NUMBER_FORMATS = [
   'comma-dot',
   'dot-comma',
@@ -285,13 +267,21 @@ export function setNumberFormat(config: typeof numberFormatConfig) {
 }
 
 export function getNumberFormat({
-  format,
-  hideFraction,
+  format = numberFormatConfig.format,
+  hideFraction = numberFormatConfig.hideFraction,
+  decimalPlaces,
 }: {
   format?: NumberFormats;
-  hideFraction: boolean;
+  hideFraction?: boolean;
+  decimalPlaces?: number;
 } = numberFormatConfig) {
   let locale, thousandsSeparator, decimalSeparator;
+
+  const currentFormat = format || numberFormatConfig.format;
+  const currentHideFraction =
+    typeof hideFraction === 'boolean'
+      ? hideFraction
+      : numberFormatConfig.hideFraction;
 
   switch (format) {
     case 'space-comma':
@@ -321,14 +311,25 @@ export function getNumberFormat({
       decimalSeparator = '.';
   }
 
+  const fractionDigitsOptions: {
+    minimumFractionDigits: number;
+    maximumFractionDigits: number;
+  } =
+    typeof decimalPlaces === 'number'
+      ? {
+          minimumFractionDigits: decimalPlaces,
+          maximumFractionDigits: decimalPlaces,
+        }
+      : {
+          minimumFractionDigits: currentHideFraction ? 0 : 2,
+          maximumFractionDigits: currentHideFraction ? 0 : 2,
+        };
+
   return {
-    value: format,
+    value: currentFormat,
     thousandsSeparator,
     decimalSeparator,
-    formatter: new Intl.NumberFormat(locale, {
-      minimumFractionDigits: hideFraction ? 0 : 2,
-      maximumFractionDigits: hideFraction ? 0 : 2,
-    }),
+    formatter: new Intl.NumberFormat(locale, fractionDigitsOptions),
   };
 }
 
@@ -373,26 +374,15 @@ export function safeNumber(value: number) {
   return value;
 }
 
-export function toRelaxedNumber(currencyAmount: CurrencyAmount): Amount {
-  return integerToAmount(currencyToInteger(currencyAmount) || 0);
-}
-
 export function integerToCurrency(
   integerAmount: IntegerAmount,
+  decimalPlaces: number,
   formatter = getNumberFormat().formatter,
 ) {
-  return formatter.format(safeNumber(integerAmount) / 100);
-}
+  const divisor = Math.pow(10, decimalPlaces);
+  const amount = safeNumber(integerAmount) / divisor;
 
-export function amountToCurrency(amount: Amount): CurrencyAmount {
-  return getNumberFormat().formatter.format(amount);
-}
-
-export function amountToCurrencyNoDecimal(amount: Amount): CurrencyAmount {
-  return getNumberFormat({
-    ...numberFormatConfig,
-    hideFraction: true,
-  }).formatter.format(amount);
+  return formatter.format(amount);
 }
 
 export function currencyToAmount(currencyAmount: string): Amount | null {
@@ -417,13 +407,6 @@ export function currencyToAmount(currencyAmount: string): Amount | null {
   return isNaN(amount) ? null : amount;
 }
 
-export function currencyToInteger(
-  currencyAmount: CurrencyAmount,
-): IntegerAmount | null {
-  const amount = currencyToAmount(currencyAmount);
-  return amount == null ? null : amountToInteger(amount);
-}
-
 export function stringToInteger(str: string): number | null {
   const amount = parseInt(str.replace(/[^-0-9.,]/g, ''));
   if (!isNaN(amount)) {
@@ -432,12 +415,20 @@ export function stringToInteger(str: string): number | null {
   return null;
 }
 
-export function amountToInteger(amount: Amount): IntegerAmount {
-  return Math.round(amount * 100);
+export function amountToInteger(
+  amount: Amount,
+  decimalPlaces: number,
+): IntegerAmount {
+  const multiplier = Math.pow(10, decimalPlaces);
+  return Math.round(amount * multiplier);
 }
 
-export function integerToAmount(integerAmount: IntegerAmount): Amount {
-  return parseFloat((safeNumber(integerAmount) / 100).toFixed(2));
+export function integerToAmount(
+  integerAmount: IntegerAmount,
+  decimalPlaces: number,
+): Amount {
+  const divisor = Math.pow(10, decimalPlaces);
+  return integerAmount / divisor;
 }
 
 // This is used when the input format could be anything (from

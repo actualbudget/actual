@@ -30,7 +30,6 @@ import {
 } from '@react-aria/interactions';
 
 import { isPreviewId } from 'loot-core/shared/transactions';
-import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type TransactionEntity,
@@ -39,6 +38,7 @@ import {
 import { lookupName, Status } from './TransactionEdit';
 
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -84,6 +84,7 @@ export function TransactionListItem({
 }: TransactionListItemProps) {
   const { t } = useTranslation();
   const { list: categories } = useCategories();
+  const format = useFormat();
 
   const { value: transaction } = props;
 
@@ -289,7 +290,7 @@ export function TransactionListItem({
                     ...makeAmountFullStyle(amount),
                   }}
                 >
-                  {integerToCurrency(amount)}
+                  {format(amount, 'financial')}
                 </Text>
               </View>
             </View>

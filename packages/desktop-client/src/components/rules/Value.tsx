@@ -8,9 +8,9 @@ import { format as formatDate, parseISO } from 'date-fns';
 
 import { getMonthYearFormat } from 'loot-core/shared/months';
 import { getRecurringDescription } from 'loot-core/shared/schedules';
-import { integerToCurrency } from 'loot-core/shared/util';
 
 import { Link } from '@desktop-client/components/common/Link';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
@@ -38,6 +38,8 @@ export function Value<T>({
   style,
 }: ValueProps<T>) {
   const { t } = useTranslation();
+  const format = useFormat();
+
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const payees = usePayees();
   const { list: categories } = useCategories();
@@ -73,7 +75,7 @@ export function Value<T>({
     } else {
       switch (field) {
         case 'amount':
-          return integerToCurrency(value);
+          return format(value, 'financial');
         case 'date':
           if (value) {
             if (value.frequency) {

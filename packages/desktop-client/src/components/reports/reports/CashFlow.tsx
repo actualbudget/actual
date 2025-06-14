@@ -14,7 +14,6 @@ import * as d from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type CashFlowWidget,
   type RuleConditionEntity,
@@ -36,6 +35,7 @@ import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndi
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { cashFlowByDate } from '@desktop-client/components/reports/spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
@@ -72,6 +72,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   const locale = useLocale();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const format = useFormat();
 
   const {
     conditions,
@@ -111,8 +112,16 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
 
   const params = useMemo(
     () =>
-      cashFlowByDate(start, end, isConcise, conditions, conditionsOp, locale),
-    [start, end, isConcise, conditions, conditionsOp, locale],
+      cashFlowByDate(
+        start,
+        end,
+        isConcise,
+        conditions,
+        conditionsOp,
+        locale,
+        format,
+      ),
+    [start, end, isConcise, conditions, conditionsOp, locale, format],
   );
   const data = useReport('cash_flow', params);
 
@@ -287,7 +296,9 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
             }
             right={
               <Text style={{ fontWeight: 600 }}>
-                <PrivacyFilter>{integerToCurrency(totalIncome)}</PrivacyFilter>
+                <PrivacyFilter>
+                  {format(totalIncome, 'financial')}
+                </PrivacyFilter>
               </Text>
             }
           />
@@ -302,7 +313,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
             right={
               <Text style={{ fontWeight: 600 }}>
                 <PrivacyFilter>
-                  {integerToCurrency(totalExpenses)}
+                  {format(totalExpenses, 'financial')}
                 </PrivacyFilter>
               </Text>
             }
@@ -318,7 +329,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
             right={
               <Text style={{ fontWeight: 600 }}>
                 <PrivacyFilter>
-                  {integerToCurrency(totalTransfers)}
+                  {format(totalTransfers, 'financial')}
                 </PrivacyFilter>
               </Text>
             }

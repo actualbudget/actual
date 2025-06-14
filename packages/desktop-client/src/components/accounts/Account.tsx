@@ -19,6 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { send, listen } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 import { type UndoState } from 'loot-core/server/undo';
+import { type Currency } from 'loot-core/shared/currencies';
 import { currentDay } from 'loot-core/shared/months';
 import { q, type Query } from 'loot-core/shared/query';
 import {
@@ -45,6 +46,7 @@ import { AccountHeader } from './Header';
 import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
 import { syncAndDownload } from '@desktop-client/app/appSlice';
 import { type SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { TransactionList } from '@desktop-client/components/transactions/TransactionList';
 import { validateAccountName } from '@desktop-client/components/util/accountValidation';
 import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
@@ -260,6 +262,7 @@ type AccountInternalProps = {
   accountsSyncing: string[];
   dispatch: AppDispatch;
   onSetTransfer: ReturnType<typeof useTransactionBatchActions>['onSetTransfer'];
+  currency: Currency;
 };
 type AccountInternalState = {
   search: string;
@@ -572,6 +575,7 @@ class AccountInternal extends PureComponent<
           this.currentQuery,
           this.state.search,
           this.props.dateFormat,
+          this.props.currency,
         ),
         true,
       );
@@ -627,6 +631,7 @@ class AccountInternal extends PureComponent<
   onExport = async (accountName: string) => {
     const exportedTransactions = await send('transactions-export-query', {
       query: this.currentQuery.serialize(),
+      currencyCode: this.props.currency.code,
     });
     const normalizedName =
       accountName && accountName.replace(/[()]/g, '').replace(/\s+/g, '-');
@@ -1925,6 +1930,7 @@ function AccountHack(props: AccountHackProps) {
 export function Account() {
   const params = useParams();
   const location = useLocation();
+  const format = useFormat();
 
   const { grouped: categoryGroups } = useCategories();
   const newTransactions = useSelector(state => state.queries.newTransactions);
@@ -1994,6 +2000,7 @@ export function Account() {
           categoryId={location?.state?.categoryId}
           location={location}
           savedFilters={savedFiters}
+          currency={format.currency}
         />
       </SplitsExpandedProvider>
     </SchedulesProvider>

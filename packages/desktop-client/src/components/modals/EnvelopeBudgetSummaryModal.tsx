@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { styles } from '@actual-app/components/styles';
 
 import { format, sheetForMonth, prevMonth } from 'loot-core/shared/months';
-import { groupById, integerToCurrency } from 'loot-core/shared/util';
+import { groupById } from 'loot-core/shared/util';
 
 import { ToBudgetAmount } from '@desktop-client/components/budget/envelope/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '@desktop-client/components/budget/envelope/budgetsummary/TotalsList';
@@ -15,6 +15,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useUndo } from '@desktop-client/hooks/useUndo';
@@ -36,6 +37,7 @@ export function EnvelopeBudgetSummaryModal({
   onBudgetAction,
 }: EnvelopeBudgetSummaryModalProps) {
   const { t } = useTranslation();
+  const formatFunc = useFormat();
 
   const locale = useLocale();
   const dispatch = useDispatch();
@@ -68,7 +70,7 @@ export function EnvelopeBudgetSummaryModal({
               dispatch(collapseModals({ rootModalName: 'transfer' }));
               showUndoNotification({
                 message: t('Transferred {{amount}} to {{categoryName}}', {
-                  amount: integerToCurrency(amount),
+                  amount: formatFunc(amount, 'financial'),
                   categoryName: categoriesById[toCategoryId].name,
                 }),
               });
@@ -91,6 +93,7 @@ export function EnvelopeBudgetSummaryModal({
             onSubmit: categoryId => {
               onBudgetAction(month, 'cover-overbudgeted', {
                 category: categoryId,
+                currencyCode: formatFunc.currency.code,
               });
               dispatch(collapseModals({ rootModalName: 'cover' }));
               showUndoNotification({

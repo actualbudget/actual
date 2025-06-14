@@ -7,7 +7,6 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { amountToCurrency } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { ParsedDate } from './ParsedDate';
@@ -20,6 +19,7 @@ import {
 } from './utils';
 
 import { Checkbox } from '@desktop-client/components/forms';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { Row, Field } from '@desktop-client/components/table';
 
 type TransactionProps = {
@@ -53,6 +53,8 @@ export function Transaction({
   onCheckTransaction,
   reconcile,
 }: TransactionProps) {
+  const format = useFormat();
+  const decimalPlaces = format.currency.decimalPlaces;
   const categoryList = categories.map(category => category.name);
   const transaction = useMemo(
     () =>
@@ -80,6 +82,7 @@ export function Transaction({
       outValue,
       flipAmount,
       multiplierAmount,
+      decimalPlaces,
     );
   }, [
     rawTransaction,
@@ -89,6 +92,7 @@ export function Transaction({
     outValue,
     flipAmount,
     multiplierAmount,
+    decimalPlaces,
   ]);
 
   return (
@@ -235,10 +239,10 @@ export function Transaction({
             title={
               outflow === null
                 ? 'Invalid: unable to parse the value'
-                : amountToCurrency(outflow)
+                : format(outflow, 'financial')
             }
           >
-            {amountToCurrency(outflow || 0)}
+            {format(outflow || 0, 'financial')}
           </Field>
           <Field
             width={90}
@@ -252,10 +256,10 @@ export function Transaction({
             title={
               inflow === null
                 ? 'Invalid: unable to parse the value'
-                : amountToCurrency(inflow)
+                : format(inflow, 'financial')
             }
           >
-            {amountToCurrency(inflow || 0)}
+            {format(inflow || 0, 'financial')}
           </Field>
         </>
       ) : (
@@ -269,10 +273,10 @@ export function Transaction({
           title={
             amount === null
               ? `Invalid: unable to parse the value (${transaction.amount})`
-              : amountToCurrency(amount)
+              : format(amount, 'financial')
           }
         >
-          {amountToCurrency(amount || 0)}
+          {format(amount || 0, 'financial')}
         </Field>
       )}
     </Row>

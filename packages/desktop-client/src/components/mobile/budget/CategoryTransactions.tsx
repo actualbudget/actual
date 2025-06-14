@@ -16,6 +16,7 @@ import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackBu
 import { AddTransactionButton } from '@desktop-client/components/mobile/transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategoryPreviewTransactions } from '@desktop-client/hooks/useCategoryPreviewTransactions';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
@@ -75,6 +76,7 @@ function TransactionListWithPreviews({
 }: TransactionListWithPreviewsProps) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const format = useFormat();
 
   const baseTransactionsQuery = useCallback(
     () =>
@@ -119,6 +121,7 @@ function TransactionListWithPreviews({
     updateQuery: setTransactionsQuery,
     resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
     dateFormat,
+    currency: format.currency,
   });
 
   const onOpenTransaction = useCallback(

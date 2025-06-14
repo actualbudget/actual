@@ -26,6 +26,7 @@ import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackBu
 import { AddTransactionButton } from '@desktop-client/components/mobile/transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
@@ -240,6 +241,7 @@ function TransactionListWithPreviews({
   readonly accountName: AccountEntity['name'] | string;
 }) {
   const { t } = useTranslation();
+  const format = useFormat();
   const baseTransactionsQuery = useCallback(
     () =>
       queries.transactions(accountId).options({ splits: 'all' }).select('*'),
@@ -299,6 +301,7 @@ function TransactionListWithPreviews({
     updateQuery: setTransactionsQuery,
     resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
     dateFormat,
+    currency: format.currency,
   });
 
   const onOpenTransaction = useCallback(

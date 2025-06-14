@@ -7,6 +7,7 @@ import React, {
   type FocusEventHandler,
   type KeyboardEventHandler,
   type CSSProperties,
+  useCallback,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -17,12 +18,8 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import { amountToInteger, appendDecimals } from 'loot-core/shared/util';
-
 import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type AmountInputProps = {
   id?: string;
@@ -66,14 +63,25 @@ export function AmountInput({
 
   const [isFocused, setIsFocused] = useState(focused ?? false);
 
-  const initialValueAbsolute = format(Math.abs(initialValue || 0), 'financial');
-  const [value, setValue] = useState(initialValueAbsolute);
-  useEffect(() => setValue(initialValueAbsolute), [initialValueAbsolute]);
+  const getDisplayValue = useCallback(
+    (value: number, isEditing: boolean) => {
+      const absoluteValue = Math.abs(value || 0);
+      return isEditing
+        ? format.forEdit(absoluteValue)
+        : format(absoluteValue, 'financial');
+    },
+    [format],
+  );
+
+  const [value, setValue] = useState(getDisplayValue(initialValue, false));
+  useEffect(
+    () => setValue(getDisplayValue(initialValue, isFocused)),
+    [initialValue, isFocused, getDisplayValue],
+  );
 
   const buttonRef = useRef(null);
   const ref = useRef<HTMLInputElement>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
-  const [hideFraction] = useSyncedPref('hideFraction');
 
   useEffect(() => {
     if (focused) {
@@ -91,15 +99,23 @@ export function AmountInput({
 
   function getAmount() {
     const signedValued = symbol === '-' ? symbol + value : value;
-    return amountToInteger(evalArithmetic(signedValued));
+    return format.fromEdit(signedValued, 0);
   }
 
   function onInputTextChange(val) {
-    val = autoDecimals
-      ? appendDecimals(val, String(hideFraction) === 'true')
-      : val;
-    setValue(val ? val : '');
-    onChangeValue?.(val);
+    let newText = val;
+    if (autoDecimals) {
+      const digits = val.replace(/\D/g, '');
+      if (digits === '') {
+        newText = '';
+      } else {
+        const intValue = parseInt(digits, 10);
+        newText = format.forEdit(intValue);
+      }
+    }
+
+    setValue(newText || '');
+    onChangeValue?.(newText);
   }
 
   function fireUpdate(amount) {
@@ -109,6 +125,7 @@ export function AmountInput({
     } else if (amount < 0) {
       setSymbol('-');
     }
+    setValue(format(Math.abs(amount), 'financial'));
   }
 
   function onInputAmountBlur(e) {
@@ -171,6 +188,7 @@ export function AmountInput({
         )}
         onFocus={e => {
           setIsFocused(true);
+          setValue(format.forEdit(Math.abs(initialValue)));
           onFocus?.(e);
         }}
         onBlur={e => {
