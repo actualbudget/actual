@@ -877,7 +877,7 @@ handlers['api/schedule-update'] = withMutation(async function ({
   }
   else
   {
-  return sched.id
+  return null;
   }
 });
 
