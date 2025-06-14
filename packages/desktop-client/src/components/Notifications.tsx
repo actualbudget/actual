@@ -22,6 +22,7 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { Link } from './common/Link';
+import { MODAL_Z_INDEX } from './common/Modal';
 
 import {
   removeNotification,
@@ -313,7 +314,7 @@ export function Notifications({ style }: { style?: CSSProperties }) {
         top: notificationInset?.top,
         right: notificationInset?.right || 13,
         left: notificationInset?.left || (isNarrowWidth ? 13 : undefined),
-        zIndex: 10000,
+        zIndex: MODAL_Z_INDEX - 1,
         ...style,
       }}
     >

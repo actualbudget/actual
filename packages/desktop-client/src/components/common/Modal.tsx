@@ -33,6 +33,8 @@ import { AutoTextSize } from 'auto-text-size';
 
 import { useModalState } from '@desktop-client/hooks/useModalState';
 
+export const MODAL_Z_INDEX = 3000;
+
 type ModalProps = ComponentPropsWithRef<typeof ReactAriaModal> & {
   name: string;
   isLoading?: boolean;
@@ -80,7 +82,7 @@ export const Modal = ({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 3000,
+        zIndex: MODAL_Z_INDEX,
         fontSize: 14,
         willChange: 'transform',
         // on mobile, we disable the blurred background for performance reasons
