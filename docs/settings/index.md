@@ -53,10 +53,5 @@ If you are experiencing bugs relating to split transactions and the “Reset bud
 
 ### Experimental Features
 
-Be careful with this section; you might encounter irrecoverable errors if you enable these settings. But if you want to test out some bleeding-edge features, here's your place to do it. We _highly_ recommend backing up your budget before continuing, just in case. As of the [latest release](../releases.md), the current available experimental features are:
-
-- Monthly spending report
-- [Goal templates](../experimental/goal-templates.md)
-- Customizable reports page (dashboards)
-- Rule action templating
-- Scheduled transaction upcoming length adjustment
+This section is where you can enable features that are still in development and testing.
+See the [experimental feature documentation](../experimental) for more information.

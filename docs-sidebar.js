@@ -211,6 +211,10 @@ const sidebars = {
           type: 'category',
           label: 'Experimental features',
           collapsed: true,
+          link: {
+            type: 'doc',
+            id: 'experimental/index',
+          },
           items: [
             'experimental/goal-templates',
             'experimental/monthly-cleanup',
