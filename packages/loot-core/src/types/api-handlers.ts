@@ -13,7 +13,14 @@ import type {
 import { BudgetFileHandlers } from '../server/budgetfiles/app';
 import { type batchUpdateTransactions } from '../server/transactions';
 
-import type { NewRuleEntity, RuleEntity, TransactionEntity, DiscoverScheduleEntity, ScheduleEntity,  RecurConfig } from './models';
+import type {
+  NewRuleEntity,
+  RuleEntity,
+  TransactionEntity,
+  DiscoverScheduleEntity,
+  ScheduleEntity,
+  RecurConfig,
+} from './models';
 
 export interface ApiHandlers {
   'api/batch-budget-start': () => Promise<unknown>;
@@ -184,8 +191,10 @@ export interface ApiHandlers {
   'api/rule-update': (arg: { rule: RuleEntity }) => Promise<RuleEntity>;
 
   'api/rule-delete': (id: string) => Promise<boolean>;
-  
-  'api/schedule-create': (schedule: APIScheduleEntity) => Promise<ScheduleEntity['id']>;
+
+  'api/schedule-create': (
+    schedule: APIScheduleEntity,
+  ) => Promise<ScheduleEntity['id']>;
 
   'api/schedule-update': (arg: {
     id: ScheduleEntity['id'];
@@ -209,5 +218,7 @@ export interface ApiHandlers {
     type: string;
     name: string;
   }) => Promise<string>;
-  'api/get-server-version': () => Promise<{ error?: string } | { version: string }>;
+  'api/get-server-version': () => Promise<
+    { error?: string } | { version: string }
+  >;
 }
