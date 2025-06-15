@@ -280,14 +280,14 @@ function BudgetInner(props: BudgetInnerProps) {
         type: 'date',
       },
     ];
-    
+
     navigate('/budget', {
       replace: true,
-      state: { 
-        scrollToCategoryId: categoryId 
+      state: {
+        scrollToCategoryId: categoryId,
       },
     });
-    
+
     navigate('/accounts', {
       state: {
         goBack: true,

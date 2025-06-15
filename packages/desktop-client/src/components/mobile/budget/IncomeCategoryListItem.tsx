@@ -196,8 +196,8 @@ export function IncomeCategoryListItem({
 
     navigate('/budget', {
       replace: true,
-      state: { 
-        scrollToCategoryId: category.id 
+      state: {
+        scrollToCategoryId: category.id,
       },
     });
 

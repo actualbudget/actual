@@ -97,7 +97,7 @@ export function BudgetTable(props: BudgetTableProps) {
   const [editing, setEditing] = useState<{ id: string; cell: string } | null>(
     null,
   );
-  
+
   const location = useLocation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -237,16 +237,16 @@ export function BudgetTable(props: BudgetTableProps) {
 
   useEffect(() => {
     const scrollToCategoryId = location.state?.scrollToCategoryId;
-    
+
     if (scrollToCategoryId && scrollContainerRef.current) {
       requestAnimationFrame(() => {
         const categoryElement = scrollContainerRef.current?.querySelector(
-          `[data-category-id="${scrollToCategoryId}"]`
+          `[data-category-id="${scrollToCategoryId}"]`,
         );
-        
+
         if (categoryElement) {
-          categoryElement.scrollIntoView({ 
-            block: 'start' 
+          categoryElement.scrollIntoView({
+            block: 'start',
           });
         }
       });

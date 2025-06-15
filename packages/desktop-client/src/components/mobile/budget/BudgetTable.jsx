@@ -331,7 +331,7 @@ export function BudgetTable({
   const [showSpentColumn = false, setShowSpentColumnPref] = useLocalPref(
     'mobile.showSpentColumn',
   );
-  
+
   const location = useLocation();
   const scrollContainerRef = useRef(null);
 
@@ -349,16 +349,16 @@ export function BudgetTable({
 
   useEffect(() => {
     const scrollToCategoryId = location.state?.scrollToCategoryId;
-    
+
     if (scrollToCategoryId && scrollContainerRef.current) {
       requestAnimationFrame(() => {
         const categoryElement = scrollContainerRef.current?.querySelector(
-          `[data-category-id="${scrollToCategoryId}"]`
+          `[data-category-id="${scrollToCategoryId}"]`,
         );
-        
+
         if (categoryElement) {
-          categoryElement.scrollIntoView({ 
-            block: 'start' 
+          categoryElement.scrollIntoView({
+            block: 'start',
           });
         }
       });

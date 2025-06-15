@@ -391,14 +391,14 @@ export function ExpenseCategoryListItem({
     if (!category) {
       return;
     }
-    
+
     navigate('/budget', {
       replace: true,
-      state: { 
-        scrollToCategoryId: category.id 
+      state: {
+        scrollToCategoryId: category.id,
       },
     });
-    
+
     navigate(`/categories/${category.id}?month=${month}`);
   }, [category, month, navigate]);
 
