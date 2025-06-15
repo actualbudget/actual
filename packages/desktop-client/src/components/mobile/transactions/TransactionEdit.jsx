@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { SvgSplit } from '@actual-app/components/icons/v0';

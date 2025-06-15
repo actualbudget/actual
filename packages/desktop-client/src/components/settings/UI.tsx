@@ -1,6 +1,6 @@
 import React, { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 
 import { type CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
