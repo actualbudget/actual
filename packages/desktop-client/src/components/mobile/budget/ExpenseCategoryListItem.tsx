@@ -391,6 +391,14 @@ export function ExpenseCategoryListItem({
     if (!category) {
       return;
     }
+    
+    navigate('/budget', {
+      replace: true,
+      state: { 
+        scrollToCategoryId: category.id 
+      },
+    });
+    
     navigate(`/categories/${category.id}?month=${month}`);
   }, [category, month, navigate]);
 
@@ -402,6 +410,7 @@ export function ExpenseCategoryListItem({
     <GridListItem
       textValue={category.name}
       data-testid="category-row"
+      data-category-id={category.id}
       {...props}
     >
       <View

@@ -1,6 +1,7 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useEffect, useRef } from 'react';
 import { GridList, GridListItem } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
@@ -330,6 +331,9 @@ export function BudgetTable({
   const [showSpentColumn = false, setShowSpentColumnPref] = useLocalPref(
     'mobile.showSpentColumn',
   );
+  
+  const location = useLocation();
+  const scrollContainerRef = useRef(null);
 
   function toggleSpentColumn() {
     setShowSpentColumnPref(!showSpentColumn);
@@ -342,6 +346,24 @@ export function BudgetTable({
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
   const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
+
+  useEffect(() => {
+    const scrollToCategoryId = location.state?.scrollToCategoryId;
+    
+    if (scrollToCategoryId && scrollContainerRef.current) {
+      requestAnimationFrame(() => {
+        const categoryElement = scrollContainerRef.current?.querySelector(
+          `[data-category-id="${scrollToCategoryId}"]`
+        );
+        
+        if (categoryElement) {
+          categoryElement.scrollIntoView({ 
+            block: 'start' 
+          });
+        }
+      });
+    }
+  }, [location.state?.scrollToCategoryId]);
 
   return (
     <Page
@@ -401,6 +423,7 @@ export function BudgetTable({
       />
       <PullToRefresh onRefresh={onRefresh}>
         <View
+          innerRef={scrollContainerRef}
           data-testid="budget-table"
           style={{
             backgroundColor: theme.pageBackground,

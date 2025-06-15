@@ -194,6 +194,13 @@ export function IncomeCategoryListItem({
       return null;
     }
 
+    navigate('/budget', {
+      replace: true,
+      state: { 
+        scrollToCategoryId: category.id 
+      },
+    });
+
     navigate(`/categories/${category.id}?month=${month}`);
   }, [category, month, navigate]);
 
@@ -245,6 +252,7 @@ export function IncomeCategoryListItem({
     <GridListItem
       textValue={category.name}
       data-testid="category-row"
+      data-category-id={category.id}
       {...props}
     >
       <View
