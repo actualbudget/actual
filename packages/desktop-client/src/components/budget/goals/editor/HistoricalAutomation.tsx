@@ -6,7 +6,7 @@ import { Stack } from '@actual-app/components/stack';
 import type {
   CopyTemplate,
   AverageTemplate,
-} from 'loot-core/server/budget/types/templates';
+} from 'loot-core/types/models/templates';
 
 import {
   type Action,

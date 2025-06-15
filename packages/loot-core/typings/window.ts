@@ -1,4 +1,13 @@
+// @ts-strict-ignore
 export {};
+
+type FileDialogOptions = {
+  properties?: Array<'openFile' | 'openDirectory'>;
+  filters?: {
+    name: string;
+    extensions: string[];
+  }[];
+};
 
 type Actual = {
   IS_DEV: boolean;
@@ -9,7 +18,7 @@ type Actual = {
     filename: string,
     dialogTitle?: string,
   ) => Promise<void>;
-  openFileDialog: (options) => Promise<string[]>;
+  openFileDialog: (options: FileDialogOptions) => Promise<string[]>;
   relaunch: () => void;
   reload: (() => Promise<void>) | undefined;
   restartElectronServer: () => void;
@@ -20,7 +29,7 @@ type Actual = {
   applyAppUpdate: () => Promise<void>;
   updateAppMenu: (budgetId: string) => void;
   ipcConnect: (callback: (client) => void) => void;
-  getServerSocket: () => Promise<string | null>;
+  getServerSocket: () => Promise<Worker | null>;
   setTheme: (theme: string) => void;
   logToTerminal: (...args: unknown[]) => void;
   onEventFromMain: (

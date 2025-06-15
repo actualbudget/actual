@@ -5,6 +5,7 @@ export type * from './category';
 export type * from './category-group';
 export type * from './dashboard';
 export type * from './gocardless';
+export type * from './import-transaction';
 export type * from './note';
 export type * from './openid';
 export type * from './payee';

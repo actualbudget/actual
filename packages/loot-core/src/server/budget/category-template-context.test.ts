@@ -2,11 +2,11 @@ import { vi } from 'vitest';
 
 import { amountToInteger } from '../../shared/util';
 import { type CategoryEntity } from '../../types/models';
+import { type Template } from '../../types/models/templates';
 import * as db from '../db';
 
 import * as actions from './actions';
 import { CategoryTemplateContext } from './category-template-context';
-import { type Template } from './types/templates';
 
 // Mock getSheetValue and getCategories
 vi.mock('./actions', () => ({
