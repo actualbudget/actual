@@ -48,7 +48,9 @@ export async function applyMultipleCategoryTemplates({
   categoryIds: Array<CategoryEntity['id']>;
 }) {
   const { data: categoryData }: { data: CategoryEntity[] } = await aqlQuery(
-    q('categories').filter({ $oneof: categoryIds }).select('*'),
+    q('categories')
+      .filter({ id: { $oneof: categoryIds } })
+      .select('*'),
   );
   await storeTemplates();
   const categoryTemplates = await getTemplates(c => categoryIds.includes(c.id));

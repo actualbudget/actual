@@ -100,12 +100,6 @@ export function ExperimentalFeatures() {
               <Trans>Rule action templating</Trans>
             </FeatureToggle>
             <FeatureToggle
-              flag="contextMenus"
-              feedbackLink="https://github.com/actualbudget/actual/issues/3706"
-            >
-              <Trans>Context menus</Trans>
-            </FeatureToggle>
-            <FeatureToggle
               flag="pluggyAiBankSync"
               feedbackLink="https://github.com/actualbudget/actual/pull/4049"
             >

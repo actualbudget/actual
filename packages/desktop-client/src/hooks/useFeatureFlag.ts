@@ -6,7 +6,6 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   goalTemplatesEnabled: false,
   goalTemplatesUIEnabled: false,
   actionTemplating: false,
-  contextMenus: false,
   pluggyAiBankSync: false,
 };
 

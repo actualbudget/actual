@@ -1,0 +1,26 @@
+name: Count points
+
+on:
+  schedule:
+    # Run at 00:00 on the first day of every month
+    - cron: '0 0 1 * *'
+  workflow_dispatch:
+    inputs:
+      startDate:
+        description: 'Start date for point counter (YYYY-MM-DD)'
+        required: true
+        type: string
+
+jobs:
+  count-points:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Count points
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          START_DATE: ${{ inputs.startDate }}
+        run: node .github/scripts/count-points.mjs

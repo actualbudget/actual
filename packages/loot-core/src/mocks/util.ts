@@ -2,7 +2,7 @@
 import fs from 'fs/promises';
 import { join, dirname, basename } from 'path';
 
-import snapshotDiff from 'snapshot-diff';
+import { diff } from 'jest-diff';
 
 export function expectSnapshotWithDiffer(
   initialValue,
@@ -14,7 +14,14 @@ export function expectSnapshotWithDiffer(
   }
   return {
     expectToMatchDiff: value => {
-      expect(snapshotDiff(currentValue, value)).toMatchSnapshot();
+      expect(
+        diff(currentValue, value, {
+          aAnnotation: 'First value',
+          bAnnotation: 'Second value',
+          contextLines: 5,
+          expand: false,
+        }),
+      ).toMatchSnapshot();
       currentValue = value;
     },
   };
