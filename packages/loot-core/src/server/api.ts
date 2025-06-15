@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { getIDByName } from '@actual-app/api';
 import { getClock } from '@actual-app/crdt';
 
 import * as connection from '../platform/server/connection';
@@ -45,7 +46,6 @@ import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
 import { setSyncingMode, batchMessages } from './sync';
-import { getIDByName } from '@actual-app/api';
 
 let IMPORT_MODE = false;
 
@@ -818,12 +818,13 @@ handlers['api/schedule-update'] = withMutation(async function ({
     switch (typedKey) {
       case 'name':
         sched.name = value as string;
-        if (sched.name.length > 0 && sched.id !== await getIDByName('schedules', sched.name)) {
+        if (
+          sched.name.length > 0 &&
+          sched.id !== (await getIDByName('schedules', sched.name))
+        ) {
           console.warn('There is already a schedule with this name');
           return;
-        }
-        else
-        {
+        } else {
           conditionsUpdated = true;
         }
         break;
@@ -910,7 +911,7 @@ handlers['api/schedule-post-transaction'] = withMutation(async function (
 handlers['api/get-id-by-name'] = withMutation(async function ({ type, name }) {
   const allowedTypes = ['payees', 'categories', 'schedules', 'accounts'];
   if (!allowedTypes.includes(type)) {
-    return 'Error: Provide a valid type'
+    return 'Error: Provide a valid type';
   }
   const { data } = await aqlQuery(q(type).filter({ name }).select('*'));
   if (!data || data.length === 0) {
