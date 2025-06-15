@@ -11,7 +11,6 @@ import { View } from '@actual-app/components/view';
 import deepEqual from 'deep-equal';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { amountToInteger } from 'loot-core/shared/util';
 
 import { CheckboxOption } from './CheckboxOption';
 import { DateFormatSelect } from './DateFormatSelect';
@@ -33,6 +32,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { SectionLabel } from '@desktop-client/components/forms';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import {
   TableHeader,
   TableWithNavigator,
@@ -158,6 +158,8 @@ export function ImportTransactionsModal({
   const [prefs, savePrefs] = useSyncedPrefs();
   const dispatch = useDispatch();
   const categories = useCategories();
+  const format = useFormat();
+  const decimalPlaces = format.currency.decimalPlaces;
 
   const [multiplierAmount, setMultiplierAmount] = useState('');
   const [loadingState, setLoadingState] = useState('parsing');
@@ -249,6 +251,7 @@ export function ImportTransactionsModal({
           outValue,
           flipAmount,
           multiplierAmount,
+          decimalPlaces,
         );
         if (amount == null) {
           console.log(`Transaction on ${trans.date} has no amount`);
@@ -273,7 +276,7 @@ export function ImportTransactionsModal({
         previewTransactions.push({
           ...finalTransaction,
           date,
-          amount: amountToInteger(amount),
+          amount,
           cleared: clearOnImport,
         });
       }
@@ -327,7 +330,7 @@ export function ImportTransactionsModal({
           return next;
         }, []);
     },
-    [accountId, categories.list, clearOnImport, dispatch],
+    [accountId, categories.list, clearOnImport, dispatch, decimalPlaces],
   );
 
   const parse = useCallback(
@@ -590,6 +593,7 @@ export function ImportTransactionsModal({
         outValue,
         flipAmount,
         multiplierAmount,
+        decimalPlaces,
       );
       if (amount == null) {
         errorMessage = `Transaction on ${trans.date} has no amount`;
@@ -625,7 +629,7 @@ export function ImportTransactionsModal({
       finalTransactions.push({
         ...finalTransaction,
         date,
-        amount: amountToInteger(amount),
+        amount,
         cleared: clearOnImport,
         notes: importNotes ? finalTransaction.notes : null,
       });

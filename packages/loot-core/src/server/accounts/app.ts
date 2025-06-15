@@ -7,7 +7,6 @@ import * as connection from '../../platform/server/connection';
 import { isNonProductionEnvironment } from '../../shared/environment';
 import { dayFromDate } from '../../shared/months';
 import * as monthUtils from '../../shared/months';
-import { amountToInteger } from '../../shared/util';
 import {
   AccountEntity,
   CategoryEntity,
@@ -345,7 +344,7 @@ async function createAccount({
 
     await db.insertTransaction({
       account: id,
-      amount: amountToInteger(balance),
+      amount: balance,
       category: offBudget ? null : payee.category,
       payee: payee.id,
       date: monthUtils.currentDay(),

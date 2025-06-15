@@ -5,6 +5,7 @@ import { CoverMenu } from './CoverMenu';
 import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
 import { TransferMenu } from './TransferMenu';
 
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { envelopeBudget } from '@desktop-client/queries/queries';
 
 type BalanceMovementMenuProps = {
@@ -20,6 +21,8 @@ export function BalanceMovementMenu({
   onBudgetAction,
   onClose = () => {},
 }: BalanceMovementMenuProps) {
+  const format = useFormat();
+
   const catBalance =
     useEnvelopeSheetValue(envelopeBudget.catBalance(categoryId)) ?? 0;
 
@@ -63,6 +66,7 @@ export function BalanceMovementMenu({
               amount,
               from: categoryId,
               to: toCategoryId,
+              currencyCode: format.currency.code,
             });
           }}
         />
@@ -76,6 +80,7 @@ export function BalanceMovementMenu({
             onBudgetAction(month, 'cover-overspending', {
               to: categoryId,
               from: fromCategoryId,
+              currencyCode: format.currency.code,
             });
           }}
         />

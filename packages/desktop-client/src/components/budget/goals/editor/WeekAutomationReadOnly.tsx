@@ -1,7 +1,8 @@
 import { Trans } from 'react-i18next';
 
 import type { WeekTemplate } from 'loot-core/server/budget/types/templates';
-import { integerToCurrency } from 'loot-core/shared/util';
+
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 
 type WeekAutomationReadOnlyProps = {
   template: WeekTemplate;
@@ -10,9 +11,10 @@ type WeekAutomationReadOnlyProps = {
 export const WeekAutomationReadOnly = ({
   template,
 }: WeekAutomationReadOnlyProps) => {
+  const format = useFormat();
   return (
     <Trans>
-      Budget {{ amount: integerToCurrency(template.amount) }} each week
+      Budget {{ amount: format(template.amount, 'financial') }} each week
     </Trans>
   );
 };

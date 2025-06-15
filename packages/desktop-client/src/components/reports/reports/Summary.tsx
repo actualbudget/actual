@@ -17,7 +17,6 @@ import { parseISO } from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { amountToCurrency } from 'loot-core/shared/util';
 import {
   type SummaryContent,
   type SummaryWidget,
@@ -43,6 +42,7 @@ import { calculateTimeRange } from '@desktop-client/components/reports/reportRan
 import { summarySpreadsheet } from '@desktop-client/components/reports/spreadsheets/summary-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
@@ -74,6 +74,8 @@ type FilterObject = ReturnType<typeof useRuleConditionFilters>;
 function SummaryInner({ widget }: SummaryInnerProps) {
   const locale = useLocale();
   const { t } = useTranslation();
+  const format = useFormat();
+
   const [initialStart, initialEnd, initialMode] = calculateTimeRange(
     widget?.meta?.timeFrame,
     {
@@ -262,6 +264,15 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     );
   }
 
+  const getDivisorFormatted = (contentType: string, value: number) => {
+    if (contentType === 'avgPerMonth') {
+      return format(value, 'number');
+    } else if (contentType === 'avgPerTransact') {
+      return format(value, 'number');
+    }
+    return format(Math.round(value), 'financial');
+  };
+
   return (
     <Page
       header={
@@ -406,7 +417,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
                   }}
                 >
                   <PrivacyFilter>
-                    {amountToCurrency(data?.dividend ?? 0)}
+                    {format(data?.dividend ?? 0, 'financial')}
                   </PrivacyFilter>
                 </Text>
                 <div
@@ -426,7 +437,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
                   }}
                 >
                   <PrivacyFilter>
-                    {amountToCurrency(data?.divisor ?? 0)}
+                    {getDivisorFormatted(content.type, data?.divisor ?? 0)}
                   </PrivacyFilter>
                 </Text>
               </View>
@@ -451,7 +462,9 @@ function SummaryInner({ widget }: SummaryInnerProps) {
             }}
           >
             <PrivacyFilter>
-              {amountToCurrency(Math.abs(data?.total ?? 0))}
+              {content.type === 'percentage'
+                ? format(Math.abs(data?.total ?? 0), 'number')
+                : format(Math.round(data?.total ?? 0), 'financial')}
               {content.type === 'percentage' ? '%' : ''}
             </PrivacyFilter>
           </View>

@@ -15,6 +15,7 @@ import { CoverMenu } from '@desktop-client/components/budget/envelope/CoverMenu'
 import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
 import { HoldMenu } from '@desktop-client/components/budget/envelope/HoldMenu';
 import { TransferMenu } from '@desktop-client/components/budget/envelope/TransferMenu';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { envelopeBudget } from '@desktop-client/queries/queries';
 
@@ -36,6 +37,7 @@ export function ToBudget({
 }: ToBudgetProps) {
   const [menuStep, _setMenuStep] = useState<string>('actions');
   const triggerRef = useRef(null);
+  const format = useFormat();
 
   const ref = useRef<HTMLSpanElement>(null);
   const setMenuStep = useCallback(
@@ -133,6 +135,7 @@ export function ToBudget({
               onSubmit={categoryId => {
                 onBudgetAction(month, 'cover-overbudgeted', {
                   category: categoryId,
+                  currencyCode: format.currency.code,
                 });
               }}
             />

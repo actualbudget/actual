@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 
 import { debounce } from 'lodash';
 
+import { type Currency } from 'loot-core/shared/currencies';
 import type { Query } from 'loot-core/shared/query';
 
 import * as queries from '@desktop-client/queries/queries';
@@ -10,6 +11,7 @@ type UseTransactionsSearchProps = {
   updateQuery: (updateFn: (searchQuery: Query) => Query) => void;
   resetQuery: () => void;
   dateFormat: string;
+  currency: Currency;
   delayMs?: number;
 };
 type UseTransactionsSearchResult = {
@@ -21,6 +23,7 @@ export function useTransactionsSearch({
   updateQuery,
   resetQuery,
   dateFormat,
+  currency,
   delayMs = 150,
 }: UseTransactionsSearchProps): UseTransactionsSearchResult {
   const [isSearching, setIsSearching] = useState(false);
@@ -34,12 +37,17 @@ export function useTransactionsSearch({
         } else if (searchText) {
           resetQuery();
           updateQuery(previousQuery =>
-            queries.transactionsSearch(previousQuery, searchText, dateFormat),
+            queries.transactionsSearch(
+              previousQuery,
+              searchText,
+              dateFormat,
+              currency,
+            ),
           );
           setIsSearching(true);
         }
       }, delayMs),
-    [dateFormat, delayMs, resetQuery, updateQuery],
+    [dateFormat, delayMs, resetQuery, updateQuery, currency],
   );
 
   useEffect(() => {

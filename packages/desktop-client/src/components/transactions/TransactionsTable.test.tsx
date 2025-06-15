@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, type ReactNode } from 'react';
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, renderHook } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
@@ -17,7 +17,6 @@ import {
   splitTransaction,
   updateTransaction,
 } from 'loot-core/shared/transactions';
-import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type CategoryEntity,
@@ -29,6 +28,7 @@ import {
 import { TransactionTable } from './TransactionsTable';
 
 import { AuthProvider } from '@desktop-client/auth/AuthProvider';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
 import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
@@ -259,6 +259,14 @@ afterEach(() => {
   global.__resetWorld();
 });
 
+const FormatWrapper = ({ children }: { children: ReactNode }) => (
+  <TestProvider>
+    <AuthProvider>
+      <SpreadsheetProvider>{children}</SpreadsheetProvider>
+    </AuthProvider>
+  </TestProvider>
+);
+
 // Not good, see `Autocomplete.js` for details
 function waitForAutocomplete() {
   return new Promise(resolve => setTimeout(resolve, 0));
@@ -431,6 +439,9 @@ function expectToBeEditingField(
 }
 
 describe('Transactions', () => {
+  const { result } = renderHook(() => useFormat(), { wrapper: FormatWrapper });
+  const format = result.current;
+
   test('transactions table shows the correct data', () => {
     const { container, getTransactions } = renderTransactions();
 
@@ -455,7 +466,7 @@ describe('Transactions', () => {
       );
       if (transaction.amount <= 0) {
         expect(queryField(container, 'debit', 'div', idx).textContent).toBe(
-          integerToCurrency(-transaction.amount),
+          format(-transaction.amount, 'financial'),
         );
         expect(queryField(container, 'credit', 'div', idx).textContent).toBe(
           '',
@@ -463,7 +474,7 @@ describe('Transactions', () => {
       } else {
         expect(queryField(container, 'debit', 'div', idx).textContent).toBe('');
         expect(queryField(container, 'credit', 'div', idx).textContent).toBe(
-          integerToCurrency(transaction.amount),
+          format(transaction.amount, 'financial'),
         );
       }
     });

@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import { parse as parseDate, isValid as isDateValid } from 'date-fns';
 
+import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import { type Currency } from 'loot-core/shared/currencies';
 import {
   dayFromDate,
   getDayMonthRegex,
@@ -101,8 +103,14 @@ export function transactionsSearch(
   currentQuery: Query,
   search: string,
   dateFormat: SyncedPrefs['dateFormat'],
+  currency: Currency,
 ) {
-  const amount = currencyToAmount(search);
+  let amount = evalArithmetic(search, null);
+  if (amount === null) {
+    amount = currencyToAmount(search);
+  }
+
+  const divisor = Math.pow(10, currency.decimalPlaces);
 
   // Support various date formats
   let parsedDate;
@@ -124,12 +132,16 @@ export function transactionsSearch(
       $or: [
         isDateValid(parsedDate) && { date: dayFromDate(parsedDate) },
         amount != null && {
-          amount: { $transform: '$abs', $eq: amountToInteger(amount) },
+          amount: {
+            $transform: '$abs',
+            $eq: amountToInteger(amount, currency.decimalPlaces),
+          },
         },
         amount != null &&
-          Number.isInteger(amount) && {
+          Number.isInteger(amount) &&
+          currency.decimalPlaces > 0 && {
             amount: {
-              $transform: { $abs: { $idiv: ['$', 100] } },
+              $transform: { $abs: { $idiv: ['$', divisor] } },
               $eq: amount,
             },
           },

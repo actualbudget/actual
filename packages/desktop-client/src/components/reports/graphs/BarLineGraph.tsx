@@ -16,11 +16,10 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import { amountToCurrencyNoDecimal } from 'loot-core/shared/util';
-
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 
 type PayloadItem = {
   payload: {
@@ -89,8 +88,9 @@ export function BarLineGraph({
   compact,
   showTooltip = true,
 }: BarLineGraphProps) {
+  const format = useFormat();
   const tickFormatter = tick => {
-    return `${amountToCurrencyNoDecimal(Math.round(tick))}`; // Formats the tick values as strings with commas
+    return `${format(Math.round(tick), 'financial')}`; // Formats the tick values as strings with commas
   };
 
   return (

@@ -16,6 +16,7 @@ import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
 import { prewarmAllMonths, prewarmMonth } from './util';
 
 import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
+import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
@@ -70,6 +71,8 @@ function BudgetInner(props: BudgetInnerProps) {
   const spreadsheet = useSpreadsheet();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const format = useFormat();
+
   const [summaryCollapsed, setSummaryCollapsedPref] = useLocalPref(
     'budget.summaryCollapsed',
   );
@@ -260,13 +263,18 @@ function BudgetInner(props: BudgetInnerProps) {
         type: 'apply-multiple-templates',
         args: {
           categories,
+          currencyCode: format.currency.code,
         },
       }),
     );
   };
 
   const onBudgetAction = (month, type, args) => {
-    dispatch(applyBudgetAction({ month, type, args }));
+    const newArgs = {
+      ...(args || {}),
+      currencyCode: format.currency.code,
+    };
+    dispatch(applyBudgetAction({ month, type, args: newArgs }));
   };
 
   const onShowActivity = (categoryId, month) => {

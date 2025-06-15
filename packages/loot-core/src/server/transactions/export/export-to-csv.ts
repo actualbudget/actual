@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import csvStringify from 'csv-stringify/lib/sync';
 
+import { getCurrency } from 'loot-core/shared/currencies';
+
 import { integerToAmount } from '../../../shared/util';
 import { aqlQuery } from '../../aql';
 
@@ -9,7 +11,10 @@ export async function exportToCSV(
   accounts,
   categoryGroups,
   payees,
+  currencyCode,
 ) {
+  const currency = getCurrency(currencyCode);
+
   const accountNamesById = accounts.reduce((reduced, { id, name }) => {
     reduced[id] = name;
     return reduced;
@@ -47,7 +52,8 @@ export async function exportToCSV(
       Payee: payeeNamesById[payee],
       Notes: notes,
       Category: categoryNamesById[category],
-      Amount: amount == null ? 0 : integerToAmount(amount),
+      Amount:
+        amount == null ? 0 : integerToAmount(amount, currency.decimalPlaces),
       Cleared: cleared,
       Reconciled: reconciled,
     }),
@@ -56,7 +62,9 @@ export async function exportToCSV(
   return csvStringify(transactionsForExport, { header: true });
 }
 
-export async function exportQueryToCSV(query) {
+export async function exportQueryToCSV(query, currencyCode) {
+  const currency = getCurrency(currencyCode);
+
   const { data: transactions } = await aqlQuery(
     query
       .select([
@@ -115,8 +123,10 @@ export async function exportQueryToCSV(query) {
         ? 0
         : trans.Amount == null
           ? 0
-          : integerToAmount(trans.Amount),
-      Split_Amount: trans.IsParent ? integerToAmount(trans.Amount) : 0,
+          : integerToAmount(trans.Amount, currency.decimalPlaces),
+      Split_Amount: trans.IsParent
+        ? integerToAmount(trans.Amount, currency.decimalPlaces)
+        : 0,
       Cleared:
         trans.Reconciled === true
           ? 'Reconciled'
