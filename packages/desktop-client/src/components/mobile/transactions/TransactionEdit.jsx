@@ -174,7 +174,6 @@ function Footer({
   onSplit,
   onAddSplit,
   onEmptySplitFound,
-  editingField,
   onEditField,
 }) {
   const [transaction, ...childTransactions] = transactions;
@@ -208,7 +207,6 @@ function Footer({
         <Button
           variant="primary"
           style={{ height: styles.mobileMinHeight }}
-          isDisabled={editingField}
           onPress={onClickRemainingSplit}
         >
           <SvgSplit width={17} height={17} />
@@ -248,7 +246,6 @@ function Footer({
         <Button
           variant="primary"
           style={{ height: styles.mobileMinHeight }}
-          isDisabled={editingField}
           onPress={() => onEditField(transaction.id, 'account')}
         >
           <SvgPiggyBank width={17} height={17} />
@@ -265,7 +262,6 @@ function Footer({
         <Button
           variant="primary"
           style={{ height: styles.mobileMinHeight }}
-          isDisabled={editingField}
           onPress={onAdd}
         >
           <SvgAdd width={17} height={17} />
@@ -282,7 +278,6 @@ function Footer({
         <Button
           variant="primary"
           style={{ height: styles.mobileMinHeight }}
-          isDisabled={editingField}
           onPress={onSave}
         >
           <SvgPencilWriteAlternate width={16} height={16} />
@@ -318,7 +313,7 @@ const ChildTransactionEdit = forwardRef(
     ref,
   ) => {
     const { t } = useTranslation();
-    const { editingField, onRequestActiveEdit, onClearActiveEdit } =
+    const { onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm();
     const prettyPayee = getPrettyPayee({
       transaction,
@@ -344,10 +339,6 @@ const ChildTransactionEdit = forwardRef(
           <View style={{ flexBasis: '75%' }}>
             <FieldLabel title={t('Payee')} />
             <TapField
-              isDisabled={
-                editingField &&
-                editingField !== getFieldName(transaction.id, 'payee')
-              }
               value={prettyPayee}
               onPress={() => onEditField(transaction.id, 'payee')}
               data-testid={`payee-field-${transaction.id}`}
@@ -360,10 +351,6 @@ const ChildTransactionEdit = forwardRef(
           >
             <FieldLabel title={t('Amount')} style={{ padding: 0 }} />
             <AmountInput
-              disabled={
-                editingField &&
-                editingField !== getFieldName(transaction.id, 'amount')
-              }
               focused={amountFocused}
               value={amountToInteger(transaction.amount)}
               zeroSign={amountSign}
@@ -400,12 +387,7 @@ const ChildTransactionEdit = forwardRef(
               }),
             }}
             value={getCategory(transaction, isOffBudget)}
-            isDisabled={
-              (editingField &&
-                editingField !== getFieldName(transaction.id, 'category')) ||
-              isOffBudget ||
-              isBudgetTransfer(transaction)
-            }
+            isDisabled={isOffBudget || isBudgetTransfer(transaction)}
             onPress={() => onEditField(transaction.id, 'category')}
             data-testid={`category-field-${transaction.id}`}
           />
@@ -414,10 +396,6 @@ const ChildTransactionEdit = forwardRef(
         <View>
           <FieldLabel title={t('Notes')} />
           <InputField
-            disabled={
-              editingField &&
-              editingField !== getFieldName(transaction.id, 'notes')
-            }
             defaultValue={transaction.notes}
             onFocus={() =>
               onRequestActiveEdit(getFieldName(transaction.id, 'notes'))
@@ -495,8 +473,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
 
   const [transaction, ...childTransactions] = transactions;
 
-  const { editingField, onRequestActiveEdit, onClearActiveEdit } =
-    useSingleActiveEditForm();
+  const { onRequestActiveEdit, onClearActiveEdit } = useSingleActiveEditForm();
   const [totalAmountFocused, setTotalAmountFocused] = useState(
     // iOS does not support automatically opening up the keyboard for the
     // total amount field. Hence we should not focus on it on page render.
@@ -600,8 +577,13 @@ const TransactionEditInner = memo(function TransactionEditInner({
     }
   }, [isAdding, dispatch, navigate, onSave, unserializedTransactions]);
 
-  const onUpdateInner = useCallback(
-    async (serializedTransaction, name, value) => {
+  const _onUpdateInner = useRef(async () => {});
+  const onUpdateInner = _onUpdateInner.current;
+  useEffect(() => {
+    console.log('effect', transactions);
+    _onUpdateInner.current = async ({ id }, name, value) => {
+      const serializedTransaction = transactions.find(t => t.id === id);
+      console.log('update', transactions);
       const newTransaction = { ...serializedTransaction, [name]: value };
       await onUpdate(newTransaction, name);
       onClearActiveEdit();
@@ -609,9 +591,8 @@ const TransactionEditInner = memo(function TransactionEditInner({
       if (name === 'account') {
         hasAccountChanged.current = serializedTransaction.account !== value;
       }
-    },
-    [onClearActiveEdit, onUpdate],
-  );
+    };
+  }, [onClearActiveEdit, onUpdate, transactions]);
 
   const onTotalAmountUpdate = useCallback(
     value => {
@@ -643,7 +624,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
                       unserializedTransaction.date,
                     ),
                     onSelect: categoryId => {
-                      onUpdateInner(transactionToEdit, name, categoryId);
+                      _onUpdateInner.current(
+                        transactionToEdit,
+                        name,
+                        categoryId,
+                      );
                     },
                     onClose: () => {
                       onClearActiveEdit();
@@ -660,7 +645,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   name: 'account-autocomplete',
                   options: {
                     onSelect: accountId => {
-                      onUpdateInner(transactionToEdit, name, accountId);
+                      _onUpdateInner.current(
+                        transactionToEdit,
+                        name,
+                        accountId,
+                      );
                     },
                     onClose: () => {
                       onClearActiveEdit();
@@ -677,7 +666,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   name: 'payee-autocomplete',
                   options: {
                     onSelect: payeeId => {
-                      onUpdateInner(transactionToEdit, name, payeeId);
+                      _onUpdateInner.current(transactionToEdit, name, payeeId);
                     },
                     onClose: () => {
                       onClearActiveEdit();
@@ -698,7 +687,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                       unserializedTransaction.date,
                     ),
                     onSubmit: (name, value) => {
-                      onUpdateInner(transactionToEdit, name, value);
+                      _onUpdateInner.current(transactionToEdit, name, value);
                     },
                     onClose: () => {
                       onClearActiveEdit();
@@ -714,7 +703,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
     [
       categoryGroups,
       dispatch,
-      onUpdateInner,
+      _onUpdateInner,
       onClearActiveEdit,
       onRequestActiveEdit,
       transaction.id,
@@ -835,7 +824,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
           onSplit={onSplit}
           onAddSplit={onAddSplit}
           onEmptySplitFound={onEmptySplitFound}
-          editingField={editingField}
           onEditField={onEditFieldInner}
         />
       }
@@ -879,10 +867,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
               }),
             }}
             value={title}
-            isDisabled={
-              editingField &&
-              editingField !== getFieldName(transaction.id, 'payee')
-            }
             onPress={() => onEditFieldInner(transaction.id, 'payee')}
             data-testid="payee-field"
           />
@@ -900,12 +884,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                 }),
               }}
               value={getCategory(transaction, isOffBudget)}
-              isDisabled={
-                (editingField &&
-                  editingField !== getFieldName(transaction.id, 'category')) ||
-                isOffBudget ||
-                isBudgetTransfer(transaction)
-              }
+              isDisabled={isOffBudget || isBudgetTransfer(transaction)}
               onPress={() => onEditFieldInner(transaction.id, 'category')}
               data-testid="category-field"
             />
@@ -939,7 +918,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
           <View style={{ alignItems: 'center' }}>
             <Button
               variant="bare"
-              isDisabled={editingField}
               style={{
                 height: 40,
                 borderWidth: 0,
@@ -971,10 +949,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
         <View>
           <FieldLabel title={t('Account')} />
           <TapField
-            isDisabled={
-              editingField &&
-              editingField !== getFieldName(transaction.id, 'account')
-            }
             value={account?.name}
             onPress={() => onEditFieldInner(transaction.id, 'account')}
             data-testid="account-field"
@@ -986,10 +960,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
             <FieldLabel title={t('Date')} />
             <InputField
               type="date"
-              disabled={
-                editingField &&
-                editingField !== getFieldName(transaction.id, 'date')
-              }
               required
               style={{ color: theme.tableText, minWidth: '150px' }}
               defaultValue={dateDefaultValue}
@@ -1025,10 +995,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
         <View>
           <FieldLabel title={t('Notes')} />
           <InputField
-            disabled={
-              editingField &&
-              editingField !== getFieldName(transaction.id, 'notes')
-            }
             defaultValue={transaction.notes}
             onFocus={() => {
               onRequestActiveEdit(getFieldName(transaction.id, 'notes'));
