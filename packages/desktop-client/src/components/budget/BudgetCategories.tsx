@@ -232,6 +232,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                 >
                   <SidebarGroup
                     group={{ id: 'new', name: '' }}
+                    collapsed={collapsedGroupIds.includes(item.value.id)}
                     editing={true}
                     onSave={_onSaveGroup}
                     onHideNewGroup={onHideNewGroup}
