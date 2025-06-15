@@ -8,11 +8,11 @@ Server Version 25.4.0 or higher are required to use this feature.
 ### Create CLIENT ID and CLIENT SECRET for Actual
 
 1. Create an account at [https://pluggy.ai](https://pluggy.ai).
-2. Sign in to the [Pluggy Console](https://console.pluggy.ai/) and create a new team.
+2. Sign in to the [Pluggy Dashboard](https://dashboard.pluggy.ai/) and create a new team.
 
     ![](/static/img/connecting-your-bank/pluggy-console-01.png)
 
-3. In the Pluggy Console, create an **Application** before generating API keys:
+3. In the Pluggy Dashboard, create an **Application** before generating API keys:
    - Click **Applications** in the top bar and create a new application.
    - Once created, you will see the **Client ID** and **Client Secret**.
 
@@ -35,7 +35,7 @@ Please note, you will only be able to connect your account to meu.pluggy.ai whil
 ![](/static/img/connecting-your-bank/pluggy-trial-warning.png)
 :::
 
-3. After completing the steps in *item 2*, return to the Pluggy Console. Go to the application you created and click "Ir para Demo" to open the demo app.
+3. After completing the steps in *item 2*, return to the Pluggy Dashboard. Go to the application you created and click "Ir para Demo" to open the demo app.
 4. In the top right corner, open the three-dot menu. Open it and click **Copiar Item ID** from your bank sync to the clipboard. You'll need this to complete your Pluggy.ai bank sync setup.
 
 ![](/static/img/connecting-your-bank/pluggy-console-03.png)
@@ -55,8 +55,8 @@ Pluggy integration is experimental at this point, so before you can use it you n
     ![](/static/img/connecting-your-bank/pluggy-setup-modal-setup.png)
 
 3. In the dialog that appears, enter:
-   - **Client ID**: From your Pluggy Console
-   - **Client Secret**: From your Pluggy Console
+   - **Client ID**: From your Pluggy Dashboard
+   - **Client Secret**: From your Pluggy Dashboard
    - **Item IDs**: Comma-separated if entering more than one
 
     ![](/static/img/connecting-your-bank/pluggy-setup-modal.png)
