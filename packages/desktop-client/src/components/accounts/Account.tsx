@@ -7,7 +7,7 @@ import React, {
   useEffect,
 } from 'react';
 import { Trans } from 'react-i18next';
-import { Navigate, useParams, useLocation } from 'react-router-dom';
+import { Navigate, useParams, useLocation } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';

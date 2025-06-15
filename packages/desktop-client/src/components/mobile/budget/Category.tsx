@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router';
 
 import * as monthUtils from 'loot-core/shared/months';
 

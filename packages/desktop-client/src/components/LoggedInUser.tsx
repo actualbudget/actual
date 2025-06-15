@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';

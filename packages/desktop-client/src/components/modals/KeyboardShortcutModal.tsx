@@ -1,6 +1,6 @@
 import { type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';

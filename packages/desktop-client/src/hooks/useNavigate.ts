@@ -7,7 +7,7 @@ import {
   useLocation,
   // eslint-disable-next-line no-restricted-imports
   useNavigate as useNavigateReactRouter,
-} from 'react-router-dom';
+} from 'react-router';
 
 export function useNavigate(): NavigateFunction {
   const location = useLocation();

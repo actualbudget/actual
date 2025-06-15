@@ -1,13 +1,7 @@
 // @ts-strict-ignore
 import React, { type ReactElement, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Route,
-  Routes,
-  Navigate,
-  useLocation,
-  useHref,
-} from 'react-router-dom';
+import { Route, Routes, Navigate, useLocation, useHref } from 'react-router';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';

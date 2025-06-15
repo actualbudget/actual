@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import React, { useState, useEffect, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';

@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import React from 'react';
 import { Trans } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';

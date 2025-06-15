@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { SvgExclamationOutline } from '@actual-app/components/icons/v1';
