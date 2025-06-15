@@ -1,0 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Vitest test runner is used for unit tests.
+
+When running unit tests, always include the flag `--watch=false` to prevent watch mode.
+
+To run unit tests for a specific package in the monorepo, use the following command:
+
+`yarn workspace <workspaceNameFromPackageJson> run test <pathToTest>`
+
+Recommendation: Minimize the number of dependencies you mock. The fewer dependencies you mock, the better.
