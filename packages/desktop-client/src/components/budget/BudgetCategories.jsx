@@ -30,7 +30,6 @@ export const BudgetCategories = memo(
     onDeleteGroup,
     onReorderCategory,
     onReorderGroup,
-    setScrollPosition,
   }) => {
     const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
       useLocalPref('budget.collapsed');
@@ -264,7 +263,6 @@ export const BudgetCategories = memo(
                   onReorder={onReorderCategory}
                   onBudgetAction={onBudgetAction}
                   onShowActivity={onShowActivity}
-                  setScrollPosition={setScrollPosition}
                 />
               );
               break;

@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { useCategories } from '../../hooks/useCategories';
 import { useLocalPref } from '../../hooks/useLocalPref';
@@ -30,6 +31,8 @@ export function BudgetTable(props) {
   } = props;
 
   const budgetCategoriesRef = useRef();
+  const scrollableDivRef = useRef();
+  const location = useLocation();
   const { grouped: categoryGroups } = useCategories();
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
@@ -37,27 +40,27 @@ export function BudgetTable(props) {
     'budget.showHiddenCategories',
   );
 
-  const setScrollPosition = () => {
-    sessionStorage.setItem(
-      'scrollPosition',
-      document.getElementById('scrollableDiv').scrollTop,
-    );
-    sessionStorage.setItem('scrollPositionSetBySpentColumn', true);
+  const getCurrentScrollPosition = () => {
+    return scrollableDivRef.current?.scrollTop || 0;
+  };
+
+  const onShowActivityWithScroll = (categoryId, month) => {
+    const scrollPosition = getCurrentScrollPosition();
+    onShowActivity(categoryId, month, scrollPosition);
   };
 
   useEffect(() => {
-    const savedPosition = parseInt(
-      sessionStorage.getItem('scrollPosition'),
-      10,
-    );
-    const scrollPositionSetBySpentColumn = sessionStorage.getItem(
-      'scrollPositionSetBySpentColumn',
-    );
-    if (savedPosition && scrollPositionSetBySpentColumn) {
-      document.getElementById('scrollableDiv').scrollTop = savedPosition;
-      sessionStorage.removeItem('scrollPositionSetBySpentColumn');
+    const savedScrollPosition = location.state?.scrollPosition;
+    
+    if (savedScrollPosition && scrollableDivRef.current) {
+      // Use requestAnimationFrame to ensure the DOM is ready
+      requestAnimationFrame(() => {
+        if (scrollableDivRef.current) {
+          scrollableDivRef.current.scrollTop = savedScrollPosition;
+        }
+      });
     }
-  }, []);
+  }, [location.state?.scrollPosition]);
 
   const [editing, setEditing] = useState(null);
 
@@ -233,7 +236,7 @@ export function BudgetTable(props) {
             paddingLeft: 5,
             paddingRight: 5,
           }}
-          innerRef={budgetCategoriesRef}
+          innerRef={scrollableDivRef}
         >
           <View
             style={{
@@ -254,8 +257,7 @@ export function BudgetTable(props) {
               onReorderCategory={_onReorderCategory}
               onReorderGroup={_onReorderGroup}
               onBudgetAction={onBudgetAction}
-              onShowActivity={onShowActivity}
-              setScrollPosition={setScrollPosition}
+              onShowActivity={onShowActivityWithScroll}
             />
           </View>
         </View>

@@ -1,5 +1,6 @@
 import React, { memo, useRef, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 import { AutoTextSize } from 'auto-text-size';
 import memoizeOne from 'memoize-one';
@@ -329,6 +330,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
   show3Cols,
   showBudgetedCol,
   setScrollPosition,
+  onShowActivityWithScroll,
 }) {
   const opacity = blank ? 0 : 1;
 
@@ -397,10 +399,6 @@ const ExpenseCategory = memo(function ExpenseCategory({
 
   const listItemRef = useRef();
   const format = useFormat();
-  const navigate = useNavigate();
-  const onShowActivity = () => {
-    navigate(`/categories/${category.id}?month=${month}`);
-  };
 
   const sidebarColumnWidth = getColumnWidth({ show3Cols, isSidebar: true });
   const columnWidth = getColumnWidth({ show3Cols });
@@ -519,8 +517,7 @@ const ExpenseCategory = memo(function ExpenseCategory({
             getStyle={makeAmountGrey}
             type="financial"
             onClick={() => {
-              setScrollPosition();
-              onShowActivity();
+              onShowActivityWithScroll(category.id, month);
             }}
             formatter={value => (
               <Button
@@ -1240,6 +1237,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
   collapsed,
   onToggleCollapse,
   setScrollPosition,
+  onShowActivityWithScroll,
 }) {
   function editable(content) {
     if (!editMode) {
@@ -1353,6 +1351,7 @@ const ExpenseGroup = memo(function ExpenseGroup({
               // onReorder={onReorderCategory}
               onBudgetAction={onBudgetAction}
               setScrollPosition={setScrollPosition}
+              onShowActivityWithScroll={onShowActivityWithScroll}
             />
           );
         })}
@@ -1465,6 +1464,7 @@ function BudgetGroups({
   show3Cols,
   showHiddenCategories,
   setScrollPosition,
+  onShowActivityWithScroll,
 }) {
   const separateGroups = memoizeOne(groups => {
     return {
@@ -1515,6 +1515,7 @@ function BudgetGroups({
               collapsed={collapsedGroupIds.includes(group.id)}
               onToggleCollapse={onToggleCollapse}
               setScrollPosition={setScrollPosition}
+              onShowActivityWithScroll={onShowActivityWithScroll}
             />
           );
         })}
@@ -1565,6 +1566,8 @@ export function BudgetTable({
 }) {
   const { width } = useResponsive();
   const show3Cols = width >= 360;
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // let editMode = false; // neuter editMode -- sorry, not rewriting drag-n-drop right now
 
@@ -1572,27 +1575,43 @@ export function BudgetTable({
     'mobile.showSpentColumn',
   );
 
+  const getCurrentScrollPosition = () => {
+    const scrollableDiv = document.getElementById('scrollableDiv');
+    return scrollableDiv?.scrollTop || 0;
+  };
+
   const setScrollPosition = () => {
-    sessionStorage.setItem(
-      'scrollPosition',
-      document.getElementById('scrollableDiv').scrollTop,
-    );
-    sessionStorage.setItem('scrollPositionSetBySpentColumn', true);
+    const scrollPosition = getCurrentScrollPosition();
+    
+    navigate('/budget', {
+      replace: true,
+      state: { scrollPosition }
+    });
+  };
+
+  const onShowActivityWithScroll = (categoryId, month) => {
+    const scrollPosition = getCurrentScrollPosition();
+    
+    navigate('/budget', {
+      replace: true,
+      state: { scrollPosition }
+    });
+    
+    navigate(`/categories/${categoryId}?month=${month}`);
   };
 
   useEffect(() => {
-    const savedPosition = parseInt(
-      sessionStorage.getItem('scrollPosition'),
-      10,
-    );
-    const scrollPositionSetBySpentColumn = sessionStorage.getItem(
-      'scrollPositionSetBySpentColumn',
-    );
-    if (savedPosition && scrollPositionSetBySpentColumn) {
-      document.getElementById('scrollableDiv').scrollTop = savedPosition;
-      sessionStorage.removeItem('scrollPositionSetBySpentColumn');
+    const savedScrollPosition = location.state?.scrollPosition;
+    
+    if (savedScrollPosition) {
+      const scrollableDiv = document.getElementById('scrollableDiv');
+      if (scrollableDiv) {
+        requestAnimationFrame(() => {
+          scrollableDiv.scrollTop = savedScrollPosition;
+        });
+      }
     }
-  }, []);
+  }, [location.state?.scrollPosition]);
 
   function toggleSpentColumn() {
     setShowSpentColumnPref(!showSpentColumn);
@@ -1681,6 +1700,7 @@ export function BudgetTable({
             onReorderGroup={onReorderGroup}
             onBudgetAction={onBudgetAction}
             setScrollPosition={setScrollPosition}
+            onShowActivityWithScroll={onShowActivityWithScroll}
           />
         </View>
       </PullToRefresh>

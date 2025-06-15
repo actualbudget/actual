@@ -276,7 +276,7 @@ function BudgetInner(props: BudgetInnerProps) {
     dispatch(applyBudgetAction(month, type, args));
   };
 
-  const onShowActivity = (categoryId, month) => {
+  const onShowActivity = (categoryId, month, scrollPosition) => {
     const conditions = [
       { field: 'category', op: 'is', value: categoryId, type: 'id' },
       {
@@ -287,6 +287,12 @@ function BudgetInner(props: BudgetInnerProps) {
         type: 'date',
       },
     ];
+    
+    navigate('/budget', {
+      replace: true,
+      state: { scrollPosition }
+    });
+    
     navigate('/accounts', {
       state: {
         goBack: true,
