@@ -30,6 +30,7 @@ export const TagEditor = ({ tag }: TagEditorProps) => {
             : createTag({
                 tag: tag.tag,
                 color: color.toString('hex'),
+                description: tag.description,
               }),
         );
       }}

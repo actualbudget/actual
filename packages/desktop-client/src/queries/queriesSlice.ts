@@ -186,8 +186,8 @@ const queriesSlice = createSlice({
     });
 
     builder.addCase(updateTag.fulfilled, (state, action) => {
-      state.tags.find(tag => tag.id === action.payload.id).color =
-        action.payload.color;
+      const tagIdx = state.tags.findIndex(tag => tag.id === action.payload.id);
+      state.tags[tagIdx] = action.payload;
     });
   },
 });
@@ -456,12 +456,13 @@ export const getTags = createAppAsyncThunk(`${sliceName}/getTags`, async () => {
 type CreateTagPayload = {
   tag: Tag['tag'];
   color: Tag['color'];
+  description?: Tag['description'];
 };
 
 export const createTag = createAppAsyncThunk(
   `${sliceName}/createTag`,
-  async ({ tag, color }: CreateTagPayload) => {
-    const id = await send('tags-create', { tag, color });
+  async ({ tag, color, description }: CreateTagPayload) => {
+    const id = await send('tags-create', { tag, color, description });
     return id;
   },
 );
