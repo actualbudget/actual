@@ -6,8 +6,10 @@ import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { t } from 'i18next';
 
 import { getNormalisedString } from 'loot-core/shared/normalisation';
+import { type Tag } from 'loot-core/types/models';
 
 import { TagsHeader } from './TagsHeader';
 import { TagsList } from './TagsList';
@@ -21,18 +23,32 @@ import { deleteAllTags } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { useTags } from '@desktop-client/style/tags';
 
+const defaultTagFallback: Tag = {
+  id: '',
+  tag: '*',
+  color: theme.noteTagDefault,
+  description: t('Default tag color'),
+};
+
 export function ManageTags() {
   const tags = useTags();
+  const defaultTag = useMemo(
+    () => ({
+      ...defaultTagFallback,
+      ...tags.find(tag => tag.tag === '*'),
+    }),
+    [tags],
+  );
   const [filter, setFilter] = useState('');
   const dispatch = useDispatch();
 
   const filteredTags = useMemo(() => {
     return filter === ''
-      ? tags
+      ? [defaultTag, ...tags.filter(tag => tag.tag !== '*')]
       : tags.filter(tag =>
           getNormalisedString(tag.tag).includes(getNormalisedString(filter)),
         );
-  }, [filter, tags]);
+  }, [defaultTag, filter, tags]);
 
   const selectedInst = useSelected('manage-tags', filteredTags, []);
   const [hoveredTag, setHoveredTag] = useState<string>();
