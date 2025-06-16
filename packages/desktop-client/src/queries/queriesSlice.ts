@@ -181,6 +181,10 @@ const queriesSlice = createSlice({
       state.tags = state.tags.filter(tag => tag.id !== action.payload);
     });
 
+    builder.addCase(deleteAllTags.fulfilled, (state, action) => {
+      state.tags = state.tags.filter(tag => !action.payload.includes(tag.id));
+    });
+
     builder.addCase(updateTag.fulfilled, (state, action) => {
       state.tags.find(tag => tag.id === action.payload.id).color =
         action.payload.color;
@@ -466,6 +470,14 @@ export const deleteTag = createAppAsyncThunk(
   `${sliceName}/deleteTag`,
   async (tag: Tag) => {
     const id = await send('tags-delete', tag);
+    return id;
+  },
+);
+
+export const deleteAllTags = createAppAsyncThunk(
+  `${sliceName}/deleteAllTags`,
+  async (ids: Array<Tag['id']>) => {
+    const id = await send('tags-delete-all', ids);
     return id;
   },
 );
