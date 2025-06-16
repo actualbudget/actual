@@ -9,7 +9,7 @@ import {
 } from 'react-error-boundary';
 import { HotkeysProvider } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
