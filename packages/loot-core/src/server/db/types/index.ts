@@ -314,8 +314,9 @@ export type DbViewSchedule = {
   _actions: JsonString;
 };
 
-export type DbTagColor = {
+export type DbTag = {
   id: string;
   tag: string;
   color: string;
+  description?: string;
 };

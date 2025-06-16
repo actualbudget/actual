@@ -7,21 +7,21 @@ import { type Theme } from 'loot-core/types/prefs';
 
 import { useTheme } from './theme';
 
-import { getTagsColors } from '@desktop-client/queries/queriesSlice';
+import { getTags } from '@desktop-client/queries/queriesSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
 
 export function useTags() {
   const dispatch = useDispatch();
-  const tagsColors = useSelector(state => state.queries.tagsColors);
-  const tagsColorsLoaded = useSelector(state => state.queries.tagsColorsLoaded);
+  const tags = useSelector(state => state.queries.tags);
+  const tagsLoaded = useSelector(state => state.queries.tagsLoaded);
 
   useEffect(() => {
-    if (!tagsColorsLoaded) {
-      dispatch(getTagsColors());
+    if (!tagsLoaded) {
+      dispatch(getTags());
     }
-  }, [tagsColorsLoaded, dispatch]);
+  }, [tagsLoaded, dispatch]);
 
-  return tagsColors;
+  return tags;
 }
 
 function getTagCSSColors(theme: Theme, color?: string) {
@@ -47,7 +47,7 @@ function getTagCSSColors(theme: Theme, color?: string) {
 }
 
 export function useTagCSS() {
-  const tagsColors = useTags();
+  const tags = useTags();
   const [theme] = useTheme();
 
   return useCallback(
@@ -56,8 +56,8 @@ export function useTagCSS() {
         theme,
         // fallback strategy: options color > tag color > default color > theme color (undefined)
         options.color ??
-          tagsColors.find(t => t.tag === tag)?.color ??
-          tagsColors.find(t => t.tag === '*')?.color,
+          tags.find(t => t.tag === tag)?.color ??
+          tags.find(t => t.tag === '*')?.color,
       );
 
       return css({
@@ -76,6 +76,6 @@ export function useTagCSS() {
         },
       });
     },
-    [theme, tagsColors],
+    [theme, tags],
   );
 }

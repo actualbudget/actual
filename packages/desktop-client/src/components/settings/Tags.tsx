@@ -19,58 +19,55 @@ import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { t } from 'i18next';
 
-import { type TagColor } from 'loot-core/types/models';
+import { type Tag } from 'loot-core/types/models';
 
 import { Setting } from './UI';
 
 import { useSidebar } from '@desktop-client/components/sidebar/SidebarProvider';
 import {
-  createTagColor,
-  deleteTagColor,
-  updateTagColor,
+  createTag,
+  deleteTag,
+  updateTag,
 } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
-import { purple700 } from '@desktop-client/style/palette';
 import { useTagCSS, useTags } from '@desktop-client/style/tags';
 
 type TagEditorProps = {
-  tagColor?: TagColor;
+  tag?: Tag;
   mode: 'trash' | 'edit';
 };
 
-const defaultTagColor: TagColor = {
+const defaultTag: Tag = {
   id: '',
   tag: '*',
-  color: purple700,
+  color: theme.noteTagDefault,
 };
-const TagEditor = ({ tagColor = defaultTagColor, mode }: TagEditorProps) => {
+const TagEditor = ({ tag = defaultTag, mode }: TagEditorProps) => {
   const getTagCSS = useTagCSS();
   const dispatch = useDispatch();
 
-  const onTrashTag = (tag: TagColor) => {
-    dispatch(deleteTagColor(tag));
+  const onTrashTag = (tag: Tag) => {
+    dispatch(deleteTag(tag));
   };
 
-  const formattedTag = (
-    <>#{tagColor.tag === '*' ? t('Default') : tagColor.tag}</>
-  );
+  const formattedTag = <>#{tag.tag === '*' ? t('Default') : tag.tag}</>;
 
   if (mode === 'edit') {
     return (
       <ColorPicker
-        value={tagColor.color}
+        value={tag.color}
         onChange={color => {
           dispatch(
-            tagColor.id
-              ? updateTagColor({ ...tagColor, color: color.toString('hex') })
-              : createTagColor({
-                  tag: tagColor.tag,
+            tag.id
+              ? updateTag({ ...tag, color: color.toString('hex') })
+              : createTag({
+                  tag: tag.tag,
                   color: color.toString('hex'),
                 }),
           );
         }}
       >
-        <Button variant="bare" className={getTagCSS(tagColor.tag)}>
+        <Button variant="bare" className={getTagCSS(tag.tag)}>
           {formattedTag}
         </Button>
       </ColorPicker>
@@ -79,12 +76,12 @@ const TagEditor = ({ tagColor = defaultTagColor, mode }: TagEditorProps) => {
     return (
       <Button
         variant="bare"
-        className={getTagCSS(tagColor.tag)}
-        onPress={() => onTrashTag(tagColor)}
+        className={getTagCSS(tag.tag)}
+        onPress={() => onTrashTag(tag)}
       >
         {formattedTag}
         &nbsp;
-        {tagColor.tag !== '*' ? (
+        {tag.tag !== '*' ? (
           <SvgClose width={10} height={10} />
         ) : (
           <SvgRefresh width={10} height={10} />
@@ -96,15 +93,15 @@ const TagEditor = ({ tagColor = defaultTagColor, mode }: TagEditorProps) => {
 
 export function TagsSettings() {
   const sidebar = useSidebar();
-  const tagsColors = useTags();
+  const tags = useTags();
   const getTagCSS = useTagCSS();
   const [newTag, setNewTag] = useState('');
-  const [newColor, setNewColor] = useState(purple700);
+  const [newColor, setNewColor] = useState(theme.noteTagDefault);
   const [errorMsg, setErrorMsg] = useState('');
   const [trashMode, setTrashMode] = useState(false);
   const dispatch = useDispatch();
 
-  const onAddTagColor = () => {
+  const onAddTag = () => {
     if (!newTag.trim()) {
       setErrorMsg(t('Tag name cannot be empty'));
       return;
@@ -115,13 +112,13 @@ export function TagsSettings() {
       return;
     }
 
-    if (tagsColors.some(tc => tc.tag === newTag)) {
+    if (tags.some(tag => tag.tag === newTag)) {
       setErrorMsg(t('Tag already exists'));
       return;
     }
 
     setErrorMsg('');
-    dispatch(createTagColor({ tag: newTag, color: newColor }));
+    dispatch(createTag({ tag: newTag, color: newColor }));
     setNewTag('');
   };
 
@@ -168,7 +165,7 @@ export function TagsSettings() {
             }}
             onSubmit={e => {
               e.preventDefault();
-              onAddTagColor();
+              onAddTag();
             }}
           >
             <Input
@@ -230,25 +227,22 @@ export function TagsSettings() {
           >
             <View style={{ display: 'inline' }}>
               <TagEditor
-                tagColor={tagsColors.find(tc => tc.tag === '*')}
+                tag={tags.find(tag => tag.tag === '*')}
                 mode={trashMode ? 'trash' : 'edit'}
               />
             </View>
 
-            {tagsColors
-              .filter(tc => tc.tag !== '*')
-              .map(tc => (
+            {tags
+              .filter(tag => tag.tag !== '*')
+              .map(tag => (
                 <View
-                  key={tc.tag}
+                  key={tag.tag}
                   style={{
                     display: 'flex',
                     flexDirection: 'row',
                   }}
                 >
-                  <TagEditor
-                    tagColor={tc}
-                    mode={trashMode ? 'trash' : 'edit'}
-                  />
+                  <TagEditor tag={tag} mode={trashMode ? 'trash' : 'edit'} />
                 </View>
               ))}
           </View>
