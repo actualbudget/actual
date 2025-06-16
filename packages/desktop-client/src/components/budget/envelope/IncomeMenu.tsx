@@ -8,7 +8,6 @@ import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
 
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
-
 type IncomeMenuProps = {
   categoryId: string;
   month: string;
