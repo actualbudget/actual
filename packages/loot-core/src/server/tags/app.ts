@@ -27,16 +27,19 @@ async function getTags(): Promise<Tag[]> {
 async function createTag({
   tag,
   color,
+  description = null,
 }: {
   tag: string;
   color: string;
+  description?: string | null;
 }): Promise<Tag> {
   const id = await db.insertTag({
     tag: tag.trim(),
     color: color.trim(),
+    description,
   });
 
-  return { id, tag, color };
+  return { id, tag, color, description };
 }
 
 async function deleteTag(tag: Tag): Promise<Tag['id']> {

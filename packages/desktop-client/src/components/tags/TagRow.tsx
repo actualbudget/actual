@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
@@ -8,8 +8,15 @@ import { type Tag } from 'loot-core/types/models';
 
 import { TagEditor } from './TagEditor';
 
-import { SelectCell, Row, Cell } from '@desktop-client/components/table';
+import {
+  SelectCell,
+  Row,
+  Cell,
+  InputCell,
+} from '@desktop-client/components/table';
 import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
+import { createTag, updateTag } from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type TagRowProps = {
   tag: Tag;
@@ -21,9 +28,23 @@ type TagRowProps = {
 export const TagRow = memo(
   ({ tag, hovered, selected, onHover }: TagRowProps) => {
     const { t } = useTranslation();
+    const dispatch = useDispatch();
     const dispatchSelected = useSelectedDispatch();
     const borderColor = selected ? theme.tableBorderSelected : 'none';
     const backgroundFocus = hovered;
+    const [exposed, setExposed] = useState(false);
+
+    const onEdit = description => {
+      dispatch(
+        tag.id
+          ? updateTag({ ...tag, description })
+          : createTag({
+              tag: tag.tag,
+              color: tag.color,
+              description,
+            }),
+      );
+    };
 
     return (
       <Row
@@ -70,11 +91,25 @@ export const TagRow = memo(
           </div>
         </Cell>
 
-        <Cell name="description" width="flex" plain>
-          {tag.description ?? (
-            <i style={{ color: theme.tableTextLight }}>{t('No description')}</i>
-          )}
-        </Cell>
+        <InputCell
+          width="flex"
+          name="description"
+          textAlign="flex"
+          exposed={exposed}
+          onExpose={() => setExposed(true)}
+          value={tag.description || t('No description')}
+          valueStyle={
+            tag.description
+              ? {}
+              : { fontStyle: 'italic', color: theme.tableTextLight }
+          }
+          inputProps={{
+            value: tag.description || '',
+            onUpdate: onEdit,
+            onBlur: () => setExposed(false),
+            placeholder: t('No description'),
+          }}
+        />
       </Row>
     );
   },

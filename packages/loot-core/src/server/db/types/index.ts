@@ -318,5 +318,5 @@ export type DbTag = {
   id: string;
   tag: string;
   color: string;
-  description?: string;
+  description?: string | null;
 };
