@@ -277,12 +277,12 @@ export function Modals() {
 
         case 'envelope-income-balance-menu':
           return (
-            <NamespaceContext.Provider
+            <SheetNameProvider
               key={key}
-              value={monthUtils.sheetForMonth(modal.options.month)}
+              name={monthUtils.sheetForMonth(modal.options.month)}
             >
               <EnvelopeIncomeBalanceMenuModal {...modal.options} />
-            </NamespaceContext.Provider>
+            </SheetNameProvider>
           );
 
         case 'envelope-summary-to-budget-menu':

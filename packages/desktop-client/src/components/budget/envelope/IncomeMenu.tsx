@@ -6,7 +6,8 @@ import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
 
-import { envelopeBudget } from '@desktop-client/queries/queries';
+import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
+
 
 type IncomeMenuProps = {
   categoryId: string;
