@@ -188,6 +188,7 @@ export const theme = {
   reportsInnerLabel: 'var(--color-reportsInnerLabel)',
   noteTagBackground: 'var(--color-noteTagBackground)',
   noteTagBackgroundHover: 'var(--color-noteTagBackgroundHover)',
+  noteTagDefault: 'var(--color-noteTagDefault)',
   noteTagText: 'var(--color-noteTagText)',
   budgetOtherMonth: 'var(--color-budgetOtherMonth)',
   budgetCurrentMonth: 'var(--color-budgetCurrentMonth)',

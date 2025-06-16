@@ -1,9 +1,10 @@
 BEGIN TRANSACTION;
 
-CREATE TABLE tags_colors(
+CREATE TABLE tags(
   id TEXT PRIMARY KEY,
   tag TEXT UNIQUE,
-  color TEXT
+  color TEXT,
+  description TEXT
 );
 
 COMMIT

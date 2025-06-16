@@ -43,7 +43,7 @@ import {
   DbClockMessage,
   DbPayee,
   DbPayeeMapping,
-  DbTagColor,
+  DbTag,
   DbTransaction,
   DbViewTransaction,
   DbViewTransactionInternalAlive,
@@ -805,24 +805,24 @@ function toSqlQueryParameters(params: unknown[]) {
   return params.map(() => '?').join(',');
 }
 
-export function getTagsColors() {
-  return all<DbTagColor>(`
-    SELECT id, tag, color
-    FROM tags_colors
+export function getTags() {
+  return all<DbTag>(`
+    SELECT id, tag, color, description
+    FROM tags
     ORDER BY tag
   `);
 }
 
-export function insertTagColor(tagColor): Promise<DbTagColor['id']> {
-  return insertWithUUID('tags_colors', tagColor);
+export function insertTag(tag): Promise<DbTag['id']> {
+  return insertWithUUID('tags', tag);
 }
 
-export async function deleteTagColor(tag) {
+export async function deleteTag(tag) {
   return transaction(() => {
-    runQuery(`DELETE FROM tags_colors WHERE id = ?`, [tag.id]);
+    runQuery(`DELETE FROM tags WHERE id = ?`, [tag.id]);
   });
 }
 
-export function updateTagColor(tagColor) {
-  return update('tags_colors', tagColor);
+export function updateTag(tag) {
+  return update('tags', tag);
 }

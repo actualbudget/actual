@@ -11,7 +11,7 @@ import {
   type TransactionEntity,
   type AccountEntity,
   type PayeeEntity,
-  type TagColor,
+  type Tag,
 } from 'loot-core/types/models';
 
 import { resetApp } from '@desktop-client/app/appSlice';
@@ -41,8 +41,8 @@ type QueriesState = {
   commonPayees: PayeeEntity[];
   payees: PayeeEntity[];
   payeesLoaded: boolean;
-  tagsColors: TagColor[];
-  tagsColorsLoaded: boolean;
+  tags: Tag[];
+  tagsLoaded: boolean;
 };
 
 const initialState: QueriesState = {
@@ -61,8 +61,8 @@ const initialState: QueriesState = {
   commonPayeesLoaded: false,
   payees: [],
   payeesLoaded: false,
-  tagsColors: [],
-  tagsColorsLoaded: false,
+  tags: [],
+  tagsLoaded: false,
 };
 
 type SetNewTransactionsPayload = {
@@ -168,23 +168,21 @@ const queriesSlice = createSlice({
 
     // Tags
 
-    builder.addCase(getTagsColors.fulfilled, (state, action) => {
-      state.tagsColors = action.payload;
-      state.tagsColorsLoaded = true;
+    builder.addCase(getTags.fulfilled, (state, action) => {
+      state.tags = action.payload;
+      state.tagsLoaded = true;
     });
 
-    builder.addCase(createTagColor.fulfilled, (state, action) => {
-      state.tagsColors.push(action.payload);
+    builder.addCase(createTag.fulfilled, (state, action) => {
+      state.tags.push(action.payload);
     });
 
-    builder.addCase(deleteTagColor.fulfilled, (state, action) => {
-      state.tagsColors = state.tagsColors.filter(
-        tag => tag.id !== action.payload,
-      );
+    builder.addCase(deleteTag.fulfilled, (state, action) => {
+      state.tags = state.tags.filter(tag => tag.id !== action.payload);
     });
 
-    builder.addCase(updateTagColor.fulfilled, (state, action) => {
-      state.tagsColors.find(tag => tag.id === action.payload.id).color =
+    builder.addCase(updateTag.fulfilled, (state, action) => {
+      state.tags.find(tag => tag.id === action.payload.id).color =
         action.payload.color;
     });
   },
@@ -446,39 +444,36 @@ export const getPayees = createAppAsyncThunk(
   },
 );
 
-export const getTagsColors = createAppAsyncThunk(
-  `${sliceName}/getTagsColors`,
-  async () => {
-    const tags: TagColor[] = await send('tags-colors-get');
-    return tags;
-  },
-);
+export const getTags = createAppAsyncThunk(`${sliceName}/getTags`, async () => {
+  const tags: Tag[] = await send('tags-get');
+  return tags;
+});
 
-type CreateTagColorPayload = {
-  tag: TagColor['tag'];
-  color: TagColor['color'];
+type CreateTagPayload = {
+  tag: Tag['tag'];
+  color: Tag['color'];
 };
 
-export const createTagColor = createAppAsyncThunk(
-  `${sliceName}/createTagColor`,
-  async ({ tag, color }: CreateTagColorPayload) => {
-    const id = await send('tags-colors-create', { tag, color });
+export const createTag = createAppAsyncThunk(
+  `${sliceName}/createTag`,
+  async ({ tag, color }: CreateTagPayload) => {
+    const id = await send('tags-create', { tag, color });
     return id;
   },
 );
 
-export const deleteTagColor = createAppAsyncThunk(
-  `${sliceName}/deleteTagColor`,
-  async (tag: TagColor) => {
-    const id = await send('tags-colors-delete', tag);
+export const deleteTag = createAppAsyncThunk(
+  `${sliceName}/deleteTag`,
+  async (tag: Tag) => {
+    const id = await send('tags-delete', tag);
     return id;
   },
 );
 
-export const updateTagColor = createAppAsyncThunk(
-  `${sliceName}/updateTagColor`,
-  async (tag: TagColor) => {
-    const id = await send('tags-colors-update', tag);
+export const updateTag = createAppAsyncThunk(
+  `${sliceName}/updateTag`,
+  async (tag: Tag) => {
+    const id = await send('tags-update', tag);
     return id;
   },
 );
@@ -946,7 +941,7 @@ export const actions = {
   moveCategory,
   moveCategoryGroup,
   initiallyLoadPayees,
-  getTagsColors,
+  getTags,
 };
 
 export const {
