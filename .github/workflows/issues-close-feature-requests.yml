@@ -24,7 +24,7 @@ jobs:
           body: |
             :sparkles: Thanks for sharing your idea! :sparkles:
 
-            This repository uses lodash style issue management for enhancements. That means enhancement issues are automatically closed. This doesn’t mean we don’t accept feature requests, though! We will consider implementing ones that receive many upvotes, and we welcome contributions for any feature requests marked as needing votes (just post a comment first so we can help you make a successful contribution).
+            This repository uses a voting-based system for feature requests. While enhancement issues are automatically closed, we still welcome feature requests! The voting system helps us gauge community interest in potential features. We also encourage community contributions for any feature requests marked as needing votes (just post a comment first so we can help guide you toward a successful contribution).
 
             The enhancement backlog can be found here: https://github.com/actualbudget/actual/issues?q=label%3A%22needs+votes%22+sort%3Areactions-%2B1-desc+
 
