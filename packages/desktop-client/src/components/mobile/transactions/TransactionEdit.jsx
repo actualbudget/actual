@@ -805,7 +805,11 @@ const TransactionEditInner = memo(function TransactionEditInner({
                 fontWeight: 300,
               }),
             }}
-            value={getPrettyPayee({ transaction })}
+            value={getPrettyPayee({
+              transaction,
+              payee: getPayee(transaction),
+              transferAccount: getTransferAccount(transaction),
+            })}
             onPress={() => onEditField(transaction.id, 'payee')}
             data-testid="payee-field"
           />
