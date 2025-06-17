@@ -157,7 +157,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     setBalances(newVal);
     dispatch(
       collapseModals({
-        rootModalName: 'scheduled-transaction-menu',
+        rootModalName: 'account-menu',
       }),
     );
   }, [showBalances, setBalances, dispatch]);
@@ -301,9 +301,14 @@ function TransactionListWithPreviews({
     previewTransactions,
     runningBalances: previewRunningBalances,
     isLoading: isPreviewTransactionsLoading,
+    //reload: reloadPreviewTransactions,
   } = useAccountPreviewTransactions({
     accountId: account?.id,
   });
+
+  useEffect(() => {
+    reloadTransactions();
+  }, [showBalances]);
 
   const allBalances = useMemo(() => {
     const map = new Map<TransactionEntity['id'], IntegerAmount>([
