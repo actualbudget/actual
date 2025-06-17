@@ -453,15 +453,9 @@ export const getTags = createAppAsyncThunk(`${sliceName}/getTags`, async () => {
   return tags;
 });
 
-type CreateTagPayload = {
-  tag: Tag['tag'];
-  color: Tag['color'];
-  description?: Tag['description'];
-};
-
 export const createTag = createAppAsyncThunk(
   `${sliceName}/createTag`,
-  async ({ tag, color, description }: CreateTagPayload) => {
+  async ({ tag, color, description }: Omit<Tag, 'id'>) => {
     const id = await send('tags-create', { tag, color, description });
     return id;
   },

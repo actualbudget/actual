@@ -87,7 +87,7 @@ export const TagCreationRow = () => {
             placeholder={t('Tag')}
             width={100}
             value={tag}
-            onChangeValue={setTag}
+            onChangeValue={value => setTag(value.replace(/\s/g, ''))}
           />
         </Cell>
 
