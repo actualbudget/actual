@@ -28,11 +28,7 @@ async function createTag({
   tag,
   color,
   description = null,
-}: {
-  tag: string;
-  color: string;
-  description?: string | null;
-}): Promise<Tag> {
+}: Omit<Tag, 'id'>): Promise<Tag> {
   const id = await db.insertTag({
     tag: tag.trim(),
     color: color.trim(),
