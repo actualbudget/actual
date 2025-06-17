@@ -68,7 +68,11 @@ export function useAccountPreviewTransactions({
   const accountBalanceValue = useSheetValue<
     'account',
     'balance' | 'accounts-balance'
-  >(accountId ? bindings.accountBalance(accountId) : bindings.allAccountBalance());
+  >(
+    accountId
+      ? bindings.accountBalance(accountId)
+      : bindings.allAccountBalance(),
+  );
 
   const {
     previewTransactions: allPreviewTransactions,
