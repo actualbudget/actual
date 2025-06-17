@@ -62,13 +62,16 @@ export const pluggyaiService = {
     try {
       console.log(`Attempting to fetch investments for itemId: "${itemId}"`);
       console.log(`ItemId length: ${itemId.length}`);
-      console.log(`ItemId format check: ${/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(itemId)}`);
-      
+      console.log(
+        `ItemId format check: ${/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(itemId)}`,
+      );
+
       const client = getPluggyClient();
-      
+
       // Tentar usar o método fetchInvestments se disponível
       if (typeof client.fetchInvestments === 'function') {
-        const { results, total, ...rest } = await client.fetchInvestments(itemId);
+        const { results, total, ...rest } =
+          await client.fetchInvestments(itemId);
         return {
           results,
           total,
@@ -78,19 +81,24 @@ export const pluggyaiService = {
         };
       } else {
         // Se o método não estiver disponível, fazer chamada direta à API
-        console.log('fetchInvestments method not available, making direct API call');
+        console.log(
+          'fetchInvestments method not available, making direct API call',
+        );
         const apiKey = await client.createAPIKey();
-        const response = await fetch(`https://api.pluggy.ai/investments?itemId=${itemId}`, {
-          headers: {
-            'X-API-KEY': apiKey.apiKey,
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          `https://api.pluggy.ai/investments?itemId=${itemId}`,
+          {
+            headers: {
+              'X-API-KEY': apiKey.apiKey,
+              'Content-Type': 'application/json',
+            },
           },
-        });
-        
+        );
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         return {
           results: data.results || data,
@@ -100,7 +108,9 @@ export const pluggyaiService = {
         };
       }
     } catch (error) {
-      console.error(`Error fetching investments for itemId "${itemId}": ${error.message}`);
+      console.error(
+        `Error fetching investments for itemId "${itemId}": ${error.message}`,
+      );
       throw error;
     }
   },

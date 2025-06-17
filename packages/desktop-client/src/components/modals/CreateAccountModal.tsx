@@ -160,7 +160,14 @@ export function CreateAccountModal({
         throw new Error(results.error);
       }
 
-      console.log('Pluggy.ai accounts received:', results.accounts.map(acc => ({ id: acc.id, name: acc.name, type: acc.type })));
+      console.log(
+        'Pluggy.ai accounts received:',
+        results.accounts.map(acc => ({
+          id: acc.id,
+          name: acc.name,
+          type: acc.type,
+        })),
+      );
 
       const newAccounts = [];
 
@@ -179,22 +186,24 @@ export function CreateAccountModal({
           name: oldAccount.name,
           type: oldAccount.type,
           balance: oldAccount.balance,
-          investmentData: oldAccount.investmentData
+          investmentData: oldAccount.investmentData,
         });
 
         let calculatedBalance = 0;
-        
+
         if (oldAccount.type === 'BANK') {
-          calculatedBalance = oldAccount.bankData.automaticallyInvestedBalance + oldAccount.bankData.closingBalance;
+          calculatedBalance =
+            oldAccount.bankData.automaticallyInvestedBalance +
+            oldAccount.bankData.closingBalance;
         } else if (oldAccount.type === 'INVESTMENT') {
           const investmentBalance = oldAccount.investmentData?.totalBalance;
           const fallbackBalance = oldAccount.balance;
           calculatedBalance = investmentBalance || fallbackBalance;
-          
+
           console.log('Investment balance calculation:', {
             investmentDataBalance: investmentBalance,
-            fallbackBalance: fallbackBalance,
-            finalBalance: calculatedBalance
+            fallbackBalance,
+            finalBalance: calculatedBalance,
           });
         } else {
           calculatedBalance = oldAccount.balance;
@@ -205,9 +214,11 @@ export function CreateAccountModal({
         const newAccount: NormalizedAccount = {
           account_id: oldAccount.id,
           name: `${oldAccount.name.trim()} - ${
-            oldAccount.type === 'BANK' ? oldAccount.taxNumber : 
-            oldAccount.type === 'INVESTMENT' ? `Investment - ${oldAccount.owner}` : 
-            oldAccount.owner
+            oldAccount.type === 'BANK'
+              ? oldAccount.taxNumber
+              : oldAccount.type === 'INVESTMENT'
+                ? `Investment - ${oldAccount.owner}`
+                : oldAccount.owner
           }`,
           institution: oldAccount.name,
           orgDomain: null,
