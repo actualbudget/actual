@@ -11,6 +11,7 @@ import { t } from 'i18next';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { type Tag } from 'loot-core/types/models';
 
+import { TagCreationRow } from './TagCreationRow';
 import { TagsHeader } from './TagsHeader';
 import { TagsList } from './TagsList';
 
@@ -50,15 +51,17 @@ export function ManageTags() {
         );
   }, [defaultTag, filter, tags]);
 
-  const selectedInst = useSelected('manage-tags', filteredTags, []);
+  const selectedInst = useSelected(
+    'manage-tags',
+    filteredTags.filter(tag => tag.tag !== '*'),
+    [],
+  );
   const [hoveredTag, setHoveredTag] = useState<string>();
 
   const onDeleteSelected = useCallback(async () => {
     dispatch(deleteAllTags([...selectedInst.items]));
     selectedInst.dispatch({ type: 'select-none' });
   }, [dispatch, selectedInst]);
-
-  function onCreateTag() {}
 
   const { t } = useTranslation();
 
@@ -92,6 +95,7 @@ export function ManageTags() {
         </View>
         <View style={{ flex: 1 }}>
           <TagsHeader />
+          <TagCreationRow />
           <TagsList
             tags={filteredTags}
             selectedItems={selectedInst.items}
@@ -113,9 +117,6 @@ export function ManageTags() {
                 Delete {selectedInst.items.size} tags
               </Button>
             )}
-            <Button variant="primary" onPress={onCreateTag} isDisabled={true}>
-              {t('Create new tag')}
-            </Button>
           </Stack>
         </View>
       </View>
