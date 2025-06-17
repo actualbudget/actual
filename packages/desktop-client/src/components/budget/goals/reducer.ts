@@ -1,4 +1,4 @@
-import { type Template } from 'loot-core/server/budget/types/templates';
+import { type Template } from 'loot-core/types/models/templates';
 
 import { type Action } from './actions';
 import { type ReducerState, type DisplayTemplateType } from './constants';

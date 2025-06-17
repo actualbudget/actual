@@ -135,8 +135,26 @@ export function ElectronServerConfig({
           }}
         >
           <Trans>
-            Configure your local server below to allow seamless data
-            synchronization across your devices, bank sync and more...
+            Set up your server below to enable seamless data synchronization
+            across your devices, bank sync and more...
+          </Trans>
+        </Text>
+        <Text
+          style={{
+            fontSize: 16,
+            color: theme.pageText,
+            lineHeight: 1.5,
+          }}
+        >
+          <Trans>
+            Need to expose your server to the internet? Follow our step-by-step{' '}
+            <Link
+              variant="external"
+              to="https://actualbudget.org/docs/install/desktop-app"
+            >
+              guide
+            </Link>{' '}
+            for more information.
           </Trans>
         </Text>
 

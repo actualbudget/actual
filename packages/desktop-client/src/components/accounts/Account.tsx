@@ -7,7 +7,7 @@ import React, {
   useEffect,
 } from 'react';
 import { Trans } from 'react-i18next';
-import { Navigate, useParams, useLocation } from 'react-router-dom';
+import { Navigate, useParams, useLocation } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -583,7 +583,7 @@ class AccountInternal extends PureComponent<
     const account = this.props.accounts.find(acct => acct.id === accountId);
 
     await this.props.dispatch(
-      syncAndDownload({ accountId: account ? account.id : undefined }),
+      syncAndDownload({ accountId: account ? account.id : accountId }),
     );
   };
 

@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { SvgSplit } from '@actual-app/components/icons/v0';
@@ -198,7 +198,7 @@ function Footer({
         paddingLeft: styles.mobileEditingPadding,
         paddingRight: styles.mobileEditingPadding,
         paddingTop: 10,
-        paddingBottom: 10,
+        paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
         backgroundColor: theme.tableHeaderBackground,
         borderTopWidth: 1,
         borderColor: theme.tableBorder,
