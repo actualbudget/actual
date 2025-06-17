@@ -1,7 +1,8 @@
-// @ts-strict-ignore
 import React, { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { SvgRefreshArrow } from '@actual-app/components/icons/v2';
 import { theme } from '@actual-app/components/theme';
 
 import { type Tag } from 'loot-core/types/models';
@@ -15,7 +16,11 @@ import {
   InputCell,
 } from '@desktop-client/components/table';
 import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
-import { createTag, updateTag } from '@desktop-client/queries/queriesSlice';
+import {
+  createTag,
+  deleteTag,
+  updateTag,
+} from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type TagRowProps = {
@@ -34,7 +39,7 @@ export const TagRow = memo(
     const backgroundFocus = hovered;
     const [exposed, setExposed] = useState(false);
 
-    const onEdit = description => {
+    const onEdit = (description: string) => {
       dispatch(
         tag.id
           ? updateTag({ ...tag, description })
@@ -50,8 +55,6 @@ export const TagRow = memo(
       <Row
         height="auto"
         style={{
-          fontSize: 13,
-          zIndex: selected ? 101 : 'auto',
           borderColor,
           backgroundColor: selected
             ? theme.tableRowBackgroundHighlight
@@ -63,7 +66,7 @@ export const TagRow = memo(
         onMouseEnter={() => onHover && onHover(tag.id)}
         onMouseLeave={() => onHover && onHover(null)}
       >
-        {tag.id ? (
+        {tag.tag !== '*' ? (
           <SelectCell
             exposed={hovered || selected}
             focused={true}
@@ -77,18 +80,29 @@ export const TagRow = memo(
             selected={selected}
           />
         ) : (
-          <Cell width={20} />
+          <Cell width={20} plain>
+            <Button
+              variant="bare"
+              type="button"
+              style={{
+                borderWidth: 0,
+                backgroundColor: 'transparent',
+                marginLeft: 'auto',
+              }}
+              onClick={() => dispatch(deleteTag(tag))}
+            >
+              <SvgRefreshArrow width={13} height={13} />
+            </Button>
+          </Cell>
         )}
 
         <Cell
           name="tag"
           width={250}
           plain
-          style={{ color: theme.tableText, padding: '5px' }}
+          style={{ padding: '5px', display: 'block' }}
         >
-          <div>
-            <TagEditor tag={tag} />
-          </div>
+          <TagEditor tag={tag} />
         </Cell>
 
         <InputCell
