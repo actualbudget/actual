@@ -160,6 +160,8 @@ export function CreateAccountModal({
         throw new Error(results.error);
       }
 
+      console.log('Pluggy.ai accounts received:', results.accounts.map(acc => ({ id: acc.id, name: acc.name, type: acc.type })));
+
       const newAccounts = [];
 
       type NormalizedAccount = {
@@ -172,19 +174,48 @@ export function CreateAccountModal({
       };
 
       for (const oldAccount of results.accounts) {
+        console.log('Processing account:', {
+          id: oldAccount.id,
+          name: oldAccount.name,
+          type: oldAccount.type,
+          balance: oldAccount.balance,
+          investmentData: oldAccount.investmentData
+        });
+
+        let calculatedBalance = 0;
+        
+        if (oldAccount.type === 'BANK') {
+          calculatedBalance = oldAccount.bankData.automaticallyInvestedBalance + oldAccount.bankData.closingBalance;
+        } else if (oldAccount.type === 'INVESTMENT') {
+          const investmentBalance = oldAccount.investmentData?.totalBalance;
+          const fallbackBalance = oldAccount.balance;
+          calculatedBalance = investmentBalance || fallbackBalance;
+          
+          console.log('Investment balance calculation:', {
+            investmentDataBalance: investmentBalance,
+            fallbackBalance: fallbackBalance,
+            finalBalance: calculatedBalance
+          });
+        } else {
+          calculatedBalance = oldAccount.balance;
+        }
+
+        console.log('Final calculated balance:', calculatedBalance);
+
         const newAccount: NormalizedAccount = {
           account_id: oldAccount.id,
-          name: `${oldAccount.name.trim()} - ${oldAccount.type === 'BANK' ? oldAccount.taxNumber : oldAccount.owner}`,
+          name: `${oldAccount.name.trim()} - ${
+            oldAccount.type === 'BANK' ? oldAccount.taxNumber : 
+            oldAccount.type === 'INVESTMENT' ? `Investment - ${oldAccount.owner}` : 
+            oldAccount.owner
+          }`,
           institution: oldAccount.name,
           orgDomain: null,
           orgId: oldAccount.id,
-          balance:
-            oldAccount.type === 'BANK'
-              ? oldAccount.bankData.automaticallyInvestedBalance +
-                oldAccount.bankData.closingBalance
-              : oldAccount.balance,
+          balance: calculatedBalance,
         };
 
+        console.log('Created normalized account:', newAccount);
         newAccounts.push(newAccount);
       }
 
