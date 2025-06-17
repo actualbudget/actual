@@ -37,13 +37,11 @@ app.post(
   handleError(async (req, res) => {
     try {
       const itemIdsRaw = secretsService.get(SecretName.pluggyai_itemIds);
-      
-      const itemIds = itemIdsRaw
-        .split(',')
-        .map(item => item.trim());
 
-      itemIds.forEach((item, index) => {
-        const isValid = isValidUUID(item);
+      const itemIds = itemIdsRaw.split(',').map(item => item.trim());
+
+      itemIds.forEach(item => {
+        const _isValid = isValidUUID(item);
       });
 
       // TODO: Use only valid UUID itemIds for investments API calls
@@ -71,11 +69,13 @@ app.post(
         // SKIP INVESTMENTS IF ITEMID IS NOT A VALID UUID
         if (isValidUUID(item)) {
           try {
-            const investments = await pluggyaiService.getInvestmentsByItemId(item);
-            
+            const investments =
+              await pluggyaiService.getInvestmentsByItemId(item);
+
             // Consolidate investments by institution
             if (investments.results.length > 0) {
-              const consolidatedInvestments = consolidateInvestmentsByInvestment(investments.results, item);
+              const consolidatedInvestments =
+                consolidateInvestmentsByInvestment(investments.results, item);
               accounts = accounts.concat(consolidatedInvestments);
             }
           } catch (investmentError) {
@@ -329,9 +329,9 @@ function consolidateInvestmentsByInvestment(investments, itemId) {
   const allInvestments = [];
   let institutionName = 'Investimentos';
 
-  investments.forEach((investment, index) => {
+  investments.forEach(investment => {
     allInvestments.push(investment);
-    
+
     // Ensure balance is a valid number
     let investmentBalance = 0;
     if (investment.balance !== undefined && investment.balance !== null) {
@@ -342,7 +342,7 @@ function consolidateInvestmentsByInvestment(investments, itemId) {
     }
 
     totalBalance += investmentBalance;
-    
+
     // Get institution name from first investment that has one
     if (investment.institution?.name && institutionName === 'Investimentos') {
       institutionName = investment.institution.name;
@@ -372,6 +372,6 @@ function consolidateInvestmentsByInvestment(investments, itemId) {
     },
     updatedAt: new Date().toISOString(),
   };
-  
+
   return [consolidatedAccount];
 }
