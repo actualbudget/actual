@@ -117,7 +117,8 @@ if (values.config) {
 }
 
 if (values['reset-password']) {
-  import('../src/scripts/reset-password.js');
+  console.info('Running reset password script...');
+  await import('../src/scripts/reset-password.js');
   process.exit();
 }
 
