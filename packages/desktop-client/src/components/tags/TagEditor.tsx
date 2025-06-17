@@ -14,9 +14,9 @@ type TagEditorProps = {
 };
 
 export const TagEditor = ({ tag }: TagEditorProps) => {
-  const getTagCSS = useTagCSS();
-  const dispatch = useDispatch();
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const getTagCSS = useTagCSS();
 
   const formattedTag = <>#{tag.tag === '*' ? t('Default') : tag.tag}</>;
 

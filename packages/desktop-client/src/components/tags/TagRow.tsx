@@ -27,17 +27,16 @@ type TagRowProps = {
   tag: Tag;
   hovered?: boolean;
   selected?: boolean;
-  onHover?: (id: string | null) => void;
+  onHover: (id: string | null) => void;
 };
 
 export const TagRow = memo(
   ({ tag, hovered, selected, onHover }: TagRowProps) => {
     const { t } = useTranslation();
     const dispatch = useDispatch();
+    const [exposed, setExposed] = useState(false);
     const dispatchSelected = useSelectedDispatch();
     const borderColor = selected ? theme.tableBorderSelected : 'none';
-    const backgroundFocus = hovered;
-    const [exposed, setExposed] = useState(false);
 
     const onEdit = (description: string) => {
       dispatch(
@@ -58,13 +57,13 @@ export const TagRow = memo(
           borderColor,
           backgroundColor: selected
             ? theme.tableRowBackgroundHighlight
-            : backgroundFocus
+            : hovered
               ? theme.tableRowBackgroundHover
               : theme.tableBackground,
         }}
         collapsed={true}
-        onMouseEnter={() => onHover && onHover(tag.id)}
-        onMouseLeave={() => onHover && onHover(null)}
+        onMouseEnter={() => onHover(tag.id)}
+        onMouseLeave={() => onHover(null)}
       >
         {tag.tag !== '*' ? (
           <SelectCell

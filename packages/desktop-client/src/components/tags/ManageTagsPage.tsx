@@ -7,6 +7,7 @@ import { Page } from '@desktop-client/components/Page';
 
 export const ManageTagsPage = () => {
   const { t } = useTranslation();
+
   return (
     <Page header={t('Tags')}>
       <ManageTags />
