@@ -7,7 +7,7 @@ type PullToRefreshProps = ComponentProps<typeof BasePullToRefresh>;
 
 export function PullToRefresh(props: PullToRefreshProps) {
   return (
-    <div style={{ overflow: 'auto' }}>
+    <div style={{ overflow: 'auto', flex: 1 }}>
       <BasePullToRefresh
         pullDownThreshold={80}
         resistance={2}
