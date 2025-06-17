@@ -6,10 +6,8 @@ import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { t } from 'i18next';
 
 import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { type Tag } from 'loot-core/types/models';
 
 import { TagCreationRow } from './TagCreationRow';
 import { TagsHeader } from './TagsHeader';
@@ -24,24 +22,23 @@ import { deleteAllTags } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { useTags } from '@desktop-client/style/tags';
 
-const defaultTagFallback: Tag = {
-  id: '',
-  tag: '*',
-  color: theme.noteTagDefault,
-  description: t('Default tag color'),
-};
-
 export function ManageTags() {
+  const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const [filter, setFilter] = useState('');
+  const [hoveredTag, setHoveredTag] = useState<string>();
   const tags = useTags();
+
   const defaultTag = useMemo(
     () => ({
-      ...defaultTagFallback,
+      id: '',
+      tag: '*',
+      color: theme.noteTagDefault,
+      description: t('Default tag color'),
       ...tags.find(tag => tag.tag === '*'),
     }),
-    [tags],
+    [t, tags],
   );
-  const [filter, setFilter] = useState('');
-  const dispatch = useDispatch();
 
   const filteredTags = useMemo(() => {
     return filter === ''
@@ -56,14 +53,11 @@ export function ManageTags() {
     filteredTags.filter(tag => tag.tag !== '*'),
     [],
   );
-  const [hoveredTag, setHoveredTag] = useState<string>();
 
   const onDeleteSelected = useCallback(async () => {
     dispatch(deleteAllTags([...selectedInst.items]));
     selectedInst.dispatch({ type: 'select-none' });
   }, [dispatch, selectedInst]);
-
-  const { t } = useTranslation();
 
   return (
     <SelectedProvider instance={selectedInst}>

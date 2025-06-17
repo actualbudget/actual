@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Form } from 'react-aria-components';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { ColorPicker } from '@actual-app/components/color-picker';
@@ -15,11 +15,12 @@ import { useDispatch } from '@desktop-client/redux';
 import { useTagCSS } from '@desktop-client/style/tags';
 
 export const TagCreationRow = () => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
-  const getTagCSS = useTagCSS();
   const [tag, setTag] = useState('');
+  const [description, setDescription] = useState('');
   const [color, setColor] = useState(theme.noteTagDefault);
-  const [description, setDescription] = useState<string>();
+  const getTagCSS = useTagCSS();
 
   const onAddTag = () => {
     if (!tag.trim() || !color.trim()) {
@@ -83,7 +84,7 @@ export const TagCreationRow = () => {
         <Cell name="tag" width={150} plain style={{ padding: '5px' }}>
           <Input
             id="tag-field"
-            placeholder="tag"
+            placeholder={t('Tag')}
             width={100}
             value={tag}
             onChangeValue={setTag}
@@ -93,7 +94,7 @@ export const TagCreationRow = () => {
         <Cell name="description" width="flex" plain style={{ padding: '5px' }}>
           <Input
             id="description-field"
-            placeholder="description"
+            placeholder={t('Description')}
             value={description}
             onChangeValue={setDescription}
           />

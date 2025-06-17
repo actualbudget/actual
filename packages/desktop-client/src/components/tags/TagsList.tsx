@@ -10,7 +10,7 @@ type TagsListProps = {
   tags: Tag[];
   selectedItems: Set<string>;
   hoveredTag?: string;
-  onHover?: (id: string | null) => void;
+  onHover: (id: string | null) => void;
 };
 
 export function TagsList({

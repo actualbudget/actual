@@ -17,7 +17,7 @@ export function TagsHeader() {
   const dispatchSelected = useSelectedDispatch();
 
   return (
-    <TableHeader style={{}}>
+    <TableHeader>
       <SelectCell
         exposed={true}
         focused={false}
