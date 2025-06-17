@@ -14,8 +14,8 @@ import type {
 
 import { useSyncedPref } from './useSyncedPref';
 
+import { accountFilter } from '@desktop-client/queries';
 import { liveQuery, type LiveQuery } from '@desktop-client/queries/liveQuery';
-import { accountFilter } from '@desktop-client/queries/queries';
 
 export type ScheduleStatusType = ReturnType<typeof getStatus>;
 export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
