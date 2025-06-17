@@ -37,11 +37,10 @@ Click **Start** to run the server.
 
 Upon starting the server, you’ll be prompted to create a password (if you haven’t already). Sign in to complete the configuration.
 
-Once these steps are completed, your local server will be running, unlocking full server functionalities including Bank Sync and more.
 
-## Connecting your local server to a mobile device
+## Exposing your local server to the internet
 
-You can access your local server from your mobile device. However, this requires a bit more setup since you’ll need a way to expose your local server to the internet. To achieve this you must set up a [Reverse Proxy](../config/reverse-proxies.md).
+To access your local server from mobile devices or other networks, you'll need to expose it to the internet. This requires setting up a [Reverse Proxy](../config/reverse-proxies.md) to securely tunnel your local server connection.
 
 For a practical walkthrough, check out the [Ngrok guide](../config/reverse-proxies.md#ngrok). If you plan to use your mobile device regularly while the desktop app is running, consider configuring the reverse proxy to launch automatically with your computer.
 

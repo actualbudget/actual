@@ -8,7 +8,7 @@ The Actual sync-server is available as an NPM package. The package is designed t
 
 ### Installing the CLI tool
 
-Node.js v18 or higher is required for the `@actual-app/sync-server` npm package
+Node.js v20 or higher is required for the `@actual-app/sync-server` npm package
 
 **Install globally with npm:**
 
@@ -35,6 +35,7 @@ actual-server [options]
 | `-h` or `--help`    | Print this list and exit.    |
 | `-v` or `--version` | Print this version and exit. |
 | `--config`          | Path to the config file.     |
+| `--reset-password`  | Reset your password          |
 
 **Default values**
 
@@ -61,10 +62,24 @@ Run with [Environment Variable Configuration](../config/index.md):
 ACTUAL_DATA_DIR=./custom-directory actual-server --config ./config.json
 ```
 
+Reset your password
+
+```bash
+actual-server --reset-password
+```
+
 ### Updating the CLI tool
 
 The sync server can be updated with a simple command.
 
 ```bash
 npm update -g @actual-app/sync-server
+```
+
+### Uninstalling the CLI tool
+
+The sync server can be uninstalled with a simple command.
+
+```bash
+npm uninstall -g @actual-app/sync-server
 ```
