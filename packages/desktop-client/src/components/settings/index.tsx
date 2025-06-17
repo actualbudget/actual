@@ -23,7 +23,6 @@ import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
 import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
-import { TagsSettings } from './Tags';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
@@ -203,7 +202,6 @@ export function Settings() {
         )}
         <About />
         <ThemeSettings />
-        <TagsSettings />
         <FormatSettings />
         <LanguageSettings />
         <AuthSettings />
