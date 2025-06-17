@@ -15,6 +15,9 @@ const options = {
     type: 'boolean',
     short: 'v',
   },
+  'reset-password': {
+    type: 'boolean',
+  },
   config: {
     type: 'string',
   },
@@ -111,6 +114,11 @@ if (values.config) {
   } else {
     setupDataDir(); // No default config exists - setup data dir with defaults
   }
+}
+
+if (values['reset-password']) {
+  import('../src/scripts/reset-password.js');
+  process.exit();
 }
 
 // start the sync server
