@@ -37,25 +37,20 @@ app.post(
   handleError(async (req, res) => {
     try {
       const itemIdsRaw = secretsService.get(SecretName.pluggyai_itemIds);
-      console.log('Raw itemIds from config:', itemIdsRaw);
+      
+      const itemIds = itemIdsRaw
+        .split(',')
+        .map(item => item.trim());
 
-      const itemIds = itemIdsRaw.split(',').map(item => item.trim());
-
-      console.log('Parsed itemIds:', itemIds);
-      console.log('ItemIds validation:');
       itemIds.forEach((item, index) => {
         const isValid = isValidUUID(item);
-        console.log(
-          `  ${index + 1}. Valid UUID: ${isValid} (Length: ${item.length})`,
-        );
       });
 
-      // TEMPORÁRIO: usar todos os itemIds mesmo que não sejam UUID válidos
-      // AVISO: Isto pode não funcionar com a API da Pluggy para investimentos
+      // TODO: Use only valid UUID itemIds for investments API calls
+      // WARNING: Non-UUID itemIds may not work with Pluggy investments API
       const validItemIds = itemIds.filter(item => item && item.length > 0);
 
       if (validItemIds.length === 0) {
-        console.log('No itemIds found');
         res.send({
           status: 'ok',
           data: {
@@ -66,82 +61,28 @@ app.post(
         return;
       }
 
-      console.log(`Processing ${validItemIds.length} itemIds`);
-
       let accounts = [];
 
       for (const item of validItemIds) {
-        console.log('Fetching accounts for itemId...');
         const partial = await pluggyaiService.getAccountsByItemId(item);
-        console.log(
-          'Accounts fetched:',
-          partial.results.map(acc => ({
-            id: acc.id,
-            name: acc.name,
-            type: acc.type,
-          })),
-        );
         accounts = accounts.concat(partial.results);
 
-        // Buscar investimentos também, pois podem estar em endpoint separado
-        // PULAR INVESTIMENTOS SE O ITEMID NÃO FOR UUID VÁLIDO
+        // Fetch investments as well, as they may be in a separate endpoint
+        // SKIP INVESTMENTS IF ITEMID IS NOT A VALID UUID
         if (isValidUUID(item)) {
           try {
-            console.log('Fetching investments for itemId...');
-            const investments =
-              await pluggyaiService.getInvestmentsByItemId(item);
-            console.log(
-              'Raw investments data:',
-              JSON.stringify(investments.results, null, 2),
-            );
-            console.log(
-              'Investments fetched:',
-              investments.results.map(inv => ({
-                id: inv.id,
-                name: inv.name,
-                type: 'INVESTMENT',
-                balance: inv.balance,
-                number: inv.number,
-                subtype: inv.subtype,
-                investmentType: inv.type,
-              })),
-            );
-
-            // Consolidar investimentos por instituição
+            const investments = await pluggyaiService.getInvestmentsByItemId(item);
+            
+            // Consolidate investments by institution
             if (investments.results.length > 0) {
-              const consolidatedInvestments =
-                consolidateInvestmentsByInvestment(investments.results, item);
-              console.log(
-                'Consolidated investments:',
-                consolidatedInvestments.map(acc => ({
-                  id: acc.id,
-                  name: acc.name,
-                  balance: acc.balance,
-                  totalBalance: acc.investmentData?.totalBalance,
-                  investmentCount: acc.investmentData?.investmentCount,
-                })),
-              );
+              const consolidatedInvestments = consolidateInvestmentsByInvestment(investments.results, item);
               accounts = accounts.concat(consolidatedInvestments);
             }
           } catch (investmentError) {
-            console.log(
-              'No investments found for itemId - Error:',
-              investmentError.message,
-            );
+            // Silently continue if investments not found for this itemId
           }
-        } else {
-          console.log(
-            '⚠️  Skipping investments for itemId - not a valid UUID format',
-          );
-          console.log(
-            '   Para buscar investimentos, você precisa de um itemId no formato UUID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-          );
         }
       }
-
-      console.log('All account types found:', [
-        ...new Set(accounts.map(acc => acc.type)),
-      ]);
 
       res.send({
         status: 'ok',
@@ -174,10 +115,10 @@ app.post(
 
         let itemId;
         if (idParts.endsWith('-all')) {
-          // Remover o '-all' do final e usar o resto como itemId
+          // Remove '-all' suffix and use the rest as itemId
           itemId = idParts.slice(0, -4); // Remove '-all'
         } else {
-          // Fallback para o formato antigo
+          // Fallback for legacy format
           itemId = idParts.split('-')[0];
         }
 
@@ -199,10 +140,7 @@ app.post(
                 await pluggyaiService.getTransactions(investment.id, startDate);
               transactions = transactions.concat(investmentTransactions);
             } catch (error) {
-              console.log(
-                'Error fetching transactions for investment - Error:',
-                error.message,
-              );
+              // Continue if transaction fetch fails for individual investment
             }
           }
           account = targetAccount;
@@ -382,62 +320,41 @@ function getPayeeName(trans) {
 }
 
 function consolidateInvestmentsByInvestment(investments, itemId) {
-  console.log(`Starting consolidation for ${investments.length} investments`);
-
   if (investments.length === 0) {
     return [];
   }
 
-  // Criar uma única conta consolidada com todos os investimentos
+  // Create a single consolidated account with all investments
   let totalBalance = 0;
   const allInvestments = [];
   let institutionName = 'Investimentos';
 
   investments.forEach((investment, index) => {
-    console.log(`Processing investment ${index + 1}:`, {
-      name: investment.name,
-      balance: investment.balance,
-      balanceType: typeof investment.balance,
-      number: investment.number,
-      subtype: investment.subtype,
-      type: investment.type,
-    });
-
     allInvestments.push(investment);
-
-    // Garantir que o saldo seja um número válido
+    
+    // Ensure balance is a valid number
     let investmentBalance = 0;
     if (investment.balance !== undefined && investment.balance !== null) {
       investmentBalance = Number(investment.balance);
       if (isNaN(investmentBalance)) {
-        console.log('Invalid balance for investment:', investment.balance);
         investmentBalance = 0;
       }
     }
 
     totalBalance += investmentBalance;
-
-    // Pegar o nome da instituição do primeiro investimento que tiver
+    
+    // Get institution name from first investment that has one
     if (investment.institution?.name && institutionName === 'Investimentos') {
       institutionName = investment.institution.name;
     }
-
-    console.log(
-      `Added investment. Balance: ${investmentBalance}, Total so far: ${totalBalance}`,
-    );
   });
 
-  console.log(
-    `Creating single consolidated investment account with total balance: ${totalBalance} (type: ${typeof totalBalance})`,
-  );
-
-  // Garantir que o totalBalance seja um número válido
+  // Ensure totalBalance is a valid number
   if (isNaN(totalBalance)) {
-    console.log('Total balance is NaN, setting to 0');
     totalBalance = 0;
   }
 
-  // Retornar uma única conta com todos os investimentos
+  // Return a single account with all investments consolidated
   const consolidatedAccount = {
     id: `investment-${itemId}-all`,
     name: `${institutionName} - Investimentos`,
@@ -455,16 +372,6 @@ function consolidateInvestmentsByInvestment(investments, itemId) {
     },
     updatedAt: new Date().toISOString(),
   };
-
-  console.log(`Final consolidated account:`, {
-    id: consolidatedAccount.id,
-    name: consolidatedAccount.name,
-    balance: consolidatedAccount.balance,
-    balanceType: typeof consolidatedAccount.balance,
-    totalBalance: consolidatedAccount.investmentData.totalBalance,
-    totalBalanceType: typeof consolidatedAccount.investmentData.totalBalance,
-    investmentCount: consolidatedAccount.investmentData.investmentCount,
-  });
-
+  
   return [consolidatedAccount];
 }

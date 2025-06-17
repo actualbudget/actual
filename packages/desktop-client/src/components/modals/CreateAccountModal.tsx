@@ -130,7 +130,6 @@ export function CreateAccountModal({
         }),
       );
     } catch (err) {
-      console.error(err);
       dispatch(
         pushModal({
           modal: {
@@ -160,15 +159,6 @@ export function CreateAccountModal({
         throw new Error(results.error);
       }
 
-      console.log(
-        'Pluggy.ai accounts received:',
-        results.accounts.map(acc => ({
-          id: acc.id,
-          name: acc.name,
-          type: acc.type,
-        })),
-      );
-
       const newAccounts = [];
 
       type NormalizedAccount = {
@@ -181,14 +171,6 @@ export function CreateAccountModal({
       };
 
       for (const oldAccount of results.accounts) {
-        console.log('Processing account:', {
-          id: oldAccount.id,
-          name: oldAccount.name,
-          type: oldAccount.type,
-          balance: oldAccount.balance,
-          investmentData: oldAccount.investmentData,
-        });
-
         let calculatedBalance = 0;
 
         if (oldAccount.type === 'BANK') {
@@ -199,17 +181,9 @@ export function CreateAccountModal({
           const investmentBalance = oldAccount.investmentData?.totalBalance;
           const fallbackBalance = oldAccount.balance;
           calculatedBalance = investmentBalance || fallbackBalance;
-
-          console.log('Investment balance calculation:', {
-            investmentDataBalance: investmentBalance,
-            fallbackBalance,
-            finalBalance: calculatedBalance,
-          });
         } else {
           calculatedBalance = oldAccount.balance;
         }
-
-        console.log('Final calculated balance:', calculatedBalance);
 
         const newAccount: NormalizedAccount = {
           account_id: oldAccount.id,
@@ -226,7 +200,6 @@ export function CreateAccountModal({
           balance: calculatedBalance,
         };
 
-        console.log('Created normalized account:', newAccount);
         newAccounts.push(newAccount);
       }
 
@@ -242,7 +215,6 @@ export function CreateAccountModal({
         }),
       );
     } catch (err) {
-      console.error(err);
       addNotification({
         notification: {
           type: 'error',

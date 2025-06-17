@@ -39,7 +39,6 @@ export const pluggyaiService = {
         errors: {},
       };
     } catch (error) {
-      console.error(`Error fetching accounts: ${error.message}`);
       throw error;
     }
   },
@@ -53,22 +52,15 @@ export const pluggyaiService = {
         errors: {},
       };
     } catch (error) {
-      console.error(`Error fetching account: ${error.message}`);
       throw error;
     }
   },
 
   getInvestmentsByItemId: async itemId => {
     try {
-      console.log(`Attempting to fetch investments for itemId: "${itemId}"`);
-      console.log(`ItemId length: ${itemId.length}`);
-      console.log(
-        `ItemId format check: ${/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(itemId)}`,
-      );
-
       const client = getPluggyClient();
 
-      // Tentar usar o método fetchInvestments se disponível
+      // Try to use fetchInvestments method if available
       if (typeof client.fetchInvestments === 'function') {
         const { results, total, ...rest } =
           await client.fetchInvestments(itemId);
@@ -80,10 +72,7 @@ export const pluggyaiService = {
           errors: {},
         };
       } else {
-        // Se o método não estiver disponível, fazer chamada direta à API
-        console.log(
-          'fetchInvestments method not available, making direct API call',
-        );
+        // If method not available, make direct API call
         const apiKey = await client.createAPIKey();
         const response = await fetch(
           `https://api.pluggy.ai/investments?itemId=${itemId}`,
@@ -108,9 +97,6 @@ export const pluggyaiService = {
         };
       }
     } catch (error) {
-      console.error(
-        `Error fetching investments for itemId "${itemId}": ${error.message}`,
-      );
       throw error;
     }
   },
@@ -121,7 +107,7 @@ export const pluggyaiService = {
 
       const account = await pluggyaiService.getAccountById(accountId);
 
-      // the sandbox data doesn't move the dates automatically so the
+      // The sandbox data doesn't move the dates automatically so the
       // transactions are often older than 90 days. The owner on one of the
       // sandbox accounts is set to John Doe so in these cases we'll ignore
       // the start date.
@@ -148,7 +134,6 @@ export const pluggyaiService = {
         errors: {},
       };
     } catch (error) {
-      console.error(`Error fetching transactions: ${error.message}`);
       throw error;
     }
   },
