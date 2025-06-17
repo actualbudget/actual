@@ -4,7 +4,7 @@ import { Button } from '@actual-app/components/button';
 import { SvgChartPie } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
 
-import { type Template } from 'loot-core/server/budget/types/templates';
+import { type Template } from 'loot-core/types/models/templates';
 
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
