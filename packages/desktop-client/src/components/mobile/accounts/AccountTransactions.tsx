@@ -287,7 +287,7 @@ function TransactionListWithPreviews({
   } = useTransactions({
     query: transactionsQuery,
     options: {
-      calculateRunningBalances: showBalances === 'true',
+      calculateRunningBalances: true,
     },
   });
 
@@ -301,14 +301,13 @@ function TransactionListWithPreviews({
     previewTransactions,
     runningBalances: previewRunningBalances,
     isLoading: isPreviewTransactionsLoading,
-    //reload: reloadPreviewTransactions,
   } = useAccountPreviewTransactions({
     accountId: account?.id,
   });
 
   useEffect(() => {
     reloadTransactions();
-  }, [showBalances]);
+  }, [showBalances, reloadTransactions]);
 
   const allBalances = useMemo(() => {
     const map = new Map<TransactionEntity['id'], IntegerAmount>([

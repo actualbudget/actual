@@ -58,7 +58,6 @@ export function useAccountPreviewTransactions({
 
   const accountSchedulesFilter = useCallback(
     (schedule: ScheduleEntity) =>
-      !accountId ||
       schedule._account === accountId ||
       getTransferAccountByPayee(schedule._payee)?.id === accountId,
     [accountId, getTransferAccountByPayee],
@@ -83,10 +82,10 @@ export function useAccountPreviewTransactions({
   return useMemo(() => {
     if (!accountId) {
       return {
-        previewTransactions: allPreviewTransactions,
-        runningBalances: allRunningBalances,
-        isLoading,
-        error,
+        previewTransactions: [],
+        runningBalances: new Map(),
+        isLoading: false,
+        error: undefined,
       };
     }
 
