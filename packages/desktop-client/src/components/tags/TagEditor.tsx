@@ -1,3 +1,4 @@
+import { type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -11,9 +12,10 @@ import { useTagCSS } from '@desktop-client/style/tags';
 
 type TagEditorProps = {
   tag: Tag;
+  ref: RefObject<HTMLButtonElement | null>;
 };
 
-export const TagEditor = ({ tag }: TagEditorProps) => {
+export const TagEditor = ({ tag, ref }: TagEditorProps) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const getTagCSS = useTagCSS();
@@ -35,7 +37,7 @@ export const TagEditor = ({ tag }: TagEditorProps) => {
         );
       }}
     >
-      <Button variant="bare" className={getTagCSS(tag.tag)}>
+      <Button variant="bare" className={getTagCSS(tag.tag)} ref={ref}>
         {formattedTag}
       </Button>
     </ColorPicker>

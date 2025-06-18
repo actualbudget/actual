@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -15,6 +15,7 @@ import {
   Cell,
   InputCell,
 } from '@desktop-client/components/table';
+import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
 import {
   createTag,
@@ -27,20 +28,26 @@ type TagRowProps = {
   tag: Tag;
   hovered?: boolean;
   selected?: boolean;
-  onHover: (id: string | null) => void;
+  onHover: (id?: string) => void;
+  focusedField: string | null;
+  onEdit: (id: string, field: string) => void;
 };
 
 export const TagRow = memo(
-  ({ tag, hovered, selected, onHover }: TagRowProps) => {
+  ({ tag, hovered, selected, onHover, focusedField, onEdit }: TagRowProps) => {
     const { t } = useTranslation();
     const dispatch = useDispatch();
-    const [exposed, setExposed] = useState(false);
     const dispatchSelected = useSelectedDispatch();
     const borderColor = selected ? theme.tableBorderSelected : 'none';
 
-    const onEdit = (description: string) => {
+    const colorButtonRef = useRef(null);
+    useProperFocus(colorButtonRef, focusedField === 'color');
+    const resetButtonRef = useRef(null);
+    useProperFocus(resetButtonRef, focusedField === 'select');
+
+    const onUpdate = (description: string) => {
       dispatch(
-        tag.id
+        tag.id !== '*'
           ? updateTag({ ...tag, description })
           : createTag({
               tag: tag.tag,
@@ -52,7 +59,7 @@ export const TagRow = memo(
 
     return (
       <Row
-        height="auto"
+        data-test-id={tag.id}
         style={{
           borderColor,
           backgroundColor: selected
@@ -63,12 +70,12 @@ export const TagRow = memo(
         }}
         collapsed={true}
         onMouseEnter={() => onHover(tag.id)}
-        onMouseLeave={() => onHover(null)}
+        onMouseLeave={() => onHover()}
       >
         {tag.tag !== '*' ? (
           <SelectCell
-            exposed={hovered || selected}
-            focused={true}
+            exposed={hovered || selected || focusedField === 'select'}
+            focused={focusedField === 'select'}
             onSelect={e => {
               dispatchSelected({
                 type: 'select',
@@ -89,27 +96,23 @@ export const TagRow = memo(
                 marginLeft: 'auto',
               }}
               onPress={() => dispatch(deleteTag(tag))}
+              ref={resetButtonRef}
             >
               <SvgRefreshArrow width={13} height={13} />
             </Button>
           </Cell>
         )}
 
-        <Cell
-          name="tag"
-          width={250}
-          plain
-          style={{ padding: '5px', display: 'block' }}
-        >
-          <TagEditor tag={tag} />
+        <Cell width={250} plain style={{ padding: '5px', display: 'block' }}>
+          <TagEditor tag={tag} ref={colorButtonRef} />
         </Cell>
 
         <InputCell
           width="flex"
           name="description"
           textAlign="flex"
-          exposed={exposed}
-          onExpose={() => setExposed(true)}
+          exposed={focusedField === 'description'}
+          onExpose={name => onEdit(tag.id, name)}
           value={tag.description || t('No description')}
           valueStyle={
             tag.description
@@ -118,8 +121,7 @@ export const TagRow = memo(
           }
           inputProps={{
             value: tag.description || '',
-            onUpdate: onEdit,
-            onBlur: () => setExposed(false),
+            onUpdate,
             placeholder: t('No description'),
           }}
         />
