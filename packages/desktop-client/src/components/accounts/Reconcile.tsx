@@ -1,4 +1,4 @@
-import React, { type FormEvent, useState } from 'react';
+import React, { useEffect, type FormEvent, useState } from 'react';
 import { Form } from 'react-aria-components';
 import { Trans } from 'react-i18next';
 
@@ -134,9 +134,18 @@ export function ReconcileMenu({
     value: null,
     query: balanceQuery.query.filter({ cleared: true }),
   });
+  const lastSyncedBalance = account.balance_current;
   const format = useFormat();
   const locale = useLocale();
-  const [inputValue, setInputValue] = useState<string | null>(null);
+
+  const [inputValue, setInputValue] = useState<string | null>();
+  // useEffect is needed here. clearedBalance does not work as a default value for inputValue and
+  // to use a button to update inputValue we can't use defaultValue in the input form below
+  useEffect(() => {
+    if (clearedBalance != null) {
+      setInputValue(format(clearedBalance, 'financial'));
+    }
+  }, [clearedBalance, format]);
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -161,14 +170,29 @@ export function ReconcileMenu({
             reconcile with:
           </Trans>
         </Text>
-        {clearedBalance != null && (
-          <InitialFocus>
-            <Input
-              defaultValue={format(clearedBalance, 'financial')}
-              onChangeValue={setInputValue}
-              style={{ margin: '7px 0' }}
-            />
-          </InitialFocus>
+        <InitialFocus>
+          <Input
+            value={inputValue ?? ''}
+            onChangeValue={setInputValue}
+            style={{ margin: '7px 0' }}
+          />
+        </InitialFocus>
+        {lastSyncedBalance != null && (
+          <View>
+            <Text>
+              <Trans>Last Balance from Bank: </Trans>
+              {format(lastSyncedBalance, 'financial')}
+            </Text>
+            <Button
+              variant="menu"
+              onPress={() =>
+                setInputValue(format(lastSyncedBalance, 'financial'))
+              }
+              style={{ marginBottom: 7 }}
+            >
+              <Trans>Use last synced total</Trans>
+            </Button>
+          </View>
         )}
         <Text style={{ color: theme.pageTextSubdued, paddingBottom: 6 }}>
           {account?.last_reconciled
