@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import type { Handlers } from 'loot-core/types/handlers';
+import type { ImportTransactionEntity } from 'loot-core/types/models/import-transaction';
 
 import * as injected from './injected';
 
@@ -98,8 +99,8 @@ export interface ImportTransactionsOpts {
 }
 
 export function importTransactions(
-  accountId,
-  transactions,
+  accountId: string,
+  transactions: ImportTransactionEntity[],
   opts: ImportTransactionsOpts = {
     defaultCleared: true,
   },

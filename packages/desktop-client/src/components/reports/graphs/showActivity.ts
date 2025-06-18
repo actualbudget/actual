@@ -1,4 +1,4 @@
-import { type NavigateFunction } from 'react-router-dom';
+import { type NavigateFunction } from 'react-router';
 
 import * as monthUtils from 'loot-core/shared/months';
 import {

@@ -36,10 +36,6 @@ import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTa
 import { PullToRefresh } from '@desktop-client/components/mobile/PullToRefresh';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import {
-  type Binding,
-  type SheetFields,
-} from '@desktop-client/components/spreadsheet';
-import {
   CellValue,
   CellValueText,
 } from '@desktop-client/components/spreadsheet/CellValue';
@@ -49,8 +45,9 @@ import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { replaceModal } from '@desktop-client/modals/modalsSlice';
-import * as queries from '@desktop-client/queries/queries';
 import { useDispatch, useSelector } from '@desktop-client/redux';
+import { type Binding, type SheetFields } from '@desktop-client/spreadsheet';
+import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 type AccountHeaderProps<SheetFieldName extends SheetFields<'account'>> = {
   id: string;
@@ -322,13 +319,13 @@ function AllAccountList({
         />
       }
       padding={0}
-      style={{
-        paddingBottom: MOBILE_NAV_HEIGHT,
-      }}
     >
       {accounts.length === 0 && <EmptyMessage />}
       <PullToRefresh onRefresh={onSync}>
-        <View aria-label={t('Account list')} style={{ margin: 10 }}>
+        <View
+          aria-label={t('Account list')}
+          style={{ margin: 10, paddingBottom: MOBILE_NAV_HEIGHT }}
+        >
           {onBudgetAccounts.length > 0 && (
             <AccountHeader
               id="onbudget"
@@ -528,10 +525,10 @@ export function Accounts() {
         // format changes
         key={numberFormat + hideFraction}
         accounts={accounts}
-        getAccountBalance={queries.accountBalance}
-        getOnBudgetBalance={queries.onBudgetAccountBalance}
-        getOffBudgetBalance={queries.offBudgetAccountBalance}
-        getClosedAccountsBalance={queries.closedAccountBalance}
+        getAccountBalance={bindings.accountBalance}
+        getOnBudgetBalance={bindings.onBudgetAccountBalance}
+        getOffBudgetBalance={bindings.offBudgetAccountBalance}
+        getClosedAccountsBalance={bindings.closedAccountBalance}
         onAddAccount={onAddAccount}
         onOpenAccount={onOpenAccount}
         onSync={onSync}

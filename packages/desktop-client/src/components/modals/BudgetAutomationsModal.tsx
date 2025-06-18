@@ -6,8 +6,8 @@ import { Stack } from '@actual-app/components/stack';
 import { theme } from '@actual-app/components/theme';
 import { uniqueId } from 'lodash';
 
-import { type Template } from 'loot-core/server/budget/types/templates';
 import { q } from 'loot-core/shared/query';
+import { type Template } from 'loot-core/types/models/templates';
 
 import { BudgetAutomation } from '@desktop-client/components/budget/goals/BudgetAutomation';
 import { useBudgetAutomationCategories } from '@desktop-client/components/budget/goals/useBudgetAutomationCategories';

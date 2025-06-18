@@ -2,6 +2,7 @@ name: 'Close stale PRs'
 on:
   schedule:
     - cron: '30 1 * * *'
+  workflow_dispatch: # Allow manual triggering
 
 jobs:
   stale:
@@ -24,3 +25,18 @@ jobs:
           any-of-labels: ':construction: WIP'
           days-before-close: -1
           days-before-issue-stale: -1
+
+  stale-needs-info:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          stale-issue-label: 'needs info'
+          days-before-stale: -1
+          days-before-close: 7
+          close-issue-message: 'This issue has been automatically closed because there have been no comments for 7 days after the "needs info" label was added. If you still need help, please feel free to reopen the issue with the requested information.'
+          remove-stale-when-updated: false
+          stale-pr-message: '' # Disable PR processing
+          close-pr-message: '' # Disable PR processing
+          days-before-pr-stale: -1 # Disable PR processing
+          days-before-pr-close: -1 # Disable PR processing

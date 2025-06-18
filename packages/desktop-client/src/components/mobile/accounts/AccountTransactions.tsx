@@ -39,13 +39,14 @@ import {
   openAccountCloseModal,
   pushModal,
 } from '@desktop-client/modals/modalsSlice';
-import * as queries from '@desktop-client/queries/queries';
+import * as queries from '@desktop-client/queries';
 import {
   markAccountRead,
   reopenAccount,
   updateAccount,
 } from '@desktop-client/queries/queriesSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
+import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 export function AccountTransactions({
   account,
@@ -251,7 +252,7 @@ function TransactionListWithPreviews({
   );
   const {
     transactions,
-    isLoading,
+    isLoading: isTransactionsLoading,
     reload: reloadTransactions,
     isLoadingMore,
     loadMore: loadMoreTransactions,
@@ -259,9 +260,10 @@ function TransactionListWithPreviews({
     query: transactionsQuery,
   });
 
-  const { previewTransactions } = useAccountPreviewTransactions({
-    accountId: account?.id,
-  });
+  const { previewTransactions, isLoading: isPreviewTransactionsLoading } =
+    useAccountPreviewTransactions({
+      accountId: account?.id,
+    });
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
@@ -361,7 +363,9 @@ function TransactionListWithPreviews({
 
   return (
     <TransactionListWithBalances
-      isLoading={isLoading}
+      isLoading={
+        isSearching ? isTransactionsLoading : isPreviewTransactionsLoading
+      }
       transactions={transactionsToDisplay}
       balance={balanceQueries.balance}
       balanceCleared={balanceQueries.cleared}
@@ -384,27 +388,27 @@ function queriesFromAccountId(
   switch (id) {
     case 'onbudget':
       return {
-        balance: queries.onBudgetAccountBalance(),
+        balance: bindings.onBudgetAccountBalance(),
       };
     case 'offbudget':
       return {
-        balance: queries.offBudgetAccountBalance(),
+        balance: bindings.offBudgetAccountBalance(),
       };
     case 'closed':
       return {
-        balance: queries.closedAccountBalance(),
+        balance: bindings.closedAccountBalance(),
       };
     case 'uncategorized':
       return {
-        balance: queries.uncategorizedBalance(),
+        balance: bindings.uncategorizedBalance(),
       };
     default:
       return entity
         ? {
-            balance: queries.accountBalance(entity.id),
-            cleared: queries.accountBalanceCleared(entity.id),
-            uncleared: queries.accountBalanceUncleared(entity.id),
+            balance: bindings.accountBalance(entity.id),
+            cleared: bindings.accountBalanceCleared(entity.id),
+            uncleared: bindings.accountBalanceUncleared(entity.id),
           }
-        : { balance: queries.allAccountBalance() };
+        : { balance: bindings.allAccountBalance() };
   }
 }

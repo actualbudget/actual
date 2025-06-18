@@ -16,6 +16,7 @@ import {
   SyncServerSimpleFinAccount,
   SyncServerPluggyAiAccount,
   type GoCardlessToken,
+  ImportTransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
@@ -1074,7 +1075,7 @@ async function simpleFinBatchSync({
   return retVal;
 }
 
-type ImportTransactionsResult = bankSync.ReconcileTransactionsResult & {
+export type ImportTransactionsResult = bankSync.ReconcileTransactionsResult & {
   errors: Array<{
     message: string;
   }>;
@@ -1087,7 +1088,7 @@ async function importTransactions({
   opts,
 }: {
   accountId: AccountEntity['id'];
-  transactions: TransactionEntity[];
+  transactions: ImportTransactionEntity[];
   isPreview: boolean;
   opts?: {
     defaultCleared: boolean;

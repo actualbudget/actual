@@ -15,11 +15,11 @@ import * as trackingBudget from './tracking/TrackingBudgetComponents';
 import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
 import { prewarmAllMonths, prewarmMonth } from './util';
 
-import { NamespaceContext } from '@desktop-client/components/spreadsheet/NamespaceContext';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
@@ -388,9 +388,9 @@ function BudgetInner(props: BudgetInnerProps) {
   }
 
   return (
-    <NamespaceContext.Provider value={monthUtils.sheetForMonth(startMonth)}>
+    <SheetNameProvider name={monthUtils.sheetForMonth(startMonth)}>
       <View style={{ flex: 1 }}>{table}</View>
-    </NamespaceContext.Provider>
+    </SheetNameProvider>
   );
 }
 

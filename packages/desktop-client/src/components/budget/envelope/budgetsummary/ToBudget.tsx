@@ -16,7 +16,7 @@ import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelop
 import { HoldMenu } from '@desktop-client/components/budget/envelope/HoldMenu';
 import { TransferMenu } from '@desktop-client/components/budget/envelope/TransferMenu';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { envelopeBudget } from '@desktop-client/queries/queries';
+import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type ToBudgetProps = {
   month: string;
@@ -102,6 +102,8 @@ export function ToBudget({
                 onBudgetAction(month, 'reset-hold');
                 setMenuOpen(false);
               }}
+              month={month}
+              onBudgetAction={onBudgetAction}
             />
           )}
           {menuStep === 'buffer' && (

@@ -11,9 +11,9 @@ import {
 import { useAccounts } from './useAccounts';
 import { usePayees } from './usePayees';
 import { usePreviewTransactions } from './usePreviewTransactions';
+import { useSheetValue } from './useSheetValue';
 
-import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
-import { accountBalance } from '@desktop-client/queries/queries';
+import { accountBalance } from '@desktop-client/spreadsheet/bindings';
 
 type UseAccountPreviewTransactionsProps = {
   accountId?: AccountEntity['id'] | undefined;
@@ -58,6 +58,7 @@ export function useAccountPreviewTransactions({
 
   const accountSchedulesFilter = useCallback(
     (schedule: ScheduleEntity) =>
+      !accountId ||
       schedule._account === accountId ||
       getTransferAccountByPayee(schedule._payee)?.id === accountId,
     [accountId, getTransferAccountByPayee],
@@ -82,10 +83,10 @@ export function useAccountPreviewTransactions({
   return useMemo(() => {
     if (!accountId) {
       return {
-        previewTransactions: [],
-        runningBalances: new Map(),
-        isLoading: false,
-        error: undefined,
+        previewTransactions: allPreviewTransactions,
+        runningBalances: allRunningBalances,
+        isLoading,
+        error,
       };
     }
 

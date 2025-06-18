@@ -300,6 +300,27 @@ describe('goCardlessService', () => {
       expect(getDetailsSpy).toBeCalledTimes(1);
       expect(getMetadataSpy).toBeCalledTimes(1);
     });
+
+    it('metadata does not overwrite values from details with empty values', async () => {
+      getDetailsSpy.mockResolvedValue({
+        ...mockAccountDetails,
+        account: {
+          ...mockAccountDetails.account,
+          name: 'An Actual Account Name',
+        },
+      });
+
+      getMetadataSpy.mockResolvedValue({
+        ...mockAccountMetaData,
+        name: '',
+      });
+
+      expect(await goCardlessService.getDetailedAccount(accountId)).toEqual({
+        ...mockAccountMetaData,
+        ...mockAccountDetails.account,
+        name: 'An Actual Account Name',
+      });
+    });
   });
 
   describe('#getInstitutions', () => {

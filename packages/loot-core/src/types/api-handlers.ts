@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import { ImportTransactionsOpts } from '@actual-app/api';
 
+import type { ImportTransactionsResult } from '../server/accounts/app';
 import type {
   APIAccountEntity,
   APICategoryEntity,
@@ -11,7 +12,12 @@ import type {
 import { BudgetFileHandlers } from '../server/budgetfiles/app';
 import { type batchUpdateTransactions } from '../server/transactions';
 
-import type { NewRuleEntity, RuleEntity, TransactionEntity } from './models';
+import type {
+  ImportTransactionEntity,
+  NewRuleEntity,
+  RuleEntity,
+  TransactionEntity,
+} from './models';
 
 export interface ApiHandlers {
   'api/batch-budget-start': () => Promise<unknown>;
@@ -82,14 +88,10 @@ export interface ApiHandlers {
 
   'api/transactions-import': (arg: {
     accountId;
-    transactions;
+    transactions: ImportTransactionEntity[];
     isPreview?;
     opts?: ImportTransactionsOpts;
-  }) => Promise<{
-    errors?: { message: string }[];
-    added;
-    updated;
-  }>;
+  }) => Promise<ImportTransactionsResult>;
 
   'api/transactions-add': (arg: {
     accountId;
