@@ -1,16 +1,21 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  type ChangeEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { ColorPicker } from '@actual-app/components/color-picker';
-import { SvgColorPalette } from '@actual-app/components/icons/v1';
 import { Stack } from '@actual-app/components/stack';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { type Tag } from 'loot-core/types/models';
 
-import { Cell, InputCell, Row } from '@desktop-client/components/table';
+import { InputCell, Row } from '@desktop-client/components/table';
 import { createTag } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { useTagCSS } from '@desktop-client/style/tags';
@@ -69,7 +74,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
       }}
     >
       <Row
-        height="auto"
+        height={34}
         style={{
           padding: '0px 20px',
           width: '100%',
@@ -79,7 +84,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
         collapsed={true}
       >
         <InputCell
-          width={200}
+          width={250}
           name="tag"
           textAlign="flex"
           exposed={tagExposed}
@@ -90,34 +95,13 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           }
           inputProps={{
             value: tag || '',
-            onUpdate: value => setTag(value.replace(/\s/g, '')),
+            onInput: ({ target: { value } }: ChangeEvent<HTMLInputElement>) =>
+              setTag(value.replace(/\s/g, '')),
             onBlur: () => setTagExposed(false),
             placeholder: t('New tag'),
             ref: tagInput,
           }}
         />
-
-        <Cell
-          name="color"
-          width={40}
-          plain
-          style={{
-            padding: '5px',
-            display: 'flex',
-            flexDirection: 'row',
-            gap: 5,
-          }}
-          focused={true}
-        >
-          <ColorPicker
-            value={color}
-            onChange={color => setColor(color.toString('hex'))}
-          >
-            <Button variant="bare" className={getTagCSS('', { color })}>
-              <SvgColorPalette width={13} height={13} />
-            </Button>
-          </ColorPicker>
-        </Cell>
 
         <InputCell
           width="flex"
@@ -142,7 +126,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
       <Row
         height="auto"
         style={{
-          padding: '10px 20px 6px',
+          padding: '6px 20px',
           width: '100%',
           backgroundColor: theme.tableBackground,
           gap: 10,
@@ -151,10 +135,15 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
         }}
         collapsed={true}
       >
-        <Trans>Preview:</Trans>
-        <Button variant="bare" className={getTagCSS(tag)}>
-          #{tag}
-        </Button>
+        <Trans>Choose Color:</Trans>
+        <ColorPicker
+          value={color}
+          onChange={color => setColor(color.toString('hex'))}
+        >
+          <Button variant="bare" className={getTagCSS('', { color })}>
+            #{tag}
+          </Button>
+        </ColorPicker>
         <Stack
           direction="row"
           align="center"
