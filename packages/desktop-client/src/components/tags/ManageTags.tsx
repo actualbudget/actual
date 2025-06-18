@@ -33,7 +33,7 @@ export function ManageTags() {
 
   const defaultTag = useMemo(
     () => ({
-      id: '',
+      id: '*',
       tag: '*',
       color: theme.noteTagDefault,
       description: t('Default tag color'),

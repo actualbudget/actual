@@ -1,5 +1,6 @@
 import React, {
   type ChangeEvent,
+  type KeyboardEvent,
   useEffect,
   useMemo,
   useRef,
@@ -15,7 +16,12 @@ import { View } from '@actual-app/components/view';
 
 import { type Tag } from 'loot-core/types/models';
 
-import { InputCell, Row } from '@desktop-client/components/table';
+import {
+  InputCell,
+  Row,
+  useTableNavigator,
+} from '@desktop-client/components/table';
+import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 import { createTag } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { useTagCSS } from '@desktop-client/style/tags';
@@ -31,12 +37,31 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
   const [tag, setTag] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState(theme.noteTagDefault);
-  const [descriptionExposed, setDescriptionExposed] = useState(false);
-  const [tagExposed, setTagExposed] = useState(true);
   const tagInput = useRef<HTMLInputElement>(null);
   const getTagCSS = useTagCSS();
 
   const tagNames = useMemo(() => tags.map(tag => tag.tag), [tags]);
+
+  const tableNavigator = useTableNavigator(
+    [{ id: 'new-tag' }],
+    !tag || tagNames.includes(tag)
+      ? ['tag', 'description', 'color', 'cancel']
+      : ['tag', 'description', 'color', 'cancel', 'add'],
+  );
+
+  const colorButtonRef = useRef(null);
+  useProperFocus(colorButtonRef, tableNavigator.focusedField === 'color');
+  const addButtonRef = useRef(null);
+  useProperFocus(addButtonRef, tableNavigator.focusedField === 'add');
+  const cancelButtonRef = useRef(null);
+  useProperFocus(cancelButtonRef, tableNavigator.focusedField === 'cancel');
+
+  const resetInputs = () => {
+    setColor(theme.noteTagDefault);
+    setTag('');
+    setDescription('');
+    tableNavigator.onEdit('new-tag', 'tag');
+  };
 
   const onAddTag = () => {
     if (!tag.trim() || !color.trim() || tagNames.includes(tag)) {
@@ -44,18 +69,10 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
     }
 
     dispatch(createTag({ tag, color, description }));
-    setColor(theme.noteTagDefault);
-    setTag('');
-    setDescription('');
-    setTagExposed(true);
+    resetInputs();
   };
 
-  useEffect(() => {
-    setTagExposed(true);
-    if (tagInput.current) {
-      tagInput.current.focus();
-    }
-  }, []);
+  useEffect(() => resetInputs(), []);
 
   return (
     <View
@@ -64,14 +81,16 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
         backgroundColor: theme.tableBackground,
       }}
       data-testid="new-tag"
-      onKeyDown={e => {
-        if (e.key === 'Escape') {
-          onClose();
-        }
-        if (e.key === 'Enter' && tag) {
-          onAddTag();
-        }
-      }}
+      {...tableNavigator.getNavigatorProps({
+        onKeyUp: (e: KeyboardEvent<HTMLDivElement>) => {
+          if (e.key === 'Escape') {
+            onClose();
+          }
+          if (e.key === 'Enter' && tag) {
+            onAddTag();
+          }
+        },
+      })}
     >
       <Row
         height={34}
@@ -87,8 +106,8 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           width={250}
           name="tag"
           textAlign="flex"
-          exposed={tagExposed}
-          onExpose={() => setTagExposed(true)}
+          exposed={tableNavigator.focusedField === 'tag'}
+          onExpose={name => tableNavigator.onEdit('new-tag', name)}
           value={tag || t('New tag')}
           valueStyle={
             tag ? {} : { fontStyle: 'italic', color: theme.tableTextLight }
@@ -97,7 +116,6 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
             value: tag || '',
             onInput: ({ target: { value } }: ChangeEvent<HTMLInputElement>) =>
               setTag(value.replace(/\s/g, '')),
-            onBlur: () => setTagExposed(false),
             placeholder: t('New tag'),
             ref: tagInput,
           }}
@@ -107,8 +125,8 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           width="flex"
           name="description"
           textAlign="flex"
-          exposed={descriptionExposed}
-          onExpose={() => setDescriptionExposed(true)}
+          exposed={tableNavigator.focusedField === 'description'}
+          onExpose={name => tableNavigator.onEdit('new-tag', name)}
           value={description || t('Tag description')}
           valueStyle={
             description
@@ -118,7 +136,6 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           inputProps={{
             value: description || '',
             onUpdate: setDescription,
-            onBlur: () => setDescriptionExposed(false),
             placeholder: t('Tag description'),
           }}
         />
@@ -140,7 +157,11 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           value={color}
           onChange={color => setColor(color.toString('hex'))}
         >
-          <Button variant="bare" className={getTagCSS('', { color })}>
+          <Button
+            ref={colorButtonRef}
+            variant="bare"
+            className={getTagCSS('', { color })}
+          >
             #{tag}
           </Button>
         </ColorPicker>
@@ -156,6 +177,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
             style={{ padding: '4px 10px' }}
             onPress={onClose}
             data-testid="close-button"
+            ref={cancelButtonRef}
           >
             <Trans>Cancel</Trans>
           </Button>
@@ -165,6 +187,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
             onPress={onAddTag}
             data-testid="add-button"
             isDisabled={!tag || tagNames.includes(tag)}
+            ref={addButtonRef}
           >
             <Trans>Add</Trans>
           </Button>

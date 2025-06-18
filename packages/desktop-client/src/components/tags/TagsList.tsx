@@ -1,16 +1,16 @@
 import React from 'react';
 
-import { View } from '@actual-app/components/view';
-
 import { type Tag } from 'loot-core/types/models';
 
 import { TagRow } from './TagRow';
+
+import { Table, useTableNavigator } from '@desktop-client/components/table';
 
 type TagsListProps = {
   tags: Tag[];
   selectedItems: Set<string>;
   hoveredTag?: string;
-  onHover: (id: string | null) => void;
+  onHover: (id?: string) => void;
 };
 
 export function TagsList({
@@ -19,9 +19,18 @@ export function TagsList({
   hoveredTag,
   onHover,
 }: TagsListProps) {
+  const tableNavigator = useTableNavigator(tags, [
+    'select',
+    'color',
+    'description',
+  ]);
+
   return (
-    <View>
-      {tags.map(tag => {
+    <Table
+      navigator={tableNavigator}
+      items={tags}
+      backgroundColor="none"
+      renderItem={({ item: tag, focusedField, onEdit }) => {
         const hovered = hoveredTag === tag.id;
         const selected = selectedItems.has(tag.id);
 
@@ -32,9 +41,11 @@ export function TagsList({
             hovered={hovered}
             selected={selected}
             onHover={onHover}
+            focusedField={focusedField}
+            onEdit={onEdit}
           />
         );
-      })}
-    </View>
+      }}
+    />
   );
 }
