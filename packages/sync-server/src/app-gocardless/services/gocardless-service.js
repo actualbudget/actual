@@ -313,6 +313,8 @@ export const goCardlessService = {
     await goCardlessService.setToken();
 
     const institution = await goCardlessService.getInstitution(institutionId);
+    const accountSelection =
+      institution.supported_features?.includes('account_selection') ?? false;
 
     let response;
     try {
@@ -329,7 +331,7 @@ export const goCardlessService = {
         userLanguage: 'en',
         ssn: null,
         redirectImmediate: false,
-        accountSelection: false,
+        accountSelection,
       });
     } catch (error) {
       handleGoCardlessError(error);
