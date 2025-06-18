@@ -46,50 +46,96 @@ export const BudgetCategories = memo(
     const [newGroupForGroup, setNewGroupForGroup] = useState(null);
     const items = useMemo(() => {
       const [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
+      // Before
+      let items = Array.prototype.concat.apply(
+        [],
+        expenseGroups.map(group => {
+          if (group.hidden && !showHiddenCategories) {
+            return [];
+          }
 
-      function expandGroup(group, depth = 0, type = 'expense') {
-        if (group.hidden && !showHiddenCategories) {
-          return [];
-        }
+          const groupCategories = group.categories.filter(
+            cat => showHiddenCategories || !cat.hidden,
+          );
 
-        const groupCategories = group.categories.filter(
-          cat => showHiddenCategories || !cat.hidden,
-        );
+          const items = [{ type: 'expense-group', value: { ...group } }];
 
-        const groupChildren = group.children.filter(
-          child => showHiddenCategories || !child.hidden,
-        );
+          if (newCategoryForGroup === group.id) {
+            items.push({ type: 'new-category' });
+          }
 
-        const items = [{ type: `${type}-group`, value: { ...group }, depth }];
-
-        if (newCategoryForGroup === group.id) {
-          items.push({ type: 'new-category', depth });
-        }
-
-        if (isAddingGroup && newGroupForGroup === group.id) {
-          items.push({ type: 'new-group' });
-        }
-
-        return [
-          ...items,
-          ...(collapsedGroupIds.includes(group.id)
-            ? []
-            : groupChildren
-          ).flatMap(child => expandGroup(child, depth + 1, type)),
-          ...(collapsedGroupIds.includes(group.id) ? [] : groupCategories).map(
-            cat => ({
-              type: `${type}-category`,
+          return [
+            ...items,
+            ...(collapsedGroupIds.includes(group.id)
+              ? []
+              : groupCategories
+            ).map(cat => ({
+              type: 'expense-category',
               value: cat,
               group,
-              depth,
-            }),
-          ),
-        ];
-      }
+            })),
+          ];
+        }),
+      );
 
-      let items = expenseGroups.flatMap(group => expandGroup(group, 0));
+      //After
+      // function expandGroup(group, depth = 0, type = 'expense') {
+      //   if (group.hidden && !showHiddenCategories) {
+      //     return [];
+      //   }
 
-      if (isAddingGroup && newGroupForGroup == null) {
+      //   const groupCategories = group.categories.filter(
+      //     cat => showHiddenCategories || !cat.hidden,
+      //   );
+
+      //   const groupChildren = group.children.filter(
+      //     child => showHiddenCategories || !child.hidden,
+      //   );
+
+      //   const items = [{ type: `${type}-group`, value: { ...group }, depth }];
+
+      //   if (newCategoryForGroup === group.id) {
+      //     items.push({ type: 'new-category', depth });
+      //   }
+
+      //   if (isAddingGroup && newGroupForGroup === group.id) {
+      //     items.push({ type: 'new-group' });
+      //   }
+
+      //   return [
+      //     ...items,
+      //     ...(collapsedGroupIds.includes(group.id)
+      //       ? []
+      //       : groupChildren
+      //     ).flatMap(child => expandGroup(child, depth + 1, type)),
+      //     ...(collapsedGroupIds.includes(group.id) ? [] : groupCategories).map(
+      //       cat => ({
+      //         type: `${type}-category`,
+      //         value: cat,
+      //         group,
+      //         depth,
+      //       }),
+      //     ),
+      //   ];
+      // }
+
+      // let items = expenseGroups.flatMap(group => expandGroup(group, 0));
+
+      // if (isAddingGroup && newGroupForGroup == null) {
+      //   items.push({ type: 'new-group' });
+      // }
+
+      // if (incomeGroup) {
+      //   items = items.concat(
+      //     [
+      //       { type: 'income-separator' },
+      //       ...expandGroup(incomeGroup, 0, 'income'),
+      //     ].filter(x => x),
+      //   );
+      // }
+
+      // return items;
+      if (isAddingGroup) {
         items.push({ type: 'new-group' });
       }
 
@@ -97,10 +143,21 @@ export const BudgetCategories = memo(
         items = items.concat(
           [
             { type: 'income-separator' },
-            ...expandGroup(incomeGroup, 0, 'income'),
+            { type: 'income-group', value: incomeGroup },
+            newCategoryForGroup === incomeGroup.id && { type: 'new-category' },
+            ...(collapsedGroupIds.includes(incomeGroup.id)
+              ? []
+              : incomeGroup.categories.filter(
+                  cat => showHiddenCategories || !cat.hidden,
+                )
+            ).map(cat => ({
+              type: 'income-category',
+              value: cat,
+            })),
           ].filter(x => x),
         );
       }
+
 
       return items;
     }, [

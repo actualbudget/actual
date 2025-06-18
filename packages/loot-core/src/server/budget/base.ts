@@ -11,6 +11,7 @@ import { resolveName } from '../spreadsheet/util';
 import * as budgetActions from './actions';
 import * as envelopeBudget from './envelope';
 import * as report from './report';
+import { sumAmounts } from './util';
 
 export function getBudgetType() {
   const meta = sheet.get().meta();
@@ -64,6 +65,7 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
   }
 }
 
+
 function createCategoryGroup(group, sheetName) {
   const children = group.children || [];
   children.forEach(child => createCategoryGroup(child, sheetName));
@@ -77,7 +79,7 @@ function createCategoryGroup(group, sheetName) {
     run: sumAmounts,
   });
 
-  if (!group.is_income || getBudgetType() !== 'rollover') {
+  if (!group.is_income || getBudgetType() !== 'envelope') {
     sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
       initialValue: 0,
       dependencies: [
@@ -104,7 +106,7 @@ function createCategoryGroup(group, sheetName) {
         `group-sum-amount-${group.id}`,
       ]);
 
-    if (!group.is_income || getBudgetType() !== 'rollover') {
+    if (!group.is_income || getBudgetType() !== 'envelope') {
       sheet
         .get()
         .addDependencies(sheetName, `group-budget-${group.parent_id}`, [
@@ -227,7 +229,7 @@ function handleCategoryChange(months, oldValue, newValue) {
     newValue.tombstone === 0 &&
     (!oldValue || oldValue.tombstone === 1)
   ) {
-    if (budgetType === 'rollover') {
+    if (budgetType === 'envelope') {
       envelopeBudget.createBlankCategory(newValue, months);
     }
 
@@ -242,7 +244,7 @@ function handleCategoryChange(months, oldValue, newValue) {
       const id = newValue.id;
       const groupId = newValue.cat_group;
 
-      if (getBudgetType() === 'rollover') {
+      if (getBudgetType() === 'envelope') {
         sheet
           .get()
           .addDependencies(sheetName, 'last-month-overspent', [

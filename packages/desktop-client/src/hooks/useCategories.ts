@@ -20,7 +20,7 @@ export function useCategories() {
   return useMemo(
     () => ({
       ...selector,
-      groupedHierarchy: selector.grouped.filter(g => g.parent_id === null),
+          groupedHierarchy: selector.grouped.filter(g => g.parent_id == null),
     }),
     [selector],
   );

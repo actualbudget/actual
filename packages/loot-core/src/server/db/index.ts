@@ -15,7 +15,7 @@ import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
 import * as monthUtils from '../../shared/months';
 import { groupById } from '../../shared/util';
-import { TransactionEntity } from '../../types/models';
+import { CategoryGroupEntity, NewCategoryGroupEntity, TransactionEntity } from '../../types/models';
 import { WithRequired } from '../../types/util';
 import {
   schema,
@@ -47,6 +47,7 @@ import {
   DbViewTransaction,
   DbViewTransactionInternalAlive,
 } from './types';
+import { Console } from 'console';
 
 export * from './types';
 
@@ -363,14 +364,29 @@ export async function getCategoriesGrouped(
       }
     }
   }
-
+  console.log('test', mappedGroups);
+  
   return mappedGroups.filter(g => !hierarchical || !g.parent_id);
 }
 
 export async function getCategoriesGroupedHierarchical(
   ids?: Array<CategoryGroupEntity['id']>,
 ): Promise<Array<CategoryGroupEntity>> {
-  return getCategoriesGrouped(ids, true);
+  const groups = await getCategoriesGrouped(ids, true);
+  return groups.map(group => ({
+    ...group,
+    is_income: Boolean(group.is_income),
+    hidden: Boolean(group.hidden),
+    tombstone: Boolean(group.tombstone),
+    categories: group.categories.map(cat => ({
+      ...cat,
+      group: group.id,
+      is_income: Boolean(cat.is_income),
+      hidden: Boolean(cat.hidden),
+      tombstone: Boolean(cat.tombstone),
+    })),
+    parent_id: group.parent_id,
+  }));
 }
 
 export async function insertCategoryGroup(
