@@ -24,6 +24,7 @@ import {
 import { SectionLabel } from '@desktop-client/components/forms';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 const itemStyle: CSSProperties = {
@@ -47,6 +48,7 @@ export function EditFieldModal({
 }: EditFieldModalProps) {
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const format = useFormat();
   const noteInputRef = useRef<HTMLInputElement | null>(null);
 
   function onSelectNote(value: string, mode?: NoteAmendMode) {
@@ -59,7 +61,7 @@ export function EditFieldModal({
     if (value != null) {
       // Process the value if needed
       if (name === 'amount' && typeof value === 'number') {
-        value = amountToInteger(value);
+        value = amountToInteger(value, format.currency.decimalPlaces);
       }
 
       onSubmit(name, value);
