@@ -88,7 +88,7 @@ export const TagRow = memo(
                 backgroundColor: 'transparent',
                 marginLeft: 'auto',
               }}
-              onClick={() => dispatch(deleteTag(tag))}
+              onPress={() => dispatch(deleteTag(tag))}
             >
               <SvgRefreshArrow width={13} height={13} />
             </Button>

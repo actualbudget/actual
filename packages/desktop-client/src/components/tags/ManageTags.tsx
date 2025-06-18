@@ -1,7 +1,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgAdd } from '@actual-app/components/icons/v1';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -27,6 +28,7 @@ export function ManageTags() {
   const dispatch = useDispatch();
   const [filter, setFilter] = useState('');
   const [hoveredTag, setHoveredTag] = useState<string>();
+  const [create, setCreate] = useState(false);
   const tags = useTags();
 
   const defaultTag = useMemo(
@@ -80,16 +82,29 @@ export function ManageTags() {
           >
             <Text>{t('User defined tags with color and description.')} </Text>
           </View>
+        </View>
+        <Stack
+          spacing={2}
+          direction="row"
+          align="center"
+          style={{ marginTop: 12 }}
+        >
+          <Button variant="bare" onPress={() => setCreate(true)}>
+            <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
+            <Trans>Add New</Trans>
+          </Button>
           <View style={{ flex: 1 }} />
           <Search
             placeholder={t('Filter tags...')}
             value={filter}
             onChange={setFilter}
           />
-        </View>
-        <View style={{ flex: 1 }}>
+        </Stack>
+        <View style={{ flex: 1, marginTop: 12 }}>
           <TagsHeader />
-          <TagCreationRow />
+          {create && (
+            <TagCreationRow onClose={() => setCreate(false)} tags={tags} />
+          )}
           <TagsList
             tags={filteredTags}
             selectedItems={selectedInst.items}
