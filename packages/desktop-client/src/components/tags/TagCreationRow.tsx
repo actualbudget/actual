@@ -1,29 +1,40 @@
-import React, { useState } from 'react';
-import { Form } from 'react-aria-components';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { ColorPicker } from '@actual-app/components/color-picker';
-import { SvgAdd } from '@actual-app/components/icons/v1';
-import { Input } from '@actual-app/components/input';
+import { SvgColorPalette } from '@actual-app/components/icons/v1';
+import { Stack } from '@actual-app/components/stack';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { Cell, Row } from '@desktop-client/components/table';
+import { type Tag } from 'loot-core/types/models';
+
+import { Cell, InputCell, Row } from '@desktop-client/components/table';
 import { createTag } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { useTagCSS } from '@desktop-client/style/tags';
 
-export const TagCreationRow = () => {
+type TagCreationRowProps = {
+  tags: Tag[];
+  onClose: () => void;
+};
+
+export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [tag, setTag] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState(theme.noteTagDefault);
+  const [descriptionExposed, setDescriptionExposed] = useState(false);
+  const [tagExposed, setTagExposed] = useState(true);
+  const tagInput = useRef<HTMLInputElement>(null);
   const getTagCSS = useTagCSS();
 
+  const tagNames = useMemo(() => tags.map(tag => tag.tag), [tags]);
+
   const onAddTag = () => {
-    if (!tag.trim() || !color.trim()) {
+    if (!tag.trim() || !color.trim() || tagNames.includes(tag)) {
       return;
     }
 
@@ -31,75 +42,145 @@ export const TagCreationRow = () => {
     setColor(theme.noteTagDefault);
     setTag('');
     setDescription('');
+    setTagExposed(true);
   };
 
+  useEffect(() => {
+    setTagExposed(true);
+    if (tagInput.current) {
+      tagInput.current.focus();
+    }
+  }, []);
+
   return (
-    <Form
+    <View
       style={{
-        display: 'flex',
-        flexDirection: 'row',
-        gap: '1em',
+        paddingBottom: 1,
+        backgroundColor: theme.tableBackground,
       }}
-      onSubmit={e => {
-        e.preventDefault();
-        onAddTag();
+      data-testid="new-tag"
+      onKeyDown={e => {
+        if (e.key === 'Escape') {
+          onClose();
+        }
+        if (e.key === 'Enter' && tag) {
+          onAddTag();
+        }
       }}
     >
       <Row
         height="auto"
         style={{
+          padding: '0px 20px',
           width: '100%',
           backgroundColor: theme.tableBackground,
+          gap: 5,
         }}
         collapsed={true}
       >
-        <Cell width={20} plain>
-          <Button
-            variant="bare"
-            type="button"
-            style={{
-              borderWidth: 0,
-              backgroundColor: 'transparent',
-              marginLeft: 'auto',
-            }}
-            onClick={onAddTag}
+        <InputCell
+          width={200}
+          name="tag"
+          textAlign="flex"
+          exposed={tagExposed}
+          onExpose={() => setTagExposed(true)}
+          value={tag || t('New tag')}
+          valueStyle={
+            tag ? {} : { fontStyle: 'italic', color: theme.tableTextLight }
+          }
+          inputProps={{
+            value: tag || '',
+            onUpdate: value => setTag(value.replace(/\s/g, '')),
+            onBlur: () => setTagExposed(false),
+            placeholder: t('New tag'),
+            ref: tagInput,
+          }}
+        />
+
+        <Cell
+          name="color"
+          width={40}
+          plain
+          style={{
+            padding: '5px',
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 5,
+          }}
+          focused={true}
+        >
+          <ColorPicker
+            value={color}
+            onChange={color => setColor(color.toString('hex'))}
           >
-            <SvgAdd width={13} height={13} />
-          </Button>
+            <Button variant="bare" className={getTagCSS('', { color })}>
+              <SvgColorPalette width={13} height={13} />
+            </Button>
+          </ColorPicker>
         </Cell>
 
-        <Cell name="color" width={100} plain style={{ padding: '5px' }}>
-          <View style={{ display: 'block' }}>
-            <ColorPicker
-              value={color}
-              onChange={color => setColor(color.toString('hex'))}
-            >
-              <Button variant="bare" className={getTagCSS('', { color })}>
-                <Trans>Pick Color</Trans>
-              </Button>
-            </ColorPicker>
-          </View>
-        </Cell>
-
-        <Cell name="tag" width={150} plain style={{ padding: '5px' }}>
-          <Input
-            id="tag-field"
-            placeholder={t('Tag')}
-            width={100}
-            value={tag}
-            onChangeValue={value => setTag(value.replace(/\s/g, ''))}
-          />
-        </Cell>
-
-        <Cell name="description" width="flex" plain style={{ padding: '5px' }}>
-          <Input
-            id="description-field"
-            placeholder={t('Description')}
-            value={description}
-            onChangeValue={setDescription}
-          />
-        </Cell>
+        <InputCell
+          width="flex"
+          name="description"
+          textAlign="flex"
+          exposed={descriptionExposed}
+          onExpose={() => setDescriptionExposed(true)}
+          value={description || t('Tag description')}
+          valueStyle={
+            description
+              ? {}
+              : { fontStyle: 'italic', color: theme.tableTextLight }
+          }
+          inputProps={{
+            value: description || '',
+            onUpdate: setDescription,
+            onBlur: () => setDescriptionExposed(false),
+            placeholder: t('Tag description'),
+          }}
+        />
       </Row>
-    </Form>
+      <Row
+        height="auto"
+        style={{
+          padding: '10px 20px 6px',
+          width: '100%',
+          backgroundColor: theme.tableBackground,
+          gap: 10,
+          alignItems: 'center',
+          borderBottom: '1px solid ' + theme.tableBorderHover,
+        }}
+        collapsed={true}
+      >
+        <Trans>Preview:</Trans>
+        <Button variant="bare" className={getTagCSS(tag)}>
+          #{tag}
+        </Button>
+        <Stack
+          direction="row"
+          align="center"
+          justify="flex-end"
+          style={{ marginLeft: 'auto' }}
+          spacing={2}
+        >
+          <Button
+            variant="normal"
+            style={{ padding: '4px 10px' }}
+            onPress={onClose}
+            data-testid="close-button"
+          >
+            <Trans>Cancel</Trans>
+          </Button>
+          <Button
+            variant="primary"
+            style={{ padding: '4px 10px' }}
+            onPress={onAddTag}
+            data-testid="add-button"
+            isDisabled={!tag || tagNames.includes(tag)}
+          >
+            <Trans>Add</Trans>
+          </Button>
+        </Stack>
+      </Row>
+    </View>
   );
 };
