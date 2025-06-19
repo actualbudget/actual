@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import csv2json from 'csv-parse/lib/sync';
+import { parse as csv2json } from 'csv-parse/sync';
 
 import * as fs from '../../../platform/server/fs';
 import { looselyParseAmount } from '../../../shared/util';
