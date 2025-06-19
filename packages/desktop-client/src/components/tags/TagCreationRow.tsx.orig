@@ -1,6 +1,7 @@
 import React, {
   type ChangeEvent,
   type KeyboardEvent,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -56,12 +57,12 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
   const cancelButtonRef = useRef(null);
   useProperFocus(cancelButtonRef, tableNavigator.focusedField === 'cancel');
 
-  const resetInputs = () => {
+  const resetInputs = useCallback(() => {
     setColor(theme.noteTagDefault);
     setTag('');
     setDescription('');
     tableNavigator.onEdit('new-tag', 'tag');
-  };
+  }, [tableNavigator]);
 
   const onAddTag = () => {
     if (!tag.trim() || !color.trim() || tagNames.includes(tag)) {
@@ -72,8 +73,12 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
     resetInputs();
   };
 
+<<<<<<< Updated upstream
+  useEffect(() => resetInputs(), [resetInputs]);
+=======
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => tableNavigator.onEdit('new-tag', 'tag'), []);
+>>>>>>> Stashed changes
 
   return (
     <View
