@@ -26,25 +26,27 @@ function setOutput(name, value) {
 
 async function getPRDetails() {
   try {
-    console.log(`Fetching PR details for ${owner}/${repoName}#${issueNumber}...`);
-    
+    console.log(
+      `Fetching PR details for ${owner}/${repoName}#${issueNumber}...`,
+    );
+
     const { data: pr } = await octokit.rest.pulls.get({
       owner,
       repo: repoName,
       pull_number: issueNumber,
     });
-    
+
     console.log('PR details fetched successfully');
     console.log('- PR Number:', pr.number);
     console.log('- PR Author:', pr.user.login);
     console.log('- PR Title:', pr.title);
-    
+
     const result = {
       number: pr.number,
       author: pr.user.login,
       title: pr.title,
     };
-    
+
     setOutput('result', JSON.stringify(result));
   } catch (error) {
     console.log('Error getting PR details:', error.message);

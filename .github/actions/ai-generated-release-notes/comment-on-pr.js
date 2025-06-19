@@ -19,32 +19,35 @@ const octokit = new Octokit({ auth: token });
 async function commentOnPR() {
   try {
     const summaryData = JSON.parse(summaryDataJson);
-    
+
     if (!summaryData) {
       console.log('No summary data available, skipping comment');
       return;
     }
-    
+
     if (!category || category === 'null') {
       console.log('No valid category available, skipping comment');
       return;
     }
-    
+
     // Clean category for display
-    const cleanCategory = typeof category === 'string' ? category.replace(/^["']|["']$/g, '') : category;
-    
+    const cleanCategory =
+      typeof category === 'string'
+        ? category.replace(/^["']|["']$/g, '')
+        : category;
+
     // Get PR info for the file URL
     const { data: pr } = await octokit.rest.pulls.get({
       owner,
       repo: repoName,
       pull_number: issueNumber,
     });
-    
+
     const prBranch = pr.head.ref;
     const headOwner = pr.head.repo.owner.login;
     const headRepo = pr.head.repo.name;
     const fileUrl = `https://github.com/${headOwner}/${headRepo}/blob/${prBranch}/upcoming-release-notes/${summaryData.prNumber}.md`;
-    
+
     const commentBody = [
       '🤖 **Auto-generated Release Notes**',
       '',
@@ -54,7 +57,7 @@ async function commentOnPR() {
       `**Summary:** ${summaryData.summary}`,
       `**File:** [upcoming-release-notes/${summaryData.prNumber}.md](${fileUrl})`,
       '',
-      'The release notes file has been committed to the repository. You can edit it if needed before merging.'
+      'The release notes file has been committed to the repository. You can edit it if needed before merging.',
     ].join('\n');
 
     await octokit.rest.issues.createComment({
@@ -63,7 +66,7 @@ async function commentOnPR() {
       issue_number: issueNumber,
       body: commentBody,
     });
-    
+
     console.log('✅ Successfully commented on PR');
   } catch (error) {
     console.log('Error commenting on PR:', error.message);

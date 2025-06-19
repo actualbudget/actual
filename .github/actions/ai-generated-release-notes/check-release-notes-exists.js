@@ -28,21 +28,21 @@ async function checkReleaseNotesExists() {
       setOutput('result', 'false');
       return;
     }
-    
+
     const fileName = `upcoming-release-notes/${prDetails.number}.md`;
-    
+
     // Get PR info to get head SHA
     const { data: pr } = await octokit.rest.pulls.get({
       owner,
       repo: repoName,
       pull_number: issueNumber,
     });
-    
+
     const prHeadSha = pr.head.sha;
     console.log(
       `Checking for file on PR branch: ${pr.head.ref} (${prHeadSha})`,
     );
-    
+
     // Check if file exists
     try {
       await octokit.rest.repos.getContent({
@@ -51,7 +51,7 @@ async function checkReleaseNotesExists() {
         path: fileName,
         ref: prHeadSha,
       });
-      
+
       console.log(
         `Release notes file already exists on PR branch: ${fileName}`,
       );

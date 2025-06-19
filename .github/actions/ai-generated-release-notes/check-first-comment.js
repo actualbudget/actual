@@ -29,35 +29,39 @@ function setOutput(name, value) {
 async function checkFirstComment() {
   try {
     console.log('Fetching comments with Octokit...');
-    
+
     // Get all comments with automatic pagination
     const comments = await octokit.paginate(octokit.rest.issues.listComments, {
       owner,
       repo: repoName,
       issue_number: issueNumber,
     });
-    
+
     console.log(`Total comments found: ${comments.length}`);
-    
+
     // Filter for CodeRabbit summary comments (containing the specific marker)
-    const coderabbitSummaryComments = comments.filter(
-      comment => {
-        const isCodeRabbit = comment.user.login === 'coderabbitai[bot]';
-        const hasSummaryMarker = comment.body.includes('<!-- This is an auto-generated comment: summarize by coderabbit.ai -->');
-        
-        if (isCodeRabbit) {
-          console.log(`CodeRabbit comment found (ID: ${comment.id}), has summary marker: ${hasSummaryMarker}`);
-        }
-        
-        return isCodeRabbit && hasSummaryMarker;
+    const coderabbitSummaryComments = comments.filter(comment => {
+      const isCodeRabbit = comment.user.login === 'coderabbitai[bot]';
+      const hasSummaryMarker = comment.body.includes(
+        '<!-- This is an auto-generated comment: summarize by coderabbit.ai -->',
+      );
+
+      if (isCodeRabbit) {
+        console.log(
+          `CodeRabbit comment found (ID: ${comment.id}), has summary marker: ${hasSummaryMarker}`,
+        );
       }
-    );
-    
+
+      return isCodeRabbit && hasSummaryMarker;
+    });
+
     const isFirstSummaryComment =
-      coderabbitSummaryComments.length === 1 && 
+      coderabbitSummaryComments.length === 1 &&
       coderabbitSummaryComments[0].id == commentId;
-    
-    console.log(`CodeRabbit summary comments found: ${coderabbitSummaryComments.length}`);
+
+    console.log(
+      `CodeRabbit summary comments found: ${coderabbitSummaryComments.length}`,
+    );
     console.log(`Current comment ID: ${commentId}`);
     console.log(`Is first summary comment: ${isFirstSummaryComment}`);
     setOutput('result', isFirstSummaryComment);
