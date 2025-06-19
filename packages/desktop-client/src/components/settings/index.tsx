@@ -153,7 +153,7 @@ export function Settings() {
   const [budgetName] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
-  const [_, setCurrencyCodePref] = useSyncedPref('currencyCode');
+  const [_, setDefaultCurrencyCodePref] = useSyncedPref('defaultCurrencyCode');
 
   const onCloseBudget = () => {
     dispatch(closeBudget());
@@ -170,9 +170,9 @@ export function Settings() {
 
   useEffect(() => {
     if (!isCurrencyExperimentalEnabled) {
-      setCurrencyCodePref('');
+      setDefaultCurrencyCodePref('');
     }
-  }, [isCurrencyExperimentalEnabled, setCurrencyCodePref]);
+  }, [isCurrencyExperimentalEnabled, setDefaultCurrencyCodePref]);
 
   const { isNarrowWidth } = useResponsive();
 

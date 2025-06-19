@@ -17,9 +17,9 @@ export type SyncedPrefs = Partial<
     | 'numberFormat'
     | 'hideFraction'
     | 'isPrivacyEnabled'
-    | 'currencyCode'
     | 'currencySymbolPosition'
     | 'currencySpaceBetweenAmountAndSymbol'
+    | 'defaultCurrencyCode'
     | `show-balances-${string}`
     | `show-extra-balances-${string}`
     | `hide-cleared-${string}`
