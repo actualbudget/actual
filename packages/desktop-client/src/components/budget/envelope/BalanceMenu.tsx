@@ -5,7 +5,7 @@ import { Menu } from '@actual-app/components/menu';
 
 import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
 
-import { envelopeBudget } from '@desktop-client/queries/queries';
+import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type BalanceMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,

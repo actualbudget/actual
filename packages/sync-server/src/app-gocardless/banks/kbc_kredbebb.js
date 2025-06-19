@@ -5,7 +5,7 @@ import { extractPayeeNameFromRemittanceInfo } from './util/extract-payeeName-fro
 export default {
   ...Fallback,
 
-  institutionIds: ['KBC_KREDBEBB'],
+  institutionIds: ['KBC_KREDBEBB', 'KBC_BRUSSELS_KREDBEBB'],
 
   /**
    * For negative amounts, the only payee information we have is returned in
