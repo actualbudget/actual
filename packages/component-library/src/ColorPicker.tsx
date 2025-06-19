@@ -84,7 +84,7 @@ function ColorSwatchPicker() {
     </>
   );
 }
-const isColor = (value: string) => /^#(?:[0-9a-fA-F]{3}){1,2}$/.test(value);
+const isColor = (value: string) => /^#[0-9a-fA-F]{6}$/.test(value);
 
 interface ColorPickerProps extends AriaColorPickerProps {
   children?: ReactNode;
