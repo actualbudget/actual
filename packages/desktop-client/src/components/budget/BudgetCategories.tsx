@@ -26,10 +26,7 @@ import { separateGroups } from './util';
 type BudgetCategoriesProps = {
   categoryGroups: CategoryGroupEntity[],
   editingCell: { id: string; cell: string } | null,
-  dataComponents: {
-    SummaryComponent: ComponentPropsWithoutRef<typeof BudgetSummaries>["SummaryComponent"];
-    BudgetTotalsComponent: ComponentPropsWithoutRef<typeof BudgetTotals>["MonthComponent"];
-},
+  dataComponents: any,
   onBudgetAction: (month: string, action: string, args: unknown) => void,
   onShowActivity: (id: CategoryEntity["id"], month?: string) => void,
   onEditName: (id: string) => void,
@@ -254,6 +251,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                       id: 'new',
                     }}
                     editing={true}
+                    innerRef={null}
                     onSave={_onSaveCategory}
                     onDelete={onDeleteGroup}
                     onHideNewCategory={onHideNewCategory}
