@@ -287,7 +287,7 @@ function TransactionListWithPreviews({
   } = useTransactions({
     query: transactionsQuery,
     options: {
-      calculateRunningBalances: showBalances === 'true',
+      calculateRunningBalances: true,
     },
   });
 
