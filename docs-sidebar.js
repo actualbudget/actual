@@ -70,6 +70,7 @@ const sidebars = {
                 'install/cli-tool',
                 'install/desktop-app',
                 'install/build-from-source',
+                'install/apple-container',
               ],
             },
 
