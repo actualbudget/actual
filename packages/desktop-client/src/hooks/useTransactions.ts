@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 
+import * as queries from '@desktop-client/queries/queries';
 import * as d from 'date-fns';
 import debounce from 'lodash/debounce';
 
@@ -28,7 +29,6 @@ import {
   type PagedQuery,
   pagedQuery,
 } from '@desktop-client/queries/pagedQuery';
-import * as queries from '@desktop-client/queries/queries';
 
 type UseTransactionsProps = {
   /**
