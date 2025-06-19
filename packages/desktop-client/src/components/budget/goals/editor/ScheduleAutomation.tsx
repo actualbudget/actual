@@ -4,8 +4,8 @@ import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 
-import type { ScheduleTemplate } from 'loot-core/server/budget/types/templates';
 import type { ScheduleEntity } from 'loot-core/types/models';
+import type { ScheduleTemplate } from 'loot-core/types/models/templates';
 
 import {
   type Action,

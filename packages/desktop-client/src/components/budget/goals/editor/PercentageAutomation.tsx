@@ -4,11 +4,11 @@ import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
 import { View } from '@actual-app/components/view';
 
-import type { PercentageTemplate } from 'loot-core/server/budget/types/templates';
 import type {
   CategoryGroupEntity,
   CategoryEntity,
 } from 'loot-core/types/models';
+import type { PercentageTemplate } from 'loot-core/types/models/templates';
 
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import {

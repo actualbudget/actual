@@ -12,7 +12,7 @@ import { Input } from '@actual-app/components/input';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 
-import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 
 type PercentInputProps = {

@@ -87,16 +87,16 @@ day 'day' = $(d d)
 date = $(month '-' day)
 currencySymbol 'currency symbol' = symbol: . & { return /\p{Sc}/u.test(symbol) }
 
-// Match schedule name including spaces up until we see a [, looking ahead to make sure it's followed by increase/decrease
+// Match schedule name including spaces and brackets, but stop before percentage modifiers
 rawScheduleName = $(
   (
-    [^ \t\r\n\[]        // First character can't be space or [
+    !('['('increase'i/'decrease'i)) // Don't start with [increase/decrease
+    [^ \t\r\n]                     // First character can't be whitespace
     (
-      [^\r\n\[]         // Subsequent characters can include spaces but not [
-      / 
-      (![^\r\n\[]* '['('increase'i/'decrease'i)) [ ] // Or spaces if not followed by [increase/decrease
+      !(_ '['('increase'i/'decrease'i)) // Don't match if followed by [increase/decrease modifier
+      [^\r\n]                       // Any character except newlines
     )*
   )
-) { return text() }
+) { return text().trim() }
 
 name 'Name' = $([^\r\n\t]+) { return text() }

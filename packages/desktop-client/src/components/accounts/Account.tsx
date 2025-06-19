@@ -7,7 +7,7 @@ import React, {
   useEffect,
 } from 'react';
 import { Trans } from 'react-i18next';
-import { Navigate, useParams, useLocation } from 'react-router-dom';
+import { Navigate, useParams, useLocation } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -73,12 +73,12 @@ import {
   replaceModal,
 } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import * as queries from '@desktop-client/queries';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import {
   pagedQuery,
   type PagedQuery,
 } from '@desktop-client/queries/pagedQuery';
-import * as queries from '@desktop-client/queries/queries';
 import {
   createPayee,
   initiallyLoadPayees,

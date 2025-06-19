@@ -3,7 +3,7 @@ import React, {
   type ComponentProps,
   type ReactNode,
 } from 'react';
-import { NavLink, useMatch } from 'react-router-dom';
+import { NavLink, useMatch } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { styles, type CSSProperties } from '@actual-app/components/styles';

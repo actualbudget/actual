@@ -3,11 +3,6 @@
 import * as monthUtils from '../../shared/months';
 import { amountToInteger } from '../../shared/util';
 import { CategoryEntity } from '../../types/models';
-import * as db from '../db';
-
-import { getSheetValue, getSheetBoolean } from './actions';
-import { runSchedule } from './schedule-template';
-import { getActiveSchedules } from './statements';
 import {
   AverageTemplate,
   ByTemplate,
@@ -19,7 +14,12 @@ import {
   SpendTemplate,
   Template,
   WeekTemplate,
-} from './types/templates';
+} from '../../types/models/templates';
+import * as db from '../db';
+
+import { getSheetValue, getSheetBoolean } from './actions';
+import { runSchedule } from './schedule-template';
+import { getActiveSchedules } from './statements';
 
 export class CategoryTemplateContext {
   /*----------------------------------------------------------------------------

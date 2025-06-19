@@ -33,6 +33,7 @@ actual-server [options]
 | `-h` or `--help`    | Print this list and exit.    |
 | `-v` or `--version` | Print this version and exit. |
 | `--config`          | Path to the config file.     |
+| `--reset-password`  | Reset your password          |
 
 **Examples**
 
@@ -46,6 +47,12 @@ Run with custom configuration
 
 ```bash
 actual-server --config ./config.json
+```
+
+Reset your password
+
+```bash
+actual-server --reset-password
 ```
 
 ### Documentation
