@@ -3,14 +3,13 @@ import React, {
   type KeyboardEvent,
   useMemo,
   useState,
-  useEffect,
-  useRef,
 } from 'react';
-import { useLocation } from 'react-router-dom';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+
+import { ScrollRestore } from '../ScrollRestore';
 
 import { q } from 'loot-core/shared/query';
 import {
@@ -94,12 +93,9 @@ export function BudgetTable(props: BudgetTableProps) {
   );
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
-  const [editing, setEditing] = useState<{ id: string; cell: string } | null>(
+    const [editing, setEditing] = useState<{ id: string; cell: string } | null>(
     null,
   );
-
-  const location = useLocation();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const onEditMonth = (id: string, month: string) => {
     setEditing(id ? { id, cell: month } : null);
@@ -235,23 +231,7 @@ export function BudgetTable(props: BudgetTableProps) {
     onCollapse(categoryGroups.map(g => g.id));
   };
 
-  useEffect(() => {
-    const scrollToCategoryId = location.state?.scrollToCategoryId;
 
-    if (scrollToCategoryId && scrollContainerRef.current) {
-      requestAnimationFrame(() => {
-        const categoryElement = scrollContainerRef.current?.querySelector(
-          `[data-category-id="${scrollToCategoryId}"]`,
-        );
-
-        if (categoryElement) {
-          categoryElement.scrollIntoView({
-            block: 'start',
-          });
-        }
-      });
-    }
-  }, [location.state?.scrollToCategoryId]);
 
   const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
 
@@ -304,16 +284,16 @@ export function BudgetTable(props: BudgetTableProps) {
           expandAllCategories={expandAllCategories}
           collapseAllCategories={collapseAllCategories}
         />
-        <View
-          innerRef={scrollContainerRef}
-          style={{
-            overflowY: 'scroll',
-            overflowAnchor: 'none',
-            flex: 1,
-            paddingLeft: 5,
-            paddingRight: 5,
-          }}
-        >
+        <ScrollRestore scrollKey="budget-table">
+          <View
+            style={{
+              overflowY: 'scroll',
+              overflowAnchor: 'none',
+              flex: 1,
+              paddingLeft: 5,
+              paddingRight: 5,
+            }}
+          >
           <View
             style={{
               flexShrink: 0,
@@ -340,7 +320,8 @@ export function BudgetTable(props: BudgetTableProps) {
               />
             </SchedulesProvider>
           </View>
-        </View>
+          </View>
+        </ScrollRestore>
       </MonthsProvider>
     </View>
   );

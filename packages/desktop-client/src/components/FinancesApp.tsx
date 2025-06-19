@@ -31,6 +31,7 @@ import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
 import { UserDirectoryPage } from './responsive/wide';
 import { ScrollProvider } from './ScrollProvider';
+import { ScrollRestoreProvider } from './ScrollRestore';
 import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
@@ -202,10 +203,11 @@ export function FinancesApp() {
             width: '100%',
           }}
         >
-          <ScrollProvider
-            isDisabled={!isNarrowWidth}
-            scrollableRef={scrollableRef}
-          >
+          <ScrollRestoreProvider>
+            <ScrollProvider
+              isDisabled={!isNarrowWidth}
+              scrollableRef={scrollableRef}
+            >
             <View
               ref={scrollableRef}
               style={{
@@ -338,6 +340,7 @@ export function FinancesApp() {
               <Route path="*" element={null} />
             </Routes>
           </ScrollProvider>
+          </ScrollRestoreProvider>
         </View>
       </View>
     </View>

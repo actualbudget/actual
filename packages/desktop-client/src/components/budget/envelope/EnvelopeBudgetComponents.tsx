@@ -51,9 +51,9 @@ import {
 } from '@desktop-client/components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import { envelopeBudget } from '@desktop-client/queries/queries';
+import { useScrollRestore } from '@desktop-client/components/ScrollRestore';
 
 export function useEnvelopeSheetName<
   FieldName extends SheetFields<'envelope-budget'>,
@@ -251,7 +251,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
 
   const { showUndoNotification } = useUndo();
 
-  const navigate = useNavigate();
+  const { navigate } = useScrollRestore();
 
   const { schedule, scheduleStatus, isScheduleRecurring, description } =
     useCategoryScheduleGoalTemplateIndicator({
@@ -414,6 +414,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           }}
         />
       </View>
+
       <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
         <View
           data-testid="category-month-spent"
@@ -439,7 +440,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                         ? theme.warningText
                         : theme.upcomingText,
                 }}
-                onPress={() =>
+                onPress={() => 
                   schedule._account
                     ? navigate(`/accounts/${schedule._account}`)
                     : navigate('/accounts')

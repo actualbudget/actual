@@ -37,6 +37,7 @@ import {
   updateGroup,
 } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { useScrollRestore } from '../ScrollRestore';
 
 type TrackingReportComponents = {
   SummaryComponent: typeof trackingBudget.BudgetSummary;
@@ -69,7 +70,7 @@ function BudgetInner(props: BudgetInnerProps) {
   const currentMonth = monthUtils.currentMonth();
   const spreadsheet = useSpreadsheet();
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const { navigate } = useScrollRestore();
   const [summaryCollapsed, setSummaryCollapsedPref] = useLocalPref(
     'budget.summaryCollapsed',
   );
@@ -280,13 +281,6 @@ function BudgetInner(props: BudgetInnerProps) {
         type: 'date',
       },
     ];
-
-    navigate('/budget', {
-      replace: true,
-      state: {
-        scrollToCategoryId: categoryId,
-      },
-    });
 
     navigate('/accounts', {
       state: {

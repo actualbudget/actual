@@ -49,7 +49,7 @@ import {
   type SheetCellProps,
 } from '@desktop-client/components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useScrollRestore } from '@desktop-client/components/ScrollRestore';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import { trackingBudget } from '@desktop-client/queries/queries';
 
@@ -242,7 +242,7 @@ export const CategoryMonth = memo(function CategoryMonth({
 
   const { showUndoNotification } = useUndo();
 
-  const navigate = useNavigate();
+  const { navigate } = useScrollRestore();
 
   const { schedule, scheduleStatus, isScheduleRecurring, description } =
     useCategoryScheduleGoalTemplateIndicator({
@@ -417,7 +417,7 @@ export const CategoryMonth = memo(function CategoryMonth({
                         ? theme.warningText
                         : theme.upcomingText,
                 }}
-                onPress={() =>
+                onPress={() => 
                   schedule._account
                     ? navigate(`/accounts/${schedule._account}`)
                     : navigate('/accounts')

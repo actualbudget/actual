@@ -21,7 +21,7 @@ import { SpentCell } from './SpentCell';
 
 import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
 import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useScrollRestore } from '@desktop-client/components/ScrollRestore';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
@@ -386,18 +386,11 @@ export function ExpenseCategoryListItem({
     onCover,
   ]);
 
-  const navigate = useNavigate();
+  const { navigate } = useScrollRestore();
   const onShowActivity = useCallback(() => {
     if (!category) {
       return;
     }
-
-    navigate('/budget', {
-      replace: true,
-      state: {
-        scrollToCategoryId: category.id,
-      },
-    });
 
     navigate(`/categories/${category.id}?month=${month}`);
   }, [category, month, navigate]);
@@ -410,7 +403,6 @@ export function ExpenseCategoryListItem({
     <GridListItem
       textValue={category.name}
       data-testid="category-row"
-      data-category-id={category.id}
       {...props}
     >
       <View

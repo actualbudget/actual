@@ -1,7 +1,6 @@
-import React, { useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { GridList, GridListItem } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
 
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
@@ -34,6 +33,7 @@ import { IncomeGroup } from './IncomeGroup';
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
 import { PullToRefresh } from '@desktop-client/components/mobile/PullToRefresh';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
+import { ScrollRestore, useScrollRestore } from '@desktop-client/components/ScrollRestore';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
 import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
@@ -42,7 +42,6 @@ import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useOverspentCategories } from '@desktop-client/hooks/useOverspentCategories';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
@@ -332,8 +331,7 @@ export function BudgetTable({
     'mobile.showSpentColumn',
   );
 
-  const location = useLocation();
-  const scrollContainerRef = useRef(null);
+
 
   function toggleSpentColumn() {
     setShowSpentColumnPref(!showSpentColumn);
@@ -347,23 +345,7 @@ export function BudgetTable({
 
   const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
 
-  useEffect(() => {
-    const scrollToCategoryId = location.state?.scrollToCategoryId;
 
-    if (scrollToCategoryId && scrollContainerRef.current) {
-      requestAnimationFrame(() => {
-        const categoryElement = scrollContainerRef.current?.querySelector(
-          `[data-category-id="${scrollToCategoryId}"]`,
-        );
-
-        if (categoryElement) {
-          categoryElement.scrollIntoView({
-            block: 'start',
-          });
-        }
-      });
-    }
-  }, [location.state?.scrollToCategoryId]);
 
   return (
     <Page
@@ -422,28 +404,30 @@ export function BudgetTable({
         onShowBudgetSummary={onShowBudgetSummary}
       />
       <PullToRefresh onRefresh={onRefresh}>
-        <View
-          innerRef={scrollContainerRef}
-          data-testid="budget-table"
-          style={{
-            backgroundColor: theme.pageBackground,
-            paddingBottom: MOBILE_NAV_HEIGHT,
-          }}
-        >
-          <SchedulesProvider query={schedulesQuery}>
-            <BudgetGroups
-              type={budgetType}
-              categoryGroups={categoryGroups}
-              showBudgetedColumn={!showSpentColumn}
-              show3Columns={show3Columns}
-              showHiddenCategories={showHiddenCategories}
-              month={month}
-              onEditCategoryGroup={onEditCategoryGroup}
-              onEditCategory={onEditCategory}
-              onBudgetAction={onBudgetAction}
-            />
-          </SchedulesProvider>
-        </View>
+        <ScrollRestore scrollKey="mobile-budget-table">
+          <View
+            data-testid="budget-table"
+            style={{
+              backgroundColor: theme.pageBackground,
+              paddingBottom: MOBILE_NAV_HEIGHT,
+              overflowY: 'auto',
+            }}
+          >
+            <SchedulesProvider query={schedulesQuery}>
+              <BudgetGroups
+                type={budgetType}
+                categoryGroups={categoryGroups}
+                showBudgetedColumn={!showSpentColumn}
+                show3Columns={show3Columns}
+                showHiddenCategories={showHiddenCategories}
+                month={month}
+                onEditCategoryGroup={onEditCategoryGroup}
+                onEditCategory={onEditCategory}
+                onBudgetAction={onBudgetAction}
+              />
+            </SchedulesProvider>
+          </View>
+        </ScrollRestore>
       </PullToRefresh>
     </Page>
   );
@@ -473,7 +457,7 @@ function Banner({ type = 'info', children }) {
 
 function UncategorizedTransactionsBanner(props) {
   const count = useSheetValue(uncategorizedCount());
-  const navigate = useNavigate();
+  const { navigate } = useScrollRestore();
 
   if (count === null || count <= 0) {
     return null;

@@ -16,11 +16,11 @@ import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackBu
 import { AddTransactionButton } from '@desktop-client/components/mobile/transactions/AddTransactionButton';
 import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
+import { useScrollRestore } from '@desktop-client/components/ScrollRestore';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategoryPreviewTransactions } from '@desktop-client/hooks/useCategoryPreviewTransactions';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
 import * as queries from '@desktop-client/queries/queries';
@@ -74,7 +74,7 @@ function TransactionListWithPreviews({
   month,
 }: TransactionListWithPreviewsProps) {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const { navigate } = useScrollRestore();
 
   const baseTransactionsQuery = useCallback(
     () =>

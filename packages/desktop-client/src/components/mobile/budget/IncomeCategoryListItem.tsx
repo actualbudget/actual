@@ -16,7 +16,7 @@ import { BalanceCell } from './BalanceCell';
 import { BudgetCell } from './BudgetCell';
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useScrollRestore } from '@desktop-client/components/ScrollRestore';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
 import {
@@ -185,7 +185,7 @@ export function IncomeCategoryListItem({
 }: IncomeCategoryListItemProps) {
   const { value: category } = props;
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const { navigate } = useScrollRestore();
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const balanceMenuModalName = `envelope-income-balance-menu`;
 
@@ -193,13 +193,6 @@ export function IncomeCategoryListItem({
     if (!category) {
       return null;
     }
-
-    navigate('/budget', {
-      replace: true,
-      state: {
-        scrollToCategoryId: category.id,
-      },
-    });
 
     navigate(`/categories/${category.id}?month=${month}`);
   }, [category, month, navigate]);
@@ -252,7 +245,6 @@ export function IncomeCategoryListItem({
     <GridListItem
       textValue={category.name}
       data-testid="category-row"
-      data-category-id={category.id}
       {...props}
     >
       <View

@@ -150,7 +150,6 @@ export function SidebarCategory({
   return (
     <View
       innerRef={innerRef}
-      data-category-id={category.id}
       style={{
         width: 200 + 100 * categoryExpandedState,
         overflow: 'hidden',
