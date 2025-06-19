@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ChangeEvent, ReactNode } from 'react';
 import {
   ColorPicker as AriaColorPicker,
   ColorPickerProps as AriaColorPickerProps,
@@ -9,11 +9,11 @@ import {
   ColorSwatchPicker as AriaColorSwatchPicker,
   ColorSwatchPickerItem,
   ColorField,
+  parseColor,
 } from 'react-aria-components';
 
 import { css } from '@emotion/css';
 
-import { SvgRefresh } from './icons/v1';
 import { Input } from './Input';
 import { Popover } from './Popover';
 
@@ -84,12 +84,24 @@ function ColorSwatchPicker() {
     </>
   );
 }
+const isColor = (value: string) => /^#(?:[0-9a-fA-F]{3}){1,2}$/.test(value);
 
 interface ColorPickerProps extends AriaColorPickerProps {
   children?: ReactNode;
 }
 
 export function ColorPicker({ children, ...props }: ColorPickerProps) {
+  const onInput = (value: string) => {
+    if (!isColor(value)) {
+      return;
+    }
+
+    const color = parseColor(value);
+    if (color) {
+      props.onChange?.(color);
+    }
+  };
+
   return (
     <AriaColorPicker {...props}>
       <DialogTrigger>
@@ -109,10 +121,12 @@ export function ColorPicker({ children, ...props }: ColorPickerProps) {
             }}
           >
             <ColorSwatchPicker />
-            <ColorField>
+            <ColorField
+              onInput={({ target: { value } }: ChangeEvent<HTMLInputElement>) =>
+                onInput(value)
+              }
+            >
               <Input placeholder="#RRGGBB" style={{ width: '100px' }} />
-              &nbsp;
-              <SvgRefresh width={13} height={13} />
             </ColorField>
           </Dialog>
         </Popover>
