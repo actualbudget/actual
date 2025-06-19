@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 
-import * as queries from '@desktop-client/queries/queries';
 import * as d from 'date-fns';
 import debounce from 'lodash/debounce';
 
@@ -25,6 +24,7 @@ import { useCachedSchedules } from './useCachedSchedules';
 import type { ScheduleStatuses } from './useSchedules';
 import { useSyncedPref } from './useSyncedPref';
 
+import * as queries from '@desktop-client/queries';
 import {
   type PagedQuery,
   pagedQuery,
