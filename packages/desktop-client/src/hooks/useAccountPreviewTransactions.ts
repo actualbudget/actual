@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 
-import { groupById } from 'loot-core/shared/util';
+import { groupById, type IntegerAmount } from 'loot-core/shared/util';
 import {
   type ScheduleEntity,
   type AccountEntity,
@@ -109,7 +109,9 @@ export function useAccountPreviewTransactions({
     return {
       isLoading,
       previewTransactions,
-      runningBalances,
+      runningBalances: getRunningBalances
+        ? runningBalances
+        : new Map<AccountEntity['id'], IntegerAmount>(),
       error,
     };
   }, [
