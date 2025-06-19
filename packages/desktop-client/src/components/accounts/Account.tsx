@@ -55,7 +55,7 @@ import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { usePayees } from '@desktop-client/hooks/usePayees';
-import { accountSchedulesQuery } from '@desktop-client/hooks/useSchedules';
+import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
 import {
   SelectedProviderWithItems,
   type Actions,
@@ -1956,7 +1956,7 @@ export function Account() {
   const savedFiters = useTransactionFilters();
 
   const schedulesQuery = useMemo(
-    () => accountSchedulesQuery(params.id),
+    () => getSchedulesQuery(params.id),
     [params.id],
   );
 
