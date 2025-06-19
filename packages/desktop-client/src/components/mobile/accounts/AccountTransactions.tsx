@@ -310,7 +310,6 @@ function TransactionListWithPreviews({
     reloadTransactions();
   }, [showBalances, reloadTransactions]);
 
-  //const allBalances = showBalances === 'true'
   const allBalances =
     showBalances === 'true'
       ? isSearching
