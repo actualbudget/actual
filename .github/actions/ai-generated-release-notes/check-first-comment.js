@@ -8,12 +8,6 @@ const repo = process.env.GITHUB_REPOSITORY;
 const issueNumber = process.env.GITHUB_EVENT_ISSUE_NUMBER;
 const commentId = process.env.GITHUB_EVENT_COMMENT_ID;
 
-console.log('Environment variables:');
-console.log('- GITHUB_TOKEN:', token ? 'SET' : 'NOT SET');
-console.log('- GITHUB_REPOSITORY:', repo);
-console.log('- GITHUB_EVENT_ISSUE_NUMBER:', issueNumber);
-console.log('- GITHUB_EVENT_COMMENT_ID:', commentId);
-
 if (!token || !repo || !issueNumber || !commentId) {
   console.log('Missing required environment variables');
   process.exit(1);
