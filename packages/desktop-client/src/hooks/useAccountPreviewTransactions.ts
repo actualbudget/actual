@@ -17,6 +17,7 @@ import { accountBalance } from '@desktop-client/queries/queries';
 
 type UseAccountPreviewTransactionsProps = {
   accountId?: AccountEntity['id'] | undefined;
+  getRunningBalances?: boolean;
 };
 
 type UseAccountPreviewTransactionsResult = ReturnType<
@@ -29,6 +30,7 @@ type UseAccountPreviewTransactionsResult = ReturnType<
  */
 export function useAccountPreviewTransactions({
   accountId,
+  getRunningBalances,
 }: UseAccountPreviewTransactionsProps): UseAccountPreviewTransactionsResult {
   const accounts = useAccounts();
   const accountsById = useMemo(() => groupById(accounts), [accounts]);
@@ -112,6 +114,7 @@ export function useAccountPreviewTransactions({
     };
   }, [
     accountId,
+    getRunningBalances,
     allPreviewTransactions,
     allRunningBalances,
     error,
