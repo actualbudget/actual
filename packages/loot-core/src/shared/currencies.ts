@@ -1,5 +1,3 @@
-import { t } from 'i18next';
-
 export type Currency = {
   code: string;
   symbol: string;
@@ -9,6 +7,9 @@ export type Currency = {
 
 // When adding a new currency with a higher decimal precision, make sure to update
 // the MAX_SAFE_NUMBER in util.ts.
+// When adding a currency, also update the translation map in
+// at packages/desktop-client/src/components/settings/Currency.tsx
+// for the translation
 export const currencies: Currency[] = [
   { code: '', name: 'None', symbol: '', decimalPlaces: 2 },
   { code: 'AUD', name: 'Australian Dollar', symbol: 'A$', decimalPlaces: 2 },
@@ -25,14 +26,4 @@ export const currencies: Currency[] = [
 
 export function getCurrency(code: string): Currency {
   return currencies.find(c => c.code === code) || currencies[0];
-}
-
-export function getLocalizedCurrencyOption(
-  currency: Currency,
-): [string, string] {
-  if (currency.code === '') {
-    return [currency.code, t('None')];
-  }
-  const name = t(currency.name);
-  return [currency.code, `${currency.code} - ${name} (${currency.symbol})`];
 }

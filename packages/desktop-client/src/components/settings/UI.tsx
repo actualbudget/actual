@@ -3,6 +3,7 @@ import { Trans } from 'react-i18next';
 import { useLocation } from 'react-router';
 
 import { type CSSProperties } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
@@ -95,3 +96,28 @@ export const AdvancedToggle = ({ children }: AdvancedToggleProps) => {
     </Link>
   );
 };
+
+export function Column({
+  title,
+  children,
+  style,
+}: {
+  title: string;
+  children: ReactNode;
+  style?: CSSProperties;
+}) {
+  return (
+    <View
+      style={{
+        alignItems: 'flex-start',
+        flexGrow: 1,
+        gap: '0.5em',
+        width: '100%',
+        ...style,
+      }}
+    >
+      <Text style={{ fontWeight: 500 }}>{title}</Text>
+      <View style={{ alignItems: 'flex-start', gap: '1em' }}>{children}</View>
+    </View>
+  );
+}

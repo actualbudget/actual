@@ -109,15 +109,15 @@ function format(
 export function useFormat(): UseFormatResult {
   const [numberFormatPref] = useSyncedPref('numberFormat');
   const [hideFractionPref] = useSyncedPref('hideFraction');
-  const [currencyCodePref] = useSyncedPref('currencyCode');
+  const [defaultCurrencyCodePref] = useSyncedPref('defaultCurrencyCode');
   const [symbolPositionPref] = useSyncedPref('currencySymbolPosition');
   const [spaceEnabledPref] = useSyncedPref(
     'currencySpaceBetweenAmountAndSymbol',
   );
 
   const activeCurrency = useMemo(() => {
-    return getCurrency(currencyCodePref || '');
-  }, [currencyCodePref]);
+    return getCurrency(defaultCurrencyCodePref || '');
+  }, [defaultCurrencyCodePref]);
 
   const numberFormatConfig = useMemo(
     () =>

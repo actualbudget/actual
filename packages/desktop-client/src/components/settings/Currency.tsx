@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
@@ -7,12 +7,9 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import {
-  currencies,
-  getLocalizedCurrencyOption,
-} from 'loot-core/shared/currencies';
+import { currencies } from 'loot-core/shared/currencies';
 
-import { Setting } from './UI';
+import { Column, Setting } from './UI';
 
 import { Checkbox } from '@desktop-client/components/forms';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
@@ -20,8 +17,10 @@ import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 export function CurrencySettings() {
   const { t } = useTranslation();
 
-  const [currencyCode, setCurrencyCodePref] = useSyncedPref('currencyCode');
-  const selectedCurrencyCode = currencyCode || '';
+  const [defaultCurrencyCode, setDefaultCurrencyCodePref] = useSyncedPref(
+    'defaultCurrencyCode',
+  );
+  const selectedCurrencyCode = defaultCurrencyCode || '';
 
   const [symbolPosition, setSymbolPositionPref] = useSyncedPref(
     'currencySymbolPosition',
@@ -36,8 +35,34 @@ export function CurrencySettings() {
     },
   });
 
+  const currencyTranslations = new Map([
+    ['', t('None')],
+    ['AUD', t('Australian Dollar')],
+    ['CAD', t('Canadian Dollar')],
+    ['CHF', t('Swiss Franc')],
+    ['CNY', t('Yuan Renminbi')],
+    ['EUR', t('Euro')],
+    ['GBP', t('Pound Sterling')],
+    ['HKD', t('Hong Kong Dollar')],
+    // ['JPY', t('Yen')],
+    ['SGD', t('Singapore Dollar')],
+    ['USD', t('US Dollar')],
+  ]);
+
+  const currencyOptions: [string, string][] = currencies.map(currency => {
+    const translatedName =
+      currencyTranslations.get(currency.code) ?? currency.name;
+    if (currency.code === '') {
+      return [currency.code, translatedName];
+    }
+    return [
+      currency.code,
+      `${currency.code} - ${translatedName} (${currency.symbol})`,
+    ];
+  });
+
   const handleCurrencyChange = (code: string) => {
-    setCurrencyCodePref(code);
+    setDefaultCurrencyCodePref(code);
   };
 
   const symbolPositionOptions = [
@@ -56,57 +81,57 @@ export function CurrencySettings() {
             width: '100%',
           }}
         >
-          <View style={{ width: 'fit-content' }}>
-            <Text style={{ fontWeight: 500, marginBottom: '0.5em' }}>
-              {t('Currency')}
-            </Text>
-            <Select
-              value={selectedCurrencyCode}
-              onChange={handleCurrencyChange}
-              options={currencies.map(getLocalizedCurrencyOption)}
-              className={selectButtonClassName}
-              style={{ width: 'fit-content' }}
-            />
+          <View style={{ display: 'flex', flexDirection: 'row', gap: '1.5em' }}>
+            <Column title={t('Default Currency')}>
+              <Select
+                value={selectedCurrencyCode}
+                onChange={handleCurrencyChange}
+                options={currencyOptions}
+                className={selectButtonClassName}
+                style={{ width: '100%' }}
+              />
+            </Column>
+
+            <Column
+              title={t('Symbol Position')}
+              style={{
+                visibility: selectedCurrencyCode === '' ? 'hidden' : 'visible',
+              }}
+            >
+              <Select
+                value={symbolPosition || 'before'}
+                onChange={value => setSymbolPositionPref(value)}
+                options={symbolPositionOptions.map(f => [f.value, f.label])}
+                className={selectButtonClassName}
+                style={{ width: '100%' }}
+                disabled={selectedCurrencyCode === ''}
+              />
+            </Column>
           </View>
 
           {selectedCurrencyCode !== '' && (
-            <>
-              <View style={{ width: 'fit-content' }}>
-                <Text style={{ fontWeight: 500, marginBottom: '0.5em' }}>
-                  {t('Symbol Position')}
-                </Text>
-                <Select
-                  value={symbolPosition || 'before'}
-                  onChange={value => setSymbolPositionPref(value)}
-                  options={symbolPositionOptions.map(f => [f.value, f.label])}
-                  className={selectButtonClassName}
-                  style={{ width: 'auto' }}
-                />
-              </View>
-
-              <View
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
-                }}
+            <View
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+              }}
+            >
+              <Checkbox
+                id="settings-spaceEnabled"
+                checked={spaceEnabled === 'true'}
+                onChange={e =>
+                  setSpaceEnabledPref(e.target.checked ? 'true' : 'false')
+                }
+              />
+              <label
+                htmlFor="settings-spaceEnabled"
+                style={{ marginLeft: '0.5em' }}
               >
-                <Checkbox
-                  id="settings-spaceEnabled"
-                  checked={spaceEnabled === 'true'}
-                  onChange={e =>
-                    setSpaceEnabledPref(e.target.checked ? 'true' : 'false')
-                  }
-                />
-                <label
-                  htmlFor="settings-spaceEnabled"
-                  style={{ marginLeft: '0.5em' }}
-                >
-                  <Trans>Add space between amount and symbol</Trans>
-                </label>
-              </View>
-            </>
+                <Trans>Add space between amount and symbol</Trans>
+              </label>
+            </View>
           )}
         </View>
       }
