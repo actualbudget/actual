@@ -12,8 +12,8 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write
-      pull-requests: read
-      issues: read
+      pull-requests: write
+      issues: write
 
     steps:
       - name: Checkout repository
