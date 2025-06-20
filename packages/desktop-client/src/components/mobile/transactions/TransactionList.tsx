@@ -32,7 +32,11 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
-import { groupById, integerToCurrency } from 'loot-core/shared/util';
+import {
+  groupById,
+  type IntegerAmount,
+  integerToCurrency,
+} from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type TransactionEntity,
@@ -83,6 +87,7 @@ function Loading({ style, 'aria-label': ariaLabel }: LoadingProps) {
 type TransactionListProps = {
   isLoading: boolean;
   transactions: readonly TransactionEntity[];
+  runningBalances: Map<TransactionEntity['id'], IntegerAmount> | undefined;
   onOpenTransaction?: (transaction: TransactionEntity) => void;
   isLoadingMore: boolean;
   onLoadMore: () => void;
@@ -92,6 +97,7 @@ type TransactionListProps = {
 export function TransactionList({
   isLoading,
   transactions,
+  runningBalances,
   onOpenTransaction,
   isLoadingMore,
   onLoadMore,
@@ -201,6 +207,7 @@ export function TransactionList({
               {transaction => (
                 <TransactionListItem
                   key={transaction.id}
+                  balance={runningBalances?.get(transaction.id) || null}
                   value={transaction}
                   onPress={trans => onTransactionPress(trans)}
                   onLongPress={trans => onTransactionPress(trans, true)}
