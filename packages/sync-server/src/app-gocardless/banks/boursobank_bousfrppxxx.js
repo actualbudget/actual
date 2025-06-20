@@ -23,9 +23,9 @@ export default {
     const editedTrans = { ...transaction };
 
     editedTrans.remittanceInformationUnstructuredArray =
-      // Remove the backslashes that are sometimes present
+      // Remove the localisation with backslashes that are sometimes present
       transaction.remittanceInformationUnstructuredArray
-        .map(line => line.replace(/\\ ?/g, ' '))
+        .map(line => line.replace(/\\.+/g, ''))
         // Remove an unwanted line that pollutes the remittance information
         .filter(line => line.startsWith('Réf : ') === false);
 

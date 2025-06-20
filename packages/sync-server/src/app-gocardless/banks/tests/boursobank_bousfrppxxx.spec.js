@@ -129,7 +129,8 @@ describe('BoursoBank', () => {
         'ECH PRET:1823918329832913',
       ],
       [['PAYEE NAME 411'], 'Payee Name', ''],
-      [['PAYEE\\NAME\\ BIS'], 'Payee Name Bis', ''],
+      [['PAYEE NAME\\PARIS\\ FR'], 'Payee Name', ''],
+      [['PAYEE NAME 1\\PARIS\\ FR'], 'Payee Name', ''],
       [['AVOIR 17/06/25 PAYEE NAME CB*1234'], 'Payee Name', 'Avoir 17/06/25'],
     ])(
       'normalizes transaction with %s',
