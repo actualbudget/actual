@@ -30,23 +30,16 @@ export default {
     const infoArray = editedTrans.remittanceInformationUnstructuredArray;
     const firstLine = infoArray[0];
 
+    /*
+     * Some transactions always have their identifier in the first line (e.g. card),
+     * while others have it **randomly** in any of the lines (e.g. transfers).
+     */
+
+    // Check the first line for specific patterns
     if (firstLine.match(regexCard)) {
       // Card transaction
       const payeeName = firstLine.replace(regexCard, '$1');
       editedTrans.payeeName = title(payeeName);
-    } else if (firstLine.match(regexInstantTransfer)) {
-      // Instant transfer
-      editedTrans.payeeName = title(
-        firstLine.replace(regexInstantTransfer, ''),
-      );
-    } else if (firstLine.match(regexSepa)) {
-      // SEPA transfer
-      editedTrans.payeeName = title(firstLine.replace(regexSepa, ''));
-    } else if (firstLine.match(regexTransfer) && infoArray.length > 1) {
-      // Other transfer
-      // Must be evaluated after the other transfers as they're more specific (here VIR only)
-      editedTrans.payeeName = title(infoArray[1]);
-      editedTrans.notes = firstLine.replace(regexTransfer, '');
     } else if (firstLine.match(regexLoan)) {
       // Loan
       editedTrans.payeeName = 'Prêt bancaire';
@@ -60,7 +53,49 @@ export default {
         editedTrans.notes += ' ' + infoArray[1];
       }
     } else {
-      editedTrans.payeeName = title(firstLine);
+      // For the next patterns, we need to check all lines as the identifier can be anywhere
+      let identified = false;
+
+      // Instant transfer
+      for (let line of infoArray) {
+        if (line.match(regexInstantTransfer)) {
+          editedTrans.payeeName = title(line.replace(regexInstantTransfer, ''));
+          editedTrans.notes = infoArray.filter(l => l !== line).join(' ');
+          identified = true;
+          break;
+        }
+      }
+
+      // SEPA transfer
+      if (!identified) {
+        for (let line of infoArray) {
+          if (line.match(regexSepa)) {
+            editedTrans.payeeName = title(line.replace(regexSepa, ''));
+            editedTrans.notes = infoArray.filter(l => l !== line).join(' ');
+            identified = true;
+            break;
+          }
+        }
+      }
+
+      // Other transfer
+      // Must be evaluated after the other transfers as they're more specific (here VIR only)
+      if (!identified) {
+        for (let line of infoArray) {
+          if (line.match(regexTransfer)) {
+            const infoArrayWithoutLine = infoArray.filter(l => l !== line);
+            editedTrans.payeeName = title(infoArrayWithoutLine.join(' '));
+            editedTrans.notes = line.replace(regexTransfer, '');
+            identified = true;
+            break;
+          }
+        }
+      }
+
+      if (!identified) {
+        // Unknown transaction type
+        editedTrans.payeeName = title(firstLine);
+      }
     }
 
     if (editedTrans.notes === undefined) {
