@@ -10,6 +10,8 @@ const regexTransfer = /^VIR /;
 const regexInstantTransfer = /^VIR INST /;
 const regexSepa = /^(PRLV|VIR) SEPA /;
 const regexLoan = /^ECH PRET:/;
+const regexCreditNote =
+  /^AVOIR (?<date>\d{2}\/\d{2}\/\d{2}) (?<payeeName>.+?) CB\*\d{4,}/;
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -52,6 +54,11 @@ export default {
       if (infoArray.length > 1) {
         editedTrans.notes += ' ' + infoArray[1];
       }
+    } else if (firstLine.match(regexCreditNote)) {
+      // Credit note (refund)
+      const match = firstLine.match(regexCreditNote);
+      editedTrans.payeeName = title(match.groups.payeeName);
+      editedTrans.notes = `Avoir ${match.groups.date}`;
     } else {
       // For the next patterns, we need to check all lines as the identifier can be anywhere
       let identified = false;

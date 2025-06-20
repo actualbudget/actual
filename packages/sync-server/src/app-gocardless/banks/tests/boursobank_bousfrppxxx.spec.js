@@ -129,6 +129,7 @@ describe('BoursoBank', () => {
       ],
       [['PAYEE NAME'], 'Payee Name', ''],
       [['PAYEE\\NAME\\ BIS'], 'Payee Name Bis', ''],
+      [['AVOIR 17/06/25 PAYEE NAME CB*1234'], 'Payee Name', 'Avoir 17/06/25'],
     ])(
       'normalizes transaction with %s',
       (
