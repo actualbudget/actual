@@ -69,7 +69,7 @@ export default {
       let identified = false;
 
       // Instant transfer
-      for (let line of infoArray) {
+      for (const line of infoArray) {
         if (line.match(regexInstantTransfer)) {
           editedTrans.payeeName = title(line.replace(regexInstantTransfer, ''));
           editedTrans.notes = infoArray.filter(l => l !== line).join(' ');
@@ -80,7 +80,7 @@ export default {
 
       // SEPA transfer
       if (!identified) {
-        for (let line of infoArray) {
+        for (const line of infoArray) {
           if (line.match(regexSepa)) {
             editedTrans.payeeName = title(line.replace(regexSepa, ''));
             editedTrans.notes = infoArray.filter(l => l !== line).join(' ');
@@ -93,7 +93,7 @@ export default {
       // Other transfer
       // Must be evaluated after the other transfers as they're more specific (here VIR only)
       if (!identified) {
-        for (let line of infoArray) {
+        for (const line of infoArray) {
           if (line.match(regexTransfer)) {
             const infoArrayWithoutLine = infoArray.filter(l => l !== line);
             editedTrans.payeeName = title(infoArrayWithoutLine.join(' '));
