@@ -4,6 +4,7 @@ describe('BoursoBank', () => {
   describe('#normalizeTransaction', () => {
     it.each([
       [['CARTE 01/03/25 PAYEE NAME CB*4567'], 'Payee Name', ''],
+      [['CARTE 01/03/25 PAYEE NAME 713621 CB*4567'], 'Payee Name', ''],
       [['CARTE 01/03/25 PAYEE NAME'], 'Payee Name', ''],
       [['CARTE 01/03/25 PAYEE NAME 7428347'], 'Payee Name', ''],
       [
@@ -127,7 +128,7 @@ describe('BoursoBank', () => {
         'Prêt bancaire',
         'ECH PRET:1823918329832913',
       ],
-      [['PAYEE NAME'], 'Payee Name', ''],
+      [['PAYEE NAME 411'], 'Payee Name', ''],
       [['PAYEE\\NAME\\ BIS'], 'Payee Name Bis', ''],
       [['AVOIR 17/06/25 PAYEE NAME CB*1234'], 'Payee Name', 'Avoir 17/06/25'],
     ])(

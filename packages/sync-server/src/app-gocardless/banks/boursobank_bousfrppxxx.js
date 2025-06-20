@@ -3,7 +3,7 @@ import { title } from '../../util/title/index.js';
 import Fallback from './integration-bank.js';
 
 const regexCard =
-  /^CARTE \d{2}\/\d{2}\/\d{2} (?<payeeName>.+?)( CB\*)?( ?\d{4,})?$/;
+  /^CARTE \d{2}\/\d{2}\/\d{2} (?<payeeName>.+?)( \d+)?( CB\*\d{4})?$/;
 const regexAtmWithdrawal =
   /^RETRAIT DAB \d{2}\/\d{2}\/\d{2} (?<locationName>.+?) CB\*\d{4,}/;
 const regexTransfer = /^VIR /;
@@ -101,7 +101,7 @@ export default {
 
       if (!identified) {
         // Unknown transaction type
-        editedTrans.payeeName = title(firstLine);
+        editedTrans.payeeName = title(firstLine.replace(/ \d+$/, ''));
       }
     }
 
