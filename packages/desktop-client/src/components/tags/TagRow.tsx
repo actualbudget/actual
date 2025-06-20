@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgRefreshArrow } from '@actual-app/components/icons/v2';
+import { Menu } from '@actual-app/components/menu';
+import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 
 import { type Tag } from 'loot-core/types/models';
@@ -15,6 +17,7 @@ import {
   Cell,
   InputCell,
 } from '@desktop-client/components/table';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
 import {
@@ -45,6 +48,10 @@ export const TagRow = memo(
     const resetButtonRef = useRef(null);
     useProperFocus(resetButtonRef, focusedField === 'select');
 
+    const triggerRef = useRef(null);
+    const { setMenuOpen, menuOpen, handleContextMenu, position } =
+      useContextMenu();
+
     const onUpdate = (description: string) => {
       dispatch(
         tag.id !== '*'
@@ -59,6 +66,7 @@ export const TagRow = memo(
 
     return (
       <Row
+        ref={triggerRef}
         data-test-id={tag.id}
         style={{
           borderColor,
@@ -71,7 +79,36 @@ export const TagRow = memo(
         collapsed={true}
         onMouseEnter={() => onHover(tag.id)}
         onMouseLeave={() => onHover()}
+        onContextMenu={handleContextMenu}
       >
+        <Popover
+          triggerRef={triggerRef}
+          placement="bottom start"
+          isOpen={menuOpen}
+          onOpenChange={() => setMenuOpen(false)}
+          {...position}
+          style={{ width: 200, margin: 1 }}
+          isNonModal
+        >
+          <Menu
+            items={[
+              {
+                name: 'delete',
+                text: tag.tag !== '*' ? t('Delete') : t('Reset'),
+              },
+            ]}
+            onMenuSelect={name => {
+              switch (name) {
+                case 'delete':
+                  dispatch(deleteTag(tag));
+                  break;
+                default:
+                  throw new Error(`Unrecognized menu option: ${name}`);
+              }
+              setMenuOpen(false);
+            }}
+          />
+        </Popover>
         {tag.tag !== '*' ? (
           <SelectCell
             exposed={hovered || selected || focusedField === 'select'}
