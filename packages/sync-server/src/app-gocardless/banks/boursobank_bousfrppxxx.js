@@ -3,9 +3,9 @@ import { title } from '../../util/title/index.js';
 import Fallback from './integration-bank.js';
 
 const regexCard =
-  /^CARTE \d{2}\/\d{2}\/\d{2} (?<payeeName>.+?)( \d+)?( CB\*\d{4})?$/;
+  /^CARTE (?<date>\d{2}\/\d{2}\/\d{2}) (?<payeeName>.+?)( \d+)?( CB\*\d{4})?$/;
 const regexAtmWithdrawal =
-  /^RETRAIT DAB \d{2}\/\d{2}\/\d{2} (?<locationName>.+?) CB\*\d{4,}/;
+  /^RETRAIT DAB (?<date>\d{2}\/\d{2}\/\d{2}) (?<locationName>.+?) CB\*\d{4,}/;
 const regexTransfer = /^VIR /;
 const regexInstantTransfer = /^VIR INST /;
 const regexSepa = /^(PRLV|VIR) SEPA /;
@@ -40,19 +40,24 @@ export default {
     // Check the first line for specific patterns
     if (firstLine.match(regexCard)) {
       // Card transaction
-      const payeeName = firstLine.replace(regexCard, '$1');
+      const match = firstLine.match(regexCard);
+      const payeeName = match.groups.payeeName;
       editedTrans.payeeName = title(payeeName);
+      editedTrans.notes = `Carte ${match.groups.date}`;
+      if (infoArray.length > 1) {
+        editedTrans.notes += ' ' + infoArray.slice(1).join(' ');
+      }
     } else if (firstLine.match(regexLoan)) {
       // Loan
       editedTrans.payeeName = 'Prêt bancaire';
       editedTrans.notes = firstLine;
     } else if (firstLine.match(regexAtmWithdrawal)) {
       // ATM withdrawal
+      const match = firstLine.match(regexAtmWithdrawal);
       editedTrans.payeeName = 'Retrait DAB';
-      editedTrans.notes =
-        firstLine.match(regexAtmWithdrawal).groups.locationName;
+      editedTrans.notes = `Retrait ${match.groups.date} ${match.groups.locationName}`;
       if (infoArray.length > 1) {
-        editedTrans.notes += ' ' + infoArray[1];
+        editedTrans.notes += ' ' + infoArray.slice(1).join(' ');
       }
     } else if (firstLine.match(regexCreditNote)) {
       // Credit note (refund)
@@ -102,19 +107,7 @@ export default {
       if (!identified) {
         // Unknown transaction type
         editedTrans.payeeName = title(firstLine.replace(/ \d+$/, ''));
-      }
-    }
-
-    if (editedTrans.notes === undefined) {
-      // We managed to extract the payee name, but nothing specific in the notes
-
-      if (infoArray.length === 2) {
-        // If there are only two lines, the second one is the notes
-        editedTrans.notes = infoArray[1];
-      } else {
-        // Unfortunately, the order of the lines is not always the same, which causes issues on multiple syncs
-        // Thus, do not set the notes if we have more than two lines
-        editedTrans.notes = '';
+        editedTrans.notes = infoArray.slice(1).join(' ');
       }
     }
 

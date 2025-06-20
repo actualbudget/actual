@@ -3,22 +3,26 @@ import BoursoBank from '../boursobank_bousfrppxxx.js';
 describe('BoursoBank', () => {
   describe('#normalizeTransaction', () => {
     it.each([
-      [['CARTE 01/03/25 PAYEE NAME CB*4567'], 'Payee Name', ''],
-      [['CARTE 01/03/25 PAYEE NAME 713621 CB*4567'], 'Payee Name', ''],
-      [['CARTE 01/03/25 PAYEE NAME'], 'Payee Name', ''],
-      [['CARTE 01/03/25 PAYEE NAME 7428347'], 'Payee Name', ''],
+      [['CARTE 01/03/25 PAYEE NAME CB*4567'], 'Payee Name', 'Carte 01/03/25'],
+      [
+        ['CARTE 01/03/25 PAYEE NAME 713621 CB*4567'],
+        'Payee Name',
+        'Carte 01/03/25',
+      ],
+      [['CARTE 01/03/25 PAYEE NAME'], 'Payee Name', 'Carte 01/03/25'],
+      [['CARTE 01/03/25 PAYEE NAME 7428347'], 'Payee Name', 'Carte 01/03/25'],
       [
         [
           'CARTE 03/02/25 PAYEE NAME CB*1234',
           '2,80 NZD / 1 euro = 1,818181818',
         ],
         'Payee Name',
-        '2,80 NZD / 1 euro = 1,818181818',
+        'Carte 03/02/25 2,80 NZD / 1 euro = 1,818181818',
       ],
       [
         ['RETRAIT DAB 01/03/25 My location CB*9876'],
         'Retrait DAB',
-        'My location',
+        'Retrait 01/03/25 My location',
       ],
       [
         [
@@ -26,7 +30,7 @@ describe('BoursoBank', () => {
           '2,80 NZD / 1 euro = 1,818181818',
         ],
         'Retrait DAB',
-        'My location 2,80 NZD / 1 euro = 1,818181818',
+        'Retrait 01/03/25 My location 2,80 NZD / 1 euro = 1,818181818',
       ],
       [
         ['VIR Text put by the sender', 'PAYEE NAME'],
