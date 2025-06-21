@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
@@ -9,6 +9,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { type PayeeEntity } from 'loot-core/types/models';
+import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { Information } from '@desktop-client/components/alerts';
 import { Modal, ModalButtons } from '@desktop-client/components/common/Modal';
@@ -109,16 +110,28 @@ export function MergeUnusedPayeesModal({
           <View>
             <Paragraph style={{ marginBottom: 10, fontWeight: 500 }}>
               {payees.length === 1 ? (
-                <>
-                  The payee <Text style={highlightStyle}>{payees[0].name}</Text>{' '}
+                <Trans>
+                  The payee{' '}
+                  <Text style={highlightStyle}>
+                    {{ payee: payees[0].name } as TransObjectLiteral}
+                  </Text>{' '}
                   is not used by transactions any more. Would like to merge it
-                  with <Text style={highlightStyle}>{targetPayee.name}</Text>?
-                </>
+                  with{' '}
+                  <Text style={highlightStyle}>
+                    {{ payee: targetPayee.name } as TransObjectLiteral}
+                  </Text>
+                  ?
+                </Trans>
               ) : (
                 <>
-                  The following payees are not used by transactions any more.
-                  Would like to merge them with{' '}
-                  <Text style={highlightStyle}>{targetPayee.name}</Text>?
+                  <Trans>
+                    The following payees are not used by transactions any more.
+                    Would like to merge them with{' '}
+                    <Text style={highlightStyle}>
+                      {{ payee: targetPayee.name } as TransObjectLiteral}
+                    </Text>
+                    ?
+                  </Trans>
                   <ul
                     ref={flashRef}
                     style={{
@@ -139,15 +152,15 @@ export function MergeUnusedPayeesModal({
             </Paragraph>
 
             <Information>
-              {t(
-                'Merging will remove the payee and transfer any existing rules to the new payee.',
-              )}
+              <Trans>
+                Merging will remove the payee and transfer any existing rules to
+                the new payee.
+              </Trans>
               {!isEditingRule && (
-                <>
-                  {' '}
+                <Trans>
                   If checked below, a rule will be created to do this rename
                   while importing transactions.
-                </>
+                </Trans>
               )}
             </Information>
 
@@ -169,9 +182,9 @@ export function MergeUnusedPayeesModal({
                   onChange={e => setShouldCreateRule(e.target.checked)}
                 />
                 <Text style={{ marginLeft: 3 }}>
-                  Automatically rename{' '}
-                  {payees.length === 1 ? 'this payee' : 'these payees'} in the
-                  future
+                  <Trans count={payees.length}>
+                    Automatically rename these payees in the future
+                  </Trans>
                 </Text>
               </label>
             )}
