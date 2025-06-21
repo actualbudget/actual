@@ -15,13 +15,16 @@ const processTranslations = () => {
       throw new Error('untranslated.json not found in the repository.');
     }
 
-    const untranslatedJson = JSON.parse(fs.readFileSync(untranslatedJsonPath, 'utf8'));
+    const untranslatedJson = JSON.parse(
+      fs.readFileSync(untranslatedJsonPath, 'utf8'),
+    );
     const untranslatedKeysCount = Object.keys(untranslatedJson).length;
 
     console.log(`untranslated.json has ${untranslatedKeysCount} keys.`);
 
     files.forEach(file => {
-      if (file === 'untranslated.json' || path.extname(file) !== '.json') return;
+      if (file === 'untranslated.json' || path.extname(file) !== '.json')
+        return;
 
       if (file.startsWith('en-')) {
         console.log(`Keeping ${file} as it's an English language.`);
