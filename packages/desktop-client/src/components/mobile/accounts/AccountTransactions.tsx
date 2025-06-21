@@ -317,8 +317,6 @@ function TransactionListWithPreviews({
     accountId: account?.id,
   });
 
-  useEffect(() => reloadTransactions(), [showBalances, reloadTransactions]);
-
   const allBalances = useMemo(
     () =>
       new Map<TransactionEntity['id'], IntegerAmount>([
