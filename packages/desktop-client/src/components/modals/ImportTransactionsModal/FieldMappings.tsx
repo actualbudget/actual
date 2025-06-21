@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Stack } from '@actual-app/components/stack';
 import { View } from '@actual-app/components/view';
@@ -12,7 +13,6 @@ import {
 } from './utils';
 
 import { SectionLabel } from '@desktop-client/components/forms';
-import { useTranslation } from 'react-i18next';
 
 type FieldMappingsProps = {
   transactions: ImportTransaction[];

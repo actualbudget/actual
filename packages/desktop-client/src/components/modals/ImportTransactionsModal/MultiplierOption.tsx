@@ -1,10 +1,10 @@
 import React, { type ComponentProps } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
 
 import { CheckboxOption } from './CheckboxOption';
-import { Trans, useTranslation } from 'react-i18next';
 
 type MultiplierOptionProps = {
   multiplierEnabled: boolean;

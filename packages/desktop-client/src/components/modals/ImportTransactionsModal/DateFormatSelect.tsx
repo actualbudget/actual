@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
 import { View } from '@actual-app/components/view';
@@ -10,7 +11,6 @@ import {
 } from './utils';
 
 import { SectionLabel } from '@desktop-client/components/forms';
-import { useTranslation } from 'react-i18next';
 
 type DateFormatSelectProps = {
   transactions: ImportTransaction[];
