@@ -10,6 +10,7 @@ import pluginReactHooks from 'eslint-plugin-react-hooks';
 import pluginRulesDir from 'eslint-plugin-rulesdir';
 import pluginTypescript from 'typescript-eslint';
 import pluginTypescriptPaths from 'eslint-plugin-typescript-paths';
+import pluginActual from './packages/eslint-plugin-actual/lib/index.js';
 
 import tsParser from '@typescript-eslint/parser';
 
@@ -167,10 +168,15 @@ export default pluginTypescript.config(
   pluginImport.flatConfigs.recommended,
   {
     plugins: {
+      actual: pluginActual,
       'react-hooks': pluginReactHooks,
       'jsx-a11y': pluginJSXA11y,
       rulesdir: pluginRulesDir,
       'typescript-paths': pluginTypescriptPaths,
+    },
+    rules: {
+      'actual/no-untranslated-strings': 'error',
+      'actual/prefer-trans-over-t': 'error',
     },
   },
   {
@@ -779,6 +785,7 @@ export default pluginTypescript.config(
 
     rules: {
       'rulesdir/typography': 'off',
+      'actual/no-untranslated-strings': 'off',
     },
   },
   {
