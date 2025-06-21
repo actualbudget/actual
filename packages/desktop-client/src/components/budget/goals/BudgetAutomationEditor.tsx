@@ -136,7 +136,7 @@ export function BudgetAutomationEditor({
             <Select
               id="type-field"
               options={displayTemplateTypes}
-              defaultLabel="Select an option"
+              defaultLabel={t("Select an option")}
               value={state.displayType}
               onChange={type => type && dispatch(setType(type))}
               style={{ width: 172 }}

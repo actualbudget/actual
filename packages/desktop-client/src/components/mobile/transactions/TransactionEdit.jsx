@@ -137,6 +137,8 @@ export function lookupName(items, id) {
 }
 
 export function Status({ status, isSplit }) {
+  const { t } = useTranslation();
+
   let color;
 
   switch (status) {
@@ -161,7 +163,7 @@ export function Status({ status, isSplit }) {
         textAlign: 'left',
       }}
     >
-      {titleFirst(status) + (isSplit ? ' (Split)' : '')}
+      {titleFirst(status) + (isSplit ? t(' (Split)') : '')}
     </Text>
   );
 }
@@ -451,7 +453,7 @@ const ChildTransactionEdit = forwardRef(
                 userSelect: 'none',
               }}
             >
-              {t('Delete split')}
+              <Trans>Delete split</Trans>
             </Text>
           </Button>
         </View>
@@ -962,7 +964,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   color: theme.formLabelText,
                 }}
               >
-                {t('Split')}
+                <Trans>Split</Trans>
               </Text>
             </Button>
           </View>
@@ -1065,7 +1067,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   userSelect: 'none',
                 }}
               >
-                {t('Delete transaction')}
+                <Trans>Delete transaction</Trans>
               </Text>
             </Button>
           </View>

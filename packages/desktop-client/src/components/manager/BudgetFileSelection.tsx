@@ -129,6 +129,8 @@ function BudgetFileMenuButton({
   onDelete,
   onDuplicate,
 }: BudgetFileMenuButtonProps) {
+  const { t } = useTranslation();
+
   const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -137,7 +139,7 @@ function BudgetFileMenuButton({
       <Button
         ref={triggerRef}
         variant="bare"
-        aria-label="Menu"
+        aria-label={t("Menu")}
         onPress={() => {
           setMenuOpen(true);
         }}
@@ -182,18 +184,18 @@ function BudgetFileState({ file, currentUserId }: BudgetFileStateProps) {
         return 'Server';
       }
 
-      return userFound?.displayName ?? userFound?.userName ?? 'Unassigned';
+      return userFound?.displayName ?? userFound?.userName ?? t('Unassigned');
     }
 
-    return 'Unknown';
-  }, [file]);
+    return t('Unknown');
+  }, [file, t]);
 
   switch (file.state) {
     case 'unknown':
       Icon = SvgCloudUnknown;
       status = t('Network unavailable');
       color = theme.buttonNormalDisabledText;
-      ownerName = 'Unknown';
+      ownerName = t('Unknown');
       break;
     case 'remote':
       Icon = SvgCloudDownload;
@@ -202,7 +204,7 @@ function BudgetFileState({ file, currentUserId }: BudgetFileStateProps) {
       break;
     case 'local':
       Icon = SvgFileDouble;
-      status = 'Local';
+      status = t('Local');
       ownerName = 'You';
       break;
     case 'broken':
@@ -444,6 +446,8 @@ type RefreshButtonProps = {
 };
 
 function RefreshButton({ style, onRefresh }: RefreshButtonProps) {
+  const { t } = useTranslation();
+
   const [loading, setLoading] = useState(false);
 
   async function _onRefresh() {
@@ -457,7 +461,7 @@ function RefreshButton({ style, onRefresh }: RefreshButtonProps) {
   return (
     <Button
       variant="bare"
-      aria-label="Refresh"
+      aria-label={t("Refresh")}
       style={{ padding: 10, ...style }}
       onPress={_onRefresh}
     >
@@ -724,6 +728,8 @@ type UserAccessForFileProps = {
 };
 
 function UserAccessForFile({ fileId, currentUserId }: UserAccessForFileProps) {
+  const { t } = useTranslation();
+
   const allFiles = useSelector(state => state.budgets.allFiles || []);
   const remoteFiles = allFiles.filter(
     f => f.state === 'remote' || f.state === 'synced' || f.state === 'detached',
@@ -736,9 +742,9 @@ function UserAccessForFile({ fileId, currentUserId }: UserAccessForFileProps) {
 
   const sortedUsersAccess = [...usersAccess].sort((a, b) => {
     const textA =
-      a.userId === currentUserId ? 'You' : (a.displayName ?? a.userName);
+      a.userId === currentUserId ? t('You') : (a.displayName ?? a.userName);
     const textB =
-      b.userId === currentUserId ? 'You' : (b.displayName ?? b.userName);
+      b.userId === currentUserId ? t('You') : (b.displayName ?? b.userName);
     return textA.localeCompare(textB);
   });
 
@@ -794,7 +800,7 @@ function UserAccessForFile({ fileId, currentUserId }: UserAccessForFileProps) {
                           }}
                         >
                           {user.userId === currentUserId
-                            ? 'You'
+                            ? t('You')
                             : (user.displayName ?? user.userName)}
                         </View>
                       </View>
