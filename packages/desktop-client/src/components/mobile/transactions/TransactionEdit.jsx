@@ -163,7 +163,9 @@ export function Status({ status, isSplit }) {
         textAlign: 'left',
       }}
     >
-      {isSplit ? t('{{status}} (Split)', { status: titleFirst(status) }) : titleFirst(status)}
+      {isSplit
+        ? t('{{status}} (Split)', { status: titleFirst(status) })
+        : titleFirst(status)}
     </Text>
   );
 }
