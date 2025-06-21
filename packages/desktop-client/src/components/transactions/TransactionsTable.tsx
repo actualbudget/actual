@@ -589,7 +589,7 @@ function PayeeCell({
               <Tooltip
                 content={
                   <View style={{ padding: 10 }}>
-                    <Text style={{ fontWeight: 'bold' }}>Imported Payee</Text>
+                    <Text style={{ fontWeight: 'bold' }}><Trans>Imported Payee</Trans></Text>
                     <Text style={{ fontWeight: 'normal' }}>
                       {importedPayee}
                     </Text>
@@ -665,7 +665,7 @@ function PayeeCell({
                 <Tooltip
                   content={
                     <View style={{ padding: 10 }}>
-                      <Text style={{ fontWeight: 'bold' }}>Imported Payee</Text>
+                      <Text style={{ fontWeight: 'bold' }}><Trans>Imported Payee</Trans></Text>
                       <Text style={{ fontWeight: 'normal' }}>
                         {importedPayee}
                       </Text>

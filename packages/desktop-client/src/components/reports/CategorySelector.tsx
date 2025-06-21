@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React, { Fragment, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import {
@@ -87,7 +87,7 @@ export function CategorySelector({
                   height={15}
                   style={{ marginRight: 5 }}
                 />
-                <Text>{t('Show unchecked')}</Text>
+                <Text><Trans>Show unchecked</Trans></Text>
               </View>
             ) : (
               <View
@@ -109,7 +109,7 @@ export function CategorySelector({
                     textOverflow: 'ellipsis',
                   }}
                 >
-                  {t('Hide unchecked')}
+                  <Trans>Hide unchecked</Trans>
                 </Text>
               </View>
             )}
