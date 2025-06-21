@@ -1,6 +1,3 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
 import globals from 'globals';
 
 import pluginImport from 'eslint-plugin-import';
@@ -12,9 +9,6 @@ import pluginTypescriptPaths from 'eslint-plugin-typescript-paths';
 import pluginActual from './packages/eslint-plugin-actual/lib/index.js';
 
 import tsParser from '@typescript-eslint/parser';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const confusingBrowserGlobals = [
   // https://github.com/facebook/create-react-app/tree/main/packages/confusing-browser-globals

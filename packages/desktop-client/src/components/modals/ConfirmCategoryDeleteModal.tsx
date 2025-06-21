@@ -164,7 +164,7 @@ export function ConfirmCategoryDeleteModal({
                   }
                 }}
               >
-                {t('Delete')}
+                <Trans>Delete</Trans>
               </Button>
             </View>
           </View>

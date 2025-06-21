@@ -1298,7 +1298,9 @@ export function EditRuleModal({
                   justify="flex-end"
                   style={{ marginTop: 20 }}
                 >
-                  <Button onClick={close}>{t('Cancel')}</Button>
+                  <Button onClick={close}>
+                    <Trans>Cancel</Trans>
+                  </Button>
                   <Button variant="primary" onPress={() => onSave(close)}>
                     <Trans>Save</Trans>
                   </Button>

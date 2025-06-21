@@ -313,7 +313,7 @@ export const ManagePayees = ({
                 marginTop: 5,
               }}
             >
-              {t('No payees')}
+              <Trans>No payees</Trans>
             </View>
           ) : (
             <PayeeTable

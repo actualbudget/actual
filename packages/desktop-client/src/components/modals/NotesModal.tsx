@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheck } from '@actual-app/components/icons/v2';
@@ -82,7 +82,7 @@ export function NotesModal({ id, name, onSave }: NotesModalProps) {
                 }}
               >
                 <SvgCheck width={17} height={17} style={{ paddingRight: 5 }} />
-                {t('Save notes')}
+                <Trans>Save notes</Trans>
               </Button>
             </View>
           </View>

@@ -4,7 +4,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -140,7 +140,7 @@ export function EditFieldModal({
                 noteInputRef.current?.focus();
               }}
             >
-              {t('Prepend')}
+              <Trans>Prepend</Trans>
             </Button>
             <Button
               style={{
@@ -171,7 +171,7 @@ export function EditFieldModal({
                 noteInputRef.current?.focus();
               }}
             >
-              {t('Replace')}
+              <Trans>Replace</Trans>
             </Button>
             <Button
               style={{
@@ -202,7 +202,7 @@ export function EditFieldModal({
                 noteInputRef.current?.focus();
               }}
             >
-              {t('Append')}
+              <Trans>Append</Trans>
             </Button>
           </View>
           <Input

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, type CSSProperties } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -41,7 +41,6 @@ export function EnvelopeBudgetMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
 
-  const { t } = useTranslation();
   const budgeted = useEnvelopeSheetValue(
     envelopeBudget.catBudgeted(categoryId),
   );
@@ -85,7 +84,7 @@ export function EnvelopeBudgetMenuModal({
                 fontWeight: 400,
               }}
             >
-              {t('Budgeted')}
+              <Trans>Budgeted</Trans>
             </Text>
             <FocusableAmountInput
               value={integerToAmount(budgeted || 0)}

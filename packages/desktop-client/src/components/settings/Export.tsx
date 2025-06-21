@@ -48,7 +48,7 @@ export function ExportBudget() {
       primaryAction={
         <>
           <ButtonWithLoading onPress={onExport} isLoading={isLoading}>
-            {t('Export data')}
+            <Trans>Export data</Trans>
           </ButtonWithLoading>
           {error && (
             <Block style={{ color: theme.errorText, marginTop: 15 }}>
