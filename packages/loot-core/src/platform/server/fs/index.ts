@@ -7,7 +7,7 @@ export declare function getDataDir(): string;
 export type GetDataDir = typeof getDataDir;
 
 export declare function _setDocumentDir(dir: string): string;
-export type _setDocumentDir = typeof _setDocumentDir;
+export type _SetDocumentDir = typeof _setDocumentDir;
 
 export declare function getDocumentDir(): string;
 export type GetDocumentDir = typeof getDocumentDir;
@@ -39,13 +39,13 @@ export type Exists = typeof exists;
 export declare function mkdir(filepath: string): Promise<undefined>;
 export type Mkdir = typeof mkdir;
 
-export declare function size(filepath: string): Promise<undefined>;
+export declare function size(filepath: string): Promise<number>;
 export type Size = typeof size;
 
 export declare function copyFile(
   frompath: string,
   topath: string,
-): Promise<undefined>;
+): Promise<boolean>;
 export type CopyFile = typeof copyFile;
 
 export declare function readFile(
