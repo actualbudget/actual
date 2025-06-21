@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Routes, Route, useLocation } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
@@ -60,7 +60,7 @@ function UncategorizedButton() {
         color: theme.errorText,
       }}
     >
-      {count} uncategorized {count === 1 ? 'transaction' : 'transactions'}
+      <Trans count={count}>{{ count }} uncategorized transactions</Trans>
     </Link>
   );
 }
@@ -70,6 +70,7 @@ type PrivacyButtonProps = {
 };
 
 function PrivacyButton({ style }: PrivacyButtonProps) {
+  const { t } = useTranslation();
   const [isPrivacyEnabledPref, setPrivacyEnabledPref] =
     useSyncedPref('isPrivacyEnabled');
   const isPrivacyEnabled = String(isPrivacyEnabledPref) === 'true';
@@ -91,7 +92,9 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
   return (
     <Button
       variant="bare"
-      aria-label={`${isPrivacyEnabled ? 'Disable' : 'Enable'} privacy mode`}
+      aria-label={
+        isPrivacyEnabled ? t('Disable privacy mode') : t('Enable privacy mode')
+      }
       onPress={() => setPrivacyEnabledPref(String(!isPrivacyEnabled))}
       style={style}
     >
@@ -242,10 +245,10 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
       )}
       <Text style={isMobile ? { ...mobileTextStyle } : { marginLeft: 3 }}>
         {syncState === 'disabled'
-          ? 'Disabled'
+          ? t('Disabled')
           : syncState === 'offline'
-            ? 'Offline'
-            : 'Sync'}
+            ? t('Offline')
+            : t('Sync')}
       </Text>
     </Button>
   );
@@ -328,7 +331,7 @@ export function Titlebar({ style }: TitlebarProps) {
                   height={10}
                   style={{ marginRight: 5, color: 'currentColor' }}
                 />{' '}
-                {t('Back')}
+                <Trans>Back</Trans>
               </Button>
             ) : null
           }
