@@ -137,9 +137,7 @@ export function AmountInput({
       <Button
         variant="bare"
         isDisabled={disabled}
-        aria-label={t('Make {{type}}', {
-          type: symbol === '-' ? t('positive') : t('negative'),
-        })}
+        aria-label={symbol === '-' ? t('Make positive') : t('Make negative')}
         style={{ padding: '0 7px' }}
         onPress={onSwitch}
         ref={buttonRef}
