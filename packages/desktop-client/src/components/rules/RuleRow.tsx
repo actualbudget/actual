@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React, { memo, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgRightArrow2 } from '@actual-app/components/icons/v0';
@@ -219,7 +219,9 @@ export const RuleRow = memo(
         </Field>
 
         <Cell name="edit" plain style={{ padding: '0 15px', paddingLeft: 5 }}>
-          <Button onPress={() => onEditRule(rule)}>{t('Edit')}</Button>
+          <Button onPress={() => onEditRule(rule)}>
+            <Trans>Edit</Trans>
+          </Button>
         </Cell>
       </Row>
     );

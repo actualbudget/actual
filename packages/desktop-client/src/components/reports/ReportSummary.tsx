@@ -169,7 +169,14 @@ export function ReportSummary({
           </PrivacyFilter>
         </Text>
         <Text style={{ fontWeight: 600 }}>
-          Per {(ReportOptions.intervalMap.get(interval) || '').toLowerCase()}
+          <Trans>
+            Per{' '}
+            {{
+              interval: (
+                ReportOptions.intervalMap.get(interval) || ''
+              ).toLowerCase(),
+            }}
+          </Trans>
         </Text>
       </View>
     </View>

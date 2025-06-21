@@ -60,7 +60,7 @@ export function ConfirmUnlinkAccountModal({
               }}
             >
               <Button style={{ marginRight: 10 }} onPress={close}>
-                {t('Cancel')}
+                <Trans>Cancel</Trans>
               </Button>
               <InitialFocus>
                 <Button
@@ -70,7 +70,7 @@ export function ConfirmUnlinkAccountModal({
                     close();
                   }}
                 >
-                  {t('Unlink')}
+                  <Trans>Unlink</Trans>
                 </Button>
               </InitialFocus>
             </View>

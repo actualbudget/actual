@@ -14,7 +14,7 @@ export const expect = baseExpect.extend({
     }
 
     const config = {
-      // eslint-disable-next-line rulesdir/typography
+      // eslint-disable-next-line actual/typography
       mask: [locator.locator('[data-vrt-mask="true"]')],
       maxDiffPixels: 5,
     };

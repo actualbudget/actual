@@ -38,7 +38,7 @@ function isKeyword(str) {
 }
 
 export function quoteAlias(alias) {
-  // eslint-disable-next-line rulesdir/typography
+  // eslint-disable-next-line actual/typography
   return alias.indexOf('.') === -1 && !isKeyword(alias) ? alias : `"${alias}"`;
 }
 
@@ -342,7 +342,7 @@ function val(state, expr, type?: string) {
   }
 
   if (castedExpr.literal) {
-    /* eslint-disable rulesdir/typography */
+    /* eslint-disable actual/typography */
     if (castedExpr.type === 'id') {
       return `'${castedExpr.value}'`;
     } else if (castedExpr.type === 'string') {
@@ -350,7 +350,7 @@ function val(state, expr, type?: string) {
       const value = castedExpr.value.replace(/'/g, "''");
       return `'${value}'`;
     }
-    /* eslint-enable rulesdir/typography */
+    /* eslint-enable actual/typography */
   }
 
   return castedExpr.value;
@@ -718,7 +718,7 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
       const [left, right] = valArray(state, [lhs, rhs], [null, 'array']);
       // Dedupe the ids
       const ids = [...new Set(right)];
-      // eslint-disable-next-line rulesdir/typography
+      // eslint-disable-next-line actual/typography
       return `${left} IN (` + ids.map(id => `'${id}'`).join(',') + ')';
     }
     case '$like': {

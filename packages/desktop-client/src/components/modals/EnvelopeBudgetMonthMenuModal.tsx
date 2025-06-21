@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import {
@@ -125,7 +125,7 @@ export function EnvelopeBudgetMonthMenuModal({
                     height={20}
                     style={{ paddingRight: 5 }}
                   />
-                  {t('Edit notes')}
+                  <Trans>Edit notes</Trans>
                 </Button>
               </View>
               <View>
@@ -155,7 +155,7 @@ export function EnvelopeBudgetMonthMenuModal({
                       style={{ paddingRight: 5 }}
                     />
                   )}
-                  {t('Actions')}
+                  <Trans>Actions</Trans>
                 </Button>
               </View>
             </View>

@@ -13,7 +13,7 @@ module.exports = {
     fixable: null,
     schema: [],
     messages: {
-      // eslint-disable-next-line rulesdir/typography
+      // eslint-disable-next-line actual/typography
       quote: `Avoid using straight quotes (' or ") in user-visible text. Use curly quotes (‘ ’ or “ ”) instead.`,
     },
   },
@@ -26,7 +26,7 @@ module.exports = {
     //----------------------------------------------------------------------
 
     function check(node, { value = node.value, strip = false } = {}) {
-      // eslint-disable-next-line rulesdir/typography
+      // eslint-disable-next-line actual/typography
       if (!value.includes("'") && !value.includes('"')) return;
 
       let rawText = context.getSourceCode().getText(node);

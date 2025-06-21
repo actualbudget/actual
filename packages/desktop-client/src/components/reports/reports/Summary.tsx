@@ -326,7 +326,9 @@ function SummaryInner({ widget }: SummaryInnerProps) {
             padding: 16,
           }}
         >
-          <span style={{ marginRight: 4 }}>{t('Show as')}</span>
+          <span style={{ marginRight: 4 }}>
+            <Trans>Show as</Trans>
+          </span>
           <FieldSelect
             style={{ marginRight: 16 }}
             fields={[

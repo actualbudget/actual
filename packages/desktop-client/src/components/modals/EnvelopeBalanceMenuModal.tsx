@@ -1,5 +1,5 @@
 import React, { type CSSProperties } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -40,7 +40,6 @@ export function EnvelopeBalanceMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
 
-  const { t } = useTranslation();
   const category = useCategory(categoryId);
 
   if (!category) {
@@ -68,7 +67,7 @@ export function EnvelopeBalanceMenuModal({
                 fontWeight: 400,
               }}
             >
-              {t('Balance')}
+              <Trans>Balance</Trans>
             </Text>
             <BalanceWithCarryover
               isDisabled

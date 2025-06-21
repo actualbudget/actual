@@ -166,7 +166,7 @@ export function TransferOwnership({
                     marginTop: 5,
                   }}
                 >
-                  {t('No users available')}
+                  <Trans>No users available</Trans>
                 </Text>
               )}
             </FormField>
