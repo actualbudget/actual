@@ -2200,7 +2200,7 @@ function TransactionTableInner({
               balance={
                 props.transactions?.length > 0
                   ? (props.balances?.[
-                      props.transactions.filter(t => t.schedule === null)[0]?.id
+                      props.transactions.find(t => t.schedule === null)?.id
                     ]?.balance ?? 0)
                   : 0
               }
