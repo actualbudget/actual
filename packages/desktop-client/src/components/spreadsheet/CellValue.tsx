@@ -83,10 +83,15 @@ export function CellValueText<
   ...props
 }: CellValueTextProps<SheetName, FieldName>) {
   const format = useFormat();
+  const isFinancial =
+    type === 'financial' ||
+    type === 'financial-with-sign' ||
+    type === 'financial-no-decimals';
   return (
     <Text
       style={{
-        ...(type === 'financial' && styles.tnum),
+        ...(isFinancial && styles.tnum),
+        ...(isFinancial && { whiteSpace: 'nowrap' }),
         ...style,
       }}
       data-testid={name}

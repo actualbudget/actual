@@ -2,7 +2,8 @@ export type FeatureFlag =
   | 'goalTemplatesEnabled'
   | 'goalTemplatesUIEnabled'
   | 'actionTemplating'
-  | 'pluggyAiBankSync';
+  | 'pluggyAiBankSync'
+  | 'currency';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -16,6 +17,9 @@ export type SyncedPrefs = Partial<
     | 'numberFormat'
     | 'hideFraction'
     | 'isPrivacyEnabled'
+    | 'currencySymbolPosition'
+    | 'currencySpaceBetweenAmountAndSymbol'
+    | 'defaultCurrencyCode'
     | `show-balances-${string}`
     | `show-extra-balances-${string}`
     | `hide-cleared-${string}`
