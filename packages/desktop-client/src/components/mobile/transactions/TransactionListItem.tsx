@@ -296,12 +296,12 @@ export function TransactionListItem({
                 >
                   {integerToCurrency(amount)}
                 </Text>
-                {balance && (
+                {balance !== null && (
                   <Text
                     style={{
                       fontSize: 11,
                       fontWeight: '400',
-                      ...makeBalanceAmountStyle(balance || 0),
+                      ...makeBalanceAmountStyle(balance),
                     }}
                   >
                     {integerToCurrency(balance)}

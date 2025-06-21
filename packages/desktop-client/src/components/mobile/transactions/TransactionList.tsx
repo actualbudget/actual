@@ -207,7 +207,7 @@ export function TransactionList({
               {transaction => (
                 <TransactionListItem
                   key={transaction.id}
-                  balance={runningBalances?.get(transaction.id) || null}
+                  balance={runningBalances?.get(transaction.id)}
                   value={transaction}
                   onPress={trans => onTransactionPress(trans)}
                   onLongPress={trans => onTransactionPress(trans, true)}
