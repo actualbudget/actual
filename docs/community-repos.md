@@ -68,6 +68,8 @@ Actual currently has official support for migrating budgets from YNAB4 and nYNAB
    - *A background service that automatically syncs your Actual Budget accounts on a scheduled basis.*
 * **Actual Userscripts** - https://github.com/pogman-code/actual-userscripts
    - *A collection of JavaScript/CSS Userscripts for Actual Budget.*
+* **Actual Budget iOS Widget** - https://github.com/TaylorJns/Actual-Budget-iOS-Widget
+   - *An iOS widget to display your Actual Budget category balances for the current month. Requires your Actual server to be accessible via HTTPS, and the **Local REST API** community project to be installed.*
 
 
 ## Others
