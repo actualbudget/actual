@@ -157,9 +157,9 @@ proto.EncryptedData.prototype.toObject = function(opt_includeInstance) {
  */
 proto.EncryptedData.toObject = function(includeInstance, msg) {
   var f, obj = {
-    iv: msg.getIv_asB64(),
-    authtag: msg.getAuthtag_asB64(),
-    data: msg.getData_asB64()
+iv: msg.getIv_asB64(),
+authtag: msg.getAuthtag_asB64(),
+data: msg.getData_asB64()
   };
 
   if (includeInstance) {
@@ -419,10 +419,10 @@ proto.Message.prototype.toObject = function(opt_includeInstance) {
  */
 proto.Message.toObject = function(includeInstance, msg) {
   var f, obj = {
-    dataset: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    row: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    column: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    value: jspb.Message.getFieldWithDefault(msg, 4, "")
+dataset: jspb.Message.getFieldWithDefault(msg, 1, ""),
+row: jspb.Message.getFieldWithDefault(msg, 2, ""),
+column: jspb.Message.getFieldWithDefault(msg, 3, ""),
+value: jspb.Message.getFieldWithDefault(msg, 4, "")
   };
 
   if (includeInstance) {
@@ -639,9 +639,9 @@ proto.MessageEnvelope.prototype.toObject = function(opt_includeInstance) {
  */
 proto.MessageEnvelope.toObject = function(includeInstance, msg) {
   var f, obj = {
-    timestamp: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    isencrypted: jspb.Message.getBooleanFieldWithDefault(msg, 2, false),
-    content: msg.getContent_asB64()
+timestamp: jspb.Message.getFieldWithDefault(msg, 1, ""),
+isencrypted: jspb.Message.getBooleanFieldWithDefault(msg, 2, false),
+content: msg.getContent_asB64()
   };
 
   if (includeInstance) {
@@ -860,12 +860,12 @@ proto.SyncRequest.prototype.toObject = function(opt_includeInstance) {
  */
 proto.SyncRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-    messagesList: jspb.Message.toObjectList(msg.getMessagesList(),
+messagesList: jspb.Message.toObjectList(msg.getMessagesList(),
     proto.MessageEnvelope.toObject, includeInstance),
-    fileid: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    groupid: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    keyid: jspb.Message.getFieldWithDefault(msg, 5, ""),
-    since: jspb.Message.getFieldWithDefault(msg, 6, "")
+fileid: jspb.Message.getFieldWithDefault(msg, 2, ""),
+groupid: jspb.Message.getFieldWithDefault(msg, 3, ""),
+keyid: jspb.Message.getFieldWithDefault(msg, 5, ""),
+since: jspb.Message.getFieldWithDefault(msg, 6, "")
   };
 
   if (includeInstance) {
@@ -1140,9 +1140,9 @@ proto.SyncResponse.prototype.toObject = function(opt_includeInstance) {
  */
 proto.SyncResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
-    messagesList: jspb.Message.toObjectList(msg.getMessagesList(),
+messagesList: jspb.Message.toObjectList(msg.getMessagesList(),
     proto.MessageEnvelope.toObject, includeInstance),
-    merkle: jspb.Message.getFieldWithDefault(msg, 2, "")
+merkle: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
   if (includeInstance) {
