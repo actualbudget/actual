@@ -13,6 +13,7 @@ import {
   SvgPiggyBank,
   SvgReports,
   SvgStoreFront,
+  SvgTag,
   SvgTuning,
   SvgWallet,
 } from '@actual-app/components/icons/v1';
@@ -67,6 +68,7 @@ export function CommandBar() {
       },
       { id: 'payees', name: t('Payees'), path: '/payees', Icon: SvgStoreFront },
       { id: 'rules', name: t('Rules'), path: '/rules', Icon: SvgTuning },
+      { id: 'tags', name: t('Tags'), path: '/tags', Icon: SvgTag },
       { id: 'settings', name: t('Settings'), path: '/settings', Icon: SvgCog },
     ],
     [t],

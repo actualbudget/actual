@@ -43,6 +43,7 @@ import {
   DbClockMessage,
   DbPayee,
   DbPayeeMapping,
+  DbTag,
   DbTransaction,
   DbViewTransaction,
   DbViewTransactionInternalAlive,
@@ -802,4 +803,26 @@ export async function deleteTransaction(transaction) {
 
 function toSqlQueryParameters(params: unknown[]) {
   return params.map(() => '?').join(',');
+}
+
+export function getTags() {
+  return all<DbTag>(`
+    SELECT id, tag, color, description
+    FROM tags
+    ORDER BY tag
+  `);
+}
+
+export function insertTag(tag): Promise<DbTag['id']> {
+  return insertWithUUID('tags', tag);
+}
+
+export async function deleteTag(tag) {
+  return transaction(() => {
+    runQuery(`DELETE FROM tags WHERE id = ?`, [tag.id]);
+  });
+}
+
+export function updateTag(tag) {
+  return update('tags', tag);
 }

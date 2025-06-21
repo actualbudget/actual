@@ -9,6 +9,7 @@ import {
   SvgCreditCard,
   SvgReports,
   SvgStoreFront,
+  SvgTag,
   SvgTuning,
   SvgWallet,
 } from '@actual-app/components/icons/v1';
@@ -77,6 +78,12 @@ export function PrimaryButtons() {
               indent={15}
             />
           )}
+          <SecondaryItem
+            title={t('Tags')}
+            Icon={SvgTag}
+            to="/tags"
+            indent={15}
+          />
           <SecondaryItem
             title={t('Settings')}
             Icon={SvgCog}
