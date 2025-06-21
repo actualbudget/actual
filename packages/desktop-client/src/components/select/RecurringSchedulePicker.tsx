@@ -460,9 +460,9 @@ function RecurringScheduleTooltip({
               defaultValue={config.endOccurrences || 1}
             />
             {config.endOccurrences === '1' ? (
-              <Trans>ocurrence</Trans>
+              <Trans>occurrence</Trans>
             ) : (
-              <Trans>ocurrences</Trans>
+              <Trans>occurrences</Trans>
             )}
           </>
         )}
