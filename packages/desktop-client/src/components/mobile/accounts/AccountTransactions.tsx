@@ -321,13 +321,11 @@ function TransactionListWithPreviews({
 
   const allBalances = useMemo(
     () =>
-      showBalances === 'true' && !isSearching
-        ? new Map<TransactionEntity['id'], IntegerAmount>([
-            ...previewRunningBalances,
-            ...runningBalances,
-          ])
-        : undefined,
-    [showBalances, isSearching, runningBalances, previewRunningBalances],
+      new Map<TransactionEntity['id'], IntegerAmount>([
+        ...previewRunningBalances,
+        ...runningBalances,
+      ]),
+    [runningBalances, previewRunningBalances],
   );
 
   useEffect(() => {
@@ -420,6 +418,7 @@ function TransactionListWithPreviews({
       balanceCleared={balanceQueries.cleared}
       balanceUncleared={balanceQueries.uncleared}
       runningBalances={allBalances}
+      showBalances={!isSearching && showBalances === 'true'}
       isLoadingMore={isLoadingMore}
       onLoadMore={loadMoreTransactions}
       searchPlaceholder={t('Search {{accountName}}', { accountName })}
