@@ -59,6 +59,7 @@ export function AmountInput({
   disabled = false,
   autoDecimals = false,
 }: AmountInputProps) {
+  const { t } = useTranslation();
   const format = useFormat();
   const [symbol, setSymbol] = useState<'+' | '-'>(
     initialValue === 0 ? zeroSign : initialValue > 0 ? '+' : '-',
@@ -136,7 +137,9 @@ export function AmountInput({
       <Button
         variant="bare"
         isDisabled={disabled}
-        aria-label={`Make ${symbol === '-' ? 'positive' : 'negative'}`}
+        aria-label={t('Make {{type}}', {
+          type: symbol === '-' ? t('positive') : t('negative'),
+        })}
         style={{ padding: '0 7px' }}
         onPress={onSwitch}
         ref={buttonRef}
