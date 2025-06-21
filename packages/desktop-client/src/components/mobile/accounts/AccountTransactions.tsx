@@ -274,10 +274,20 @@ function TransactionListWithPreviews({
     [accountId],
   );
 
+  const runningBalancesQuery = useCallback(
+    () =>
+      queries
+        .transactions(accountId)
+        .options({ splits: 'none' })
+        .select({ balance: { $sumOver: '$amount' } }),
+    [accountId],
+  );
+
   const [showBalances] = useSyncedPref(`show-balances-${accountId}`);
   const [transactionsQuery, setTransactionsQuery] = useState<Query>(
     baseTransactionsQuery(),
   );
+  const [balancesQuery] = useState<Query>(runningBalancesQuery);
   const {
     transactions,
     runningBalances,
@@ -287,6 +297,7 @@ function TransactionListWithPreviews({
     loadMore: loadMoreTransactions,
   } = useTransactions({
     query: transactionsQuery,
+    runningBalanceQuery: balancesQuery,
     options: {
       calculateRunningBalances: true,
     },
@@ -304,22 +315,21 @@ function TransactionListWithPreviews({
     isLoading: isPreviewTransactionsLoading,
   } = useAccountPreviewTransactions({
     accountId: account?.id,
-    getRunningBalances: showBalances === 'true',
+    getRunningBalances: true,
   });
 
-  useEffect(() => {
-    reloadTransactions();
-  }, [showBalances, reloadTransactions]);
+  useEffect(() => reloadTransactions(), [showBalances, reloadTransactions]);
 
-  const allBalances =
-    showBalances === 'true'
-      ? isSearching
-        ? undefined
-        : new Map<TransactionEntity['id'], IntegerAmount>([
-            ...runningBalances,
+  const allBalances = useMemo(
+    () =>
+      showBalances === 'true' && !isSearching
+        ? new Map<TransactionEntity['id'], IntegerAmount>([
             ...previewRunningBalances,
+            ...runningBalances,
           ])
-      : undefined;
+        : undefined,
+    [showBalances, isSearching, runningBalances, previewRunningBalances],
+  );
 
   useEffect(() => {
     if (accountId) {

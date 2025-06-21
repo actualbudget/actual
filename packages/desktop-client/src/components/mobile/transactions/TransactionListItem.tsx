@@ -296,7 +296,7 @@ export function TransactionListItem({
                 >
                   {integerToCurrency(amount)}
                 </Text>
-                {balance != null && (
+                {balance && (
                   <Text
                     style={{
                       fontSize: 11,

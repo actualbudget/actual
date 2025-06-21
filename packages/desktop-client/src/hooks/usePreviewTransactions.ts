@@ -23,6 +23,7 @@ import { useCachedSchedules } from './useCachedSchedules';
 import { type ScheduleStatuses } from './useSchedules';
 import { useSyncedPref } from './useSyncedPref';
 
+import { liveQuery } from '@desktop-client/queries/liveQuery';
 import {
   pagedQuery,
   type PagedQuery,
@@ -44,6 +45,10 @@ type UseTransactionsProps = {
    * to prevent unnecessary re-renders i.e. `useMemo`, `useState`, etc.
    */
   query?: Query;
+  /**
+   * Query to use to calculate the running balance
+   */
+  runningBalanceQuery?: Query;
   /**
    * The options to configure the hook behavior.
    */
@@ -109,6 +114,7 @@ type UseTransactionsResult = {
 
 export function useTransactions({
   query,
+  runningBalanceQuery,
   options = { pageCount: 50, calculateRunningBalances: false },
 }: UseTransactionsProps): UseTransactionsResult {
   const [isLoading, setIsLoading] = useState(true);
@@ -156,19 +162,6 @@ export function useTransactions({
       onData: data => {
         if (!isUnmounted) {
           setTransactions(data);
-
-          const calculateFn = getCalculateRunningBalancesFn(
-            optionsRef.current?.calculateRunningBalances,
-          );
-          if (calculateFn) {
-            setRunningBalances(
-              calculateFn(
-                data,
-                query.state.tableOptions?.splits as TransactionSplitsOption,
-              ),
-            );
-          }
-
           setIsLoading(false);
         }
       },
@@ -183,6 +176,23 @@ export function useTransactions({
       pagedQueryRef.current?.unsubscribe();
     };
   }, [query]);
+
+  useMemo(() => {
+    if (optionsRef.current.calculateRunningBalances) {
+      liveQuery(runningBalanceQuery, {
+        onData: data => {
+          const map = new Map<TransactionEntity['id'], IntegerAmount>();
+          data.forEach(val => {
+            //@ts-ignore the data is of type array[{balance: IntegerAmount, id: string}]
+            map.set(val.id, val.balance);
+          });
+          setRunningBalances(map);
+        },
+      });
+    } else {
+      setRunningBalances(new Map());
+    }
+  }, [runningBalanceQuery, optionsRef]);
 
   const loadMore = useCallback(async () => {
     if (!pagedQueryRef.current) {
@@ -200,6 +210,7 @@ export function useTransactions({
   }, []);
 
   const reload = useCallback(() => {
+    //optionsRef.current = options;
     pagedQueryRef.current?.run();
   }, []);
 
@@ -418,16 +429,6 @@ export function isForPreview(
     !schedule.completed &&
     ['due', 'upcoming', 'missed', 'paid'].includes(status!)
   );
-}
-
-function getCalculateRunningBalancesFn(
-  calculateRunningBalances: CalculateRunningBalancesOption = false,
-) {
-  return calculateRunningBalances === true
-    ? calculateRunningBalancesBottomUp
-    : typeof calculateRunningBalances === 'function'
-      ? calculateRunningBalances
-      : undefined;
 }
 
 export function calculateRunningBalancesBottomUp(
