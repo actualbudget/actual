@@ -2199,9 +2199,14 @@ function TransactionTableInner({
               onDistributeRemainder={props.onDistributeRemainder}
               balance={
                 props.transactions?.length > 0
-                  ? (props.balances?.[
-                      props.transactions.find(t => t.schedule === null)?.id
-                    ]?.balance ?? 0)
+                  ? (() => {
+                      const id = props.transactions.find(
+                        t => t.schedule === null,
+                      )?.id;
+                      return id !== undefined
+                        ? (props.balances?.[id]?.balance ?? 0)
+                        : 0;
+                    })()
                   : 0
               }
             />
