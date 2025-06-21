@@ -315,7 +315,6 @@ function TransactionListWithPreviews({
     isLoading: isPreviewTransactionsLoading,
   } = useAccountPreviewTransactions({
     accountId: account?.id,
-    getRunningBalances: true,
   });
 
   useEffect(() => reloadTransactions(), [showBalances, reloadTransactions]);
