@@ -8,6 +8,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { type TransObjectLiteral } from 'loot-core/types/util';
+
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import {
   Modal,
@@ -76,15 +78,19 @@ export function ConfirmCategoryDeleteModal({
                 {!isIncome ? (
                   <Trans>
                     Categories in the group{' '}
-                    <strong>{{ group: group.name }}</strong> are used by
-                    existing transactions.
+                    <strong>
+                      {{ group: group.name } as TransObjectLiteral}
+                    </strong>{' '}
+                    are used by existing transactions.
                   </Trans>
                 ) : (
                   <Trans>
                     Categories in the group{' '}
-                    <strong>{{ group: group.name }}</strong> are used by
-                    existing transactions or it has a positive leftover balance
-                    currently.
+                    <strong>
+                      {{ group: group.name } as TransObjectLiteral}
+                    </strong>{' '}
+                    are used by existing transactions or it has a positive
+                    leftover balance currently.
                   </Trans>
                 )}
                 <Trans>
@@ -97,14 +103,18 @@ export function ConfirmCategoryDeleteModal({
               <Block>
                 {!isIncome ? (
                   <Trans>
-                    <strong>{{ category: category.name }}</strong> is used by
-                    existing transactions.
+                    <strong>
+                      {{ category: category.name } as TransObjectLiteral}
+                    </strong>{' '}
+                    is used by existing transactions.
                   </Trans>
                 ) : (
                   <Trans>
-                    <strong>{{ category: category.name }}</strong> is used by
-                    existing transactions or it has a positive leftover balance
-                    currently.
+                    <strong>
+                      {{ category: category.name } as TransObjectLiteral}
+                    </strong>{' '}
+                    is used by existing transactions or it has a positive
+                    leftover balance currently.
                   </Trans>
                 )}
                 <Trans>
