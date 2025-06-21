@@ -205,13 +205,13 @@ function BudgetFileState({ file, currentUserId }: BudgetFileStateProps) {
     case 'local':
       Icon = SvgFileDouble;
       status = t('Local');
-      ownerName = 'You';
+      ownerName = t('You');
       break;
     case 'broken':
       ownerName = 'unknown';
       Icon = SvgFileDouble;
       status = t('Local');
-      ownerName = 'You';
+      ownerName = t('You');
       break;
     default:
       Icon = SvgCloudCheck;
