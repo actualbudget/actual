@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 
-import { groupById, type IntegerAmount } from 'loot-core/shared/util';
+import { groupById } from 'loot-core/shared/util';
 import {
   type ScheduleEntity,
   type AccountEntity,
@@ -17,7 +17,6 @@ import { accountBalance } from '@desktop-client/spreadsheet/bindings';
 
 type UseAccountPreviewTransactionsProps = {
   accountId?: AccountEntity['id'] | undefined;
-  getRunningBalances?: boolean;
 };
 
 type UseAccountPreviewTransactionsResult = ReturnType<
@@ -30,7 +29,6 @@ type UseAccountPreviewTransactionsResult = ReturnType<
  */
 export function useAccountPreviewTransactions({
   accountId,
-  getRunningBalances,
 }: UseAccountPreviewTransactionsProps): UseAccountPreviewTransactionsResult {
   const accounts = useAccounts();
   const accountsById = useMemo(() => groupById(accounts), [accounts]);
@@ -110,14 +108,11 @@ export function useAccountPreviewTransactions({
     return {
       isLoading,
       previewTransactions,
-      runningBalances: getRunningBalances
-        ? runningBalances
-        : new Map<AccountEntity['id'], IntegerAmount>(),
+      runningBalances,
       error,
     };
   }, [
     accountId,
-    getRunningBalances,
     allPreviewTransactions,
     allRunningBalances,
     error,
