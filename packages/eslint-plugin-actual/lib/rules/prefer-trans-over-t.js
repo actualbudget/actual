@@ -8,7 +8,8 @@ module.exports = {
     },
     schema: [],
     messages: {
-      preferTrans: 'Prefer <Trans>{{ text }}</Trans> over t(\'{{ text }}\') for simple text content in JSX.',
+      // eslint-disable-next-line actual/typography
+      preferTrans: "Prefer <Trans>{{ text }}</Trans> over t('{{ text }}')",
     },
     fixable: 'code',
   },
@@ -80,10 +81,7 @@ module.exports = {
             }
             if (containerParent.type === 'JSXElement') {
               const children = containerParent.children || [];
-              return children.some(child => 
-                child === parent || 
-                child === node
-              );
+              return children.some(child => child === parent || child === node);
             }
             containerParent = containerParent.parent;
           }
@@ -94,15 +92,17 @@ module.exports = {
           // <div>{t('Text')}</div> - WILL flag
           // <div title={t('Text')}></div> - will NOT flag
           const children = parent.children || [];
-          return children.some(child => 
-            child === node || 
-            (child.type === 'JSXExpressionContainer' && child.expression === node)
+          return children.some(
+            child =>
+              child === node ||
+              (child.type === 'JSXExpressionContainer' &&
+                child.expression === node),
           );
         }
-        
+
         parent = parent.parent;
       }
-      
+
       return false;
     }
 
@@ -125,14 +125,11 @@ module.exports = {
             },
             fix(fixer) {
               const text = node.arguments[0].value;
-              return fixer.replaceText(
-                node,
-                `<Trans>${text}</Trans>`
-              );
+              return fixer.replaceText(node, `<Trans>${text}</Trans>`);
             },
           });
         }
       },
     };
   },
-}; 
+};

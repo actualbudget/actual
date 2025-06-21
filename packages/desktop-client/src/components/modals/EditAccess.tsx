@@ -149,7 +149,7 @@ export function EditUserAccess({
               style={{ marginRight: 10 }}
               onPress={() => dispatch(popModal())}
             >
-              Cancel
+              <Trans>Cancel</Trans>
             </Button>
             <Button
               variant="primary"

@@ -472,7 +472,7 @@ export function ReportSidebar({
               onSelectRange(customReportItems.dateRange);
             }}
           >
-            Live
+            <Trans>Live</Trans>
           </ModeButton>
           <ModeButton
             selected={customReportItems.isDateStatic}
