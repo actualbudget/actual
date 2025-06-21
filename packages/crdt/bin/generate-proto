@@ -18,4 +18,9 @@ protoc --plugin="protoc-gen-ts=../../node_modules/.bin/protoc-gen-ts" \
 
 ../../node_modules/.bin/prettier --write src/proto/*.d.ts
 
+for file in src/proto/*.d.ts; do
+  { echo "/* eslint-disable @typescript-eslint/no-namespace */"; sed 's/export class/export declare class/g' "$file"; } > "${file%.d.ts}.ts"
+  rm "$file"
+done
+
 echo 'One more step! Find the `var global = ...` declaration in src/proto/sync_pb.js and change it to `var global = globalThis;`'

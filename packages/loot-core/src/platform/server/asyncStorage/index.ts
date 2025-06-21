@@ -2,7 +2,7 @@
 import { GlobalPrefsJson } from '../../../types/prefs';
 import { getDatabase } from '../indexeddb';
 
-import * as T from './index.d';
+import * as T from './index-types';
 
 export const init: T.Init = function () {};
 
