@@ -72,7 +72,7 @@ async function parseCSV(
       columns: options?.hasHeaderRow,
       bom: true,
       delimiter: options?.delimiter || ',',
-      // eslint-disable-next-line rulesdir/typography
+      // eslint-disable-next-line actual/typography
       quote: '"',
       trim: true,
       relax_column_count: true,
