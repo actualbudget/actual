@@ -7,7 +7,6 @@ import pluginImport from 'eslint-plugin-import';
 import pluginJSXA11y from 'eslint-plugin-jsx-a11y';
 import pluginReact from 'eslint-plugin-react';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
-import pluginRulesDir from 'eslint-plugin-rulesdir';
 import pluginTypescript from 'typescript-eslint';
 import pluginTypescriptPaths from 'eslint-plugin-typescript-paths';
 import pluginActual from './packages/eslint-plugin-actual/lib/index.js';
@@ -16,14 +15,6 @@ import tsParser from '@typescript-eslint/parser';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-pluginRulesDir.RULES_DIR = path.join(
-  __dirname,
-  'packages',
-  'eslint-plugin-actual',
-  'lib',
-  'rules',
-);
 
 const confusingBrowserGlobals = [
   // https://github.com/facebook/create-react-app/tree/main/packages/confusing-browser-globals
@@ -171,7 +162,6 @@ export default pluginTypescript.config(
       actual: pluginActual,
       'react-hooks': pluginReactHooks,
       'jsx-a11y': pluginJSXA11y,
-      rulesdir: pluginRulesDir,
       'typescript-paths': pluginTypescriptPaths,
     },
     rules: {
@@ -464,8 +454,8 @@ export default pluginTypescript.config(
         },
       ],
 
-      'rulesdir/typography': 'warn',
-      'rulesdir/prefer-if-statement': 'warn',
+      'actual/typography': 'warn',
+      'actual/prefer-if-statement': 'warn',
 
       // Note: base rule explicitly disabled in favor of the TS one
       'no-unused-vars': 'off',
@@ -784,7 +774,7 @@ export default pluginTypescript.config(
     ],
 
     rules: {
-      'rulesdir/typography': 'off',
+      'actual/typography': 'off',
       'actual/no-untranslated-strings': 'off',
     },
   },
@@ -804,7 +794,7 @@ export default pluginTypescript.config(
     // TODO: fix the issues in these files
     rules: {
       'import/extensions': 'off',
-      'rulesdir/typography': 'off',
+      'actual/typography': 'off',
     },
   },
   {

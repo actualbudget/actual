@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-/* eslint-disable rulesdir/typography */
+/* eslint-disable actual/typography */
 export default async function runMigration(db) {
   db.transaction(() => {
     db.execQuery(`
