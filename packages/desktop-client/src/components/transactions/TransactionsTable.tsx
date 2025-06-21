@@ -589,7 +589,9 @@ function PayeeCell({
               <Tooltip
                 content={
                   <View style={{ padding: 10 }}>
-                    <Text style={{ fontWeight: 'bold' }}><Trans>Imported Payee</Trans></Text>
+                    <Text style={{ fontWeight: 'bold' }}>
+                      <Trans>Imported Payee</Trans>
+                    </Text>
                     <Text style={{ fontWeight: 'normal' }}>
                       {importedPayee}
                     </Text>
@@ -665,7 +667,9 @@ function PayeeCell({
                 <Tooltip
                   content={
                     <View style={{ padding: 10 }}>
-                      <Text style={{ fontWeight: 'bold' }}><Trans>Imported Payee</Trans></Text>
+                      <Text style={{ fontWeight: 'bold' }}>
+                        <Trans>Imported Payee</Trans>
+                      </Text>
                       <Text style={{ fontWeight: 'normal' }}>
                         {importedPayee}
                       </Text>
@@ -763,7 +767,7 @@ function PayeeIcons({
         <Button
           variant="bare"
           data-testid="schedule-icon"
-          aria-label={t("See schedule details")}
+          aria-label={t('See schedule details')}
           style={payeeIconButtonStyle}
           onPress={() => {
             if (scheduleId) {
@@ -782,7 +786,7 @@ function PayeeIcons({
         <Button
           variant="bare"
           data-testid="transfer-icon"
-          aria-label={t("See transfer account")}
+          aria-label={t('See transfer account')}
           style={payeeIconButtonStyle}
           onPress={() => {
             if (!isTemporaryId(transaction.id)) {

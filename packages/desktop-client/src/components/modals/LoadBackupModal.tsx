@@ -105,7 +105,10 @@ export function LoadBackupModal({
                     <Text style={{ fontWeight: 600 }}>
                       <Trans>You are currently working from a backup.</Trans>
                     </Text>{' '}
-                    <Trans>You can load a different backup or revert to the original version below.</Trans>
+                    <Trans>
+                      You can load a different backup or revert to the original
+                      version below.
+                    </Trans>
                   </Block>
                   <Button
                     variant="primary"
@@ -126,9 +129,16 @@ export function LoadBackupModal({
               ) : (
                 <View style={{ alignItems: 'flex-start' }}>
                   <Block style={{ marginBottom: 10 }}>
-                    <Trans>Select a backup to load. After loading a backup, you will have a chance to revert to the current version in this screen.</Trans>{' '}
+                    <Trans>
+                      Select a backup to load. After loading a backup, you will
+                      have a chance to revert to the current version in this
+                      screen.
+                    </Trans>{' '}
                     <Text style={{ fontWeight: 600 }}>
-                      <Trans>If you use a backup, you will have to set up all your devices to sync from the new budget.</Trans>
+                      <Trans>
+                        If you use a backup, you will have to set up all your
+                        devices to sync from the new budget.
+                      </Trans>
                     </Text>
                   </Block>
                   <Button

@@ -129,7 +129,9 @@ export function ReportSummary({
         >
           <PrivacyFilter>{amountToCurrency(data[balanceTypeOp])}</PrivacyFilter>
         </Text>
-        <Text style={{ fontWeight: 600 }}><Trans>For this time period</Trans></Text>
+        <Text style={{ fontWeight: 600 }}>
+          <Trans>For this time period</Trans>
+        </Text>
       </View>
       <View
         style={{
@@ -167,7 +169,14 @@ export function ReportSummary({
           </PrivacyFilter>
         </Text>
         <Text style={{ fontWeight: 600 }}>
-          <Trans>Per {{interval: (ReportOptions.intervalMap.get(interval) || '').toLowerCase()}}</Trans>
+          <Trans>
+            Per{' '}
+            {{
+              interval: (
+                ReportOptions.intervalMap.get(interval) || ''
+              ).toLowerCase(),
+            }}
+          </Trans>
         </Text>
       </View>
     </View>

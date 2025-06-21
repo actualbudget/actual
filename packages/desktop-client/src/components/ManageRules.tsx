@@ -307,7 +307,9 @@ export function ManageRules({
             }}
           >
             <Text>
-              <Trans>Rules are always run in the order that you see them.</Trans>{' '}
+              <Trans>
+                Rules are always run in the order that you see them.
+              </Trans>{' '}
               <Link
                 variant="external"
                 to="https://actualbudget.org/docs/budgeting/rules/"
@@ -352,7 +354,9 @@ export function ManageRules({
           <Stack direction="row" align="center" justify="flex-end" spacing={2}>
             {selectedInst.items.size > 0 && (
               <Button onPress={onDeleteSelected}>
-                <Trans count={selectedInst.items.size}>Delete {{count: selectedInst.items.size}} rules</Trans>
+                <Trans count={selectedInst.items.size}>
+                  Delete {{ count: selectedInst.items.size }} rules
+                </Trans>
               </Button>
             )}
             <Button variant="primary" onPress={onCreateRule}>

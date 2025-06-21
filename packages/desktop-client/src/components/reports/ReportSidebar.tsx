@@ -215,7 +215,9 @@ export function ReportSidebar({
           }}
         >
           <Text>
-            <strong><Trans>Display</Trans></strong>
+            <strong>
+              <Trans>Display</Trans>
+            </strong>
           </Text>
         </View>
         <SpaceBetween
@@ -224,7 +226,9 @@ export function ReportSidebar({
             padding: 5,
           }}
         >
-          <Text style={{ width: 50, textAlign: 'right' }}><Trans>Mode:</Trans></Text>
+          <Text style={{ width: 50, textAlign: 'right' }}>
+            <Trans>Mode:</Trans>
+          </Text>
           <ModeButton
             selected={customReportItems.mode === 'total'}
             onSelect={() => onChangeMode('total')}
@@ -455,7 +459,9 @@ export function ReportSidebar({
           }}
         >
           <Text>
-            <strong><Trans>Date filters</Trans></strong>
+            <strong>
+              <Trans>Date filters</Trans>
+            </strong>
           </Text>
           <View style={{ flex: 1 }} />
           <ModeButton
@@ -600,7 +606,9 @@ export function ReportSidebar({
       >
         {isComplexCategoryCondition ? (
           <Information>
-            <Trans>Remove active category filters to show the category selector.</Trans>
+            <Trans>
+              Remove active category filters to show the category selector.
+            </Trans>
           </Information>
         ) : (
           <CategorySelector

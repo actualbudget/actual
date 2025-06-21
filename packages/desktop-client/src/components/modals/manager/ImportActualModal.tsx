@@ -28,17 +28,25 @@ export function ImportActualModal() {
   function getErrorMessage(error: string): string {
     switch (error) {
       case 'parse-error':
-        return t('Unable to parse file. Please select a JSON file exported from nYNAB.');
+        return t(
+          'Unable to parse file. Please select a JSON file exported from nYNAB.',
+        );
       case 'not-ynab5':
-        return t('This file is not valid. Please select a JSON file exported from nYNAB.');
+        return t(
+          'This file is not valid. Please select a JSON file exported from nYNAB.',
+        );
       case 'not-zip-file':
-        return t('This file is not valid. Please select an unencrypted archive of Actual data.');
+        return t(
+          'This file is not valid. Please select an unencrypted archive of Actual data.',
+        );
       case 'invalid-zip-file':
         return t('This archive is not a valid Actual export file.');
       case 'invalid-metadata-file':
         return t('The metadata file in the given archive is corrupted.');
       default:
-        return t('An unknown error occurred while importing. Please report this as a new issue on GitHub.');
+        return t(
+          'An unknown error occurred while importing. Please report this as a new issue on GitHub.',
+        );
     }
   }
 

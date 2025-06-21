@@ -12,7 +12,7 @@ export function GoCardlessLink() {
   window.close();
   return (
     <Modal name="gocardless-link" isDismissable={false}>
-      <ModalHeader title={t("Account sync")} />
+      <ModalHeader title={t('Account sync')} />
       <View style={{ maxWidth: 500 }}>
         <Paragraph>
           <Trans>Please wait...</Trans>

@@ -577,7 +577,10 @@ export function ImportTransactionsModal({
           ? trans.date
           : parseDate(trans.date, parseDateFormat);
       if (date == null) {
-        errorMessage = t('Unable to parse date {{date}} with given date format', { date: trans.date || '(empty)' });
+        errorMessage = t(
+          'Unable to parse date {{date}} with given date format',
+          { date: trans.date || '(empty)' },
+        );
         break;
       }
 
@@ -590,7 +593,9 @@ export function ImportTransactionsModal({
         multiplierAmount,
       );
       if (amount == null) {
-        errorMessage = t('Transaction on {{date}} has no amount', { date: trans.date });
+        errorMessage = t('Transaction on {{date}} has no amount', {
+          date: trans.date,
+        });
         break;
       }
 
@@ -723,13 +728,29 @@ export function ImportTransactionsModal({
     headers.unshift({ name: ' ', width: 31 });
   }
   if (inOutMode) {
-    headers.push({ name: t('In/Out'), width: 90, style: { textAlign: 'left' } });
+    headers.push({
+      name: t('In/Out'),
+      width: 90,
+      style: { textAlign: 'left' },
+    });
   }
   if (splitMode) {
-    headers.push({ name: t('Outflow'), width: 90, style: { textAlign: 'right' } });
-    headers.push({ name: t('Inflow'), width: 90, style: { textAlign: 'right' } });
+    headers.push({
+      name: t('Outflow'),
+      width: 90,
+      style: { textAlign: 'right' },
+    });
+    headers.push({
+      name: t('Inflow'),
+      width: 90,
+      style: { textAlign: 'right' },
+    });
   } else {
-    headers.push({ name: t('Amount'), width: 90, style: { textAlign: 'right' } });
+    headers.push({
+      name: t('Amount'),
+      width: 90,
+      style: { textAlign: 'right' },
+    });
   }
 
   return (
@@ -750,7 +771,10 @@ export function ImportTransactionsModal({
           {error && !error.parsed && (
             <View style={{ alignItems: 'center', marginBottom: 15 }}>
               <Text style={{ marginRight: 10, color: theme.errorText }}>
-                <strong><Trans>Error:</Trans></strong> {error.message}
+                <strong>
+                  <Trans>Error:</Trans>
+                </strong>{' '}
+                {error.message}
               </Text>
             </View>
           )}
@@ -1055,7 +1079,9 @@ export function ImportTransactionsModal({
                           runImportPreview();
                         }}
                       >
-                        <Trans>Split amount into separate inflow/outflow columns</Trans>
+                        <Trans>
+                          Split amount into separate inflow/outflow columns
+                        </Trans>
                       </CheckboxOption>
                       <InOutOption
                         inOutMode={inOutMode}
@@ -1087,7 +1113,7 @@ export function ImportTransactionsModal({
                 const count = transactions?.filter(
                   trans => !trans.isMatchedTransaction && trans.selected,
                 ).length;
-                
+
                 return (
                   <ButtonWithLoading
                     variant="primary"
@@ -1098,9 +1124,7 @@ export function ImportTransactionsModal({
                       onImport(close);
                     }}
                   >
-                    <Trans count={count}>
-                      Import {{ count }} transactions
-                    </Trans>
+                    <Trans count={count}>Import {{ count }} transactions</Trans>
                   </ButtonWithLoading>
                 );
               })()}

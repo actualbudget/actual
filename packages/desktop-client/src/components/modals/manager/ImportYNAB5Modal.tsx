@@ -19,8 +19,6 @@ import {
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useDispatch } from '@desktop-client/redux';
 
-
-
 export function ImportYNAB5Modal() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -30,11 +28,17 @@ export function ImportYNAB5Modal() {
   function getErrorMessage(error: string): string {
     switch (error) {
       case 'parse-error':
-        return t('Unable to parse file. Please select a JSON file exported from nYNAB.');
+        return t(
+          'Unable to parse file. Please select a JSON file exported from nYNAB.',
+        );
       case 'not-ynab5':
-        return t('This file is not valid. Please select a JSON file exported from nYNAB.');
+        return t(
+          'This file is not valid. Please select a JSON file exported from nYNAB.',
+        );
       default:
-        return t('An unknown error occurred while importing. Please report this as a new issue on GitHub.');
+        return t(
+          'An unknown error occurred while importing. Please report this as a new issue on GitHub.',
+        );
     }
   }
 

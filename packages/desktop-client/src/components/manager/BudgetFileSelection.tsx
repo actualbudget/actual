@@ -139,7 +139,7 @@ function BudgetFileMenuButton({
       <Button
         ref={triggerRef}
         variant="bare"
-        aria-label={t("Menu")}
+        aria-label={t('Menu')}
         onPress={() => {
           setMenuOpen(true);
         }}
@@ -461,7 +461,7 @@ function RefreshButton({ style, onRefresh }: RefreshButtonProps) {
   return (
     <Button
       variant="bare"
-      aria-label={t("Refresh")}
+      aria-label={t('Refresh')}
       style={{ padding: 10, ...style }}
       onPress={_onRefresh}
     >

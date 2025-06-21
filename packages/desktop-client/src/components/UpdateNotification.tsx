@@ -45,7 +45,7 @@ export function UpdateNotification() {
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <View style={{ marginRight: 10, fontWeight: 700 }}>
             <Text>
-              <Trans>App updated to {{version: updateInfo.version}}</Trans>
+              <Trans>App updated to {{ version: updateInfo.version }}</Trans>
             </Text>
           </View>
           <View style={{ flex: 1 }} />

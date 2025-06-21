@@ -87,7 +87,9 @@ export function CategorySelector({
                   height={15}
                   style={{ marginRight: 5 }}
                 />
-                <Text><Trans>Show unchecked</Trans></Text>
+                <Text>
+                  <Trans>Show unchecked</Trans>
+                </Text>
               </View>
             ) : (
               <View

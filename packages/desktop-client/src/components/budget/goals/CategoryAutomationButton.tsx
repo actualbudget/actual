@@ -40,7 +40,7 @@ export function CategoryAutomationButton({
   return (
     <Button
       variant="bare"
-      aria-label={t("Change category automations")}
+      aria-label={t('Change category automations')}
       className={!hasAutomations ? 'hover-visible' : ''}
       style={{
         color: defaultColor,
