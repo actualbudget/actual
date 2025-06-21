@@ -13,7 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as monthUtils from '../../shared/months';
 import { groupBy, sortByKey } from '../../shared/util';
 
-import { YNAB4 } from './ynab4-types';
+import * as YNAB4 from './ynab4-types';
 
 // Importer
 

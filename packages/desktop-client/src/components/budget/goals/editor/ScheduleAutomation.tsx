@@ -39,7 +39,7 @@ export const ScheduleAutomation = ({
         <Select
           id="schedule-field"
           key="schedule-picker"
-          defaultLabel="Select a schedule"
+          defaultLabel={t('Select a schedule')}
           value={template.name}
           onChange={schedule =>
             dispatch(

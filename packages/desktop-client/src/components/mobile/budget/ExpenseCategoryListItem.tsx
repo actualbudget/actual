@@ -19,17 +19,17 @@ import { BudgetCell } from './BudgetCell';
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { SpentCell } from './SpentCell';
 
-import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 import {
   envelopeBudget,
   trackingBudget,
-} from '@desktop-client/queries/queries';
-import { useDispatch } from '@desktop-client/redux';
+} from '@desktop-client/spreadsheet/bindings';
 
 type ExpenseCategoryNameProps = {
   category: CategoryEntity;

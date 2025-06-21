@@ -2,7 +2,6 @@ import fs, { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
@@ -38,17 +37,17 @@ if (process.env.NODE_ENV !== 'development') {
   );
 }
 
+app.use(express.json({ limit: `${config.get('upload.fileSizeLimitMB')}mb` }));
+
 app.use(
-  bodyParser.json({ limit: `${config.get('upload.fileSizeLimitMB')}mb` }),
-);
-app.use(
-  bodyParser.raw({
+  express.raw({
     type: 'application/actual-sync',
     limit: `${config.get('upload.fileSizeSyncLimitMB')}mb`,
   }),
 );
+
 app.use(
-  bodyParser.raw({
+  express.raw({
     type: 'application/encrypted-file',
     limit: `${config.get('upload.syncEncryptedFileSizeLimitMB')}mb`,
   }),

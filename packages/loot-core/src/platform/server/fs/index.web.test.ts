@@ -98,7 +98,7 @@ describe('web filesystem', () => {
     expect(await readFile('/documents/deep/nested/file/ok.txt')).toBe('deeper');
 
     const FS = sqlite._getModule().FS;
-    const { node } = FS.lookupPath('/documents/deep/nested/db.sqlite');
+    const { node } = FS.lookupPath('/documents/deep/nested/db.sqlite', {});
     expect(node.link).toBe(
       '/blocked/' + pathToId('/documents/deep/nested/db.sqlite'),
     );
