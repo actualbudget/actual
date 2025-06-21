@@ -796,8 +796,6 @@ export default pluginTypescript.config(
     rules: {
       'import/no-anonymous-default-export': 'off',
       'import/no-default-export': 'off',
-      // can be re-enabled after https://github.com/actualbudget/actual/pull/4253
-      '@typescript-eslint/no-unused-vars': 'off',
     },
   },
 );
