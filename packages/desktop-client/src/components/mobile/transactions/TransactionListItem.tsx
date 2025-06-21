@@ -77,7 +77,7 @@ type TransactionListItemProps = ComponentPropsWithoutRef<
   typeof ListBoxItem<TransactionEntity>
 > & {
   showBalance?: boolean;
-  balance: IntegerAmount | undefined;
+  balance?: IntegerAmount;
   onPress: (transaction: TransactionEntity) => void;
   onLongPress: (transaction: TransactionEntity) => void;
 };
@@ -298,15 +298,15 @@ export function TransactionListItem({
                 >
                   {integerToCurrency(amount)}
                 </Text>
-                {balance !== null && showBalance && (
+                {balance && showBalance && (
                   <Text
                     style={{
                       fontSize: 11,
                       fontWeight: '400',
-                      ...makeBalanceAmountStyle(balance ?? 0),
+                      ...makeBalanceAmountStyle(balance),
                     }}
                   >
-                    {integerToCurrency(balance ?? 0)}
+                    {integerToCurrency(balance)}
                   </Text>
                 )}
               </View>

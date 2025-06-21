@@ -88,7 +88,7 @@ type TransactionListWithBalancesProps = {
     | Binding<'category', 'balanceUncleared'>
     | Binding<'account', 'balanceUncleared'>;
   showBalances?: boolean;
-  runningBalances: Map<TransactionEntity['id'], IntegerAmount> | undefined;
+  runningBalances?: Map<TransactionEntity['id'], IntegerAmount>;
   searchPlaceholder: string;
   onSearch: (searchText: string) => void;
   isLoadingMore: boolean;

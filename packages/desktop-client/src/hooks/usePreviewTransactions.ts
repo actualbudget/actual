@@ -210,7 +210,6 @@ export function useTransactions({
   }, []);
 
   const reload = useCallback(() => {
-    //optionsRef.current = options;
     pagedQueryRef.current?.run();
   }, []);
 
