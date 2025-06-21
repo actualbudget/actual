@@ -9,19 +9,19 @@ const localRepoPath = './packages/desktop-client/locale';
 const processTranslations = () => {
   try {
     const files = fs.readdirSync(localRepoPath);
-    const enJsonPath = path.join(localRepoPath, 'en.json');
+    const untranslatedJsonPath = path.join(localRepoPath, 'untranslated.json');
 
-    if (!fs.existsSync(enJsonPath)) {
-      throw new Error('en.json not found in the repository.');
+    if (!fs.existsSync(untranslatedJsonPath)) {
+      throw new Error('untranslated.json not found in the repository.');
     }
 
-    const enJson = JSON.parse(fs.readFileSync(enJsonPath, 'utf8'));
-    const enKeysCount = Object.keys(enJson).length;
+    const untranslatedJson = JSON.parse(fs.readFileSync(untranslatedJsonPath, 'utf8'));
+    const untranslatedKeysCount = Object.keys(untranslatedJson).length;
 
-    console.log(`en.json has ${enKeysCount} keys.`);
+    console.log(`untranslated.json has ${untranslatedKeysCount} keys.`);
 
     files.forEach(file => {
-      if (file === 'en.json' || path.extname(file) !== '.json') return;
+      if (file === 'untranslated.json' || path.extname(file) !== '.json') return;
 
       if (file.startsWith('en-')) {
         console.log(`Keeping ${file} as it's an English language.`);
@@ -32,8 +32,8 @@ const processTranslations = () => {
       const jsonData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
       const fileKeysCount = Object.keys(jsonData).length;
 
-      // Calculate the percentage of keys present compared to en.json
-      const percentage = (fileKeysCount / enKeysCount) * 100;
+      // Calculate the percentage of keys present compared to untranslated.json
+      const percentage = (fileKeysCount / untranslatedKeysCount) * 100;
       console.log(
         `${file} has ${fileKeysCount} keys (${percentage.toFixed(2)}%).`,
       );
