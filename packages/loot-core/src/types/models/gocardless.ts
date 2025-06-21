@@ -1,6 +1,6 @@
 export type GoCardlessToken = {
   id: string;
-  accounts: unknown[];
+  accounts: SyncServerGoCardlessAccount[];
 };
 
 export type GoCardlessInstitution = {
@@ -75,7 +75,8 @@ export type GoCardlessTransaction = {
 };
 
 export type SyncServerGoCardlessAccount = {
-  institution: string;
+  balance: number;
+  institution: string | { name: string };
   account_id: string;
   mask: string;
   name: string;
