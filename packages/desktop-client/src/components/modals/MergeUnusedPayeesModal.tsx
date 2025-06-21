@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
@@ -31,7 +31,6 @@ export function MergeUnusedPayeesModal({
   payeeIds,
   targetPayeeId,
 }: MergeUnusedPayeesModalProps) {
-  const { t } = useTranslation();
   const allPayees = usePayees();
   const modalStack = useSelector(state => state.modals.modalStack);
   const isEditingRule = !!modalStack.find(m => m.name === 'edit-rule');
@@ -199,7 +198,7 @@ export function MergeUnusedPayeesModal({
                   close();
                 }}
               >
-                {t('Merge')}
+                <Trans>Merge</Trans>
               </Button>
               {!isEditingRule && (
                 <Button
@@ -209,11 +208,11 @@ export function MergeUnusedPayeesModal({
                     close();
                   }}
                 >
-                  {t('Merge and edit rule')}
+                  <Trans>Merge and edit rule</Trans>
                 </Button>
               )}
               <Button style={{ marginRight: 10 }} onPress={close}>
-                {t('Do nothing')}
+                <Trans>Do nothing</Trans>
               </Button>
             </ModalButtons>
           </View>

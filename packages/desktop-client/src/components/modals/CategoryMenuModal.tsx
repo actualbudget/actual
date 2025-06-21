@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React, { useRef, useState, type CSSProperties } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import {
@@ -148,7 +148,7 @@ export function CategoryMenuModal({
                   height={20}
                   style={{ paddingRight: 5 }}
                 />
-                {t('Edit notes')}
+                <Trans>Edit notes</Trans>
               </Button>
             </View>
           </View>

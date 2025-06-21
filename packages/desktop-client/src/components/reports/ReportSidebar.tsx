@@ -509,7 +509,11 @@ export function ReportSidebar({
               customReportItems.includeCurrentInterval && (
                 <Tooltip
                   placement="bottom start"
-                  content={<Text>{t('Current month')}</Text>}
+                  content={
+                    <Text>
+                      <Trans>Current month</Trans>
+                    </Text>
+                  }
                   style={{
                     ...styles.tooltip,
                     lineHeight: 1.5,
