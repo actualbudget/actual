@@ -2193,7 +2193,7 @@ function TransactionTableInner({
                 props.transactions?.length > 0
                   ? (() => {
                       const id = props.transactions.find(
-                        t => t.schedule === null,
+                        t => !isPreviewId(t.id),
                       )?.id;
                       return id !== undefined
                         ? (props.balances?.[id]?.balance ?? 0)
