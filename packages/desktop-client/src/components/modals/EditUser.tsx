@@ -143,7 +143,7 @@ export function EditUserFinanceApp({
                 ? t('Edit user {{userName}}', {
                     userName: defaultUser.displayName ?? defaultUser.userName,
                   })
-                : 'Add user'
+                : t('Add user')
             }
             rightContent={<ModalCloseButton onPress={close} />}
           />
@@ -249,7 +249,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
             onChange={() => setEnabled(!enabled)}
           />
           <label htmlFor="enabled-field" style={{ userSelect: 'none' }}>
-            Enabled
+            <Trans>Enabled</Trans>
           </label>
         </View>
       </Stack>
@@ -305,7 +305,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
       </Stack>
       <Stack direction="row" style={{ marginTop: 10, width: '100px' }}>
         <FormField style={{ flex: 1 }}>
-          <FormLabel title="Role" htmlFor="role-field" />
+          <FormLabel title={t('Role')} htmlFor="role-field" />
           <Select
             id="role-field"
             disabled={isOwner}
@@ -335,7 +335,7 @@ function EditUser({ defaultUser, onSave: originalOnSave }: EditUserProps) {
           <Trans>Cancel</Trans>
         </Button>
         <Button variant="primary" onPress={onSave}>
-          {isExistingUser ? 'Save' : 'Add'}
+          {isExistingUser ? t('Save') : t('Add')}
         </Button>
       </Stack>
     </>

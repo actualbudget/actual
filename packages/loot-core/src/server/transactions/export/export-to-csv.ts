@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import csvStringify from 'csv-stringify/lib/sync';
+import { stringify as csvStringify } from 'csv-stringify/sync';
 
 import { integerToAmount } from '../../../shared/util';
 import { aqlQuery } from '../../aql';

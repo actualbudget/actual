@@ -232,7 +232,7 @@ function AdditionalAccountMenu({
       <Button
         ref={triggerRef}
         variant="bare"
-        aria-label="Menu"
+        aria-label={t('Menu')}
         onPress={() => {
           setMenuOpen(true);
         }}
