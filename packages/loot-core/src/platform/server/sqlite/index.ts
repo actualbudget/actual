@@ -1,35 +1,58 @@
-import { type Database } from '@jlongster/sql.js';
+import { type Database, type SqlJsStatic } from '@jlongster/sql.js';
+/// <reference types="emscripten" />
 
-export async function init(): Promise<void>;
+// Types exported from sql.js (and Emscripten) are incomplete, so we need to redefine them here
+type FSStream = (typeof FS)['FSStream'] & {
+  node: (typeof FS)['FSNode'] & {
+    contents: {
+      readIfFallback: () => Promise<unknown>;
+    };
+  };
+};
+type FS = Omit<typeof FS, 'lookupPath' | 'open' | 'close'> & {
+  lookupPath: (
+    path: string,
+    opts?: { follow?: boolean },
+  ) => { node: (typeof FS)['FSNode'] & { link?: string } };
+  open: (path: string, flags: string, mode?: number) => FSStream;
+  close: (stream: FSStream) => void;
+};
+export type SqlJsModule = SqlJsStatic & {
+  FS: FS;
+  reset_filesystem: () => void;
+  register_for_idb: (idb: IDBDatabase) => void;
+};
 
-export function _getModule(): SqlJsStatic;
+export declare function init(): Promise<void>;
 
-export function prepare(db: Database, sql: string): string;
+export declare function _getModule(): SqlJsModule;
 
-export function runQuery(
+export declare function prepare(db: Database, sql: string): string;
+
+export declare function runQuery(
   db: Database,
   sql: string,
   params?: (string | number)[],
   fetchAll?: false,
 ): { changes: unknown };
-export function runQuery<T>(
+export declare function runQuery<T>(
   db: Database,
   sql: string,
   params: (string | number)[],
   fetchAll: true,
 ): T[];
 
-export function execQuery(db: Database, sql): void;
+export declare function execQuery(db: Database, sql: string): void;
 
-export function transaction(db: Database, fn: () => void): void;
+export declare function transaction(db: Database, fn: () => void): void;
 
-export async function asyncTransaction(
+export declare function asyncTransaction(
   db: Database,
   fn: () => Promise<void>,
 ): Promise<void>;
 
-export async function openDatabase(pathOrBuffer?: string | Buffer): Database;
+export declare function openDatabase(pathOrBuffer?: string | Buffer): Database;
 
-export function closeDatabase(db: Database): void;
+export declare function closeDatabase(db: Database): void;
 
-export async function exportDatabase(db: Database): Promise<Uint8Array>;
+export declare function exportDatabase(db: Database): Promise<Uint8Array>;

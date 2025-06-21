@@ -7,14 +7,14 @@ export declare function init(
 ): void;
 export type Init = typeof init;
 
-export function send<K extends keyof ServerEvents>(
+export declare function send<K extends keyof ServerEvents>(
   type: K,
   args?: ServerEvents[K],
 ): void;
 export type Send = typeof send;
 
-export function getNumClients(): number;
+export declare function getNumClients(): number;
 export type GetNumClients = typeof getNumClients;
 
-export function resetEvents(): void;
+export declare function resetEvents(): void;
 export type ResetEvents = typeof resetEvents;
