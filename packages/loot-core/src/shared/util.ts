@@ -222,7 +222,9 @@ export function reapplyThousandSeparators(amountText: string) {
   const { decimalSeparator, thousandsSeparator } = getNumberFormat();
   const [integerPartRaw, decimalPart = ''] = amountText.split(decimalSeparator);
 
-  const numericValue = Number(integerPartRaw.replaceAll(thousandsSeparator, ''));
+  const numericValue = Number(
+    integerPartRaw.replaceAll(thousandsSeparator, ''),
+  );
   if (isNaN(numericValue)) {
     return amountText; // Return original if parsing fails
   }
