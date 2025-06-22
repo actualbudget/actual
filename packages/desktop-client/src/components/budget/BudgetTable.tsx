@@ -26,7 +26,10 @@ import {
   separateGroups,
 } from './util';
 
-import { OnDropCallback, type DropPosition } from '@desktop-client/components/sort';
+import {
+  OnDropCallback,
+  type DropPosition,
+} from '@desktop-client/components/sort';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
@@ -49,7 +52,9 @@ type BudgetTableProps = {
   onDeleteCategory: (id: CategoryEntity['id']) => Promise<void>;
   onSaveGroup: (group: CategoryGroupEntity) => void;
   onDeleteGroup: (id: CategoryGroupEntity['id']) => Promise<void>;
-  onApplyBudgetTemplatesInGroup: (groupIds: CategoryGroupEntity['id'][]) => void;
+  onApplyBudgetTemplatesInGroup: (
+    groupIds: CategoryGroupEntity['id'][],
+  ) => void;
   onReorderCategory: (params: {
     id: CategoryEntity['id'];
     groupId?: CategoryGroupEntity['id'];
@@ -228,8 +233,7 @@ export function BudgetTable(props: BudgetTableProps) {
     onCollapse(categoryGroups.map(g => g.id));
   };
 
-    const schedulesQuery = useMemo(() => 
-    q('schedules').select('*'), []);
+  const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
 
   return (
     <View

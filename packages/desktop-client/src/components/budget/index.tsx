@@ -217,7 +217,7 @@ function BudgetInner(props: BudgetInnerProps) {
     }
   };
 
-  const onSaveGroup =  async (group: CategoryGroupEntity) => {
+  const onSaveGroup = async (group: CategoryGroupEntity) => {
     if (group.id === 'new') {
       dispatch(createGroup({ name: group.name }));
     } else {
