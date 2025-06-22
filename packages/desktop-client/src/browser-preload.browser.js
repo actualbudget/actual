@@ -22,7 +22,7 @@ const ACTUAL_VERSION = Platform.isPlaywright
     : packageJson.version;
 
 // *** Start the backend ***
-let worker;
+let worker = null;
 
 function createBackendWorker() {
   worker = new Worker(backendWorkerUrl);

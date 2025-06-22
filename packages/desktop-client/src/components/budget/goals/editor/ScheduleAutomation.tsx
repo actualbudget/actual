@@ -4,8 +4,8 @@ import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 
-import type { ScheduleTemplate } from 'loot-core/server/budget/types/templates';
 import type { ScheduleEntity } from 'loot-core/types/models';
+import type { ScheduleTemplate } from 'loot-core/types/models/templates';
 
 import {
   type Action,
@@ -39,7 +39,7 @@ export const ScheduleAutomation = ({
         <Select
           id="schedule-field"
           key="schedule-picker"
-          defaultLabel="Select a schedule"
+          defaultLabel={t('Select a schedule')}
           value={template.name}
           onChange={schedule =>
             dispatch(

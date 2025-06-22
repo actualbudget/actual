@@ -173,6 +173,7 @@ function SplitAmountMethodSelect({ options, style, value, onChange }) {
 }
 
 function EditorButtons({ onAdd, onDelete }) {
+  const { t } = useTranslation();
   return (
     <>
       {onDelete && (
@@ -180,7 +181,7 @@ function EditorButtons({ onAdd, onDelete }) {
           variant="bare"
           onPress={onDelete}
           style={{ padding: 7 }}
-          aria-label="Delete entry"
+          aria-label={t('Delete entry')}
         >
           <SvgSubtract style={{ width: 8, height: 8, color: 'inherit' }} />
         </Button>
@@ -190,7 +191,7 @@ function EditorButtons({ onAdd, onDelete }) {
           variant="bare"
           onPress={onAdd}
           style={{ padding: 7 }}
-          aria-label="Add entry"
+          aria-label={t('Add entry')}
         >
           <SvgAdd style={{ width: 10, height: 10, color: 'inherit' }} />
         </Button>

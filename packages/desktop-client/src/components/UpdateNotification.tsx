@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgClose } from '@actual-app/components/icons/v1';
@@ -45,7 +45,7 @@ export function UpdateNotification() {
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <View style={{ marginRight: 10, fontWeight: 700 }}>
             <Text>
-              {t('App updated to {{version}}', { version: updateInfo.version })}
+              <Trans>App updated to {{ version: updateInfo.version }}</Trans>
             </Text>
           </View>
           <View style={{ flex: 1 }} />
@@ -59,7 +59,7 @@ export function UpdateNotification() {
                   textDecoration: 'underline',
                 }}
               >
-                {t('Restart')}
+                <Trans>Restart</Trans>
               </Link>{' '}
               (
               <Link
@@ -74,7 +74,7 @@ export function UpdateNotification() {
                   )
                 }
               >
-                {t('notes')}
+                <Trans>notes</Trans>
               </Link>
               )
               <Button

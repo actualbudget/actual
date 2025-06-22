@@ -16,6 +16,7 @@ import {
   SyncServerSimpleFinAccount,
   SyncServerPluggyAiAccount,
   type GoCardlessToken,
+  ImportTransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
@@ -1087,7 +1088,7 @@ async function importTransactions({
   opts,
 }: {
   accountId: AccountEntity['id'];
-  transactions: TransactionEntity[];
+  transactions: ImportTransactionEntity[];
   isPreview: boolean;
   opts?: {
     defaultCleared: boolean;

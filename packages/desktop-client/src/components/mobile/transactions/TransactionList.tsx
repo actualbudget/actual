@@ -64,9 +64,10 @@ type LoadingProps = {
 };
 
 function Loading({ style, 'aria-label': ariaLabel }: LoadingProps) {
+  const { t } = useTranslation();
   return (
     <View
-      aria-label={ariaLabel || 'Loading...'}
+      aria-label={ariaLabel || t('Loading...')}
       style={{
         backgroundColor: theme.mobilePageBackground,
         flex: 1,

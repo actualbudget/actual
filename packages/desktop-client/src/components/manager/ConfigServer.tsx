@@ -61,7 +61,7 @@ export function ElectronServerConfig({
       electronServerPort <= 0 ||
       electronServerPort > 65535
     ) {
-      setConfigError('Ports must be within range 1 - 65535');
+      setConfigError(t('Ports must be within range 1 - 65535'));
       return;
     }
 
@@ -89,7 +89,7 @@ export function ElectronServerConfig({
       navigate('/');
     } catch (error) {
       setStartingSyncServer(false);
-      setConfigError('Failed to configure sync server');
+      setConfigError(t('Failed to configure sync server'));
       console.error('Failed to configure sync server:', error);
     }
   };
@@ -481,7 +481,7 @@ export function ConfigServer() {
               style={{ fontSize: 15 }}
               onPress={onSubmit}
             >
-              {t('OK')}
+              <Trans>OK</Trans>
             </ButtonWithLoading>
             {currentUrl && (
               <Button
@@ -489,7 +489,7 @@ export function ConfigServer() {
                 style={{ fontSize: 15, marginLeft: 10 }}
                 onPress={() => navigate(-1)}
               >
-                {t('Cancel')}
+                <Trans>Cancel</Trans>
               </Button>
             )}
           </View>
@@ -507,7 +507,7 @@ export function ConfigServer() {
                 style={{ color: theme.pageTextLight }}
                 onPress={onSkip}
               >
-                {t('Stop using a server')}
+                <Trans>Stop using a server</Trans>
               </Button>
             ) : (
               <>
@@ -521,7 +521,7 @@ export function ConfigServer() {
                     }}
                     onPress={onSameDomain}
                   >
-                    {t('Use current domain')}
+                    <Trans>Use current domain</Trans>
                   </Button>
                 )}
                 <Button
@@ -529,7 +529,7 @@ export function ConfigServer() {
                   style={{ color: theme.pageTextLight, margin: 5 }}
                   onPress={onSkip}
                 >
-                  {t('Don’t use a server')}
+                  <Trans>Don’t use a server</Trans>
                 </Button>
 
                 {isNonProductionEnvironment() && (
@@ -541,7 +541,7 @@ export function ConfigServer() {
                       navigate('/');
                     }}
                   >
-                    {t('Create test file')}
+                    <Trans>Create test file</Trans>
                   </Button>
                 )}
               </>

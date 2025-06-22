@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useLocation, type Location } from 'react-router-dom';
+import { useLocation, type Location } from 'react-router';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
