@@ -214,6 +214,17 @@ export function titleFirst(str: string | null | undefined) {
   return str[0].toUpperCase() + str.slice(1);
 }
 
+export function reapplyThousandSeparators(amountText: string) {
+  const { decimalSeparator, thousandsSeparator } = getNumberFormat();
+  const [integerPartRaw, decimalPart = ''] = amountText.split(decimalSeparator);
+  const integerPart = Number(integerPartRaw.replaceAll(thousandsSeparator, ''))
+    .toLocaleString('en-US')
+    .replaceAll(',', thousandsSeparator);
+  return decimalPart
+    ? integerPart + decimalSeparator + decimalPart
+    : integerPart;
+}
+
 export function appendDecimals(
   amountText: string,
   hideDecimals = false,
