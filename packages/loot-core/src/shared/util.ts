@@ -215,9 +215,19 @@ export function titleFirst(str: string | null | undefined) {
 }
 
 export function reapplyThousandSeparators(amountText: string) {
+  if (!amountText || typeof amountText !== 'string') {
+    return amountText;
+  }
+
   const { decimalSeparator, thousandsSeparator } = getNumberFormat();
   const [integerPartRaw, decimalPart = ''] = amountText.split(decimalSeparator);
-  const integerPart = Number(integerPartRaw.replaceAll(thousandsSeparator, ''))
+
+  const numericValue = Number(integerPartRaw.replaceAll(thousandsSeparator, ''));
+  if (isNaN(numericValue)) {
+    return amountText; // Return original if parsing fails
+  }
+
+  const integerPart = numericValue
     .toLocaleString('en-US')
     .replaceAll(',', thousandsSeparator);
   return decimalPart
