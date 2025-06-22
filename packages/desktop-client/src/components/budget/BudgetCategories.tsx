@@ -9,7 +9,7 @@ import { useLocalPref } from '../../hooks/useLocalPref';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { DropHighlightPosContext, DropPosition, OnDropCallback } from '../sort';
+import { DropHighlightPosContext, OnDropCallback } from '../sort';
 import { Row } from '../table';
 
 import { ExpenseCategory } from './ExpenseCategory';
