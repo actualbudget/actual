@@ -99,8 +99,7 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
       const mostRecent = totals[totals.length - 1].balance;
       months.forEach(expectedMonth => {
         const monthString = format(expectedMonth.toDateString(), 'MMM yyyy');
-        const filtered = totals.filter(t => t.date === monthString);
-        if (filtered.length === 0) {
+        if (totals.filter(t => t.date === monthString).length === 0) {
           totals.push({
             date: monthString,
             balance: mostRecent,
