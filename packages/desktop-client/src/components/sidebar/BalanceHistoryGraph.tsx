@@ -4,7 +4,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { subMonths, format } from 'date-fns';
+import { subMonths, format, eachMonthOfInterval } from 'date-fns';
 import { LineChart, Line, YAxis, Tooltip as RechartsTooltip } from 'recharts';
 
 import * as monthUtils from 'loot-core/shared/months';
@@ -50,6 +50,7 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
     async function fetchBalanceHistory() {
       const endDate = new Date();
       const startDate = subMonths(endDate, 12);
+      const months = eachMonthOfInterval({ start: startDate, end: endDate });
 
       const [starting, totals]: [number, Balance[]] = await Promise.all([
         aqlQuery(
@@ -76,9 +77,9 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
               { amount: { $sum: '$amount' } },
             ]),
         ).then(({ data }) =>
-          data.map(d => {
+          data.map((d: { date: string; amount: number }) => {
             return {
-              date: format(monthUtils.addMonths(d.date, 1), 'MMM yyy'),
+              date: format(monthUtils.addMonths(d.date, 1), 'MMM yyyy'),
               balance: d.amount,
             };
           }),
@@ -86,10 +87,25 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
       ]);
 
       let balance = starting;
-      totals.reverse().map(month => {
+      //data comes out in reversed date order
+      totals.reverse().forEach(month => {
         balance = balance + month.balance;
         month.balance = balance;
-        return balance;
+      });
+
+      // if the account doesn't have recent transactions
+      // then the empty months will be missing from our data
+      // so add in entries for those here
+      const mostRecent = totals[totals.length - 1].balance;
+      months.forEach(expectedMonth => {
+        const monthString = format(expectedMonth.toDateString(), 'MMM yyyy');
+        const filtered = totals.filter(t => t.date === monthString);
+        if (filtered.length === 0) {
+          totals.push({
+            date: monthString,
+            balance: mostRecent,
+          });
+        }
       });
 
       setBalanceData(totals);
