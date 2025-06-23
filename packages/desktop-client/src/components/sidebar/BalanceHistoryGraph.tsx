@@ -4,13 +4,15 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { subMonths, format, eachMonthOfInterval, endOfMonth } from 'date-fns';
+import { subMonths, format } from 'date-fns';
 import { LineChart, Line, YAxis, Tooltip as RechartsTooltip } from 'recharts';
 
-import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
+import { q } from 'loot-core/shared/query';
 import { integerToCurrency } from 'loot-core/shared/util';
 
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 const CHART_HEIGHT = 70;
 const CHART_WIDTH = 280;
@@ -19,6 +21,11 @@ const TOTAL_WIDTH = CHART_WIDTH + LABEL_WIDTH;
 
 type BalanceHistoryGraphProps = {
   accountId: string;
+};
+
+type Balance = {
+  date: string;
+  balance: number;
 };
 
 export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
@@ -43,23 +50,50 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
     async function fetchBalanceHistory() {
       const endDate = new Date();
       const startDate = subMonths(endDate, 12);
-      const months = eachMonthOfInterval({ start: startDate, end: endDate });
 
-      const balances = await Promise.all(
-        months.map(async date => {
-          const balance = await send('api/account-balance', {
-            id: accountId,
-            cutoff: endOfMonth(date),
-          });
-          return {
-            date: format(date, 'MMM yyyy'),
-            balance: balance || 0,
-          };
-        }),
-      );
+      const [starting, totals]: [number, Balance[]] = await Promise.all([
+        aqlQuery(
+          q('transactions')
+            .filter({
+              account: accountId,
+              date: { $lt: monthUtils.firstDayOfMonth(startDate) },
+            })
+            .calculate({ $sum: '$amount' }),
+        ).then(({ data }) => data),
 
-      setBalanceData(balances);
-      setHoveredValue(balances[balances.length - 1]);
+        aqlQuery(
+          q('transactions')
+            .filter({
+              account: accountId,
+              $and: [
+                { date: { $gte: monthUtils.firstDayOfMonth(startDate) } },
+                { date: { $lte: monthUtils.lastDayOfMonth(endDate) } },
+              ],
+            })
+            .groupBy({ $month: '$date' })
+            .select([
+              { date: { $month: '$date' } },
+              { amount: { $sum: '$amount' } },
+            ]),
+        ).then(({ data }) =>
+          data.map(d => {
+            return {
+              date: format(monthUtils.addMonths(d.date, 1), 'MMM yyy'),
+              balance: d.amount,
+            };
+          }),
+        ),
+      ]);
+
+      let balance = starting;
+      totals.reverse().map(month => {
+        balance = balance + month.balance;
+        month.balance = balance;
+        return balance;
+      });
+
+      setBalanceData(totals);
+      setHoveredValue(totals[totals.length - 1]);
       setLoading(false);
     }
 
