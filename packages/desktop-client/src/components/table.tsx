@@ -898,6 +898,7 @@ export type TableHandleRef<T extends TableItem = TableItem> = {
   anchor(): void;
   unanchor(): void;
   isAnchored(): boolean;
+  getEditingState(): { editingId: T['id'] | null; focusedField: string | null };
 };
 
 type TableWithNavigatorProps = TableProps & {
@@ -1033,6 +1034,13 @@ export const Table = forwardRef(
 
       isAnchored() {
         return list.current && list.current.isAnchored();
+      },
+
+      getEditingState() {
+        return {
+          editingId: navigator.editingId,
+          focusedField: navigator.focusedField,
+        };
       },
     }));
 
