@@ -20,6 +20,9 @@ We’re proposing a 3-month trial program to pay our core maintainers for the es
 
 We believe it’s time to recognize the financial value of labor — but before we move forward, we want to hear your feedback. Join the conversation on [Discord] or leave anonymous feedback in [this form].
 
+> **Update:** This proposal has been approved. More details about the payment system can be found in the [paying contributors](/docs/contributing/leadership/paying-contributors) page.
+
+
 <!--truncate-->
 
 ## What We’re Proposing
