@@ -10,9 +10,10 @@ const REPOSITORY_CONFIG = new Map([
       POINTS_PER_ISSUE_CLOSING_ACTION: 1,
       POINTS_PER_RELEASE_PR: 0,
       PR_REVIEW_POINT_TIERS: [
-        { minChanges: 1000, points: 6 },
-        { minChanges: 100, points: 4 },
-        { minChanges: 0, points: 2 },
+        { minChanges: 500, points: 8 },
+        { minChanges: 100, points: 6 },
+        { minChanges: 10, points: 2 },
+        { minChanges: 0, points: 1 },
       ],
       EXCLUDED_FILES: [
         'yarn.lock',
