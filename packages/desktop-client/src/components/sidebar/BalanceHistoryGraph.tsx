@@ -50,7 +50,10 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
     async function fetchBalanceHistory() {
       const endDate = new Date();
       const startDate = subMonths(endDate, 12);
-      const months = eachMonthOfInterval({ start: startDate, end: endDate });
+      const months = eachMonthOfInterval({
+        start: startDate,
+        end: endDate,
+      }).map(m => format(m.toDateString(), 'MMM yyyy'));
 
       const [starting, totals]: [number, Balance[]] = await Promise.all([
         aqlQuery(
@@ -96,19 +99,44 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
       // if the account doesn't have recent transactions
       // then the empty months will be missing from our data
       // so add in entries for those here
-      const mostRecent = totals[totals.length - 1].balance;
-      months.forEach(expectedMonth => {
-        const monthString = format(expectedMonth.toDateString(), 'MMM yyyy');
-        if (totals.every(t => t.date === monthString)) {
+      if (totals.length === 0) {
+        //handle case of no transactions in the last year
+        months.forEach(expectedMonth =>
           totals.push({
-            date: monthString,
-            balance: mostRecent,
-          });
-        }
-      });
+            date: expectedMonth,
+            balance: starting,
+          }),
+        );
+      } else {
+        // handle case of some months are included but not all
+        const totalsDates = totals.map(t => t.date);
+        const mostRecent = totals[totals.length - 1].balance;
+        months.forEach(expectedMonth => {
+          if (!totalsDates.includes(expectedMonth)) {
+            const value =
+              monthUtils.differenceInCalendarMonths(
+                format(totalsDates[0], 'yyyy-MM'),
+                format(expectedMonth, 'yyyy-MM'),
+              ) > 0
+                ? starting
+                : mostRecent;
+            totals.push({
+              date: expectedMonth,
+              balance: value,
+            });
+          }
+        });
+      }
 
-      setBalanceData(totals);
-      setHoveredValue(totals[totals.length - 1]);
+      const balances = totals.sort((a, b) =>
+        monthUtils.differenceInCalendarMonths(
+          format(a.date, 'yyyy-MM'),
+          format(b.date, 'yyyy-MM'),
+        ),
+      );
+
+      setBalanceData(balances);
+      setHoveredValue(balances[balances.length - 1]);
       setLoading(false);
     }
 
