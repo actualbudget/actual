@@ -259,6 +259,24 @@ const configSchema = convict({
   },
 });
 
+const overrideSecretFromFile = (envVar, convictPath) => {
+  const fileEnv = `${envVar}_FILE`;
+  const filePath = process.env[fileEnv];
+
+  if (filePath && fs.existsSync(filePath)) {
+    try {
+      const value = fs.readFileSync(filePath, 'utf8').trim();
+      configSchema.set(convictPath, value);
+      debug(`Loaded secret from ${fileEnv} -> ${convictPath}`);
+    } catch (err) {
+      console.error(`Failed to read secret from file: ${filePath}`, err);
+      process.exit(1);
+    }
+  }
+};
+
+overrideSecretFromFile('ACTUAL_OPENID_CLIENT_SECRET', 'openId.client_secret');
+
 let configPath = null;
 
 if (process.env.ACTUAL_CONFIG_PATH) {
