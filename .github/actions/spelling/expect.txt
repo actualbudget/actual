@@ -72,6 +72,7 @@ Kreditbank
 LHV
 LHVBEE
 mbank
+mdc
 modals
 murmurhash
 nginx

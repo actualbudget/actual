@@ -320,6 +320,7 @@ const sidebars = {
             'contributing/leadership/funding',
             'contributing/leadership/triaging-issues',
             'contributing/leadership/new-core-contributors-guide',
+            'contributing/leadership/cursor-ide',
           ],
         },
       ],

@@ -48,4 +48,6 @@ When this happens we usually follow this framework:
 
 As a core contributor, you are eligible for a sponsored [Cursor] subscription. The process is simple: purchase your [Cursor] subscription, and then submit the expense to OpenCollective for reimbursement. To minimize administrative overhead, we encourage you to submit expenses quarterly rather than monthly. This benefit has been pre-approved for all core contributors, so there's no need to request permission - simply follow the reimbursement process through OpenCollective.
 
+Some helpful Cursor usage tips can be found [here](./cursor-ide.md).
+
 [Cursor]: https://www.cursor.com
