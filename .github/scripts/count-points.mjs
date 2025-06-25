@@ -240,10 +240,15 @@ async function countContributorPoints(repo) {
         }
 
         if (event.event === 'closed') {
-          const closer = event.actor.login;
-          const userStats = stats.get(closer);
-          userStats.issueClosings.push(issue.number.toString());
-          userStats.points += config.POINTS_PER_ISSUE_CLOSING_ACTION;
+          // Check if the issue was closed with "no planned" status
+          const closeEvent = events.find(e => e.event === 'closed');
+
+          if (closeEvent?.state_reason === 'not_planned') {
+            const closer = event.actor.login;
+            const userStats = stats.get(closer);
+            userStats.issueClosings.push(issue.number.toString());
+            userStats.points += config.POINTS_PER_ISSUE_CLOSING_ACTION;
+          }
         }
       });
   }
