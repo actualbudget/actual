@@ -13,7 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as monthUtils from '../../shared/months';
 import { groupBy, sortByKey } from '../../shared/util';
 
-import { YNAB4 } from './ynab4-types';
+import * as YNAB4 from './ynab4-types';
 
 // Importer
 
@@ -218,15 +218,17 @@ async function importTransactions(
 
             subtransactions:
               transaction.subTransactions &&
-              transaction.subTransactions.map(t => {
-                return {
-                  id: entityIdMap.get(t.entityId),
-                  amount: amountToInteger(t.amount),
-                  category: getCategory(t.categoryId),
-                  notes: t.memo || null,
-                  ...transferProperties(t),
-                };
-              }),
+              transaction.subTransactions
+                .filter(st => !st.isTombstone)
+                .map(t => {
+                  return {
+                    id: entityIdMap.get(t.entityId),
+                    amount: amountToInteger(t.amount),
+                    category: getCategory(t.categoryId),
+                    notes: t.memo || null,
+                    ...transferProperties(t),
+                  };
+                }),
           };
 
           return newTransaction;

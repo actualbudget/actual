@@ -125,7 +125,7 @@ function mapOfxTransaction(stmtTrn): OFXTransaction {
 
 export async function ofx2json(ofx: string): Promise<OFXParseResult> {
   // firstly, split into the header attributes and the footer sgml
-  const contents = ofx.split('<OFX>', 2);
+  const contents = ofx.split(/<OFX\s?>/, 2);
 
   // firstly, parse the headers
   const headerString = contents[0].split(/\r?\n/);

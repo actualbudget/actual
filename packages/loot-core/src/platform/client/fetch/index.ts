@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as undo from '../undo';
 
-import type * as T from './index.d';
+import type * as T from './index-types';
 
 const replyHandlers = new Map();
 const listeners = new Map();

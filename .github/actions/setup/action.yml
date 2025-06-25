@@ -1,4 +1,5 @@
 name: Setup
+description: Setup the environment for the project
 
 inputs:
   working-directory:

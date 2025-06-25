@@ -3,7 +3,7 @@ import { Dialog, DialogTrigger } from 'react-aria-components';
 import { Responsive, WidthProvider, type Layout } from 'react-grid-layout';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -250,7 +250,7 @@ export function Overview() {
     window.Actual.saveFile(
       JSON.stringify(data, null, 2),
       'dashboard.json',
-      'Export Dashboard',
+      t('Export Dashboard'),
     );
   };
   const onImport = async () => {

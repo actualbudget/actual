@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { SvgSplit } from '@actual-app/components/icons/v0';
@@ -137,6 +137,8 @@ export function lookupName(items, id) {
 }
 
 export function Status({ status, isSplit }) {
+  const { t } = useTranslation();
+
   let color;
 
   switch (status) {
@@ -161,7 +163,9 @@ export function Status({ status, isSplit }) {
         textAlign: 'left',
       }}
     >
-      {titleFirst(status) + (isSplit ? ' (Split)' : '')}
+      {isSplit
+        ? t('{{status}} (Split)', { status: titleFirst(status) })
+        : titleFirst(status)}
     </Text>
   );
 }
@@ -451,7 +455,7 @@ const ChildTransactionEdit = forwardRef(
                 userSelect: 'none',
               }}
             >
-              {t('Delete split')}
+              <Trans>Delete split</Trans>
             </Text>
           </Button>
         </View>
@@ -962,7 +966,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   color: theme.formLabelText,
                 }}
               >
-                {t('Split')}
+                <Trans>Split</Trans>
               </Text>
             </Button>
           </View>
@@ -1065,7 +1069,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   userSelect: 'none',
                 }}
               >
-                {t('Delete transaction')}
+                <Trans>Delete transaction</Trans>
               </Text>
             </Button>
           </View>

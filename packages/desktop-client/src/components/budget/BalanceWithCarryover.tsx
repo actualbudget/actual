@@ -19,14 +19,14 @@ import { type TransObjectLiteral } from 'loot-core/types/util';
 
 import { makeBalanceAmountStyle } from './util';
 
-import { type Binding } from '@desktop-client/components/spreadsheet';
 import {
   CellValue,
   CellValueText,
 } from '@desktop-client/components/spreadsheet/CellValue';
-import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
-import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
+import { type Binding } from '@desktop-client/spreadsheet';
 
 type CarryoverIndicatorProps = {
   style?: CSSProperties;

@@ -343,6 +343,7 @@ function CalendarCardInner({
   widgetId,
   isEditing,
 }: CalendarCardInnerProps) {
+  const { t } = useTranslation();
   const [monthNameVisible, setMonthNameVisible] = useState(true);
   const monthFormatSizeContainers = useRef<(HTMLSpanElement | null)[]>(
     new Array(5),
@@ -474,7 +475,7 @@ function CalendarCardInner({
               fontSize: '10px',
               marginRight: 10,
             }}
-            aria-label="Income"
+            aria-label={t('Income')}
           >
             {calendar.totalIncome !== 0 ? (
               <>
@@ -497,7 +498,7 @@ function CalendarCardInner({
               flexDirection: 'row',
               fontSize: '10px',
             }}
-            aria-label="Expenses"
+            aria-label={t('Expenses')}
           >
             {calendar.totalExpense !== 0 ? (
               <>
