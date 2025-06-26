@@ -243,7 +243,7 @@ export async function copySinglePreviousMonth({
 
 export async function setZero({ month }: { month: string }): Promise<void> {
   const categories = await db.all<db.DbViewCategory>(
-    'SELECT * FROM v_categories WHERE tombstone = 0',
+    'SELECT * FROM v_categories WHERE tombstone = 0 AND hidden = 0',
   );
 
   await batchMessages(async () => {
@@ -262,7 +262,7 @@ export async function set3MonthAvg({
   month: string;
 }): Promise<void> {
   const categories = await db.all<db.DbViewCategory>(
-    'SELECT * FROM v_categories WHERE tombstone = 0',
+    'SELECT * FROM v_categories WHERE tombstone = 0 AND hidden = 0',
   );
 
   const prevMonth1 = monthUtils.prevMonth(month);
@@ -305,7 +305,7 @@ export async function set12MonthAvg({
   month: string;
 }): Promise<void> {
   const categories = await db.all<db.DbViewCategory>(
-    'SELECT * FROM v_categories WHERE tombstone = 0',
+    'SELECT * FROM v_categories WHERE tombstone = 0 AND hidden = 0',
   );
 
   await batchMessages(async () => {
@@ -324,7 +324,7 @@ export async function set6MonthAvg({
   month: string;
 }): Promise<void> {
   const categories = await db.all<db.DbViewCategory>(
-    'SELECT * FROM v_categories WHERE tombstone = 0',
+    'SELECT * FROM v_categories WHERE tombstone = 0 AND hidden = 0',
   );
 
   await batchMessages(async () => {
