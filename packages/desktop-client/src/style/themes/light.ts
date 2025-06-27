@@ -89,8 +89,8 @@ export const markdownDark = colorPalette.purple400;
 export const markdownLight = colorPalette.purple100;
 
 // Button
-export const buttonMenuText = colorPalette.navy100;
-export const buttonMenuTextHover = colorPalette.navy50;
+export const buttonMenuText = colorPalette.navy500;
+export const buttonMenuTextHover = colorPalette.navy900;
 export const buttonMenuBackground = 'transparent';
 export const buttonMenuBackgroundHover = 'rgba(200, 200, 200, .25)';
 export const buttonMenuBorder = colorPalette.navy500;
