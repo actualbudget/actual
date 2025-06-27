@@ -102,7 +102,7 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
       if (totals.length === 0) {
         //handle case of no transactions in the last year
         months.forEach(expectedMonth =>
-          balances.push({
+          totals.push({
             date: expectedMonth,
             balance: starting,
           }),
