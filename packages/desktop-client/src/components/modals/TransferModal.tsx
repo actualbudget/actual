@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -84,6 +84,10 @@ export function TransferModal({
   };
 
   const toCategory = categories.find(c => c.id === toCategoryId);
+
+  useEffect(() => {
+    setAmount(initialAmount ?? 0);
+  }, [initialAmount]);
 
   return (
     <Modal name="transfer">
