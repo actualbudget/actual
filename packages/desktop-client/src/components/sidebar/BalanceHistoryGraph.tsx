@@ -89,11 +89,11 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
         ),
       ]);
 
-      let balance = starting;
-      //data comes out in reversed date order
+      // calculate balances from sum of transactions
+      let currentBalance = starting;
       totals.reverse().forEach(month => {
-        balance = balance + month.balance;
-        month.balance = balance;
+        currentBalance = currentBalance + month.balance;
+        month.balance = currentBalance;
       });
 
       // if the account doesn't have recent transactions
@@ -102,27 +102,31 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
       if (totals.length === 0) {
         //handle case of no transactions in the last year
         months.forEach(expectedMonth =>
-          totals.push({
+          balances.push({
             date: expectedMonth,
             balance: starting,
           }),
         );
-      } else if (totals.length < 13) {
-        // handle case of some months are included but not all
-        const totalsDates = totals.map(t => t.date);
-        const mostRecent = totals[totals.length - 1].balance;
+      } else if (totals.length < months.length) {
+        // iterate through each array together and add in missing data
+        let totalsIndex = 0;
+        let mostRecent = starting;
         months.forEach(expectedMonth => {
-          if (!totalsDates.includes(expectedMonth)) {
-            const value =
-              monthUtils.differenceInCalendarMonths(
-                totalsDates[0],
-                expectedMonth,
-              ) > 0
-                ? starting
-                : mostRecent;
+          if (totalsIndex > totals.length - 1) {
+            // fill in the data at the end of the window
             totals.push({
               date: expectedMonth,
-              balance: value,
+              balance: mostRecent,
+            });
+          } else if (totals[totalsIndex].date === expectedMonth) {
+            // a matched month
+            mostRecent = totals[totalsIndex].balance;
+            totalsIndex += 1;
+          } else {
+            // a missing month in the middle
+            totals.push({
+              date: expectedMonth,
+              balance: mostRecent,
             });
           }
         });
