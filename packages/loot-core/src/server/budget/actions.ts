@@ -243,12 +243,12 @@ export async function copySinglePreviousMonth({
 
 export async function setZero({ month }: { month: string }): Promise<void> {
   const categories = await db.all<db.DbViewCategory>(
-  `
+    `
   SELECT c.*
   FROM categories c
   LEFT JOIN category_groups g ON c.cat_group = g.id
   WHERE c.tombstone = 0 AND c.hidden = 0 AND g.hidden = 0
-  `
+  `,
   );
 
   await batchMessages(async () => {
@@ -267,12 +267,12 @@ export async function set3MonthAvg({
   month: string;
 }): Promise<void> {
   const categories = await db.all<db.DbViewCategory>(
-  `
+    `
   SELECT c.*
   FROM categories c
   LEFT JOIN category_groups g ON c.cat_group = g.id
   WHERE c.tombstone = 0 AND c.hidden = 0 AND g.hidden = 0
-  `
+  `,
   );
 
   const prevMonth1 = monthUtils.prevMonth(month);
@@ -315,12 +315,12 @@ export async function set12MonthAvg({
   month: string;
 }): Promise<void> {
   const categories = await db.all<db.DbViewCategory>(
-  `
+    `
   SELECT c.*
   FROM categories c
   LEFT JOIN category_groups g ON c.cat_group = g.id
   WHERE c.tombstone = 0 AND c.hidden = 0 AND g.hidden = 0
-  `
+  `,
   );
 
   await batchMessages(async () => {
@@ -339,12 +339,12 @@ export async function set6MonthAvg({
   month: string;
 }): Promise<void> {
   const categories = await db.all<db.DbViewCategory>(
-  `
+    `
   SELECT c.*
   FROM categories c
   LEFT JOIN category_groups g ON c.cat_group = g.id
   WHERE c.tombstone = 0 AND c.hidden = 0 AND g.hidden = 0
-  `
+  `,
   );
 
   await batchMessages(async () => {
