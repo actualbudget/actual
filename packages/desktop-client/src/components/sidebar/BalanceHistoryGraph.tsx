@@ -4,7 +4,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { subMonths, format, eachMonthOfInterval } from 'date-fns';
+import { subMonths, format, eachMonthOfInterval, parseISO } from 'date-fns';
 import { LineChart, Line, YAxis, Tooltip as RechartsTooltip } from 'recharts';
 
 import * as monthUtils from 'loot-core/shared/months';
@@ -53,7 +53,7 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
       const months = eachMonthOfInterval({
         start: startDate,
         end: endDate,
-      }).map(m => format(m.toDateString(), 'MMM yyyy'));
+      }).map(m => format(m, 'yyyy-MM'));
 
       const [starting, totals]: [number, Balance[]] = await Promise.all([
         aqlQuery(
@@ -82,7 +82,7 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
         ).then(({ data }) =>
           data.map((d: { date: string; amount: number }) => {
             return {
-              date: format(monthUtils.addMonths(d.date, 1), 'MMM yyyy'),
+              date: d.date,
               balance: d.amount,
             };
           }),
@@ -107,7 +107,7 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
             balance: starting,
           }),
         );
-      } else {
+      } else if (totals.length < 13) {
         // handle case of some months are included but not all
         const totalsDates = totals.map(t => t.date);
         const mostRecent = totals[totals.length - 1].balance;
@@ -115,8 +115,8 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
           if (!totalsDates.includes(expectedMonth)) {
             const value =
               monthUtils.differenceInCalendarMonths(
-                format(totalsDates[0], 'yyyy-MM'),
-                format(expectedMonth, 'yyyy-MM'),
+                totalsDates[0],
+                expectedMonth,
               ) > 0
                 ? starting
                 : mostRecent;
@@ -128,12 +128,14 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
         });
       }
 
-      const balances = totals.sort((a, b) =>
-        monthUtils.differenceInCalendarMonths(
-          format(a.date, 'yyyy-MM'),
-          format(b.date, 'yyyy-MM'),
-        ),
-      );
+      const balances = totals
+        .sort((a, b) => monthUtils.differenceInCalendarMonths(a.date, b.date))
+        .map(t => {
+          return {
+            balance: t.balance,
+            date: format(parseISO(t.date), 'MMM yyyy'),
+          };
+        });
 
       setBalanceData(balances);
       setHoveredValue(balances[balances.length - 1]);
