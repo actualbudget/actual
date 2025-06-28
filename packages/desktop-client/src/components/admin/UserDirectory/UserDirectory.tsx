@@ -286,7 +286,7 @@ function UserDirectoryContent({
               </Trans>{' '}
               <Link
                 variant="external"
-                to="https://actualbudget.org/docs/budgeting/users/"
+                to="https://actualbudget.org/docs/config/multi-user/"
                 linkColor="muted"
               >
                 <Trans>Learn more</Trans>
