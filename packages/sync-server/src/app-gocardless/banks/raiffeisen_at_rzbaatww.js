@@ -20,9 +20,9 @@ export default {
 
     // avoid empty notes if payee is set but no information in unstructured information
     // if no structured or unstructured information is provided, return the endToEndId instead
-    editedTrans.remittanceInformationUnstructured = 
-      transaction.remittanceInformationUnstructured ?? 
-      transaction.remittanceInformationStructured ?? 
+    editedTrans.remittanceInformationUnstructured =
+      transaction.remittanceInformationUnstructured ??
+      transaction.remittanceInformationStructured ??
       transaction.endToEndId;
 
     return Fallback.normalizeTransaction(transaction, booked, editedTrans);
