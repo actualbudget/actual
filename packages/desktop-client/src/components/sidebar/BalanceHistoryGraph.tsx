@@ -4,13 +4,15 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { subMonths, format, eachMonthOfInterval, endOfMonth } from 'date-fns';
+import { subMonths, format, eachMonthOfInterval, parseISO } from 'date-fns';
 import { LineChart, Line, YAxis, Tooltip as RechartsTooltip } from 'recharts';
 
-import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
+import { q } from 'loot-core/shared/query';
 import { integerToCurrency } from 'loot-core/shared/util';
 
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 const CHART_HEIGHT = 70;
 const CHART_WIDTH = 280;
@@ -19,6 +21,11 @@ const TOTAL_WIDTH = CHART_WIDTH + LABEL_WIDTH;
 
 type BalanceHistoryGraphProps = {
   accountId: string;
+};
+
+type Balance = {
+  date: string;
+  balance: number;
 };
 
 export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
@@ -43,20 +50,96 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
     async function fetchBalanceHistory() {
       const endDate = new Date();
       const startDate = subMonths(endDate, 12);
-      const months = eachMonthOfInterval({ start: startDate, end: endDate });
+      const months = eachMonthOfInterval({
+        start: startDate,
+        end: endDate,
+      }).map(m => format(m, 'yyyy-MM'));
 
-      const balances = await Promise.all(
-        months.map(async date => {
-          const balance = await send('api/account-balance', {
-            id: accountId,
-            cutoff: endOfMonth(date),
-          });
+      const [starting, totals]: [number, Balance[]] = await Promise.all([
+        aqlQuery(
+          q('transactions')
+            .filter({
+              account: accountId,
+              date: { $lt: monthUtils.firstDayOfMonth(startDate) },
+            })
+            .calculate({ $sum: '$amount' }),
+        ).then(({ data }) => data),
+
+        aqlQuery(
+          q('transactions')
+            .filter({
+              account: accountId,
+              $and: [
+                { date: { $gte: monthUtils.firstDayOfMonth(startDate) } },
+                { date: { $lte: monthUtils.lastDayOfMonth(endDate) } },
+              ],
+            })
+            .groupBy({ $month: '$date' })
+            .select([
+              { date: { $month: '$date' } },
+              { amount: { $sum: '$amount' } },
+            ]),
+        ).then(({ data }) =>
+          data.map((d: { date: string; amount: number }) => {
+            return {
+              date: d.date,
+              balance: d.amount,
+            };
+          }),
+        ),
+      ]);
+
+      // calculate balances from sum of transactions
+      let currentBalance = starting;
+      totals.reverse().forEach(month => {
+        currentBalance = currentBalance + month.balance;
+        month.balance = currentBalance;
+      });
+
+      // if the account doesn't have recent transactions
+      // then the empty months will be missing from our data
+      // so add in entries for those here
+      if (totals.length === 0) {
+        //handle case of no transactions in the last year
+        months.forEach(expectedMonth =>
+          totals.push({
+            date: expectedMonth,
+            balance: starting,
+          }),
+        );
+      } else if (totals.length < months.length) {
+        // iterate through each array together and add in missing data
+        let totalsIndex = 0;
+        let mostRecent = starting;
+        months.forEach(expectedMonth => {
+          if (totalsIndex > totals.length - 1) {
+            // fill in the data at the end of the window
+            totals.push({
+              date: expectedMonth,
+              balance: mostRecent,
+            });
+          } else if (totals[totalsIndex].date === expectedMonth) {
+            // a matched month
+            mostRecent = totals[totalsIndex].balance;
+            totalsIndex += 1;
+          } else {
+            // a missing month in the middle
+            totals.push({
+              date: expectedMonth,
+              balance: mostRecent,
+            });
+          }
+        });
+      }
+
+      const balances = totals
+        .sort((a, b) => monthUtils.differenceInCalendarMonths(a.date, b.date))
+        .map(t => {
           return {
-            date: format(date, 'MMM yyyy'),
-            balance: balance || 0,
+            balance: t.balance,
+            date: format(parseISO(t.date), 'MMM yyyy'),
           };
-        }),
-      );
+        });
 
       setBalanceData(balances);
       setHoveredValue(balances[balances.length - 1]);
