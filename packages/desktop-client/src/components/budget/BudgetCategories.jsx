@@ -25,7 +25,7 @@ export const BudgetCategories = memo(
     onBudgetAction,
     onShowActivity,
     onEditName,
-    onEditMonth,
+    onEditMonth, 
     onSaveCategory,
     onSaveGroup,
     onDeleteCategory,
@@ -46,127 +46,84 @@ export const BudgetCategories = memo(
     const [newGroupForGroup, setNewGroupForGroup] = useState(null);
     const items = useMemo(() => {
       const [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
-      // Before
-      let items = Array.prototype.concat.apply(
-        [],
-        expenseGroups.map(group => {
-          if (group.hidden && !showHiddenCategories) {
-            return [];
-          }
+      let builtItems = []; // Use a different variable name temporarily to avoid confusion
 
-          const groupCategories = group.categories.filter(
-            cat => showHiddenCategories || !cat.hidden,
-          );
+      // 1. Process all expense groups hierarchically
+      // Check if expenseGroups is not null and has items before trying to flatMap
+      if (expenseGroups && expenseGroups.length > 0) {
+        builtItems = expenseGroups.flatMap(group => expandGroup(group, 0, 'expense'));
+      } else {
+        builtItems = []; // Initialize as empty if no expense groups
+      } 
 
-          const items = [{ type: 'expense-group', value: { ...group } }];
-
-          if (newCategoryForGroup === group.id) {
-            items.push({ type: 'new-category' });
-          }
-
-          return [
-            ...items,
-            ...(collapsedGroupIds.includes(group.id)
-              ? []
-              : groupCategories
-            ).map(cat => ({
-              type: 'expense-category',
-              value: cat,
-              group,
-            })),
-          ];
-        }),
-      );
-
-      //After
-      // function expandGroup(group, depth = 0, type = 'expense') {
-      //   if (group.hidden && !showHiddenCategories) {
-      //     return [];
-      //   }
-
-      //   const groupCategories = group.categories.filter(
-      //     cat => showHiddenCategories || !cat.hidden,
-      //   );
-
-      //   const groupChildren = group.children.filter(
-      //     child => showHiddenCategories || !child.hidden,
-      //   );
-
-      //   const items = [{ type: `${type}-group`, value: { ...group }, depth }];
-
-      //   if (newCategoryForGroup === group.id) {
-      //     items.push({ type: 'new-category', depth });
-      //   }
-
-      //   if (isAddingGroup && newGroupForGroup === group.id) {
-      //     items.push({ type: 'new-group' });
-      //   }
-
-      //   return [
-      //     ...items,
-      //     ...(collapsedGroupIds.includes(group.id)
-      //       ? []
-      //       : groupChildren
-      //     ).flatMap(child => expandGroup(child, depth + 1, type)),
-      //     ...(collapsedGroupIds.includes(group.id) ? [] : groupCategories).map(
-      //       cat => ({
-      //         type: `${type}-category`,
-      //         value: cat,
-      //         group,
-      //         depth,
-      //       }),
-      //     ),
-      //   ];
-      // }
-
-      // let items = expenseGroups.flatMap(group => expandGroup(group, 0));
-
-      // if (isAddingGroup && newGroupForGroup == null) {
-      //   items.push({ type: 'new-group' });
-      // }
-
-      // if (incomeGroup) {
-      //   items = items.concat(
-      //     [
-      //       { type: 'income-separator' },
-      //       ...expandGroup(incomeGroup, 0, 'income'),
-      //     ].filter(x => x),
-      //   );
-      // }
-
-      // return items;
-      if (isAddingGroup) {
-        items.push({ type: 'new-group' });
+      // 2. Add the placeholder for a new TOP-LEVEL expense group if applicable
+      // This is for the "Add new group" button that isn't under any specific parent.
+      // The `newGroupForGroup` would be null in this case, indicating it's a top-level addition.
+      if (isAddingGroup && newGroupForGroup == null) {
+        builtItems.push({ type: 'new-group' }); // The 'depth' might need to be considered or handled in render
       }
 
+      // 3. Process the income group hierarchically (if it exists)
       if (incomeGroup) {
-        items = items.concat(
-          [
-            { type: 'income-separator' },
-            { type: 'income-group', value: incomeGroup },
-            newCategoryForGroup === incomeGroup.id && { type: 'new-category' },
-            ...(collapsedGroupIds.includes(incomeGroup.id)
-              ? []
-              : incomeGroup.categories.filter(
-                  cat => showHiddenCategories || !cat.hidden,
-                )
-            ).map(cat => ({
-              type: 'income-category',
-              value: cat,
-            })),
-          ].filter(x => x),
+        // Ensure expandGroup returns an array, even if it's empty
+        const incomeItems = expandGroup(incomeGroup, 0, 'income') || [];
+        
+        builtItems = builtItems.concat(
+          { type: 'income-separator' },
+          ...incomeItems // Spread the items returned by expandGroup
         );
+
+
       }
 
-
-      return items;
+      return builtItems; // Return the fully constructed list
     }, [
       categoryGroups,
       collapsedGroupIds,
       newCategoryForGroup,
       isAddingGroup,
+      newGroupForGroup, // Added newGroupForGroup as a dependency for the top-level new group
       showHiddenCategories,
     ]);
+      function expandGroup(group, depth = 0, type = 'expense') {
+        if (group.hidden && !showHiddenCategories) {
+          return [];
+        }
+
+        const groupCategories = group.categories.filter(
+          cat => showHiddenCategories || !cat.hidden,
+        );
+
+        const groupChildren = group.children.filter(
+          child => showHiddenCategories || !child.hidden,
+        );
+
+        const items = [{ type: `${type}-group`, value: { ...group }, depth }];
+
+        if (newCategoryForGroup === group.id) {
+          items.push({ type: 'new-category', depth });
+        }
+
+        if (isAddingGroup && newGroupForGroup === group.id) {
+          items.push({ type: 'new-group' });
+        }
+
+        return [
+          ...items,
+          ...(collapsedGroupIds.includes(group.id)
+            ? []
+            : groupChildren
+          ).flatMap(child => expandGroup(child, depth + 1, type)),
+          ...(collapsedGroupIds.includes(group.id) ? [] : groupCategories).map(
+            cat => ({
+              type: `${type}-category`,
+              value: cat,
+              group,
+              depth,
+            }),
+          ),
+        ];
+      }
 
     const [dragState, setDragState] = useState(null);
     const [savedCollapsed, setSavedCollapsed] = useState(null);
