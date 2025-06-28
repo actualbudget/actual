@@ -176,7 +176,7 @@ function UserAccessContent({
             </Trans>{' '}
             <Link
               variant="external"
-              to="https://actualbudget.org/docs/budgeting/users-access/"
+              to="https://actualbudget.org/docs/config/multi-user#user-access-management"
               linkColor="muted"
             >
               <Trans>Learn more</Trans>
