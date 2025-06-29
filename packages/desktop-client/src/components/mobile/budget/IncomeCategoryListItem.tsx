@@ -126,23 +126,22 @@ function IncomeCategoryCells({
         alignItems: 'center',
       }}
     >
-      {budgetType === 'report' && (
-        <View
-          style={{
-            width: columnWidth,
-            justifyContent: 'center',
-            alignItems: 'flex-end',
-          }}
-        >
-          <BudgetCell
-            binding={budgeted}
-            type="financial"
-            category={category}
-            month={month}
-            onBudgetAction={onBudgetAction}
-          />
-        </View>
-      )}
+      <View
+        style={{
+          width: columnWidth,
+          justifyContent: 'center',
+          alignItems: 'flex-end',
+        }}
+      >
+        <BudgetCell
+          binding={budgeted}
+          type="financial"
+          category={category}
+          month={month}
+          onBudgetAction={onBudgetAction}
+        />
+      </View>
+
       <View
         style={{
           width: columnWidth,
