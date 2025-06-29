@@ -1,5 +1,5 @@
 import { type ComponentProps, type ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -152,26 +152,26 @@ export function Header({
               variant="bare"
               onPress={() => onChangeDates(...getLatestRange(1))}
             >
-              {t('1 month')}
+              <Trans>1 month</Trans>
             </Button>
           )}
           <Button
             variant="bare"
             onPress={() => onChangeDates(...getLatestRange(2))}
           >
-            {t('3 months')}
+            <Trans>3 months</Trans>
           </Button>
           <Button
             variant="bare"
             onPress={() => onChangeDates(...getLatestRange(5))}
           >
-            {t('6 months')}
+            <Trans>6 months</Trans>
           </Button>
           <Button
             variant="bare"
             onPress={() => onChangeDates(...getLatestRange(11))}
           >
-            {t('1 year')}
+            <Trans>1 year</Trans>
           </Button>
           <Button
             variant="bare"
@@ -189,7 +189,7 @@ export function Header({
               )
             }
           >
-            {t('Year to date')}
+            <Trans>Year to date</Trans>
           </Button>
           <Button
             variant="bare"
@@ -207,7 +207,7 @@ export function Header({
               )
             }
           >
-            {t('Last year')}
+            <Trans>Last year</Trans>
           </Button>
           <Button
             variant="bare"
@@ -217,7 +217,7 @@ export function Header({
               )
             }
           >
-            {t('All time')}
+            <Trans>All time</Trans>
           </Button>
 
           {filters && (

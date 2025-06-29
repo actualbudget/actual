@@ -214,6 +214,29 @@ export function titleFirst(str: string | null | undefined) {
   return str[0].toUpperCase() + str.slice(1);
 }
 
+export function reapplyThousandSeparators(amountText: string) {
+  if (!amountText || typeof amountText !== 'string') {
+    return amountText;
+  }
+
+  const { decimalSeparator, thousandsSeparator } = getNumberFormat();
+  const [integerPartRaw, decimalPart = ''] = amountText.split(decimalSeparator);
+
+  const numericValue = Number(
+    integerPartRaw.replaceAll(thousandsSeparator, ''),
+  );
+  if (isNaN(numericValue)) {
+    return amountText; // Return original if parsing fails
+  }
+
+  const integerPart = numericValue
+    .toLocaleString('en-US')
+    .replaceAll(',', thousandsSeparator);
+  return decimalPart
+    ? integerPart + decimalSeparator + decimalPart
+    : integerPart;
+}
+
 export function appendDecimals(
   amountText: string,
   hideDecimals = false,

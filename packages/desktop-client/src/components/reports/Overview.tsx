@@ -250,7 +250,7 @@ export function Overview() {
     window.Actual.saveFile(
       JSON.stringify(data, null, 2),
       'dashboard.json',
-      'Export Dashboard',
+      t('Export Dashboard'),
     );
   };
   const onImport = async () => {

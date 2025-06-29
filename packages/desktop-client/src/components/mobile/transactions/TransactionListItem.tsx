@@ -30,7 +30,7 @@ import {
 } from '@react-aria/interactions';
 
 import { isPreviewId } from 'loot-core/shared/transactions';
-import { type IntegerAmount, integerToCurrency } from 'loot-core/shared/util';
+import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type TransactionEntity,
@@ -38,10 +38,7 @@ import {
 
 import { lookupName, Status } from './TransactionEdit';
 
-import {
-  makeAmountFullStyle,
-  makeBalanceAmountStyle,
-} from '@desktop-client/components/budget/util';
+import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -76,13 +73,11 @@ const getScheduleIconStyle = ({ isPreview }: { isPreview: boolean }) => ({
 type TransactionListItemProps = ComponentPropsWithoutRef<
   typeof ListBoxItem<TransactionEntity>
 > & {
-  balance: IntegerAmount | null;
   onPress: (transaction: TransactionEntity) => void;
   onLongPress: (transaction: TransactionEntity) => void;
 };
 
 export function TransactionListItem({
-  balance,
   onPress,
   onLongPress,
   ...props
@@ -287,7 +282,7 @@ export function TransactionListItem({
                   </TextOneLine>
                 )}
               </View>
-              <View style={{ textAlign: 'right' }}>
+              <View style={{ justifyContent: 'center' }}>
                 <Text
                   style={{
                     ...textStyle,
@@ -296,17 +291,6 @@ export function TransactionListItem({
                 >
                   {integerToCurrency(amount)}
                 </Text>
-                {balance != null && (
-                  <Text
-                    style={{
-                      fontSize: 11,
-                      fontWeight: '400',
-                      ...makeBalanceAmountStyle(balance || 0),
-                    }}
-                  >
-                    {integerToCurrency(balance)}
-                  </Text>
-                )}
               </View>
             </View>
           </Button>
