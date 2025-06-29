@@ -5,22 +5,22 @@ import { useInitialMount } from './useInitialMount';
 import { getCategories } from '@desktop-client/queries/queriesSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
 
-export function useCategories() {
+export function useCategories(options?: { hierarchical?: boolean }) {
   const dispatch = useDispatch();
   const categoriesLoaded = useSelector(state => state.queries.categoriesLoaded);
   const isInitialMount = useInitialMount();
 
   useEffect(() => {
     if (isInitialMount && !categoriesLoaded) {
-      dispatch(getCategories());
+      dispatch(getCategories({ hierarchical: options?.hierarchical ?? false }));
     }
-  }, [categoriesLoaded, dispatch, isInitialMount]);
+  }, [categoriesLoaded, dispatch, isInitialMount, options?.hierarchical]); //Confirm if options?.hierarchical is needed
 
   const selector = useSelector(state => state.queries.categories);
   return useMemo(
     () => ({
       ...selector,
-          groupedHierarchy: selector.grouped.filter(g => g.parent_id == null),
+      groupedHierarchy: selector.grouped,
     }),
     [selector],
   );

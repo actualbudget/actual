@@ -1,6 +1,6 @@
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
-import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
+import { type CategoryEntity, type CategoryGroupEntity } from '../../types/models';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
@@ -141,8 +141,17 @@ app.method('category-group-delete', mutator(undoable(deleteCategoryGroup)));
 app.method('must-category-transfer', isCategoryTransferRequired);
 
 // Server must return AQL entities not the raw DB data
-async function getCategories() {
-  const categoryGroups = await getCategoryGroups();
+// This handler fetches categories and groups, returning them in a grouped (potentially hierarchical)
+// and a flat list format.
+async function getCategories({
+  hierarchical = false // Only accept the hierarchical parameter
+}: { hierarchical?: boolean } = {}) { // Make the parameter optional
+
+  // Call the db function, passing the hierarchical flag.
+  // The db function now returns either the hierarchical structure (if hierarchical: true)
+  // or a flat list of all groups with children populated (if hierarchical: false).
+  const categoryGroups = await db.getCategoriesGrouped(undefined, hierarchical);
+
   return {
     grouped: categoryGroups,
     list: categoryGroups.flatMap(g => g.categories ?? []),
@@ -385,6 +394,7 @@ async function createCategoryGroup({
   return await db.insertCategoryGroup({
     name,
     is_income: isIncome ? 1 : 0,
+    parent_id: parentId || null,
     hidden: hidden ? 1 : 0,
   });
 }

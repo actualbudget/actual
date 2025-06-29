@@ -83,7 +83,7 @@ export function BudgetTable(props: BudgetTableProps) {
     onBudgetAction,
   } = props;
 
-  const { groupedHierarchy: categoryGroups } = useCategories();
+  const { groupedHierarchy: categoryGroups } = useCategories({hierarchical: true});
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
   const [showHiddenCategories, setShowHiddenCategoriesPef] = useLocalPref(
