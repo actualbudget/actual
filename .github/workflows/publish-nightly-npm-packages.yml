@@ -10,6 +10,7 @@ jobs:
   build-and-pack:
     runs-on: ubuntu-latest
     name: Build and pack npm packages
+    if: github.event.repository.fork == false
     steps:
       - uses: actions/checkout@v4
 

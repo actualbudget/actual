@@ -176,7 +176,7 @@ function UserAccessContent({
             </Trans>{' '}
             <Link
               variant="external"
-              to="https://actualbudget.org/docs/budgeting/users-access/"
+              to="https://actualbudget.org/docs/config/multi-user#user-access-management"
               linkColor="muted"
             >
               <Trans>Learn more</Trans>
@@ -274,13 +274,14 @@ type LockToggleProps = {
 function LockToggle({ style, onToggleSave }: LockToggleProps) {
   const [hover, setHover] = useState(false);
   const dispatch = useDispatch();
+  const { t } = useTranslation();
 
   return (
     <Button
       onHoverStart={() => setHover(true)}
       onHoverEnd={() => setHover(false)}
       variant="primary"
-      aria-label="Menu"
+      aria-label={t('Menu')}
       onPress={() =>
         dispatch(
           pushModal({

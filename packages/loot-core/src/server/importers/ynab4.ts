@@ -218,15 +218,17 @@ async function importTransactions(
 
             subtransactions:
               transaction.subTransactions &&
-              transaction.subTransactions.map(t => {
-                return {
-                  id: entityIdMap.get(t.entityId),
-                  amount: amountToInteger(t.amount),
-                  category: getCategory(t.categoryId),
-                  notes: t.memo || null,
-                  ...transferProperties(t),
-                };
-              }),
+              transaction.subTransactions
+                .filter(st => !st.isTombstone)
+                .map(t => {
+                  return {
+                    id: entityIdMap.get(t.entityId),
+                    amount: amountToInteger(t.amount),
+                    category: getCategory(t.categoryId),
+                    notes: t.memo || null,
+                    ...transferProperties(t),
+                  };
+                }),
           };
 
           return newTransaction;

@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Form } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Stack } from '@actual-app/components/stack';
@@ -18,7 +18,6 @@ export function SaveReportChoose({ onApply }: SaveReportChooseProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [err, setErr] = useState('');
   const [value, setValue] = useState('');
-  const { t } = useTranslation();
 
   useEffect(() => {
     if (inputRef.current) {
@@ -42,7 +41,7 @@ export function SaveReportChoose({ onApply }: SaveReportChooseProps) {
       >
         <View style={{ flexDirection: 'row', align: 'center' }}>
           <Text style={{ userSelect: 'none', flex: 1 }}>
-            {t('Choose Report')}
+            <Trans>Choose Report</Trans>
           </Text>
           <View style={{ flex: 1 }} />
         </View>
@@ -65,7 +64,7 @@ export function SaveReportChoose({ onApply }: SaveReportChooseProps) {
         >
           <View style={{ flex: 1 }} />
           <Button variant="primary" type="submit">
-            {t('Apply')}
+            <Trans>Apply</Trans>
           </Button>
         </Stack>
       </Form>
