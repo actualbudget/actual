@@ -20,7 +20,7 @@ import {
 import { FocusableAmountInput } from '@desktop-client/components/mobile/transactions/FocusableAmountInput';
 import { useCategory } from '@desktop-client/hooks/useCategory';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { envelopeBudget } from '@desktop-client/queries/queries';
+import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type EnvelopeBudgetMenuModalProps = Omit<
   Extract<ModalType, { name: 'envelope-budget-menu' }>['options'],

@@ -3,7 +3,7 @@ import { APIError } from '../../../server/errors';
 import { runHandler, isMutating } from '../../../server/mutators';
 import { captureException } from '../../exceptions';
 
-import type * as T from './index.d';
+import type * as T from './index-types';
 
 function coerceError(error) {
   if (error.type && error.type === 'APIError') {

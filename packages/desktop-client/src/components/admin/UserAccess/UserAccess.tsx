@@ -274,13 +274,14 @@ type LockToggleProps = {
 function LockToggle({ style, onToggleSave }: LockToggleProps) {
   const [hover, setHover] = useState(false);
   const dispatch = useDispatch();
+  const { t } = useTranslation();
 
   return (
     <Button
       onHoverStart={() => setHover(true)}
       onHoverEnd={() => setHover(false)}
       variant="primary"
-      aria-label="Menu"
+      aria-label={t('Menu')}
       onPress={() =>
         dispatch(
           pushModal({

@@ -4,14 +4,14 @@ interface BaseTemplate {
   directive: string;
 }
 
-interface PercentageTemplate extends BaseTemplate {
+export interface PercentageTemplate extends BaseTemplate {
   type: 'percentage';
   percent: number;
   previous: boolean;
   category: string;
 }
 
-interface WeekTemplate extends BaseTemplate {
+export interface WeekTemplate extends BaseTemplate {
   type: 'week';
   amount: number;
   weeks: number | null;
@@ -24,7 +24,7 @@ interface WeekTemplate extends BaseTemplate {
   };
 }
 
-interface ByTemplate extends BaseTemplate {
+export interface ByTemplate extends BaseTemplate {
   type: 'by';
   amount: number;
   month: string;
@@ -33,7 +33,7 @@ interface ByTemplate extends BaseTemplate {
   from?: string;
 }
 
-interface SpendTemplate extends BaseTemplate {
+export interface SpendTemplate extends BaseTemplate {
   type: 'spend';
   amount: number;
   month: string;
@@ -42,7 +42,7 @@ interface SpendTemplate extends BaseTemplate {
   repeat?: number;
 }
 
-interface SimpleTemplate extends BaseTemplate {
+export interface SimpleTemplate extends BaseTemplate {
   type: 'simple';
   monthly?: number;
   limit?: {
@@ -53,14 +53,14 @@ interface SimpleTemplate extends BaseTemplate {
   };
 }
 
-interface ScheduleTemplate extends BaseTemplate {
+export interface ScheduleTemplate extends BaseTemplate {
   type: 'schedule';
   name: string;
   full?: boolean;
   adjustment?: number;
 }
 
-interface RemainderTemplate extends BaseTemplate {
+export interface RemainderTemplate extends BaseTemplate {
   type: 'remainder';
   weight: number;
   limit?: {
@@ -71,17 +71,17 @@ interface RemainderTemplate extends BaseTemplate {
   };
 }
 
-interface AverageTemplate extends BaseTemplate {
+export interface AverageTemplate extends BaseTemplate {
   type: 'average';
   numMonths: number;
 }
 
-interface GoalTemplate extends BaseTemplate {
+export interface GoalTemplate extends BaseTemplate {
   type: 'goal';
   amount: number;
 }
 
-interface CopyTemplate extends BaseTemplate {
+export interface CopyTemplate extends BaseTemplate {
   type: 'copy';
   lookBack: number;
 }

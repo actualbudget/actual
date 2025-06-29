@@ -505,7 +505,7 @@ export default pluginTypescript.config(
         {
           paths: [
             {
-              name: 'react-router-dom',
+              name: 'react-router',
               importNames: ['useNavigate'],
               message:
                 "Please import Actual's useNavigate() hook from `src/hooks` instead.",

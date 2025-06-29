@@ -6,11 +6,11 @@ import {
   extractScheduleConds,
 } from '../../shared/schedules';
 import { CategoryEntity } from '../../types/models';
+import { ScheduleTemplate, Template } from '../../types/models/templates';
 import * as db from '../db';
 import { getRuleForSchedule } from '../schedules/app';
 
 import { isReflectBudget } from './actions';
-import { ScheduleTemplate, Template } from './types/templates';
 
 type ScheduleTemplateTarget = {
   name: string;

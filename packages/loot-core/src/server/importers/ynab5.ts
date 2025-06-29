@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as monthUtils from '../../shared/months';
 import { sortByKey, groupBy } from '../../shared/util';
 
-import { YNAB5 } from './ynab5-types';
+import * as YNAB5 from './ynab5-types';
 
 function amountFromYnab(amount: number) {
   // ynabs multiplies amount by 1000 and actual by 100
