@@ -240,16 +240,12 @@ async function countContributorPoints(repo) {
           userStats.points += config.POINTS_PER_ISSUE_TRIAGE_ACTION;
         }
 
-        if (event.event === 'closed') {
-          // Check if the issue was closed with "no planned" status
-          const closeEvent = events.find(e => e.event === 'closed');
-
-          if (closeEvent?.state_reason === 'not_planned') {
-            const closer = event.actor.login;
-            const userStats = stats.get(closer);
-            userStats.issueClosings.push(issue.number.toString());
-            userStats.points += config.POINTS_PER_ISSUE_CLOSING_ACTION;
-          }
+        // Check if the issue was closed with "no planned" status
+        if (event.event === 'closed' && event.state_reason === 'not_planned') {
+          const closer = event.actor.login;
+          const userStats = stats.get(closer);
+          userStats.issueClosings.push(issue.number.toString());
+          userStats.points += config.POINTS_PER_ISSUE_CLOSING_ACTION;
         }
       });
   }
