@@ -208,6 +208,14 @@ Your cautionary item
 :::
 ```
 
+If you want to make a reader aware of something really important that can mess up their budget, use this:
+
+```markdown
+:::warning
+Your warning content
+:::
+```
+
 #### The above highlights will be rendered as follows
 :::tip
 Your tip content
@@ -221,6 +229,9 @@ Your note content
 Your cautionary item
 :::
 
+:::warning
+Your warning content
+:::
 
 ### Hiding and showing  information
 
