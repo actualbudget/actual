@@ -37,6 +37,8 @@ DKB
 dmg
 easybank
 Edenred
+emojis
+emoji
 escodegen
 EUR
 expando

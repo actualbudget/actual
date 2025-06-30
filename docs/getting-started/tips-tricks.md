@@ -112,3 +112,17 @@ To enable this:
 A new column should appear which shows the balance of the account after each transaction:
 
 ![Show running balance](/img/tips-tricks/running-balance.png)
+
+
+## Using Emojis in Actual
+
+Actual supports emojis in many places, including payees, categories, and notes. You can use emojis to add visual
+flair to your budget and make it more fun to use.
+
+To add an emoji, you can use the emoji picker on your operating system, or you can copy and paste emojis from web sites
+like [Emojipedia](https://emojipedia.org/), [EmojiDB](https://emojidb.org/) or [Get Emoji](https://getemoji.com/).
+
+![Emojis everywhere](/img/tips-tricks/using-emojis.png)
+
+By using emojis on the accounts, you can have grouping of accounts by type, such as credit cards, expenses, and savings.
+
