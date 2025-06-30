@@ -209,10 +209,14 @@ function ConfigureField({
       <Form
         onSubmit={e => {
           e.preventDefault();
+
+          // Use the live input value to avoid race conditions with fast typing (when pressing Enter)
+          const liveValue = inputRef.current?.value?.trim();
+
           onApply({
             field,
             op,
-            value,
+            value: liveValue,
             options: subfieldToOptions(field, subfield),
           });
         }}
