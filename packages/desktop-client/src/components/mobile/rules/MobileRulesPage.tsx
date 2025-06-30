@@ -9,7 +9,6 @@ import { type RuleEntity } from 'loot-core/types/models';
 import { AddRuleButton } from './AddRuleButton';
 import { RulesList } from './RulesList';
 
-import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useScrollListener } from '@desktop-client/components/ScrollProvider';
 import { initiallyLoadPayees } from '@desktop-client/queries/queriesSlice';
@@ -73,7 +72,6 @@ export function MobileRulesPage() {
       header={
         <MobilePageHeader
           title={t('Rules')}
-          leftContent={<MobileBackButton />}
           rightContent={<AddRuleButton />}
         />
       }

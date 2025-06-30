@@ -18,11 +18,11 @@ Successfully created a mobile rules page for the Actual Budget application, foll
 - Individual rule item component for mobile display
 - Features:
   - Displays rule stage (pre/post) as a pill badge with proper color coding (matches desktop)
-  - Shows rule conditions in "IF" section
-  - Shows rule actions in "THEN" section
-  - Readable formatting of rule logic using existing utility functions
-  - Proper handling of date objects (including recurring dates)
-  - Proper handling of different field types (amount, payee, category, etc.)
+  - Shows rule conditions in "IF" section using desktop `ConditionExpression` components
+  - Shows rule actions in "THEN" section using desktop `ActionExpression` components
+  - Reuses desktop components for consistent styling and functionality
+  - Proper handling of all rule types (date, amount, payee, category, etc.) via desktop components
+  - Gray background with purple text for condition/action pills (matches desktop exactly)
   - Proper mobile touch interaction support
   - No click actions implemented (as requested)
 
@@ -30,7 +30,7 @@ Successfully created a mobile rules page for the Actual Budget application, foll
 - Main mobile rules page component
 - Features:
   - Uses `Page` component with `MobilePageHeader` for consistent mobile UI
-  - Header with back button and "+" add rule button
+  - Header with "Rules" title and "+" add rule button (no back button)
   - Loads rules from the server using existing API (`rules-get`)
   - Implements pagination for performance
   - Scroll-based infinite loading
@@ -92,18 +92,21 @@ Successfully created a mobile rules page for the Actual Budget application, foll
 
 - Uses React Aria Components for accessibility and mobile interaction
 - Follows existing mobile component patterns from transaction list
-- Leverages existing rule utility functions (`mapField`, `friendlyOp`) for display
-- Integrates with existing data hooks (`useAccounts`, `useCategories`, `usePayees`, `useDateFormat`, `useLocale`)
+- **Reuses desktop components**: `ConditionExpression` and `ActionExpression` for consistent styling
 - Uses the same responsive routing pattern as other mobile pages
-- Implements proper value formatting similar to desktop `Value` component
-- Handles complex date objects including recurring schedules
-- Uses consistent color theming with desktop version (`theme.pillBackgroundSelected`, `theme.pillTextSelected`)
+- Leverages existing rule utility functions via desktop components
+- **Consistent theming**: Uses `theme.pillBackgroundLight` and `theme.pillTextHighlighted` from desktop
+- Handles all rule types (date, amount, payee, category, etc.) through proven desktop logic
+- Mobile-optimized layout with flexbox wrapping for multiple conditions/actions
 
 ## User Experience
 
 - Users can now access rules from the mobile navigation
-- Rules are displayed in an easy-to-read format showing conditions and actions
-- Mobile-optimized header with back button for navigation
+- Rules are displayed with **identical styling to desktop version**:
+  - Gray background pills with purple text for conditions and actions
+  - Proper formatting of dates, amounts, and entity references
+  - Multiple conditions/actions displayed as separate pills
+- Clean header with just title and "+" add button (no back button clutter)
 - "+" button in header opens rule creation modal (currently empty placeholder)
 - Smooth scrolling and loading experience
 - Consistent with other mobile pages in the app

@@ -14,18 +14,12 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { usePress } from '@react-aria/interactions';
 
-import { format as formatDate, parseISO } from 'date-fns';
 
-import { getRecurringDescription } from 'loot-core/shared/schedules';
-import { friendlyOp, mapField } from 'loot-core/shared/rules';
-import { integerToCurrency } from 'loot-core/shared/util';
+import { friendlyOp } from 'loot-core/shared/rules';
 import { type RuleEntity } from 'loot-core/types/models';
 
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { usePayees } from '@desktop-client/hooks/usePayees';
+import { ActionExpression } from '@desktop-client/components/rules/ActionExpression';
+import { ConditionExpression } from '@desktop-client/components/rules/ConditionExpression';
 
 const ROW_HEIGHT = 80;
 
@@ -42,11 +36,6 @@ type RulesListItemProps = ComponentPropsWithoutRef<
 
 export function RulesListItem({ onPress, ...props }: RulesListItemProps) {
   const { t } = useTranslation();
-  const { list: categories } = useCategories();
-  const payees = usePayees();
-  const accounts = useAccounts();
-  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const locale = useLocale();
 
   const { value: rule } = props;
 
@@ -61,87 +50,6 @@ export function RulesListItem({ onPress, ...props }: RulesListItemProps) {
   }
 
   const textStyle = getTextStyle();
-
-  // Helper function to map field values to names (similar to Value component)
-  const mapValue = (field: string, value: any) => {
-    if (value == null || value === '') {
-      return t('(nothing)');
-    }
-
-    if (typeof value === 'boolean') {
-      return value ? 'true' : 'false';
-    }
-
-    switch (field) {
-      case 'amount':
-        return integerToCurrency(value);
-      case 'date':
-        if (value) {
-          if (typeof value === 'object' && value.frequency) {
-            return getRecurringDescription(value, dateFormat, locale);
-          }
-          if (typeof value === 'string') {
-            return formatDate(parseISO(value), dateFormat);
-          }
-        }
-        return null;
-      case 'notes':
-      case 'imported_payee':
-      case 'payee_name':
-        return value;
-      case 'payee': {
-        const object = payees.find(p => p.id === value);
-        return object ? object.name : t('(deleted)');
-      }
-      case 'category': {
-        const object = categories.find(c => c.id === value);
-        return object ? object.name : t('(deleted)');
-      }
-      case 'account': {
-        const object = accounts.find(a => a.id === value);
-        return object ? object.name : t('(deleted)');
-      }
-      default:
-        return String(value);
-    }
-  };
-
-  // Build a readable description of the rule conditions
-  const conditionsText = rule.conditions
-    .map(cond => {
-      const fieldName = mapField(cond.field);
-      const opName = friendlyOp(cond.op);
-      let valueName;
-      
-      if (cond.op === 'oneOf' || cond.op === 'notOneOf') {
-        if (Array.isArray(cond.value)) {
-          valueName = cond.value.map(v => mapValue(cond.field, v)).join(', ');
-        } else {
-          valueName = mapValue(cond.field, cond.value);
-        }
-      } else {
-        valueName = mapValue(cond.field, cond.value);
-      }
-      
-      return `${fieldName} ${opName} ${valueName}`;
-    })
-    .join(` ${friendlyOp(rule.conditionsOp)} `);
-
-  // Build a readable description of the rule actions
-  const actionsText = rule.actions
-    .map(action => {
-      if (action.op === 'set') {
-        const fieldName = mapField(action.field);
-        const valueName = mapValue(action.field, action.value);
-        return `${friendlyOp(action.op)} ${fieldName} to ${valueName}`;
-      } else if (action.op === 'link-schedule') {
-        return `${friendlyOp(action.op)} schedule`;
-      } else if (action.op === 'prepend-notes' || action.op === 'append-notes') {
-        return `${friendlyOp(action.op)} "${action.value}"`;
-      }
-      return friendlyOp(action.op);
-    })
-    .join(', ');
 
   return (
     <ListBoxItem textValue={rule.id} {...props}>
@@ -193,30 +101,35 @@ export function RulesListItem({ onPress, ...props }: RulesListItemProps) {
                 <Text style={{ fontSize: 11, color: theme.pageTextLight, marginBottom: 2 }}>
                   {t('IF')}
                 </Text>
-                <TextOneLine
-                  style={{
-                    ...textStyle,
-                    fontSize: 12,
-                    color: theme.tableText,
-                  }}
-                >
-                  {conditionsText}
-                </TextOneLine>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
+                  {rule.conditions.map((cond, i) => (
+                    <ConditionExpression
+                      key={i}
+                      field={cond.field}
+                      op={cond.op}
+                      inline={true}
+                      value={cond.value}
+                      options={cond.options}
+                      prefix={i > 0 ? friendlyOp(rule.conditionsOp) : null}
+                      style={{ fontSize: 11 }}
+                    />
+                  ))}
+                </View>
               </View>
 
               <View>
                 <Text style={{ fontSize: 11, color: theme.pageTextLight, marginBottom: 2 }}>
                   {t('THEN')}
                 </Text>
-                <TextOneLine
-                  style={{
-                    ...textStyle,
-                    fontSize: 12,
-                    color: theme.tableText,
-                  }}
-                >
-                  {actionsText}
-                </TextOneLine>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
+                  {rule.actions.map((action, i) => (
+                    <ActionExpression
+                      key={i}
+                      {...action}
+                      style={{ fontSize: 11 }}
+                    />
+                  ))}
+                </View>
               </View>
             </View>
           </View>
