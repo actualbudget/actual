@@ -27,11 +27,27 @@ Successfully created a mobile rules page for the Actual Budget application, foll
 ### 3. `packages/desktop-client/src/components/mobile/rules/MobileRulesPage.tsx`
 - Main mobile rules page component
 - Features:
+  - Uses `Page` component with `MobilePageHeader` for consistent mobile UI
+  - Header with back button and "+" add rule button
   - Loads rules from the server using existing API (`rules-get`)
   - Implements pagination for performance
   - Scroll-based infinite loading
   - Error handling
   - Loading states
+
+### 4. `packages/desktop-client/src/components/mobile/rules/AddRuleButton.tsx`
+- Add rule button component for mobile header
+- Features:
+  - "+" icon button similar to add transaction button
+  - Opens modal for rule creation when pressed
+  - Proper accessibility with aria-label
+
+### 5. `packages/desktop-client/src/components/modals/MobileCreateRuleModal.tsx`
+- Empty modal for rule creation (placeholder for future implementation)
+- Features:
+  - Standard modal structure with header and close button
+  - Placeholder content indicating where rule creation UI will go
+  - Proper modal lifecycle management
 
 ## Files Modified
 
@@ -50,6 +66,15 @@ Successfully created a mobile rules page for the Actual Budget application, foll
 - Changed "Rules (Soon)" to "Rules" 
 - Updated path from `/rules/soon` to `/rules`
 
+### 5. `packages/desktop-client/src/modals/modalsSlice.ts`
+- Added `mobile-create-rule` modal type to the Modal union type
+- Enables the modal system to recognize and handle the new rule creation modal
+
+### 6. `packages/desktop-client/src/components/Modals.tsx`
+- Added import for `MobileCreateRuleModal`
+- Added case for `mobile-create-rule` in the modal switch statement
+- Registers the modal so it can be rendered when triggered
+
 ## Key Features
 
 1. **Mobile-First Design**: Optimized for touch interaction and mobile screens
@@ -57,7 +82,9 @@ Successfully created a mobile rules page for the Actual Budget application, foll
 3. **Performance**: Implements pagination and infinite scroll for large rule lists
 4. **Responsive**: Automatically switches between mobile and desktop views
 5. **Accessible**: Proper ARIA labels and semantic HTML structure
-6. **No Edit Actions**: As requested, no click actions or editing functionality implemented
+6. **Header with Add Button**: Mobile-optimized header with back button and "+" add rule button
+7. **Modal Integration**: Empty modal ready for rule creation functionality
+8. **No Edit Actions**: As requested, no click actions or editing functionality implemented for rule items
 
 ## Technical Implementation Details
 
@@ -71,6 +98,8 @@ Successfully created a mobile rules page for the Actual Budget application, foll
 
 - Users can now access rules from the mobile navigation
 - Rules are displayed in an easy-to-read format showing conditions and actions
+- Mobile-optimized header with back button for navigation
+- "+" button in header opens rule creation modal (currently empty placeholder)
 - Smooth scrolling and loading experience
 - Consistent with other mobile pages in the app
 

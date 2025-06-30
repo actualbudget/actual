@@ -6,8 +6,11 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import { type RuleEntity } from 'loot-core/types/models';
 
+import { AddRuleButton } from './AddRuleButton';
 import { RulesList } from './RulesList';
 
+import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
+import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useScrollListener } from '@desktop-client/components/ScrollProvider';
 import { initiallyLoadPayees } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
@@ -66,11 +69,15 @@ export function MobileRulesPage() {
   }, [loadRules, dispatch]);
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: 'white',
-      }}
+    <Page
+      header={
+        <MobilePageHeader
+          title={t('Rules')}
+          leftContent={<MobileBackButton />}
+          rightContent={<AddRuleButton />}
+        />
+      }
+      padding={0}
     >
       <RulesList
         isLoading={isLoading}
@@ -78,6 +85,6 @@ export function MobileRulesPage() {
         isLoadingMore={isLoadingMore}
         onLoadMore={loadMore}
       />
-    </View>
+    </Page>
   );
 }
