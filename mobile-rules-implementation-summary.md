@@ -17,6 +17,8 @@ Successfully created a mobile rules page for the Actual Budget application, foll
 ### 2. `packages/desktop-client/src/components/mobile/rules/RulesListItem.tsx`
 - Individual rule item component for mobile display
 - Features:
+  - **Dynamic height**: Adjusts automatically based on content (minimum 60px)
+  - **Clickable**: Tapping opens the rule edit modal
   - Displays rule stage (pre/post) as a pill badge with proper color coding (matches desktop)
   - Shows rule conditions in "IF" section using desktop `ConditionExpression` components
   - Shows rule actions in "THEN" section using desktop `ActionExpression` components
@@ -24,11 +26,12 @@ Successfully created a mobile rules page for the Actual Budget application, foll
   - Proper handling of all rule types (date, amount, payee, category, etc.) via desktop components
   - Gray background with purple text for condition/action pills (matches desktop exactly)
   - Proper mobile touch interaction support
-  - No click actions implemented (as requested)
 
 ### 3. `packages/desktop-client/src/components/mobile/rules/MobileRulesPage.tsx`
 - Main mobile rules page component
 - Features:
+  - **Rule editing**: Clicking any rule opens the existing desktop edit modal
+  - **Auto-reload**: Rules list refreshes automatically after editing
   - Uses `Page` component with `MobilePageHeader` for consistent mobile UI
   - Header with "Rules" title and "+" add rule button (no back button)
   - Loads rules from the server using existing API (`rules-get`)
@@ -86,7 +89,7 @@ Successfully created a mobile rules page for the Actual Budget application, foll
 5. **Accessible**: Proper ARIA labels and semantic HTML structure
 6. **Header with Add Button**: Mobile-optimized header with back button and "+" add rule button
 7. **Modal Integration**: Empty modal ready for rule creation functionality
-8. **No Edit Actions**: As requested, no click actions or editing functionality implemented for rule items
+8. **Rule Editing**: Tapping any rule opens the existing desktop edit modal with auto-reload after save
 
 ## Technical Implementation Details
 
@@ -106,6 +109,9 @@ Successfully created a mobile rules page for the Actual Budget application, foll
   - Gray background pills with purple text for conditions and actions
   - Proper formatting of dates, amounts, and entity references
   - Multiple conditions/actions displayed as separate pills
+- **Dynamic row heights**: Rule rows adjust height based on content for better readability
+- **Interactive rules**: Tapping any rule opens the full desktop edit modal
+- **Auto-refresh**: After editing a rule, the list automatically updates with changes
 - Clean header with just title and "+" add button (no back button clutter)
 - "+" button in header opens rule creation modal (currently empty placeholder)
 - Smooth scrolling and loading experience
@@ -113,7 +119,7 @@ Successfully created a mobile rules page for the Actual Budget application, foll
 
 ## Future Enhancements (Not Implemented)
 
-- Rule editing/creation functionality
+- Rule creation functionality (modal placeholder exists)
 - Rule selection and bulk operations
 - Search/filter functionality
 - Rule reordering

@@ -40,6 +40,7 @@ type RulesListProps = {
   rules: readonly RuleEntity[];
   isLoadingMore: boolean;
   onLoadMore: () => void;
+  onRulePress?: (rule: RuleEntity) => void;
 };
 
 export function RulesList({
@@ -47,15 +48,17 @@ export function RulesList({
   rules,
   isLoadingMore,
   onLoadMore,
+  onRulePress,
 }: RulesListProps) {
   const { t } = useTranslation();
 
-  const onRulePress = useCallback(
+  const handleRulePress = useCallback(
     (rule: RuleEntity) => {
-      // For now, we're not implementing click actions as requested
-      // This is where we would handle rule selection/editing in the future
+      if (onRulePress) {
+        onRulePress(rule);
+      }
     },
-    [],
+    [onRulePress],
   );
 
   if (isLoading) {
@@ -87,7 +90,7 @@ export function RulesList({
           <RulesListItem
             key={rule.id}
             value={rule}
-            onPress={onRulePress}
+            onPress={handleRulePress}
           />
         )}
       </ListBox>

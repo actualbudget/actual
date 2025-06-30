@@ -11,6 +11,7 @@ import { RulesList } from './RulesList';
 
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useScrollListener } from '@desktop-client/components/ScrollProvider';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { initiallyLoadPayees } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -38,6 +39,22 @@ export function MobileRulesPage() {
       setIsLoading(false);
     }
   }, []);
+
+  const onEditRule = useCallback((rule: RuleEntity) => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'edit-rule',
+          options: {
+            rule,
+            onSave: async () => {
+              await loadRules();
+            },
+          },
+        },
+      }),
+    );
+  }, [dispatch, loadRules]);
 
   const loadMore = useCallback(() => {
     if (isLoadingMore || rules.length >= allRules.length) {
@@ -82,6 +99,7 @@ export function MobileRulesPage() {
         rules={rules}
         isLoadingMore={isLoadingMore}
         onLoadMore={loadMore}
+        onRulePress={onEditRule}
       />
     </Page>
   );

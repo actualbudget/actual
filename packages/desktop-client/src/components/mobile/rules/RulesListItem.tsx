@@ -21,7 +21,7 @@ import { type RuleEntity } from 'loot-core/types/models';
 import { ActionExpression } from '@desktop-client/components/rules/ActionExpression';
 import { ConditionExpression } from '@desktop-client/components/rules/ConditionExpression';
 
-const ROW_HEIGHT = 80;
+// Dynamic height - will be determined by content
 
 const getTextStyle = (): CSSProperties => ({
   ...styles.text,
@@ -41,7 +41,9 @@ export function RulesListItem({ onPress, ...props }: RulesListItemProps) {
 
   const { pressProps } = usePress({
     onPress: () => {
-      onPress(rule!);
+      if (rule) {
+        onPress(rule);
+      }
     },
   });
 
@@ -58,7 +60,7 @@ export function RulesListItem({ onPress, ...props }: RulesListItemProps) {
           {...mergeProps(itemProps, pressProps)}
           style={{
             userSelect: 'none',
-            height: ROW_HEIGHT,
+            minHeight: 60, // Minimum height, but can grow with content
             width: '100%',
             borderRadius: 0,
             borderWidth: '0 0 1px 0',
