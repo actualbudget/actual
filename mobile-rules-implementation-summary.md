@@ -17,10 +17,12 @@ Successfully created a mobile rules page for the Actual Budget application, foll
 ### 2. `packages/desktop-client/src/components/mobile/rules/RulesListItem.tsx`
 - Individual rule item component for mobile display
 - Features:
-  - Displays rule stage (pre/post) as a pill badge
+  - Displays rule stage (pre/post) as a pill badge with proper color coding (matches desktop)
   - Shows rule conditions in "IF" section
   - Shows rule actions in "THEN" section
   - Readable formatting of rule logic using existing utility functions
+  - Proper handling of date objects (including recurring dates)
+  - Proper handling of different field types (amount, payee, category, etc.)
   - Proper mobile touch interaction support
   - No click actions implemented (as requested)
 
@@ -91,8 +93,11 @@ Successfully created a mobile rules page for the Actual Budget application, foll
 - Uses React Aria Components for accessibility and mobile interaction
 - Follows existing mobile component patterns from transaction list
 - Leverages existing rule utility functions (`mapField`, `friendlyOp`) for display
-- Integrates with existing data hooks (`useAccounts`, `useCategories`, `usePayees`)
+- Integrates with existing data hooks (`useAccounts`, `useCategories`, `usePayees`, `useDateFormat`, `useLocale`)
 - Uses the same responsive routing pattern as other mobile pages
+- Implements proper value formatting similar to desktop `Value` component
+- Handles complex date objects including recurring schedules
+- Uses consistent color theming with desktop version (`theme.pillBackgroundSelected`, `theme.pillTextSelected`)
 
 ## User Experience
 

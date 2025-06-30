@@ -14,11 +14,17 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { usePress } from '@react-aria/interactions';
 
+import { format as formatDate, parseISO } from 'date-fns';
+
+import { getRecurringDescription } from 'loot-core/shared/schedules';
 import { friendlyOp, mapField } from 'loot-core/shared/rules';
+import { integerToCurrency } from 'loot-core/shared/util';
 import { type RuleEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 
 const ROW_HEIGHT = 80;
@@ -39,6 +45,8 @@ export function RulesListItem({ onPress, ...props }: RulesListItemProps) {
   const { list: categories } = useCategories();
   const payees = usePayees();
   const accounts = useAccounts();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const locale = useLocale();
 
   const { value: rule } = props;
 
@@ -54,25 +62,48 @@ export function RulesListItem({ onPress, ...props }: RulesListItemProps) {
 
   const textStyle = getTextStyle();
 
-  // Helper function to map field values to names
+  // Helper function to map field values to names (similar to Value component)
   const mapValue = (field: string, value: any) => {
-    if (!value) return '';
+    if (value == null || value === '') {
+      return t('(nothing)');
+    }
 
-    let object = null;
-    if (field === 'payee') {
-      object = payees.find(p => p.id === value);
-    } else if (field === 'category') {
-      object = categories.find(c => c.id === value);
-    } else if (field === 'account') {
-      object = accounts.find(a => a.id === value);
-    } else {
-      return value;
+    if (typeof value === 'boolean') {
+      return value ? 'true' : 'false';
     }
-    
-    if (object) {
-      return object.name;
+
+    switch (field) {
+      case 'amount':
+        return integerToCurrency(value);
+      case 'date':
+        if (value) {
+          if (typeof value === 'object' && value.frequency) {
+            return getRecurringDescription(value, dateFormat, locale);
+          }
+          if (typeof value === 'string') {
+            return formatDate(parseISO(value), dateFormat);
+          }
+        }
+        return null;
+      case 'notes':
+      case 'imported_payee':
+      case 'payee_name':
+        return value;
+      case 'payee': {
+        const object = payees.find(p => p.id === value);
+        return object ? object.name : t('(deleted)');
+      }
+      case 'category': {
+        const object = categories.find(c => c.id === value);
+        return object ? object.name : t('(deleted)');
+      }
+      case 'account': {
+        const object = accounts.find(a => a.id === value);
+        return object ? object.name : t('(deleted)');
+      }
+      default:
+        return String(value);
     }
-    return '(deleted)';
   };
 
   // Build a readable description of the rule conditions
@@ -80,9 +111,18 @@ export function RulesListItem({ onPress, ...props }: RulesListItemProps) {
     .map(cond => {
       const fieldName = mapField(cond.field);
       const opName = friendlyOp(cond.op);
-      const valueName = cond.op === 'oneOf' || cond.op === 'notOneOf'
-        ? cond.value.map(v => mapValue(cond.field, v)).join(', ')
-        : mapValue(cond.field, cond.value);
+      let valueName;
+      
+      if (cond.op === 'oneOf' || cond.op === 'notOneOf') {
+        if (Array.isArray(cond.value)) {
+          valueName = cond.value.map(v => mapValue(cond.field, v)).join(', ');
+        } else {
+          valueName = mapValue(cond.field, cond.value);
+        }
+      } else {
+        valueName = mapValue(cond.field, cond.value);
+      }
+      
       return `${fieldName} ${opName} ${valueName}`;
     })
     .join(` ${friendlyOp(rule.conditionsOp)} `);
@@ -135,12 +175,15 @@ export function RulesListItem({ onPress, ...props }: RulesListItemProps) {
                     alignSelf: 'flex-start',
                     marginBottom: 4,
                     backgroundColor: theme.pillBackgroundSelected,
-                    color: theme.pillTextSelected,
                     borderRadius: 4,
                     padding: '2px 6px',
                   }}
                 >
-                  <Text style={{ fontSize: 10, fontWeight: '600' }}>
+                  <Text style={{ 
+                    fontSize: 10, 
+                    fontWeight: '600',
+                    color: theme.pillTextSelected,
+                  }}>
                     {rule.stage.toUpperCase()}
                   </Text>
                 </View>
