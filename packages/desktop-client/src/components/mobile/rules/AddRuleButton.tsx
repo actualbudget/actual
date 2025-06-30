@@ -4,19 +4,53 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
 
+import { type NewRuleEntity } from 'loot-core/types/models';
+
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
-export function AddRuleButton() {
+type AddRuleButtonProps = {
+  onRuleCreated?: () => void;
+};
+
+export function AddRuleButton({ onRuleCreated }: AddRuleButtonProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
   const onPress = () => {
+    const rule: NewRuleEntity = {
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [
+        {
+          field: 'payee',
+          op: 'is',
+          value: null,
+          type: 'id',
+        },
+      ],
+      actions: [
+        {
+          op: 'set',
+          field: 'category',
+          value: null,
+          type: 'id',
+        },
+      ],
+    };
+
     dispatch(
       pushModal({
         modal: {
-          name: 'mobile-create-rule',
-          options: {},
+          name: 'edit-rule',
+          options: {
+            rule,
+            onSave: async () => {
+              if (onRuleCreated) {
+                await onRuleCreated();
+              }
+            },
+          },
         },
       }),
     );

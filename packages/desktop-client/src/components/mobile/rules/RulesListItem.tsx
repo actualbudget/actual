@@ -9,10 +9,9 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
-import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { usePress } from '@react-aria/interactions';
+import { PressResponder, usePress } from '@react-aria/interactions';
 
 
 import { friendlyOp } from 'loot-core/shared/rules';
@@ -56,19 +55,20 @@ export function RulesListItem({ onPress, ...props }: RulesListItemProps) {
   return (
     <ListBoxItem textValue={rule.id} {...props}>
       {itemProps => (
-        <Button
-          {...mergeProps(itemProps, pressProps)}
-          style={{
-            userSelect: 'none',
-            minHeight: 60, // Minimum height, but can grow with content
-            width: '100%',
-            borderRadius: 0,
-            borderWidth: '0 0 1px 0',
-            borderColor: theme.tableBorder,
-            borderStyle: 'solid',
-            backgroundColor: theme.tableBackground,
-          }}
-        >
+        <PressResponder {...pressProps}>
+          <Button
+            {...itemProps}
+            style={{
+              userSelect: 'none',
+              minHeight: 60, // Minimum height, but can grow with content
+              width: '100%',
+              borderRadius: 0,
+              borderWidth: '0 0 1px 0',
+              borderColor: theme.tableBorder,
+              borderStyle: 'solid',
+              backgroundColor: theme.tableBackground,
+            }}
+          >
           <View
             style={{
               flexDirection: 'row',
@@ -135,8 +135,6 @@ export function RulesListItem({ onPress, ...props }: RulesListItemProps) {
               </View>
             </View>
           </View>
-        </Button>
-      )}
     </ListBoxItem>
   );
 }

@@ -89,7 +89,7 @@ export function MobileRulesPage() {
       header={
         <MobilePageHeader
           title={t('Rules')}
-          rightContent={<AddRuleButton />}
+          rightContent={<AddRuleButton onRuleCreated={loadRules} />}
         />
       }
       padding={0}

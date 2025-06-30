@@ -541,10 +541,7 @@ export type Modal =
   | {
       name: 'category-automations-edit';
     }
-  | {
-      name: 'mobile-create-rule';
-      options: {};
-    };
+;
 
 type OpenAccountCloseModalPayload = {
   accountId: AccountEntity['id'];

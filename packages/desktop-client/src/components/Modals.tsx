@@ -51,7 +51,7 @@ import { ImportYNAB4Modal } from './modals/manager/ImportYNAB4Modal';
 import { ImportYNAB5Modal } from './modals/manager/ImportYNAB5Modal';
 import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayeesModal } from './modals/MergeUnusedPayeesModal';
-import { MobileCreateRuleModal } from './modals/MobileCreateRuleModal';
+
 import { NewCategoryGroupModal } from './modals/NewCategoryGroupModal';
 import { NewCategoryModal } from './modals/NewCategoryModal';
 import { NotesModal } from './modals/NotesModal';
@@ -152,8 +152,7 @@ export function Modals() {
         case 'edit-rule':
           return <EditRuleModal key={key} {...modal.options} />;
 
-        case 'mobile-create-rule':
-          return <MobileCreateRuleModal key={key} {...modal.options} />;
+
 
         case 'merge-unused-payees':
           return <MergeUnusedPayeesModal key={key} {...modal.options} />;

@@ -43,16 +43,11 @@ Successfully created a mobile rules page for the Actual Budget application, foll
 ### 4. `packages/desktop-client/src/components/mobile/rules/AddRuleButton.tsx`
 - Add rule button component for mobile header
 - Features:
+  - **Real rule creation**: Opens the actual desktop edit modal with a blank rule template
+  - **Auto-reload**: Rules list refreshes automatically after creating a new rule
   - "+" icon button similar to add transaction button
-  - Opens modal for rule creation when pressed
+  - Creates default rule structure (payee condition → category action)
   - Proper accessibility with aria-label
-
-### 5. `packages/desktop-client/src/components/modals/MobileCreateRuleModal.tsx`
-- Empty modal for rule creation (placeholder for future implementation)
-- Features:
-  - Standard modal structure with header and close button
-  - Placeholder content indicating where rule creation UI will go
-  - Proper modal lifecycle management
 
 ## Files Modified
 
@@ -72,13 +67,12 @@ Successfully created a mobile rules page for the Actual Budget application, foll
 - Updated path from `/rules/soon` to `/rules`
 
 ### 5. `packages/desktop-client/src/modals/modalsSlice.ts`
-- Added `mobile-create-rule` modal type to the Modal union type
-- Enables the modal system to recognize and handle the new rule creation modal
+- **Cleaned up**: Removed unused `mobile-create-rule` modal type
+- Now uses the existing `edit-rule` modal for both creation and editing
 
 ### 6. `packages/desktop-client/src/components/Modals.tsx`
-- Added import for `MobileCreateRuleModal`
-- Added case for `mobile-create-rule` in the modal switch statement
-- Registers the modal so it can be rendered when triggered
+- **Cleaned up**: Removed unused `MobileCreateRuleModal` import and case
+- Simplified to use only the existing `EditRuleModal` for all rule operations
 
 ## Key Features
 
@@ -88,8 +82,9 @@ Successfully created a mobile rules page for the Actual Budget application, foll
 4. **Responsive**: Automatically switches between mobile and desktop views
 5. **Accessible**: Proper ARIA labels and semantic HTML structure
 6. **Header with Add Button**: Mobile-optimized header with back button and "+" add rule button
-7. **Modal Integration**: Empty modal ready for rule creation functionality
+7. **Full Modal Integration**: Complete rule creation and editing using desktop modals
 8. **Rule Editing**: Tapping any rule opens the existing desktop edit modal with auto-reload after save
+9. **Rule Creation**: "+" button opens the same edit modal with a blank rule template
 
 ## Technical Implementation Details
 
@@ -110,18 +105,18 @@ Successfully created a mobile rules page for the Actual Budget application, foll
   - Proper formatting of dates, amounts, and entity references
   - Multiple conditions/actions displayed as separate pills
 - **Dynamic row heights**: Rule rows adjust height based on content for better readability
-- **Interactive rules**: Tapping any rule opens the full desktop edit modal
-- **Auto-refresh**: After editing a rule, the list automatically updates with changes
+- **Interactive rules**: Tapping any rule opens the full desktop edit modal (works with short tap/click)
+- **Auto-refresh**: After editing or creating a rule, the list automatically updates with changes
 - Clean header with just title and "+" add button (no back button clutter)
-- "+" button in header opens rule creation modal (currently empty placeholder)
+- **"+" button functionality**: Opens the real rule creation modal with full editing capabilities
 - Smooth scrolling and loading experience
 - Consistent with other mobile pages in the app
 
 ## Future Enhancements (Not Implemented)
 
-- Rule creation functionality (modal placeholder exists)
 - Rule selection and bulk operations
 - Search/filter functionality
 - Rule reordering
+- Mobile-optimized rule creation form (currently uses desktop modal)
 
 The implementation provides a solid foundation for mobile rules viewing while maintaining consistency with the existing mobile interface patterns.
