@@ -89,7 +89,8 @@ Successfully created a mobile rules page for the Actual Budget application, foll
 ## Technical Implementation Details
 
 - Uses React Aria Components for accessibility and mobile interaction
-- Follows existing mobile component patterns from transaction list
+- **Mobile touch optimization**: Uses `PressResponder` and `usePress` hooks for reliable touch interactions
+- Follows existing mobile component patterns from transaction list (same press handling as TransactionListItem)
 - **Reuses desktop components**: `ConditionExpression` and `ActionExpression` for consistent styling
 - Uses the same responsive routing pattern as other mobile pages
 - Leverages existing rule utility functions via desktop components
@@ -105,7 +106,7 @@ Successfully created a mobile rules page for the Actual Budget application, foll
   - Proper formatting of dates, amounts, and entity references
   - Multiple conditions/actions displayed as separate pills
 - **Dynamic row heights**: Rule rows adjust height based on content for better readability
-- **Interactive rules**: Tapping any rule opens the full desktop edit modal (works with short tap/click)
+- **Interactive rules**: Tapping any rule opens the full desktop edit modal (optimized for both short tap and long press)
 - **Auto-refresh**: After editing or creating a rule, the list automatically updates with changes
 - Clean header with just title and "+" add button (no back button clutter)
 - **"+" button functionality**: Opens the real rule creation modal with full editing capabilities

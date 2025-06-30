@@ -135,6 +135,9 @@ export function RulesListItem({ onPress, ...props }: RulesListItemProps) {
               </View>
             </View>
           </View>
+          </Button>
+        </PressResponder>
+      )}
     </ListBoxItem>
   );
 }
