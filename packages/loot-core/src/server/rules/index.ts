@@ -707,7 +707,10 @@ export class Action {
               object[this.field] = parseFloat(object[this.field]);
               break;
             case 'date':
-              object[this.field] = parseDate(object[this.field]);
+              object[this.field] = format(
+                parseDate(object[this.field]),
+                'yyyy-MM-dd',
+              );
               break;
             case 'boolean':
               object[this.field] = object[this.field] === 'true';
