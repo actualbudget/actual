@@ -126,7 +126,7 @@ function IncomeCategoryCells({
         alignItems: 'center',
       }}
     >
-      {budgetType === 'report' && (
+      {budgetType === 'tracking' && (
         <View
           style={{
             width: columnWidth,
@@ -143,6 +143,7 @@ function IncomeCategoryCells({
           />
         </View>
       )}
+
       <View
         style={{
           width: columnWidth,
