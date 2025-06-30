@@ -282,6 +282,16 @@ export type DbViewCategory = {
   is_income: DbCategory['is_income'];
   hidden: DbCategory['hidden'];
   group: DbCategoryGroup['id'];
+  sort_order: DbCategory['sort_order'];
+  tombstone: DbCategory['tombstone'];
+};
+
+export type DbViewCategoryWithGroupHidden = {
+  id: DbCategory['id'];
+  name: DbCategory['name'];
+  is_income: DbCategory['is_income'];
+  hidden: DbCategory['hidden'];
+  group: DbCategoryGroup['id'];
   group_hidden: DbCategoryGroup['hidden'];
   sort_order: DbCategory['sort_order'];
   tombstone: DbCategory['tombstone'];

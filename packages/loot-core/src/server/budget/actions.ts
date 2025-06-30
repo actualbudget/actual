@@ -261,7 +261,7 @@ export async function set3MonthAvg({
 }: {
   month: string;
 }): Promise<void> {
-  const categories = await db.all<db.DbViewCategory>(
+  const categories = await db.all<db.DbViewCategoryWithGroupHidden>(
     `
   SELECT c.*
   FROM categories c
@@ -309,7 +309,7 @@ export async function set12MonthAvg({
 }: {
   month: string;
 }): Promise<void> {
-  const categories = await db.all<db.DbViewCategory>(
+  const categories = await db.all<db.DbViewCategoryWithGroupHidden>(
     `
   SELECT c.*
   FROM categories c
@@ -333,7 +333,7 @@ export async function set6MonthAvg({
 }: {
   month: string;
 }): Promise<void> {
-  const categories = await db.all<db.DbViewCategory>(
+  const categories = await db.all<db.DbViewCategoryWithGroupHidden>(
     `
   SELECT c.*
   FROM categories c
