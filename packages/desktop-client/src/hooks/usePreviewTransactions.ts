@@ -24,7 +24,6 @@ import { type ScheduleStatuses } from './useSchedules';
 import { useSyncedPref } from './useSyncedPref';
 
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { liveQuery } from '@desktop-client/queries/liveQuery';
 import {
   pagedQuery,
   type PagedQuery,
@@ -182,7 +181,7 @@ export function useTransactions({
     if (optionsRef.current.calculateRunningBalances && runningBalanceQuery) {
       aqlQuery(runningBalanceQuery).then(data => {
         const map = new Map<TransactionEntity['id'], IntegerAmount>();
-        data.data.forEach(val => {
+        data.data.forEach((val: { id: string; balance: IntegerAmount }) => {
           map.set(val.id, val.balance);
         });
         setRunningBalances(map);
