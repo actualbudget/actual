@@ -370,23 +370,12 @@ export const moveCategoryGroup = createAppAsyncThunk(
   },
 );
 
-type GetCategoriesPayload = {
-  hierarchical?: boolean;
-};
-
-// Define the thunk's argument type as a union of the payload type and void
-// This allows calling the thunk with either the payload object or no arguments (void)
-type GetCategoriesThunkArg = GetCategoriesPayload | void;
-
 export const getCategories = createAppAsyncThunk(
   `${sliceName}/getCategories`,
-  // Update the payload creator signature to accept the union type
-  async (payload: GetCategoriesThunkArg) => {
-    // Access hierarchical from the payload if it exists, otherwise it will be undefined
-    const hierarchical = (payload as GetCategoriesPayload)?.hierarchical;
-
-    // Call the API handler, passing the hierarchical flag (will be undefined if no payload was provided)
-    const categories: CategoryViews = await send('get-categories', { hierarchical });
+  async () => {
+    // Always fetch categories in their raw, flat structure from the backend.
+    // The UI will be responsible for building the hierarchical view.
+    const categories: CategoryViews = await send('get-categories');
 
     // The API now returns { grouped: ..., list: ... }
     // The thunk should return this structure to be stored in the state

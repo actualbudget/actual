@@ -11,11 +11,13 @@ import { IncomeGroup } from './IncomeGroup';
 import { IncomeHeader } from './IncomeHeader';
 import { SidebarCategory } from './SidebarCategory';
 import { SidebarGroup } from './SidebarGroup';
+import { buildCategoryHierarchy } from './buildCategoryHierarchy';
 import { separateGroups } from './util';
 
 import { DropHighlightPosContext } from '@desktop-client/components/sort';
 import { Row } from '@desktop-client/components/table';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useCategories } from '@desktop-client/hooks/useCategories';
 
 export const BudgetCategories = memo(
   ({
@@ -34,6 +36,8 @@ export const BudgetCategories = memo(
     onReorderCategory,
     onReorderGroup,
   }) => {
+    const { list: allCategories, grouped: allCategoryGroups } =
+      useCategories();
     const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
       useLocalPref('budget.collapsed');
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
@@ -45,16 +49,24 @@ export const BudgetCategories = memo(
     const [newCategoryForGroup, setNewCategoryForGroup] = useState(null);
     const [newGroupForGroup, setNewGroupForGroup] = useState(null);
     const items = useMemo(() => {
-      const [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
+      const hierarchicalCategoryGroups = buildCategoryHierarchy(
+        allCategoryGroups,
+        allCategories,
+      );
+      const [expenseGroups, incomeGroup] = separateGroups(
+        hierarchicalCategoryGroups,
+      );
       let builtItems = []; // Use a different variable name temporarily to avoid confusion
 
       // 1. Process all expense groups hierarchically
       // Check if expenseGroups is not null and has items before trying to flatMap
       if (expenseGroups && expenseGroups.length > 0) {
-        builtItems = expenseGroups.flatMap(group => expandGroup(group, 0, 'expense'));
+        builtItems = expenseGroups.flatMap(group =>
+          expandGroup(group, 0, 'expense'),
+        );
       } else {
         builtItems = []; // Initialize as empty if no expense groups
-      } 
+      }
 
       // 2. Add the placeholder for a new TOP-LEVEL expense group if applicable
       // This is for the "Add new group" button that isn't under any specific parent.
@@ -78,11 +90,12 @@ export const BudgetCategories = memo(
 
       return builtItems; // Return the fully constructed list
     }, [
-      categoryGroups,
+      allCategoryGroups,
+      allCategories,
       collapsedGroupIds,
       newCategoryForGroup,
       isAddingGroup,
-      newGroupForGroup, // Added newGroupForGroup as a dependency for the top-level new group
+      newGroupForGroup,
       showHiddenCategories,
     ]);
       function expandGroup(group, depth = 0, type = 'expense') {
