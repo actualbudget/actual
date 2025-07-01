@@ -23,6 +23,7 @@ import { useCachedSchedules } from './useCachedSchedules';
 import { type ScheduleStatuses } from './useSchedules';
 import { useSyncedPref } from './useSyncedPref';
 
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { liveQuery } from '@desktop-client/queries/liveQuery';
 import {
   pagedQuery,
@@ -179,14 +180,12 @@ export function useTransactions({
 
   useMemo(() => {
     if (optionsRef.current.calculateRunningBalances && runningBalanceQuery) {
-      liveQuery(runningBalanceQuery, {
-        onData: (data: { id: string; balance: IntegerAmount }[]) => {
-          const map = new Map<TransactionEntity['id'], IntegerAmount>();
-          data.forEach(val => {
-            map.set(val.id, val.balance);
-          });
-          setRunningBalances(map);
-        },
+      aqlQuery(runningBalanceQuery).then(data => {
+        const map = new Map<TransactionEntity['id'], IntegerAmount>();
+        data.data.forEach(val => {
+          map.set(val.id, val.balance);
+        });
+        setRunningBalances(map);
       });
     } else {
       setRunningBalances(new Map());
