@@ -18,6 +18,7 @@ Bizum
 BKBKESMM
 BOFIIE
 Bourso
+Boursobank
 brexplpw
 BYLADEM
 Caddyfile
@@ -90,6 +91,7 @@ Priotecs
 proactively
 QNTOFRP
 QONTO
+Raiffeisen
 revolut
 RIED
 RSchedule
