@@ -18,7 +18,11 @@ import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import { amountToInteger, appendDecimals } from 'loot-core/shared/util';
+import {
+  amountToInteger,
+  appendDecimals,
+  reapplyThousandSeparators,
+} from 'loot-core/shared/util';
 
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
@@ -59,6 +63,7 @@ export function AmountInput({
   disabled = false,
   autoDecimals = false,
 }: AmountInputProps) {
+  const { t } = useTranslation();
   const format = useFormat();
   const [symbol, setSymbol] = useState<'+' | '-'>(
     initialValue === 0 ? zeroSign : initialValue > 0 ? '+' : '-',
@@ -95,6 +100,7 @@ export function AmountInput({
   }
 
   function onInputTextChange(val) {
+    val = reapplyThousandSeparators(val);
     val = autoDecimals
       ? appendDecimals(val, String(hideFraction) === 'true')
       : val;
@@ -136,7 +142,7 @@ export function AmountInput({
       <Button
         variant="bare"
         isDisabled={disabled}
-        aria-label={`Make ${symbol === '-' ? 'positive' : 'negative'}`}
+        aria-label={symbol === '-' ? t('Make positive') : t('Make negative')}
         style={{ padding: '0 7px' }}
         onPress={onSwitch}
         ref={buttonRef}

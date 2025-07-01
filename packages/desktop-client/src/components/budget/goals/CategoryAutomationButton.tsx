@@ -1,4 +1,5 @@
 import React, { type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgChartPie } from '@actual-app/components/icons/v1';
@@ -22,6 +23,8 @@ export function CategoryAutomationButton({
   defaultColor = theme.buttonNormalText,
   style,
 }: CategoryAutomationButtonProps) {
+  const { t } = useTranslation();
+
   const automations: Template[] = [];
   const hasAutomations = !!automations.length;
 
@@ -37,7 +40,7 @@ export function CategoryAutomationButton({
   return (
     <Button
       variant="bare"
-      aria-label="Change category automations"
+      aria-label={t('Change category automations')}
       className={!hasAutomations ? 'hover-visible' : ''}
       style={{
         color: defaultColor,

@@ -1,10 +1,12 @@
 // @ts-strict-ignore
-import initSqlJS, { type SqlJsStatic, type Database } from '@jlongster/sql.js';
+import initSqlJS, { type Database } from '@jlongster/sql.js';
 
 import { normalise } from './normalise';
 import { unicodeLike } from './unicodeLike';
 
-let SQL: SqlJsStatic | null = null;
+import type { SqlJsModule } from '.';
+
+let SQL: SqlJsModule | null = null;
 
 export async function init({
   baseURL = process.env.PUBLIC_URL,
@@ -16,7 +18,7 @@ export async function init({
       locateFile: file => baseURL + file,
     }).then(
       sql => {
-        SQL = sql;
+        SQL = sql as SqlJsModule;
         resolve(undefined);
       },
       err => {
@@ -173,15 +175,12 @@ export async function openDatabase(pathOrBuffer?: string | Buffer) {
       const path = pathOrBuffer;
       if (path !== ':memory:') {
         if (typeof SharedArrayBuffer === 'undefined') {
-          // @ts-expect-error FS missing in sql.js types
           const stream = SQL.FS.open(SQL.FS.readlink(path), 'a+');
           await stream.node.contents.readIfFallback();
-          // @ts-expect-error FS missing in sql.js types
           SQL.FS.close(stream);
         }
 
         db = new SQL.Database(
-          // @ts-expect-error FS missing in sql.js types
           path.includes('/blocked') ? path : SQL.FS.readlink(path),
           // @ts-expect-error 2nd argument missed in sql.js types
           { filename: true },

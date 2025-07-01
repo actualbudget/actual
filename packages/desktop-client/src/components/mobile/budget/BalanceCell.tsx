@@ -48,22 +48,22 @@ export function BalanceCell({
   });
 
   const goal =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.catGoal(category.id)
       : envelopeBudget.catGoal(category.id);
 
   const longGoal =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.catLongGoal(category.id)
       : envelopeBudget.catLongGoal(category.id);
 
   const budgeted =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.catBudgeted(category.id)
       : envelopeBudget.catBudgeted(category.id);
 
   const carryover =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.catCarryover(category.id)
       : envelopeBudget.catCarryover(category.id);
 

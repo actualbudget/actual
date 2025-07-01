@@ -4,11 +4,11 @@ import IndexedDBBackend from 'absurd-sql/dist/indexeddb-backend';
 
 import * as connection from '../connection';
 import * as idb from '../indexeddb';
-import { _getModule } from '../sqlite';
+import { _getModule, SqlJsModule } from '../sqlite';
 
 import { join } from './path-join';
 
-let FS = null;
+let FS: SqlJsModule['FS'] = null;
 let BFS = null;
 const NO_PERSIST = false;
 
@@ -67,7 +67,10 @@ function _createFile(filepath: string) {
   return filepath;
 }
 
-async function _readFile(filepath: string, opts?: { encoding?: string }) {
+async function _readFile(
+  filepath: string,
+  opts?: { encoding: 'utf8' } | { encoding: 'binary' },
+): Promise<string | Uint8Array> {
   // We persist stuff in /documents, but don't need to handle sqlite
   // file specifically because those are symlinked to a separate
   // filesystem and will be handled in the BlockedFS
@@ -97,7 +100,13 @@ async function _readFile(filepath: string, opts?: { encoding?: string }) {
 
     return item.contents;
   } else {
-    return FS.readFile(resolveLink(filepath), opts);
+    if (opts?.encoding === 'utf8') {
+      return FS.readFile(resolveLink(filepath), { encoding: 'utf8' });
+    } else if (opts?.encoding === 'binary') {
+      return FS.readFile(resolveLink(filepath), { encoding: 'binary' });
+    } else {
+      return FS.readFile(resolveLink(filepath));
+    }
   }
 }
 
@@ -341,7 +350,10 @@ export const copyFile = async function (
   return result;
 };
 
-export const readFile = async function (filepath: string, encoding = 'utf8') {
+export const readFile = async function (
+  filepath: string,
+  encoding: 'binary' | 'utf8' = 'utf8',
+) {
   return _readFile(filepath, { encoding });
 };
 

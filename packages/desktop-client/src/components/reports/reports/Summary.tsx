@@ -362,7 +362,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
                 }));
               }}
             />{' '}
-            {t('All time divisor')}
+            <Trans>All time divisor</Trans>
           </View>
         )}
       </View>

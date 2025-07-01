@@ -1,0 +1,89 @@
+name: Generate Release Notes from CodeRabbit summary
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  generate-release-notes:
+    # Only run on PR comments from CodeRabbit bot
+    if: github.event.issue.pull_request && github.event.comment.user.login == 'coderabbitai[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up environment
+        uses: ./.github/actions/setup
+
+      - name: Check if this is CodeRabbit's first comment
+        id: check-first-comment
+        run: node .github/actions/ai-generated-release-notes/check-first-comment.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
+          GITHUB_EVENT_COMMENT_ID: ${{ github.event.comment.id }}
+
+      - name: Get PR details
+        if: steps.check-first-comment.outputs.result == 'true'
+        id: pr-details
+        run: node .github/actions/ai-generated-release-notes/pr-details.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
+
+      - name: Check if release notes file already exists
+        if: steps.check-first-comment.outputs.result == 'true' && steps.pr-details.outputs.result != 'null'
+        id: check-release-notes-exists
+        run: node .github/actions/ai-generated-release-notes/check-release-notes-exists.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
+          PR_DETAILS: ${{ steps.pr-details.outputs.result }}
+
+      - name: Generate summary with OpenAI
+        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false'
+        id: generate-summary
+        run: node .github/actions/ai-generated-release-notes/generate-summary.js
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_EVENT_COMMENT_BODY: ${{ github.event.comment.body }}
+          PR_DETAILS: ${{ steps.pr-details.outputs.result }}
+
+      - name: Determine category with OpenAI
+        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null'
+        id: determine-category
+        run: node .github/actions/ai-generated-release-notes/determine-category.js
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_EVENT_COMMENT_BODY: ${{ github.event.comment.body }}
+          PR_DETAILS: ${{ steps.pr-details.outputs.result }}
+          SUMMARY_DATA: ${{ steps.generate-summary.outputs.result }}
+
+      - name: Create and commit release notes file via GitHub API
+        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
+        run: node .github/actions/ai-generated-release-notes/create-release-notes-file.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
+          SUMMARY_DATA: ${{ steps.generate-summary.outputs.result }}
+          CATEGORY: ${{ steps.determine-category.outputs.result }}
+
+      - name: Comment on PR
+        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
+        run: node .github/actions/ai-generated-release-notes/comment-on-pr.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
+          SUMMARY_DATA: ${{ steps.generate-summary.outputs.result }}
+          CATEGORY: ${{ steps.determine-category.outputs.result }}
