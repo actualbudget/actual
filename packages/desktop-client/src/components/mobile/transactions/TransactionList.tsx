@@ -89,7 +89,7 @@ type TransactionListProps = {
   isLoading: boolean;
   transactions: readonly TransactionEntity[];
   showBalances?: boolean;
-  runningBalances: Map<TransactionEntity['id'], IntegerAmount> | undefined;
+  runningBalances?: Map<TransactionEntity['id'], IntegerAmount>;
   onOpenTransaction?: (transaction: TransactionEntity) => void;
   isLoadingMore: boolean;
   onLoadMore: () => void;
@@ -206,6 +206,7 @@ export function TransactionList({
                 t => !isPreviewId(t.id) || !t.is_child,
               )}
               addIdAndValue
+              dependencies={[transactions, showBalances, runningBalances]}
             >
               {transaction => (
                 <TransactionListItem
