@@ -184,7 +184,6 @@ export function ReconcileMenu({
               {format(lastSyncedBalance, 'financial')}
             </Text>
             <Button
-              variant="menu"
               onPress={() =>
                 setInputValue(format(lastSyncedBalance, 'financial'))
               }
