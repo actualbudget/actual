@@ -180,10 +180,9 @@ export function useTransactions({
   useMemo(() => {
     if (optionsRef.current.calculateRunningBalances && runningBalanceQuery) {
       liveQuery(runningBalanceQuery, {
-        onData: data => {
+        onData: (data: { id: string; balance: IntegerAmount }[]) => {
           const map = new Map<TransactionEntity['id'], IntegerAmount>();
           data.forEach(val => {
-            //@ts-ignore the data is of type array[{balance: IntegerAmount, id: string}]
             map.set(val.id, val.balance);
           });
           setRunningBalances(map);
