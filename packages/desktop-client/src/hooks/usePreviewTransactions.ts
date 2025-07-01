@@ -177,8 +177,8 @@ export function useTransactions({
     };
   }, [query]);
 
-  useMemo(() => {
-    if (optionsRef.current.calculateRunningBalances && runningBalanceQuery) {
+  useEffect(() => {
+    if (options.calculateRunningBalances && runningBalanceQuery) {
       aqlQuery(runningBalanceQuery).then(data => {
         const map = new Map<TransactionEntity['id'], IntegerAmount>();
         data.data.forEach((val: { id: string; balance: IntegerAmount }) => {
@@ -189,7 +189,7 @@ export function useTransactions({
     } else {
       setRunningBalances(new Map());
     }
-  }, [runningBalanceQuery, optionsRef]);
+  }, [runningBalanceQuery, options.calculateRunningBalances]);
 
   const loadMore = useCallback(async () => {
     if (!pagedQueryRef.current) {

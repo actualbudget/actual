@@ -298,15 +298,15 @@ export function TransactionListItem({
                 >
                   {integerToCurrency(amount)}
                 </Text>
-                {balance && showBalance && (
+                {showBalance && (
                   <Text
                     style={{
                       fontSize: 11,
                       fontWeight: '400',
-                      ...makeBalanceAmountStyle(balance),
+                      ...makeBalanceAmountStyle(balance || 0),
                     }}
                   >
-                    {integerToCurrency(balance)}
+                    {integerToCurrency(balance || 0)}
                   </Text>
                 )}
               </View>
