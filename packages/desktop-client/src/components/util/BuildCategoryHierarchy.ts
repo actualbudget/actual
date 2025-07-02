@@ -1,10 +1,7 @@
 import memoizeOne from 'memoize-one';
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
-} from 'loot-core/types/models';
+import { CategoryEntity, CategoryGroupEntity } from 'loot-core/types/models';
 import { WithRequired } from 'loot-core/types/util';
-import { separateGroups } from './util'; // We need this utility
+import { separateGroups } from '../budget/util'; // We need this utility
 
 /**
  * Groups a flat list of categories by their group ID.

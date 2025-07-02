@@ -37,11 +37,7 @@ function getAllTransactions() {
 }
 
 async function prepareDatabase() {
-  await db.insertCategoryGroup({
-    id: 'group1',
-    name: 'group1',
-    is_income: true,
-  });
+  await db.insertCategoryGroup({ id: 'group1', name: 'group1', is_income: 1 });
   await db.insertCategory({
     name: 'income',
     cat_group: 'group1',

@@ -17,7 +17,7 @@ describe('Base budget', () => {
     await db.insertCategoryGroup({
       id: 'group2',
       name: 'income',
-      is_income: true,
+      is_income: 1,
     });
     const catId = await db.insertCategory({
       name: 'foo',

@@ -83,14 +83,11 @@ function BudgetInner(props: BudgetInnerProps) {
   const [maxMonthsPref] = useGlobalPref('maxMonths');
   const maxMonths = maxMonthsPref || 1;
   const [initialized, setInitialized] = useState(false);
-  // The useCategories hook provides both the grouped structure and a flat list
-  const { grouped: categoryGroups, list: categoryList } = useCategories({
-    hierarchical: true,
-  });
+  const { grouped: categoryGroups } = useCategories();
 
   useEffect(() => {
     async function run() {
-      await dispatch(getCategories({ hierarchical: true }));
+      await dispatch(getCategories());
 
       const { start, end } = await send('get-budget-bounds');
       setBounds({ start, end });
@@ -163,17 +160,15 @@ function BudgetInner(props: BudgetInnerProps) {
   };
 
   const onSaveCategory = async category => {
-    // Keep the existing existence check logic structure, but use categoryGroups
-    const targetGroup = categoryGroups.find(g => g.id === category.group);
-
-    let exists = false;
-    if (targetGroup) {
-      exists = targetGroup.categories
-        .filter(c => c.name.toUpperCase() === category.name.toUpperCase()
-      )
+    const cats = await send('get-categories');
+    const exists =
+      cats.grouped
+        .filter(g => g.id === category.group)[0]
+        .categories.filter(
+          c => c.name.toUpperCase() === category.name.toUpperCase(),
+        )
         .filter(c => (category.id === 'new' ? true : c.id !== category.id))
         .length > 0;
-    }
 
     if (exists) {
       categoryNameAlreadyExistsNotification(category.name);
@@ -181,8 +176,7 @@ function BudgetInner(props: BudgetInnerProps) {
     }
 
     if (category.id === 'new') {
-      // Dispatch the create action
-      await dispatch( // Use await here to wait for the thunk to complete
+      dispatch( // Use await here to wait for the thunk to complete
         createCategory({
           name: category.name,
           groupId: category.group,
@@ -194,7 +188,6 @@ function BudgetInner(props: BudgetInnerProps) {
       dispatch(updateCategory({ category }),
       );
     }
-
   };
 
   const onDeleteCategory = async id => {
@@ -212,7 +205,7 @@ function BudgetInner(props: BudgetInnerProps) {
                   dispatch(
                     deleteCategory({ id, transferId: transferCategory }),
                   );
-                                  }
+                }
               },
             },
           },
@@ -223,13 +216,13 @@ function BudgetInner(props: BudgetInnerProps) {
     }
   };
 
-  const onSaveGroup = async group => {
+  const onSaveGroup = group => {
     if (group.id === 'new') {
-      await dispatch(
-        createGroup({ name: group.name, parentId: group.parent_id }),
-      );
+      dispatch(createGroup({ name: group.name, parentId: group.parent_id }));
     } else {
-      await dispatch(updateGroup({ group }));
+      // The `children` and properties are ephemeral and used for UI rendering only, stripping them out to avoid schema errors.
+      const { children, ...groupToUpdate } = group;
+      dispatch(updateGroup({ group: groupToUpdate }));
     }
   };
 
@@ -312,20 +305,15 @@ function BudgetInner(props: BudgetInnerProps) {
   };
 
   const onReorderCategory = async sortInfo => {
-    // Keep the existing existence check logic structure, but use categoryList and categoryGroups
-    const moveCandidate = categoryList.find(c => c.id === sortInfo.id);
-    if (!moveCandidate) {
-      return;
-    }
-
-    const targetGroup = categoryGroups.find(g => g.id === sortInfo.groupId);
-    let exists = false;
-    if (targetGroup) {
-       // Reverted to original filter/length check, applied to targetGroup.categories
-      exists = targetGroup.categories
-        .filter(c => c.name.toUpperCase() === moveCandidate.name.toUpperCase())
+    const cats = await send('get-categories');
+    const moveCandidate = cats.list.filter(c => c.id === sortInfo.id)[0];
+    const exists =
+      cats.grouped
+        .filter(g => g.id === sortInfo.groupId)[0]
+        .categories.filter(
+          c => c.name.toUpperCase() === moveCandidate.name.toUpperCase(),
+        )
         .filter(c => c.id !== moveCandidate.id).length > 0;
-    }
 
     if (exists) {
       categoryNameAlreadyExistsNotification(moveCandidate.name);

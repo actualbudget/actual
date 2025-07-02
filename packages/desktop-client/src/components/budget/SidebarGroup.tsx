@@ -155,10 +155,12 @@ export function SidebarGroup({
                 }}
                 items={[
                   { name: 'add-category', text: t('Add category') },
-                  subCategoryGroups && {
-                    name: 'add-sub-group',
-                    text: t('Add sub-group'),
-                  },
+                  // Don't allow sub-groups under income categories for now
+                  subCategoryGroups &&
+                    !group.is_income && {
+                      name: 'add-sub-group',
+                      text: t('Add sub-group'),
+                    },
                   { name: 'rename', text: t('Rename') },
                   !group.is_income && {
                     name: 'toggle-visibility',

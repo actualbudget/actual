@@ -139,7 +139,7 @@ export function execQuery(sql: string) {
 // This manages an LRU cache of prepared query statements. This is
 // only needed in hot spots when you are running lots of queries.
 let _queryCache = new LRUCache<string, string>({ max: 100 });
-export function cache(sql: string) { 
+export function cache(sql: string) {
   const cached = _queryCache.get(sql);
   if (cached) {
     return cached;

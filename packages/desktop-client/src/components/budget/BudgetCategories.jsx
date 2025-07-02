@@ -11,7 +11,7 @@ import { IncomeGroup } from './IncomeGroup';
 import { IncomeHeader } from './IncomeHeader';
 import { SidebarCategory } from './SidebarCategory';
 import { SidebarGroup } from './SidebarGroup';
-import { buildCategoryHierarchy } from './buildCategoryHierarchy';
+import { buildCategoryHierarchy } from '../util/BuildCategoryHierarchy';
 import { separateGroups } from './util';
 
 import { DropHighlightPosContext } from '@desktop-client/components/sort';
@@ -27,7 +27,7 @@ export const BudgetCategories = memo(
     onBudgetAction,
     onShowActivity,
     onEditName,
-    onEditMonth, 
+    onEditMonth,
     onSaveCategory,
     onSaveGroup,
     onDeleteCategory,
@@ -64,18 +64,9 @@ export const BudgetCategories = memo(
         builtItems = expenseGroups.flatMap(group =>
           expandGroup(group, 0, 'expense'),
         );
-      } else {
-        builtItems = []; // Initialize as empty if no expense groups
       }
 
-      // 2. Add the placeholder for a new TOP-LEVEL expense group if applicable
-      // This is for the "Add new group" button that isn't under any specific parent.
-      // The `newGroupForGroup` would be null in this case, indicating it's a top-level addition.
-      if (isAddingGroup && newGroupForGroup == null) {
-        builtItems.push({ type: 'new-group' }); // The 'depth' might need to be considered or handled in render
-      }
-
-      // 3. Process the income group hierarchically (if it exists)
+      // 2. Process the income group hierarchically (if it exists)
       if (incomeGroup) {
         // Ensure expandGroup returns an array, even if it's empty
         const incomeItems = expandGroup(incomeGroup, 0, 'income') || [];
@@ -84,7 +75,6 @@ export const BudgetCategories = memo(
           { type: 'income-separator' },
           ...incomeItems // Spread the items returned by expandGroup
         );
-
 
       }
 
@@ -98,28 +88,29 @@ export const BudgetCategories = memo(
       newGroupForGroup,
       showHiddenCategories,
     ]);
-      function expandGroup(group, depth = 0, type = 'expense') {
-        if (group.hidden && !showHiddenCategories) {
-          return [];
-        }
 
-        const groupCategories = group.categories.filter(
-          cat => showHiddenCategories || !cat.hidden,
-        );
+    function expandGroup(group, depth = 0, type = 'expense') {
+      if (group.hidden && !showHiddenCategories) {
+        return [];
+      }
 
-        const groupChildren = group.children.filter(
-          child => showHiddenCategories || !child.hidden,
-        );
+      const groupCategories = group.categories.filter(
+        cat => showHiddenCategories || !cat.hidden,
+      );
 
-        const items = [{ type: `${type}-group`, value: { ...group }, depth }];
+      const groupChildren = group.children.filter(
+        child => showHiddenCategories || !child.hidden,
+      );
 
-        if (newCategoryForGroup === group.id) {
-          items.push({ type: 'new-category', depth });
-        }
+      const items = [{ type: `${type}-group`, value: { ...group }, depth }];
 
-        if (isAddingGroup && newGroupForGroup === group.id) {
-          items.push({ type: 'new-group' });
-        }
+      if (newCategoryForGroup === group.id) {
+        items.push({ type: 'new-category', depth });
+      }
+
+      if (isAddingGroup && newGroupForGroup === group.id) {
+        items.push({ type: 'new-group' });
+      }
 
         return [
           ...items,
