@@ -42,20 +42,23 @@ export function AccountPage() {
 
   const account = useAccount(accountIdParam || '');
 
-  const nameFromId = useCallback((id: string | undefined) => {
-    switch (id) {
-      case 'onbudget':
-        return t('On Budget Accounts');
-      case 'offbudget':
-        return t('Off Budget Accounts');
-      case 'uncategorized':
-        return t('Uncategorized');
-      case 'closed':
-        return t('Closed Accounts');
-      default:
-        return t('All Accounts');
-    }
-  }, [t]);
+  const nameFromId = useCallback(
+    (id: string | undefined) => {
+      switch (id) {
+        case 'onbudget':
+          return t('On Budget Accounts');
+        case 'offbudget':
+          return t('Off Budget Accounts');
+        case 'uncategorized':
+          return t('Uncategorized');
+        case 'closed':
+          return t('Closed Accounts');
+        default:
+          return t('All Accounts');
+      }
+    },
+    [t],
+  );
 
   return (
     <Page
