@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { useInitialMount } from './useInitialMount';
 
@@ -12,9 +12,17 @@ export function useCategories() {
 
   useEffect(() => {
     if (isInitialMount && !categoriesLoaded) {
+      // Always fetch the flat list; hierarchy is built in the UI
       dispatch(getCategories());
     }
   }, [categoriesLoaded, dispatch, isInitialMount]);
 
-  return useSelector(state => state.queries.categories);
+  const selector = useSelector(state => state.queries.categories);
+  return useMemo(
+    () => ({
+      ...selector,
+      groupedHierarchy: selector.grouped,
+    }),
+    [selector],
+  );
 }

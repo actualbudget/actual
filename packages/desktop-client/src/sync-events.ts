@@ -67,7 +67,7 @@ export function listenForSyncEvent(store: AppStore) {
         tables.includes('category_groups') ||
         tables.includes('category_mapping')
       ) {
-        store.dispatch(getCategories());
+        store.dispatch(getCategories()); // Called whenever categories change, including reordering categories
       }
 
       if (

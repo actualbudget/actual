@@ -176,7 +176,7 @@ function BudgetInner(props: BudgetInnerProps) {
     }
 
     if (category.id === 'new') {
-      dispatch(
+      dispatch( // Use await here to wait for the thunk to complete
         createCategory({
           name: category.name,
           groupId: category.group,
@@ -185,7 +185,8 @@ function BudgetInner(props: BudgetInnerProps) {
         }),
       );
     } else {
-      dispatch(updateCategory({ category }));
+      dispatch(updateCategory({ category }),
+      );
     }
   };
 
@@ -217,17 +218,31 @@ function BudgetInner(props: BudgetInnerProps) {
 
   const onSaveGroup = group => {
     if (group.id === 'new') {
-      dispatch(createGroup({ name: group.name }));
+      dispatch(createGroup({ name: group.name, parentId: group.parent_id }));
     } else {
-      dispatch(updateGroup({ group }));
+      // The `children` and properties are ephemeral and used for UI rendering only, stripping them out to avoid schema errors.
+      const { children, ...groupToUpdate } = group;
+      dispatch(updateGroup({ group: groupToUpdate }));
     }
   };
 
   const onDeleteGroup = async id => {
-    const group = categoryGroups.find(g => g.id === id);
+    // Recursively find all categories within this group and its children
+    const getAllCategories = g => {
+      let cats = [...(g.categories || [])];
+      if (g.children) {
+        for (const child of g.children) {
+          cats = cats.concat(getAllCategories(child));
+        }
+      }
+      return cats;
+    };
+    const allCategories = getAllCategories(categoryGroups);
+
+    if (!allCategories) return;
 
     let mustTransfer = false;
-    for (const category of group.categories) {
+    for (const category of allCategories) {
       if (await send('must-category-transfer', { id: category.id })) {
         mustTransfer = true;
         break;

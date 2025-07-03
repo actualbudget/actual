@@ -49,6 +49,7 @@ export type DbCategoryGroup = {
   sort_order: number;
   hidden: 1 | 0;
   tombstone: 1 | 0;
+  parent_id?: string;
 };
 
 export type DbCategoryMapping = {
