@@ -266,6 +266,7 @@ export function GenericInput({
             placeholder={t('nothing')}
             onEnter={onChange}
             onUpdate={onChange}
+            onChange={onChange}
           />
         );
       }
