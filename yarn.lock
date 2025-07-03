@@ -67,8 +67,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/crdt@workspace:packages/crdt"
   dependencies:
+    "@types/google-protobuf": "npm:^3.15.12"
     google-protobuf: "npm:^3.21.4"
     murmurhash: "npm:^2.0.1"
+    protoc-gen-js: "npm:^3.21.4-4"
     ts-protoc-gen: "npm:^0.15.0"
     typescript: "npm:^5.8.3"
     uuid: "npm:^11.1.0"
@@ -6550,6 +6552,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/google-protobuf@npm:^3.15.12":
+  version: 3.15.12
+  resolution: "@types/google-protobuf@npm:3.15.12"
+  checksum: 10/a5c5f09a3fc4bc6a9339df29f4a32daf77c37f2bce6e8aa7b949fae19829a87c351786b7401eb45ea643dfa98d5155ffd9dd637c3ec61f69a30979bd67f6954e
+  languageName: node
+  linkType: hard
+
 "@types/hast@npm:^3.0.0":
   version: 3.0.4
   resolution: "@types/hast@npm:3.0.4"
@@ -7632,6 +7641,13 @@ __metadata:
     typescript-strict-plugin: "npm:^2.4.4"
   languageName: unknown
   linkType: soft
+
+"adm-zip@npm:0.5.10":
+  version: 0.5.10
+  resolution: "adm-zip@npm:0.5.10"
+  checksum: 10/c5ab79b77114d8277f0cbfd6cca830198d6c7ee4971f6960f48e08cd2375953b11dc71729b7f396abd51d2d6cce8c862fad185ea90cb2c84ab5161c37ed1b099
+  languageName: node
+  linkType: hard
 
 "adm-zip@npm:0.5.16":
   version: 0.5.16
@@ -16520,6 +16536,17 @@ __metadata:
   version: 7.0.0
   resolution: "property-information@npm:7.0.0"
   checksum: 10/55f443088456cddc2fe499d6f5895e68cbd465e39dc318ecc63a0d2432d1b918f51fb6d13f8b1adf8a78337bc4e608baa6e46afbe0c6d50d2e38588b2c409f86
+  languageName: node
+  linkType: hard
+
+"protoc-gen-js@npm:^3.21.4-4":
+  version: 3.21.4-4
+  resolution: "protoc-gen-js@npm:3.21.4-4"
+  dependencies:
+    adm-zip: "npm:0.5.10"
+  bin:
+    protoc-gen-js: cli.js
+  checksum: 10/43d5469195fb28ecbb6e2f387601c22d7a032aaffd5eadee10e02ca4a6b6361bfb54e83fe220b6eef36a27011421f3a0ef86e163116273d71ab9158d31980c3b
   languageName: node
   linkType: hard
 

@@ -33,6 +33,7 @@ import { validateAccountName } from '@desktop-client/components/util/accountVali
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useNotes } from '@desktop-client/hooks/useNotes';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type AccountMenuModalProps = Extract<
@@ -47,6 +48,7 @@ export function AccountMenuModal({
   onReopenAccount,
   onEditNotes,
   onClose,
+  onToggleRunningBalance,
 }: AccountMenuModalProps) {
   const { t } = useTranslation();
   const account = useAccount(accountId);
@@ -124,6 +126,7 @@ export function AccountMenuModal({
                 account={account}
                 onClose={onCloseAccount}
                 onReopen={onReopenAccount}
+                onToggleRunningBalance={onToggleRunningBalance}
               />
             }
             title={
@@ -158,7 +161,7 @@ export function AccountMenuModal({
                 notes={
                   originalNotes && originalNotes.length > 0
                     ? originalNotes
-                    : 'No notes'
+                    : t('No notes')
                 }
                 editable={false}
                 focused={false}
@@ -201,12 +204,14 @@ type AdditionalAccountMenuProps = {
   account: AccountEntity;
   onClose?: (accountId: string) => void;
   onReopen?: (accountId: string) => void;
+  onToggleRunningBalance?: () => void;
 };
 
 function AdditionalAccountMenu({
   account,
   onClose,
   onReopen,
+  onToggleRunningBalance,
 }: AdditionalAccountMenuProps) {
   const { t } = useTranslation();
   const triggerRef = useRef(null);
@@ -220,6 +225,7 @@ function AdditionalAccountMenu({
     ...itemStyle,
     ...(item.name === 'close' && { color: theme.errorTextMenu }),
   });
+  const [showBalances] = useSyncedPref(`show-balances-${account.id}`);
 
   return (
     <View>
@@ -245,6 +251,13 @@ function AdditionalAccountMenu({
           <Menu
             getItemStyle={getItemStyle}
             items={[
+              {
+                name: 'balance',
+                text:
+                  showBalances === 'true'
+                    ? t('Hide running balance')
+                    : t('Show running balance'),
+              },
               account.closed
                 ? {
                     name: 'reopen',
@@ -267,6 +280,9 @@ function AdditionalAccountMenu({
                   break;
                 case 'reopen':
                   onReopen?.(account.id);
+                  break;
+                case 'balance':
+                  onToggleRunningBalance?.();
                   break;
                 default:
                   throw new Error(`Unrecognized menu option: ${name}`);
