@@ -14,7 +14,7 @@ module.exports = {
     fixable: 'code',
   },
   create(context) {
-    const simpleTextPattern = /^[A-Z][a-z\s]*[a-z]$/;
+    const simpleTextPattern = /^[A-Z][a-z\s]*[a-z](\p{P})?$/u;
 
     function isSimpleText(text) {
       const trimmed = text.trim();
