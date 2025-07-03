@@ -114,8 +114,8 @@ export function MergeUnusedPayeesModal({
                   <Text style={highlightStyle}>
                     {{ payee: payees[0].name } as TransObjectLiteral}
                   </Text>{' '}
-                  is not used by transactions any more. Would you like to merge it
-                  with{' '}
+                  is not used by transactions any more. Would you like to merge
+                  it with{' '}
                   <Text style={highlightStyle}>
                     {{ payee: targetPayee.name } as TransObjectLiteral}
                   </Text>

@@ -135,7 +135,9 @@ export function ConfirmCategoryDeleteModal({
                 alignItems: 'center',
               }}
             >
-              <Text>{t('Transfer to:')}</Text>
+              <Text>
+                <Trans>Transfer to:</Trans>
+              </Text>
 
               <View style={{ flex: 1, marginLeft: 10, marginRight: 30 }}>
                 <CategoryAutocomplete

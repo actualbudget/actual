@@ -954,7 +954,7 @@ export function ImportTransactionsModal({
                         alignItems: 'baseline',
                       }}
                     >
-                      {t('Delimiter:')}
+                      <Trans>Delimiter:</Trans>
                       <Select
                         options={[
                           [',', ','],
@@ -986,7 +986,7 @@ export function ImportTransactionsModal({
                         alignItems: 'baseline',
                       }}
                     >
-                      {t('Skip lines:')}
+                      <Trans>Skip lines:</Trans>
                       <Input
                         type="number"
                         value={skipLines}
