@@ -125,7 +125,25 @@ module.exports = {
             },
             fix(fixer) {
               const text = node.arguments[0].value;
-              return fixer.replaceText(node, `<Trans>${text}</Trans>`);
+              const sourceCode = context.getSourceCode();
+              const program = sourceCode.ast;
+
+              const fixes = [fixer.replaceText(node, `<Trans>${text}</Trans>`)];
+
+              const firstImport = program.body.find(
+                n => n.type === 'ImportDeclaration',
+              );
+              if (firstImport) {
+                fixes.unshift(
+                  fixer.insertTextAfter(
+                    firstImport,
+                    // eslint-disable-next-line actual/typography
+                    "\nimport { Trans } from 'react-i18next';",
+                  ),
+                );
+              }
+
+              return fixes;
             },
           });
         }
