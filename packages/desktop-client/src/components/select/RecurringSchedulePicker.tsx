@@ -484,7 +484,9 @@ function RecurringScheduleTooltip({
         style={{ marginTop: 10 }}
         spacing={1}
       >
-        <Text style={{ whiteSpace: 'nowrap' }}>{t('Repeat every')}</Text>
+        <Text style={{ whiteSpace: 'nowrap' }}>
+          <Trans>Repeat every</Trans>
+        </Text>
         <Input
           id="interval"
           style={{ width: 40 }}
@@ -507,7 +509,7 @@ function RecurringScheduleTooltip({
             }}
             onPress={() => dispatch({ type: 'add-recurrence' })}
           >
-            {t('Add specific days')}
+            <Trans>Add specific days</Trans>
           </Button>
         ) : null}
       </Stack>
