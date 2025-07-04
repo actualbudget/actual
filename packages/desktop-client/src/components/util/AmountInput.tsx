@@ -18,11 +18,7 @@ import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import {
-  amountToInteger,
-  appendDecimals,
-  reapplyThousandSeparators,
-} from 'loot-core/shared/util';
+import { amountToInteger, appendDecimals } from 'loot-core/shared/util';
 
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
@@ -100,7 +96,6 @@ export function AmountInput({
   }
 
   function onInputTextChange(val) {
-    val = reapplyThousandSeparators(val);
     val = autoDecimals
       ? appendDecimals(val, String(hideFraction) === 'true')
       : val;

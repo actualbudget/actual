@@ -7,6 +7,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   goalTemplatesUIEnabled: false,
   actionTemplating: false,
   pluggyAiBankSync: false,
+  currency: false,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {
