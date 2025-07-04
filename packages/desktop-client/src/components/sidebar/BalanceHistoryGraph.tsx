@@ -228,10 +228,10 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
 
           {hoveredValue && (
             <View>
-                <Text style={{ fontWeight: 800 }}>{hoveredValue.date}</Text>
-                  <PrivacyFilter activationFilters={[() => !isHovered]}>
-                   <Text>{integerToCurrency(hoveredValue.balance)}</Text>
-                  </PrivacyFilter>
+              <Text style={{ fontWeight: 800 }}>{hoveredValue.date}</Text>
+              <PrivacyFilter activationFilters={[() => !isHovered]}>
+                <Text>{integerToCurrency(hoveredValue.balance)}</Text>
+              </PrivacyFilter>
             </View>
           )}
         </SpaceBetween>
