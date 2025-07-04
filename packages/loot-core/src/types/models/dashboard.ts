@@ -28,6 +28,7 @@ export type NetWorthWidget = AbstractWidget<
     conditions?: RuleConditionEntity[];
     conditionsOp?: 'and' | 'or';
     timeFrame?: TimeFrame;
+    interval?: string;
   } | null
 >;
 export type CashFlowWidget = AbstractWidget<

@@ -30,6 +30,8 @@ export function createSpreadsheet(
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
   locale: Locale,
+  interval: string = 'Monthly',
+  firstDayOfWeekIdx: string = '0',
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -40,6 +42,10 @@ export function createSpreadsheet(
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
+    // Convert dates to ensure we have the full range
+    const startDate = monthUtils.firstDayOfMonth(start);
+    const endDate = monthUtils.lastDayOfMonth(end);
+
     const data = await Promise.all(
       accounts.map(async acct => {
         const [starting, balances]: [number, Balance[]] = await Promise.all([
@@ -48,7 +54,7 @@ export function createSpreadsheet(
               .filter({
                 [conditionsOpKey]: filters,
                 account: acct.id,
-                date: { $lt: monthUtils.firstDayOfMonth(start) },
+                date: { $lt: startDate },
               })
               .calculate({ $sum: '$amount' }),
           ).then(({ data }) => data),
@@ -61,27 +67,61 @@ export function createSpreadsheet(
               .filter({
                 account: acct.id,
                 $and: [
-                  { date: { $gte: monthUtils.firstDayOfMonth(start) } },
-                  { date: { $lte: monthUtils.lastDayOfMonth(end) } },
+                  { date: { $gte: startDate } },
+                  { date: { $lte: endDate } },
                 ],
               })
-              .groupBy({ $month: '$date' })
+              .groupBy(
+                interval === 'Yearly'
+                  ? { $year: '$date' }
+                  : interval === 'Daily' || interval === 'Weekly'
+                    ? 'date'
+                    : { $month: '$date' },
+              )
               .select([
-                { date: { $month: '$date' } },
+                {
+                  date: interval === 'Yearly'
+                    ? { $year: '$date' }
+                    : interval === 'Daily' || interval === 'Weekly'
+                      ? 'date'
+                      : { $month: '$date' }
+                },
                 { amount: { $sum: '$amount' } },
               ]),
           ).then(({ data }) => data),
         ]);
 
+        // For weekly intervals, transform dates to week format and properly aggregate
+        let processedBalances: Record<string, Balance>;
+        if (interval === 'Weekly') {
+          // Group transactions by week and sum their amounts
+          const weeklyBalances: Record<string, number> = {};
+          balances.forEach(b => {
+            const weekDate = monthUtils.weekFromDate(b.date, firstDayOfWeekIdx);
+            weeklyBalances[weekDate] = (weeklyBalances[weekDate] || 0) + b.amount;
+          });
+
+          // Convert back to Balance format
+          processedBalances = Object.entries(weeklyBalances).reduce(
+            (acc, [date, amount]) => ({
+              ...acc,
+              [date]: { date, amount },
+            }),
+            {},
+          );
+        } else {
+          processedBalances = keyBy(balances, 'date');
+        }
+
         return {
           id: acct.id,
-          balances: keyBy(balances, 'date'),
+          balances: processedBalances,
           starting,
         };
       }),
     );
 
-    setData(recalculate(data, start, end, locale));
+    setData(recalculate(data, start, end, locale, interval, firstDayOfWeekIdx));
   };
 }
 
@@ -94,15 +134,24 @@ function recalculate(
   start: string,
   end: string,
   locale: Locale,
+  interval: string = 'Monthly',
+  firstDayOfWeekIdx: string = '0',
 ) {
-  const months = monthUtils.rangeInclusive(start, end);
+  // Get intervals using the same pattern as other working spreadsheets
+  const intervals =
+    interval === 'Weekly'
+      ? monthUtils.weekRangeInclusive(start, end, firstDayOfWeekIdx)
+      : interval === 'Daily'
+        ? monthUtils.dayRangeInclusive(start, end)
+        : interval === 'Yearly'
+          ? monthUtils.yearRangeInclusive(start, end)
+          : monthUtils.rangeInclusive(monthUtils.getMonth(start), monthUtils.getMonth(end));
 
   const accountBalances = data.map(account => {
-    // Start off with the balance at that point in time
     let balance = account.starting;
-    return months.map(month => {
-      if (account.balances[month]) {
-        balance += account.balances[month].amount;
+    return intervals.map(intervalItem => {
+      if (account.balances[intervalItem]) {
+        balance += account.balances[intervalItem].amount;
       }
       return balance;
     });
@@ -114,7 +163,7 @@ function recalculate(
   let lowestNetWorth: number | null = null;
   let highestNetWorth: number | null = null;
 
-  const graphData = months.reduce<
+  const graphData = intervals.reduce<
     Array<{
       x: string;
       y: number;
@@ -124,7 +173,7 @@ function recalculate(
       networth: string;
       date: string;
     }>
-  >((arr, month, idx) => {
+  >((arr, intervalItem, idx) => {
     let debt = 0;
     let assets = 0;
     let total = 0;
@@ -144,7 +193,16 @@ function recalculate(
       hasNegative = true;
     }
 
-    const x = d.parseISO(month + '-01');
+    // Parse dates based on interval type - following the working pattern
+    let x: Date;
+    if (interval === 'Daily' || interval === 'Weekly') {
+      x = d.parseISO(intervalItem);
+    } else if (interval === 'Yearly') {
+      x = d.parseISO(intervalItem + '-01-01');
+    } else {
+      x = d.parseISO(intervalItem + '-01');
+    }
+
     const change = last ? total - amountToInteger(last.y) : 0;
 
     if (arr.length === 0) {
@@ -152,24 +210,39 @@ function recalculate(
     }
     endNetWorth = total;
 
-    arr.push({
-      x: d.format(x, 'MMM ’yy', { locale }),
+    // Format dates for display
+    const displayFormat =
+      interval === 'Daily' ? 'MM/dd' :
+        interval === 'Weekly' ? 'MM/dd' :
+          interval === 'Yearly' ? 'yyyy' :
+            "MMM ''yy";
+
+    const tooltipFormat =
+      interval === 'Daily' ? 'MMMM d, yyyy' :
+        interval === 'Weekly' ? 'MMM d, yyyy' :
+          interval === 'Yearly' ? 'yyyy' :
+            'MMMM yyyy';
+
+    const graphPoint = {
+      x: d.format(x, displayFormat, { locale }),
       y: integerToAmount(total),
       assets: integerToCurrency(assets),
       debt: `-${integerToCurrency(debt)}`,
       change: integerToCurrency(change),
       networth: integerToCurrency(total),
-      date: d.format(x, 'MMMM yyyy', { locale }),
-    });
+      date: d.format(x, tooltipFormat, { locale }),
+    };
 
-    arr.forEach(item => {
-      if (lowestNetWorth === null || item.y < lowestNetWorth) {
-        lowestNetWorth = item.y;
-      }
-      if (highestNetWorth === null || item.y > highestNetWorth) {
-        highestNetWorth = item.y;
-      }
-    });
+    arr.push(graphPoint);
+
+    // Track min/max for the current point only
+    if (lowestNetWorth === null || graphPoint.y < lowestNetWorth) {
+      lowestNetWorth = graphPoint.y;
+    }
+    if (highestNetWorth === null || graphPoint.y > highestNetWorth) {
+      highestNetWorth = graphPoint.y;
+    }
+
     return arr;
   }, []);
 

@@ -40,6 +40,7 @@ type NetWorthGraphProps = {
   };
   compact?: boolean;
   showTooltip?: boolean;
+  interval?: string;
 };
 
 export function NetWorthGraph({
@@ -47,10 +48,14 @@ export function NetWorthGraph({
   graphData,
   compact = false,
   showTooltip = true,
+  interval = 'Monthly',
 }: NetWorthGraphProps) {
   const { t } = useTranslation();
   const privacyMode = usePrivacyMode();
   const id = useId();
+
+  // Use more aggressive smoothing for high-frequency data
+  const interpolationType = interval === 'Daily' || interval === 'Weekly' ? 'basis' : 'monotone';
 
   const tickFormatter = tick => {
     const res = privacyMode
@@ -197,14 +202,16 @@ export function NetWorthGraph({
                 </defs>
 
                 <Area
-                  type="monotone"
+                  type={interpolationType}
                   dot={false}
                   activeDot={false}
                   animationDuration={0}
                   dataKey="y"
                   stroke={theme.reportsBlue}
+                  strokeWidth={2}
                   fill={`url(#${gradientId})`}
                   fillOpacity={1}
+                  connectNulls={true}
                 />
               </AreaChart>
             </div>
