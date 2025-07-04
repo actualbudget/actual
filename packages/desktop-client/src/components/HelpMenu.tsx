@@ -87,7 +87,6 @@ export const HelpMenu = () => {
         break;
       case 'discord':
         window.Actual.openURLInBrowser('https://discord.gg/pRYNYr4W5A');
-        // dispatch(pushModal({ modal: { name: '' } }));
         break;
       case 'keyboard-shortcuts':
         dispatch(pushModal({ modal: { name: 'keyboard-shortcuts' } }));
