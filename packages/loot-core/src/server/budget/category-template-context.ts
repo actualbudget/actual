@@ -1,5 +1,9 @@
 // @ts-strict-ignore
 
+import { integerToAmount } from '@actual-app/api/utils';
+
+import { q } from 'loot-core/shared/query';
+
 import * as monthUtils from '../../shared/months';
 import { amountToInteger } from '../../shared/util';
 import { CategoryEntity } from '../../types/models';
@@ -15,6 +19,7 @@ import {
   Template,
   WeekTemplate,
 } from '../../types/models/templates';
+import { aqlQuery } from '../aql';
 import * as db from '../db';
 
 import { getSheetValue, getSheetBoolean } from './actions';
@@ -72,12 +77,19 @@ export class CategoryTemplateContext {
     await CategoryTemplateContext.checkByAndScheduleAndSpend(templates, month);
     await CategoryTemplateContext.checkPercentage(templates);
     // call the private constructor
+
+    const hideDecimal = (
+      await aqlQuery(
+        q('preferences').filter({ id: 'hideFraction' }).select('*'),
+      )
+    ).data[0].value;
     return new CategoryTemplateContext(
       templates,
       category,
       month,
       fromLastMonth,
       budgeted,
+      hideDecimal === 'true',
     );
   }
 
@@ -210,6 +222,10 @@ export class CategoryTemplateContext {
         available = available + orig - toBudget;
       }
     }
+
+    //round all budget values if needed
+    if (this.hideDecimal) toBudget = this.removeFraction(toBudget);
+
     // don't overbudget when using a priority
     if (priority > 0 && available < 0) {
       this.fullAmount += toBudget;
@@ -258,6 +274,7 @@ export class CategoryTemplateContext {
   private remainder: RemainderTemplate[] = [];
   private goals: GoalTemplate[] = [];
   private priorities: number[] = [];
+  readonly hideDecimal: boolean = false;
   private remainderWeight: number = 0;
   private toBudgetAmount: number = 0; // amount that will be budgeted by the templates
   private fullAmount: number = null; // the full requested amount, start null for remainder only cats
@@ -277,11 +294,13 @@ export class CategoryTemplateContext {
     month: string,
     fromLastMonth: number,
     budgeted: number,
+    hideDecimal: boolean,
   ) {
     this.category = category;
     this.month = month;
     this.fromLastMonth = fromLastMonth;
     this.previouslyBudgeted = budgeted;
+    this.hideDecimal = hideDecimal;
     // sort the template lines into regular template, goals, and remainder templates
     if (templates) {
       templates.forEach(t => {
@@ -472,6 +491,10 @@ export class CategoryTemplateContext {
     if (this.goals.length > 1) {
       throw new Error(`Only one #goal is allowed per category`);
     }
+  }
+
+  private removeFraction(amount) {
+    return amountToInteger(Math.round(integerToAmount(amount)));
   }
 
   //-----------------------------------------------------------------------------
