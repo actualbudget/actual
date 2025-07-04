@@ -1,11 +1,8 @@
 // @ts-strict-ignore
-
-import { integerToAmount } from '@actual-app/api/utils';
-
 import { q } from 'loot-core/shared/query';
 
 import * as monthUtils from '../../shared/months';
-import { amountToInteger } from '../../shared/util';
+import { amountToInteger, integerToAmount } from '../../shared/util';
 import { CategoryEntity } from '../../types/models';
 import {
   AverageTemplate,
@@ -78,18 +75,16 @@ export class CategoryTemplateContext {
     await CategoryTemplateContext.checkPercentage(templates);
     // call the private constructor
 
-    const hideDecimal = (
-      await aqlQuery(
-        q('preferences').filter({ id: 'hideFraction' }).select('*'),
-      )
-    ).data[0].value;
+    const hideDecimal = await aqlQuery(
+      q('preferences').filter({ id: 'hideFraction' }).select('*'),
+    );
     return new CategoryTemplateContext(
       templates,
       category,
       month,
       fromLastMonth,
       budgeted,
-      hideDecimal === 'true',
+      hideDecimal.data.length > 0 ? hideDecimal.data[0].value : false,
     );
   }
 
@@ -294,7 +289,7 @@ export class CategoryTemplateContext {
     month: string,
     fromLastMonth: number,
     budgeted: number,
-    hideDecimal: boolean,
+    hideDecimal: boolean = false,
   ) {
     this.category = category;
     this.month = month;
