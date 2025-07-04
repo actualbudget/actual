@@ -151,6 +151,9 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
     fetchBalanceHistory();
   }, [accountId]);
 
+  // State to track if the chart is hovered (used to conditionally render PrivacyFilter)
+  const [isHovered, setIsHovered] = useState(false);
+
   if (loading) {
     return (
       <div style={{ width: TOTAL_WIDTH, height: CHART_HEIGHT, marginTop: 10 }}>
@@ -167,6 +170,8 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
           alignItems: 'stretch',
           justifyContent: 'space-between',
         }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
         <LineChart data={balanceData} width={CHART_WIDTH} height={CHART_HEIGHT}>
           <YAxis domain={['dataMin', 'dataMax']} hide={true} />
@@ -223,10 +228,10 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
 
           {hoveredValue && (
             <View>
-              <Text style={{ fontWeight: 800 }}>{hoveredValue.date}</Text>
-              <PrivacyFilter>
-                <Text>{integerToCurrency(hoveredValue.balance)}</Text>
-              </PrivacyFilter>
+                <Text style={{ fontWeight: 800 }}>{hoveredValue.date}</Text>
+                  <PrivacyFilter activationFilters={[() => !isHovered]}>
+                   <Text>{integerToCurrency(hoveredValue.balance)}</Text>
+                  </PrivacyFilter>
             </View>
           )}
         </SpaceBetween>
