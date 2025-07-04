@@ -16,7 +16,6 @@ import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
-
 const CHART_HEIGHT = 70;
 const CHART_WIDTH = 280;
 const LABEL_WIDTH = 70;
