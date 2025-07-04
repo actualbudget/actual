@@ -104,13 +104,10 @@ export function createSpreadsheet(
           });
 
           // Convert back to Balance format
-          processedBalances = Object.entries(weeklyBalances).reduce(
-            (acc, [date, amount]) => ({
-              ...acc,
-              [date]: { date, amount },
-            }),
-            {},
-          );
+          processedBalances = {};
+          Object.entries(weeklyBalances).forEach(([date, amount]) => {
+            processedBalances[date] = { date, amount };
+          });
         } else {
           processedBalances = keyBy(balances, 'date');
         }
@@ -223,7 +220,7 @@ function recalculate(
           ? 'MM/dd'
           : interval === 'Yearly'
             ? 'yyyy'
-            : "MMM ''yy";
+            : 'MMM yy';
 
     const tooltipFormat =
       interval === 'Daily'

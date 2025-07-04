@@ -5,6 +5,8 @@ import { useParams } from 'react-router';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Paragraph } from '@actual-app/components/paragraph';
+import { Select } from '@actual-app/components/select';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -14,9 +16,6 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type TimeFrame, type NetWorthWidget } from 'loot-core/types/models';
-
-import { Select } from '@actual-app/components/select';
-import { SpaceBetween } from '@actual-app/components/space-between';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
@@ -30,8 +29,8 @@ import { Change } from '@desktop-client/components/reports/Change';
 import { NetWorthGraph } from '@desktop-client/components/reports/graphs/NetWorthGraph';
 import { Header } from '@desktop-client/components/reports/Header';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
+import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '@desktop-client/components/reports/spreadsheets/net-worth-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
@@ -274,7 +273,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
             value={interval}
             onChange={setInterval}
             options={ReportOptions.interval.map(({ description, key }) => [
-              key,
+              key as 'Daily' | 'Weekly' | 'Monthly' | 'Yearly',
               description,
             ])}
           />
