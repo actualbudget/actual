@@ -123,7 +123,7 @@ export const HelpMenu = () => {
             },
             {
               name: 'discord',
-              text: t('Discord community support'),
+              text: t('Community support (Discord)'),
             },
             { name: 'keyboard-shortcuts', text: t('Keyboard shortcuts') },
             ...(showGoalTemplates && page === '/budget'
