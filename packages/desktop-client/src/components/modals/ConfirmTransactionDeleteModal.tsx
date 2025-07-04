@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -55,7 +55,7 @@ export function ConfirmTransactionDeleteModal({
                 }}
                 onPress={close}
               >
-                {t('Cancel')}
+                <Trans>Cancel</Trans>
               </Button>
               <InitialFocus>
                 <Button
@@ -66,7 +66,7 @@ export function ConfirmTransactionDeleteModal({
                     close();
                   }}
                 >
-                  {t('Delete')}
+                  <Trans>Delete</Trans>
                 </Button>
               </InitialFocus>
             </View>
