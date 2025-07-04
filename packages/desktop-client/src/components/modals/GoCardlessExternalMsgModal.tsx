@@ -288,7 +288,7 @@ export function GoCardlessExternalMsgModal({
                 />
                 <View style={{ marginTop: 10, color: theme.pageText }}>
                   {isConfigurationLoading
-                    ? t('Checking GoCardless configuration..')
+                    ? t('Checking GoCardless configuration...')
                     : waiting === 'browser'
                       ? t('Waiting on GoCardless...')
                       : waiting === 'accounts'
