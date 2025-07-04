@@ -73,11 +73,12 @@ export class CategoryTemplateContext {
     // run all checks
     await CategoryTemplateContext.checkByAndScheduleAndSpend(templates, month);
     await CategoryTemplateContext.checkPercentage(templates);
-    // call the private constructor
 
     const hideDecimal = await aqlQuery(
       q('preferences').filter({ id: 'hideFraction' }).select('*'),
     );
+
+    // call the private constructor
     return new CategoryTemplateContext(
       templates,
       category,
