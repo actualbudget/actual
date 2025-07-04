@@ -4,6 +4,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 import { subMonths, format, eachMonthOfInterval, parseISO } from 'date-fns';
 import { LineChart, Line, YAxis, Tooltip as RechartsTooltip } from 'recharts';
 
@@ -11,6 +12,7 @@ import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { integerToCurrency } from 'loot-core/shared/util';
 
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
@@ -149,6 +151,9 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
     fetchBalanceHistory();
   }, [accountId]);
 
+  // State to track if the chart is hovered (used to conditionally render PrivacyFilter)
+  const [isHovered, setIsHovered] = useState(false);
+
   if (loading) {
     return (
       <div style={{ width: TOTAL_WIDTH, height: CHART_HEIGHT, marginTop: 10 }}>
@@ -165,6 +170,8 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
           alignItems: 'stretch',
           justifyContent: 'space-between',
         }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
         <LineChart data={balanceData} width={CHART_WIDTH} height={CHART_HEIGHT}>
           <YAxis domain={['dataMin', 'dataMax']} hide={true} />
@@ -220,10 +227,12 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
           )}
 
           {hoveredValue && (
-            <Text>
-              <div style={{ fontWeight: 800 }}>{hoveredValue.date}</div>
-              <div>{integerToCurrency(hoveredValue.balance)}</div>
-            </Text>
+            <View>
+              <Text style={{ fontWeight: 800 }}>{hoveredValue.date}</Text>
+              <PrivacyFilter activationFilters={[() => !isHovered]}>
+                <Text>{integerToCurrency(hoveredValue.balance)}</Text>
+              </PrivacyFilter>
+            </View>
           )}
         </SpaceBetween>
       </div>
