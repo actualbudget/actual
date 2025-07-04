@@ -38,7 +38,11 @@ function openDocsForCurrentPage() {
   window.Actual.openURLInBrowser(getPageDocs(window.location.pathname));
 }
 
-type HelpMenuItem = 'docs' | 'keyboard-shortcuts' | 'goal-templates';
+type HelpMenuItem =
+  | 'docs'
+  | 'discord'
+  | 'keyboard-shortcuts'
+  | 'goal-templates';
 
 type HelpButtonProps = {
   onPress?: () => void;
@@ -81,6 +85,9 @@ export const HelpMenu = () => {
       case 'docs':
         openDocsForCurrentPage();
         break;
+      case 'discord':
+        window.Actual.openURLInBrowser('https://discord.gg/pRYNYr4W5A');
+        break;
       case 'keyboard-shortcuts':
         dispatch(pushModal({ modal: { name: 'keyboard-shortcuts' } }));
         break;
@@ -112,6 +119,10 @@ export const HelpMenu = () => {
             {
               name: 'docs',
               text: t('Documentation'),
+            },
+            {
+              name: 'discord',
+              text: t('Community support (Discord)'),
             },
             { name: 'keyboard-shortcuts', text: t('Keyboard shortcuts') },
             ...(showGoalTemplates && page === '/budget'
