@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import * as db from '../db';
 
+import { runRules } from './transaction-rules';
+
 async function getPayee(acct) {
   return db.first<db.DbPayee>('SELECT * FROM payees WHERE transfer_acct = ?', [
     acct,
@@ -56,7 +58,7 @@ export async function addTransfer(transaction, transferredAccount) {
     [transaction.account],
   );
 
-  const id = await db.insertTransaction({
+  const transferTransaction = {
     account: transferredAccount,
     amount: -transaction.amount,
     payee: fromPayee,
@@ -65,6 +67,12 @@ export async function addTransfer(transaction, transferredAccount) {
     notes: transaction.notes || null,
     schedule: transaction.schedule,
     cleared: false,
+  };
+  const { notes, cleared } = await runRules(transferTransaction);
+  const id = await db.insertTransaction({
+    ...transferTransaction,
+    notes,
+    cleared,
   });
 
   await db.updateTransaction({ id: transaction.id, transfer_id: id });
