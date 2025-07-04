@@ -25,7 +25,6 @@ import { format } from 'date-fns';
 import { debounce } from 'debounce';
 
 import * as monthUtils from 'loot-core/shared/months';
-import { amountToCurrency } from 'loot-core/shared/util';
 import { type CalendarWidget } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
@@ -42,6 +41,7 @@ import {
   calendarSpreadsheet,
 } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
+import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
@@ -64,6 +64,8 @@ export function CalendarCard({
   firstDayOfWeekIdx,
 }: CalendarCardProps) {
   const { t } = useTranslation();
+  const formatFunc = useFormat();
+
   const [start, end] = calculateTimeRange(meta?.timeFrame, {
     start: monthUtils.dayFromDate(monthUtils.currentMonth()),
     end: monthUtils.currentDay(),
@@ -225,7 +227,7 @@ export function CalendarCard({
                           <View style={{ color: chartTheme.colors.blue }}>
                             {totalIncome !== 0 ? (
                               <PrivacyFilter>
-                                {amountToCurrency(totalIncome)}
+                                {formatFunc(totalIncome, 'financial')}
                               </PrivacyFilter>
                             ) : (
                               ''
@@ -246,7 +248,7 @@ export function CalendarCard({
                           <View style={{ color: chartTheme.colors.red }}>
                             {totalExpense !== 0 ? (
                               <PrivacyFilter>
-                                {amountToCurrency(totalExpense)}
+                                {formatFunc(totalExpense, 'financial')}
                               </PrivacyFilter>
                             ) : (
                               ''
@@ -307,6 +309,7 @@ export function CalendarCard({
                   index={index}
                   widgetId={widgetId}
                   isEditing={isEditing}
+                  formatFunc={formatFunc}
                 />
               ))
             ) : (
@@ -333,6 +336,7 @@ type CalendarCardInnerProps = {
   index: number;
   widgetId: string;
   isEditing?: boolean;
+  formatFunc: (value: unknown, type: FormatType) => string;
 };
 function CalendarCardInner({
   calendar,
@@ -342,6 +346,7 @@ function CalendarCardInner({
   index,
   widgetId,
   isEditing,
+  formatFunc,
 }: CalendarCardInnerProps) {
   const { t } = useTranslation();
   const [monthNameVisible, setMonthNameVisible] = useState(true);
@@ -485,7 +490,7 @@ function CalendarCardInner({
                   style={{ flexShrink: 0 }}
                 />
                 <PrivacyFilter>
-                  {amountToCurrency(calendar.totalIncome)}
+                  {formatFunc(calendar.totalIncome, 'financial')}
                 </PrivacyFilter>
               </>
             ) : (
@@ -508,7 +513,7 @@ function CalendarCardInner({
                   style={{ flexShrink: 0 }}
                 />
                 <PrivacyFilter>
-                  {amountToCurrency(calendar.totalExpense)}
+                  {formatFunc(calendar.totalExpense, 'financial')}
                 </PrivacyFilter>
               </>
             ) : (
