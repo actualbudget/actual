@@ -9,9 +9,9 @@ import { LineChart, Line, YAxis, Tooltip as RechartsTooltip } from 'recharts';
 
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
-import { integerToCurrency } from 'loot-core/shared/util';
 
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 const CHART_HEIGHT = 70;
@@ -29,6 +29,7 @@ type Balance = {
 };
 
 export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
+  const formatFunc = useFormat();
   const [balanceData, setBalanceData] = useState<
     Array<{ date: string; balance: number }>
   >([]);
@@ -222,7 +223,7 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
           {hoveredValue && (
             <Text>
               <div style={{ fontWeight: 800 }}>{hoveredValue.date}</div>
-              <div>{integerToCurrency(hoveredValue.balance)}</div>
+              <div>{formatFunc(hoveredValue.balance, 'financial')}</div>
             </Text>
           )}
         </SpaceBetween>

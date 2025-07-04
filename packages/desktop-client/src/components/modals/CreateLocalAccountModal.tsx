@@ -12,8 +12,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { toRelaxedNumber } from 'loot-core/shared/util';
-
 import { Link } from '@desktop-client/components/common/Link';
 import {
   Modal,
@@ -24,6 +22,7 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { Checkbox } from '@desktop-client/components/forms';
 import { validateAccountName } from '@desktop-client/components/util/accountValidation';
+import { FinancialInput } from '@desktop-client/components/util/FinancialInput';
 import * as useAccounts from '@desktop-client/hooks/useAccounts';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { closeModal } from '@desktop-client/modals/modalsSlice';
@@ -37,12 +36,9 @@ export function CreateLocalAccountModal() {
   const accounts = useAccounts.useAccounts();
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
-  const [balance, setBalance] = useState('0');
+  const [balance, setBalance] = useState(0);
 
   const [nameError, setNameError] = useState(null);
-  const [balanceError, setBalanceError] = useState(false);
-
-  const validateBalance = balance => !isNaN(parseFloat(balance));
 
   const validateAndSetName = (name: string) => {
     const nameError = validateAccountName(name, '', accounts);
@@ -59,15 +55,12 @@ export function CreateLocalAccountModal() {
 
     const nameError = validateAccountName(name, '', accounts);
 
-    const balanceError = !validateBalance(balance);
-    setBalanceError(balanceError);
-
-    if (!nameError && !balanceError) {
+    if (!nameError) {
       dispatch(closeModal());
       const id = await dispatch(
         createAccount({
           name,
-          balance: toRelaxedNumber(balance),
+          balance,
           offBudget: offbudget,
         }),
       ).unwrap();
@@ -162,26 +155,13 @@ export function CreateLocalAccountModal() {
               </View>
 
               <InlineField label={t('Balance')} width="100%">
-                <Input
+                <FinancialInput
                   name="balance"
-                  inputMode="decimal"
                   value={balance}
                   onChangeValue={setBalance}
-                  onUpdate={value => {
-                    const balance = value.trim();
-                    setBalance(balance);
-                    if (validateBalance(balance) && balanceError) {
-                      setBalanceError(false);
-                    }
-                  }}
                   style={{ flex: 1 }}
                 />
               </InlineField>
-              {balanceError && (
-                <FormError style={{ marginLeft: 75 }}>
-                  {t('Balance must be a number')}
-                </FormError>
-              )}
 
               <ModalButtons>
                 <Button onPress={close}>{t('Back')}</Button>

@@ -7,7 +7,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import * as Platform from 'loot-core/shared/platform';
-import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
 import { BudgetMenu } from '@desktop-client/components/budget/envelope/BudgetMenu';
 import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
@@ -48,10 +47,6 @@ export function EnvelopeBudgetMenuModal({
   const category = useCategory(categoryId);
   const [amountFocused, setAmountFocused] = useState(false);
 
-  const _onUpdateBudget = (amount: number) => {
-    onUpdateBudget?.(amountToInteger(amount));
-  };
-
   useEffect(() => {
     // iOS does not support automatically opening up the keyboard for the
     // total amount field. Hence we should not focus on it on page render.
@@ -88,7 +83,7 @@ export function EnvelopeBudgetMenuModal({
               {t('Budgeted')}
             </Text>
             <FocusableAmountInput
-              value={integerToAmount(budgeted || 0)}
+              value={budgeted || 0}
               focused={amountFocused}
               onFocus={() => setAmountFocused(true)}
               onBlur={() => setAmountFocused(false)}
@@ -102,7 +97,7 @@ export function EnvelopeBudgetMenuModal({
                 minWidth: '100%',
               }}
               textStyle={{ ...styles.veryLargeText, textAlign: 'center' }}
-              onUpdateAmount={_onUpdateBudget}
+              onUpdateAmount={onUpdateBudget}
               data-testid="budget-amount"
             />
           </View>

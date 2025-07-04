@@ -31,6 +31,7 @@ import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountP
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useTransactions } from '@desktop-client/hooks/usePreviewTransactions';
 import { accountSchedulesQuery } from '@desktop-client/hooks/useSchedules';
@@ -258,6 +259,7 @@ function TransactionListWithPreviews({
   readonly accountName: AccountEntity['name'] | string;
 }) {
   const { t } = useTranslation();
+  const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -307,6 +309,7 @@ function TransactionListWithPreviews({
     updateQuery: setTransactionsQuery,
     resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
     dateFormat,
+    currency: format.currency,
   });
 
   const {

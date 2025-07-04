@@ -463,12 +463,12 @@ type ApplyBudgetActionPayload =
   | {
       type: 'apply-goal-template';
       month: string;
-      args: never;
+      args: { currencyCode: string };
     }
   | {
       type: 'overwrite-goal-template';
       month: string;
-      args: never;
+      args: { currencyCode: string };
     }
   | {
       type: 'cleanup-goal-template';
@@ -493,6 +493,7 @@ type ApplyBudgetActionPayload =
       args: {
         to: CategoryEntity['id'];
         from: CategoryEntity['id'];
+        currencyCode: string;
       };
     }
   | {
@@ -508,6 +509,7 @@ type ApplyBudgetActionPayload =
       month: string;
       args: {
         category: CategoryEntity['id'];
+        currencyCode: string;
       };
     }
   | {
@@ -517,6 +519,7 @@ type ApplyBudgetActionPayload =
         amount: number;
         from: CategoryEntity['id'];
         to: CategoryEntity['id'];
+        currencyCode: string;
       };
     }
   | {
@@ -537,6 +540,7 @@ type ApplyBudgetActionPayload =
       month: string;
       args: {
         category: CategoryEntity['id'];
+        currencyCode: string;
       };
     }
   | {
@@ -544,6 +548,7 @@ type ApplyBudgetActionPayload =
       month: string;
       args: {
         categories: Array<CategoryEntity['id']>;
+        currencyCode: string;
       };
     }
   | {
@@ -611,7 +616,10 @@ export const applyBudgetAction = createAppAsyncThunk(
       case 'apply-goal-template':
         dispatch(
           addNotification({
-            notification: await send('budget/apply-goal-template', { month }),
+            notification: await send('budget/apply-goal-template', {
+              month,
+              currencyCode: args.currencyCode,
+            }),
           }),
         );
         break;
@@ -620,6 +628,7 @@ export const applyBudgetAction = createAppAsyncThunk(
           addNotification({
             notification: await send('budget/overwrite-goal-template', {
               month,
+              currencyCode: args.currencyCode,
             }),
           }),
         );
@@ -630,6 +639,7 @@ export const applyBudgetAction = createAppAsyncThunk(
             notification: await send('budget/apply-single-template', {
               month,
               category: args.category,
+              currencyCode: args.currencyCode,
             }),
           }),
         );
@@ -655,6 +665,7 @@ export const applyBudgetAction = createAppAsyncThunk(
           month,
           to: args.to,
           from: args.from,
+          currencyCode: args.currencyCode,
         });
         break;
       case 'transfer-available':
@@ -668,6 +679,7 @@ export const applyBudgetAction = createAppAsyncThunk(
         await send('budget/cover-overbudgeted', {
           month,
           category: args.category,
+          currencyCode: args.currencyCode,
         });
         break;
       case 'transfer-category':
@@ -676,6 +688,7 @@ export const applyBudgetAction = createAppAsyncThunk(
           amount: args.amount,
           from: args.from,
           to: args.to,
+          currencyCode: args.currencyCode,
         });
         break;
       case 'carryover': {
@@ -695,6 +708,7 @@ export const applyBudgetAction = createAppAsyncThunk(
             notification: await send('budget/apply-multiple-templates', {
               month,
               categoryIds: args.categories,
+              currencyCode: args.currencyCode,
             }),
           }),
         );

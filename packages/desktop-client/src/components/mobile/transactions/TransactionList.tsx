@@ -32,11 +32,7 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
-import {
-  groupById,
-  type IntegerAmount,
-  integerToCurrency,
-} from 'loot-core/shared/util';
+import { groupById, type IntegerAmount } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type TransactionEntity,
@@ -48,6 +44,7 @@ import { FloatingActionBar } from '@desktop-client/components/mobile/FloatingAct
 import { useScrollListener } from '@desktop-client/components/ScrollProvider';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
@@ -259,6 +256,7 @@ function SelectedTransactionsFloatingActionBar({
   const [isEditMenuOpen, setIsEditMenuOpen] = useState(false);
   const moreOptionsMenuTriggerRef = useRef(null);
   const [isMoreOptionsMenuOpen, setIsMoreOptionsMenuOpen] = useState(false);
+  const format = useFormat();
   const getMenuItemStyle = useCallback(
     <T extends string>(item: MenuItemObject<T>) => ({
       ...styles.mobileMenuItem,
@@ -475,7 +473,7 @@ function SelectedTransactionsFloatingActionBar({
                       case 'amount':
                         displayValue = Number.isNaN(Number(value))
                           ? value
-                          : integerToCurrency(Number(value));
+                          : format(Number(value), 'financial');
                         break;
                       case 'notes':
                         displayValue = `${mode} with ${value}`;

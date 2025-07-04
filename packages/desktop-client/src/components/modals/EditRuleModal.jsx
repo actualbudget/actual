@@ -38,11 +38,6 @@ import {
   isValidOp,
   getValidOps,
 } from 'loot-core/shared/rules';
-import {
-  integerToCurrency,
-  integerToAmount,
-  amountToInteger,
-} from 'loot-core/shared/util';
 
 import {
   Modal,
@@ -56,6 +51,7 @@ import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
 import {
   useSelected,
@@ -311,20 +307,22 @@ function ConditionEditor({
   );
 }
 
-function formatAmount(amount) {
+function formatAmount(amount, format) {
   if (!amount) {
-    return integerToCurrency(0);
+    return format(0, 'financial');
   } else if (typeof amount === 'number') {
-    return integerToCurrency(amount);
+    return format(amount, 'financial');
   } else {
-    return `${integerToCurrency(amount.num1)} to ${integerToCurrency(
+    return `${format(amount.num1, 'financial')} to ${format(
       amount.num2,
+      'financial',
     )}`;
   }
 }
 
 function ScheduleDescription({ id }) {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const format = useFormat();
   const scheduleQuery = useMemo(
     () => q('schedules').filter({ id }).select('*'),
     [id],
@@ -365,7 +363,7 @@ function ScheduleDescription({ id }) {
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
         <Text style={{ flexShrink: 0 }}>
-          <Trans>Amount:</Trans> {formatAmount(schedule._amount)}
+          <Trans>Amount:</Trans> {formatAmount(schedule._amount, format)}
         </Text>
         <Text style={{ margin: '0 5px' }}> — </Text>
         <Text style={{ flexShrink: 0 }}>
@@ -707,13 +705,13 @@ function ConditionsList({
             // behavior and we can probably get rid of `makeValue`
             return makeValue(
               {
-                num1: amountToInteger(cond.value),
-                num2: amountToInteger(cond.value),
+                num1: cond.value,
+                num2: cond.value,
               },
               { ...cond, op: value },
             );
           } else if (cond.op === 'isbetween' && op !== 'isbetween') {
-            return makeValue(integerToAmount(cond.value.num1 || 0), {
+            return makeValue(cond.value.num1 || 0, {
               ...cond,
               op: value,
             });

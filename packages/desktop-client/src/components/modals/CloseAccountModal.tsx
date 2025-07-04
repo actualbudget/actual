@@ -12,7 +12,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { integerToCurrency } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
@@ -26,6 +25,7 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import {
   type Modal as ModalType,
   pushModal,
@@ -57,6 +57,7 @@ export function CloseAccountModal({
   canDelete,
 }: CloseAccountModalProps) {
   const { t } = useTranslation(); // Initialize translation hook
+  const format = useFormat();
   const accounts = useAccounts().filter(a => a.closed === 0);
   const { grouped: categoryGroups, list: categories } = useCategories();
   const [loading, setLoading] = useState(false);
@@ -170,7 +171,7 @@ export function CloseAccountModal({
                       <strong>
                         {
                           {
-                            balance: integerToCurrency(balance),
+                            balance: format(balance, 'financial'),
                           } as TransObjectLiteral
                         }
                       </strong>
