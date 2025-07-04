@@ -10,9 +10,10 @@ const REPOSITORY_CONFIG = new Map([
       POINTS_PER_ISSUE_CLOSING_ACTION: 1,
       POINTS_PER_RELEASE_PR: 0,
       PR_REVIEW_POINT_TIERS: [
-        { minChanges: 1000, points: 6 },
-        { minChanges: 100, points: 4 },
-        { minChanges: 0, points: 2 },
+        { minChanges: 500, points: 8 },
+        { minChanges: 100, points: 6 },
+        { minChanges: 10, points: 2 },
+        { minChanges: 0, points: 1 },
       ],
       EXCLUDED_FILES: [
         'yarn.lock',
@@ -29,8 +30,8 @@ const REPOSITORY_CONFIG = new Map([
       POINTS_PER_ISSUE_CLOSING_ACTION: 1,
       POINTS_PER_RELEASE_PR: 4,
       PR_REVIEW_POINT_TIERS: [
-        { minChanges: 1000, points: 6 },
-        { minChanges: 100, points: 4 },
+        { minChanges: 2000, points: 6 },
+        { minChanges: 200, points: 4 },
         { minChanges: 0, points: 2 },
       ],
       EXCLUDED_FILES: ['yarn.lock', '.yarn/**/*'],
@@ -164,22 +165,6 @@ async function countContributorPoints(repo) {
       tier => totalChanges > tier.minChanges,
     ).points;
 
-    // Add points to the reviewers
-    const uniqueReviewers = new Set();
-    reviews
-      .filter(
-        review =>
-          stats.has(review.user?.login) &&
-          review.state === 'APPROVED' &&
-          !uniqueReviewers.has(review.user?.login),
-      )
-      .forEach(({ user: { login: reviewer } }) => {
-        uniqueReviewers.add(reviewer);
-        const userStats = stats.get(reviewer);
-        userStats.reviews.push({ pr: pr.number.toString(), points: prPoints });
-        userStats.points += prPoints;
-      });
-
     // Award points to the PR creator if it's a release PR
     if (isReleasePR && stats.has(pr.user.login)) {
       const creatorStats = stats.get(pr.user.login);
@@ -189,6 +174,25 @@ async function countContributorPoints(repo) {
         isReleaseCreator: true,
       });
       creatorStats.points += config.POINTS_PER_RELEASE_PR;
+    } else {
+      // Add points to the reviewers
+      const uniqueReviewers = new Set();
+      reviews
+        .filter(
+          review =>
+            stats.has(review.user?.login) &&
+            review.state === 'APPROVED' &&
+            !uniqueReviewers.has(review.user?.login),
+        )
+        .forEach(({ user: { login: reviewer } }) => {
+          uniqueReviewers.add(reviewer);
+          const userStats = stats.get(reviewer);
+          userStats.reviews.push({
+            pr: pr.number.toString(),
+            points: prPoints,
+          });
+          userStats.points += prPoints;
+        });
     }
   }
 
@@ -236,7 +240,8 @@ async function countContributorPoints(repo) {
           userStats.points += config.POINTS_PER_ISSUE_TRIAGE_ACTION;
         }
 
-        if (event.event === 'closed') {
+        // Check if the issue was closed with "no planned" status
+        if (event.event === 'closed' && event.state_reason === 'not_planned') {
           const closer = event.actor.login;
           const userStats = stats.get(closer);
           userStats.issueClosings.push(issue.number.toString());

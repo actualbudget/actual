@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useEffect, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
@@ -26,6 +26,10 @@ export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
   const { t } = useTranslation(); // Initialize i18next
   const available = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
   const [amount, setAmount] = useState<number>(0);
+
+  useEffect(() => {
+    setAmount(available);
+  }, [available]);
 
   const _onSubmit = (newAmount: number) => {
     if (newAmount) {
@@ -79,7 +83,7 @@ export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
               }}
               onPress={() => _onSubmit(amount)}
             >
-              {t('Hold')}
+              <Trans>Hold</Trans>
             </Button>
           </View>
         </>

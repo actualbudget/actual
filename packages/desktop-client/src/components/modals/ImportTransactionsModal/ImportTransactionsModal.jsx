@@ -807,7 +807,7 @@ export function ImportTransactionsModal({
                         fontStyle: 'italic',
                       }}
                     >
-                      {t('No transactions found')}
+                      <Trans>No transactions found</Trans>
                     </View>
                   );
                 }}
@@ -914,7 +914,7 @@ export function ImportTransactionsModal({
                 setReconcile(!reconcile);
               }}
             >
-              {t('Merge with existing transactions')}
+              <Trans>Merge with existing transactions</Trans>
             </CheckboxOption>
           )}
 
@@ -954,7 +954,7 @@ export function ImportTransactionsModal({
                         alignItems: 'baseline',
                       }}
                     >
-                      {t('Delimiter:')}
+                      <Trans>Delimiter:</Trans>
                       <Select
                         options={[
                           [',', ','],
@@ -986,7 +986,7 @@ export function ImportTransactionsModal({
                         alignItems: 'baseline',
                       }}
                     >
-                      {t('Skip lines:')}
+                      <Trans>Skip lines:</Trans>
                       <Input
                         type="number"
                         value={skipLines}

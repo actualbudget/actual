@@ -707,7 +707,18 @@ export class Action {
               object[this.field] = parseFloat(object[this.field]);
               break;
             case 'date':
-              object[this.field] = parseDate(object[this.field]);
+              const parsed = parseDate(object[this.field]);
+              if (parsed && dateFns.isValid(parsed)) {
+                object[this.field] = format(parsed, 'yyyy-MM-dd');
+              } else {
+                // Keep original string; log for diagnostics but avoid hard crash
+                console.error(
+                  `rules: invalid date produced by template for field “${this.field}”:`,
+                  object[this.field],
+                );
+                // Make it stick like a sore thumb
+                object[this.field] = '9999-12-31';
+              }
               break;
             case 'boolean':
               object[this.field] = object[this.field] === 'true';
