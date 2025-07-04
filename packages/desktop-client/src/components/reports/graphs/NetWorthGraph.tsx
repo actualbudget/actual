@@ -55,7 +55,8 @@ export function NetWorthGraph({
   const id = useId();
 
   // Use more aggressive smoothing for high-frequency data
-  const interpolationType = interval === 'Daily' || interval === 'Weekly' ? 'basis' : 'monotone';
+  const interpolationType =
+    interval === 'Daily' || interval === 'Weekly' ? 'basis' : 'monotone';
 
   const tickFormatter = tick => {
     const res = privacyMode

@@ -91,9 +91,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [start, setStart] = useState(initialStart);
   const [end, setEnd] = useState(initialEnd);
   const [mode, setMode] = useState(initialMode);
-  const [interval, setInterval] = useState(
-    widget?.meta?.interval || 'Monthly',
-  );
+  const [interval, setInterval] = useState(widget?.meta?.interval || 'Monthly');
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
@@ -110,7 +108,16 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         interval,
         firstDayOfWeekIdx,
       ),
-    [start, end, accounts, conditions, conditionsOp, locale, interval, firstDayOfWeekIdx],
+    [
+      start,
+      end,
+      accounts,
+      conditions,
+      conditionsOp,
+      locale,
+      interval,
+      firstDayOfWeekIdx,
+    ],
   );
   const data = useReport('net_worth', reportParams);
   useEffect(() => {

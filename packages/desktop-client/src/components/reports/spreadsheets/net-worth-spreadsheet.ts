@@ -80,11 +80,12 @@ export function createSpreadsheet(
               )
               .select([
                 {
-                  date: interval === 'Yearly'
-                    ? { $year: '$date' }
-                    : interval === 'Daily' || interval === 'Weekly'
-                      ? 'date'
-                      : { $month: '$date' }
+                  date:
+                    interval === 'Yearly'
+                      ? { $year: '$date' }
+                      : interval === 'Daily' || interval === 'Weekly'
+                        ? 'date'
+                        : { $month: '$date' },
                 },
                 { amount: { $sum: '$amount' } },
               ]),
@@ -98,7 +99,8 @@ export function createSpreadsheet(
           const weeklyBalances: Record<string, number> = {};
           balances.forEach(b => {
             const weekDate = monthUtils.weekFromDate(b.date, firstDayOfWeekIdx);
-            weeklyBalances[weekDate] = (weeklyBalances[weekDate] || 0) + b.amount;
+            weeklyBalances[weekDate] =
+              (weeklyBalances[weekDate] || 0) + b.amount;
           });
 
           // Convert back to Balance format
@@ -145,7 +147,10 @@ function recalculate(
         ? monthUtils.dayRangeInclusive(start, end)
         : interval === 'Yearly'
           ? monthUtils.yearRangeInclusive(start, end)
-          : monthUtils.rangeInclusive(monthUtils.getMonth(start), monthUtils.getMonth(end));
+          : monthUtils.rangeInclusive(
+              monthUtils.getMonth(start),
+              monthUtils.getMonth(end),
+            );
 
   const accountBalances = data.map(account => {
     let balance = account.starting;
@@ -212,16 +217,22 @@ function recalculate(
 
     // Format dates for display
     const displayFormat =
-      interval === 'Daily' ? 'MM/dd' :
-        interval === 'Weekly' ? 'MM/dd' :
-          interval === 'Yearly' ? 'yyyy' :
-            "MMM ''yy";
+      interval === 'Daily'
+        ? 'MM/dd'
+        : interval === 'Weekly'
+          ? 'MM/dd'
+          : interval === 'Yearly'
+            ? 'yyyy'
+            : "MMM ''yy";
 
     const tooltipFormat =
-      interval === 'Daily' ? 'MMMM d, yyyy' :
-        interval === 'Weekly' ? 'MMM d, yyyy' :
-          interval === 'Yearly' ? 'yyyy' :
-            'MMMM yyyy';
+      interval === 'Daily'
+        ? 'MMMM d, yyyy'
+        : interval === 'Weekly'
+          ? 'MMM d, yyyy'
+          : interval === 'Yearly'
+            ? 'yyyy'
+            : 'MMMM yyyy';
 
     const graphPoint = {
       x: d.format(x, displayFormat, { locale }),
