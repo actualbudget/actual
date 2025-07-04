@@ -1617,7 +1617,7 @@ const Transaction = memo(function Transaction({
           /* Balance field for all transactions */
           name="balance"
           value={
-            runningBalance == null || isChild
+            runningBalance == null || isChild || isTemporaryId(id)
               ? ''
               : integerToCurrency(runningBalance)
           }
@@ -1725,7 +1725,6 @@ function TransactionError({
 
 type NewTransactionProps = {
   accounts: AccountEntity[];
-  balance: number;
   categoryGroups: CategoryGroupEntity[];
   dateFormat: string;
   editingTransaction: TransactionEntity['id'];
@@ -1752,6 +1751,7 @@ type NewTransactionProps = {
   payees: PayeeEntity[];
   showAccount?: boolean;
   showBalance?: boolean;
+  balance?: number | null;
   showCleared?: boolean;
   transactions: TransactionEntity[];
   transferAccountsByTransaction: {
@@ -1845,7 +1845,7 @@ function NewTransaction({
           onNavigateToTransferAccount={onNavigateToTransferAccount}
           onNavigateToSchedule={onNavigateToSchedule}
           onNotesTagClick={onNotesTagClick}
-          balance={balance}
+          balance={balance ?? 0}
           showSelection={true}
           allowSplitTransaction={true}
         />
@@ -2199,11 +2199,6 @@ function TransactionTableInner({
               onNavigateToSchedule={onNavigateToSchedule}
               onNotesTagClick={onNotesTagClick}
               onDistributeRemainder={props.onDistributeRemainder}
-              balance={
-                props.transactions?.length > 0
-                  ? (props.balances?.[props.transactions[0]?.id]?.balance ?? 0)
-                  : 0
-              }
             />
           </View>
         )}

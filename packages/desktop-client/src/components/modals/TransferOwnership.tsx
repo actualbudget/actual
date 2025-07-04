@@ -132,9 +132,10 @@ export function TransferOwnership({
                       marginTop: 5,
                     }}
                   >
-                    {t(
-                      'Select a user from the directory to designate as the new budget owner.',
-                    )}
+                    <Trans>
+                      Select a user from the directory to designate as the new
+                      budget owner.
+                    </Trans>
                   </label>
                   <label
                     style={{
@@ -154,7 +155,7 @@ export function TransferOwnership({
                       marginTop: 5,
                     }}
                   >
-                    {t('Proceed with caution.')}
+                    <Trans>Proceed with caution.</Trans>
                   </label>
                 </View>
               )}
@@ -166,7 +167,7 @@ export function TransferOwnership({
                     marginTop: 5,
                   }}
                 >
-                  {t('No users available')}
+                  <Trans>No users available</Trans>
                 </Text>
               )}
             </FormField>
