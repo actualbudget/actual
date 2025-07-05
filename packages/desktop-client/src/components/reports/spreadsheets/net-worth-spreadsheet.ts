@@ -42,9 +42,23 @@ export function createSpreadsheet(
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    // Convert dates to ensure we have the full range
+    // Convert dates to ensure we have the full range. Then clamp end date to avoid future projections
     const startDate = monthUtils.firstDayOfMonth(start);
-    const endDate = monthUtils.lastDayOfMonth(end);
+
+    // Start with the provided end-of-month date, then adjust for current context
+    let endDate = monthUtils.lastDayOfMonth(end);
+
+    if (interval === 'Daily') {
+      const today = monthUtils.currentDay();
+      if (monthUtils.isAfter(endDate, today)) {
+        endDate = today;
+      }
+    } else if (interval === 'Weekly') {
+      const currentWeekStart = monthUtils.currentWeek(firstDayOfWeekIdx);
+      if (monthUtils.isAfter(endDate, currentWeekStart)) {
+        endDate = currentWeekStart;
+      }
+    }
 
     const data = await Promise.all(
       accounts.map(async acct => {
@@ -120,7 +134,16 @@ export function createSpreadsheet(
       }),
     );
 
-    setData(recalculate(data, start, end, locale, interval, firstDayOfWeekIdx));
+    setData(
+      recalculate(
+        data,
+        startDate,
+        endDate,
+        locale,
+        interval,
+        firstDayOfWeekIdx,
+      ),
+    );
   };
 }
 
@@ -130,8 +153,8 @@ function recalculate(
     balances: Record<string, Balance>;
     starting: number;
   }>,
-  start: string,
-  end: string,
+  startDate: string,
+  endDate: string,
   locale: Locale,
   interval: string = 'Monthly',
   firstDayOfWeekIdx: string = '0',
@@ -139,14 +162,14 @@ function recalculate(
   // Get intervals using the same pattern as other working spreadsheets
   const intervals =
     interval === 'Weekly'
-      ? monthUtils.weekRangeInclusive(start, end, firstDayOfWeekIdx)
+      ? monthUtils.weekRangeInclusive(startDate, endDate, firstDayOfWeekIdx)
       : interval === 'Daily'
-        ? monthUtils.dayRangeInclusive(start, end)
+        ? monthUtils.dayRangeInclusive(startDate, endDate)
         : interval === 'Yearly'
-          ? monthUtils.yearRangeInclusive(start, end)
+          ? monthUtils.yearRangeInclusive(startDate, endDate)
           : monthUtils.rangeInclusive(
-              monthUtils.getMonth(start),
-              monthUtils.getMonth(end),
+              monthUtils.getMonth(startDate),
+              monthUtils.getMonth(endDate),
             );
 
   const accountBalances = data.map(account => {
@@ -258,8 +281,8 @@ function recalculate(
     graphData: {
       data: graphData,
       hasNegative,
-      start,
-      end,
+      start: startDate,
+      end: endDate,
     },
     netWorth: endNetWorth,
     totalChange: endNetWorth - startNetWorth,
