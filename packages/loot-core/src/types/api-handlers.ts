@@ -14,13 +14,10 @@ import { BudgetFileHandlers } from '../server/budgetfiles/app';
 import { type batchUpdateTransactions } from '../server/transactions';
 
 import type {
-  ImportTransactionEntity,
   NewRuleEntity,
   RuleEntity,
   TransactionEntity,
-  DiscoverScheduleEntity,
-  ScheduleEntity,
-  RecurConfig,
+  ScheduleEntity
 } from './models';
 
 export interface ApiHandlers {
