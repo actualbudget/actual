@@ -128,8 +128,8 @@ export function MobileNavTabs() {
       Icon: SvgStoreFront,
     },
     {
-      name: t('Rules (Soon)'),
-      path: '/rules/soon',
+      name: t('Rules'),
+      path: '/rules',
       style: navTabStyle,
       Icon: SvgTuning,
     },
