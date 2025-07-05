@@ -26,12 +26,14 @@ import {
   separateGroups,
 } from './util';
 
-import { type DropPosition } from '@desktop-client/components/sort';
+import {
+  OnDropCallback,
+  type DropPosition,
+} from '@desktop-client/components/sort';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-
 type BudgetTableProps = {
   type: string;
   prewarmStartMonth: string;
@@ -47,10 +49,12 @@ type BudgetTableProps = {
     >['MonthComponent'];
   };
   onSaveCategory: (category: CategoryEntity) => void;
-  onDeleteCategory: (id: CategoryEntity['id']) => void;
+  onDeleteCategory: (id: CategoryEntity['id']) => Promise<void>;
   onSaveGroup: (group: CategoryGroupEntity) => void;
-  onDeleteGroup: (id: CategoryGroupEntity['id']) => void;
-  onApplyBudgetTemplatesInGroup: (groupId: CategoryGroupEntity['id']) => void;
+  onDeleteGroup: (id: CategoryGroupEntity['id']) => Promise<void>;
+  onApplyBudgetTemplatesInGroup: (
+    groupIds: CategoryGroupEntity['id'][],
+  ) => void;
   onReorderCategory: (params: {
     id: CategoryEntity['id'];
     groupId?: CategoryGroupEntity['id'];
@@ -61,7 +65,7 @@ type BudgetTableProps = {
     targetId: CategoryEntity['id'] | null;
   }) => void;
   onShowActivity: (id: CategoryEntity['id'], month?: string) => void;
-  onBudgetAction: (month: string, type: string, args: unknown) => void;
+  onBudgetAction: (month: string, action: string, args: unknown) => void;
 };
 
 export function BudgetTable(props: BudgetTableProps) {
@@ -297,7 +301,6 @@ export function BudgetTable(props: BudgetTableProps) {
           >
             <SchedulesProvider query={schedulesQuery}>
               <BudgetCategories
-                // @ts-expect-error Fix when migrating BudgetCategories to ts
                 categoryGroups={categoryGroups}
                 editingCell={editing}
                 dataComponents={dataComponents}
@@ -307,8 +310,8 @@ export function BudgetTable(props: BudgetTableProps) {
                 onSaveGroup={onSaveGroup}
                 onDeleteCategory={onDeleteCategory}
                 onDeleteGroup={onDeleteGroup}
-                onReorderCategory={_onReorderCategory}
-                onReorderGroup={_onReorderGroup}
+                onReorderCategory={_onReorderCategory as OnDropCallback}
+                onReorderGroup={_onReorderGroup as OnDropCallback}
                 onBudgetAction={onBudgetAction}
                 onShowActivity={onShowActivity}
                 onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}

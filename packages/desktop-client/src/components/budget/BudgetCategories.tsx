@@ -1,8 +1,16 @@
 import React, { memo, useState, useMemo } from 'react';
 
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/types/models';
+
+import { useLocalPref } from '../../hooks/useLocalPref';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { DropHighlightPosContext, OnDropCallback } from '../sort';
+import { Row } from '../table';
 
 import { ExpenseCategory } from './ExpenseCategory';
 import { ExpenseGroup } from './ExpenseGroup';
@@ -13,11 +21,26 @@ import { SidebarCategory } from './SidebarCategory';
 import { SidebarGroup } from './SidebarGroup';
 import { separateGroups } from './util';
 
-import { DropHighlightPosContext } from '@desktop-client/components/sort';
-import { Row } from '@desktop-client/components/table';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+type BudgetCategoriesProps = {
+  categoryGroups: CategoryGroupEntity[];
+  editingCell: { id: string; cell: string } | null;
+  dataComponents: any;
+  onBudgetAction: (month: string, action: string, args: unknown) => void;
+  onShowActivity: (id: CategoryEntity['id'], month?: string) => void;
+  onEditName: (id: string) => void;
+  onEditMonth: (id: string, month: string) => void;
+  onSaveCategory: (category: CategoryEntity) => void;
+  onSaveGroup: (group: CategoryGroupEntity) => void;
+  onDeleteCategory: (id: CategoryEntity['id']) => Promise<void>;
+  onDeleteGroup: (id: CategoryGroupEntity['id']) => Promise<void>;
+  onApplyBudgetTemplatesInGroup: (
+    groupIds: CategoryGroupEntity['id'][],
+  ) => void;
+  onReorderCategory: OnDropCallback;
+  onReorderGroup: OnDropCallback;
+};
 
-export const BudgetCategories = memo(
+export const BudgetCategories = memo<BudgetCategoriesProps>(
   ({
     categoryGroups,
     editingCell,
@@ -42,11 +65,16 @@ export const BudgetCategories = memo(
     }
 
     const [isAddingGroup, setIsAddingGroup] = useState(false);
-    const [newCategoryForGroup, setNewCategoryForGroup] = useState(null);
+    const [newCategoryForGroup, setNewCategoryForGroup] = useState<
+      string | null
+    >(null);
     const items = useMemo(() => {
       const [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
 
-      let items = Array.prototype.concat.apply(
+      let items: {
+        type: string;
+        value?: CategoryEntity | CategoryGroupEntity;
+      }[] = Array.prototype.concat.apply(
         [],
         expenseGroups.map(group => {
           if (group.hidden && !showHiddenCategories) {
@@ -57,7 +85,10 @@ export const BudgetCategories = memo(
             cat => showHiddenCategories || !cat.hidden,
           );
 
-          const items = [{ type: 'expense-group', value: { ...group } }];
+          const items: {
+            type: string;
+            value?: CategoryEntity | CategoryGroupEntity;
+          }[] = [{ type: 'expense-group', value: { ...group } }];
 
           if (newCategoryForGroup === group.id) {
             items.push({ type: 'new-category' });
@@ -78,7 +109,7 @@ export const BudgetCategories = memo(
       );
 
       if (isAddingGroup) {
-        items.push({ type: 'new-group' });
+        items.push({ type: 'new-group', value: { id: 'new', name: '' } });
       }
 
       if (incomeGroup) {
@@ -143,7 +174,7 @@ export const BudgetCategories = memo(
       }
     }
 
-    function onToggleCollapse(id) {
+    function onToggleCollapse(id: string) {
       if (collapsedGroupIds.includes(id)) {
         onCollapse(collapsedGroupIds.filter(id_ => id_ !== id));
       } else {
@@ -159,14 +190,14 @@ export const BudgetCategories = memo(
       setIsAddingGroup(false);
     }
 
-    function _onSaveGroup(group) {
+    async function _onSaveGroup(group: CategoryGroupEntity) {
       onSaveGroup?.(group);
       if (group.id === 'new') {
         onHideNewGroup();
       }
     }
 
-    function onShowNewCategory(groupId) {
+    function onShowNewCategory(groupId: string) {
       onCollapse(collapsedGroupIds.filter(c => c !== groupId));
       setNewCategoryForGroup(groupId);
     }
@@ -175,7 +206,7 @@ export const BudgetCategories = memo(
       setNewCategoryForGroup(null);
     }
 
-    function _onSaveCategory(category) {
+    function _onSaveCategory(category: CategoryEntity) {
       onSaveCategory?.(category);
       if (category.id === 'new') {
         onHideNewCategory();
@@ -194,7 +225,7 @@ export const BudgetCategories = memo(
         }}
       >
         {items.map((item, idx) => {
-          let content;
+          let content: React.ReactNode;
           switch (item.type) {
             case 'new-group':
               content = (
@@ -203,6 +234,7 @@ export const BudgetCategories = memo(
                 >
                   <SidebarGroup
                     group={{ id: 'new', name: '' }}
+                    collapsed={collapsedGroupIds.includes(item.value.id)}
                     editing={true}
                     onSave={_onSaveGroup}
                     onHideNewGroup={onHideNewGroup}
@@ -224,7 +256,9 @@ export const BudgetCategories = memo(
                       id: 'new',
                     }}
                     editing={true}
+                    innerRef={null}
                     onSave={_onSaveCategory}
+                    onDelete={onDeleteGroup}
                     onHideNewCategory={onHideNewCategory}
                     onEditName={onEditName}
                   />
@@ -255,8 +289,8 @@ export const BudgetCategories = memo(
             case 'expense-category':
               content = (
                 <ExpenseCategory
-                  cat={item.value}
-                  categoryGroup={item.group}
+                  cat={item.value as CategoryEntity}
+                  categoryGroup={item.value as CategoryGroupEntity}
                   editingCell={editingCell}
                   MonthComponent={dataComponents.ExpenseCategoryComponent}
                   dragState={dragState}
@@ -303,7 +337,7 @@ export const BudgetCategories = memo(
             case 'income-category':
               content = (
                 <IncomeCategory
-                  cat={item.value}
+                  cat={item.value as CategoryEntity}
                   editingCell={editingCell}
                   isLast={idx === items.length - 1}
                   MonthComponent={dataComponents.IncomeCategoryComponent}
