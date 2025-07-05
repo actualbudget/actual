@@ -3,6 +3,7 @@ import { vi } from 'vitest';
 import { amountToInteger } from '../../shared/util';
 import { type CategoryEntity } from '../../types/models';
 import { type Template } from '../../types/models/templates';
+import * as aql from '../aql';
 import * as db from '../db';
 
 import * as actions from './actions';
@@ -16,6 +17,10 @@ vi.mock('./actions', () => ({
 
 vi.mock('../db', () => ({
   getCategories: vi.fn(),
+}));
+
+vi.mock('../aql', () => ({
+  aqlQuery: vi.fn(),
 }));
 
 // Test helper class to access constructor and methods
@@ -801,6 +806,10 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
+        data: 'false',
+        dependencies: [],
+      });
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -864,6 +873,10 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
+        data: 'false',
+        dependencies: [],
+      });
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -916,6 +929,10 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
+        data: 'false',
+        dependencies: [],
+      });
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -974,6 +991,10 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
+        data: 'false',
+        dependencies: [],
+      });
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1015,6 +1036,10 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(10000); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
+        data: 'false',
+        dependencies: [],
+      });
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
