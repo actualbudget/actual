@@ -817,13 +817,13 @@ handlers['api/schedule-update'] = withMutation(async function ({
     switch (typedKey) {
       case 'name':
         const newName = value as string;
-        const { data } = await aqlQuery(q('schedules').filter({ newName }).select('*'));
+        const { data } = await aqlQuery(
+          q('schedules').filter({ newName }).select('*'),
+        );
         if (!data || data.length === 0 || data[0].id === sched.id) {
-        sched.name = newName;
-        conditionsUpdated = true;
-        }
-        else
-        {
+          sched.name = newName;
+          conditionsUpdated = true;
+        } else {
           console.warn('There is already a schedule with this name');
           return;
         }
@@ -894,11 +894,10 @@ handlers['api/schedule-delete'] = withMutation(async function (id: string) {
   return handlers['schedule/delete']({ id });
 });
 
-
 handlers['api/get-id-by-name'] = withMutation(async function ({ type, name }) {
   const allowedTypes = ['payees', 'categories', 'schedules', 'accounts'];
   if (!allowedTypes.includes(type)) {
-    return 'Error: Provide a valid type'
+    return 'Error: Provide a valid type';
   }
   const { data } = await aqlQuery(q(type).filter({ name }).select('*'));
   if (!data || data.length === 0) {
@@ -906,8 +905,6 @@ handlers['api/get-id-by-name'] = withMutation(async function ({ type, name }) {
   }
   return data[0].id;
 });
-
-
 
 handlers['api/get-server-version'] = withMutation(async function () {
   checkFileOpen();
