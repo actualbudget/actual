@@ -814,9 +814,18 @@ test('Schedules: successfully complete schedules operations', async () => {
     expect.arrayContaining([
       expect.objectContaining({
         id: ScheduleId1,
-        name: 'test-account1',
-        closed: true,
-        offbudget: false,
+        posts_transaction: true,
+        amount: -5000,
+        amountOp: 'is',
+        date: {
+          frequency: 'monthly',
+          interval: 1,
+          start: '2025-06-13',
+          patterns: [],
+          skipWeekend: false,
+          weekendSolveMode: 'after',
+          endMode: 'never',
+        },
       }),
       expect.not.objectContaining({ id: ScheduleId2 }),
     ]),
