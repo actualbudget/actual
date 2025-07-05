@@ -1,5 +1,4 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
-
 import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
@@ -35,7 +34,7 @@ export function CategoryGroupActionMenu({
               {
                 name: 'apply-budget-templates-in-group',
                 text: t('Apply budget template'),
-              }
+              },
             ]
           : []),
       ]}

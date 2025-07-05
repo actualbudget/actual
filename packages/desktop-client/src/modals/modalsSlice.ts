@@ -331,7 +331,9 @@ export type Modal =
         onDelete: (groupId: CategoryGroupEntity['id']) => void;
         onToggleVisibility: (groupId: CategoryGroupEntity['id']) => void;
         onClose?: () => void;
-        onApplyBudgetTemplatesInGroup?: (categories: Array<CategoryEntity['id']>) => void;
+        onApplyBudgetTemplatesInGroup?: (
+          categories: Array<CategoryEntity['id']>,
+        ) => void;
       };
     }
   | {
