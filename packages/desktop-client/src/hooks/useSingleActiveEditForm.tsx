@@ -52,10 +52,15 @@ export function SingleActiveEditFormProvider({
   };
 
   const onClearActiveEdit = (delayMs?: number) => {
-    setTimeout(() => {
+    if (delayMs) {
+      setTimeout(() => {
+        runCleanup();
+        setEditingField(null);
+      }, delayMs);
+    } else {
       runCleanup();
       setEditingField(null);
-    }, delayMs);
+    }
   };
 
   const onActiveEdit = (field: string, action: ActiveEditAction) => {
@@ -77,9 +82,8 @@ export function SingleActiveEditFormProvider({
 
     if (editingField) {
       onClearActiveEdit(options?.clearActiveEditDelayMs);
-    } else {
-      onActiveEdit(field, action);
     }
+    onActiveEdit(field, action);
   };
 
   return (
