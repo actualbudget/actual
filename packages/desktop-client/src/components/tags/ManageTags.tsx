@@ -4,7 +4,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
 import { Stack } from '@actual-app/components/stack';
-import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
@@ -80,7 +79,7 @@ export function ManageTags() {
               width: '50%',
             }}
           >
-            <Text>{t('User defined tags with color and description.')} </Text>
+            <Trans>User defined tags with color and description.</Trans>
           </View>
         </View>
         <Stack
@@ -123,7 +122,9 @@ export function ManageTags() {
           <Stack direction="row" align="center" justify="flex-end" spacing={2}>
             {selectedInst.items.size > 0 && (
               <Button onPress={onDeleteSelected}>
-                Delete {selectedInst.items.size} tags
+                <Trans count={selectedInst.items.size}>
+                  Delete {selectedInst.items.size} tags
+                </Trans>
               </Button>
             )}
           </Stack>

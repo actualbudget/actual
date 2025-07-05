@@ -65,8 +65,7 @@ function ColorSwatchPicker() {
                 cursor: 'pointer',
 
                 '&[data-selected]::after': {
-                  // eslint-disable-next-line rulesdir/typography
-                  content: "''",
+                  content: '‘’',
                   position: 'absolute',
                   inset: 0,
                   border: '2px solid black',
