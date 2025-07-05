@@ -151,6 +151,18 @@ export function Budget() {
     [dispatch],
   );
 
+  const onApplyBudgetTemplatesInGroup = async categories => {
+    dispatch(
+      applyBudgetAction({
+        month: startMonth,
+        type: 'apply-multiple-templates',
+        args: {
+          categories,
+        },
+      }),
+    );
+  };
+
   const onDeleteGroup = useCallback(
     async groupId => {
       const group = categoryGroups?.find(g => g.id === groupId);
@@ -378,6 +390,7 @@ export function Budget() {
               onEditNotes: onOpenCategoryGroupNotesModal,
               onDelete: onDeleteGroup,
               onToggleVisibility: onToggleGroupVisibility,
+              onApplyBudgetTemplatesInGroup: onApplyBudgetTemplatesInGroup
             },
           },
         }),

@@ -14,6 +14,10 @@ import {
   SvgTrash,
 } from '@actual-app/components/icons/v1';
 import {
+  SvgCheveronDown,
+  SvgCheveronUp,
+} from '@actual-app/components/icons/v1';
+import {
   SvgNotesPaper,
   SvgViewHide,
   SvgViewShow,
@@ -34,6 +38,10 @@ import { Notes } from '@desktop-client/components/Notes';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useNotes } from '@desktop-client/hooks/useNotes';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { css } from '@emotion/css';
+import { CategoryGroupActionMenu } from '../mobile/budget/CategoryGroupActionMenu';
+import { useUndo } from '@desktop-client/hooks/useUndo';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 
 type CategoryGroupMenuModalProps = Extract<
   ModalType,
@@ -48,10 +56,18 @@ export function CategoryGroupMenuModal({
   onDelete,
   onToggleVisibility,
   onClose,
+  onApplyBudgetTemplatesInGroup
 }: CategoryGroupMenuModalProps) {
+  const [showMore, setShowMore] = useState(false);
   const { grouped: categoryGroups } = useCategories();
   const group = categoryGroups.find(g => g.id === groupId);
   const notes = useNotes(group.id);
+  const { showUndoNotification } = useUndo();
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const { t } = useTranslation();
+
+  
+
 
   const onRename = newName => {
     if (newName && newName !== group.name) {
@@ -61,6 +77,11 @@ export function CategoryGroupMenuModal({
       });
     }
   };
+
+  const onShowMore = () => {
+    setShowMore(!showMore);
+  };
+
 
   const _onAddCategory = () => {
     onAddCategory?.(group.id, group.is_income);
@@ -78,6 +99,10 @@ export function CategoryGroupMenuModal({
     onToggleVisibility?.(group.id);
   };
 
+  const _onApplyBudgetTemplatesInGroup = () => {
+    onApplyBudgetTemplatesInGroup?.(group.categories.filter(c => !c.hidden).map(c => c.id))
+  }
+
   const buttonStyle: CSSProperties = {
     ...styles.mediumText,
     height: styles.mobileMinHeight,
@@ -86,6 +111,23 @@ export function CategoryGroupMenuModal({
     flexBasis: '48%',
     marginLeft: '1%',
     marginRight: '1%',
+  };
+
+
+  const actionButtonStyle: CSSProperties = {
+    ...styles.mediumText,
+    height: styles.mobileMinHeight,
+    color: theme.formLabelText,
+    // Adjust based on desired number of buttons per row.
+    flexBasis: '100%',
+  };
+
+  const defaultMenuItemStyle: CSSProperties = {
+    ...styles.mobileMenuItem,
+    height: styles.mobileMinHeight,
+    color: theme.menuItemText,
+    borderRadius: 0,
+    borderTop: `1px solid ${theme.pillBorder}`,
   };
 
   return (
@@ -165,7 +207,50 @@ export function CategoryGroupMenuModal({
                 />
                 <Trans>Edit notes</Trans>
               </Button>
+              {isGoalTemplatesEnabled && (<Button
+                variant="bare"
+                className={css([
+                  actionButtonStyle,
+                  {
+                    '&[data-pressed], &[data-hovered]': {
+                      backgroundColor: 'transparent',
+                      color: actionButtonStyle.color,
+                    },
+                  },
+                ])}
+                onPress={onShowMore}
+              >
+                {!showMore ? (
+                  <SvgCheveronUp
+                    width={30}
+                    height={30}
+                    style={{ paddingRight: 5 }}
+                  />
+                ) : (
+                  <SvgCheveronDown
+                    width={30}
+                    height={30}
+                    style={{ paddingRight: 5 }}
+                  />
+                )}
+                {t('Actions')}
+              </Button>)}
             </View>
+                        {showMore && (
+                          <CategoryGroupActionMenu
+                            style={{ overflowY: 'auto', paddingTop: 10 }}
+                            getItemStyle={() => defaultMenuItemStyle}
+                            onApplyBudgetTemplatesInGroup={() => {
+                              _onApplyBudgetTemplatesInGroup();
+                              close();
+                              showUndoNotification({
+                                message: t(
+                                  'budget templates have been applied.'
+                                ),
+                              });
+                            }}
+                          />
+                        )}
           </View>
         </>
       )}
