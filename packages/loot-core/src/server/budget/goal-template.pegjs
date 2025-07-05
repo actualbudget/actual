@@ -53,8 +53,8 @@ percentOf = percent:percent _ of _ 'previous'i _ { return { percent: percent, pr
 		/ percent:percent _ of _ { return { percent: percent, prev: false}}
 
 periodCount = 'day'i { return {period: 'day', amount: 1 }}
-		       / n: number _ 'days'i _ { return { period: 'day', amount: +n }} 
-		       / week _ { return {period: 'week', amount: 1 }}
+           / n: number _ 'days'i _ { return { period: 'day', amount: +n }} 
+           / week _ { return {period: 'week', amount: 1 }}
            / n: number _ weeks { return {period: 'week', amount: +n }}
            / n: number _ 'months'i _ {return {period: 'month', amount: +n }}
            / 'year'i _ { return {period: 'year', amount: 1 }}
