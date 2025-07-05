@@ -2,7 +2,6 @@
 import React, { useId, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { type CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
