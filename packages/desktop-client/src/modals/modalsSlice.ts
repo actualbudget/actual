@@ -4,7 +4,6 @@ import { send } from 'loot-core/platform/client/fetch';
 import { type File } from 'loot-core/types/file';
 import {
   type AccountEntity,
-  type AccountSyncSource,
   type CategoryEntity,
   type CategoryGroupEntity,
   type GoCardlessToken,
@@ -19,6 +18,7 @@ import {
 } from 'loot-core/types/models';
 
 import { resetApp, setAppState } from '@desktop-client/app/appSlice';
+import { type SelectLinkedAccountsModalProps } from '@desktop-client/components/modals/SelectLinkedAccountsModal';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 import { signOut } from '@desktop-client/users/usersSlice';
 
@@ -53,12 +53,7 @@ export type Modal =
     }
   | {
       name: 'select-linked-accounts';
-      options: {
-        externalAccounts: unknown[];
-        requisitionId?: string;
-        upgradingAccountId?: string | undefined;
-        syncSource?: AccountSyncSource;
-      };
+      options: SelectLinkedAccountsModalProps;
     }
   | {
       name: 'confirm-category-delete';
