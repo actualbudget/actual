@@ -5,6 +5,8 @@ import { useParams } from 'react-router';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Paragraph } from '@actual-app/components/paragraph';
+import { Select } from '@actual-app/components/select';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -27,6 +29,7 @@ import { Change } from '@desktop-client/components/reports/Change';
 import { NetWorthGraph } from '@desktop-client/components/reports/graphs/NetWorthGraph';
 import { Header } from '@desktop-client/components/reports/Header';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '@desktop-client/components/reports/spreadsheets/net-worth-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
@@ -87,6 +90,10 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [start, setStart] = useState(initialStart);
   const [end, setEnd] = useState(initialEnd);
   const [mode, setMode] = useState(initialMode);
+  const [interval, setInterval] = useState(widget?.meta?.interval || 'Monthly');
+
+  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   const reportParams = useMemo(
     () =>
@@ -97,8 +104,19 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         conditions,
         conditionsOp,
         locale,
+        interval,
+        firstDayOfWeekIdx,
       ),
-    [start, end, accounts, conditions, conditionsOp, locale],
+    [
+      start,
+      end,
+      accounts,
+      conditions,
+      conditionsOp,
+      locale,
+      interval,
+      firstDayOfWeekIdx,
+    ],
   );
   const data = useReport('net_worth', reportParams);
   useEffect(() => {
@@ -147,6 +165,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         ...(widget.meta ?? {}),
         conditions,
         conditionsOp,
+        interval,
         timeFrame: {
           start,
           end,
@@ -184,8 +203,6 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   };
 
   const [earliestTransaction, _] = useState('');
-  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
-  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   if (!allMonths || !data) {
     return null;
@@ -242,6 +259,29 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
 
       <View
         style={{
+          padding: 20,
+          paddingTop: 10,
+          paddingBottom: 10,
+          flexShrink: 0,
+        }}
+      >
+        <SpaceBetween gap={10}>
+          <View style={{ fontSize: 14, fontWeight: 500 }}>
+            <Trans>Interval:</Trans>
+          </View>
+          <Select
+            value={interval}
+            onChange={setInterval}
+            options={ReportOptions.interval.map(({ description, key }) => [
+              key as 'Daily' | 'Weekly' | 'Monthly' | 'Yearly',
+              description,
+            ])}
+          />
+        </SpaceBetween>
+      </View>
+
+      <View
+        style={{
           backgroundColor: theme.tableBackground,
           padding: 20,
           paddingTop: 0,
@@ -268,6 +308,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         <NetWorthGraph
           graphData={data.graphData}
           showTooltip={!isNarrowWidth}
+          interval={interval}
         />
 
         <View style={{ marginTop: 30, userSelect: 'none' }}>

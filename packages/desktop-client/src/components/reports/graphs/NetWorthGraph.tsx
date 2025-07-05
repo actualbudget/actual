@@ -1,11 +1,12 @@
 // @ts-strict-ignore
-import React, { useId } from 'react';
+import React, { useId, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { type CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
+import { parse, getDay } from 'date-fns';
 import {
   AreaChart,
   Area,
@@ -40,6 +41,7 @@ type NetWorthGraphProps = {
   };
   compact?: boolean;
   showTooltip?: boolean;
+  interval?: string;
 };
 
 export function NetWorthGraph({
@@ -47,10 +49,15 @@ export function NetWorthGraph({
   graphData,
   compact = false,
   showTooltip = true,
+  interval = 'Monthly',
 }: NetWorthGraphProps) {
   const { t } = useTranslation();
   const privacyMode = usePrivacyMode();
   const id = useId();
+
+  // Use more aggressive smoothening for high-frequency data
+  const interpolationType =
+    interval === 'Daily' || interval === 'Weekly' ? 'basis' : 'monotone';
 
   const tickFormatter = tick => {
     const res = privacyMode
@@ -76,6 +83,19 @@ export function NetWorthGraph({
 
   const off = gradientOffset();
   const gradientId = `splitColor-${id}`;
+
+  // Generate weekly tick positions when viewing Daily data
+  const weeklyTicks = useMemo(() => {
+    if (interval !== 'Daily') {
+      return undefined;
+    }
+    return graphData.data
+      .filter(point => {
+        const date = parse(point.x, 'yy-MM-dd', new Date());
+        return getDay(date) === 1; // Monday
+      })
+      .map(point => point.x);
+  }, [interval, graphData.data]);
 
   type PayloadItem = {
     payload: {
@@ -165,6 +185,7 @@ export function NetWorthGraph({
                   hide={compact}
                   tick={{ fill: theme.pageText }}
                   tickLine={{ stroke: theme.pageText }}
+                  ticks={weeklyTicks}
                 />
                 <YAxis
                   dataKey="y"
@@ -197,14 +218,16 @@ export function NetWorthGraph({
                 </defs>
 
                 <Area
-                  type="monotone"
+                  type={interpolationType}
                   dot={false}
                   activeDot={false}
                   animationDuration={0}
                   dataKey="y"
                   stroke={theme.reportsBlue}
+                  strokeWidth={2}
                   fill={`url(#${gradientId})`}
                   fillOpacity={1}
+                  connectNulls={true}
                 />
               </AreaChart>
             </div>
