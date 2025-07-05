@@ -85,7 +85,9 @@ export class CategoryTemplateContext {
       month,
       fromLastMonth,
       budgeted,
-      hideDecimal.data.length > 0 ? hideDecimal.data[0].value : false,
+      hideDecimal.data.length > 0
+        ? hideDecimal.data[0].value === 'true'
+        : false,
     );
   }
 
@@ -489,7 +491,7 @@ export class CategoryTemplateContext {
     }
   }
 
-  private removeFraction(amount) {
+  private removeFraction(amount: number): number {
     return amountToInteger(Math.round(integerToAmount(amount)));
   }
 
