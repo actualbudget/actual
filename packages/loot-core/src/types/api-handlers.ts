@@ -17,7 +17,7 @@ import type {
   NewRuleEntity,
   RuleEntity,
   TransactionEntity,
-  ScheduleEntity
+  ScheduleEntity,
 } from './models';
 
 export interface ApiHandlers {
