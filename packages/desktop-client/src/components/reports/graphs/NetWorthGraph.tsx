@@ -1,12 +1,13 @@
 // @ts-strict-ignore
 import React, { useId, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { parse, getDay } from 'date-fns';
+
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { type CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
+import { parse, getDay } from 'date-fns';
 import {
   AreaChart,
   Area,
