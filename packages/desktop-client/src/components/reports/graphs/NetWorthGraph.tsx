@@ -1,6 +1,7 @@
 // @ts-strict-ignore
-import React, { useId } from 'react';
+import React, { useId, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { parse, getDay } from 'date-fns';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { type CSSProperties } from '@actual-app/components/styles';
@@ -82,6 +83,19 @@ export function NetWorthGraph({
 
   const off = gradientOffset();
   const gradientId = `splitColor-${id}`;
+
+  // Generate weekly tick positions when viewing Daily data
+  const weeklyTicks = useMemo(() => {
+    if (interval !== 'Daily') {
+      return undefined;
+    }
+    return graphData.data
+      .filter(point => {
+        const date = parse(point.x, 'yy-MM-dd', new Date());
+        return getDay(date) === 1; // Monday
+      })
+      .map(point => point.x);
+  }, [interval, graphData.data]);
 
   type PayloadItem = {
     payload: {
@@ -171,6 +185,7 @@ export function NetWorthGraph({
                   hide={compact}
                   tick={{ fill: theme.pageText }}
                   tickLine={{ stroke: theme.pageText }}
+                  ticks={weeklyTicks}
                 />
                 <YAxis
                   dataKey="y"

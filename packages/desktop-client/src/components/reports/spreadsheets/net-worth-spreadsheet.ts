@@ -15,6 +15,7 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
+import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
@@ -235,15 +236,9 @@ function recalculate(
     }
     endNetWorth = total;
 
-    // Format dates for display
+    // Use standardized format from ReportOptions
     const displayFormat =
-      interval === 'Daily'
-        ? 'MM/dd'
-        : interval === 'Weekly'
-          ? 'MM/dd'
-          : interval === 'Yearly'
-            ? 'yyyy'
-            : 'MMM yy';
+      ReportOptions.intervalFormat.get(interval) ?? 'MMM ‘yy';
 
     const tooltipFormat =
       interval === 'Daily'
