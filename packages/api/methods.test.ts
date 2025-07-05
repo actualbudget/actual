@@ -742,7 +742,8 @@ describe('API CRUD operations', () => {
 });
 
 //apis: createSchedule, getSchedules, updateSchedule, deleteSchedule
-test('Schedules: successfully complete account operators', async () => {
+test('Schedules: successfully complete schedules operations', async () => {
+  await api.loadBudget(budgetName);
   //test a schedule with a recuring configuration
   const ScheduleId1 = await api.createSchedule({
     name: 'test-schedule 1',
