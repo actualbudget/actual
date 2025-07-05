@@ -783,7 +783,7 @@ export function getCommonPayees() {
   `);
 }
 
-/* eslint-disable rulesdir/typography */
+/* eslint-disable actual/typography */
 const orphanedPayeesQuery = `
   SELECT p.id
   FROM payees p
@@ -801,7 +801,7 @@ const orphanedPayeesQuery = `
         AND json_extract(cond.value, '$.value') = pm.targetId
     );
 `;
-/* eslint-enable rulesdir/typography */
+/* eslint-enable actual/typography */
 
 export function syncGetOrphanedPayees() {
   return all<Pick<DbPayee, 'id'>>(orphanedPayeesQuery);

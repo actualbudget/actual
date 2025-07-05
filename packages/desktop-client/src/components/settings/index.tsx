@@ -16,6 +16,7 @@ import { isElectron } from 'loot-core/shared/environment';
 import { AuthSettings } from './AuthSettings';
 import { Backups } from './Backups';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
+import { CurrencySettings } from './Currency';
 import { EncryptionSettings } from './Encryption';
 import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
@@ -32,12 +33,14 @@ import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
 import { Page } from '@desktop-client/components/Page';
 import { useServerVersion } from '@desktop-client/components/ServerContext';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import {
   useIsOutdated,
   useLatestVersion,
 } from '@desktop-client/hooks/useLatestVersion';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { loadPrefs } from '@desktop-client/prefs/prefsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -149,6 +152,8 @@ export function Settings() {
   const [floatingSidebar] = useGlobalPref('floatingSidebar');
   const [budgetName] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
+  const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
+  const [_, setDefaultCurrencyCodePref] = useSyncedPref('defaultCurrencyCode');
 
   const onCloseBudget = () => {
     dispatch(closeBudget());
@@ -162,6 +167,12 @@ export function Settings() {
     dispatch(loadPrefs());
     return () => unlisten();
   }, [dispatch]);
+
+  useEffect(() => {
+    if (!isCurrencyExperimentalEnabled) {
+      setDefaultCurrencyCodePref('');
+    }
+  }, [isCurrencyExperimentalEnabled, setDefaultCurrencyCodePref]);
 
   const { isNarrowWidth } = useResponsive();
 
@@ -203,6 +214,7 @@ export function Settings() {
         <About />
         <ThemeSettings />
         <FormatSettings />
+        {isCurrencyExperimentalEnabled && <CurrencySettings />}
         <LanguageSettings />
         <AuthSettings />
         <EncryptionSettings />

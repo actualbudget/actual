@@ -23,6 +23,7 @@ import { useCachedSchedules } from './useCachedSchedules';
 import { type ScheduleStatuses } from './useSchedules';
 import { useSyncedPref } from './useSyncedPref';
 
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import {
   pagedQuery,
   type PagedQuery,
@@ -44,6 +45,10 @@ type UseTransactionsProps = {
    * to prevent unnecessary re-renders i.e. `useMemo`, `useState`, etc.
    */
   query?: Query;
+  /**
+   * Query to use to calculate the running balance
+   */
+  runningBalanceQuery?: Query;
   /**
    * The options to configure the hook behavior.
    */
@@ -109,6 +114,7 @@ type UseTransactionsResult = {
 
 export function useTransactions({
   query,
+  runningBalanceQuery,
   options = { pageCount: 50, calculateRunningBalances: false },
 }: UseTransactionsProps): UseTransactionsResult {
   const [isLoading, setIsLoading] = useState(true);
@@ -156,19 +162,6 @@ export function useTransactions({
       onData: data => {
         if (!isUnmounted) {
           setTransactions(data);
-
-          const calculateFn = getCalculateRunningBalancesFn(
-            optionsRef.current?.calculateRunningBalances,
-          );
-          if (calculateFn) {
-            setRunningBalances(
-              calculateFn(
-                data,
-                query.state.tableOptions?.splits as TransactionSplitsOption,
-              ),
-            );
-          }
-
           setIsLoading(false);
         }
       },
@@ -183,6 +176,20 @@ export function useTransactions({
       pagedQueryRef.current?.unsubscribe();
     };
   }, [query]);
+
+  useEffect(() => {
+    if (options.calculateRunningBalances && runningBalanceQuery) {
+      aqlQuery(runningBalanceQuery).then(data => {
+        const map = new Map<TransactionEntity['id'], IntegerAmount>();
+        data.data.forEach((val: { id: string; balance: IntegerAmount }) => {
+          map.set(val.id, val.balance);
+        });
+        setRunningBalances(map);
+      });
+    } else {
+      setRunningBalances(new Map());
+    }
+  }, [runningBalanceQuery, options.calculateRunningBalances]);
 
   const loadMore = useCallback(async () => {
     if (!pagedQueryRef.current) {
@@ -216,24 +223,16 @@ export function useTransactions({
 
 type UsePreviewTransactionsProps = {
   filter?: (schedule: ScheduleEntity) => boolean;
-  options?: {
-    /**
-     * The starting balance to start the running balance calculation from.
-     */
-    startingBalance?: IntegerAmount;
-  };
 };
 
 type UsePreviewTransactionsResult = {
   previewTransactions: ReadonlyArray<TransactionEntity>;
-  runningBalances: Map<TransactionEntity['id'], IntegerAmount>;
   isLoading: boolean;
   error?: Error;
 };
 
 export function usePreviewTransactions({
   filter,
-  options,
 }: UsePreviewTransactionsProps = {}): UsePreviewTransactionsResult {
   const [previewTransactions, setPreviewTransactions] = useState<
     TransactionEntity[]
@@ -246,17 +245,8 @@ export function usePreviewTransactions({
   } = useCachedSchedules();
   const [isLoading, setIsLoading] = useState(isSchedulesLoading);
   const [error, setError] = useState<Error | undefined>(undefined);
-  const [runningBalances, setRunningBalances] = useState<
-    Map<TransactionEntity['id'], IntegerAmount>
-  >(new Map());
 
   const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
-
-  // We don't want to re-render if options changes.
-  // Putting options in a ref will prevent that and
-  // allow us to use the latest options on next render.
-  const optionsRef = useRef(options);
-  optionsRef.current = options;
 
   const scheduleTransactions = useMemo(() => {
     if (isSchedulesLoading) {
@@ -372,19 +362,6 @@ export function usePreviewTransactions({
           const ungroupedTransactions = ungroupTransactions(withDefaults);
           setPreviewTransactions(ungroupedTransactions);
 
-          setRunningBalances(
-            // We always use the bottom up calculation for preview transactions
-            // because the hook controls the order of the transactions. We don't
-            // need to provide a custom way for consumers to calculate the running
-            // balances, at least as of writing.
-            calculateRunningBalancesBottomUp(
-              ungroupedTransactions,
-              // Preview transactions are behaves like 'all' splits
-              'all',
-              optionsRef.current?.startingBalance,
-            ),
-          );
-
           setIsLoading(false);
         }
       })
@@ -403,7 +380,6 @@ export function usePreviewTransactions({
   const returnError = error || scheduleQueryError;
   return {
     previewTransactions,
-    runningBalances,
     isLoading: isLoading || isSchedulesLoading,
     ...(returnError && { error: returnError }),
   };
@@ -417,53 +393,5 @@ export function isForPreview(
   return (
     !schedule.completed &&
     ['due', 'upcoming', 'missed', 'paid'].includes(status!)
-  );
-}
-
-function getCalculateRunningBalancesFn(
-  calculateRunningBalances: CalculateRunningBalancesOption = false,
-) {
-  return calculateRunningBalances === true
-    ? calculateRunningBalancesBottomUp
-    : typeof calculateRunningBalances === 'function'
-      ? calculateRunningBalances
-      : undefined;
-}
-
-export function calculateRunningBalancesBottomUp(
-  transactions: TransactionEntity[],
-  splits: TransactionSplitsOption,
-  startingBalance: IntegerAmount = 0,
-) {
-  return (
-    transactions
-      .filter(t => {
-        switch (splits) {
-          case 'all':
-            // Only calculate parent/non-split amounts
-            return !t.parent_id;
-          default:
-            // inline
-            // grouped
-            // none
-            return true;
-        }
-      })
-      // We're using `reduceRight` here to calculate the running balance in reverse order (bottom up).
-      .reduceRight((acc, transaction, index, arr) => {
-        const previousTransactionIndex = index + 1;
-        if (previousTransactionIndex >= arr.length) {
-          // This is the last transaction in the list,
-          // so we set the running balance to the starting balance + the amount of the transaction
-          acc.set(transaction.id, startingBalance + transaction.amount);
-          return acc;
-        }
-        const previousTransaction = arr[previousTransactionIndex];
-        const previousRunningBalance = acc.get(previousTransaction.id) ?? 0;
-        const currentRunningBalance =
-          previousRunningBalance + transaction.amount;
-        acc.set(transaction.id, currentRunningBalance);
-        return acc;
-      }, new Map<TransactionEntity['id'], IntegerAmount>())
   );
 }

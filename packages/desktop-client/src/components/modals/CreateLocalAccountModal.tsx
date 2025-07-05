@@ -179,18 +179,20 @@ export function CreateLocalAccountModal() {
               </InlineField>
               {balanceError && (
                 <FormError style={{ marginLeft: 75 }}>
-                  {t('Balance must be a number')}
+                  <Trans>Balance must be a number</Trans>
                 </FormError>
               )}
 
               <ModalButtons>
-                <Button onPress={close}>{t('Back')}</Button>
+                <Button onPress={close}>
+                  <Trans>Back</Trans>
+                </Button>
                 <Button
                   type="submit"
                   variant="primary"
                   style={{ marginLeft: 10 }}
                 >
-                  {t('Create')}
+                  <Trans>Create</Trans>
                 </Button>
               </ModalButtons>
             </Form>
