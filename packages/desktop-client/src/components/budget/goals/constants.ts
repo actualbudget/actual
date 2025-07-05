@@ -4,7 +4,7 @@ import {
   type PercentageTemplate,
   type ScheduleTemplate,
   type SimpleTemplate,
-  type WeekTemplate,
+  type PeriodicTemplate,
 } from 'loot-core/types/models/templates';
 
 export const displayTemplateTypes = [
@@ -23,7 +23,7 @@ export type ReducerState =
       displayType: 'simple';
     }
   | {
-      template: WeekTemplate;
+      template: PeriodicTemplate;
       displayType: 'week';
     }
   | {

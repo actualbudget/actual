@@ -1,10 +1,10 @@
 import { Trans } from 'react-i18next';
 
 import { integerToCurrency } from 'loot-core/shared/util';
-import type { WeekTemplate } from 'loot-core/types/models/templates';
+import type { PeriodicTemplate } from 'loot-core/types/models/templates';
 
 type WeekAutomationReadOnlyProps = {
-  template: WeekTemplate;
+  template: PeriodicTemplate;
 };
 
 export const WeekAutomationReadOnly = ({
