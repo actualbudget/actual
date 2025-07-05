@@ -3,6 +3,7 @@ import { vi } from 'vitest';
 import { amountToInteger } from '../../shared/util';
 import { type CategoryEntity } from '../../types/models';
 import { type Template } from '../../types/models/templates';
+import * as aql from '../aql';
 import * as db from '../db';
 
 import * as actions from './actions';
@@ -16,6 +17,10 @@ vi.mock('./actions', () => ({
 
 vi.mock('../db', () => ({
   getCategories: vi.fn(),
+}));
+
+vi.mock('../aql', () => ({
+  aqlQuery: vi.fn(),
 }));
 
 // Test helper class to access constructor and methods
@@ -801,6 +806,10 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
+        data: [{ value: 'false' }],
+        dependencies: [],
+      });
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -864,6 +873,10 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
+        data: [{ value: 'false' }],
+        dependencies: [],
+      });
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -916,6 +929,10 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
+        data: [{ value: 'false' }],
+        dependencies: [],
+      });
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -974,6 +991,10 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
+        data: [{ value: 'false' }],
+        dependencies: [],
+      });
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1015,6 +1036,10 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(10000); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
+        data: [{ value: 'false' }],
+        dependencies: [],
+      });
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1032,6 +1057,57 @@ describe('CategoryTemplateContext', () => {
       expect(values.budgeted).toBe(10000);
       expect(values.goal).toBe(100000); // Should be the goal amount
       expect(values.longGoal).toBe(true); // Should have a long goal
+    });
+
+    it('should handle hide fraction', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const templates: Template[] = [
+        {
+          type: 'simple',
+          monthly: 100.89,
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'goal',
+          amount: 1000,
+          directive: 'goal',
+        },
+      ];
+
+      // Mock the sheet values needed for init
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
+      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
+        data: [{ value: 'true' }],
+        dependencies: [],
+      });
+
+      // Initialize the template
+      const instance = await CategoryTemplateContext.init(
+        templates,
+        category,
+        '2024-01',
+        0,
+      );
+
+      // Run the templates with more than enough funds
+      const result = await instance.runTemplatesForPriority(1, 100000, 100000);
+
+      // Get the final values
+      const values = instance.getValues();
+
+      // Verify the results
+      expect(result).toBe(10100); // Should get full amount rounded up
+      expect(values.budgeted).toBe(10100); // Should match the result
+      expect(values.goal).toBe(100000); // Should be the goal amount
+      expect(values.longGoal).toBe(true); // Should have a long goal
+      expect(instance.isGoalOnly()).toBe(false); // Should not be goal only
     });
   });
 });
