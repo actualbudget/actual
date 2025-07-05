@@ -3,8 +3,8 @@
 expr
   = template: template _ percentOf:percentOf category: name
     { return { type: 'percentage', percent: +percentOf.percent, previous: percentOf.prev, category, priority: template.priority, directive: template.directive }}
-  / template: template _ amount: amount _ repeatEvery _ weeks: weekCount _ starting _ starting: date limit: limit?
-    { return { type: 'week', amount, weeks, starting, limit, priority: template.priority, directive: template.directive }}
+  / template: template _ amount: amount _ repeatEvery _ period: periodCount _ starting _ starting: date limit: limit?
+    { return { type: 'periodic', amount, period, starting, limit, priority: template.priority, directive: template.directive }}
   / template: template _ amount: amount _ by _ month: month from: spendFrom? repeat: (_ repeatEvery _ repeat)?
     { return {
       type: from ? 'spend' : 'by',
@@ -52,9 +52,13 @@ limit =  _? upTo _ amount: amount _ 'per week starting'i _ start:date _? hold:ho
 percentOf = percent:percent _ of _ 'previous'i _ { return { percent: percent, prev: true}}
 		/ percent:percent _ of _ { return { percent: percent, prev: false}}
 
-weekCount
-  = week { return null }
-  / n: number _ weeks { return +n }
+periodCount = 'day'i { return {period: 'day', amount: 1 }}
+		       / n: number _ 'days'i _ { return { period: 'day', amount: +n }} 
+		       / week _ { return {period: 'week', amount: 1 }}
+           / n: number _ weeks { return {period: 'week', amount: +n }}
+           / n: number _ 'months'i _ {return {period: 'month', amount: +n }}
+           / 'year'i _ { return {period: 'year', amount: 1 }}
+           / n: number _ 'years'i _ { return { period: 'year', amount: +n }}
 
 spendFrom = _ 'spend'i _ 'from'i _ month: month { return month }
 

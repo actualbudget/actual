@@ -169,7 +169,7 @@ describe('CategoryTemplateContext', () => {
     });
   });
 
-  describe('runWeek', () => {
+  describe('runPeriodic', () => {
     let instance: TestCategoryTemplateContext;
 
     beforeEach(() => {
@@ -185,43 +185,103 @@ describe('CategoryTemplateContext', () => {
     //5 mondays in January 2024
     it('should calculate weekly amount for single week', () => {
       const template: Template = {
-        type: 'week',
+        type: 'periodic',
         amount: 100,
-        weeks: 1,
+        period: {
+          period: 'week',
+          amount: 1,
+        },
         starting: '2024-01-01',
         directive: 'template',
         priority: 1,
       };
 
-      const result = CategoryTemplateContext.runWeek(template, instance);
+      const result = CategoryTemplateContext.runPeriodic(template, instance);
       expect(result).toBe(amountToInteger(500));
     });
 
     it('should calculate weekly amount for multiple weeks', () => {
       const template: Template = {
-        type: 'week',
+        type: 'periodic',
         amount: 100,
-        weeks: 2,
+        period: {
+          period: 'week',
+          amount: 2,
+        },
         starting: '2024-01-01',
         directive: 'template',
         priority: 1,
       };
 
-      const result = CategoryTemplateContext.runWeek(template, instance);
+      const result = CategoryTemplateContext.runPeriodic(template, instance);
       expect(result).toBe(amountToInteger(300));
     });
 
     it('should handle weeks spanning multiple months', () => {
       const template: Template = {
-        type: 'week',
+        type: 'periodic',
         amount: 100,
-        weeks: 7,
+        period: {
+          period: 'week',
+          amount: 7,
+        },
         starting: '2023-12-04',
         directive: 'template',
         priority: 1,
       };
 
-      const result = CategoryTemplateContext.runWeek(template, instance);
+      const result = CategoryTemplateContext.runPeriodic(template, instance);
+      expect(result).toBe(amountToInteger(100));
+    });
+
+    it('should handle periodic days', () => {
+      const template: Template = {
+        type: 'periodic',
+        amount: 100,
+        period: {
+          period: 'day',
+          amount: 10,
+        },
+        starting: '2024-01-01',
+        directive: 'template',
+        priority: 1,
+      };
+
+      const result = CategoryTemplateContext.runPeriodic(template, instance);
+      expect(result).toBe(amountToInteger(400)); // for the 1st, 11th, 21st, 31st
+    });
+
+    it('should handle periodic years', () => {
+      const template: Template = {
+        type: 'periodic',
+        amount: 100,
+        period: {
+          period: 'year',
+          amount: 1,
+        },
+        starting: '2023-01-01',
+        directive: 'template',
+        priority: 1,
+      };
+
+      const result = CategoryTemplateContext.runPeriodic(template, instance);
+      expect(result).toBe(amountToInteger(100));
+    });
+
+    it('should handle periodic months', () => {
+      const template: Template = {
+        type: 'periodic',
+        amount: 100,
+        period: {
+          period: 'month',
+          amount: 2,
+        },
+        starting: '2023-11-01',
+        directive: 'template',
+        priority: 1,
+      };
+
+      const result = CategoryTemplateContext.runPeriodic(template, instance);
       expect(result).toBe(amountToInteger(100));
     });
   });

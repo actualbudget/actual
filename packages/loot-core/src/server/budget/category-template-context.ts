@@ -13,7 +13,7 @@ import {
   SimpleTemplate,
   SpendTemplate,
   Template,
-  WeekTemplate,
+  PeriodicTemplate,
 } from '../../types/models/templates';
 import * as db from '../db';
 
@@ -141,8 +141,8 @@ export class CategoryTemplateContext {
           newBudget = await CategoryTemplateContext.runCopy(template, this);
           break;
         }
-        case 'week': {
-          newBudget = CategoryTemplateContext.runWeek(template, this);
+        case 'periodic': {
+          newBudget = CategoryTemplateContext.runPeriodic(template, this);
           break;
         }
         case 'spend': {
@@ -415,7 +415,10 @@ export class CategoryTemplateContext {
   private checkLimit() {
     for (const template of this.templates
       .filter(
-        t => t.type === 'simple' || t.type === 'week' || t.type === 'remainder',
+        t =>
+          t.type === 'simple' ||
+          t.type === 'periodic' ||
+          t.type === 'remainder',
       )
       .filter(t => t.limit)) {
       if (this.limitCheck) {
@@ -498,22 +501,51 @@ export class CategoryTemplateContext {
     );
   }
 
-  static runWeek(
-    template: WeekTemplate,
+  static runPeriodic(
+    template: PeriodicTemplate,
     templateContext: CategoryTemplateContext,
   ): number {
     let toBudget = 0;
     const amount = amountToInteger(template.amount);
-    const weeks = template.weeks != null ? Math.round(template.weeks) : 1;
-    let w = template.starting;
-    const nextMonth = monthUtils.addMonths(templateContext.month, 1);
+    const period = template.period.period;
+    const numPeriods = template.period.amount;
+    let date = template.starting;
 
-    while (w < nextMonth) {
-      if (w >= templateContext.month) {
-        toBudget += amount;
-      }
-      w = monthUtils.addWeeks(w, weeks);
+    let dateShiftFunction;
+    switch (period) {
+      case 'day':
+        dateShiftFunction = monthUtils.addDays;
+        break;
+      case 'week':
+        dateShiftFunction = monthUtils.addWeeks;
+        break;
+      case 'month':
+        dateShiftFunction = monthUtils.addMonths;
+        break;
+      case 'year':
+        // the addYears function doesn't return the month number, so use addMonths
+        dateShiftFunction = (date, numPeriods) =>
+          monthUtils.addMonths(date, numPeriods * 12);
+        break;
     }
+
+    //shift the starting date until its in our month or in the future
+    while (templateContext.month > date) {
+      date = dateShiftFunction(date, numPeriods);
+    }
+
+    if (
+      monthUtils.differenceInCalendarMonths(templateContext.month, date) < 0
+    ) {
+      return 0;
+    } // nothing needed this month
+
+    const nextMonth = monthUtils.addMonths(templateContext.month, 1);
+    while (date < nextMonth) {
+      toBudget += amount;
+      date = dateShiftFunction(date, numPeriods);
+    }
+
     return toBudget;
   }
 
