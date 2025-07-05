@@ -4,6 +4,8 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
   PayeeEntity,
+  ScheduleEntity,
+  RecurConfig,
 } from '../types/models';
 
 import { RemoteFile } from './cloud-storage';
@@ -151,5 +153,64 @@ export const budgetModel = {
 
   fromExternal(file: APIFileEntity) {
     return file as Budget;
+  },
+};
+
+export type AmountOPType = 'is' | 'isapprox' | 'isbetween';
+
+export type APIScheduleEntity = Pick<ScheduleEntity, 'id' | 'name'> & {
+  rule?: string; //All schedules has an associated underlying rule. not to be supplied iwth a new schedule
+  next_date?: string; //Next occurence of a schedule. not to be supplied iwth a new schedule
+  completed?: boolean; //not to be supplied iwth a new schedule
+  posts_transaction: boolean; //Whethere the schedule should auto post transaction on your behalf. Default to false
+  payee?: string | null; // Optional will default to null
+  account?: string | null; // Optional will default to null
+  amount: number | { num1: number; num2: number }; // Provide only 1 number except if the Amount
+  amountOp: AmountOPType; // 'is' | 'isapprox' | 'isbetween'
+  date: RecurConfig; // mandatory field in creating a schedule Mandatory field in creation
+};
+
+export const scheduleModel = {
+  toExternal(schedule: ScheduleEntity): APIScheduleEntity {
+    return {
+      id: schedule.id,
+      name: schedule.name,
+      rule: schedule.rule,
+      next_date: schedule.next_date,
+      completed: schedule.completed,
+      posts_transaction: schedule.posts_transaction,
+      payee: schedule._payee,
+      account: schedule._account,
+      amount: schedule._amount,
+      amountOp: schedule._amountOp as 'is' | 'isapprox' | 'isbetween', // e.g. 'isapprox', 'is', etc.
+      date: schedule._date,
+    };
+  },
+  //just an update
+
+  fromExternal(schedule: APIScheduleEntity): ScheduleEntity {
+    const result: ScheduleEntity = {
+      id: schedule.id,
+      name: schedule.name,
+      rule: schedule.rule as string,
+      next_date: schedule.next_date as string,
+      completed: schedule.completed as boolean,
+      posts_transaction: schedule.posts_transaction,
+      tombstone: false,
+      _payee: schedule.payee as string,
+      _account: schedule.account as string,
+      _amount: schedule.amount,
+      _amountOp: schedule.amountOp, // e.g. 'isapprox', 'is', etc.
+      _date: schedule.date,
+      _conditions: [
+        { op: 'is', field: 'payee', value: schedule.payee as string },
+        { op: 'is', field: 'account', value: schedule.account as string },
+        { op: 'isapprox', field: 'date', value: schedule.date },
+        { op: schedule.amountOp, field: 'amount', value: schedule.amount },
+      ],
+      _actions: [], // empty array, as you requested
+    };
+
+    return result;
   },
 };
