@@ -14,10 +14,13 @@ import { BudgetFileHandlers } from '../server/budgetfiles/app';
 import { type batchUpdateTransactions } from '../server/transactions';
 
 import type {
+  ImportTransactionEntity,
   NewRuleEntity,
   RuleEntity,
   TransactionEntity,
+  DiscoverScheduleEntity,
   ScheduleEntity,
+  RecurConfig,
 } from './models';
 
 export interface ApiHandlers {
@@ -89,7 +92,7 @@ export interface ApiHandlers {
 
   'api/transactions-import': (arg: {
     accountId;
-    transactions;
+    transactions: ImportTransactionEntity[];
     isPreview?;
     opts?: ImportTransactionsOpts;
   }) => Promise<ImportTransactionsResult>;
