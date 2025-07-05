@@ -624,6 +624,7 @@ type SelectCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
   partial?: boolean;
   onEdit?: () => void;
   onSelect?: (e) => void;
+  icon?: ReactNode;
   buttonProps?: Partial<CellButtonProps>;
 };
 export function SelectCell({
@@ -632,6 +633,7 @@ export function SelectCell({
   style,
   onSelect,
   onEdit,
+  icon = <SvgCheckmark width={6} height={6} />,
   buttonProps = {},
   ...props
 }: SelectCellProps) {
@@ -673,7 +675,7 @@ export function SelectCell({
           clickBehavior="none"
           {...buttonProps}
         >
-          {selected && <SvgCheckmark width={6} height={6} />}
+          {selected && icon}
         </CellButton>
       )}
     </Cell>
