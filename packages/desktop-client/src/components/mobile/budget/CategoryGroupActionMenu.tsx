@@ -9,7 +9,7 @@ type CategoryGroupActionMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,
   'onMenuSelect' | 'items'
 > & {
-  onApplyBudgetTemplatesInGroup?: () => void;
+  onApplyBudgetTemplatesInGroup: () => void;
 };
 export function CategoryGroupActionMenu({
   onApplyBudgetTemplatesInGroup,
