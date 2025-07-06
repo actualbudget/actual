@@ -13,7 +13,7 @@ import {
 import { convertInputType, convertOutputType } from './schema-helpers';
 
 // TODO (compiler):
-// * Properly safeguard all inputs against SQL injection
+// * Properly safeg uard all inputs against SQL injection
 // * Functions for incr/decr dates
 // * Support HAVING
 // * Allow creating in-memory tables to run queries against static

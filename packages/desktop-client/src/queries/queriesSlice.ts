@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
 
@@ -249,7 +249,7 @@ type CreateCategoryGroupPayload = {
 
 export const createGroup = createAppAsyncThunk(
   `${sliceName}/createGroup`,
-  async ({ name, parentId, }: CreateCategoryGroupPayload) => {
+  async ({ name, parentId }: CreateCategoryGroupPayload) => {
     const id = await send('category-group-create', { name, parentId });
     return id;
   },
@@ -379,7 +379,10 @@ export const getCategories = createAppAsyncThunk(
 
     // The API now returns { grouped: ..., list: ... }
     // The thunk should return this structure to be stored in the state
-    return categories as { grouped: CategoryGroupEntity[], list: CategoryEntity[] };
+    return categories as {
+      grouped: CategoryGroupEntity[];
+      list: CategoryEntity[];
+    };
   },
 );
 

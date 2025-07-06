@@ -176,7 +176,7 @@ function BudgetInner(props: BudgetInnerProps) {
     }
 
     if (category.id === 'new') {
-      dispatch( // Use await here to wait for the thunk to complete
+      dispatch(
         createCategory({
           name: category.name,
           groupId: category.group,
@@ -185,8 +185,7 @@ function BudgetInner(props: BudgetInnerProps) {
         }),
       );
     } else {
-      dispatch(updateCategory({ category }),
-      );
+      dispatch(updateCategory({ category }));
     }
   };
 

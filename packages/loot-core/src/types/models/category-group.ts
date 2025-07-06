@@ -8,7 +8,7 @@ export interface NewCategoryGroupEntity {
   sort_order?: number;
   tombstone?: boolean;
   hidden?: boolean;
-  parent_id?: string;
+  parent_id?: string | null;
   categories?: Omit<CategoryEntity, 'id'>[];
 }
 

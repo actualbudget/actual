@@ -15,7 +15,11 @@ import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
 import * as monthUtils from '../../shared/months';
 import { groupById } from '../../shared/util';
-import { CategoryEntity, CategoryGroupEntity, TransactionEntity } from '../../types/models';
+import {
+  CategoryEntity,
+  CategoryGroupEntity,
+  TransactionEntity,
+} from '../../types/models';
 import { WithRequired } from '../../types/util';
 import {
   schema,
@@ -326,52 +330,6 @@ type ProcessedDbCategoryGroup = DbCategoryGroup & {
   children: ProcessedDbCategoryGroup[]; // Recursive reference
 };
 
-// Helper function for conversion - Update its parameter type
-function convertToAppCategoryGroup(
-  // It now expects the ProcessedDbCategoryGroup structure
-  dbGroup: ProcessedDbCategoryGroup
-): CategoryGroupEntity {
-  // 1. Convert direct categories of this group
-  const entityCategories: CategoryEntity[] = (dbGroup.categories || []).map(dbCat => {
-    const categoryEntity: CategoryEntity = {
-      id: dbCat.id,
-      name: dbCat.name,
-      is_income: Boolean(dbCat.is_income), // Convert DB 0/1 to boolean
-      group: dbCat.cat_group,               // This is the ID of the parent CategoryGroupEntity
-      sort_order: dbCat.sort_order,
-      hidden: Boolean(dbCat.hidden),         // Convert DB 0/1 to boolean
-      goal_def: dbCat.goal_def || undefined, // Use undefined if null from DB for optional string
-      tombstone: Boolean(dbCat.tombstone),   // Convert DB 0/1 to boolean
-      // No parent_id for categories themselves
-    };
-    return categoryEntity;
-  });
-
-  // 2. Recursively convert children groups
-  const entityChildren: CategoryGroupEntity[] = (dbGroup.children || []).map(
-    childDbGroup => convertToAppCategoryGroup(childDbGroup) // Recursive call
-  );
-
-  // 3. Construct the CategoryGroupEntity for the current group
-  const groupEntity: CategoryGroupEntity = {
-    id: dbGroup.id,
-    name: dbGroup.name,
-    is_income: Boolean(dbGroup.is_income),   // Convert DB 0/1 to boolean
-    sort_order: dbGroup.sort_order,
-    hidden: Boolean(dbGroup.hidden),         // Convert DB 0/1 to boolean
-    tombstone: Boolean(dbGroup.tombstone),   // Convert DB 0/1 to boolean
-    parent_id: dbGroup.parent_id || undefined,// Use undefined for optional string (matches NewCategoryGroupEntity)
-                                            // If it becomes null in the DB for top-level it's also fine
-    categories: entityCategories,
-    // TypeScript needs help here if `children` property expects parent_id to be strictly string
-    // on its elements due to WithRequired. But CategoryGroupEntity.parent_id is optional.
-    // The cast ensures the array type matches, assuming children logically HAVE parent_id set from dbGroup.
-    children: entityChildren as WithRequired<CategoryGroupEntity, 'parent_id'>[],
-  };
-  return groupEntity;
-}
-
-
 export async function getCategoriesGrouped(
   ids?: Array<CategoryGroupEntity['id']>,
   hierarchical: boolean = false,
@@ -397,13 +355,14 @@ export async function getCategoriesGrouped(
     : await all<DbCategory>(categoryQuery);
 
   // Map DB groups to the ProcessedDbCategoryGroup structure
-  const mappedDbGroupsWithOwnCategories: ProcessedDbCategoryGroup[] = dbGroups.map(group => {
-    return {
-      ...group, // Copy DbCategoryGroup properties
-      categories: dbCategories.filter(c => c.cat_group === group.id), // Add direct categories
-      children: [], // Initialize empty children array (typed as ProcessedDbCategoryGroup[])
-    };
-  });
+  const mappedDbGroupsWithOwnCategories: ProcessedDbCategoryGroup[] =
+    dbGroups.map(group => {
+      return {
+        ...group, // Copy DbCategoryGroup properties
+        categories: dbCategories.filter(c => c.cat_group === group.id), // Add direct categories
+        children: [], // Initialize empty children array (typed as ProcessedDbCategoryGroup[])
+      };
+    });
 
   // Build hierarchy: populate 'children' arrays in mappedDbGroupsWithOwnCategories
   const groupMap = groupById(mappedDbGroupsWithOwnCategories);
@@ -411,57 +370,48 @@ export async function getCategoriesGrouped(
     if (group.parent_id) {
       const parent = groupMap[group.parent_id];
       if (parent) {
-          // Push the child group (which is a ProcessedDbCategoryGroup)
-          // into the parent's children array (typed as ProcessedDbCategoryGroup[]).
-          parent.children.push(group);
+        // Push the child group (which is a ProcessedDbCategoryGroup)
+        // into the parent's children array (typed as ProcessedDbCategoryGroup[]).
+        parent.children.push(group);
       }
     }
   }
 
-  if (hierarchical) {
-    // Get top-level groups (those without a parent_id from the DB)
-    const topLevelDbGroupsInHierarchy = mappedDbGroupsWithOwnCategories.filter(g => !g.parent_id);
-
-    // Convert the entire hierarchical structure starting from top-level groups
-    // convertToAppCategoryGroup handles recursive conversion of children
-    const resultAppEntities: CategoryGroupEntity[] = topLevelDbGroupsInHierarchy.map(
-      dbGroup => convertToAppCategoryGroup(dbGroup)
-    );
-     // This now returns the fully converted hierarchical structure, starting from top-level groups
-    return resultAppEntities;
-  } else {
     // If hierarchical is false, return a flat list of *all* groups.
     // Each group object should contain its direct categories, but the 'children'
     // array must be empty, as the frontend will build its own rendering hierarchy.
-    const flatListWithoutChildren: CategoryGroupEntity[] = mappedDbGroupsWithOwnCategories.map(dbGroup => {
-      const entityCategories: CategoryEntity[] = (dbGroup.categories || []).map(dbCat => ({
-        id: dbCat.id,
-        name: dbCat.name,
-        is_income: Boolean(dbCat.is_income),
-        group: dbCat.cat_group,
-        sort_order: dbCat.sort_order,
-        hidden: Boolean(dbCat.hidden),
-        goal_def: dbCat.goal_def || undefined,
-        tombstone: Boolean(dbCat.tombstone),
-      }));
+    const flatListWithoutChildren: CategoryGroupEntity[] =
+      mappedDbGroupsWithOwnCategories.map(dbGroup => {
+        const entityCategories: CategoryEntity[] = (
+          dbGroup.categories || []
+        ).map(dbCat => ({
+          id: dbCat.id,
+          name: dbCat.name,
+          is_income: Boolean(dbCat.is_income),
+          group: dbCat.cat_group,
+          sort_order: dbCat.sort_order,
+          hidden: Boolean(dbCat.hidden),
+          goal_def: dbCat.goal_def || undefined,
+          tombstone: Boolean(dbCat.tombstone),
+        }));
 
-      return {
-        id: dbGroup.id,
-        name: dbGroup.name,
-        is_income: Boolean(dbGroup.is_income),
-        sort_order: dbGroup.sort_order,
-        hidden: Boolean(dbGroup.hidden),
-        tombstone: Boolean(dbGroup.tombstone),
-        parent_id: dbGroup.parent_id || undefined,
-        categories: entityCategories,
-        children: [], // Explicitly set children to an empty array for the flat view
-      };
-    });
+        return {
+          id: dbGroup.id,
+          name: dbGroup.name,
+          is_income: Boolean(dbGroup.is_income),
+          sort_order: dbGroup.sort_order,
+          hidden: Boolean(dbGroup.hidden),
+          tombstone: Boolean(dbGroup.tombstone),
+          parent_id: dbGroup.parent_id || undefined,
+          categories: entityCategories,
+          children: [], // Explicitly set children to an empty array for the flat view
+        };
+      });
 
     // This returns a flat array of CategoryGroupEntity objects, where each object
     // has its 'categories' populated, and its 'children' array is empty.
     return flatListWithoutChildren;
-  }
+  
 }
 
 export async function insertCategoryGroup(
@@ -480,7 +430,7 @@ export async function insertCategoryGroup(
     );
   }
 
-const lastGroup = await first<Pick<DbCategoryGroup, 'sort_order'>>(`
+  const lastGroup = await first<Pick<DbCategoryGroup, 'sort_order'>>(`
     SELECT sort_order FROM category_groups WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
   `);
   const sort_order = (lastGroup ? lastGroup.sort_order : 0) + SORT_INCREMENT;
@@ -522,7 +472,7 @@ export async function deleteCategoryGroup(
   group: Pick<DbCategoryGroup, 'id'>,
   transferId?: DbCategory['id'],
 ) {
-    const children = await all<DbCategoryGroup>(
+  const children = await all<DbCategoryGroup>(
     'SELECT * FROM category_groups WHERE parent_id = ?',
     [group.id],
   );
@@ -532,9 +482,10 @@ export async function deleteCategoryGroup(
     children.map(child => deleteCategoryGroup(child, transferId)),
   );
 
-  const categories = await all<DbCategory>('SELECT * FROM categories WHERE cat_group = ?', [
-    group.id,
-  ]);
+  const categories = await all<DbCategory>(
+    'SELECT * FROM categories WHERE cat_group = ?',
+    [group.id],
+  );
 
   // Delete all the categories within a group
   await Promise.all(categories.map(cat => deleteCategory(cat, transferId)));

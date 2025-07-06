@@ -198,7 +198,6 @@ export function SidebarGroup({
       style={{
         ...style,
         width: 200 + 100 * categoryExpandedState,
-        backgroundColor: theme.tableRowHeaderBackground,
         overflow: 'hidden',
         '& .hover-visible': {
           display: 'none',

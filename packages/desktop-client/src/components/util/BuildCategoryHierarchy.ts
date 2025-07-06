@@ -1,7 +1,12 @@
 import memoizeOne from 'memoize-one';
-import { CategoryEntity, CategoryGroupEntity } from 'loot-core/types/models';
-import { WithRequired } from 'loot-core/types/util';
-import { separateGroups } from '../budget/util'; // We need this utility
+
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/types/models';
+import { type WithRequired } from 'loot-core/types/util';
+
+import { separateGroups } from '@desktop-client/components/budget/util'; // We need this utility
 
 /**
  * Groups a flat list of categories by their group ID.
@@ -11,16 +16,19 @@ import { separateGroups } from '../budget/util'; // We need this utility
 function groupCategoriesByGroupId(
   categories: CategoryEntity[],
 ): Record<string, CategoryEntity[]> {
-  return categories.reduce((acc, category) => {
-    const groupId = category.group;
-    if (groupId) {
-      if (!acc[groupId]) {
-        acc[groupId] = [];
+  return categories.reduce(
+    (acc, category) => {
+      const groupId = category.group;
+      if (groupId) {
+        if (!acc[groupId]) {
+          acc[groupId] = [];
+        }
+        acc[groupId].push(category);
       }
-      acc[groupId].push(category);
-    }
-    return acc;
-  }, {} as Record<string, CategoryEntity[]>);
+      return acc;
+    },
+    {} as Record<string, CategoryEntity[]>,
+  );
 }
 
 /**
@@ -34,10 +42,13 @@ function filterAndSortGroups(
   groups: CategoryGroupEntity[],
   parentId: string | null,
 ): CategoryGroupEntity[] {
-  return groups
-    // Using == null checks for both null and undefined, which is what we need for top-level groups.
-    .filter(group => group.parent_id == parentId)
-    .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+  return (
+    groups
+      // Using == null checks for both null and undefined, which is what we need for top-level groups. This will handle pre-existing groups.
+      // eslint-disable-next-line eqeqeq
+      .filter(group => group.parent_id == parentId)
+      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+  );
 }
 
 /**
@@ -71,10 +82,17 @@ function processSingleGroupNode(
   allGroups: CategoryGroupEntity[],
   categoriesByGroupId: Record<string, CategoryEntity[]>,
 ): CategoryGroupEntity {
-  const groupWithCategories = attachCategoriesToGroup(group, categoriesByGroupId);
+  const groupWithCategories = attachCategoriesToGroup(
+    group,
+    categoriesByGroupId,
+  );
   return {
     ...groupWithCategories,
-    children: buildGroupTree(allGroups, categoriesByGroupId, group.id) as WithRequired<CategoryGroupEntity, 'parent_id'>[],
+    children: buildGroupTree(
+      allGroups,
+      categoriesByGroupId,
+      group.id,
+    ) as WithRequired<CategoryGroupEntity, 'parent_id'>[],
   };
 }
 

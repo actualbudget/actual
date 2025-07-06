@@ -2,7 +2,6 @@
 import React, { type ComponentProps } from 'react';
 
 import { theme } from '@actual-app/components/theme';
-import * as colorPalette from '../../style/palette';
 import { View } from '@actual-app/components/view';
 
 import { RenderMonths } from './RenderMonths';
@@ -93,8 +92,6 @@ export function ExpenseGroup({
       style={{
         fontWeight: 600,
         opacity: group.hidden ? 0.33 : undefined,
-        backgroundColor:
-          depth > 0 ? theme.tableRowHeaderBackground : colorPalette.navy900,
       }}
     >
       {dragState && !dragState.preview && dragState.type === 'group' && (
@@ -132,6 +129,12 @@ export function ExpenseGroup({
             editingCell.cell === 'name' &&
             editingCell.id === group.id
           }
+          style={{
+            backgroundColor:
+              depth == 0
+                ? theme.tableRowHeaderBackground
+                : theme.tableRowSubHeaderBackground,
+          }}          
           dragPreview={dragging && dragState.preview}
           collapsed={collapsed}
           onToggleCollapse={onToggleCollapse}
