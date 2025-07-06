@@ -92,6 +92,9 @@ export class CategoryTemplateContext {
   getPriorities(): number[] {
     return this.priorities;
   }
+  hasRemainder(): boolean {
+    return this.remainderWeight > 0 && !this.limitMet;
+  }
   getRemainderWeight(): number {
     return this.remainderWeight;
   }
@@ -222,23 +225,29 @@ export class CategoryTemplateContext {
     return toBudget;
   }
 
-  // run all of the 'remainder' type templates
   runRemainder(budgetAvail: number, perWeight: number) {
     if (this.remainder.length === 0) return 0;
     let toBudget = Math.round(this.remainderWeight * perWeight);
+
     //check possible overbudget from rounding, 1cent leftover
     if (toBudget > budgetAvail) {
       toBudget = budgetAvail;
-      this.toBudgetAmount += toBudget;
-      return toBudget;
     } else if (budgetAvail - toBudget === 1) {
       toBudget += 1;
-      this.toBudgetAmount += toBudget;
-      return toBudget;
-    } else {
-      this.toBudgetAmount += toBudget;
-      return toBudget;
     }
+
+    if (this.limitCheck) {
+      if (
+        toBudget + this.toBudgetAmount + this.fromLastMonth >=
+        this.limitAmount
+      ) {
+        toBudget = this.limitAmount - this.toBudgetAmount - this.fromLastMonth;
+        this.limitMet = true;
+      }
+    }
+
+    this.toBudgetAmount += toBudget;
+    return toBudget;
   }
 
   getValues() {
@@ -298,8 +307,8 @@ export class CategoryTemplateContext {
         if (t.directive === 'goal' && t.type === 'goal') this.goals.push(t);
       });
     }
-    // check limits here since it needs to save states inside the object
-    this.checkLimit();
+
+    this.checkLimit(templates);
     this.checkSpend();
     this.checkGoal();
 
@@ -412,8 +421,8 @@ export class CategoryTemplateContext {
     });
   }
 
-  private checkLimit() {
-    for (const template of this.templates
+  private checkLimit(templates: Template[]) {
+    for (const template of templates
       .filter(
         t => t.type === 'simple' || t.type === 'week' || t.type === 'remainder',
       )

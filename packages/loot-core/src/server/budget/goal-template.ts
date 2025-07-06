@@ -170,7 +170,6 @@ async function processTemplate(
     `to-budget`,
   );
   let priorities: number[] = [];
-  let remainderWeight = 0;
   const errors: string[] = [];
   const budgetList: TemplateBudget[] = [];
   const goalList: TemplateGoal[] = [];
@@ -199,7 +198,6 @@ async function processTemplate(
         }
         availBudget += templateContext.getLimitExcess();
         priorities = [...priorities, ...templateContext.getPriorities()];
-        remainderWeight += templateContext.getRemainderWeight();
         templateContexts.push(templateContext);
       } catch (e) {
         errors.push(`${category.name}: ${e.message}`);
@@ -252,13 +250,21 @@ async function processTemplate(
       availBudget -= budget;
     }
   }
+
   // run remainder
-  if (availBudget > 0 && remainderWeight) {
+  let remainderContexts = templateContexts.filter(c => c.hasRemainder());
+  while (availBudget > 0 && remainderContexts.length > 0) {
+    let remainderWeight = 0;
+    remainderContexts.forEach(
+      context => (remainderWeight += context.getRemainderWeight()),
+    );
     const perWeight = availBudget / remainderWeight;
-    templateContexts.forEach(context => {
+    remainderContexts.forEach(context => {
       availBudget -= context.runRemainder(availBudget, perWeight);
     });
+    remainderContexts = templateContexts.filter(c => c.hasRemainder());
   }
+
   // finish
   templateContexts.forEach(context => {
     const values = context.getValues();
