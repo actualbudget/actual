@@ -285,6 +285,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
           </Text>
           <BalanceHistoryGraph
             accountId={to.match(/\/accounts\/?(.+)?/)?.[1]}
+            style={{ minWidth: 350, minHeight: 70 }}
           />
           {accountNote && (
             <Notes

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, type CSSProperties } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { SpaceBetween } from '@actual-app/components/space-between';
@@ -19,6 +19,7 @@ import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 type BalanceHistoryGraphProps = {
   accountId?: string;
+  style?: CSSProperties;
 };
 
 type Balance = {
@@ -26,7 +27,10 @@ type Balance = {
   balance: number;
 };
 
-export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
+export function BalanceHistoryGraph({
+  accountId,
+  style,
+}: BalanceHistoryGraphProps) {
   const [balanceData, setBalanceData] = useState<
     Array<{ date: string; balance: number }>
   >([]);
@@ -151,7 +155,7 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <View style={{ minWidth: 350, minHeight: 70, flexGrow: 1, margin: 10 }}>
+    <View style={{ flexGrow: 1, margin: 10, ...style }}>
       <AutoSizer>
         {({ width, height }: { width: number; height: number }) => {
           if (loading) {
