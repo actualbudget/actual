@@ -250,6 +250,9 @@ export class CategoryTemplateContext {
       toBudget += 1;
     }
 
+    //round all budget values if needed
+    if (this.hideDecimal) toBudget = this.removeFraction(toBudget);
+
     if (this.limitCheck) {
       if (
         toBudget + this.toBudgetAmount + this.fromLastMonth >=
