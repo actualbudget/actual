@@ -28,6 +28,7 @@ import { ScrollProvider } from './ScrollProvider';
 import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
+import { ManageTagsPage } from './tags/ManageTagsPage';
 import { Titlebar } from './Titlebar';
 
 import { sync } from '@desktop-client/app/appSlice';
@@ -258,6 +259,7 @@ export function FinancesApp() {
                 <Route path="/payees" element={<ManagePayeesPage />} />
                 <Route path="/rules" element={<ManageRulesPage />} />
                 <Route path="/bank-sync" element={<BankSync />} />
+                <Route path="/tags" element={<ManageTagsPage />} />
                 <Route path="/settings" element={<Settings />} />
 
                 <Route
