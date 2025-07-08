@@ -243,15 +243,17 @@ export class CategoryTemplateContext {
     if (this.remainder.length === 0) return 0;
     let toBudget = Math.round(this.remainderWeight * perWeight);
 
-    //check possible overbudget from rounding, 1cent leftover
-    if (toBudget > budgetAvail) {
-      toBudget = budgetAvail;
-    } else if (budgetAvail - toBudget === 1) {
-      toBudget += 1;
+    let smallest = 1;
+    if (this.hideDecimal) {
+      // handle hideDecimal
+      toBudget = this.removeFraction(toBudget);
+      smallest = 100;
     }
 
-    //round all budget values if needed
-    if (this.hideDecimal) toBudget = this.removeFraction(toBudget);
+    //check possible overbudget from rounding, 1cent leftover
+    if (toBudget > budgetAvail || budgetAvail - toBudget <= smallest) {
+      toBudget = budgetAvail;
+    }
 
     if (this.limitCheck) {
       if (
