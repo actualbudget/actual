@@ -654,7 +654,14 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
         },
       }),
     );
-  }, [categoryGroupsToShow, dispatch, month, onOpenCoverCategoryModal, t]);
+  }, [
+    categoryGroupsToShow,
+    dispatch,
+    month,
+    onOpenCoverCategoryModal,
+    t,
+    budgetType,
+  ]);
 
   const numberOfOverspentCategories = overspentCategories.length;
   if (numberOfOverspentCategories === 0) {
