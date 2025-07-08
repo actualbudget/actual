@@ -642,7 +642,7 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
             title:
               budgetType === 'envelope'
                 ? t('Cover overspending')
-                : t('Overspent Categories'),
+                : t('Overspent categories'),
             month,
             categoryGroups: categoryGroupsToShow,
             showHiddenCategories: true,
