@@ -567,15 +567,21 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
   );
 }
 
-function OverspendingBanner({ month, onBudgetAction, ...props }) {
+function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
   const { t } = useTranslation();
 
   const { list: categories, grouped: categoryGroups } = useCategories();
   const categoriesById = groupById(categories);
+  const groupsById = groupById(categoryGroups);
 
   const dispatch = useDispatch();
 
-  const overspentCategories = useOverspentCategories({ month });
+  const overspentCategories = useOverspentCategories({ month }).filter(c => {
+    if (budgetType === 'tracking') {
+      return !c.hidden && !groupsById[c.group].hidden;
+    }
+    return true;
+  });
 
   const categoryGroupsToShow = useMemo(
     () =>
@@ -694,7 +700,11 @@ function Banners({ month, onBudgetAction }) {
       style={{ backgroundColor: theme.mobilePageBackground }}
     >
       <UncategorizedTransactionsBanner />
-      <OverspendingBanner month={month} onBudgetAction={onBudgetAction} />
+      <OverspendingBanner
+        month={month}
+        onBudgetAction={onBudgetAction}
+        budgetType={budgetType}
+      />
       {budgetType === 'envelope' && (
         <OverbudgetedBanner month={month} onBudgetAction={onBudgetAction} />
       )}
