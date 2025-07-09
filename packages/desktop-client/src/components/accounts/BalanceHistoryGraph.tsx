@@ -7,7 +7,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { subMonths, format, eachMonthOfInterval, parseISO } from 'date-fns';
-import { LineChart, Line, YAxis, Tooltip as RechartsTooltip } from 'recharts';
+import { AreaChart, Area, YAxis, Tooltip as RechartsTooltip } from 'recharts';
 
 import * as monthUtils from 'loot-core/shared/months';
 import { integerToCurrency } from 'loot-core/shared/util';
@@ -47,6 +47,10 @@ export function BalanceHistoryGraph({
     if (firstBalance === 0) return 0;
     return ((lastBalance - firstBalance) / Math.abs(firstBalance)) * 100;
   }, [balanceData]);
+  const color = useMemo(
+    () => (percentageChange >= 0 ? theme.noticeTextLight : theme.errorText),
+    [percentageChange],
+  );
 
   useEffect(() => {
     async function fetchBalanceHistory() {
@@ -135,6 +139,7 @@ export function BalanceHistoryGraph({
       }
 
       const balances = totals
+        .filter(t => t.balance !== 0)
         .sort((a, b) => monthUtils.differenceInCalendarMonths(a.date, b.date))
         .map(t => {
           return {
@@ -177,7 +182,37 @@ export function BalanceHistoryGraph({
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
               >
-                <LineChart data={balanceData} width={width} height={height}>
+                <AreaChart data={balanceData} width={width} height={height}>
+                  <defs>
+                    <linearGradient
+                      id="fillLight"
+                      x1="0.9"
+                      y1="0"
+                      x2="0.3"
+                      y2="1"
+                    >
+                      <stop stopColor={theme.noticeTextLight} stopOpacity={1} />
+                      <stop
+                        offset="90%"
+                        stopColor={theme.noticeTextLight}
+                        stopOpacity={0.2}
+                      />
+                    </linearGradient>
+                    <linearGradient
+                      id="fillError"
+                      x1="0.9"
+                      y1="0"
+                      x2="0.3"
+                      y2="1"
+                    >
+                      <stop stopColor={theme.errorText} stopOpacity={1} />
+                      <stop
+                        offset="90%"
+                        stopColor={theme.errorText}
+                        stopOpacity={0.2}
+                      />
+                    </linearGradient>
+                  </defs>
                   <YAxis domain={['dataMin', 'dataMax']} hide={true} />
                   <RechartsTooltip
                     contentStyle={{
@@ -192,19 +227,19 @@ export function BalanceHistoryGraph({
                     }}
                     isAnimationActive={false}
                   />
-                  <Line
+                  <Area
                     type="monotone"
                     dataKey="balance"
-                    stroke={
-                      percentageChange >= 0
-                        ? theme.noticeTextLight
-                        : theme.errorText
-                    }
+                    stroke={color}
                     strokeWidth={2}
-                    dot={false}
                     animationDuration={0}
+                    fill={
+                      color === theme.noticeTextLight
+                        ? 'url(#fillLight)'
+                        : 'url(#fillError)'
+                    }
                   />
-                </LineChart>
+                </AreaChart>
 
                 <SpaceBetween
                   direction="vertical"
@@ -219,14 +254,7 @@ export function BalanceHistoryGraph({
                   {percentageChange === 0 ? (
                     <div />
                   ) : (
-                    <Text
-                      style={{
-                        color:
-                          percentageChange >= 0
-                            ? theme.noticeTextLight
-                            : theme.errorText,
-                      }}
-                    >
+                    <Text style={{ color }}>
                       {percentageChange >= 0 ? '+' : ''}
                       {percentageChange.toFixed(1)}%
                     </Text>
