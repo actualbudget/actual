@@ -1,6 +1,7 @@
 import React, {
   type ComponentProps,
   type ReactNode,
+  useEffect,
   useRef,
   useState,
 } from 'react';
@@ -54,6 +55,7 @@ import { SelectedTransactionsButton } from '@desktop-client/components/transacti
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 type AccountHeaderProps = {
@@ -71,7 +73,6 @@ type AccountHeaderProps = {
   transactions: TransactionEntity[];
   showBalances: boolean;
   showExtraBalances: boolean;
-  showNetWorthChart: boolean;
   showCleared: boolean;
   showReconciled: boolean;
   showEmptyMessage: boolean;
@@ -148,7 +149,6 @@ export function AccountHeader({
   transactions,
   showBalances,
   showExtraBalances,
-  showNetWorthChart,
   showCleared,
   showReconciled,
   showEmptyMessage,
@@ -202,6 +202,10 @@ export function AccountHeader({
   const isUsingServer = syncServerStatus !== 'no-server';
   const isServerOffline = syncServerStatus === 'offline';
   const [_, setExpandSplitsPref] = useLocalPref('expand-splits');
+  const [showNetWorthChartPref, setShowNetWorthChartPref] = useSyncedPref(
+    'show-account-net-worth-chart',
+  );
+  const showNetWorthChart = showNetWorthChartPref === 'true';
 
   const locale = useLocale();
 
@@ -224,6 +228,22 @@ export function AccountHeader({
       setExpandSplitsPref(!(splitsExpanded.state.mode === 'expand'));
     }
   }
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerHeight < 500 && showNetWorthChart) {
+        setShowNetWorthChartPref('false');
+      } else if (window.innerHeight >= 500 && !showNetWorthChart) {
+        setShowNetWorthChartPref('true');
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [setShowNetWorthChartPref, showNetWorthChart]);
 
   useHotkeys(
     'ctrl+f, cmd+f, meta+f',
@@ -272,6 +292,7 @@ export function AccountHeader({
       <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
         <View
           style={{
+            position: 'relative',
             flexDirection: 'column',
             marginTop: 2,
             gap: 10,
