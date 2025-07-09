@@ -16,8 +16,7 @@ import { css, cx } from '@emotion/css';
 import * as Platform from 'loot-core/shared/platform';
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { BalanceHistoryGraph } from './BalanceHistoryGraph';
-
+import { BalanceHistoryGraph } from '@desktop-client/components/accounts/BalanceHistoryGraph';
 import { Link } from '@desktop-client/components/common/Link';
 import { Notes } from '@desktop-client/components/Notes';
 import {

@@ -41,6 +41,7 @@ import {
 
 import { type TableRef } from './Account';
 import { Balances } from './Balance';
+import { BalanceHistoryGraph } from './BalanceHistoryGraph';
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
 
 import { AnimatedRefresh } from '@desktop-client/components/AnimatedRefresh';
@@ -49,7 +50,6 @@ import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
 import { FiltersStack } from '@desktop-client/components/filters/FiltersStack';
 import { type SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
 import { NotesButton } from '@desktop-client/components/NotesButton';
-import { BalanceHistoryGraph } from '@desktop-client/components/sidebar/BalanceHistoryGraph';
 import { SelectedTransactionsButton } from '@desktop-client/components/transactions/SelectedTransactionsButton';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
