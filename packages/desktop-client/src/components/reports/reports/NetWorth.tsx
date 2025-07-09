@@ -4,12 +4,10 @@ import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { Paragraph } from '@actual-app/components/paragraph';
-import { Select } from '@actual-app/components/select';
-import { Popover } from '@actual-app/components/popover';
-import { Menu } from '@actual-app/components/menu';
 import { SvgCalendar } from '@actual-app/components/icons/v1';
-import { SpaceBetween } from '@actual-app/components/space-between';
+import { Menu } from '@actual-app/components/menu';
+import { Paragraph } from '@actual-app/components/paragraph';
+import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -326,6 +324,10 @@ function IntervalSelector({
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
+  const currentLabel =
+    ReportOptions.interval.find(opt => opt.key === interval)?.description ??
+    interval;
+
   return (
     <>
       <Button
@@ -335,9 +337,7 @@ function IntervalSelector({
         aria-label="Change interval"
       >
         <SvgCalendar style={{ width: 12, height: 12 }} />
-        <Trans>
-          <span style={{ marginLeft: 5 }}>Interval</span>
-        </Trans>
+        <span style={{ marginLeft: 5 }}>{currentLabel}</span>
       </Button>
 
       <Popover
