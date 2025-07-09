@@ -116,7 +116,10 @@ export function useOverspentCategories({ month }: UseOverspentCategoriesProps) {
 
   return useMemo(
     () =>
-      categories.filter(category => overspentCategoryIds.includes(category.id)),
+      categories.filter(
+        category =>
+          overspentCategoryIds.includes(category.id) && !category.is_income,
+      ),
     [categories, overspentCategoryIds],
   );
 }
