@@ -198,9 +198,10 @@ export function Balances({
     <View
       style={{
         flexDirection: 'row',
-        flexGrow: 0,
         flexWrap: 'wrap',
         alignItems: 'center',
+        marginTop: -5,
+        marginLeft: -5,
         gap: 10,
       }}
     >

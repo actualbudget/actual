@@ -1699,7 +1699,6 @@ class AccountInternal extends PureComponent<
       transactionsFiltered,
       showBalances,
       balances,
-      showNetWorthChart,
       showCleared,
       showReconciled,
       filteredAmount,
@@ -1768,7 +1767,6 @@ class AccountInternal extends PureComponent<
                 transactions={transactions}
                 showBalances={showBalances ?? false}
                 showExtraBalances={showExtraBalances ?? false}
-                showNetWorthChart={showNetWorthChart ?? false}
                 showCleared={showCleared ?? false}
                 showReconciled={showReconciled ?? false}
                 showEmptyMessage={showEmptyMessage ?? false}

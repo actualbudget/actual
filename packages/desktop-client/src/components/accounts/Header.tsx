@@ -292,37 +292,50 @@ export function AccountHeader({
       <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
         <View
           style={{
-            position: 'relative',
             flexDirection: 'column',
             marginTop: 2,
+            justifyContent: 'space-between',
             gap: 10,
           }}
         >
-          <View style={{ flexDirection: 'row', gap: 3 }}>
-            {!!account?.bank && (
-              <AccountSyncSidebar
+          <View
+            style={{
+              flexGrow: 1,
+              alignItems: 'flex-start',
+              gap: 10,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 3,
+              }}
+            >
+              {!!account?.bank && (
+                <AccountSyncSidebar
+                  account={account}
+                  failedAccounts={failedAccounts}
+                  accountsSyncing={accountsSyncing}
+                />
+              )}
+              <AccountNameField
                 account={account}
-                failedAccounts={failedAccounts}
-                accountsSyncing={accountsSyncing}
-              />
-            )}
-            <AccountNameField
-              account={account}
-              accountName={accountName}
-              isNameEditable={isNameEditable}
-              saveNameError={saveNameError}
-              onSaveName={onSaveName}
-            />
-            <View style={{ flexShrink: 1 }}>
-              <Balances
-                balanceQuery={balanceQuery}
-                showExtraBalances={showExtraBalances}
-                onToggleExtraBalances={onToggleExtraBalances}
-                account={account}
-                isFiltered={isFiltered}
-                filteredAmount={filteredAmount}
+                accountName={accountName}
+                isNameEditable={isNameEditable}
+                saveNameError={saveNameError}
+                onSaveName={onSaveName}
               />
             </View>
+
+            <Balances
+              balanceQuery={balanceQuery}
+              showExtraBalances={showExtraBalances}
+              onToggleExtraBalances={onToggleExtraBalances}
+              account={account}
+              isFiltered={isFiltered}
+              filteredAmount={filteredAmount}
+            />
           </View>
 
           {showNetWorthChart && (
