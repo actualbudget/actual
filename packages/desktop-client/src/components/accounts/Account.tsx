@@ -226,6 +226,8 @@ type AccountInternalProps = {
   filterConditions: RuleConditionEntity[];
   showBalances?: boolean;
   setShowBalances: (newValue: boolean) => void;
+  showNetWorthChart: boolean;
+  setShowNetWorthChart: (newValue: boolean) => void;
   showCleared?: boolean;
   setShowCleared: (newValue: boolean) => void;
   showReconciled: boolean;
@@ -274,6 +276,7 @@ type AccountInternalState = {
   transactionsFiltered?: boolean;
   showBalances?: boolean | undefined;
   balances: Record<string, { balance: number }> | null;
+  showNetWorthChart: boolean;
   showCleared?: boolean | undefined;
   prevShowCleared?: boolean | undefined;
   showReconciled: boolean;
@@ -325,6 +328,7 @@ class AccountInternal extends PureComponent<
       transactionCount: 0,
       showBalances: props.showBalances,
       balances: null,
+      showNetWorthChart: props.showNetWorthChart,
       showCleared: props.showCleared,
       showReconciled: props.showReconciled,
       nameError: '',
@@ -765,7 +769,8 @@ class AccountInternal extends PureComponent<
       | 'toggle-balance'
       | 'remove-sorting'
       | 'toggle-cleared'
-      | 'toggle-reconciled',
+      | 'toggle-reconciled'
+      | 'toggle-net-worth-chart',
   ) => {
     const accountId = this.props.accountId!;
     const account = this.props.accounts.find(
@@ -866,6 +871,15 @@ class AccountInternal extends PureComponent<
           this.setState({ showReconciled: true }, () =>
             this.fetchTransactions(this.state.filterConditions),
           );
+        }
+        break;
+      case 'toggle-net-worth-chart':
+        if (this.state.showNetWorthChart) {
+          this.props.setShowNetWorthChart(false);
+          this.setState({ showNetWorthChart: false });
+        } else {
+          this.props.setShowNetWorthChart(true);
+          this.setState({ showNetWorthChart: true });
         }
         break;
       default:
@@ -1685,6 +1699,7 @@ class AccountInternal extends PureComponent<
       transactionsFiltered,
       showBalances,
       balances,
+      showNetWorthChart,
       showCleared,
       showReconciled,
       filteredAmount,
@@ -1753,6 +1768,7 @@ class AccountInternal extends PureComponent<
                 transactions={transactions}
                 showBalances={showBalances ?? false}
                 showExtraBalances={showExtraBalances ?? false}
+                showNetWorthChart={showNetWorthChart ?? false}
                 showCleared={showCleared ?? false}
                 showReconciled={showReconciled ?? false}
                 showEmptyMessage={showEmptyMessage ?? false}
@@ -1941,6 +1957,9 @@ export function Account() {
   const [showBalances, setShowBalances] = useSyncedPref(
     `show-balances-${params.id}`,
   );
+  const [showNetWorthChart, setShowNetWorthChart] = useSyncedPref(
+    'show-account-net-worth-chart',
+  );
   const [hideCleared, setHideCleared] = useSyncedPref(
     `hide-cleared-${params.id}`,
   );
@@ -1978,6 +1997,8 @@ export function Account() {
           setShowBalances={showBalances =>
             setShowBalances(String(showBalances))
           }
+          showNetWorthChart={String(showNetWorthChart) === 'true'}
+          setShowNetWorthChart={val => setShowNetWorthChart(String(val))}
           showCleared={String(hideCleared) !== 'true'}
           setShowCleared={val => setHideCleared(String(!val))}
           showReconciled={String(hideReconciled) !== 'true'}

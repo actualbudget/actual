@@ -54,7 +54,6 @@ import { SelectedTransactionsButton } from '@desktop-client/components/transacti
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 type AccountHeaderProps = {
@@ -72,6 +71,7 @@ type AccountHeaderProps = {
   transactions: TransactionEntity[];
   showBalances: boolean;
   showExtraBalances: boolean;
+  showNetWorthChart: boolean;
   showCleared: boolean;
   showReconciled: boolean;
   showEmptyMessage: boolean;
@@ -148,6 +148,7 @@ export function AccountHeader({
   transactions,
   showBalances,
   showExtraBalances,
+  showNetWorthChart,
   showCleared,
   showReconciled,
   showEmptyMessage,
@@ -201,10 +202,6 @@ export function AccountHeader({
   const isUsingServer = syncServerStatus !== 'no-server';
   const isServerOffline = syncServerStatus === 'offline';
   const [_, setExpandSplitsPref] = useLocalPref('expand-splits');
-  const [showAccountNetWorthPref] = useSyncedPref(
-    'show-account-net-worth-chart',
-  );
-  const showAccountNetWorth = showAccountNetWorthPref === 'true';
 
   const locale = useLocale();
 
@@ -283,8 +280,8 @@ export function AccountHeader({
         >
           <View
             style={{
-              maxWidth: showAccountNetWorth ? '35%' : '100%',
-              minHeight: showAccountNetWorth ? 150 : undefined,
+              maxWidth: showNetWorthChart ? '35%' : '100%',
+              minHeight: showNetWorthChart ? 150 : undefined,
               alignItems: 'flex-start',
               gap: 10,
             }}
@@ -321,7 +318,7 @@ export function AccountHeader({
               filteredAmount={filteredAmount}
             />
           </View>
-          {showAccountNetWorth && <BalanceHistoryGraph accountId={accountId} />}
+          {showNetWorthChart && <BalanceHistoryGraph accountId={accountId} />}
         </View>
         <Stack
           spacing={2}
@@ -488,6 +485,7 @@ export function AccountHeader({
                     <AccountMenu
                       account={account}
                       canSync={canSync}
+                      showNetWorthChart={showNetWorthChart}
                       canShowBalances={
                         canCalculateBalance ? canCalculateBalance() : false
                       }
@@ -715,6 +713,7 @@ function AccountNameField({
 type AccountMenuProps = {
   account: AccountEntity;
   canSync: boolean;
+  showNetWorthChart: boolean;
   showBalances: boolean;
   canShowBalances: boolean;
   showCleared: boolean;
@@ -730,13 +729,15 @@ type AccountMenuProps = {
       | 'toggle-balance'
       | 'remove-sorting'
       | 'toggle-cleared'
-      | 'toggle-reconciled',
+      | 'toggle-reconciled'
+      | 'toggle-net-worth-chart',
   ) => void;
 };
 
 function AccountMenu({
   account,
   canSync,
+  showNetWorthChart,
   showBalances,
   canShowBalances,
   showCleared,
@@ -772,6 +773,12 @@ function AccountMenu({
               } as const,
             ]
           : []),
+        {
+          name: 'toggle-net-worth-chart',
+          text: showNetWorthChart
+            ? t('Hide balance chart')
+            : t('Show balance chart'),
+        },
         {
           name: 'toggle-cleared',
           text: showCleared
