@@ -17,6 +17,8 @@ import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndi
 import * as queries from '@desktop-client/queries';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
+const LABEL_WIDTH = 70;
+
 type BalanceHistoryGraphProps = {
   accountId?: string;
   style?: CSSProperties;
@@ -182,7 +184,11 @@ export function BalanceHistoryGraph({
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
               >
-                <AreaChart data={balanceData} width={width} height={height}>
+                <AreaChart
+                  data={balanceData}
+                  width={width - LABEL_WIDTH}
+                  height={height}
+                >
                   <defs>
                     <linearGradient
                       id="fillLight"
@@ -246,7 +252,7 @@ export function BalanceHistoryGraph({
                   style={{
                     alignItems: 'flex-end',
                     justifyContent: 'space-between',
-                    width: 70,
+                    width: LABEL_WIDTH,
                     textAlign: 'right',
                     ...styles.verySmallText,
                   }}
