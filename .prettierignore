@@ -20,11 +20,8 @@ packages/desktop-client/playwright-report/
 packages/desktop-electron/client-build/
 packages/desktop-electron/build/
 packages/desktop-electron/dist/
-packages/import-ynab4/**/node_modules/*
-packages/import-ynab5/**/node_modules/*
 packages/loot-core/**/node_modules/*
 packages/loot-core/**/lib-dist/*
 packages/loot-core/**/proto/*
 .yarn/*
-.github/*
 upcoming-release-notes/*

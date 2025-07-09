@@ -13,16 +13,6 @@ import deepEqual from 'deep-equal';
 import { send } from 'loot-core/platform/client/fetch';
 import { amountToInteger } from 'loot-core/shared/util';
 
-import {
-  getPayees,
-  importPreviewTransactions,
-  importTransactions,
-} from '../../../queries/queriesSlice';
-import { useDispatch } from '../../../redux';
-import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
-import { SectionLabel } from '../../forms';
-import { TableHeader, TableWithNavigator } from '../../table';
-
 import { CheckboxOption } from './CheckboxOption';
 import { DateFormatSelect } from './DateFormatSelect';
 import { FieldMappings } from './FieldMappings';
@@ -37,9 +27,25 @@ import {
   stripCsvImportTransaction,
 } from './utils';
 
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { SectionLabel } from '@desktop-client/components/forms';
+import {
+  TableHeader,
+  TableWithNavigator,
+} from '@desktop-client/components/table';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useSyncedPrefs } from '@desktop-client/hooks/useSyncedPrefs';
+import {
+  getPayees,
+  importPreviewTransactions,
+  importTransactions,
+} from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 function getFileType(filepath) {
   const m = filepath.match(/\.([^.]*)$/);
@@ -571,9 +577,10 @@ export function ImportTransactionsModal({
           ? trans.date
           : parseDate(trans.date, parseDateFormat);
       if (date == null) {
-        errorMessage = `Unable to parse date ${
-          trans.date || '(empty)'
-        } with given date format`;
+        errorMessage = t(
+          'Unable to parse date {{date}} with given date format',
+          { date: trans.date || '(empty)' },
+        );
         break;
       }
 
@@ -586,7 +593,9 @@ export function ImportTransactionsModal({
         multiplierAmount,
       );
       if (amount == null) {
-        errorMessage = `Transaction on ${trans.date} has no amount`;
+        errorMessage = t('Transaction on {{date}} has no amount', {
+          date: trans.date,
+        });
         break;
       }
 
@@ -719,13 +728,29 @@ export function ImportTransactionsModal({
     headers.unshift({ name: ' ', width: 31 });
   }
   if (inOutMode) {
-    headers.push({ name: 'In/Out', width: 90, style: { textAlign: 'left' } });
+    headers.push({
+      name: t('In/Out'),
+      width: 90,
+      style: { textAlign: 'left' },
+    });
   }
   if (splitMode) {
-    headers.push({ name: 'Outflow', width: 90, style: { textAlign: 'right' } });
-    headers.push({ name: 'Inflow', width: 90, style: { textAlign: 'right' } });
+    headers.push({
+      name: t('Outflow'),
+      width: 90,
+      style: { textAlign: 'right' },
+    });
+    headers.push({
+      name: t('Inflow'),
+      width: 90,
+      style: { textAlign: 'right' },
+    });
   } else {
-    headers.push({ name: 'Amount', width: 90, style: { textAlign: 'right' } });
+    headers.push({
+      name: t('Amount'),
+      width: 90,
+      style: { textAlign: 'right' },
+    });
   }
 
   return (
@@ -746,7 +771,10 @@ export function ImportTransactionsModal({
           {error && !error.parsed && (
             <View style={{ alignItems: 'center', marginBottom: 15 }}>
               <Text style={{ marginRight: 10, color: theme.errorText }}>
-                <strong>Error:</strong> {error.message}
+                <strong>
+                  <Trans>Error:</Trans>
+                </strong>{' '}
+                {error.message}
               </Text>
             </View>
           )}
@@ -779,7 +807,7 @@ export function ImportTransactionsModal({
                         fontStyle: 'italic',
                       }}
                     >
-                      {t('No transactions found')}
+                      <Trans>No transactions found</Trans>
                     </View>
                   );
                 }}
@@ -818,7 +846,7 @@ export function ImportTransactionsModal({
               </Text>
               {error.parsed && (
                 <Button onPress={() => onNewFile()}>
-                  {t('Select new file...')}
+                  <Trans>Select new file...</Trans>
                 </Button>
               )}
             </View>
@@ -852,7 +880,7 @@ export function ImportTransactionsModal({
                 );
               }}
             >
-              {t('Use Memo as a fallback for empty Payees')}
+              <Trans>Use Memo as a fallback for empty Payees</Trans>
             </CheckboxOption>
           )}
 
@@ -886,7 +914,7 @@ export function ImportTransactionsModal({
                 setReconcile(!reconcile);
               }}
             >
-              {t('Merge with existing transactions')}
+              <Trans>Merge with existing transactions</Trans>
             </CheckboxOption>
           )}
 
@@ -926,7 +954,7 @@ export function ImportTransactionsModal({
                         alignItems: 'baseline',
                       }}
                     >
-                      {t('Delimiter:')}
+                      <Trans>Delimiter:</Trans>
                       <Select
                         options={[
                           [',', ','],
@@ -958,7 +986,7 @@ export function ImportTransactionsModal({
                         alignItems: 'baseline',
                       }}
                     >
-                      {t('Skip lines:')}
+                      <Trans>Skip lines:</Trans>
                       <Input
                         type="number"
                         value={skipLines}
@@ -994,7 +1022,7 @@ export function ImportTransactionsModal({
                         );
                       }}
                     >
-                      {t('File has header row')}
+                      <Trans>File has header row</Trans>
                     </CheckboxOption>
                     <CheckboxOption
                       id="clear_on_import"
@@ -1003,7 +1031,7 @@ export function ImportTransactionsModal({
                         setClearOnImport(!clearOnImport);
                       }}
                     >
-                      {t('Clear transactions on import')}
+                      <Trans>Clear transactions on import</Trans>
                     </CheckboxOption>
                     <CheckboxOption
                       id="form_dont_reconcile"
@@ -1012,7 +1040,7 @@ export function ImportTransactionsModal({
                         setReconcile(!reconcile);
                       }}
                     >
-                      {t('Merge with existing transactions')}
+                      <Trans>Merge with existing transactions</Trans>
                     </CheckboxOption>
                   </View>
                 )}
@@ -1029,7 +1057,7 @@ export function ImportTransactionsModal({
                       runImportPreview();
                     }}
                   >
-                    {t('Flip amount')}
+                    <Trans>Flip amount</Trans>
                   </CheckboxOption>
                   <MultiplierOption
                     multiplierEnabled={multiplierEnabled}
@@ -1051,7 +1079,9 @@ export function ImportTransactionsModal({
                           runImportPreview();
                         }}
                       >
-                        {t('Split amount into separate inflow/outflow columns')}
+                        <Trans>
+                          Split amount into separate inflow/outflow columns
+                        </Trans>
                       </CheckboxOption>
                       <InOutOption
                         inOutMode={inOutMode}
@@ -1079,27 +1109,25 @@ export function ImportTransactionsModal({
                 gap: '1em',
               }}
             >
-              <ButtonWithLoading
-                variant="primary"
-                autoFocus
-                isDisabled={
-                  transactions?.filter(
-                    trans => !trans.isMatchedTransaction && trans.selected,
-                  ).length === 0
-                }
-                isLoading={loadingState === 'importing'}
-                onPress={() => {
-                  onImport(close);
-                }}
-              >
-                Import{' '}
-                {
-                  transactions?.filter(
-                    trans => !trans.isMatchedTransaction && trans.selected,
-                  ).length
-                }{' '}
-                {t('transactions')}
-              </ButtonWithLoading>
+              {(() => {
+                const count = transactions?.filter(
+                  trans => !trans.isMatchedTransaction && trans.selected,
+                ).length;
+
+                return (
+                  <ButtonWithLoading
+                    variant="primary"
+                    autoFocus
+                    isDisabled={count === 0}
+                    isLoading={loadingState === 'importing'}
+                    onPress={() => {
+                      onImport(close);
+                    }}
+                  >
+                    <Trans count={count}>Import {{ count }} transactions</Trans>
+                  </ButtonWithLoading>
+                );
+              })()}
             </View>
           </View>
         </>

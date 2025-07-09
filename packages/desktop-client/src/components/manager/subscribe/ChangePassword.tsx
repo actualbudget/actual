@@ -24,13 +24,13 @@ export function ChangePassword() {
   function getErrorMessage(error) {
     switch (error) {
       case 'invalid-password':
-        return 'Password cannot be empty';
+        return t('Password cannot be empty');
       case 'password-match':
-        return 'Passwords do not match';
+        return t('Passwords do not match');
       case 'network-failure':
-        return 'Unable to contact the server';
+        return t('Unable to contact the server');
       default:
-        return 'Internal error';
+        return t('Internal error');
     }
   }
 

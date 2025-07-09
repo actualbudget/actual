@@ -1,4 +1,4 @@
-import { type Template } from 'loot-core/server/budget/types/templates';
+import { type Template } from 'loot-core/types/models/templates';
 
 import { type Action } from './actions';
 import { type ReducerState, type DisplayTemplateType } from './constants';
@@ -21,7 +21,7 @@ export const getInitialState = (template: Template | null): ReducerState => {
         template,
         displayType: 'schedule',
       };
-    case 'week':
+    case 'periodic':
       return {
         template,
         displayType: 'week',
@@ -90,16 +90,19 @@ const changeType = (
         },
       };
     case 'week':
-      if (prevState.template.type === 'week') {
+      if (prevState.template.type === 'periodic') {
         return prevState;
       }
       return {
         displayType: visualType,
         template: {
           directive: '',
-          type: 'week',
+          type: 'periodic',
           amount: 500,
-          weeks: null,
+          period: {
+            period: 'week',
+            amount: 1,
+          },
           starting: '',
         },
       };

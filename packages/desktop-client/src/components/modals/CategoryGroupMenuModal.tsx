@@ -5,7 +5,7 @@ import React, {
   useState,
   type CSSProperties,
 } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import {
@@ -24,17 +24,16 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal';
-import { Notes } from '../Notes';
-
+} from '@desktop-client/components/common/Modal';
+import { Notes } from '@desktop-client/components/Notes';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useNotes } from '@desktop-client/hooks/useNotes';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type CategoryGroupMenuModalProps = Extract<
   ModalType,
@@ -50,7 +49,6 @@ export function CategoryGroupMenuModal({
   onToggleVisibility,
   onClose,
 }: CategoryGroupMenuModalProps) {
-  const { t } = useTranslation();
   const { grouped: categoryGroups } = useCategories();
   const group = categoryGroups.find(g => g.id === groupId);
   const notes = useNotes(group.id);
@@ -157,7 +155,7 @@ export function CategoryGroupMenuModal({
             >
               <Button style={buttonStyle} onPress={_onAddCategory}>
                 <SvgAdd width={17} height={17} style={{ paddingRight: 5 }} />
-                {t('Add category')}
+                <Trans>Add category</Trans>
               </Button>
               <Button style={buttonStyle} onPress={_onEditNotes}>
                 <SvgNotesPaper
@@ -165,7 +163,7 @@ export function CategoryGroupMenuModal({
                   height={20}
                   style={{ paddingRight: 5 }}
                 />
-                {t('Edit notes')}
+                <Trans>Edit notes</Trans>
               </Button>
             </View>
           </View>

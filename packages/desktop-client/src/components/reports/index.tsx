@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
 
-import { LoadComponent } from '../util/LoadComponent';
+import { LoadComponent } from '@desktop-client/components/util/LoadComponent';
 
 export function Reports() {
   const { t } = useTranslation();

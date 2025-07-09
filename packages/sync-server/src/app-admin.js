@@ -47,7 +47,7 @@ app.post('/users', validateSessionMiddleware, async (req, res) => {
     return;
   }
 
-  const { userName, role, displayName, enabled } = req.body;
+  const { userName, role, displayName, enabled } = req.body || {};
 
   if (!userName || !role) {
     res.status(400).send({
@@ -99,7 +99,7 @@ app.patch('/users', validateSessionMiddleware, async (req, res) => {
     return;
   }
 
-  const { id, userName, role, displayName, enabled } = req.body;
+  const { id, userName, role, displayName, enabled } = req.body || {};
 
   if (!userName || !role) {
     res.status(400).send({
@@ -151,7 +151,7 @@ app.delete('/users', validateSessionMiddleware, async (req, res) => {
     return;
   }
 
-  const ids = req.body.ids;
+  const { ids } = req.body || {};
   let totalDeleted = 0;
   ids.forEach(item => {
     const ownerId = UserService.getOwnerId();
@@ -301,7 +301,7 @@ app.delete('/access', (req, res) => {
     return;
   }
 
-  const ids = req.body.ids;
+  const { ids } = req.body || {};
   const totalDeleted = UserService.deleteUserAccessByFileId(ids, fileId);
 
   if (ids.length === totalDeleted) {

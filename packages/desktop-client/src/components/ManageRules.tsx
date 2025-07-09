@@ -7,7 +7,7 @@ import React, {
   type SetStateAction,
   type Dispatch,
 } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Stack } from '@actual-app/components/stack';
@@ -23,10 +23,6 @@ import { mapField, friendlyOp } from 'loot-core/shared/rules';
 import { describeSchedule } from 'loot-core/shared/schedules';
 import { type RuleEntity, type NewRuleEntity } from 'loot-core/types/models';
 
-import { pushModal } from '../modals/modalsSlice';
-import { initiallyLoadPayees } from '../queries/queriesSlice';
-import { useDispatch } from '../redux';
-
 import { InfiniteScrollWrapper } from './common/InfiniteScrollWrapper';
 import { Link } from './common/Link';
 import { Search } from './common/Search';
@@ -41,6 +37,9 @@ import {
   useSelected,
   SelectedProvider,
 } from '@desktop-client/hooks/useSelected';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { initiallyLoadPayees } from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 function mapValue(
   field,
@@ -115,6 +114,8 @@ export function ManageRules({
   payeeId,
   setLoading = () => {},
 }: ManageRulesProps) {
+  const { t } = useTranslation();
+
   const [allRules, setAllRules] = useState<RuleEntity[]>([]);
   const [page, setPage] = useState(0);
   const [filter, setFilter] = useState('');
@@ -211,7 +212,7 @@ export function ManageRules({
 
     if (someDeletionsFailed) {
       alert(
-        t('Some rules were not deleted because they are linked to schedules'),
+        t('Some rules were not deleted because they are linked to schedules.'),
       );
     }
 
@@ -285,7 +286,6 @@ export function ManageRules({
   const onHover = useCallback(id => {
     setHoveredRule(id);
   }, []);
-  const { t } = useTranslation();
 
   return (
     <SelectedProvider instance={selectedInst}>
@@ -307,13 +307,15 @@ export function ManageRules({
             }}
           >
             <Text>
-              {t('Rules are always run in the order that you see them.')}{' '}
+              <Trans>
+                Rules are always run in the order that you see them.
+              </Trans>{' '}
               <Link
                 variant="external"
                 to="https://actualbudget.org/docs/budgeting/rules/"
                 linkColor="muted"
               >
-                {t('Learn more')}
+                <Trans>Learn more</Trans>
               </Link>
             </Text>
           </View>
@@ -352,11 +354,13 @@ export function ManageRules({
           <Stack direction="row" align="center" justify="flex-end" spacing={2}>
             {selectedInst.items.size > 0 && (
               <Button onPress={onDeleteSelected}>
-                Delete {selectedInst.items.size} rules
+                <Trans count={selectedInst.items.size}>
+                  Delete {{ count: selectedInst.items.size }} rules
+                </Trans>
               </Button>
             )}
             <Button variant="primary" onPress={onCreateRule}>
-              {t('Create new rule')}
+              <Trans>Create new rule</Trans>
             </Button>
           </Stack>
         </View>

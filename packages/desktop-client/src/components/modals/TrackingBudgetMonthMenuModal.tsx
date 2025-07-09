@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import {
@@ -15,14 +15,17 @@ import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
-import { BudgetMonthMenu } from '../budget/tracking/budgetsummary/BudgetMonthMenu';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { Notes } from '../Notes';
-
+import { BudgetMonthMenu } from '@desktop-client/components/budget/tracking/budgetsummary/BudgetMonthMenu';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { Notes } from '@desktop-client/components/Notes';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNotes } from '@desktop-client/hooks/useNotes';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type TrackingBudgetMonthMenuModalProps = Extract<
   ModalType,
@@ -124,7 +127,7 @@ export function TrackingBudgetMonthMenuModal({
                     height={20}
                     style={{ paddingRight: 5 }}
                   />
-                  {t('Edit notes')}
+                  <Trans>Edit notes</Trans>
                 </Button>
               </View>
               <View>
@@ -154,7 +157,7 @@ export function TrackingBudgetMonthMenuModal({
                       style={{ paddingRight: 5 }}
                     />
                   )}
-                  {t('Actions')}
+                  <Trans>Actions</Trans>
                 </Button>
               </View>
             </View>

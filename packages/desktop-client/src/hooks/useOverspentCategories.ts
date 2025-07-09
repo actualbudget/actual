@@ -2,13 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useCategories } from './useCategories';
+import { useSpreadsheet } from './useSpreadsheet';
+import { useSyncedPref } from './useSyncedPref';
+
 import {
   envelopeBudget,
   trackingBudget,
-} from '@desktop-client/queries/queries';
+} from '@desktop-client/spreadsheet/bindings';
 
 type UseOverspentCategoriesProps = {
   month: string;
@@ -115,7 +116,10 @@ export function useOverspentCategories({ month }: UseOverspentCategoriesProps) {
 
   return useMemo(
     () =>
-      categories.filter(category => overspentCategoryIds.includes(category.id)),
+      categories.filter(
+        category =>
+          overspentCategoryIds.includes(category.id) && !category.is_income,
+      ),
     [categories, overspentCategoryIds],
   );
 }

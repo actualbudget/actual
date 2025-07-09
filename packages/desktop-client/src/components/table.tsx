@@ -36,21 +36,21 @@ import {
   ConditionalPrivacyFilter,
   mergeConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
-import {
-  type Spreadsheets,
-  type SheetFields,
-  type SheetNames,
-  type Binding,
-} from './spreadsheet';
-import { type FormatType, useFormat } from './spreadsheet/useFormat';
-import { useSheetValue } from './spreadsheet/useSheetValue';
 
+import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
 import { useModalState } from '@desktop-client/hooks/useModalState';
 import {
   AvoidRefocusScrollProvider,
   useProperFocus,
 } from '@desktop-client/hooks/useProperFocus';
 import { useSelectedItems } from '@desktop-client/hooks/useSelected';
+import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
+import {
+  type Spreadsheets,
+  type SheetFields,
+  type SheetNames,
+  type Binding,
+} from '@desktop-client/spreadsheet';
 
 export const ROW_HEIGHT = 32;
 
@@ -313,8 +313,12 @@ const readonlyInputStyle = {
   '::selection': { backgroundColor: theme.formInputTextReadOnlySelection },
 };
 
-type InputValueProps = Omit<ComponentProps<typeof Input>, 'value'> & {
+type InputValueProps = Omit<
+  ComponentProps<typeof Input>,
+  'value' | 'onUpdate'
+> & {
   value?: string;
+  onUpdate?: (newValue: string) => void;
 };
 
 function InputValue({
@@ -344,12 +348,14 @@ function InputValue({
       e.stopPropagation();
     }
 
-    if (e.key === 'Escape') {
-      if (value !== defaultValue) {
-        setValue(defaultValue);
-      }
-    } else if (shouldSaveFromKey(e)) {
+    if (shouldSaveFromKey(e)) {
       onUpdate?.(value);
+    }
+  }
+
+  function onEscape() {
+    if (value !== defaultValue) {
+      setValue(defaultValue);
     }
   }
 
@@ -371,10 +377,11 @@ function InputValue({
     <Input
       {...props}
       value={value}
-      onChangeValue={text => setValue_(text)}
+      onChangeValue={setValue_}
       onBlur={onBlur_}
       onUpdate={onUpdate}
       onKeyDown={onKeyDown}
+      onEscape={onEscape}
       style={{
         ...inputCellStyle,
         ...(props.readOnly ? readonlyInputStyle : null),

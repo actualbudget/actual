@@ -11,14 +11,15 @@ import {
   type TransactionEntity,
   type AccountEntity,
   type PayeeEntity,
+  type Tag,
 } from 'loot-core/types/models';
 
-import { resetApp } from '../app/appSlice';
+import { resetApp } from '@desktop-client/app/appSlice';
 import {
   addGenericErrorNotification,
   addNotification,
-} from '../notifications/notificationsSlice';
-import { createAppAsyncThunk } from '../redux';
+} from '@desktop-client/notifications/notificationsSlice';
+import { createAppAsyncThunk } from '@desktop-client/redux';
 
 const sliceName = 'queries';
 
@@ -40,6 +41,8 @@ type QueriesState = {
   commonPayees: PayeeEntity[];
   payees: PayeeEntity[];
   payeesLoaded: boolean;
+  tags: Tag[];
+  tagsLoaded: boolean;
 };
 
 const initialState: QueriesState = {
@@ -58,6 +61,8 @@ const initialState: QueriesState = {
   commonPayeesLoaded: false,
   payees: [],
   payeesLoaded: false,
+  tags: [],
+  tagsLoaded: false,
 };
 
 type SetNewTransactionsPayload = {
@@ -160,6 +165,30 @@ const queriesSlice = createSlice({
     // App
 
     builder.addCase(resetApp, () => initialState);
+
+    // Tags
+
+    builder.addCase(getTags.fulfilled, (state, action) => {
+      state.tags = action.payload;
+      state.tagsLoaded = true;
+    });
+
+    builder.addCase(createTag.fulfilled, (state, action) => {
+      state.tags.push(action.payload);
+    });
+
+    builder.addCase(deleteTag.fulfilled, (state, action) => {
+      state.tags = state.tags.filter(tag => tag.id !== action.payload);
+    });
+
+    builder.addCase(deleteAllTags.fulfilled, (state, action) => {
+      state.tags = state.tags.filter(tag => !action.payload.includes(tag.id));
+    });
+
+    builder.addCase(updateTag.fulfilled, (state, action) => {
+      const tagIdx = state.tags.findIndex(tag => tag.id === action.payload.id);
+      state.tags[tagIdx] = action.payload;
+    });
   },
 });
 
@@ -419,6 +448,43 @@ export const getPayees = createAppAsyncThunk(
   },
 );
 
+export const getTags = createAppAsyncThunk(`${sliceName}/getTags`, async () => {
+  const tags: Tag[] = await send('tags-get');
+  return tags;
+});
+
+export const createTag = createAppAsyncThunk(
+  `${sliceName}/createTag`,
+  async ({ tag, color, description }: Omit<Tag, 'id'>) => {
+    const id = await send('tags-create', { tag, color, description });
+    return id;
+  },
+);
+
+export const deleteTag = createAppAsyncThunk(
+  `${sliceName}/deleteTag`,
+  async (tag: Tag) => {
+    const id = await send('tags-delete', tag);
+    return id;
+  },
+);
+
+export const deleteAllTags = createAppAsyncThunk(
+  `${sliceName}/deleteAllTags`,
+  async (ids: Array<Tag['id']>) => {
+    const id = await send('tags-delete-all', ids);
+    return id;
+  },
+);
+
+export const updateTag = createAppAsyncThunk(
+  `${sliceName}/updateTag`,
+  async (tag: Tag) => {
+    const id = await send('tags-update', tag);
+    return id;
+  },
+);
+
 // Budget actions
 
 type ApplyBudgetActionPayload =
@@ -526,6 +592,11 @@ type ApplyBudgetActionPayload =
         category: CategoryEntity['id'];
         flag: boolean;
       };
+    }
+  | {
+      type: 'reset-income-carryover';
+      month: string;
+      args: never;
     }
   | {
       type: 'apply-single-category-template';
@@ -681,6 +752,9 @@ export const applyBudgetAction = createAppAsyncThunk(
         });
         break;
       }
+      case 'reset-income-carryover':
+        await send('budget/reset-income-carryover', { month });
+        break;
       case 'apply-multiple-templates':
         dispatch(
           addNotification({
@@ -874,6 +948,7 @@ export const actions = {
   moveCategory,
   moveCategoryGroup,
   initiallyLoadPayees,
+  getTags,
 };
 
 export const {

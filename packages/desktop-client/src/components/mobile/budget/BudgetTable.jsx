@@ -27,32 +27,31 @@ import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { groupById } from 'loot-core/shared/util';
 
-import { pushModal } from '../../../modals/modalsSlice';
-import {
-  envelopeBudget,
-  trackingBudget,
-  uncategorizedCount,
-} from '../../../queries/queries';
-import { useDispatch } from '../../../redux';
-import { MobilePageHeader, Page } from '../../Page';
-import { PrivacyFilter } from '../../PrivacyFilter';
-import { CellValue } from '../../spreadsheet/CellValue';
-import { useFormat } from '../../spreadsheet/useFormat';
-import { useSheetValue } from '../../spreadsheet/useSheetValue';
-import { MOBILE_NAV_HEIGHT } from '../MobileNavTabs';
-import { PullToRefresh } from '../PullToRefresh';
-
 import { ExpenseGroupList } from './ExpenseGroupList';
 import { IncomeGroup } from './IncomeGroup';
 
+import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
+import { PullToRefresh } from '@desktop-client/components/mobile/PullToRefresh';
+import { MobilePageHeader, Page } from '@desktop-client/components/Page';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useOverspentCategories } from '@desktop-client/hooks/useOverspentCategories';
+import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
+import {
+  envelopeBudget,
+  trackingBudget,
+  uncategorizedCount,
+} from '@desktop-client/spreadsheet/bindings';
 
 export const ROW_HEIGHT = 50;
 
@@ -172,7 +171,7 @@ function Saved({ projected, onPress, show3Columns }) {
                 minFontSizePx={6}
                 maxFontSizePx={12}
                 mode="oneline"
-                title="Projected savings"
+                title={t('Projected savings')}
                 style={{
                   color: theme.formInputText,
                   textAlign: 'left',
@@ -568,15 +567,21 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
   );
 }
 
-function OverspendingBanner({ month, onBudgetAction, ...props }) {
+function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
   const { t } = useTranslation();
 
   const { list: categories, grouped: categoryGroups } = useCategories();
   const categoriesById = groupById(categories);
+  const groupsById = groupById(categoryGroups);
 
   const dispatch = useDispatch();
 
-  const overspentCategories = useOverspentCategories({ month });
+  const overspentCategories = useOverspentCategories({ month }).filter(c => {
+    if (budgetType === 'tracking') {
+      return !c.hidden && !groupsById[c.group].hidden;
+    }
+    return true;
+  });
 
   const categoryGroupsToShow = useMemo(
     () =>
@@ -634,18 +639,29 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
         modal: {
           name: 'category-autocomplete',
           options: {
-            title: t('Cover overspending'),
+            title:
+              budgetType === 'envelope'
+                ? t('Cover overspending')
+                : t('Overspent categories'),
             month,
             categoryGroups: categoryGroupsToShow,
             showHiddenCategories: true,
-            onSelect: onOpenCoverCategoryModal,
+            onSelect:
+              budgetType === 'envelope' ? onOpenCoverCategoryModal : null,
             clearOnSelect: true,
             closeOnSelect: false,
           },
         },
       }),
     );
-  }, [categoryGroupsToShow, dispatch, month, onOpenCoverCategoryModal, t]);
+  }, [
+    categoryGroupsToShow,
+    dispatch,
+    month,
+    onOpenCoverCategoryModal,
+    t,
+    budgetType,
+  ]);
 
   const numberOfOverspentCategories = overspentCategories.length;
   if (numberOfOverspentCategories === 0) {
@@ -677,7 +693,8 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
             </Text>
           </View>
           <Button onPress={onOpenCategorySelectionModal} style={PILL_STYLE}>
-            <Trans>Cover</Trans>
+            {budgetType === 'envelope' && <Trans>Cover</Trans>}
+            {budgetType === 'tracking' && <Trans>View</Trans>}
           </Button>
         </View>
       </Banner>
@@ -695,7 +712,11 @@ function Banners({ month, onBudgetAction }) {
       style={{ backgroundColor: theme.mobilePageBackground }}
     >
       <UncategorizedTransactionsBanner />
-      <OverspendingBanner month={month} onBudgetAction={onBudgetAction} />
+      <OverspendingBanner
+        month={month}
+        onBudgetAction={onBudgetAction}
+        budgetType={budgetType}
+      />
       {budgetType === 'envelope' && (
         <OverbudgetedBanner month={month} onBudgetAction={onBudgetAction} />
       )}

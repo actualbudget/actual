@@ -33,6 +33,8 @@ import { AutoTextSize } from 'auto-text-size';
 
 import { useModalState } from '@desktop-client/hooks/useModalState';
 
+export const MODAL_Z_INDEX = 3000;
+
 type ModalProps = ComponentPropsWithRef<typeof ReactAriaModal> & {
   name: string;
   isLoading?: boolean;
@@ -80,7 +82,7 @@ export const Modal = ({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 3000,
+        zIndex: MODAL_Z_INDEX,
         fontSize: 14,
         willChange: 'transform',
         // on mobile, we disable the blurred background for performance reasons
@@ -413,7 +415,7 @@ export function ModalTitle({
 
   return isEditing ? (
     <Input
-      inputRef={inputRef}
+      ref={inputRef}
       style={{
         fontSize: 25,
         fontWeight: 700,
@@ -422,11 +424,9 @@ export function ModalTitle({
       }}
       defaultValue={title}
       onUpdate={_onTitleUpdate}
-      onKeyDown={e => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          _onTitleUpdate?.(e.currentTarget.value);
-        }
+      onEnter={(value, e) => {
+        e.preventDefault();
+        _onTitleUpdate?.(value);
       }}
     />
   ) : (

@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useLocation, type Location } from 'react-router-dom';
+import { useLocation, type Location } from 'react-router';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -15,9 +15,9 @@ import { View } from '@actual-app/components/view';
 
 import { type OpenIdConfig } from 'loot-core/types/models';
 
-import { Link } from '../../common/Link';
-import { FormField, FormLabel } from '../../forms';
-import { useServerURL } from '../../ServerContext';
+import { Link } from '@desktop-client/components/common/Link';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { useServerURL } from '@desktop-client/components/ServerContext';
 
 type OpenIdCallback = (config: OpenIdConfig) => Promise<void>;
 

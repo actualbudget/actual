@@ -4,12 +4,15 @@ import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 
-import type { ScheduleTemplate } from 'loot-core/server/budget/types/templates';
 import type { ScheduleEntity } from 'loot-core/types/models';
+import type { ScheduleTemplate } from 'loot-core/types/models/templates';
 
-import { Link } from '../../../common/Link';
-import { FormField, FormLabel } from '../../../forms';
-import { type Action, updateTemplate } from '../actions';
+import {
+  type Action,
+  updateTemplate,
+} from '@desktop-client/components/budget/goals/actions';
+import { Link } from '@desktop-client/components/common/Link';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
 
 type ScheduleAutomationProps = {
   schedules: readonly ScheduleEntity[];
@@ -36,7 +39,7 @@ export const ScheduleAutomation = ({
         <Select
           id="schedule-field"
           key="schedule-picker"
-          defaultLabel="Select a schedule"
+          defaultLabel={t('Select a schedule')}
           value={template.name}
           onChange={schedule =>
             dispatch(

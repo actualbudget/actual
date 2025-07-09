@@ -4,7 +4,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -16,12 +16,15 @@ import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 import { currentDay, dayFromDate } from 'loot-core/shared/months';
 import { amountToInteger } from 'loot-core/shared/util';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { SectionLabel } from '../forms';
-import { DateSelect } from '../select/DateSelect';
-
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { SectionLabel } from '@desktop-client/components/forms';
+import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 const itemStyle: CSSProperties = {
   fontSize: 17,
@@ -137,7 +140,7 @@ export function EditFieldModal({
                 noteInputRef.current?.focus();
               }}
             >
-              {t('Prepend')}
+              <Trans>Prepend</Trans>
             </Button>
             <Button
               style={{
@@ -168,7 +171,7 @@ export function EditFieldModal({
                 noteInputRef.current?.focus();
               }}
             >
-              {t('Replace')}
+              <Trans>Replace</Trans>
             </Button>
             <Button
               style={{
@@ -199,14 +202,14 @@ export function EditFieldModal({
                 noteInputRef.current?.focus();
               }}
             >
-              {t('Append')}
+              <Trans>Append</Trans>
             </Button>
           </View>
           <Input
-            inputRef={noteInputRef}
+            ref={noteInputRef}
             autoFocus
-            onEnter={e => {
-              onSelectNote(e.currentTarget.value, noteAmend);
+            onEnter={value => {
+              onSelectNote(value, noteAmend);
               close();
             }}
             style={inputStyle}
@@ -219,8 +222,8 @@ export function EditFieldModal({
       label = t('Amount');
       editor = ({ close }) => (
         <Input
-          onEnter={e => {
-            onSelect(e.currentTarget.value);
+          onEnter={value => {
+            onSelect(value);
             close();
           }}
           style={inputStyle}

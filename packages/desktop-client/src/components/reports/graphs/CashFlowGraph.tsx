@@ -23,9 +23,8 @@ import {
   amountToCurrencyNoDecimal,
 } from 'loot-core/shared/util';
 
-import { chartTheme } from '../chart-theme';
-import { Container } from '../Container';
-
+import { chartTheme } from '@desktop-client/components/reports/chart-theme';
+import { Container } from '@desktop-client/components/reports/Container';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -140,7 +139,7 @@ export function CashFlowGraph({
               dataKey="date"
               tick={{ fill: theme.reportsLabel }}
               tickFormatter={x => {
-                // eslint-disable-next-line rulesdir/typography
+                // eslint-disable-next-line actual/typography
                 return d.format(x, isConcise ? "MMM ''yy" : 'MMM d', {
                   locale,
                 });
@@ -160,7 +159,7 @@ export function CashFlowGraph({
             />
             <Tooltip
               labelFormatter={x => {
-                // eslint-disable-next-line rulesdir/typography
+                // eslint-disable-next-line actual/typography
                 return d.format(x, isConcise ? "MMM ''yy" : 'MMM d', {
                   locale,
                 });

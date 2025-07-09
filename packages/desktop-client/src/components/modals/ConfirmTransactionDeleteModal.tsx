@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -8,8 +8,12 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type ConfirmTransactionDeleteModalProps = Extract<
   ModalType,
@@ -51,7 +55,7 @@ export function ConfirmTransactionDeleteModal({
                 }}
                 onPress={close}
               >
-                {t('Cancel')}
+                <Trans>Cancel</Trans>
               </Button>
               <InitialFocus>
                 <Button
@@ -62,7 +66,7 @@ export function ConfirmTransactionDeleteModal({
                     close();
                   }}
                 >
-                  {t('Delete')}
+                  <Trans>Delete</Trans>
                 </Button>
               </InitialFocus>
             </View>

@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { SvgExclamationOutline } from '@actual-app/components/icons/v1';
@@ -10,13 +10,12 @@ import { View } from '@actual-app/components/view';
 
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { unlinkAccount } from '../../accounts/accountsSlice';
-import { authorizeBank } from '../../gocardless';
-import { useDispatch } from '../../redux';
-import { Link } from '../common/Link';
-
+import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
+import { Link } from '@desktop-client/components/common/Link';
+import { authorizeBank } from '@desktop-client/gocardless';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
+import { useDispatch } from '@desktop-client/redux';
 
 function useErrorMessage() {
   const { t } = useTranslation();

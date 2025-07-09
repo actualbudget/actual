@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -17,10 +17,9 @@ import {
   type DataEntity,
 } from 'loot-core/types/models';
 
-import { PrivacyFilter } from '../PrivacyFilter';
-
 import { ReportOptions } from './ReportOptions';
 
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type ReportSummaryProps = {
@@ -44,12 +43,12 @@ export function ReportSummary({
   const { t } = useTranslation();
   const net =
     balanceTypeOp === 'netAssets'
-      ? 'DEPOSIT'
+      ? t('DEPOSIT')
       : balanceTypeOp === 'netDebts'
-        ? 'PAYMENT'
+        ? t('PAYMENT')
         : Math.abs(data.totalDebts) > Math.abs(data.totalAssets)
-          ? 'PAYMENT'
-          : 'DEPOSIT';
+          ? t('PAYMENT')
+          : t('DEPOSIT');
   const average = amountToInteger(data[balanceTypeOp]) / intervalsCount;
   return (
     <View
@@ -115,10 +114,10 @@ export function ReportSummary({
           }}
         >
           {balanceTypeOp === 'totalDebts'
-            ? 'TOTAL SPENDING'
+            ? t('TOTAL SPENDING')
             : balanceTypeOp === 'totalAssets'
-              ? 'TOTAL DEPOSITS'
-              : 'NET ' + net}
+              ? t('TOTAL DEPOSITS')
+              : t('NET {{net}}', { net })}
         </Text>
         <Text
           style={{
@@ -130,7 +129,9 @@ export function ReportSummary({
         >
           <PrivacyFilter>{amountToCurrency(data[balanceTypeOp])}</PrivacyFilter>
         </Text>
-        <Text style={{ fontWeight: 600 }}>{t('For this time period')}</Text>
+        <Text style={{ fontWeight: 600 }}>
+          <Trans>For this time period</Trans>
+        </Text>
       </View>
       <View
         style={{
@@ -150,10 +151,10 @@ export function ReportSummary({
           }}
         >
           {balanceTypeOp === 'totalDebts'
-            ? 'AVERAGE SPENDING'
+            ? t('AVERAGE SPENDING')
             : balanceTypeOp === 'totalAssets'
-              ? 'AVERAGE DEPOSIT'
-              : 'AVERAGE NET'}
+              ? t('AVERAGE DEPOSIT')
+              : t('AVERAGE NET')}
         </Text>
         <Text
           style={{
@@ -168,7 +169,14 @@ export function ReportSummary({
           </PrivacyFilter>
         </Text>
         <Text style={{ fontWeight: 600 }}>
-          Per {(ReportOptions.intervalMap.get(interval) || '').toLowerCase()}
+          <Trans>
+            Per{' '}
+            {{
+              interval: (
+                ReportOptions.intervalMap.get(interval) || ''
+              ).toLowerCase(),
+            }}
+          </Trans>
         </Text>
       </View>
     </View>

@@ -1,5 +1,6 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router';
 
 import { AccountTransactions } from './AccountTransactions';
 
@@ -7,6 +8,7 @@ import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function Account() {
+  const { t } = useTranslation();
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction] = useSyncedPref('hideFraction');
@@ -14,6 +16,21 @@ export function Account() {
   const { id: accountId } = useParams();
 
   const account = useAccount(accountId!);
+
+  function accountNameFromId(id: string | undefined) {
+    switch (id) {
+      case 'onbudget':
+        return t('On Budget Accounts');
+      case 'offbudget':
+        return t('Off Budget Accounts');
+      case 'uncategorized':
+        return t('Uncategorized');
+      case 'closed':
+        return t('Closed Accounts');
+      default:
+        return t('All Accounts');
+    }
+  }
 
   return (
     <AccountTransactions
@@ -25,19 +42,4 @@ export function Account() {
       accountName={account ? account.name : accountNameFromId(accountId)}
     />
   );
-}
-
-function accountNameFromId(id: string | undefined) {
-  switch (id) {
-    case 'onbudget':
-      return 'On Budget Accounts';
-    case 'offbudget':
-      return 'Off Budget Accounts';
-    case 'uncategorized':
-      return 'Uncategorized';
-    case 'closed':
-      return 'Closed Accounts';
-    default:
-      return 'All Accounts';
-  }
 }

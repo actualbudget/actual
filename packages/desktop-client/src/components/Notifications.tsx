@@ -21,13 +21,14 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
+import { Link } from './common/Link';
+import { MODAL_Z_INDEX } from './common/Modal';
+
 import {
   removeNotification,
   type NotificationWithId,
-} from '../notifications/notificationsSlice';
-import { useSelector, useDispatch } from '../redux';
-
-import { Link } from './common/Link';
+} from '@desktop-client/notifications/notificationsSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 function compileMessage(
   message: string,
@@ -313,7 +314,7 @@ export function Notifications({ style }: { style?: CSSProperties }) {
         top: notificationInset?.top,
         right: notificationInset?.right || 13,
         left: notificationInset?.left || (isNarrowWidth ? 13 : undefined),
-        zIndex: 10000,
+        zIndex: MODAL_Z_INDEX - 1,
         ...style,
       }}
     >

@@ -19,10 +19,10 @@ import {
   amountToCurrency,
   appendDecimals,
   currencyToAmount,
+  reapplyThousandSeparators,
 } from 'loot-core/shared/util';
 
-import { makeAmountFullStyle } from '../../budget/util';
-
+import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
@@ -114,6 +114,7 @@ const AmountInput = memo(function AmountInput({
   };
 
   const onChangeText = (text: string) => {
+    text = reapplyThousandSeparators(text);
     text = appendDecimals(text, String(hideFraction) === 'true');
     setEditing(true);
     setText(text);

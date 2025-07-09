@@ -5,16 +5,15 @@ import { vi } from 'vitest';
 import { generateAccount } from 'loot-core/mocks';
 import type { AccountEntity, PayeeEntity } from 'loot-core/types/models';
 
-import { AuthProvider } from '../../auth/AuthProvider';
-import { TestProvider } from '../../redux/mock';
-
 import {
   PayeeAutocomplete,
   type PayeeAutocompleteItem,
   type PayeeAutocompleteProps,
 } from './PayeeAutocomplete';
 
+import { AuthProvider } from '@desktop-client/auth/AuthProvider';
 import { useCommonPayees } from '@desktop-client/hooks/usePayees';
+import { TestProvider } from '@desktop-client/redux/mock';
 
 const PAYEE_SELECTOR = '[data-testid][role=option]';
 const PAYEE_SECTION_SELECTOR = '[data-testid$="-item-group"]';

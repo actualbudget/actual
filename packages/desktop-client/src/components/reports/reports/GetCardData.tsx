@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
@@ -17,23 +17,22 @@ import {
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { ChooseGraph } from '../ChooseGraph';
-import { getLiveRange } from '../getLiveRange';
-import { LoadingIndicator } from '../LoadingIndicator';
-import { ReportOptions } from '../ReportOptions';
-import { createCustomSpreadsheet } from '../spreadsheets/custom-spreadsheet';
-import { createGroupedSpreadsheet } from '../spreadsheets/grouped-spreadsheet';
-import { useReport } from '../useReport';
+import { ChooseGraph } from '@desktop-client/components/reports/ChooseGraph';
+import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';
+import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
+import { createCustomSpreadsheet } from '@desktop-client/components/reports/spreadsheets/custom-spreadsheet';
+import { createGroupedSpreadsheet } from '@desktop-client/components/reports/spreadsheets/grouped-spreadsheet';
+import { useReport } from '@desktop-client/components/reports/useReport';
 
 function ErrorFallback() {
-  const { t } = useTranslation();
   return (
     <>
       <div>
         <br />
       </div>
       <Text style={{ ...styles.mediumText, color: theme.errorText }}>
-        {t('There was a problem loading your report')}
+        <Trans>There was a problem loading your report</Trans>
       </Text>
     </>
   );

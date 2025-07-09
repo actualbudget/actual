@@ -8,23 +8,6 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
-import { pushModal } from '../../modals/modalsSlice';
-import { addNotification } from '../../notifications/notificationsSlice';
-import {
-  applyBudgetAction,
-  createCategory,
-  createGroup,
-  deleteCategory,
-  deleteGroup,
-  getCategories,
-  moveCategory,
-  moveCategoryGroup,
-  updateCategory,
-  updateGroup,
-} from '../../queries/queriesSlice';
-import { useDispatch } from '../../redux';
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
-
 import { DynamicBudgetTable } from './DynamicBudgetTable';
 import * as envelopeBudget from './envelope/EnvelopeBudgetComponents';
 import { EnvelopeBudgetProvider } from './envelope/EnvelopeBudgetContext';
@@ -36,8 +19,24 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import {
+  applyBudgetAction,
+  createCategory,
+  createGroup,
+  deleteCategory,
+  deleteGroup,
+  getCategories,
+  moveCategory,
+  moveCategoryGroup,
+  updateCategory,
+  updateGroup,
+} from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type TrackingReportComponents = {
   SummaryComponent: typeof trackingBudget.BudgetSummary;
@@ -389,9 +388,9 @@ function BudgetInner(props: BudgetInnerProps) {
   }
 
   return (
-    <NamespaceContext.Provider value={monthUtils.sheetForMonth(startMonth)}>
+    <SheetNameProvider name={monthUtils.sheetForMonth(startMonth)}>
       <View style={{ flex: 1 }}>{table}</View>
-    </NamespaceContext.Provider>
+    </SheetNameProvider>
   );
 }
 

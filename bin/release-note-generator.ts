@@ -6,7 +6,7 @@ import prompts from 'prompts';
 
 async function run() {
   const username = await execAsync(
-    // eslint-disable-next-line rulesdir/typography
+    // eslint-disable-next-line actual/typography
     "gh api user --jq '.login'",
     'To avoid having to enter your username, consider installing the official GitHub CLI (https://github.com/cli/cli) and logging in with `gh auth login`.',
   );
@@ -16,7 +16,7 @@ async function run() {
       `Found potentially matching PR ${activePr.number}: ${activePr.title}`,
     );
   }
-  const prNumber = activePr?.number ?? (await getNextPrNumber());
+  const initialPrNumber = activePr?.number ?? (await getNextPrNumber());
 
   const result = await prompts([
     {
@@ -29,7 +29,7 @@ async function run() {
       name: 'pullRequestNumber',
       message: 'PR Number',
       type: 'number',
-      initial: prNumber,
+      initial: initialPrNumber,
     },
     {
       name: 'releaseNoteType',
@@ -53,7 +53,8 @@ async function run() {
   if (
     !result.githubUsername ||
     !result.oneLineSummary ||
-    !result.releaseNoteType
+    !result.releaseNoteType ||
+    !result.pullRequestNumber
   ) {
     console.log('All questions must be answered. Exiting');
     exit(1);
@@ -64,6 +65,7 @@ async function run() {
     result.githubUsername,
     result.oneLineSummary,
   );
+  const prNumber = result.pullRequestNumber;
 
   const filepath = `./upcoming-release-notes/${prNumber}.md`;
   if (existsSync(filepath)) {
@@ -83,9 +85,7 @@ async function run() {
       console.error('Failed to write release note file:', err);
       exit(1);
     } else {
-      console.log(
-        `Release note generated successfully: ./upcoming-release-notes/${prNumber}.md`,
-      );
+      console.log(`Release note generated successfully: ${filepath}`);
     }
   });
 }

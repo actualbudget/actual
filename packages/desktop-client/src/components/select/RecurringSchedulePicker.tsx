@@ -30,10 +30,9 @@ import {
   type WithRequired,
 } from 'loot-core/types/util';
 
-import { Checkbox } from '../forms';
-
 import { DateSelect } from './DateSelect';
 
+import { Checkbox } from '@desktop-client/components/forms';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
@@ -457,13 +456,13 @@ function RecurringScheduleTooltip({
               style={{ width: 40 }}
               type="number"
               min={1}
-              onChange={e => updateField('endOccurrences', e.target.value)}
+              onChangeValue={value => updateField('endOccurrences', value)}
               defaultValue={config.endOccurrences || 1}
             />
             {config.endOccurrences === '1' ? (
-              <Trans>ocurrence</Trans>
+              <Trans>occurrence</Trans>
             ) : (
-              <Trans>ocurrences</Trans>
+              <Trans>occurrences</Trans>
             )}
           </>
         )}
@@ -485,13 +484,15 @@ function RecurringScheduleTooltip({
         style={{ marginTop: 10 }}
         spacing={1}
       >
-        <Text style={{ whiteSpace: 'nowrap' }}>{t('Repeat every')}</Text>
+        <Text style={{ whiteSpace: 'nowrap' }}>
+          <Trans>Repeat every</Trans>
+        </Text>
         <Input
           id="interval"
           style={{ width: 40 }}
           type="number"
           min={1}
-          onChange={e => updateField('interval', e.target.value)}
+          onChangeValue={value => updateField('interval', value)}
           defaultValue={config.interval || 1}
         />
         <Select
@@ -508,7 +509,7 @@ function RecurringScheduleTooltip({
             }}
             onPress={() => dispatch({ type: 'add-recurrence' })}
           >
-            {t('Add specific days')}
+            <Trans>Add specific days</Trans>
           </Button>
         ) : null}
       </Stack>

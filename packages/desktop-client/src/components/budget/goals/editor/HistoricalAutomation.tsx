@@ -6,11 +6,14 @@ import { Stack } from '@actual-app/components/stack';
 import type {
   CopyTemplate,
   AverageTemplate,
-} from 'loot-core/server/budget/types/templates';
+} from 'loot-core/types/models/templates';
 
-import { FormField, FormLabel } from '../../../forms';
-import { GenericInput } from '../../../util/GenericInput';
-import { type Action, updateTemplate } from '../actions';
+import {
+  type Action,
+  updateTemplate,
+} from '@desktop-client/components/budget/goals/actions';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { GenericInput } from '@desktop-client/components/util/GenericInput';
 
 type HistoricalAutomationProps = {
   template: CopyTemplate | AverageTemplate;

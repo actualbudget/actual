@@ -1,7 +1,7 @@
-import { createRequire } from 'module';
 import fs, { readFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
@@ -37,17 +37,17 @@ if (process.env.NODE_ENV !== 'development') {
   );
 }
 
+app.use(express.json({ limit: `${config.get('upload.fileSizeLimitMB')}mb` }));
+
 app.use(
-  bodyParser.json({ limit: `${config.get('upload.fileSizeLimitMB')}mb` }),
-);
-app.use(
-  bodyParser.raw({
+  express.raw({
     type: 'application/actual-sync',
     limit: `${config.get('upload.fileSizeSyncLimitMB')}mb`,
   }),
 );
+
 app.use(
-  bodyParser.raw({
+  express.raw({
     type: 'application/encrypted-file',
     limit: `${config.get('upload.syncEncryptedFileSizeLimitMB')}mb`,
   }),
@@ -68,17 +68,42 @@ app.get('/mode', (req, res) => {
 });
 
 app.get('/info', (_req, res) => {
-  const require = createRequire(import.meta.url);
-  const packageJsonPath = require.resolve(
-    '@actual-app/sync-server/package.json',
-  );
-  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+  function findPackageJson(startDir: string) {
+    // find the nearest package.json file while traversing up the directory tree
+    let currentPath = startDir;
+    let directoriesSearched = 0;
+    const pathRoot = resolve(currentPath, '/');
+    try {
+      while (currentPath !== pathRoot && directoriesSearched < 5) {
+        const packageJsonPath = resolve(currentPath, 'package.json');
+        if (fs.existsSync(packageJsonPath)) {
+          const packageJson = JSON.parse(
+            readFileSync(packageJsonPath, 'utf-8'),
+          );
+
+          if (packageJson.name === '@actual-app/sync-server') {
+            return packageJson;
+          }
+        }
+
+        currentPath = resolve(join(currentPath, '..')); // Move up one directory
+        directoriesSearched++;
+      }
+    } catch (error) {
+      console.error('Error while searching for package.json:', error);
+    }
+
+    return null;
+  }
+
+  const dirname = resolve(fileURLToPath(import.meta.url), '../');
+  const packageJson = findPackageJson(dirname);
 
   res.status(200).json({
     build: {
-      name: packageJson.name,
-      description: packageJson.description,
-      version: packageJson.version,
+      name: packageJson?.name,
+      description: packageJson?.description,
+      version: packageJson?.version,
     },
   });
 });
@@ -119,7 +144,7 @@ if (process.env.NODE_ENV === 'development') {
   console.log('Running in production mode - Serving static React app');
 
   app.use(express.static(config.get('webRoot'), { index: false }));
-  app.get('/*', (req, res) =>
+  app.get('/{*splat}', (req, res) =>
     res.sendFile(config.get('webRoot') + '/index.html'),
   );
 }
@@ -129,6 +154,15 @@ function parseHTTPSConfig(value: string) {
     return value;
   }
   return fs.readFileSync(value);
+}
+
+function sendServerStartedMessage() {
+  // Signify to any parent process that the server has started. Used in electron desktop app
+  // @ts-ignore-error electron types
+  process.parentPort?.postMessage({ type: 'server-started' });
+  console.log(
+    'Listening on ' + config.get('hostname') + ':' + config.get('port') + '...',
+  );
 }
 
 export async function run() {
@@ -161,16 +195,12 @@ export async function run() {
       key: parseHTTPSConfig(config.get('https.key')),
       cert: parseHTTPSConfig(config.get('https.cert')),
     };
-    https.createServer(httpsOptions, app).listen(port, hostname);
+    https.createServer(httpsOptions, app).listen(port, hostname, () => {
+      sendServerStartedMessage();
+    });
   } else {
-    app.listen(port, hostname);
+    app.listen(port, hostname, () => {
+      sendServerStartedMessage();
+    });
   }
-
-  // Signify to any parent process that the server has started. Used in electron desktop app
-  // @ts-ignore-error electron types
-  process.parentPort?.postMessage({ type: 'server-started' });
-
-  console.log(
-    'Listening on ' + config.get('hostname') + ':' + config.get('port') + '...',
-  );
 }

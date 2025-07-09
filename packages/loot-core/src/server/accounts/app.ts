@@ -16,6 +16,7 @@ import {
   SyncServerSimpleFinAccount,
   SyncServerPluggyAiAccount,
   type GoCardlessToken,
+  ImportTransactionEntity,
 } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
@@ -848,13 +849,22 @@ function handleSyncError(
   if (err instanceof BankSyncError || (err as any)?.type === 'BankSyncError') {
     const error = err as BankSyncError;
 
-    return {
+    const syncError = {
       type: 'SyncError',
       accountId: acct.id,
       message: 'Failed syncing account “' + acct.name + '.”',
       category: error.category,
       code: error.code,
     };
+
+    if (error.category === 'RATE_LIMIT_EXCEEDED') {
+      return {
+        ...syncError,
+        message: `Failed syncing account ${acct.name}. Rate limit exceeded. Please try again later.`,
+      };
+    }
+
+    return syncError;
   }
 
   if (err instanceof PostError && err.reason !== 'internal') {
@@ -1065,7 +1075,7 @@ async function simpleFinBatchSync({
   return retVal;
 }
 
-type ImportTransactionsResult = bankSync.ReconcileTransactionsResult & {
+export type ImportTransactionsResult = bankSync.ReconcileTransactionsResult & {
   errors: Array<{
     message: string;
   }>;
@@ -1078,7 +1088,7 @@ async function importTransactions({
   opts,
 }: {
   accountId: AccountEntity['id'];
-  transactions: TransactionEntity[];
+  transactions: ImportTransactionEntity[];
   isPreview: boolean;
   opts?: {
     defaultCleared: boolean;

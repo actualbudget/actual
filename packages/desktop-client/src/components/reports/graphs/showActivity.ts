@@ -1,4 +1,4 @@
-import { type NavigateFunction } from 'react-router-dom';
+import { type NavigateFunction } from 'react-router';
 
 import * as monthUtils from 'loot-core/shared/months';
 import {
@@ -9,7 +9,7 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { ReportOptions } from '../ReportOptions';
+import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 
 type showActivityProps = {
   navigate: NavigateFunction;

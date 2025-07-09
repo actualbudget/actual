@@ -1,13 +1,17 @@
 import { type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import * as Platform from 'loot-core/shared/platform';
 
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
 
 type KeyIconProps = {
   shortcut: string;

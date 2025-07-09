@@ -6,17 +6,26 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType, pushModal } from '../../modals/modalsSlice';
-import { useDispatch } from '../../redux';
 import {
   addToBeBudgetedGroup,
   removeCategoriesFromGroups,
-} from '../budget/util';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { FieldLabel, TapField } from '../mobile/MobileForms';
-import { AmountInput } from '../util/AmountInput';
-
+} from '@desktop-client/components/budget/util';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import {
+  FieldLabel,
+  TapField,
+} from '@desktop-client/components/mobile/MobileForms';
+import { AmountInput } from '@desktop-client/components/util/AmountInput';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import {
+  type Modal as ModalType,
+  pushModal,
+} from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type TransferModalProps = Extract<ModalType, { name: 'transfer' }>['options'];
 
@@ -46,7 +55,7 @@ export function TransferModal({
     return [filteredCategoryGroups, filteredCategories];
   }, [categoryId, originalCategoryGroups, showToBeBudgeted]);
 
-  const [amount, setAmount] = useState<number>(0);
+  const [amount, setAmount] = useState<number>(initialAmount);
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
 

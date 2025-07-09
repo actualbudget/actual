@@ -40,7 +40,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
 import { format as formatDate, parseISO } from 'date-fns';
 
 import * as monthUtils from 'loot-core/shared/months';
@@ -69,18 +68,26 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { useSelectedDispatch, useSelectedItems } from '../../hooks/useSelected';
 import {
-  type SplitsExpandedContextValue,
-  useSplitsExpanded,
-} from '../../hooks/useSplitsExpanded';
-import { useDispatch } from '../../redux';
-import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
-import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
-import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
-import { getStatusProps, type StatusTypes } from '../schedules/StatusBadge';
-import { DateSelect } from '../select/DateSelect';
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
+  deserializeTransaction,
+  isLastChild,
+  makeTemporaryTransactions,
+  selectAscDesc,
+  type SerializedTransaction,
+  serializeTransaction,
+  type TransactionEditFunction,
+  type TransactionUpdateFunction,
+} from './table/utils';
+import { TransactionMenu } from './TransactionMenu';
+
+import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
+import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
+import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
+import {
+  getStatusProps,
+  type StatusTypes,
+} from '@desktop-client/components/schedules/StatusBadge';
+import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import {
   Cell,
   CellButton,
@@ -96,33 +103,31 @@ import {
   type TableProps,
   UnexposedCellContent,
   useTableNavigator,
-} from '../table';
-
-import {
-  deserializeTransaction,
-  isLastChild,
-  makeTemporaryTransactions,
-  selectAscDesc,
-  type SerializedTransaction,
-  serializeTransaction,
-  type TransactionEditFunction,
-  type TransactionUpdateFunction,
-} from './table/utils';
-import { TransactionMenu } from './TransactionMenu';
-
+} from '@desktop-client/components/table';
 import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { usePrevious } from '@desktop-client/hooks/usePrevious';
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
+import {
+  useSelectedDispatch,
+  useSelectedItems,
+} from '@desktop-client/hooks/useSelected';
+import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
+import {
+  type SplitsExpandedContextValue,
+  useSplitsExpanded,
+} from '@desktop-client/hooks/useSplitsExpanded';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import {
   getAccountsById,
   getPayeesById,
   getCategoriesById,
 } from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;
@@ -584,7 +589,9 @@ function PayeeCell({
               <Tooltip
                 content={
                   <View style={{ padding: 10 }}>
-                    <Text style={{ fontWeight: 'bold' }}>Imported Payee</Text>
+                    <Text style={{ fontWeight: 'bold' }}>
+                      <Trans>Imported Payee</Trans>
+                    </Text>
                     <Text style={{ fontWeight: 'normal' }}>
                       {importedPayee}
                     </Text>
@@ -660,7 +667,9 @@ function PayeeCell({
                 <Tooltip
                   content={
                     <View style={{ padding: 10 }}>
-                      <Text style={{ fontWeight: 'bold' }}>Imported Payee</Text>
+                      <Text style={{ fontWeight: 'bold' }}>
+                        <Trans>Imported Payee</Trans>
+                      </Text>
                       <Text style={{ fontWeight: 'normal' }}>
                         {importedPayee}
                       </Text>
@@ -733,6 +742,8 @@ function PayeeIcons({
   onNavigateToTransferAccount,
   onNavigateToSchedule,
 }: PayeeIconsProps) {
+  const { t } = useTranslation();
+
   const scheduleId = transaction.schedule;
   const { isLoading, schedules = [] } = useCachedSchedules();
 
@@ -756,7 +767,7 @@ function PayeeIcons({
         <Button
           variant="bare"
           data-testid="schedule-icon"
-          aria-label="See schedule details"
+          aria-label={t('See schedule details')}
           style={payeeIconButtonStyle}
           onPress={() => {
             if (scheduleId) {
@@ -775,7 +786,7 @@ function PayeeIcons({
         <Button
           variant="bare"
           data-testid="transfer-icon"
-          aria-label="See transfer account"
+          aria-label={t('See transfer account')}
           style={payeeIconButtonStyle}
           onPress={() => {
             if (!isTemporaryId(transaction.id)) {
@@ -892,6 +903,8 @@ const Transaction = memo(function Transaction({
   showSelection,
   allowSplitTransaction,
 }: TransactionProps) {
+  const { t } = useTranslation();
+
   const dispatch = useDispatch();
   const dispatchSelected = useSelectedDispatch();
   const triggerRef = useRef(null);
@@ -1348,7 +1361,9 @@ const Transaction = memo(function Transaction({
         focused={focusedField === 'notes'}
         value={notes || ''}
         valueStyle={valueStyle}
-        formatter={value => notesTagFormatter(value, onNotesTagClick)}
+        formatter={value =>
+          NotesTagFormatter({ notes: value, onNotesTagClick })
+        }
         onExpose={name => !isPreview && onEdit(id, name)}
         inputProps={{
           value: notes || '',
@@ -1444,7 +1459,7 @@ const Transaction = memo(function Transaction({
                     userSelect: 'none',
                   }}
                 >
-                  Split
+                  <Trans>Split</Trans>
                 </Text>
               )}
             </View>
@@ -1461,13 +1476,13 @@ const Transaction = memo(function Transaction({
           onExpose={name => onEdit(id, name)}
           value={
             isParent
-              ? 'Split'
+              ? t('Split')
               : isOffBudget
-                ? 'Off budget'
+                ? t('Off budget')
                 : isBudgetTransfer
                   ? categoryId != null
-                    ? 'Needs Repair'
-                    : 'Transfer'
+                    ? t('Needs Repair')
+                    : t('Transfer')
                   : ''
           }
           valueStyle={valueStyle}
@@ -1492,7 +1507,7 @@ const Transaction = memo(function Transaction({
             value
               ? (getCategoriesById(categoryGroups)[value]?.name ?? '')
               : transaction.id
-                ? 'Categorize'
+                ? t('Categorize')
                 : ''
           }
           exposed={focusedField === 'category'}
@@ -1523,8 +1538,8 @@ const Transaction = memo(function Transaction({
             shouldSaveFromKey,
             inputStyle,
           }) => (
-            <NamespaceContext.Provider
-              value={monthUtils.sheetForMonth(
+            <SheetNameProvider
+              name={monthUtils.sheetForMonth(
                 monthUtils.monthFromDate(transaction.date),
               )}
             >
@@ -1540,7 +1555,7 @@ const Transaction = memo(function Transaction({
                 onSelect={onSave}
                 showHiddenCategories={false}
               />
-            </NamespaceContext.Provider>
+            </SheetNameProvider>
           )}
         </CustomCell>
       )}
@@ -1602,7 +1617,7 @@ const Transaction = memo(function Transaction({
           /* Balance field for all transactions */
           name="balance"
           value={
-            runningBalance == null || isChild
+            runningBalance == null || isChild || isTemporaryId(id)
               ? ''
               : integerToCurrency(runningBalance)
           }
@@ -1674,7 +1689,7 @@ function TransactionError({
             data-testid="transaction-error"
           >
             <Text>
-              Amount left:{' '}
+              <Trans>Amount left:</Trans>{' '}
               <Text style={{ fontWeight: 500 }}>
                 {integerToCurrency(
                   isDeposit ? error.difference : -error.difference,
@@ -1689,7 +1704,7 @@ function TransactionError({
               data-testid="distribute-split-button"
               isDisabled={!canDistributeRemainder}
             >
-              Distribute
+              <Trans>Distribute</Trans>
             </Button>
             <Button
               variant="primary"
@@ -1697,7 +1712,7 @@ function TransactionError({
               onPress={onAddSplit}
               data-testid="add-split-button"
             >
-              Add Split
+              <Trans>Add Split</Trans>
             </Button>
           </View>
         );
@@ -1710,7 +1725,6 @@ function TransactionError({
 
 type NewTransactionProps = {
   accounts: AccountEntity[];
-  balance: number;
   categoryGroups: CategoryGroupEntity[];
   dateFormat: string;
   editingTransaction: TransactionEntity['id'];
@@ -1737,6 +1751,7 @@ type NewTransactionProps = {
   payees: PayeeEntity[];
   showAccount?: boolean;
   showBalance?: boolean;
+  balance?: number | null;
   showCleared?: boolean;
   transactions: TransactionEntity[];
   transferAccountsByTransaction: {
@@ -1830,7 +1845,7 @@ function NewTransaction({
           onNavigateToTransferAccount={onNavigateToTransferAccount}
           onNavigateToSchedule={onNavigateToSchedule}
           onNotesTagClick={onNotesTagClick}
-          balance={balance}
+          balance={balance ?? 0}
           showSelection={true}
           allowSplitTransaction={true}
         />
@@ -2184,11 +2199,6 @@ function TransactionTableInner({
               onNavigateToSchedule={onNavigateToSchedule}
               onNotesTagClick={onNotesTagClick}
               onDistributeRemainder={props.onDistributeRemainder}
-              balance={
-                props.transactions?.length > 0
-                  ? (props.balances?.[props.transactions[0]?.id]?.balance ?? 0)
-                  : 0
-              }
             />
           </View>
         )}
@@ -2296,6 +2306,8 @@ export const TransactionTable = forwardRef(
     props: TransactionTableProps,
     ref: ForwardedRef<TableHandleRef<TransactionEntity>>,
   ) => {
+    const { t } = useTranslation();
+
     const dispatch = useDispatch();
     const [newTransactions, setNewTransactions] = useState<
       TransactionEntity[] | null
@@ -2445,7 +2457,7 @@ export const TransactionTable = forwardRef(
           addNotification({
             notification: {
               type: 'error',
-              message: 'Account is a required field',
+              message: t('Account is a required field'),
             },
           }),
         );
@@ -2912,67 +2924,3 @@ export const TransactionTable = forwardRef(
 );
 
 TransactionTable.displayName = 'TransactionTable';
-
-function notesTagFormatter(
-  notes: string,
-  onNotesTagClick: (tag: string) => void,
-) {
-  const words = notes.split(' ');
-  return (
-    <>
-      {words.map((word, i, arr) => {
-        const separator = arr.length - 1 === i ? '' : ' ';
-        if (word.includes('#') && word.length > 1) {
-          let lastEmptyTag = -1;
-          // Treat tags in a single word as separate tags.
-          // #tag1#tag2 => (#tag1)(#tag2)
-          // not-a-tag#tag2#tag3 => not-a-tag(#tag2)(#tag3)
-          return word.split('#').map((tag, ti) => {
-            if (ti === 0) {
-              return tag;
-            }
-
-            if (!tag) {
-              lastEmptyTag = ti;
-              return '#';
-            }
-
-            if (lastEmptyTag === ti - 1) {
-              return `${tag} `;
-            }
-            lastEmptyTag = -1;
-
-            const validTag = `#${tag}`;
-            return (
-              <span key={`${validTag}${ti}`}>
-                <Button
-                  variant="bare"
-                  key={i}
-                  className={css({
-                    display: 'inline-flex',
-                    padding: '3px 7px',
-                    borderRadius: 16,
-                    userSelect: 'none',
-                    backgroundColor: theme.noteTagBackground,
-                    color: theme.noteTagText,
-                    cursor: 'pointer',
-                    '&[data-hovered]': {
-                      backgroundColor: theme.noteTagBackgroundHover,
-                    },
-                  })}
-                  onPress={() => {
-                    onNotesTagClick?.(validTag);
-                  }}
-                >
-                  {validTag}
-                </Button>
-                {separator}
-              </span>
-            );
-          });
-        }
-        return `${word}${separator}`;
-      })}
-    </>
-  );
-}

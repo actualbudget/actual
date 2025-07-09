@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React, { Fragment, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import {
@@ -17,9 +17,9 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { Checkbox } from '../forms';
-
 import { GraphButton } from './GraphButton';
+
+import { Checkbox } from '@desktop-client/components/forms';
 
 type CategorySelectorProps = {
   categoryGroups: Array<CategoryGroupEntity>;
@@ -87,7 +87,9 @@ export function CategorySelector({
                   height={15}
                   style={{ marginRight: 5 }}
                 />
-                <Text>{t('Show unchecked')}</Text>
+                <Text>
+                  <Trans>Show unchecked</Trans>
+                </Text>
               </View>
             ) : (
               <View
@@ -109,7 +111,7 @@ export function CategorySelector({
                     textOverflow: 'ellipsis',
                   }}
                 >
-                  {t('Hide unchecked')}
+                  <Trans>Hide unchecked</Trans>
                 </Text>
               </View>
             )}

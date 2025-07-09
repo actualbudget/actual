@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React, { useRef, useState, type CSSProperties } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import {
@@ -18,18 +18,17 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal';
-import { Notes } from '../Notes';
-
+} from '@desktop-client/components/common/Modal';
+import { Notes } from '@desktop-client/components/Notes';
 import { useCategory } from '@desktop-client/hooks/useCategory';
 import { useCategoryGroup } from '@desktop-client/hooks/useCategoryGroup';
 import { useNotes } from '@desktop-client/hooks/useNotes';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type CategoryMenuModalProps = Extract<
   ModalType,
@@ -149,7 +148,7 @@ export function CategoryMenuModal({
                   height={20}
                   style={{ paddingRight: 5 }}
                 />
-                {t('Edit notes')}
+                <Trans>Edit notes</Trans>
               </Button>
             </View>
           </View>

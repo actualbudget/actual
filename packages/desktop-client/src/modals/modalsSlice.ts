@@ -18,9 +18,9 @@ import {
   type NoteEntity,
 } from 'loot-core/types/models';
 
-import { resetApp, setAppState } from '../app/appSlice';
-import { createAppAsyncThunk } from '../redux';
-import { signOut } from '../users/usersSlice';
+import { resetApp, setAppState } from '@desktop-client/app/appSlice';
+import { createAppAsyncThunk } from '@desktop-client/redux';
+import { signOut } from '@desktop-client/users/usersSlice';
 
 const sliceName = 'modals';
 
@@ -282,6 +282,7 @@ export type Modal =
         onReopenAccount: (accountId: AccountEntity['id']) => void;
         onEditNotes: (id: NoteEntity['id']) => void;
         onClose?: () => void;
+        onToggleRunningBalance?: () => void;
       };
     }
   | {
@@ -374,9 +375,18 @@ export type Modal =
       options: {
         categoryId: CategoryEntity['id'];
         month: string;
+        onCarryover?: (carryover: boolean) => void;
+        onTransfer?: () => void;
+        onCover?: () => void;
+      };
+    }
+  | {
+      name: 'envelope-income-balance-menu';
+      options: {
+        categoryId: CategoryEntity['id'];
+        month: string;
         onCarryover: (carryover: boolean) => void;
-        onTransfer: () => void;
-        onCover: () => void;
+        onShowActivity: () => void;
       };
     }
   | {
@@ -387,6 +397,7 @@ export type Modal =
         onCover: () => void;
         onHoldBuffer: () => void;
         onResetHoldBuffer: () => void;
+        onBudgetAction: (month: string, action: string, arg?: unknown) => void;
       };
     }
   | {

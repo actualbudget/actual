@@ -6,7 +6,7 @@ import React, {
   useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router';
 import { useSpring, animated, config } from 'react-spring';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -25,7 +25,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { useDrag } from '@use-gesture/react';
 
-import { useScrollListener } from '../ScrollProvider';
+import { useScrollListener } from '@desktop-client/components/ScrollProvider';
 
 const COLUMN_COUNT = 3;
 const PILL_HEIGHT = 15;

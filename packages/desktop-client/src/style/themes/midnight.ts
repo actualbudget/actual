@@ -1,4 +1,5 @@
-import * as colorPalette from '../palette';
+// eslint-disable-next-line no-restricted-imports
+import * as colorPalette from '@desktop-client/style/palette';
 
 export const pageBackground = colorPalette.gray600;
 export const pageBackgroundModalActive = colorPalette.gray700;
@@ -201,6 +202,7 @@ export const reportsInnerLabel = colorPalette.navy800;
 
 export const noteTagBackground = colorPalette.purple800;
 export const noteTagBackgroundHover = colorPalette.purple600;
+export const noteTagDefault = colorPalette.purple700;
 export const noteTagText = colorPalette.purple100;
 
 export const budgetOtherMonth = colorPalette.gray700;

@@ -1,13 +1,16 @@
 import { useTranslation } from 'react-i18next';
 
-import type { WeekTemplate } from 'loot-core/server/budget/types/templates';
+import type { PeriodicTemplate } from 'loot-core/types/models/templates';
 
-import { FormField, FormLabel } from '../../../forms';
-import { AmountInput } from '../../../util/AmountInput';
-import { type Action, updateTemplate } from '../actions';
+import {
+  type Action,
+  updateTemplate,
+} from '@desktop-client/components/budget/goals/actions';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { AmountInput } from '@desktop-client/components/util/AmountInput';
 
 type WeekAutomationProps = {
-  template: WeekTemplate;
+  template: PeriodicTemplate;
   dispatch: (action: Action) => void;
 };
 
@@ -23,7 +26,7 @@ export const WeekAutomation = ({ template, dispatch }: WeekAutomationProps) => {
         value={template.amount ?? 0}
         zeroSign="+"
         onUpdate={(value: number) =>
-          dispatch(updateTemplate({ type: 'week', amount: value }))
+          dispatch(updateTemplate({ type: 'periodic', amount: value }))
         }
       />
     </FormField>

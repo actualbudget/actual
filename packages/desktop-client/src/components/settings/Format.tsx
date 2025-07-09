@@ -12,11 +12,10 @@ import { css } from '@emotion/css';
 import { numberFormats } from 'loot-core/shared/util';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { Checkbox } from '../forms';
-import { useSidebar } from '../sidebar/SidebarProvider';
+import { Column, Setting } from './UI';
 
-import { Setting } from './UI';
-
+import { Checkbox } from '@desktop-client/components/forms';
+import { useSidebar } from '@desktop-client/components/sidebar/SidebarProvider';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
@@ -47,22 +46,6 @@ const dateFormats: { value: SyncedPrefs['dateFormat']; label: string }[] = [
   { value: 'MM.dd.yyyy', label: 'MM.DD.YYYY' },
   { value: 'dd.MM.yyyy', label: 'DD.MM.YYYY' },
 ];
-
-function Column({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <View
-      style={{
-        alignItems: 'flex-start',
-        flexGrow: 1,
-        gap: '0.5em',
-        width: '100%',
-      }}
-    >
-      <Text style={{ fontWeight: 500 }}>{title}</Text>
-      <View style={{ alignItems: 'flex-start', gap: '1em' }}>{children}</View>
-    </View>
-  );
-}
 
 export function FormatSettings() {
   const { t } = useTranslation();

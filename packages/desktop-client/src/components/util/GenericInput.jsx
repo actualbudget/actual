@@ -7,23 +7,22 @@ import { View } from '@actual-app/components/view';
 import { getMonthYearFormat } from 'loot-core/shared/months';
 import { integerToAmount, amountToInteger } from 'loot-core/shared/util';
 
-import { useSelector } from '../../redux';
-import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
-import { Autocomplete } from '../autocomplete/Autocomplete';
-import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
-import { FilterAutocomplete } from '../autocomplete/FilterAutocomplete';
-import { PayeeAutocomplete } from '../autocomplete/PayeeAutocomplete';
-import { ReportAutocomplete } from '../autocomplete/ReportAutocomplete';
-import { Checkbox } from '../forms';
-import { DateSelect } from '../select/DateSelect';
-import { RecurringSchedulePicker } from '../select/RecurringSchedulePicker';
-
 import { AmountInput } from './AmountInput';
 import { PercentInput } from './PercentInput';
 
+import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
+import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
+import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
+import { FilterAutocomplete } from '@desktop-client/components/autocomplete/FilterAutocomplete';
+import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
+import { ReportAutocomplete } from '@desktop-client/components/autocomplete/ReportAutocomplete';
+import { Checkbox } from '@desktop-client/components/forms';
+import { DateSelect } from '@desktop-client/components/select/DateSelect';
+import { RecurringSchedulePicker } from '@desktop-client/components/select/RecurringSchedulePicker';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useReports } from '@desktop-client/hooks/useReports';
+import { useSelector } from '@desktop-client/redux';
 
 export function GenericInput({
   field,
@@ -32,7 +31,7 @@ export function GenericInput({
   numberFormatType = undefined,
   multi,
   value,
-  inputRef,
+  ref,
   style,
   onChange,
   op = undefined,
@@ -48,7 +47,7 @@ export function GenericInput({
       case 'currency':
         return (
           <AmountInput
-            inputRef={inputRef}
+            inputRef={ref}
             value={amountToInteger(value)}
             onUpdate={v => onChange(integerToAmount(v))}
           />
@@ -56,7 +55,7 @@ export function GenericInput({
       case 'percentage':
         return (
           <PercentInput
-            inputRef={inputRef}
+            inputRef={ref}
             value={value}
             onUpdatePercent={onChange}
           />
@@ -64,11 +63,10 @@ export function GenericInput({
       default:
         return (
           <Input
-            inputRef={inputRef}
-            defaultValue={value || ''}
+            ref={ref}
+            value={value || ''}
             placeholder={t('nothing')}
-            onEnter={e => onChange(e.target.value)}
-            onBlur={e => onChange(e.target.value)}
+            onChangeValue={onChange}
           />
         );
     }
@@ -97,7 +95,7 @@ export function GenericInput({
               value={value}
               onSelect={onChange}
               inputProps={{
-                inputRef,
+                ref,
                 ...(showPlaceholder ? { placeholder: t('nothing') } : null),
               }}
             />
@@ -118,7 +116,7 @@ export function GenericInput({
                   openOnFocus={true}
                   onSelect={onChange}
                   inputProps={{
-                    inputRef,
+                    ref,
                     ...(showPlaceholder ? { placeholder: t('nothing') } : null),
                   }}
                 />
@@ -137,7 +135,7 @@ export function GenericInput({
               onSelect={onChange}
               showHiddenCategories={false}
               inputProps={{
-                inputRef,
+                ref,
                 ...(showPlaceholder ? { placeholder: t('nothing') } : null),
               }}
             />
@@ -159,7 +157,7 @@ export function GenericInput({
               openOnFocus={true}
               onSelect={onChange}
               inputProps={{
-                inputRef,
+                ref,
                 ...(showPlaceholder ? { placeholder: t('nothing') } : null),
               }}
             />
@@ -174,7 +172,7 @@ export function GenericInput({
               openOnFocus={true}
               onSelect={onChange}
               inputProps={{
-                inputRef,
+                ref,
                 ...(showPlaceholder ? { placeholder: t('nothing') } : null),
               }}
             />
@@ -190,11 +188,10 @@ export function GenericInput({
         case 'month':
           content = (
             <Input
-              inputRef={inputRef}
-              defaultValue={value || ''}
+              ref={ref}
+              value={value || ''}
               placeholder={getMonthYearFormat(dateFormat).toLowerCase()}
-              onEnter={e => onChange(e.target.value)}
-              onBlur={e => onChange(e.target.value)}
+              onChangeValue={onChange}
             />
           );
           break;
@@ -202,11 +199,10 @@ export function GenericInput({
         case 'year':
           content = (
             <Input
-              inputRef={inputRef}
-              defaultValue={value || ''}
+              ref={ref}
+              value={value || ''}
               placeholder="yyyy"
-              onEnter={e => onChange(e.target.value)}
-              onBlur={e => onChange(e.target.value)}
+              onChangeValue={onChange}
             />
           );
           break;
@@ -226,7 +222,7 @@ export function GenericInput({
                 value={value}
                 dateFormat={dateFormat}
                 openOnFocus={false}
-                inputRef={inputRef}
+                inputRef={ref}
                 inputProps={{ placeholder: dateFormat.toLowerCase() }}
                 onSelect={onChange}
               />
@@ -253,7 +249,7 @@ export function GenericInput({
             type={autocompleteType}
             suggestions={[]}
             value={value}
-            inputProps={{ inputRef }}
+            inputProps={{ ref }}
             onSelect={onChange}
           />
         );
@@ -262,11 +258,10 @@ export function GenericInput({
       } else {
         content = (
           <Input
-            inputRef={inputRef}
-            defaultValue={value || ''}
+            ref={ref}
+            value={value || ''}
             placeholder={t('nothing')}
-            onEnter={e => onChange(e.target.value)}
-            onBlur={e => onChange(e.target.value)}
+            onChangeValue={onChange}
           />
         );
       }

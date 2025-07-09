@@ -11,13 +11,12 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { PrivacyFilter } from '../../PrivacyFilter';
-import { Container } from '../Container';
-
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { Container } from '@desktop-client/components/reports/Container';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';

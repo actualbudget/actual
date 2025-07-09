@@ -10,16 +10,15 @@ import {
   type AccountEntity,
 } from 'loot-core/types/models';
 
-import { pushModal } from '../../modals/modalsSlice';
-import { useDispatch } from '../../redux';
-import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
-import { Page } from '../Page';
-
 import { AccountsHeader } from './AccountsHeader';
 import { AccountsList } from './AccountsList';
 
+import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
+import { Page } from '@desktop-client/components/Page';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type SyncProviders = BankSyncProviders | 'unlinked';
 

@@ -14,10 +14,10 @@ import {
 } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { type useSpreadsheet } from '../../hooks/useSpreadsheet';
-import { type DropPosition } from '../sort';
-
 import { getValidMonthBounds } from './MonthsContext';
+
+import { type DropPosition } from '@desktop-client/components/sort';
+import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
   return [
@@ -27,7 +27,7 @@ export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
       categories: [
         {
           id: 'to-budget',
-          name: t('To  Budget'),
+          name: t('To Budget'),
           group: 'to-budget',
         },
       ],
@@ -60,7 +60,7 @@ export function separateGroups(categoryGroups: CategoryGroupEntity[]) {
   ] as const;
 }
 
-export function makeAmountGrey(value: number | string): CSSProperties {
+export function makeAmountGrey(value: number | string | null): CSSProperties {
   return value === 0 || value === '0' || value === '' || value == null
     ? { color: theme.tableTextSubdued }
     : null;

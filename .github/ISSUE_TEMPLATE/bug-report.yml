@@ -1,15 +1,13 @@
 name: Bug Report
 description: File a bug report also known as an issue or problem.
 title: '[Bug]: '
-labels: ['bug']
+labels: ['needs triage', 'bug']
 body:
   - type: markdown
-    id: intro-md
     attributes:
       value: |
         Thanks for taking the time to fill out this bug report! Please ensure you provide as much information as possible to better assist in confirming and identifying a fix for the bug.
   - type: markdown
-    id: intro-md
     attributes:
       value: |
         **IMPORTANT:** we use GitHub Issues only for BUG REPORTS and FEATURE REQUESTS. If you are looking for help/support - please reach out to the [community on Discord](https://discord.gg/pRYNYr4W5A). All non-bug and non-feature-request issues will be closed.
@@ -23,8 +21,6 @@ body:
       options:
         - label: 'I have searched and found no existing issue'
           required: true
-    validations:
-      required: true
   - type: textarea
     id: what-happened
     attributes:
@@ -43,7 +39,6 @@ body:
     validations:
       required: true
   - type: markdown
-    id: env-info
     attributes:
       value: '## Environment Details'
   - type: dropdown

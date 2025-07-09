@@ -15,13 +15,13 @@ import { getColumnWidth, PILL_STYLE } from './BudgetTable';
 
 import { BalanceWithCarryover } from '@desktop-client/components/budget/BalanceWithCarryover';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { type Binding } from '@desktop-client/components/spreadsheet';
-import { useFormat } from '@desktop-client/components/spreadsheet/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { type Binding } from '@desktop-client/spreadsheet';
 import {
   envelopeBudget,
   trackingBudget,
-} from '@desktop-client/queries/queries';
+} from '@desktop-client/spreadsheet/bindings';
 
 type BalanceCellProps = {
   binding: Binding<
@@ -48,22 +48,22 @@ export function BalanceCell({
   });
 
   const goal =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.catGoal(category.id)
       : envelopeBudget.catGoal(category.id);
 
   const longGoal =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.catLongGoal(category.id)
       : envelopeBudget.catLongGoal(category.id);
 
   const budgeted =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.catBudgeted(category.id)
       : envelopeBudget.catBudgeted(category.id);
 
   const carryover =
-    budgetType === 'report'
+    budgetType === 'tracking'
       ? trackingBudget.catCarryover(category.id)
       : envelopeBudget.catCarryover(category.id);
 

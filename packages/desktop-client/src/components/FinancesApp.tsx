@@ -1,13 +1,7 @@
 // @ts-strict-ignore
 import React, { type ReactElement, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Route,
-  Routes,
-  Navigate,
-  useLocation,
-  useHref,
-} from 'react-router-dom';
+import { Route, Routes, Navigate, useLocation, useHref } from 'react-router';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
@@ -15,16 +9,10 @@ import { View } from '@actual-app/components/view';
 
 import * as undo from 'loot-core/platform/client/undo';
 
-import { sync } from '../app/appSlice';
-import { ProtectedRoute } from '../auth/ProtectedRoute';
-import { Permissions } from '../auth/types';
-import { addNotification } from '../notifications/notificationsSlice';
-import { useSelector, useDispatch } from '../redux';
-import { getIsOutdated, getLatestVersion } from '../util/versions';
-
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
 import { BankSync } from './banksync';
 import { BankSyncStatus } from './BankSyncStatus';
+import { CommandBar } from './CommandBar';
 import { GlobalKeys } from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
 import { Category } from './mobile/budget/Category';
@@ -40,12 +28,19 @@ import { ScrollProvider } from './ScrollProvider';
 import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
+import { ManageTagsPage } from './tags/ManageTagsPage';
 import { Titlebar } from './Titlebar';
 
+import { sync } from '@desktop-client/app/appSlice';
+import { ProtectedRoute } from '@desktop-client/auth/ProtectedRoute';
+import { Permissions } from '@desktop-client/auth/types';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
+import { getIsOutdated, getLatestVersion } from '@desktop-client/util/versions';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -147,10 +142,16 @@ export function FinancesApp() {
             notification: {
               type: 'message',
               title: t('A new version of Actual is available!'),
-              message: t(
-                'Version {{latestVersion}} of Actual was recently released.',
-                { latestVersion },
-              ),
+              message:
+                (process.env.REACT_APP_IS_PIKAPODS ?? '').toLowerCase() ===
+                'true'
+                  ? t(
+                      'A new version of Actual is available! Your Pikapods instance will be automatically updated in the next few days - no action needed.',
+                    )
+                  : t(
+                      'Version {{latestVersion}} of Actual was recently released.',
+                      { latestVersion },
+                    ),
               sticky: true,
               id: 'update-notification',
               button: {
@@ -177,7 +178,7 @@ export function FinancesApp() {
     <View style={{ height: '100%' }}>
       <RouterBehaviors />
       <GlobalKeys />
-
+      <CommandBar />
       <View
         style={{
           flexDirection: 'row',
@@ -258,6 +259,7 @@ export function FinancesApp() {
                 <Route path="/payees" element={<ManagePayeesPage />} />
                 <Route path="/rules" element={<ManageRulesPage />} />
                 <Route path="/bank-sync" element={<BankSync />} />
+                <Route path="/tags" element={<ManageTagsPage />} />
                 <Route path="/settings" element={<Settings />} />
 
                 <Route

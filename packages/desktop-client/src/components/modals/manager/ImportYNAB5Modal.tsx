@@ -9,29 +9,39 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { importBudget } from '../../../budgets/budgetsSlice';
-import { useDispatch } from '../../../redux';
-import { Link } from '../../common/Link';
-import { Modal, ModalCloseButton, ModalHeader } from '../../common/Modal';
-
+import { importBudget } from '@desktop-client/budgets/budgetsSlice';
+import { Link } from '@desktop-client/components/common/Link';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-
-function getErrorMessage(error: string): string {
-  switch (error) {
-    case 'parse-error':
-      return 'Unable to parse file. Please select a JSON file exported from nYNAB.';
-    case 'not-ynab5':
-      return 'This file is not valid. Please select a JSON file exported from nYNAB.';
-    default:
-      return 'An unknown error occurred while importing. Please report this as a new issue on GitHub.';
-  }
-}
+import { useDispatch } from '@desktop-client/redux';
 
 export function ImportYNAB5Modal() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [error, setError] = useState<string | null>(null);
+
+  function getErrorMessage(error: string): string {
+    switch (error) {
+      case 'parse-error':
+        return t(
+          'Unable to parse file. Please select a JSON file exported from nYNAB.',
+        );
+      case 'not-ynab5':
+        return t(
+          'This file is not valid. Please select a JSON file exported from nYNAB.',
+        );
+      default:
+        return t(
+          'An unknown error occurred while importing. Please report this as a new issue on GitHub.',
+        );
+    }
+  }
+
   const [importing, setImporting] = useState(false);
 
   async function onImport() {

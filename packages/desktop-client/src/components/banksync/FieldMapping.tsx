@@ -7,12 +7,12 @@ import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 
-import { Row, Cell, TableHeader } from '../table';
-
 import {
   type MappableFieldWithExample,
   type TransactionDirection,
 } from './EditSyncAccount';
+
+import { Row, Cell, TableHeader } from '@desktop-client/components/table';
 
 const useTransactionDirectionOptions = () => {
   const { t } = useTranslation();

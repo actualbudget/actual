@@ -3,7 +3,7 @@ import React, {
   type ComponentPropsWithoutRef,
   type CSSProperties,
 } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 import { styles } from '@actual-app/components/styles';
@@ -18,16 +18,15 @@ import {
   extractScheduleConds,
 } from 'loot-core/shared/schedules';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal';
-
+} from '@desktop-client/components/common/Modal';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type ScheduledTransactionMenuModalProps = Extract<
   ModalType,
@@ -41,7 +40,6 @@ export function ScheduledTransactionMenuModal({
   onComplete,
 }: ScheduledTransactionMenuModalProps) {
   const locale = useLocale();
-  const { t } = useTranslation();
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -83,7 +81,7 @@ export function ScheduledTransactionMenuModal({
             }}
           >
             <Text style={{ fontSize: 17, fontWeight: 400 }}>
-              {t('Scheduled date')}
+              <Trans>Scheduled date</Trans>
             </Text>
             <Text style={{ fontSize: 17, fontWeight: 700 }}>
               {format(schedule?.next_date || '', 'MMMM dd, yyyy', locale)}

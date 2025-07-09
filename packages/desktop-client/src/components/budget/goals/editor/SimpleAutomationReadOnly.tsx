@@ -1,7 +1,7 @@
 import { Trans } from 'react-i18next';
 
-import type { SimpleTemplate } from 'loot-core/server/budget/types/templates';
 import { integerToCurrency } from 'loot-core/shared/util';
+import type { SimpleTemplate } from 'loot-core/types/models/templates';
 
 type SimpleAutomationReadOnlyProps = {
   template: SimpleTemplate;

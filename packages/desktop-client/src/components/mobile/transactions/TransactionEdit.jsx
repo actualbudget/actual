@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { SvgSplit } from '@actual-app/components/icons/v0';
@@ -53,18 +53,18 @@ import {
   groupById,
 } from 'loot-core/shared/util';
 
-import { pushModal } from '../../../modals/modalsSlice';
-import { aqlQuery } from '../../../queries/aqlQuery';
-import { setLastTransaction } from '../../../queries/queriesSlice';
-import { useSelector, useDispatch } from '../../../redux';
-import { MobilePageHeader, Page } from '../../Page';
-import { AmountInput } from '../../util/AmountInput';
-import { MobileBackButton } from '../MobileBackButton';
-import { FieldLabel, TapField, InputField, ToggleField } from '../MobileForms';
-import { getPrettyPayee } from '../utils';
-
 import { FocusableAmountInput } from './FocusableAmountInput';
 
+import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
+import {
+  FieldLabel,
+  TapField,
+  InputField,
+  ToggleField,
+} from '@desktop-client/components/mobile/MobileForms';
+import { getPrettyPayee } from '@desktop-client/components/mobile/utils';
+import { MobilePageHeader, Page } from '@desktop-client/components/Page';
+import { AmountInput } from '@desktop-client/components/util/AmountInput';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
@@ -75,6 +75,10 @@ import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
 } from '@desktop-client/hooks/useSingleActiveEditForm';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+import { setLastTransaction } from '@desktop-client/queries/queriesSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;
@@ -133,6 +137,8 @@ export function lookupName(items, id) {
 }
 
 export function Status({ status, isSplit }) {
+  const { t } = useTranslation();
+
   let color;
 
   switch (status) {
@@ -157,7 +163,9 @@ export function Status({ status, isSplit }) {
         textAlign: 'left',
       }}
     >
-      {titleFirst(status) + (isSplit ? ' (Split)' : '')}
+      {isSplit
+        ? t('{{status}} (Split)', { status: titleFirst(status) })
+        : titleFirst(status)}
     </Text>
   );
 }
@@ -194,7 +202,7 @@ function Footer({
         paddingLeft: styles.mobileEditingPadding,
         paddingRight: styles.mobileEditingPadding,
         paddingTop: 10,
-        paddingBottom: 10,
+        paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
         backgroundColor: theme.tableHeaderBackground,
         borderTopWidth: 1,
         borderColor: theme.tableBorder,
@@ -447,7 +455,7 @@ const ChildTransactionEdit = forwardRef(
                 userSelect: 'none',
               }}
             >
-              {t('Delete split')}
+              <Trans>Delete split</Trans>
             </Text>
           </Button>
         </View>
@@ -958,7 +966,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   color: theme.formLabelText,
                 }}
               >
-                {t('Split')}
+                <Trans>Split</Trans>
               </Text>
             </Button>
           </View>
@@ -1061,7 +1069,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   userSelect: 'none',
                 }}
               >
-                {t('Delete transaction')}
+                <Trans>Delete transaction</Trans>
               </Text>
             </Button>
           </View>

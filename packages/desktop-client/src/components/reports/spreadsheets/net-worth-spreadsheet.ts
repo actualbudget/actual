@@ -1,4 +1,5 @@
 import * as d from 'date-fns';
+import { type Locale } from 'date-fns';
 import keyBy from 'lodash/keyBy';
 
 import { send } from 'loot-core/platform/client/fetch';
@@ -14,9 +15,8 @@ import {
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { aqlQuery } from '../../../queries/aqlQuery';
-
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 type Balance = {
   date: string;

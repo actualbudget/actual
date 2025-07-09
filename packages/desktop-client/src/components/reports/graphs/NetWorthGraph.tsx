@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React from 'react';
+import React, { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -18,9 +18,8 @@ import {
 
 import { amountToCurrencyNoDecimal } from 'loot-core/shared/util';
 
-import { Container } from '../Container';
-import { numberFormatterTooltip } from '../numberFormatter';
-
+import { Container } from '@desktop-client/components/reports/Container';
+import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type NetWorthGraphProps = {
@@ -51,6 +50,7 @@ export function NetWorthGraph({
 }: NetWorthGraphProps) {
   const { t } = useTranslation();
   const privacyMode = usePrivacyMode();
+  const id = useId();
 
   const tickFormatter = tick => {
     const res = privacyMode
@@ -75,6 +75,7 @@ export function NetWorthGraph({
   };
 
   const off = gradientOffset();
+  const gradientId = `splitColor-${id}`;
 
   type PayloadItem = {
     payload: {
@@ -181,7 +182,7 @@ export function NetWorthGraph({
                   />
                 )}
                 <defs>
-                  <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                     <stop
                       offset={off}
                       stopColor={theme.reportsBlue}
@@ -196,13 +197,13 @@ export function NetWorthGraph({
                 </defs>
 
                 <Area
-                  type="linear"
+                  type="monotone"
                   dot={false}
                   activeDot={false}
                   animationDuration={0}
                   dataKey="y"
                   stroke={theme.reportsBlue}
-                  fill="url(#splitColor)"
+                  fill={`url(#${gradientId})`}
                   fillOpacity={1}
                 />
               </AreaChart>

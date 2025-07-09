@@ -9,25 +9,13 @@ import {
 } from 'react-error-boundary';
 import { HotkeysProvider } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import { init as initConnection, send } from 'loot-core/platform/client/fetch';
 import * as Platform from 'loot-core/shared/platform';
-
-import { setAppState, sync } from '../app/appSlice';
-import { closeBudget, loadBudget } from '../budgets/budgetsSlice';
-import { handleGlobalEvents } from '../global-events';
-import { setI18NextLanguage } from '../i18n';
-import { addNotification } from '../notifications/notificationsSlice';
-import { installPolyfills } from '../polyfills';
-import { loadGlobalPrefs } from '../prefs/prefsSlice';
-import { useDispatch, useSelector, useStore } from '../redux';
-import { hasHiddenScrollbars, ThemeStyle, useTheme } from '../style';
-import { signOut } from '../users/usersSlice';
-import { ExposeNavigate } from '../util/router-tools';
 
 import { AppBackground } from './AppBackground';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
@@ -39,8 +27,23 @@ import { Modals } from './Modals';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
 
+import { setAppState, sync } from '@desktop-client/app/appSlice';
+import { closeBudget, loadBudget } from '@desktop-client/budgets/budgetsSlice';
+import { handleGlobalEvents } from '@desktop-client/global-events';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { SpreadsheetProvider } from '@desktop-client/hooks/useSpreadsheet';
+import { setI18NextLanguage } from '@desktop-client/i18n';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { installPolyfills } from '@desktop-client/polyfills';
+import { loadGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
+import { useDispatch, useSelector, useStore } from '@desktop-client/redux';
+import {
+  hasHiddenScrollbars,
+  ThemeStyle,
+  useTheme,
+} from '@desktop-client/style';
+import { signOut } from '@desktop-client/users/usersSlice';
+import { ExposeNavigate } from '@desktop-client/util/router-tools';
 
 function AppInner() {
   const [budgetId] = useMetadataPref('id');
@@ -68,7 +71,7 @@ function AppInner() {
     };
 
     async function init() {
-      const socketName = await maybeUpdate(() =>
+      const serverSocket = await maybeUpdate(() =>
         global.Actual.getServerSocket(),
       );
 
@@ -79,7 +82,7 @@ function AppInner() {
           ),
         }),
       );
-      await initConnection(socketName);
+      await initConnection(serverSocket);
 
       // Load any global prefs
       dispatch(

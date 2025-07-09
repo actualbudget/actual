@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import csv2json from 'csv-parse/lib/sync';
+import { parse as csv2json } from 'csv-parse/sync';
 
 import * as fs from '../../../platform/server/fs';
 import { looselyParseAmount } from '../../../shared/util';
@@ -72,7 +72,7 @@ async function parseCSV(
       columns: options?.hasHeaderRow,
       bom: true,
       delimiter: options?.delimiter || ',',
-      // eslint-disable-next-line rulesdir/typography
+      // eslint-disable-next-line actual/typography
       quote: '"',
       trim: true,
       relax_column_count: true,

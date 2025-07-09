@@ -1,11 +1,11 @@
 import React, { useCallback, useRef, useState } from 'react';
 
-import { envelopeBudget } from '../../../queries/queries';
-
 import { BalanceMenu } from './BalanceMenu';
 import { CoverMenu } from './CoverMenu';
 import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
 import { TransferMenu } from './TransferMenu';
+
+import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type BalanceMovementMenuProps = {
   categoryId: string;

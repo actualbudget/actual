@@ -13,18 +13,10 @@ import { css } from '@emotion/css';
 import { listen } from 'loot-core/platform/client/fetch';
 import { isElectron } from 'loot-core/shared/environment';
 
-import { closeBudget } from '../../budgets/budgetsSlice';
-import { loadPrefs } from '../../prefs/prefsSlice';
-import { useDispatch } from '../../redux';
-import { Link } from '../common/Link';
-import { FormField, FormLabel } from '../forms';
-import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
-import { Page } from '../Page';
-import { useServerVersion } from '../ServerContext';
-
 import { AuthSettings } from './AuthSettings';
 import { Backups } from './Backups';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
+import { CurrencySettings } from './Currency';
 import { EncryptionSettings } from './Encryption';
 import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
@@ -35,12 +27,22 @@ import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
+import { closeBudget } from '@desktop-client/budgets/budgetsSlice';
+import { Link } from '@desktop-client/components/common/Link';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
+import { Page } from '@desktop-client/components/Page';
+import { useServerVersion } from '@desktop-client/components/ServerContext';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import {
   useIsOutdated,
   useLatestVersion,
 } from '@desktop-client/hooks/useLatestVersion';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { loadPrefs } from '@desktop-client/prefs/prefsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 function About() {
   const version = useServerVersion();
@@ -150,6 +152,8 @@ export function Settings() {
   const [floatingSidebar] = useGlobalPref('floatingSidebar');
   const [budgetName] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
+  const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
+  const [_, setDefaultCurrencyCodePref] = useSyncedPref('defaultCurrencyCode');
 
   const onCloseBudget = () => {
     dispatch(closeBudget());
@@ -164,6 +168,12 @@ export function Settings() {
     return () => unlisten();
   }, [dispatch]);
 
+  useEffect(() => {
+    if (!isCurrencyExperimentalEnabled) {
+      setDefaultCurrencyCodePref('');
+    }
+  }, [isCurrencyExperimentalEnabled, setDefaultCurrencyCodePref]);
+
   const { isNarrowWidth } = useResponsive();
 
   return (
@@ -171,7 +181,6 @@ export function Settings() {
       header={t('Settings')}
       style={{
         marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
-        paddingBottom: MOBILE_NAV_HEIGHT,
       }}
     >
       <View
@@ -181,6 +190,7 @@ export function Settings() {
           flexShrink: 0,
           maxWidth: 530,
           gap: 30,
+          paddingBottom: MOBILE_NAV_HEIGHT,
         }}
       >
         {isNarrowWidth && (
@@ -204,6 +214,7 @@ export function Settings() {
         <About />
         <ThemeSettings />
         <FormatSettings />
+        {isCurrencyExperimentalEnabled && <CurrencySettings />}
         <LanguageSettings />
         <AuthSettings />
         <EncryptionSettings />

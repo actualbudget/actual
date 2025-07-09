@@ -8,18 +8,16 @@ import React, {
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 
-import { PrivacyFilter } from '../PrivacyFilter';
-
-import { type FormatType, useFormat } from './useFormat';
-import { useSheetName } from './useSheetName';
-import { useSheetValue } from './useSheetValue';
-
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useSheetName } from '@desktop-client/hooks/useSheetName';
+import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import {
   type Binding,
   type SheetNames,
   type SheetFields,
   type Spreadsheets,
-} from '.';
+} from '@desktop-client/spreadsheet';
 
 type CellValueProps<
   SheetName extends SheetNames,
@@ -85,10 +83,15 @@ export function CellValueText<
   ...props
 }: CellValueTextProps<SheetName, FieldName>) {
   const format = useFormat();
+  const isFinancial =
+    type === 'financial' ||
+    type === 'financial-with-sign' ||
+    type === 'financial-no-decimals';
   return (
     <Text
       style={{
-        ...(type === 'financial' && styles.tnum),
+        ...(isFinancial && styles.tnum),
+        ...(isFinancial && { whiteSpace: 'nowrap' }),
         ...style,
       }}
       data-testid={name}

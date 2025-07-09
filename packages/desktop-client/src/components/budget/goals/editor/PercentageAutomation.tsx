@@ -4,16 +4,19 @@ import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
 import { View } from '@actual-app/components/view';
 
-import type { PercentageTemplate } from 'loot-core/server/budget/types/templates';
 import type {
   CategoryGroupEntity,
   CategoryEntity,
 } from 'loot-core/types/models';
+import type { PercentageTemplate } from 'loot-core/types/models/templates';
 
-import { CategoryAutocomplete } from '../../../autocomplete/CategoryAutocomplete';
-import { FormField, FormLabel } from '../../../forms';
-import { PercentInput } from '../../../util/PercentInput';
-import { type Action, updateTemplate } from '../actions';
+import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
+import {
+  type Action,
+  updateTemplate,
+} from '@desktop-client/components/budget/goals/actions';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { PercentInput } from '@desktop-client/components/util/PercentInput';
 
 type PercentageAutomationProps = {
   dispatch: (action: Action) => void;

@@ -1,15 +1,15 @@
 import { useEffect, useState, type ReactElement } from 'react';
+import { Trans } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
 
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 
-import { useSelector } from '../redux';
-
 import { useAuth } from './AuthProvider';
 import { type Permissions } from './types';
 
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useSelector } from '@desktop-client/redux';
 
 type ProtectedRouteProps = {
   permission: Permissions;
@@ -61,7 +61,9 @@ export const ProtectedRoute = ({
         margin: '50px',
       }}
     >
-      <h3>You don&apos;t have permission to view this page</h3>
+      <h3>
+        <Trans>You don’t have permission to view this page</Trans>
+      </h3>
     </View>
   );
 };

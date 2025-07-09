@@ -6,22 +6,25 @@ import { styles } from '@actual-app/components/styles';
 import { format, sheetForMonth, prevMonth } from 'loot-core/shared/months';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 
+import { ToBudgetAmount } from '@desktop-client/components/budget/envelope/budgetsummary/ToBudgetAmount';
+import { TotalsList } from '@desktop-client/components/budget/envelope/budgetsummary/TotalsList';
+import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useLocale } from '@desktop-client/hooks/useLocale';
+import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 import {
   collapseModals,
   type Modal as ModalType,
   pushModal,
-} from '../../modals/modalsSlice';
-import { envelopeBudget } from '../../queries/queries';
-import { useDispatch } from '../../redux';
-import { ToBudgetAmount } from '../budget/envelope/budgetsummary/ToBudgetAmount';
-import { TotalsList } from '../budget/envelope/budgetsummary/TotalsList';
-import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
-
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useUndo } from '@desktop-client/hooks/useUndo';
+} from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
+import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type EnvelopeBudgetSummaryModalProps = Extract<
   ModalType,
@@ -137,6 +140,7 @@ export function EnvelopeBudgetSummaryModal({
               close();
             },
             onHoldBuffer,
+            onBudgetAction,
           },
         },
       }),
@@ -151,7 +155,7 @@ export function EnvelopeBudgetSummaryModal({
             title={t('Budget Summary')}
             rightContent={<ModalCloseButton onPress={close} />}
           />
-          <NamespaceContext.Provider value={sheetForMonth(month)}>
+          <SheetNameProvider name={sheetForMonth(month)}>
             <TotalsList
               prevMonthName={prevMonthName}
               style={{
@@ -170,7 +174,7 @@ export function EnvelopeBudgetSummaryModal({
               onClick={() => onClick({ close })}
               isTotalsListTooltipDisabled={true}
             />
-          </NamespaceContext.Provider>
+          </SheetNameProvider>
         </>
       )}
     </Modal>

@@ -44,17 +44,16 @@ import {
   amountToInteger,
 } from 'loot-core/shared/util';
 
-import { aqlQuery } from '../../queries/aqlQuery';
-import { initiallyLoadPayees } from '../../queries/queriesSlice';
-import { useDispatch } from '../../redux';
-import { enableUndo, disableUndo } from '../../undo';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
-import { StatusBadge } from '../schedules/StatusBadge';
-import { SimpleTransactionsTable } from '../transactions/SimpleTransactionsTable';
-import { BetweenAmountInput } from '../util/AmountInput';
-import { DisplayId } from '../util/DisplayId';
-import { GenericInput } from '../util/GenericInput';
-
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { StatusBadge } from '@desktop-client/components/schedules/StatusBadge';
+import { SimpleTransactionsTable } from '@desktop-client/components/transactions/SimpleTransactionsTable';
+import { BetweenAmountInput } from '@desktop-client/components/util/AmountInput';
+import { DisplayId } from '@desktop-client/components/util/DisplayId';
+import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
@@ -62,6 +61,10 @@ import {
   useSelected,
   SelectedProvider,
 } from '@desktop-client/hooks/useSelected';
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+import { initiallyLoadPayees } from '@desktop-client/queries/queriesSlice';
+import { useDispatch } from '@desktop-client/redux';
+import { enableUndo, disableUndo } from '@desktop-client/undo';
 
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));
@@ -170,6 +173,7 @@ function SplitAmountMethodSelect({ options, style, value, onChange }) {
 }
 
 function EditorButtons({ onAdd, onDelete }) {
+  const { t } = useTranslation();
   return (
     <>
       {onDelete && (
@@ -177,7 +181,7 @@ function EditorButtons({ onAdd, onDelete }) {
           variant="bare"
           onPress={onDelete}
           style={{ padding: 7 }}
-          aria-label="Delete entry"
+          aria-label={t('Delete entry')}
         >
           <SvgSubtract style={{ width: 8, height: 8, color: 'inherit' }} />
         </Button>
@@ -187,7 +191,7 @@ function EditorButtons({ onAdd, onDelete }) {
           variant="bare"
           onPress={onAdd}
           style={{ padding: 7 }}
-          aria-label="Add entry"
+          aria-label={t('Add entry')}
         >
           <SvgAdd style={{ width: 10, height: 10, color: 'inherit' }} />
         </Button>
@@ -1294,7 +1298,9 @@ export function EditRuleModal({
                   justify="flex-end"
                   style={{ marginTop: 20 }}
                 >
-                  <Button onClick={close}>{t('Cancel')}</Button>
+                  <Button onClick={close}>
+                    <Trans>Cancel</Trans>
+                  </Button>
                   <Button variant="primary" onPress={() => onSave(close)}>
                     <Trans>Save</Trans>
                   </Button>

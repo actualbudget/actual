@@ -3,7 +3,10 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import type { Query } from 'loot-core/shared/query';
 import type { TransactionEntity } from 'loot-core/types/models';
 
-import { type PagedQuery, pagedQuery } from '../queries/pagedQuery';
+import {
+  type PagedQuery,
+  pagedQuery,
+} from '@desktop-client/queries/pagedQuery';
 
 type UseTransactionsProps = {
   /**

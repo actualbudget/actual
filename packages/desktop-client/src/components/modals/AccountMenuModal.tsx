@@ -5,7 +5,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import {
@@ -22,19 +22,19 @@ import { View } from '@actual-app/components/view';
 
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal';
-import { Notes } from '../Notes';
-import { validateAccountName } from '../util/accountValidation';
-
+} from '@desktop-client/components/common/Modal';
+import { Notes } from '@desktop-client/components/Notes';
+import { validateAccountName } from '@desktop-client/components/util/accountValidation';
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useNotes } from '@desktop-client/hooks/useNotes';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type AccountMenuModalProps = Extract<
   ModalType,
@@ -48,6 +48,7 @@ export function AccountMenuModal({
   onReopenAccount,
   onEditNotes,
   onClose,
+  onToggleRunningBalance,
 }: AccountMenuModalProps) {
   const { t } = useTranslation();
   const account = useAccount(accountId);
@@ -125,6 +126,7 @@ export function AccountMenuModal({
                 account={account}
                 onClose={onCloseAccount}
                 onReopen={onReopenAccount}
+                onToggleRunningBalance={onToggleRunningBalance}
               />
             }
             title={
@@ -159,7 +161,7 @@ export function AccountMenuModal({
                 notes={
                   originalNotes && originalNotes.length > 0
                     ? originalNotes
-                    : 'No notes'
+                    : t('No notes')
                 }
                 editable={false}
                 focused={false}
@@ -188,7 +190,7 @@ export function AccountMenuModal({
                   height={20}
                   style={{ paddingRight: 5 }}
                 />
-                {t('Edit notes')}
+                <Trans>Edit notes</Trans>
               </Button>
             </View>
           </View>
@@ -202,13 +204,16 @@ type AdditionalAccountMenuProps = {
   account: AccountEntity;
   onClose?: (accountId: string) => void;
   onReopen?: (accountId: string) => void;
+  onToggleRunningBalance?: () => void;
 };
 
 function AdditionalAccountMenu({
   account,
   onClose,
   onReopen,
+  onToggleRunningBalance,
 }: AdditionalAccountMenuProps) {
+  const { t } = useTranslation();
   const triggerRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const itemStyle: CSSProperties = {
@@ -220,13 +225,14 @@ function AdditionalAccountMenu({
     ...itemStyle,
     ...(item.name === 'close' && { color: theme.errorTextMenu }),
   });
+  const [showBalances] = useSyncedPref(`show-balances-${account.id}`);
 
   return (
     <View>
       <Button
         ref={triggerRef}
         variant="bare"
-        aria-label="Menu"
+        aria-label={t('Menu')}
         onPress={() => {
           setMenuOpen(true);
         }}
@@ -245,16 +251,23 @@ function AdditionalAccountMenu({
           <Menu
             getItemStyle={getItemStyle}
             items={[
+              {
+                name: 'balance',
+                text:
+                  showBalances === 'true'
+                    ? t('Hide running balance')
+                    : t('Show running balance'),
+              },
               account.closed
                 ? {
                     name: 'reopen',
-                    text: 'Reopen account',
+                    text: t('Reopen account'),
                     icon: SvgLockOpen,
                     iconSize: 15,
                   }
                 : {
                     name: 'close',
-                    text: 'Close account',
+                    text: t('Close account'),
                     icon: SvgClose,
                     iconSize: 15,
                   },
@@ -267,6 +280,9 @@ function AdditionalAccountMenu({
                   break;
                 case 'reopen':
                   onReopen?.(account.id);
+                  break;
+                case 'balance':
+                  onToggleRunningBalance?.();
                   break;
                 default:
                   throw new Error(`Unrecognized menu option: ${name}`);

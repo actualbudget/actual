@@ -1,7 +1,7 @@
 import { forwardRef, useRef } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { SvgHelp } from '@actual-app/components/icons/v2';
@@ -10,10 +10,9 @@ import { Popover } from '@actual-app/components/popover';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { useToggle } from 'usehooks-ts';
 
-import { pushModal } from '../modals/modalsSlice';
-import { useDispatch } from '../redux';
-
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 const getPageDocs = (page: string) => {
   switch (page) {
@@ -39,7 +38,11 @@ function openDocsForCurrentPage() {
   window.Actual.openURLInBrowser(getPageDocs(window.location.pathname));
 }
 
-type HelpMenuItem = 'docs' | 'keyboard-shortcuts' | 'goal-templates';
+type HelpMenuItem =
+  | 'docs'
+  | 'discord'
+  | 'keyboard-shortcuts'
+  | 'goal-templates';
 
 type HelpButtonProps = {
   onPress?: () => void;
@@ -82,6 +85,9 @@ export const HelpMenu = () => {
       case 'docs':
         openDocsForCurrentPage();
         break;
+      case 'discord':
+        window.Actual.openURLInBrowser('https://discord.gg/pRYNYr4W5A');
+        break;
       case 'keyboard-shortcuts':
         dispatch(pushModal({ modal: { name: 'keyboard-shortcuts' } }));
         break;
@@ -113,6 +119,10 @@ export const HelpMenu = () => {
             {
               name: 'docs',
               text: t('Documentation'),
+            },
+            {
+              name: 'discord',
+              text: t('Community support (Discord)'),
             },
             { name: 'keyboard-shortcuts', text: t('Keyboard shortcuts') },
             ...(showGoalTemplates && page === '/budget'

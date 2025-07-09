@@ -1,15 +1,15 @@
 import React, { type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgChartPie } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
 
-import { type Template } from 'loot-core/server/budget/types/templates';
-
-import { pushModal } from '../../../modals/modalsSlice';
-import { useDispatch } from '../../../redux';
+import { type Template } from 'loot-core/types/models/templates';
 
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type CategoryAutomationButtonProps = {
   width?: number;
@@ -23,6 +23,8 @@ export function CategoryAutomationButton({
   defaultColor = theme.buttonNormalText,
   style,
 }: CategoryAutomationButtonProps) {
+  const { t } = useTranslation();
+
   const automations: Template[] = [];
   const hasAutomations = !!automations.length;
 
@@ -38,7 +40,7 @@ export function CategoryAutomationButton({
   return (
     <Button
       variant="bare"
-      aria-label="Change category automations"
+      aria-label={t('Change category automations')}
       className={!hasAutomations ? 'hover-visible' : ''}
       style={{
         color: defaultColor,

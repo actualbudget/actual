@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
@@ -14,17 +14,16 @@ import { listen } from 'loot-core/platform/client/fetch';
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
-import { useAuth } from '../auth/AuthProvider';
-import { Permissions } from '../auth/types';
-import { closeBudget } from '../budgets/budgetsSlice';
-import { useSelector, useDispatch } from '../redux';
-import { getUserData, signOut } from '../users/usersSlice';
-
 import { PrivacyFilter } from './PrivacyFilter';
 import { useMultiuserEnabled, useServerURL } from './ServerContext';
 
+import { useAuth } from '@desktop-client/auth/AuthProvider';
+import { Permissions } from '@desktop-client/auth/types';
+import { closeBudget } from '@desktop-client/budgets/budgetsSlice';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSelector, useDispatch } from '@desktop-client/redux';
+import { getUserData, signOut } from '@desktop-client/users/usersSlice';
 
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;

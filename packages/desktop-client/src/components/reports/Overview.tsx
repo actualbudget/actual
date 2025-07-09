@@ -3,7 +3,7 @@ import { Dialog, DialogTrigger } from 'react-aria-components';
 import { Responsive, WidthProvider, type Layout } from 'react-grid-layout';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -21,14 +21,6 @@ import {
   type Widget,
 } from 'loot-core/types/models';
 
-import {
-  addNotification,
-  removeNotification,
-} from '../../notifications/notificationsSlice';
-import { useDispatch } from '../../redux';
-import { MOBILE_NAV_HEIGHT } from '../mobile/MobileNavTabs';
-import { MobilePageHeader, Page, PageHeader } from '../Page';
-
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { LoadingIndicator } from './LoadingIndicator';
 import { CalendarCard } from './reports/CalendarCard';
@@ -40,12 +32,23 @@ import { SpendingCard } from './reports/SpendingCard';
 import './overview.scss';
 import { SummaryCard } from './reports/SummaryCard';
 
+import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
+import {
+  MobilePageHeader,
+  Page,
+  PageHeader,
+} from '@desktop-client/components/Page';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useDashboard } from '@desktop-client/hooks/useDashboard';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useReports } from '@desktop-client/hooks/useReports';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import {
+  addNotification,
+  removeNotification,
+} from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -247,7 +250,7 @@ export function Overview() {
     window.Actual.saveFile(
       JSON.stringify(data, null, 2),
       'dashboard.json',
-      'Export Dashboard',
+      t('Export Dashboard'),
     );
   };
   const onImport = async () => {
@@ -516,87 +519,91 @@ export function Overview() {
         )
       }
       padding={10}
-      style={{ paddingBottom: MOBILE_NAV_HEIGHT }}
     >
       {isImporting ? (
         <LoadingIndicator message={t('Import is running...')} />
       ) : (
-        <View data-testid="reports-overview" style={{ userSelect: 'none' }}>
-          <ResponsiveGridLayout
-            breakpoints={{ desktop: breakpoints.medium, mobile: 1 }}
-            layouts={{ desktop: desktopLayout, mobile: mobileLayout }}
-            onLayoutChange={
-              currentBreakpoint === 'desktop' ? onLayoutChange : undefined
-            }
-            onBreakpointChange={onBreakpointChange}
-            cols={{ desktop: 12, mobile: 1 }}
-            rowHeight={100}
-            draggableCancel={`.${NON_DRAGGABLE_AREA_CLASS_NAME}`}
-            isDraggable={currentBreakpoint === 'desktop' && isEditing}
-            isResizable={currentBreakpoint === 'desktop' && isEditing}
+        <div>
+          <View
+            data-testid="reports-overview"
+            style={{ userSelect: 'none', paddingBottom: MOBILE_NAV_HEIGHT }}
           >
-            {desktopLayout.map(item => (
-              <div key={item.i}>
-                {item.type === 'net-worth-card' ? (
-                  <NetWorthCard
-                    widgetId={item.i}
-                    isEditing={isEditing}
-                    accounts={accounts}
-                    meta={item.meta}
-                    onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                    onRemove={() => onRemoveWidget(item.i)}
-                  />
-                ) : item.type === 'cash-flow-card' ? (
-                  <CashFlowCard
-                    widgetId={item.i}
-                    isEditing={isEditing}
-                    meta={item.meta}
-                    onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                    onRemove={() => onRemoveWidget(item.i)}
-                  />
-                ) : item.type === 'spending-card' ? (
-                  <SpendingCard
-                    widgetId={item.i}
-                    isEditing={isEditing}
-                    meta={item.meta}
-                    onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                    onRemove={() => onRemoveWidget(item.i)}
-                  />
-                ) : item.type === 'markdown-card' ? (
-                  <MarkdownCard
-                    isEditing={isEditing}
-                    meta={item.meta}
-                    onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                    onRemove={() => onRemoveWidget(item.i)}
-                  />
-                ) : item.type === 'custom-report' ? (
-                  <CustomReportListCards
-                    isEditing={isEditing}
-                    report={customReportMap.get(item.meta.id)}
-                    onRemove={() => onRemoveWidget(item.i)}
-                  />
-                ) : item.type === 'summary-card' ? (
-                  <SummaryCard
-                    widgetId={item.i}
-                    isEditing={isEditing}
-                    meta={item.meta}
-                    onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                    onRemove={() => onRemoveWidget(item.i)}
-                  />
-                ) : item.type === 'calendar-card' ? (
-                  <CalendarCard
-                    widgetId={item.i}
-                    isEditing={isEditing}
-                    meta={item.meta}
-                    firstDayOfWeekIdx={firstDayOfWeekIdx}
-                    onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                    onRemove={() => onRemoveWidget(item.i)}
-                  />
-                ) : null}
-              </div>
-            ))}
-          </ResponsiveGridLayout>
-        </View>
+            <ResponsiveGridLayout
+              breakpoints={{ desktop: breakpoints.medium, mobile: 1 }}
+              layouts={{ desktop: desktopLayout, mobile: mobileLayout }}
+              onLayoutChange={
+                currentBreakpoint === 'desktop' ? onLayoutChange : undefined
+              }
+              onBreakpointChange={onBreakpointChange}
+              cols={{ desktop: 12, mobile: 1 }}
+              rowHeight={100}
+              draggableCancel={`.${NON_DRAGGABLE_AREA_CLASS_NAME}`}
+              isDraggable={currentBreakpoint === 'desktop' && isEditing}
+              isResizable={currentBreakpoint === 'desktop' && isEditing}
+            >
+              {desktopLayout.map(item => (
+                <div key={item.i}>
+                  {item.type === 'net-worth-card' ? (
+                    <NetWorthCard
+                      widgetId={item.i}
+                      isEditing={isEditing}
+                      accounts={accounts}
+                      meta={item.meta}
+                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                      onRemove={() => onRemoveWidget(item.i)}
+                    />
+                  ) : item.type === 'cash-flow-card' ? (
+                    <CashFlowCard
+                      widgetId={item.i}
+                      isEditing={isEditing}
+                      meta={item.meta}
+                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                      onRemove={() => onRemoveWidget(item.i)}
+                    />
+                  ) : item.type === 'spending-card' ? (
+                    <SpendingCard
+                      widgetId={item.i}
+                      isEditing={isEditing}
+                      meta={item.meta}
+                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                      onRemove={() => onRemoveWidget(item.i)}
+                    />
+                  ) : item.type === 'markdown-card' ? (
+                    <MarkdownCard
+                      isEditing={isEditing}
+                      meta={item.meta}
+                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                      onRemove={() => onRemoveWidget(item.i)}
+                    />
+                  ) : item.type === 'custom-report' ? (
+                    <CustomReportListCards
+                      isEditing={isEditing}
+                      report={customReportMap.get(item.meta.id)}
+                      onRemove={() => onRemoveWidget(item.i)}
+                    />
+                  ) : item.type === 'summary-card' ? (
+                    <SummaryCard
+                      widgetId={item.i}
+                      isEditing={isEditing}
+                      meta={item.meta}
+                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                      onRemove={() => onRemoveWidget(item.i)}
+                    />
+                  ) : item.type === 'calendar-card' ? (
+                    <CalendarCard
+                      widgetId={item.i}
+                      isEditing={isEditing}
+                      meta={item.meta}
+                      firstDayOfWeekIdx={firstDayOfWeekIdx}
+                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                      onRemove={() => onRemoveWidget(item.i)}
+                    />
+                  ) : null}
+                </div>
+              ))}
+            </ResponsiveGridLayout>
+          </View>
+        </div>
       )}
     </Page>
   );

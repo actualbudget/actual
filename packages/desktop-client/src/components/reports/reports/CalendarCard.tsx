@@ -29,20 +29,19 @@ import { amountToCurrency } from 'loot-core/shared/util';
 import { type CalendarWidget } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
-import { PrivacyFilter } from '../../PrivacyFilter';
-import { chartTheme } from '../chart-theme';
-import { DateRange } from '../DateRange';
-import { CalendarGraph } from '../graphs/CalendarGraph';
-import { LoadingIndicator } from '../LoadingIndicator';
-import { ReportCard } from '../ReportCard';
-import { ReportCardName } from '../ReportCardName';
-import { calculateTimeRange } from '../reportRanges';
+import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { chartTheme } from '@desktop-client/components/reports/chart-theme';
+import { DateRange } from '@desktop-client/components/reports/DateRange';
+import { CalendarGraph } from '@desktop-client/components/reports/graphs/CalendarGraph';
+import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { ReportCard } from '@desktop-client/components/reports/ReportCard';
+import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
+import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import {
   type CalendarDataType,
   calendarSpreadsheet,
-} from '../spreadsheets/calendar-spreadsheet';
-import { useReport } from '../useReport';
-
+} from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
+import { useReport } from '@desktop-client/components/reports/useReport';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
@@ -344,6 +343,7 @@ function CalendarCardInner({
   widgetId,
   isEditing,
 }: CalendarCardInnerProps) {
+  const { t } = useTranslation();
   const [monthNameVisible, setMonthNameVisible] = useState(true);
   const monthFormatSizeContainers = useRef<(HTMLSpanElement | null)[]>(
     new Array(5),
@@ -475,7 +475,7 @@ function CalendarCardInner({
               fontSize: '10px',
               marginRight: 10,
             }}
-            aria-label="Income"
+            aria-label={t('Income')}
           >
             {calendar.totalIncome !== 0 ? (
               <>
@@ -498,7 +498,7 @@ function CalendarCardInner({
               flexDirection: 'row',
               fontSize: '10px',
             }}
-            aria-label="Expenses"
+            aria-label={t('Expenses')}
           >
             {calendar.totalExpense !== 0 ? (
               <>

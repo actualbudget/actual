@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 
-import { groupById } from 'loot-core/shared/util';
+import { groupById, type IntegerAmount } from 'loot-core/shared/util';
 import {
   type ScheduleEntity,
   type AccountEntity,
@@ -11,17 +11,23 @@ import {
 import { useAccounts } from './useAccounts';
 import { usePayees } from './usePayees';
 import { usePreviewTransactions } from './usePreviewTransactions';
+import { useSheetValue } from './useSheetValue';
 
-import { useSheetValue } from '@desktop-client/components/spreadsheet/useSheetValue';
-import { accountBalance } from '@desktop-client/queries/queries';
+import { accountBalance } from '@desktop-client/spreadsheet/bindings';
 
 type UseAccountPreviewTransactionsProps = {
   accountId?: AccountEntity['id'] | undefined;
 };
 
-type UseAccountPreviewTransactionsResult = ReturnType<
-  typeof usePreviewTransactions
->;
+// Mirrors the `splits` AQL option from the server
+type TransactionSplitsOption = 'all' | 'inline' | 'grouped' | 'none';
+
+type UseAccountPreviewTransactionsResult = {
+  previewTransactions: ReadonlyArray<TransactionEntity>;
+  runningBalances: Map<TransactionEntity['id'], IntegerAmount>;
+  isLoading: boolean;
+  error?: Error;
+};
 
 /**
  * Preview transactions for a given account. This will invert the payees, accounts,
@@ -58,6 +64,7 @@ export function useAccountPreviewTransactions({
 
   const accountSchedulesFilter = useCallback(
     (schedule: ScheduleEntity) =>
+      !accountId ||
       schedule._account === accountId ||
       getTransferAccountByPayee(schedule._payee)?.id === accountId,
     [accountId, getTransferAccountByPayee],
@@ -69,23 +76,19 @@ export function useAccountPreviewTransactions({
 
   const {
     previewTransactions: allPreviewTransactions,
-    runningBalances: allRunningBalances,
     isLoading,
     error,
   } = usePreviewTransactions({
     filter: accountSchedulesFilter,
-    options: {
-      startingBalance: accountBalanceValue ?? 0,
-    },
   });
 
   return useMemo(() => {
     if (!accountId) {
       return {
-        previewTransactions: [],
+        previewTransactions: allPreviewTransactions,
         runningBalances: new Map(),
-        isLoading: false,
-        error: undefined,
+        isLoading,
+        error,
       };
     }
 
@@ -96,6 +99,11 @@ export function useAccountPreviewTransactions({
       getTransferAccountByPayee,
     });
 
+    const allRunningBalances = calculateRunningBalancesBottomUp(
+      previewTransactions,
+      'all',
+      accountBalanceValue ?? 0,
+    );
     const transactionIds = new Set(previewTransactions.map(t => t.id));
     const runningBalances = allRunningBalances;
     for (const transactionId of runningBalances.keys()) {
@@ -112,8 +120,8 @@ export function useAccountPreviewTransactions({
     };
   }, [
     accountId,
+    accountBalanceValue,
     allPreviewTransactions,
-    allRunningBalances,
     error,
     getPayeeByTransferAccount,
     getTransferAccountByPayee,
@@ -162,4 +170,42 @@ function accountPreview({
       ...(subtransactions && { subtransactions }),
     };
   });
+}
+
+export function calculateRunningBalancesBottomUp(
+  transactions: TransactionEntity[],
+  splits: TransactionSplitsOption,
+  startingBalance: IntegerAmount = 0,
+) {
+  return (
+    transactions
+      .filter(t => {
+        switch (splits) {
+          case 'all':
+            // Only calculate parent/non-split amounts
+            return !t.parent_id;
+          default:
+            // inline
+            // grouped
+            // none
+            return true;
+        }
+      })
+      // We're using `reduceRight` here to calculate the running balance in reverse order (bottom up).
+      .reduceRight((acc, transaction, index, arr) => {
+        const previousTransactionIndex = index + 1;
+        if (previousTransactionIndex >= arr.length) {
+          // This is the last transaction in the list,
+          // so we set the running balance to the starting balance + the amount of the transaction
+          acc.set(transaction.id, startingBalance + transaction.amount);
+          return acc;
+        }
+        const previousTransaction = arr[previousTransactionIndex];
+        const previousRunningBalance = acc.get(previousTransaction.id) ?? 0;
+        const currentRunningBalance =
+          previousRunningBalance + transaction.amount;
+        acc.set(transaction.id, currentRunningBalance);
+        return acc;
+      }, new Map<TransactionEntity['id'], IntegerAmount>())
+  );
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, type CSSProperties } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -9,19 +9,18 @@ import { View } from '@actual-app/components/view';
 import * as Platform from 'loot-core/shared/platform';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
-import { envelopeBudget } from '../../queries/queries';
-import { BudgetMenu } from '../budget/envelope/BudgetMenu';
-import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
+import { BudgetMenu } from '@desktop-client/components/budget/envelope/BudgetMenu';
+import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal';
-import { FocusableAmountInput } from '../mobile/transactions/FocusableAmountInput';
-
+} from '@desktop-client/components/common/Modal';
+import { FocusableAmountInput } from '@desktop-client/components/mobile/transactions/FocusableAmountInput';
 import { useCategory } from '@desktop-client/hooks/useCategory';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 type EnvelopeBudgetMenuModalProps = Omit<
   Extract<ModalType, { name: 'envelope-budget-menu' }>['options'],
@@ -42,7 +41,6 @@ export function EnvelopeBudgetMenuModal({
     borderTop: `1px solid ${theme.pillBorder}`,
   };
 
-  const { t } = useTranslation();
   const budgeted = useEnvelopeSheetValue(
     envelopeBudget.catBudgeted(categoryId),
   );
@@ -86,7 +84,7 @@ export function EnvelopeBudgetMenuModal({
                 fontWeight: 400,
               }}
             >
-              {t('Budgeted')}
+              <Trans>Budgeted</Trans>
             </Text>
             <FocusableAmountInput
               value={integerToAmount(budgeted || 0)}

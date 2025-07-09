@@ -4,8 +4,8 @@ import {
   type PercentageTemplate,
   type ScheduleTemplate,
   type SimpleTemplate,
-  type WeekTemplate,
-} from 'loot-core/server/budget/types/templates';
+  type PeriodicTemplate,
+} from 'loot-core/types/models/templates';
 
 export const displayTemplateTypes = [
   ['simple', 'Fixed (monthly)'] as const,
@@ -23,7 +23,7 @@ export type ReducerState =
       displayType: 'simple';
     }
   | {
-      template: WeekTemplate;
+      template: PeriodicTemplate;
       displayType: 'week';
     }
   | {

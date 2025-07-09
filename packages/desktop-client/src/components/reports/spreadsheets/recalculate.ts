@@ -5,12 +5,12 @@ import {
   type IntervalEntity,
 } from 'loot-core/types/models';
 
+import { filterHiddenItems } from './filterHiddenItems';
+
 import {
   type UncategorizedEntity,
   type QueryDataEntity,
-} from '../ReportOptions';
-
-import { filterHiddenItems } from './filterHiddenItems';
+} from '@desktop-client/components/reports/ReportOptions';
 
 type recalculateProps = {
   item: UncategorizedEntity;

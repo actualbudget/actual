@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgClose } from '@actual-app/components/icons/v1';
@@ -7,10 +7,10 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { setAppState, updateApp } from '../app/appSlice';
-import { useSelector, useDispatch } from '../redux';
-
 import { Link } from './common/Link';
+
+import { setAppState, updateApp } from '@desktop-client/app/appSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 export function UpdateNotification() {
   const { t } = useTranslation();
@@ -45,7 +45,7 @@ export function UpdateNotification() {
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <View style={{ marginRight: 10, fontWeight: 700 }}>
             <Text>
-              {t('App updated to {{version}}', { version: updateInfo.version })}
+              <Trans>App updated to {{ version: updateInfo.version }}</Trans>
             </Text>
           </View>
           <View style={{ flex: 1 }} />
@@ -59,7 +59,7 @@ export function UpdateNotification() {
                   textDecoration: 'underline',
                 }}
               >
-                {t('Restart')}
+                <Trans>Restart</Trans>
               </Link>{' '}
               (
               <Link
@@ -74,7 +74,7 @@ export function UpdateNotification() {
                   )
                 }
               >
-                {t('notes')}
+                <Trans>notes</Trans>
               </Link>
               )
               <Button

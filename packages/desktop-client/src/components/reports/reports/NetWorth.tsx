@@ -1,6 +1,6 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -11,18 +11,21 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import { type NetWorthWidget } from 'loot-core/types/models';
 
-import { addNotification } from '../../../notifications/notificationsSlice';
-import { useDispatch } from '../../../redux';
-import { EditablePageHeaderTitle } from '../../EditablePageHeaderTitle';
-import { MobileBackButton } from '../../mobile/MobileBackButton';
-import { MobilePageHeader, Page, PageHeader } from '../../Page';
-import { LoadingIndicator } from '../LoadingIndicator';
-
 import { NetWorthComponent } from './NetWorthComponent';
 
+import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
+import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
+import {
+  MobilePageHeader,
+  Page,
+  PageHeader,
+} from '@desktop-client/components/Page';
+import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useWidget } from '@desktop-client/hooks/useWidget';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 export function NetWorth() {
   const params = useParams();

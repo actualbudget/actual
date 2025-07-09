@@ -62,7 +62,7 @@ export const Toggle = ({
           data-on={isOn}
           className={css(
             {
-              // eslint-disable-next-line rulesdir/typography
+              // eslint-disable-next-line actual/typography
               content: '" "',
               position: 'absolute',
               top: '2px',

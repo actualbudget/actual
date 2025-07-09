@@ -7,16 +7,16 @@ import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
-import { CategoryAutocomplete } from '../autocomplete/CategoryAutocomplete';
+import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import {
   ModalCloseButton,
   Modal,
   ModalTitle,
   ModalHeader,
-} from '../common/Modal';
-import { SectionLabel } from '../forms';
-import { NamespaceContext } from '../spreadsheet/NamespaceContext';
+} from '@desktop-client/components/common/Modal';
+import { SectionLabel } from '@desktop-client/components/forms';
+import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type CategoryAutocompleteModalProps = Extract<
   ModalType,
@@ -84,8 +84,8 @@ export function CategoryAutocompleteModal({
               />
             )}
             <View style={{ flex: 1 }}>
-              <NamespaceContext.Provider
-                value={month ? monthUtils.sheetForMonth(month) : ''}
+              <SheetNameProvider
+                name={month ? monthUtils.sheetForMonth(month) : ''}
               >
                 <CategoryAutocomplete
                   focused={true}
@@ -101,7 +101,7 @@ export function CategoryAutocompleteModal({
                   showHiddenCategories={showHiddenCategories}
                   value={null}
                 />
-              </NamespaceContext.Provider>
+              </SheetNameProvider>
             </View>
           </View>
         </>

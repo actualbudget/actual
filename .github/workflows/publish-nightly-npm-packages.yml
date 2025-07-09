@@ -1,0 +1,95 @@
+name: Publish nightly npm packages
+
+# Nightly npm packages are built daily
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  build-and-pack:
+    runs-on: ubuntu-latest
+    name: Build and pack npm packages
+    if: github.event.repository.fork == false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+
+      - name: Update package versions
+        run: |
+          # Get new nightly versions
+          NEW_WEB_VERSION=$(node ./.github/actions/get-next-package-version.js --package-json ./packages/desktop-client/package.json --type nightly)
+          NEW_SYNC_VERSION=$(node ./.github/actions/get-next-package-version.js --package-json ./packages/sync-server/package.json --type nightly)
+          NEW_API_VERSION=$(node ./.github/actions/get-next-package-version.js --package-json ./packages/api/package.json --type nightly)
+
+          # Set package versions
+          npm version $NEW_WEB_VERSION --no-git-tag-version --workspace=@actual-app/web --no-workspaces-update
+          npm version $NEW_SYNC_VERSION --no-git-tag-version --workspace=@actual-app/sync-server --no-workspaces-update
+          npm version $NEW_API_VERSION --no-git-tag-version --workspace=@actual-app/api --no-workspaces-update
+
+      - name: Yarn install
+        run: |
+          yarn install
+
+      - name: Build Server & Web
+        run: yarn build:server
+
+      - name: Pack the web and server packages
+        run: |
+          yarn workspace @actual-app/web pack --filename @actual-app/web.tgz
+          yarn workspace @actual-app/sync-server pack --filename @actual-app/sync-server.tgz
+
+      - name: Build API
+        run: yarn build:api
+
+      - name: Pack the api package
+        run: |
+          yarn workspace @actual-app/api pack --filename @actual-app/api.tgz
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-packages
+          path: |
+            packages/desktop-client/@actual-app/web.tgz
+            packages/sync-server/@actual-app/sync-server.tgz
+            packages/api/@actual-app/api.tgz
+
+  publish:
+    runs-on: ubuntu-latest
+    name: Publish Nightly npm packages
+    needs: build-and-pack
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Download the artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: npm-packages
+
+      - name: Setup node and npm registry
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish Web
+        run: |
+          npm publish desktop-client/@actual-app/web.tgz --access public --tag nightly
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish Sync-Server
+        run: |
+          npm publish sync-server/@actual-app/sync-server.tgz --access public --tag nightly
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish API
+        run: |
+          npm publish api/@actual-app/api.tgz --access public --tag nightly
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

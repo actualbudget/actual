@@ -12,13 +12,10 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import * as queries from '../../../queries/queries';
-import { useDispatch } from '../../../redux';
-import { MobilePageHeader, Page } from '../../Page';
-import { MobileBackButton } from '../MobileBackButton';
-import { AddTransactionButton } from '../transactions/AddTransactionButton';
-import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
-
+import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
+import { AddTransactionButton } from '@desktop-client/components/mobile/transactions/AddTransactionButton';
+import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
+import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategoryPreviewTransactions } from '@desktop-client/hooks/useCategoryPreviewTransactions';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
@@ -26,6 +23,8 @@ import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
+import { useDispatch } from '@desktop-client/redux';
+import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 type CategoryTransactionsProps = {
   category: CategoryEntity;
@@ -132,9 +131,12 @@ function TransactionListWithPreviews({
     [navigate],
   );
 
-  const balance = queries.categoryBalance(category.id, month);
-  const balanceCleared = queries.categoryBalanceCleared(category.id, month);
-  const balanceUncleared = queries.categoryBalanceUncleared(category.id, month);
+  const balance = bindings.categoryBalance(category.id, month);
+  const balanceCleared = bindings.categoryBalanceCleared(category.id, month);
+  const balanceUncleared = bindings.categoryBalanceUncleared(
+    category.id,
+    month,
+  );
 
   const { previewTransactions } = useCategoryPreviewTransactions({
     categoryId: category.id,
@@ -152,6 +154,7 @@ function TransactionListWithPreviews({
       balance={balance}
       balanceCleared={balanceCleared}
       balanceUncleared={balanceUncleared}
+      runningBalances={undefined}
       searchPlaceholder={`Search ${category.name}`}
       onSearch={onSearch}
       isLoadingMore={isLoadingMore}

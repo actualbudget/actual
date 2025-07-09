@@ -11,7 +11,7 @@ import { View } from '@actual-app/components/view';
 
 import { type CustomReportEntity } from 'loot-core/types/models';
 
-import { FormField, FormLabel } from '../forms';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
 
 type SaveReportNameProps = {
   menuItem: string;
@@ -73,7 +73,7 @@ export function SaveReportName({
               <Input
                 value={name}
                 id="name-field"
-                inputRef={inputRef}
+                ref={inputRef}
                 onChangeValue={setName}
                 style={{ marginTop: 10 }}
               />

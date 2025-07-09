@@ -6,8 +6,12 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { View } from '@actual-app/components/view';
 
-import { type Modal as ModalType } from '../../modals/modalsSlice';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type ConfirmUnlinkAccountModalProps = Extract<
   ModalType,
@@ -56,7 +60,7 @@ export function ConfirmUnlinkAccountModal({
               }}
             >
               <Button style={{ marginRight: 10 }} onPress={close}>
-                {t('Cancel')}
+                <Trans>Cancel</Trans>
               </Button>
               <InitialFocus>
                 <Button
@@ -66,7 +70,7 @@ export function ConfirmUnlinkAccountModal({
                     close();
                   }}
                 >
-                  {t('Unlink')}
+                  <Trans>Unlink</Trans>
                 </Button>
               </InitialFocus>
             </View>

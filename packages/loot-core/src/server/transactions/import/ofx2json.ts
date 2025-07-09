@@ -33,8 +33,8 @@ export function html2Plain(value) {
   return value
     ?.replace(/&lt;/g, '<') // lessthan
     .replace(/&gt;/g, '>') // greaterthan
-    .replace(/&#39;/g, "'") // eslint-disable-line rulesdir/typography
-    .replace(/&quot;/g, '"') // eslint-disable-line rulesdir/typography
+    .replace(/&#39;/g, "'") // eslint-disable-line actual/typography
+    .replace(/&quot;/g, '"') // eslint-disable-line actual/typography
     .replace(/(&amp;|&#038;)/g, '&'); // ampersands
 }
 
@@ -125,7 +125,7 @@ function mapOfxTransaction(stmtTrn): OFXTransaction {
 
 export async function ofx2json(ofx: string): Promise<OFXParseResult> {
   // firstly, split into the header attributes and the footer sgml
-  const contents = ofx.split('<OFX>', 2);
+  const contents = ofx.split(/<OFX\s?>/, 2);
 
   // firstly, parse the headers
   const headerString = contents[0].split(/\r?\n/);

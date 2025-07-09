@@ -10,31 +10,15 @@ import { css } from '@emotion/css';
 
 import { type DarkTheme, type Theme } from 'loot-core/types/prefs';
 
+import { Column, Setting } from './UI';
+
+import { useSidebar } from '@desktop-client/components/sidebar/SidebarProvider';
 import {
   themeOptions,
   useTheme,
   usePreferredDarkTheme,
   darkThemeOptions,
-} from '../../style';
-import { useSidebar } from '../sidebar/SidebarProvider';
-
-import { Setting } from './UI';
-
-function Column({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <View
-      style={{
-        alignItems: 'flex-start',
-        flexGrow: 1,
-        gap: '0.5em',
-        width: '100%',
-      }}
-    >
-      <Text style={{ fontWeight: 500 }}>{title}</Text>
-      <View style={{ alignItems: 'flex-start', gap: '1em' }}>{children}</View>
-    </View>
-  );
-}
+} from '@desktop-client/style';
 
 export function ThemeSettings() {
   const { t } = useTranslation();

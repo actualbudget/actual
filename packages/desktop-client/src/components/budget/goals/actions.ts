@@ -1,4 +1,4 @@
-import { type Template } from 'loot-core/server/budget/types/templates';
+import { type Template } from 'loot-core/types/models/templates';
 
 import { type DisplayTemplateType } from './constants';
 

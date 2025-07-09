@@ -32,19 +32,20 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
-import { groupById, integerToCurrency } from 'loot-core/shared/util';
+import {
+  groupById,
+  type IntegerAmount,
+  integerToCurrency,
+} from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { setNotificationInset } from '../../../notifications/notificationsSlice';
-import { useDispatch } from '../../../redux';
-import { useScrollListener } from '../../ScrollProvider';
-import { FloatingActionBar } from '../FloatingActionBar';
-
 import { TransactionListItem } from './TransactionListItem';
 
+import { FloatingActionBar } from '@desktop-client/components/mobile/FloatingActionBar';
+import { useScrollListener } from '@desktop-client/components/ScrollProvider';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
@@ -56,6 +57,8 @@ import {
 } from '@desktop-client/hooks/useSelected';
 import { useTransactionBatchActions } from '@desktop-client/hooks/useTransactionBatchActions';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import { setNotificationInset } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 const NOTIFICATION_BOTTOM_INSET = 75;
 
@@ -65,9 +68,10 @@ type LoadingProps = {
 };
 
 function Loading({ style, 'aria-label': ariaLabel }: LoadingProps) {
+  const { t } = useTranslation();
   return (
     <View
-      aria-label={ariaLabel || 'Loading...'}
+      aria-label={ariaLabel || t('Loading...')}
       style={{
         backgroundColor: theme.mobilePageBackground,
         flex: 1,
@@ -84,6 +88,8 @@ function Loading({ style, 'aria-label': ariaLabel }: LoadingProps) {
 type TransactionListProps = {
   isLoading: boolean;
   transactions: readonly TransactionEntity[];
+  showBalances?: boolean;
+  runningBalances?: Map<TransactionEntity['id'], IntegerAmount>;
   onOpenTransaction?: (transaction: TransactionEntity) => void;
   isLoadingMore: boolean;
   onLoadMore: () => void;
@@ -93,6 +99,8 @@ type TransactionListProps = {
 export function TransactionList({
   isLoading,
   transactions,
+  showBalances,
+  runningBalances,
   onOpenTransaction,
   isLoadingMore,
   onLoadMore,
@@ -198,10 +206,13 @@ export function TransactionList({
                 t => !isPreviewId(t.id) || !t.is_child,
               )}
               addIdAndValue
+              dependencies={[transactions, showBalances, runningBalances]}
             >
               {transaction => (
                 <TransactionListItem
                   key={transaction.id}
+                  showBalance={showBalances}
+                  balance={runningBalances?.get(transaction.id)}
                   value={transaction}
                   onPress={trans => onTransactionPress(trans)}
                   onLongPress={trans => onTransactionPress(trans, true)}

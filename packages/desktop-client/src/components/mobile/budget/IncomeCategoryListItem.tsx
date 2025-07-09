@@ -12,14 +12,18 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from 'loot-core/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models';
 
-import { envelopeBudget, trackingBudget } from '../../../queries/queries';
-
 import { BalanceCell } from './BalanceCell';
 import { BudgetCell } from './BudgetCell';
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
+import {
+  envelopeBudget,
+  trackingBudget,
+} from '@desktop-client/spreadsheet/bindings';
 
 type IncomeCategoryNameProps = {
   category: CategoryEntity;
@@ -91,14 +95,14 @@ type IncomeCategoryCellsProps = {
   category: CategoryEntity;
   month: string;
   onBudgetAction: (month: string, action: string, args: unknown) => void;
-  onShowActivity: () => void;
+  onPress: () => void;
 };
 
 function IncomeCategoryCells({
   category,
   month,
   onBudgetAction,
-  onShowActivity,
+  onPress,
 }: IncomeCategoryCellsProps) {
   const { t } = useTranslation();
   const columnWidth = getColumnWidth();
@@ -122,7 +126,7 @@ function IncomeCategoryCells({
         alignItems: 'center',
       }}
     >
-      {budgetType === 'report' && (
+      {budgetType === 'tracking' && (
         <View
           style={{
             width: columnWidth,
@@ -139,6 +143,7 @@ function IncomeCategoryCells({
           />
         </View>
       )}
+
       <View
         style={{
           width: columnWidth,
@@ -149,10 +154,16 @@ function IncomeCategoryCells({
         <BalanceCell
           binding={balance}
           category={category}
-          onPress={onShowActivity}
-          aria-label={t('Show transactions for {{categoryName}} category', {
-            categoryName: category.name,
-          })}
+          onPress={onPress}
+          aria-label={
+            budgetType === 'envelope'
+              ? t('Open balance menu for {{categoryName}} category', {
+                  categoryName: category.name,
+                })
+              : t('Show transactions for {{categoryName}} category', {
+                  categoryName: category.name,
+                })
+          }
         />
       </View>
     </View>
@@ -174,14 +185,58 @@ export function IncomeCategoryListItem({
   ...props
 }: IncomeCategoryListItemProps) {
   const { value: category } = props;
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
+  const balanceMenuModalName = `envelope-income-balance-menu`;
 
   const onShowActivity = useCallback(() => {
     if (!category) {
-      return;
+      return null;
     }
+
     navigate(`/categories/${category.id}?month=${month}`);
   }, [category, month, navigate]);
+
+  const onCarryover = useCallback(
+    (carryover: boolean) => {
+      if (!category) {
+        return;
+      }
+      onBudgetAction(month, 'carryover', {
+        category: category.id,
+        flag: carryover,
+      });
+      dispatch(collapseModals({ rootModalName: balanceMenuModalName }));
+    },
+    [category, onBudgetAction, month, dispatch, balanceMenuModalName],
+  );
+
+  const onOpenBalanceMenu = useCallback(() => {
+    if (!category) {
+      return;
+    }
+    dispatch(
+      pushModal({
+        modal: {
+          name: balanceMenuModalName,
+          options: {
+            month,
+            categoryId: category.id,
+            onCarryover,
+            onShowActivity,
+          },
+        },
+      }),
+    );
+  }, [
+    category,
+    balanceMenuModalName,
+    dispatch,
+    month,
+    onShowActivity,
+    onCarryover,
+  ]);
 
   if (!category) {
     return null;
@@ -211,10 +266,13 @@ export function IncomeCategoryListItem({
       >
         <IncomeCategoryName category={category} onEdit={onEdit} />
         <IncomeCategoryCells
+          key={`${category.id}`}
           category={category}
           month={month}
           onBudgetAction={onBudgetAction}
-          onShowActivity={onShowActivity}
+          onPress={
+            budgetType === 'envelope' ? onOpenBalanceMenu : onShowActivity
+          }
         />
       </View>
     </GridListItem>

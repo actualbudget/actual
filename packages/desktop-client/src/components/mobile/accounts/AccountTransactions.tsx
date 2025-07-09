@@ -16,37 +16,39 @@ import { View } from '@actual-app/components/view';
 import { listen, send } from 'loot-core/platform/client/fetch';
 import { type Query } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
+import { type IntegerAmount } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { syncAndDownload } from '../../../app/appSlice';
-import {
-  collapseModals,
-  openAccountCloseModal,
-  pushModal,
-} from '../../../modals/modalsSlice';
-import * as queries from '../../../queries/queries';
-import {
-  markAccountRead,
-  reopenAccount,
-  updateAccount,
-} from '../../../queries/queriesSlice';
-import { useSelector, useDispatch } from '../../../redux';
-import { MobilePageHeader, Page } from '../../Page';
-import { MobileBackButton } from '../MobileBackButton';
-import { AddTransactionButton } from '../transactions/AddTransactionButton';
-import { TransactionListWithBalances } from '../transactions/TransactionListWithBalances';
-
+import { syncAndDownload } from '@desktop-client/app/appSlice';
+import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
+import { AddTransactionButton } from '@desktop-client/components/mobile/transactions/AddTransactionButton';
+import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
+import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useTransactions } from '@desktop-client/hooks/usePreviewTransactions';
 import { accountSchedulesQuery } from '@desktop-client/hooks/useSchedules';
-import { useTransactions } from '@desktop-client/hooks/useTransactions';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
+import {
+  collapseModals,
+  openAccountCloseModal,
+  pushModal,
+} from '@desktop-client/modals/modalsSlice';
+import * as queries from '@desktop-client/queries';
+import {
+  markAccountRead,
+  reopenAccount,
+  updateAccount,
+} from '@desktop-client/queries/queriesSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
+import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 export function AccountTransactions({
   account,
@@ -148,6 +150,19 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     dispatch(reopenAccount({ id: account.id }));
   }, [account.id, dispatch]);
 
+  const [showBalances, setBalances] = useSyncedPref(
+    `show-balances-${account.id}`,
+  );
+  const onToggleRunningBalance = useCallback(() => {
+    const newVal = showBalances === 'true' ? 'false' : 'true';
+    setBalances(newVal);
+    dispatch(
+      collapseModals({
+        rootModalName: 'account-menu',
+      }),
+    );
+  }, [showBalances, setBalances, dispatch]);
+
   const onClick = useCallback(() => {
     dispatch(
       pushModal({
@@ -159,6 +174,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
             onEditNotes,
             onCloseAccount,
             onReopenAccount,
+            onToggleRunningBalance,
           },
         },
       }),
@@ -170,6 +186,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     onEditNotes,
     onReopenAccount,
     onSave,
+    onToggleRunningBalance,
   ]);
 
   return (
@@ -241,29 +258,6 @@ function TransactionListWithPreviews({
   readonly accountName: AccountEntity['name'] | string;
 }) {
   const { t } = useTranslation();
-  const baseTransactionsQuery = useCallback(
-    () =>
-      queries.transactions(accountId).options({ splits: 'all' }).select('*'),
-    [accountId],
-  );
-
-  const [transactionsQuery, setTransactionsQuery] = useState<Query>(
-    baseTransactionsQuery(),
-  );
-  const {
-    transactions,
-    isLoading,
-    reload: reloadTransactions,
-    isLoadingMore,
-    loadMore: loadMoreTransactions,
-  } = useTransactions({
-    query: transactionsQuery,
-  });
-
-  const { previewTransactions } = useAccountPreviewTransactions({
-    accountId: account?.id,
-  });
-
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -273,6 +267,64 @@ function TransactionListWithPreviews({
       dispatch(syncAndDownload({ accountId }));
     }
   }, [accountId, dispatch]);
+
+  const baseTransactionsQuery = useCallback(
+    () =>
+      queries.transactions(accountId).options({ splits: 'all' }).select('*'),
+    [accountId],
+  );
+
+  const runningBalancesQuery = useCallback(
+    () =>
+      queries
+        .transactions(accountId)
+        .options({ splits: 'none' })
+        .select({ balance: { $sumOver: '$amount' } }),
+    [accountId],
+  );
+
+  const [showBalances] = useSyncedPref(`show-balances-${accountId}`);
+  const [transactionsQuery, setTransactionsQuery] = useState<Query>(
+    baseTransactionsQuery(),
+  );
+  const [balancesQuery] = useState<Query>(runningBalancesQuery);
+  const {
+    transactions,
+    runningBalances,
+    isLoading: isTransactionsLoading,
+    reload: reloadTransactions,
+    isLoadingMore,
+    loadMore: loadMoreTransactions,
+  } = useTransactions({
+    query: transactionsQuery,
+    runningBalanceQuery: balancesQuery,
+    options: {
+      calculateRunningBalances: true,
+    },
+  });
+
+  const { isSearching, search: onSearch } = useTransactionsSearch({
+    updateQuery: setTransactionsQuery,
+    resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
+    dateFormat,
+  });
+
+  const {
+    previewTransactions,
+    runningBalances: previewRunningBalances,
+    isLoading: isPreviewTransactionsLoading,
+  } = useAccountPreviewTransactions({
+    accountId: account?.id,
+  });
+
+  const allBalances = useMemo(
+    () =>
+      new Map<TransactionEntity['id'], IntegerAmount>([
+        ...previewRunningBalances,
+        ...runningBalances,
+      ]),
+    [runningBalances, previewRunningBalances],
+  );
 
   useEffect(() => {
     if (accountId) {
@@ -294,12 +346,6 @@ function TransactionListWithPreviews({
       }
     });
   }, [dispatch, reloadTransactions]);
-
-  const { isSearching, search: onSearch } = useTransactionsSearch({
-    updateQuery: setTransactionsQuery,
-    resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
-    dateFormat,
-  });
 
   const onOpenTransaction = useCallback(
     (transaction: TransactionEntity) => {
@@ -362,11 +408,15 @@ function TransactionListWithPreviews({
 
   return (
     <TransactionListWithBalances
-      isLoading={isLoading}
+      isLoading={
+        isSearching ? isTransactionsLoading : isPreviewTransactionsLoading
+      }
       transactions={transactionsToDisplay}
       balance={balanceQueries.balance}
       balanceCleared={balanceQueries.cleared}
       balanceUncleared={balanceQueries.uncleared}
+      runningBalances={allBalances}
+      showBalances={isSearching ? false : showBalances === 'true'}
       isLoadingMore={isLoadingMore}
       onLoadMore={loadMoreTransactions}
       searchPlaceholder={t('Search {{accountName}}', { accountName })}
@@ -385,27 +435,27 @@ function queriesFromAccountId(
   switch (id) {
     case 'onbudget':
       return {
-        balance: queries.onBudgetAccountBalance(),
+        balance: bindings.onBudgetAccountBalance(),
       };
     case 'offbudget':
       return {
-        balance: queries.offBudgetAccountBalance(),
+        balance: bindings.offBudgetAccountBalance(),
       };
     case 'closed':
       return {
-        balance: queries.closedAccountBalance(),
+        balance: bindings.closedAccountBalance(),
       };
     case 'uncategorized':
       return {
-        balance: queries.uncategorizedBalance(),
+        balance: bindings.uncategorizedBalance(),
       };
     default:
       return entity
         ? {
-            balance: queries.accountBalance(entity.id),
-            cleared: queries.accountBalanceCleared(entity.id),
-            uncleared: queries.accountBalanceUncleared(entity.id),
+            balance: bindings.accountBalance(entity.id),
+            cleared: bindings.accountBalanceCleared(entity.id),
+            uncleared: bindings.accountBalanceUncleared(entity.id),
           }
-        : { balance: queries.allAccountBalance() };
+        : { balance: bindings.allAccountBalance() };
   }
 }
