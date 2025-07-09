@@ -276,7 +276,6 @@ type AccountInternalState = {
   transactionsFiltered?: boolean;
   showBalances?: boolean | undefined;
   balances: Record<string, { balance: number }> | null;
-  showNetWorthChart: boolean;
   showCleared?: boolean | undefined;
   prevShowCleared?: boolean | undefined;
   showReconciled: boolean;
@@ -328,7 +327,6 @@ class AccountInternal extends PureComponent<
       transactionCount: 0,
       showBalances: props.showBalances,
       balances: null,
-      showNetWorthChart: props.showNetWorthChart,
       showCleared: props.showCleared,
       showReconciled: props.showReconciled,
       nameError: '',
@@ -874,12 +872,10 @@ class AccountInternal extends PureComponent<
         }
         break;
       case 'toggle-net-worth-chart':
-        if (this.state.showNetWorthChart) {
+        if (this.props.showNetWorthChart) {
           this.props.setShowNetWorthChart(false);
-          this.setState({ showNetWorthChart: false });
         } else {
           this.props.setShowNetWorthChart(true);
-          this.setState({ showNetWorthChart: true });
         }
         break;
       default:
