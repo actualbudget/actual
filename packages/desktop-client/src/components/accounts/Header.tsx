@@ -272,54 +272,47 @@ export function AccountHeader({
       <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
         <View
           style={{
-            flexDirection: 'row',
+            flexDirection: 'column',
             marginTop: 2,
-            justifyContent: 'space-between',
             gap: 10,
           }}
         >
-          <View
-            style={{
-              maxWidth: showNetWorthChart ? '35%' : '100%',
-              minHeight: showNetWorthChart ? 150 : undefined,
-              flexGrow: 1,
-              alignItems: 'flex-start',
-              gap: 10,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 3,
-              }}
-            >
-              {!!account?.bank && (
-                <AccountSyncSidebar
-                  account={account}
-                  failedAccounts={failedAccounts}
-                  accountsSyncing={accountsSyncing}
-                />
-              )}
-              <AccountNameField
+          <View style={{ flexDirection: 'row', gap: 3 }}>
+            {!!account?.bank && (
+              <AccountSyncSidebar
                 account={account}
-                accountName={accountName}
-                isNameEditable={isNameEditable}
-                saveNameError={saveNameError}
-                onSaveName={onSaveName}
+                failedAccounts={failedAccounts}
+                accountsSyncing={accountsSyncing}
+              />
+            )}
+            <AccountNameField
+              account={account}
+              accountName={accountName}
+              isNameEditable={isNameEditable}
+              saveNameError={saveNameError}
+              onSaveName={onSaveName}
+            />
+            <View style={{ flexShrink: 1 }}>
+              <Balances
+                balanceQuery={balanceQuery}
+                showExtraBalances={showExtraBalances}
+                onToggleExtraBalances={onToggleExtraBalances}
+                account={account}
+                isFiltered={isFiltered}
+                filteredAmount={filteredAmount}
               />
             </View>
-
-            <Balances
-              balanceQuery={balanceQuery}
-              showExtraBalances={showExtraBalances}
-              onToggleExtraBalances={onToggleExtraBalances}
-              account={account}
-              isFiltered={isFiltered}
-              filteredAmount={filteredAmount}
-            />
           </View>
-          {showNetWorthChart && <BalanceHistoryGraph accountId={accountId} />}
+
+          {showNetWorthChart && (
+            <BalanceHistoryGraph
+              accountId={accountId}
+              style={{
+                height: 'calc(5vh + 5vw)',
+                margin: 0,
+              }}
+            />
+          )}
         </View>
         <Stack
           spacing={2}
@@ -617,39 +610,38 @@ function AccountNameField({
     setEditingName(false);
   };
 
-  if (editingName) {
-    return (
-      <>
-        <InitialFocus>
-          <Input
-            defaultValue={accountName}
-            onEnter={handleSave}
-            onUpdate={handleSave}
-            onEscape={() => setEditingName(false)}
-            style={{
-              fontSize: 25,
-              fontWeight: 500,
-              marginTop: -3,
-              marginBottom: -4,
-              marginLeft: -6,
-              paddingTop: 2,
-              paddingBottom: 2,
-              width: Math.max(20, accountName.length) + 'ch',
-            }}
-          />
-        </InitialFocus>
-        {saveNameError && (
-          <View style={{ color: theme.warningText }}>{saveNameError}</View>
-        )}
-      </>
-    );
-  } else {
-    if (isNameEditable) {
-      return (
+  return (
+    <View style={{ flexShrink: 0, alignItems: 'center' }}>
+      {editingName ? (
+        <>
+          <InitialFocus>
+            <Input
+              defaultValue={accountName}
+              onEnter={handleSave}
+              onUpdate={handleSave}
+              onEscape={() => setEditingName(false)}
+              style={{
+                fontSize: 25,
+                fontWeight: 500,
+                marginTop: -3,
+                marginBottom: -4,
+                marginLeft: -6,
+                paddingTop: 2,
+                paddingBottom: 2,
+                width: Math.max(20, accountName.length) + 'ch',
+              }}
+            />
+          </InitialFocus>
+          {saveNameError && (
+            <View style={{ color: theme.warningText }}>{saveNameError}</View>
+          )}
+        </>
+      ) : (
         <View
           style={{
             flexDirection: 'row',
             alignItems: 'center',
+            whiteSpace: 'nowrap',
             gap: 3,
             '& .hover-visible': {
               opacity: 0,
@@ -674,41 +666,34 @@ function AccountNameField({
               : accountName}
           </View>
 
-          {account && (
-            <NotesButton
-              id={`account-${account.id}`}
-              defaultColor={theme.pageTextSubdued}
-            />
-          )}
-          <Button
-            variant="bare"
-            aria-label={t('Edit account name')}
-            className="hover-visible"
-            onPress={() => setEditingName(true)}
-          >
-            <SvgPencil1
-              style={{
-                width: 11,
-                height: 11,
-                color: theme.pageTextSubdued,
-              }}
-            />
-          </Button>
+          <View style={{ flexDirection: 'row', width: 50 }}>
+            {isNameEditable && account && (
+              <NotesButton
+                id={`account-${account.id}`}
+                defaultColor={theme.pageTextSubdued}
+              />
+            )}
+            {isNameEditable && (
+              <Button
+                variant="bare"
+                aria-label={t('Edit account name')}
+                className="hover-visible"
+                onPress={() => setEditingName(true)}
+              >
+                <SvgPencil1
+                  style={{
+                    width: 11,
+                    height: 11,
+                    color: theme.pageTextSubdued,
+                  }}
+                />
+              </Button>
+            )}
+          </View>
         </View>
-      );
-    } else {
-      return (
-        <View
-          style={{ fontSize: 25, fontWeight: 500, marginBottom: -1 }}
-          data-testid="account-name"
-        >
-          {account && account.closed
-            ? t('Closed: {{ accountName }}', { accountName })
-            : accountName}
-        </View>
-      );
-    }
-  }
+      )}
+    </View>
+  );
 }
 
 type AccountMenuProps = {

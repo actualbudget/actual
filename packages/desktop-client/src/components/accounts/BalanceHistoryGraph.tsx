@@ -162,7 +162,7 @@ export function BalanceHistoryGraph({
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <View style={{ flexGrow: 1, margin: 10, ...style }}>
+    <View style={{ margin: 10, ...style }}>
       <AutoSizer>
         {({ width, height }: { width: number; height: number }) => {
           if (loading) {
