@@ -229,13 +229,23 @@ export function AccountHeader({
     }
   }
 
+  const graphRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerHeight < 500 && showNetWorthChart) {
-        setShowNetWorthChartPref('false');
-      } else if (window.innerHeight >= 500 && !showNetWorthChart) {
+      const ele = graphRef.current;
+      if (!ele) return;
+      const clone = ele.cloneNode(true) as HTMLDivElement;
+      Object.assign(clone.style, {
+        visibility: 'hidden',
+        display: 'flex',
+      });
+      ele.after(clone);
+      if (clone.clientHeight < window.innerHeight * 0.15) {
         setShowNetWorthChartPref('true');
+      } else {
+        setShowNetWorthChartPref('false');
       }
+      clone.remove();
     };
 
     window.addEventListener('resize', handleResize);
@@ -243,7 +253,7 @@ export function AccountHeader({
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [setShowNetWorthChartPref, showNetWorthChart]);
+  }, [setShowNetWorthChartPref]);
 
   useHotkeys(
     'ctrl+f, cmd+f, meta+f',
@@ -338,15 +348,15 @@ export function AccountHeader({
             />
           </View>
 
-          {showNetWorthChart && (
-            <BalanceHistoryGraph
-              accountId={accountId}
-              style={{
-                height: 'calc(5vh + 5vw)',
-                margin: 0,
-              }}
-            />
-          )}
+          <BalanceHistoryGraph
+            ref={graphRef}
+            accountId={accountId}
+            style={{
+              height: 'calc(5vh + 5vw)',
+              margin: 0,
+              display: showNetWorthChart ? 'flex' : 'none',
+            }}
+          />
         </View>
         <Stack
           spacing={2}

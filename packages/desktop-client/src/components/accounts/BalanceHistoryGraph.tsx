@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo, type CSSProperties } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  type CSSProperties,
+  type Ref,
+} from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { SpaceBetween } from '@actual-app/components/space-between';
@@ -22,6 +28,7 @@ const LABEL_WIDTH = 70;
 type BalanceHistoryGraphProps = {
   accountId?: string;
   style?: CSSProperties;
+  ref?: Ref<HTMLDivElement>;
 };
 
 type Balance = {
@@ -32,6 +39,7 @@ type Balance = {
 export function BalanceHistoryGraph({
   accountId,
   style,
+  ref,
 }: BalanceHistoryGraphProps) {
   const [balanceData, setBalanceData] = useState<
     Array<{ date: string; balance: number }>
@@ -162,7 +170,7 @@ export function BalanceHistoryGraph({
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <View style={{ margin: 10, ...style }}>
+    <View ref={ref} style={{ margin: 10, ...style }}>
       <AutoSizer>
         {({ width, height }: { width: number; height: number }) => {
           if (loading) {
