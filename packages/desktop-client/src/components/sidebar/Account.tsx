@@ -114,13 +114,12 @@ export function Account<FieldName extends SheetFields<'account'>>({
   const [isEditing, setIsEditing] = useState(false);
 
   const accountNote = useNotes(`account-${account?.id}`);
-  const needsTooltip = !!account?.id;
 
   const accountRow = (
     <View
       innerRef={dropRef}
       style={{ flexShrink: 0, ...outerStyle }}
-      onContextMenu={needsTooltip ? handleContextMenu : undefined}
+      onContextMenu={handleContextMenu}
     >
       <View innerRef={triggerRef}>
         <DropHighlight pos={dropPos} />
@@ -266,7 +265,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
     </View>
   );
 
-  if (!needsTooltip || Platform.isPlaywright) {
+  if (Platform.isPlaywright) {
     return accountRow;
   }
 
@@ -285,7 +284,9 @@ export function Account<FieldName extends SheetFields<'account'>>({
           >
             {name}
           </Text>
-          {account && <BalanceHistoryGraph accountId={account.id} />}
+          <BalanceHistoryGraph
+            accountId={to.match(/\/accounts\/?(.+)?/)?.[1]}
+          />
           {accountNote && (
             <Notes
               getStyle={() => ({

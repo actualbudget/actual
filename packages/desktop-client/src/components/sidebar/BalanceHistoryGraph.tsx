@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
@@ -9,20 +10,15 @@ import { subMonths, format, eachMonthOfInterval, parseISO } from 'date-fns';
 import { LineChart, Line, YAxis, Tooltip as RechartsTooltip } from 'recharts';
 
 import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
 import { integerToCurrency } from 'loot-core/shared/util';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import * as queries from '@desktop-client/queries';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
-const CHART_HEIGHT = 70;
-const CHART_WIDTH = 280;
-const LABEL_WIDTH = 70;
-const TOTAL_WIDTH = CHART_WIDTH + LABEL_WIDTH;
-
 type BalanceHistoryGraphProps = {
-  accountId: string;
+  accountId?: string;
 };
 
 type Balance = {
@@ -59,18 +55,18 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
 
       const [starting, totals]: [number, Balance[]] = await Promise.all([
         aqlQuery(
-          q('transactions')
+          queries
+            .transactions(accountId)
             .filter({
-              account: accountId,
               date: { $lt: monthUtils.firstDayOfMonth(startDate) },
             })
             .calculate({ $sum: '$amount' }),
         ).then(({ data }) => data),
 
         aqlQuery(
-          q('transactions')
+          queries
+            .transactions(accountId)
             .filter({
-              account: accountId,
               $and: [
                 { date: { $gte: monthUtils.firstDayOfMonth(startDate) } },
                 { date: { $lte: monthUtils.lastDayOfMonth(endDate) } },
@@ -154,88 +150,100 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
   // State to track if the chart is hovered (used to conditionally render PrivacyFilter)
   const [isHovered, setIsHovered] = useState(false);
 
-  if (loading) {
-    return (
-      <div style={{ width: TOTAL_WIDTH, height: CHART_HEIGHT, marginTop: 10 }}>
-        <LoadingIndicator />
-      </div>
-    );
-  }
-
   return (
-    <div style={{ width: TOTAL_WIDTH, marginTop: 10 }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'stretch',
-          justifyContent: 'space-between',
-        }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <LineChart data={balanceData} width={CHART_WIDTH} height={CHART_HEIGHT}>
-          <YAxis domain={['dataMin', 'dataMax']} hide={true} />
-          <RechartsTooltip
-            contentStyle={{
-              display: 'none',
-            }}
-            labelFormatter={(label, items) => {
-              const data = items[0]?.payload;
-              if (data) {
-                setHoveredValue(data);
-              }
-              return '';
-            }}
-            isAnimationActive={false}
-          />
-          <Line
-            type="monotone"
-            dataKey="balance"
-            stroke={
-              percentageChange >= 0 ? theme.noticeTextLight : theme.errorText
-            }
-            strokeWidth={2}
-            dot={false}
-            animationDuration={0}
-          />
-        </LineChart>
+    <View style={{ minWidth: 350, minHeight: 70, flexGrow: 1, margin: 10 }}>
+      <AutoSizer>
+        {({ width, height }: { width: number; height: number }) => {
+          if (loading) {
+            return (
+              <div style={{ width, height }}>
+                <LoadingIndicator />
+              </div>
+            );
+          }
 
-        <SpaceBetween
-          direction="vertical"
-          style={{
-            alignItems: 'flex-end',
-            justifyContent: 'space-between',
-            width: LABEL_WIDTH,
-            textAlign: 'right',
-            ...styles.verySmallText,
-          }}
-        >
-          {percentageChange === 0 ? (
-            <div />
-          ) : (
-            <Text
-              style={{
-                color:
-                  percentageChange >= 0
-                    ? theme.noticeTextLight
-                    : theme.errorText,
-              }}
-            >
-              {percentageChange >= 0 ? '+' : ''}
-              {percentageChange.toFixed(1)}%
-            </Text>
-          )}
+          return (
+            <View style={{ width }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'stretch',
+                  justifyContent: 'space-between',
+                }}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+              >
+                <LineChart data={balanceData} width={width} height={height}>
+                  <YAxis domain={['dataMin', 'dataMax']} hide={true} />
+                  <RechartsTooltip
+                    contentStyle={{
+                      display: 'none',
+                    }}
+                    labelFormatter={(label, items) => {
+                      const data = items[0]?.payload;
+                      if (data) {
+                        setHoveredValue(data);
+                      }
+                      return '';
+                    }}
+                    isAnimationActive={false}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="balance"
+                    stroke={
+                      percentageChange >= 0
+                        ? theme.noticeTextLight
+                        : theme.errorText
+                    }
+                    strokeWidth={2}
+                    dot={false}
+                    animationDuration={0}
+                  />
+                </LineChart>
 
-          {hoveredValue && (
-            <View>
-              <Text style={{ fontWeight: 800 }}>{hoveredValue.date}</Text>
-              <PrivacyFilter activationFilters={[() => !isHovered]}>
-                <Text>{integerToCurrency(hoveredValue.balance)}</Text>
-              </PrivacyFilter>
+                <SpaceBetween
+                  direction="vertical"
+                  style={{
+                    alignItems: 'flex-end',
+                    justifyContent: 'space-between',
+                    width: 70,
+                    textAlign: 'right',
+                    ...styles.verySmallText,
+                  }}
+                >
+                  {percentageChange === 0 ? (
+                    <div />
+                  ) : (
+                    <Text
+                      style={{
+                        color:
+                          percentageChange >= 0
+                            ? theme.noticeTextLight
+                            : theme.errorText,
+                      }}
+                    >
+                      {percentageChange >= 0 ? '+' : ''}
+                      {percentageChange.toFixed(1)}%
+                    </Text>
+                  )}
+
+                  {hoveredValue && (
+                    <View>
+                      <Text style={{ fontWeight: 800 }}>
+                        {hoveredValue.date}
+                      </Text>
+                      <PrivacyFilter activationFilters={[() => !isHovered]}>
+                        <Text>{integerToCurrency(hoveredValue.balance)}</Text>
+                      </PrivacyFilter>
+                    </View>
+                  )}
+                </SpaceBetween>
+              </div>
             </View>
-          )}
-        </SpaceBetween>
-      </div>
-    </div>
+          );
+        }}
+      </AutoSizer>
+    </View>
   );
 }

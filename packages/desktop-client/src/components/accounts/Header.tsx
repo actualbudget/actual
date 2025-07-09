@@ -49,7 +49,7 @@ import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
 import { FiltersStack } from '@desktop-client/components/filters/FiltersStack';
 import { type SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
 import { NotesButton } from '@desktop-client/components/NotesButton';
-import { NetWorthComponent } from '@desktop-client/components/reports/reports/NetWorthComponent';
+import { BalanceHistoryGraph } from '@desktop-client/components/sidebar/BalanceHistoryGraph';
 import { SelectedTransactionsButton } from '@desktop-client/components/transactions/SelectedTransactionsButton';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
@@ -62,8 +62,8 @@ type AccountHeaderProps = {
   isNameEditable: boolean;
   workingHard: boolean;
   accountName: string;
+  accountId?: string;
   account?: AccountEntity;
-  selectedAccounts: AccountEntity[];
   filterId?: SavedFilter;
   savedFilters: TransactionFilterEntity[];
   accountsSyncing: string[];
@@ -138,8 +138,8 @@ export function AccountHeader({
   isNameEditable,
   workingHard,
   accountName,
+  accountId,
   account,
-  selectedAccounts,
   filterId,
   savedFilters,
   accountsSyncing,
@@ -204,6 +204,7 @@ export function AccountHeader({
   const [showAccountNetWorthPref] = useSyncedPref(
     'show-account-net-worth-chart',
   );
+  const showAccountNetWorth = showAccountNetWorthPref === 'true';
 
   const locale = useLocale();
 
@@ -274,7 +275,7 @@ export function AccountHeader({
       <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
         <View
           style={{
-            flexDirection: 'column',
+            flexDirection: 'row',
             marginTop: 2,
             justifyContent: 'space-between',
             gap: 10,
@@ -282,6 +283,8 @@ export function AccountHeader({
         >
           <View
             style={{
+              maxWidth: showAccountNetWorth ? '35%' : '100%',
+              minHeight: showAccountNetWorth ? 150 : undefined,
               alignItems: 'flex-start',
               gap: 10,
             }}
@@ -318,14 +321,7 @@ export function AccountHeader({
               filteredAmount={filteredAmount}
             />
           </View>
-          {showAccountNetWorthPref === 'true' && selectedAccounts.length && (
-            <NetWorthComponent
-              hideNetWorth
-              hideFilters
-              accounts={selectedAccounts}
-              style={{ height: '30vh', minHeight: '250px', maxHeight: '400px' }}
-            />
-          )}
+          {showAccountNetWorth && <BalanceHistoryGraph accountId={accountId} />}
         </View>
         <Stack
           spacing={2}
