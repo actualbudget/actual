@@ -49,6 +49,7 @@ type HeaderProps = {
     typeof AppliedFilters
   >['onConditionsOpChange'];
   children?: ReactNode;
+  inlineContent?: ReactNode;
 };
 
 export function Header({
@@ -67,6 +68,7 @@ export function Header({
   onDeleteFilter,
   onConditionsOpChange,
   children,
+  inlineContent,
 }: HeaderProps) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -228,6 +230,7 @@ export function Header({
               exclude={undefined}
             />
           )}
+          {inlineContent}
         </SpaceBetween>
 
         {children ? (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -6,6 +6,9 @@ import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Select } from '@actual-app/components/select';
+import { Popover } from '@actual-app/components/popover';
+import { Menu } from '@actual-app/components/menu';
+import { SvgCalendar } from '@actual-app/components/icons/v1';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -249,6 +252,9 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         onDeleteFilter={onDeleteFilter}
         conditionsOp={conditionsOp}
         onConditionsOpChange={onConditionsOpChange}
+        inlineContent={
+          <IntervalSelector interval={interval} onChange={setInterval} />
+        }
       >
         {widget && (
           <Button variant="primary" onPress={onSaveWidget}>
@@ -256,29 +262,6 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
           </Button>
         )}
       </Header>
-
-      <View
-        style={{
-          padding: 20,
-          paddingTop: 10,
-          paddingBottom: 10,
-          flexShrink: 0,
-        }}
-      >
-        <SpaceBetween gap={10}>
-          <View style={{ fontSize: 14, fontWeight: 500 }}>
-            <Trans>Interval:</Trans>
-          </View>
-          <Select
-            value={interval}
-            onChange={setInterval}
-            options={ReportOptions.interval.map(({ description, key }) => [
-              key as 'Daily' | 'Weekly' | 'Monthly' | 'Yearly',
-              description,
-            ])}
-          />
-        </SpaceBetween>
-      </View>
 
       <View
         style={{
@@ -329,5 +312,51 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         </View>
       </View>
     </Page>
+  );
+}
+
+// Interval selector component with icon-only trigger similar to filter button
+function IntervalSelector({
+  interval,
+  onChange,
+}: {
+  interval: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
+  onChange: (val: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly') => void;
+}) {
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <Button
+        ref={triggerRef}
+        variant="bare"
+        onPress={() => setIsOpen(true)}
+        aria-label="Change interval"
+      >
+        <SvgCalendar style={{ width: 12, height: 12 }} />
+        <Trans>
+          <span style={{ marginLeft: 5 }}>Interval</span>
+        </Trans>
+      </Button>
+
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom start"
+        isOpen={isOpen}
+        onOpenChange={() => setIsOpen(false)}
+      >
+        <Menu
+          onMenuSelect={item => {
+            onChange(item as 'Daily' | 'Weekly' | 'Monthly' | 'Yearly');
+            setIsOpen(false);
+          }}
+          items={ReportOptions.interval.map(({ key, description }) => ({
+            name: key as 'Daily' | 'Weekly' | 'Monthly' | 'Yearly',
+            text: description,
+          }))}
+        />
+      </Popover>
+    </>
   );
 }
