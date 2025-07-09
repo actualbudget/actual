@@ -282,6 +282,7 @@ export function AccountHeader({
             style={{
               maxWidth: showNetWorthChart ? '35%' : '100%',
               minHeight: showNetWorthChart ? 150 : undefined,
+              flexGrow: 1,
               alignItems: 'flex-start',
               gap: 10,
             }}
