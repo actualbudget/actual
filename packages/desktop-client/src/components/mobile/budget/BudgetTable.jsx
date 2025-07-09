@@ -639,18 +639,29 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
         modal: {
           name: 'category-autocomplete',
           options: {
-            title: t('Cover overspending'),
+            title:
+              budgetType === 'envelope'
+                ? t('Cover overspending')
+                : t('Overspent categories'),
             month,
             categoryGroups: categoryGroupsToShow,
             showHiddenCategories: true,
-            onSelect: onOpenCoverCategoryModal,
+            onSelect:
+              budgetType === 'envelope' ? onOpenCoverCategoryModal : null,
             clearOnSelect: true,
             closeOnSelect: false,
           },
         },
       }),
     );
-  }, [categoryGroupsToShow, dispatch, month, onOpenCoverCategoryModal, t]);
+  }, [
+    categoryGroupsToShow,
+    dispatch,
+    month,
+    onOpenCoverCategoryModal,
+    t,
+    budgetType,
+  ]);
 
   const numberOfOverspentCategories = overspentCategories.length;
   if (numberOfOverspentCategories === 0) {
@@ -682,7 +693,8 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
             </Text>
           </View>
           <Button onPress={onOpenCategorySelectionModal} style={PILL_STYLE}>
-            <Trans>Cover</Trans>
+            {budgetType === 'envelope' && <Trans>Cover</Trans>}
+            {budgetType === 'tracking' && <Trans>View</Trans>}
           </Button>
         </View>
       </Banner>
