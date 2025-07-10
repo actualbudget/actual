@@ -49,7 +49,7 @@ export const setI18NextLanguage = (language: string) => {
     return;
   }
 
-  if (!isLanguageAvailable(language)) {
+  if (language !== 'cimode' && !isLanguageAvailable(language)) {
     if (language === 'en') {
       // English is always available since we use natural-language keys.
       return;
