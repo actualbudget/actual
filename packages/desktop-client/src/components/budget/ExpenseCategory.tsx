@@ -34,7 +34,7 @@ type ExpenseCategoryProps = {
   onSave?: ComponentProps<typeof SidebarCategory>['onSave'];
   onDelete?: ComponentProps<typeof SidebarCategory>['onDelete'];
   onDragChange: OnDragChangeCallback<CategoryEntity>;
-  onBudgetAction: (month: number, action: string, arg: unknown) => void;
+  onBudgetAction: (month: string, action: string, arg: unknown) => void;
   onShowActivity: (id: string, month: string) => void;
   onReorder: OnDropCallback;
 };
