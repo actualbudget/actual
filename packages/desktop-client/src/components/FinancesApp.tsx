@@ -17,6 +17,7 @@ import { GlobalKeys } from './GlobalKeys';
 import { ManageRulesPage } from './ManageRulesPage';
 import { Category } from './mobile/budget/Category';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
+import { MobileRulesPage } from './mobile/rules/MobileRulesPage';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Notifications } from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
@@ -257,7 +258,10 @@ export function FinancesApp() {
                 />
 
                 <Route path="/payees" element={<ManagePayeesPage />} />
-                <Route path="/rules" element={<ManageRulesPage />} />
+                <Route
+                  path="/rules"
+                  element={<NarrowAlternate name="Rules" />}
+                />
                 <Route path="/bank-sync" element={<BankSync />} />
                 <Route path="/tags" element={<ManageTagsPage />} />
                 <Route path="/settings" element={<Settings />} />
@@ -329,6 +333,7 @@ export function FinancesApp() {
             <Routes>
               <Route path="/budget" element={<MobileNavTabs />} />
               <Route path="/accounts" element={<MobileNavTabs />} />
+              <Route path="/rules" element={<MobileNavTabs />} />
               <Route path="/settings" element={<MobileNavTabs />} />
               <Route path="/reports" element={<MobileNavTabs />} />
               <Route path="*" element={null} />
