@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { memo, useRef, type CSSProperties } from 'react';
+import { memo, useRef, useMemo, type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -24,7 +24,10 @@ import {
   SelectCell,
 } from '@desktop-client/components/table';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
+import {
+  useSelectedDispatch,
+  useSelectedItems,
+} from '@desktop-client/hooks/useSelected';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type RuleButtonProps = {
@@ -89,7 +92,7 @@ type PayeeTableRowProps = {
     field: T,
     value: PayeeEntity[T],
   ) => void;
-  onDelete: (id: PayeeEntity['id']) => void;
+  onDelete: (ids: PayeeEntity['id'][]) => void;
   onViewRules: (id: PayeeEntity['id']) => void;
   onCreateRule: (id: PayeeEntity['id']) => void;
   style?: CSSProperties;
@@ -113,6 +116,9 @@ export const PayeeTableRow = memo(
   }: PayeeTableRowProps) => {
     const { id } = payee;
     const dispatchSelected = useSelectedDispatch();
+    const selectedItems = useSelectedItems();
+    const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
+
     const borderColor = selected
       ? theme.tableBorderSelected
       : theme.tableBorder;
@@ -169,7 +175,10 @@ export const PayeeTableRow = memo(
                 text: payee.favorite ? t('Unfavorite') : t('Favorite'),
               },
               ruleCount > 0 && { name: 'view-rules', text: t('View rules') },
-              { name: 'create-rule', text: t('Create rule') },
+              selectedIds.length === 1 && {
+                name: 'create-rule',
+                text: t('Create rule'),
+              },
               isLearnCategoriesEnabled &&
                 (payee.learn_categories
                   ? {
@@ -181,13 +190,17 @@ export const PayeeTableRow = memo(
             onMenuSelect={name => {
               switch (name) {
                 case 'delete':
-                  onDelete(id);
+                  onDelete(selectedIds);
                   break;
                 case 'favorite':
-                  onUpdate(id, 'favorite', !payee.favorite);
+                  selectedIds.forEach(id => {
+                    onUpdate(id, 'favorite', !payee.favorite);
+                  });
                   break;
                 case 'learn':
-                  onUpdate(id, 'learn_categories', !payee.learn_categories);
+                  selectedIds.forEach(id => {
+                    onUpdate(id, 'learn_categories', !payee.learn_categories);
+                  });
                   break;
                 case 'view-rules':
                   onViewRules(id);
