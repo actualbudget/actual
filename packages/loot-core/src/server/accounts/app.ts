@@ -1091,7 +1091,7 @@ async function importTransactions({
   transactions: ImportTransactionEntity[];
   isPreview: boolean;
   opts?: {
-    defaultCleared: boolean;
+    defaultCleared?: boolean;
   };
 }): Promise<ImportTransactionsResult> {
   if (typeof accountId !== 'string') {
