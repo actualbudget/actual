@@ -156,6 +156,15 @@ function parseHTTPSConfig(value: string) {
   return fs.readFileSync(value);
 }
 
+function sendServerStartedMessage() {
+  // Signify to any parent process that the server has started. Used in electron desktop app
+  // @ts-ignore-error electron types
+  process.parentPort?.postMessage({ type: 'server-started' });
+  console.log(
+    'Listening on ' + config.get('hostname') + ':' + config.get('port') + '...',
+  );
+}
+
 export async function run() {
   const portVal = config.get('port');
   const port = typeof portVal === 'string' ? parseInt(portVal) : portVal;
@@ -186,16 +195,12 @@ export async function run() {
       key: parseHTTPSConfig(config.get('https.key')),
       cert: parseHTTPSConfig(config.get('https.cert')),
     };
-    https.createServer(httpsOptions, app).listen(port, hostname);
+    https.createServer(httpsOptions, app).listen(port, hostname, () => {
+      sendServerStartedMessage();
+    });
   } else {
-    app.listen(port, hostname);
+    app.listen(port, hostname, () => {
+      sendServerStartedMessage();
+    });
   }
-
-  // Signify to any parent process that the server has started. Used in electron desktop app
-  // @ts-ignore-error electron types
-  process.parentPort?.postMessage({ type: 'server-started' });
-
-  console.log(
-    'Listening on ' + config.get('hostname') + ':' + config.get('port') + '...',
-  );
 }

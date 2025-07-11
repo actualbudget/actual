@@ -175,6 +175,14 @@ export function getMenu(
           },
         },
         {
+          label: 'Community Support (Discord)',
+          click(_menuItem, focusedWin) {
+            focusedWin?.webContents.executeJavaScript(
+              'window.open("https://discord.gg/pRYNYr4W5A", "_blank")',
+            );
+          },
+        },
+        {
           label: 'Keyboard Shortcuts',
           accelerator: '?',
           enabled: !!budgetId,

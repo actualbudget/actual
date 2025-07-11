@@ -7623,7 +7623,6 @@ __metadata:
     eslint-plugin-jsx-a11y: "npm:^6.10.2"
     eslint-plugin-react: "npm:^7.37.5"
     eslint-plugin-react-hooks: "npm:^5.2.0"
-    eslint-plugin-rulesdir: "npm:^0.2.2"
     eslint-plugin-typescript-paths: "npm:^0.0.33"
     globals: "npm:^15.15.0"
     html-to-image: "npm:^1.11.13"
@@ -10956,13 +10955,6 @@ __metadata:
   peerDependencies:
     eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9.7
   checksum: 10/ee1bd4e0ec64f29109d5a625bb703d179c82e0159c86c3f1b52fc1209d2994625a137dae303c333fb308a2e38315e44066d5204998177e31974382f9fda25d5c
-  languageName: node
-  linkType: hard
-
-"eslint-plugin-rulesdir@npm:^0.2.2":
-  version: 0.2.2
-  resolution: "eslint-plugin-rulesdir@npm:0.2.2"
-  checksum: 10/aac282554e5eb5b1fb3944dd43a08be5fd3e0bc33a00738f525df08344bc1d54f4abe3303118582d86776b3146ddb9e09d3fd1af502d484b3354da2bfee2ce24
   languageName: node
   linkType: hard
 
