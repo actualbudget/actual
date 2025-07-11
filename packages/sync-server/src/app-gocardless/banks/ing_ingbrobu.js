@@ -1,5 +1,6 @@
-import Fallback from './integration-bank.js';
 import { amountToInteger } from '../utils.js';
+
+import Fallback from './integration-bank.js';
 
 /** @type {import('./bank.interface.js').IBank} */
 export default {
@@ -75,33 +76,59 @@ export default {
       return null;
     }
 
-        if (amountToInteger(transaction.transactionAmount.amount) < 0) {
-            if (!transaction.creditorName) {
-                if (transaction.remittanceInformationUnstructured.match(/^Card/)) {
-                    editedTrans.payeeName = transaction.remittanceInformationUnstructured.split(',')[3];
-                }
-                else if (transaction.remittanceInformationUnstructured.match(/^Beneficiary/)) {
-                    console.info('-------------------------------> HIT: /^Beneficiary/ - without creditorName set!');
-                    editedTrans.payeeName = transaction.remittanceInformationUnstructured.split(',')[1];
-                }
-            }
-            else {
-                editedTrans.payeeName = transaction.creditorName + ' (' + transaction.creditorAccount.iban.replace(/(.{4}).{16}(.{4})/,"$1 XXXX $2") + ')';
-            }
+    if (amountToInteger(transaction.transactionAmount.amount) < 0) {
+      if (!transaction.creditorName) {
+        if (transaction.remittanceInformationUnstructured.match(/^Card/)) {
+          editedTrans.payeeName =
+            transaction.remittanceInformationUnstructured.split(',')[3];
+        } else if (
+          transaction.remittanceInformationUnstructured.match(/^Beneficiary/)
+        ) {
+          console.info(
+            '-------------------------------> HIT: /^Beneficiary/ - without creditorName set!',
+          );
+          editedTrans.payeeName =
+            transaction.remittanceInformationUnstructured.split(',')[1];
         }
-        else {
-            if (transaction.remittanceInformationUnstructured.match(/Ordering\sparty/)) {
-                editedTrans.payeeName = transaction.remittanceInformationUnstructured.match(/Ordering\sparty,\s?(.+?),/)[1] + ' (' + transaction.debtorAccount.iban.replace(/(.{4}).{16}(.{4})/,"$1 XXXX $2") + ')';
-            }
-        }
+      } else {
+        editedTrans.payeeName =
+          transaction.creditorName +
+          ' (' +
+          transaction.creditorAccount.iban.replace(
+            /(.{4}).{16}(.{4})/,
+            '$1 XXXX $2',
+          ) +
+          ')';
+      }
+    } else {
+      if (
+        transaction.remittanceInformationUnstructured.match(/Ordering\sparty/)
+      ) {
+        editedTrans.payeeName =
+          transaction.remittanceInformationUnstructured.match(
+            /Ordering\sparty,\s?(.+?),/,
+          )[1] +
+          ' (' +
+          transaction.debtorAccount.iban.replace(
+            /(.{4}).{16}(.{4})/,
+            '$1 XXXX $2',
+          ) +
+          ')';
+      }
+    }
 
-        if (transaction.proprietaryBankTransactionCode) {
-            console.info(transaction.notes);
-            editedTrans.notes = transaction.remittanceInformationUnstructured + ' (' + transaction.proprietaryBankTransactionCode + ')';
-        }
-        else {
-            console.info('-------------------------------> HIT: Missing transaction.proprietaryBankTransactionCode set!');
-        }
+    if (transaction.proprietaryBankTransactionCode) {
+      console.info(transaction.notes);
+      editedTrans.notes =
+        transaction.remittanceInformationUnstructured +
+        ' (' +
+        transaction.proprietaryBankTransactionCode +
+        ')';
+    } else {
+      console.info(
+        '-------------------------------> HIT: Missing transaction.proprietaryBankTransactionCode set!',
+      );
+    }
 
     return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
