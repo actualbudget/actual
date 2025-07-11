@@ -60,6 +60,23 @@ export type MarkdownWidget = AbstractWidget<
   'markdown-card',
   { content: string; text_align?: 'left' | 'right' | 'center' }
 >;
+export type SpreadsheetRowData = {
+  id: string;
+  label: string;
+  formula: string;
+  value: string;
+  hidden?: boolean;
+};
+
+export type SpreadsheetWidget = AbstractWidget<
+  'spreadsheet-card',
+  {
+    id?: string;
+    name?: string;
+    rows?: SpreadsheetRowData[];
+    showFormulaColumn?: boolean;
+  } | null
+>;
 
 type SpecializedWidget =
   | NetWorthWidget
@@ -67,7 +84,8 @@ type SpecializedWidget =
   | SpendingWidget
   | MarkdownWidget
   | SummaryWidget
-  | CalendarWidget;
+  | CalendarWidget
+  | SpreadsheetWidget;
 export type Widget = SpecializedWidget | CustomReportWidget;
 export type NewWidget = Omit<Widget, 'id' | 'tombstone'>;
 

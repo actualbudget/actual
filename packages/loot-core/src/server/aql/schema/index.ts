@@ -190,6 +190,13 @@ export const schema = {
     meta: f('json'),
     tombstone: f('boolean'),
   },
+  spreadsheet_reports: {
+    id: f('id'),
+    name: f('string', { required: true }),
+    rows: f('string', { default: '[]' }),
+    show_formula_column: f('integer', { default: 1 }),
+    tombstone: f('boolean'),
+  },
 };
 
 export const schemaConfig: SchemaConfig = {

@@ -1,9 +1,13 @@
+// Type-only import for spreadsheet rows; erased at compile time
+import type { SheetRowData } from '@desktop-client/components/reports/reports/SheetRow';
+
 export type FeatureFlag =
   | 'goalTemplatesEnabled'
   | 'goalTemplatesUIEnabled'
   | 'actionTemplating'
   | 'pluggyAiBankSync'
-  | 'currency';
+  | 'currency'
+  | 'experimentalSheets';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -77,6 +81,7 @@ export type LocalPrefs = Partial<{
   reportsViewLabel: boolean;
   sidebarWidth: number;
   'mobile.showSpentColumn': boolean;
+  'report.spreadsheetRows': SheetRowData[];
 }>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | 'development';

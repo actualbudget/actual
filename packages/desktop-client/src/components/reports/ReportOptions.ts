@@ -33,6 +33,13 @@ export const defaultReport: CustomReportEntity = {
   conditionsOp: 'and',
 };
 
+export const defaultSpreadsheetReport = {
+  id: '',
+  name: '',
+  rows: [],
+  showFormulaColumn: true,
+};
+
 const balanceTypeOptions = [
   { description: t('Payment'), key: 'Payment', format: 'totalDebts' as const },
   { description: t('Deposit'), key: 'Deposit', format: 'totalAssets' as const },

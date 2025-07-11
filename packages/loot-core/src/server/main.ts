@@ -32,6 +32,7 @@ import * as prefs from './prefs';
 import { app as reportsApp } from './reports/app';
 import { app as rulesApp } from './rules/app';
 import { app as schedulesApp } from './schedules/app';
+import { app as spreadsheetReportsApp } from './spreadsheet-reports/app';
 import { getServer, setServer } from './server-config';
 import { app as spreadsheetApp } from './spreadsheet/app';
 import { fullSync, setSyncingMode } from './sync';
@@ -144,6 +145,7 @@ app.combine(
   accountsApp,
   payeesApp,
   spreadsheetApp,
+  spreadsheetReportsApp,
   syncApp,
   budgetFilesApp,
   encryptionApp,

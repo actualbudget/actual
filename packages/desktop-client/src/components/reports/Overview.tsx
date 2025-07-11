@@ -18,6 +18,7 @@ import {
   type CustomReportWidget,
   type ExportImportDashboard,
   type MarkdownWidget,
+  type SpreadsheetWidget,
   type Widget,
 } from 'loot-core/types/models';
 
@@ -29,6 +30,7 @@ import { CustomReportListCards } from './reports/CustomReportListCards';
 import { MarkdownCard } from './reports/MarkdownCard';
 import { NetWorthCard } from './reports/NetWorthCard';
 import { SpendingCard } from './reports/SpendingCard';
+import { SpreadsheetCard } from './reports/SpreadsheetCard';
 import './overview.scss';
 import { SummaryCard } from './reports/SummaryCard';
 
@@ -421,6 +423,10 @@ export function Overview() {
                               text: t('Spending analysis'),
                             },
                             {
+                              name: 'spreadsheet-card' as const,
+                              text: t('Spreadsheet report'),
+                            },
+                            {
                               name: 'markdown-card' as const,
                               text: t('Text widget'),
                             },
@@ -595,6 +601,14 @@ export function Overview() {
                       isEditing={isEditing}
                       meta={item.meta}
                       firstDayOfWeekIdx={firstDayOfWeekIdx}
+                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                      onRemove={() => onRemoveWidget(item.i)}
+                    />
+                  ) : item.type === 'spreadsheet-card' ? (
+                    <SpreadsheetCard
+                      widgetId={item.i}
+                      isEditing={isEditing}
+                      meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
                     />
