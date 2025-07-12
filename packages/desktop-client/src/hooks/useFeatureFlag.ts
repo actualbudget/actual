@@ -7,6 +7,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   goalTemplatesUIEnabled: false,
   actionTemplating: false,
   pluggyAiBankSync: false,
+  subCategoryGroups: true, // Defaulting to true for feedback purposes
   currency: false,
 };
 

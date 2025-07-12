@@ -3,6 +3,7 @@ export type FeatureFlag =
   | 'goalTemplatesUIEnabled'
   | 'actionTemplating'
   | 'pluggyAiBankSync'
+  | 'subCategoryGroups'
   | 'currency';
 
 /**
