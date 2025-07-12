@@ -111,6 +111,12 @@ export function ExperimentalFeatures() {
             >
               <Trans>Currency support</Trans>
             </FeatureToggle>
+            <FeatureToggle
+              flag="experimentalSheets"
+              feedbackLink="https://github.com/actualbudget/actual/issues/5191"
+            >
+              <Trans>Spreadsheet report</Trans>
+            </FeatureToggle>
           </View>
         ) : (
           <Link
