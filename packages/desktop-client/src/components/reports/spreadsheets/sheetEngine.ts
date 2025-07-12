@@ -1,4 +1,4 @@
-/* eslint-disable rulesdir/typography */
+/* eslint-disable actual/typography */
 // Simple spreadsheet engine for formula evaluation
 // Supports basic arithmetic, functions, and cell references
 

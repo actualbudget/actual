@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import {
@@ -231,7 +231,9 @@ export function SpreadsheetCard({
                     fontSize: 13,
                   }}
                 >
-                  {t('Interactive spreadsheet with formulas and calculations')}
+                  <Trans>
+                    Interactive spreadsheet with formulas and calculations
+                  </Trans>
                 </Text>
               )}
             </View>
@@ -385,7 +387,7 @@ export function SpreadsheetCard({
                   fontWeight: 500,
                 }}
               >
-                {t('No data yet')}
+                <Trans>No data yet</Trans>
               </Text>
 
               <View
@@ -428,7 +430,7 @@ export function SpreadsheetCard({
                   lineHeight: 1.4,
                 }}
               >
-                {t('Click to add formulas and calculations')}
+                <Trans>Click to add formulas and calculations</Trans>
               </Text>
             </View>
           )}

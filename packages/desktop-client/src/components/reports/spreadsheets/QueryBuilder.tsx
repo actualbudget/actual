@@ -1,6 +1,6 @@
-/* eslint-disable rulesdir/typography */
+/* eslint-disable actual/typography */
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Input } from '@actual-app/components/input';
@@ -750,7 +750,7 @@ export function QueryBuilder({
                       borderRadius: 4,
                     }}
                   >
-                    Clear
+                    <Trans>Clear</Trans>
                   </Button>
                 </View>
 
@@ -860,7 +860,9 @@ export function QueryBuilder({
 
         {/* Action Buttons */}
         <Stack direction="row" justify="flex-end" style={{ gap: 10 }}>
-          <Button onPress={handleClose}>{t('Cancel')}</Button>
+          <Button onPress={handleClose}>
+            <Trans>Cancel</Trans>
+          </Button>
           <Button
             variant="primary"
             onPress={handleSave}

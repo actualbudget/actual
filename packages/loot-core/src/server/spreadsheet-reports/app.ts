@@ -6,7 +6,6 @@ import {
 } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
-import { ValidationError } from '../errors';
 import { requiredFields } from '../models';
 import { mutator } from '../mutators';
 import { undoable } from '../undo';
