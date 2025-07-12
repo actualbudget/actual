@@ -16,8 +16,7 @@ import { css, cx } from '@emotion/css';
 import * as Platform from 'loot-core/shared/platform';
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { BalanceHistoryGraph } from './BalanceHistoryGraph';
-
+import { BalanceHistoryGraph } from '@desktop-client/components/accounts/BalanceHistoryGraph';
 import { Link } from '@desktop-client/components/common/Link';
 import { Notes } from '@desktop-client/components/Notes';
 import {
@@ -114,13 +113,12 @@ export function Account<FieldName extends SheetFields<'account'>>({
   const [isEditing, setIsEditing] = useState(false);
 
   const accountNote = useNotes(`account-${account?.id}`);
-  const needsTooltip = !!account?.id;
 
   const accountRow = (
     <View
       innerRef={dropRef}
       style={{ flexShrink: 0, ...outerStyle }}
-      onContextMenu={needsTooltip ? handleContextMenu : undefined}
+      onContextMenu={handleContextMenu}
     >
       <View innerRef={triggerRef}>
         <DropHighlight pos={dropPos} />
@@ -266,7 +264,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
     </View>
   );
 
-  if (!needsTooltip || Platform.isPlaywright) {
+  if (Platform.isPlaywright) {
     return accountRow;
   }
 
@@ -285,7 +283,10 @@ export function Account<FieldName extends SheetFields<'account'>>({
           >
             {name}
           </Text>
-          {account && <BalanceHistoryGraph accountId={account.id} />}
+          <BalanceHistoryGraph
+            accountId={to.match(/\/accounts\/?(.+)?/)?.[1]}
+            style={{ minWidth: 350, minHeight: 70 }}
+          />
           {accountNote && (
             <Notes
               getStyle={() => ({
