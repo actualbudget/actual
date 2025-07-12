@@ -134,7 +134,7 @@ export function ExpenseGroup({
               depth === 0
                 ? theme.tableRowHeaderBackground
                 : theme.tableRowSubHeaderBackground,
-          }}          
+          }}
           dragPreview={dragging && dragState.preview}
           collapsed={collapsed}
           onToggleCollapse={onToggleCollapse}

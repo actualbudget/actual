@@ -380,18 +380,18 @@ export async function getCategoriesGrouped(
   // array must be empty, as the frontend will build its own rendering hierarchy.
   const flatListWithoutChildren: CategoryGroupEntity[] =
     mappedDbGroupsWithOwnCategories.map(dbGroup => {
-      const entityCategories: CategoryEntity[] = (
-        dbGroup.categories || []
-      ).map(dbCat => ({
-        id: dbCat.id,
-        name: dbCat.name,
-        is_income: Boolean(dbCat.is_income),
-        group: dbCat.cat_group,
-        sort_order: dbCat.sort_order,
-        hidden: Boolean(dbCat.hidden),
-        goal_def: dbCat.goal_def || undefined,
-        tombstone: Boolean(dbCat.tombstone),
-      }));
+      const entityCategories: CategoryEntity[] = (dbGroup.categories || []).map(
+        dbCat => ({
+          id: dbCat.id,
+          name: dbCat.name,
+          is_income: Boolean(dbCat.is_income),
+          group: dbCat.cat_group,
+          sort_order: dbCat.sort_order,
+          hidden: Boolean(dbCat.hidden),
+          goal_def: dbCat.goal_def || undefined,
+          tombstone: Boolean(dbCat.tombstone),
+        }),
+      );
 
       return {
         id: dbGroup.id,
@@ -409,7 +409,6 @@ export async function getCategoriesGrouped(
   // This returns a flat array of CategoryGroupEntity objects, where each object
   // has its 'categories' populated, and its 'children' array is empty.
   return flatListWithoutChildren;
-  
 }
 
 export async function insertCategoryGroup(
@@ -433,10 +432,9 @@ export async function insertCategoryGroup(
   `);
   const sort_order = (lastGroup ? lastGroup.sort_order : 0) + SORT_INCREMENT;
 
-
   const processedGroup = {
     ...group,
-    parent_id: group.parent_id ?? null,// Ensure parent_id is null if undefined, as the database expects null for no parent
+    parent_id: group.parent_id ?? null, // Ensure parent_id is null if undefined, as the database expects null for no parent
   };
 
   const validated = {

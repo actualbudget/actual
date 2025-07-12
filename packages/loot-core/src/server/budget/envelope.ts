@@ -96,7 +96,7 @@ export function createCategoryGroup(group, sheetName) {
 }
 
 export function createSummary(groups, categories, prevSheetName, sheetName) {
-  const incomeGroup = groups. filter(group => group.is_income)[0];
+  const incomeGroup = groups.filter(group => group.is_income)[0];
   const expenseCategories = categories.filter(cat => !cat.is_income);
   const incomeCategories = categories.filter(cat => cat.is_income);
 

@@ -4,6 +4,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+
 import { ExpenseCategory } from './ExpenseCategory';
 import { ExpenseGroup } from './ExpenseGroup';
 import { IncomeCategory } from './IncomeCategory';
@@ -11,13 +12,13 @@ import { IncomeGroup } from './IncomeGroup';
 import { IncomeHeader } from './IncomeHeader';
 import { SidebarCategory } from './SidebarCategory';
 import { SidebarGroup } from './SidebarGroup';
-import { buildCategoryHierarchy } from '../util/BuildCategoryHierarchy';
 import { separateGroups } from './util';
 
 import { DropHighlightPosContext } from '@desktop-client/components/sort';
 import { Row } from '@desktop-client/components/table';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { buildCategoryHierarchy } from '@desktop-client/components/util/BuildCategoryHierarchy';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 
 export const BudgetCategories = memo(
   ({
@@ -36,8 +37,7 @@ export const BudgetCategories = memo(
     onReorderCategory,
     onReorderGroup,
   }) => {
-    const { list: allCategories, grouped: allCategoryGroups } =
-      useCategories();
+    const { list: allCategories, grouped: allCategoryGroups } = useCategories();
     const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
       useLocalPref('budget.collapsed');
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
@@ -74,10 +74,10 @@ export const BudgetCategories = memo(
       if (incomeGroup) {
         // Ensure expandGroup returns an array, even if it's empty
         const incomeItems = expandGroup(incomeGroup, 0, 'income') || [];
-        
+
         builtItems = builtItems.concat(
           { type: 'income-separator' },
-          ...incomeItems // Spread the items returned by expandGroup
+          ...incomeItems, // Spread the items returned by expandGroup
         );
       }
 
@@ -115,22 +115,21 @@ export const BudgetCategories = memo(
         items.push({ type: 'new-group' });
       }
 
-        return [
-          ...items,
-          ...(collapsedGroupIds.includes(group.id)
-            ? []
-            : groupChildren
-          ).flatMap(child => expandGroup(child, depth + 1, type)),
-          ...(collapsedGroupIds.includes(group.id) ? [] : groupCategories).map(
-            cat => ({
-              type: `${type}-category`,
-              value: cat,
-              group,
-              depth,
-            }),
-          ),
-        ];
-      }
+      return [
+        ...items,
+        ...(collapsedGroupIds.includes(group.id) ? [] : groupChildren).flatMap(
+          child => expandGroup(child, depth + 1, type),
+        ),
+        ...(collapsedGroupIds.includes(group.id) ? [] : groupCategories).map(
+          cat => ({
+            type: `${type}-category`,
+            value: cat,
+            group,
+            depth,
+          }),
+        ),
+      ];
+    }
 
     const [dragState, setDragState] = useState(null);
     const [savedCollapsed, setSavedCollapsed] = useState(null);
