@@ -180,7 +180,8 @@ function evaluateCell(
         });
         return typeof result === 'number' ? result : String(result);
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
+        const message =
+          error instanceof Error ? error.message : 'Unknown error';
         if (typeof message === 'string' && message.startsWith('Error:')) {
           return message;
         } else {

@@ -11,7 +11,6 @@ import { RowOperationHelpers } from './RowOperationHelpers';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { hasSelfReference } from '@desktop-client/components/reports/spreadsheets/useSheetCalculation';
 
-
 type QueryType = 'cost' | 'balance' | 'formula' | 'row-operation';
 
 type FormulaQueryFormProps = {
