@@ -1,1 +1,13 @@
+#!/usr/bin/env sh
+
+# Prevent committing to master branch
+current_branch=$(git symbolic-ref --short HEAD)
+if [ "$current_branch" = "master" ]; then
+  echo "❌ Error: Committing directly to the master branch is not allowed."
+  echo "Please create a feature branch and submit a pull request instead."
+  echo "Current branch: $current_branch"
+  exit 1
+fi
+
+# Run lint-staged to check staged files
 yarn lint-staged
