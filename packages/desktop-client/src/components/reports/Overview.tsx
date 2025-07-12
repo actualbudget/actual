@@ -81,7 +81,7 @@ export function Overview() {
     [customReports],
   );
 
-  const _spreadsheetReportMap = useMemo(
+  const spreadsheetReportMap = useMemo(
     () => new Map(spreadsheetReports.map(report => [report.id, report])),
     [spreadsheetReports],
   );
@@ -643,7 +643,9 @@ export function Overview() {
                     <SpreadsheetCard
                       widgetId={item.i}
                       isEditing={isEditing}
-                      meta={item.meta}
+                      meta={
+                        spreadsheetReportMap.get(item.meta?.id) || item.meta
+                      }
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
                     />
