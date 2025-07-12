@@ -536,7 +536,7 @@ export type EvaluationContext = {
   negate: (q: string | unknown) => unknown;
   queryRunner: (query: string) => unknown;
   lookupIdentifier?: (name: string) => number;
-  getCellValue?: (ref: string) => number; // New: function to get cell values
+  getCellValue?: (ref: string) => number | string; // Updated to allow error strings
 };
 
 function evaluate(node: Expression, ctx: EvaluationContext): number | unknown {
@@ -554,7 +554,12 @@ function evaluate(node: Expression, ctx: EvaluationContext): number | unknown {
       throw new Error(`Unknown identifier: ${node.name}`);
     case 'CellRef': // Handle cell reference evaluation
       if (ctx.getCellValue) {
-        return ctx.getCellValue(node.ref);
+        const value = ctx.getCellValue(node.ref);
+        // If getCellValue returns an error string, throw it as an error
+        if (typeof value === 'string' && value.startsWith('Error:')) {
+          throw new Error(value);
+        }
+        return value;
       }
       throw new Error(`Cannot resolve cell reference: ${node.ref}`);
     case 'Range': // Handle range evaluation (expand to array of values)
@@ -565,8 +570,23 @@ function evaluate(node: Expression, ctx: EvaluationContext): number | unknown {
         if (startMatch && endMatch) {
           const startNum = parseInt(startMatch[1]);
           const endNum = parseInt(endMatch[1]);
+          // Validate range bounds
+          if (startNum > endNum) {
+            throw new Error(
+              'Error: Invalid range - start must be less than or equal to end',
+            );
+          }
+          if (endNum - startNum > 1000) {
+            throw new Error(
+              'Error: Range too large - maximum 1000 cells allowed',
+            );
+          }
           for (let i = startNum; i <= endNum; i++) {
             const value = ctx.getCellValue(`row-${i}`);
+            // If getCellValue returns an error string, throw it as an error
+            if (typeof value === 'string' && value.startsWith('Error:')) {
+              throw new Error(value);
+            }
             if (typeof value === 'number') {
               values.push(value);
             }
@@ -580,6 +600,27 @@ function evaluate(node: Expression, ctx: EvaluationContext): number | unknown {
     case 'Call': {
       const fn = node.callee.name;
       const argValues = node.args.map(arg => evaluate(arg, ctx));
+      // Propagate error if any argument is an error string
+      for (const val of argValues) {
+        if (typeof val === 'string' && val.startsWith('Error:')) {
+          throw new Error(val);
+        }
+        if (Array.isArray(val)) {
+          for (const item of val) {
+            if (typeof item === 'string' && item.startsWith('Error:')) {
+              throw new Error(item);
+            }
+          }
+        }
+      }
+      // Additional validation for specific functions that require numeric arguments
+      if (
+        ['abs', 'round', 'floor', 'ceil', 'sqrt', 'pow', 'len'].includes(fn)
+      ) {
+        if (argValues.length === 0 || typeof argValues[0] !== 'number') {
+          throw new Error(`Error: Function ${fn} requires numeric arguments`);
+        }
+      }
       switch (fn) {
         case 'cost':
           return ctx.cost(argValues[0]);
@@ -766,9 +807,28 @@ function evaluate(node: Expression, ctx: EvaluationContext): number | unknown {
     case 'Binary': {
       const left = evaluate(node.left, ctx);
       const right = evaluate(node.right, ctx);
-
-      // Handle comparison operators (work with any types)
+      // Propagate error if either operand is an error string
+      if (typeof left === 'string' && left.startsWith('Error:')) {
+        throw new Error(left);
+      }
+      if (typeof right === 'string' && right.startsWith('Error:')) {
+        throw new Error(right);
+      }
       switch (node.operator) {
+        case '+':
+          return (left as number) + (right as number);
+        case '-':
+          return (left as number) - (right as number);
+        case '*':
+          return (left as number) * (right as number);
+        case '/':
+          const divisor = right as number;
+          if (divisor === 0) {
+            throw new Error('Error: Division by zero');
+          }
+          return (left as number) / divisor;
+        case '^':
+          return Math.pow(left as number, right as number);
         case '>':
           return (left as number) > (right as number) ? 1 : 0;
         case '<':
@@ -778,32 +838,19 @@ function evaluate(node: Expression, ctx: EvaluationContext): number | unknown {
         case '<=':
           return (left as number) <= (right as number) ? 1 : 0;
         case '==':
-          return left === right ? 1 : 0;
+          return (left as number) === (right as number) ? 1 : 0;
         case '!=':
-          return left !== right ? 1 : 0;
-      }
-
-      // Handle arithmetic operators (require numbers)
-      if (typeof left !== 'number' || typeof right !== 'number') {
-        return 0;
-      }
-      switch (node.operator) {
-        case '+':
-          return left + right;
-        case '-':
-          return left - right;
-        case '*':
-          return left * right;
-        case '/':
-          return right !== 0 ? left / right : 0;
-        case '^':
-          return Math.pow(left, right);
+          return (left as number) !== (right as number) ? 1 : 0;
         default:
-          throw new Error(`Unknown operator: ${node.operator}`);
+          throw new Error(`Unknown binary operator: ${node.operator}`);
       }
     }
     case 'Unary': {
       const arg = evaluate(node.argument, ctx);
+      // Propagate error if argument is an error string
+      if (typeof arg === 'string' && arg.startsWith('Error:')) {
+        throw new Error(arg);
+      }
       if (typeof arg !== 'number') return 0;
       switch (node.operator) {
         case '+':

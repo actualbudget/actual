@@ -109,7 +109,12 @@ export const SheetRow = memo<SheetRowProps>(
     const valueInputRef = useRef<HTMLInputElement>(null);
 
     // Calculate the value using the formula, or use the constant value
-    const calculatedValue = useSheetCalculation(data.formula || '', cellGrid);
+    const currentRowRef = `row-${rowIndex + 1}`;
+    const calculatedValue = useSheetCalculation(
+      data.formula || '',
+      cellGrid,
+      currentRowRef,
+    );
 
     // Update the calculated value in the parent component for cell references
     useEffect(() => {
@@ -592,6 +597,7 @@ export const SheetRow = memo<SheetRowProps>(
             onClose={() => setShowQueryBuilder(false)}
             onSave={onQueryBuilderSave}
             existingFormula={data.formula}
+            currentRowRef={currentRowRef}
           />
         )}
       </>

@@ -7,6 +7,7 @@ import { Stack } from '@actual-app/components/stack';
 import { View } from '@actual-app/components/view';
 
 import { parseQueryParams } from './queryParser';
+import { hasSelfReference } from './useSheetCalculation';
 
 import {
   Modal,
@@ -28,6 +29,7 @@ type QueryBuilderProps = {
   onClose: () => void;
   onSave: (query: string) => void;
   existingFormula?: string;
+  currentRowRef?: string; // Add current row reference for validation
 };
 
 type QueryType = 'cost' | 'balance' | 'formula' | 'row-operation';
@@ -282,6 +284,7 @@ export function QueryBuilder({
   onClose,
   onSave,
   existingFormula,
+  currentRowRef,
 }: QueryBuilderProps) {
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
@@ -500,6 +503,10 @@ export function QueryBuilder({
       );
     }
     if (queryType === 'formula' || queryType === 'row-operation') {
+      // Check for self-reference
+      if (currentRowRef && hasSelfReference(customFormula, currentRowRef)) {
+        return false;
+      }
       return customFormula.trim() !== '';
     }
     return true;
@@ -636,6 +643,7 @@ export function QueryBuilder({
             queryType={queryType}
             customFormula={customFormula}
             onFormulaChange={setCustomFormula}
+            currentRowRef={currentRowRef}
           />
         )}
 

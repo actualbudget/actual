@@ -26,6 +26,7 @@ type CellGrid = {
 export function useSheetCalculation(
   formula: string,
   cellGrid?: CellGrid,
+  currentRowRef?: string, // Add current row reference to detect self-references
 ): number | string {
   const [result, setResult] = useState<number | string>(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -40,15 +41,19 @@ export function useSheetCalculation(
     return JSON.stringify(cellGrid);
   }, [cellGrid]);
 
-  // Memoize the getCellValue function to prevent infinite loops
-  const getCellValue = useCallback((ref: string) => {
-    const currentCellGrid = cellGridRef.current;
-    if (currentCellGrid && currentCellGrid[ref] !== undefined) {
-      const value = currentCellGrid[ref];
-      return typeof value === 'number' ? value : parseFloat(String(value)) || 0;
-    }
-    return 0;
-  }, []);
+  // Memoize the getCellValue function to prevent infinite loops and detect circular references
+  const getCellValue = useCallback(
+    (ref: string) => {
+      const currentCellGrid = cellGridRef.current;
+      if (!currentCellGrid) return 0;
+      if (currentRowRef && ref === currentRowRef) {
+        return 'Error: Self-reference detected';
+      }
+      // Recursively evaluate the referenced cell
+      return evaluateCell(ref, currentCellGrid, new Set([currentRowRef || '']));
+    },
+    [currentRowRef],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -76,6 +81,7 @@ export function useSheetCalculation(
           const asyncResult = await processAsyncFormula(
             cleanFormula,
             cellGridRef.current,
+            currentRowRef,
           );
           if (!cancelled) {
             setResult(
@@ -106,9 +112,14 @@ export function useSheetCalculation(
             'useSheetCalculation: Formula evaluation error:',
             error,
           );
-          setResult(
-            `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          );
+          const message =
+            error instanceof Error ? error.message : 'Unknown error';
+          // Avoid double 'Error:'
+          if (typeof message === 'string' && message.startsWith('Error:')) {
+            setResult(message);
+          } else {
+            setResult(`Error: ${message}`);
+          }
         }
       } finally {
         if (!cancelled) {
@@ -122,9 +133,66 @@ export function useSheetCalculation(
     return () => {
       cancelled = true;
     };
-  }, [formula, stableCellGrid, getCellValue]);
+  }, [formula, stableCellGrid, getCellValue, currentRowRef]);
 
   return isLoading ? '...' : result;
+}
+
+/**
+ * Recursively evaluate a cell, tracking visited references to detect circular/self-references.
+ */
+function evaluateCell(
+  ref: string,
+  cellGrid: CellGrid,
+  visited: Set<string>,
+): number | string {
+  if (visited.has(ref)) {
+    return 'Error: Circular reference detected';
+  }
+  visited.add(ref);
+
+  const value = cellGrid[ref];
+  if (typeof value === 'number') {
+    return value;
+  }
+  if (typeof value === 'string') {
+    if (value.startsWith('Error:')) {
+      return value;
+    }
+    // If value is a formula (starts with =), evaluate it recursively
+    if (value.trim().startsWith('=')) {
+      const formula = value.trim().slice(1);
+      try {
+        const result = evaluateFormula(formula, {
+          cost: () => 0,
+          balance: () => 0,
+          fifo: () => 0,
+          negate: () => 0,
+          queryRunner: () => 0,
+          getCellValue: (innerRef: string) => {
+            if (innerRef === ref) {
+              return 'Error: Self-reference detected';
+            }
+            // Create a new visited set to avoid modifying the original
+            const newVisited = new Set(visited);
+            return evaluateCell(innerRef, cellGrid, newVisited);
+          },
+        });
+        return typeof result === 'number' ? result : String(result);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        if (typeof message === 'string' && message.startsWith('Error:')) {
+          return message;
+        } else {
+          return `Error: ${message}`;
+        }
+      }
+    }
+    // Otherwise, try to parse as a number
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? 0 : parsed;
+  }
+  return 0;
 }
 
 /**
@@ -133,6 +201,7 @@ export function useSheetCalculation(
 async function processAsyncFormula(
   formula: string,
   cellGrid?: CellGrid,
+  currentRowRef?: string,
 ): Promise<number | string> {
   // Create a cache for async results
   const asyncCache = new Map<string, number>();
@@ -259,13 +328,12 @@ async function processAsyncFormula(
       negate: () => 0,
       queryRunner: () => 0,
       getCellValue: (ref: string) => {
-        if (cellGrid && cellGrid[ref] !== undefined) {
-          const value = cellGrid[ref];
-          return typeof value === 'number'
-            ? value
-            : parseFloat(String(value)) || 0;
+        if (!cellGrid) return 0;
+        if (currentRowRef && ref === currentRowRef) {
+          return 'Error: Self-reference detected';
         }
-        return 0;
+        // Use the same recursive evaluation logic as the main getCellValue
+        return evaluateCell(ref, cellGrid, new Set([currentRowRef || '']));
       },
       lookupIdentifier: (name: string) => {
         // Check if this is one of our async placeholders
@@ -282,4 +350,82 @@ async function processAsyncFormula(
     console.error('Final formula evaluation error:', error);
     return `Error: ${error instanceof Error ? error.message : 'Unknown error'}`;
   }
+}
+
+/**
+ * Check if a formula contains a self-reference
+ */
+export function hasSelfReference(
+  formula: string,
+  currentRowRef: string,
+): boolean {
+  if (!formula || !currentRowRef) return false;
+
+  const cleanFormula = formula.startsWith('=') ? formula.slice(1) : formula;
+
+  // Check for direct self-reference
+  if (cleanFormula.includes(currentRowRef)) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Check if a formula contains circular references by analyzing cell references
+ * Note: This function is for static analysis and may be expensive for large spreadsheets.
+ * Consider using it only for validation, not for real-time checking.
+ */
+export function hasCircularReference(
+  formula: string,
+  cellGrid: CellGrid,
+  currentRowRef: string,
+  visited: Set<string> = new Set(),
+  originalRowRef?: string,
+): boolean {
+  if (!formula || !currentRowRef) return false;
+
+  // Use the original row reference for the first call, then current row reference for recursive calls
+  const targetRowRef = originalRowRef || currentRowRef;
+
+  const cleanFormula = formula.startsWith('=') ? formula.slice(1) : formula;
+
+  // Extract all cell references from the formula
+  const cellRefRegex = /row-\d+/g;
+  const cellRefs = cleanFormula.match(cellRefRegex) || [];
+
+  for (const ref of cellRefs) {
+    // Skip if we've already visited this reference to avoid infinite recursion
+    if (visited.has(ref)) {
+      continue;
+    }
+
+    // Check if this reference points to a formula that references back to the target row
+    if (cellGrid[ref] && typeof cellGrid[ref] === 'string') {
+      const refFormula = cellGrid[ref] as string;
+
+      // If the referenced formula contains the target row, it's a circular reference
+      if (refFormula.includes(targetRowRef)) {
+        return true;
+      }
+
+      // Recursively check for deeper circular references
+      const newVisited = new Set(visited);
+      newVisited.add(ref);
+
+      if (
+        hasCircularReference(
+          refFormula,
+          cellGrid,
+          ref,
+          newVisited,
+          targetRowRef,
+        )
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }

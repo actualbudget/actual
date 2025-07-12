@@ -9,6 +9,8 @@ import { theme } from '@actual-app/components/theme';
 import { RowOperationHelpers } from './RowOperationHelpers';
 
 import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { hasSelfReference } from '@desktop-client/components/reports/spreadsheets/useSheetCalculation';
+
 
 type QueryType = 'cost' | 'balance' | 'formula' | 'row-operation';
 
@@ -16,12 +18,14 @@ type FormulaQueryFormProps = {
   queryType: QueryType;
   customFormula: string;
   onFormulaChange: (formula: string) => void;
+  currentRowRef?: string; // Add current row reference for validation
 };
 
 export function FormulaQueryForm({
   queryType,
   customFormula,
   onFormulaChange,
+  currentRowRef,
 }: FormulaQueryFormProps) {
   const { t } = useTranslation();
 
@@ -48,6 +52,26 @@ export function FormulaQueryForm({
             const value = e.target.value;
             // Input validation to prevent DoS attacks
             if (value.length <= 5000) {
+              // Check for self-reference if currentRowRef is provided
+              if (currentRowRef && hasSelfReference(value, currentRowRef)) {
+                console.warn(
+                  'QueryBuilder: Self-reference detected, ignoring input',
+                );
+                return;
+              }
+              // Additional validation: check for excessive nesting or complexity
+              const openParens = (value.match(/\(/g) || []).length;
+              const closeParens = (value.match(/\)/g) || []).length;
+              if (
+                openParens > 100 ||
+                closeParens > 100 ||
+                Math.abs(openParens - closeParens) > 10
+              ) {
+                console.warn(
+                  'QueryBuilder: Formula too complex, ignoring input',
+                );
+                return;
+              }
               onFormulaChange(value);
             } else {
               console.warn('QueryBuilder: Formula too long, ignoring input');
@@ -66,6 +90,22 @@ export function FormulaQueryForm({
           }}
         />
       </FormField>
+
+      {/* Show warning if self-reference is detected */}
+      {currentRowRef && hasSelfReference(customFormula, currentRowRef) && (
+        <Text
+          style={{
+            fontSize: 11,
+            color: theme.errorText,
+            lineHeight: 1.4,
+            marginTop: 5,
+          }}
+        >
+          {t(
+            'Warning: This formula references itself, which will cause an error',
+          )}
+        </Text>
+      )}
 
       {queryType === 'row-operation' && (
         <RowOperationHelpers

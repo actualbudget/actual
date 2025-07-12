@@ -460,7 +460,12 @@ function SpreadsheetTableRow({
   const [isRowHovered, setIsRowHovered] = useState(false);
 
   // For formulas, use the calculation hook
-  const calculatedValue = useSheetCalculation(row.formula || '', cellGrid);
+  const currentRowRef = `row-${rowNumber}`;
+  const calculatedValue = useSheetCalculation(
+    row.formula || '',
+    cellGrid,
+    currentRowRef,
+  );
 
   // Update the calculated value in the parent component for cell references
   useEffect(() => {
