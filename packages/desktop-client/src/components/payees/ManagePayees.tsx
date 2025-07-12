@@ -8,7 +8,7 @@ import {
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgExpandArrow } from '@actual-app/components/icons/v0';
+import { SvgExpandArrow, SvgSubtract } from '@actual-app/components/icons/v0';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -61,6 +61,7 @@ function PayeeTableHeader() {
           exposed={true}
           focused={false}
           selected={selectedItems.size > 0}
+          icon={<SvgSubtract width={6} height={6} />}
           onSelect={e =>
             dispatchSelected({ type: 'select-all', isRangeSelect: e.shiftKey })
           }
@@ -323,7 +324,7 @@ export const ManagePayees = ({
               onUpdate={onUpdate}
               onViewRules={onViewRules}
               onCreateRule={onCreateRule}
-              onDelete={id => onDelete([{ id }])}
+              onDelete={ids => onDelete(ids.map(id => ({ id })))}
             />
           )}
         </View>

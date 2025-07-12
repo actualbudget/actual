@@ -180,7 +180,7 @@ export function friendlyOp(op, type?) {
     case 'contains':
       return t('contains');
     case 'hasTags':
-      return t('has tag(s)');
+      return t('has tags');
     case 'matches':
       return t('matches');
     case 'doesNotContain':

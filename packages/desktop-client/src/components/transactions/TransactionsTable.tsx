@@ -33,6 +33,7 @@ import {
   SvgArrowsSynchronize,
   SvgCalendar3,
   SvgHyperlink2,
+  SvgSubtract,
 } from '@actual-app/components/icons/v2';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
@@ -40,7 +41,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
 import { format as formatDate, parseISO } from 'date-fns';
 
 import * as monthUtils from 'loot-core/shared/months';
@@ -121,6 +121,7 @@ import {
   useSplitsExpanded,
 } from '@desktop-client/hooks/useSplitsExpanded';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import {
   getAccountsById,
@@ -191,6 +192,7 @@ const TransactionHeader = memo(
               borderTopWidth: 0,
               borderBottomWidth: 0,
             }}
+            icon={<SvgSubtract width={6} height={6} />}
             onSelect={(e: KeyboardEvent<HTMLDivElement>) =>
               dispatchSelected({
                 type: 'select-all',
@@ -837,15 +839,16 @@ type TransactionProps = {
   ) => void;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
   onDelete: (id: TransactionEntity['id']) => void;
-  onDuplicate?: (id: TransactionEntity['id']) => void;
-  onLinkSchedule?: (id: TransactionEntity['id']) => void;
-  onUnlinkSchedule?: (id: TransactionEntity['id']) => void;
-  onCreateRule?: (id: TransactionEntity['id']) => void;
+  onBatchDelete?: (ids: TransactionEntity['id'][]) => void;
+  onBatchDuplicate?: (ids: TransactionEntity['id'][]) => void;
+  onBatchLinkSchedule?: (ids: TransactionEntity['id'][]) => void;
+  onBatchUnlinkSchedule?: (ids: TransactionEntity['id'][]) => void;
+  onCreateRule?: (ids: TransactionEntity['id'][]) => void;
   onScheduleAction?: (
     name: 'skip' | 'post-transaction' | 'complete',
-    id: TransactionEntity['id'],
+    ids: TransactionEntity['id'][],
   ) => void;
-  onMakeAsNonSplitTransactions?: (id: TransactionEntity['id']) => void;
+  onMakeAsNonSplitTransactions?: (ids: TransactionEntity['id'][]) => void;
   onSplit: (id: TransactionEntity['id']) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
   onCreatePayee: (name: string) => Promise<null | PayeeEntity['id']>;
@@ -885,9 +888,10 @@ const Transaction = memo(function Transaction({
   onSave,
   onEdit,
   onDelete,
-  onDuplicate,
-  onLinkSchedule,
-  onUnlinkSchedule,
+  onBatchDelete,
+  onBatchDuplicate,
+  onBatchLinkSchedule,
+  onBatchUnlinkSchedule,
   onCreateRule,
   onScheduleAction,
   onMakeAsNonSplitTransactions,
@@ -1148,17 +1152,15 @@ const Transaction = memo(function Transaction({
         isNonModal
       >
         <TransactionMenu
-          transaction={transaction}
-          onDelete={() => onDelete?.(transaction.id)}
-          onDuplicate={() => onDuplicate?.(transaction.id)}
-          onLinkSchedule={() => onLinkSchedule?.(transaction.id)}
-          onUnlinkSchedule={() => onUnlinkSchedule?.(transaction.id)}
-          onCreateRule={() => onCreateRule?.(transaction.id)}
-          onScheduleAction={action =>
-            onScheduleAction?.(action, transaction.id)
-          }
-          onMakeAsNonSplitTransactions={() =>
-            onMakeAsNonSplitTransactions?.(transaction.id)
+          getTransaction={id => allTransactions?.find(t => t.id === id)}
+          onDelete={ids => onBatchDelete?.(ids)}
+          onDuplicate={ids => onBatchDuplicate?.(ids)}
+          onLinkSchedule={ids => onBatchLinkSchedule?.(ids)}
+          onUnlinkSchedule={ids => onBatchUnlinkSchedule?.(ids)}
+          onCreateRule={ids => onCreateRule?.(ids)}
+          onScheduleAction={(name, ids) => onScheduleAction?.(name, ids)}
+          onMakeAsNonSplitTransactions={ids =>
+            onMakeAsNonSplitTransactions?.(ids)
           }
           closeMenu={() => setMenuOpen(false)}
         />
@@ -1361,7 +1363,9 @@ const Transaction = memo(function Transaction({
         focused={focusedField === 'notes'}
         value={notes || ''}
         valueStyle={valueStyle}
-        formatter={value => notesTagFormatter(value, onNotesTagClick)}
+        formatter={value =>
+          NotesTagFormatter({ notes: value, onNotesTagClick })
+        }
         onExpose={name => !isPreview && onEdit(id, name)}
         inputProps={{
           value: notes || '',
@@ -1942,19 +1946,20 @@ type TransactionTableInnerProps = {
   onNotesTagClick: (tag: string) => void;
   sortField: string;
   ascDesc: 'asc' | 'desc';
-  onCreateRule: (id: RuleEntity['id']) => void;
+  onCreateRule: (ids: RuleEntity['id'][]) => void;
   onScheduleAction: (
     name: 'skip' | 'post-transaction' | 'complete',
-    id: TransactionEntity['id'],
+    ids: TransactionEntity['id'][],
   ) => void;
-  onMakeAsNonSplitTransactions: (id: string) => void;
+  onMakeAsNonSplitTransactions: (ids: TransactionEntity['id'][]) => void;
   showSelection: boolean;
   allowSplitTransaction?: boolean;
 
   onDelete: (id: TransactionEntity['id']) => void;
-  onDuplicate: (id: TransactionEntity['id']) => void;
-  onLinkSchedule: (id: TransactionEntity['id']) => void;
-  onUnlinkSchedule: (id: TransactionEntity['id']) => void;
+  onBatchDelete: (ids: TransactionEntity['id'][]) => void;
+  onBatchDuplicate: (ids: TransactionEntity['id'][]) => void;
+  onBatchLinkSchedule: (ids: TransactionEntity['id'][]) => void;
+  onBatchUnlinkSchedule: (ids: TransactionEntity['id'][]) => void;
   onCheckNewEnter: (e: KeyboardEvent) => void;
   onCheckEnter: (e: KeyboardEvent) => void;
   onAddTemporary: (id?: TransactionEntity['id']) => void;
@@ -2106,9 +2111,10 @@ function TransactionTableInner({
         onEdit={tableNavigator.onEdit}
         onSave={props.onSave}
         onDelete={props.onDelete}
-        onDuplicate={props.onDuplicate}
-        onLinkSchedule={props.onLinkSchedule}
-        onUnlinkSchedule={props.onUnlinkSchedule}
+        onBatchDelete={props.onBatchDelete}
+        onBatchDuplicate={props.onBatchDuplicate}
+        onBatchLinkSchedule={props.onBatchLinkSchedule}
+        onBatchUnlinkSchedule={props.onBatchUnlinkSchedule}
         onCreateRule={props.onCreateRule}
         onScheduleAction={props.onScheduleAction}
         onMakeAsNonSplitTransactions={props.onMakeAsNonSplitTransactions}
@@ -2625,10 +2631,10 @@ export const TransactionTable = forwardRef(
     const {
       onSave: onSaveProp,
       onApplyRules: onApplyRulesProp,
-      onBatchDelete,
-      onBatchDuplicate,
-      onBatchLinkSchedule,
-      onBatchUnlinkSchedule,
+      onBatchDelete: onBatchDeleteProp,
+      onBatchDuplicate: onBatchDuplicateProp,
+      onBatchLinkSchedule: onBatchLinkScheduleProp,
+      onBatchUnlinkSchedule: onBatchUnlinkScheduleProp,
       onCreateRule: onCreateRuleProp,
       onScheduleAction: onScheduleActionProp,
       onMakeAsNonSplitTransactions: onMakeAsNonSplitTransactionsProp,
@@ -2670,63 +2676,69 @@ export const TransactionTable = forwardRef(
       [onSaveProp, onApplyRulesProp],
     );
 
-    const onDelete = useCallback(
-      (id: TransactionEntity['id']) => {
-        const temporary = isTemporaryId(id);
+    const onDelete = useCallback((id: TransactionEntity['id']) => {
+      const temporary = isTemporaryId(id);
 
-        if (temporary) {
-          const newTrans = latestState.current.newTransactions;
+      if (temporary) {
+        const newTrans = latestState.current.newTransactions;
 
-          if (id === newTrans[0].id) {
-            // You can never delete the parent new transaction
-            return;
-          }
-
-          setNewTransactions(deleteTransaction(newTrans, id).data);
-        } else {
-          onBatchDelete([id]);
+        if (id === newTrans[0].id) {
+          // You can never delete the parent new transaction
+          return;
         }
+
+        setNewTransactions(deleteTransaction(newTrans, id).data);
+      }
+    }, []);
+
+    const onBatchDelete = useCallback(
+      (ids: TransactionEntity['id'][]) => {
+        onBatchDeleteProp(ids);
       },
-      [onBatchDelete],
+      [onBatchDeleteProp],
     );
 
-    const onDuplicate = useCallback(
-      (id: TransactionEntity['id']) => {
-        onBatchDuplicate([id]);
+    const onBatchDuplicate = useCallback(
+      (ids: TransactionEntity['id'][]) => {
+        onBatchDuplicateProp(ids);
       },
-      [onBatchDuplicate],
+      [onBatchDuplicateProp],
     );
 
-    const onLinkSchedule = useCallback(
-      (id: TransactionEntity['id']) => {
-        onBatchLinkSchedule([id]);
+    const onBatchLinkSchedule = useCallback(
+      (ids: TransactionEntity['id'][]) => {
+        onBatchLinkScheduleProp(ids);
       },
-      [onBatchLinkSchedule],
+      [onBatchLinkScheduleProp],
     );
-    const onUnlinkSchedule = useCallback(
-      (id: TransactionEntity['id']) => {
-        onBatchUnlinkSchedule([id]);
+
+    const onBatchUnlinkSchedule = useCallback(
+      (ids: TransactionEntity['id'][]) => {
+        onBatchUnlinkScheduleProp(ids);
       },
-      [onBatchUnlinkSchedule],
+      [onBatchUnlinkScheduleProp],
     );
+
     const onCreateRule = useCallback(
-      (id: TransactionEntity['id']) => {
-        onCreateRuleProp([id]);
+      (ids: TransactionEntity['id'][]) => {
+        onCreateRuleProp(ids);
       },
       [onCreateRuleProp],
     );
+
     const onScheduleAction = useCallback(
       (
         action: 'skip' | 'post-transaction' | 'complete',
-        id: TransactionEntity['id'],
+        ids: TransactionEntity['id'][],
       ) => {
-        onScheduleActionProp(action, [id]);
+        onScheduleActionProp(action, ids);
       },
       [onScheduleActionProp],
     );
+
     const onMakeAsNonSplitTransactions = useCallback(
-      (id: TransactionEntity['id']) => {
-        onMakeAsNonSplitTransactionsProp([id]);
+      (ids: TransactionEntity['id'][]) => {
+        onMakeAsNonSplitTransactionsProp(ids);
       },
       [onMakeAsNonSplitTransactionsProp],
     );
@@ -2897,9 +2909,10 @@ export const TransactionTable = forwardRef(
         isExpanded={splitsExpanded.isExpanded}
         onSave={onSave}
         onDelete={onDelete}
-        onDuplicate={onDuplicate}
-        onLinkSchedule={onLinkSchedule}
-        onUnlinkSchedule={onUnlinkSchedule}
+        onBatchDelete={onBatchDelete}
+        onBatchDuplicate={onBatchDuplicate}
+        onBatchLinkSchedule={onBatchLinkSchedule}
+        onBatchUnlinkSchedule={onBatchUnlinkSchedule}
         onCreateRule={onCreateRule}
         onScheduleAction={onScheduleAction}
         onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
@@ -2922,67 +2935,3 @@ export const TransactionTable = forwardRef(
 );
 
 TransactionTable.displayName = 'TransactionTable';
-
-function notesTagFormatter(
-  notes: string,
-  onNotesTagClick: (tag: string) => void,
-) {
-  const words = notes.split(' ');
-  return (
-    <>
-      {words.map((word, i, arr) => {
-        const separator = arr.length - 1 === i ? '' : ' ';
-        if (word.includes('#') && word.length > 1) {
-          let lastEmptyTag = -1;
-          // Treat tags in a single word as separate tags.
-          // #tag1#tag2 => (#tag1)(#tag2)
-          // not-a-tag#tag2#tag3 => not-a-tag(#tag2)(#tag3)
-          return word.split('#').map((tag, ti) => {
-            if (ti === 0) {
-              return tag;
-            }
-
-            if (!tag) {
-              lastEmptyTag = ti;
-              return '#';
-            }
-
-            if (lastEmptyTag === ti - 1) {
-              return `${tag} `;
-            }
-            lastEmptyTag = -1;
-
-            const validTag = `#${tag}`;
-            return (
-              <span key={`${validTag}${ti}`}>
-                <Button
-                  variant="bare"
-                  key={i}
-                  className={css({
-                    display: 'inline-flex',
-                    padding: '3px 7px',
-                    borderRadius: 16,
-                    userSelect: 'none',
-                    backgroundColor: theme.noteTagBackground,
-                    color: theme.noteTagText,
-                    cursor: 'pointer',
-                    '&[data-hovered]': {
-                      backgroundColor: theme.noteTagBackgroundHover,
-                    },
-                  })}
-                  onPress={() => {
-                    onNotesTagClick?.(validTag);
-                  }}
-                >
-                  {validTag}
-                </Button>
-                {separator}
-              </span>
-            );
-          });
-        }
-        return `${word}${separator}`;
-      })}
-    </>
-  );
-}
