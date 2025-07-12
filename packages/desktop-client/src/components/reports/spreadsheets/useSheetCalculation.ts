@@ -1,51 +1,11 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
-import { send } from 'loot-core/platform/client/fetch';
-import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 
 import { evaluateFormula } from './sheetEngine';
+import { parseQueryFilters, type TransactionFilters } from './queryParser';
 
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-
-// Type definitions for better type safety
-type Category = {
-  id: string;
-  name: string;
-};
-
-type Account = {
-  id: string;
-  name: string;
-};
-
-type Payee = {
-  id: string;
-  name: string;
-};
-
-type TransactionFilters = {
-  category?: string;
-  account?: string;
-  payee?: string;
-  notes?:
-    | string
-    | { $regexp: string }
-    | { $and: Array<{ $regexp: string }> }
-    | Array<{ $regexp: string }>;
-  cleared?: boolean;
-  reconciled?: boolean;
-  transfer?: boolean;
-  date?: {
-    $gte?: string;
-    $lt?: string;
-    $lte?: string;
-  };
-  amount?: {
-    $gte?: number;
-    $lte?: number;
-  };
-};
 
 type AsyncMatch = {
   match: string;
@@ -94,17 +54,13 @@ export function useSheetCalculation(
     let cancelled = false;
 
     async function evaluateAsyncFormula() {
-      console.log('useSheetCalculation: Evaluating formula:', formula);
-
       if (!formula.trim()) {
-        console.log('useSheetCalculation: Empty formula, setting result to 0');
         setResult(0);
         return;
       }
 
       // Remove leading '=' if present
       const cleanFormula = formula.startsWith('=') ? formula.slice(1) : formula;
-      console.log('useSheetCalculation: Clean formula:', cleanFormula);
 
       setIsLoading(true);
 
@@ -117,20 +73,15 @@ export function useSheetCalculation(
 
         if (hasAsyncOps) {
           // Handle async evaluation
-          console.log(
-            'useSheetCalculation: Has async operations, processing...',
-          );
           const asyncResult = await processAsyncFormula(
             cleanFormula,
             cellGridRef.current,
           );
-          console.log('useSheetCalculation: Async result:', asyncResult);
           if (!cancelled) {
             setResult(asyncResult);
           }
         } else {
           // Handle synchronous evaluation (basic math + cell references)
-          console.log('useSheetCalculation: Synchronous evaluation');
           const syncResult = evaluateFormula(cleanFormula, {
             cost: () => 0,
             balance: () => 0,
@@ -139,7 +90,6 @@ export function useSheetCalculation(
             queryRunner: () => 0,
             getCellValue,
           });
-          console.log('useSheetCalculation: Sync result:', syncResult);
           if (!cancelled) {
             setResult(syncResult);
           }
@@ -181,8 +131,6 @@ async function processAsyncFormula(
   // Create a cache for async results
   const asyncCache = new Map<string, number>();
 
-  console.log('DEBUG: Starting fresh calculation with empty cache');
-
   // Replace async function calls with placeholders, evaluate them, then substitute back
   let processedFormula = formula;
   const asyncMatches: AsyncMatch[] = [];
@@ -197,270 +145,27 @@ async function processAsyncFormula(
     const [fullMatch, queryString] = match;
     const placeholder = `__ASYNC_${placeholderIndex++}__`;
 
-    console.log('DEBUG: Processing cost() function:', fullMatch);
-
     if (!asyncCache.has(fullMatch)) {
-      console.log(
-        'DEBUG: Cache miss, calculating fresh result for:',
-        fullMatch,
-      );
       try {
-        // Parse query string more robustly
-        const filters: TransactionFilters = {};
-
-        // Extract category
-        const categoryMatch = queryString.match(/category:\s*"([^"]+)"/);
-        if (categoryMatch) {
-          // We need to look up the category by name to get transactions
-          const categoryName = categoryMatch[1];
-          const categories = await send('get-categories');
-
-          // Try multiple matching strategies for better compatibility
-          let category = categories.list.find(
-            (cat: Category) => cat.name === categoryName, // Exact match first
-          );
-
-          if (!category) {
-            // Try case-insensitive match
-            category = categories.list.find(
-              (cat: Category) =>
-                cat.name.toLowerCase() === categoryName.toLowerCase(),
-            );
-          }
-
-          if (!category) {
-            // Try partial match (useful for emoji issues)
-            category = categories.list.find(
-              (cat: Category) =>
-                cat.name.includes(categoryName) ||
-                categoryName.includes(cat.name),
-            );
-          }
-
-          if (category) {
-            filters.category = category.id;
-            console.log(
-              'DEBUG: Found category:',
-              category.name,
-              'ID:',
-              category.id,
-            );
-          } else {
-            console.warn(
-              'Category not found:',
-              categoryName,
-              'Available categories:',
-              categories.list.map((c: Category) => c.name),
-            );
-          }
-        }
-
-        // Extract account filters
-        const accountMatch = queryString.match(/account:\s*"([^"]+)"/);
-        if (accountMatch) {
-          const accountName = accountMatch[1];
-          const accounts = await send('accounts-get');
-          const account = accounts.find(
-            (acc: Account) => acc.name === accountName,
-          );
-          if (account) {
-            filters.account = account.id;
-            console.log(
-              'DEBUG: Found account:',
-              account.name,
-              'ID:',
-              account.id,
-            );
-          } else {
-            console.warn('Account not found (exact match):', accountName);
-          }
-        }
-
-        // Extract payee filters
-        const payeeMatch = queryString.match(/payee:\s*"([^"]+)"/);
-        if (payeeMatch) {
-          const payeeName = payeeMatch[1];
-          const payees = await send('payees-get');
-          const payee = payees.find((p: Payee) => p.name === payeeName);
-          if (payee) {
-            filters.payee = payee.id;
-            console.log('DEBUG: Found payee:', payee.name, 'ID:', payee.id);
-          } else {
-            console.warn('Payee not found (exact match):', payeeName);
-          }
-        }
-
-        // Extract notes filters
-        const notesMatch = queryString.match(
-          /notes:\s*([^(]+)\(\s*"([^"]+)"\s*\)/,
-        );
-        if (notesMatch) {
-          const notesOp = notesMatch[1];
-          const notesValue = notesMatch[2];
-
-          if (notesOp === 'hasTags') {
-            // Process hasTags filter - split by spaces and create regex patterns
-            const words = notesValue.split(/\s+/);
-            const tagValues: string[] = [];
-
-            words.forEach(word => {
-              const startsWithHash = word.startsWith('#');
-              const containsMultipleHash = word.slice(1).includes('#');
-              const correctlyFormatted = word.match(/#[\w\d\p{Emoji}-]+/gu);
-              const validHashtag =
-                startsWithHash && !containsMultipleHash && correctlyFormatted;
-
-              if (validHashtag) {
-                tagValues.push(word);
-              }
-            });
-
-            if (tagValues.length > 0) {
-              // Create regex patterns for each tag
-              const tagRegexes = tagValues.map(tag => {
-                const regex = new RegExp(
-                  `(^|\\s)${tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`,
-                );
-                return regex.source;
-              });
-
-              // Use array format which the compiler will automatically combine with AND
-              filters.notes = tagRegexes.map(regex => ({ $regexp: regex }));
-              console.log('DEBUG: Applied hasTags filter:', filters.notes);
-            }
-          } else if (notesOp === 'is') {
-            // Exact match
-            filters.notes = notesValue;
-            console.log('DEBUG: Applied notes is filter:', filters.notes);
-          } else if (notesOp === 'contains') {
-            // Contains match
-            filters.notes = {
-              $regexp: notesValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
-            };
-            console.log('DEBUG: Applied notes contains filter:', filters.notes);
-          }
-        } else {
-          // Handle simple notes:"value" format (defaults to 'is')
-          const notesSimpleMatch = queryString.match(/notes:\s*"([^"]+)"/);
-          if (notesSimpleMatch) {
-            filters.notes = notesSimpleMatch[1];
-            console.log('DEBUG: Applied simple notes filter:', filters.notes);
-          }
-        }
-
-        // Extract boolean filters
-        if (queryString.includes('cleared:true')) {
-          filters.cleared = true;
-        } else if (queryString.includes('cleared:false')) {
-          filters.cleared = false;
-        }
-
-        if (queryString.includes('reconciled:true')) {
-          filters.reconciled = true;
-        } else if (queryString.includes('reconciled:false')) {
-          filters.reconciled = false;
-        }
-
-        if (queryString.includes('transfer:true')) {
-          filters.transfer = true;
-        } else if (queryString.includes('transfer:false')) {
-          filters.transfer = false;
-        }
-
-        // Extract date filters
-        if (queryString.includes('date:thisMonth')) {
-          filters.date = { $gte: monthUtils.currentMonth() + '-01' };
-        } else if (queryString.includes('date:lastMonth')) {
-          const lastMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
-          filters.date = {
-            $gte: lastMonth + '-01',
-            $lt: monthUtils.currentMonth() + '-01',
-          };
-        } else if (queryString.includes('date:thisYear')) {
-          const currentYear = new Date().getFullYear();
-          filters.date = { $gte: `${currentYear}-01-01` };
-        } else if (queryString.includes('date:lastYear')) {
-          const lastYear = new Date().getFullYear() - 1;
-          filters.date = {
-            $gte: `${lastYear}-01-01`,
-            $lt: `${lastYear + 1}-01-01`,
-          };
-        } else {
-          // Handle date:between, date:gte, date:lte
-          const dateBetweenMatch = queryString.match(
-            /date:between\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)/,
-          );
-          if (dateBetweenMatch) {
-            filters.date = {
-              $gte: dateBetweenMatch[1],
-              $lte: dateBetweenMatch[2],
-            };
-            console.log('DEBUG: Date filter applied:', filters.date);
-          } else {
-            const dateGteMatch = queryString.match(
-              /date:gte\(\s*"([^"]+)"\s*\)/,
-            );
-            if (dateGteMatch) {
-              filters.date = { $gte: dateGteMatch[1] };
-            }
-
-            const dateLteMatch = queryString.match(
-              /date:lte\(\s*"([^"]+)"\s*\)/,
-            );
-            if (dateLteMatch) {
-              filters.date = { ...filters.date, $lte: dateLteMatch[1] };
-            }
-          }
-        }
-
-        // Extract amount filters
-        const amountGteMatch = queryString.match(/amount:gte\(\s*([^)]+)\s*\)/);
-        if (amountGteMatch) {
-          const minAmount = parseFloat(amountGteMatch[1]);
-          filters.amount = { $gte: minAmount };
-        }
-
-        const amountLteMatch = queryString.match(/amount:lte\(\s*([^)]+)\s*\)/);
-        if (amountLteMatch) {
-          const maxAmount = parseFloat(amountLteMatch[1]);
-          filters.amount = { ...filters.amount, $lte: maxAmount };
-        }
-
-        console.log('DEBUG: Applied filters:', filters);
+        // Parse query string using shared utility
+        const filters = await parseQueryFilters(queryString);
 
         const result = await aqlQuery(
           q('transactions').filter(filters).calculate({ $sum: '$amount' }),
         );
 
-        console.log('DEBUG: Raw query result:', result);
-        console.log('DEBUG: Raw sum amount (cents):', result.data);
-        console.log('DEBUG: After Math.abs():', Math.abs(result.data || 0));
-        console.log(
-          'DEBUG: Final value (dollars):',
-          Math.abs(result.data || 0) / 100,
-        );
-
         // Convert to positive value and from cents to dollars
         const value = Math.abs(result.data || 0) / 100;
-        console.log('DEBUG: Caching value:', value, 'for:', fullMatch);
         asyncCache.set(fullMatch, value);
       } catch (error) {
         console.error('Cost query error:', error);
         asyncCache.set(fullMatch, 0);
       }
-    } else {
-      console.log('DEBUG: Using cached value for:', fullMatch);
     }
 
     const value = asyncCache.get(fullMatch) || 0;
-    console.log('DEBUG: Retrieved value from cache:', value);
     asyncMatches.push({ match: fullMatch, placeholder, value });
     processedFormula = processedFormula.replace(fullMatch, placeholder);
-
-    console.log(
-      'DEBUG: After cost() replacement, processedFormula:',
-      processedFormula,
-    );
   }
 
   // Find all balance() function calls
@@ -471,9 +176,10 @@ async function processAsyncFormula(
 
     if (!asyncCache.has(fullMatch)) {
       try {
+        const { send } = await import('loot-core/platform/client/fetch');
         const accounts = await send('accounts-get');
         const account = accounts.find(
-          (acc: Account) => acc.name === accountName,
+          (acc: { id: string; name: string }) => acc.name === accountName,
         );
 
         if (account) {
@@ -502,243 +208,18 @@ async function processAsyncFormula(
 
   // Find all query blocks (simple version)
   const queryRegex = /\{\s*([^}]*)\s*\}/g;
-  console.log('DEBUG: Looking for query blocks in:', processedFormula);
 
   while ((match = queryRegex.exec(processedFormula)) !== null) {
     const [fullMatch, queryString] = match;
     const placeholder = `__ASYNC_${placeholderIndex++}__`;
 
-    console.log('DEBUG: Processing query block:', fullMatch);
-
     if (!asyncCache.has(fullMatch)) {
       try {
-        const filters: TransactionFilters = {};
-
-        // Parse the query string for category, account, payee, date, etc.
-        const categoryMatch = queryString.match(/category:\s*"([^"]+)"/);
-        if (categoryMatch) {
-          const categoryName = categoryMatch[1];
-          const categories = await send('get-categories');
-
-          // Try multiple matching strategies for better compatibility
-          let category = categories.list.find(
-            (cat: Category) => cat.name === categoryName, // Exact match first
-          );
-
-          if (!category) {
-            // Try case-insensitive match
-            category = categories.list.find(
-              (cat: Category) =>
-                cat.name.toLowerCase() === categoryName.toLowerCase(),
-            );
-          }
-
-          if (!category) {
-            // Try partial match (useful for emoji issues)
-            category = categories.list.find(
-              (cat: Category) =>
-                cat.name.includes(categoryName) ||
-                categoryName.includes(cat.name),
-            );
-          }
-
-          if (category) {
-            filters.category = category.id;
-            console.log(
-              'DEBUG: Found category:',
-              category.name,
-              'ID:',
-              category.id,
-            );
-          } else {
-            console.warn(
-              'Category not found:',
-              categoryName,
-              'Available categories:',
-              categories.list.map((c: Category) => c.name),
-            );
-          }
-        }
-
-        const accountMatch = queryString.match(/account:\s*"([^"]+)"/);
-        if (accountMatch) {
-          const accountName = accountMatch[1];
-          const accounts = await send('accounts-get');
-          const account = accounts.find(
-            (acc: Account) => acc.name === accountName,
-          );
-          if (account) {
-            filters.account = account.id;
-            console.log(
-              'DEBUG: Found account:',
-              account.name,
-              'ID:',
-              account.id,
-            );
-          } else {
-            console.warn('Account not found (exact match):', accountName);
-          }
-        }
-
-        const payeeMatch = queryString.match(/payee:\s*"([^"]+)"/);
-        if (payeeMatch) {
-          const payeeName = payeeMatch[1];
-          const payees = await send('payees-get');
-          const payee = payees.find((p: Payee) => p.name === payeeName);
-          if (payee) {
-            filters.payee = payee.id;
-            console.log('DEBUG: Found payee:', payee.name, 'ID:', payee.id);
-          } else {
-            console.warn('Payee not found (exact match):', payeeName);
-          }
-        }
-
-        // Extract notes filters
-        const notesMatch = queryString.match(
-          /notes:\s*([^(]+)\(\s*"([^"]+)"\s*\)/,
-        );
-        if (notesMatch) {
-          const notesOp = notesMatch[1];
-          const notesValue = notesMatch[2];
-
-          if (notesOp === 'hasTags') {
-            // Process hasTags filter - split by spaces and create regex patterns
-            const words = notesValue.split(/\s+/);
-            const tagValues: string[] = [];
-
-            words.forEach(word => {
-              const startsWithHash = word.startsWith('#');
-              const containsMultipleHash = word.slice(1).includes('#');
-              const correctlyFormatted = word.match(/#[\w\d\p{Emoji}-]+/gu);
-              const validHashtag =
-                startsWithHash && !containsMultipleHash && correctlyFormatted;
-
-              if (validHashtag) {
-                tagValues.push(word);
-              }
-            });
-
-            if (tagValues.length > 0) {
-              // Create regex patterns for each tag
-              const tagRegexes = tagValues.map(tag => {
-                const regex = new RegExp(
-                  `(^|\\s)${tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`,
-                );
-                return regex.source;
-              });
-
-              // Use array format which the compiler will automatically combine with AND
-              filters.notes = tagRegexes.map(regex => ({ $regexp: regex }));
-              console.log('DEBUG: Applied hasTags filter:', filters.notes);
-            }
-          } else if (notesOp === 'is') {
-            // Exact match
-            filters.notes = notesValue;
-            console.log('DEBUG: Applied notes is filter:', filters.notes);
-          } else if (notesOp === 'contains') {
-            // Contains match
-            filters.notes = {
-              $regexp: notesValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
-            };
-            console.log('DEBUG: Applied notes contains filter:', filters.notes);
-          }
-        } else {
-          // Handle simple notes:"value" format (defaults to 'is')
-          const notesSimpleMatch = queryString.match(/notes:\s*"([^"]+)"/);
-          if (notesSimpleMatch) {
-            filters.notes = notesSimpleMatch[1];
-            console.log('DEBUG: Applied simple notes filter:', filters.notes);
-          }
-        }
-
-        // Extract boolean filters
-        if (queryString.includes('cleared:true')) {
-          filters.cleared = true;
-        } else if (queryString.includes('cleared:false')) {
-          filters.cleared = false;
-        }
-
-        if (queryString.includes('reconciled:true')) {
-          filters.reconciled = true;
-        } else if (queryString.includes('reconciled:false')) {
-          filters.reconciled = false;
-        }
-
-        if (queryString.includes('transfer:true')) {
-          filters.transfer = true;
-        } else if (queryString.includes('transfer:false')) {
-          filters.transfer = false;
-        }
-
-        if (queryString.includes('date:thisMonth')) {
-          filters.date = { $gte: monthUtils.currentMonth() + '-01' };
-        } else if (queryString.includes('date:lastMonth')) {
-          const lastMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
-          filters.date = {
-            $gte: lastMonth + '-01',
-            $lt: monthUtils.currentMonth() + '-01',
-          };
-        } else if (queryString.includes('date:thisYear')) {
-          const currentYear = new Date().getFullYear();
-          filters.date = { $gte: `${currentYear}-01-01` };
-        } else if (queryString.includes('date:lastYear')) {
-          const lastYear = new Date().getFullYear() - 1;
-          filters.date = {
-            $gte: `${lastYear}-01-01`,
-            $lt: `${lastYear + 1}-01-01`,
-          };
-        } else {
-          // Handle date:between, date:gte, date:lte
-          const dateBetweenMatch = queryString.match(
-            /date:between\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)/,
-          );
-          if (dateBetweenMatch) {
-            filters.date = {
-              $gte: dateBetweenMatch[1],
-              $lte: dateBetweenMatch[2],
-            };
-          } else {
-            const dateGteMatch = queryString.match(
-              /date:gte\(\s*"([^"]+)"\s*\)/,
-            );
-            if (dateGteMatch) {
-              filters.date = { $gte: dateGteMatch[1] };
-            }
-
-            const dateLteMatch = queryString.match(
-              /date:lte\(\s*"([^"]+)"\s*\)/,
-            );
-            if (dateLteMatch) {
-              filters.date = { ...filters.date, $lte: dateLteMatch[1] };
-            }
-          }
-        }
-
-        // Extract amount filters
-        const amountGteMatch = queryString.match(/amount:gte\(\s*([^)]+)\s*\)/);
-        if (amountGteMatch) {
-          const minAmount = parseFloat(amountGteMatch[1]);
-          filters.amount = { $gte: minAmount };
-        }
-
-        const amountLteMatch = queryString.match(/amount:lte\(\s*([^)]+)\s*\)/);
-        if (amountLteMatch) {
-          const maxAmount = parseFloat(amountLteMatch[1]);
-          filters.amount = { ...filters.amount, $lte: maxAmount };
-        }
-
-        console.log('DEBUG: Applied filters:', filters);
+        // Parse query string using shared utility
+        const filters = await parseQueryFilters(queryString);
 
         const result = await aqlQuery(
           q('transactions').filter(filters).calculate({ $sum: '$amount' }),
-        );
-
-        console.log('DEBUG: Raw query result:', result);
-        console.log('DEBUG: Raw sum amount (cents):', result.data);
-        console.log('DEBUG: After Math.abs():', Math.abs(result.data || 0));
-        console.log(
-          'DEBUG: Final value (dollars):',
-          Math.abs(result.data || 0) / 100,
         );
 
         const value = Math.abs(result.data || 0) / 100;
@@ -755,8 +236,6 @@ async function processAsyncFormula(
   }
 
   // Now evaluate the processed formula with placeholders replaced by actual values
-  console.log('DEBUG: Final asyncMatches:', asyncMatches);
-  console.log('DEBUG: Final processedFormula:', processedFormula);
 
   try {
     // Handle case where the entire formula is just a single query block
@@ -764,10 +243,6 @@ async function processAsyncFormula(
       asyncMatches.length === 1 &&
       processedFormula.trim() === asyncMatches[0].placeholder
     ) {
-      console.log(
-        'DEBUG: Returning single match value:',
-        asyncMatches[0].value,
-      );
       return asyncMatches[0].value;
     }
 

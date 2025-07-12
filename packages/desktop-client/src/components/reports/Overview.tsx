@@ -424,8 +424,6 @@ export function Overview() {
                               );
                               onAddWidget('spreadsheet-card', {
                                 id: reportId,
-                                name: spreadsheetReportMap.get(reportId)?.name,
-                                rows: spreadsheetReportMap.get(reportId)?.rows,
                               });
                               return;
                             }

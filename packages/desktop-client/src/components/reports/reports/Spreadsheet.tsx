@@ -259,7 +259,7 @@ function SpreadsheetInner({ report: initialReport }: SpreadsheetInnerProps) {
           setReport(defaultSpreadsheetReport);
           setReportData(defaultSpreadsheetReport);
           break;
-        case 'choose':
+        case 'choose': {
           sessionStorage.clear();
           const newReport = params.savedReport || report;
           setSessionReport('savedStatus', 'saved');
@@ -268,6 +268,7 @@ function SpreadsheetInner({ report: initialReport }: SpreadsheetInnerProps) {
           setReportData(newReport);
           navigate(`/reports/spreadsheet/${newReport.id}`);
           break;
+        }
         default:
       }
     },

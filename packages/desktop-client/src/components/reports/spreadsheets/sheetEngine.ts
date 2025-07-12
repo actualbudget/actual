@@ -146,27 +146,34 @@ export function tokenize(input: string): Token[] {
             // Handle escape sequences
             i++;
             switch (input[i]) {
-              case 'n':
+              case 'n': {
                 str += '\n';
                 break;
-              case 't':
+              }
+              case 't': {
                 str += '\t';
                 break;
-              case 'r':
+              }
+              case 'r': {
                 str += '\r';
                 break;
-              case '\\':
+              }
+              case '\\': {
                 str += '\\';
                 break;
-              case '"':
+              }
+              case '"': {
                 str += '"';
                 break;
-              case "'":
+              }
+              case "'": {
                 str += "'";
                 break;
-              default:
+              }
+              default: {
                 str += input[i];
                 break;
+              }
             }
           } else {
             str += input[i];
@@ -441,11 +448,12 @@ class Parser {
   private parsePrimary(): Expression {
     const t = this.peek();
     switch (t.kind) {
-      case TokenKind.LParen:
+      case TokenKind.LParen: {
         this.consume(TokenKind.LParen);
         const expr = this.parseExpression();
         this.consume(TokenKind.RParen);
         return expr;
+      }
       case TokenKind.Number:
         this.pos++;
         return { type: 'Number', value: parseNumber(t.value!) };
@@ -460,11 +468,13 @@ class Parser {
           operator: t.kind === TokenKind.Plus ? '+' : '-',
           argument: this.parsePrimary(),
         };
-      case TokenKind.LBrace:
+      case TokenKind.LBrace: {
         const query = this.consume(TokenKind.LBrace);
         this.consume(TokenKind.RBrace);
         return { type: 'Query', query: query.value! };
-      case TokenKind.CellRef: // Handle cell references and ranges
+      }
+      case TokenKind.CellRef: {
+        // Handle cell references and ranges
         const cellRef = this.consume(TokenKind.CellRef);
         // Check if this is a range (cellRef:cellRef)
         if (this.peek().kind === TokenKind.Colon) {
@@ -477,7 +487,8 @@ class Parser {
           };
         }
         return { type: 'CellRef', ref: cellRef.value! };
-      case TokenKind.Identifier:
+      }
+      case TokenKind.Identifier: {
         const ident = this.consume(TokenKind.Identifier);
         if (this.peek().kind === TokenKind.LParen) {
           // function call
@@ -504,6 +515,7 @@ class Parser {
           };
         }
         return { type: 'Identifier', name: ident.value! };
+      }
       default:
         throw new Error(`Unexpected token: ${TokenKind[t.kind]}`);
     }

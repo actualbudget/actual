@@ -7,7 +7,10 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { send, sendCatch } from 'loot-core/platform/client/fetch';
-import { type SpreadsheetReportEntity } from 'loot-core/types/models';
+import {
+  type SpreadsheetReportEntity,
+  type SpreadsheetRowData,
+} from 'loot-core/types/models';
 
 import { SaveReportChoose } from './SaveReportChoose';
 import { SaveReportDelete } from './SaveReportDelete';
@@ -79,10 +82,20 @@ export function SaveSpreadsheetReport({
       return null;
     }
     if (menuChoice === 'save-report') {
+      let parsedRows: SpreadsheetRowData[];
+      try {
+        parsedRows = JSON.parse(spreadsheetReportItems.rows);
+      } catch (error) {
+        console.error('Failed to parse spreadsheet rows JSON:', error);
+        console.error('Invalid JSON string:', spreadsheetReportItems.rows);
+        // Fallback to empty array to prevent crash
+        parsedRows = [];
+      }
+
       const newSavedReport: SpreadsheetReportEntity = {
         ...report,
         name: newName,
-        rows: JSON.parse(spreadsheetReportItems.rows),
+        rows: parsedRows,
         showFormulaColumn: spreadsheetReportItems.showFormulaColumn,
       };
 
@@ -98,6 +111,19 @@ export function SaveSpreadsheetReport({
       }
 
       // Add to dashboard
+      let dashboardRows: SpreadsheetRowData[];
+      try {
+        dashboardRows = JSON.parse(spreadsheetReportItems.rows);
+      } catch (error) {
+        console.error(
+          'Failed to parse spreadsheet rows JSON for dashboard widget:',
+          error,
+        );
+        console.error('Invalid JSON string:', spreadsheetReportItems.rows);
+        // Fallback to empty array to prevent crash
+        dashboardRows = [];
+      }
+
       await send('dashboard-add-widget', {
         type: 'spreadsheet-card',
         width: 4,
@@ -105,7 +131,7 @@ export function SaveSpreadsheetReport({
         meta: {
           id: response.data,
           name: newName,
-          rows: JSON.parse(spreadsheetReportItems.rows),
+          rows: dashboardRows,
         },
       });
 
@@ -120,10 +146,20 @@ export function SaveSpreadsheetReport({
       return;
     }
 
+    let updatedRows: SpreadsheetRowData[];
+    try {
+      updatedRows = JSON.parse(spreadsheetReportItems.rows);
+    } catch (error) {
+      console.error('Failed to parse spreadsheet rows JSON for update:', error);
+      console.error('Invalid JSON string:', spreadsheetReportItems.rows);
+      // Fallback to empty array to prevent crash
+      updatedRows = [];
+    }
+
     const updatedReport: SpreadsheetReportEntity = {
       ...report,
       name: menuChoice === 'rename-report' ? newName : report.name,
-      rows: JSON.parse(spreadsheetReportItems.rows),
+      rows: updatedRows,
       showFormulaColumn: spreadsheetReportItems.showFormulaColumn,
     };
 

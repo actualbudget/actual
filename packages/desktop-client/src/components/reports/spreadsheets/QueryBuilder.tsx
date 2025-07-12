@@ -24,6 +24,7 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { usePayees } from '@desktop-client/hooks/usePayees';
+import { parseQueryParams } from './queryParser';
 
 type QueryBuilderProps = {
   isOpen: boolean;
@@ -246,117 +247,23 @@ function parseFormulaToQueryParams(formula: string): ParsedParams {
   if (queryMatch) {
     const queryString = queryMatch[1];
 
-    // Parse category:"value"
-    const categoryMatch = safeRegexMatch(queryString, /category:\s*"([^"]+)"/);
-    if (categoryMatch) {
-      params.category = categoryMatch[1];
-    }
+    // Use shared utility to parse query parameters
+    const parsedParams = parseQueryParams(queryString);
 
-    // Parse account:"value"
-    const accountMatch = safeRegexMatch(queryString, /account:\s*"([^"]+)"/);
-    if (accountMatch) {
-      params.account = accountMatch[1];
-    }
-
-    // Parse payee:"value"
-    const payeeMatch = safeRegexMatch(queryString, /payee:\s*"([^"]+)"/);
-    if (payeeMatch) {
-      params.payee = payeeMatch[1];
-    }
-
-    // Parse notes filters
-    const notesMatch = safeRegexMatch(
-      queryString,
-      /notes:\s*(is|contains|hasTags)\(\s*"([^"]+)"\s*\)/,
-    );
-    if (notesMatch) {
-      params.notesOp = notesMatch[1];
-      params.notes = notesMatch[2];
-    } else {
-      const notesSimpleMatch = safeRegexMatch(
-        queryString,
-        /notes:\s*"([^"]+)"/,
-      );
-      if (notesSimpleMatch) {
-        params.notesOp = 'is';
-        params.notes = notesSimpleMatch[1];
-      }
-    }
-
-    // Parse boolean filters
-    if (queryString.includes('cleared:true')) {
-      params.cleared = true;
-    } else if (queryString.includes('cleared:false')) {
-      params.cleared = false;
-    }
-
-    if (queryString.includes('reconciled:true')) {
-      params.reconciled = true;
-    } else if (queryString.includes('reconciled:false')) {
-      params.reconciled = false;
-    }
-
-    if (queryString.includes('transfer:true')) {
-      params.transfer = true;
-    } else if (queryString.includes('transfer:false')) {
-      params.transfer = false;
-    }
-
-    // Parse date filters
-    if (queryString.includes('date:thisMonth')) {
-      params.datePreset = 'thisMonth';
-    } else if (queryString.includes('date:lastMonth')) {
-      params.datePreset = 'lastMonth';
-    } else if (queryString.includes('date:thisYear')) {
-      params.datePreset = 'thisYear';
-    } else if (queryString.includes('date:lastYear')) {
-      params.datePreset = 'lastYear';
-    } else {
-      const dateBetweenMatch = safeRegexMatch(
-        queryString,
-        /date:between\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)/,
-      );
-      if (dateBetweenMatch) {
-        params.datePreset = 'custom';
-        params.startDate = dateBetweenMatch[1];
-        params.endDate = dateBetweenMatch[2];
-      } else {
-        const dateGteMatch = safeRegexMatch(
-          queryString,
-          /date:gte\(\s*"([^"]+)"\s*\)/,
-        );
-        if (dateGteMatch) {
-          params.datePreset = 'custom';
-          params.startDate = dateGteMatch[1];
-        }
-
-        const dateLteMatch = safeRegexMatch(
-          queryString,
-          /date:lte\(\s*"([^"]+)"\s*\)/,
-        );
-        if (dateLteMatch) {
-          params.datePreset = 'custom';
-          params.endDate = dateLteMatch[1];
-        }
-      }
-    }
-
-    // Parse amount filters
-    const amountGteMatch = safeRegexMatch(
-      queryString,
-      /amount:gte\(\s*([+-]?\d+(?:\.\d+)?)\s*\)/,
-    );
-    if (amountGteMatch) {
-      params.minAmount = (parseFloat(amountGteMatch[1]) / 100).toString();
-    }
-
-    const amountLteMatch = safeRegexMatch(
-      queryString,
-      /amount:lte\(\s*([+-]?\d+(?:\.\d+)?)\s*\)/,
-    );
-    if (amountLteMatch) {
-      params.maxAmount = (parseFloat(amountLteMatch[1]) / 100).toString();
-    }
+    // Copy parsed parameters to our local params object
+    params.category = parsedParams.category;
+    params.account = parsedParams.account;
+    params.payee = parsedParams.payee;
+    params.notes = parsedParams.notes;
+    params.notesOp = parsedParams.notesOp;
+    params.cleared = parsedParams.cleared;
+    params.reconciled = parsedParams.reconciled;
+    params.transfer = parsedParams.transfer;
+    params.datePreset = parsedParams.datePreset;
+    params.startDate = parsedParams.startDate;
+    params.endDate = parsedParams.endDate;
+    params.minAmount = parsedParams.minAmount;
+    params.maxAmount = parsedParams.maxAmount;
   }
 
   // Parse balance queries
@@ -515,7 +422,6 @@ export function QueryBuilder({
     const filters: string[] = [];
 
     if (selectedCategory) {
-      console.log('QueryBuilder: Adding category filter:', selectedCategory);
       filters.push(`category:"${selectedCategory}"`);
     }
 
@@ -608,18 +514,14 @@ export function QueryBuilder({
     }
 
     const formula = generateFormula();
-    console.log('QueryBuilder: Generated formula:', formula);
 
     if (queryType === 'balance') {
-      console.log('QueryBuilder: Saving balance formula:', formula);
       onSave(formula);
     } else if (queryType === 'cost' && formula) {
       const queryMatch = safeRegexMatch(formula, /\{([^}]*)\}/);
       const queryString = queryMatch ? queryMatch[1] : '';
-      console.log('QueryBuilder: Saving cost query:', queryString);
       onSave(queryString);
     } else if (queryType === 'formula' || queryType === 'row-operation') {
-      console.log('QueryBuilder: Saving custom formula:', formula);
       onSave(formula);
     }
     handleClose();

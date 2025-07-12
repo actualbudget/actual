@@ -111,21 +111,6 @@ export const SheetRow = memo<SheetRowProps>(
     // Calculate the value using the formula, or use the constant value
     const calculatedValue = useSheetCalculation(data.formula || '', cellGrid);
 
-    // Debug logging for formula changes
-    useEffect(() => {
-      console.log(
-        `SheetRow ${rowIndex + 1}: Formula changed to:`,
-        data.formula,
-      );
-    }, [data.formula, rowIndex]);
-
-    useEffect(() => {
-      console.log(
-        `SheetRow ${rowIndex + 1}: Calculated value changed to:`,
-        calculatedValue,
-      );
-    }, [calculatedValue, rowIndex]);
-
     // Update the calculated value in the parent component for cell references
     useEffect(() => {
       if (
@@ -214,7 +199,6 @@ export const SheetRow = memo<SheetRowProps>(
     };
 
     const onQueryBuilderSave = (query: string) => {
-      console.log('SheetRow: onQueryBuilderSave called with query:', query);
       let formula = '';
 
       // The QueryBuilder returns different formats based on query type
@@ -230,7 +214,6 @@ export const SheetRow = memo<SheetRowProps>(
         formula = `=cost({${query}})`;
       }
 
-      console.log('SheetRow: Final formula to save:', formula);
       // The updateCell function will automatically clear the value when setting a formula
       onUpdateCell(rowIndex, 'formula', formula);
       setShowQueryBuilder(false);
