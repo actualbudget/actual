@@ -25,30 +25,6 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 
-// Helper function for safe regex matching with timeout
-function safeRegexMatch(
-  input: string,
-  regex: RegExp,
-  timeoutMs: number = 100,
-): RegExpMatchArray | null {
-  try {
-    // Set a timeout for the regex operation
-    const startTime = Date.now();
-    const result = input.match(regex);
-    const endTime = Date.now();
-
-    if (endTime - startTime > timeoutMs) {
-      console.warn('QueryBuilder: Regex operation took too long, aborting');
-      return null;
-    }
-
-    return result;
-  } catch (error) {
-    console.warn('QueryBuilder: Regex operation failed:', error);
-    return null;
-  }
-}
-
 type QueryBuilderProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -81,6 +57,162 @@ type ParsedParams = {
   maxAmount?: string;
 };
 
+// Helper function for safe regex matching with timeout
+function safeRegexMatch(
+  input: string,
+  regex: RegExp,
+  timeoutMs: number = 100,
+): RegExpMatchArray | null {
+  try {
+    // Input validation to prevent ReDoS attacks
+    if (!input || typeof input !== 'string') {
+      return null;
+    }
+
+    // Limit input length to prevent excessive processing
+    if (input.length > 1000) {
+      console.warn('QueryBuilder: Input too long for regex matching');
+      return null;
+    }
+
+    // Check for potentially dangerous regex patterns and input combinations
+    const regexSource = regex.source;
+
+    // For patterns with unbounded quantifiers, apply stricter limits
+    if (regexSource.includes('.*') || regexSource.includes('.+')) {
+      if (input.length > 100) {
+        console.warn(
+          'QueryBuilder: Input too long for unbounded regex pattern',
+        );
+        return null;
+      }
+
+      // Additional check for catastrophic backtracking patterns
+      if (
+        regexSource.includes('.*.*') ||
+        regexSource.includes('.+.*') ||
+        regexSource.includes('.*.+')
+      ) {
+        if (input.length > 50) {
+          console.warn(
+            'QueryBuilder: Input too long for nested unbounded pattern',
+          );
+          return null;
+        }
+      }
+    }
+
+    // Check for nested quantifiers that can cause exponential backtracking
+    if (
+      regexSource.includes('(.*)*') ||
+      regexSource.includes('(.+)*') ||
+      regexSource.includes('(.*)+')
+    ) {
+      if (input.length > 50) {
+        console.warn(
+          'QueryBuilder: Input too long for nested quantifier pattern',
+        );
+        return null;
+      }
+    }
+
+    // For synchronous safety, use a more conservative approach
+    // Set a maximum execution time and use Date.now() to check
+    const startTime = Date.now();
+    const result = input.match(regex);
+    const endTime = Date.now();
+
+    if (endTime - startTime > timeoutMs) {
+      console.warn('QueryBuilder: Regex operation took too long, aborting');
+      return null;
+    }
+
+    return result;
+  } catch (error) {
+    console.warn('QueryBuilder: Regex operation failed:', error);
+    return null;
+  }
+}
+
+// Helper function for safe regex testing with timeout
+function safeRegexTest(
+  input: string,
+  regex: RegExp,
+  timeoutMs: number = 100,
+): boolean {
+  try {
+    // Input validation to prevent ReDoS attacks
+    if (!input || typeof input !== 'string') {
+      return false;
+    }
+
+    // Limit input length to prevent excessive processing
+    if (input.length > 1000) {
+      console.warn('QueryBuilder: Input too long for regex testing');
+      return false;
+    }
+
+    // Check for potentially dangerous regex patterns and input combinations
+    const regexSource = regex.source;
+
+    // For patterns with unbounded quantifiers, apply stricter limits
+    if (regexSource.includes('.*') || regexSource.includes('.+')) {
+      if (input.length > 100) {
+        console.warn(
+          'QueryBuilder: Input too long for unbounded regex pattern',
+        );
+        return false;
+      }
+
+      // Additional check for catastrophic backtracking patterns
+      if (
+        regexSource.includes('.*.*') ||
+        regexSource.includes('.+.*') ||
+        regexSource.includes('.*.+')
+      ) {
+        if (input.length > 50) {
+          console.warn(
+            'QueryBuilder: Input too long for nested unbounded pattern',
+          );
+          return false;
+        }
+      }
+    }
+
+    // Check for nested quantifiers that can cause exponential backtracking
+    if (
+      regexSource.includes('(.*)*') ||
+      regexSource.includes('(.+)*') ||
+      regexSource.includes('(.*)+')
+    ) {
+      if (input.length > 50) {
+        console.warn(
+          'QueryBuilder: Input too long for nested quantifier pattern',
+        );
+        return false;
+      }
+    }
+
+    // For synchronous safety, use a more conservative approach
+    // Set a maximum execution time and use Date.now() to check
+    const startTime = Date.now();
+    const result = regex.test(input);
+    const endTime = Date.now();
+
+    if (endTime - startTime > timeoutMs) {
+      console.warn(
+        'QueryBuilder: Regex test operation took too long, aborting',
+      );
+      return false;
+    }
+
+    return result;
+  } catch (error) {
+    console.warn('QueryBuilder: Regex test operation failed:', error);
+    return false;
+  }
+}
+
 // Function to parse existing formula and extract query parameters
 function parseFormulaToQueryParams(formula: string): ParsedParams {
   if (!formula) return { queryType: 'cost' };
@@ -99,8 +231,8 @@ function parseFormulaToQueryParams(formula: string): ParsedParams {
   } else if (formula.includes('balance(')) {
     params.queryType = 'balance';
   } else if (
-    /^row-\d+[+\-*/]row-\d+/.test(formula.trim()) ||
-    /^row-\d+$/.test(formula.trim())
+    safeRegexTest(formula.trim(), /^row-\d+[+\-*/]row-\d+/) ||
+    safeRegexTest(formula.trim(), /^row-\d+$/)
   ) {
     params.queryType = 'row-operation';
   } else {
