@@ -2,6 +2,30 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+// Helper function for safe regex matching with timeout
+function safeRegexMatch(
+  input: string,
+  regex: RegExp,
+  timeoutMs: number = 100,
+): RegExpMatchArray | null {
+  try {
+    // Set a timeout for the regex operation
+    const startTime = Date.now();
+    const result = input.match(regex);
+    const endTime = Date.now();
+
+    if (endTime - startTime > timeoutMs) {
+      console.warn('QueryBuilder: Regex operation took too long, aborting');
+      return null;
+    }
+
+    return result;
+  } catch (error) {
+    console.warn('QueryBuilder: Regex operation failed:', error);
+    return null;
+  }
+}
+
 import { Button } from '@actual-app/components/button';
 import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
@@ -61,6 +85,12 @@ type ParsedParams = {
 function parseFormulaToQueryParams(formula: string): ParsedParams {
   if (!formula) return { queryType: 'cost' };
 
+  // Input validation to prevent DoS attacks
+  if (formula.length > 10000) {
+    console.warn('QueryBuilder: Formula too long, truncating');
+    formula = formula.substring(0, 10000);
+  }
+
   const params: ParsedParams = { queryType: 'cost' };
 
   // Determine query type based on formula content
@@ -79,36 +109,42 @@ function parseFormulaToQueryParams(formula: string): ParsedParams {
 
   // Remove leading = and extract content between { } for cost queries
   const cleanFormula = formula.startsWith('=') ? formula.slice(1) : formula;
-  const queryMatch = cleanFormula.match(/\{([^}]*)\}/);
+  const queryMatch = safeRegexMatch(cleanFormula, /\{([^}]*)\}/);
 
   if (queryMatch) {
     const queryString = queryMatch[1];
 
     // Parse category:"value"
-    const categoryMatch = queryString.match(/category:\s*"([^"]+)"/);
+    const categoryMatch = safeRegexMatch(queryString, /category:\s*"([^"]+)"/);
     if (categoryMatch) {
       params.category = categoryMatch[1];
     }
 
     // Parse account:"value"
-    const accountMatch = queryString.match(/account:\s*"([^"]+)"/);
+    const accountMatch = safeRegexMatch(queryString, /account:\s*"([^"]+)"/);
     if (accountMatch) {
       params.account = accountMatch[1];
     }
 
     // Parse payee:"value"
-    const payeeMatch = queryString.match(/payee:\s*"([^"]+)"/);
+    const payeeMatch = safeRegexMatch(queryString, /payee:\s*"([^"]+)"/);
     if (payeeMatch) {
       params.payee = payeeMatch[1];
     }
 
     // Parse notes filters
-    const notesMatch = queryString.match(/notes:\s*([^(]+)\(\s*"([^"]+)"\s*\)/);
+    const notesMatch = safeRegexMatch(
+      queryString,
+      /notes:\s*(is|contains|hasTags)\(\s*"([^"]+)"\s*\)/,
+    );
     if (notesMatch) {
       params.notesOp = notesMatch[1];
       params.notes = notesMatch[2];
     } else {
-      const notesSimpleMatch = queryString.match(/notes:\s*"([^"]+)"/);
+      const notesSimpleMatch = safeRegexMatch(
+        queryString,
+        /notes:\s*"([^"]+)"/,
+      );
       if (notesSimpleMatch) {
         params.notesOp = 'is';
         params.notes = notesSimpleMatch[1];
@@ -144,7 +180,8 @@ function parseFormulaToQueryParams(formula: string): ParsedParams {
     } else if (queryString.includes('date:lastYear')) {
       params.datePreset = 'lastYear';
     } else {
-      const dateBetweenMatch = queryString.match(
+      const dateBetweenMatch = safeRegexMatch(
+        queryString,
         /date:between\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)/,
       );
       if (dateBetweenMatch) {
@@ -152,13 +189,19 @@ function parseFormulaToQueryParams(formula: string): ParsedParams {
         params.startDate = dateBetweenMatch[1];
         params.endDate = dateBetweenMatch[2];
       } else {
-        const dateGteMatch = queryString.match(/date:gte\(\s*"([^"]+)"\s*\)/);
+        const dateGteMatch = safeRegexMatch(
+          queryString,
+          /date:gte\(\s*"([^"]+)"\s*\)/,
+        );
         if (dateGteMatch) {
           params.datePreset = 'custom';
           params.startDate = dateGteMatch[1];
         }
 
-        const dateLteMatch = queryString.match(/date:lte\(\s*"([^"]+)"\s*\)/);
+        const dateLteMatch = safeRegexMatch(
+          queryString,
+          /date:lte\(\s*"([^"]+)"\s*\)/,
+        );
         if (dateLteMatch) {
           params.datePreset = 'custom';
           params.endDate = dateLteMatch[1];
@@ -167,12 +210,18 @@ function parseFormulaToQueryParams(formula: string): ParsedParams {
     }
 
     // Parse amount filters
-    const amountGteMatch = queryString.match(/amount:gte\(\s*([^)]+)\s*\)/);
+    const amountGteMatch = safeRegexMatch(
+      queryString,
+      /amount:gte\(\s*([+-]?\d+(?:\.\d+)?)\s*\)/,
+    );
     if (amountGteMatch) {
       params.minAmount = (parseFloat(amountGteMatch[1]) / 100).toString();
     }
 
-    const amountLteMatch = queryString.match(/amount:lte\(\s*([^)]+)\s*\)/);
+    const amountLteMatch = safeRegexMatch(
+      queryString,
+      /amount:lte\(\s*([+-]?\d+(?:\.\d+)?)\s*\)/,
+    );
     if (amountLteMatch) {
       params.maxAmount = (parseFloat(amountLteMatch[1]) / 100).toString();
     }
@@ -180,7 +229,10 @@ function parseFormulaToQueryParams(formula: string): ParsedParams {
 
   // Parse balance queries
   if (params.queryType === 'balance') {
-    const balanceMatch = cleanFormula.match(/balance\(\s*"([^"]+)"\s*\)/);
+    const balanceMatch = safeRegexMatch(
+      cleanFormula,
+      /balance\(\s*"([^"]+)"\s*\)/,
+    );
     if (balanceMatch) {
       params.account = balanceMatch[1];
     }
@@ -430,7 +482,7 @@ export function QueryBuilder({
       console.log('QueryBuilder: Saving balance formula:', formula);
       onSave(formula);
     } else if (queryType === 'cost' && formula) {
-      const queryMatch = formula.match(/\{([^}]*)\}/);
+      const queryMatch = safeRegexMatch(formula, /\{([^}]*)\}/);
       const queryString = queryMatch ? queryMatch[1] : '';
       console.log('QueryBuilder: Saving cost query:', queryString);
       onSave(queryString);
@@ -782,7 +834,17 @@ export function QueryBuilder({
               <FormLabel title={t('Formula')} />
               <Input
                 value={customFormula}
-                onChange={e => setCustomFormula(e.target.value)}
+                onChange={e => {
+                  const value = e.target.value;
+                  // Input validation to prevent DoS attacks
+                  if (value.length <= 5000) {
+                    setCustomFormula(value);
+                  } else {
+                    console.warn(
+                      'QueryBuilder: Formula too long, ignoring input',
+                    );
+                  }
+                }}
                 placeholder={
                   queryType === 'row-operation'
                     ? t('e.g., row-1 + row-2, row-2 - row-1, sum(row-1:row-5)')

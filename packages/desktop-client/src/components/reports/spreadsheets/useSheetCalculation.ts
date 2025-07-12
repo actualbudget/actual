@@ -301,7 +301,7 @@ async function processAsyncFormula(
           if (notesOp === 'hasTags') {
             // Process hasTags filter - split by spaces and create regex patterns
             const words = notesValue.split(/\s+/);
-            const tagValues = [];
+            const tagValues: string[] = [];
 
             words.forEach(word => {
               const startsWithHash = word.startsWith('#');
@@ -604,7 +604,7 @@ async function processAsyncFormula(
           if (notesOp === 'hasTags') {
             // Process hasTags filter - split by spaces and create regex patterns
             const words = notesValue.split(/\s+/);
-            const tagValues = [];
+            const tagValues: string[] = [];
 
             words.forEach(word => {
               const startsWithHash = word.startsWith('#');

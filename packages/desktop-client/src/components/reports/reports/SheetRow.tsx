@@ -252,7 +252,7 @@ export const SheetRow = memo<SheetRowProps>(
             ':hover': { backgroundColor: theme.tableRowBackgroundHover },
           }}
         >
-          <DropHighlight pos={dropPos} offset={{ top: 1 }} />
+          {dropPos && <DropHighlight pos={dropPos} offset={{ top: 1 }} />}
 
           {/* Row Number Field */}
           <Field
