@@ -159,7 +159,7 @@ async function createScheduleList(
   return { t: t.filter(c => c.completed === 0), errors };
 }
 
-async function getPayMonthOfTotal(t: ScheduleTemplateTarget[]) {
+function getPayMonthOfTotal(t: ScheduleTemplateTarget[]) {
   //return the contribution amounts of full or every month type schedules
   let total = 0;
   const schedules = t.filter(c => c.num_months === 0);
@@ -194,20 +194,36 @@ async function getSinkingContributionTotal(
   return total;
 }
 
-async function getSinkingBaseContributionTotal(t: ScheduleTemplateTarget[]) {
+function getSinkingBaseContributionTotal(t: ScheduleTemplateTarget[]) {
   //return only the base contribution of each schedule
   let total = 0;
   for (const schedule of t) {
-    let monthlyAmount = schedule.target / schedule.target_interval;
-    if (schedule.target_frequency === 'yearly') {
-      monthlyAmount /= 12;
+    let monthlyAmount = 0;
+    switch (schedule.target_frequency) {
+      case 'yearly':
+        monthlyAmount = schedule.target / schedule.target_interval / 12;
+        break;
+      case 'monthly':
+        monthlyAmount = schedule.target / schedule.target_interval;
+        break;
+      case 'daily':
+        const prevDate = monthUtils.subDays(
+          schedule.next_date_string,
+          schedule.target_interval,
+        );
+        const intervalMonths = monthUtils.differenceInCalendarMonths(
+          schedule.next_date_string,
+          prevDate,
+        );
+        monthlyAmount = schedule.target / intervalMonths;
+        break;
     }
     total += monthlyAmount;
   }
   return total;
 }
 
-async function getSinkingTotal(t: ScheduleTemplateTarget[]) {
+function getSinkingTotal(t: ScheduleTemplateTarget[]) {
   //sum the total of all upcoming schedules
   let total = 0;
   for (const schedule of t) {
@@ -244,17 +260,17 @@ export async function runSchedule(
     (c.target_frequency === 'weekly' &&
       c.target_interval >= 0 &&
       c.num_months === 0) ||
-    c.target_frequency === 'daily' ||
+    (c.target_frequency === 'daily' && c.num_months === 0) ||
     isReflectBudget();
 
   const t_payMonthOf = t.t.filter(isPayMonthOf);
   const t_sinking = t.t
     .filter(c => !isPayMonthOf(c))
     .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
-  const totalPayMonthOf = await getPayMonthOfTotal(t_payMonthOf);
-  const totalSinking = await getSinkingTotal(t_sinking);
+  const totalPayMonthOf = getPayMonthOfTotal(t_payMonthOf);
+  const totalSinking = getSinkingTotal(t_sinking);
   const totalSinkingBaseContribution =
-    await getSinkingBaseContributionTotal(t_sinking);
+    getSinkingBaseContributionTotal(t_sinking);
 
   if (balance >= totalSinking + totalPayMonthOf) {
     to_budget += Math.round(totalPayMonthOf + totalSinkingBaseContribution);
