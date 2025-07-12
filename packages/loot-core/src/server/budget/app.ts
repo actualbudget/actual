@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
 import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
@@ -42,6 +44,11 @@ export interface BudgetHandlers {
   'budget/reset-income-carryover': typeof actions.resetIncomeCarryover;
   'get-categories': typeof getCategories;
   'get-budget-bounds': typeof getBudgetBounds;
+  'get-future-budget-projections': typeof getFutureBudgetProjections;
+  'get-historical-budget-data': typeof getHistoricalBudgetData;
+  'get-future-templates': typeof getFutureTemplates;
+  'save-future-template': typeof saveFutureTemplate;
+  'delete-future-template': typeof deleteFutureTemplate;
   'envelope-budget-month': typeof envelopeBudgetMonth;
   'tracking-budget-month': typeof trackingBudgetMonth;
   'category-create': typeof createCategory;
@@ -127,6 +134,11 @@ app.method(
 );
 app.method('get-categories', getCategories);
 app.method('get-budget-bounds', getBudgetBounds);
+app.method('get-future-budget-projections', getFutureBudgetProjections);
+app.method('get-historical-budget-data', getHistoricalBudgetData);
+app.method('get-future-templates', getFutureTemplates);
+app.method('save-future-template', saveFutureTemplate);
+app.method('delete-future-template', deleteFutureTemplate);
 app.method('envelope-budget-month', envelopeBudgetMonth);
 app.method('tracking-budget-month', trackingBudgetMonth);
 app.method('category-create', mutator(undoable(createCategory)));
@@ -151,6 +163,390 @@ async function getCategories() {
 
 async function getBudgetBounds() {
   return await budget.createAllBudgets();
+}
+
+async function getFutureBudgetProjections({
+  periods,
+  timePeriod = 'months',
+  projectionType = 'average',
+  templateId,
+  manualValues,
+  manualIncomeValues,
+}: {
+  periods: string[];
+  timePeriod?: 'months' | 'weeks';
+  projectionType?: 'average' | 'manual';
+  templateId?: string;
+  manualValues?: Record<string, Record<string, number>>;
+  manualIncomeValues?: Record<string, Record<string, number>>;
+}) {
+  const categoryGroups = await getCategoryGroups();
+  const projections = {};
+
+  // Load template if using manual projection
+  let template = null;
+  if (projectionType === 'manual' && templateId) {
+    const templateData = await db.first(
+      'SELECT * FROM future_templates WHERE id = ?',
+      [templateId],
+    );
+    if (templateData) {
+      template = JSON.parse((templateData as any).template);
+    }
+  }
+
+  // Get current account balances to calculate cumulative projections
+  const accounts = await db.getAccounts();
+  let currentTotalBalance = 0;
+
+  for (const account of accounts) {
+    if (!account.closed && !account.offbudget) {
+      const balance = await db.first<{ balance: number }>(
+        'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0',
+        [account.id],
+      );
+      currentTotalBalance += balance?.balance || 0;
+    }
+  }
+
+  // For the current month, we need to get the balance at the first day of the month
+  const currentMonth = monthUtils.currentMonth();
+  let currentMonthStartBalance = 0;
+
+  for (const account of accounts) {
+    if (!account.closed && !account.offbudget) {
+      const firstDayOfMonth = currentMonth + '-01';
+      const balance = await db.first<{ balance: number }>(
+        'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0 AND date < ?',
+        [account.id, firstDayOfMonth],
+      );
+      currentMonthStartBalance += balance?.balance || 0;
+    }
+  }
+
+  let cumulativeBalance = currentMonthStartBalance;
+  let cumulativeIncome = 0;
+  let cumulativeExpenses = 0;
+  let cumulativeSavings = 0;
+  let previousProjectedBalance = 0;
+
+  for (const period of periods) {
+    const isWeekly = timePeriod === 'weeks';
+    const month = isWeekly
+      ? monthUtils.format(new Date(period), 'yyyy-MM')
+      : period;
+    const sheetName = monthUtils.sheetForMonth(month);
+    const periodProjections = {
+      month: period,
+      income: 0,
+      expenses: 0,
+      savings: 0,
+      categories: {},
+      // Add cumulative tracking
+      cumulativeIncome: 0,
+      cumulativeExpenses: 0,
+      cumulativeSavings: 0,
+      projectedBalance: 0,
+    };
+
+    // Calculate beginning balance based on previous month's projected balance
+    let monthBeginBalance = 0;
+    
+    // For the first month, use 0 as beginning balance
+    if (period === periods[0]) {
+      monthBeginBalance = 0;
+    } else {
+      // For subsequent months, use the projected balance from the previous month
+      monthBeginBalance = previousProjectedBalance;
+    }
+    
+    // Store the beginning balance for display
+    periodProjections.beginningBalance = monthBeginBalance;
+
+    // Calculate projections for each category
+    for (const group of categoryGroups) {
+      for (const category of group.categories || []) {
+        let projectedAmount = 0;
+
+        // For past months, use actual historical data instead of projections
+        if (period < currentMonth) {
+          // Use actual historical data from the budget sheet
+          const cellName = `sum-amount-${category.id}`;
+          const amount = sheet.getCellValue(sheetName, cellName) || 0;
+          projectedAmount = Math.abs(Number(amount));
+        } else {
+          // For current and future months, use projections
+          if (projectionType === 'average') {
+            // Calculate 3-month average of actual spending from last 3 completed months
+            const last3Months = [];
+            const currentMonth = monthUtils.currentMonth();
+
+            // Get the last 3 completed months (not including current month)
+            for (let i = 1; i <= 3; i++) {
+              const prevMonth = monthUtils.subMonths(currentMonth, i);
+              last3Months.push(prevMonth);
+            }
+
+            if (last3Months.length > 0) {
+              let totalAmount = 0;
+              let validMonths = 0;
+              for (const prevMonth of last3Months) {
+                const prevSheetName = monthUtils.sheetForMonth(prevMonth);
+                const cellName = `sum-amount-${category.id}`;
+                const amount = sheet.getCellValue(prevSheetName, cellName) || 0;
+
+                // Only use actual spending amounts, not starting balances
+                // sum-amount represents actual transactions for the category
+                if (amount !== 0) {
+                  totalAmount += Math.abs(Number(amount));
+                  validMonths++;
+                }
+              }
+              if (validMonths > 0) {
+                projectedAmount = totalAmount / validMonths;
+                // For weekly view, divide by ~4.33 (average weeks per month)
+                if (timePeriod === 'weeks') {
+                  projectedAmount = projectedAmount / 4.33;
+                }
+              }
+            }
+          } else {
+            // Manual projection - use manual values if available, otherwise template
+            if (category.is_income) {
+              // Handle income categories
+              if (
+                manualIncomeValues &&
+                manualIncomeValues[period] &&
+                manualIncomeValues[period][category.id] !== undefined
+              ) {
+                projectedAmount = manualIncomeValues[period][category.id];
+              } else if (template && template[category.id]) {
+                projectedAmount = template[category.id];
+              } else {
+                // Fallback to budgeted amount from the current month
+                const currentSheetName = monthUtils.sheetForMonth(
+                  monthUtils.currentMonth(),
+                );
+                const budgetedAmount =
+                  sheet.getCellValue(currentSheetName, `budget-${category.id}`) ||
+                  0;
+                projectedAmount = Math.abs(Number(budgetedAmount));
+              }
+            } else {
+              // Handle expense categories
+              if (
+                manualValues &&
+                manualValues[period] &&
+                manualValues[period][category.id] !== undefined
+              ) {
+                projectedAmount = manualValues[period][category.id];
+              } else if (template && template[category.id]) {
+                projectedAmount = template[category.id];
+              } else {
+                // Fallback to budgeted amount from the current month
+                const currentSheetName = monthUtils.sheetForMonth(
+                  monthUtils.currentMonth(),
+                );
+                const budgetedAmount =
+                  sheet.getCellValue(currentSheetName, `budget-${category.id}`) ||
+                  0;
+                projectedAmount = Math.abs(Number(budgetedAmount));
+              }
+            }
+
+            // For weekly view, divide by ~4.33 (average weeks per month)
+            if (timePeriod === 'weeks') {
+              projectedAmount = projectedAmount / 4.33;
+            }
+          }
+        }
+
+        // Special handling for Starting Balances category
+        let adjustedAmount = projectedAmount;
+        let isIncome = category.is_income;
+        
+        // Starting balances should only be included in past months (actual data)
+        // For current and future months, they should not be projected
+        if (category.name === 'Starting Balances' && period >= currentMonth) {
+          // Don't include starting balances in current/future projections
+          adjustedAmount = 0;
+        } else if (category.name === 'Starting Balances' && period < currentMonth) {
+          // For past months, starting balances are included as income
+          isIncome = true;
+        }
+
+        periodProjections.categories[category.id] = {
+          id: category.id,
+          name: category.name,
+          groupId: group.id,
+          groupName: group.name,
+          projectedAmount: adjustedAmount,
+          budgetedAmount:
+            sheet.getCellValue(sheetName, `budget-${category.id}`) || 0,
+          isIncome: isIncome,
+        };
+
+        // Add to totals
+        if (isIncome) {
+          periodProjections.income += adjustedAmount;
+        } else {
+          periodProjections.expenses += adjustedAmount;
+        }
+      }
+    }
+
+    // Calculate projected income and expenses as sum of individual category projections
+    // Reset the totals to ensure they match the sum of category projections
+    periodProjections.income = 0;
+    periodProjections.expenses = 0;
+    
+    Object.values(periodProjections.categories).forEach(category => {
+      if (category.isIncome) {
+        periodProjections.income += category.projectedAmount;
+      } else {
+        periodProjections.expenses += category.projectedAmount;
+      }
+    });
+
+    // Calculate projected savings (income - expenses)
+    periodProjections.savings =
+      periodProjections.income - periodProjections.expenses;
+
+    // Update cumulative totals
+    cumulativeIncome += periodProjections.income;
+    cumulativeExpenses += periodProjections.expenses;
+    cumulativeSavings += periodProjections.savings;
+
+    // Calculate projected balance (beginning balance + net change)
+    periodProjections.projectedBalance = monthBeginBalance + periodProjections.savings;
+
+    // Set cumulative values
+    periodProjections.cumulativeIncome = cumulativeIncome;
+    periodProjections.cumulativeExpenses = cumulativeExpenses;
+    periodProjections.cumulativeSavings = cumulativeSavings;
+
+    // Store projected balance for next month's beginning balance
+    previousProjectedBalance = periodProjections.projectedBalance;
+
+    projections[period] = periodProjections;
+  }
+
+  // For the final balance, use the projected balance of the last month (December)
+  // which should be the projected balance of the last period processed
+  const finalBalance = previousProjectedBalance;
+
+  return {
+    projections,
+    summary: {
+      currentBalance: currentTotalBalance,
+      finalBalance: finalBalance,
+      totalProjectedIncome: cumulativeIncome,
+      totalProjectedExpenses: cumulativeExpenses,
+      totalProjectedSavings: cumulativeSavings,
+      netChange: finalBalance - currentMonthStartBalance,
+    },
+  };
+}
+
+async function getHistoricalBudgetData({ months }: { months: string[] }) {
+  const categoryGroups = await getCategoryGroups();
+  const historicalData = [];
+
+  for (const month of months) {
+    const sheetName = monthUtils.sheetForMonth(month);
+    const monthData = {
+      month,
+      income: 0,
+      expenses: 0,
+      categories: {},
+      projectedBalance: 0,
+    };
+
+    // Calculate actual spending for each category using actual budget data
+    for (const group of categoryGroups) {
+      for (const category of group.categories || []) {
+        const cellName = `sum-amount-${category.id}`;
+        const amount = sheet.getCellValue(sheetName, cellName) || 0;
+
+        monthData.categories[category.id] = {
+          id: category.id,
+          name: category.name,
+          groupId: group.id,
+          groupName: group.name,
+          actualAmount: Math.abs(Number(amount)),
+          isIncome: category.is_income,
+        };
+
+        // Add to totals - use actual spending/income data
+        if (category.is_income) {
+          monthData.income += Math.abs(Number(amount));
+        } else {
+          monthData.expenses += Math.abs(Number(amount));
+        }
+      }
+    }
+
+    // Calculate projected balance for this month by getting account balances at month end
+    const accounts = await db.getAccounts();
+    let monthEndBalance = 0;
+
+    for (const account of accounts) {
+      if (!account.closed && !account.offbudget) {
+        // Get balance at the end of the month
+        const lastDayOfMonth = monthUtils.lastDayOfMonth(month + '-01');
+        const balance = await db.first<{ balance: number }>(
+          'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0 AND date <= ?',
+          [account.id, lastDayOfMonth],
+        );
+        monthEndBalance += balance?.balance || 0;
+      }
+    }
+
+    monthData.projectedBalance = monthEndBalance;
+    historicalData.push(monthData);
+  }
+
+  return historicalData;
+}
+
+async function getFutureTemplates() {
+  const templates = await db.all(
+    'SELECT * FROM future_templates ORDER BY name ASC',
+  );
+  return templates;
+}
+
+async function saveFutureTemplate({
+  id,
+  name,
+  template,
+}: {
+  id?: string;
+  name: string;
+  template: Record<string, number>;
+}) {
+  const now = new Date().toISOString();
+
+  if (id) {
+    await db.update('future_templates', {
+      id,
+      name,
+      template: JSON.stringify(template),
+      updated_at: now,
+    });
+  } else {
+    await db.insert('future_templates', {
+      id: uuidv4(),
+      name,
+      template: JSON.stringify(template),
+      created_at: now,
+      updated_at: now,
+    });
+  }
+}
+
+async function deleteFutureTemplate({ id }: { id: string }) {
+  await db.delete_('future_templates', { id });
 }
 
 async function envelopeBudgetMonth({ month }: { month: string }) {
