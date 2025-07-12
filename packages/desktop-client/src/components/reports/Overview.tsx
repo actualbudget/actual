@@ -644,7 +644,9 @@ export function Overview() {
                       widgetId={item.i}
                       isEditing={isEditing}
                       meta={
-                        spreadsheetReportMap.get(item.meta?.id) || item.meta
+                        item.meta?.id
+                          ? spreadsheetReportMap.get(item.meta.id) || item.meta
+                          : item.meta
                       }
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}

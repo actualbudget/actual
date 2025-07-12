@@ -26,8 +26,8 @@ type CellGrid = {
 export function useSheetCalculation(
   formula: string,
   cellGrid?: CellGrid,
-): number | unknown {
-  const [result, setResult] = useState<number | unknown>(null);
+): number | string {
+  const [result, setResult] = useState<number | string>(0);
   const [isLoading, setIsLoading] = useState(false);
 
   // Use ref to store current cellGrid to avoid dependency issues
@@ -78,7 +78,11 @@ export function useSheetCalculation(
             cellGridRef.current,
           );
           if (!cancelled) {
-            setResult(asyncResult);
+            setResult(
+              typeof asyncResult === 'number'
+                ? asyncResult
+                : String(asyncResult),
+            );
           }
         } else {
           // Handle synchronous evaluation (basic math + cell references)
@@ -91,7 +95,9 @@ export function useSheetCalculation(
             getCellValue,
           });
           if (!cancelled) {
-            setResult(syncResult);
+            setResult(
+              typeof syncResult === 'number' ? syncResult : String(syncResult),
+            );
           }
         }
       } catch (error) {
@@ -127,7 +133,7 @@ export function useSheetCalculation(
 async function processAsyncFormula(
   formula: string,
   cellGrid?: CellGrid,
-): Promise<number | unknown> {
+): Promise<number | string> {
   // Create a cache for async results
   const asyncCache = new Map<string, number>();
 
@@ -271,7 +277,7 @@ async function processAsyncFormula(
       },
     });
 
-    return finalResult;
+    return typeof finalResult === 'number' ? finalResult : String(finalResult);
   } catch (error) {
     console.error('Final formula evaluation error:', error);
     return `Error: ${error instanceof Error ? error.message : 'Unknown error'}`;
