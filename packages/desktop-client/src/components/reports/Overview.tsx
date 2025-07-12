@@ -81,7 +81,7 @@ export function Overview() {
     [customReports],
   );
 
-  const spreadsheetReportMap = useMemo(
+  const _spreadsheetReportMap = useMemo(
     () => new Map(spreadsheetReports.map(report => [report.id, report])),
     [spreadsheetReports],
   );

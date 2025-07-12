@@ -2,8 +2,8 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
 import { q } from 'loot-core/shared/query';
 
+import { parseQueryFilters } from './queryParser';
 import { evaluateFormula } from './sheetEngine';
-import { parseQueryFilters, type TransactionFilters } from './queryParser';
 
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 

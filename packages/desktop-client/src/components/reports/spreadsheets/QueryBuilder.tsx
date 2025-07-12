@@ -10,6 +10,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { parseQueryParams } from './queryParser';
+
 import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
@@ -24,7 +26,6 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { usePayees } from '@desktop-client/hooks/usePayees';
-import { parseQueryParams } from './queryParser';
 
 type QueryBuilderProps = {
   isOpen: boolean;

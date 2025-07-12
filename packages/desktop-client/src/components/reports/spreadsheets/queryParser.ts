@@ -124,7 +124,7 @@ export async function parseQueryFilters(
   }
 
   // Extract notes filters
-  const notesMatch = queryString.match(/notes:\s*([^\(]+)\(\s*"([^"]+)"\s*\)/);
+  const notesMatch = queryString.match(/notes:\s*([^(]+)\(\s*"([^"]+)"\s*\)/);
   if (notesMatch) {
     const notesOp = notesMatch[1];
     const notesValue = notesMatch[2];
@@ -142,7 +142,7 @@ export async function parseQueryFilters(
       if (tagValues.length > 0) {
         const tagRegexes = tagValues.map(tag => {
           const regex = new RegExp(
-            `(^|\\s)${tag.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}(\\s|$)`,
+            `(^|\\s)${tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`,
           );
           return regex.source;
         });
@@ -152,7 +152,7 @@ export async function parseQueryFilters(
       filters.notes = notesValue;
     } else if (notesOp === 'contains') {
       filters.notes = {
-        $regexp: notesValue.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&'),
+        $regexp: notesValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
       };
     }
   } else {
@@ -163,12 +163,21 @@ export async function parseQueryFilters(
   }
 
   // Extract boolean filters
-  if (queryString.includes('cleared:true')) filters.cleared = true;
-  else if (queryString.includes('cleared:false')) filters.cleared = false;
-  if (queryString.includes('reconciled:true')) filters.reconciled = true;
-  else if (queryString.includes('reconciled:false')) filters.reconciled = false;
-  if (queryString.includes('transfer:true')) filters.transfer = true;
-  else if (queryString.includes('transfer:false')) filters.transfer = false;
+  if (queryString.includes('cleared:true')) {
+    filters.cleared = true;
+  } else if (queryString.includes('cleared:false')) {
+    filters.cleared = false;
+  }
+  if (queryString.includes('reconciled:true')) {
+    filters.reconciled = true;
+  } else if (queryString.includes('reconciled:false')) {
+    filters.reconciled = false;
+  }
+  if (queryString.includes('transfer:true')) {
+    filters.transfer = true;
+  } else if (queryString.includes('transfer:false')) {
+    filters.transfer = false;
+  }
 
   // Extract date filters
   if (queryString.includes('date:thisMonth')) {
@@ -193,10 +202,13 @@ export async function parseQueryFilters(
       filters.date = { $gte: dateBetweenMatch[1], $lte: dateBetweenMatch[2] };
     } else {
       const dateGteMatch = queryString.match(/date:gte\(\s*"([^"]+)"\s*\)/);
-      if (dateGteMatch) filters.date = { $gte: dateGteMatch[1] };
+      if (dateGteMatch) {
+        filters.date = { $gte: dateGteMatch[1] };
+      }
       const dateLteMatch = queryString.match(/date:lte\(\s*"([^"]+)"\s*\)/);
-      if (dateLteMatch)
+      if (dateLteMatch) {
         filters.date = { ...filters.date, $lte: dateLteMatch[1] };
+      }
     }
   }
 
