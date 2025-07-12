@@ -2,6 +2,29 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Input } from '@actual-app/components/input';
+import { Select } from '@actual-app/components/select';
+import { Stack } from '@actual-app/components/stack';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
+
+import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
+import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
+import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@desktop-client/components/common/Modal';
+import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { DateSelect } from '@desktop-client/components/select/DateSelect';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { usePayees } from '@desktop-client/hooks/usePayees';
+
 // Helper function for safe regex matching with timeout
 function safeRegexMatch(
   input: string,
@@ -25,29 +48,6 @@ function safeRegexMatch(
     return null;
   }
 }
-
-import { Button } from '@actual-app/components/button';
-import { Input } from '@actual-app/components/input';
-import { Select } from '@actual-app/components/select';
-import { Stack } from '@actual-app/components/stack';
-import { Text } from '@actual-app/components/text';
-import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
-
-import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
-import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
-import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { FormField, FormLabel } from '@desktop-client/components/forms';
-import { DateSelect } from '@desktop-client/components/select/DateSelect';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { usePayees } from '@desktop-client/hooks/usePayees';
 
 type QueryBuilderProps = {
   isOpen: boolean;
