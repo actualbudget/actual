@@ -630,12 +630,13 @@ function SpreadsheetInner({ report: initialReport }: SpreadsheetInnerProps) {
               display: 'flex',
               alignItems: 'center',
               borderRight: `1px solid ${theme.tableBorder}`,
+              minWidth: 120,
             }}
           >
             <Trans>Label</Trans>
           </Field>
           <Field
-            width={150}
+            width="flex"
             style={{
               textAlign: 'right',
               padding: '8px 12px',
@@ -643,6 +644,7 @@ function SpreadsheetInner({ report: initialReport }: SpreadsheetInnerProps) {
               alignItems: 'center',
               justifyContent: 'flex-end',
               borderRight: `1px solid ${theme.tableBorder}`,
+              minWidth: 100,
             }}
           >
             <Trans>Value</Trans>
@@ -655,6 +657,7 @@ function SpreadsheetInner({ report: initialReport }: SpreadsheetInnerProps) {
                 display: 'flex',
                 alignItems: 'center',
                 borderRight: `1px solid ${theme.tableBorder}`,
+                minWidth: 150,
               }}
             >
               <Trans>Formula</Trans>

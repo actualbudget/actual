@@ -28,6 +28,14 @@ type TransactionFilters = {
   category?: string;
   account?: string;
   payee?: string;
+  notes?:
+    | string
+    | { $regexp: string }
+    | { $and: Array<{ $regexp: string }> }
+    | Array<{ $regexp: string }>;
+  cleared?: boolean;
+  reconciled?: boolean;
+  transfer?: boolean;
   date?: {
     $gte?: string;
     $lt?: string;
@@ -282,6 +290,83 @@ async function processAsyncFormula(
           }
         }
 
+        // Extract notes filters
+        const notesMatch = queryString.match(
+          /notes:\s*([^(]+)\(\s*"([^"]+)"\s*\)/,
+        );
+        if (notesMatch) {
+          const notesOp = notesMatch[1];
+          const notesValue = notesMatch[2];
+
+          if (notesOp === 'hasTags') {
+            // Process hasTags filter - split by spaces and create regex patterns
+            const words = notesValue.split(/\s+/);
+            const tagValues = [];
+
+            words.forEach(word => {
+              const startsWithHash = word.startsWith('#');
+              const containsMultipleHash = word.slice(1).includes('#');
+              const correctlyFormatted = word.match(/#[\w\d\p{Emoji}-]+/gu);
+              const validHashtag =
+                startsWithHash && !containsMultipleHash && correctlyFormatted;
+
+              if (validHashtag) {
+                tagValues.push(word);
+              }
+            });
+
+            if (tagValues.length > 0) {
+              // Create regex patterns for each tag
+              const tagRegexes = tagValues.map(tag => {
+                const regex = new RegExp(
+                  `(^|\\s)${tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`,
+                );
+                return regex.source;
+              });
+
+              // Use array format which the compiler will automatically combine with AND
+              filters.notes = tagRegexes.map(regex => ({ $regexp: regex }));
+              console.log('DEBUG: Applied hasTags filter:', filters.notes);
+            }
+          } else if (notesOp === 'is') {
+            // Exact match
+            filters.notes = notesValue;
+            console.log('DEBUG: Applied notes is filter:', filters.notes);
+          } else if (notesOp === 'contains') {
+            // Contains match
+            filters.notes = {
+              $regexp: notesValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+            };
+            console.log('DEBUG: Applied notes contains filter:', filters.notes);
+          }
+        } else {
+          // Handle simple notes:"value" format (defaults to 'is')
+          const notesSimpleMatch = queryString.match(/notes:\s*"([^"]+)"/);
+          if (notesSimpleMatch) {
+            filters.notes = notesSimpleMatch[1];
+            console.log('DEBUG: Applied simple notes filter:', filters.notes);
+          }
+        }
+
+        // Extract boolean filters
+        if (queryString.includes('cleared:true')) {
+          filters.cleared = true;
+        } else if (queryString.includes('cleared:false')) {
+          filters.cleared = false;
+        }
+
+        if (queryString.includes('reconciled:true')) {
+          filters.reconciled = true;
+        } else if (queryString.includes('reconciled:false')) {
+          filters.reconciled = false;
+        }
+
+        if (queryString.includes('transfer:true')) {
+          filters.transfer = true;
+        } else if (queryString.includes('transfer:false')) {
+          filters.transfer = false;
+        }
+
         // Extract date filters
         if (queryString.includes('date:thisMonth')) {
           filters.date = { $gte: monthUtils.currentMonth() + '-01' };
@@ -506,6 +591,83 @@ async function processAsyncFormula(
           } else {
             console.warn('Payee not found (exact match):', payeeName);
           }
+        }
+
+        // Extract notes filters
+        const notesMatch = queryString.match(
+          /notes:\s*([^(]+)\(\s*"([^"]+)"\s*\)/,
+        );
+        if (notesMatch) {
+          const notesOp = notesMatch[1];
+          const notesValue = notesMatch[2];
+
+          if (notesOp === 'hasTags') {
+            // Process hasTags filter - split by spaces and create regex patterns
+            const words = notesValue.split(/\s+/);
+            const tagValues = [];
+
+            words.forEach(word => {
+              const startsWithHash = word.startsWith('#');
+              const containsMultipleHash = word.slice(1).includes('#');
+              const correctlyFormatted = word.match(/#[\w\d\p{Emoji}-]+/gu);
+              const validHashtag =
+                startsWithHash && !containsMultipleHash && correctlyFormatted;
+
+              if (validHashtag) {
+                tagValues.push(word);
+              }
+            });
+
+            if (tagValues.length > 0) {
+              // Create regex patterns for each tag
+              const tagRegexes = tagValues.map(tag => {
+                const regex = new RegExp(
+                  `(^|\\s)${tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`,
+                );
+                return regex.source;
+              });
+
+              // Use array format which the compiler will automatically combine with AND
+              filters.notes = tagRegexes.map(regex => ({ $regexp: regex }));
+              console.log('DEBUG: Applied hasTags filter:', filters.notes);
+            }
+          } else if (notesOp === 'is') {
+            // Exact match
+            filters.notes = notesValue;
+            console.log('DEBUG: Applied notes is filter:', filters.notes);
+          } else if (notesOp === 'contains') {
+            // Contains match
+            filters.notes = {
+              $regexp: notesValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+            };
+            console.log('DEBUG: Applied notes contains filter:', filters.notes);
+          }
+        } else {
+          // Handle simple notes:"value" format (defaults to 'is')
+          const notesSimpleMatch = queryString.match(/notes:\s*"([^"]+)"/);
+          if (notesSimpleMatch) {
+            filters.notes = notesSimpleMatch[1];
+            console.log('DEBUG: Applied simple notes filter:', filters.notes);
+          }
+        }
+
+        // Extract boolean filters
+        if (queryString.includes('cleared:true')) {
+          filters.cleared = true;
+        } else if (queryString.includes('cleared:false')) {
+          filters.cleared = false;
+        }
+
+        if (queryString.includes('reconciled:true')) {
+          filters.reconciled = true;
+        } else if (queryString.includes('reconciled:false')) {
+          filters.reconciled = false;
+        }
+
+        if (queryString.includes('transfer:true')) {
+          filters.transfer = true;
+        } else if (queryString.includes('transfer:false')) {
+          filters.transfer = false;
         }
 
         if (queryString.includes('date:thisMonth')) {

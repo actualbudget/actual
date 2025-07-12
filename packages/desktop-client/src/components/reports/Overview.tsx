@@ -43,6 +43,7 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useDashboard } from '@desktop-client/hooks/useDashboard';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useReports } from '@desktop-client/hooks/useReports';
+import { useSpreadsheetReports } from '@desktop-client/hooks/useSpreadsheetReports';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import {
@@ -71,6 +72,8 @@ export function Overview() {
 
   const { data: customReports, isLoading: isCustomReportsLoading } =
     useReports();
+  const { data: spreadsheetReports, isLoading: isSpreadsheetReportsLoading } =
+    useSpreadsheetReports();
   const { data: widgets, isLoading: isWidgetsLoading } = useDashboard();
 
   const customReportMap = useMemo(
@@ -78,7 +81,13 @@ export function Overview() {
     [customReports],
   );
 
-  const isLoading = isCustomReportsLoading || isWidgetsLoading;
+  const spreadsheetReportMap = useMemo(
+    () => new Map(spreadsheetReports.map(report => [report.id, report])),
+    [spreadsheetReports],
+  );
+
+  const isLoading =
+    isCustomReportsLoading || isSpreadsheetReportsLoading || isWidgetsLoading;
 
   const { isNarrowWidth } = useResponsive();
   const navigate = useNavigate();
@@ -386,6 +395,11 @@ export function Overview() {
                               return;
                             }
 
+                            if (item === 'spreadsheet-card') {
+                              navigate('/reports/spreadsheet');
+                              return;
+                            }
+
                             function isExistingCustomReport(
                               name: string,
                             ): name is `custom-report-${string}` {
@@ -395,6 +409,23 @@ export function Overview() {
                               const [, reportId] = item.split('custom-report-');
                               onAddWidget<CustomReportWidget>('custom-report', {
                                 id: reportId,
+                              });
+                              return;
+                            }
+
+                            function isExistingSpreadsheetReport(
+                              name: string,
+                            ): name is `spreadsheet-report-${string}` {
+                              return name.startsWith('spreadsheet-report-');
+                            }
+                            if (isExistingSpreadsheetReport(item)) {
+                              const [, reportId] = (item as string).split(
+                                'spreadsheet-report-',
+                              );
+                              onAddWidget('spreadsheet-card', {
+                                id: reportId,
+                                name: spreadsheetReportMap.get(reportId)?.name,
+                                rows: spreadsheetReportMap.get(reportId)?.rows,
                               });
                               return;
                             }
@@ -446,6 +477,13 @@ export function Overview() {
                               : []),
                             ...customReports.map(report => ({
                               name: `custom-report-${report.id}` as const,
+                              text: report.name,
+                            })),
+                            ...(spreadsheetReports.length
+                              ? ([Menu.line] satisfies Array<typeof Menu.line>)
+                              : []),
+                            ...spreadsheetReports.map(report => ({
+                              name: `spreadsheet-report-${report.id}` as const,
                               text: report.name,
                             })),
                           ]}

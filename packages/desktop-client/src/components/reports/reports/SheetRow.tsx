@@ -30,9 +30,26 @@ import { useDragRef } from '@desktop-client/hooks/useDragRef';
 // Match SchedulesTable constants
 export const ROW_HEIGHT = 43;
 
-// Simple formula truncation helper
-const truncateFormula = (formula: string, maxLength: number = 50): string => {
+// Responsive formula truncation helper
+const truncateFormula = (formula: string, maxLength: number = 40): string => {
   if (formula.length <= maxLength) return formula;
+
+  // Try to truncate at a logical point (after operators, before long numbers)
+  const truncateAt = Math.max(
+    formula.lastIndexOf('+', maxLength),
+    formula.lastIndexOf('-', maxLength),
+    formula.lastIndexOf('*', maxLength),
+    formula.lastIndexOf('/', maxLength),
+    formula.lastIndexOf('(', maxLength),
+    formula.lastIndexOf(')', maxLength),
+    formula.lastIndexOf(' ', maxLength),
+    maxLength - 10, // Fallback to simple truncation
+  );
+
+  if (truncateAt > maxLength * 0.6) {
+    return formula.slice(0, truncateAt) + '...';
+  }
+
   return formula.slice(0, maxLength) + '...';
 };
 
@@ -226,7 +243,6 @@ export const SheetRow = memo<SheetRowProps>(
           inset={0}
           innerRef={dropRef}
           style={{
-            cursor: 'grab',
             backgroundColor: data.hidden
               ? theme.tableRowBackgroundHover
               : theme.tableBackground,
@@ -236,13 +252,18 @@ export const SheetRow = memo<SheetRowProps>(
             ':hover': { backgroundColor: theme.tableRowBackgroundHover },
           }}
         >
-          <DropHighlight pos={dropPos ?? 'bottom'} offset={{ top: 1 }} />
+          <DropHighlight pos={dropPos} offset={{ top: 1 }} />
 
           {/* Row Number Field */}
           <Field
             width={60}
             name="row-number"
+            innerRef={handleDragRef}
             style={{
+              cursor:
+                !editingLabel && !editingValue && !showQueryBuilder
+                  ? 'grab'
+                  : 'default',
               padding: '8px 12px',
               minHeight: ROW_HEIGHT - 2,
               display: 'flex',
@@ -259,7 +280,11 @@ export const SheetRow = memo<SheetRowProps>(
                 fontSize: 12,
                 userSelect: 'none',
               }}
-              title={`Reference this row as: row-${rowIndex + 1}`}
+              title={
+                !editingLabel && !editingValue && !showQueryBuilder
+                  ? `Drag to reorder row ${rowIndex + 1}`
+                  : `Reference this row as: row-${rowIndex + 1}`
+              }
             >
               {rowIndex + 1}
             </Text>
@@ -269,10 +294,9 @@ export const SheetRow = memo<SheetRowProps>(
           <Field
             width="flex"
             name="label"
-            innerRef={handleDragRef}
             onClick={!editingLabel ? startEditLabel : undefined}
             style={{
-              cursor: !editingLabel ? 'grab' : 'default',
+              cursor: !editingLabel ? 'pointer' : 'default',
               padding: '8px 12px',
               minHeight: ROW_HEIGHT - 2,
               display: 'flex',
@@ -280,6 +304,7 @@ export const SheetRow = memo<SheetRowProps>(
               backgroundColor: editingLabel
                 ? theme.formInputBackground
                 : 'transparent',
+              minWidth: 120,
               ':hover': !editingLabel
                 ? {
                     backgroundColor: theme.tableRowBackgroundHover,
@@ -308,13 +333,17 @@ export const SheetRow = memo<SheetRowProps>(
                 }}
               />
             ) : (
-              <View style={{ width: '100%' }}>
+              <View style={{ width: '100%', overflow: 'hidden' }}>
                 <Text
                   style={{
                     color: data.label
                       ? theme.tableText
                       : theme.tableTextSubdued,
                     userSelect: 'none',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    display: 'block',
                   }}
                   title={data.label ? data.label : ''}
                 >
@@ -326,6 +355,9 @@ export const SheetRow = memo<SheetRowProps>(
                       fontSize: 10,
                       color: theme.pageTextSubdued,
                       fontStyle: 'italic',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
                     }}
                   >
                     {t('(Hidden)')}
@@ -338,7 +370,7 @@ export const SheetRow = memo<SheetRowProps>(
           {/* Value */}
           <Field
             name="value"
-            width={150}
+            width="flex"
             onClick={
               !editingValue && !data.formula ? startEditValue : undefined
             }
@@ -352,6 +384,7 @@ export const SheetRow = memo<SheetRowProps>(
               backgroundColor: editingValue
                 ? theme.formInputBackground
                 : 'transparent',
+              minWidth: 100,
               ':hover':
                 !editingValue && !data.formula
                   ? {
@@ -418,6 +451,8 @@ export const SheetRow = memo<SheetRowProps>(
                 minHeight: ROW_HEIGHT - 2,
                 display: 'flex',
                 alignItems: 'center',
+                minWidth: 150,
+                overflow: 'hidden',
               }}
             >
               <Text
@@ -434,6 +469,7 @@ export const SheetRow = memo<SheetRowProps>(
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
+                  display: 'block',
                 }}
                 title={data.formula ? data.formula : ''}
               >

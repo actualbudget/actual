@@ -19,8 +19,10 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 
 type QueryBuilderProps = {
@@ -43,6 +45,11 @@ type ParsedParams = {
   category?: string;
   account?: string;
   payee?: string;
+  notes?: string;
+  notesOp?: string;
+  cleared?: boolean;
+  reconciled?: boolean;
+  transfer?: boolean;
   datePreset?: string;
   startDate?: string;
   endDate?: string;
@@ -93,6 +100,38 @@ function parseFormulaToQueryParams(formula: string): ParsedParams {
     const payeeMatch = queryString.match(/payee:\s*"([^"]+)"/);
     if (payeeMatch) {
       params.payee = payeeMatch[1];
+    }
+
+    // Parse notes filters
+    const notesMatch = queryString.match(/notes:\s*([^(]+)\(\s*"([^"]+)"\s*\)/);
+    if (notesMatch) {
+      params.notesOp = notesMatch[1];
+      params.notes = notesMatch[2];
+    } else {
+      const notesSimpleMatch = queryString.match(/notes:\s*"([^"]+)"/);
+      if (notesSimpleMatch) {
+        params.notesOp = 'is';
+        params.notes = notesSimpleMatch[1];
+      }
+    }
+
+    // Parse boolean filters
+    if (queryString.includes('cleared:true')) {
+      params.cleared = true;
+    } else if (queryString.includes('cleared:false')) {
+      params.cleared = false;
+    }
+
+    if (queryString.includes('reconciled:true')) {
+      params.reconciled = true;
+    } else if (queryString.includes('reconciled:false')) {
+      params.reconciled = false;
+    }
+
+    if (queryString.includes('transfer:true')) {
+      params.transfer = true;
+    } else if (queryString.includes('transfer:false')) {
+      params.transfer = false;
     }
 
     // Parse date filters
@@ -157,6 +196,7 @@ export function QueryBuilder({
   existingFormula,
 }: QueryBuilderProps) {
   const { t } = useTranslation();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   // Get data for ID to name conversion
   const { grouped: categoryGroups } = useCategories();
@@ -233,6 +273,11 @@ export function QueryBuilder({
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedAccount, setSelectedAccount] = useState<string>('');
   const [selectedPayee, setSelectedPayee] = useState<string>('');
+  const [selectedNotes, setSelectedNotes] = useState<string>('');
+  const [notesOp, setNotesOp] = useState<string>('is');
+  const [cleared, setCleared] = useState<boolean | null>(null);
+  const [reconciled, setReconciled] = useState<boolean | null>(null);
+  const [transfer, setTransfer] = useState<boolean | null>(null);
   const [datePreset, setDatePreset] = useState<DatePreset>('thisMonth');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
@@ -250,6 +295,11 @@ export function QueryBuilder({
       setSelectedCategory(params.category || '');
       setSelectedAccount(params.account || '');
       setSelectedPayee(params.payee || '');
+      setSelectedNotes(params.notes || '');
+      setNotesOp(params.notesOp || 'is');
+      setCleared(params.cleared ?? null);
+      setReconciled(params.reconciled ?? null);
+      setTransfer(params.transfer ?? null);
 
       setDatePreset((params.datePreset as DatePreset) || 'thisMonth');
       setStartDate(params.startDate || '');
@@ -293,6 +343,26 @@ export function QueryBuilder({
       filters.push(`payee:"${selectedPayee}"`);
     }
 
+    if (selectedNotes) {
+      if (notesOp === 'hasTags') {
+        filters.push(`notes:hasTags("${selectedNotes}")`);
+      } else {
+        filters.push(`notes:${notesOp}("${selectedNotes}")`);
+      }
+    }
+
+    if (cleared !== null) {
+      filters.push(`cleared:${cleared}`);
+    }
+
+    if (reconciled !== null) {
+      filters.push(`reconciled:${reconciled}`);
+    }
+
+    if (transfer !== null) {
+      filters.push(`transfer:${transfer}`);
+    }
+
     // Handle date presets
     if (datePreset === 'thisMonth') {
       filters.push('date:thisMonth');
@@ -333,6 +403,10 @@ export function QueryBuilder({
         selectedCategory ||
         selectedAccount ||
         selectedPayee ||
+        selectedNotes ||
+        cleared !== null ||
+        reconciled !== null ||
+        transfer !== null ||
         minAmount ||
         maxAmount ||
         datePreset !== 'thisMonth'
@@ -373,6 +447,11 @@ export function QueryBuilder({
     setSelectedCategory('');
     setSelectedAccount('');
     setSelectedPayee('');
+    setSelectedNotes('');
+    setNotesOp('is');
+    setCleared(null);
+    setReconciled(null);
+    setTransfer(null);
     setDatePreset('thisMonth');
     setStartDate('');
     setEndDate('');
@@ -496,6 +575,90 @@ export function QueryBuilder({
             </FormField>
 
             <FormField style={{ marginBottom: 15 }}>
+              <FormLabel title={t('Notes')} />
+              <View
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 2fr',
+                  gap: 10,
+                }}
+              >
+                <Select
+                  value={notesOp}
+                  onChange={(value: string) => setNotesOp(value)}
+                  options={[
+                    ['is', t('is')],
+                    ['contains', t('contains')],
+                    ['hasTags', t('has tag(s)')],
+                  ]}
+                />
+                <Input
+                  value={selectedNotes}
+                  onChange={e => setSelectedNotes(e.target.value)}
+                  placeholder={
+                    notesOp === 'hasTags'
+                      ? t('e.g., #food, #entertainment')
+                      : t('Enter notes text')
+                  }
+                />
+              </View>
+            </FormField>
+
+            <View
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 15,
+                marginBottom: 15,
+              }}
+            >
+              <FormField>
+                <FormLabel title={t('Cleared')} />
+                <Select
+                  value={cleared === null ? '' : cleared.toString()}
+                  onChange={(value: string) =>
+                    setCleared(value === '' ? null : value === 'true')
+                  }
+                  options={[
+                    ['', t('Any')],
+                    ['true', t('Yes')],
+                    ['false', t('No')],
+                  ]}
+                />
+              </FormField>
+
+              <FormField>
+                <FormLabel title={t('Reconciled')} />
+                <Select
+                  value={reconciled === null ? '' : reconciled.toString()}
+                  onChange={(value: string) =>
+                    setReconciled(value === '' ? null : value === 'true')
+                  }
+                  options={[
+                    ['', t('Any')],
+                    ['true', t('Yes')],
+                    ['false', t('No')],
+                  ]}
+                />
+              </FormField>
+            </View>
+
+            <FormField style={{ marginBottom: 15 }}>
+              <FormLabel title={t('Transfer')} />
+              <Select
+                value={transfer === null ? '' : transfer.toString()}
+                onChange={(value: string) =>
+                  setTransfer(value === '' ? null : value === 'true')
+                }
+                options={[
+                  ['', t('Any')],
+                  ['true', t('Yes')],
+                  ['false', t('No')],
+                ]}
+              />
+            </FormField>
+
+            <FormField style={{ marginBottom: 15 }}>
               <FormLabel title={t('Date Range')} />
               <Select
                 value={datePreset}
@@ -521,18 +684,20 @@ export function QueryBuilder({
               >
                 <FormField>
                   <FormLabel title={t('Start Date')} />
-                  <Input
-                    type="date"
+                  <DateSelect
                     value={startDate}
-                    onChange={e => setStartDate(e.target.value)}
+                    dateFormat={dateFormat}
+                    onSelect={setStartDate}
+                    inputProps={{ placeholder: dateFormat.toLowerCase() }}
                   />
                 </FormField>
                 <FormField>
                   <FormLabel title={t('End Date')} />
-                  <Input
-                    type="date"
+                  <DateSelect
                     value={endDate}
-                    onChange={e => setEndDate(e.target.value)}
+                    dateFormat={dateFormat}
+                    onSelect={setEndDate}
+                    inputProps={{ placeholder: dateFormat.toLowerCase() }}
                   />
                 </FormField>
               </View>
