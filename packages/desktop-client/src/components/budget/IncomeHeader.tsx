@@ -28,10 +28,7 @@ export function IncomeHeader({
           justifyContent: 'flex-start',
         }}
       >
-        <Button
-          onPress={() => onShowNewGroup()}
-          style={{ fontSize: 12, margin: 10 }}
-        >
+        <Button onPress={() => onShowNewGroup()} style={{ fontSize: 12, margin: 10 }}>
           <Trans>Add group</Trans>
         </Button>
       </View>

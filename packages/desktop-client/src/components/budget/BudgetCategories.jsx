@@ -66,6 +66,10 @@ export const BudgetCategories = memo(
         );
       }
 
+      if (isAddingGroup && newGroupForGroup === undefined) {
+        builtItems.push({ type: 'new-group' });
+      }
+
       // 2. Process the income group hierarchically (if it exists)
       if (incomeGroup) {
         // Ensure expandGroup returns an array, even if it's empty
@@ -75,10 +79,9 @@ export const BudgetCategories = memo(
           { type: 'income-separator' },
           ...incomeItems // Spread the items returned by expandGroup
         );
-
       }
 
-      return builtItems; // Return the fully constructed list
+      return builtItems;
     }, [
       allCategoryGroups,
       allCategories,

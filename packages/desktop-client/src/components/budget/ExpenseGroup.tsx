@@ -131,7 +131,7 @@ export function ExpenseGroup({
           }
           style={{
             backgroundColor:
-              depth == 0
+              depth === 0
                 ? theme.tableRowHeaderBackground
                 : theme.tableRowSubHeaderBackground,
           }}          

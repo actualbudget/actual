@@ -385,7 +385,7 @@ async function createCategoryGroup({
   return await db.insertCategoryGroup({
     name,
     is_income: isIncome ? 1 : 0,
-    parent_id: parentId || null,
+    parent_id: parentId || undefined,
     hidden: hidden ? 1 : 0,
   });
 }

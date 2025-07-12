@@ -332,7 +332,6 @@ type ProcessedDbCategoryGroup = DbCategoryGroup & {
 
 export async function getCategoriesGrouped(
   ids?: Array<CategoryGroupEntity['id']>,
-  hierarchical: boolean = false,
 ): Promise<Array<CategoryGroupEntity>> {
   const categoryGroupWhereIn = ids
     ? `cg.id IN (${toSqlQueryParameters(ids)}) AND`
@@ -377,40 +376,39 @@ export async function getCategoriesGrouped(
     }
   }
 
-    // If hierarchical is false, return a flat list of *all* groups.
-    // Each group object should contain its direct categories, but the 'children'
-    // array must be empty, as the frontend will build its own rendering hierarchy.
-    const flatListWithoutChildren: CategoryGroupEntity[] =
-      mappedDbGroupsWithOwnCategories.map(dbGroup => {
-        const entityCategories: CategoryEntity[] = (
-          dbGroup.categories || []
-        ).map(dbCat => ({
-          id: dbCat.id,
-          name: dbCat.name,
-          is_income: Boolean(dbCat.is_income),
-          group: dbCat.cat_group,
-          sort_order: dbCat.sort_order,
-          hidden: Boolean(dbCat.hidden),
-          goal_def: dbCat.goal_def || undefined,
-          tombstone: Boolean(dbCat.tombstone),
-        }));
+  // Each group object should contain its direct categories, but the 'children'
+  // array must be empty, as the frontend will build its own rendering hierarchy.
+  const flatListWithoutChildren: CategoryGroupEntity[] =
+    mappedDbGroupsWithOwnCategories.map(dbGroup => {
+      const entityCategories: CategoryEntity[] = (
+        dbGroup.categories || []
+      ).map(dbCat => ({
+        id: dbCat.id,
+        name: dbCat.name,
+        is_income: Boolean(dbCat.is_income),
+        group: dbCat.cat_group,
+        sort_order: dbCat.sort_order,
+        hidden: Boolean(dbCat.hidden),
+        goal_def: dbCat.goal_def || undefined,
+        tombstone: Boolean(dbCat.tombstone),
+      }));
 
-        return {
-          id: dbGroup.id,
-          name: dbGroup.name,
-          is_income: Boolean(dbGroup.is_income),
-          sort_order: dbGroup.sort_order,
-          hidden: Boolean(dbGroup.hidden),
-          tombstone: Boolean(dbGroup.tombstone),
-          parent_id: dbGroup.parent_id || undefined,
-          categories: entityCategories,
-          children: [], // Explicitly set children to an empty array for the flat view
-        };
-      });
+      return {
+        id: dbGroup.id,
+        name: dbGroup.name,
+        is_income: Boolean(dbGroup.is_income),
+        sort_order: dbGroup.sort_order,
+        hidden: Boolean(dbGroup.hidden),
+        tombstone: Boolean(dbGroup.tombstone),
+        parent_id: dbGroup.parent_id || undefined,
+        categories: entityCategories,
+        children: [], // Explicitly set children to an empty array for the flat view
+      };
+    });
 
-    // This returns a flat array of CategoryGroupEntity objects, where each object
-    // has its 'categories' populated, and its 'children' array is empty.
-    return flatListWithoutChildren;
+  // This returns a flat array of CategoryGroupEntity objects, where each object
+  // has its 'categories' populated, and its 'children' array is empty.
+  return flatListWithoutChildren;
   
 }
 
@@ -435,13 +433,19 @@ export async function insertCategoryGroup(
   `);
   const sort_order = (lastGroup ? lastGroup.sort_order : 0) + SORT_INCREMENT;
 
+
+  const processedGroup = {
+    ...group,
+    parent_id: group.parent_id ?? null,// Ensure parent_id is null if undefined, as the database expects null for no parent
+  };
+
   const validated = {
-    ...categoryGroupModel.validate(group),
+    ...categoryGroupModel.validate(processedGroup),
     sort_order,
   };
   const id: DbCategoryGroup['id'] = await insertWithUUID(
     'category_groups',
-    group,
+    validated,
   );
   return id;
 }
