@@ -18,7 +18,6 @@ import {
   type CustomReportWidget,
   type ExportImportDashboard,
   type MarkdownWidget,
-  type SpreadsheetWidget,
   type Widget,
 } from 'loot-core/types/models';
 

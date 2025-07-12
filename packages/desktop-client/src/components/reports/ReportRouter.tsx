@@ -7,8 +7,8 @@ import { CashFlow } from './reports/CashFlow';
 import { CustomReport } from './reports/CustomReport';
 import { NetWorth } from './reports/NetWorth';
 import { Spending } from './reports/Spending';
-import { Summary } from './reports/Summary';
 import { Spreadsheet } from './reports/Spreadsheet';
+import { Summary } from './reports/Summary';
 
 export function ReportRouter() {
   return (

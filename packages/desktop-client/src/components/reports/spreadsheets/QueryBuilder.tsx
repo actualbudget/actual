@@ -1,33 +1,34 @@
+/* eslint-disable rulesdir/typography */
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Input } from '@actual-app/components/input';
-import { Text } from '@actual-app/components/text';
-import { View } from '@actual-app/components/view';
+import { Select } from '@actual-app/components/select';
 import { Stack } from '@actual-app/components/stack';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 
+import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
+import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
+import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
-import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
-import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
-import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
-import { Select } from '@actual-app/components/select';
-import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useCategories } from '@desktop-client/hooks/useCategories';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 
-interface QueryBuilderProps {
+type QueryBuilderProps = {
   isOpen: boolean;
   onClose: () => void;
   onSave: (query: string) => void;
   existingFormula?: string;
-}
+};
 
 type QueryType = 'cost' | 'balance' | 'formula' | 'row-operation';
 type DatePreset =
@@ -37,7 +38,7 @@ type DatePreset =
   | 'lastYear'
   | 'custom';
 
-interface ParsedParams {
+type ParsedParams = {
   queryType: QueryType;
   category?: string;
   account?: string;
@@ -47,7 +48,7 @@ interface ParsedParams {
   endDate?: string;
   minAmount?: string;
   maxAmount?: string;
-}
+};
 
 // Function to parse existing formula and extract query parameters
 function parseFormulaToQueryParams(formula: string): ParsedParams {
@@ -61,7 +62,7 @@ function parseFormulaToQueryParams(formula: string): ParsedParams {
   } else if (formula.includes('balance(')) {
     params.queryType = 'balance';
   } else if (
-    /^row-\d+[\+\-\*/]row-\d+/.test(formula.trim()) ||
+    /^row-\d+[+\-*/]row-\d+/.test(formula.trim()) ||
     /^row-\d+$/.test(formula.trim())
   ) {
     params.queryType = 'row-operation';

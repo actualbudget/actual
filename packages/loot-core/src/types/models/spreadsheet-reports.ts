@@ -1,10 +1,10 @@
-export type SpreadsheetRowData = {
+export interface SpreadsheetRowData {
   id: string;
   label: string;
   formula: string;
   value: string;
   hidden?: boolean;
-};
+}
 
 export type SpreadsheetReportEntity = {
   id: string;

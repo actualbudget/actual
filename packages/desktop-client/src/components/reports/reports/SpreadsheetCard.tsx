@@ -1,28 +1,34 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { View } from '@actual-app/components/view';
-import { Text } from '@actual-app/components/text';
-import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
-import { theme } from '@actual-app/components/theme';
-import { styles } from '@actual-app/components/styles';
 import {
+  SvgMinusOutline,
   SvgViewShow,
   SvgViewHide,
-  SvgMinusOutline,
 } from '@actual-app/components/icons/v1';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 
 import { integerToCurrency } from 'loot-core/shared/util';
 import { type SpreadsheetWidget } from 'loot-core/types/models';
 
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
-import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { useSheetCalculation } from '@desktop-client/components/reports/spreadsheets/useSheetCalculation';
-import { useSpreadsheetReport } from '@desktop-client/hooks/useSpreadsheetReport';
 import { Row, Cell } from '@desktop-client/components/table';
+import { useSpreadsheetReport } from '@desktop-client/hooks/useSpreadsheetReport';
+
+// Type for spreadsheet row data
+type SpreadsheetRowData = {
+  id: string;
+  label: string;
+  formula: string;
+  value?: string | number;
+  hidden?: boolean;
+};
 
 type SpreadsheetCardProps = {
   widgetId: string;
@@ -59,16 +65,14 @@ export function SpreadsheetCard({
   const { data: spreadsheetData, isLoading: isLoadingSpreadsheet } =
     useSpreadsheetReport(reportId);
 
-  // Use rows from the fetched spreadsheet data, fallback to meta.rows for backward compatibility
-  const baseRows = spreadsheetData?.rows || meta?.rows || [];
-
   // Merge base rows with local hidden state
   const rows = useMemo(() => {
+    const baseRows = spreadsheetData?.rows || meta?.rows || [];
     return baseRows.map(row => ({
       ...row,
       hidden: hiddenRowIds.has(row.id),
     }));
-  }, [baseRows, hiddenRowIds]);
+  }, [spreadsheetData?.rows, meta?.rows, hiddenRowIds]);
 
   // Create cell grid for cross-references (fixed to use calculated values)
   const cellGrid = useMemo(() => {
@@ -443,7 +447,7 @@ function SpreadsheetTableRow({
   onToggleVisibility,
   isCardHovered,
 }: {
-  row: any;
+  row: SpreadsheetRowData;
   rowNumber: number;
   cellGrid: { [key: string]: number | string };
   onUpdateCalculatedValue?: (cellRef: string, value: number) => void;
@@ -457,7 +461,7 @@ function SpreadsheetTableRow({
   const calculatedValue = useSheetCalculation(row.formula || '', cellGrid);
 
   // Update the calculated value in the parent component for cell references
-  React.useEffect(() => {
+  useEffect(() => {
     if (
       row.formula &&
       typeof calculatedValue === 'number' &&

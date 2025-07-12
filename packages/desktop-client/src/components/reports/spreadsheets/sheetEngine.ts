@@ -1,3 +1,4 @@
+/* eslint-disable rulesdir/typography */
 // Simple spreadsheet engine for formula evaluation
 // Supports basic arithmetic, functions, and cell references
 
@@ -28,11 +29,11 @@ export enum TokenKind {
   EOF,
 }
 
-interface Token {
+type Token = {
   kind: TokenKind;
   value?: string;
   pos: number;
-}
+};
 
 function isDigit(ch: string): boolean {
   return ch >= '0' && ch <= '9';
@@ -137,7 +138,7 @@ export function tokenize(input: string): Token[] {
       case "'":
         // String literal parsing
         const quote = ch;
-        let start = i + 1;
+        const start = i + 1;
         i++; // skip opening quote
         let str = '';
         while (i < input.length && input[i] !== quote) {
@@ -183,7 +184,7 @@ export function tokenize(input: string): Token[] {
       case '{': {
         // capture until matching }
         let depth = 1;
-        let start = ++i;
+        const start = ++i;
         while (i < input.length && depth > 0) {
           if (input[i] === '{') depth++;
           else if (input[i] === '}') depth--;
@@ -204,7 +205,7 @@ export function tokenize(input: string): Token[] {
     }
 
     if (isDigit(ch) || (ch === '.' && isDigit(input[i + 1]))) {
-      let start = i;
+      const start = i;
       // Parse integer part, handling comma separators properly
       while (i < input.length && isDigit(input[i])) i++;
 
@@ -239,15 +240,16 @@ export function tokenize(input: string): Token[] {
     }
 
     if (isAlpha(ch) || ch === '_') {
-      let start = i;
+      const start = i;
       while (
         i < input.length &&
         (isAlpha(input[i]) ||
           isDigit(input[i]) ||
           input[i] === '_' ||
           input[i] === '-')
-      )
+      ) {
         i++;
+      }
       const text = input.slice(start, i);
 
       // Check if this is a cell reference (e.g., row-1, row-2, row-10)
@@ -268,47 +270,47 @@ export function tokenize(input: string): Token[] {
 // ----------------------------- Parser ------------------------------
 
 // AST Nodes
-interface NumberNode {
+type NumberNode = {
   type: 'Number';
   value: number;
-}
-interface StringNode {
+};
+type StringNode = {
   type: 'String';
   value: string;
-}
-interface QueryNode {
+};
+type QueryNode = {
   type: 'Query';
   query: string; // raw string
-}
-interface IdentifierNode {
+};
+type IdentifierNode = {
   type: 'Identifier';
   name: string;
-}
-interface CellRefNode {
+};
+type CellRefNode = {
   type: 'CellRef';
   ref: string; // e.g., "row-1", "row-2"
-}
-interface RangeNode {
+};
+type RangeNode = {
   type: 'Range';
   start: CellRefNode;
   end: CellRefNode;
-}
-interface CallNode {
+};
+type CallNode = {
   type: 'Call';
   callee: IdentifierNode;
   args: Expression[];
-}
-interface BinaryNode {
+};
+type BinaryNode = {
   type: 'Binary';
   operator: string;
   left: Expression;
   right: Expression;
-}
-interface UnaryNode {
+};
+type UnaryNode = {
   type: 'Unary';
   operator: string;
   argument: Expression;
-}
+};
 
 type Expression =
   | NumberNode
@@ -515,7 +517,7 @@ function parseNumber(raw: string): number {
   return parseFloat(raw.replace(/,/g, ''));
 }
 
-export interface EvaluationContext {
+export type EvaluationContext = {
   cost: (q: string | unknown) => number;
   balance: (q: string | unknown) => number;
   fifo: (q: string | unknown) => unknown; // not used in MVP
@@ -523,7 +525,7 @@ export interface EvaluationContext {
   queryRunner: (query: string) => unknown;
   lookupIdentifier?: (name: string) => number;
   getCellValue?: (ref: string) => number; // New: function to get cell values
-}
+};
 
 function evaluate(node: Expression, ctx: EvaluationContext): number | unknown {
   switch (node.type) {

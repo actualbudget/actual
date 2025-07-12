@@ -1,37 +1,39 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams, useLocation } from 'react-router';
 
-import { SvgAdd } from '@actual-app/components/icons/v1';
-import { SvgViewHide, SvgViewShow } from '@actual-app/components/icons/v1';
 import { Button } from '@actual-app/components/button';
-import { View } from '@actual-app/components/view';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import {
+  SvgAdd,
+  SvgViewHide,
+  SvgViewShow,
+} from '@actual-app/components/icons/v1';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { View } from '@actual-app/components/view';
 
 import {
   type SpreadsheetReportEntity,
   type SpreadsheetRowData,
-} from 'loot-core/types/models/spreadsheet-reports';
+} from 'loot-core/types/models';
 
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { SheetRow, type SheetRowData } from './SheetRow';
-import { Table, TableHeader, Field } from '@desktop-client/components/table';
+
+import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   Page,
   PageHeader,
   MobilePageHeader,
 } from '@desktop-client/components/Page';
-import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
-import { useSheetCalculation } from '../spreadsheets/useSheetCalculation';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-
-import { useSpreadsheetReport } from '@desktop-client/hooks/useSpreadsheetReport';
-import { defaultSpreadsheetReport } from '../ReportOptions';
-import { setSessionReport } from '../setSessionReport';
+import { defaultSpreadsheetReport } from '@desktop-client/components/reports/ReportOptions';
 import { SaveSpreadsheetReport } from '@desktop-client/components/reports/SaveSpreadsheetReport';
+import { setSessionReport } from '@desktop-client/components/reports/setSessionReport';
+import { Table, TableHeader, Field } from '@desktop-client/components/table';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSpreadsheetReport } from '@desktop-client/hooks/useSpreadsheetReport';
 
 // Match SchedulesTable constants
 const ROW_HEIGHT = 43;
@@ -194,6 +196,11 @@ function SpreadsheetInner({ report: initialReport }: SpreadsheetInnerProps) {
     }
   }, [report.name]);
 
+  const setReportData = useCallback((input: SpreadsheetReportEntity) => {
+    setRows(input.rows || []);
+    setShowFormulaColumn(input.showFormulaColumn ?? true);
+  }, []);
+
   // Report change handler like CustomReport
   const onReportChange = useCallback(
     (
@@ -264,13 +271,8 @@ function SpreadsheetInner({ report: initialReport }: SpreadsheetInnerProps) {
         default:
       }
     },
-    [initialReport, report, navigate],
+    [initialReport, report, navigate, setReportData],
   );
-
-  const setReportData = useCallback((input: SpreadsheetReportEntity) => {
-    setRows(input.rows || []);
-    setShowFormulaColumn(input.showFormulaColumn ?? true);
-  }, []);
 
   const updateCell = useCallback(
     (rowIndex: number, field: 'label' | 'formula' | 'value', value: string) => {
@@ -374,11 +376,11 @@ function SpreadsheetInner({ report: initialReport }: SpreadsheetInnerProps) {
   );
 
   const onReorderRow = useCallback(
-    ({ draggedRow, targetId, direction }: any) => {
+    (draggedId: string, dropPos: 'top' | 'bottom', targetId: unknown) => {
       let newRows = [...rows];
 
       const draggedIndex = newRows.findIndex(
-        (row: SpreadsheetRowData) => row.id === draggedRow.id,
+        (row: SpreadsheetRowData) => row.id === draggedId,
       );
       const targetIndex = newRows.findIndex(
         (row: SpreadsheetRowData) => row.id === targetId,
@@ -389,13 +391,13 @@ function SpreadsheetInner({ report: initialReport }: SpreadsheetInnerProps) {
         newRows.splice(draggedIndex, 1); // Remove from old position
 
         let insertIndex = targetIndex;
-        if (direction === 'bottom' && draggedIndex < targetIndex) {
+        if (dropPos === 'bottom' && draggedIndex < targetIndex) {
           insertIndex -= 1;
-        } else if (direction === 'top' && draggedIndex > targetIndex) {
+        } else if (dropPos === 'top' && draggedIndex > targetIndex) {
           insertIndex += 1;
         }
 
-        if (direction === 'bottom') {
+        if (dropPos === 'bottom') {
           insertIndex += 1;
         }
 
@@ -486,14 +488,7 @@ function SpreadsheetInner({ report: initialReport }: SpreadsheetInnerProps) {
                   <Trans>Spreadsheet Report:</Trans>
                 </Text>{' '}
                 <Text style={{ marginLeft: 5, color: theme.pageTextPositive }}>
-                  {
-                    {
-                      name:
-                        report.name?.length > 0
-                          ? report.name
-                          : t('Unsaved report'),
-                    } as any
-                  }
+                  {report.name?.length > 0 ? report.name : t('Unsaved report')}
                 </Text>
               </Trans>
             }
@@ -705,8 +700,6 @@ function SpreadsheetInner({ report: initialReport }: SpreadsheetInnerProps) {
               cellGrid={cellGrid}
               onUpdateCalculatedValue={updateCalculatedValue}
               onToggleVisibility={() => toggleRowVisibility(item.id)}
-              isFirst={index === 0}
-              isLast={index === sheetRows.length - 1}
               showFormulaColumn={showFormulaColumn}
             />
           )}

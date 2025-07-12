@@ -1,5 +1,6 @@
 import { type CustomReportEntity } from './reports';
 import { type RuleConditionEntity } from './rule';
+import { type SpreadsheetRowData } from './spreadsheet-reports';
 
 export type TimeFrame = {
   start: string;
@@ -60,13 +61,6 @@ export type MarkdownWidget = AbstractWidget<
   'markdown-card',
   { content: string; text_align?: 'left' | 'right' | 'center' }
 >;
-export type SpreadsheetRowData = {
-  id: string;
-  label: string;
-  formula: string;
-  value: string;
-  hidden?: boolean;
-};
 
 export type SpreadsheetWidget = AbstractWidget<
   'spreadsheet-card',

@@ -1,27 +1,30 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { Input } from '@actual-app/components/input';
-import { SvgAdd } from '@actual-app/components/icons/v1';
 import { SvgDelete } from '@actual-app/components/icons/v0';
-import { SvgArrowDown } from '@actual-app/components/icons/v1';
-import { SvgCopy } from '@actual-app/components/icons/v1';
-import { SvgViewShow, SvgViewHide } from '@actual-app/components/icons/v1';
+import {
+  SvgAdd,
+  SvgArrowDown,
+  SvgCopy,
+  SvgViewShow,
+  SvgViewHide,
+} from '@actual-app/components/icons/v1';
+import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
-import { View } from '@actual-app/components/view';
 import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 
-import { Row, Field } from '@desktop-client/components/table';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { useSheetCalculation } from '../spreadsheets/useSheetCalculation';
-import { QueryBuilder } from '../spreadsheets/QueryBuilder';
+import { QueryBuilder } from '@desktop-client/components/reports/spreadsheets/QueryBuilder';
+import { useSheetCalculation } from '@desktop-client/components/reports/spreadsheets/useSheetCalculation';
 import {
   useDraggable,
   useDroppable,
   DropHighlight,
   type OnDropCallback,
 } from '@desktop-client/components/sort';
+import { Row, Field } from '@desktop-client/components/table';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
 
 // Match SchedulesTable constants
@@ -33,20 +36,20 @@ const truncateFormula = (formula: string, maxLength: number = 50): string => {
   return formula.slice(0, maxLength) + '...';
 };
 
-export interface SheetRowData {
+export type SheetRowData = {
   id: string;
   label: string;
   formula: string;
   value?: string | number; // Add support for constant values
   hidden?: boolean; // Add support for hiding rows
   originalIndex?: number; // Track original position for formula references
-}
+};
 
-interface CellGrid {
+type CellGrid = {
   [key: string]: number | string;
-}
+};
 
-interface SheetRowProps {
+type SheetRowProps = {
   rowIndex: number;
   data: SheetRowData;
   onUpdateCell: (
@@ -61,12 +64,10 @@ interface SheetRowProps {
   cellGrid?: CellGrid;
   onUpdateCalculatedValue?: (cellRef: string, value: number) => void;
   onToggleVisibility?: () => void;
-  isFirst?: boolean;
-  isLast?: boolean;
   showFormulaColumn?: boolean;
-}
+};
 
-export const SheetRow = React.memo<SheetRowProps>(
+export const SheetRow = memo<SheetRowProps>(
   ({
     rowIndex,
     data,
@@ -78,8 +79,6 @@ export const SheetRow = React.memo<SheetRowProps>(
     cellGrid,
     onUpdateCalculatedValue,
     onToggleVisibility,
-    isFirst = false,
-    isLast = false,
     showFormulaColumn = true,
   }) => {
     const { t } = useTranslation();
@@ -237,7 +236,7 @@ export const SheetRow = React.memo<SheetRowProps>(
             ':hover': { backgroundColor: theme.tableRowBackgroundHover },
           }}
         >
-          <DropHighlight pos={dropPos} offset={{ top: 1 }} />
+          <DropHighlight pos={dropPos ?? 'bottom'} offset={{ top: 1 }} />
 
           {/* Row Number Field */}
           <Field

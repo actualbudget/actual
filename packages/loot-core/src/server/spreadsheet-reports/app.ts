@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   type SpreadsheetReportData,
   type SpreadsheetReportEntity,
-} from '../../types/models/spreadsheet-reports';
+} from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
 import { ValidationError } from '../errors';
@@ -128,7 +128,8 @@ export type SpreadsheetReportsHandlers = {
   'spreadsheet-report/delete': typeof deleteSpreadsheetReport;
 };
 
-const app = createApp<SpreadsheetReportsHandlers>();
+// Expose functions to the client
+export const app = createApp<SpreadsheetReportsHandlers>();
 
 app.method(
   'spreadsheet-report/create',
@@ -142,5 +143,3 @@ app.method(
   'spreadsheet-report/delete',
   mutator(undoable(deleteSpreadsheetReport)),
 );
-
-export { app };

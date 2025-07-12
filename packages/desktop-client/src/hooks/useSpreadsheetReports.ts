@@ -4,7 +4,7 @@ import { q } from 'loot-core/shared/query';
 import {
   type SpreadsheetReportData,
   type SpreadsheetReportEntity,
-} from 'loot-core/types/models/spreadsheet-reports';
+} from 'loot-core/types/models';
 
 import { useQuery } from './useQuery';
 
