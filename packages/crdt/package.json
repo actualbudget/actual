@@ -11,7 +11,7 @@
   "scripts": {
     "build:node": "tsc --p tsconfig.dist.json",
     "proto:generate": "./bin/generate-proto",
-    "build": "rm -rf dist && yarn run build:node && cp src/proto/sync_pb.d.ts dist/src/proto/",
+    "build": "rm -rf dist && yarn run build:node",
     "test": "vitest --globals"
   },
   "dependencies": {
@@ -20,6 +20,8 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@types/google-protobuf": "^3.15.12",
+    "protoc-gen-js": "^3.21.4-4",
     "ts-protoc-gen": "^0.15.0",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"

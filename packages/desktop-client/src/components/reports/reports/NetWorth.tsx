@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { SvgCalendar } from '@actual-app/components/icons/v1';
+import { Menu } from '@actual-app/components/menu';
 import { Paragraph } from '@actual-app/components/paragraph';
+import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -27,6 +30,7 @@ import { Change } from '@desktop-client/components/reports/Change';
 import { NetWorthGraph } from '@desktop-client/components/reports/graphs/NetWorthGraph';
 import { Header } from '@desktop-client/components/reports/Header';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '@desktop-client/components/reports/spreadsheets/net-worth-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
@@ -87,6 +91,10 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [start, setStart] = useState(initialStart);
   const [end, setEnd] = useState(initialEnd);
   const [mode, setMode] = useState(initialMode);
+  const [interval, setInterval] = useState(widget?.meta?.interval || 'Monthly');
+
+  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   const reportParams = useMemo(
     () =>
@@ -97,8 +105,19 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         conditions,
         conditionsOp,
         locale,
+        interval,
+        firstDayOfWeekIdx,
       ),
-    [start, end, accounts, conditions, conditionsOp, locale],
+    [
+      start,
+      end,
+      accounts,
+      conditions,
+      conditionsOp,
+      locale,
+      interval,
+      firstDayOfWeekIdx,
+    ],
   );
   const data = useReport('net_worth', reportParams);
   useEffect(() => {
@@ -147,6 +166,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         ...(widget.meta ?? {}),
         conditions,
         conditionsOp,
+        interval,
         timeFrame: {
           start,
           end,
@@ -184,8 +204,6 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   };
 
   const [earliestTransaction, _] = useState('');
-  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
-  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   if (!allMonths || !data) {
     return null;
@@ -232,6 +250,9 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         onDeleteFilter={onDeleteFilter}
         conditionsOp={conditionsOp}
         onConditionsOpChange={onConditionsOpChange}
+        inlineContent={
+          <IntervalSelector interval={interval} onChange={setInterval} />
+        }
       >
         {widget && (
           <Button variant="primary" onPress={onSaveWidget}>
@@ -268,6 +289,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         <NetWorthGraph
           graphData={data.graphData}
           showTooltip={!isNarrowWidth}
+          interval={interval}
         />
 
         <View style={{ marginTop: 30, userSelect: 'none' }}>
@@ -288,5 +310,53 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         </View>
       </View>
     </Page>
+  );
+}
+
+// Interval selector component with icon-only trigger similar to filter button
+function IntervalSelector({
+  interval,
+  onChange,
+}: {
+  interval: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
+  onChange: (val: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly') => void;
+}) {
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const currentLabel =
+    ReportOptions.interval.find(opt => opt.key === interval)?.description ??
+    interval;
+
+  return (
+    <>
+      <Button
+        ref={triggerRef}
+        variant="bare"
+        onPress={() => setIsOpen(true)}
+        aria-label="Change interval"
+      >
+        <SvgCalendar style={{ width: 12, height: 12 }} />
+        <span style={{ marginLeft: 5 }}>{currentLabel}</span>
+      </Button>
+
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom start"
+        isOpen={isOpen}
+        onOpenChange={() => setIsOpen(false)}
+      >
+        <Menu
+          onMenuSelect={item => {
+            onChange(item as 'Daily' | 'Weekly' | 'Monthly' | 'Yearly');
+            setIsOpen(false);
+          }}
+          items={ReportOptions.interval.map(({ key, description }) => ({
+            name: key as 'Daily' | 'Weekly' | 'Monthly' | 'Yearly',
+            text: description,
+          }))}
+        />
+      </Popover>
+    </>
   );
 }

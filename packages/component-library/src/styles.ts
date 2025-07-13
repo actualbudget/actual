@@ -91,7 +91,7 @@ export const styles: Record<string, any> = {
   },
   shadowLarge,
   tnum: {
-    // eslint-disable-next-line rulesdir/typography
+    // eslint-disable-next-line actual/typography
     fontFeatureSettings: '"tnum"',
   },
   notFixed: { fontFeatureSettings: '' },
