@@ -76,7 +76,23 @@ export function BudgetCell<
                 category: category.id,
               });
               showUndoNotification({
-                message: `${category.name} budget has been set last to month’s budgeted amount.`,
+                message: `${category.name} budget has been set last to month's budgeted amount.`,
+              });
+            },
+            onSetToZero: () => {
+              onBudgetAction(month, 'set-single-zero', {
+                category: category.id,
+              });
+              showUndoNotification({
+                message: `${category.name} budget has been set to zero.`,
+              });
+            },
+            onSetToSpent: () => {
+              onBudgetAction(month, 'set-single-to-spent', {
+                category: category.id,
+              });
+              showUndoNotification({
+                message: `${category.name} budget has been set to spent amount.`,
               });
             },
             onSetMonthsAverage: numberOfMonths => {

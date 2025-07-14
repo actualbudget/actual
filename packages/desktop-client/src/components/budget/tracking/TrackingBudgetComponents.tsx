@@ -316,6 +316,14 @@ export const CategoryMonth = memo(function CategoryMonth({
                     message: `Budget set to last month’s budget.`,
                   });
                 }}
+                onSetToSpent={() => {
+                  onMenuAction(month, 'set-single-to-spent', {
+                    category: category.id,
+                  });
+                  showUndoNotification({
+                    message: `Budget set to spent amount.`,
+                  });
+                }}
                 onSetMonthsAverage={numberOfMonths => {
                   if (
                     numberOfMonths !== 3 &&

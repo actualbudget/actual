@@ -507,6 +507,11 @@ type ApplyBudgetActionPayload =
       args: never;
     }
   | {
+      type: 'set-to-spent';
+      month: string;
+      args: never;
+    }
+  | {
       type: 'set-3-avg';
       month: string;
       args: never;
@@ -639,6 +644,13 @@ type ApplyBudgetActionPayload =
       args: {
         category: CategoryEntity['id'];
       };
+    }
+  | {
+      type: 'set-single-to-spent';
+      month: string;
+      args: {
+        category: CategoryEntity['id'];
+      };
     };
 
 export const applyBudgetAction = createAppAsyncThunk(
@@ -657,6 +669,9 @@ export const applyBudgetAction = createAppAsyncThunk(
         break;
       case 'set-zero':
         await send('budget/set-zero', { month });
+        break;
+      case 'set-to-spent':
+        await send('budget/set-to-spent', { month });
         break;
       case 'set-3-avg':
         await send('budget/set-3month-avg', { month });
@@ -788,6 +803,12 @@ export const applyBudgetAction = createAppAsyncThunk(
         break;
       case 'copy-single-last':
         await send('budget/copy-single-month', {
+          month,
+          category: args.category,
+        });
+        break;
+      case 'set-single-to-spent':
+        await send('budget/set-single-to-spent', {
           month,
           category: args.category,
         });

@@ -25,12 +25,15 @@ import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 type EnvelopeBudgetMenuModalProps = Omit<
   Extract<ModalType, { name: 'envelope-budget-menu' }>['options'],
   'month'
->;
+> & {
+  onSetToSpent?: () => void;
+};
 
 export function EnvelopeBudgetMenuModal({
   categoryId,
   onUpdateBudget,
   onCopyLastMonthAverage,
+  onSetToSpent,
   onSetMonthsAverage,
   onApplyBudgetTemplate,
 }: EnvelopeBudgetMenuModalProps) {
@@ -110,6 +113,7 @@ export function EnvelopeBudgetMenuModal({
             onCopyLastMonthAverage={onCopyLastMonthAverage}
             onSetMonthsAverage={onSetMonthsAverage}
             onApplyBudgetTemplate={onApplyBudgetTemplate}
+            onSetToSpent={onSetToSpent}
           />
         </>
       )}

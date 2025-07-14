@@ -185,6 +185,16 @@ export function TrackingBudgetMonthMenuModal({
                     ),
                   });
                 }}
+                onSetBudgetsToSpent={() => {
+                  onBudgetAction(month, 'set-to-spent');
+                  close();
+                  showUndoNotification({
+                    message: t(
+                      '{{displayMonth}} budgets have all been set to spent amounts.',
+                      { displayMonth },
+                    ),
+                  });
+                }}
                 onSetMonthsAverage={numberOfMonths => {
                   onBudgetAction(month, `set-${numberOfMonths}-avg`);
                   close();
