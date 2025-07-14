@@ -260,10 +260,6 @@ export function SelectedTransactionsButton({
     onEdit,
     selectedIds,
   ]);
-  useHotkeys('m', () => onEdit('amount', selectedIds), hotKeyOptions, [
-    onEdit,
-    selectedIds,
-  ]);
   useHotkeys('l', () => onEdit('cleared', selectedIds), hotKeyOptions, [
     onEdit,
     selectedIds,
@@ -277,6 +273,12 @@ export function SelectedTransactionsButton({
     },
     [onLinkSchedule, onViewSchedule, linked, selectedIds],
   );
+  // edit amount (only if we're not in a merge context)
+  useHotkeys('m', () => !canMerge && onEdit('amount', selectedIds), hotKeyOptions, [
+    onEdit,
+    selectedIds,
+  ]);
+  // merge
   useHotkeys(
     'm',
     () => canMerge && onMergeTransactions(selectedIds),
