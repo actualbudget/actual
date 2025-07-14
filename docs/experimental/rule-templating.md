@@ -35,6 +35,7 @@ When the template input mode is active you can type your template into the input
 | account               | id      |                                                                                                                 |
 | date                  | date    |                                                                                                                 |
 | payee                 | id      |                                                                                                                 |
+| payee_name            | string  |                                                                                                                 |
 | imported_payee        | string  |                                                                                                                 |
 | notes                 | string  |                                                                                                                 |
 | amount                | number  | This is stored without the decimal place. ie. 152 will be 15200. {{div amount 100}} can be used to convert back |
