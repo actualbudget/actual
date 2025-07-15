@@ -232,8 +232,16 @@ export function SelectedTransactionsButton({
     onShow,
     selectedIds,
   ]);
+  useHotkeys('u', () => onDuplicate(selectedIds), hotKeyOptions, [
+    onDuplicate,
+    selectedIds,
+  ]);
   useHotkeys('d', () => onDelete(selectedIds), hotKeyOptions, [
     onDelete,
+    selectedIds,
+  ]);
+  useHotkeys('t', () => onEdit('date', selectedIds), hotKeyOptions, [
+    onEdit,
     selectedIds,
   ]);
   useHotkeys('a', () => onEdit('account', selectedIds), hotKeyOptions, [
@@ -265,6 +273,14 @@ export function SelectedTransactionsButton({
     },
     [onLinkSchedule, onViewSchedule, linked, selectedIds],
   );
+  // edit amount (only if we're not in a merge context)
+  useHotkeys(
+    'm',
+    () => !canMerge && onEdit('amount', selectedIds),
+    hotKeyOptions,
+    [onEdit, selectedIds],
+  );
+  // merge
   useHotkeys(
     'm',
     () => canMerge && onMergeTransactions(selectedIds),
@@ -302,6 +318,7 @@ export function SelectedTransactionsButton({
               {
                 name: 'duplicate',
                 text: t('Duplicate'),
+                key: 'U',
                 disabled: ambiguousDuplication,
               } as const,
               { name: 'delete', text: t('Delete'), key: 'D' } as const,
@@ -372,12 +389,12 @@ export function SelectedTransactionsButton({
                 : []),
               Menu.line,
               { type: Menu.label, name: t('Edit field'), text: '' } as const,
-              { name: 'date', text: t('Date') } as const,
+              { name: 'date', text: t('Date'), key: 'T' } as const,
               { name: 'account', text: t('Account'), key: 'A' } as const,
               { name: 'payee', text: t('Payee'), key: 'P' } as const,
               { name: 'notes', text: t('Notes'), key: 'N' } as const,
               { name: 'category', text: t('Category'), key: 'C' } as const,
-              { name: 'amount', text: t('Amount') } as const,
+              { name: 'amount', text: t('Amount'), key: 'M' } as const,
               { name: 'cleared', text: t('Cleared'), key: 'L' } as const,
             ]),
       ]}
