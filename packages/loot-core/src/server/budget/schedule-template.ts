@@ -199,6 +199,8 @@ function getSinkingBaseContributionTotal(t: ScheduleTemplateTarget[]) {
   let total = 0;
   for (const schedule of t) {
     let monthlyAmount = 0;
+    let prevDate;
+    let intervalMonths;
     switch (schedule.target_frequency) {
       case 'yearly':
         monthlyAmount = schedule.target / schedule.target_interval / 12;
@@ -206,12 +208,23 @@ function getSinkingBaseContributionTotal(t: ScheduleTemplateTarget[]) {
       case 'monthly':
         monthlyAmount = schedule.target / schedule.target_interval;
         break;
-      case 'daily':
-        const prevDate = monthUtils.subDays(
+      case 'weekly':
+        prevDate = monthUtils.subWeeks(
           schedule.next_date_string,
           schedule.target_interval,
         );
-        const intervalMonths = monthUtils.differenceInCalendarMonths(
+        intervalMonths = monthUtils.differenceInCalendarMonths(
+          schedule.next_date_string,
+          prevDate,
+        );
+        monthlyAmount = schedule.target / intervalMonths;
+        break;
+      case 'daily':
+        prevDate = monthUtils.subDays(
+          schedule.next_date_string,
+          schedule.target_interval,
+        );
+        intervalMonths = monthUtils.differenceInCalendarMonths(
           schedule.next_date_string,
           prevDate,
         );
@@ -243,7 +256,6 @@ export async function runSchedule(
   category: CategoryEntity,
 ) {
   const scheduleTemplates = template_lines.filter(t => t.type === 'schedule');
-  //in the case of multiple templates per category, schedules may have wrong priority level
 
   const t = await createScheduleList(
     scheduleTemplates,
@@ -257,10 +269,8 @@ export async function runSchedule(
     (c.target_frequency === 'monthly' &&
       c.target_interval === 1 &&
       c.num_months === 0) ||
-    (c.target_frequency === 'weekly' &&
-      c.target_interval >= 0 &&
-      c.num_months === 0) ||
-    (c.target_frequency === 'daily' && c.num_months === 0) ||
+    (c.target_frequency === 'weekly' && c.target_interval <= 4) ||
+    (c.target_frequency === 'daily' && c.target_interval <= 31) ||
     isReflectBudget();
 
   const t_payMonthOf = t.t.filter(isPayMonthOf);
