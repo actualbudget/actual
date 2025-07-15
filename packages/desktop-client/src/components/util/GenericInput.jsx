@@ -64,10 +64,9 @@ export function GenericInput({
         return (
           <Input
             ref={ref}
-            defaultValue={value || ''}
+            value={value || ''}
             placeholder={t('nothing')}
-            onEnter={onChange}
-            onUpdate={onChange}
+            onChangeValue={onChange}
           />
         );
     }
@@ -190,10 +189,9 @@ export function GenericInput({
           content = (
             <Input
               ref={ref}
-              defaultValue={value || ''}
+              value={value || ''}
               placeholder={getMonthYearFormat(dateFormat).toLowerCase()}
-              onEnter={onChange}
-              onUpdate={onChange}
+              onChangeValue={onChange}
             />
           );
           break;
@@ -202,10 +200,9 @@ export function GenericInput({
           content = (
             <Input
               ref={ref}
-              defaultValue={value || ''}
+              value={value || ''}
               placeholder="yyyy"
-              onEnter={onChange}
-              onUpdate={onChange}
+              onChangeValue={onChange}
             />
           );
           break;
@@ -262,11 +259,12 @@ export function GenericInput({
         content = (
           <Input
             ref={ref}
-            defaultValue={value || ''}
+            value={value || ''}
             placeholder={t('nothing')}
             onEnter={onChange}
             onUpdate={onChange}
             onChange={onChange}
+            onChangeValue={onChange}
           />
         );
       }

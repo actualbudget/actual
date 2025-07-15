@@ -1,0 +1,10 @@
+BEGIN TRANSACTION;
+
+CREATE TABLE tags(
+  id TEXT PRIMARY KEY,
+  tag TEXT UNIQUE,
+  color TEXT,
+  description TEXT
+);
+
+COMMIT

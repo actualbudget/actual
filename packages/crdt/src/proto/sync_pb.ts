@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 // package:
 // file: sync.proto
 
 import * as jspb from 'google-protobuf';
 
-export class EncryptedData extends jspb.Message {
+export declare class EncryptedData extends jspb.Message {
   getIv(): Uint8Array | string;
   getIv_asU8(): Uint8Array;
   getIv_asB64(): string;
@@ -48,7 +49,7 @@ export namespace EncryptedData {
   };
 }
 
-export class Message extends jspb.Message {
+export declare class Message extends jspb.Message {
   getDataset(): string;
   setDataset(value: string): void;
 
@@ -88,7 +89,7 @@ export namespace Message {
   };
 }
 
-export class MessageEnvelope extends jspb.Message {
+export declare class MessageEnvelope extends jspb.Message {
   getTimestamp(): string;
   setTimestamp(value: string): void;
 
@@ -129,7 +130,7 @@ export namespace MessageEnvelope {
   };
 }
 
-export class SyncRequest extends jspb.Message {
+export declare class SyncRequest extends jspb.Message {
   clearMessagesList(): void;
   getMessagesList(): Array<MessageEnvelope>;
   setMessagesList(value: Array<MessageEnvelope>): void;
@@ -178,7 +179,7 @@ export namespace SyncRequest {
   };
 }
 
-export class SyncResponse extends jspb.Message {
+export declare class SyncResponse extends jspb.Message {
   clearMessagesList(): void;
   getMessagesList(): Array<MessageEnvelope>;
   setMessagesList(value: Array<MessageEnvelope>): void;

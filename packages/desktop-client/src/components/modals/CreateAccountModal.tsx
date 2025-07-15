@@ -359,7 +359,7 @@ export function CreateAccountModal({
                     }}
                     onPress={onCreateLocalAccount}
                   >
-                    {t('Create a local account')}
+                    <Trans>Create a local account</Trans>
                   </Button>
                 </InitialFocus>
                 <View style={{ lineHeight: '1.4em', fontSize: 15 }}>
