@@ -178,7 +178,7 @@ export function KeyboardShortcutModal() {
               <Shortcut shortcut="?" description={t('Open the help menu')} />
               <Shortcut
                 shortcut="K"
-                description={t('Show the command bar')}
+                description={t('Open the Command Palette')}
                 meta={ctrl}
               />
               <Shortcut
