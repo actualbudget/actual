@@ -177,6 +177,11 @@ export function KeyboardShortcutModal() {
             <View>
               <Shortcut shortcut="?" description={t('Open the help menu')} />
               <Shortcut
+                shortcut="K"
+                description={t('Show the command bar')}
+                meta={ctrl}
+              />
+              <Shortcut
                 shortcut="O"
                 description={t('Close the current budget and open another')}
                 meta={ctrl}
