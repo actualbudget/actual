@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { useState, type CSSProperties, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -115,7 +115,7 @@ export function KeyboardShortcutModal() {
   const ctrl = Platform.OS === 'mac' ? '⌘' : 'Ctrl';
   const [searchText, setSearchText] = useState('');
 
-  // Track the current view - either "sections" or a specific section ID
+  // Track the current view - either "sections", a specific section ID, or "search-results"
   const [currentView, setCurrentView] = useState<string>('sections');
 
   const shortcuts: ShortcutCategories[] = [
@@ -164,6 +164,7 @@ export function KeyboardShortcutModal() {
     // Add other sections as needed
   ];
 
+  // Filter sections and their items based on search text
   const getFilteredShortcuts = (searchText: string) => {
     return shortcuts
       .map(section => ({
@@ -176,11 +177,27 @@ export function KeyboardShortcutModal() {
       .filter(section => section.items.length > 0 || !searchText);
   };
 
+  // Get all matching shortcuts across all sections as a flat list
+  const getAllMatchingShortcuts = (searchText: string) => {
+    if (!searchText) return [];
+
+    const searchTextLower = searchText.toLowerCase();
+    return shortcuts.flatMap(section =>
+      section.items.filter(item =>
+        item.description.toLowerCase().includes(searchTextLower),
+      ),
+    );
+  };
+
   const [filteredShortcuts, setFilteredShortcuts] = useState(shortcuts);
+  const allMatchingShortcuts = useMemo(
+    () => getAllMatchingShortcuts(searchText),
+    [searchText],
+  );
 
   // Get the current section being viewed (if any)
   const currentSection =
-    currentView !== 'sections'
+    currentView !== 'sections' && currentView !== 'search-results'
       ? filteredShortcuts.find(s => s.id === currentView)
       : null;
 
@@ -190,17 +207,24 @@ export function KeyboardShortcutModal() {
         <>
           <ModalHeader
             title={
-              currentSection
-                ? t('{{sectionName}} shortcuts', {
-                    sectionName: currentSection.name,
-                  })
-                : t('Keyboard shortcuts')
+              currentView === 'search-results'
+                ? t('Search results')
+                : currentSection
+                  ? t('{{sectionName}} shortcuts', {
+                      sectionName: currentSection.name,
+                    })
+                  : t('Keyboard shortcuts')
             }
             leftContent={
               currentView !== 'sections' ? (
                 <Button
                   variant="bare"
-                  onClick={() => setCurrentView('sections')}
+                  onClick={() => {
+                    setCurrentView('sections');
+                    if (currentView === 'search-results') {
+                      setSearchText('');
+                    }
+                  }}
                   style={{ marginRight: 10, zIndex: 3000 }}
                 >
                   ← <Trans>Back</Trans>
@@ -222,8 +246,11 @@ export function KeyboardShortcutModal() {
                 setSearchText(text);
                 setFilteredShortcuts(getFilteredShortcuts(text));
 
-                // Return to section list when searching
-                if (text && currentView !== 'sections') {
+                // Switch to search results view when searching
+                if (text) {
+                  setCurrentView('search-results');
+                } else if (currentView === 'search-results') {
+                  // Return to section list when clearing search
                   setCurrentView('sections');
                 }
               }}
@@ -301,10 +328,10 @@ export function KeyboardShortcutModal() {
               </View>
             )}
 
-            {/* Section detail view */}
-            {currentView !== 'sections' && currentSection && (
+            {/* Search results view - Shows all matching shortcuts */}
+            {currentView === 'search-results' && (
               <View style={{ flexDirection: 'column' }}>
-                {currentSection.items.length === 0 ? (
+                {allMatchingShortcuts.length === 0 ? (
                   <View
                     style={{
                       alignItems: 'center',
@@ -313,11 +340,11 @@ export function KeyboardShortcutModal() {
                     }}
                   >
                     <Text style={{ fontSize: 15 }}>
-                      <Trans>No shortcuts in this section</Trans>
+                      <Trans>No matching shortcuts</Trans>
                     </Text>
                   </View>
                 ) : (
-                  currentSection.items.map(shortcut => (
+                  allMatchingShortcuts.map(shortcut => (
                     <View
                       key={shortcut.id}
                       style={{
@@ -342,6 +369,50 @@ export function KeyboardShortcutModal() {
                 )}
               </View>
             )}
+
+            {/* Section detail view */}
+            {currentView !== 'sections' &&
+              currentView !== 'search-results' &&
+              currentSection && (
+                <View style={{ flexDirection: 'column' }}>
+                  {currentSection.items.length === 0 ? (
+                    <View
+                      style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 20,
+                      }}
+                    >
+                      <Text style={{ fontSize: 15 }}>
+                        <Trans>No shortcuts in this section</Trans>
+                      </Text>
+                    </View>
+                  ) : (
+                    currentSection.items.map(shortcut => (
+                      <View
+                        key={shortcut.id}
+                        style={{
+                          padding: 12,
+                          backgroundColor: theme.tableBackground,
+                          borderRadius: 6,
+                          marginBottom: 8,
+                          borderWidth: 1,
+                          borderColor: theme.tableBorder,
+                          height: 40,
+                        }}
+                      >
+                        <ShortcutListItem
+                          shortcut={shortcut.shortcut}
+                          description={shortcut.description}
+                          meta={shortcut.meta}
+                          shift={shortcut.shift}
+                          style={shortcut.style}
+                        />
+                      </View>
+                    ))
+                  )}
+                </View>
+              )}
           </View>
         </>
       )}
