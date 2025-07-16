@@ -1,8 +1,18 @@
-import { type CSSProperties } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useState, type CSSProperties } from 'react';
+import {
+  Collection,
+  Header,
+  ListBox,
+  ListBoxItem,
+  ListBoxSection,
+  Menu,
+  MenuItem,
+} from 'react-aria-components';
+import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 
 import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import * as Platform from 'loot-core/shared/platform';
@@ -12,6 +22,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
+import { Search } from '@desktop-client/components/common/Search';
 
 type KeyIconProps = {
   shortcut: string;
@@ -77,89 +88,117 @@ function Shortcut({
   style,
 }: ShortcutProps) {
   return (
-    <div
+    <View
       style={{
-        display: 'flex',
-        marginBottom: 5,
-        marginLeft: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
       }}
     >
-      <div
+      <Text>{description}</Text>
+
+      <View
         style={{
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            marginRight: 10,
-          }}
-        >
-          {shift && (
-            <>
-              <KeyIcon shortcut="Shift" />
-              <Text
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                  fontSize: 16,
-                  paddingLeft: 2,
-                  paddingRight: 2,
-                }}
-              >
-                +
-              </Text>
-            </>
-          )}
-          {meta && (
-            <>
-              <KeyIcon shortcut={meta} />
-              <Text
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                  fontSize: 16,
-                  paddingLeft: 2,
-                  paddingRight: 2,
-                }}
-              >
-                +
-              </Text>
-            </>
-          )}
-          <KeyIcon shortcut={shortcut} style={style} />
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            flex: 1,
-          }}
-        />
-      </div>
-      <div
-        style={{
-          display: 'flex',
+          flexDirection: 'row',
+          gap: 4,
           alignItems: 'center',
-          maxWidth: 300,
         }}
       >
-        {description}
-      </div>
-    </div>
+        {shift && (
+          <>
+            <KeyIcon shortcut="Shift" />
+            <Text>+</Text>
+          </>
+        )}
+        {meta && (
+          <>
+            <KeyIcon shortcut={meta} />
+            <Text>+</Text>
+          </>
+        )}
+        <KeyIcon shortcut={shortcut} style={style} />
+      </View>
+    </View>
   );
 }
 
+type Shortcut = {
+  id: string;
+  shortcut: string;
+  description: string;
+  meta?: string;
+  shift?: boolean;
+};
+
+type ShortcutCategories = {
+  id: string;
+  name: string;
+  items: Shortcut[];
+};
 export function KeyboardShortcutModal() {
-  const location = useLocation();
+  // const location = useLocation();
   const { t } = useTranslation();
-  const onBudget = location.pathname.startsWith('/budget');
-  const onAccounts = location.pathname.startsWith('/accounts');
+  // const onBudget = location.pathname.startsWith('/budget');
+  // const onAccounts = location.pathname.startsWith('/accounts');
   const ctrl = Platform.OS === 'mac' ? '⌘' : 'Ctrl';
+
+  const [searchText, setSearchText] = useState('');
+
+  const shortcuts: ShortcutCategories[] = [
+    {
+      name: t('General'),
+      id: 'general',
+      items: [
+        {
+          id: 'help',
+          shortcut: '?',
+          description: t('Open the help menu'),
+        },
+        {
+          id: 'command-palette',
+          shortcut: 'K',
+          description: t('Open the Command Palette'),
+          meta: ctrl,
+        },
+        {
+          id: 'close-budget',
+          shortcut: 'O',
+          description: t('Close the current budget and open another'),
+          meta: ctrl,
+        },
+        {
+          id: 'toggle-privacy-filter',
+          shortcut: 'P',
+          description: t('Toggle the privacy filter'),
+          meta: ctrl,
+          shift: true,
+        },
+      ],
+    },
+    {
+      id: 'account-page',
+      name: t('Account page'),
+      items: [],
+    },
+  ];
+
+  const getFilteredShortcuts = (searchText: string) => {
+    return shortcuts.map(section => ({
+      ...section,
+      items: section.items.filter(item => {
+        const searchTextLower = searchText.toLowerCase();
+        if (item.description.toLowerCase().includes(searchTextLower)) {
+          return true;
+        }
+
+        return false;
+      }),
+    }));
+  };
+
+  const [filteredShortcuts, setFilteredShortcuts] = useState(shortcuts);
+
   return (
     <Modal name="keyboard-shortcuts">
       {({ state: { close } }) => (
@@ -170,11 +209,106 @@ export function KeyboardShortcutModal() {
           />
           <View
             style={{
-              flexDirection: 'row',
+              flexDirection: 'column',
               fontSize: 13,
             }}
           >
-            <View>
+            <Search
+              value={searchText}
+              onChange={text => {
+                setSearchText(text);
+                setFilteredShortcuts(getFilteredShortcuts(text));
+              }}
+              placeholder={t('Search shortcuts')}
+              width="100%"
+              style={{
+                backgroundColor: theme.tableBackground,
+                borderColor: theme.formInputBorder,
+              }}
+            />
+            <View
+              style={{
+                flexDirection: 'column',
+                fontSize: 13,
+              }}
+            >
+              <ListBox
+                aria-label={t('Shortcuts list')}
+                selectionMode="none"
+                items={filteredShortcuts}
+                renderEmptyState={() => (
+                  <View
+                    style={{
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: theme.mobilePageBackground,
+                    }}
+                  >
+                    <Text style={{ fontSize: 15 }}>
+                      <Trans>No matching shortcuts</Trans>
+                    </Text>
+                  </View>
+                )}
+              >
+                {section => (
+                  <ListBoxSection>
+                    <Header>{section.name}</Header>
+
+                    <Collection items={section.items} addIdAndValue>
+                      {shortcut => (
+                        <ListBoxItem
+                          style={{
+                            padding: '4px 0',
+                            height: 60,
+                            borderWidth: '0 0 1px 0',
+                            borderColor: theme.tableBorder,
+                            borderStyle: 'solid',
+                            borderRadius: 0,
+                            display: 'flex',
+                            // width: '100%',
+                            // alignItems: 'center',
+                            // justifyContent: 'center',
+                            // backgroundColor: theme.mobilePageBackground,
+                          }}
+                        >
+                          <Shortcut
+                            shortcut={shortcut.shortcut}
+                            description={shortcut.description}
+                            meta={shortcut.meta}
+                            shift={shortcut.shift}
+                          />
+                        </ListBoxItem>
+                      )}
+                    </Collection>
+                  </ListBoxSection>
+                )}
+              </ListBox>
+              {/* <Shortcut shortcut="?" description={t('Open the help menu')} />
+              <Shortcut
+                shortcut="K"
+                description={t('Open the Command Palette')}
+                meta={ctrl}
+              />
+              <Shortcut
+                shortcut="O"
+                description={t('Close the current budget and open another')}
+                meta={ctrl}
+              />
+              <Shortcut
+                shortcut="P"
+                description={t('Toggle the privacy filter')}
+                meta={ctrl}
+                shift={true}
+              /> */}
+            </View>
+          </View>
+          {/* <View
+            style={{
+              flexDirection: 'row',
+              fontSize: 13,
+            }}
+          > */}
+          {/* <View>
               <Shortcut shortcut="?" description={t('Open the help menu')} />
               <Shortcut
                 shortcut="K"
@@ -259,8 +393,8 @@ export function KeyboardShortcutModal() {
                   />
                 </>
               )}
-            </View>
-            <View
+            </View> */}
+          {/* <View
               style={{
                 marginRight: 15,
               }}
@@ -362,8 +496,8 @@ export function KeyboardShortcutModal() {
                   )}
                 </>
               )}
-            </View>
-          </View>
+            </View> */}
+          {/* </View> */}
         </>
       )}
     </Modal>
