@@ -217,6 +217,8 @@ function getSinkingBaseContributionTotal(t: ScheduleTemplateTarget[]) {
           schedule.next_date_string,
           prevDate,
         );
+        // shouldn't be possible, but better check
+        if (intervalMonths === 0) intervalMonths = 1;
         monthlyAmount = schedule.target / intervalMonths;
         break;
       case 'daily':
@@ -228,6 +230,8 @@ function getSinkingBaseContributionTotal(t: ScheduleTemplateTarget[]) {
           schedule.next_date_string,
           prevDate,
         );
+        // shouldn't be possible, but better check
+        if (intervalMonths === 0) intervalMonths = 1;
         monthlyAmount = schedule.target / intervalMonths;
         break;
     }
