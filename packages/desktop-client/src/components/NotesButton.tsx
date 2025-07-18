@@ -44,7 +44,7 @@ export function NotesButton({
   const hasNotes = note && note !== '';
 
   const [tempNotes, setTempNotes] = useState<string>(note);
-  useEffect(() => setTempNotes(note), [note]);
+  useEffect(() => setTempNotes(note), [note, id]);
 
   const onOpenChange = useCallback<
     NonNullable<ComponentProps<typeof Popover>['onOpenChange']>
