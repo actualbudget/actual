@@ -203,7 +203,7 @@ export function AccountHeader({
   const isServerOffline = syncServerStatus === 'offline';
   const [_, setExpandSplitsPref] = useLocalPref('expand-splits');
   const [showNetWorthChartPref, setShowNetWorthChartPref] = useSyncedPref(
-    'show-account-net-worth-chart',
+    `show-account-${accountId}-net-worth-chart`,
   );
   const showNetWorthChart = showNetWorthChartPref === 'true';
 
@@ -563,6 +563,12 @@ export function AccountHeader({
                             ]
                           : []),
                         { name: 'export', text: t('Export') },
+                        {
+                          name: 'toggle-net-worth-chart',
+                          text: showNetWorthChart
+                            ? t('Hide balance chart')
+                            : t('Show balance chart'),
+                        },
                       ]}
                     />
                   </Dialog>

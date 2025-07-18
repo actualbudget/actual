@@ -1952,7 +1952,7 @@ export function Account() {
     `show-balances-${params.id}`,
   );
   const [showNetWorthChart, setShowNetWorthChart] = useSyncedPref(
-    'show-account-net-worth-chart',
+    `show-account-${params.id}-net-worth-chart`,
   );
   const [hideCleared, setHideCleared] = useSyncedPref(
     `hide-cleared-${params.id}`,

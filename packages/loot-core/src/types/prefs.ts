@@ -20,7 +20,7 @@ export type SyncedPrefs = Partial<
     | 'currencySymbolPosition'
     | 'currencySpaceBetweenAmountAndSymbol'
     | 'defaultCurrencyCode'
-    | 'show-account-net-worth-chart'
+    | `show-account-${string}-net-worth-chart`
     | `show-balances-${string}`
     | `show-extra-balances-${string}`
     | `hide-cleared-${string}`
