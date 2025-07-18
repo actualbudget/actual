@@ -51,11 +51,13 @@ export function NotesButton({
   >(
     isOpen => {
       if (!isOpen) {
-        void send('notes-save', { id, note: tempNotes });
+        if (tempNotes !== note) {
+          void send('notes-save', { id, note: tempNotes });
+        }
         setIsOpen(false);
       }
     },
-    [id, tempNotes],
+    [id, note, tempNotes],
   );
 
   return (
