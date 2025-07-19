@@ -1,10 +1,4 @@
-import {
-  useState,
-  type CSSProperties,
-  useMemo,
-  useCallback,
-  type ReactNode,
-} from 'react';
+import { useState, type CSSProperties, useMemo, type ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -173,11 +167,9 @@ export function KeyboardShortcutModal() {
   const { t } = useTranslation();
   const ctrl = Platform.OS === 'mac' ? '⌘' : 'Ctrl';
   const [searchText, setSearchText] = useState('');
-
-  // Track the current view - either "sections", a specific section ID, or "search-results"
-  const [currentView, setCurrentView] = useState<
-    'sections' | 'search-results' | string
-  >('sections');
+  const [selectedSectionId, setSelectedSectionId] = useState<string | null>(
+    null,
+  );
 
   const shortcuts: ShortcutCategories[] = useMemo(
     () => [
@@ -231,6 +223,9 @@ export function KeyboardShortcutModal() {
           {
             id: 'current-month',
             shortcut: '0',
+            style: {
+              fontVariantNumeric: 'slashed-zero',
+            },
             description: t('View current month'),
           },
           {
@@ -378,45 +373,46 @@ export function KeyboardShortcutModal() {
     [t, ctrl],
   );
 
-  // Filter sections and their items based on search text
-  const getFilteredShortcuts = (searchText: string) => {
-    return shortcuts
-      .map(section => ({
-        ...section,
-        items: section.items.filter(item => {
-          const searchTextLower = searchText.toLowerCase();
-          return item.description.toLowerCase().includes(searchTextLower);
-        }),
-      }))
-      .filter(section => section.items.length > 0 || !searchText);
-  };
+  // determine what to show based on search and selection
+  const { isSearching, isInSection, currentSection, itemsToShow } =
+    useMemo(() => {
+      const isSearching = Boolean(searchText);
+      const isInSection = Boolean(selectedSectionId);
 
-  // Get all matching shortcuts across all sections as a flat list
-  const getAllMatchingShortcuts = useCallback(
-    (searchText: string) => {
-      if (!searchText) return [];
+      if (isSearching) {
+        // Show all matching shortcuts across all sections
+        const allMatches = shortcuts.flatMap(section =>
+          section.items.filter(item =>
+            item.description.toLowerCase().includes(searchText.toLowerCase()),
+          ),
+        );
+        return {
+          isSearching,
+          isInSection: false,
+          currentSection: null,
+          itemsToShow: allMatches,
+        };
+      }
 
-      const searchTextLower = searchText.toLowerCase();
-      return shortcuts.flatMap(section =>
-        section.items.filter(item =>
-          item.description.toLowerCase().includes(searchTextLower),
-        ),
-      );
-    },
-    [shortcuts],
-  );
+      if (isInSection) {
+        // Show shortcuts for selected section
+        const section = shortcuts.find(s => s.id === selectedSectionId);
+        return {
+          isSearching: false,
+          isInSection: true,
+          currentSection: section || null,
+          itemsToShow: section?.items || [],
+        };
+      }
 
-  const [filteredShortcuts, setFilteredShortcuts] = useState(shortcuts);
-  const allMatchingShortcuts = useMemo(
-    () => getAllMatchingShortcuts(searchText),
-    [getAllMatchingShortcuts, searchText],
-  );
-
-  // Get the current section being viewed (if any)
-  const currentSection =
-    currentView !== 'sections' && currentView !== 'search-results'
-      ? filteredShortcuts.find(s => s.id === currentView)
-      : null;
+      // Show section list
+      return {
+        isSearching: false,
+        isInSection: false,
+        currentSection: null,
+        itemsToShow: shortcuts,
+      };
+    }, [searchText, selectedSectionId, shortcuts]);
 
   return (
     <Modal name="keyboard-shortcuts" containerProps={{ style: { width: 700 } }}>
@@ -424,7 +420,7 @@ export function KeyboardShortcutModal() {
         <>
           <ModalHeader
             title={
-              currentView === 'search-results'
+              isSearching
                 ? t('Search results')
                 : currentSection
                   ? t('{{sectionName}} shortcuts', {
@@ -433,13 +429,12 @@ export function KeyboardShortcutModal() {
                   : t('Keyboard shortcuts')
             }
             leftContent={
-              currentView !== 'sections' ? (
+              isSearching || isInSection ? (
                 <Button
                   variant="bare"
                   onClick={() => {
                     setSearchText('');
-                    setFilteredShortcuts(getFilteredShortcuts(''));
-                    setCurrentView('sections');
+                    setSelectedSectionId(null);
                   }}
                   style={{ marginRight: 10, marginLeft: 15, zIndex: 3000 }}
                 >
@@ -465,14 +460,9 @@ export function KeyboardShortcutModal() {
               value={searchText}
               onChange={text => {
                 setSearchText(text);
-                setFilteredShortcuts(getFilteredShortcuts(text));
-
-                // Switch to search results view when searching
-                if (text) {
-                  setCurrentView('search-results');
-                } else if (currentView === 'search-results') {
-                  // Return to section list when clearing search
-                  setCurrentView('sections');
+                // Clear section selection when searching
+                if (text && selectedSectionId) {
+                  setSelectedSectionId(null);
                 }
               }}
               placeholder={t('Search shortcuts')}
@@ -491,107 +481,66 @@ export function KeyboardShortcutModal() {
                 maxHeight: '50vh',
               }}
             >
-              {/* Main view - List of sections */}
-              {currentView === 'sections' &&
-                (filteredShortcuts.length === 0 ? (
-                  <View
-                    style={{
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: 20,
+              {itemsToShow.length === 0 ? (
+                <View
+                  style={{
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 20,
+                  }}
+                >
+                  <Text style={{ fontSize: 15 }}>
+                    <Trans>
+                      {isSearching
+                        ? 'No matching shortcuts'
+                        : isInSection
+                          ? 'No shortcuts in this section'
+                          : 'No matching shortcuts'}
+                    </Trans>
+                  </Text>
+                </View>
+              ) : isSearching || isInSection ? (
+                // Show individual shortcuts (either search results or section details)
+                itemsToShow.map(shortcut => (
+                  <ShortcutListItem
+                    key={shortcut.id}
+                    shortcut={shortcut.shortcut}
+                    description={shortcut.description}
+                    meta={shortcut.meta}
+                    shift={shortcut.shift}
+                    style={shortcut.style}
+                  />
+                ))
+              ) : (
+                // Show section list
+                itemsToShow.map(section => (
+                  <ListItem
+                    key={section.id}
+                    onClick={() => {
+                      if (section.items.length > 0) {
+                        setSelectedSectionId(section.id);
+                      }
                     }}
                   >
-                    <Text style={{ fontSize: 15 }}>
-                      <Trans>No matching shortcuts</Trans>
-                    </Text>
-                  </View>
-                ) : (
-                  filteredShortcuts.map(section => (
-                    <ListItem
-                      key={section.id}
-                      onClick={() => {
-                        if (section.items.length > 0) {
-                          setCurrentView(section.id);
-                        }
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        width: '100%',
                       }}
                     >
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          justifyContent: 'space-between',
-                          width: '100%',
-                        }}
-                      >
-                        <Text style={{ fontWeight: 'bold' }}>
-                          {section.name}
-                        </Text>
-                        <Text style={{ color: theme.pageTextLight }}>
-                          {section.items.length}{' '}
-                          {section.items.length === 1
-                            ? t('shortcut')
-                            : t('shortcuts')}{' '}
-                          ›
-                        </Text>
-                      </View>
-                    </ListItem>
-                  ))
-                ))}
-
-              {/* Search results view - Shows all matching shortcuts */}
-              {currentView === 'search-results' &&
-                (allMatchingShortcuts.length === 0 ? (
-                  <View
-                    style={{
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: 20,
-                    }}
-                  >
-                    <Text style={{ fontSize: 15 }}>
-                      <Trans>No matching shortcuts</Trans>
-                    </Text>
-                  </View>
-                ) : (
-                  allMatchingShortcuts.map(shortcut => (
-                    <ShortcutListItem
-                      key={shortcut.id}
-                      shortcut={shortcut.shortcut}
-                      description={shortcut.description}
-                      meta={shortcut.meta}
-                      shift={shortcut.shift}
-                      style={shortcut.style}
-                    />
-                  ))
-                ))}
-
-              {/* Section detail view */}
-              {currentView !== 'sections' &&
-                currentView !== 'search-results' &&
-                currentSection &&
-                (currentSection.items.length === 0 ? (
-                  <View
-                    style={{
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: 20,
-                    }}
-                  >
-                    <Text style={{ fontSize: 15 }}>
-                      <Trans>No shortcuts in this section</Trans>
-                    </Text>
-                  </View>
-                ) : (
-                  currentSection.items.map(shortcut => (
-                    <ShortcutListItem
-                      key={shortcut.id}
-                      shortcut={shortcut.shortcut}
-                      description={shortcut.description}
-                      meta={shortcut.meta}
-                      shift={shortcut.shift}
-                      style={shortcut.style}
-                    />
-                  ))
-                ))}
+                      <Text style={{ fontWeight: 'bold' }}>{section.name}</Text>
+                      <Text style={{ color: theme.pageTextLight }}>
+                        {section.items.length}{' '}
+                        {section.items.length === 1
+                          ? t('shortcut')
+                          : t('shortcuts')}{' '}
+                        ›
+                      </Text>
+                    </View>
+                  </ListItem>
+                ))
+              )}
             </View>
           </View>
         </>
