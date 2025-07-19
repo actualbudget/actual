@@ -544,7 +544,8 @@ export type Modal =
     }
   | {
       name: 'category-automations-edit';
-    };
+    }
+;
 
 type OpenAccountCloseModalPayload = {
   accountId: AccountEntity['id'];
