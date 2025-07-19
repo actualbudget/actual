@@ -10,6 +10,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import {
   SvgCog,
+  SvgLibrary,
   SvgPiggyBank,
   SvgReports,
   SvgStoreFront,
@@ -70,6 +71,12 @@ export function CommandBar() {
       { id: 'rules', name: t('Rules'), path: '/rules', Icon: SvgTuning },
       { id: 'tags', name: t('Tags'), path: '/tags', Icon: SvgTag },
       { id: 'settings', name: t('Settings'), path: '/settings', Icon: SvgCog },
+      {
+        id: 'accounts',
+        name: t('All Accounts'),
+        path: '/accounts',
+        Icon: SvgLibrary,
+      },
     ],
     [t],
   );
@@ -126,10 +133,22 @@ export function CommandBar() {
     {
       key: 'accounts',
       heading: t('Accounts'),
-      items: accounts.map(account => ({
-        ...account,
-        Icon: SvgPiggyBank,
-      })),
+      items: [
+        {
+          id: 'onbudget',
+          name: t('On Budget'),
+          Icon: SvgLibrary,
+        },
+        {
+          id: 'offbudget',
+          name: t('Off Budget'),
+          Icon: SvgLibrary,
+        },
+        ...accounts.map(account => ({
+          ...account,
+          Icon: SvgPiggyBank,
+        })),
+      ],
       onSelect: ({ id }) => handleNavigate(`/accounts/${id}`),
     },
     {
