@@ -45,10 +45,13 @@ through the list of available commands. You can also quickly move to any of the 
 
 - <Key k="f" /> Show only selected transactions.
 - <Key k="d" /> Delete selected transactions.
+- <Key k="u" /> Duplicate selected transactions.
+- <Key k="t" /> Set date for selected transactions.
 - <Key k="a" /> Set account for selected transactions.
 - <Key k="p" /> set payee for selected transactions.
 - <Key k="n" /> Set notes for selected transactions.
 - <Key k="c" /> Set category for selected transactions.
+- <Key k="m" /> Set amount for selected transactions.
 - <Key k="l" /> Toggle cleared for current transaction.
 
 The following require a transaction to have been selected first:
