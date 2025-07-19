@@ -65,10 +65,6 @@ function ListItem({
 }) {
   const clickStyles = onClick && {
     cursor: 'pointer',
-    ':hover': {
-      backgroundColor: theme.tableRowBackgroundHover,
-      color: theme.tableText,
-    },
   };
 
   return (
@@ -79,27 +75,15 @@ function ListItem({
         justifyContent: 'space-between',
         width: '100%',
         gap: 5,
-
-        // Working on the below
         padding: 12,
         backgroundColor: theme.tableBackground,
-        borderLeftWidth: 1,
-        borderRightWidth: 1,
         borderBottomWidth: 1,
-        borderTopWidth: 1,
         borderColor: theme.tableBorder,
         height: 45,
         flexShrink: 0,
-        '&:not(:first-child)': {
-          borderTopWidth: 0,
-        },
-        '&:first-child': {
-          borderTopLeftRadius: baseStyles.menuBorderRadius,
-          borderTopRightRadius: baseStyles.menuBorderRadius,
-        },
-        '&:last-child': {
-          borderBottomLeftRadius: baseStyles.menuBorderRadius,
-          borderBottomRightRadius: baseStyles.menuBorderRadius,
+        ':hover': {
+          backgroundColor: theme.tableRowBackgroundHover,
+          color: theme.tableText,
         },
         ...clickStyles,
         ...style,
@@ -478,7 +462,11 @@ export function KeyboardShortcutModal() {
               style={{
                 flexDirection: 'column',
                 overflowY: 'auto',
-                maxHeight: '50vh',
+                maxHeight: '40vh',
+                height: 400,
+                backgroundColor: theme.tableBackground,
+                border: `1px solid ${theme.tableBorder}`,
+                borderRadius: baseStyles.menuBorderRadius,
               }}
             >
               {itemsToShow.length === 0 ? (
