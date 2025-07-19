@@ -15,7 +15,11 @@ import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
 import * as monthUtils from '../../shared/months';
 import { groupById } from '../../shared/util';
-import { TransactionEntity } from '../../types/models';
+import {
+  CategoryEntity,
+  CategoryGroupEntity,
+  TransactionEntity,
+} from '../../types/models';
 import { WithRequired } from '../../types/util';
 import {
   schema,
@@ -318,15 +322,18 @@ export async function getCategories(
     : await all<DbCategory>(query);
 }
 
+// Define a temporary type for category groups during processing within getCategoriesGrouped.
+// This structure includes properties from DbCategoryGroup plus the added 'categories'
+// and 'children' arrays used for building the hierarchy before final conversion
+// to CategoryGroupEntity.
+type ProcessedDbCategoryGroup = DbCategoryGroup & {
+  categories: DbCategory[];
+  children: ProcessedDbCategoryGroup[]; // Recursive reference
+};
+
 export async function getCategoriesGrouped(
-  ids?: Array<DbCategoryGroup['id']>,
-): Promise<
-  Array<
-    DbCategoryGroup & {
-      categories: DbCategory[];
-    }
-  >
-> {
+  ids?: Array<CategoryGroupEntity['id']>,
+): Promise<Array<CategoryGroupEntity>> {
   const categoryGroupWhereIn = ids
     ? `cg.id IN (${toSqlQueryParameters(ids)}) AND`
     : '';
@@ -339,18 +346,70 @@ export async function getCategoriesGrouped(
   const categoryQuery = `SELECT c.* FROM categories c WHERE ${categoryWhereIn} c.tombstone = 0
     ORDER BY c.sort_order, c.id`;
 
-  const groups = ids
+  const dbGroups = ids
     ? await all<DbCategoryGroup>(categoryGroupQuery, [...ids])
     : await all<DbCategoryGroup>(categoryGroupQuery);
 
-  const categories = ids
+  const dbCategories = ids
     ? await all<DbCategory>(categoryQuery, [...ids])
     : await all<DbCategory>(categoryQuery);
 
-  return groups.map(group => ({
-    ...group,
-    categories: categories.filter(c => c.cat_group === group.id),
-  }));
+  // Map DB groups to the ProcessedDbCategoryGroup structure
+  const mappedDbGroupsWithOwnCategories: ProcessedDbCategoryGroup[] =
+    dbGroups.map(group => {
+      return {
+        ...group, // Copy DbCategoryGroup properties
+        categories: dbCategories.filter(c => c.cat_group === group.id), // Add direct categories
+        children: [], // Initialize empty children array (typed as ProcessedDbCategoryGroup[])
+      };
+    });
+
+  // Build hierarchy: populate 'children' arrays in mappedDbGroupsWithOwnCategories
+  const groupMap = groupById(mappedDbGroupsWithOwnCategories);
+  for (const group of mappedDbGroupsWithOwnCategories) {
+    if (group.parent_id) {
+      const parent = groupMap[group.parent_id];
+      if (parent) {
+        // Push the child group (which is a ProcessedDbCategoryGroup)
+        // into the parent's children array (typed as ProcessedDbCategoryGroup[]).
+        parent.children.push(group);
+      }
+    }
+  }
+
+  // Each group object should contain its direct categories, but the 'children'
+  // array must be empty, as the frontend will build its own rendering hierarchy.
+  const flatListWithoutChildren: CategoryGroupEntity[] =
+    mappedDbGroupsWithOwnCategories.map(dbGroup => {
+      const entityCategories: CategoryEntity[] = (dbGroup.categories || []).map(
+        dbCat => ({
+          id: dbCat.id,
+          name: dbCat.name,
+          is_income: Boolean(dbCat.is_income),
+          group: dbCat.cat_group,
+          sort_order: dbCat.sort_order,
+          hidden: Boolean(dbCat.hidden),
+          goal_def: dbCat.goal_def || undefined,
+          tombstone: Boolean(dbCat.tombstone),
+        }),
+      );
+
+      return {
+        id: dbGroup.id,
+        name: dbGroup.name,
+        is_income: Boolean(dbGroup.is_income),
+        sort_order: dbGroup.sort_order,
+        hidden: Boolean(dbGroup.hidden),
+        tombstone: Boolean(dbGroup.tombstone),
+        parent_id: dbGroup.parent_id || undefined,
+        categories: entityCategories,
+        children: [], // Explicitly set children to an empty array for the flat view
+      };
+    });
+
+  // This returns a flat array of CategoryGroupEntity objects, where each object
+  // has its 'categories' populated, and its 'children' array is empty.
+  return flatListWithoutChildren;
 }
 
 export async function insertCategoryGroup(
@@ -374,13 +433,18 @@ export async function insertCategoryGroup(
   `);
   const sort_order = (lastGroup ? lastGroup.sort_order : 0) + SORT_INCREMENT;
 
-  group = {
-    ...categoryGroupModel.validate(group),
+  const processedGroup = {
+    ...group,
+    parent_id: group.parent_id ?? null, // Ensure parent_id is null if undefined, as the database expects null for no parent
+  };
+
+  const validated = {
+    ...categoryGroupModel.validate(processedGroup),
     sort_order,
   };
   const id: DbCategoryGroup['id'] = await insertWithUUID(
     'category_groups',
-    group,
+    validated,
   );
   return id;
 }
@@ -411,6 +475,16 @@ export async function deleteCategoryGroup(
   group: Pick<DbCategoryGroup, 'id'>,
   transferId?: DbCategory['id'],
 ) {
+  const children = await all<DbCategoryGroup>(
+    'SELECT * FROM category_groups WHERE parent_id = ?',
+    [group.id],
+  );
+
+  // Delete all the children
+  await Promise.all(
+    children.map(child => deleteCategoryGroup(child, transferId)),
+  );
+
   const categories = await all<DbCategory>(
     'SELECT * FROM categories WHERE cat_group = ?',
     [group.id],

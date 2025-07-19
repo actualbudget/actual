@@ -19,6 +19,8 @@ type IncomeGroupProps = {
   onSave: (group: CategoryGroupEntity) => Promise<void>;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
   onShowNewCategory: (groupId: CategoryGroupEntity['id']) => void;
+  onShowNewGroup?: (parent?: string) => void;
+  depth?: number;
 };
 
 export function IncomeGroup({
@@ -30,6 +32,8 @@ export function IncomeGroup({
   onSave,
   onToggleCollapse,
   onShowNewCategory,
+  onShowNewGroup,
+  depth,
 }: IncomeGroupProps) {
   return (
     <Row
@@ -51,6 +55,8 @@ export function IncomeGroup({
         onSave={onSave}
         onToggleCollapse={onToggleCollapse}
         onShowNewCategory={onShowNewCategory}
+        onShowNewGroup={onShowNewGroup}
+        depth={depth}
       />
       <RenderMonths component={MonthComponent} args={{ group }} />
     </Row>
