@@ -18,12 +18,13 @@ Want to say thanks? Click the ⭐ at the top of the page.
 
 ## Installation
 
-There are four ways to deploy Actual:
+There are five ways to deploy Actual:
 
 1. One-click deployment [via PikaPods](https://www.pikapods.com/pods?run=actual) (~1.40 $/month) - recommended for non-technical users
-1. Managed hosting [via Fly.io](https://actualbudget.org/docs/install/fly) (~1.50 $/month)
-1. Self-hosted by using [a Docker image](https://actualbudget.org/docs/install/docker)
-1. Local-only apps - [downloadable Windows, Mac and Linux apps](https://actualbudget.org/download/) you can run on your device
+2. Managed hosting [via Fly.io](https://actualbudget.org/docs/install/fly) (~1.50 $/month)
+3. Premium managed hosting [with ElfHosted](https://store.elfhosted.com/product/actual-budget/) ($1 7-day trial, $9/month)
+4. Self-hosted by using [a Docker image](https://actualbudget.org/docs/install/docker)
+5. Local-only apps - [downloadable Windows, Mac and Linux apps](https://actualbudget.org/download/) you can run on your device
 
 Learn more in the [installation instructions docs](https://actualbudget.org/docs/install/).
 
