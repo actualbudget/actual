@@ -501,7 +501,7 @@ export function KeyboardShortcutModal() {
                 </View>
               ) : isSearching || isInSection ? (
                 // Show individual shortcuts (either search results or section details)
-                itemsToShow.map(shortcut => (
+                (itemsToShow as Shortcut[]).map(shortcut => (
                   <ShortcutListItem
                     key={shortcut.id}
                     shortcut={shortcut.shortcut}
@@ -513,7 +513,7 @@ export function KeyboardShortcutModal() {
                 ))
               ) : (
                 // Show section list
-                itemsToShow.map(section => (
+                (itemsToShow as ShortcutCategories[]).map(section => (
                   <ListItem
                     key={section.id}
                     onClick={() => {
