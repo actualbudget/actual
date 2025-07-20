@@ -215,7 +215,7 @@ export function KeyboardShortcutModal() {
             description: t('View current month'),
           },
           {
-            id: 'View previous month',
+            id: 'view-previous-month',
             shortcut: '←',
             description: t('View previous month'),
           },
@@ -331,14 +331,14 @@ export function KeyboardShortcutModal() {
             description: t('Move to the next transaction up'),
           },
           {
-            id: 'move-next-transaction-scroll',
+            id: 'move-previous-transaction-scroll',
             shortcut: '↑',
-            description: t('Move to the next transaction down and scroll'),
+            description: t('Move to the previous transaction and scroll'),
           },
           {
-            id: 'move-previous-transaction-scroll',
+            id: 'move-next-transaction-scroll',
             shortcut: '↓',
-            description: t('Move to the next transaction up and scroll'),
+            description: t('Move to the next transaction and scroll'),
           },
           {
             id: 'toggle-selection-current-transaction',
