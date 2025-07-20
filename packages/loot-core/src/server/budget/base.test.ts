@@ -337,4 +337,62 @@ describe('Base budget', () => {
     // Verify total spent includes both visible and hidden group amounts
     expect(sheet.getCellValue(sheetName, 'total-spent')).toBe(-3000);
   });
+
+  it('Creates rollover balance fields for Tracking Budget', async () => {
+    await sheet.loadSpreadsheet(db);
+    sheet.get().meta().budgetType = 'tracking';
+
+    // Create category groups
+    await db.insertCategoryGroup({ id: 'group1', name: 'Test Group' });
+    await db.insertCategoryGroup({
+      id: 'income-group',
+      name: 'Income',
+      is_income: 1,
+    });
+
+    const catId = await db.insertCategory({
+      name: 'Test Category',
+      cat_group: 'group1',
+    });
+
+    const incomeCatId = await db.insertCategory({
+      name: 'Income Category',
+      cat_group: 'income-group',
+      is_income: 1,
+    });
+
+    await createAllBudgets();
+    const month = '2017-01';
+    const sheetName = monthUtils.sheetForMonth(month);
+
+    await db.insertAccount({ id: 'account1', name: 'Account 1' });
+
+    // Add some transactions
+    await db.insertTransaction({
+      date: '2017-01-15',
+      amount: -1000,
+      account: 'account1',
+      category: catId,
+    });
+
+    await db.insertTransaction({
+      date: '2017-01-15',
+      amount: 2000,
+      account: 'account1',
+      category: incomeCatId,
+    });
+
+    await sheet.waitOnSpreadsheet();
+
+    // Verify that rollover balance fields exist and have correct initial values
+    expect(sheet.getCellValue(sheetName, 'from-last-month')).toBe(0);
+    expect(sheet.getCellValue(sheetName, 'available-funds')).toBe(2000); // income + from-last-month
+    expect(sheet.getCellValue(sheetName, 'to-budget')).toBe(2000); // available-funds - total-budgeted
+    expect(sheet.getCellValue(sheetName, 'buffered')).toBe(0);
+
+    // Verify existing tracking budget fields still work
+    expect(sheet.getCellValue(sheetName, 'total-budgeted')).toBe(0);
+    expect(sheet.getCellValue(sheetName, 'total-income')).toBe(2000);
+    expect(sheet.getCellValue(sheetName, 'total-spent')).toBe(-1000);
+  });
 });

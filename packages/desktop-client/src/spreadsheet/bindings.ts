@@ -187,6 +187,12 @@ export const envelopeBudget = {
 } satisfies BudgetType<'envelope-budget'>;
 
 export const trackingBudget = {
+  // Rollover balance fields
+  fromLastMonth: 'from-last-month',
+  availableFunds: 'available-funds',
+  toBudget: 'to-budget',
+  buffered: 'buffered',
+
   totalBudgetedExpense: 'total-budgeted',
   totalBudgetedIncome: 'total-budget-income',
   totalBudgetedSaved: 'total-saved',

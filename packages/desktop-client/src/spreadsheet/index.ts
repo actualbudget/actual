@@ -59,6 +59,10 @@ export type Spreadsheets = {
     'uncategorized-balance': number;
 
     // Tracking budget fields
+    'from-last-month': number;
+    'available-funds': number;
+    'to-budget': number;
+    buffered: number;
     'total-budgeted': number;
     'total-budget-income': number;
     'total-saved': number;

@@ -267,7 +267,7 @@ export async function createBudget(months) {
           sheetName,
         );
       } else {
-        report.createSummary(groups, sheetName);
+        report.createSummary(groups, sheetName, prevSheetName);
       }
 
       meta.createdMonths.add(month);
