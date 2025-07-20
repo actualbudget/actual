@@ -155,7 +155,9 @@ export function KeyboardShortcutModal() {
     null,
   );
 
-  const shortcuts: ShortcutCategories[] = useMemo(
+  // In future, we may move this to state and pull overrides from config/db
+  // This would allow us to drive our shortcuts from state instead of hardcoding them
+  const defaultShortcuts: ShortcutCategories[] = useMemo(
     () => [
       {
         name: t('General'),
@@ -364,7 +366,7 @@ export function KeyboardShortcutModal() {
 
       if (isSearching) {
         // Show all matching shortcuts across all categories
-        const allMatches = shortcuts.flatMap(category =>
+        const allMatches = defaultShortcuts.flatMap(category =>
           category.items.filter(item =>
             item.description.toLowerCase().includes(searchText.toLowerCase()),
           ),
@@ -379,7 +381,9 @@ export function KeyboardShortcutModal() {
 
       if (isInCategory) {
         // Show shortcuts for selected category
-        const category = shortcuts.find(s => s.id === selectedCategoryId);
+        const category = defaultShortcuts.find(
+          s => s.id === selectedCategoryId,
+        );
         return {
           isSearching: false,
           isInCategory: true,
@@ -393,9 +397,9 @@ export function KeyboardShortcutModal() {
         isSearching: false,
         isInCategory: false,
         currentCategory: null,
-        itemsToShow: shortcuts,
+        itemsToShow: defaultShortcuts,
       };
-    }, [searchText, selectedCategoryId, shortcuts]);
+    }, [searchText, selectedCategoryId, defaultShortcuts]);
 
   const showingShortcuts = isSearching || isInCategory;
 
