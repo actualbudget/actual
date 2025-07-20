@@ -151,7 +151,7 @@ export function KeyboardShortcutModal() {
   const { t } = useTranslation();
   const ctrl = Platform.OS === 'mac' ? '⌘' : 'Ctrl';
   const [searchText, setSearchText] = useState('');
-  const [selectedSectionId, setSelectedSectionId] = useState<string | null>(
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     null,
   );
 
@@ -357,46 +357,47 @@ export function KeyboardShortcutModal() {
     [t, ctrl],
   );
 
-  // determine what to show based on search and selection
-  const { isSearching, isInSection, currentSection, itemsToShow } =
+  const { isSearching, isInCategory, currentCategory, itemsToShow } =
     useMemo(() => {
       const isSearching = Boolean(searchText);
-      const isInSection = Boolean(selectedSectionId);
+      const isInCategory = Boolean(selectedCategoryId);
 
       if (isSearching) {
-        // Show all matching shortcuts across all sections
-        const allMatches = shortcuts.flatMap(section =>
-          section.items.filter(item =>
+        // Show all matching shortcuts across all categories
+        const allMatches = shortcuts.flatMap(category =>
+          category.items.filter(item =>
             item.description.toLowerCase().includes(searchText.toLowerCase()),
           ),
         );
         return {
           isSearching,
-          isInSection: false,
-          currentSection: null,
+          isInCategory: false,
+          currentCategory: null,
           itemsToShow: allMatches,
         };
       }
 
-      if (isInSection) {
-        // Show shortcuts for selected section
-        const section = shortcuts.find(s => s.id === selectedSectionId);
+      if (isInCategory) {
+        // Show shortcuts for selected category
+        const category = shortcuts.find(s => s.id === selectedCategoryId);
         return {
           isSearching: false,
-          isInSection: true,
-          currentSection: section || null,
-          itemsToShow: section?.items || [],
+          isInCategory: true,
+          currentCategory: category || null,
+          itemsToShow: category?.items || [],
         };
       }
 
-      // Show section list
+      // Show category list
       return {
         isSearching: false,
-        isInSection: false,
-        currentSection: null,
+        isInCategory: false,
+        currentCategory: null,
         itemsToShow: shortcuts,
       };
-    }, [searchText, selectedSectionId, shortcuts]);
+    }, [searchText, selectedCategoryId, shortcuts]);
+
+  const showingShortcuts = isSearching || isInCategory;
 
   return (
     <Modal name="keyboard-shortcuts" containerProps={{ style: { width: 700 } }}>
@@ -406,19 +407,19 @@ export function KeyboardShortcutModal() {
             title={
               isSearching
                 ? t('Search results')
-                : currentSection
-                  ? t('{{sectionName}} shortcuts', {
-                      sectionName: currentSection.name,
+                : currentCategory
+                  ? t('{{categoryName}} shortcuts', {
+                      categoryName: currentCategory.name,
                     })
                   : t('Keyboard shortcuts')
             }
             leftContent={
-              isSearching || isInSection ? (
+              showingShortcuts ? (
                 <Button
                   variant="bare"
                   onClick={() => {
                     setSearchText('');
-                    setSelectedSectionId(null);
+                    setSelectedCategoryId(null);
                   }}
                   style={{ marginRight: 10, marginLeft: 15, zIndex: 3000 }}
                 >
@@ -444,9 +445,9 @@ export function KeyboardShortcutModal() {
               value={searchText}
               onChange={text => {
                 setSearchText(text);
-                // Clear section selection when searching
-                if (text && selectedSectionId) {
-                  setSelectedSectionId(null);
+                // Clear category selection when searching to search all shortcuts
+                if (text && selectedCategoryId) {
+                  setSelectedCategoryId(null);
                 }
               }}
               placeholder={t('Search shortcuts')}
@@ -481,14 +482,13 @@ export function KeyboardShortcutModal() {
                     <Trans>
                       {isSearching
                         ? 'No matching shortcuts'
-                        : isInSection
-                          ? 'No shortcuts in this section'
+                        : isInCategory
+                          ? 'No shortcuts in this category'
                           : 'No matching shortcuts'}
                     </Trans>
                   </Text>
                 </View>
-              ) : isSearching || isInSection ? (
-                // Show individual shortcuts (either search results or section details)
+              ) : showingShortcuts ? (
                 (itemsToShow as Shortcut[]).map(shortcut => (
                   <ShortcutListItem
                     key={shortcut.id}
@@ -500,13 +500,12 @@ export function KeyboardShortcutModal() {
                   />
                 ))
               ) : (
-                // Show section list
-                (itemsToShow as ShortcutCategories[]).map(section => (
+                (itemsToShow as ShortcutCategories[]).map(category => (
                   <ListItem
-                    key={section.id}
+                    key={category.id}
                     onClick={() => {
-                      if (section.items.length > 0) {
-                        setSelectedSectionId(section.id);
+                      if (category.items.length > 0) {
+                        setSelectedCategoryId(category.id);
                       }
                     }}
                   >
@@ -517,10 +516,12 @@ export function KeyboardShortcutModal() {
                         width: '100%',
                       }}
                     >
-                      <Text style={{ fontWeight: 'bold' }}>{section.name}</Text>
+                      <Text style={{ fontWeight: 'bold' }}>
+                        {category.name}
+                      </Text>
                       <Text style={{ color: theme.pageTextLight }}>
-                        {section.items.length}{' '}
-                        {section.items.length === 1
+                        {category.items.length}{' '}
+                        {category.items.length === 1
                           ? t('shortcut')
                           : t('shortcuts')}{' '}
                         ›
