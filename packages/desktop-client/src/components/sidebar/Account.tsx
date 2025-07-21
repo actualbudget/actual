@@ -114,7 +114,8 @@ export function Account<FieldName extends SheetFields<'account'>>({
   const [isEditing, setIsEditing] = useState(false);
 
   const accountNote = useNotes(`account-${account?.id}`);
-  const needsTooltip = !!account?.id;
+  const canDeviceHover = window.matchMedia('(hover: hover)').matches;
+  const needsTooltip = !!account?.id && canDeviceHover;
 
   const accountRow = (
     <View
