@@ -155,8 +155,14 @@ Apache HTTP server can serve as a reverse proxy using [VirtualHosts](https://htt
   SSLProxyEngine on
   SSLCertificateFile /etc/letsencrypt/live/example.com/fullchain.pem
   SSLCertificateKeyFile /etc/letsencrypt/live/example.com/privkey.pem
-  ProxyPass / http://127.0.0.1:5006 # this can be a remote host, or a container IP
-  ProxyPassReverse / http://127.0.0.1:5006
+
+  ProxyPreserveHost On
+  RequestHeader set X-Forwarded-Proto "https"
+  RequestHeader set X-Forwarded-Port "443"
+
+  # IP in the following lines can be a remote host, or a container IP
+  ProxyPass / http://127.0.0.1:5006/
+  ProxyPassReverse / http://127.0.0.1:5006/
 </VirtualHost>
 ```
 
