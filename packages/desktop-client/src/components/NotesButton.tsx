@@ -4,6 +4,7 @@ import React, {
   useState,
   type ComponentProps,
   type CSSProperties,
+  useCallback,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -43,12 +44,21 @@ export function NotesButton({
   const hasNotes = note && note !== '';
 
   const [tempNotes, setTempNotes] = useState<string>(note);
-  useEffect(() => setTempNotes(note), [note]);
+  useEffect(() => setTempNotes(note), [note, id]);
 
-  function onClose() {
-    send('notes-save', { id, note: tempNotes });
-    setIsOpen(false);
-  }
+  const onOpenChange = useCallback<
+    NonNullable<ComponentProps<typeof Popover>['onOpenChange']>
+  >(
+    isOpen => {
+      if (!isOpen) {
+        if (tempNotes !== note) {
+          void send('notes-save', { id, note: tempNotes });
+        }
+        setIsOpen(false);
+      }
+    },
+    [id, note, tempNotes],
+  );
 
   return (
     <Tooltip
@@ -81,7 +91,7 @@ export function NotesButton({
       <Popover
         triggerRef={triggerRef}
         isOpen={isOpen}
-        onOpenChange={onClose}
+        onOpenChange={onOpenChange}
         placement={tooltipPosition}
         style={{ padding: 4 }}
       >

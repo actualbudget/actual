@@ -100,7 +100,7 @@ export class CategoryTemplateContext {
     );
   }
   getPriorities(): number[] {
-    return this.priorities;
+    return Array.from(this.priorities);
   }
   hasRemainder(): boolean {
     return this.remainderWeight > 0 && !this.limitMet;
@@ -115,11 +115,11 @@ export class CategoryTemplateContext {
   // what is the full requested amount this month
   async runAll(available: number) {
     let toBudget: number = 0;
-    for (let i = 0; i < this.priorities.length; i++) {
-      const p = this.priorities[i];
+    const prioritiesSorted = this.getPriorities().sort();
+    for (let i = 0; i < prioritiesSorted.length; i++) {
+      const p = prioritiesSorted[i];
       toBudget += await this.runTemplatesForPriority(p, available, available);
     }
-    //TODO does this need to run limits? maybe pass in option to ignore previous balance?
     return toBudget;
   }
 
@@ -130,7 +130,7 @@ export class CategoryTemplateContext {
     budgetAvail: number,
     availStart: number,
   ): Promise<number> {
-    if (!this.priorities.includes(priority)) return 0;
+    if (!this.priorities.has(priority)) return 0;
     if (this.limitMet) return 0;
 
     const t = this.templates.filter(t => t.priority === priority);
@@ -227,8 +227,8 @@ export class CategoryTemplateContext {
     //round all budget values if needed
     if (this.hideDecimal) toBudget = this.removeFraction(toBudget);
 
-    // don't overbudget when using a priority
-    if (priority > 0 && available < 0) {
+    // don't overbudget when using a priority unless income category
+    if (priority > 0 && available < 0 && !this.category.is_income) {
       this.fullAmount += toBudget;
       toBudget = Math.max(0, toBudget + available);
       this.toBudgetAmount += toBudget;
@@ -236,7 +236,7 @@ export class CategoryTemplateContext {
       this.fullAmount += toBudget;
       this.toBudgetAmount += toBudget;
     }
-    return toBudget;
+    return this.category.is_income ? -toBudget : toBudget;
   }
 
   runRemainder(budgetAvail: number, perWeight: number) {
@@ -285,7 +285,7 @@ export class CategoryTemplateContext {
   private templates: Template[] = [];
   private remainder: RemainderTemplate[] = [];
   private goals: GoalTemplate[] = [];
-  private priorities: number[] = [];
+  private priorities: Set<number> = new Set();
   readonly hideDecimal: boolean = false;
   private remainderWeight: number = 0;
   private toBudgetAmount: number = 0; // amount that will be budgeted by the templates
@@ -318,42 +318,19 @@ export class CategoryTemplateContext {
       templates.forEach(t => {
         if (t.directive === 'template' && t.type !== 'remainder') {
           this.templates.push(t);
-        }
-      });
-      templates.forEach(t => {
-        if (t.directive === 'template' && t.type === 'remainder') {
+          if (t.priority !== null) this.priorities.add(t.priority);
+        } else if (t.directive === 'template' && t.type === 'remainder') {
           this.remainder.push(t);
+          this.remainderWeight += t.weight;
+        } else if (t.directive === 'goal' && t.type === 'goal') {
+          this.goals.push(t);
         }
-      });
-      templates.forEach(t => {
-        if (t.directive === 'goal' && t.type === 'goal') this.goals.push(t);
       });
     }
 
     this.checkLimit(templates);
     this.checkSpend();
     this.checkGoal();
-
-    //find priorities
-    const p = [];
-    this.templates.forEach(t => {
-      if (t.priority != null) {
-        p.push(t.priority);
-      }
-    });
-    //sort and reduce to unique items
-    this.priorities = p
-      .sort(function (a, b) {
-        return a - b;
-      })
-      .filter((item, idx, curr) => curr.indexOf(item) === idx);
-
-    //find remainder weight
-    let weight = 0;
-    this.remainder.forEach(r => {
-      weight += r.weight;
-    });
-    this.remainderWeight = weight;
   }
 
   private runGoal() {

@@ -123,6 +123,8 @@ export function Account<FieldName extends SheetFields<'account'>>({
   const [isEditing, setIsEditing] = useState(false);
 
   const accountNote = useNotes(`account-${account?.id}`);
+  const canDeviceHover = window.matchMedia('(hover: hover)').matches;
+  const needsTooltip = canDeviceHover;
 
   const accountRow = (
     <View
@@ -284,7 +286,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
     </View>
   );
 
-  if (Platform.isPlaywright) {
+  if (!needsTooltip || Platform.isPlaywright) {
     return accountRow;
   }
 
