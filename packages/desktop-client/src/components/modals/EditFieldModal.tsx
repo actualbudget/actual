@@ -60,7 +60,12 @@ export function EditFieldModal({
       // Process the value if needed
       if (name === 'amount') {
         if (typeof value === 'string') {
-          value = currencyToInteger(value);
+          const parsed = currencyToInteger(value);
+          if (parsed === null) {
+            alert(t('Invalid amount value'));
+            return;
+          }
+          value = parsed;
         } else if (typeof value === 'number') {
           value = amountToInteger(value);
         }
