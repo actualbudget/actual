@@ -14,7 +14,7 @@ import { View } from '@actual-app/components/view';
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 
 import { currentDay, dayFromDate } from 'loot-core/shared/months';
-import { amountToInteger } from 'loot-core/shared/util';
+import { amountToInteger, currencyToInteger } from 'loot-core/shared/util';
 
 import {
   Modal,
@@ -58,8 +58,12 @@ export function EditFieldModal({
   function onSelect(value: string | number) {
     if (value != null) {
       // Process the value if needed
-      if (name === 'amount' && typeof value === 'number') {
-        value = amountToInteger(value);
+      if (name === 'amount') {
+        if (typeof value === 'string') {
+          value = currencyToInteger(value);
+        } else if (typeof value === 'number') {
+          value = amountToInteger(value);
+        }
       }
 
       onSubmit(name, value);
