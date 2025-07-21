@@ -20,6 +20,7 @@ type BalanceMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,
   'onMenuSelect' | 'items'
 > & {
+  transaction: TransactionEntity;
   getTransaction: (id: string) => TransactionEntity | undefined;
   onDuplicate: (ids: string[]) => void;
   onDelete: (ids: string[]) => void;
@@ -35,6 +36,7 @@ type BalanceMenuProps = Omit<
 };
 
 export function TransactionMenu({
+  transaction,
   getTransaction,
   onDuplicate,
   onDelete,
@@ -49,7 +51,14 @@ export function TransactionMenu({
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const selectedItems = useSelectedItems();
-  const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
+
+  const selectedIds = useMemo(() => {
+    const ids =
+      selectedItems && selectedItems.size > 0
+        ? selectedItems
+        : [transaction.id];
+    return Array.from(new Set(ids));
+  }, [transaction, selectedItems]);
 
   const scheduleIds = useMemo(() => {
     return selectedIds
