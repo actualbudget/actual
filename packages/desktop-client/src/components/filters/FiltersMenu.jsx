@@ -481,6 +481,14 @@ export function FilterEditor({ field, op, value, options, onSave, onClose }) {
               alert(t('Invalid date format'));
               return;
             }
+          } else if (cond.options.year) {
+            const date = parseDate(cond.value, 'yyyy', new Date());
+            if (isDateValid(date)) {
+              cond.value = formatDate(date, 'yyyy');
+            } else {
+              alert(t('Invalid date format'));
+              return;
+            }
           }
         }
 
