@@ -489,7 +489,7 @@ function RecurringScheduleTooltip({
         </Text>
         <Input
           id="interval"
-          style={{ width: 40 }}
+          style={{ width: 55 }}
           type="number"
           min={1}
           onChangeValue={value => updateField('interval', value)}
