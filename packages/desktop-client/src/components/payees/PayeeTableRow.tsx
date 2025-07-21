@@ -117,7 +117,11 @@ export const PayeeTableRow = memo(
     const { id } = payee;
     const dispatchSelected = useSelectedDispatch();
     const selectedItems = useSelectedItems();
-    const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
+    const selectedIds = useMemo(() => {
+      const ids =
+        selectedItems && selectedItems.size > 0 ? selectedItems : [payee.id];
+      return Array.from(new Set(ids));
+    }, [payee, selectedItems]);
 
     const borderColor = selected
       ? theme.tableBorderSelected
