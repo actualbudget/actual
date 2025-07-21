@@ -1,8 +1,15 @@
-import { useState, type CSSProperties, useMemo, type ReactNode } from 'react';
+import {
+  useState,
+  type CSSProperties,
+  useMemo,
+  type ReactNode,
+  createRef,
+} from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgArrowLeft } from '@actual-app/components/icons/v1';
+import { InitialFocus } from '@actual-app/components/initial-focus';
 import { styles as baseStyles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -445,24 +452,29 @@ export function KeyboardShortcutModal() {
               padding: '0 16px 16px 16px',
             }}
           >
-            <Search
-              value={searchText}
-              onChange={text => {
-                setSearchText(text);
-                // Clear category selection when searching to search all shortcuts
-                if (text && selectedCategoryId) {
-                  setSelectedCategoryId(null);
-                }
-              }}
-              placeholder={t('Search shortcuts')}
-              width="100%"
-              style={{
-                backgroundColor: theme.tableBackground,
-                borderColor: theme.formInputBorder,
-                marginBottom: 10,
-              }}
-            />
-
+            <InitialFocus<HTMLInputElement>>
+              {ref => (
+                <Search
+                  inputRef={ref}
+                  value={searchText}
+                  isInModal
+                  onChange={text => {
+                    setSearchText(text);
+                    // Clear category selection when searching to search all shortcuts
+                    if (text && selectedCategoryId) {
+                      setSelectedCategoryId(null);
+                    }
+                  }}
+                  placeholder={t('Search shortcuts')}
+                  width="100%"
+                  style={{
+                    backgroundColor: theme.tableBackground,
+                    borderColor: theme.formInputBorder,
+                    marginBottom: 10,
+                  }}
+                />
+              )}
+            </InitialFocus>
             <View
               style={{
                 flexDirection: 'column',
