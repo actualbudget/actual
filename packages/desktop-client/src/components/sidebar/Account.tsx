@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import React, { type CSSProperties, useRef, useState } from 'react';
-import { isDesktop } from 'react-device-detect';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { InitialFocus } from '@actual-app/components/initial-focus';
@@ -115,7 +114,8 @@ export function Account<FieldName extends SheetFields<'account'>>({
   const [isEditing, setIsEditing] = useState(false);
 
   const accountNote = useNotes(`account-${account?.id}`);
-  const needsTooltip = !!account?.id && isDesktop;
+  const canDeviceHover = window.matchMedia('(hover: hover)').matches;
+  const needsTooltip = !!account?.id && canDeviceHover;
 
   const accountRow = (
     <View
