@@ -18,7 +18,6 @@ test.describe('Help menu', () => {
     // sometimes the mouse hovers on a budget element thus rendering an input box
     // and this breaks screenshot tests
     await page.mouse.move(0, 0);
-    await page.focus('body');
   });
 
   test.afterAll(async () => {
