@@ -64,7 +64,7 @@ async function importTags(): Promise<Tag[]> {
 
   const tags = await getTags();
   for (const { notes } of taggedNotes) {
-    for (const [_, tag] of notes.matchAll(/#([^#\s]+)/g)) {
+    for (const [_, tag] of notes.matchAll(/(?<!#)#([^#\s]+)/g)) {
       if (!tags.find(t => t.tag === tag)) {
         tags.push(await createTag({ tag, color: '' }));
       }
