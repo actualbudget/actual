@@ -73,7 +73,7 @@ export function Input({
 
   return (
     <ReactAriaInput
-      ref={(el) => {
+      ref={el => {
         if (ref) {
           if (typeof ref === 'function') {
             ref(el);
