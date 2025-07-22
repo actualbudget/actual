@@ -382,7 +382,7 @@ function RecurringScheduleTooltip({
   const [previewDates, setPreviewDates] = useState<string[] | string | null>(
     null,
   );
-
+  const [intervalWidth, setIntervalWidth] = useState('4ch');
   const { FREQUENCY_OPTIONS } = useFrequencyOptions();
 
   const [state, dispatch] = useReducer(reducer, {
@@ -422,8 +422,6 @@ function RecurringScheduleTooltip({
   if (previewDates == null) {
     return null;
   }
-  
-  const [intervalWidth, setIntervalWidth] = useState('4ch');
 
   return (
     <>
