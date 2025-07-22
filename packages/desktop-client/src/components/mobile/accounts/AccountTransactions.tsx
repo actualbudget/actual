@@ -358,9 +358,12 @@ function TransactionListWithPreviews({
               name: 'scheduled-transaction-menu',
               options: {
                 transactionId: transaction.id,
-                onPost: async transactionId => {
+                onPost: async (transactionId, today = false) => {
                   const parts = transactionId.split('/');
-                  await send('schedule/post-transaction', { id: parts[1] });
+                  await send('schedule/post-transaction', {
+                    id: parts[1],
+                    today,
+                  });
                   dispatch(
                     collapseModals({
                       rootModalName: 'scheduled-transaction-menu',

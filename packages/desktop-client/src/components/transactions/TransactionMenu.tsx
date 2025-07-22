@@ -28,7 +28,7 @@ type BalanceMenuProps = Omit<
   onUnlinkSchedule: (ids: string[]) => void;
   onCreateRule: (ids: string[]) => void;
   onScheduleAction: (
-    name: 'skip' | 'post-transaction' | 'complete',
+    name: 'skip' | 'post-transaction' | 'post-transaction-today' | 'complete',
     ids: TransactionEntity['id'][],
   ) => void;
   onMakeAsNonSplitTransactions: (ids: string[]) => void;
@@ -169,6 +169,7 @@ export function TransactionMenu({
             onMakeAsNonSplitTransactions(selectedIds);
             break;
           case 'post-transaction':
+          case 'post-transaction-today':
           case 'skip':
           case 'complete':
             onScheduleAction(name, selectedIds);
@@ -196,7 +197,11 @@ export function TransactionMenu({
               ...(selectedIds.length === 1
                 ? [{ name: 'view-schedule', text: t('View schedule') }]
                 : []),
-              { name: 'post-transaction', text: t('Post transaction today') },
+              { name: 'post-transaction', text: t('Post transaction') },
+              {
+                name: 'post-transaction-today',
+                text: t('Post transaction today'),
+              },
               ...(canBeSkipped
                 ? [{ name: 'skip', text: t('Skip next scheduled date') }]
                 : []),

@@ -438,7 +438,10 @@ export type Modal =
       name: 'scheduled-transaction-menu';
       options: {
         transactionId: TransactionEntity['id'];
-        onPost: (transactionId: TransactionEntity['id']) => void;
+        onPost: (
+          transactionId: TransactionEntity['id'],
+          today?: boolean,
+        ) => void;
         onSkip: (transactionId: TransactionEntity['id']) => void;
         onComplete: (transactionId: TransactionEntity['id']) => void;
       };

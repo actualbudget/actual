@@ -108,7 +108,7 @@ type ScheduledTransactionMenuProps = Omit<
 > & {
   transactionId: string;
   onSkip: (transactionId: string) => void;
-  onPost: (transactionId: string) => void;
+  onPost: (transactionId: string, today?: boolean) => void;
   onComplete: (transactionId: string) => void;
 };
 
@@ -134,6 +134,9 @@ function ScheduledTransactionMenu({
           case 'post':
             onPost?.(transactionId);
             break;
+          case 'post-today':
+            onPost?.(transactionId, true);
+            break;
           case 'skip':
             onSkip?.(transactionId);
             break;
@@ -145,7 +148,8 @@ function ScheduledTransactionMenu({
         }
       }}
       items={[
-        { name: 'post', text: t('Post transaction today') },
+        { name: 'post', text: t('Post transaction') },
+        { name: 'post-today', text: t('Post transaction today') },
         ...(canBeSkipped
           ? [{ name: 'skip', text: t('Skip next scheduled date') }]
           : []),
