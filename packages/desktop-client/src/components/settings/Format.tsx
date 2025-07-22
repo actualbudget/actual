@@ -45,6 +45,7 @@ const dateFormats: { value: SyncedPrefs['dateFormat']; label: string }[] = [
   { value: 'yyyy-MM-dd', label: 'YYYY-MM-DD' },
   { value: 'MM.dd.yyyy', label: 'MM.DD.YYYY' },
   { value: 'dd.MM.yyyy', label: 'DD.MM.YYYY' },
+  { value: 'dd-MM-yyyy', label: 'DD-MM-YYYY' },
 ];
 
 export function FormatSettings() {

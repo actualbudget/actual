@@ -1152,6 +1152,7 @@ const Transaction = memo(function Transaction({
         isNonModal
       >
         <TransactionMenu
+          transaction={transaction}
           getTransaction={id => allTransactions?.find(t => t.id === id)}
           onDelete={ids => onBatchDelete?.(ids)}
           onDuplicate={ids => onBatchDuplicate?.(ids)}

@@ -104,7 +104,6 @@ __metadata:
     debug: "npm:^4.4.1"
     express: "npm:5.1.0"
     express-rate-limit: "npm:^7.5.0"
-    express-response-size: "npm:^0.0.3"
     express-winston: "npm:^4.2.0"
     http-proxy-middleware: "npm:^3.0.5"
     jws: "npm:^4.0.0"
@@ -11261,15 +11260,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express-response-size@npm:^0.0.3":
-  version: 0.0.3
-  resolution: "express-response-size@npm:0.0.3"
-  dependencies:
-    on-headers: "npm:1.0.1"
-  checksum: 10/6c97395d225e5aa98338569842ed84e5d861f19f6f1c535e70c97d65ffe7301826299607f491c824f240952b39b4b18c3269ed3652ecb8bd0abb93c7ece7048b
-  languageName: node
-  linkType: hard
-
 "express-winston@npm:^4.2.0":
   version: 4.2.0
   resolution: "express-winston@npm:4.2.0"
@@ -15818,13 +15808,6 @@ __metadata:
   dependencies:
     ee-first: "npm:1.1.1"
   checksum: 10/8e81472c5028125c8c39044ac4ab8ba51a7cdc19a9fbd4710f5d524a74c6d8c9ded4dd0eed83f28d3d33ac1d7a6a439ba948ccb765ac6ce87f30450a26bfe2ea
-  languageName: node
-  linkType: hard
-
-"on-headers@npm:1.0.1":
-  version: 1.0.1
-  resolution: "on-headers@npm:1.0.1"
-  checksum: 10/7e5dc811cd8e16590385ac56a63e27aa9006c594069960655d37f96c9b1f7af4ce7e71f4f6a771ed746ebf180e0c1cbc1e5ecd125a4006b9eb0ef23125068cd2
   languageName: node
   linkType: hard
 
