@@ -826,3 +826,14 @@ export async function deleteTag(tag) {
 export function updateTag(tag) {
   return update('tags', tag);
 }
+
+export function importTags() {
+  return all<{ notes: string }>(
+    `
+    SELECT notes
+    FROM transactions
+    WHERE notes LIKE ?
+  `,
+    ['%#%'],
+  );
+}

@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgAdd } from '@actual-app/components/icons/v1';
+import { SvgAdd, SvgDownload } from '@actual-app/components/icons/v1';
 import { Stack } from '@actual-app/components/stack';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -18,7 +18,10 @@ import {
   SelectedProvider,
   useSelected,
 } from '@desktop-client/hooks/useSelected';
-import { deleteAllTags } from '@desktop-client/queries/queriesSlice';
+import {
+  deleteAllTags,
+  importTags,
+} from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { useTags } from '@desktop-client/style/tags';
 
@@ -91,6 +94,10 @@ export function ManageTags() {
           <Button variant="bare" onPress={() => setCreate(true)}>
             <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
             <Trans>Add New</Trans>
+          </Button>
+          <Button variant="bare" onPress={() => dispatch(importTags())}>
+            <SvgDownload width={10} height={10} style={{ marginRight: 3 }} />
+            <Trans>Import existing tags</Trans>
           </Button>
           <View style={{ flex: 1 }} />
           <Search
