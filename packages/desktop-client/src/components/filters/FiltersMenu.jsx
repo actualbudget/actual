@@ -88,12 +88,16 @@ function ConfigureField({
   }
 
   const formattedValue = useMemo(() => {
-    if (field === 'date' && subfield === 'month' && /^\d{4}-\d{2}$/.test(value)) {
+    if (
+      field === 'date' &&
+      subfield === 'month' &&
+      /^\d{4}-\d{2}$/.test(value)
+    ) {
       const [year, month] = value.split('-');
       return `${month}/${year}`;
     }
     return value;
-  }, [value, field, subfield])
+  }, [value, field, subfield]);
 
   return (
     <FocusScope>
