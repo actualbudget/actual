@@ -87,6 +87,14 @@ function ConfigureField({
     ops = ['is'];
   }
 
+  const formattedValue = useMemo(() => {
+    if (field === 'date' && subfield === 'month' && /^\d{4}-\d{2}$/.test(value)) {
+      const [year, month] = value.split('-');
+      return `${month}/${year}`;
+    }
+    return value;
+  }, [value, field, subfield])
+
   return (
     <FocusScope>
       <View style={{ marginBottom: 10 }}>
@@ -231,7 +239,7 @@ function ConfigureField({
                 ? 'string'
                 : type
             }
-            value={value}
+            value={formattedValue}
             multi={op === 'oneOf' || op === 'notOneOf'}
             op={op}
             style={{ marginTop: 10 }}
