@@ -845,7 +845,7 @@ type TransactionProps = {
   onBatchUnlinkSchedule?: (ids: TransactionEntity['id'][]) => void;
   onCreateRule?: (ids: TransactionEntity['id'][]) => void;
   onScheduleAction?: (
-    name: 'skip' | 'post-transaction' | 'complete',
+    name: 'skip' | 'post-transaction' | 'post-transaction-today' | 'complete',
     ids: TransactionEntity['id'][],
   ) => void;
   onMakeAsNonSplitTransactions?: (ids: TransactionEntity['id'][]) => void;
@@ -1949,7 +1949,7 @@ type TransactionTableInnerProps = {
   ascDesc: 'asc' | 'desc';
   onCreateRule: (ids: RuleEntity['id'][]) => void;
   onScheduleAction: (
-    name: 'skip' | 'post-transaction' | 'complete',
+    name: 'skip' | 'post-transaction' | 'post-transaction-today' | 'complete',
     ids: TransactionEntity['id'][],
   ) => void;
   onMakeAsNonSplitTransactions: (ids: TransactionEntity['id'][]) => void;
@@ -2297,7 +2297,7 @@ export type TransactionTableProps = {
   onBatchUnlinkSchedule: (ids: TransactionEntity['id'][]) => void;
   onCreateRule: (ids: RuleEntity['id'][]) => void;
   onScheduleAction: (
-    name: 'skip' | 'post-transaction' | 'complete',
+    name: 'skip' | 'post-transaction' | 'post-transaction-today' | 'complete',
     ids: TransactionEntity['id'][],
   ) => void;
   onMakeAsNonSplitTransactions: (ids: string[]) => void;
@@ -2729,7 +2729,11 @@ export const TransactionTable = forwardRef(
 
     const onScheduleAction = useCallback(
       (
-        action: 'skip' | 'post-transaction' | 'complete',
+        action:
+          | 'skip'
+          | 'post-transaction'
+          | 'post-transaction-today'
+          | 'complete',
         ids: TransactionEntity['id'][],
       ) => {
         onScheduleActionProp(action, ids);

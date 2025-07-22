@@ -41,7 +41,7 @@ type SelectedTransactionsButtonProps = {
   onRunRules: (selectedIds: string[]) => void;
   onSetTransfer: (selectedIds: string[]) => void;
   onScheduleAction: (
-    action: 'post-transaction' | 'skip' | 'complete',
+    action: 'post-transaction' | 'post-transaction-today' | 'skip' | 'complete',
     selectedIds: TransactionEntity['id'][],
   ) => void;
   showMakeTransfer: boolean;
@@ -303,6 +303,10 @@ export function SelectedTransactionsButton({
               } as const,
               {
                 name: 'post-transaction',
+                text: t('Post transaction'),
+              } as const,
+              {
+                name: 'post-transaction-today',
                 text: t('Post transaction today'),
               } as const,
               canBeSkipped &&
@@ -419,6 +423,7 @@ export function SelectedTransactionsButton({
             onMergeTransactions(selectedIds);
             break;
           case 'post-transaction':
+          case 'post-transaction-today':
           case 'skip':
           case 'complete':
             onScheduleAction(name, selectedIds);
