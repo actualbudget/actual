@@ -135,7 +135,6 @@ export function Menu<const NameType = string>({
       style={{ outline: 'none', borderRadius: 4, overflow: 'hidden', ...style }}
       tabIndex={1}
       innerRef={elRef}
-      aria-label={ariaLabel}
     >
       {header}
       {items.map((item, idx) => {
