@@ -115,6 +115,7 @@ export const HelpMenu = () => {
             setMenuOpen(false);
             handleItemSelect(item);
           }}
+          ariaLabel={t('Help')}
           items={[
             {
               name: 'docs',

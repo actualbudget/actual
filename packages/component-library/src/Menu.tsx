@@ -64,6 +64,7 @@ type MenuProps<NameType> = {
   className?: string;
   getItemStyle?: (item: MenuItemObject<NameType>) => CSSProperties;
   slot?: ComponentProps<typeof Button>['slot'];
+  ariaLabel?: string;
 };
 
 export function Menu<const NameType = string>({
@@ -75,6 +76,7 @@ export function Menu<const NameType = string>({
   className,
   getItemStyle,
   slot,
+  ariaLabel,
 }: MenuProps<NameType>) {
   const elRef = useRef<HTMLDivElement>(null);
   const items = allItems.filter(x => x);
@@ -135,6 +137,7 @@ export function Menu<const NameType = string>({
       style={{ outline: 'none', borderRadius: 4, overflow: 'hidden', ...style }}
       tabIndex={1}
       innerRef={elRef}
+      aria-label={ariaLabel}
     >
       {header}
       {items.map((item, idx) => {
