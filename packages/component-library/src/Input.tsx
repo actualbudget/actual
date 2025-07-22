@@ -3,6 +3,8 @@ import React, {
   ComponentPropsWithRef,
   type KeyboardEvent,
   type FocusEvent,
+  useEffect,
+  useRef,
 } from 'react';
 import { Input as ReactAriaInput } from 'react-aria-components';
 
@@ -58,9 +60,29 @@ export function Input({
   className,
   ...props
 }: InputProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const input = inputRef.current;
+    if (input && props.value) {
+      setTimeout(() => {
+        input.select();
+      }, 100);
+    }
+  }, [props.value, inputRef]);
+
   return (
     <ReactAriaInput
-      ref={ref}
+      ref={(el) => {
+        if (ref) {
+          if (typeof ref === 'function') {
+            ref(el);
+          } else {
+            ref.current = el;
+          }
+        }
+        inputRef.current = el;
+      }}
       className={
         typeof className === 'function'
           ? renderProps => cx(defaultInputClassName, className(renderProps))
