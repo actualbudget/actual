@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import { int32Array } from 'fast-check';
+
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
 import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
@@ -228,7 +230,7 @@ async function processTemplate(
     };
   }
 
-  const priorities = [...prioritiesSet].sort();
+  const priorities = new Int32Array([...prioritiesSet]).sort();
   // run each priority level
   for (const priority of priorities) {
     const availStart = availBudget;
