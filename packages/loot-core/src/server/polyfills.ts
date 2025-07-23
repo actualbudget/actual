@@ -10,7 +10,7 @@ import process from 'process';
 if (typeof globalThis !== 'undefined') {
   globalThis.Buffer = Buffer;
   globalThis.process = process;
-  
+
   // Add a basic require polyfill for CommonJS modules
   if (typeof globalThis.require === 'undefined') {
     // @ts-ignore - we're creating a minimal require implementation
@@ -32,7 +32,7 @@ if (typeof globalThis !== 'undefined') {
 if (typeof global !== 'undefined') {
   global.Buffer = Buffer;
   global.process = process;
-  
+
   if (typeof global.require === 'undefined') {
     // @ts-ignore - assigning minimal require implementation to global
     global.require = globalThis.require;
