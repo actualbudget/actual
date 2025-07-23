@@ -827,7 +827,7 @@ export function updateTag(tag) {
   return update('tags', tag);
 }
 
-export function importTags() {
+export function findTags() {
   return all<{ notes: string }>(
     `
     SELECT notes

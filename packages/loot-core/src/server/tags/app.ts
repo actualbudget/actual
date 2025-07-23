@@ -11,7 +11,7 @@ export type TagsHandlers = {
   'tags-delete': typeof deleteTag;
   'tags-delete-all': typeof deleteAllTags;
   'tags-update': typeof updateTag;
-  'tags-import': typeof importTags;
+  'tags-find': typeof findTags;
 };
 
 export const app = createApp<TagsHandlers>();
@@ -20,7 +20,7 @@ app.method('tags-create', mutator(undoable(createTag)));
 app.method('tags-delete', mutator(undoable(deleteTag)));
 app.method('tags-delete-all', mutator(deleteAllTags));
 app.method('tags-update', mutator(undoable(updateTag)));
-app.method('tags-import', mutator(importTags));
+app.method('tags-find', mutator(findTags));
 
 async function getTags(): Promise<Tag[]> {
   return await db.getTags();
@@ -59,8 +59,8 @@ async function updateTag(tag: Tag): Promise<Tag> {
   return tag;
 }
 
-async function importTags(): Promise<Tag[]> {
-  const taggedNotes = await db.importTags();
+async function findTags(): Promise<Tag[]> {
+  const taggedNotes = await db.findTags();
 
   const tags = await getTags();
   for (const { notes } of taggedNotes) {

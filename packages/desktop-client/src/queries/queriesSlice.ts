@@ -190,7 +190,7 @@ const queriesSlice = createSlice({
       state.tags[tagIdx] = action.payload;
     });
 
-    builder.addCase(importTags.fulfilled, (state, action) => {
+    builder.addCase(findTags.fulfilled, (state, action) => {
       state.tags = action.payload;
     });
   },
@@ -489,10 +489,10 @@ export const updateTag = createAppAsyncThunk(
   },
 );
 
-export const importTags = createAppAsyncThunk(
-  `${sliceName}/importTags`,
+export const findTags = createAppAsyncThunk(
+  `${sliceName}/findTags`,
   async () => {
-    const id = await send('tags-import');
+    const id = await send('tags-find');
     return id;
   },
 );
