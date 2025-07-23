@@ -3,6 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
+import { SvgSearchAlternate } from '@actual-app/components/icons/v2';
 import { Stack } from '@actual-app/components/stack';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -18,7 +19,7 @@ import {
   SelectedProvider,
   useSelected,
 } from '@desktop-client/hooks/useSelected';
-import { deleteAllTags } from '@desktop-client/queries/queriesSlice';
+import { deleteAllTags, findTags } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { useTags } from '@desktop-client/style/tags';
 
@@ -91,6 +92,14 @@ export function ManageTags() {
           <Button variant="bare" onPress={() => setCreate(true)}>
             <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
             <Trans>Add New</Trans>
+          </Button>
+          <Button variant="bare" onPress={() => dispatch(findTags())}>
+            <SvgSearchAlternate
+              width={10}
+              height={10}
+              style={{ marginRight: 3 }}
+            />
+            <Trans>Find Existing Tags</Trans>
           </Button>
           <View style={{ flex: 1 }} />
           <Search
