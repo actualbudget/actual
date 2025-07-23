@@ -1,10 +1,11 @@
 import React, { memo, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgRefreshArrow } from '@actual-app/components/icons/v2';
+import { SvgRefreshArrow, SvgViewShow } from '@actual-app/components/icons/v2';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 
 import { type Tag } from 'loot-core/types/models';
@@ -16,8 +17,10 @@ import {
   Row,
   Cell,
   InputCell,
+  CellButton,
 } from '@desktop-client/components/table';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
 import {
@@ -51,6 +54,7 @@ export const TagRow = memo(
     const triggerRef = useRef(null);
     const { setMenuOpen, menuOpen, handleContextMenu, position } =
       useContextMenu();
+    const navigate = useNavigate();
 
     const onUpdate = (description: string) => {
       dispatch(
@@ -62,6 +66,23 @@ export const TagRow = memo(
               description,
             }),
       );
+    };
+
+    const onShowActivity = () => {
+      const filterConditions = [
+        {
+          field: 'notes',
+          op: 'hasTags',
+          value: `#${tag.tag}`,
+          type: 'string',
+        },
+      ];
+      navigate('/accounts', {
+        state: {
+          goBack: true,
+          filterConditions,
+        },
+      });
     };
 
     return (
@@ -162,6 +183,30 @@ export const TagRow = memo(
             placeholder: t('No description'),
           }}
         />
+        {tag.tag !== '*' && (
+          <Cell
+            name="rule-count"
+            width="auto"
+            style={{ padding: '0 10px' }}
+            plain
+          >
+            <CellButton
+              onSelect={onShowActivity}
+              style={{
+                cursor: 'pointer',
+                fontSize: 11,
+                color: theme.tableTextLight,
+                ':hover': { borderBottom: '1px solid' },
+              }}
+              bare
+            >
+              <Text style={{ paddingRight: 5 }}>
+                <Trans>View Transactions</Trans>
+              </Text>
+              <SvgViewShow style={{ width: 10, height: 10 }} />
+            </CellButton>
+          </Cell>
+        )}
       </Row>
     );
   },
