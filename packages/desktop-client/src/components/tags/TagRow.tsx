@@ -2,7 +2,8 @@ import React, { memo, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgRefreshArrow, SvgViewShow } from '@actual-app/components/icons/v2';
+import { SvgArrowThinRight } from '@actual-app/components/icons/v1';
+import { SvgRefreshArrow } from '@actual-app/components/icons/v2';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
@@ -184,26 +185,24 @@ export const TagRow = memo(
           }}
         />
         {tag.tag !== '*' && (
-          <Cell
-            name="rule-count"
-            width="auto"
-            style={{ padding: '0 10px' }}
-            plain
-          >
+          <Cell width="auto" style={{ padding: '0 10px' }} plain>
             <CellButton
-              onSelect={onShowActivity}
               style={{
+                borderRadius: 4,
+                padding: '3px 6px',
+                backgroundColor: theme.noticeBackground,
+                border: '1px solid ' + theme.noticeBackground,
+                color: theme.noticeTextDark,
+                fontSize: 12,
                 cursor: 'pointer',
-                fontSize: 11,
-                color: theme.tableTextLight,
-                ':hover': { borderBottom: '1px solid' },
+                ':hover': { backgroundColor: theme.noticeBackgroundLight },
               }}
-              bare
+              onSelect={onShowActivity}
             >
               <Text style={{ paddingRight: 5 }}>
                 <Trans>View Transactions</Trans>
               </Text>
-              <SvgViewShow style={{ width: 10, height: 10 }} />
+              <SvgArrowThinRight style={{ width: 8, height: 8 }} />
             </CellButton>
           </Cell>
         )}

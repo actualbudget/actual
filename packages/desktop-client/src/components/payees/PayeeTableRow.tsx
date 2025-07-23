@@ -56,6 +56,8 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }: RuleButtonProps) {
           border: '1px solid ' + theme.noticeBackground,
           color: theme.noticeTextDark,
           fontSize: 12,
+          cursor: 'pointer',
+          ':hover': { backgroundColor: theme.noticeBackgroundLight },
         }}
         onEdit={onEdit}
         onSelect={onClick}
