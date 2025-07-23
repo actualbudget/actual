@@ -15,8 +15,8 @@ Below is a list of the most useful shortcuts.
 ### The Command Palette
 
 The Command Palette is a powerful tool which allows you to quickly access various features and functions within Actual.
-- On Windows and Linux, you can open it by pressing the <Key mod="ctrl" k="k" /> combination to open the Command Palette.
-- On macOS, you can use the <Key mod="cmd" k="k" /> or the <Key mod="ctrl" k="k" /> key combinations to open the Command Palette.
+- On Windows and Linux, you can open it by pressing the <Key mod="ctrl" fixed k="k" /> combination to open the Command Palette.
+- On macOS, you can use the <Key mod="cmd" fixed k="k" /> or the <Key mod="ctrl" fixed k="k" /> key combinations to open the Command Palette.
 
 ![Command Palette](/img/tips-tricks/command-palette.png)
 
