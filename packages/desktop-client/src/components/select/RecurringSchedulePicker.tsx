@@ -494,11 +494,15 @@ function RecurringScheduleTooltip({
           onChangeValue={value => {
             updateField('interval', value);
             const length = String(value).length || 1;
-            const width = Math.min(Math.max(length + 2, 4), 6);
+            const width = Math.min(Math.max(length + 4, 6), 8);
             setIntervalWidth(`${width}ch`);
           }}
           defaultValue={config.interval || 1}
-          style={{ width: intervalWidth }}
+          style={{
+            width: intervalWidth,
+            minWidth: '40px',
+            maxWidth: '80px',
+          }}
         />
         <Select
           options={FREQUENCY_OPTIONS.map(opt => [opt.id, opt.name])}
