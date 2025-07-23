@@ -1,6 +1,8 @@
 import path from 'path';
 
+import { viteCommonjs } from '@originjs/vite-plugin-commonjs';
 import { defineConfig } from 'vite';
+// import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 import { vitePeggyPlugin } from './vite-peggy-plugin';
 
@@ -19,7 +21,7 @@ export default defineConfig(({ mode }) => {
       lib: {
         entry: path.resolve(__dirname, 'src/server/main.ts'),
         name: 'backend',
-        formats: ['umd'],
+        formats: ['iife'],
         fileName: () =>
           isDev ? 'kcab.worker.dev.js' : `kcab.worker.[hash].js`,
       },
@@ -58,18 +60,18 @@ export default defineConfig(({ mode }) => {
       ],
       alias: [
         // Node.js polyfills
-        { find: 'assert', replacement: 'assert' },
-        { find: 'buffer', replacement: 'buffer' },
-        { find: 'path', replacement: 'path-browserify' },
-        { find: 'process', replacement: 'process/browser' },
-        { find: 'stream', replacement: 'stream-browserify' },
-        { find: 'zlib', replacement: 'browserify-zlib' },
-        { find: 'fs', replacement: 'memfs' },
-        // Workspace packages
-        {
-          find: '@actual-app/crdt',
-          replacement: path.resolve(__dirname, '../crdt/src/index.ts'),
-        },
+        // { find: 'assert', replacement: 'assert' },
+        // { find: 'buffer', replacement: 'buffer' },
+        // { find: 'path', replacement: 'path-browserify' },
+        // { find: 'process', replacement: 'process/browser' },
+        // { find: 'stream', replacement: 'stream-browserify' },
+        // { find: 'zlib', replacement: 'browserify-zlib' },
+        // { find: 'fs', replacement: 'memfs' },
+        // // Workspace packages
+        // {
+        //   find: '@actual-app/crdt',
+        //   replacement: path.resolve(__dirname, '../crdt/src/index.ts'),
+        // },
       ],
     },
     define: {
@@ -82,7 +84,7 @@ export default defineConfig(({ mode }) => {
       Buffer: 'globalThis.Buffer',
       process: 'globalThis.process',
     },
-    plugins: [vitePeggyPlugin()],
+    plugins: [vitePeggyPlugin(), viteCommonjs()],
     optimizeDeps: {
       include: [
         'buffer',

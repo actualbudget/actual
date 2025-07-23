@@ -43,6 +43,8 @@
     "@actual-app/api": "workspace:^",
     "@actual-app/crdt": "workspace:^",
     "@actual-app/web": "workspace:^",
+    "@originjs/vite-plugin-commonjs": "^1.0.3",
+    "@rollup/plugin-commonjs": "^28.0.6",
     "@swc/core": "^1.11.24",
     "@types/adm-zip": "^0.5.7",
     "@types/better-sqlite3": "^7.6.13",
