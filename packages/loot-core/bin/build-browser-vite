@@ -1,0 +1,40 @@
+#!/bin/bash -e
+
+cd `dirname "$0"`
+ROOT=`pwd -P`
+VITE_ARGS=""
+
+PUBLIC_DIR="$ROOT"/../../desktop-client/public
+DATA_DIR="$PUBLIC_DIR"/data
+mkdir -p "$DATA_DIR"
+"$ROOT"/copy-migrations "$DATA_DIR"
+
+cd "$DATA_DIR"
+find * -type f | sort > ../data-file-index.txt
+cd "$ROOT"
+
+# Clean out previous build files
+rm -f ../lib-dist/browser/*
+rm -rf ../../desktop-client/public/kcab
+
+if [ $NODE_ENV == 'development' ]; then
+  # In dev mode, always enable watch mode and symlink the build files.
+  # Make sure to do this before starting the build since watch mode
+  # will block
+  VITE_ARGS="$VITE_ARGS --watch"
+  if [ "$OSTYPE" == "msys" ]; then
+    # Ensure symlinks are created as native Windows symlinks.
+    export MSYS=winsymlinks:nativestrict
+  fi
+  ln -snf "$ROOT"/../lib-dist/browser ../../desktop-client/public/kcab
+fi
+
+cp ../../../node_modules/@jlongster/sql.js/dist/sql-wasm.wasm "$PUBLIC_DIR"/sql-wasm.wasm
+
+yarn vite build --config ../vite.config.ts --mode $NODE_ENV $VITE_ARGS
+
+if [ $NODE_ENV == 'production' ]; then
+  # In production, just copy the built files
+  mkdir ../../desktop-client/public/kcab
+  cp -r ../lib-dist/browser/* ../../desktop-client/public/kcab
+fi
