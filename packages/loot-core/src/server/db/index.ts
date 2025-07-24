@@ -818,9 +818,7 @@ export function insertTag(tag): Promise<DbTag['id']> {
 }
 
 export async function deleteTag(tag) {
-  return transaction(() => {
-    runQuery(`DELETE FROM tags WHERE id = ?`, [tag.id]);
-  });
+  return delete_('tags', tag.id);
 }
 
 export function updateTag(tag) {
