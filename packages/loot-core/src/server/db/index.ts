@@ -809,6 +809,7 @@ export function getTags() {
   return all<DbTag>(`
     SELECT id, tag, color, description
     FROM tags
+    WHERE tombstone = 0
     ORDER BY tag
   `);
 }
