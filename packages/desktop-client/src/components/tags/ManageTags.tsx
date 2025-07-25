@@ -33,9 +33,8 @@ export function ManageTags() {
 
   const defaultTag = useMemo(
     () => ({
-      id: '*',
+      id: 'dummy-tag',
       tag: '*',
-      color: theme.noteTagDefault,
       description: t('Default tag color'),
       ...tags.find(tag => tag.tag === '*'),
     }),

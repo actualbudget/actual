@@ -56,8 +56,8 @@ export function useTagCSS() {
         theme,
         // fallback strategy: options color > tag color > default color > theme color (undefined)
         options.color ??
-          (tags.find(t => t.tag === tag)?.color ||
-            tags.find(t => t.tag === '*')?.color),
+          tags.find(t => t.tag === tag)?.color ??
+          tags.find(t => t.tag === '*')?.color,
       );
 
       return css({

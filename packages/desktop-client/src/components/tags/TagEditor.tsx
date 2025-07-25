@@ -27,7 +27,7 @@ export const TagEditor = ({ tag, ref }: TagEditorProps) => {
       value={tag.color}
       onChange={color => {
         dispatch(
-          tag.id !== '*'
+          tag.id !== 'dummy-tag'
             ? updateTag({ ...tag, color: color.toString('hex') })
             : createTag({
                 tag: tag.tag,

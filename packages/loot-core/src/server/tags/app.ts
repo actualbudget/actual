@@ -28,12 +28,26 @@ async function getTags(): Promise<Tag[]> {
 
 async function createTag({
   tag,
-  color,
+  color = null,
   description = null,
 }: Omit<Tag, 'id'>): Promise<Tag> {
+  const allTags = await db.getAllTags();
+
+  const { id: tagId = null } = allTags.find(t => t.tag === tag) || {};
+  if (tagId) {
+    await db.updateTag({
+      id: tagId,
+      tag,
+      color,
+      description,
+      tombstone: 0,
+    });
+    return { id: tagId, tag, color, description };
+  }
+
   const id = await db.insertTag({
     tag: tag.trim(),
-    color: color.trim(),
+    color: color ? color.trim() : null,
     description,
   });
 
@@ -66,7 +80,7 @@ async function findTags(): Promise<Tag[]> {
   for (const { notes } of taggedNotes) {
     for (const [_, tag] of notes.matchAll(/(?<!#)#([^#\s]+)/g)) {
       if (!tags.find(t => t.tag === tag)) {
-        tags.push(await createTag({ tag, color: '' }));
+        tags.push(await createTag({ tag }));
       }
     }
   }

@@ -59,7 +59,7 @@ export const TagRow = memo(
 
     const onUpdate = (description: string) => {
       dispatch(
-        tag.id !== '*'
+        tag.id !== 'dummy-tag'
           ? updateTag({ ...tag, description })
           : createTag({
               tag: tag.tag,

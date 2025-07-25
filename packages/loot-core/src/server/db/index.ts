@@ -814,6 +814,14 @@ export function getTags() {
   `);
 }
 
+export function getAllTags() {
+  return all<DbTag>(`
+    SELECT id, tag, color, description
+    FROM tags
+    ORDER BY tag
+  `);
+}
+
 export function insertTag(tag): Promise<DbTag['id']> {
   return insertWithUUID('tags', tag);
 }
