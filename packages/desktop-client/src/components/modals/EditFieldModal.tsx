@@ -4,7 +4,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -14,7 +14,7 @@ import { View } from '@actual-app/components/view';
 import { parseISO, format as formatDate, parse as parseDate } from 'date-fns';
 
 import { currentDay, dayFromDate } from 'loot-core/shared/months';
-import { amountToInteger } from 'loot-core/shared/util';
+import { amountToInteger, currencyToInteger } from 'loot-core/shared/util';
 
 import {
   Modal,
@@ -58,8 +58,17 @@ export function EditFieldModal({
   function onSelect(value: string | number) {
     if (value != null) {
       // Process the value if needed
-      if (name === 'amount' && typeof value === 'number') {
-        value = amountToInteger(value);
+      if (name === 'amount') {
+        if (typeof value === 'string') {
+          const parsed = currencyToInteger(value);
+          if (parsed === null) {
+            alert(t('Invalid amount value'));
+            return;
+          }
+          value = parsed;
+        } else if (typeof value === 'number') {
+          value = amountToInteger(value);
+        }
       }
 
       onSubmit(name, value);
@@ -140,7 +149,7 @@ export function EditFieldModal({
                 noteInputRef.current?.focus();
               }}
             >
-              {t('Prepend')}
+              <Trans>Prepend</Trans>
             </Button>
             <Button
               style={{
@@ -171,7 +180,7 @@ export function EditFieldModal({
                 noteInputRef.current?.focus();
               }}
             >
-              {t('Replace')}
+              <Trans>Replace</Trans>
             </Button>
             <Button
               style={{
@@ -202,7 +211,7 @@ export function EditFieldModal({
                 noteInputRef.current?.focus();
               }}
             >
-              {t('Append')}
+              <Trans>Append</Trans>
             </Button>
           </View>
           <Input

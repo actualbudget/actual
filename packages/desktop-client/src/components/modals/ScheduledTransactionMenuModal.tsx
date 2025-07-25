@@ -3,7 +3,7 @@ import React, {
   type ComponentPropsWithoutRef,
   type CSSProperties,
 } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 import { styles } from '@actual-app/components/styles';
@@ -40,7 +40,6 @@ export function ScheduledTransactionMenuModal({
   onComplete,
 }: ScheduledTransactionMenuModalProps) {
   const locale = useLocale();
-  const { t } = useTranslation();
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -82,7 +81,7 @@ export function ScheduledTransactionMenuModal({
             }}
           >
             <Text style={{ fontSize: 17, fontWeight: 400 }}>
-              {t('Scheduled date')}
+              <Trans>Scheduled date</Trans>
             </Text>
             <Text style={{ fontSize: 17, fontWeight: 700 }}>
               {format(schedule?.next_date || '', 'MMMM dd, yyyy', locale)}
@@ -109,7 +108,7 @@ type ScheduledTransactionMenuProps = Omit<
 > & {
   transactionId: string;
   onSkip: (transactionId: string) => void;
-  onPost: (transactionId: string) => void;
+  onPost: (transactionId: string, today?: boolean) => void;
   onComplete: (transactionId: string) => void;
 };
 
@@ -135,6 +134,9 @@ function ScheduledTransactionMenu({
           case 'post':
             onPost?.(transactionId);
             break;
+          case 'post-today':
+            onPost?.(transactionId, true);
+            break;
           case 'skip':
             onSkip?.(transactionId);
             break;
@@ -146,7 +148,8 @@ function ScheduledTransactionMenu({
         }
       }}
       items={[
-        { name: 'post', text: t('Post transaction today') },
+        { name: 'post', text: t('Post transaction') },
+        { name: 'post-today', text: t('Post transaction today') },
         ...(canBeSkipped
           ? [{ name: 'skip', text: t('Skip next scheduled date') }]
           : []),

@@ -50,6 +50,9 @@ export function Schedules() {
         case 'post-transaction':
           await send('schedule/post-transaction', { id });
           break;
+        case 'post-transaction-today':
+          await send('schedule/post-transaction', { id, today: true });
+          break;
         case 'skip':
           await send('schedule/skip-next-date', { id });
           break;

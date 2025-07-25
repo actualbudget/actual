@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
@@ -36,7 +36,7 @@ export function BudgetFileSelectionModal() {
             }}
           >
             <Text style={{ fontSize: 17, fontWeight: 400 }}>
-              {t('Switching from:')}
+              <Trans>Switching from:</Trans>
             </Text>
             <Text style={{ fontSize: 17, fontWeight: 700 }}>
               {currentFile?.name}

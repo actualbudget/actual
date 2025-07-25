@@ -1,5 +1,6 @@
 import {
   type ComponentType,
+  type ReactNode,
   type SVGProps,
   useCallback,
   useEffect,
@@ -10,9 +11,11 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import {
   SvgCog,
+  SvgLibrary,
   SvgPiggyBank,
   SvgReports,
   SvgStoreFront,
+  SvgTag,
   SvgTuning,
   SvgWallet,
 } from '@actual-app/components/icons/v1';
@@ -20,18 +23,41 @@ import {
   SvgCalendar3,
   SvgNotesPaperText,
 } from '@actual-app/components/icons/v2';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { Command } from 'cmdk';
+
+import { CellValue, CellValueText } from './spreadsheet/CellValue';
 
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useModalState } from '@desktop-client/hooks/useModalState';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useReports } from '@desktop-client/hooks/useReports';
+import type {
+  Binding,
+  SheetFields,
+  SheetNames,
+} from '@desktop-client/spreadsheet';
+import {
+  accountBalance,
+  allAccountBalance,
+  offBudgetAccountBalance,
+  onBudgetAccountBalance,
+} from '@desktop-client/spreadsheet/bindings';
 
 type SearchableItem = {
   id: string;
+  /** The name to display and use for searching */
   name: string;
+  /**
+   * The item content to display. If not provided, {@link SearchableItem.name `name`} will be used.
+   *
+   * Meant for complex items that want to display more than just static text.
+   */
+  content?: ReactNode;
   Icon: ComponentType<SVGProps<SVGSVGElement>>;
 };
 
@@ -41,6 +67,38 @@ type SearchSection = {
   items: Readonly<SearchableItem[]>;
   onSelect: (item: Pick<SearchableItem, 'id'>) => void;
 };
+
+function BalanceRow<
+  SheetName extends SheetNames,
+  FieldName extends SheetFields<SheetName>,
+>({
+  label,
+  binding,
+}: {
+  label: string;
+  binding: Binding<SheetName, FieldName>;
+}) {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flex: 1,
+      }}
+    >
+      <Text>{label}</Text>
+      <CellValue binding={binding} type="financial">
+        {props => (
+          <CellValueText
+            {...props}
+            style={{ ...styles.tnum, whiteSpace: 'nowrap', opacity: 0.9 }}
+          />
+        )}
+      </CellValue>
+    </View>
+  );
+}
 
 export function CommandBar() {
   const { t } = useTranslation();
@@ -67,7 +125,20 @@ export function CommandBar() {
       },
       { id: 'payees', name: t('Payees'), path: '/payees', Icon: SvgStoreFront },
       { id: 'rules', name: t('Rules'), path: '/rules', Icon: SvgTuning },
+      { id: 'tags', name: t('Tags'), path: '/tags', Icon: SvgTag },
       { id: 'settings', name: t('Settings'), path: '/settings', Icon: SvgCog },
+      {
+        id: 'accounts',
+        name: t('All Accounts'),
+        path: '/accounts',
+        content: (
+          <BalanceRow<'account', 'accounts-balance'>
+            label={t('All Accounts')}
+            binding={allAccountBalance()}
+          />
+        ),
+        Icon: SvgLibrary,
+      },
     ],
     [t],
   );
@@ -111,11 +182,7 @@ export function CommandBar() {
     {
       key: 'navigation',
       heading: t('Navigation'),
-      items: navigationItems.map(({ id, name, Icon }) => ({
-        id,
-        name,
-        Icon,
-      })),
+      items: navigationItems,
       onSelect: ({ id }) => {
         const item = navigationItems.find(item => item.id === id);
         if (!!item) handleNavigate(item.path);
@@ -124,10 +191,40 @@ export function CommandBar() {
     {
       key: 'accounts',
       heading: t('Accounts'),
-      items: accounts.map(account => ({
-        ...account,
-        Icon: SvgPiggyBank,
-      })),
+      items: [
+        {
+          id: 'onbudget',
+          name: t('On Budget'),
+          content: (
+            <BalanceRow<'account', 'onbudget-accounts-balance'>
+              label={t('On Budget')}
+              binding={onBudgetAccountBalance()}
+            />
+          ),
+          Icon: SvgLibrary,
+        },
+        {
+          id: 'offbudget',
+          name: t('Off Budget'),
+          content: (
+            <BalanceRow<'account', 'offbudget-accounts-balance'>
+              label={t('Off Budget')}
+              binding={offBudgetAccountBalance()}
+            />
+          ),
+          Icon: SvgLibrary,
+        },
+        ...accounts.map(account => ({
+          ...account,
+          content: (
+            <BalanceRow<'account', 'balance'>
+              label={account.name}
+              binding={accountBalance(account.id)}
+            />
+          ),
+          Icon: SvgPiggyBank,
+        })),
+      ],
       onSelect: ({ id }) => handleNavigate(`/accounts/${id}`),
     },
     {
@@ -224,7 +321,7 @@ export function CommandBar() {
                   },
                 })}
               >
-                {section.items.map(({ id, name, Icon }) => (
+                {section.items.map(({ id, name, Icon, content }) => (
                   <Command.Item
                     key={id}
                     onSelect={() => section.onSelect({ id })}
@@ -245,7 +342,7 @@ export function CommandBar() {
                             'var(--color-menuItemBackgroundHover)',
                           color: 'var(--color-menuItemTextHover)',
                         },
-                      // eslint-disable-next-line rulesdir/typography
+                      // eslint-disable-next-line actual/typography
                       "&[data-selected='true']": {
                         backgroundColor: 'var(--color-menuItemBackgroundHover)',
                         color: 'var(--color-menuItemTextHover)',
@@ -253,7 +350,7 @@ export function CommandBar() {
                     })}
                   >
                     <Icon width={16} height={16} />
-                    {name}
+                    {content || name}
                   </Command.Item>
                 ))}
               </Command.Group>

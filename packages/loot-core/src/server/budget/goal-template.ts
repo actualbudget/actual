@@ -158,8 +158,8 @@ async function processTemplate(
   categories: CategoryEntity[] = [],
 ): Promise<Notification> {
   // setup categories
+  const isReflect = isReflectBudget();
   if (!categories.length) {
-    const isReflect = isReflectBudget();
     categories = (await getCategories()).filter(c => isReflect || !c.is_income);
   }
 
@@ -169,8 +169,7 @@ async function processTemplate(
     monthUtils.sheetForMonth(month),
     `to-budget`,
   );
-  let priorities: number[] = [];
-  let remainderWeight = 0;
+  const prioritiesSet = new Set<number>();
   const errors: string[] = [];
   const budgetList: TemplateBudget[] = [];
   const goalList: TemplateGoal[] = [];
@@ -183,9 +182,6 @@ async function processTemplate(
 
     // only run categories that are unbudgeted or if we are forcing it
     if ((budgeted === 0 || force) && templates) {
-      // add to available budget
-      // gather needed priorities
-      // gather remainder weights
       try {
         const templateContext = await CategoryTemplateContext.init(
           templates,
@@ -198,8 +194,7 @@ async function processTemplate(
           availBudget += budgeted;
         }
         availBudget += templateContext.getLimitExcess();
-        priorities = [...priorities, ...templateContext.getPriorities()];
-        remainderWeight += templateContext.getRemainderWeight();
+        templateContext.getPriorities().forEach(p => prioritiesSet.add(p));
         templateContexts.push(templateContext);
       } catch (e) {
         errors.push(`${category.name}: ${e.message}`);
@@ -233,13 +228,7 @@ async function processTemplate(
     };
   }
 
-  //compress to needed, sorted priorities
-  priorities = priorities
-    .sort((a, b) => {
-      return a - b;
-    })
-    .filter((item, idx, curr) => curr.indexOf(item) === idx);
-
+  const priorities = new Int32Array([...prioritiesSet]).sort();
   // run each priority level
   for (const priority of priorities) {
     const availStart = availBudget;
@@ -252,13 +241,21 @@ async function processTemplate(
       availBudget -= budget;
     }
   }
+
   // run remainder
-  if (availBudget > 0 && remainderWeight) {
+  let remainderContexts = templateContexts.filter(c => c.hasRemainder());
+  while (availBudget > 0 && remainderContexts.length > 0) {
+    let remainderWeight = 0;
+    remainderContexts.forEach(
+      context => (remainderWeight += context.getRemainderWeight()),
+    );
     const perWeight = availBudget / remainderWeight;
-    templateContexts.forEach(context => {
+    remainderContexts.forEach(context => {
       availBudget -= context.runRemainder(availBudget, perWeight);
     });
+    remainderContexts = templateContexts.filter(c => c.hasRemainder());
   }
+
   // finish
   templateContexts.forEach(context => {
     const values = context.getValues();
