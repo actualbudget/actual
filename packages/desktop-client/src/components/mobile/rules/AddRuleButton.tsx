@@ -2,7 +2,6 @@ import React from 'react';
 
 import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
-import { theme } from '@actual-app/components/theme';
 
 import { type NewRuleEntity } from 'loot-core/types/models';
 
@@ -55,22 +54,10 @@ export function AddRuleButton({ onRuleAdded }: AddRuleButtonProps) {
     <Button
       variant="bare"
       aria-label="Add new rule"
-      style={{
-        width: 28,
-        height: 28,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 14,
-        backgroundColor: theme.pillBackgroundLight,
-        margin: 10,
-      }}
+      style={{ margin: 10 }}
       onPress={handleAddRule}
     >
-      <SvgAdd
-        width={16}
-        height={16}
-        style={{ color: theme.pillTextHighlighted }}
-      />
+      <SvgAdd width={20} height={20} />
     </Button>
   );
 }
