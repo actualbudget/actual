@@ -31,24 +31,19 @@ export function RulesListItem({ rule, onPress }: RulesListItemProps) {
         borderColor: theme.tableBorder,
         borderStyle: 'solid',
         backgroundColor: theme.tableBackground,
-        flexDirection: 'column',
+        flexDirection: 'row',
         alignItems: 'flex-start',
-        justifyContent: 'center',
-        padding: '8px 0',
-        gap: 4,
+        justifyContent: 'flex-start',
+        padding: '8px 16px',
+        gap: 12,
       }}
       onPress={onPress}
     >
-      {/* IF conditions with pre/post label - inline and left-aligned */}
+      {/* Column 1: PRE/POST pill */}
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 6,
-          width: '100%',
-          paddingLeft: 16,
-          paddingRight: 16,
+          flexShrink: 0,
+          paddingTop: 2, // Slight top padding to align with text baseline
         }}
       >
         <View
@@ -62,7 +57,6 @@ export function RulesListItem({ rule, onPress }: RulesListItemProps) {
             paddingTop: 2,
             paddingBottom: 2,
             borderRadius: 3,
-            marginRight: 4,
           }}
         >
           <span
@@ -78,67 +72,75 @@ export function RulesListItem({ rule, onPress }: RulesListItemProps) {
             {rule.stage === 'pre' ? t('PRE') : t('POST')}
           </span>
         </View>
-
-        <span
-          style={{
-            fontSize: 13,
-            fontWeight: 600,
-            color: theme.pageTextLight,
-            marginRight: 4,
-          }}
-        >
-          {t('IF')}
-        </span>
-
-        {rule.conditions.map((condition, index) => (
-          <View key={index} style={{ marginRight: 4, marginBottom: 2 }}>
-            <ConditionExpression
-              field={condition.field}
-              op={condition.op}
-              value={condition.value}
-              options={condition.options}
-              inline={true}
-            />
-          </View>
-        ))}
       </View>
 
-      {/* THEN actions - inline and left-aligned with spacing to match IF alignment */}
+      {/* Column 2: IF and THEN blocks */}
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 6,
-          width: '100%',
-          paddingLeft: 16,
-          paddingRight: 16,
+          flex: 1,
+          flexDirection: 'column',
+          gap: 4,
         }}
       >
-        {/* Spacer to align with IF label - matches PRE/POST badge + margin */}
+        {/* IF conditions block */}
         <View
           style={{
-            width: 42, // Approximate width of PRE/POST badge + margin
-            marginRight: 4,
-          }}
-        />
-
-        <span
-          style={{
-            fontSize: 13,
-            fontWeight: 600,
-            color: theme.pageTextLight,
-            marginRight: 4,
+            flexDirection: 'row',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 6,
           }}
         >
-          {t('THEN')}
-        </span>
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: theme.pageTextLight,
+              marginRight: 4,
+            }}
+          >
+            {t('IF')}
+          </span>
 
-        {rule.actions.map((action, index) => (
-          <View key={index} style={{ marginRight: 4, marginBottom: 2 }}>
-            <ActionExpression {...action} />
-          </View>
-        ))}
+          {rule.conditions.map((condition, index) => (
+            <View key={index} style={{ marginRight: 4, marginBottom: 2 }}>
+              <ConditionExpression
+                field={condition.field}
+                op={condition.op}
+                value={condition.value}
+                options={condition.options}
+                inline={true}
+              />
+            </View>
+          ))}
+        </View>
+
+        {/* THEN actions block */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 6,
+          }}
+        >
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: theme.pageTextLight,
+              marginRight: 4,
+            }}
+          >
+            {t('THEN')}
+          </span>
+
+          {rule.actions.map((action, index) => (
+            <View key={index} style={{ marginRight: 4, marginBottom: 2 }}>
+              <ActionExpression {...action} />
+            </View>
+          ))}
+        </View>
       </View>
     </Button>
   );
