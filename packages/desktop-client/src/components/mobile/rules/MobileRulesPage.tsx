@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
@@ -203,7 +204,11 @@ export function MobileRulesPage() {
     >
       <View
         style={{
-          padding: '10px 16px 0px 16px',
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: theme.mobilePageBackground,
+          padding: 10,
+          width: '100%',
           borderBottomWidth: 2,
           borderBottomStyle: 'solid',
           borderBottomColor: theme.tableBorder,
@@ -214,6 +219,11 @@ export function MobileRulesPage() {
           value={filter}
           onChange={onSearchChange}
           width="100%"
+          height={styles.mobileMinHeight}
+          style={{
+            backgroundColor: theme.tableBackground,
+            borderColor: theme.formInputBorder,
+          }}
         />
       </View>
       <RulesList
