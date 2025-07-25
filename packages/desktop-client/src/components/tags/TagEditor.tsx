@@ -24,7 +24,7 @@ export const TagEditor = ({ tag, ref }: TagEditorProps) => {
 
   return (
     <ColorPicker
-      value={tag.color}
+      value={tag.color ?? undefined}
       onChange={color => {
         dispatch(
           tag.id !== '*'
