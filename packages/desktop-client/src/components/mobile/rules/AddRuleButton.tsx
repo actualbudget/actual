@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { SvgAdd } from '@actual-app/components/icons';
+import { Button } from '@actual-app/components/button';
+import { SvgAdd } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
 
 import { type NewRuleEntity } from 'loot-core/types/models';
 
@@ -19,34 +19,41 @@ export function AddRuleButton({ onRuleAdded }: AddRuleButtonProps) {
   const handleAddRule = () => {
     const newRule: NewRuleEntity = {
       stage: 'pre',
-      condOp: 'and',
+      conditionsOp: 'and',
       conditions: [
         {
           field: 'payee',
           op: 'is',
-          value: null,
+          value: '',
+          type: 'id',
         },
       ],
       actions: [
         {
           field: 'category',
           op: 'set',
-          value: null,
+          value: '',
+          type: 'id',
         },
       ],
     };
 
     dispatch(
-      pushModal('edit-rule', {
-        rule: newRule,
-        onSave: onRuleAdded,
+      pushModal({
+        modal: {
+          name: 'edit-rule',
+          options: {
+            rule: newRule,
+            onSave: onRuleAdded,
+          },
+        },
       }),
     );
   };
 
   return (
-    <View
-      role="button"
+    <Button
+      variant="bare"
       aria-label="Add new rule"
       style={{
         width: 28,
@@ -55,15 +62,15 @@ export function AddRuleButton({ onRuleAdded }: AddRuleButtonProps) {
         justifyContent: 'center',
         borderRadius: 14,
         backgroundColor: theme.pillBackgroundLight,
-        cursor: 'pointer',
+        margin: 10,
       }}
       onPress={handleAddRule}
     >
-      <SvgAdd 
-        width={16} 
-        height={16} 
-        style={{ color: theme.pillTextHighlighted }} 
+      <SvgAdd
+        width={16}
+        height={16}
+        style={{ color: theme.pillTextHighlighted }}
       />
-    </View>
+    </Button>
   );
 }

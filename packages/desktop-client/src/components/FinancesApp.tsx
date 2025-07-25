@@ -14,7 +14,6 @@ import { BankSync } from './banksync';
 import { BankSyncStatus } from './BankSyncStatus';
 import { CommandBar } from './CommandBar';
 import { GlobalKeys } from './GlobalKeys';
-import { ManageRulesPage } from './ManageRulesPage';
 import { Category } from './mobile/budget/Category';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
