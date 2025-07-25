@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
@@ -77,8 +78,8 @@ function ruleToString(rule: RuleEntity, data: FilterData) {
         'to',
         mapValue(action.field, action.value, data),
       ];
-          } else if (action.op === 'link-schedule') {
-        const schedule = data.schedules.find(s => s.id === String(action.value));
+    } else if (action.op === 'link-schedule') {
+      const schedule = data.schedules.find(s => s.id === String(action.value));
       return [
         friendlyOp(action.op),
         describeSchedule(
@@ -200,7 +201,14 @@ export function MobileRulesPage() {
       }
       padding={0}
     >
-      <View style={{ padding: '10px 16px 0px 16px' }}>
+      <View
+        style={{
+          padding: '10px 16px 0px 16px',
+          borderBottomWidth: 2,
+          borderBottomStyle: 'solid',
+          borderBottomColor: theme.tableBorder,
+        }}
+      >
         <Search
           placeholder={t('Filter rules…')}
           value={filter}

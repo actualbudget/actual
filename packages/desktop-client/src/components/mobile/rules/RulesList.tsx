@@ -49,7 +49,6 @@ export function RulesList({
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
-          paddingTop: 100,
           paddingHorizontal: 20,
         }}
       >
