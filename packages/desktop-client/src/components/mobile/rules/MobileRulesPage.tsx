@@ -77,8 +77,8 @@ function ruleToString(rule: RuleEntity, data: FilterData) {
         'to',
         mapValue(action.field, action.value, data),
       ];
-          } else if (action.op === 'link-schedule') {
-        const schedule = data.schedules.find(s => s.id === String(action.value));
+    } else if (action.op === 'link-schedule') {
+      const schedule = data.schedules.find(s => s.id === String(action.value));
       return [
         friendlyOp(action.op),
         describeSchedule(
