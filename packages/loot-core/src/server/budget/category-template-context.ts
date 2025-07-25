@@ -1,7 +1,8 @@
 // @ts-strict-ignore
+import { q } from 'loot-core/shared/query';
 
 import * as monthUtils from '../../shared/months';
-import { amountToInteger } from '../../shared/util';
+import { amountToInteger, integerToAmount } from '../../shared/util';
 import { CategoryEntity } from '../../types/models';
 import {
   AverageTemplate,
@@ -13,8 +14,9 @@ import {
   SimpleTemplate,
   SpendTemplate,
   Template,
-  WeekTemplate,
+  PeriodicTemplate,
 } from '../../types/models/templates';
+import { aqlQuery } from '../aql';
 import * as db from '../db';
 
 import { getSheetValue, getSheetBoolean } from './actions';
@@ -71,6 +73,11 @@ export class CategoryTemplateContext {
     // run all checks
     await CategoryTemplateContext.checkByAndScheduleAndSpend(templates, month);
     await CategoryTemplateContext.checkPercentage(templates);
+
+    const hideDecimal = await aqlQuery(
+      q('preferences').filter({ id: 'hideFraction' }).select('*'),
+    );
+
     // call the private constructor
     return new CategoryTemplateContext(
       templates,
@@ -78,6 +85,9 @@ export class CategoryTemplateContext {
       month,
       fromLastMonth,
       budgeted,
+      hideDecimal.data.length > 0
+        ? hideDecimal.data[0].value === 'true'
+        : false,
     );
   }
 
@@ -90,7 +100,10 @@ export class CategoryTemplateContext {
     );
   }
   getPriorities(): number[] {
-    return this.priorities;
+    return Array.from(this.priorities);
+  }
+  hasRemainder(): boolean {
+    return this.remainderWeight > 0 && !this.limitMet;
   }
   getRemainderWeight(): number {
     return this.remainderWeight;
@@ -102,11 +115,11 @@ export class CategoryTemplateContext {
   // what is the full requested amount this month
   async runAll(available: number) {
     let toBudget: number = 0;
-    for (let i = 0; i < this.priorities.length; i++) {
-      const p = this.priorities[i];
+    const prioritiesSorted = new Int32Array([...this.getPriorities()].sort());
+    for (let i = 0; i < prioritiesSorted.length; i++) {
+      const p = prioritiesSorted[i];
       toBudget += await this.runTemplatesForPriority(p, available, available);
     }
-    //TODO does this need to run limits? maybe pass in option to ignore previous balance?
     return toBudget;
   }
 
@@ -117,7 +130,7 @@ export class CategoryTemplateContext {
     budgetAvail: number,
     availStart: number,
   ): Promise<number> {
-    if (!this.priorities.includes(priority)) return 0;
+    if (!this.priorities.has(priority)) return 0;
     if (this.limitMet) return 0;
 
     const t = this.templates.filter(t => t.priority === priority);
@@ -141,8 +154,8 @@ export class CategoryTemplateContext {
           newBudget = await CategoryTemplateContext.runCopy(template, this);
           break;
         }
-        case 'week': {
-          newBudget = CategoryTemplateContext.runWeek(template, this);
+        case 'periodic': {
+          newBudget = CategoryTemplateContext.runPeriodic(template, this);
           break;
         }
         case 'spend': {
@@ -210,8 +223,12 @@ export class CategoryTemplateContext {
         available = available + orig - toBudget;
       }
     }
-    // don't overbudget when using a priority
-    if (priority > 0 && available < 0) {
+
+    //round all budget values if needed
+    if (this.hideDecimal) toBudget = this.removeFraction(toBudget);
+
+    // don't overbudget when using a priority unless income category
+    if (priority > 0 && available < 0 && !this.category.is_income) {
       this.fullAmount += toBudget;
       toBudget = Math.max(0, toBudget + available);
       this.toBudgetAmount += toBudget;
@@ -219,26 +236,37 @@ export class CategoryTemplateContext {
       this.fullAmount += toBudget;
       this.toBudgetAmount += toBudget;
     }
-    return toBudget;
+    return this.category.is_income ? -toBudget : toBudget;
   }
 
-  // run all of the 'remainder' type templates
   runRemainder(budgetAvail: number, perWeight: number) {
     if (this.remainder.length === 0) return 0;
     let toBudget = Math.round(this.remainderWeight * perWeight);
-    //check possible overbudget from rounding, 1cent leftover
-    if (toBudget > budgetAvail) {
-      toBudget = budgetAvail;
-      this.toBudgetAmount += toBudget;
-      return toBudget;
-    } else if (budgetAvail - toBudget === 1) {
-      toBudget += 1;
-      this.toBudgetAmount += toBudget;
-      return toBudget;
-    } else {
-      this.toBudgetAmount += toBudget;
-      return toBudget;
+
+    let smallest = 1;
+    if (this.hideDecimal) {
+      // handle hideDecimal
+      toBudget = this.removeFraction(toBudget);
+      smallest = 100;
     }
+
+    //check possible overbudget from rounding, 1cent leftover
+    if (toBudget > budgetAvail || budgetAvail - toBudget <= smallest) {
+      toBudget = budgetAvail;
+    }
+
+    if (this.limitCheck) {
+      if (
+        toBudget + this.toBudgetAmount + this.fromLastMonth >=
+        this.limitAmount
+      ) {
+        toBudget = this.limitAmount - this.toBudgetAmount - this.fromLastMonth;
+        this.limitMet = true;
+      }
+    }
+
+    this.toBudgetAmount += toBudget;
+    return toBudget;
   }
 
   getValues() {
@@ -257,7 +285,8 @@ export class CategoryTemplateContext {
   private templates: Template[] = [];
   private remainder: RemainderTemplate[] = [];
   private goals: GoalTemplate[] = [];
-  private priorities: number[] = [];
+  private priorities: Set<number> = new Set();
+  readonly hideDecimal: boolean = false;
   private remainderWeight: number = 0;
   private toBudgetAmount: number = 0; // amount that will be budgeted by the templates
   private fullAmount: number = null; // the full requested amount, start null for remainder only cats
@@ -277,52 +306,31 @@ export class CategoryTemplateContext {
     month: string,
     fromLastMonth: number,
     budgeted: number,
+    hideDecimal: boolean = false,
   ) {
     this.category = category;
     this.month = month;
     this.fromLastMonth = fromLastMonth;
     this.previouslyBudgeted = budgeted;
+    this.hideDecimal = hideDecimal;
     // sort the template lines into regular template, goals, and remainder templates
     if (templates) {
       templates.forEach(t => {
         if (t.directive === 'template' && t.type !== 'remainder') {
           this.templates.push(t);
-        }
-      });
-      templates.forEach(t => {
-        if (t.directive === 'template' && t.type === 'remainder') {
+          if (t.priority !== null) this.priorities.add(t.priority);
+        } else if (t.directive === 'template' && t.type === 'remainder') {
           this.remainder.push(t);
+          this.remainderWeight += t.weight;
+        } else if (t.directive === 'goal' && t.type === 'goal') {
+          this.goals.push(t);
         }
-      });
-      templates.forEach(t => {
-        if (t.directive === 'goal' && t.type === 'goal') this.goals.push(t);
       });
     }
-    // check limits here since it needs to save states inside the object
-    this.checkLimit();
+
+    this.checkLimit(templates);
     this.checkSpend();
     this.checkGoal();
-
-    //find priorities
-    const p = [];
-    this.templates.forEach(t => {
-      if (t.priority != null) {
-        p.push(t.priority);
-      }
-    });
-    //sort and reduce to unique items
-    this.priorities = p
-      .sort(function (a, b) {
-        return a - b;
-      })
-      .filter((item, idx, curr) => curr.indexOf(item) === idx);
-
-    //find remainder weight
-    let weight = 0;
-    this.remainder.forEach(r => {
-      weight += r.weight;
-    });
-    this.remainderWeight = weight;
   }
 
   private runGoal() {
@@ -412,10 +420,13 @@ export class CategoryTemplateContext {
     });
   }
 
-  private checkLimit() {
-    for (const template of this.templates
+  private checkLimit(templates: Template[]) {
+    for (const template of templates
       .filter(
-        t => t.type === 'simple' || t.type === 'week' || t.type === 'remainder',
+        t =>
+          t.type === 'simple' ||
+          t.type === 'periodic' ||
+          t.type === 'remainder',
       )
       .filter(t => t.limit)) {
       if (this.limitCheck) {
@@ -474,6 +485,10 @@ export class CategoryTemplateContext {
     }
   }
 
+  private removeFraction(amount: number): number {
+    return amountToInteger(Math.round(integerToAmount(amount)));
+  }
+
   //-----------------------------------------------------------------------------
   //  Processor Functions
 
@@ -498,22 +513,51 @@ export class CategoryTemplateContext {
     );
   }
 
-  static runWeek(
-    template: WeekTemplate,
+  static runPeriodic(
+    template: PeriodicTemplate,
     templateContext: CategoryTemplateContext,
   ): number {
     let toBudget = 0;
     const amount = amountToInteger(template.amount);
-    const weeks = template.weeks != null ? Math.round(template.weeks) : 1;
-    let w = template.starting;
-    const nextMonth = monthUtils.addMonths(templateContext.month, 1);
+    const period = template.period.period;
+    const numPeriods = template.period.amount;
+    let date = template.starting;
 
-    while (w < nextMonth) {
-      if (w >= templateContext.month) {
-        toBudget += amount;
-      }
-      w = monthUtils.addWeeks(w, weeks);
+    let dateShiftFunction;
+    switch (period) {
+      case 'day':
+        dateShiftFunction = monthUtils.addDays;
+        break;
+      case 'week':
+        dateShiftFunction = monthUtils.addWeeks;
+        break;
+      case 'month':
+        dateShiftFunction = monthUtils.addMonths;
+        break;
+      case 'year':
+        // the addYears function doesn't return the month number, so use addMonths
+        dateShiftFunction = (date, numPeriods) =>
+          monthUtils.addMonths(date, numPeriods * 12);
+        break;
     }
+
+    //shift the starting date until its in our month or in the future
+    while (templateContext.month > date) {
+      date = dateShiftFunction(date, numPeriods);
+    }
+
+    if (
+      monthUtils.differenceInCalendarMonths(templateContext.month, date) < 0
+    ) {
+      return 0;
+    } // nothing needed this month
+
+    const nextMonth = monthUtils.addMonths(templateContext.month, 1);
+    while (date < nextMonth) {
+      toBudget += amount;
+      date = dateShiftFunction(date, numPeriods);
+    }
+
     return toBudget;
   }
 

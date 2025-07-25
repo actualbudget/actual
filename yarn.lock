@@ -67,8 +67,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/crdt@workspace:packages/crdt"
   dependencies:
+    "@types/google-protobuf": "npm:^3.15.12"
     google-protobuf: "npm:^3.21.4"
     murmurhash: "npm:^2.0.1"
+    protoc-gen-js: "npm:^3.21.4-4"
     ts-protoc-gen: "npm:^0.15.0"
     typescript: "npm:^5.8.3"
     uuid: "npm:^11.1.0"
@@ -102,7 +104,6 @@ __metadata:
     debug: "npm:^4.4.1"
     express: "npm:5.1.0"
     express-rate-limit: "npm:^7.5.0"
-    express-response-size: "npm:^0.0.3"
     express-winston: "npm:^4.2.0"
     http-proxy-middleware: "npm:^3.0.5"
     jws: "npm:^4.0.0"
@@ -6550,6 +6551,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/google-protobuf@npm:^3.15.12":
+  version: 3.15.12
+  resolution: "@types/google-protobuf@npm:3.15.12"
+  checksum: 10/a5c5f09a3fc4bc6a9339df29f4a32daf77c37f2bce6e8aa7b949fae19829a87c351786b7401eb45ea643dfa98d5155ffd9dd637c3ec61f69a30979bd67f6954e
+  languageName: node
+  linkType: hard
+
 "@types/hast@npm:^3.0.0":
   version: 3.0.4
   resolution: "@types/hast@npm:3.0.4"
@@ -7614,7 +7622,6 @@ __metadata:
     eslint-plugin-jsx-a11y: "npm:^6.10.2"
     eslint-plugin-react: "npm:^7.37.5"
     eslint-plugin-react-hooks: "npm:^5.2.0"
-    eslint-plugin-rulesdir: "npm:^0.2.2"
     eslint-plugin-typescript-paths: "npm:^0.0.33"
     globals: "npm:^15.15.0"
     html-to-image: "npm:^1.11.13"
@@ -7632,6 +7639,13 @@ __metadata:
     typescript-strict-plugin: "npm:^2.4.4"
   languageName: unknown
   linkType: soft
+
+"adm-zip@npm:0.5.10":
+  version: 0.5.10
+  resolution: "adm-zip@npm:0.5.10"
+  checksum: 10/c5ab79b77114d8277f0cbfd6cca830198d6c7ee4971f6960f48e08cd2375953b11dc71729b7f396abd51d2d6cce8c862fad185ea90cb2c84ab5161c37ed1b099
+  languageName: node
+  linkType: hard
 
 "adm-zip@npm:0.5.16":
   version: 0.5.16
@@ -10943,13 +10957,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-rulesdir@npm:^0.2.2":
-  version: 0.2.2
-  resolution: "eslint-plugin-rulesdir@npm:0.2.2"
-  checksum: 10/aac282554e5eb5b1fb3944dd43a08be5fd3e0bc33a00738f525df08344bc1d54f4abe3303118582d86776b3146ddb9e09d3fd1af502d484b3354da2bfee2ce24
-  languageName: node
-  linkType: hard
-
 "eslint-plugin-typescript-paths@npm:^0.0.33":
   version: 0.0.33
   resolution: "eslint-plugin-typescript-paths@npm:0.0.33"
@@ -11250,15 +11257,6 @@ __metadata:
   peerDependencies:
     express: ^4.11 || 5 || ^5.0.0-beta.1
   checksum: 10/eff34c83bf586789933a332a339b66649e2cca95c8e977d193aa8bead577d3182ac9f0e9c26f39389287539b8038890ff023f910b54ebb506a26a2ce135b92ca
-  languageName: node
-  linkType: hard
-
-"express-response-size@npm:^0.0.3":
-  version: 0.0.3
-  resolution: "express-response-size@npm:0.0.3"
-  dependencies:
-    on-headers: "npm:1.0.1"
-  checksum: 10/6c97395d225e5aa98338569842ed84e5d861f19f6f1c535e70c97d65ffe7301826299607f491c824f240952b39b4b18c3269ed3652ecb8bd0abb93c7ece7048b
   languageName: node
   linkType: hard
 
@@ -11636,13 +11634,15 @@ __metadata:
   linkType: hard
 
 "form-data@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "form-data@npm:4.0.0"
+  version: 4.0.4
+  resolution: "form-data@npm:4.0.4"
   dependencies:
     asynckit: "npm:^0.4.0"
     combined-stream: "npm:^1.0.8"
+    es-set-tostringtag: "npm:^2.1.0"
+    hasown: "npm:^2.0.2"
     mime-types: "npm:^2.1.12"
-  checksum: 10/7264aa760a8cf09482816d8300f1b6e2423de1b02bba612a136857413fdc96d7178298ced106817655facc6b89036c6e12ae31c9eb5bdc16aabf502ae8a5d805
+  checksum: 10/a4b62e21932f48702bc468cc26fb276d186e6b07b557e3dd7cc455872bdbb82db7db066844a64ad3cf40eaf3a753c830538183570462d3649fdfd705601cbcfb
   languageName: node
   linkType: hard
 
@@ -15813,13 +15813,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"on-headers@npm:1.0.1":
-  version: 1.0.1
-  resolution: "on-headers@npm:1.0.1"
-  checksum: 10/7e5dc811cd8e16590385ac56a63e27aa9006c594069960655d37f96c9b1f7af4ce7e71f4f6a771ed746ebf180e0c1cbc1e5ecd125a4006b9eb0ef23125068cd2
-  languageName: node
-  linkType: hard
-
 "once@npm:^1.3.0, once@npm:^1.3.1, once@npm:^1.4.0":
   version: 1.4.0
   resolution: "once@npm:1.4.0"
@@ -16520,6 +16513,17 @@ __metadata:
   version: 7.0.0
   resolution: "property-information@npm:7.0.0"
   checksum: 10/55f443088456cddc2fe499d6f5895e68cbd465e39dc318ecc63a0d2432d1b918f51fb6d13f8b1adf8a78337bc4e608baa6e46afbe0c6d50d2e38588b2c409f86
+  languageName: node
+  linkType: hard
+
+"protoc-gen-js@npm:^3.21.4-4":
+  version: 3.21.4-4
+  resolution: "protoc-gen-js@npm:3.21.4-4"
+  dependencies:
+    adm-zip: "npm:0.5.10"
+  bin:
+    protoc-gen-js: cli.js
+  checksum: 10/43d5469195fb28ecbb6e2f387601c22d7a032aaffd5eadee10e02ca4a6b6361bfb54e83fe220b6eef36a27011421f3a0ef86e163116273d71ab9158d31980c3b
   languageName: node
   linkType: hard
 

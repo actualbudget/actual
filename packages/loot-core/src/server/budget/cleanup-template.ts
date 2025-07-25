@@ -34,6 +34,9 @@ async function applyGroupCleanups(
     const sinkGroup = sinkGroups.filter(c => c.group === groupName);
     const generalGroup = generalGroups.filter(c => c.group === groupName);
     let total_weight = 0;
+    // We track how mouch amount was produced by all group sinks and only
+    // distribute this instead of the "to-budget" amount.
+    let available_amount = 0;
 
     if (sinkGroup.length > 0 || generalGroup.length > 0) {
       //only return group source funds to To Budget if there are corresponding sinking groups or underfunded included groups
@@ -51,6 +54,7 @@ async function applyGroupCleanups(
           month,
           amount: budgeted - balance,
         });
+        available_amount += balance;
       }
 
       //calculate total weight for sinking funds
@@ -59,8 +63,7 @@ async function applyGroupCleanups(
       }
 
       //fill underfunded categories within the group first
-      for (let ii = 0; ii < generalGroup.length; ii++) {
-        const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
+      for (let ii = 0; ii < generalGroup.length && available_amount > 0; ii++) {
         const balance = await getSheetValue(
           sheetName,
           `leftover-${generalGroup[ii].category}`,
@@ -81,8 +84,9 @@ async function applyGroupCleanups(
         }
 
         if (
+          // We have enough to fully cover the overspent.
           balance < 0 &&
-          Math.abs(balance) <= budgetAvailable &&
+          Math.abs(balance) <= available_amount &&
           !generalGroup[ii].category.is_income &&
           carryover.carryover === 0
         ) {
@@ -91,28 +95,30 @@ async function applyGroupCleanups(
             month,
             amount: to_budget,
           });
+          available_amount -= Math.abs(balance);
         } else if (
+          // We can only cover this category partially.
           balance < 0 &&
           !generalGroup[ii].category.is_income &&
           carryover.carryover === 0 &&
-          Math.abs(balance) > budgetAvailable
+          Math.abs(balance) > available_amount
         ) {
           await setBudget({
             category: generalGroup[ii].category,
             month,
-            amount: budgeted + budgetAvailable,
+            amount: budgeted + available_amount,
           });
+          available_amount = 0;
         }
       }
-      const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
-      for (let ii = 0; ii < sinkGroup.length; ii++) {
+      for (let ii = 0; ii < sinkGroup.length && available_amount > 0; ii++) {
         const budgeted = await getSheetValue(
           sheetName,
           `budget-${sinkGroup[ii].category}`,
         );
         const to_budget =
           budgeted +
-          Math.round((sinkGroup[ii].weight / total_weight) * budgetAvailable);
+          Math.round((sinkGroup[ii].weight / total_weight) * available_amount);
         await setBudget({
           category: sinkGroup[ii].category,
           month,

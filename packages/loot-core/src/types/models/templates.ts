@@ -11,10 +11,13 @@ export interface PercentageTemplate extends BaseTemplate {
   category: string;
 }
 
-export interface WeekTemplate extends BaseTemplate {
-  type: 'week';
+export interface PeriodicTemplate extends BaseTemplate {
+  type: 'periodic';
   amount: number;
-  weeks: number | null;
+  period: {
+    period: 'day' | 'week' | 'month' | 'year';
+    amount: number;
+  };
   starting: string;
   limit?: {
     amount: number;
@@ -94,7 +97,7 @@ interface ErrorTemplate extends BaseTemplate {
 
 export type Template =
   | PercentageTemplate
-  | WeekTemplate
+  | PeriodicTemplate
   | ByTemplate
   | SpendTemplate
   | SimpleTemplate

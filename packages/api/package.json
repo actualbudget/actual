@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/api",
-  "version": "25.6.1",
+  "version": "25.7.1",
   "license": "MIT",
   "description": "An API for Actual",
   "engines": {

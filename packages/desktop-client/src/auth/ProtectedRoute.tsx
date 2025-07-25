@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactElement } from 'react';
+import { Trans } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
 
@@ -60,7 +61,9 @@ export const ProtectedRoute = ({
         margin: '50px',
       }}
     >
-      <h3>You don&apos;t have permission to view this page</h3>
+      <h3>
+        <Trans>You don’t have permission to view this page</Trans>
+      </h3>
     </View>
   );
 };

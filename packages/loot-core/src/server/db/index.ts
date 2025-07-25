@@ -43,6 +43,7 @@ import {
   DbClockMessage,
   DbPayee,
   DbPayeeMapping,
+  DbTag,
   DbTransaction,
   DbViewTransaction,
   DbViewTransactionInternalAlive,
@@ -662,7 +663,7 @@ export function getCommonPayees() {
   `);
 }
 
-/* eslint-disable rulesdir/typography */
+/* eslint-disable actual/typography */
 const orphanedPayeesQuery = `
   SELECT p.id
   FROM payees p
@@ -680,7 +681,7 @@ const orphanedPayeesQuery = `
         AND json_extract(cond.value, '$.value') = pm.targetId
     );
 `;
-/* eslint-enable rulesdir/typography */
+/* eslint-enable actual/typography */
 
 export function syncGetOrphanedPayees() {
   return all<Pick<DbPayee, 'id'>>(orphanedPayeesQuery);
@@ -802,4 +803,37 @@ export async function deleteTransaction(transaction) {
 
 function toSqlQueryParameters(params: unknown[]) {
   return params.map(() => '?').join(',');
+}
+
+export function getTags() {
+  return all<DbTag>(`
+    SELECT id, tag, color, description
+    FROM tags
+    ORDER BY tag
+  `);
+}
+
+export function insertTag(tag): Promise<DbTag['id']> {
+  return insertWithUUID('tags', tag);
+}
+
+export async function deleteTag(tag) {
+  return transaction(() => {
+    runQuery(`DELETE FROM tags WHERE id = ?`, [tag.id]);
+  });
+}
+
+export function updateTag(tag) {
+  return update('tags', tag);
+}
+
+export function findTags() {
+  return all<{ notes: string }>(
+    `
+    SELECT notes
+    FROM transactions
+    WHERE notes LIKE ?
+  `,
+    ['%#%'],
+  );
 }

@@ -55,6 +55,7 @@ type SchedulesTableItem = ScheduleEntity | CompletedScheduleItem;
 
 export type ScheduleItemAction =
   | 'post-transaction'
+  | 'post-transaction-today'
   | 'skip'
   | 'complete'
   | 'restart'
@@ -76,10 +77,16 @@ function OverflowMenu({
   const getMenuItems = () => {
     const menuItems: { name: ScheduleItemAction; text: string }[] = [];
 
-    menuItems.push({
-      name: 'post-transaction',
-      text: t('Post transaction today'),
-    });
+    menuItems.push(
+      {
+        name: 'post-transaction',
+        text: t('Post transaction'),
+      },
+      {
+        name: 'post-transaction-today',
+        text: t('Post transaction today'),
+      },
+    );
 
     if (status === 'completed') {
       menuItems.push({
