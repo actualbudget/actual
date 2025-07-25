@@ -69,20 +69,6 @@ export class MobileRulesPage {
   }
 
   /**
-   * Wait for rules to load
-   */
-  async waitForRulesToLoad() {
-    await this.page.waitForLoadState('networkidle');
-    // Wait for either rules to appear or empty message to appear
-    await this.page.waitForFunction(() => {
-      const rules = document.querySelectorAll('[role="button"]');
-      const allText = document.body.textContent || '';
-      const hasEmptyMessage = allText.includes('No rules found');
-      return rules.length > 0 || hasEmptyMessage;
-    });
-  }
-
-  /**
    * Get the number of visible rules
    */
   async getRuleCount() {
