@@ -328,6 +328,7 @@ export type DbViewSchedule = {
 export type DbTag = {
   id: string;
   tag: string;
-  color: string;
+  color?: string | null;
   description?: string | null;
+  tombstone: 1 | 0;
 };
