@@ -24,7 +24,7 @@ export function useTags() {
   return tags;
 }
 
-function getTagCSSColors(theme: Theme, color?: string) {
+function getTagCSSColors(theme: Theme, color?: string | null) {
   if (theme === 'light') {
     return [
       color ? `${color} !important` : themeStyle.noteTagText,
