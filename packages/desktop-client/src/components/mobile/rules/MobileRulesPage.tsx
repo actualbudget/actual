@@ -72,6 +72,7 @@ export function MobileRulesPage() {
           rightContent={<AddRuleButton onRuleAdded={handleRuleAdded} />}
         />
       }
+      padding={0}
     >
       <RulesList
         rules={rules}

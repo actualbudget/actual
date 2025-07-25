@@ -103,7 +103,7 @@ export function RulesListItem({ rule, onPress }: RulesListItemProps) {
         ))}
       </View>
 
-      {/* THEN actions - inline and left-aligned */}
+      {/* THEN actions - inline and left-aligned with spacing to match IF alignment */}
       <View
         style={{
           flexDirection: 'row',
@@ -115,6 +115,14 @@ export function RulesListItem({ rule, onPress }: RulesListItemProps) {
           paddingRight: 16,
         }}
       >
+        {/* Spacer to align with IF label - matches PRE/POST badge + margin */}
+        <View
+          style={{
+            width: 42, // Approximate width of PRE/POST badge + margin
+            marginRight: 4,
+          }}
+        />
+
         <span
           style={{
             fontSize: 13,
