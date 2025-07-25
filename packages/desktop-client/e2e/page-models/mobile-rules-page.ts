@@ -15,6 +15,13 @@ export class MobileRulesPage {
     this.emptyMessage = page.getByText('No rules found');
   }
 
+  async waitFor(options?: {
+    state?: 'attached' | 'detached' | 'visible' | 'hidden';
+    timeout?: number;
+  }) {
+    await this.rulesList.waitFor(options);
+  }
+
   /**
    * Search for rules using the search box
    */
