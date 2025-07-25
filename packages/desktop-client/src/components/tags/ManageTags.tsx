@@ -5,6 +5,7 @@ import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
 import { SvgSearchAlternate } from '@actual-app/components/icons/v2';
 import { Stack } from '@actual-app/components/stack';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
@@ -31,30 +32,15 @@ export function ManageTags() {
   const [create, setCreate] = useState(false);
   const tags = useTags();
 
-  const defaultTag = useMemo(
-    () => ({
-      id: '*',
-      tag: '*',
-      color: theme.noteTagDefault,
-      description: t('Default tag color'),
-      ...tags.find(tag => tag.tag === '*'),
-    }),
-    [t, tags],
-  );
-
   const filteredTags = useMemo(() => {
     return filter === ''
-      ? [defaultTag, ...tags.filter(tag => tag.tag !== '*')]
+      ? tags
       : tags.filter(tag =>
           getNormalisedString(tag.tag).includes(getNormalisedString(filter)),
         );
-  }, [defaultTag, filter, tags]);
+  }, [filter, tags]);
 
-  const selectedInst = useSelected(
-    'manage-tags',
-    filteredTags.filter(tag => tag.tag !== '*'),
-    [],
-  );
+  const selectedInst = useSelected('manage-tags', filteredTags, []);
 
   const onDeleteSelected = useCallback(async () => {
     dispatch(deleteAllTags([...selectedInst.items]));
@@ -113,12 +99,25 @@ export function ManageTags() {
           {create && (
             <TagCreationRow onClose={() => setCreate(false)} tags={tags} />
           )}
-          <TagsList
-            tags={filteredTags}
-            selectedItems={selectedInst.items}
-            hoveredTag={hoveredTag}
-            onHover={id => setHoveredTag(id ?? undefined)}
-          />
+          {tags.length ? (
+            <TagsList
+              tags={filteredTags}
+              selectedItems={selectedInst.items}
+              hoveredTag={hoveredTag}
+              onHover={id => setHoveredTag(id ?? undefined)}
+            />
+          ) : (
+            <View
+              style={{
+                background: theme.tableBackground,
+                fontStyle: 'italic',
+              }}
+            >
+              <Text style={{ margin: 'auto', padding: '20px' }}>
+                <Trans>No Tags</Trans>
+              </Text>
+            </View>
+          )}
         </View>
         <View
           style={{
