@@ -257,7 +257,10 @@ export function FinancesApp() {
                 />
 
                 <Route path="/payees" element={<ManagePayeesPage />} />
-                <Route path="/rules" element={<ManageRulesPage />} />
+                <Route
+                  path="/rules"
+                  element={<NarrowAlternate name="Rules" />}
+                />
                 <Route path="/bank-sync" element={<BankSync />} />
                 <Route path="/tags" element={<ManageTagsPage />} />
                 <Route path="/settings" element={<Settings />} />
@@ -331,6 +334,7 @@ export function FinancesApp() {
               <Route path="/accounts" element={<MobileNavTabs />} />
               <Route path="/settings" element={<MobileNavTabs />} />
               <Route path="/reports" element={<MobileNavTabs />} />
+              <Route path="/rules" element={<MobileNavTabs />} />
               <Route path="*" element={null} />
             </Routes>
           </ScrollProvider>
