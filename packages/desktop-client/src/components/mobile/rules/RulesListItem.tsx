@@ -24,7 +24,7 @@ export function RulesListItem({ rule, onPress }: RulesListItemProps) {
     <Button
       variant="bare"
       style={{
-        height: ROW_HEIGHT,
+        minHeight: ROW_HEIGHT,
         width: '100%',
         borderRadius: 0,
         borderWidth: '0 0 1px 0',
@@ -34,7 +34,7 @@ export function RulesListItem({ rule, onPress }: RulesListItemProps) {
         flexDirection: 'column',
         alignItems: 'flex-start',
         justifyContent: 'center',
-        padding: '8px 16px',
+        padding: '8px 0',
         gap: 4,
       }}
       onPress={onPress}
@@ -47,6 +47,8 @@ export function RulesListItem({ rule, onPress }: RulesListItemProps) {
           flexWrap: 'wrap',
           gap: 6,
           width: '100%',
+          paddingLeft: 16,
+          paddingRight: 16,
         }}
       >
         <View
@@ -109,6 +111,8 @@ export function RulesListItem({ rule, onPress }: RulesListItemProps) {
           flexWrap: 'wrap',
           gap: 6,
           width: '100%',
+          paddingLeft: 16,
+          paddingRight: 16,
         }}
       >
         <span
