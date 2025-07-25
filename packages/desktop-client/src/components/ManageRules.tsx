@@ -42,10 +42,10 @@ import { initiallyLoadPayees } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 export type FilterData = {
-  payees: Array<{ id: string; name: string }>;
-  categories: Array<{ id: string; name: string }>;
-  accounts: Array<{ id: string; name: string }>;
-  schedules: readonly {
+  payees?: Array<{ id: string; name: string }>;
+  categories?: Array<{ id: string; name: string }>;
+  accounts?: Array<{ id: string; name: string }>;
+  schedules?: readonly {
     id: string;
     rule: string;
     _payee: string;
@@ -95,12 +95,12 @@ export function ruleToString(rule: RuleEntity, data: FilterData) {
         mapValue(action.field, action.value, data),
       ];
     } else if (action.op === 'link-schedule') {
-      const schedule = data.schedules.find(s => s.id === String(action.value));
+      const schedule = data.schedules?.find(s => s.id === String(action.value));
       return [
         friendlyOp(action.op),
         describeSchedule(
           schedule,
-          data.payees.find(p => p.id === schedule?._payee),
+          data.payees?.find(p => p.id === schedule?._payee),
         ),
       ];
     } else if (action.op === 'prepend-notes' || action.op === 'append-notes') {

@@ -76,14 +76,9 @@ export class MobileRulesPage {
     // Wait for either rules to appear or empty message to appear
     await this.page.waitForFunction(() => {
       const rules = document.querySelectorAll('[role="button"]');
-      const emptyMessage = document.evaluate(
-        "//text()[contains(., 'No rules found')]",
-        document,
-        null,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-      ).singleNodeValue;
-      return rules.length > 0 || emptyMessage !== null;
+      const allText = document.body.textContent || '';
+      const hasEmptyMessage = allText.includes('No rules found');
+      return rules.length > 0 || hasEmptyMessage;
     });
   }
 
