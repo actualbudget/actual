@@ -545,4 +545,66 @@ describe('Account sync', () => {
       expect(transactions[0].amount).toBe(-1239);
     },
   );
+
+  test('reconcile doesnt reimport transactions that were moved to another account', async () => {
+    const { id: firstAcctId } = await prepareDatabase();
+
+    const secondAcctId = await db.insertAccount({
+      id: 'second-account',
+      name: 'Second Account',
+      type: 'checking',
+    });
+    await db.insertPayee({
+      id: 'transfer-' + secondAcctId,
+      name: '',
+      transfer_acct: secondAcctId,
+    });
+
+    // Rule to move transactions with a specific payee to the second account
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'imported_payee', value: 'TEST_PAYEE' }],
+      actions: [{ op: 'set', field: 'account', value: secondAcctId }],
+    });
+
+    // First import creating the transaction and moving it to the second account
+    {
+      const { added } = await reconcileTransactions(firstAcctId, [
+        {
+          date: '2020-01-01',
+          payee_name: 'TEST_PAYEE',
+          amount: -1000,
+          imported_id: 'test-imported-id',
+        },
+      ]);
+
+      expect(added.length).toBe(1);
+
+      const transactions = await getAllTransactions();
+      expect(transactions.length).toBe(1);
+      expect(transactions[0].account).toBe(secondAcctId);
+      expect(transactions[0].imported_id).toBe('test-imported-id');
+    }
+
+    // Second import - same transaction should be found and not duplicated
+    {
+      const { added, updated } = await reconcileTransactions(firstAcctId, [
+        {
+          date: '2020-01-01',
+          payee_name: 'TEST_PAYEE',
+          amount: -1000,
+          imported_id: 'test-imported-id',
+        },
+      ]);
+
+      expect(added.length).toBe(0);
+      expect(updated.length).toBe(0);
+
+      const transactions2 = await getAllTransactions();
+      expect(transactions2.length).toBe(1);
+      expect(transactions2[0].account).toBe(secondAcctId);
+      expect(transactions2[0].imported_id).toBe('test-imported-id');
+    }
+  });
 });

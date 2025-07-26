@@ -660,7 +660,7 @@ export async function matchTransactions(
         : 'v_transactions_internal';
       match = await db.first<db.DbTransaction>(
         `SELECT * FROM ${table} WHERE imported_id = ? AND account = ?`,
-        [trans.imported_id, acctId],
+        [trans.imported_id, trans.account],
       );
 
       if (match) {
@@ -707,7 +707,7 @@ export async function matchTransactions(
             sevenDaysBefore,
             sevenDaysAfter,
             trans.amount || 0,
-            acctId,
+            trans.account,
           ],
         );
       } else {
@@ -730,7 +730,7 @@ export async function matchTransactions(
           `SELECT id, is_parent, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
           FROM v_transactions
           WHERE date >= ? AND date <= ? AND amount = ? AND account = ?`,
-          [sevenDaysBefore, sevenDaysAfter, trans.amount || 0, acctId],
+          [sevenDaysBefore, sevenDaysAfter, trans.amount || 0, trans.account],
         );
       }
 
