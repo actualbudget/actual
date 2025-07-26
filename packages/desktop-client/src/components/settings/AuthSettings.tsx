@@ -53,7 +53,7 @@ export function AuthSettings() {
                   )
                 }
               >
-                Start using OpenID
+                {t('Start using OpenID')}
               </Button>
               <Label
                 style={{ paddingTop: 5 }}
