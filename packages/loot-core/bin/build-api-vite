@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -euo pipefail
+
+cd "$(dirname "$0")/.." || exit 1
+ROOT="$(pwd -P)"
+
+yarn tsc -p tsconfig.api.json --outDir ../api/@types/loot-core/
+# Copy existing handwritten .d.ts files, as tsc doesn't move them for us
+dest="../../api/@types/loot-core"
+cd src
+find . -type f -name "*.d.ts" | while read -r f
+do
+    d=$(dirname "${f}")
+    d="${dest}/${d}"
+    mkdir -p "${d}"
+    cp "${f}" "${d}"
+done
+cd "$ROOT"
+yarn vite build --config ./vite.api.config.ts;
+./bin/copy-migrations ../api
