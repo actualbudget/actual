@@ -261,6 +261,9 @@ export function GenericInput({
             ref={ref}
             value={value || ''}
             placeholder={t('nothing')}
+            onEnter={onChange}
+            onUpdate={onChange}
+            onChange={onChange}
             onChangeValue={onChange}
           />
         );
