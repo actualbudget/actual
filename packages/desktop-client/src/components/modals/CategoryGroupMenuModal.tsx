@@ -294,7 +294,7 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
                 [
                   {
                     name: 'toggleVisibility',
-                    text: group.hidden ? 'Show' : 'Hide',
+                    text: group.hidden ? t('Show') : t('Hide'),
                     icon: group.hidden ? SvgViewShow : SvgViewHide,
                     iconSize: 16,
                   },
@@ -302,7 +302,7 @@ function AdditionalCategoryGroupMenu({ group, onDelete, onToggleVisibility }) {
                     Menu.line,
                     {
                       name: 'delete',
-                      text: 'Delete',
+                      text: t('Delete'),
                       icon: SvgTrash,
                       iconSize: 15,
                     },
