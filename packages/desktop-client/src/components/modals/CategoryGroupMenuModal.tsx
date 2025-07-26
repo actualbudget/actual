@@ -162,7 +162,7 @@ export function CategoryGroupMenuModal({
               }}
             >
               <Notes
-                notes={notes?.length > 0 ? notes : 'No notes'}
+                notes={notes?.length > 0 ? notes : t('No notes')}
                 editable={false}
                 focused={false}
                 getStyle={() => ({
