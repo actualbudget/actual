@@ -242,17 +242,17 @@ function recalculate(
         daysArray.push({
           date: currentDate,
           incomeSize: getBarLength(currentIncome),
-          incomeValue: Math.abs(currentIncome) / 100,
+          incomeValue: Math.abs(currentIncome),
           expenseSize: getBarLength(currentExpense),
-          expenseValue: Math.abs(currentExpense) / 100,
+          expenseValue: Math.abs(currentExpense),
         });
       }
     }
 
     return {
       data: daysArray as CalendarDataType[],
-      totalExpense: (totalExpenseValue ?? 0) / 100,
-      totalIncome: (totalIncomeValue ?? 0) / 100,
+      totalExpense: totalExpenseValue ?? 0,
+      totalIncome: totalIncomeValue ?? 0,
     };
   };
 
