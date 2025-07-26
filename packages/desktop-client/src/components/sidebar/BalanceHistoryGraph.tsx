@@ -175,19 +175,19 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <LineChart data={balanceData} width={CHART_WIDTH} height={CHART_HEIGHT}>
+        <LineChart
+          data={balanceData}
+          width={CHART_WIDTH}
+          height={CHART_HEIGHT}
+          onMouseMove={state => {
+            if (state && state.activePayload && state.activePayload[0]) {
+              setHoveredValue(state.activePayload[0].payload);
+            }
+          }}
+        >
           <YAxis domain={['dataMin', 'dataMax']} hide={true} />
           <RechartsTooltip
-            contentStyle={{
-              display: 'none',
-            }}
-            labelFormatter={(label, items) => {
-              const data = items[0]?.payload;
-              if (data) {
-                setHoveredValue(data);
-              }
-              return '';
-            }}
+            contentStyle={{ display: 'none' }}
             isAnimationActive={false}
           />
           <Line
