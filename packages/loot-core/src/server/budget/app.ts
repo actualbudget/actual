@@ -1,6 +1,9 @@
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
-import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from '../../types/models';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
@@ -140,9 +143,9 @@ app.method('category-group-move', mutator(undoable(moveCategoryGroup)));
 app.method('category-group-delete', mutator(undoable(deleteCategoryGroup)));
 app.method('must-category-transfer', isCategoryTransferRequired);
 
-// Server must return AQL entities not the raw DB data
 async function getCategories() {
-  const categoryGroups = await getCategoryGroups();
+  const categoryGroups = await db.getCategoriesGrouped();
+
   return {
     grouped: categoryGroups,
     list: categoryGroups.flatMap(g => g.categories ?? []),
@@ -375,14 +378,17 @@ async function createCategoryGroup({
   name,
   isIncome,
   hidden,
+  parentId,
 }: {
   name: CategoryGroupEntity['name'];
   isIncome?: CategoryGroupEntity['is_income'];
   hidden?: CategoryGroupEntity['hidden'];
+  parentId?: CategoryGroupEntity['parent_id'];
 }): Promise<CategoryGroupEntity['id']> {
   return await db.insertCategoryGroup({
     name,
     is_income: isIncome ? 1 : 0,
+    parent_id: parentId || undefined,
     hidden: hidden ? 1 : 0,
   });
 }
