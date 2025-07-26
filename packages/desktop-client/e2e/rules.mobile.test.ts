@@ -62,9 +62,9 @@ test.describe('Mobile Rules', () => {
     await expect(firstRule).toContainText('IF');
     await expect(firstRule).toContainText('THEN');
 
-    // Check that rule has stage badge (PRE or POST)
+    // Check that rule has stage badge (PRE, DEFAULT, or POST)
     const stage = await rulesPage.getRuleStage(0);
-    expect(stage).toMatch(/PRE|POST/);
+    expect(stage).toMatch(/PRE|DEFAULT|POST/);
   });
 
   test('search functionality filters rules correctly', async () => {

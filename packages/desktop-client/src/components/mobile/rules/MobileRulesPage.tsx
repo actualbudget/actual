@@ -55,13 +55,26 @@ export function MobileRulesPage() {
       return schedule ? schedule.completed === false : true;
     });
 
-    return filter === ''
-      ? rules
-      : rules.filter(rule =>
-          getNormalisedString(ruleToString(rule, filterData)).includes(
-            getNormalisedString(filter),
-          ),
-        );
+    const searchFilteredRules =
+      filter === ''
+        ? rules
+        : rules.filter(rule =>
+            getNormalisedString(ruleToString(rule, filterData)).includes(
+              getNormalisedString(filter),
+            ),
+          );
+
+    // Sort rules by stage: pre first, default (null) next, post last
+    return searchFilteredRules.sort((a, b) => {
+      const getStageOrder = (stage: 'pre' | 'post' | null) => {
+        if (stage === 'pre') return 0;
+        if (stage === 'post') return 2;
+        return 1; // null/default
+      };
+      const aOrder = getStageOrder(a.stage);
+      const bOrder = getStageOrder(b.stage);
+      return aOrder - bOrder;
+    });
   }, [allRules, filter, filterData, schedules]);
 
   const loadRules = useCallback(async (append = false) => {

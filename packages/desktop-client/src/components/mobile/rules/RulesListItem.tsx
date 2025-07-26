@@ -51,7 +51,9 @@ export function RulesListItem({ rule, onPress }: RulesListItemProps) {
             backgroundColor:
               rule.stage === 'pre'
                 ? theme.noticeBackgroundLight
-                : theme.warningBackground,
+                : rule.stage === 'post'
+                  ? theme.warningBackground
+                  : theme.pillBackgroundSelected,
             paddingLeft: 6,
             paddingRight: 6,
             paddingTop: 2,
@@ -66,10 +68,16 @@ export function RulesListItem({ rule, onPress }: RulesListItemProps) {
               color:
                 rule.stage === 'pre'
                   ? theme.noticeTextLight
-                  : theme.warningText,
+                  : rule.stage === 'post'
+                    ? theme.warningText
+                    : theme.pillTextSelected,
             }}
           >
-            {rule.stage === 'pre' ? t('PRE') : t('POST')}
+            {rule.stage === 'pre'
+              ? t('PRE')
+              : rule.stage === 'post'
+                ? t('POST')
+                : t('DEFAULT')}
           </span>
         </View>
       </View>

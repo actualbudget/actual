@@ -155,15 +155,28 @@ export function ManageRules({
       return schedule ? schedule.completed === false : true;
     });
 
-    return (
+    const searchFilteredRules =
       filter === ''
         ? rules
         : rules.filter(rule =>
             getNormalisedString(ruleToString(rule, filterData)).includes(
               getNormalisedString(filter),
             ),
-          )
-    ).slice(0, 100 + page * 50);
+          );
+
+    // Sort rules by stage: pre first, default (null) next, post last
+    const sortedRules = searchFilteredRules.sort((a, b) => {
+      const getStageOrder = (stage: 'pre' | 'post' | null) => {
+        if (stage === 'pre') return 0;
+        if (stage === 'post') return 2;
+        return 1; // null/default
+      };
+      const aOrder = getStageOrder(a.stage);
+      const bOrder = getStageOrder(b.stage);
+      return aOrder - bOrder;
+    });
+
+    return sortedRules.slice(0, 100 + page * 50);
   }, [allRules, filter, filterData, page]);
   const selectedInst = useSelected('manage-rules', filteredRules, []);
   const [hoveredRule, setHoveredRule] = useState(null);

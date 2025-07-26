@@ -108,7 +108,7 @@ export class MobileRulesPage {
   }
 
   /**
-   * Get the stage badge text for a rule (PRE/POST)
+   * Get the stage badge text for a rule (PRE/DEFAULT/POST)
    */
   async getRuleStage(index: number) {
     const rule = this.getNthRule(index);
