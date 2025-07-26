@@ -24,17 +24,27 @@ export async function mergeTransactions(
   }
   const { keep, drop } = determineKeepDrop(a, b);
 
+  const isCopyingTransfer = Boolean(
+    !keep.transfer_id && !keep.payee && drop.transfer_id,
+  );
+
   await Promise.all([
     db.updateTransaction({
       id: keep.id,
-      payee: keep.payee || drop.payee,
-      category: keep.category || drop.category,
+      payee: isCopyingTransfer ? drop.payee : keep.payee || drop.payee,
+      transfer_id: isCopyingTransfer ? drop.transfer_id : keep.transfer_id,
+      category: isCopyingTransfer ? null : keep.category || drop.category,
       notes: keep.notes || drop.notes,
       cleared: keep.cleared || drop.cleared,
       reconciled: keep.reconciled || drop.reconciled,
     } as TransactionEntity),
     db.deleteTransaction(drop),
   ]);
+  if (drop.transfer_id && !isCopyingTransfer) {
+    await db.deleteTransaction({ id: drop.transfer_id });
+  } else if (isCopyingTransfer) {
+    await db.updateTransaction({ id: drop.transfer_id, transfer_id: keep.id });
+  }
   return keep.id;
 }
 
