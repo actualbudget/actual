@@ -481,7 +481,7 @@ function RecurringScheduleTooltip({
         direction="row"
         align="center"
         justify="flex-start"
-        style={{ marginTop: 10 }}
+        style={{ marginTop: 10, flexWrap: 'wrap', alignItems: 'center' }}
         spacing={1}
       >
         <Text style={{ whiteSpace: 'nowrap' }}>
@@ -489,7 +489,11 @@ function RecurringScheduleTooltip({
         </Text>
         <Input
           id="interval"
-          style={{ width: 40 }}
+          style={{
+            minWidth: 60,
+            width: `${String(config.interval || 1).length * 15 + 15}px`, // dynamic width
+            maxWidth: 80,
+          }}
           type="number"
           min={1}
           onChangeValue={value => updateField('interval', value)}
@@ -502,15 +506,18 @@ function RecurringScheduleTooltip({
           style={{ marginRight: 5 }}
         />
         {config.frequency === 'monthly' &&
-        (config.patterns == null || config.patterns.length === 0) ? (
-          <Button
-            style={{
-              backgroundColor: theme.tableBackground,
-            }}
-            onPress={() => dispatch({ type: 'add-recurrence' })}
-          >
-            <Trans>Add specific days</Trans>
-          </Button>
+          (config.patterns == null || config.patterns.length === 0) ? (
+          <>
+            <div style={{ flexBasis: '100%', height: 0, marginTop: 5 }} />
+            <Button
+              style={{
+                backgroundColor: theme.tableBackground,
+              }}
+              onPress={() => dispatch({ type: 'add-recurrence' })}
+            >
+              <Trans>Add specific days</Trans>
+            </Button>
+          </>
         ) : null}
       </Stack>
       {config.frequency === 'monthly' &&
