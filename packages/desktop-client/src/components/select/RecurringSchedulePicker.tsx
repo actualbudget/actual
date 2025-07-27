@@ -506,7 +506,7 @@ function RecurringScheduleTooltip({
           style={{ marginRight: 5 }}
         />
         {config.frequency === 'monthly' &&
-          (config.patterns == null || config.patterns.length === 0) ? (
+        (config.patterns == null || config.patterns.length === 0) ? (
           <>
             <div style={{ flexBasis: '100%', height: 0, marginTop: 5 }} />
             <Button
