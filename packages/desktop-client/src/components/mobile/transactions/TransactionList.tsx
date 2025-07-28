@@ -148,30 +148,34 @@ export function TransactionList({
     }
   });
 
-  if (isLoading) {
-    return <Loading aria-label={t('Loading transactions...')} />;
-  }
-
   return (
     <>
+      {isLoading && (
+        <Loading
+          style={{ paddingBottom: 8 }}
+          aria-label={t('Loading transactions...')}
+        />
+      )}
       <ListBox
         aria-label={t('Transaction list')}
         selectionMode={selectedTransactions.size > 0 ? 'multiple' : 'single'}
         selectedKeys={selectedTransactions}
         dependencies={[selectedTransactions]}
-        renderEmptyState={() => (
-          <View
-            style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: theme.mobilePageBackground,
-            }}
-          >
-            <Text style={{ fontSize: 15 }}>
-              <Trans>No transactions</Trans>
-            </Text>
-          </View>
-        )}
+        renderEmptyState={() =>
+          !isLoading && (
+            <View
+              style={{
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: theme.mobilePageBackground,
+              }}
+            >
+              <Text style={{ fontSize: 15 }}>
+                <Trans>No transactions</Trans>
+              </Text>
+            </View>
+          )
+        }
         items={sections}
       >
         {section => (

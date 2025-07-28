@@ -98,12 +98,9 @@ export function useAccountPreviewTransactions({
     });
 
     const transactionIds = new Set(previewTransactions.map(t => t.id));
-    const runningBalances = allRunningBalances;
-    for (const transactionId of runningBalances.keys()) {
-      if (!transactionIds.has(transactionId)) {
-        runningBalances.delete(transactionId);
-      }
-    }
+    const runningBalances = new Map(
+      [...allRunningBalances].filter(([id]) => transactionIds.has(id)),
+    );
 
     return {
       isLoading,
@@ -114,11 +111,11 @@ export function useAccountPreviewTransactions({
   }, [
     accountId,
     allPreviewTransactions,
-    allRunningBalances,
-    error,
     getPayeeByTransferAccount,
     getTransferAccountByPayee,
+    allRunningBalances,
     isLoading,
+    error,
   ]);
 }
 
