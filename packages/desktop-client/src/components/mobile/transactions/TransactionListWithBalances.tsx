@@ -142,7 +142,7 @@ export function TransactionListWithBalances({
           />
         </View>
         <PullToRefresh
-          isPullable={!!onRefresh}
+          isPullable={!isLoading && !!onRefresh}
           onRefresh={async () => onRefresh?.()}
         >
           <TransactionList
