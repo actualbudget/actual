@@ -1,9 +1,7 @@
 import React, { memo, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
 import { SvgArrowThinRight } from '@actual-app/components/icons/v1';
-import { SvgRefreshArrow } from '@actual-app/components/icons/v2';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
@@ -24,11 +22,7 @@ import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
-import {
-  createTag,
-  deleteTag,
-  updateTag,
-} from '@desktop-client/queries/queriesSlice';
+import { deleteTag, updateTag } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type TagRowProps = {
@@ -58,15 +52,7 @@ export const TagRow = memo(
     const navigate = useNavigate();
 
     const onUpdate = (description: string) => {
-      dispatch(
-        tag.id !== '*'
-          ? updateTag({ ...tag, description })
-          : createTag({
-              tag: tag.tag,
-              color: tag.color,
-              description,
-            }),
-      );
+      dispatch(updateTag({ ...tag, description }));
     };
 
     const onShowActivity = () => {
@@ -116,7 +102,7 @@ export const TagRow = memo(
             items={[
               {
                 name: 'delete',
-                text: tag.tag !== '*' ? t('Delete') : t('Reset'),
+                text: t('Delete'),
               },
             ]}
             onMenuSelect={name => {
@@ -131,36 +117,19 @@ export const TagRow = memo(
             }}
           />
         </Popover>
-        {tag.tag !== '*' ? (
-          <SelectCell
-            exposed={hovered || selected || focusedField === 'select'}
-            focused={focusedField === 'select'}
-            onSelect={e => {
-              dispatchSelected({
-                type: 'select',
-                id: tag.id,
-                isRangeSelect: e.shiftKey,
-              });
-            }}
-            selected={selected}
-          />
-        ) : (
-          <Cell width={20} plain>
-            <Button
-              variant="bare"
-              type="button"
-              style={{
-                borderWidth: 0,
-                backgroundColor: 'transparent',
-                marginLeft: 'auto',
-              }}
-              onPress={() => dispatch(deleteTag(tag))}
-              ref={resetButtonRef}
-            >
-              <SvgRefreshArrow width={13} height={13} />
-            </Button>
-          </Cell>
-        )}
+
+        <SelectCell
+          exposed={hovered || selected || focusedField === 'select'}
+          focused={focusedField === 'select'}
+          onSelect={e => {
+            dispatchSelected({
+              type: 'select',
+              id: tag.id,
+              isRangeSelect: e.shiftKey,
+            });
+          }}
+          selected={selected}
+        />
 
         <Cell width={250} plain style={{ padding: '5px', display: 'block' }}>
           <TagEditor tag={tag} ref={colorButtonRef} />
@@ -184,28 +153,27 @@ export const TagRow = memo(
             placeholder: t('No description'),
           }}
         />
-        {tag.tag !== '*' && (
-          <Cell width="auto" style={{ padding: '0 10px' }} plain>
-            <CellButton
-              style={{
-                borderRadius: 4,
-                padding: '3px 6px',
-                backgroundColor: theme.noticeBackground,
-                border: '1px solid ' + theme.noticeBackground,
-                color: theme.noticeTextDark,
-                fontSize: 12,
-                cursor: 'pointer',
-                ':hover': { backgroundColor: theme.noticeBackgroundLight },
-              }}
-              onSelect={onShowActivity}
-            >
-              <Text style={{ paddingRight: 5 }}>
-                <Trans>View Transactions</Trans>
-              </Text>
-              <SvgArrowThinRight style={{ width: 8, height: 8 }} />
-            </CellButton>
-          </Cell>
-        )}
+
+        <Cell width="auto" style={{ padding: '0 10px' }} plain>
+          <CellButton
+            style={{
+              borderRadius: 4,
+              padding: '3px 6px',
+              backgroundColor: theme.noticeBackground,
+              border: '1px solid ' + theme.noticeBackground,
+              color: theme.noticeTextDark,
+              fontSize: 12,
+              cursor: 'pointer',
+              ':hover': { backgroundColor: theme.noticeBackgroundLight },
+            }}
+            onSelect={onShowActivity}
+          >
+            <Text style={{ paddingRight: 5 }}>
+              <Trans>View Transactions</Trans>
+            </Text>
+            <SvgArrowThinRight style={{ width: 8, height: 8 }} />
+          </CellButton>
+        </Cell>
       </Row>
     );
   },
