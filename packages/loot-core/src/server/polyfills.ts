@@ -1,10 +1,14 @@
+// By default, no polyfills are installed
+
 // Polyfills for browser/web worker environment
 // These match what webpack's ProvidePlugin was providing
 
 import { Buffer } from 'buffer';
+import process from 'process';
+
+import * as jspb from 'google-protobuf';
 // Import process for browser environment using the alias
 // @ts-ignore - process doesn't have proper TypeScript exports
-import process from 'process';
 
 // Make Buffer and process available globally
 if (typeof globalThis !== 'undefined') {
@@ -21,8 +25,12 @@ if (typeof globalThis !== 'undefined') {
         case 'process':
         case 'process/browser':
           return process;
+        case 'google-protobuf':
+          return jspb;
         default:
-          throw new Error(`Module not found: ${moduleId}. Add to polyfills if needed.`);
+          throw new Error(
+            `Module not found: ${moduleId}. Add to polyfills if needed.`,
+          );
       }
     };
   }

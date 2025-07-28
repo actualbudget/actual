@@ -2,7 +2,7 @@ import path from 'path';
 
 import { viteCommonjs } from '@originjs/vite-plugin-commonjs';
 import { defineConfig } from 'vite';
-// import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 import { vitePeggyPlugin } from './vite-peggy-plugin';
 
@@ -72,6 +72,10 @@ export default defineConfig(({ mode }) => {
         //   find: '@actual-app/crdt',
         //   replacement: path.resolve(__dirname, '../crdt/src/index.ts'),
         // },
+        {
+          find: /^@actual-app\/crdt(\/.*)?$/,
+          replacement: path.resolve('../../crdt/src$1'),
+        },
       ],
     },
     define: {
@@ -84,7 +88,11 @@ export default defineConfig(({ mode }) => {
       Buffer: 'globalThis.Buffer',
       process: 'globalThis.process',
     },
-    plugins: [vitePeggyPlugin(), viteCommonjs()],
+    plugins: [
+      vitePeggyPlugin(),
+      viteCommonjs(),
+      nodePolyfills({ exclude: ['buffer'] }),
+    ],
     optimizeDeps: {
       include: [
         'buffer',
