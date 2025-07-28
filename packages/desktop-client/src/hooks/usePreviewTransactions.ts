@@ -27,7 +27,12 @@ type UsePreviewTransactionsProps = {
   filter?: (schedule: ScheduleEntity) => boolean;
   options?: {
     /**
+     * Whether to calculate running balances.
+     */
+    calculateRunningBalances?: boolean;
+    /**
      * The starting balance to start the running balance calculation from.
+     * This is ignored if `calculateRunningBalances` is false.
      */
     startingBalance?: IntegerAmount;
   };
@@ -181,18 +186,20 @@ export function usePreviewTransactions({
           const ungroupedTransactions = ungroupTransactions(withDefaults);
           setPreviewTransactions(ungroupedTransactions);
 
-          setRunningBalances(
-            // We always use the bottom up calculation for preview transactions
-            // because the hook controls the order of the transactions. We don't
-            // need to provide a custom way for consumers to calculate the running
-            // balances, at least as of writing.
-            calculateRunningBalancesBottomUp(
-              ungroupedTransactions,
-              // Preview transactions are behaves like 'all' splits
-              'all',
-              optionsRef.current?.startingBalance,
-            ),
-          );
+          if (optionsRef.current?.calculateRunningBalances) {
+            setRunningBalances(
+              // We always use the bottom up calculation for preview transactions
+              // because the hook controls the order of the transactions. We don't
+              // need to provide a custom way for consumers to calculate the running
+              // balances, at least as of writing.
+              calculateRunningBalancesBottomUp(
+                ungroupedTransactions,
+                // Preview transactions are behaves like 'all' splits
+                'all',
+                optionsRef.current?.startingBalance,
+              ),
+            );
+          }
 
           setIsLoading(false);
         }

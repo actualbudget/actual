@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 
-import { groupById } from 'loot-core/shared/util';
+import { groupById, type IntegerAmount } from 'loot-core/shared/util';
 import {
   type ScheduleEntity,
   type AccountEntity,
@@ -12,6 +12,8 @@ import { useAccounts } from './useAccounts';
 import { usePayees } from './usePayees';
 import { usePreviewTransactions } from './usePreviewTransactions';
 import { useSheetValue } from './useSheetValue';
+import { useSyncedPref } from './useSyncedPref';
+import { calculateRunningBalancesBottomUp } from './useTransactions';
 
 import { accountBalance } from '@desktop-client/spreadsheet/bindings';
 
@@ -68,6 +70,8 @@ export function useAccountPreviewTransactions({
     accountBalance(accountId || ''),
   );
 
+  const [showBalances] = useSyncedPref(`show-balances-${accountId}`);
+
   const {
     previewTransactions: allPreviewTransactions,
     runningBalances: allRunningBalances,
@@ -76,6 +80,7 @@ export function useAccountPreviewTransactions({
   } = usePreviewTransactions({
     filter: accountSchedulesFilter,
     options: {
+      calculateRunningBalances: showBalances === 'true',
       startingBalance: accountBalanceValue ?? 0,
     },
   });
@@ -90,16 +95,21 @@ export function useAccountPreviewTransactions({
       };
     }
 
-    const previewTransactions = accountPreview({
+    const {
+      transactions: previewTransactions,
+      runningBalances: previewRunningBalances,
+    } = inverseBasedOnAccount({
       accountId,
       transactions: allPreviewTransactions,
+      runningBalances: allRunningBalances,
+      startingBalance: accountBalanceValue ?? 0,
       getPayeeByTransferAccount,
       getTransferAccountByPayee,
     });
 
     const transactionIds = new Set(previewTransactions.map(t => t.id));
     const runningBalances = new Map(
-      [...allRunningBalances].filter(([id]) => transactionIds.has(id)),
+      [...previewRunningBalances.entries()].filter(([id]) => transactionIds.has(id)),
     );
 
     return {
@@ -111,17 +121,20 @@ export function useAccountPreviewTransactions({
   }, [
     accountId,
     allPreviewTransactions,
+    accountBalanceValue,
+    allRunningBalances,
     getPayeeByTransferAccount,
     getTransferAccountByPayee,
-    allRunningBalances,
     isLoading,
     error,
   ]);
 }
 
-type AccountPreviewProps = {
+type InverseBasedOnAccountProps = {
   accountId?: AccountEntity['id'];
   transactions: readonly TransactionEntity[];
+  startingBalance: IntegerAmount;
+  runningBalances: Map<TransactionEntity['id'], IntegerAmount>;
   getPayeeByTransferAccount: (
     transferAccountId?: AccountEntity['id'],
   ) => PayeeEntity | null;
@@ -130,13 +143,18 @@ type AccountPreviewProps = {
   ) => AccountEntity | null;
 };
 
-function accountPreview({
+function inverseBasedOnAccount({
   accountId,
   transactions,
+  runningBalances,
+  startingBalance,
   getPayeeByTransferAccount,
   getTransferAccountByPayee,
-}: AccountPreviewProps): TransactionEntity[] {
-  return transactions.map(transaction => {
+}: InverseBasedOnAccountProps): {
+  transactions: TransactionEntity[];
+  runningBalances: Map<TransactionEntity['id'], IntegerAmount>;
+} {
+  const mappedTransactions = transactions.map(transaction => {
     const inverse = transaction.account !== accountId;
     const subtransactions = transaction.subtransactions?.map(st => ({
       ...st,
@@ -148,6 +166,7 @@ function accountPreview({
         : st.account,
     }));
     return {
+      inversed: inverse,
       ...transaction,
       amount: inverse ? -transaction.amount : transaction.amount,
       payee:
@@ -160,4 +179,22 @@ function accountPreview({
       ...(subtransactions && { subtransactions }),
     };
   });
+
+  // Recalculate running balances if any transaction was inversed.
+  // This is necessary because the running balances are calculated based on the
+  // original transaction amounts and accounts, and we need to adjust them
+  // based on the inversed transactions.
+  const anyInversed = mappedTransactions.some(t => t.inversed);
+  const mappedRunningBalances = anyInversed
+    ? calculateRunningBalancesBottomUp(
+        mappedTransactions,
+        'all',
+        startingBalance ?? 0,
+      )
+    : runningBalances;
+
+  return {
+    transactions: mappedTransactions,
+    runningBalances: mappedRunningBalances,
+  };
 }
