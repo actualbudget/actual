@@ -109,7 +109,9 @@ export function useAccountPreviewTransactions({
 
     const transactionIds = new Set(previewTransactions.map(t => t.id));
     const runningBalances = new Map(
-      [...previewRunningBalances.entries()].filter(([id]) => transactionIds.has(id)),
+      [...previewRunningBalances.entries()].filter(([id]) =>
+        transactionIds.has(id),
+      ),
     );
 
     return {
