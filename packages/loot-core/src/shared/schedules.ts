@@ -321,8 +321,7 @@ export function extractScheduleConds(conditions: RuleConditionEntity[]) {
     date:
       conditions.find(
         cond =>
-          ((cond.op === 'is' || cond.op === 'isapprox') &&
-            cond.field === 'date')
+          (cond.op === 'is' || cond.op === 'isapprox') && cond.field === 'date',
       ) || null,
   };
 }
