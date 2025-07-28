@@ -60,18 +60,12 @@ export default defineConfig(({ mode }) => {
       ],
       alias: [
         // Node.js polyfills
-        // { find: 'assert', replacement: 'assert' },
-        // { find: 'buffer', replacement: 'buffer' },
-        // { find: 'path', replacement: 'path-browserify' },
-        // { find: 'process', replacement: 'process/browser' },
-        // { find: 'stream', replacement: 'stream-browserify' },
-        // { find: 'zlib', replacement: 'browserify-zlib' },
-        // { find: 'fs', replacement: 'memfs' },
-        // // Workspace packages
-        // {
-        //   find: '@actual-app/crdt',
-        //   replacement: path.resolve(__dirname, '../crdt/src/index.ts'),
-        // },
+        {
+          find: 'vite-plugin-node-polyfills',
+          replacement: path.resolve(
+            '../node_modules/vite-plugin-node-polyfills',
+          ),
+        },
         {
           find: /^@actual-app\/crdt(\/.*)?$/,
           replacement: path.resolve('../../crdt/src$1'),
@@ -84,14 +78,17 @@ export default defineConfig(({ mode }) => {
       'process.env.PUBLIC_URL': JSON.stringify(process.env.PUBLIC_URL || '/'),
       'process.env.ACTUAL_DATA_DIR': JSON.stringify('/'),
       'process.env.ACTUAL_DOCUMENT_DIR': JSON.stringify('/documents'),
-      global: 'globalThis',
-      Buffer: 'globalThis.Buffer',
-      process: 'globalThis.process',
     },
     plugins: [
       vitePeggyPlugin(),
       viteCommonjs(),
-      nodePolyfills({ exclude: ['buffer'] }),
+      nodePolyfills({
+        exclude: ['buffer'],
+        globals: {
+          process: true,
+          global: true,
+        },
+      }),
     ],
     optimizeDeps: {
       include: [
