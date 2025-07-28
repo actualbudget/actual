@@ -839,7 +839,7 @@ export function findTags() {
     `
     SELECT notes
     FROM transactions
-    WHERE notes LIKE ?
+    WHERE tombstone = 0 AND notes LIKE ?
   `,
     ['%#%'],
   );
