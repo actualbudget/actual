@@ -8,6 +8,7 @@ import { Condition } from '../server/rules';
 
 import * as monthUtils from './months';
 import { q } from './query';
+import { RuleConditionEntity } from 'loot-core/types/models/rule';
 
 export function getStatus(
   nextDate: string,
@@ -300,17 +301,13 @@ export function recurConfigToRSchedule(config) {
   }
 }
 
-export function extractScheduleConds(conditions) {
+export function extractScheduleConds(conditions: RuleConditionEntity[]) {
   return {
     payee:
       conditions.find(cond => cond.op === 'is' && cond.field === 'payee') ||
-      conditions.find(
-        cond => cond.op === 'is' && cond.field === 'description',
-      ) ||
       null,
     account:
       conditions.find(cond => cond.op === 'is' && cond.field === 'account') ||
-      conditions.find(cond => cond.op === 'is' && cond.field === 'acct') ||
       null,
     amount:
       conditions.find(
