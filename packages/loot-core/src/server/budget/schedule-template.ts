@@ -5,7 +5,7 @@ import {
   getDateWithSkippedWeekend,
   extractScheduleConds,
 } from '../../shared/schedules';
-import { CategoryEntity } from '../../types/models';
+import { CategoryEntity, RecurConfig } from '../../types/models';
 import { ScheduleTemplate, Template } from '../../types/models/templates';
 import * as db from '../db';
 import { getRuleForSchedule } from '../schedules/app';
@@ -43,11 +43,11 @@ async function createScheduleList(
     const conditions = rule.serialize().conditions;
     const { date: dateConditions, amount: amountCondition } =
       extractScheduleConds(conditions);
-    let scheduleAmount =
+    let scheduleAmount:number =
       amountCondition.op === 'isbetween'
-        ? Math.round(amountCondition.value.num1 + amountCondition.value.num2) /
+        ? Math.round((amountCondition.value as { num1: number }).num1 + (amountCondition.value as { num2: number }).num2) /
           2
-        : amountCondition.value;
+        : (amountCondition.value as { num1: number }).num1;
     // Apply adjustment percentage if specified
     if (template.adjustment) {
       const adjustmentFactor = 1 + template.adjustment / 100;
@@ -74,13 +74,13 @@ async function createScheduleList(
       dateConditions,
       monthUtils._parse(current_month),
     );
-    const target_interval = dateConditions.value.interval
-      ? dateConditions.value.interval
+    const target_interval = (dateConditions.value as RecurConfig).interval
+      ? (dateConditions.value as RecurConfig).interval
       : 1;
-    const target_frequency = dateConditions.value.frequency;
+    const target_frequency = (dateConditions.value as RecurConfig).frequency;
     const isRepeating =
       Object(dateConditions.value) === dateConditions.value &&
-      'frequency' in dateConditions.value;
+      'frequency' in (dateConditions.value as RecurConfig);
     const num_months = monthUtils.differenceInCalendarMonths(
       next_date_string,
       current_month,
@@ -113,11 +113,11 @@ async function createScheduleList(
             monthUtils._parse(current_month),
             true,
           );
-          let nextDate = dateConditions.value.skipWeekend
+          let nextDate = (dateConditions.value as RecurConfig).skipWeekend
             ? monthUtils.dayFromDate(
                 getDateWithSkippedWeekend(
                   monthUtils._parse(nextBaseDate),
-                  dateConditions.value.weekendSolveMode,
+                  (dateConditions.value as RecurConfig).weekendSolveMode,
                 ),
               )
             : nextBaseDate;
@@ -130,11 +130,11 @@ async function createScheduleList(
               monthUtils._parse(oneDayLater),
               true,
             );
-            nextDate = dateConditions.value.skipWeekend
+            nextDate = (dateConditions.value as RecurConfig).skipWeekend
               ? monthUtils.dayFromDate(
                   getDateWithSkippedWeekend(
                     monthUtils._parse(nextBaseDate),
-                    dateConditions.value.weekendSolveMode,
+                    (dateConditions.value as RecurConfig).weekendSolveMode,
                   ),
                 )
               : nextBaseDate;
