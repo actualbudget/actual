@@ -442,7 +442,7 @@ export function getUpcomingDays(
   }
 }
 
-export function scheduleIsRecurring(dateCond: Condition | null) {
+export function scheduleIsRecurring(dateCond: RuleConditionEntity | null) {
   if (!dateCond) {
     return false;
   }
