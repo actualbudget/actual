@@ -43,10 +43,12 @@ async function createScheduleList(
     const conditions = rule.serialize().conditions;
     const { date: dateConditions, amount: amountCondition } =
       extractScheduleConds(conditions);
-    let scheduleAmount:number =
+    let scheduleAmount: number =
       amountCondition.op === 'isbetween'
-        ? Math.round((amountCondition.value as { num1: number }).num1 + (amountCondition.value as { num2: number }).num2) /
-          2
+        ? Math.round(
+            (amountCondition.value as { num1: number }).num1 +
+              (amountCondition.value as { num2: number }).num2,
+          ) / 2
         : (amountCondition.value as { num1: number }).num1;
     // Apply adjustment percentage if specified
     if (template.adjustment) {
