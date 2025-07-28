@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import MockDate from 'mockdate';
 
+import { RuleConditionEntity } from 'loot-core/types/models';
+
 import { q } from '../../shared/query';
 import { getNextDate } from '../../shared/schedules';
 import { aqlQuery } from '../aql';
@@ -14,7 +16,6 @@ import {
   deleteSchedule,
   setNextDate,
 } from './app';
-import { RuleConditionEntity } from 'loot-core/types/models';
 
 beforeEach(async () => {
   await global.emptyDatabase()();
@@ -25,7 +26,7 @@ beforeEach(async () => {
 describe('schedule app', () => {
   describe('utility', () => {
     it('conditions are updated when they exist', () => {
-      const conds:RuleConditionEntity[] = [
+      const conds: RuleConditionEntity[] = [
         { op: 'is', field: 'payee', value: 'FOO' },
         { op: 'is', field: 'date', value: '2020-01-01' },
       ];
@@ -43,7 +44,7 @@ describe('schedule app', () => {
     });
 
     it('conditions are added if they don’t exist', () => {
-      const conds:RuleConditionEntity[] = [
+      const conds: RuleConditionEntity[] = [
         { op: 'contains', field: 'payee', value: 'FOO' },
         { op: 'contains', field: 'notes', value: 'dflksjdflskdjf' },
       ];

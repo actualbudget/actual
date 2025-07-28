@@ -4,11 +4,12 @@ import * as d from 'date-fns';
 import { Locale } from 'date-fns';
 import { t } from 'i18next';
 
+import { RuleConditionEntity } from 'loot-core/types/models/rule';
+
 import { Condition } from '../server/rules';
 
 import * as monthUtils from './months';
 import { q } from './query';
-import { RuleConditionEntity } from 'loot-core/types/models/rule';
 
 export function getStatus(
   nextDate: string,
