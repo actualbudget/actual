@@ -68,6 +68,7 @@ Content contained on external links is not managed or maintained by the Actual B
 - [Google Cloud always free tier](https://github.com/eatonc/actual-gcp)
 - [Google Cloud Run (serverless)](https://github.com/daniefdz/actual-run)
 - [Home Assistant](https://github.com/sztupy/hassio-actualbudget/blob/main/README.md)
+- [Proxmox VE Helper-Scripts](https://community-scripts.github.io/ProxmoxVE/scripts?id=actualbudget)
 - Synology NAS
   - [Marius Bogdan Lixandru's guide](https://mariushosting.com/how-to-install-actual-on-your-synology-nas/)
   - [Adam Millerchip's guide](https://adamu.jp/blog/actual_budget_nas)
