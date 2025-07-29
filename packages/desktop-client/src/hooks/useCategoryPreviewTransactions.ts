@@ -6,7 +6,6 @@ import {
   type CategoryEntity,
 } from 'loot-core/types/models';
 
-import { calculateRunningBalancesBottomUp } from './useAccountPreviewTransactions';
 import { useCategory } from './useCategory';
 import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTemplates';
 import { usePreviewTransactions } from './usePreviewTransactions';
@@ -52,10 +51,14 @@ export function useCategoryPreviewTransactions({
 
   const {
     previewTransactions: allPreviewTransactions,
+    runningBalances: allRunningBalances,
     isLoading,
     error,
   } = usePreviewTransactions({
     filter: categorySchedulesFilter,
+    options: {
+      startingBalance: categoryBalanceValue ?? 0,
+    },
   });
 
   return useMemo(() => {
@@ -63,8 +66,8 @@ export function useCategoryPreviewTransactions({
       return {
         previewTransactions: [],
         runningBalances: new Map(),
-        isLoading: false,
-        error: undefined,
+        isLoading,
+        error,
       };
     }
 
@@ -74,16 +77,9 @@ export function useCategoryPreviewTransactions({
     );
 
     const transactionIds = new Set(previewTransactions.map(t => t.id));
-    const runningBalances = calculateRunningBalancesBottomUp(
-      previewTransactions,
-      'all',
-      categoryBalanceValue ?? 0,
+    const runningBalances = new Map(
+      [...allRunningBalances].filter(([id]) => transactionIds.has(id)),
     );
-    for (const transactionId of runningBalances.keys()) {
-      if (!transactionIds.has(transactionId)) {
-        runningBalances.delete(transactionId);
-      }
-    }
 
     return {
       previewTransactions,
@@ -93,8 +89,8 @@ export function useCategoryPreviewTransactions({
     };
   }, [
     allPreviewTransactions,
+    allRunningBalances,
     category,
-    categoryBalanceValue,
     error,
     isLoading,
     schedulesToPreview,

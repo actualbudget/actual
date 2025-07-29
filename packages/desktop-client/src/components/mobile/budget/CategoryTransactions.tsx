@@ -90,7 +90,7 @@ function TransactionListWithPreviews({
   );
   const {
     transactions,
-    isLoading,
+    isLoading: isTransactionsLoading,
     isLoadingMore,
     loadMore: loadMoreTransactions,
     reload: reloadTransactions,
@@ -138,10 +138,11 @@ function TransactionListWithPreviews({
     month,
   );
 
-  const { previewTransactions } = useCategoryPreviewTransactions({
-    categoryId: category.id,
-    month,
-  });
+  const { previewTransactions, isLoading: isPreviewTransactionsLoading } =
+    useCategoryPreviewTransactions({
+      categoryId: category.id,
+      month,
+    });
 
   const transactionsToDisplay = !isSearching
     ? previewTransactions.concat(transactions)
@@ -149,19 +150,18 @@ function TransactionListWithPreviews({
 
   return (
     <TransactionListWithBalances
-      isLoading={isLoading}
+      isLoading={
+        isSearching ? isTransactionsLoading : isPreviewTransactionsLoading
+      }
       transactions={transactionsToDisplay}
       balance={balance}
       balanceCleared={balanceCleared}
       balanceUncleared={balanceUncleared}
-      runningBalances={undefined}
       searchPlaceholder={`Search ${category.name}`}
       onSearch={onSearch}
       isLoadingMore={isLoadingMore}
       onLoadMore={loadMoreTransactions}
       onOpenTransaction={onOpenTransaction}
-      onRefresh={undefined}
-      account={undefined}
     />
   );
 }
