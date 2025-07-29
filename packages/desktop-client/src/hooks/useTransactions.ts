@@ -16,6 +16,7 @@ type CalculateRunningBalancesOption =
   | ((
       transactions: TransactionEntity[],
       splits: TransactionSplitsOption,
+      startingBalance?: IntegerAmount,
     ) => Map<TransactionEntity['id'], IntegerAmount>)
   | boolean;
 
@@ -52,6 +53,12 @@ type UseTransactionsProps = {
      * @default false
      */
     calculateRunningBalances?: CalculateRunningBalancesOption;
+    /**
+     * The starting balance to start the running balance calculation from.
+     * This is ignored if `calculateRunningBalances` is false.
+     * @default 0
+     */
+    startingBalance?: IntegerAmount;
   };
 };
 
@@ -146,6 +153,7 @@ export function useTransactions({
               calculateFn(
                 data,
                 query.state.tableOptions?.splits as TransactionSplitsOption,
+                optionsRef.current?.startingBalance,
               ),
             );
           }
@@ -241,4 +249,46 @@ export function calculateRunningBalancesBottomUp(
         return acc;
       }, new Map<TransactionEntity['id'], IntegerAmount>())
   );
+}
+
+export function calculateRunningBalancesTopDown(
+  transactions: TransactionEntity[],
+  splits: TransactionSplitsOption,
+  startingBalance: IntegerAmount = 0,
+) {
+  return transactions
+    .filter(t => {
+      switch (splits) {
+        case 'all':
+          // Only calculate parent/non-split amounts
+          return !t.parent_id;
+        default:
+          // inline
+          // grouped
+          // none
+          return true;
+      }
+    })
+    .reduce((acc, transaction, index, arr) => {
+      if (index === 0) {
+        // This is the first transaction in the list,
+        // so we set the running balance to the starting balance
+        acc.set(transaction.id, startingBalance);
+        return acc;
+      }
+
+      if (index === arr.length - 1) {
+        // This is the last transaction in the list,
+        // so we set the running balance to the amount of the transaction
+        acc.set(transaction.id, transaction.amount);
+        return acc;
+      }
+
+      const previousTransaction = arr[index - 1];
+      const previousRunningBalance = acc.get(previousTransaction.id) ?? 0;
+      const previousAmount = previousTransaction.amount ?? 0;
+      const currentRunningBalance = previousRunningBalance - previousAmount;
+      acc.set(transaction.id, currentRunningBalance);
+      return acc;
+    }, new Map<TransactionEntity['id'], IntegerAmount>());
 }
