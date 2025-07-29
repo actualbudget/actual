@@ -108,7 +108,8 @@ async function createScheduleList(
           let monthlyTarget = 0;
           const nextMonth = monthUtils.addMonths(
             current_month,
-            ScheduleTemplateTargetArray[ScheduleTemplateTargetArray.length - 1].num_months + 1,
+            ScheduleTemplateTargetArray[ScheduleTemplateTargetArray.length - 1]
+              .num_months + 1,
           );
           let nextBaseDate = getNextDate(
             dateConditions,
@@ -149,7 +150,9 @@ async function createScheduleList(
               break;
             }
           }
-          ScheduleTemplateTargetArray[ScheduleTemplateTargetArray.length - 1].target = -monthlyTarget;
+          ScheduleTemplateTargetArray[
+            ScheduleTemplateTargetArray.length - 1
+          ].target = -monthlyTarget;
         }
       } else {
         errors.push(
@@ -158,7 +161,12 @@ async function createScheduleList(
       }
     }
   }
-  return { ScheduleTemplateTargetArray: ScheduleTemplateTargetArray.filter(c => c.completed === 0), errors };
+  return {
+    ScheduleTemplateTargetArray: ScheduleTemplateTargetArray.filter(
+      c => c.completed === 0,
+    ),
+    errors,
+  };
 }
 
 function getPayMonthOfTotal(t: ScheduleTemplateTarget[]) {
@@ -261,7 +269,9 @@ export async function runSchedule(
   errors: string[],
   category: CategoryEntity,
 ) {
-  const scheduleTemplates = template_lines.filter(template => template.type === 'schedule');
+  const scheduleTemplates = template_lines.filter(
+    template => template.type === 'schedule',
+  );
 
   const template = await createScheduleList(
     scheduleTemplates,
@@ -279,10 +289,11 @@ export async function runSchedule(
     (c.target_frequency === 'daily' && c.target_interval <= 31) ||
     isReflectBudget();
 
-  const t_payMonthOf = template.ScheduleTemplateTargetArray.filter(isPayMonthOf);
-  const t_sinking = template.ScheduleTemplateTargetArray
-    .filter(c => !isPayMonthOf(c))
-    .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
+  const t_payMonthOf =
+    template.ScheduleTemplateTargetArray.filter(isPayMonthOf);
+  const t_sinking = template.ScheduleTemplateTargetArray.filter(
+    c => !isPayMonthOf(c),
+  ).sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
   const totalPayMonthOf = getPayMonthOfTotal(t_payMonthOf);
   const totalSinking = getSinkingTotal(t_sinking);
   const totalSinkingBaseContribution =
