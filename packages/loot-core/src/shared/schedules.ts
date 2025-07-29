@@ -4,13 +4,13 @@ import * as d from 'date-fns';
 import { Locale } from 'date-fns';
 import { t } from 'i18next';
 
+import { ScheduleEntity } from 'loot-core/types/models';
 import { RuleConditionEntity } from 'loot-core/types/models/rule';
 
 import { Condition } from '../server/rules';
 
 import * as monthUtils from './months';
 import { q } from './query';
-import { ScheduleEntity } from 'loot-core/types/models';
 
 export function getStatus(
   nextDate: string,
