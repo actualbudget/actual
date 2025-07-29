@@ -21,6 +21,7 @@ Bourso
 Boursobank
 brexplpw
 BYLADEM
+byweekly
 Caddyfile
 CAGLPTPL
 Caixa
