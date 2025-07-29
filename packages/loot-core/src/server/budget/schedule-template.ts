@@ -49,7 +49,7 @@ async function createScheduleList(
             (amountCondition.value as { num1: number }).num1 +
               (amountCondition.value as { num2: number }).num2,
           ) / 2
-        : amountCondition.value as number;
+        : (amountCondition.value as number);
     // Apply adjustment percentage if specified
     if (template.adjustment) {
       const adjustmentFactor = 1 + template.adjustment / 100;
