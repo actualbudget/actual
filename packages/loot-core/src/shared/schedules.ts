@@ -55,7 +55,7 @@ export function getStatusLabel(status: string) {
   }
 }
 
-export function getHasTransactionsQuery(schedules) {
+export function getHasTransactionsQuery(schedules: readonly ScheduleEntity[]) {
   const filters = schedules.map(schedule => {
     const dateCond = schedule._conditions.find(c => c.field === 'date');
     return {
