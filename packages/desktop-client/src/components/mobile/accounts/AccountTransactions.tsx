@@ -241,6 +241,12 @@ function TransactionListWithPreviews({
   readonly accountName: AccountEntity['name'] | string;
 }) {
   const { t } = useTranslation();
+
+  const balanceQueries = useMemo(
+    () => queriesFromAccountId(accountId, account),
+    [accountId, account],
+  );
+
   const baseTransactionsQuery = useCallback(
     () =>
       queries.transactions(accountId).options({ splits: 'all' }).select('*'),
@@ -352,11 +358,6 @@ function TransactionListWithPreviews({
       }
     },
     [dispatch, navigate],
-  );
-
-  const balanceQueries = useMemo(
-    () => queriesFromAccountId(accountId, account),
-    [accountId, account],
   );
 
   const transactionsToDisplay = !isSearching
