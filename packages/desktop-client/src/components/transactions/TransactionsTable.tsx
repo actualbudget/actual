@@ -575,7 +575,7 @@ function PayeeCell({
               width: 14,
               height: 14,
               marginRight: 5,
-              flexShrink: 0
+              flexShrink: 0,
             }}
           />
           <Text
