@@ -232,6 +232,17 @@ export function friendlyOp(op, type?) {
   }
 }
 
+export function translateRuleStage(stage: string): string {
+  switch (stage) {
+    case 'pre':
+      return t('Pre');
+    case 'post':
+      return t('Post');
+    default:
+      return null;
+  }
+}
+
 export function deserializeField(field) {
   if (field === 'amount-inflow') {
     return { field: 'amount', options: { inflow: true } };
