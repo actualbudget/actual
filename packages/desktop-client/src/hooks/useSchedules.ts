@@ -35,8 +35,10 @@ function loadStatuses(
     onData: data => {
       const hasTrans = new Set(data.filter(Boolean).map(row => row.schedule));
 
+      const oneItem = [schedules[0]]
+
       const scheduleStatuses = new Map(
-        schedules.map(s => [
+        oneItem.map(s => [
           s.id,
           getStatus(
             s.next_date,
