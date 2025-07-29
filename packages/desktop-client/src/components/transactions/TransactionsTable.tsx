@@ -527,7 +527,7 @@ function PayeeCell({
       <CellButton
         bare
         style={{
-          alignSelf: 'flex-start',
+          alignSelf: 'stretch',
           borderRadius: 4,
           border: '1px solid transparent', // so it doesn't shift on hover
           ':hover': isPreview
@@ -575,6 +575,7 @@ function PayeeCell({
               width: 14,
               height: 14,
               marginRight: 5,
+              flexShrink: 0
             }}
           />
           <Text
@@ -582,6 +583,9 @@ function PayeeCell({
               fontStyle: 'italic',
               fontWeight: 300,
               userSelect: 'none',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
               borderBottom: importedPayee
                 ? `1px dashed ${theme.pageTextSubdued}`
                 : 'none',
