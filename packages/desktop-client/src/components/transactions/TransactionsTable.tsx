@@ -586,6 +586,7 @@ function PayeeCell({
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
+              minWidth: 0,
               borderBottom: importedPayee
                 ? `1px dashed ${theme.pageTextSubdued}`
                 : 'none',
