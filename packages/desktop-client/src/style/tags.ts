@@ -24,7 +24,7 @@ export function useTags() {
   return tags;
 }
 
-function getTagCSSColors(theme: Theme, color?: string) {
+function getTagCSSColors(theme: Theme, color?: string | null) {
   if (theme === 'light') {
     return [
       color ? `${color} !important` : themeStyle.noteTagText,
@@ -55,9 +55,7 @@ export function useTagCSS() {
       const [color, backgroundColor, backgroundColorHovered] = getTagCSSColors(
         theme,
         // fallback strategy: options color > tag color > default color > theme color (undefined)
-        options.color ??
-          (tags.find(t => t.tag === tag)?.color ||
-            tags.find(t => t.tag === '*')?.color),
+        options.color ?? tags.find(t => t.tag === tag)?.color,
       );
 
       return css({
