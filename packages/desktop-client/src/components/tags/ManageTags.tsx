@@ -3,7 +3,9 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
+import { SvgSearchAlternate } from '@actual-app/components/icons/v2';
 import { Stack } from '@actual-app/components/stack';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
@@ -18,7 +20,7 @@ import {
   SelectedProvider,
   useSelected,
 } from '@desktop-client/hooks/useSelected';
-import { deleteAllTags } from '@desktop-client/queries/queriesSlice';
+import { deleteAllTags, findTags } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { useTags } from '@desktop-client/style/tags';
 
@@ -30,30 +32,15 @@ export function ManageTags() {
   const [create, setCreate] = useState(false);
   const tags = useTags();
 
-  const defaultTag = useMemo(
-    () => ({
-      id: '*',
-      tag: '*',
-      color: theme.noteTagDefault,
-      description: t('Default tag color'),
-      ...tags.find(tag => tag.tag === '*'),
-    }),
-    [t, tags],
-  );
-
   const filteredTags = useMemo(() => {
     return filter === ''
-      ? [defaultTag, ...tags.filter(tag => tag.tag !== '*')]
+      ? tags
       : tags.filter(tag =>
           getNormalisedString(tag.tag).includes(getNormalisedString(filter)),
         );
-  }, [defaultTag, filter, tags]);
+  }, [filter, tags]);
 
-  const selectedInst = useSelected(
-    'manage-tags',
-    filteredTags.filter(tag => tag.tag !== '*'),
-    [],
-  );
+  const selectedInst = useSelected('manage-tags', filteredTags, []);
 
   const onDeleteSelected = useCallback(async () => {
     dispatch(deleteAllTags([...selectedInst.items]));
@@ -92,6 +79,14 @@ export function ManageTags() {
             <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
             <Trans>Add New</Trans>
           </Button>
+          <Button variant="bare" onPress={() => dispatch(findTags())}>
+            <SvgSearchAlternate
+              width={10}
+              height={10}
+              style={{ marginRight: 3 }}
+            />
+            <Trans>Find Existing Tags</Trans>
+          </Button>
           <View style={{ flex: 1 }} />
           <Search
             placeholder={t('Filter tags...')}
@@ -104,12 +99,25 @@ export function ManageTags() {
           {create && (
             <TagCreationRow onClose={() => setCreate(false)} tags={tags} />
           )}
-          <TagsList
-            tags={filteredTags}
-            selectedItems={selectedInst.items}
-            hoveredTag={hoveredTag}
-            onHover={id => setHoveredTag(id ?? undefined)}
-          />
+          {tags.length ? (
+            <TagsList
+              tags={filteredTags}
+              selectedItems={selectedInst.items}
+              hoveredTag={hoveredTag}
+              onHover={id => setHoveredTag(id ?? undefined)}
+            />
+          ) : (
+            <View
+              style={{
+                background: theme.tableBackground,
+                fontStyle: 'italic',
+              }}
+            >
+              <Text style={{ margin: 'auto', padding: '20px' }}>
+                <Trans>No Tags</Trans>
+              </Text>
+            </View>
+          )}
         </View>
         <View
           style={{

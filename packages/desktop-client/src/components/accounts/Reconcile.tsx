@@ -170,13 +170,15 @@ export function ReconcileMenu({
             reconcile with:
           </Trans>
         </Text>
-        <InitialFocus>
-          <Input
-            value={inputValue ?? ''}
-            onChangeValue={setInputValue}
-            style={{ margin: '7px 0' }}
-          />
-        </InitialFocus>
+        {inputValue && (
+          <InitialFocus>
+            <Input
+              value={inputValue}
+              onChangeValue={setInputValue}
+              style={{ margin: '7px 0' }}
+            />
+          </InitialFocus>
+        )}
         {lastSyncedBalance != null && (
           <View>
             <Text>
