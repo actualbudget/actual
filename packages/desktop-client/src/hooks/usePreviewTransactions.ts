@@ -338,12 +338,8 @@ export function usePreviewTransactions({
 
     setIsLoading(true);
 
-    Promise.all(
-      scheduleTransactions.map(transaction =>
-        // Kick off an async rules application
-        send('rules-run', { transaction }),
-      ),
-    )
+    // Use batch processing instead of individual calls for better performance
+    send('rules-run-batch', { transactions: scheduleTransactions })
       .then(newTrans => {
         if (!isUnmounted) {
           const withDefaults = newTrans.map(t => ({
