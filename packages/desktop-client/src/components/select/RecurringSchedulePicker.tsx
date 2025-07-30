@@ -490,9 +490,9 @@ function RecurringScheduleTooltip({
         <Input
           id="interval"
           style={{
-            minWidth: 60,
-            width: `${String(config.interval || 1).length * 15 + 15}px`, // dynamic width
-            maxWidth: 80,
+            minWidth: '7ch',
+            width: `${String(config.interval || 1).length + 4}ch`,
+            maxWidth: '12ch',
           }}
           type="number"
           min={1}
