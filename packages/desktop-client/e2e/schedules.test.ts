@@ -97,3 +97,97 @@ test.describe('Schedules', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 });
+
+test.describe('Duplicate Payee Schedule', () => {
+  let page: Page;
+  let navigation: Navigation;
+  let schedulesPage: SchedulesPage;
+  let configurationPage: ConfigurationPage;
+
+  test.beforeAll(async ({ browser }) => {
+    page = await browser.newPage();
+    navigation = new Navigation(page);
+    configurationPage = new ConfigurationPage(page);
+
+    await page.goto('/');
+    await configurationPage.createTestFile();
+  });
+
+  test.afterAll(async () => {
+    await page.close();
+  });
+
+  test.beforeEach(async () => {
+    schedulesPage = await navigation.goToSchedulesPage();
+  });
+
+  test('checks the page visuals', async () => {
+    await expect(page).toMatchThemeScreenshots();
+  });
+
+  test('creates a new schedule, posts the transaction and later completes it', async () => {
+    test.setTimeout(40000);
+
+    // Adding two schedules with the same payee and account and amount, mimicking two different subscriptions
+    await schedulesPage.addNewSchedule({
+      payee: 'Apple',
+      account: 'HSBC',
+      amount: 5,
+    });
+
+    await schedulesPage.addNewSchedule({
+      payee: 'Apple',
+      account: 'HSBC',
+      amount: 5,
+    });
+
+    const schedule = schedulesPage.getNthSchedule(2);
+    await expect(schedule.payee).toHaveText('Apple');
+    await expect(schedule.account).toHaveText('HSBC');
+    await expect(schedule.amount).toHaveText('~5.00');
+    await expect(schedule.status).toHaveText('Due');
+    await expect(page).toMatchThemeScreenshots();
+
+    const schedule2 = schedulesPage.getNthSchedule(3);
+    await expect(schedule2.payee).toHaveText('Apple');
+    await expect(schedule2.account).toHaveText('HSBC');
+    await expect(schedule2.amount).toHaveText('~5.00');
+    await expect(schedule2.status).toHaveText('Due');
+    await expect(page).toMatchThemeScreenshots();
+
+    await schedulesPage.postNthSchedule(2);
+    await expect(schedulesPage.getNthSchedule(2).status).toHaveText('Paid');
+    await expect(page).toMatchThemeScreenshots();
+
+    // Go to transactions page
+    const accountPage = await navigation.goToAccountPage('HSBC');
+    const transaction = accountPage.getNthTransaction(0);
+    await expect(transaction.payee).toHaveText('Apple');
+    await expect(transaction.category).toHaveText('Categorize');
+    await expect(transaction.debit).toHaveText('5.00');
+    await expect(transaction.credit).toHaveText('');
+
+    // Go to transactions page
+    const transaction2 = accountPage.getNthTransaction(1);
+    await expect(transaction2.payee).toHaveText('Apple');
+    await expect(transaction2.category).toHaveText('Categorize');
+    await expect(transaction2.debit).toHaveText('5.00');
+    await expect(transaction2.credit).toHaveText('');
+
+    const icon = transaction.payee.getByTestId('schedule-icon');
+    await icon.hover();
+    await expect(page).toMatchThemeScreenshots();
+
+    const icon2 = transaction.payee.getByTestId('schedule-icon');
+    await icon2.hover();
+    await expect(page).toMatchThemeScreenshots();
+
+    // Go back to schedules page
+    await navigation.goToSchedulesPage();
+    await schedulesPage.completeNthSchedule(2);
+    await expect(schedulesPage.getNthScheduleRow(4)).toHaveText(
+      'Show completed schedules',
+    );
+    await expect(page).toMatchThemeScreenshots();
+  });
+});

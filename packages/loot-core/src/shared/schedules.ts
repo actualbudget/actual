@@ -75,8 +75,7 @@ export function getHasTransactionsQuery(schedules: readonly ScheduleEntity[]) {
     .options({ splits: 'all' })
     .filter({ $or: filters })
     .orderBy({ date: 'desc' })
-    .select(['schedule', 'date'])
-    .groupBy('schedule');
+    .select(['schedule', 'date']);
 }
 
 function makeNumberSuffix(num: number, locale: Locale) {
