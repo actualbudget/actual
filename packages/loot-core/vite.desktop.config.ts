@@ -1,24 +1,32 @@
 import path from 'path';
 
+import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import peggyLoader from 'vite-plugin-peggy-loader';
 
 // eslint-disable-next-line import/no-default-export
 export default defineConfig(({ mode }) => {
+  const outDir = path.resolve(__dirname, 'lib-dist/electron');
+  const crdtDir = path.resolve(__dirname, '../crdt');
+
   return {
     mode,
     build: {
       target: 'node18',
-      outDir: path.resolve(__dirname, 'lib-dist/electron'),
+      outDir,
       emptyOutDir: true,
       ssr: true,
       lib: {
         entry: path.resolve(__dirname, 'src/server/main.ts'),
         formats: ['cjs'],
-        fileName: () => 'bundle.desktop.js',
       },
       sourcemap: true,
       rollupOptions: {
+        output: {
+          entryFileNames: 'bundle.desktop.js',
+          format: 'cjs',
+          name: 'desktop',
+        },
         external: ['better-sqlite3'],
       },
     },
@@ -36,11 +44,14 @@ export default defineConfig(({ mode }) => {
       alias: [
         { find: 'handlebars', replacement: 'handlebars/dist/handlebars.js' },
         {
-          find: '@actual-app/crdt',
-          replacement: path.resolve(__dirname, '../crdt/src/index.ts'),
+          find: /^@actual-app\/crdt(\/.*)?$/,
+          replacement: path.resolve(`${crdtDir}/src$1`),
         },
       ],
     },
-    plugins: [peggyLoader()],
+    plugins: [
+      peggyLoader(),
+      visualizer({ template: 'raw-data', filename: `${outDir}/stats.json` }),
+    ],
   };
 });
