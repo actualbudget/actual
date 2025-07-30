@@ -158,7 +158,7 @@ export function AccountMenuModal({
                 notes={
                   originalNotes && originalNotes.length > 0
                     ? originalNotes
-                    : 'No notes'
+                    : t('No notes')
                 }
                 editable={false}
                 focused={false}
