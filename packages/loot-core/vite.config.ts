@@ -1,12 +1,10 @@
 // @ts-strict-ignore
 import path from 'path';
 
-// import { viteCommonjs } from '@originjs/vite-plugin-commonjs';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
-
-import { vitePeggyPlugin } from './vite-peggy-plugin';
+import peggyLoader from 'vite-plugin-peggy-loader';
 
 // https://vitejs.dev/config/
 // eslint-disable-next-line import/no-default-export
@@ -83,8 +81,7 @@ export default defineConfig(({ mode }) => {
       'process.env.ACTUAL_DOCUMENT_DIR': JSON.stringify('/documents'),
     },
     plugins: [
-      vitePeggyPlugin(),
-      // viteCommonjs(),
+      peggyLoader(),
       nodePolyfills({
         exclude: ['buffer'],
         globals: {
