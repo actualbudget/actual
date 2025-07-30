@@ -315,6 +315,7 @@ function TransactionListWithPreviews({
     isLoading: isPreviewTransactionsLoading,
   } = useAccountPreviewTransactions({
     accountId: account?.id,
+    getRunningBalances: showBalances,
   });
 
   const allBalances = useMemo(

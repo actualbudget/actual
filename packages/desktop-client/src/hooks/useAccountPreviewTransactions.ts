@@ -17,6 +17,7 @@ import { accountBalance } from '@desktop-client/spreadsheet/bindings';
 
 type UseAccountPreviewTransactionsProps = {
   accountId?: AccountEntity['id'] | undefined;
+  getRunningBalances?: boolean;
 };
 
 // Mirrors the `splits` AQL option from the server
@@ -35,6 +36,7 @@ type UseAccountPreviewTransactionsResult = {
  */
 export function useAccountPreviewTransactions({
   accountId,
+  getRunningBalances = false,
 }: UseAccountPreviewTransactionsProps): UseAccountPreviewTransactionsResult {
   const accounts = useAccounts();
   const accountsById = useMemo(() => groupById(accounts), [accounts]);
@@ -80,6 +82,7 @@ export function useAccountPreviewTransactions({
     error,
   } = usePreviewTransactions({
     filter: accountSchedulesFilter,
+    enabled: getRunningBalances,
   });
 
   return useMemo(() => {
@@ -89,6 +92,15 @@ export function useAccountPreviewTransactions({
         runningBalances: new Map(),
         isLoading,
         error,
+      };
+    }
+
+    if (!getRunningBalances) {
+      return {
+        previewTransactions: [],
+        runningBalances: new Map(),
+        isLoading: false,
+        error: undefined,
       };
     }
 
@@ -126,6 +138,7 @@ export function useAccountPreviewTransactions({
     getPayeeByTransferAccount,
     getTransferAccountByPayee,
     isLoading,
+    getRunningBalances,
   ]);
 }
 

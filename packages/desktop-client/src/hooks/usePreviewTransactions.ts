@@ -223,6 +223,7 @@ export function useTransactions({
 
 type UsePreviewTransactionsProps = {
   filter?: (schedule: ScheduleEntity) => boolean;
+  enabled?: boolean;
 };
 
 type UsePreviewTransactionsResult = {
@@ -233,6 +234,7 @@ type UsePreviewTransactionsResult = {
 
 export function usePreviewTransactions({
   filter,
+  enabled = true,
 }: UsePreviewTransactionsProps = {}): UsePreviewTransactionsResult {
   const [previewTransactions, setPreviewTransactions] = useState<
     TransactionEntity[]
@@ -243,13 +245,15 @@ export function usePreviewTransactions({
     schedules,
     statuses,
   } = useCachedSchedules();
-  const [isLoading, setIsLoading] = useState(isSchedulesLoading);
+  const [isLoading, setIsLoading] = useState(
+    enabled ? isSchedulesLoading : false,
+  );
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
 
   const scheduleTransactions = useMemo(() => {
-    if (isSchedulesLoading) {
+    if (!enabled || isSchedulesLoading) {
       return [];
     }
 
@@ -323,14 +327,21 @@ export function usePreviewTransactions({
           parseDate(b.date).getTime() - parseDate(a.date).getTime() ||
           a.amount - b.amount,
       );
-  }, [filter, isSchedulesLoading, schedules, statuses, upcomingLength]);
+  }, [
+    filter,
+    isSchedulesLoading,
+    schedules,
+    statuses,
+    upcomingLength,
+    enabled,
+  ]);
 
   useEffect(() => {
     let isUnmounted = false;
 
     setError(undefined);
 
-    if (scheduleTransactions.length === 0) {
+    if (!enabled || scheduleTransactions.length === 0) {
       setIsLoading(false);
       setPreviewTransactions([]);
       return;
@@ -371,7 +382,7 @@ export function usePreviewTransactions({
     return () => {
       isUnmounted = true;
     };
-  }, [scheduleTransactions, schedules, statuses, upcomingLength]);
+  }, [scheduleTransactions, schedules, statuses, upcomingLength, enabled]);
 
   const returnError = error || scheduleQueryError;
   return {
