@@ -1,22 +1,25 @@
+// @ts-strict-ignore
 import path from 'path';
 
-import { viteCommonjs } from '@originjs/vite-plugin-commonjs';
+// import { viteCommonjs } from '@originjs/vite-plugin-commonjs';
+import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 import { vitePeggyPlugin } from './vite-peggy-plugin';
 
-// Browser/webworker configuration
+// https://vitejs.dev/config/
 // eslint-disable-next-line import/no-default-export
 export default defineConfig(({ mode }) => {
   const isDev = mode === 'development';
+  const outDir = path.resolve(__dirname, 'lib-dist/browser');
 
   return {
     mode,
     base: '/kcab/',
     build: {
       target: 'es2020',
-      outDir: path.resolve(__dirname, 'lib-dist/browser'),
+      outDir,
       emptyOutDir: true,
       lib: {
         entry: path.resolve(__dirname, 'src/server/main.ts'),
@@ -81,7 +84,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       vitePeggyPlugin(),
-      viteCommonjs(),
+      // viteCommonjs(),
       nodePolyfills({
         exclude: ['buffer'],
         globals: {
@@ -89,6 +92,7 @@ export default defineConfig(({ mode }) => {
           global: true,
         },
       }),
+      visualizer({ template: 'raw-data', filename: `${outDir}/stats.json` }),
     ],
     optimizeDeps: {
       include: [
