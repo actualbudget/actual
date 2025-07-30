@@ -9,6 +9,7 @@ import { type RuleEntity } from 'loot-core/types/models';
 
 import { ActionExpression } from '@desktop-client/components/rules/ActionExpression';
 import { ConditionExpression } from '@desktop-client/components/rules/ConditionExpression';
+import { groupActionsBySplitIndex } from '@desktop-client/util/ruleUtils';
 
 const ROW_HEIGHT = 60;
 
@@ -19,6 +20,10 @@ type RulesListItemProps = {
 
 export function RulesListItem({ rule, onPress }: RulesListItemProps) {
   const { t } = useTranslation();
+
+  // Group actions by splitIndex to handle split transactions
+  const actionSplits = groupActionsBySplitIndex(rule.actions);
+  const hasSplits = actionSplits.length > 1;
 
   return (
     <Button
@@ -126,10 +131,9 @@ export function RulesListItem({ rule, onPress }: RulesListItemProps) {
         {/* THEN actions block */}
         <View
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: 6,
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: 4,
           }}
         >
           <span
@@ -137,17 +141,55 @@ export function RulesListItem({ rule, onPress }: RulesListItemProps) {
               fontSize: 13,
               fontWeight: 600,
               color: theme.pageTextLight,
-              marginRight: 4,
+              marginBottom: 2,
             }}
           >
             {t('THEN')}
           </span>
 
-          {rule.actions.map((action, index) => (
-            <View key={index} style={{ marginRight: 4, marginBottom: 2 }}>
-              <ActionExpression {...action} />
-            </View>
-          ))}
+          {hasSplits
+            ? actionSplits.map((split, i) => (
+                <View
+                  key={split.id}
+                  style={{
+                    width: '100%',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    marginTop: i > 0 ? 4 : 0,
+                    padding: '6px',
+                    borderColor: theme.tableBorder,
+                    borderWidth: '1px',
+                    borderRadius: '5px',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 500,
+                      color: theme.pageTextLight,
+                      marginBottom: 4,
+                    }}
+                  >
+                    {i ? `Split ${i}` : 'Apply to all'}
+                  </span>
+                  {split.actions.map((action, j) => (
+                    <View
+                      key={j}
+                      style={{
+                        marginBottom: j !== split.actions.length - 1 ? 2 : 0,
+                        maxWidth: '100%',
+                      }}
+                    >
+                      <ActionExpression {...action} />
+                    </View>
+                  ))}
+                </View>
+              ))
+            : rule.actions.map((action, index) => (
+                <View key={index} style={{ marginBottom: 2 }}>
+                  <ActionExpression {...action} />
+                </View>
+              ))}
         </View>
       </View>
     </Button>
