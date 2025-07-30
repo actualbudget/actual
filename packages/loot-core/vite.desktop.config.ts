@@ -1,8 +1,7 @@
 import path from 'path';
 
 import { defineConfig } from 'vite';
-
-import { vitePeggyPlugin } from './vite-peggy-plugin';
+import peggyLoader from 'vite-plugin-peggy-loader';
 
 // eslint-disable-next-line import/no-default-export
 export default defineConfig(({ mode }) => {
@@ -42,6 +41,6 @@ export default defineConfig(({ mode }) => {
         },
       ],
     },
-    plugins: [vitePeggyPlugin()],
+    plugins: [peggyLoader()],
   };
 });

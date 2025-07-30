@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import './proto/sync_pb.js'; // Import for side effects
 
 export {
@@ -13,10 +14,10 @@ export {
 } from './crdt';
 
 // Access global proto namespace
-export const SyncRequest = globalThis.proto.SyncRequest;
-export const SyncResponse = globalThis.proto.SyncResponse;
-export const Message = globalThis.proto.Message;
-export const MessageEnvelope = globalThis.proto.MessageEnvelope;
-export const EncryptedData = globalThis.proto.EncryptedData;
+export const SyncRequest = (globalThis as any).proto.SyncRequest;
+export const SyncResponse = (globalThis as any).proto.SyncResponse;
+export const Message = (globalThis as any).proto.Message;
+export const MessageEnvelope = (globalThis as any).proto.MessageEnvelope;
+export const EncryptedData = (globalThis as any).proto.EncryptedData;
 
-export const SyncProtoBuf = globalThis.proto;
+export const SyncProtoBuf = (globalThis as any).proto;
