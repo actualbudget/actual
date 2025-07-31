@@ -61,16 +61,36 @@ export async function batchUpdateTransactions({
     'SELECT * FROM accounts WHERE tombstone = 0',
   );
 
-  // We need to get all the payees of updated transactions _before_
-  // making changes
+  if (added || deleted) {
+    const containsClosedAccount = [...(added || []), ...(deleted || [])]
+      .map(trans => accounts.find(acct => acct.id === trans.account))
+      .filter(acct => !!acct.closed).length > 0;
+
+    if (containsClosedAccount) {
+      // TODO: add ID of the account(s) to the error message
+      throw new Error(`Failed to add / remove transaction(s) to / from closed account(s).`);
+    }
+  }
+
   if (updated) {
-    const descUpdatedIds = updated
-      .filter(update => update.payee)
-      .map(update => update.id);
+    const transactions = await getTransactionsByIds(
+      updated.map(update => update.id)
+    );
 
-    const transactions = await getTransactionsByIds(descUpdatedIds);
+    const containsClosedAccount = updated
+      .filter(update => 'amount' in update) // only prevent updates which affect the amount of a transaction
+      .map(update => transactions.find(trans => trans.id === update.id))
+      .map(trans => accounts.find(acct => acct.id === trans.account))
+      .filter(acct => !!acct.closed).length > 0;
 
-    for (let i = 0; i < transactions.length; i++) {
+    if (containsClosedAccount) {
+      // TODO: add ID of the account(s) to the error message
+      throw new Error('Failed to update transaction(s) on closed account(s).');
+    }
+
+    // We need to get all the payees of updated transactions _before_
+    // making changes
+    for (let i = 0; i < transactions.filter(trans => trans.payee).length; i++) {
       oldPayees.add(transactions[i].payee);
     }
   }
