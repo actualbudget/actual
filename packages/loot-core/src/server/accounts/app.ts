@@ -436,8 +436,6 @@ async function closeAccount({
         throw APIError('balance is non-zero: transferAccountId is required');
       }
 
-      await db.update('accounts', { id, closed: 1 });
-
       // If there is a balance we need to transfer it to the specified
       // account (and possibly categorize it)
       if (balance !== 0 && transferAccountId) {
@@ -462,6 +460,8 @@ async function closeAccount({
           category: categoryId,
         });
       }
+
+      await db.update('accounts', { id, closed: 1 });
     }
   });
 }
