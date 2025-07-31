@@ -239,7 +239,7 @@ export function translateRuleStage(stage: string): string {
     case 'post':
       return t('Post');
     default:
-      return null;
+      return '';
   }
 }
 
