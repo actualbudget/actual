@@ -62,26 +62,30 @@ export async function batchUpdateTransactions({
   );
 
   if (added || deleted) {
-    const containsClosedAccount = [...(added || []), ...(deleted || [])]
-      .map(trans => accounts.find(acct => acct.id === trans.account))
-      .filter(acct => !!acct.closed).length > 0;
+    const containsClosedAccount =
+      [...(added || []), ...(deleted || [])]
+        .map(trans => accounts.find(acct => acct.id === trans.account))
+        .filter(acct => !!acct.closed).length > 0;
 
     if (containsClosedAccount) {
       // TODO: add ID of the account(s) to the error message
-      throw new Error(`Failed to add / remove transaction(s) to / from closed account(s).`);
+      throw new Error(
+        `Failed to add / remove transaction(s) to / from closed account(s).`,
+      );
     }
   }
 
   if (updated) {
     const transactions = await getTransactionsByIds(
-      updated.map(update => update.id)
+      updated.map(update => update.id),
     );
 
-    const containsClosedAccount = updated
-      .filter(update => 'amount' in update) // only prevent updates which affect the amount of a transaction
-      .map(update => transactions.find(trans => trans.id === update.id))
-      .map(trans => accounts.find(acct => acct.id === trans.account))
-      .filter(acct => !!acct.closed).length > 0;
+    const containsClosedAccount =
+      updated
+        .filter(update => 'amount' in update) // only prevent updates which affect the amount of a transaction
+        .map(update => transactions.find(trans => trans.id === update.id))
+        .map(trans => accounts.find(acct => acct.id === trans.account))
+        .filter(acct => !!acct.closed).length > 0;
 
     if (containsClosedAccount) {
       // TODO: add ID of the account(s) to the error message
