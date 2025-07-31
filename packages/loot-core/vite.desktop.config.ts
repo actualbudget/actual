@@ -42,7 +42,10 @@ export default defineConfig(({ mode }) => {
         '.pegjs',
       ],
       alias: [
-        { find: 'handlebars', replacement: 'handlebars/dist/handlebars.js' },
+        {
+          find: 'handlebars',
+          replacement: require.resolve('handlebars/dist/handlebars.js'),
+        },
         {
           find: /^@actual-app\/crdt(\/.*)?$/,
           replacement: path.resolve(`${crdtDir}/src$1`),
