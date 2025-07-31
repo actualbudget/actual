@@ -65,7 +65,8 @@ export default defineConfig(({ mode }) => {
         {
           find: 'vite-plugin-node-polyfills',
           replacement: path.resolve(
-            '../node_modules/vite-plugin-node-polyfills',
+            require.resolve('vite-plugin-node-polyfills'),
+            '../../', // The plugin points to a subdirectory, putting it back to the root
           ),
         },
         {
