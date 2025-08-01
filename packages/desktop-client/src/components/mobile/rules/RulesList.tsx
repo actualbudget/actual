@@ -76,7 +76,7 @@ export function RulesList({
 
   return (
     <View
-      style={{ flex: 1, paddingBottom: MOBILE_NAV_HEIGHT }}
+      style={{ flex: 1, paddingBottom: MOBILE_NAV_HEIGHT, overflow: 'auto' }}
       onScroll={handleScroll}
     >
       {rules.map(rule => (

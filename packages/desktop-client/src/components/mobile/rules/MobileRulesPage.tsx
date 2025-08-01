@@ -15,6 +15,7 @@ import { RulesList } from './RulesList';
 
 import { Search } from '@desktop-client/components/common/Search';
 import { ruleToString } from '@desktop-client/components/ManageRules';
+import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
