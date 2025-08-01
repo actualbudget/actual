@@ -104,7 +104,6 @@ __metadata:
     debug: "npm:^4.4.1"
     express: "npm:5.1.0"
     express-rate-limit: "npm:^7.5.0"
-    express-response-size: "npm:^0.0.3"
     express-winston: "npm:^4.2.0"
     http-proxy-middleware: "npm:^3.0.5"
     jws: "npm:^4.0.0"
@@ -11261,15 +11260,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express-response-size@npm:^0.0.3":
-  version: 0.0.3
-  resolution: "express-response-size@npm:0.0.3"
-  dependencies:
-    on-headers: "npm:1.0.1"
-  checksum: 10/6c97395d225e5aa98338569842ed84e5d861f19f6f1c535e70c97d65ffe7301826299607f491c824f240952b39b4b18c3269ed3652ecb8bd0abb93c7ece7048b
-  languageName: node
-  linkType: hard
-
 "express-winston@npm:^4.2.0":
   version: 4.2.0
   resolution: "express-winston@npm:4.2.0"
@@ -11644,13 +11634,15 @@ __metadata:
   linkType: hard
 
 "form-data@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "form-data@npm:4.0.0"
+  version: 4.0.4
+  resolution: "form-data@npm:4.0.4"
   dependencies:
     asynckit: "npm:^0.4.0"
     combined-stream: "npm:^1.0.8"
+    es-set-tostringtag: "npm:^2.1.0"
+    hasown: "npm:^2.0.2"
     mime-types: "npm:^2.1.12"
-  checksum: 10/7264aa760a8cf09482816d8300f1b6e2423de1b02bba612a136857413fdc96d7178298ced106817655facc6b89036c6e12ae31c9eb5bdc16aabf502ae8a5d805
+  checksum: 10/a4b62e21932f48702bc468cc26fb276d186e6b07b557e3dd7cc455872bdbb82db7db066844a64ad3cf40eaf3a753c830538183570462d3649fdfd705601cbcfb
   languageName: node
   linkType: hard
 
@@ -15818,13 +15810,6 @@ __metadata:
   dependencies:
     ee-first: "npm:1.1.1"
   checksum: 10/8e81472c5028125c8c39044ac4ab8ba51a7cdc19a9fbd4710f5d524a74c6d8c9ded4dd0eed83f28d3d33ac1d7a6a439ba948ccb765ac6ce87f30450a26bfe2ea
-  languageName: node
-  linkType: hard
-
-"on-headers@npm:1.0.1":
-  version: 1.0.1
-  resolution: "on-headers@npm:1.0.1"
-  checksum: 10/7e5dc811cd8e16590385ac56a63e27aa9006c594069960655d37f96c9b1f7af4ce7e71f4f6a771ed746ebf180e0c1cbc1e5ecd125a4006b9eb0ef23125068cd2
   languageName: node
   linkType: hard
 

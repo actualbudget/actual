@@ -56,6 +56,10 @@ export function ElectronServerConfig({
   const [startingSyncServer, setStartingSyncServer] = useState(false);
 
   const onConfigureSyncServer = async () => {
+    if (startingSyncServer) {
+      return; // Prevent multiple clicks
+    }
+
     if (
       isNaN(electronServerPort) ||
       electronServerPort <= 0 ||
@@ -221,23 +225,23 @@ export function ElectronServerConfig({
           >
             <Label title={t('')} style={{ textAlign: 'left', width: '7ch' }} />
             {!electronSyncServerRunning ? (
-              <Button
+              <ButtonWithLoading
                 variant="primary"
                 style={{ padding: 10, width: '8ch' }}
                 onPress={onConfigureSyncServer}
-                isPending={startingSyncServer}
+                isLoading={startingSyncServer}
               >
                 <Trans>Start</Trans>
-              </Button>
+              </ButtonWithLoading>
             ) : (
-              <Button
+              <ButtonWithLoading
                 variant="primary"
                 style={{ padding: 10, width: '8ch' }}
                 onPress={onConfigureSyncServer}
-                isPending={startingSyncServer}
+                isLoading={startingSyncServer}
               >
                 <Trans>Save</Trans>
-              </Button>
+              </ButtonWithLoading>
             )}
           </View>
         </View>

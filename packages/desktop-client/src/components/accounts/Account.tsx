@@ -1456,7 +1456,7 @@ class AccountInternal extends PureComponent<
   };
 
   onScheduleAction = async (
-    name: 'skip' | 'post-transaction' | 'complete',
+    name: 'skip' | 'post-transaction' | 'post-transaction-today' | 'complete',
     ids: TransactionEntity['id'][],
   ) => {
     const scheduleIds = ids.map(id => id.split('/')[1]);
@@ -1465,6 +1465,12 @@ class AccountInternal extends PureComponent<
       case 'post-transaction':
         for (const id of scheduleIds) {
           await send('schedule/post-transaction', { id });
+        }
+        this.refetchTransactions();
+        break;
+      case 'post-transaction-today':
+        for (const id of scheduleIds) {
+          await send('schedule/post-transaction', { id, today: true });
         }
         this.refetchTransactions();
         break;

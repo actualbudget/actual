@@ -93,8 +93,8 @@ export function ReportTableTotals({
     borderTopWidth: 1,
     borderColor: theme.tableBorder,
     justifyContent: 'center',
-    color: theme.tableHeaderText,
-    backgroundColor: theme.tableHeaderBackground,
+    color: theme.tableRowHeaderText,
+    backgroundColor: theme.tableRowHeaderBackground,
     fontWeight: 600,
     ...style,
   };

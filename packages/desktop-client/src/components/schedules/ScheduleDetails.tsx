@@ -943,7 +943,7 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
                   />
                 }
                 transactions={state.transactions}
-                fields={['date', 'payee', 'amount']}
+                fields={['date', 'payee', 'notes', 'amount']}
                 style={{
                   border: '1px solid ' + theme.tableBorder,
                   borderRadius: 4,
