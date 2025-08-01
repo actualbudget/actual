@@ -103,7 +103,7 @@ export function ColorPicker({ children, ...props }: ColorPickerProps) {
   };
 
   return (
-    <AriaColorPicker {...props}>
+    <AriaColorPicker defaultValue={props.defaultValue ?? '#690CB0'} {...props}>
       <DialogTrigger>
         {children}
         <Popover>
