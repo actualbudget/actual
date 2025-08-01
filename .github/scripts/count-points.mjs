@@ -161,9 +161,9 @@ async function countContributorPoints(repo) {
     const isReleasePR = pr.title.match(/^🔖 \(\d+\.\d+\.\d+\)/);
 
     // Calculate points for reviewers based on PR size
-    const prPoints = config.PR_REVIEW_POINT_TIERS.find(
-      tier => totalChanges > tier.minChanges,
-    ).points;
+    const prPoints =
+      config.PR_REVIEW_POINT_TIERS.find(tier => totalChanges > tier.minChanges)
+        ?.points ?? 0;
 
     // Award points to the PR creator if it's a release PR
     if (isReleasePR && stats.has(pr.user.login)) {

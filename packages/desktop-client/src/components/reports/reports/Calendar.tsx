@@ -713,7 +713,6 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                       onOpenTransaction={onOpenTransaction}
                       isLoadingMore={false}
                       account={undefined}
-                      runningBalances={undefined}
                     />
                   </View>
                 </animated.div>
