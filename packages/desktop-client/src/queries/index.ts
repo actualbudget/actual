@@ -84,36 +84,65 @@ export function transactionsSearch(
 ) {
   const amount = currencyToAmount(search);
 
+  // Extract tags from search
+  const tagMatches = search.match(/(?<!#)(#[^#\s]+)/g);
+  const tags = tagMatches ? tagMatches.map(tag => tag.slice(1)) : [];
+
+  // Remove tags from search text for other matching
+  const searchWithoutTags = search.replace(/(?<!#)(#[^#\s]+)/g, '').trim();
+
   // Support various date formats
   let parsedDate;
-  if (getDayMonthRegex(dateFormat).test(search)) {
-    parsedDate = parseDate(search, getDayMonthFormat(dateFormat), new Date());
-  } else if (getShortYearRegex(dateFormat).test(search)) {
-    parsedDate = parseDate(search, getShortYearFormat(dateFormat), new Date());
+  if (getDayMonthRegex(dateFormat).test(searchWithoutTags)) {
+    parsedDate = parseDate(
+      searchWithoutTags,
+      getDayMonthFormat(dateFormat),
+      new Date(),
+    );
+  } else if (getShortYearRegex(dateFormat).test(searchWithoutTags)) {
+    parsedDate = parseDate(
+      searchWithoutTags,
+      getShortYearFormat(dateFormat),
+      new Date(),
+    );
   } else {
-    parsedDate = parseDate(search, dateFormat, new Date());
+    parsedDate = parseDate(searchWithoutTags, dateFormat, new Date());
+  }
+
+  const searchConditions: any = {
+    'payee.name': { $like: `%${searchWithoutTags}%` },
+    'payee.transfer_acct.name': { $like: `%${searchWithoutTags}%` },
+    notes: { $like: `%${searchWithoutTags}%` },
+    'category.name': { $like: `%${searchWithoutTags}%` },
+    'account.name': { $like: `%${searchWithoutTags}%` },
+    $or: [
+      isDateValid(parsedDate) && { date: dayFromDate(parsedDate) },
+      amount != null && {
+        amount: { $transform: '$abs', $eq: amountToInteger(amount) },
+      },
+      amount != null &&
+        Number.isInteger(amount) && {
+          amount: {
+            $transform: { $abs: { $idiv: ['$', 100] } },
+            $eq: amount,
+          },
+        },
+    ].filter(Boolean),
+  };
+
+  // Add tag-specific filtering if tags are found
+  if (tags.length > 0) {
+    const tagConditions = tags.map(tag => ({
+      notes: {
+        $regexp: `(?<!#)${tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
+      },
+    }));
+
+    // Use $and for tags (all tags must be present) in search
+    searchConditions.$and = tagConditions;
   }
 
   return currentQuery.filter({
-    $or: {
-      'payee.name': { $like: `%${search}%` },
-      'payee.transfer_acct.name': { $like: `%${search}%` },
-      notes: { $like: `%${search}%` },
-      'category.name': { $like: `%${search}%` },
-      'account.name': { $like: `%${search}%` },
-      $or: [
-        isDateValid(parsedDate) && { date: dayFromDate(parsedDate) },
-        amount != null && {
-          amount: { $transform: '$abs', $eq: amountToInteger(amount) },
-        },
-        amount != null &&
-          Number.isInteger(amount) && {
-            amount: {
-              $transform: { $abs: { $idiv: ['$', 100] } },
-              $eq: amount,
-            },
-          },
-      ].filter(Boolean),
-    },
+    $or: searchConditions,
   });
 }

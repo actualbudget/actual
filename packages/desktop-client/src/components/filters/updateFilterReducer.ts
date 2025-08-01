@@ -20,6 +20,7 @@ export function updateFilterReducer(
           action.op === 'doesNotContain' ||
           action.op === 'isNot' ||
           action.op === 'hasTags' ||
+          action.op === 'hasAnyTags' ||
           action.op === 'onBudget' ||
           action.op === 'offBudget')
       ) {

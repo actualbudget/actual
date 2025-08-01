@@ -16,6 +16,7 @@ import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/Ca
 import { FilterAutocomplete } from '@desktop-client/components/autocomplete/FilterAutocomplete';
 import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
 import { ReportAutocomplete } from '@desktop-client/components/autocomplete/ReportAutocomplete';
+import { TagAutocomplete } from '@desktop-client/components/autocomplete/TagAutocomplete';
 import { Checkbox } from '@desktop-client/components/forms';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import { RecurringSchedulePicker } from '@desktop-client/components/select/RecurringSchedulePicker';
@@ -255,6 +256,19 @@ export function GenericInput({
         );
       } else if (type === 'number') {
         content = getNumberInputByFormatType(numberFormatType);
+      } else if (
+        field === 'notes' &&
+        (op === 'hasTags' || op === 'hasAnyTags')
+      ) {
+        content = (
+          <TagAutocomplete
+            value={value || ''}
+            onSelect={onChange}
+            inputProps={{ ref }}
+            placeholder={t('nothing')}
+            multi={true}
+          />
+        );
       } else {
         content = (
           <Input

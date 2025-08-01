@@ -542,13 +542,36 @@ export function conditionsToAQL(
           }
         }
 
+        // Use $and logic for hasTags (all tags must be present)
+        const tagConditions = tagValues.map(v => {
+          const regex = new RegExp(
+            `(?<!#)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
+          );
+          return apply(field, '$regexp', regex.source);
+        });
+
         return {
-          $and: tagValues.map(v => {
-            const regex = new RegExp(
-              `(?<!#)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
-            );
-            return apply(field, '$regexp', regex.source);
-          }),
+          $and: tagConditions,
+        };
+
+      case 'hasAnyTags':
+        const anyTagValues = [];
+        for (const [_, tag] of value.matchAll(/(?<!#)(#[^#\s]+)/g)) {
+          if (!anyTagValues.includes(tag)) {
+            anyTagValues.push(tag);
+          }
+        }
+
+        // Use $or logic for hasAnyTags (any tag can be present)
+        const anyTagConditions = anyTagValues.map(v => {
+          const regex = new RegExp(
+            `(?<!#)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
+          );
+          return apply(field, '$regexp', regex.source);
+        });
+
+        return {
+          $or: anyTagConditions,
         };
 
       case 'notOneOf':
