@@ -1,4 +1,5 @@
 import React, { createRef, useRef, useState } from 'react';
+import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgExpandArrow } from '@actual-app/components/icons/v0';
@@ -199,7 +200,7 @@ export function SaveReport({
             flexShrink: 0,
           }}
         >
-          {!report.id ? 'Unsaved report' : report.name}&nbsp;
+          {!report.id ? <Trans>Unsaved report</Trans> : report.name}&nbsp;
         </Text>
         {savedStatus === 'modified' && <Text>(modified)&nbsp;</Text>}
         <SvgExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
