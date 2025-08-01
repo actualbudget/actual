@@ -307,6 +307,18 @@ export function handleCategoryChange(months, oldValue, newValue) {
         ]);
 
       addDeps(sheetName, groupId, id);
+      if (newValue.is_income) {
+        sheet
+          .get()
+          .addDependencies(
+            sheetName,
+            'buffered-auto',
+            flatten2([
+              `${sheetName}!sum-amount-${id}`,
+              `${sheetName}!carryover-${id}`,
+            ]),
+          );
+      }
     });
   } else if (oldValue && oldValue.cat_group !== newValue.cat_group) {
     // The category moved so we need to update the dependencies
