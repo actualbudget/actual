@@ -166,7 +166,7 @@ async function countContributorPoints(repo) {
       .reduce((sum, file) => sum + file.additions + file.deletions, 0);
 
     // Check if this is a release PR
-    const isReleasePR = pr.title.match(/^🔖 \(\d+\.\d+\.\d+\)/);
+    const isReleasePR = pr.title.match(/🔖.*\d+\.\d+\.\d+/);
 
     // Calculate points for reviewers based on PR size
     const prPoints =
