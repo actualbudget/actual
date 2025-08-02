@@ -329,6 +329,10 @@ const CONDITION_TYPES = {
         );
       }
 
+      if (op === 'hasTags') {
+        return value;
+      }
+
       return value.toLowerCase();
     },
   },
