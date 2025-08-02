@@ -20,6 +20,7 @@ type BalanceMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,
   'onMenuSelect' | 'items'
 > & {
+  transaction: TransactionEntity;
   getTransaction: (id: string) => TransactionEntity | undefined;
   onDuplicate: (ids: string[]) => void;
   onDelete: (ids: string[]) => void;
@@ -27,7 +28,7 @@ type BalanceMenuProps = Omit<
   onUnlinkSchedule: (ids: string[]) => void;
   onCreateRule: (ids: string[]) => void;
   onScheduleAction: (
-    name: 'skip' | 'post-transaction' | 'complete',
+    name: 'skip' | 'post-transaction' | 'post-transaction-today' | 'complete',
     ids: TransactionEntity['id'][],
   ) => void;
   onMakeAsNonSplitTransactions: (ids: string[]) => void;
@@ -35,6 +36,7 @@ type BalanceMenuProps = Omit<
 };
 
 export function TransactionMenu({
+  transaction,
   getTransaction,
   onDuplicate,
   onDelete,
@@ -49,7 +51,14 @@ export function TransactionMenu({
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const selectedItems = useSelectedItems();
-  const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
+
+  const selectedIds = useMemo(() => {
+    const ids =
+      selectedItems && selectedItems.size > 0
+        ? selectedItems
+        : [transaction.id];
+    return Array.from(new Set(ids));
+  }, [transaction, selectedItems]);
 
   const scheduleIds = useMemo(() => {
     return selectedIds
@@ -160,6 +169,7 @@ export function TransactionMenu({
             onMakeAsNonSplitTransactions(selectedIds);
             break;
           case 'post-transaction':
+          case 'post-transaction-today':
           case 'skip':
           case 'complete':
             onScheduleAction(name, selectedIds);
@@ -187,7 +197,11 @@ export function TransactionMenu({
               ...(selectedIds.length === 1
                 ? [{ name: 'view-schedule', text: t('View schedule') }]
                 : []),
-              { name: 'post-transaction', text: t('Post transaction today') },
+              { name: 'post-transaction', text: t('Post transaction') },
+              {
+                name: 'post-transaction-today',
+                text: t('Post transaction today'),
+              },
               ...(canBeSkipped
                 ? [{ name: 'skip', text: t('Skip next scheduled date') }]
                 : []),

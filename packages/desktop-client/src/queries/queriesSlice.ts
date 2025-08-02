@@ -189,6 +189,10 @@ const queriesSlice = createSlice({
       const tagIdx = state.tags.findIndex(tag => tag.id === action.payload.id);
       state.tags[tagIdx] = action.payload;
     });
+
+    builder.addCase(findTags.fulfilled, (state, action) => {
+      state.tags = action.payload;
+    });
   },
 });
 
@@ -481,6 +485,14 @@ export const updateTag = createAppAsyncThunk(
   `${sliceName}/updateTag`,
   async (tag: Tag) => {
     const id = await send('tags-update', tag);
+    return id;
+  },
+);
+
+export const findTags = createAppAsyncThunk(
+  `${sliceName}/findTags`,
+  async () => {
+    const id = await send('tags-find');
     return id;
   },
 );

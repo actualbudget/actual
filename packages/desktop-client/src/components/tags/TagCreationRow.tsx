@@ -31,6 +31,8 @@ type TagCreationRowProps = {
   onClose: () => void;
 };
 
+const isTagValid = (tag: string) => tag.match(/^([^#\s]+)$/);
+
 export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -64,7 +66,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
   };
 
   const onAddTag = () => {
-    if (!tag.trim() || !color.trim() || tagNames.includes(tag)) {
+    if (!isTagValid(tag) || !color.trim() || tagNames.includes(tag)) {
       return;
     }
 
@@ -187,7 +189,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
             style={{ padding: '4px 10px' }}
             onPress={onAddTag}
             data-testid="add-button"
-            isDisabled={!tag || tagNames.includes(tag)}
+            isDisabled={!isTagValid(tag) || tagNames.includes(tag)}
             ref={addButtonRef}
           >
             <Trans>Add</Trans>

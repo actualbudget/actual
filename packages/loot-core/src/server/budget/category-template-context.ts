@@ -115,7 +115,7 @@ export class CategoryTemplateContext {
   // what is the full requested amount this month
   async runAll(available: number) {
     let toBudget: number = 0;
-    const prioritiesSorted = this.getPriorities().sort();
+    const prioritiesSorted = new Int32Array([...this.getPriorities()].sort());
     for (let i = 0; i < prioritiesSorted.length; i++) {
       const p = prioritiesSorted[i];
       toBudget += await this.runTemplatesForPriority(p, available, available);

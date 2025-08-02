@@ -809,6 +809,15 @@ export function getTags() {
   return all<DbTag>(`
     SELECT id, tag, color, description
     FROM tags
+    WHERE tombstone = 0
+    ORDER BY tag
+  `);
+}
+
+export function getAllTags() {
+  return all<DbTag>(`
+    SELECT id, tag, color, description
+    FROM tags
     ORDER BY tag
   `);
 }
@@ -818,11 +827,20 @@ export function insertTag(tag): Promise<DbTag['id']> {
 }
 
 export async function deleteTag(tag) {
-  return transaction(() => {
-    runQuery(`DELETE FROM tags WHERE id = ?`, [tag.id]);
-  });
+  return delete_('tags', tag.id);
 }
 
 export function updateTag(tag) {
   return update('tags', tag);
+}
+
+export function findTags() {
+  return all<{ notes: string }>(
+    `
+    SELECT notes
+    FROM transactions
+    WHERE tombstone = 0 AND notes LIKE ?
+  `,
+    ['%#%'],
+  );
 }

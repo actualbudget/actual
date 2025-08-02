@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/sync-server",
-  "version": "25.7.1",
+  "version": "25.8.0",
   "license": "MIT",
   "description": "actual syncing server",
   "bin": {
@@ -37,7 +37,6 @@
     "debug": "^4.4.1",
     "express": "5.1.0",
     "express-rate-limit": "^7.5.0",
-    "express-response-size": "^0.0.3",
     "express-winston": "^4.2.0",
     "jws": "^4.0.0",
     "migrate": "^2.1.0",

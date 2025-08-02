@@ -1037,6 +1037,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
             onFocus={() => {
               onRequestActiveEdit(getFieldName(transaction.id, 'notes'));
             }}
+            onBlur={onClearActiveEdit}
             onChange={event =>
               onUpdateInner(transaction, 'notes', event.target.value)
             }

@@ -56,6 +56,8 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }: RuleButtonProps) {
           border: '1px solid ' + theme.noticeBackground,
           color: theme.noticeTextDark,
           fontSize: 12,
+          cursor: 'pointer',
+          ':hover': { backgroundColor: theme.noticeBackgroundLight },
         }}
         onEdit={onEdit}
         onSelect={onClick}
@@ -117,7 +119,11 @@ export const PayeeTableRow = memo(
     const { id } = payee;
     const dispatchSelected = useSelectedDispatch();
     const selectedItems = useSelectedItems();
-    const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
+    const selectedIds = useMemo(() => {
+      const ids =
+        selectedItems && selectedItems.size > 0 ? selectedItems : [payee.id];
+      return Array.from(new Set(ids));
+    }, [payee, selectedItems]);
 
     const borderColor = selected
       ? theme.tableBorderSelected
