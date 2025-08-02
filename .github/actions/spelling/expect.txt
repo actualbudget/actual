@@ -19,9 +19,9 @@ BKBKESMM
 BOFIIE
 Bourso
 Boursobank
+Boursorama
 brexplpw
 BYLADEM
-byweekly
 Caddyfile
 CAGLPTPL
 Caixa
@@ -84,7 +84,6 @@ overbudgeting
 Paribas
 passwordless
 pluggyai
-Postgre
 PPABPLPK
 prefs
 Primoco
@@ -113,6 +112,7 @@ Synology
 systemctl
 tada
 templating
+touchscreen
 triaging
 ubuntu
 userinfo
