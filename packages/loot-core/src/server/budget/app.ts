@@ -221,6 +221,10 @@ async function trackingBudgetMonth({ month }: { month: string }) {
   }
 
   let values = [
+    value('from-last-month'),
+    value('available-funds'),
+    value('to-budget'),
+    value('buffered'),
     value('total-budgeted'),
     value('total-budget-income'),
     value('total-saved'),

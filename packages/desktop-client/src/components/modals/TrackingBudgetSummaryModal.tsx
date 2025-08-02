@@ -10,11 +10,14 @@ import * as monthUtils from 'loot-core/shared/months';
 import { ExpenseTotal } from '@desktop-client/components/budget/tracking/budgetsummary/ExpenseTotal';
 import { IncomeTotal } from '@desktop-client/components/budget/tracking/budgetsummary/IncomeTotal';
 import { Saved } from '@desktop-client/components/budget/tracking/budgetsummary/Saved';
+import { TrackingTotalsList } from '@desktop-client/components/budget/tracking/budgetsummary/TrackingTotalsList';
+import { TrackingToBudget } from '@desktop-client/components/budget/tracking/budgetsummary/TrackingToBudget';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
@@ -27,6 +30,7 @@ export function TrackingBudgetSummaryModal({
   month,
 }: TrackingBudgetSummaryModalProps) {
   const { t } = useTranslation();
+  const locale = useLocale();
   const currentMonth = monthUtils.currentMonth();
   return (
     <Modal name="tracking-budget-summary">
@@ -37,6 +41,22 @@ export function TrackingBudgetSummaryModal({
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <SheetNameProvider name={sheetForMonth(month)}>
+            <TrackingTotalsList
+              prevMonthName={monthUtils.format(monthUtils.prevMonth(month), 'MMM', locale)}
+              style={{
+                ...styles.mediumText,
+                marginBottom: 20,
+              }}
+            />
+            <TrackingToBudget
+              prevMonthName={monthUtils.format(monthUtils.prevMonth(month), 'MMM', locale)}
+              month={month}
+              onBudgetAction={() => {}}
+              style={{
+                ...styles.mediumText,
+                marginBottom: 20,
+              }}
+            />
             <Stack
               spacing={2}
               style={{
