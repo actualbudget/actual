@@ -171,6 +171,7 @@ const sidebars = {
             'accounts/reconciliation',
             'transactions/payees',
             'transactions/bulk-editing',
+            'transactions/tags',
             {
               type: 'category',
               label: 'Connecting Your Bank',
