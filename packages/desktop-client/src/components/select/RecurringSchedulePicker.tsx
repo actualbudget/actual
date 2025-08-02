@@ -481,7 +481,7 @@ function RecurringScheduleTooltip({
         direction="row"
         align="center"
         justify="flex-start"
-        style={{ marginTop: 10, flexWrap: 'wrap', alignItems: 'center' }}
+        style={{ marginTop: 10 }}
         spacing={1}
       >
         <Text style={{ whiteSpace: 'nowrap' }}>
@@ -507,17 +507,14 @@ function RecurringScheduleTooltip({
         />
         {config.frequency === 'monthly' &&
         (config.patterns == null || config.patterns.length === 0) ? (
-          <>
-            <div style={{ flexBasis: '100%', height: 0, marginTop: 5 }} />
-            <Button
-              style={{
-                backgroundColor: theme.tableBackground,
-              }}
-              onPress={() => dispatch({ type: 'add-recurrence' })}
-            >
-              <Trans>Add specific days</Trans>
-            </Button>
-          </>
+          <Button
+            style={{
+              backgroundColor: theme.tableBackground,
+            }}
+            onPress={() => dispatch({ type: 'add-recurrence' })}
+          >
+            <Trans>Add specific days</Trans>
+          </Button>
         ) : null}
       </Stack>
       {config.frequency === 'monthly' &&
@@ -633,7 +630,7 @@ export function RecurringSchedulePicker({
 
       <Popover
         triggerRef={triggerRef}
-        style={{ padding: 10, width: 380 }}
+        style={{ padding: 10, minWidth: 380, width: 'auto', maxWidth: '100%' }}
         placement="bottom start"
         isOpen={isOpen}
         onOpenChange={() => setIsOpen(false)}
