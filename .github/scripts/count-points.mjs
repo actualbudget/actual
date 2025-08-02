@@ -167,7 +167,7 @@ async function countContributorPoints(repo) {
 
     // Calculate points for reviewers based on PR size
     const prPoints =
-      config.PR_REVIEW_POINT_TIERS.find(tier => totalChanges > tier.minChanges)
+      config.PR_REVIEW_POINT_TIERS.find(tier => totalChanges >= tier.minChanges)
         ?.points ?? 0;
 
     // Award points to the PR creator if it's a release PR
