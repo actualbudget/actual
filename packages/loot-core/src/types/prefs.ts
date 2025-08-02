@@ -3,7 +3,8 @@ export type FeatureFlag =
   | 'goalTemplatesUIEnabled'
   | 'actionTemplating'
   | 'pluggyAiBankSync'
-  | 'currency';
+  | 'currency'
+  | 'experimentalSheets';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
