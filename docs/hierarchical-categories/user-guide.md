@@ -8,24 +8,27 @@
 
 ### Three Ways to Use It
 
-| Style | Example | Best For |
-|-------|---------|----------|
+| Style                   | Example                                                  | Best For                                   |
+| ----------------------- | -------------------------------------------------------- | ------------------------------------------ |
 | **Simple Organization** | Food → Groceries, Restaurants (budget each individually) | Current users who want better organization |
-| **Parent Budgeting** | Food $800 total → spend on any Food subcategory | Users who prefer simple totals |
-| **Mixed Budgeting** | Food $50 misc + Groceries $400 + Restaurants $200 | Users who want both flexibility |
+| **Parent Budgeting**    | Food $800 total → spend on any Food subcategory          | Users who prefer simple totals             |
+| **Mixed Budgeting**     | Food $50 misc + Groceries $400 + Restaurants $200        | Users who want both flexibility            |
 
 ### Real Examples
 
 **Sarah's Approach (Simple):**
+
 ```
 🍽️ Food (no budget - just organizes)
   ├── 🛒 Groceries          $400 budgeted
-  ├── 🍕 Restaurants        $200 budgeted  
+  ├── 🍕 Restaurants        $200 budgeted
   └── ☕ Coffee             $100 budgeted
 ```
-*Same as today, just better organized!*
+
+_Same as today, just better organized!_
 
 **Mike's Approach (Mixed):**
+
 ```
 🍽️ Food                    $30 budgeted (misc food items)
   ├── 🛒 Groceries          $400 budgeted
@@ -33,7 +36,8 @@
   └── ☕ Coffee             $100 budgeted
 Total Food Budget: $730
 ```
-*Handles both planned and unexpected food expenses*
+
+_Handles both planned and unexpected food expenses_
 
 ## Key Benefits
 
@@ -57,7 +61,7 @@ A: Tags are great for "How much did I spend on #kids across all categories?" Sub
 ## Getting Started Safely
 
 1. **Pick one category group** (like Food) to experiment with
-2. **Create a parent category** (like "Food") 
+2. **Create a parent category** (like "Food")
 3. **Move existing categories** (like Groceries, Restaurants) under it
 4. **Keep your existing budgets** on the individual categories
 5. **See how you like the organization** before trying other approaches
@@ -68,4 +72,4 @@ This gives you better organization without forcing you to change how you budget.
 
 ---
 
-*This is a community proposal to extend Actual Budget's organization capabilities while maintaining full backward compatibility.*
+_This is a community proposal to extend Actual Budget's organization capabilities while maintaining full backward compatibility._

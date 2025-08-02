@@ -8,17 +8,18 @@
 
 ## Technical Approach
 
-| Category Usage | Implementation | Display Logic |
-|----------------|----------------|---------------|
-| **Pure Organizational** | Parent organizes children only | UI shows sum of children |
-| **Mixed Usage** | Both organizes AND handles money | UI shows direct + children totals |
+| Category Usage          | Implementation                   | Display Logic                     |
+| ----------------------- | -------------------------------- | --------------------------------- |
+| **Pure Organizational** | Parent organizes children only   | UI shows sum of children          |
+| **Mixed Usage**         | Both organizes AND handles money | UI shows direct + children totals |
 
 ### Core Examples
 
 **Mixed Usage (Recommended):**
+
 ```
 🍽️ Food                    $50 budgeted (misc food)
-  ├── 🛒 Groceries          $400 budgeted  
+  ├── 🛒 Groceries          $400 budgeted
   └── 🍕 Restaurants        $200 budgeted
 Total: $650 budgeted
 ```
@@ -26,22 +27,24 @@ Total: $650 budgeted
 ## Key Benefits
 
 - **Zero artificial constraints** on budgeting/spending placement
-- **Real-world flexibility** for misc expenses in parent categories  
+- **Real-world flexibility** for misc expenses in parent categories
 - **100% backward compatible** with existing workflows
 - **Supports Sankey diagrams** and hierarchical reporting
 
 ## Relationship to Existing Systems
 
 ### vs Category Groups
-| Feature | Category Groups | Hierarchical Categories |
-|---------|----------------|------------------------|
-| **Nesting** | 2 levels only | Unlimited levels |
-| **Parent Budgeting** | ❌ Cannot have budgets | ✅ Can have budgets |
-| **Flexibility** | Fixed structure | Any category can become parent |
+
+| Feature              | Category Groups        | Hierarchical Categories        |
+| -------------------- | ---------------------- | ------------------------------ |
+| **Nesting**          | 2 levels only          | Unlimited levels               |
+| **Parent Budgeting** | ❌ Cannot have budgets | ✅ Can have budgets            |
+| **Flexibility**      | Fixed structure        | Any category can become parent |
 
 Since a parent category can act as a category group, there is potential to replace category groups later.
 
 ### vs Tags
+
 - **Tags**: Best for cross-category analysis ("How much on #kids?")
 - **Hierarchical Categories**: Best for structured budgeting with clean rollups
 - **Complementary**: Use hierarchical structure for budgeting, tags for analysis
@@ -49,11 +52,13 @@ Since a parent category can act as a category group, there is potential to repla
 ## Implementation Approach
 
 ### Data Model
+
 - Add `parent_id` field to categories table
 - Categories work exactly like today, just with optional parent relationship
 - UI-only rollup calculations keep backend simple
 
 ### Key Edge Cases Handled
+
 - **Mixed budgeting:** Parent + children both have budgets (shows direct + total)
 - **Budget/transaction mismatch:** Clear UI guidance when budgets and transactions don't align
 - **Circular references:** Validation prevents category becoming its own ancestor
@@ -64,6 +69,7 @@ Since a parent category can act as a category group, there is potential to repla
 ### Mixed Usage Scenarios
 
 **Scenario 1: Pure Organizational Parent**
+
 ```typescript
 🍽️ Food                    $0 budgeted, $0 spent (purely organizational)
   ├── 🛒 Groceries          $400 budgeted, $350 spent
@@ -76,6 +82,7 @@ Food (total): $700 budgeted, $580 spent
 ```
 
 **Scenario 2: Mixed Usage Parent**
+
 ```typescript
 🍽️ Food                    $50 budgeted, $25 spent (misc food items)
   ├── 🛒 Groceries          $400 budgeted, $350 spent
@@ -89,6 +96,7 @@ Food (direct): $50 budgeted, $25 spent
 ```
 
 **Scenario 2: Mixed Parent (Organizational + Functional)**
+
 ```typescript
 🍽️ Food                    $50 budgeted, $25 spent (misc food items)
   ├── 🛒 Groceries          $400 budgeted, $350 spent
@@ -104,6 +112,7 @@ Food (direct): $50 budgeted, $25 spent
 ```
 
 **Scenario 3: Deep Nesting with Mixed Usage**
+
 ```typescript
 🍽️ Food                    $50 budgeted, $25 spent (misc food)
   ├── 🍽️ Meals             $20 budgeted, $15 spent (misc meal costs)
@@ -118,7 +127,7 @@ Food (direct): $50 budgeted, $25 spent
 Food (total): $1080 budgeted, $800 spent
 ├── Food (direct): $50 budgeted, $25 spent
 ├── Meals (total): $520 budgeted, $455 spent
-│   ├── Meals (direct): $20 budgeted, $15 spent  
+│   ├── Meals (direct): $20 budgeted, $15 spent
 │   └── Meals children: $500 budgeted, $440 spent
 ├── Dining Out (total): $310 budgeted, $240 spent
 │   ├── Dining Out (direct): $30 budgeted, $20 spent
@@ -129,13 +138,14 @@ Food (total): $1080 budgeted, $800 spent
 ### Critical Edge Cases & Solutions
 
 **Edge Case 1: User Confusion - "Where did my money go?"**
+
 ```typescript
 // Problem: User budgets $500 for Food but sees $750 total
 // Solution: Clear UI indication
 
-🍽️ Food                    
+🍽️ Food
 ├── 📊 Your direct budget: $50 budgeted, $25 spent
-├── 📊 Children budget: $700 budgeted, $580 spent  
+├── 📊 Children budget: $700 budgeted, $580 spent
 ├── ═══════════════════════════════════════════════
 └── 📊 Total Food: $750 budgeted, $605 spent
 
@@ -143,6 +153,7 @@ Food (total): $1080 budgeted, $800 spent
 ```
 
 **Edge Case 2: Reports - Which Level to Show?**
+
 ```typescript
 // Problem: Category reports could be confusing with nested data
 // Solution: Multiple report views
@@ -153,13 +164,14 @@ Groceries: $350, Restaurants: $150, Coffee: $80, Food: $25, Meals: $15
 // Hierarchical View:
 Food: $605
 ├── Groceries: $350
-├── Restaurants: $150  
+├── Restaurants: $150
 ├── Coffee: $80
 ├── Food (direct): $25
 └── Meals (direct): $15
 ```
 
 **Edge Case 3: Moving Categories - Preserving Budget/Transaction History**
+
 ```typescript
 // Problem: User moves "Groceries" from under "Food" to under "Household"
 // Solution: Preserve all data, update UI displays
@@ -176,6 +188,7 @@ Groceries: $400 (unchanged - keeps all history)
 ```
 
 **Edge Case 4: Template/Goal Inheritance**
+
 ```typescript
 // Question: Do child categories inherit parent templates/goals?
 // Solution: No inheritance (simplest) - each category manages its own templates/goals independently
@@ -184,6 +197,7 @@ Groceries: $400 (unchanged - keeps all history)
 ## The Bottom Line
 
 This approach gives you **maximum flexibility with zero artificial constraints**. You get:
+
 - ✅ Complete freedom to budget and spend at any level
 - ✅ Familiar experience - categories work exactly like they do today
 - ✅ All existing features work unchanged
@@ -203,8 +217,9 @@ Result: Detailed budgets with zero manual math! 🎉
 ```
 
 **Potential split methods:**
+
 - **Even split:** Divide equally among children
-- **Smart split:** Based on spending history  
+- **Smart split:** Based on spending history
 - **Custom split:** Set your own percentages
 
 This would bridge the gap between simple and detailed budgeting for users who want granular control without manual calculations.
