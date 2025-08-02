@@ -273,11 +273,7 @@ function NavTab({ Icon: TabIcon, name, path, style, onClick }: NavTabProps) {
       })}
       onClick={onClick}
     >
-      <TabIcon
-        width={22}
-        height={22}
-        style={{ minHeight: '22px' }}
-      />
+      <TabIcon width={22} height={22} style={{ minHeight: '22px' }} />
       {name}
     </NavLink>
   );
