@@ -1,11 +1,18 @@
 // @ts-strict-ignore
 import React, { type CSSProperties, useRef, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
+import { Button } from '@actual-app/components/button';
+import {
+  SvgCheveronDown,
+  SvgCheveronUp,
+} from '@actual-app/components/icons/v1';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -31,6 +38,7 @@ import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
 import { useNotes } from '@desktop-client/hooks/useNotes';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { openAccountCloseModal } from '@desktop-client/modals/modalsSlice';
 import {
   reopenAccount,
@@ -83,6 +91,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
   onDrop,
   titleAccount,
 }: AccountProps<FieldName>) {
+  const { t } = useTranslation();
   const type = account
     ? account.closed
       ? 'account-closed'
@@ -108,6 +117,10 @@ export function Account<FieldName extends SheetFields<'account'>>({
     id: account && account.id,
     onDrop,
   });
+
+  const [showBalanceHistory, setShowBalanceHistory] = useSyncedPref(
+    `side-nav.show-balance-history-${account?.id}`,
+  );
 
   const dispatch = useDispatch();
 
@@ -281,14 +294,35 @@ export function Account<FieldName extends SheetFields<'account'>>({
             padding: 10,
           }}
         >
-          <Text
-            style={{
-              fontWeight: 'bold',
-            }}
-          >
-            {name}
-          </Text>
-          {account && <BalanceHistoryGraph accountId={account.id} />}
+          <SpaceBetween style={{ justifyContent: 'space-between' }}>
+            <Text
+              style={{
+                fontWeight: 'bold',
+              }}
+            >
+              {name}
+            </Text>
+            <Button
+              aria-label={t('Toggle balance history')}
+              onClick={() =>
+                setShowBalanceHistory(
+                  showBalanceHistory === 'true' ? 'false' : 'true',
+                )
+              }
+            >
+              <SpaceBetween gap={3}>
+                {showBalanceHistory === 'true' ? (
+                  <SvgCheveronUp width={14} height={14} />
+                ) : (
+                  <SvgCheveronDown width={14} height={14} />
+                )}
+                <Trans>Balance graph</Trans>
+              </SpaceBetween>
+            </Button>
+          </SpaceBetween>
+          {showBalanceHistory === 'true' && account && (
+            <BalanceHistoryGraph accountId={account.id} />
+          )}
           {accountNote && (
             <Notes
               getStyle={() => ({
