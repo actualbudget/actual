@@ -140,12 +140,17 @@ async function countContributorPoints(repo) {
       pull_number: pr.number,
     });
 
-    // Get list of modified files
-    const { data: modifiedFiles } = await octokit.pulls.listFiles({
-      owner,
-      repo,
-      pull_number: pr.number,
-    });
+    // Get list of modified files with pagination
+    const modifiedFiles = await octokit.paginate(
+      octokit.pulls.listFiles,
+      {
+        owner,
+        repo,
+        pull_number: pr.number,
+        per_page: 100, // Maximum allowed by GitHub API
+      },
+      response => response.data,
+    );
 
     // Calculate points based on PR size, excluding specified files
     const totalChanges = modifiedFiles
