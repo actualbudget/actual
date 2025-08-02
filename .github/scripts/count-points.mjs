@@ -174,8 +174,8 @@ async function countContributorPoints(repo) {
         ?.points ?? 0;
 
     if (isReleasePR) {
-      // We only credit the docs release PR creator because that is not created by the bot
-      // We never credit the release PR creator in the actual repo because it's the same person - we don't want to double count
+      // Only award points to the docs release PR creator since actual repo releases are automated.
+      // This prevents double-counting when the same person creates releases in both repositories.
       if (stats.has(pr.user.login)) {
         const creatorStats = stats.get(pr.user.login);
         creatorStats.reviews.push({
