@@ -132,8 +132,8 @@ export function summarySpreadsheet(
       case 'sum':
         setData({
           ...dateRanges,
-          total: (data.data[0]?.amount ?? 0) / 100,
-          dividend: (data.data[0]?.amount ?? 0) / 100,
+          total: data.data[0]?.amount ?? 0,
+          dividend: data.data[0]?.amount ?? 0,
           divisor: 0,
         });
         break;
@@ -142,10 +142,10 @@ export function summarySpreadsheet(
         setData({
           ...dateRanges,
           total:
-            ((data.data[0]?.count ?? 0)
+            (data.data[0]?.count ?? 0)
               ? (data.data[0]?.amount ?? 0) / data.data[0].count
-              : 0) / 100,
-          dividend: (data.data[0]?.amount ?? 0) / 100,
+              : 0,
+          dividend: data.data[0]?.amount ?? 0,
           divisor: data.data[0].count,
         });
         break;
@@ -211,8 +211,8 @@ function calculatePerMonth(
   const averageAmountPerMonth = totalAmount / numMonths;
 
   return {
-    total: averageAmountPerMonth / 100,
-    dividend: totalAmount / 100,
+    total: averageAmountPerMonth,
+    dividend: totalAmount,
     divisor: numMonths,
   };
 }
@@ -295,7 +295,7 @@ async function calculatePercentage(
   const dividend = data.reduce((prev, ac) => prev + (ac?.amount ?? 0), 0);
   return {
     total: Math.round(((dividend ?? 0) / (divisorValue ?? 1)) * 10000) / 100,
-    divisor: (divisorValue ?? 0) / 100,
-    dividend: (dividend ?? 0) / 100,
+    divisor: divisorValue ?? 0,
+    dividend: dividend ?? 0,
   };
 }

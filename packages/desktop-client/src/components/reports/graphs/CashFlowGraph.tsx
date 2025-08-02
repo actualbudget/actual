@@ -18,13 +18,9 @@ import {
   type TooltipProps,
 } from 'recharts';
 
-import {
-  amountToCurrency,
-  amountToCurrencyNoDecimal,
-} from 'loot-core/shared/util';
-
 import { chartTheme } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
+import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -33,9 +29,15 @@ const ANIMATION_DURATION = 1000; // in ms
 
 type CustomTooltipProps = TooltipProps<number, 'date'> & {
   isConcise: boolean;
+  format: (value: unknown, type?: FormatType) => string;
 };
 
-function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
+function CustomTooltip({
+  active,
+  payload,
+  isConcise,
+  format,
+}: CustomTooltipProps) {
   const locale = useLocale();
   const { t } = useTranslation();
 
@@ -67,27 +69,29 @@ function CustomTooltip({ active, payload, isConcise }: CustomTooltipProps) {
         <div style={{ lineHeight: 1.5 }}>
           <AlignedText
             left={t('Income:')}
-            right={amountToCurrency(data.income)}
+            right={format(data.income, 'financial')}
           />
           <AlignedText
             left={t('Expenses:')}
-            right={amountToCurrency(data.expenses)}
+            right={format(data.expenses, 'financial')}
           />
           <AlignedText
             left={t('Change:')}
             right={
-              <strong>{amountToCurrency(data.income + data.expenses)}</strong>
+              <strong>
+                {format(data.income + data.expenses, 'financial')}
+              </strong>
             }
           />
           {data.transfers !== 0 && (
             <AlignedText
               left={t('Transfers:')}
-              right={amountToCurrency(data.transfers)}
+              right={format(data.transfers, 'financial')}
             />
           )}
           <AlignedText
             left={t('Balance:')}
-            right={amountToCurrency(data.balance)}
+            right={format(data.balance, 'financial')}
           />
         </div>
       </div>
@@ -115,6 +119,7 @@ export function CashFlowGraph({
   const locale = useLocale();
   const privacyMode = usePrivacyMode();
   const [yAxisIsHovered, setYAxisIsHovered] = useState(false);
+  const format = useFormat();
 
   const data = graphData.expenses.map((row, idx) => ({
     date: row.x,
@@ -152,7 +157,7 @@ export function CashFlowGraph({
               tickFormatter={value =>
                 privacyMode && !yAxisIsHovered
                   ? '...'
-                  : amountToCurrencyNoDecimal(value)
+                  : format(value, 'financial-no-decimals')
               }
               onMouseEnter={() => setYAxisIsHovered(true)}
               onMouseLeave={() => setYAxisIsHovered(false)}
@@ -164,7 +169,7 @@ export function CashFlowGraph({
                   locale,
                 });
               }}
-              content={<CustomTooltip isConcise={isConcise} />}
+              content={<CustomTooltip isConcise={isConcise} format={format} />}
               isAnimationActive={false}
             />
 
