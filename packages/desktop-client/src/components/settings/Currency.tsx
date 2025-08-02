@@ -47,6 +47,7 @@ export function CurrencySettings() {
     // ['JPY', t('Yen')],
     ['SGD', t('Singapore Dollar')],
     ['USD', t('US Dollar')],
+    ['QAR', t('Qatari Riyal')],
   ]);
 
   const currencyOptions: [string, string][] = currencies.map(currency => {

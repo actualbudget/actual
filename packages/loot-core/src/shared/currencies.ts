@@ -22,6 +22,7 @@ export const currencies: Currency[] = [
   // { code: 'JPY', name: 'Yen', symbol: '¥', decimalPlaces: 0 },
   { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$', decimalPlaces: 2 },
   { code: 'USD', name: 'US Dollar', symbol: '$', decimalPlaces: 2 },
+  { code: 'QAR', name: 'Qatari Riyal', symbol: 'QAR', decimalPlaces: 2 },
 ];
 
 export function getCurrency(code: string): Currency {
