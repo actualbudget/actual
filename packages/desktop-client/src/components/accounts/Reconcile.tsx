@@ -170,7 +170,7 @@ export function ReconcileMenu({
             reconcile with:
           </Trans>
         </Text>
-        {inputValue && (
+        {inputValue != null && (
           <InitialFocus>
             <Input
               value={inputValue}
