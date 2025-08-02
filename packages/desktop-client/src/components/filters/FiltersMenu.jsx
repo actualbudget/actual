@@ -40,6 +40,7 @@ import { subfieldToOptions } from './subfieldToOptions';
 import { updateFilterReducer } from './updateFilterReducer';
 
 import { GenericInput } from '@desktop-client/components/util/GenericInput';
+import PayeeFilter from '@desktop-client/components/filters/PayeeFilter';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
 
@@ -229,7 +230,7 @@ function ConfigureField({
           });
         }}
       >
-        {type !== 'boolean' && (
+        {type !== 'boolean' && field !== 'payee' && (
           <GenericInput
             ref={inputRef}
             field={field}
@@ -250,6 +251,15 @@ function ConfigureField({
             onChange={v => {
               dispatch({ type: 'set-value', value: v });
             }}
+          />
+        )}
+
+        {field == 'payee' && (
+          <PayeeFilter
+            ref={inputRef}
+            value={formattedValue}
+            op={op}
+            onChange={v => dispatch({ type: 'set-value', value: v })}
           />
         )}
 
