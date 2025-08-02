@@ -91,7 +91,11 @@ function ToBudget({ toBudget, onPress, show3Columns }) {
     >
       <Button variant="bare" onPress={onPress}>
         <View>
-          <Label
+          <AutoTextSize
+            as={Label}
+            minFontSizePx={6}
+            maxFontSizePx={12}
+            mode="oneline"
             title={amount < 0 ? t('Overbudgeted') : t('To Budget')}
             style={{
               ...(amount < 0 ? styles.smallText : {}),
@@ -323,7 +327,7 @@ export function BudgetTable({
 }) {
   const { t } = useTranslation();
   const { width } = useResponsive();
-  const show3Columns = width >= 360;
+  const show3Columns = width >= 300;
 
   // let editMode = false; // neuter editMode -- sorry, not rewriting drag-n-drop right now
 
@@ -827,7 +831,11 @@ function BudgetTableHeader({
                         }}
                       />
                     )}
-                    <Label
+                    <AutoTextSize
+                      as={Label}
+                      minFontSizePx={6}
+                      maxFontSizePx={12}
+                      mode="oneline"
                       title={t('Budgeted')}
                       style={{ color: theme.formInputText, paddingRight: 4 }}
                     />
@@ -889,7 +897,11 @@ function BudgetTableHeader({
                         }}
                       />
                     )}
-                    <Label
+                    <AutoTextSize
+                      as={Label}
+                      minFontSizePx={6}
+                      maxFontSizePx={12}
+                      mode="oneline"
                       title={t('Spent')}
                       style={{ color: theme.formInputText, paddingRight: 4 }}
                     />
@@ -926,8 +938,12 @@ function BudgetTableHeader({
         >
           {({ type, value }) => (
             <View style={{ width: columnWidth }}>
-              <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                <Label
+              <View style={{ flex: 1, alignItems: 'flex-end !important' }}>
+                <AutoTextSize
+                  as={Label}
+                  minFontSizePx={6}
+                  maxFontSizePx={12}
+                  mode="oneline"
                   title={t('Balance')}
                   style={{ color: theme.formInputText }}
                 />
