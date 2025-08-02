@@ -57,7 +57,8 @@ async function commentOnPR() {
       `**Summary:** ${summaryData.summary}`,
       `**File:** [upcoming-release-notes/${summaryData.prNumber}.md](${fileUrl})`,
       '',
-      'The release notes file has been committed to the repository. You can edit it if needed before merging.',
+      //      'The release notes file has been committed to the repository. You can edit it if needed before merging.',
+      "If you're happy with this release note, you can add it to your pull request. If not, you'll need to add your own before a maintainer can review your change.",
     ].join('\n');
 
     await octokit.rest.issues.createComment({
