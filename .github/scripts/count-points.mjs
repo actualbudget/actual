@@ -166,22 +166,25 @@ async function countContributorPoints(repo) {
       .reduce((sum, file) => sum + file.additions + file.deletions, 0);
 
     // Check if this is a release PR
-    const isReleasePR = pr.title.match(/^🔖 \(\d+\.\d+\.\d+\)/);
+    const isReleasePR = !!pr.title.match(/^🔖.*\d{2}\.\d\.\d/);
 
     // Calculate points for reviewers based on PR size
     const prPoints =
       config.PR_REVIEW_POINT_TIERS.find(tier => totalChanges >= tier.minChanges)
         ?.points ?? 0;
 
-    // Award points to the PR creator if it's a release PR
-    if (isReleasePR && stats.has(pr.user.login)) {
-      const creatorStats = stats.get(pr.user.login);
-      creatorStats.reviews.push({
-        pr: pr.number.toString(),
-        points: config.POINTS_PER_RELEASE_PR,
-        isReleaseCreator: true,
-      });
-      creatorStats.points += config.POINTS_PER_RELEASE_PR;
+    if (isReleasePR) {
+      // We only credit the docs release PR creator because that is not created by the bot
+      // We never credit the release PR creator in the actual repo because it's the same person - we don't want to double count
+      if (stats.has(pr.user.login)) {
+        const creatorStats = stats.get(pr.user.login);
+        creatorStats.reviews.push({
+          pr: pr.number.toString(),
+          points: config.POINTS_PER_RELEASE_PR,
+          isReleaseCreator: true,
+        });
+        creatorStats.points += config.POINTS_PER_RELEASE_PR;
+      }
     } else {
       // Add points to the reviewers
       const uniqueReviewers = new Set();
