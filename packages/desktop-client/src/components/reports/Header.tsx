@@ -223,6 +223,24 @@ export function Header({
               variant="bare"
               onPress={() =>
                 onChangeDates(
+                  ...convertToMonth(
+                    ...getLiveRange(
+                      'Last year to date',
+                      earliestTransaction,
+                      false,
+                      firstDayOfWeekIdx,
+                    ),
+                    'lastYearToDate',
+                  ),
+                )
+              }
+            >
+              <Trans>Last year to date</Trans>
+            </Button>
+            <Button
+              variant="bare"
+              onPress={() =>
+                onChangeDates(
                   ...getFullRange(allMonths[allMonths.length - 1].name),
                 )
               }
