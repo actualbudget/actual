@@ -107,11 +107,9 @@ export function useTransactionBatchActions() {
 
         if (name === 'notes') {
           if (mode === 'prepend') {
-            valueToSet =
-              trans.notes === null ? value : value + ' ' + trans.notes;
+            valueToSet = trans.notes === null ? value : value + trans.notes;
           } else if (mode === 'append') {
-            valueToSet =
-              trans.notes === null ? value : trans.notes + ' ' + value;
+            valueToSet = trans.notes === null ? value : trans.notes + value;
           } else if (mode === 'replace') {
             valueToSet = value;
           }
