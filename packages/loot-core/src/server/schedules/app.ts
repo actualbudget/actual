@@ -452,7 +452,7 @@ async function advanceSchedulesService(syncSuccess) {
       .select('*'),
   );
 
-  const schedules = schedulesData as ScheduleEntity[]
+  const schedules = schedulesData as ScheduleEntity[];
 
   const { data: hasTransData } = await aqlQuery(
     getHasTransactionsQuery(schedules),
