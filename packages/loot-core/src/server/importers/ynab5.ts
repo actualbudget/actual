@@ -3,6 +3,7 @@
 // into Actual itself. We only want to pull in the methods in that
 // case and ignore everything else; otherwise we'd be pulling in the
 // entire backend bundle from the API
+import { send } from '@actual-app/api/injected';
 import * as actual from '@actual-app/api/methods';
 import { v4 as uuidv4 } from 'uuid';
 
