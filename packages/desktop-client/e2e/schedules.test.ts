@@ -159,11 +159,15 @@ test.describe('Duplicate Payee Schedule', () => {
     await expect(schedulesPage.getNthSchedule(2).status).toHaveText('Paid');
     await expect(page).toMatchThemeScreenshots();
 
+    await schedulesPage.postNthSchedule(3);
+    await expect(schedulesPage.getNthSchedule(2).status).toHaveText('Paid');
+    await expect(page).toMatchThemeScreenshots();
+
     // Go to transactions page
     const accountPage = await navigation.goToAccountPage('HSBC');
     const transaction = accountPage.getNthTransaction(0);
     await expect(transaction.payee).toHaveText('Apple');
-    await expect(transaction.category).toHaveText('Categorize');
+    await expect(transaction.category).toHaveText('Paid');
     await expect(transaction.debit).toHaveText('5.00');
     await expect(transaction.credit).toHaveText('');
 
