@@ -46,24 +46,25 @@ const REPOSITORY_CONFIG = new Map([
 function getLastMonthDates() {
   // Get data relating to the last month
   const now = new Date();
+  // Always use UTC for calculations
   const firstDayOfLastMonth = new Date(
-    now.getFullYear(),
-    now.getMonth() - 1,
-    1,
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1, 0, 0, 0, 0),
   );
   const since = process.env.START_DATE
-    ? new Date(process.env.START_DATE)
+    ? new Date(Date.parse(process.env.START_DATE))
     : firstDayOfLastMonth;
 
-  // Calculate the end of the month for the since date
+  // Calculate the end of the month for the since date in UTC
   const until = new Date(
-    since.getFullYear(),
-    since.getMonth() + 1,
-    0,
-    23,
-    59,
-    59,
-    999,
+    Date.UTC(
+      since.getUTCFullYear(),
+      since.getUTCMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+    ),
   );
 
   return { since, until };
@@ -76,7 +77,9 @@ function getLastMonthDates() {
  * @returns {number} The total points earned for the repository
  */
 async function countContributorPoints(repo) {
-  const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+  const octokit = new Octokit({
+    auth: process.env.GITHUB_TOKEN,
+  });
   const owner = 'actualbudget';
   const config = REPOSITORY_CONFIG.get(repo);
 
@@ -140,12 +143,17 @@ async function countContributorPoints(repo) {
       pull_number: pr.number,
     });
 
-    // Get list of modified files
-    const { data: modifiedFiles } = await octokit.pulls.listFiles({
-      owner,
-      repo,
-      pull_number: pr.number,
-    });
+    // Get list of modified files with pagination
+    const modifiedFiles = await octokit.paginate(
+      octokit.pulls.listFiles,
+      {
+        owner,
+        repo,
+        pull_number: pr.number,
+        per_page: 100, // Maximum allowed by GitHub API
+      },
+      response => response.data,
+    );
 
     // Calculate points based on PR size, excluding specified files
     const totalChanges = modifiedFiles
@@ -158,22 +166,24 @@ async function countContributorPoints(repo) {
       .reduce((sum, file) => sum + file.additions + file.deletions, 0);
 
     // Check if this is a release PR
-    const isReleasePR = pr.title.match(/^🔖 \(\d+\.\d+\.\d+\)/);
+    const isReleasePR = pr.title.match(/🔖.*\d+\.\d+\.\d+/);
 
     // Calculate points for reviewers based on PR size
     const prPoints =
-      config.PR_REVIEW_POINT_TIERS.find(tier => totalChanges > tier.minChanges)
+      config.PR_REVIEW_POINT_TIERS.find(tier => totalChanges >= tier.minChanges)
         ?.points ?? 0;
 
-    // Award points to the PR creator if it's a release PR
-    if (isReleasePR && stats.has(pr.user.login)) {
-      const creatorStats = stats.get(pr.user.login);
-      creatorStats.reviews.push({
-        pr: pr.number.toString(),
-        points: config.POINTS_PER_RELEASE_PR,
-        isReleaseCreator: true,
-      });
-      creatorStats.points += config.POINTS_PER_RELEASE_PR;
+    if (isReleasePR) {
+      // Award points to the PR creator if it's a release PR
+      if (stats.has(pr.user.login)) {
+        const creatorStats = stats.get(pr.user.login);
+        creatorStats.reviews.push({
+          pr: pr.number.toString(),
+          points: config.POINTS_PER_RELEASE_PR,
+          isReleaseCreator: true,
+        });
+        creatorStats.points += config.POINTS_PER_RELEASE_PR;
+      }
     } else {
       // Add points to the reviewers
       const uniqueReviewers = new Set();
@@ -197,20 +207,15 @@ async function countContributorPoints(repo) {
   }
 
   // Get all issues with label events in the last month
-  const issues = await octokit.paginate(
-    octokit.issues.listForRepo,
-    {
-      owner,
-      repo,
-      state: 'all',
-      sort: 'updated',
-      direction: 'desc',
-      per_page: 100,
-      since: since.toISOString(),
-    },
-    (response, done) =>
-      response.data.filter(issue => new Date(issue.updated_at) <= until),
-  );
+  const issues = await octokit.paginate(octokit.issues.listForRepo, {
+    owner,
+    repo,
+    state: 'all',
+    sort: 'updated',
+    direction: 'desc',
+    per_page: 100,
+    since: since.toISOString(),
+  });
 
   // Get label events for each issue
   for (const issue of issues) {
@@ -222,12 +227,15 @@ async function countContributorPoints(repo) {
 
     // Process events
     events
-      .filter(
-        event =>
-          new Date(event.created_at) > since &&
-          new Date(event.created_at) <= until &&
-          stats.has(event.actor?.login),
-      )
+      .filter(event => {
+        // Always compare UTC times
+        const createdAt = new Date(event.created_at);
+        return (
+          createdAt.getTime() > since.getTime() &&
+          createdAt.getTime() <= until.getTime() &&
+          stats.has(event.actor?.login)
+        );
+      })
       .forEach(event => {
         if (
           event.event === 'unlabeled' &&
