@@ -93,6 +93,9 @@ async function importCategories(
               hidden: group.hidden,
             });
             entityIdMap.set(group.id, groupId);
+            if (group.note) {
+              send('notes-save', { id: groupId, note: group.note });
+            }
             run = false;
           } catch (e) {
             group.name = origName + '-' + count.toString();
@@ -141,6 +144,9 @@ async function importCategories(
                     hidden: cat.hidden,
                   });
                   entityIdMap.set(cat.id, id);
+                  if (cat.note) {
+                    send('notes-save', { id, note: cat.note });
+                  }
                   run = false;
                 } catch (e) {
                   cat.name = origName + '-' + count.toString();
