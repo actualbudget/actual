@@ -25,6 +25,12 @@ export function useTags() {
 }
 
 function getTagCSSColors(theme: Theme, color?: string | null) {
+  if (theme === 'auto') {
+    theme = window.matchMedia('(prefers-color-scheme: light)').matches
+      ? 'light'
+      : 'dark';
+  }
+
   if (theme === 'light') {
     return [
       color ? `${color} !important` : themeStyle.noteTagText,
