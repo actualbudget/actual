@@ -1,13 +1,9 @@
 // @ts-strict-ignore
 import React, { type CSSProperties, useRef, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { Button } from '@actual-app/components/button';
-import {
-  SvgCheveronDown,
-  SvgCheveronUp,
-} from '@actual-app/components/icons/v1';
 import {
   SvgArrowButtonDown1,
   SvgArrowButtonUp1,
