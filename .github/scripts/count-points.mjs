@@ -170,14 +170,16 @@ async function countContributorPoints(repo) {
           config.PR_REVIEW_POINT_TIERS.find(t => totalChanges >= t.minChanges)
             ?.points ?? 0;
 
-        if (isReleasePR && stats.has(pr.user.login)) {
-          const creatorStats = stats.get(pr.user.login);
-          creatorStats.reviews.push({
-            pr: pr.number.toString(),
-            points: config.POINTS_PER_RELEASE_PR,
-            isReleaseCreator: true,
-          });
-          creatorStats.points += config.POINTS_PER_RELEASE_PR;
+        if (isReleasePR) {
+          if (stats.has(pr.user.login)) {
+            const creatorStats = stats.get(pr.user.login);
+            creatorStats.reviews.push({
+              pr: pr.number.toString(),
+              points: config.POINTS_PER_RELEASE_PR,
+              isReleaseCreator: true,
+            });
+            creatorStats.points += config.POINTS_PER_RELEASE_PR;
+          }
         } else {
           const uniqueReviewers = new Set();
           reviews.data
