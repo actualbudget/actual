@@ -20,6 +20,7 @@ export const currencies: Currency[] = [
   { code: 'GBP', name: 'Pound Sterling', symbol: '£', decimalPlaces: 2 },
   { code: 'HKD', name: 'Hong Kong Dollar', symbol: 'HK$', decimalPlaces: 2 },
   // { code: 'JPY', name: 'Yen', symbol: '¥', decimalPlaces: 0 },
+  { code: 'PLN', name: 'Polish Złoty', symbol: 'zł', decimalPlaces: 2 },
   { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$', decimalPlaces: 2 },
   { code: 'USD', name: 'US Dollar', symbol: '$', decimalPlaces: 2 },
 ];

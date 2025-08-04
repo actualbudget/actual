@@ -45,6 +45,7 @@ export function CurrencySettings() {
     ['GBP', t('Pound Sterling')],
     ['HKD', t('Hong Kong Dollar')],
     // ['JPY', t('Yen')],
+    ['PLN', t('Polish Złoty')],
     ['SGD', t('Singapore Dollar')],
     ['USD', t('US Dollar')],
   ]);
