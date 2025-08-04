@@ -34,7 +34,7 @@ import {
   unparse,
   makeValue,
   FIELD_TYPES,
-  ALLOCATION_METHODS,
+  getAllocationMethods,
   isValidOp,
   getValidOps,
 } from 'loot-core/shared/rules';
@@ -393,7 +393,9 @@ const parentOnlyFields = ['amount', 'cleared', 'account', 'date'];
 const splitActionFields = actionFields.filter(
   ([field]) => !parentOnlyFields.includes(field),
 );
-const allocationMethodOptions = Object.entries(ALLOCATION_METHODS);
+function getAllocationMethodOptions() {
+  return Object.entries(getAllocationMethods());
+}
 function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
   const { t } = useTranslation();
   const {
@@ -425,7 +427,6 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
             value={op}
             onChange={onChange}
           />
-
           <FieldSelect
             fields={fields}
             value={field}
@@ -475,7 +476,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
           </View>
 
           <SplitAmountMethodSelect
-            options={allocationMethodOptions}
+            options={getAllocationMethodOptions()}
             value={options.method}
             onChange={onChange}
           />
@@ -789,7 +790,6 @@ const conditionFields = [
     ['amount-inflow', mapField('amount', { inflow: true })],
     ['amount-outflow', mapField('amount', { outflow: true })],
   ]);
-
 export function EditRuleModal({
   rule: defaultRule,
   onSave: originalOnSave = undefined,
