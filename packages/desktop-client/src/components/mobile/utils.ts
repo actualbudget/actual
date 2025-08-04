@@ -3,6 +3,7 @@ import {
   type PayeeEntity,
   type TransactionEntity,
 } from 'loot-core/types/models';
+import { useTranslation } from 'react-i18next';
 
 type GetPrettyPayeeProps = {
   transaction?: TransactionEntity;
@@ -15,14 +16,19 @@ export function getPrettyPayee({
   payee,
   transferAccount,
 }: GetPrettyPayeeProps) {
+  const { t } = useTranslation();
+
   if (!transaction) {
     return '';
   }
 
   if (transferAccount) {
-    return `Transfer ${transaction?.amount > 0 ? 'from' : 'to'} ${transferAccount.name}`;
+    return t('Transfer {{direction}} {{accountName}}', {
+      direction: transaction?.amount > 0 ? t('from') : t('to'),
+      accountName: transferAccount.name
+    });
   } else if (transaction.is_parent) {
-    return 'Split';
+    return t('Split');
   } else if (payee) {
     return payee.name;
   }
