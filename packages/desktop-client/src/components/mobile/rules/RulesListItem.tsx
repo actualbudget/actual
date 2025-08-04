@@ -170,7 +170,7 @@ export function RulesListItem({ rule, onPress }: RulesListItemProps) {
                       marginBottom: 4,
                     }}
                   >
-                    {i ? `Split ${i}` : 'Apply to all'}
+                    {i ? t('Split {{num}}', { num: i }) : t('Apply to all')}
                   </span>
                   {split.actions.map((action, j) => (
                     <View
