@@ -31,14 +31,12 @@ type TagCreationRowProps = {
   onClose: () => void;
 };
 
-const isTagValid = (tag: string) => tag.match(/^([^#\s]+)$/);
-
 export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [tag, setTag] = useState('');
   const [description, setDescription] = useState('');
-  const [color, setColor] = useState(theme.noteTagDefault);
+  const [color, setColor] = useState<string | null>(null);
   const tagInput = useRef<HTMLInputElement>(null);
   const getTagCSS = useTagCSS();
 
@@ -59,14 +57,23 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
   useProperFocus(cancelButtonRef, tableNavigator.focusedField === 'cancel');
 
   const resetInputs = () => {
-    setColor(theme.noteTagDefault);
+    setColor(null);
     setTag('');
     setDescription('');
     tableNavigator.onEdit('new-tag', 'tag');
   };
 
+  const isTagValid = () => {
+    return (
+      /^[^#\s]+$/.test(tag) && // accept any char except whitespaces and '#'
+      !tagNames.includes(tag) && // does not exists already
+      // color is null (default color) or is a 6 char hex color
+      (color === null || /^#[0-9a-fA-F]{6}$/.test(color))
+    );
+  };
+
   const onAddTag = () => {
-    if (!isTagValid(tag) || !color.trim() || tagNames.includes(tag)) {
+    if (!isTagValid()) {
       return;
     }
 
@@ -157,7 +164,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
       >
         <Trans>Choose Color:</Trans>
         <ColorPicker
-          value={color}
+          value={color ?? undefined}
           onChange={color => setColor(color.toString('hex'))}
         >
           <Button
@@ -189,7 +196,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
             style={{ padding: '4px 10px' }}
             onPress={onAddTag}
             data-testid="add-button"
-            isDisabled={!isTagValid(tag) || tagNames.includes(tag)}
+            isDisabled={!isTagValid()}
             ref={addButtonRef}
           >
             <Trans>Add</Trans>
