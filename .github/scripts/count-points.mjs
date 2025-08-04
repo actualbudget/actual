@@ -2,7 +2,7 @@ import { Octokit } from '@octokit/rest';
 import { minimatch } from 'minimatch';
 import pLimit from 'p-limit';
 
-const limit = pLimit(90);
+const limit = pLimit(30);
 
 /** Repository-specific configuration for points calculation */
 const REPOSITORY_CONFIG = new Map([
