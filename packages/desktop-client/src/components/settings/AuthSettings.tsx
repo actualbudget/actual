@@ -53,7 +53,7 @@ export function AuthSettings() {
                   )
                 }
               >
-                {t('Start using OpenID')}
+                <Trans>Start using OpenID</Trans>
               </Button>
               <Label
                 style={{ paddingTop: 5 }}
