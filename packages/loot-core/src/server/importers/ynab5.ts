@@ -3,6 +3,7 @@
 // into Actual itself. We only want to pull in the methods in that
 // case and ignore everything else; otherwise we'd be pulling in the
 // entire backend bundle from the API
+import { send } from '@actual-app/api/injected';
 import * as actual from '@actual-app/api/methods';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -93,6 +94,9 @@ async function importCategories(
               hidden: group.hidden,
             });
             entityIdMap.set(group.id, groupId);
+            if (group.note) {
+              send('notes-save', { id: groupId, note: group.note });
+            }
             run = false;
           } catch (e) {
             group.name = origName + '-' + count.toString();
@@ -141,6 +145,9 @@ async function importCategories(
                     hidden: cat.hidden,
                   });
                   entityIdMap.set(cat.id, id);
+                  if (cat.note) {
+                    send('notes-save', { id, note: cat.note });
+                  }
                   run = false;
                 } catch (e) {
                   cat.name = origName + '-' + count.toString();

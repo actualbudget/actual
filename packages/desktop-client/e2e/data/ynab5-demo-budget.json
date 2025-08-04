@@ -133,6 +133,7 @@
       {
         "id": "53c9d1fc-dc5b-4021-8255-463fa19065e4",
         "name": "Bills",
+        "note": "Water, electric, rent etc.",
         "hidden": false,
         "deleted": false
       },
@@ -252,7 +253,7 @@
         "name": "Rent/Mortgage",
         "hidden": false,
         "original_category_group_id": null,
-        "note": null,
+        "note": "Primary and secondary properties",
         "budgeted": 0,
         "activity": 0,
         "balance": 0,
@@ -490,9 +491,9 @@
         "id": "00ef54e0-fc17-455e-8d67-efb6327dc9d7",
         "category_group_id": "857f9218-ddaa-495e-814d-0d72291a1d89",
         "name": "Auto Maintenance",
+        "note": "### Cars\n- ABD123\n- 123ABC\n### Bike\n- A1B2C3",
         "hidden": false,
         "original_category_group_id": null,
-        "note": null,
         "budgeted": 0,
         "activity": 0,
         "balance": 0,

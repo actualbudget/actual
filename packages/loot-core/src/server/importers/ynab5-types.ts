@@ -30,6 +30,7 @@ export interface CategoryGroup {
   name: string;
   deleted: boolean;
   hidden: boolean;
+  note?: string;
 }
 
 export interface Category {
@@ -38,6 +39,7 @@ export interface Category {
   name: string;
   deleted: boolean;
   hidden: boolean;
+  note?: string;
 }
 
 export interface Transaction {
