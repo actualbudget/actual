@@ -12,7 +12,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { friendlyOp } from 'loot-core/shared/rules';
+import { friendlyOp, translateRuleStage } from 'loot-core/shared/rules';
 import { type RuleEntity } from 'loot-core/types/models';
 
 import { ActionExpression } from './ActionExpression';
@@ -130,7 +130,7 @@ export const RuleRow = memo(
                 padding: '3px 5px',
               }}
             >
-              {rule.stage}
+              {translateRuleStage(rule.stage)}
             </View>
           )}
         </Cell>
