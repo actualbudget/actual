@@ -8,6 +8,10 @@ import {
   SvgCheveronDown,
   SvgCheveronUp,
 } from '@actual-app/components/icons/v1';
+import {
+  SvgArrowButtonDown1,
+  SvgArrowButtonUp1,
+} from '@actual-app/components/icons/v2';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
@@ -294,7 +298,19 @@ export function Account<FieldName extends SheetFields<'account'>>({
             padding: 10,
           }}
         >
-          <SpaceBetween style={{ justifyContent: 'space-between' }}>
+          <SpaceBetween
+            gap={5}
+            style={{
+              justifyContent: 'space-between',
+              '& .hover-visible': {
+                opacity: 0,
+                transition: 'opacity .25s',
+              },
+              '&:hover .hover-visible': {
+                opacity: 1,
+              },
+            }}
+          >
             <Text
               style={{
                 fontWeight: 'bold',
@@ -304,19 +320,20 @@ export function Account<FieldName extends SheetFields<'account'>>({
             </Text>
             <Button
               aria-label={t('Toggle balance history')}
+              variant="bare"
               onClick={() =>
                 setShowBalanceHistory(
                   showBalanceHistory === 'true' ? 'false' : 'true',
                 )
               }
+              className="hover-visible"
             >
               <SpaceBetween gap={3}>
                 {showBalanceHistory === 'true' ? (
-                  <SvgCheveronUp width={14} height={14} />
+                  <SvgArrowButtonUp1 width={10} height={10} />
                 ) : (
-                  <SvgCheveronDown width={14} height={14} />
+                  <SvgArrowButtonDown1 width={10} height={10} />
                 )}
-                <Trans>Balance graph</Trans>
               </SpaceBetween>
             </Button>
           </SpaceBetween>
