@@ -407,7 +407,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     const mapping = mappings.get(trans.amount <= 0 ? 'payment' : 'deposit');
 
     const date = trans[mapping.get('date')] ?? trans.date;
-    const payeeName = trans[mapping.get('payee')];
+    const payeeName = trans[mapping.get('payee')] ?? trans.payeeName;
     const notes = trans[mapping.get('notes')];
 
     // Validate the date because we do some stuff with it. The db
