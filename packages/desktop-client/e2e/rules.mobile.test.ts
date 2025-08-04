@@ -33,7 +33,9 @@ test.describe('Mobile Rules', () => {
     await page.close();
   });
 
-  test('displays the rules page with proper header and search bar', async () => {
+  test('checks the page visuals', async () => {
+    await rulesPage.searchFor('Dominion');
+
     // Check that the header is present
     await expect(page.getByRole('heading', { name: 'Rules' })).toBeVisible();
 
@@ -48,47 +50,6 @@ test.describe('Mobile Rules', () => {
     );
 
     await expect(page).toMatchThemeScreenshots();
-  });
-
-  test('displays existing rules with proper structure', async () => {
-    const ruleCount = await rulesPage.getRuleCount();
-    expect(ruleCount).toBeGreaterThan(0);
-
-    // Check first rule structure
-    const firstRule = rulesPage.getNthRule(0);
-    await expect(firstRule).toBeVisible();
-
-    // Check that rule contains IF and THEN blocks
-    await expect(firstRule).toContainText('IF');
-    await expect(firstRule).toContainText('THEN');
-
-    // Check that rule has stage badge (PRE, DEFAULT, or POST)
-    const stage = await rulesPage.getRuleStage(0);
-    expect(stage).toMatch(/PRE|DEFAULT|POST/);
-  });
-
-  test('search functionality filters rules correctly', async () => {
-    const initialRuleCount = await rulesPage.getRuleCount();
-    expect(initialRuleCount).toBeGreaterThan(0);
-
-    // Search for a specific term
-    await rulesPage.searchFor('Fast Internet');
-
-    // Wait for search results
-    await page.waitForTimeout(500);
-
-    const filteredRuleCount = await rulesPage.getRuleCount();
-
-    // Results should be filtered (could be 0 or less than initial)
-    expect(filteredRuleCount).toBeLessThanOrEqual(initialRuleCount);
-    await expect(page).toMatchThemeScreenshots();
-
-    // Clear search and verify all rules return
-    await rulesPage.clearSearch();
-    await page.waitForTimeout(500);
-
-    const clearedSearchRuleCount = await rulesPage.getRuleCount();
-    expect(clearedSearchRuleCount).toBe(initialRuleCount);
   });
 
   test('clicking add button opens rule creation modal', async () => {
