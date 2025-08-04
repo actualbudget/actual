@@ -1,23 +1,24 @@
+import { type useTranslation } from 'react-i18next';
+
 import {
   type AccountEntity,
   type PayeeEntity,
   type TransactionEntity,
 } from 'loot-core/types/models';
-import { useTranslation } from 'react-i18next';
 
 type GetPrettyPayeeProps = {
+  t: ReturnType<typeof useTranslation>['t'];
   transaction?: TransactionEntity;
   payee?: PayeeEntity;
   transferAccount?: AccountEntity;
 };
 
 export function getPrettyPayee({
+  t,
   transaction,
   payee,
   transferAccount,
 }: GetPrettyPayeeProps) {
-  const { t } = useTranslation();
-
   if (!transaction) {
     return '';
   }
@@ -25,7 +26,7 @@ export function getPrettyPayee({
   if (transferAccount) {
     return t('Transfer {{direction}} {{accountName}}', {
       direction: transaction?.amount > 0 ? t('from') : t('to'),
-      accountName: transferAccount.name
+      accountName: transferAccount.name,
     });
   } else if (transaction.is_parent) {
     return t('Split');
