@@ -579,7 +579,7 @@ export function ImportTransactionsModal({
       if (date == null) {
         errorMessage = t(
           'Unable to parse date {{date}} with given date format',
-          { date: trans.date || '(empty)' },
+          { date: trans.date || t('(empty)') },
         );
         break;
       }
