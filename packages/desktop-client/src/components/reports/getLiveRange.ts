@@ -38,7 +38,7 @@ export function getLiveRange(
         monthUtils.getYearStart(
           monthUtils.prevYear(monthUtils.currentMonth()),
         ) + '-01',
-        monthUtils.prevYear(monthUtils.currentDate()),
+        monthUtils.prevYear(monthUtils.currentDate(), 'yyyy-MM-dd'),
       );
       break;
     case 'allTime':
