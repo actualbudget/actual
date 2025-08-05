@@ -328,6 +328,7 @@ const ChildTransactionEdit = forwardRef(
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm();
     const prettyPayee = getPrettyPayee({
+      t,
       transaction,
       payee: getPayee(transaction),
       transferAccount: getTransferAccount(transaction),
@@ -807,6 +808,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const account = getAccount(transaction);
   const isOffBudget = account && !!account.offbudget;
   const title = getPrettyPayee({
+    t,
     transaction,
     payee: getPayee(transaction),
     transferAccount: getTransferAccount(transaction),
