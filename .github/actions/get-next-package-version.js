@@ -17,6 +17,11 @@ const options = {
     type: 'string', // nightly, hotfix, monthly, auto
     short: 't',
   },
+  update: {
+    type: 'boolean',
+    short: 'u',
+    default: false,
+  },
 };
 
 const { values } = parseArgs({
@@ -75,27 +80,36 @@ try {
     }
   }
 
+  let newVersion;
   switch (values.type) {
     case 'nightly': {
-      const newVersion = `${nextVersionYear}.${nextVersionMonth}.0-nightly.${currentDateString}`;
-      process.stdout.write(newVersion); // return the new version to stdout
-      process.exit();
+      newVersion = `${nextVersionYear}.${nextVersionMonth}.0-nightly.${currentDateString}`;
+      break;
     }
     case 'hotfix': {
-      const bugfixVersion = `${versionYear}.${versionMonth}.${versionHotfix + 1}`;
-      process.stdout.write(bugfixVersion); // return the bugfix version to stdout
-      process.exit();
+      newVersion = `${versionYear}.${versionMonth}.${versionHotfix + 1}`;
+      break;
     }
     case 'monthly': {
-      const stableVersion = `${nextVersionYear}.${nextVersionMonth}.0`;
-      process.stdout.write(stableVersion); // return the stable version to stdout
-      process.exit();
+      newVersion = `${nextVersionYear}.${nextVersionMonth}.0`;
+      break;
     }
     default:
       console.error(
         'Invalid type specified. Use "auto", "nightly", "hotfix", or "monthly".',
       );
       process.exit(1);
+  }
+
+  process.stdout.write(newVersion); // return the new version to stdout
+
+  if (values.update) {
+    packageJson.version = newVersion;
+    fs.writeFileSync(
+      packageJsonPath,
+      JSON.stringify(packageJson, null, 2) + '\n',
+      'utf8',
+    );
   }
 } catch (error) {
   console.error('Error:', error.message);
