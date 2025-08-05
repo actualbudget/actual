@@ -49,6 +49,7 @@ export function CurrencySettings() {
     ['SGD', t('Singapore Dollar')],
     ['TRY', t('Turkish Lira')],
     ['USD', t('US Dollar')],
+    ['QAR', t('Qatari Riyal')],
   ]);
 
   const currencyOptions: [string, string][] = currencies.map(currency => {

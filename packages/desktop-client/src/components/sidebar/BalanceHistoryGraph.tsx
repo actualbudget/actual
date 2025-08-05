@@ -5,7 +5,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { subMonths, format, eachMonthOfInterval, parseISO } from 'date-fns';
+import { subMonths, format, eachMonthOfInterval } from 'date-fns';
 import { LineChart, Line, YAxis, Tooltip as RechartsTooltip } from 'recharts';
 
 import * as monthUtils from 'loot-core/shared/months';
@@ -14,6 +14,7 @@ import { integerToCurrency } from 'loot-core/shared/util';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 const CHART_HEIGHT = 70;
@@ -31,6 +32,7 @@ type Balance = {
 };
 
 export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
+  const locale = useLocale();
   const [balanceData, setBalanceData] = useState<
     Array<{ date: string; balance: number }>
   >([]);
@@ -139,7 +141,7 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
         .map(t => {
           return {
             balance: t.balance,
-            date: format(parseISO(t.date), 'MMM yyyy'),
+            date: monthUtils.format(t.date, 'MMM yyyy', locale),
           };
         });
 
@@ -149,7 +151,7 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
     }
 
     fetchBalanceHistory();
-  }, [accountId]);
+  }, [accountId, locale]);
 
   // State to track if the chart is hovered (used to conditionally render PrivacyFilter)
   const [isHovered, setIsHovered] = useState(false);
@@ -173,19 +175,19 @@ export function BalanceHistoryGraph({ accountId }: BalanceHistoryGraphProps) {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <LineChart data={balanceData} width={CHART_WIDTH} height={CHART_HEIGHT}>
+        <LineChart
+          data={balanceData}
+          width={CHART_WIDTH}
+          height={CHART_HEIGHT}
+          onMouseMove={state => {
+            if (state && state.activePayload && state.activePayload[0]) {
+              setHoveredValue(state.activePayload[0].payload);
+            }
+          }}
+        >
           <YAxis domain={['dataMin', 'dataMax']} hide={true} />
           <RechartsTooltip
-            contentStyle={{
-              display: 'none',
-            }}
-            labelFormatter={(label, items) => {
-              const data = items[0]?.payload;
-              if (data) {
-                setHoveredValue(data);
-              }
-              return '';
-            }}
+            contentStyle={{ display: 'none' }}
             isAnimationActive={false}
           />
           <Line
