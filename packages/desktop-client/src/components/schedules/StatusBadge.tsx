@@ -14,6 +14,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { getStatusLabel } from 'loot-core/shared/schedules';
 import { titleFirst } from 'loot-core/shared/util';
 
 import { type ScheduleStatusType } from '@desktop-client/hooks/useSchedules';
@@ -113,7 +114,9 @@ export function StatusBadge({ status }: { status: ScheduleStatusType }) {
           marginRight: 7,
         }}
       />
-      <Text style={{ lineHeight: '1em' }}>{titleFirst(status)}</Text>
+      <Text style={{ lineHeight: '1em' }}>
+        {titleFirst(getStatusLabel(status))}
+      </Text>
     </View>
   );
 }

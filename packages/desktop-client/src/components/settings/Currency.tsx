@@ -46,8 +46,11 @@ export function CurrencySettings() {
     ['HKD', t('Hong Kong Dollar')],
     // ['JPY', t('Yen')],
     ['PLN', t('Polish Złoty')],
+    ['SEK', t('Swedish Krona')],
     ['SGD', t('Singapore Dollar')],
+    ['TRY', t('Turkish Lira')],
     ['USD', t('US Dollar')],
+    ['QAR', t('Qatari Riyal')],
   ]);
 
   const currencyOptions: [string, string][] = currencies.map(currency => {

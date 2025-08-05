@@ -28,6 +28,7 @@ test.describe('Help menu', () => {
     await page.getByRole('button', { name: 'Help' }).click();
     expect(page.getByText('Keyboard shortcuts')).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
+    await page.keyboard.press('Escape');
   });
 
   test('Check the keyboard shortcuts modal visuals', async () => {
