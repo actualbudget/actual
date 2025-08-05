@@ -225,17 +225,17 @@ export function Header({
                 onChangeDates(
                   ...convertToMonth(
                     ...getLiveRange(
-                      'Last year to date',
+                      'Prior year to date',
                       earliestTransaction,
                       false,
                       firstDayOfWeekIdx,
                     ),
-                    'lastYearToDate',
+                    'priorYearToDate',
                   ),
                 )
               }
             >
-              <Trans>Last year to date</Trans>
+              <Trans>Prior year to date</Trans>
             </Button>
             <Button
               variant="bare"

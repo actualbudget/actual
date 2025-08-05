@@ -171,9 +171,9 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: true,
   },
   {
-    description: t('Last year to date'),
-    key: 'Last year to date',
-    name: 'lastYearToDate',
+    description: t('Prior year to date'),
+    key: 'Prior year to date',
+    name: 'priorYearToDate',
     type: 'Month',
     Daily: false,
     Weekly: true,

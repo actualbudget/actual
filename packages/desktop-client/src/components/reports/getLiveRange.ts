@@ -32,7 +32,7 @@ export function getLiveRange(
           '-31',
       );
       break;
-    case 'lastYearToDate':
+    case 'priorYearToDate':
       [dateStart, dateEnd] = validateRange(
         earliestTransaction,
         monthUtils.getYearStart(

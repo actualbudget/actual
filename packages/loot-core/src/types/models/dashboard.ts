@@ -10,7 +10,7 @@ export type TimeFrame = {
     | 'full'
     | 'lastYear'
     | 'yearToDate'
-    | 'lastYearToDate';
+    | 'priorYearToDate';
 };
 
 type AbstractWidget<

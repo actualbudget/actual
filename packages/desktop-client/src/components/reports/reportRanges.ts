@@ -210,11 +210,11 @@ export function calculateTimeRange(
       'yearToDate',
     ] as const;
   }
-  if (mode === 'lastYearToDate') {
+  if (mode === 'priorYearToDate') {
     return [
       monthUtils.getYearStart(monthUtils.prevYear(monthUtils.currentMonth())),
       monthUtils.prevYear(monthUtils.currentDate()),
-      'lastYearToDate',
+      'priorYearToDate',
     ] as const;
   }
 

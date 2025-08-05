@@ -43,7 +43,7 @@ const currentIntervalOptions = [
     disableInclude: true,
   },
   {
-    description: t('Last year to date'),
+    description: t('Prior year to date'),
     disableInclude: true,
   },
   {
