@@ -186,7 +186,7 @@ export function RulesListItem({ rule, onPress }: RulesListItemProps) {
                 </View>
               ))
             : rule.actions.map((action, index) => (
-                <View key={index} style={{ marginBottom: 2 }}>
+                <View key={index} style={{ marginBottom: 2, maxWidth: '100%' }}>
                   <ActionExpression {...action} />
                 </View>
               ))}
