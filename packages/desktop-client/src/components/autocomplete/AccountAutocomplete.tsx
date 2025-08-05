@@ -101,6 +101,7 @@ type AccountAutocompleteProps = ComponentProps<
 > & {
   embedded?: boolean;
   includeClosedAccounts?: boolean;
+  hiddenAccounts?: AccountEntity['id'][];
   renderAccountItemGroupHeader?: (
     props: ComponentPropsWithoutRef<typeof ItemHeader>,
   ) => ReactElement<typeof ItemHeader>;
@@ -116,6 +117,7 @@ export function AccountAutocomplete({
   renderAccountItemGroupHeader,
   renderAccountItem,
   closeOnBlur,
+  hiddenAccounts,
   ...props
 }: AccountAutocompleteProps) {
   const accounts = useAccounts() || [];
@@ -124,7 +126,10 @@ export function AccountAutocomplete({
   //then sort by closed, then offbudget
   const accountSuggestions: AccountAutocompleteItem[] = accounts
     .filter(item => {
-      return includeClosedAccounts ? item : !item.closed;
+      return (
+        (includeClosedAccounts ? item : !item.closed) &&
+        !hiddenAccounts?.includes(item.id)
+      );
     })
     .sort(
       (a, b) =>

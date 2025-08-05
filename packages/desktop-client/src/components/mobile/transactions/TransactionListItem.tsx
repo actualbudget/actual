@@ -135,11 +135,11 @@ export function TransactionListItem({
   const isAdded = newTransactions.includes(id);
   const categoryName = lookupName(categories, categoryId);
   const specialCategory = account?.offbudget
-    ? 'Off budget'
+    ? t('Off budget')
     : transferAccount && !transferAccount.offbudget
-      ? 'Transfer'
+      ? t('Transfer')
       : isParent
-        ? 'Split'
+        ? t('Split')
         : null;
 
   const prettyCategory = specialCategory || categoryName;
@@ -264,7 +264,7 @@ export function TransactionListItem({
                         textAlign: 'left',
                       }}
                     >
-                      {prettyCategory || 'Uncategorized'}
+                      {prettyCategory || t('Uncategorized')}
                     </TextOneLine>
                   </View>
                 )}
