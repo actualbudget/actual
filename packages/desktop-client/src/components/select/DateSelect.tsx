@@ -346,11 +346,13 @@ export function DateSelect({
         onUpdate?.(defaultValue);
       }
     } else if (shouldSaveFromKey(e)) {
-      setValue(selectedValue);
-      setOpen(false);
+      if (selectedValue) {
+        setValue(selectedValue);
+        const date = parse(selectedValue, dateFormat, new Date());
+        onSelect(format(date, 'yyyy-MM-dd'));
+      }
 
-      const date = parse(selectedValue, dateFormat, new Date());
-      onSelect(format(date, 'yyyy-MM-dd'));
+      setOpen(false);
 
       if (open && e.key === 'Enter') {
         // This stops the event from propagating up

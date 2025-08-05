@@ -34,6 +34,7 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import * as Platform from 'loot-core/shared/platform';
 import { q } from 'loot-core/shared/query';
+import { getStatusLabel } from 'loot-core/shared/schedules';
 import {
   ungroupTransactions,
   updateTransaction,
@@ -164,8 +165,10 @@ export function Status({ status, isSplit }) {
       }}
     >
       {isSplit
-        ? t('{{status}} (Split)', { status: titleFirst(status) })
-        : titleFirst(status)}
+        ? t('{{status}} (Split)', {
+            status: titleFirst(getStatusLabel(status)),
+          })
+        : titleFirst(getStatusLabel(status))}
     </Text>
   );
 }
@@ -325,6 +328,7 @@ const ChildTransactionEdit = forwardRef(
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm();
     const prettyPayee = getPrettyPayee({
+      t,
       transaction,
       payee: getPayee(transaction),
       transferAccount: getTransferAccount(transaction),
@@ -804,6 +808,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const account = getAccount(transaction);
   const isOffBudget = account && !!account.offbudget;
   const title = getPrettyPayee({
+    t,
     transaction,
     payee: getPayee(transaction),
     transferAccount: getTransferAccount(transaction),
@@ -1037,6 +1042,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
             onFocus={() => {
               onRequestActiveEdit(getFieldName(transaction.id, 'notes'));
             }}
+            onBlur={onClearActiveEdit}
             onChange={event =>
               onUpdateInner(transaction, 'notes', event.target.value)
             }

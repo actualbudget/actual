@@ -1,5 +1,8 @@
 import { Octokit } from '@octokit/rest';
 import { minimatch } from 'minimatch';
+import pLimit from 'p-limit';
+
+const limit = pLimit(30);
 
 /** Repository-specific configuration for points calculation */
 const REPOSITORY_CONFIG = new Map([
@@ -46,24 +49,25 @@ const REPOSITORY_CONFIG = new Map([
 function getLastMonthDates() {
   // Get data relating to the last month
   const now = new Date();
+  // Always use UTC for calculations
   const firstDayOfLastMonth = new Date(
-    now.getFullYear(),
-    now.getMonth() - 1,
-    1,
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1, 0, 0, 0, 0),
   );
   const since = process.env.START_DATE
-    ? new Date(process.env.START_DATE)
+    ? new Date(Date.parse(process.env.START_DATE))
     : firstDayOfLastMonth;
 
-  // Calculate the end of the month for the since date
+  // Calculate the end of the month for the since date in UTC
   const until = new Date(
-    since.getFullYear(),
-    since.getMonth() + 1,
-    0,
-    23,
-    59,
-    59,
-    999,
+    Date.UTC(
+      since.getUTCFullYear(),
+      since.getUTCMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+    ),
   );
 
   return { since, until };
@@ -76,7 +80,9 @@ function getLastMonthDates() {
  * @returns {number} The total points earned for the repository
  */
 async function countContributorPoints(repo) {
-  const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+  const octokit = new Octokit({
+    auth: process.env.GITHUB_TOKEN,
+  });
   const owner = 'actualbudget';
   const config = REPOSITORY_CONFIG.get(repo);
 
@@ -133,126 +139,124 @@ async function countContributorPoints(repo) {
   );
 
   // Get reviews and PR details for each PR
-  for (const pr of recentPRs) {
-    const { data: reviews } = await octokit.pulls.listReviews({
-      owner,
-      repo,
-      pull_number: pr.number,
-    });
-
-    // Get list of modified files
-    const { data: modifiedFiles } = await octokit.pulls.listFiles({
-      owner,
-      repo,
-      pull_number: pr.number,
-    });
-
-    // Calculate points based on PR size, excluding specified files
-    const totalChanges = modifiedFiles
-      .filter(
-        file =>
-          !config.EXCLUDED_FILES.some(pattern =>
-            minimatch(file.filename, pattern),
+  await Promise.all(
+    recentPRs.map(pr =>
+      limit(async () => {
+        const [reviews, modifiedFiles] = await Promise.all([
+          octokit.pulls.listReviews({ owner, repo, pull_number: pr.number }),
+          octokit.paginate(
+            octokit.pulls.listFiles,
+            {
+              owner,
+              repo,
+              pull_number: pr.number,
+              per_page: 100,
+            },
+            res => res.data,
           ),
-      )
-      .reduce((sum, file) => sum + file.additions + file.deletions, 0);
+        ]);
 
-    // Check if this is a release PR
-    const isReleasePR = pr.title.match(/^🔖 \(\d+\.\d+\.\d+\)/);
+        const totalChanges = modifiedFiles
+          .filter(
+            file =>
+              !config.EXCLUDED_FILES.some(pattern =>
+                minimatch(file.filename, pattern),
+              ),
+          )
+          .reduce((sum, file) => sum + file.additions + file.deletions, 0);
 
-    // Calculate points for reviewers based on PR size
-    const prPoints =
-      config.PR_REVIEW_POINT_TIERS.find(tier => totalChanges > tier.minChanges)
-        ?.points ?? 0;
+        const isReleasePR = pr.title.match(/🔖.*\d+\.\d+\.\d+/);
+        const prPoints =
+          config.PR_REVIEW_POINT_TIERS.find(t => totalChanges >= t.minChanges)
+            ?.points ?? 0;
 
-    // Award points to the PR creator if it's a release PR
-    if (isReleasePR && stats.has(pr.user.login)) {
-      const creatorStats = stats.get(pr.user.login);
-      creatorStats.reviews.push({
-        pr: pr.number.toString(),
-        points: config.POINTS_PER_RELEASE_PR,
-        isReleaseCreator: true,
-      });
-      creatorStats.points += config.POINTS_PER_RELEASE_PR;
-    } else {
-      // Add points to the reviewers
-      const uniqueReviewers = new Set();
-      reviews
-        .filter(
-          review =>
-            stats.has(review.user?.login) &&
-            review.state === 'APPROVED' &&
-            !uniqueReviewers.has(review.user?.login),
-        )
-        .forEach(({ user: { login: reviewer } }) => {
-          uniqueReviewers.add(reviewer);
-          const userStats = stats.get(reviewer);
-          userStats.reviews.push({
-            pr: pr.number.toString(),
-            points: prPoints,
-          });
-          userStats.points += prPoints;
-        });
-    }
-  }
-
-  // Get all issues with label events in the last month
-  const issues = await octokit.paginate(
-    octokit.issues.listForRepo,
-    {
-      owner,
-      repo,
-      state: 'all',
-      sort: 'updated',
-      direction: 'desc',
-      per_page: 100,
-      since: since.toISOString(),
-    },
-    (response, done) =>
-      response.data.filter(issue => new Date(issue.updated_at) <= until),
+        if (isReleasePR) {
+          if (stats.has(pr.user.login)) {
+            const creatorStats = stats.get(pr.user.login);
+            creatorStats.reviews.push({
+              pr: pr.number.toString(),
+              points: config.POINTS_PER_RELEASE_PR,
+              isReleaseCreator: true,
+            });
+            creatorStats.points += config.POINTS_PER_RELEASE_PR;
+          }
+        } else {
+          const uniqueReviewers = new Set();
+          reviews.data
+            .filter(
+              review =>
+                stats.has(review.user?.login) &&
+                review.state === 'APPROVED' &&
+                !uniqueReviewers.has(review.user?.login),
+            )
+            .forEach(({ user: { login: reviewer } }) => {
+              uniqueReviewers.add(reviewer);
+              const userStats = stats.get(reviewer);
+              userStats.reviews.push({
+                pr: pr.number.toString(),
+                points: prPoints,
+              });
+              userStats.points += prPoints;
+            });
+        }
+      }),
+    ),
   );
 
+  // Get all issues with label events in the last month
+  const issues = await octokit.paginate(octokit.issues.listForRepo, {
+    owner,
+    repo,
+    state: 'all',
+    sort: 'updated',
+    direction: 'desc',
+    per_page: 100,
+    since: since.toISOString(),
+  });
+
   // Get label events for each issue
-  for (const issue of issues) {
-    const { data: events } = await octokit.issues.listEventsForTimeline({
-      owner,
-      repo,
-      issue_number: issue.number,
-    });
+  await Promise.all(
+    issues.map(issue =>
+      limit(async () => {
+        const { data: events } = await octokit.issues.listEventsForTimeline({
+          owner,
+          repo,
+          issue_number: issue.number,
+        });
 
-    // Process events
-    events
-      .filter(
-        event =>
-          new Date(event.created_at) > since &&
-          new Date(event.created_at) <= until &&
-          stats.has(event.actor?.login),
-      )
-      .forEach(event => {
-        if (
-          event.event === 'unlabeled' &&
-          event.label &&
-          event.label.name.toLowerCase() === 'needs triage'
-        ) {
-          const remover = event.actor.login;
-          const userStats = stats.get(remover);
-          if (userStats) {
-            userStats.labelRemovals.push(issue.number.toString());
-            userStats.points += config.POINTS_PER_ISSUE_TRIAGE_ACTION;
-          }
-        }
+        events
+          .filter(event => {
+            const createdAt = new Date(event.created_at);
+            return (
+              createdAt.getTime() > since.getTime() &&
+              createdAt.getTime() <= until.getTime() &&
+              stats.has(event.actor?.login)
+            );
+          })
+          .forEach(event => {
+            if (
+              event.event === 'unlabeled' &&
+              event.label?.name.toLowerCase() === 'needs triage'
+            ) {
+              const remover = event.actor.login;
+              const userStats = stats.get(remover);
+              userStats.labelRemovals.push(issue.number.toString());
+              userStats.points += config.POINTS_PER_ISSUE_TRIAGE_ACTION;
+            }
 
-        // Check if the issue was closed with "no planned" status
-        if (event.event === 'closed' && event.state_reason === 'not_planned') {
-          const closer = event.actor.login;
-          const userStats = stats.get(closer);
-          if (userStats) {
-            userStats.issueClosings.push(issue.number.toString());
-            userStats.points += config.POINTS_PER_ISSUE_CLOSING_ACTION;
-          }
-        }
-      });
-  }
+            if (
+              event.event === 'closed' &&
+              event.state_reason === 'not_planned'
+            ) {
+              const closer = event.actor.login;
+              const userStats = stats.get(closer);
+              userStats.issueClosings.push(issue.number.toString());
+              userStats.points += config.POINTS_PER_ISSUE_CLOSING_ACTION;
+            }
+          });
+      }),
+    ),
+  );
 
   // Print all statistics
   printStats(
