@@ -14,7 +14,7 @@ const options = {
     short: 'p',
   },
   type: {
-    type: 'string', // nightly, hotfix, monthly
+    type: 'string', // nightly, hotfix, monthly, auto
     short: 't',
   },
 };
@@ -61,14 +61,23 @@ try {
   const nextVersionMonth = nextVersionMonthDate.getMonth() + 1; // Convert back to 1-indexed
 
   // Get current date string
-  const currentDate = new Date()
+  const currentDate = new Date();
+  const currentDateString = currentDate
     .toISOString()
     .split('T')[0]
     .replaceAll('-', '');
 
+  if (values.type === 'auto') {
+    if (currentDate.getDay() <= 25) {
+      values.type = 'hotfix';
+    } else {
+      values.type = 'monthly';
+    }
+  }
+
   switch (values.type) {
     case 'nightly': {
-      const newVersion = `${nextVersionYear}.${nextVersionMonth}.0-nightly.${currentDate}`;
+      const newVersion = `${nextVersionYear}.${nextVersionMonth}.0-nightly.${currentDateString}`;
       process.stdout.write(newVersion); // return the new version to stdout
       process.exit();
     }
@@ -84,7 +93,7 @@ try {
     }
     default:
       console.error(
-        'Invalid type specified. Use "nightly", "hotfix", or "monthly".',
+        'Invalid type specified. Use "auto", "nightly", "hotfix", or "monthly".',
       );
       process.exit(1);
   }
