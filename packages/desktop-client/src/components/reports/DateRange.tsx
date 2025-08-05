@@ -1,6 +1,5 @@
 import React, { type ReactElement } from 'react';
-import { Trans ,useTranslation } from 'react-i18next';
-
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
