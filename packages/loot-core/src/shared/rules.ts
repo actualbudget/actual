@@ -115,11 +115,13 @@ export function getValidOps(field: keyof FieldValueTypes) {
   );
 }
 
-export const ALLOCATION_METHODS = {
-  'fixed-amount': 'a fixed amount',
-  'fixed-percent': 'a fixed percent of the remainder',
-  remainder: 'an equal portion of the remainder',
-};
+export function getAllocationMethods() {
+  return {
+    'fixed-amount': t('a fixed amount'),
+    'fixed-percent': t('a fixed percent of the remainder'),
+    remainder: t('an equal portion of the remainder'),
+  };
+}
 
 export function mapField(field, opts?) {
   opts = opts || {};
