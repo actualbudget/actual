@@ -44,6 +44,7 @@ import { View } from '@actual-app/components/view';
 import { format as formatDate, parseISO } from 'date-fns';
 
 import * as monthUtils from 'loot-core/shared/months';
+import { getStatusLabel } from 'loot-core/shared/schedules';
 import {
   addSplitTransaction,
   deleteTransaction,
@@ -1421,7 +1422,7 @@ const Transaction = memo(function Transaction({
                 display: 'inline-block',
               }}
             >
-              {titleFirst(previewStatus ?? '')}
+              {titleFirst(getStatusLabel(previewStatus ?? ''))}
             </View>
           )}
           <CellButton
