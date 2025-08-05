@@ -225,6 +225,7 @@ export type Modal =
       options: {
         onSelect: (accountId: string, accountName: string) => void;
         includeClosedAccounts?: boolean;
+        hiddenAccounts?: AccountEntity['id'][];
         onClose?: () => void;
       };
     }
