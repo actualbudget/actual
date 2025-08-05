@@ -8,7 +8,7 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import {
   addDays,
-  format,
+  format as formatDate,
   getDate,
   isSameMonth,
   startOfMonth,
@@ -42,7 +42,7 @@ export function CalendarGraph({
   isEditing,
   onDayClick,
 }: CalendarGraphProps) {
-  const formatFunc = useFormat();
+  const format = useFormat();
 
   const startingDate = startOfWeek(new Date(), {
     weekStartsOn:
@@ -90,7 +90,7 @@ export function CalendarGraph({
               marginBottom: 4,
             }}
           >
-            {format(addDays(startingDate, index), 'EEEEE')}
+            {formatDate(addDays(startingDate, index), 'EEEEE')}
           </View>
         ))}
       </View>
@@ -117,7 +117,7 @@ export function CalendarGraph({
               content={
                 <View>
                   <View style={{ marginBottom: 10 }}>
-                    <strong>{format(day.date, 'MMM dd')}</strong>
+                    <strong>{formatDate(day.date, 'MMM dd')}</strong>
                   </View>
                   <View style={{ lineHeight: 1.5 }}>
                     <View
@@ -143,7 +143,7 @@ export function CalendarGraph({
                       >
                         {day.incomeValue !== 0 ? (
                           <PrivacyFilter>
-                            {formatFunc(day.incomeValue, 'financial')}
+                            {format(day.incomeValue, 'financial')}
                           </PrivacyFilter>
                         ) : (
                           ''
@@ -172,7 +172,7 @@ export function CalendarGraph({
                       >
                         {day.expenseValue !== 0 ? (
                           <PrivacyFilter>
-                            {formatFunc(day.expenseValue, 'financial')}
+                            {format(day.expenseValue, 'financial')}
                           </PrivacyFilter>
                         ) : (
                           ''
@@ -247,7 +247,7 @@ function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
   return (
     <Button
       ref={resizeRef}
-      aria-label={format(day.date, 'MMMM d, yyyy')}
+      aria-label={formatDate(day.date, 'MMMM d, yyyy')}
       style={{
         borderColor: 'transparent',
         backgroundColor: theme.calendarCellBackground,

@@ -37,7 +37,7 @@ const ActiveShapeMobile = props => {
     payload,
     percent,
     value,
-    formatFunc,
+    format,
   } = props;
   const yAxis = payload.name ?? payload.date;
 
@@ -64,7 +64,7 @@ const ActiveShapeMobile = props => {
           textAnchor="end"
           fill={fill}
         >
-          {`${formatFunc(value, 'financial')}`}
+          {`${format(value, 'financial')}`}
         </text>
         <text
           x={cx + outerRadius * Math.cos(-RADIAN * 330) + 10}
@@ -99,7 +99,7 @@ const ActiveShapeMobile = props => {
 };
 
 const ActiveShapeMobileWithFormat = props => (
-  <ActiveShapeMobile {...props} formatFunc={props.formatFunc} />
+  <ActiveShapeMobile {...props} format={props.format} />
 );
 
 const ActiveShape = props => {
@@ -115,7 +115,7 @@ const ActiveShape = props => {
     payload,
     percent,
     value,
-    formatFunc,
+    format,
   } = props;
   const yAxis = payload.name ?? payload.date;
   const sin = Math.sin(-RADIAN * midAngle);
@@ -167,7 +167,7 @@ const ActiveShape = props => {
           dy={18}
           textAnchor={textAnchor}
           fill={fill}
-        >{`${formatFunc(value, 'financial')}`}</text>
+        >{`${format(value, 'financial')}`}</text>
         <text
           x={ex + (cos <= 0 ? 1 : -1) * 16}
           y={ey}
@@ -183,7 +183,7 @@ const ActiveShape = props => {
 };
 
 const ActiveShapeWithFormat = props => (
-  <ActiveShape {...props} formatFunc={props.formatFunc} />
+  <ActiveShape {...props} format={props.format} />
 );
 
 const customLabel = props => {
@@ -279,13 +279,13 @@ export function DonutGraph({
                           ? props => (
                               <ActiveShapeMobileWithFormat
                                 {...props}
-                                formatFunc={format}
+                                format={format}
                               />
                             )
                           : props => (
                               <ActiveShapeWithFormat
                                 {...props}
-                                formatFunc={format}
+                                format={format}
                               />
                             )
                     }

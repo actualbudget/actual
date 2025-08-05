@@ -50,7 +50,7 @@ type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
   label?: string;
-  formatFunc: (value: unknown, type: FormatType) => string;
+  format: (value: unknown, type: FormatType) => string;
 };
 
 const CustomTooltip = ({
@@ -59,7 +59,7 @@ const CustomTooltip = ({
   active,
   payload,
   label,
-  formatFunc,
+  format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
   if (active && payload && payload.length) {
@@ -92,7 +92,7 @@ const CustomTooltip = ({
                     <AlignedText
                       key={pay.name}
                       left={pay.name}
-                      right={formatFunc(pay.value, 'financial')}
+                      right={format(pay.value, 'financial')}
                       style={{
                         color: pay.color,
                         textDecoration:
@@ -105,7 +105,7 @@ const CustomTooltip = ({
             {payload.length > 5 && compact && '...'}
             <AlignedText
               left={t('Total')}
-              right={formatFunc(sumTotals, 'financial')}
+              right={format(sumTotals, 'financial')}
               style={{
                 fontWeight: 600,
               }}
@@ -122,7 +122,7 @@ const customLabel = props => {
   const calcY = props.y + props.height / 2;
   const textAnchor = 'middle';
   const display =
-    props.value && `${props.formatFunc(props.value, 'financial-no-decimals')}`;
+    props.value && `${props.format(props.value, 'financial-no-decimals')}`;
   const textSize = '12px';
   const showLabel = props.height;
   const showLabelThreshold = 20;
@@ -173,8 +173,7 @@ export function StackedBarGraph({
   const privacyMode = usePrivacyMode();
   const format = useFormat();
 
-  const customLabelWithFormat = props =>
-    customLabel({ ...props, formatFunc: format });
+  const customLabelWithFormat = props => customLabel({ ...props, format });
 
   const [pointer, setPointer] = useState('');
   const [tooltip, setTooltip] = useState('');
@@ -211,7 +210,7 @@ export function StackedBarGraph({
                       <CustomTooltip
                         compact={compact}
                         tooltip={tooltip}
-                        formatFunc={format}
+                        format={format}
                       />
                     }
                     formatter={numberFormatterTooltip}

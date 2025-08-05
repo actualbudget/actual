@@ -63,7 +63,7 @@ type CustomTooltipProps = {
   payload?: PayloadItem[];
   balanceTypeOp?: balanceTypeOpType;
   yAxis?: string;
-  formatFunc: (value: unknown, type: FormatType) => string;
+  format: (value: unknown, type: FormatType) => string;
 };
 
 const CustomTooltip = ({
@@ -71,7 +71,7 @@ const CustomTooltip = ({
   payload,
   balanceTypeOp,
   yAxis,
-  formatFunc,
+  format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
 
@@ -96,25 +96,25 @@ const CustomTooltip = ({
             {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Assets:')}
-                right={formatFunc(payload[0].payload.totalAssets, 'financial')}
+                right={format(payload[0].payload.totalAssets, 'financial')}
               />
             )}
             {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Debts:')}
-                right={formatFunc(payload[0].payload.totalDebts, 'financial')}
+                right={format(payload[0].payload.totalDebts, 'financial')}
               />
             )}
             {['netAssets'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net Assets:')}
-                right={formatFunc(payload[0].payload.netAssets, 'financial')}
+                right={format(payload[0].payload.netAssets, 'financial')}
               />
             )}
             {['netDebts'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net Debts:')}
-                right={formatFunc(payload[0].payload.netDebts, 'financial')}
+                right={format(payload[0].payload.netDebts, 'financial')}
               />
             )}
             {['totalTotals'].includes(balanceTypeOp) && (
@@ -122,7 +122,7 @@ const CustomTooltip = ({
                 left={t('Net:')}
                 right={
                   <strong>
-                    {formatFunc(payload[0].payload.totalTotals, 'financial')}
+                    {format(payload[0].payload.totalTotals, 'financial')}
                   </strong>
                 }
               />
@@ -134,12 +134,12 @@ const CustomTooltip = ({
   }
 };
 
-const customLabel = (props, typeOp, formatFunc) => {
+const customLabel = (props, typeOp, format) => {
   const calcX = props.x + props.width / 2;
   const calcY = props.y - (props.value > 0 ? 15 : -15);
   const textAnchor = 'middle';
   const display =
-    props.value !== 0 && `${formatFunc(props.value, 'financial-no-decimals')}`;
+    props.value !== 0 && `${format(props.value, 'financial-no-decimals')}`;
   const textSize = adjustTextSize({
     sized: props.width,
     type: typeOp === 'totalTotals' ? 'default' : 'variable',
@@ -236,7 +236,7 @@ export function BarGraph({
                       <CustomTooltip
                         balanceTypeOp={balanceTypeOp}
                         yAxis={yAxis}
-                        formatFunc={format}
+                        format={format}
                       />
                     }
                     formatter={numberFormatterTooltip}

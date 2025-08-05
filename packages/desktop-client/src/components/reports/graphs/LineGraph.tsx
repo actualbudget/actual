@@ -47,7 +47,7 @@ type CustomTooltipProps = {
   tooltip: string;
   active?: boolean;
   payload?: PayloadItem[];
-  formatFunc: (value: unknown, type: FormatType) => string;
+  format: (value: unknown, type: FormatType) => string;
 };
 
 const CustomTooltip = ({
@@ -55,7 +55,7 @@ const CustomTooltip = ({
   tooltip,
   active,
   payload,
-  formatFunc,
+  format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
   if (active && payload && payload.length) {
@@ -86,7 +86,7 @@ const CustomTooltip = ({
                     <AlignedText
                       key={index}
                       left={p.dataKey}
-                      right={formatFunc(p.value, 'financial')}
+                      right={format(p.value, 'financial')}
                       style={{
                         color: p.color,
                         textDecoration:
@@ -99,7 +99,7 @@ const CustomTooltip = ({
             {payload.length > 5 && compact && '...'}
             <AlignedText
               left={t('Total')}
-              right={formatFunc(sumTotals, 'financial')}
+              right={format(sumTotals, 'financial')}
               style={{
                 fontWeight: 600,
               }}
@@ -194,7 +194,7 @@ export function LineGraph({
                       <CustomTooltip
                         compact={compact}
                         tooltip={tooltip}
-                        formatFunc={format}
+                        format={format}
                       />
                     }
                     formatter={numberFormatterTooltip}

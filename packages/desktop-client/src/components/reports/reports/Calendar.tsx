@@ -23,7 +23,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { useDrag } from '@use-gesture/react';
-import { format, parseISO } from 'date-fns';
+import { format as formatDate, parseISO } from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -104,7 +104,7 @@ type CalendarInnerProps = {
 function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const locale = useLocale();
   const { t } = useTranslation();
-  const formatFunc = useFormat();
+  const format = useFormat();
 
   const [initialStart, initialEnd, initialMode] = calculateTimeRange(
     widget?.meta?.timeFrame,
@@ -571,7 +571,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     firstDayOfWeekIdx={firstDayOfWeekIdx}
                     conditions={conditions}
                     conditionsOp={conditionsOp}
-                    formatFunc={formatFunc}
+                    format={format}
                   />
                 ))}
               </View>
@@ -582,7 +582,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
               totalExpense={totalExpense}
               totalIncome={totalIncome}
               isNarrowWidth={isNarrowWidth}
-              formatFunc={formatFunc}
+              format={format}
             />
           </View>
         </View>
@@ -746,7 +746,7 @@ type CalendarWithHeaderProps = {
   firstDayOfWeekIdx: string;
   conditions: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
-  formatFunc: (value: unknown, type: FormatType) => string;
+  format: (value: unknown, type: FormatType) => string;
 };
 
 function CalendarWithHeader({
@@ -755,7 +755,7 @@ function CalendarWithHeader({
   firstDayOfWeekIdx,
   conditions,
   conditionsOp,
-  formatFunc,
+  format,
 }: CalendarWithHeaderProps) {
   const { t } = useTranslation();
 
@@ -802,7 +802,7 @@ function CalendarWithHeader({
                 {
                   field: 'date',
                   op: 'is',
-                  value: format(calendar.start, 'yyyy-MM'),
+                  value: formatDate(calendar.start, 'yyyy-MM'),
                   options: {
                     month: true,
                   },
@@ -813,7 +813,7 @@ function CalendarWithHeader({
             });
           }}
         >
-          {format(calendar.start, 'MMMM yyyy')}
+          {formatDate(calendar.start, 'MMMM yyyy')}
         </Button>
         <View
           style={{ display: 'grid', gridTemplateColumns: '16px 1fr', gap: 2 }}
@@ -833,7 +833,7 @@ function CalendarWithHeader({
             aria-label={t('Income')}
           >
             <PrivacyFilter>
-              {formatFunc(calendar.totalIncome, 'financial')}
+              {format(calendar.totalIncome, 'financial')}
             </PrivacyFilter>
           </View>
           <SvgArrowThickDown
@@ -851,7 +851,7 @@ function CalendarWithHeader({
             aria-label={t('Expenses')}
           >
             <PrivacyFilter>
-              {formatFunc(calendar.totalExpense, 'financial')}
+              {format(calendar.totalExpense, 'financial')}
             </PrivacyFilter>
           </View>
         </View>
@@ -868,7 +868,7 @@ function CalendarWithHeader({
                   {
                     field: 'date',
                     op: 'is',
-                    value: format(date, 'yyyy-MM-dd'),
+                    value: formatDate(date, 'yyyy-MM-dd'),
                   },
                 ],
                 conditionsOp: 'and',
@@ -895,7 +895,7 @@ type CalendarCardHeaderProps = {
   totalIncome: number;
   totalExpense: number;
   isNarrowWidth: boolean;
-  formatFunc: (value: unknown, type: FormatType) => string;
+  format: (value: unknown, type: FormatType) => string;
 };
 
 function CalendarCardHeader({
@@ -904,7 +904,7 @@ function CalendarCardHeader({
   totalIncome,
   totalExpense,
   isNarrowWidth,
-  formatFunc,
+  format,
 }: CalendarCardHeaderProps) {
   return (
     <View
@@ -944,9 +944,7 @@ function CalendarCardHeader({
               <Trans>Income:</Trans>
             </View>
             <View style={{ color: chartTheme.colors.blue }}>
-              <PrivacyFilter>
-                {formatFunc(totalIncome, 'financial')}
-              </PrivacyFilter>
+              <PrivacyFilter>{format(totalIncome, 'financial')}</PrivacyFilter>
             </View>
 
             <View
@@ -958,9 +956,7 @@ function CalendarCardHeader({
               <Trans>Expenses:</Trans>
             </View>
             <View style={{ color: chartTheme.colors.red }}>
-              <PrivacyFilter>
-                {formatFunc(totalExpense, 'financial')}
-              </PrivacyFilter>
+              <PrivacyFilter>{format(totalExpense, 'financial')}</PrivacyFilter>
             </View>
           </View>
         </View>

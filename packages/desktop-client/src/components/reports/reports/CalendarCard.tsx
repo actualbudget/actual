@@ -21,7 +21,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { format } from 'date-fns';
+import { format as formatDate } from 'date-fns';
 import { debounce } from 'debounce';
 
 import * as monthUtils from 'loot-core/shared/months';
@@ -64,7 +64,7 @@ export function CalendarCard({
   firstDayOfWeekIdx,
 }: CalendarCardProps) {
   const { t } = useTranslation();
-  const formatFunc = useFormat();
+  const format = useFormat();
 
   const [start, end] = calculateTimeRange(meta?.timeFrame, {
     start: monthUtils.dayFromDate(monthUtils.currentMonth()),
@@ -227,7 +227,7 @@ export function CalendarCard({
                           <View style={{ color: chartTheme.colors.blue }}>
                             {totalIncome !== 0 ? (
                               <PrivacyFilter>
-                                {formatFunc(totalIncome, 'financial')}
+                                {format(totalIncome, 'financial')}
                               </PrivacyFilter>
                             ) : (
                               ''
@@ -248,7 +248,7 @@ export function CalendarCard({
                           <View style={{ color: chartTheme.colors.red }}>
                             {totalExpense !== 0 ? (
                               <PrivacyFilter>
-                                {formatFunc(totalExpense, 'financial')}
+                                {format(totalExpense, 'financial')}
                               </PrivacyFilter>
                             ) : (
                               ''
@@ -309,7 +309,7 @@ export function CalendarCard({
                   index={index}
                   widgetId={widgetId}
                   isEditing={isEditing}
-                  formatFunc={formatFunc}
+                  format={format}
                 />
               ))
             ) : (
@@ -336,7 +336,7 @@ type CalendarCardInnerProps = {
   index: number;
   widgetId: string;
   isEditing?: boolean;
-  formatFunc: (value: unknown, type: FormatType) => string;
+  format: (value: unknown, type: FormatType) => string;
 };
 function CalendarCardInner({
   calendar,
@@ -346,7 +346,7 @@ function CalendarCardInner({
   index,
   widgetId,
   isEditing,
-  formatFunc,
+  format,
 }: CalendarCardInnerProps) {
   const { t } = useTranslation();
   const [monthNameVisible, setMonthNameVisible] = useState(true);
@@ -415,10 +415,10 @@ function CalendarCardInner({
   const navigate = useNavigate();
 
   const monthFormats = [
-    { format: 'MMMM yyyy', text: format(calendar.start, 'MMMM yyyy') },
-    { format: 'MMM yyyy', text: format(calendar.start, 'MMM yyyy') },
-    { format: 'MMM yy', text: format(calendar.start, 'MMM yy') },
-    { format: 'MMM', text: format(calendar.start, 'MMM') },
+    { format: 'MMMM yyyy', text: formatDate(calendar.start, 'MMMM yyyy') },
+    { format: 'MMM yyyy', text: formatDate(calendar.start, 'MMM yyyy') },
+    { format: 'MMM yy', text: formatDate(calendar.start, 'MMM yy') },
+    { format: 'MMM', text: formatDate(calendar.start, 'MMM') },
     { format: '', text: '' },
   ];
 
@@ -459,12 +459,12 @@ function CalendarCardInner({
             }}
             onPress={() => {
               navigate(
-                `/reports/calendar/${widgetId}?month=${format(calendar.start, 'yyyy-MM')}`,
+                `/reports/calendar/${widgetId}?month=${formatDate(calendar.start, 'yyyy-MM')}`,
               );
             }}
           >
             {selectedMonthNameFormat &&
-              format(calendar.start, selectedMonthNameFormat)}
+              formatDate(calendar.start, selectedMonthNameFormat)}
           </Button>
         </View>
         <View
@@ -490,7 +490,7 @@ function CalendarCardInner({
                   style={{ flexShrink: 0 }}
                 />
                 <PrivacyFilter>
-                  {formatFunc(calendar.totalIncome, 'financial')}
+                  {format(calendar.totalIncome, 'financial')}
                 </PrivacyFilter>
               </>
             ) : (
@@ -513,7 +513,7 @@ function CalendarCardInner({
                   style={{ flexShrink: 0 }}
                 />
                 <PrivacyFilter>
-                  {formatFunc(calendar.totalExpense, 'financial')}
+                  {format(calendar.totalExpense, 'financial')}
                 </PrivacyFilter>
               </>
             ) : (
@@ -530,7 +530,7 @@ function CalendarCardInner({
         onDayClick={date => {
           if (date) {
             navigate(
-              `/reports/calendar/${widgetId}?day=${format(date, 'yyyy-MM-dd')}`,
+              `/reports/calendar/${widgetId}?day=${formatDate(date, 'yyyy-MM-dd')}`,
             );
           } else {
             navigate(`/reports/calendar/${widgetId}`);

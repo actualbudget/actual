@@ -42,14 +42,14 @@ type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
   balanceTypeOp: balanceTypeOpType;
-  formatFunc: (value: unknown, type: FormatType) => string;
+  format: (value: unknown, type: FormatType) => string;
 };
 
 const CustomTooltip = ({
   active,
   payload,
   balanceTypeOp,
-  formatFunc,
+  format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
 
@@ -74,25 +74,25 @@ const CustomTooltip = ({
             {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Assets:')}
-                right={formatFunc(payload[0].payload.totalAssets, 'financial')}
+                right={format(payload[0].payload.totalAssets, 'financial')}
               />
             )}
             {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Debts:')}
-                right={formatFunc(payload[0].payload.totalDebts, 'financial')}
+                right={format(payload[0].payload.totalDebts, 'financial')}
               />
             )}
             {['netAssets'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net Assets:')}
-                right={formatFunc(payload[0].payload.netAssets, 'financial')}
+                right={format(payload[0].payload.netAssets, 'financial')}
               />
             )}
             {['netDebts'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net Debts:')}
-                right={formatFunc(payload[0].payload.netDebts, 'financial')}
+                right={format(payload[0].payload.netDebts, 'financial')}
               />
             )}
             {['totalTotals'].includes(balanceTypeOp) && (
@@ -100,7 +100,7 @@ const CustomTooltip = ({
                 left={t('Net:')}
                 right={
                   <strong>
-                    {formatFunc(payload[0].payload.totalTotals, 'financial')}
+                    {format(payload[0].payload.totalTotals, 'financial')}
                   </strong>
                 }
               />
@@ -126,12 +126,12 @@ const customLabel = ({
   props,
   width,
   end,
-  formatFunc,
+  format,
 }: {
   props: PropsItem;
   width: number;
   end: number;
-  formatFunc: (value: unknown, type: FormatType) => string;
+  format: (value: unknown, type: FormatType) => string;
 }) => {
   //Add margin to first and last object
   const calcX =
@@ -143,7 +143,7 @@ const customLabel = ({
   const textAnchor = props.index === 0 ? 'left' : 'middle';
   const display =
     typeof props.value !== 'string' && props.value !== 0
-      ? `${formatFunc(props.value || 0, 'financial-no-decimals')}`
+      ? `${format(props.value || 0, 'financial-no-decimals')}`
       : '';
   const textSize = adjustTextSize({ sized: width, type: 'area' });
 
@@ -261,7 +261,7 @@ export function AreaGraph({
                     content={
                       <CustomTooltip
                         balanceTypeOp={balanceTypeOp}
-                        formatFunc={format}
+                        format={format}
                       />
                     }
                     isAnimationActive={false}
@@ -324,7 +324,7 @@ export function AreaGraph({
                           props,
                           width,
                           end: lastLabel,
-                          formatFunc: format,
+                          format,
                         })
                       }
                     />
