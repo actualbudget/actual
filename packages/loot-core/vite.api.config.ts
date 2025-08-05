@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     mode,
+    ssr: { noExternal: true, external: ['better-sqlite3'] },
     build: {
       target: 'node18',
       outDir,
@@ -27,7 +28,6 @@ export default defineConfig(({ mode }) => {
           format: 'cjs',
           name: 'api',
         },
-        external: ['better-sqlite3'],
       },
     },
     resolve: {
