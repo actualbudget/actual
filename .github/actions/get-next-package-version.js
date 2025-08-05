@@ -68,7 +68,7 @@ try {
     .replaceAll('-', '');
 
   if (values.type === 'auto') {
-    if (currentDate.getDay() <= 25) {
+    if (currentDate.getDate() <= 25) {
       values.type = 'hotfix';
     } else {
       values.type = 'monthly';
