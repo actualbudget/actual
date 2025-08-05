@@ -2,8 +2,10 @@ import React, { memo } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
-import { type Locale } from 'date-fns';
+import { Tooltip } from '@actual-app/components/tooltip';
+import { format as formatDate, type Locale } from 'date-fns';
 
 import { tsToRelativeTime } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
@@ -22,9 +24,14 @@ export const AccountRow = memo(
   ({ account, hovered, onHover, onAction, locale }: AccountRowProps) => {
     const backgroundFocus = hovered;
 
-    const lastSync = tsToRelativeTime(account.last_sync, locale, {
+    const lastSyncString = tsToRelativeTime(account.last_sync, locale, {
       capitalize: true,
     });
+    const lastSyncDateTime = formatDate(
+      new Date(parseInt(account.last_sync ?? '0', 10)),
+      'MMM d, yyyy, HH:mm:ss',
+      { locale },
+    );
 
     const potentiallyTruncatedAccountName =
       account.name.length > 30
@@ -62,14 +69,33 @@ export const AccountRow = memo(
           {account.bankName}
         </Cell>
 
-        <Cell
-          name="lastSync"
-          width={200}
-          plain
-          style={{ color: theme.tableText, padding: '10px' }}
-        >
-          {account.account_sync_source ? lastSync : ''}
-        </Cell>
+        {account.account_sync_source ? (
+          <Tooltip
+            placement="bottom start"
+            content={lastSyncDateTime}
+            style={{
+              ...styles.tooltip,
+            }}
+          >
+            <Cell
+              name="lastSync"
+              width={200}
+              plain
+              style={{
+                color: theme.tableText,
+                padding: '11px',
+                textDecoration: 'underline',
+                textDecorationStyle: 'dashed',
+                textDecorationColor: theme.pageTextSubdued,
+                textUnderlineOffset: '4px',
+              }}
+            >
+              {lastSyncString}
+            </Cell>
+          </Tooltip>
+        ) : (
+          ''
+        )}
 
         {account.account_sync_source ? (
           <Cell name="edit" plain style={{ paddingRight: '10px' }}>
