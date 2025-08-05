@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { css } from '@emotion/css';
 
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { usePayee } from '@desktop-client/hooks/usePayee';
@@ -46,6 +47,15 @@ function PayeeDisplayId({ id, noneColor }) {
     <Text
       style={payee == null ? { color: noneColor } : null}
       title={payee ? payee.name : t('None')}
+      className={String(
+        css({
+          display: 'block',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          margin: '0 2px 0 0px',
+        }),
+      )}
     >
       {payee ? payee.name : t('None')}
     </Text>
