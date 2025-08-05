@@ -25,6 +25,12 @@ export function useTags() {
 }
 
 function getTagCSSColors(theme: Theme, color?: string | null) {
+  if (theme === 'auto') {
+    theme = window.matchMedia('(prefers-color-scheme: light)').matches
+      ? 'light'
+      : 'dark';
+  }
+
   if (theme === 'light') {
     return [
       color ? `${color} !important` : themeStyle.noteTagText,
@@ -51,7 +57,10 @@ export function useTagCSS() {
   const [theme] = useTheme();
 
   return useCallback(
-    (tag: string, options: { color?: string; compact?: boolean } = {}) => {
+    (
+      tag: string,
+      options: { color?: string | null; compact?: boolean } = {},
+    ) => {
       const [color, backgroundColor, backgroundColorHovered] = getTagCSSColors(
         theme,
         // fallback strategy: options color > tag color > default color > theme color (undefined)

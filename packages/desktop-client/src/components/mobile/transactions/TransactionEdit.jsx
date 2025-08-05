@@ -34,6 +34,7 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import * as Platform from 'loot-core/shared/platform';
 import { q } from 'loot-core/shared/query';
+import { getStatusLabel } from 'loot-core/shared/schedules';
 import {
   ungroupTransactions,
   updateTransaction,
@@ -164,8 +165,10 @@ export function Status({ status, isSplit }) {
       }}
     >
       {isSplit
-        ? t('{{status}} (Split)', { status: titleFirst(status) })
-        : titleFirst(status)}
+        ? t('{{status}} (Split)', {
+            status: titleFirst(getStatusLabel(status)),
+          })
+        : titleFirst(getStatusLabel(status))}
     </Text>
   );
 }
@@ -1037,6 +1040,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
             onFocus={() => {
               onRequestActiveEdit(getFieldName(transaction.id, 'notes'));
             }}
+            onBlur={onClearActiveEdit}
             onChange={event =>
               onUpdateInner(transaction, 'notes', event.target.value)
             }
