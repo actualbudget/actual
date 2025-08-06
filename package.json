@@ -59,7 +59,7 @@
     "@types/prompts": "^2.4.9",
     "@typescript-eslint/parser": "^8.42.0",
     "cross-env": "^7.0.3",
-    "eslint": "^9.34.0",
+    "eslint": "^9.36.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-import-resolver-typescript": "^4.3.5",
     "eslint-plugin-import": "^2.31.0",
