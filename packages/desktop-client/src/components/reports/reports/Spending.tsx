@@ -602,9 +602,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         <Text style={{ fontWeight: 600 }}>
                           <PrivacyFilter>
                             {format(
-                              Math.round(
-                                Math.abs(data.intervalData[todayDay].average),
-                              ),
+                              Math.abs(data.intervalData[todayDay].average),
                               'financial',
                             )}
                           </PrivacyFilter>

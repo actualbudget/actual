@@ -251,7 +251,7 @@ export function createSpendingSpreadsheet({
       return {
         months: indexedData,
         day,
-        average: averageSum / monthCount,
+        average: Math.round(averageSum / monthCount),
         compare: dayData.filter(c => c.month === compare)[0].cumulative,
         compareTo: dayData.filter(c => c.month === compareTo)[0].cumulative,
         budget: totalBudget,

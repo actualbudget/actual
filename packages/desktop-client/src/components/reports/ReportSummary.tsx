@@ -47,7 +47,7 @@ export function ReportSummary({
         : Math.abs(data.totalDebts) > Math.abs(data.totalAssets)
           ? t('PAYMENT')
           : t('DEPOSIT');
-  const average = data[balanceTypeOp] / intervalsCount;
+  const average = Math.round(data[balanceTypeOp] / intervalsCount);
   return (
     <View
       style={{
@@ -165,7 +165,7 @@ export function ReportSummary({
           }}
         >
           <PrivacyFilter>
-            {!isNaN(average) && format(Math.round(average), 'financial')}
+            {!isNaN(average) && format(average, 'financial')}
           </PrivacyFilter>
         </Text>
         <Text style={{ fontWeight: 600 }}>
