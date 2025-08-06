@@ -36,7 +36,7 @@
     "date-fns": "^4.1.0",
     "debug": "^4.4.1",
     "express": "5.1.0",
-    "express-rate-limit": "^7.5.0",
+    "express-rate-limit": "^8.0.1",
     "express-winston": "^4.2.0",
     "jws": "^4.0.0",
     "migrate": "^2.1.0",
