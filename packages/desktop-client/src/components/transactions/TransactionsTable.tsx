@@ -1072,6 +1072,11 @@ const Transaction = memo(function Transaction({
     _unmatched = false,
   } = transaction;
 
+  const { schedules = [] } = useCachedSchedules();
+  const schedule = transaction.schedule
+    ? schedules.find(s => s.id === transaction.schedule)
+    : null;
+
   const previewStatus = forceUpcoming ? 'upcoming' : categoryId;
 
   // Join in some data
@@ -1368,7 +1373,7 @@ const Transaction = memo(function Transaction({
         textAlign="flex"
         exposed={focusedField === 'notes'}
         focused={focusedField === 'notes'}
-        value={notes || ''}
+        value={notes ?? schedule?.name ?? ''}
         valueStyle={valueStyle}
         formatter={value =>
           NotesTagFormatter({ notes: value, onNotesTagClick })

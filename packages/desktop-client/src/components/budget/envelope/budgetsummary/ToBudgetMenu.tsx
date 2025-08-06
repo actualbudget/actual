@@ -43,7 +43,7 @@ export function ToBudgetMenu({
           },
         ]
       : []),
-    ...(autoBuffered === 0
+    ...(autoBuffered === 0 && toBudget > 0
       ? [
           {
             name: 'buffer',
