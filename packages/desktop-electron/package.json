@@ -90,7 +90,7 @@
   },
   "dependencies": {
     "@actual-app/sync-server": "workspace:*",
-    "better-sqlite3": "^11.10.0",
+    "better-sqlite3": "^12.2.0",
     "fs-extra": "^11.3.0",
     "promise-retry": "^2.0.1"
   },
@@ -104,6 +104,6 @@
     "cross-env": "^7.0.3",
     "electron": "30.5.1",
     "electron-builder": "24.13.3",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   }
 }
