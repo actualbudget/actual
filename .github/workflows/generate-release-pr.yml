@@ -33,28 +33,17 @@ jobs:
 
           for key in "${!packages[@]}"; do
             pkg="${packages[$key]}"
-            
+
             if [[ -n "${{ github.event.inputs.version }}" ]]; then
               version="${{ github.event.inputs.version }}"
             else
               version=$(node ./.github/actions/get-next-package-version.js \
                 --package-json "./packages/$pkg/package.json" \
-                --type auto)
+                --type auto
+                --update)
             fi
 
             eval "NEW_${key^^}_VERSION=\"$version\""
-
-            case "$key" in
-              web)      workspace="@actual-app/web" ;;
-              electron) workspace="desktop-electron" ;;
-              sync)     workspace="@actual-app/sync-server" ;;
-              api)      workspace="@actual-app/api" ;;
-            esac
-
-            npm version "$version" \
-              --no-git-tag-version \
-              --workspace="$workspace" \
-              --no-workspaces-update
           done
 
           echo "version=$NEW_WEB_VERSION" >> "$GITHUB_OUTPUT"
