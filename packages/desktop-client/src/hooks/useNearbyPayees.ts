@@ -90,7 +90,7 @@ export function useNearbyPayees({ thresholdInMeters = 50 } = {}) {
   );
 
   const getPayeesWithinThreshold = useCallback(
-    (coordinates: LatLongCoordinates, thresholdInMeters: number) =>
+    (coordinates: LatLongCoordinates | null, thresholdInMeters: number) =>
       payeesWithGeocoordinates
         .map(payee => ({
           ...payee,
@@ -110,9 +110,9 @@ export function useNearbyPayees({ thresholdInMeters = 50 } = {}) {
   const assignPayeesToLocation = useCallback(
     (
       payeeIds: Array<PayeeEntity['id']>,
-      coordinates: LatLongCoordinates = currentCoordinates,
+      coordinates: LatLongCoordinates | null = currentCoordinates,
     ) => {
-      if (!currentCoordinates) {
+      if (!coordinates) {
         console.warn('Location is not available.');
         return;
       }
@@ -152,8 +152,8 @@ export function useNearbyPayees({ thresholdInMeters = 50 } = {}) {
 }
 
 function getDistance(
-  currentLatLong: LatLongCoordinates,
-  referenceLatLong: LatLongCoordinates,
+  currentLatLong: LatLongCoordinates | null,
+  referenceLatLong: LatLongCoordinates | null,
 ) {
   if (!currentLatLong || !referenceLatLong) {
     return -1;
