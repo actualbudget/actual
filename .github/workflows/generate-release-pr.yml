@@ -39,7 +39,7 @@ jobs:
             else
               version=$(node ./.github/actions/get-next-package-version.js \
                 --package-json "./packages/$pkg/package.json" \
-                --type auto
+                --type auto \
                 --update)
             fi
 
