@@ -10975,7 +10975,7 @@ __metadata:
   resolution: "eslint-plugin-actual@workspace:packages/eslint-plugin-actual"
   dependencies:
     eslint: "npm:^9.36.0"
-    eslint-plugin-eslint-plugin: "npm:^6.4.0"
+    eslint-plugin-eslint-plugin: "npm:^7.0.0"
     eslint-plugin-node: "npm:^11.1.0"
     eslint-vitest-rule-tester: "npm:^2.2.0"
     requireindex: "npm:^1.2.0"
@@ -10997,15 +10997,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-eslint-plugin@npm:^6.4.0":
-  version: 6.4.0
-  resolution: "eslint-plugin-eslint-plugin@npm:6.4.0"
+"eslint-plugin-eslint-plugin@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "eslint-plugin-eslint-plugin@npm:7.0.0"
   dependencies:
     "@eslint-community/eslint-utils": "npm:^4.4.0"
     estraverse: "npm:^5.3.0"
   peerDependencies:
-    eslint: ">=8.23.0"
-  checksum: 10/6dd099948d0bef46c9f2cc0b1b56a737cbb13984eb0b2b8b5233e4006cf5d8566e40fb083279182119bff4e6e323568795820d02928589a946637893c828a6b9
+    eslint: ">=9.0.0"
+  checksum: 10/81dfa1c6f1a14a078c4f2b04fe9a54103092d095e1c6c291a46b53e013f21aabe50c52caa9c2e0bfca4cefe7a4a6c6d7f1580209cf2d5f2e31e6d43e9caf5458
   languageName: node
   linkType: hard
 
