@@ -72,7 +72,7 @@
     "swc-loader": "^0.2.6",
     "terser-webpack-plugin": "^5.3.14",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.2",
     "vite-plugin-peggy-loader": "^2.0.1",
     "vitest": "^3.2.4",
     "webpack": "^5.99.8",
