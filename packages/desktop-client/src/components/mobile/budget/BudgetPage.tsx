@@ -717,7 +717,7 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   const { list: categories } = useCategories();
-  const categoriesById = groupById(categories);
+  const categoriesById = useMemo(() => groupById(categories), [categories]);
 
   const openCoverOverbudgetedModal = useCallback(() => {
     dispatch(
@@ -798,8 +798,8 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
   const { t } = useTranslation();
 
   const { list: categories, grouped: categoryGroups } = useCategories();
-  const categoriesById = groupById(categories);
-  const groupsById = groupById(categoryGroups);
+  const categoriesById = useMemo(() => groupById(categories), [categories]);
+  const groupsById = useMemo(() => groupById(categoryGroups), [categoryGroups]);
 
   const dispatch = useDispatch();
 
@@ -958,11 +958,8 @@ function MonthSelector({
       <Button
         aria-label={t('Previous month')}
         variant="bare"
-        onPress={() => {
-          if (prevEnabled) {
-            onPrevMonth();
-          }
-        }}
+        isDisabled={!prevEnabled}
+        onPress={onPrevMonth}
         style={{ ...arrowButtonStyle, opacity: prevEnabled ? 1 : 0.6 }}
       >
         <SvgArrowThinLeft width="15" height="15" />
@@ -986,11 +983,8 @@ function MonthSelector({
       <Button
         aria-label={t('Next month')}
         variant="bare"
-        onPress={() => {
-          if (nextEnabled) {
-            onNextMonth();
-          }
-        }}
+        isDisabled={!nextEnabled}
+        onPress={onNextMonth}
         style={{ ...arrowButtonStyle, opacity: nextEnabled ? 1 : 0.6 }}
       >
         <SvgArrowThinRight width="15" height="15" />
