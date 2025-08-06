@@ -90,8 +90,8 @@ __metadata:
     "@types/bcrypt": "npm:^6.0.0"
     "@types/better-sqlite3": "npm:^7.6.13"
     "@types/convict": "npm:^6"
-    "@types/cors": "npm:^2.8.18"
-    "@types/express": "npm:^5.0.2"
+    "@types/cors": "npm:^2.8.19"
+    "@types/express": "npm:^5.0.3"
     "@types/express-actuator": "npm:^1.8.3"
     "@types/node": "npm:^22.15.18"
     "@types/supertest": "npm:^6.0.3"
@@ -6311,12 +6311,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/cors@npm:^2.8.18":
-  version: 2.8.18
-  resolution: "@types/cors@npm:2.8.18"
+"@types/cors@npm:^2.8.19":
+  version: 2.8.19
+  resolution: "@types/cors@npm:2.8.19"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 10/6e49b741345e67834cd19d766228509e4b37d6d5c272355bb059502b4787f5adf58776d9114ac5f0f407966e0347ae8d1f995d7ea41e6a24f716d36b3010401b
+  checksum: 10/9545cc532c9218754443f48a0c98c1a9ba4af1fe54a3425c95de75ff3158147bb39e666cb7c6bf98cc56a9c6dc7b4ce5b2cbdae6b55d5942e50c81b76ed6b825
   languageName: node
   linkType: hard
 
@@ -6502,14 +6502,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express@npm:^5.0.2":
-  version: 5.0.2
-  resolution: "@types/express@npm:5.0.2"
+"@types/express@npm:^5.0.3":
+  version: 5.0.3
+  resolution: "@types/express@npm:5.0.3"
   dependencies:
     "@types/body-parser": "npm:*"
     "@types/express-serve-static-core": "npm:^5.0.0"
     "@types/serve-static": "npm:*"
-  checksum: 10/c6f73c75c2b62e293e5fadcfd7de61716e3d0c0eaecda082b1921c9c8e56ddc37c530c5d4d68404794b38c7e8f5b893719ffc04c6fba2efa2fb13223bfb0346b
+  checksum: 10/bb6f10c14c8e3cce07f79ee172688aa9592852abd7577b663cd0c2054307f172c2b2b36468c918fed0d4ac359b99695807b384b3da6157dfa79acbac2226b59b
   languageName: node
   linkType: hard
 
