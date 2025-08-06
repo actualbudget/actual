@@ -41,14 +41,15 @@ function TransactionListWithPreviews() {
   );
   const {
     transactions,
-    isLoading,
+    isLoading: isTransactionsLoading,
     reload: reloadTransactions,
     isLoadingMore,
     loadMore: loadMoreTransactions,
   } = useTransactions({
     query: transactionsQuery,
   });
-  const { previewTransactions } = usePreviewTransactions();
+  const { previewTransactions, isLoading: isPreviewTransactionsLoading } =
+    usePreviewTransactions();
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
@@ -67,7 +68,7 @@ function TransactionListWithPreviews() {
         }
       }
     });
-  }, [dispatch, reloadTransactions]);
+  }, [reloadTransactions]);
 
   const { isSearching, search: onSearch } = useTransactionsSearch({
     updateQuery: setTransactionsQuery,
@@ -138,7 +139,9 @@ function TransactionListWithPreviews() {
 
   return (
     <TransactionListWithBalances
-      isLoading={isLoading}
+      isLoading={
+        isSearching ? isTransactionsLoading : isPreviewTransactionsLoading
+      }
       transactions={transactionsToDisplay}
       balance={balanceBindings.balance}
       isLoadingMore={isLoadingMore}
