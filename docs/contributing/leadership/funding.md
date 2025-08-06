@@ -4,7 +4,7 @@
 
 ## Accepted Expenses
 
-Actual’s Open Collective funds should be used only to cover operational costs directly related to the project. This includes, but is not limited to domain / hosting costs and code signing certificates. At this time, we are not planning to pay contributors or maintainers for time spent working on Actual. Please go through the submission process below _before_ making any purchases.
+Actual’s Open Collective funds should be used to cover operational costs directly related to the project. This includes, but is not limited to, domain/hosting costs, as well as code signing certificates. Please review the submission process below _before_ making any purchases.
 
 ## Submitting expenses
 

@@ -321,6 +321,7 @@ const sidebars = {
             'contributing/leadership/triaging-issues',
             'contributing/leadership/new-core-contributors-guide',
             'contributing/leadership/cursor-ide',
+            'contributing/leadership/paying-contributors',
           ],
         },
       ],
