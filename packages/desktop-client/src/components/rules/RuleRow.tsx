@@ -188,7 +188,7 @@ export const RuleRow = memo(
                           marginBottom: 6,
                         }}
                       >
-                        {i ? `Split ${i}` : 'Apply to all'}
+                        {i ? t('Split {{num}}', { num: i }) : t('Apply to all')}
                       </Text>
                       {split.actions.map((action, j) => (
                         <ActionExpression
