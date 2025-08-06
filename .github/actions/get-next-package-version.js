@@ -62,7 +62,7 @@ try {
   const nextVersionYear = nextVersionMonthDate
     .getFullYear()
     .toString()
-    .slice(-2);
+    .slice(nextVersionMonthDate.getFullYear() < 2100 ? -2 : -3);
   const nextVersionMonth = nextVersionMonthDate.getMonth() + 1; // Convert back to 1-indexed
 
   // Get current date string
