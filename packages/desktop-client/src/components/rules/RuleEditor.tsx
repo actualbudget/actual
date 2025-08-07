@@ -833,7 +833,6 @@ export type RuleEditorProps = {
   rule: RuleEntity | NewRuleEntity;
   onSave: (rule: RuleEntity | NewRuleEntity) => Promise<void>;
   onCancel?: () => void;
-  showTransactionPreview?: boolean;
   style?: CSSProperties;
 };
 
@@ -841,7 +840,6 @@ export function RuleEditor({
   rule: defaultRule,
   onSave,
   onCancel,
-  showTransactionPreview = true,
   style,
 }: RuleEditorProps) {
   const { t } = useTranslation();
@@ -1149,12 +1147,10 @@ export function RuleEditor({
       <View
         innerRef={scrollableEl}
         style={{
-          borderBottom: showTransactionPreview
-            ? '1px solid ' + theme.tableBorder
-            : 'none',
+          borderBottom: '1px solid ' + theme.tableBorder,
           padding: 20,
           overflow: 'auto',
-          maxHeight: showTransactionPreview ? 'calc(100% - 300px)' : 'auto',
+          maxHeight: 'calc(100% - 300px)',
         }}
       >
         <View style={{ flexShrink: 0 }}>
@@ -1291,63 +1287,58 @@ export function RuleEditor({
         </View>
       </View>
 
-      {showTransactionPreview && (
-        <SelectedProvider instance={selectedInst}>
-          <View style={{ padding: '20px', flex: 1 }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 12,
-              }}
+      <SelectedProvider instance={selectedInst}>
+        <View style={{ padding: '20px', flex: 1 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 12,
+            }}
+          >
+            <Text style={{ color: theme.pageTextLight, marginBottom: 0 }}>
+              <Trans>This rule applies to these transactions:</Trans>
+            </Text>
+
+            <View style={{ flex: 1 }} />
+            <Button
+              isDisabled={selectedInst.items.size === 0}
+              onPress={onApply}
             >
-              <Text style={{ color: theme.pageTextLight, marginBottom: 0 }}>
-                <Trans>This rule applies to these transactions:</Trans>
-              </Text>
-
-              <View style={{ flex: 1 }} />
-              <Button
-                isDisabled={selectedInst.items.size === 0}
-                onPress={onApply}
-              >
-                <Trans>Apply actions</Trans> ({selectedInst.items.size})
-              </Button>
-            </View>
-
-            <SimpleTransactionsTable
-              transactions={transactions}
-              fields={getTransactionFields(
-                conditions,
-                getActions(actionSplits),
-              )}
-              style={{
-                border: '1px solid ' + theme.tableBorder,
-                borderRadius: '6px 6px 0 0',
-              }}
-              renderEmpty={
-                <div>
-                  <Trans>No transactions match this rule</Trans>
-                </div>
-              }
-            />
-
-            <Stack direction="row" justify="flex-end" style={{ marginTop: 20 }}>
-              {onCancel && (
-                <Button onPress={onCancel}>
-                  <Trans>Cancel</Trans>
-                </Button>
-              )}
-              <Button
-                variant="primary"
-                onPress={handleSave}
-                isDisabled={isLoading}
-              >
-                <Trans>Save</Trans>
-              </Button>
-            </Stack>
+              <Trans>Apply actions</Trans> ({selectedInst.items.size})
+            </Button>
           </View>
-        </SelectedProvider>
-      )}
+
+          <SimpleTransactionsTable
+            transactions={transactions}
+            fields={getTransactionFields(conditions, getActions(actionSplits))}
+            style={{
+              border: '1px solid ' + theme.tableBorder,
+              borderRadius: '6px 6px 0 0',
+            }}
+            renderEmpty={
+              <div>
+                <Trans>No transactions match this rule</Trans>
+              </div>
+            }
+          />
+
+          <Stack direction="row" justify="flex-end" style={{ marginTop: 20 }}>
+            {onCancel && (
+              <Button onPress={onCancel}>
+                <Trans>Cancel</Trans>
+              </Button>
+            )}
+            <Button
+              variant="primary"
+              onPress={handleSave}
+              isDisabled={isLoading}
+            >
+              <Trans>Save</Trans>
+            </Button>
+          </Stack>
+        </View>
+      </SelectedProvider>
     </View>
   );
 }

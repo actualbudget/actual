@@ -35,7 +35,6 @@ export function EditRuleModal({
               close();
             }}
             onCancel={close}
-            showTransactionPreview={true}
             style={{
               maxWidth: '100%',
               width: 900,

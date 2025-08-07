@@ -115,25 +115,16 @@ export function MobileRuleEditPage() {
       }
       padding={0}
     >
-      <View
+      <RuleEditor
+        rule={defaultRule}
+        onSave={handleSave}
+        onCancel={handleCancel}
         style={{
+          paddingTop: 10,
           flex: 1,
           backgroundColor: theme.mobilePageBackground,
-          overflow: 'hidden',
-          padding: 20,
         }}
-      >
-        <RuleEditor
-          rule={defaultRule}
-          onSave={handleSave}
-          onCancel={handleCancel}
-          showTransactionPreview={false}
-          style={{
-            flex: 1,
-            backgroundColor: theme.mobilePageBackground,
-          }}
-        />
-      </View>
+      />
     </Page>
   );
 }
