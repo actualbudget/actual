@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import { input } from '@actual-app/web/i18next-parser.config';
 import { type Locale, formatDistanceToNow } from 'date-fns';
 
 export function last<T>(arr: Array<T>) {
@@ -493,8 +492,6 @@ export function parseCurrencyString(
 
   const m = raw.match(/[.,]([^.,]{1,2})$/);
 
-  let left, right;
-
   if (!m || m.index === undefined) {
     const value = parseFloat(raw.replace(/[^0-9-]/g, ''));
     return isNaN(value)
@@ -502,8 +499,8 @@ export function parseCurrencyString(
       : { amount: value, wasParsed: true };
   }
 
-  left = raw.slice(0, m.index).replace(/[^0-9-]/g, '');
-  right = raw.slice(m.index + 1).replace(/[^0-9]/g, '');
+  const left = raw.slice(0, m.index).replace(/[^0-9-]/g, '');
+  const right = raw.slice(m.index + 1).replace(/[^0-9]/g, '');
 
   const final = parseFloat(`${left}.${right}`);
   return isNaN(final)
