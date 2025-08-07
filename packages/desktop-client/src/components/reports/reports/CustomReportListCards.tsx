@@ -161,7 +161,7 @@ function CustomReportListCardsInner({
               <DateRange start={report.startDate} end={report.endDate} />
             ) : (
               <Text style={{ color: theme.pageTextSubdued }}>
-                {report.dateRange}
+                {t(report.dateRange)}
               </Text>
             )}
           </View>

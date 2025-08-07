@@ -4,7 +4,6 @@ import keyBy from 'lodash/keyBy';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
-import { integerToAmount } from 'loot-core/shared/util';
 import {
   type RuleConditionEntity,
   type SpendingMonthEntity,
@@ -133,8 +132,7 @@ export function createSpendingSpreadsheet({
 
     const dailyBudget =
       budgets &&
-      integerToAmount(budgets.reduce((a, v) => (a = a + v.amount), 0)) /
-        compareInterval.length;
+      budgets.reduce((a, v) => (a = a + v.amount), 0) / compareInterval.length;
 
     const intervals = monthUtils.dayRangeInclusive(startDate, endDate);
     if (endDateTo < startDate || startDateTo > endDate) {
@@ -224,14 +222,12 @@ export function createSpendingSpreadsheet({
 
             arr.push({
               date: intervalItem,
-              totalDebts: integerToAmount(perIntervalDebts),
-              totalAssets: integerToAmount(perIntervalAssets),
-              totalTotals: integerToAmount(
-                perIntervalDebts + perIntervalAssets,
-              ),
+              totalDebts: perIntervalDebts,
+              totalAssets: perIntervalAssets,
+              totalTotals: perIntervalDebts + perIntervalAssets,
               cumulative:
                 intervalItem <= monthUtils.currentDay()
-                  ? integerToAmount(cumulativeDebts + cumulativeAssets)
+                  ? cumulativeDebts + cumulativeAssets
                   : null,
             });
           }
@@ -255,7 +251,7 @@ export function createSpendingSpreadsheet({
       return {
         months: indexedData,
         day,
-        average: integerToAmount(averageSum) / monthCount,
+        average: Math.round(averageSum / monthCount),
         compare: dayData.filter(c => c.month === compare)[0].cumulative,
         compareTo: dayData.filter(c => c.month === compareTo)[0].cumulative,
         budget: totalBudget,
@@ -266,9 +262,9 @@ export function createSpendingSpreadsheet({
       intervalData,
       startDate,
       endDate,
-      totalDebts: integerToAmount(totalDebts),
-      totalAssets: integerToAmount(totalAssets),
-      totalTotals: integerToAmount(totalAssets + totalDebts),
+      totalDebts,
+      totalAssets,
+      totalTotals: totalAssets + totalDebts,
     });
   };
 }

@@ -31,6 +31,7 @@ import { validateEnd, validateStart } from './reportRanges';
 import { setSessionReport } from './setSessionReport';
 
 import { Information } from '@desktop-client/components/alerts';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type ReportSidebarProps = {
   customReportItems: CustomReportEntity;
@@ -96,6 +97,8 @@ export function ReportSidebar({
   isComplexCategoryCondition = false,
 }: ReportSidebarProps) {
   const { t } = useTranslation();
+  const locale = useLocale();
+
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
 
@@ -555,6 +558,7 @@ export function ReportSidebar({
                   ReportOptions.intervalFormat.get(
                     customReportItems.interval,
                   ) || '',
+                  locale,
                 )}
                 options={allIntervals.map(({ name, pretty }) => [name, pretty])}
               />
@@ -587,6 +591,7 @@ export function ReportSidebar({
                   ReportOptions.intervalFormat.get(
                     customReportItems.interval,
                   ) || '',
+                  locale,
                 )}
                 options={allIntervals.map(({ name, pretty }) => [name, pretty])}
               />

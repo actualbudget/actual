@@ -18,7 +18,6 @@ import * as d from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { amountToCurrency } from 'loot-core/shared/util';
 import {
   type SpendingWidget,
   type RuleConditionEntity,
@@ -42,6 +41,7 @@ import { calculateSpendingReportTimeRange } from '@desktop-client/components/rep
 import { createSpendingSpreadsheet } from '@desktop-client/components/reports/spreadsheets/spending-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
@@ -71,6 +71,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const locale = useLocale();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const format = useFormat();
 
   const {
     conditions,
@@ -507,8 +508,9 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         right={
                           <Text style={{ fontWeight: 600 }}>
                             <PrivacyFilter>
-                              {amountToCurrency(
+                              {format(
                                 Math.abs(data.intervalData[todayDay].compare),
+                                'financial',
                               )}
                             </PrivacyFilter>
                           </Text>
@@ -540,8 +542,9 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                         right={
                           <Text style={{ fontWeight: 600 }}>
                             <PrivacyFilter>
-                              {amountToCurrency(
+                              {format(
                                 Math.abs(data.intervalData[todayDay].compareTo),
+                                'financial',
                               )}
                             </PrivacyFilter>
                           </Text>
@@ -564,8 +567,11 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       right={
                         <Text style={{ fontWeight: 600 }}>
                           <PrivacyFilter>
-                            {amountToCurrency(
-                              Math.abs(data.intervalData[todayDay].budget),
+                            {format(
+                              Math.round(
+                                Math.abs(data.intervalData[todayDay].budget),
+                              ),
+                              'financial',
                             )}
                           </PrivacyFilter>
                         </Text>
@@ -595,8 +601,9 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       right={
                         <Text style={{ fontWeight: 600 }}>
                           <PrivacyFilter>
-                            {amountToCurrency(
+                            {format(
                               Math.abs(data.intervalData[todayDay].average),
+                              'financial',
                             )}
                           </PrivacyFilter>
                         </Text>

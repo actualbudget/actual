@@ -34,7 +34,7 @@ import {
   unparse,
   makeValue,
   FIELD_TYPES,
-  ALLOCATION_METHODS,
+  getAllocationMethods,
   isValidOp,
   getValidOps,
 } from 'loot-core/shared/rules';
@@ -379,21 +379,27 @@ function ScheduleDescription({ id }) {
   );
 }
 
-const actionFields = [
-  'category',
-  'payee',
-  'payee_name',
-  'notes',
-  'cleared',
-  'account',
-  'date',
-  'amount',
-].map(field => [field, mapField(field)]);
+function getActionFields() {
+  return [
+    'category',
+    'payee',
+    'payee_name',
+    'notes',
+    'cleared',
+    'account',
+    'date',
+    'amount',
+  ].map(field => [field, mapField(field)]);
+}
 const parentOnlyFields = ['amount', 'cleared', 'account', 'date'];
-const splitActionFields = actionFields.filter(
-  ([field]) => !parentOnlyFields.includes(field),
-);
-const allocationMethodOptions = Object.entries(ALLOCATION_METHODS);
+function getSplitActionFields() {
+  return getActionFields().filter(
+    ([field]) => !parentOnlyFields.includes(field),
+  );
+}
+function getAllocationMethodOptions() {
+  return Object.entries(getAllocationMethods());
+}
 function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
   const { t } = useTranslation();
   const {
@@ -413,7 +419,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
   const isTemplatingEnabled = actionTemplating || templated;
 
   const fields = (
-    options?.splitIndex ? splitActionFields : actionFields
+    options?.splitIndex ? getSplitActionFields() : getActionFields()
   ).filter(([s]) => actionTemplating || !s.includes('_name') || field === s);
 
   return (
@@ -475,7 +481,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
           </View>
 
           <SplitAmountMethodSelect
-            options={allocationMethodOptions}
+            options={getAllocationMethodOptions()}
             value={options.method}
             onChange={onChange}
           />
@@ -878,7 +884,8 @@ export function EditRuleModal({
         inputKey: uuid(),
       };
     } else {
-      const fieldsArray = splitIndex === 0 ? actionFields : splitActionFields;
+      const fieldsArray =
+        splitIndex === 0 ? getActionFields() : getSplitActionFields();
       let fields = fieldsArray.map(f => f[0]);
       for (const action of actionSplits[splitIndex].actions) {
         fields = fields.filter(f => f !== action.field);

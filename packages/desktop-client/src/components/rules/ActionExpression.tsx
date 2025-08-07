@@ -8,7 +8,7 @@ import { View } from '@actual-app/components/view';
 import {
   mapField,
   friendlyOp,
-  ALLOCATION_METHODS,
+  getAllocationMethods,
 } from 'loot-core/shared/rules';
 import {
   type SetSplitAmountRuleActionEntity,
@@ -98,7 +98,7 @@ function SetSplitAmountActionExpression({
   return (
     <>
       <Text>{friendlyOp(op)}</Text>{' '}
-      <Text style={valueStyle}>{ALLOCATION_METHODS[method]}</Text>
+      <Text style={valueStyle}>{getAllocationMethods()[method]}</Text>
       {method !== 'remainder' && ': '}
       {method === 'fixed-amount' && (
         <Value style={valueStyle} value={value} field="amount" />

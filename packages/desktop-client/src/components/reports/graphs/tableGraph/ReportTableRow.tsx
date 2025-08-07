@@ -11,11 +11,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import {
-  amountToCurrency,
-  amountToInteger,
-  integerToCurrency,
-} from 'loot-core/shared/util';
-import {
   type balanceTypeOpType,
   type GroupedEntity,
   type RuleConditionEntity,
@@ -25,6 +20,7 @@ import { showActivity } from '@desktop-client/components/reports/graphs/showActi
 import { Row, Cell } from '@desktop-client/components/table';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 type ReportTableRowProps = {
@@ -76,8 +72,9 @@ export const ReportTableRow = memo(
     interval,
     colorized,
   }: ReportTableRowProps) => {
-    const average = amountToInteger(item[balanceTypeOp]) / intervalsCount;
+    const average = Math.round(item[balanceTypeOp] / intervalsCount);
     const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
+    const format = useFormat();
 
     const navigate = useNavigate();
     const { isNarrowWidth } = useResponsive();
@@ -150,10 +147,10 @@ export const ReportTableRow = memo(
                       <Text style={hoverUnderline}>{value}</Text>
                     )}
                     valueStyle={compactStyle}
-                    value={amountToCurrency(intervalItem[balanceTypeOp])}
+                    value={format(intervalItem[balanceTypeOp], 'financial')}
                     title={
                       Math.abs(intervalItem[balanceTypeOp]) > 100000
-                        ? amountToCurrency(intervalItem[balanceTypeOp])
+                        ? format(intervalItem[balanceTypeOp], 'financial')
                         : undefined
                     }
                     onClick={() =>
@@ -185,10 +182,10 @@ export const ReportTableRow = memo(
             : balanceTypeOp === 'totalTotals' && (
                 <>
                   <Cell
-                    value={amountToCurrency(item.totalAssets)}
+                    value={format(item.totalAssets, 'financial')}
                     title={
                       Math.abs(item.totalAssets) > 100000
-                        ? amountToCurrency(item.totalAssets)
+                        ? format(item.totalAssets, 'financial')
                         : undefined
                     }
                     width="flex"
@@ -225,10 +222,10 @@ export const ReportTableRow = memo(
                     }
                   />
                   <Cell
-                    value={amountToCurrency(item.totalDebts)}
+                    value={format(item.totalDebts, 'financial')}
                     title={
                       Math.abs(item.totalDebts) > 100000
-                        ? amountToCurrency(item.totalDebts)
+                        ? format(item.totalDebts, 'financial')
                         : undefined
                     }
                     width="flex"
@@ -267,10 +264,10 @@ export const ReportTableRow = memo(
                 </>
               )}
           <Cell
-            value={amountToCurrency(item[balanceTypeOp])}
+            value={format(item[balanceTypeOp], 'financial')}
             title={
               Math.abs(item[balanceTypeOp]) > 100000
-                ? amountToCurrency(item[balanceTypeOp])
+                ? format(item[balanceTypeOp], 'financial')
                 : undefined
             }
             style={{
@@ -306,10 +303,10 @@ export const ReportTableRow = memo(
             privacyFilter
           />
           <Cell
-            value={integerToCurrency(Math.round(average))}
+            value={format(average, 'financial')}
             title={
-              Math.abs(Math.round(average / 100)) > 100000
-                ? integerToCurrency(Math.round(average))
+              Math.abs(average / 100) > 100000
+                ? format(average, 'financial')
                 : undefined
             }
             style={{

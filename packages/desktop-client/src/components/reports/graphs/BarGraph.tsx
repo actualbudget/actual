@@ -19,10 +19,6 @@ import {
 } from 'recharts';
 
 import {
-  amountToCurrency,
-  amountToCurrencyNoDecimal,
-} from 'loot-core/shared/util';
-import {
   type balanceTypeOpType,
   type DataEntity,
   type RuleConditionEntity,
@@ -37,6 +33,7 @@ import { getCustomTick } from '@desktop-client/components/reports/getCustomTick'
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -66,6 +63,7 @@ type CustomTooltipProps = {
   payload?: PayloadItem[];
   balanceTypeOp?: balanceTypeOpType;
   yAxis?: string;
+  format: (value: unknown, type: FormatType) => string;
 };
 
 const CustomTooltip = ({
@@ -73,6 +71,7 @@ const CustomTooltip = ({
   payload,
   balanceTypeOp,
   yAxis,
+  format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
 
@@ -97,25 +96,25 @@ const CustomTooltip = ({
             {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Assets:')}
-                right={amountToCurrency(payload[0].payload.totalAssets)}
+                right={format(payload[0].payload.totalAssets, 'financial')}
               />
             )}
             {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Debts:')}
-                right={amountToCurrency(payload[0].payload.totalDebts)}
+                right={format(payload[0].payload.totalDebts, 'financial')}
               />
             )}
             {['netAssets'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net Assets:')}
-                right={amountToCurrency(payload[0].payload.netAssets)}
+                right={format(payload[0].payload.netAssets, 'financial')}
               />
             )}
             {['netDebts'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net Debts:')}
-                right={amountToCurrency(payload[0].payload.netDebts)}
+                right={format(payload[0].payload.netDebts, 'financial')}
               />
             )}
             {['totalTotals'].includes(balanceTypeOp) && (
@@ -123,7 +122,7 @@ const CustomTooltip = ({
                 left={t('Net:')}
                 right={
                   <strong>
-                    {amountToCurrency(payload[0].payload.totalTotals)}
+                    {format(payload[0].payload.totalTotals, 'financial')}
                   </strong>
                 }
               />
@@ -135,12 +134,12 @@ const CustomTooltip = ({
   }
 };
 
-const customLabel = (props, typeOp) => {
+const customLabel = (props, typeOp, format) => {
   const calcX = props.x + props.width / 2;
   const calcY = props.y - (props.value > 0 ? 15 : -15);
   const textAnchor = 'middle';
   const display =
-    props.value !== 0 && `${amountToCurrencyNoDecimal(props.value)}`;
+    props.value !== 0 && `${format(props.value, 'financial-no-decimals')}`;
   const textSize = adjustTextSize({
     sized: props.width,
     type: typeOp === 'totalTotals' ? 'default' : 'variable',
@@ -179,6 +178,8 @@ export function BarGraph({
   const categories = useCategories();
   const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
+  const format = useFormat();
+
   const [pointer, setPointer] = useState('');
 
   const yAxis = groupBy === 'Interval' ? 'date' : 'name';
@@ -235,6 +236,7 @@ export function BarGraph({
                       <CustomTooltip
                         balanceTypeOp={balanceTypeOp}
                         yAxis={yAxis}
+                        format={format}
                       />
                     }
                     formatter={numberFormatterTooltip}
@@ -256,7 +258,7 @@ export function BarGraph({
                   <YAxis
                     tickFormatter={value =>
                       getCustomTick(
-                        amountToCurrencyNoDecimal(value),
+                        format(value, 'financial-no-decimals'),
                         privacyMode,
                       )
                     }
@@ -298,7 +300,7 @@ export function BarGraph({
                   {viewLabels && !compact && (
                     <LabelList
                       dataKey={val => getVal(val)}
-                      content={e => customLabel(e, balanceTypeOp)}
+                      content={e => customLabel(e, balanceTypeOp, format)}
                     />
                   )}
                   {data.legend.map((entry, index) => (

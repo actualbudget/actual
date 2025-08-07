@@ -161,7 +161,7 @@ export function Value<T>({
           <Text style={valueStyle}>
             &nbsp;&nbsp;
             <Link variant="text" onClick={onExpand} style={valueStyle}>
-              {numHidden} more items...
+              {t('{{num}} more items...', { num: numHidden })}
             </Link>
             {!inline && <br />}
           </Text>

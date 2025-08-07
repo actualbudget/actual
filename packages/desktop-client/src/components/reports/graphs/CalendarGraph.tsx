@@ -8,18 +8,18 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import {
   addDays,
-  format,
+  format as formatDate,
   getDate,
   isSameMonth,
   startOfMonth,
   startOfWeek,
 } from 'date-fns';
 
-import { amountToCurrency } from 'loot-core/shared/util';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { chartTheme } from '@desktop-client/components/reports/chart-theme';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 type CalendarGraphProps = {
@@ -42,6 +42,8 @@ export function CalendarGraph({
   isEditing,
   onDayClick,
 }: CalendarGraphProps) {
+  const format = useFormat();
+
   const startingDate = startOfWeek(new Date(), {
     weekStartsOn:
       firstDayOfWeekIdx !== undefined &&
@@ -88,7 +90,7 @@ export function CalendarGraph({
               marginBottom: 4,
             }}
           >
-            {format(addDays(startingDate, index), 'EEEEE')}
+            {formatDate(addDays(startingDate, index), 'EEEEE')}
           </View>
         ))}
       </View>
@@ -115,7 +117,7 @@ export function CalendarGraph({
               content={
                 <View>
                   <View style={{ marginBottom: 10 }}>
-                    <strong>{format(day.date, 'MMM dd')}</strong>
+                    <strong>{formatDate(day.date, 'MMM dd')}</strong>
                   </View>
                   <View style={{ lineHeight: 1.5 }}>
                     <View
@@ -141,7 +143,7 @@ export function CalendarGraph({
                       >
                         {day.incomeValue !== 0 ? (
                           <PrivacyFilter>
-                            {amountToCurrency(day.incomeValue)}
+                            {format(day.incomeValue, 'financial')}
                           </PrivacyFilter>
                         ) : (
                           ''
@@ -170,7 +172,7 @@ export function CalendarGraph({
                       >
                         {day.expenseValue !== 0 ? (
                           <PrivacyFilter>
-                            {amountToCurrency(day.expenseValue)}
+                            {format(day.expenseValue, 'financial')}
                           </PrivacyFilter>
                         ) : (
                           ''
@@ -245,7 +247,7 @@ function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
   return (
     <Button
       ref={resizeRef}
-      aria-label={format(day.date, 'MMMM d, yyyy')}
+      aria-label={formatDate(day.date, 'MMMM d, yyyy')}
       style={{
         borderColor: 'transparent',
         backgroundColor: theme.calendarCellBackground,

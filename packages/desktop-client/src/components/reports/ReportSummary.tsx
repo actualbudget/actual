@@ -8,11 +8,6 @@ import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
 import {
-  amountToCurrency,
-  integerToCurrency,
-  amountToInteger,
-} from 'loot-core/shared/util';
-import {
   type balanceTypeOpType,
   type DataEntity,
 } from 'loot-core/types/models';
@@ -20,6 +15,7 @@ import {
 import { ReportOptions } from './ReportOptions';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type ReportSummaryProps = {
@@ -41,6 +37,8 @@ export function ReportSummary({
 }: ReportSummaryProps) {
   const locale = useLocale();
   const { t } = useTranslation();
+  const format = useFormat();
+
   const net =
     balanceTypeOp === 'netAssets'
       ? t('DEPOSIT')
@@ -49,7 +47,7 @@ export function ReportSummary({
         : Math.abs(data.totalDebts) > Math.abs(data.totalAssets)
           ? t('PAYMENT')
           : t('DEPOSIT');
-  const average = amountToInteger(data[balanceTypeOp]) / intervalsCount;
+  const average = Math.round(data[balanceTypeOp] / intervalsCount);
   return (
     <View
       style={{
@@ -127,7 +125,9 @@ export function ReportSummary({
             fontWeight: 800,
           }}
         >
-          <PrivacyFilter>{amountToCurrency(data[balanceTypeOp])}</PrivacyFilter>
+          <PrivacyFilter>
+            {format(data[balanceTypeOp], 'financial')}
+          </PrivacyFilter>
         </Text>
         <Text style={{ fontWeight: 600 }}>
           <Trans>For this time period</Trans>
@@ -165,7 +165,7 @@ export function ReportSummary({
           }}
         >
           <PrivacyFilter>
-            {!isNaN(average) && integerToCurrency(Math.round(average))}
+            {!isNaN(average) && format(average, 'financial')}
           </PrivacyFilter>
         </Text>
         <Text style={{ fontWeight: 600 }}>
