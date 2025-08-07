@@ -235,8 +235,8 @@ export const ManagePayees = ({
             {buttonsDisabled
               ? t('No payees selected')
               : t('{{count}} payee', {
-                count: selected.items.size
-              })}
+                  count: selected.items.size,
+                })}
             <SvgExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
           </Button>
 
@@ -270,10 +270,10 @@ export const ManagePayees = ({
               onPress={() => setOrphanedOnly(prev => !prev)}
             >
               {orphanedOnly
-              ? t('Show all payees')
-              : t('Show {{count}} unused payee', {
-                count: orphanedPayees.length,
-                })}
+                ? t('Show all payees')
+                : t('Show {{count}} unused payee', {
+                    count: orphanedPayees.length,
+                  })}
             </Button>
           )}
         </View>
