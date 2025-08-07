@@ -6,14 +6,14 @@ import { View } from '@actual-app/components/view';
 
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
-import { FieldSelect } from '@desktop-client/components/modals/EditRuleModal';
+import { FieldSelect } from '@desktop-client/components/rules/RuleEditor';
 
 export function ConditionsOpMenu({
   conditionsOp,
   onChange,
   conditions,
 }: {
-  conditionsOp: string;
+  conditionsOp: 'and' | 'or';
   onChange: (value: 'and' | 'or') => void;
   conditions: RuleConditionEntity[];
 }) {

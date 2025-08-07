@@ -28,7 +28,6 @@ import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilter
 import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
 import { Checkbox } from '@desktop-client/components/forms';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
-import { FieldSelect } from '@desktop-client/components/modals/EditRuleModal';
 import {
   MobilePageHeader,
   Page,
@@ -42,6 +41,7 @@ import { calculateTimeRange } from '@desktop-client/components/reports/reportRan
 import { summarySpreadsheet } from '@desktop-client/components/reports/spreadsheets/summary-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
+import { FieldSelect } from '@desktop-client/components/rules/RuleEditor';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
