@@ -6,7 +6,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
-import { type TFunction } from 'i18next';
 
 import { currencies } from 'loot-core/shared/currencies';
 
@@ -15,29 +14,30 @@ import { Column, Setting } from './UI';
 import { Checkbox } from '@desktop-client/components/forms';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
-const buildCurrencyTranslations = (t: TFunction) =>
-  new Map<string, string>([
-    ['', t('None')],
-    ['AUD', t('Australian Dollar')],
-    ['CAD', t('Canadian Dollar')],
-    ['CHF', t('Swiss Franc')],
-    ['CNY', t('Yuan Renminbi')],
-    ['EUR', t('Euro')],
-    ['GBP', t('Pound Sterling')],
-    ['HKD', t('Hong Kong Dollar')],
-    ['INR', t('Indian Rupee')],
-    // ['JPY', t('Yen')],
-    ['SEK', t('Swedish Krona')],
-    ['SGD', t('Singapore Dollar')],
-    ['TRY', t('Turkish Lira')],
-    ['USD', t('US Dollar')],
-    ['QAR', t('Qatari Riyal')],
-  ]);
-
 export function CurrencySettings() {
   const { t } = useTranslation();
 
-  const currencyTranslations = useMemo(() => buildCurrencyTranslations(t), [t]);
+  const currencyTranslations = useMemo(
+    () =>
+      new Map<string, string>([
+        ['', t('None')],
+        ['AUD', t('Australian Dollar')],
+        ['CAD', t('Canadian Dollar')],
+        ['CHF', t('Swiss Franc')],
+        ['CNY', t('Yuan Renminbi')],
+        ['EUR', t('Euro')],
+        ['GBP', t('Pound Sterling')],
+        ['HKD', t('Hong Kong Dollar')],
+        ['INR', t('Indian Rupee')],
+        // ['JPY', t('Yen')],
+        ['SEK', t('Swedish Krona')],
+        ['SGD', t('Singapore Dollar')],
+        ['TRY', t('Turkish Lira')],
+        ['USD', t('US Dollar')],
+        ['QAR', t('Qatari Riyal')],
+      ]),
+    [t],
+  );
 
   const [defaultCurrencyCode, setDefaultCurrencyCodePref] = useSyncedPref(
     'defaultCurrencyCode',
