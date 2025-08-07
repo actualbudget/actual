@@ -462,28 +462,25 @@ type CurrencyParseResult = {
   amount: Amount | null;
   wasParsed: boolean;
   reason?: string;
-}
+};
 
 export function parseCurrencyString(
   input: string,
-  {
-    strict = true,
-  }:{ strict?: boolean } = {},
-):CurrencyParseResult{
-  if(!input || typeof input !== 'string') {
-    return { amount:null, wasParsed: false, reason: 'Invalid input' };
+  { strict = true }: { strict?: boolean } = {},
+): CurrencyParseResult {
+  if (!input || typeof input !== 'string') {
+    return { amount: null, wasParsed: false, reason: 'Invalid input' };
   }
 
   let raw = input.trim();
 
-  if(raw.startsWith('(') && raw.endsWith(')')) {
+  if (raw.startsWith('(') && raw.endsWith(')')) {
     raw = '-' + raw.slice(1, -1);
   }
 
   const { decimalSeparator, thousandsSeparator } = getNumberFormat();
 
-  if(strict) {
-
+  if (strict) {
     const withoutThousandSep = raw.split(thousandsSeparator).join('');
 
     const normalized = withoutThousandSep.replace(decimalSeparator, '.');
@@ -491,7 +488,7 @@ export function parseCurrencyString(
     const num = parseFloat(normalized);
     return isNaN(num)
       ? { amount: null, wasParsed: false, reason: 'Not a number' }
-      : { amount: num, wasParsed: true};
+      : { amount: num, wasParsed: true };
   }
 
   const m = raw.match(/[.,]([^.,]{1,2})$/);
@@ -501,8 +498,8 @@ export function parseCurrencyString(
   if (!m || m.index === undefined) {
     const value = parseFloat(raw.replace(/[^0-9-]/g, ''));
     return isNaN(value)
-      ? { amount: null, wasParsed: false, reason: 'Failed loose parse'}
-      : { amount: value, wasParsed: true};
+      ? { amount: null, wasParsed: false, reason: 'Failed loose parse' }
+      : { amount: value, wasParsed: true };
   }
 
   left = raw.slice(0, m.index).replace(/[^0-9-]/g, '');
@@ -511,24 +508,20 @@ export function parseCurrencyString(
   const final = parseFloat(`${left}.${right}`);
   return isNaN(final)
     ? { amount: null, wasParsed: false, reason: 'Loose parse invalid' }
-    : { amount: final, wasParsed: true};
+    : { amount: final, wasParsed: true };
 }
 
 export function currencyToAmount(currencyAmount: string): number | null {
-  const { amount, wasParsed } = parseCurrencyString(currencyAmount, { strict: false });
+  const { amount, wasParsed } = parseCurrencyString(currencyAmount, {
+    strict: false,
+  });
   return wasParsed ? amount : null; // Return as float, not cents
 }
 
-
-export function currencyToInteger(
-  input: CurrencyAmount,
-): IntegerAmount | null {
+export function currencyToInteger(input: CurrencyAmount): IntegerAmount | null {
   const result = parseCurrencyString(input);
-  return result.amount == null 
-    ? null
-    : amountToInteger(result.amount);
+  return result.amount == null ? null : amountToInteger(result.amount);
 }
-
 
 export function stringToInteger(str: string): number | null {
   const amount = parseInt(str.replace(/[^-0-9.,]/g, ''));
