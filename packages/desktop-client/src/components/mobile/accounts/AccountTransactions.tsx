@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { listen, send } from 'loot-core/platform/client/fetch';
 import { type Query } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
+import { type IntegerAmount } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type TransactionEntity,
@@ -17,6 +18,7 @@ import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
@@ -54,23 +56,31 @@ function TransactionListWithPreviews({
     [account.id],
   );
 
+  const [showRunningBalances] = useSyncedPref(`show-balances-${account.id}`);
   const [transactionsQuery, setTransactionsQuery] = useState<Query>(
     baseTransactionsQuery(),
   );
   const {
     transactions,
+    runningBalances,
     isLoading: isTransactionsLoading,
     reload: reloadTransactions,
     isLoadingMore,
     loadMore: loadMoreTransactions,
   } = useTransactions({
     query: transactionsQuery,
+    options: {
+      calculateRunningBalances: true,
+    },
   });
 
-  const { previewTransactions, isLoading: isPreviewTransactionsLoading } =
-    useAccountPreviewTransactions({
-      accountId: account?.id,
-    });
+  const {
+    previewTransactions,
+    runningBalances: previewRunningBalances,
+    isLoading: isPreviewTransactionsLoading,
+  } = useAccountPreviewTransactions({
+    accountId: account?.id,
+  });
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
@@ -81,6 +91,21 @@ function TransactionListWithPreviews({
       dispatch(syncAndDownload({ accountId: account.id }));
     }
   }, [account.id, dispatch]);
+
+  const { isSearching, search: onSearch } = useTransactionsSearch({
+    updateQuery: setTransactionsQuery,
+    resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
+    dateFormat,
+  });
+
+  const allBalances = useMemo(
+    () =>
+      new Map<TransactionEntity['id'], IntegerAmount>([
+        ...previewRunningBalances,
+        ...runningBalances,
+      ]),
+    [runningBalances, previewRunningBalances],
+  );
 
   useEffect(() => {
     if (account.id) {
@@ -102,12 +127,6 @@ function TransactionListWithPreviews({
       }
     });
   }, [dispatch, reloadTransactions]);
-
-  const { isSearching, search: onSearch } = useTransactionsSearch({
-    updateQuery: setTransactionsQuery,
-    resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
-    dateFormat,
-  });
 
   const onOpenTransaction = useCallback(
     (transaction: TransactionEntity) => {
@@ -184,6 +203,8 @@ function TransactionListWithPreviews({
       balance={balanceBindings.balance}
       balanceCleared={balanceBindings.cleared}
       balanceUncleared={balanceBindings.uncleared}
+      runningBalances={allBalances}
+      showBalances={isSearching ? false : showRunningBalances === 'true'}
       isLoadingMore={isLoadingMore}
       onLoadMore={loadMoreTransactions}
       searchPlaceholder={t('Search {{accountName}}', {
