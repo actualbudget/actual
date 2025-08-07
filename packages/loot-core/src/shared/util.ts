@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { input } from '@actual-app/web/i18next-parser.config';
 import { type Locale, formatDistanceToNow } from 'date-fns';
 
 export function last<T>(arr: Array<T>) {
@@ -252,7 +253,8 @@ export function appendDecimals(
     result = result.padStart(3, '0');
     result = result.slice(0, -2) + separator + result.slice(-2);
   }
-  return amountToCurrency(currencyToAmount(result));
+  const { amount } = parseCurrencyString(result, { strict: true });
+  return amountToCurrency(amount ?? 0);
 }
 
 const NUMBER_FORMATS = [
@@ -441,34 +443,92 @@ export function amountToCurrencyNoDecimal(amount: Amount): CurrencyAmount {
   }).formatter.format(amount);
 }
 
-export function currencyToAmount(currencyAmount: string): Amount | null {
-  let integer, fraction;
+export function formatAmountForEditor(value: number): string {
+  const { decimalSeparator } = getNumberFormat();
+  return (value / 100).toString().replace('.', decimalSeparator);
+}
 
-  // match the last dot or comma in the string
-  const match = currencyAmount.match(/[,.](?=[^.,]*$)/);
+export function parseAmountFromEditorInput(input: string): number {
+  const { decimalSeparator } = getNumberFormat();
+  const normalized = input
+    .replace(new RegExp(`[^\\d${decimalSeparator}]`, 'g'), '') // remove non-numeric and non-decimal chars
+    .replace(decimalSeparator, '.');
 
-  if (
-    !match ||
-    (match[0] === getNumberFormat().thousandsSeparator &&
-      match.index + 4 <= currencyAmount.length)
-  ) {
-    fraction = null;
-    integer = currencyAmount.replace(/[^\d-]/g, '');
-  } else {
-    integer = currencyAmount.slice(0, match.index).replace(/[^\d-]/g, '');
-    fraction = currencyAmount.slice(match.index + 1);
+  const parsed = Math.round(parseFloat(normalized) * 100);
+  return isNaN(parsed) ? 0 : parsed;
+}
+
+type CurrencyParseResult = {
+  amount: Amount | null;
+  wasParsed: boolean;
+  reason?: string;
+}
+
+export function parseCurrencyString(
+  input: string,
+  {
+    strict = true,
+  }:{ strict?: boolean } = {},
+):CurrencyParseResult{
+  if(!input || typeof input !== 'string') {
+    return { amount:null, wasParsed: false, reason: 'Invalid input' };
   }
 
-  const amount = parseFloat(integer + '.' + fraction);
-  return isNaN(amount) ? null : amount;
+  let raw = input.trim();
+
+  if(raw.startsWith('(') && raw.endsWith(')')) {
+    raw = '-' + raw.slice(1, -1);
+  }
+
+  const { decimalSeparator, thousandsSeparator } = getNumberFormat();
+
+  if(strict) {
+
+    const withoutThousandSep = raw.split(thousandsSeparator).join('');
+
+    const normalized = withoutThousandSep.replace(decimalSeparator, '.');
+
+    const num = parseFloat(normalized);
+    return isNaN(num)
+      ? { amount: null, wasParsed: false, reason: 'Not a number' }
+      : { amount: num, wasParsed: true};
+  }
+
+  const m = raw.match(/[.,]([^.,]{1,2})$/);
+
+  let left, right;
+
+  if (!m || m.index === undefined) {
+    const value = parseFloat(raw.replace(/[^0-9-]/g, ''));
+    return isNaN(value)
+      ? { amount: null, wasParsed: false, reason: 'Failed loose parse'}
+      : { amount: value, wasParsed: true};
+  }
+
+  left = raw.slice(0, m.index).replace(/[^0-9-]/g, '');
+  right = raw.slice(m.index + 1).replace(/[^0-9]/g, '');
+
+  const final = parseFloat(`${left}.${right}`);
+  return isNaN(final)
+    ? { amount: null, wasParsed: false, reason: 'Loose parse invalid' }
+    : { amount: final, wasParsed: true};
 }
 
-export function currencyToInteger(
-  currencyAmount: CurrencyAmount,
-): IntegerAmount | null {
-  const amount = currencyToAmount(currencyAmount);
-  return amount == null ? null : amountToInteger(amount);
+export function currencyToAmount(currencyAmount: string): number | null {
+  const { amount, wasParsed } = parseCurrencyString(currencyAmount, { strict: false });
+  return wasParsed ? amount : null; // Return as float, not cents
 }
+
+
+export function currencyToInteger(
+  input: CurrencyAmount,
+): IntegerAmount | null {
+  const result = parseCurrencyString(input);
+  return result.amount == null 
+    ? null
+    : amountToInteger(result.amount);
+}
+
 
 export function stringToInteger(str: string): number | null {
   const amount = parseInt(str.replace(/[^-0-9.,]/g, ''));

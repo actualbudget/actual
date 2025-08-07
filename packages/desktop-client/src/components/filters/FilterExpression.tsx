@@ -9,7 +9,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { mapField, friendlyOp } from 'loot-core/shared/rules';
-import { integerToCurrency } from 'loot-core/shared/util';
+import { formatAmountForEditor,  parseAmountFromEditorInput } from 'loot-core/shared/util';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
 import { FilterEditor } from './FiltersMenu';
@@ -140,12 +140,26 @@ export function FilterExpression<T extends RuleConditionEntity>({
           field={originalField}
           op={op}
           value={
-            field === 'amount' && typeof value === 'number'
-              ? integerToCurrency(value)
+            originalField === 'amount' && typeof value === 'number'
+              ? formatAmountForEditor(value)
               : value
           }
+
           options={options}
-          onSave={onChange}
+          onSave={cond => {
+            if (
+              originalField === 'amount' &&
+              typeof cond.value === 'string' &&
+              /[\d]/.test(cond.value)
+            ) {
+              const parsed = parseAmountFromEditorInput(cond.value);
+              onChange({ ...cond, value: parsed });
+            } else {
+              onChange(cond);
+            }
+          }}
+
+
           onClose={() => setEditing(false)}
         />
       </Popover>
