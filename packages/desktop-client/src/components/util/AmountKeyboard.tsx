@@ -1,10 +1,7 @@
-import React, {
-  type FocusEventHandler,
-  type ComponentPropsWithoutRef,
-  useRef,
-} from 'react';
+import React, { type FocusEventHandler, useCallback, useRef } from 'react';
 import {
   default as Keyboard,
+  type KeyboardReactInterface,
   type SimpleKeyboard,
 } from 'react-simple-keyboard';
 
@@ -15,7 +12,7 @@ import { css, cx } from '@emotion/css';
 
 export type AmountKeyboardRef = SimpleKeyboard;
 
-type AmountKeyboardProps = ComponentPropsWithoutRef<typeof Keyboard> & {
+type AmountKeyboardProps = KeyboardReactInterface['options'] & {
   onBlur?: FocusEventHandler<HTMLDivElement>;
   onEnter?: (text: string) => void;
 };
@@ -50,16 +47,16 @@ export function AmountKeyboard(props: AmountKeyboardProps) {
           transition: 'none',
         },
       },
-      // eslint-disable-next-line rulesdir/typography
-      '& [data-skbtn="+"], & [data-skbtn="-"], & [data-skbtn="×"], & [data-skbtn="÷"]':
+      // eslint-disable-next-line actual/typography
+      '& [data-skbtn="+"], & [data-skbtn="-"], & [data-skbtn="*"], & [data-skbtn="/"]':
         {
           backgroundColor: theme.keyboardButtonSecondaryBackground,
         },
-      // eslint-disable-next-line rulesdir/typography
+      // eslint-disable-next-line actual/typography
       '& [data-skbtn="{bksp}"], & [data-skbtn="{clear}"]': {
         backgroundColor: theme.keyboardButtonSecondaryBackground,
       },
-      // eslint-disable-next-line rulesdir/typography
+      // eslint-disable-next-line actual/typography
       '& [data-skbtn="{enter}"]': {
         backgroundColor: theme.buttonPrimaryBackground,
       },
@@ -68,6 +65,15 @@ export function AmountKeyboard(props: AmountKeyboardProps) {
   ]);
 
   const keyboardRef = useRef<SimpleKeyboard | null>(null);
+  const keyboardRefProp = props.keyboardRef;
+
+  const mergedRef = useCallback(
+    r => {
+      keyboardRef.current = r;
+      keyboardRefProp?.(r);
+    },
+    [keyboardRefProp],
+  );
 
   return (
     <View
@@ -94,8 +100,8 @@ export function AmountKeyboard(props: AmountKeyboardProps) {
           default: [
             '+ 1 2 3',
             '- 4 5 6',
-            '× 7 8 9',
-            '÷ {clear} 0 {bksp}',
+            '* 7 8 9',
+            '/ {clear} 0 {bksp}',
             '{space} , . {enter}',
           ],
         }}
@@ -104,23 +110,23 @@ export function AmountKeyboard(props: AmountKeyboardProps) {
           '{enter}': '↵',
           '{space}': '␣',
           '{clear}': 'C',
+          '*': '×',
+          '/': '÷',
         }}
         useButtonTag
-        stopMouseUpPropagation
-        stopMouseDownPropagation
         autoUseTouchEvents
+        physicalKeyboardHighlight
+        disableButtonHold
+        debug
         {...props}
-        keyboardRef={r => {
-          keyboardRef.current = r;
-          props.keyboardRef?.(r);
-        }}
-        onKeyPress={key => {
+        keyboardRef={mergedRef}
+        onKeyPress={(key, e) => {
           if (key === '{clear}') {
-            props.onChange?.('');
+            props.onChange?.('', e);
           } else if (key === '{enter}') {
             props.onEnter?.(keyboardRef.current?.getInput() || '');
           }
-          props.onKeyPress?.(key);
+          props.onKeyPress?.(key, e);
         }}
         theme={layoutClassName}
       />

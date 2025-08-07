@@ -60,7 +60,7 @@ const AmountInput = memo(function AmountInput({
   const [text, setText] = useState('');
   const [value, setValue] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [hideFraction] = useSyncedPref('hideFraction');
+  const [hideFractionPref] = useSyncedPref('hideFraction');
 
   const mergedInputRef = useMergedRefs<HTMLInputElement>(
     props.inputRef,
@@ -81,10 +81,6 @@ const AmountInput = memo(function AmountInput({
     setText('');
     setValue(initialValue);
   }, [initialValue]);
-
-  useEffect(() => {
-    keyboardRef.current?.setInput(text);
-  }, [text]);
 
   const onKeyUp: HTMLProps<HTMLInputElement>['onKeyUp'] = e => {
     if (e.key === 'Backspace' && text === '') {
@@ -132,10 +128,7 @@ const AmountInput = memo(function AmountInput({
   };
 
   const onChangeText = (text: string) => {
-    console.log('text', text);
-
-    text = reapplyThousandSeparators(text);
-
+    const hideFraction = String(hideFractionPref) === 'true';
     const lastOperatorIndex = lastIndexOfArithmeticOperator(text);
     if (lastOperatorIndex > 0) {
       // This will evaluate the expression whenever an operator is added
@@ -153,24 +146,34 @@ const AmountInput = memo(function AmountInput({
         ) {
           // Clicked on another operator while there is still an operator
           // Replace previous operator with the new one
-          // TODO: Fix why clicking the same operator duplicates it
           text = `${text.slice(0, charIndexPriorToLastOperator)}${lastOperator}`;
         } else {
           // Evaluate the left side of the expression whenever an operator is added
           const left = text.slice(0, lastOperatorIndex);
           const leftEvaluated = evalArithmetic(left);
           const leftEvaluatedWithDecimal = appendDecimals(
-            String(amountToInteger(leftEvaluated)),
-            String(hideFraction) === 'true',
+            reapplyThousandSeparators(String(amountToInteger(leftEvaluated))),
+            hideFraction,
           );
           text = `${leftEvaluatedWithDecimal}${lastOperator}`;
         }
+      } else {
+        // Append decimals to the right side of the expression
+        const left = text.slice(0, lastOperatorIndex);
+        const right = text.slice(lastOperatorIndex + 1);
+        const lastOperator = text[lastOperatorIndex];
+        const rightWithDecimal = appendDecimals(
+          reapplyThousandSeparators(right),
+          hideFraction,
+        );
+        text = `${left}${lastOperator}${rightWithDecimal}`;
       }
     } else {
-      text = appendDecimals(text, String(hideFraction) === 'true');
+      text = appendDecimals(reapplyThousandSeparators(text), hideFraction);
     }
     setEditing(true);
     setText(text);
+    keyboardRef.current?.setInput(text);
     props.onChangeValue?.(text);
   };
 

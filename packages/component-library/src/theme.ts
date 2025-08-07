@@ -206,5 +206,6 @@ export const theme = {
   keyboardText: 'var(--color-keyboardText)',
   keyboardButtonBackground: 'var(--color-keyboardButtonBackground)',
   keyboardButtonShadow: 'var(--color-keyboardButtonShadow)',
-  keyboardButtonSecondaryBackground: 'var(--color-keyboardButtonSecondaryBackground)',
+  keyboardButtonSecondaryBackground:
+    'var(--color-keyboardButtonSecondaryBackground)',
 };
