@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -20,14 +21,13 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+
 
 const PAGE_SIZE = 50;
 
 export function MobileRulesPage() {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [allRules, setAllRules] = useState<RuleEntity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMoreRules, setHasMoreRules] = useState(true);
@@ -87,17 +87,12 @@ export function MobileRulesPage() {
   }, [loadRules]);
 
   const handleRulePress = (rule: RuleEntity) => {
-    dispatch(
-      pushModal({
-        modal: {
-          name: 'edit-rule',
-          options: {
-            rule,
-            onSave: () => loadRules(),
-          },
-        },
-      }),
-    );
+    navigate('/rules/edit', {
+      state: {
+        rule,
+        onRuleSaved: () => loadRules(),
+      },
+    });
   };
 
   const handleLoadMore = useCallback(() => {
