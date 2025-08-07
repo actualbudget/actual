@@ -19,7 +19,6 @@ export function MobileRuleEditPage() {
 
   // Get rule data from location state
   const rule = location.state?.rule as RuleEntity | NewRuleEntity | undefined;
-  const onRuleSaved = location.state?.onRuleSaved as (() => void) | undefined;
 
   // If no rule is provided, create a new one
   const defaultRule: NewRuleEntity = rule || {
@@ -44,11 +43,6 @@ export function MobileRuleEditPage() {
   };
 
   const handleSave = async () => {
-    // Call the callback if provided
-    if (onRuleSaved) {
-      onRuleSaved();
-    }
-
     // Navigate back to rules list
     navigate('/rules');
   };

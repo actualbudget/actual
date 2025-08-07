@@ -88,13 +88,10 @@ export function MobileRulesPage() {
   const handleRulePress = useCallback(
     (rule: RuleEntity) => {
       navigate('/rules/edit', {
-        state: {
-          rule,
-          onRuleSaved: () => loadRules(),
-        },
+        state: { rule },
       });
     },
-    [navigate, loadRules],
+    [navigate],
   );
 
   const handleLoadMore = useCallback(() => {
@@ -102,10 +99,6 @@ export function MobileRulesPage() {
       loadRules(true);
     }
   }, [isLoading, hasMoreRules, filter, loadRules]);
-
-  const handleRuleAdded = useCallback(() => {
-    loadRules();
-  }, [loadRules]);
 
   const onSearchChange = useCallback(
     (value: string) => {
@@ -117,10 +110,7 @@ export function MobileRulesPage() {
   return (
     <Page
       header={
-        <MobilePageHeader
-          title={t('Rules')}
-          rightContent={<AddRuleButton onRuleAdded={handleRuleAdded} />}
-        />
+        <MobilePageHeader title={t('Rules')} rightContent={<AddRuleButton />} />
       }
       padding={0}
     >
