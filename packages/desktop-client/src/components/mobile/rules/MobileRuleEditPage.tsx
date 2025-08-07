@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router';
+import { useParams } from 'react-router';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { send } from 'loot-core/platform/client/fetch';
 import { type RuleEntity, type NewRuleEntity } from 'loot-core/types/models';
 
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
@@ -15,10 +16,34 @@ import { useNavigate } from '@desktop-client/hooks/useNavigate';
 export function MobileRuleEditPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const location = useLocation();
+  const { id } = useParams<{ id?: string }>();
 
-  // Get rule data from location state
-  const rule = location.state?.rule as RuleEntity | NewRuleEntity | undefined;
+  const [rule, setRule] = useState<RuleEntity | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Load rule by ID if we're in edit mode
+  useEffect(() => {
+    if (id && id !== 'new') {
+      setIsLoading(true);
+      send('rule-get', { id })
+        .then(loadedRule => {
+          if (loadedRule) {
+            setRule(loadedRule);
+          } else {
+            // Rule not found, navigate back to rules list
+            navigate('/rules');
+          }
+        })
+        .catch(error => {
+          console.error('Failed to load rule:', error);
+          // Navigate back to rules list if rule not found
+          navigate('/rules');
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
+  }, [id, navigate]);
 
   // If no rule is provided, create a new one
   const defaultRule: NewRuleEntity = rule || {
@@ -51,8 +76,34 @@ export function MobileRuleEditPage() {
     navigate('/rules');
   };
 
-  const isEditing = Boolean(rule && 'id' in rule && rule.id);
+  const isEditing = Boolean(id && id !== 'new' && rule);
   const pageTitle = isEditing ? t('Edit Rule') : t('Create Rule');
+
+  // Show loading state while fetching rule
+  if (isLoading) {
+    return (
+      <Page
+        header={
+          <MobilePageHeader
+            title={t('Loading...')}
+            leftContent={<MobileBackButton onPress={handleCancel} />}
+          />
+        }
+        padding={0}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: theme.mobilePageBackground,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <span>{t('Loading rule...')}</span>
+        </View>
+      </Page>
+    );
+  }
 
   return (
     <Page

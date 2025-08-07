@@ -261,7 +261,7 @@ export function FinancesApp() {
                   element={<NarrowAlternate name="Rules" />}
                 />
                 <Route
-                  path="/rules/edit"
+                  path="/rules/edit/:id?"
                   element={<NarrowAlternate name="RuleEdit" />}
                 />
                 <Route path="/bank-sync" element={<BankSync />} />
