@@ -85,14 +85,17 @@ export function MobileRulesPage() {
     loadRules();
   }, [loadRules]);
 
-  const handleRulePress = (rule: RuleEntity) => {
-    navigate('/rules/edit', {
-      state: {
-        rule,
-        onRuleSaved: () => loadRules(),
-      },
-    });
-  };
+  const handleRulePress = useCallback(
+    (rule: RuleEntity) => {
+      navigate('/rules/edit', {
+        state: {
+          rule,
+          onRuleSaved: () => loadRules(),
+        },
+      });
+    },
+    [navigate, loadRules],
+  );
 
   const handleLoadMore = useCallback(() => {
     if (!isLoading && hasMoreRules && !filter) {
@@ -100,9 +103,9 @@ export function MobileRulesPage() {
     }
   }, [isLoading, hasMoreRules, filter, loadRules]);
 
-  const handleRuleAdded = () => {
+  const handleRuleAdded = useCallback(() => {
     loadRules();
-  };
+  }, [loadRules]);
 
   const onSearchChange = useCallback(
     (value: string) => {
