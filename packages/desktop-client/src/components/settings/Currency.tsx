@@ -30,6 +30,7 @@ export function CurrencySettings() {
         ['HKD', t('Hong Kong Dollar')],
         ['INR', t('Indian Rupee')],
         // ['JPY', t('Yen')],
+        ['PHP', t('Philippine Peso')],
         ['SEK', t('Swedish Krona')],
         ['SGD', t('Singapore Dollar')],
         ['TRY', t('Turkish Lira')],
