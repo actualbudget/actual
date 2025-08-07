@@ -1126,8 +1126,8 @@ export function EditRuleModal({
                         data-testid="conditions-op"
                         style={{ display: 'inline-flex' }}
                         fields={[
-                          ['and', 'all'],
-                          ['or', 'any'],
+                          ['and', t('all')],
+                          ['or', t('any')],
                         ]}
                         value={conditionsOp}
                         onChange={onChangeConditionsOp}
