@@ -27,10 +27,15 @@ export function AddRuleButton({ onRuleAdded }: AddRuleButtonProps) {
     <Button
       variant="bare"
       aria-label="Add new rule"
-      style={{ margin: 10 }}
+      style={{ 
+        margin: 10, 
+        backgroundColor: 'blue', 
+        padding: 10, 
+        borderRadius: 5 
+      }}
       onPress={handleAddRule}
     >
-      <SvgAdd width={20} height={20} />
+      <span style={{ color: 'white', fontWeight: 'bold' }}>+ DEBUG</span>
     </Button>
   );
 }

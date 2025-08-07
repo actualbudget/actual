@@ -84,7 +84,9 @@ export function MobileRuleEditPage() {
         >
           <span style={{ color: 'black', fontWeight: 'bold' }}>
             DEBUG: MobileRuleEditPage loaded successfully!
-            {rule ? ` Editing rule: ${rule.id || 'new'}` : ' Creating new rule'}
+            {rule
+              ? ` Editing rule: ${'id' in rule ? rule.id : 'new'}`
+              : ' Creating new rule'}
           </span>
         </View>
         <RuleEditor
