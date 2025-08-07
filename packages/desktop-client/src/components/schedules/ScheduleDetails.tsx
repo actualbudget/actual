@@ -33,7 +33,7 @@ import {
   FormLabel,
   Checkbox,
 } from '@desktop-client/components/forms';
-import { OpSelect } from '@desktop-client/components/modals/EditRuleModal';
+import { OpSelect } from '@desktop-client/components/rules/RuleEditor';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import { RecurringSchedulePicker } from '@desktop-client/components/select/RecurringSchedulePicker';
 import { SelectedItemsButton } from '@desktop-client/components/table';

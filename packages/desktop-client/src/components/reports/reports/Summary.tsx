@@ -28,7 +28,7 @@ import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilter
 import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
 import { Checkbox } from '@desktop-client/components/forms';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
-import { FieldSelect } from '@desktop-client/components/modals/EditRuleModal';
+import { FieldSelect } from '@desktop-client/components/rules/RuleEditor';
 import {
   MobilePageHeader,
   Page,
