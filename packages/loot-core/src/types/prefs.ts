@@ -20,6 +20,7 @@ export type SyncedPrefs = Partial<
     | 'currencySymbolPosition'
     | 'currencySpaceBetweenAmountAndSymbol'
     | 'defaultCurrencyCode'
+    | `side-nav.show-balance-history-${string}`
     | `show-balances-${string}`
     | `show-extra-balances-${string}`
     | `hide-cleared-${string}`

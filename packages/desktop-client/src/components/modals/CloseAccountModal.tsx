@@ -182,6 +182,7 @@ export function CloseAccountModal({
                   <View style={{ marginBottom: 15 }}>
                     <AccountAutocomplete
                       includeClosedAccounts={false}
+                      hiddenAccounts={[account.id]}
                       value={transferAccountId}
                       inputProps={{
                         placeholder: t('Select account...'),
@@ -198,6 +199,7 @@ export function CloseAccountModal({
                                   name: 'account-autocomplete',
                                   options: {
                                     includeClosedAccounts: false,
+                                    hiddenAccounts: [account.id],
                                     onSelect: onSelectAccount,
                                   },
                                 },

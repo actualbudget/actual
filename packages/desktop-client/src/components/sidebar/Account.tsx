@@ -1,11 +1,18 @@
 // @ts-strict-ignore
 import React, { type CSSProperties, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
+import { Button } from '@actual-app/components/button';
+import {
+  SvgArrowButtonDown1,
+  SvgArrowButtonUp1,
+} from '@actual-app/components/icons/v2';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -31,6 +38,7 @@ import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
 import { useNotes } from '@desktop-client/hooks/useNotes';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { openAccountCloseModal } from '@desktop-client/modals/modalsSlice';
 import {
   reopenAccount,
@@ -83,6 +91,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
   onDrop,
   titleAccount,
 }: AccountProps<FieldName>) {
+  const { t } = useTranslation();
   const type = account
     ? account.closed
       ? 'account-closed'
@@ -108,6 +117,10 @@ export function Account<FieldName extends SheetFields<'account'>>({
     id: account && account.id,
     onDrop,
   });
+
+  const [showBalanceHistory, setShowBalanceHistory] = useSyncedPref(
+    `side-nav.show-balance-history-${account?.id}`,
+  );
 
   const dispatch = useDispatch();
 
@@ -281,14 +294,48 @@ export function Account<FieldName extends SheetFields<'account'>>({
             padding: 10,
           }}
         >
-          <Text
+          <SpaceBetween
+            gap={5}
             style={{
-              fontWeight: 'bold',
+              justifyContent: 'space-between',
+              '& .hover-visible': {
+                opacity: 0,
+                transition: 'opacity .25s',
+              },
+              '&:hover .hover-visible': {
+                opacity: 1,
+              },
             }}
           >
-            {name}
-          </Text>
-          {account && <BalanceHistoryGraph accountId={account.id} />}
+            <Text
+              style={{
+                fontWeight: 'bold',
+              }}
+            >
+              {name}
+            </Text>
+            <Button
+              aria-label={t('Toggle balance history')}
+              variant="bare"
+              onClick={() =>
+                setShowBalanceHistory(
+                  showBalanceHistory === 'true' ? 'false' : 'true',
+                )
+              }
+              className="hover-visible"
+            >
+              <SpaceBetween gap={3}>
+                {showBalanceHistory === 'true' ? (
+                  <SvgArrowButtonUp1 width={10} height={10} />
+                ) : (
+                  <SvgArrowButtonDown1 width={10} height={10} />
+                )}
+              </SpaceBetween>
+            </Button>
+          </SpaceBetween>
+          {showBalanceHistory === 'true' && account && (
+            <BalanceHistoryGraph accountId={account.id} />
+          )}
           {accountNote && (
             <Notes
               getStyle={() => ({
@@ -306,6 +353,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
       placement="right top"
       triggerProps={{
         delay: 1000,
+        closeDelay: 250,
         isDisabled: menuOpen,
       }}
     >
