@@ -1224,7 +1224,7 @@ function TransactionEditUnconnected({
     [dateFormat, transactions],
   );
 
-  const { assignPayeesToLocation } = useNearbyPayees();
+  const { assignPayeesToGeolocation: assignPayeesToLocation } = useNearbyPayees();
 
   const onSave = useCallback(
     async newTransactions => {
@@ -1258,7 +1258,7 @@ function TransactionEditUnconnected({
         dispatch(setLastTransaction({ transaction: newTransactions[0] }));
       }
 
-      assignPayeesToLocation(newTransactions.map(t => t.payee));
+      await assignPayeesToLocation(newTransactions.map(t => t.payee));
     },
     [assignPayeesToLocation, dispatch, fetchedTransactions],
   );

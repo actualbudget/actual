@@ -1,5 +1,5 @@
 import { Diff } from '../../shared/util';
-import { PayeeEntity, RuleEntity } from '../../types/models';
+import { PayeeEntity, PayeeGeolocationEntity, RuleEntity } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
 import { payeeModel } from '../models';
@@ -18,6 +18,8 @@ export type PayeesHandlers = {
   'payees-batch-change': typeof batchChangePayees;
   'payees-check-orphaned': typeof checkOrphanedPayees;
   'payees-get-rules': typeof getPayeeRules;
+  'payees-geolocation-get': typeof getPayeeGeolocations;
+  'payees-geolocation-assign': typeof assignPayeeGeolocation;
 };
 
 export const app = createApp<PayeesHandlers>();
@@ -38,6 +40,8 @@ app.method(
 app.method('payees-batch-change', mutator(undoable(batchChangePayees)));
 app.method('payees-check-orphaned', checkOrphanedPayees);
 app.method('payees-get-rules', getPayeeRules);
+app.method('payees-geolocation-assign', mutator(undoable(assignPayeeGeolocation)));
+app.method('payees-geolocation-get', getPayeeGeolocations);
 
 async function createPayee({ name }: { name: PayeeEntity['name'] }) {
   return db.insertPayee({ name });
@@ -123,4 +127,20 @@ async function getPayeeRules({
   id: PayeeEntity['id'];
 }): Promise<RuleEntity[]> {
   return rules.getRulesForPayee(id).map(rule => rule.serialize());
+}
+
+async function getPayeeGeolocations(): Promise<PayeeGeolocationEntity[]> {
+  return db.getPayeeGeolocations();
+}
+
+async function assignPayeeGeolocation({
+  payeeId,
+  latitude,
+  longitude,
+}: {
+  payeeId: PayeeEntity['id'];
+  latitude: number;
+  longitude: number;
+}): Promise<void> {
+  await db.insertPayeeGeolocation({ payee_id: payeeId, latitude, longitude });
 }
