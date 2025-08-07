@@ -20,14 +20,11 @@ export function NarrowAlternate({
   name: keyof typeof WideComponents & keyof typeof NarrowComponents;
 }) {
   const { isNarrowWidth } = useResponsive();
-  
-  // Temporary debug: force mobile components for Rules and RuleEdit
-  const forceNarrow = name === 'Rules' || name === 'RuleEdit';
-  
+
   return (
     <LoadComponent
       name={name}
-      importer={isNarrowWidth || forceNarrow ? loadNarrow : loadWide}
+      importer={isNarrowWidth ? loadNarrow : loadWide}
     />
   );
 }

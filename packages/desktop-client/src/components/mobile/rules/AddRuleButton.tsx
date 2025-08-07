@@ -13,37 +13,16 @@ export function AddRuleButton({ onRuleAdded }: AddRuleButtonProps) {
   const navigate = useNavigate();
 
   const handleAddRule = useCallback(() => {
-    console.log('DEBUG: handleAddRule called');
-    alert('DEBUG: Add rule button pressed');
-    
-    // Try direct window navigation as a test
-    console.log('DEBUG: Attempting window.location navigation');
-    window.location.href = '/rules/edit';
-    
-    // Original navigation (comment out for now)
-    /*
     navigate('/rules/edit', {
       state: {
         onRuleSaved: onRuleAdded,
       },
     });
-    console.log('DEBUG: navigate called to /rules/edit');
-    */
   }, [navigate, onRuleAdded]);
 
   return (
-    <Button
-      variant="bare"
-      aria-label="Add new rule"
-      style={{ 
-        margin: 10, 
-        backgroundColor: 'blue', 
-        padding: 10, 
-        borderRadius: 5 
-      }}
-      onPress={handleAddRule}
-    >
-      <span style={{ color: 'white', fontWeight: 'bold' }}>+ DEBUG</span>
+    <Button variant="bare" aria-label="Add new rule" onPress={handleAddRule}>
+      <SvgAdd width={20} height={20} />
     </Button>
   );
 }
