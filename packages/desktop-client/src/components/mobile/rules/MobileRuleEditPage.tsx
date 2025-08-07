@@ -79,7 +79,9 @@ export function MobileRuleEditPage() {
         }}
       >
         {/* Temporary debug message */}
-        <View style={{ padding: 20, backgroundColor: 'yellow', marginBottom: 20 }}>
+        <View
+          style={{ padding: 20, backgroundColor: 'yellow', marginBottom: 20 }}
+        >
           <span style={{ color: 'black', fontWeight: 'bold' }}>
             DEBUG: MobileRuleEditPage loaded successfully!
             {rule ? ` Editing rule: ${rule.id || 'new'}` : ' Creating new rule'}
