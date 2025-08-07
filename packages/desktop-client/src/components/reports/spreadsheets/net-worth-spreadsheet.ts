@@ -6,16 +6,12 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
-  integerToCurrency,
-  integerToAmount,
-  amountToInteger,
-} from 'loot-core/shared/util';
-import {
   type AccountEntity,
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
 import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
+import { type FormatType } from '@desktop-client/hooks/useFormat';
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
@@ -33,6 +29,7 @@ export function createSpreadsheet(
   locale: Locale,
   interval: string = 'Monthly',
   firstDayOfWeekIdx: string = '0',
+  format: (value: unknown, type?: FormatType) => string,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -143,6 +140,7 @@ export function createSpreadsheet(
         locale,
         interval,
         firstDayOfWeekIdx,
+        format,
       ),
     );
   };
@@ -159,6 +157,7 @@ function recalculate(
   locale: Locale,
   interval: string = 'Monthly',
   firstDayOfWeekIdx: string = '0',
+  format: (value: unknown, type?: FormatType) => string,
 ) {
   // Get intervals using the same pattern as other working spreadsheets
   const intervals =
@@ -229,7 +228,7 @@ function recalculate(
       x = d.parseISO(intervalItem + '-01');
     }
 
-    const change = last ? total - amountToInteger(last.y) : 0;
+    const change = last ? total - last.y : 0;
 
     if (arr.length === 0) {
       startNetWorth = total;
@@ -251,11 +250,11 @@ function recalculate(
 
     const graphPoint = {
       x: d.format(x, displayFormat, { locale }),
-      y: integerToAmount(total),
-      assets: integerToCurrency(assets),
-      debt: `-${integerToCurrency(debt)}`,
-      change: integerToCurrency(change),
-      networth: integerToCurrency(total),
+      y: total,
+      assets: format(assets, 'financial'),
+      debt: `-${format(debt, 'financial')}`,
+      change: format(change, 'financial'),
+      networth: format(total, 'financial'),
       date: d.format(x, tooltipFormat, { locale }),
     };
 

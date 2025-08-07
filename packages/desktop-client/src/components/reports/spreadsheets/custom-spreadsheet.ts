@@ -2,7 +2,6 @@ import * as d from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { integerToAmount } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type PayeeEntity,
@@ -213,7 +212,7 @@ export function createCustomSpreadsheet({
             stackAmounts += netAmounts;
           }
           if (stackAmounts !== 0) {
-            stacked[item.name] = integerToAmount(stackAmounts);
+            stacked[item.name] = stackAmounts; // TODO: not sure yet
           }
 
           perIntervalNetAssets =
@@ -244,11 +243,11 @@ export function createCustomSpreadsheet({
             index + 1 === intervals.length
               ? endDate
               : monthUtils.subDays(intervals[index + 1], 1),
-          totalAssets: integerToAmount(perIntervalAssets),
-          totalDebts: integerToAmount(perIntervalDebts),
-          netAssets: integerToAmount(perIntervalNetAssets),
-          netDebts: integerToAmount(perIntervalNetDebts),
-          totalTotals: integerToAmount(perIntervalTotals),
+          totalAssets: perIntervalAssets,
+          totalDebts: perIntervalDebts,
+          netAssets: perIntervalNetAssets,
+          netDebts: perIntervalNetDebts,
+          totalTotals: perIntervalTotals,
         });
 
         return arr;
@@ -293,11 +292,11 @@ export function createCustomSpreadsheet({
       legend,
       startDate,
       endDate,
-      totalAssets: integerToAmount(totalAssets),
-      totalDebts: integerToAmount(totalDebts),
-      netAssets: integerToAmount(netAssets),
-      netDebts: integerToAmount(netDebts),
-      totalTotals: integerToAmount(totalAssets + totalDebts),
+      totalAssets,
+      totalDebts,
+      netAssets,
+      netDebts,
+      totalTotals: totalAssets + totalDebts,
     });
     setDataCheck?.(true);
   };
