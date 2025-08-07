@@ -88,6 +88,13 @@ export function MobileRulesPage() {
   const handleRulePress = useCallback(
     (rule: RuleEntity) => {
       console.log('DEBUG: handleRulePress called for rule:', rule.id);
+      
+      // Try direct window navigation as a test
+      console.log('DEBUG: Attempting window.location navigation');
+      window.location.href = '/rules/edit';
+      
+      // Original navigation (comment out for now)
+      /*
       navigate('/rules/edit', {
         state: {
           rule,
@@ -95,6 +102,7 @@ export function MobileRulesPage() {
         },
       });
       console.log('DEBUG: navigate called to /rules/edit');
+      */
     },
     [navigate, loadRules],
   );

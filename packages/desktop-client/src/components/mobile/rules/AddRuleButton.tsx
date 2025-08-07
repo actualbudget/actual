@@ -15,12 +15,20 @@ export function AddRuleButton({ onRuleAdded }: AddRuleButtonProps) {
   const handleAddRule = useCallback(() => {
     console.log('DEBUG: handleAddRule called');
     alert('DEBUG: Add rule button pressed');
+    
+    // Try direct window navigation as a test
+    console.log('DEBUG: Attempting window.location navigation');
+    window.location.href = '/rules/edit';
+    
+    // Original navigation (comment out for now)
+    /*
     navigate('/rules/edit', {
       state: {
         onRuleSaved: onRuleAdded,
       },
     });
     console.log('DEBUG: navigate called to /rules/edit');
+    */
   }, [navigate, onRuleAdded]);
 
   return (
