@@ -75,8 +75,16 @@ export function MobileRuleEditPage() {
           flex: 1,
           backgroundColor: theme.mobilePageBackground,
           overflow: 'hidden',
+          padding: 20,
         }}
       >
+        {/* Temporary debug message */}
+        <View style={{ padding: 20, backgroundColor: 'yellow', marginBottom: 20 }}>
+          <span style={{ color: 'black', fontWeight: 'bold' }}>
+            DEBUG: MobileRuleEditPage loaded successfully!
+            {rule ? ` Editing rule: ${rule.id || 'new'}` : ' Creating new rule'}
+          </span>
+        </View>
         <RuleEditor
           rule={defaultRule}
           onSave={handleSave}

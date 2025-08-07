@@ -21,6 +21,12 @@ type RulesListItemProps = {
 export function RulesListItem({ rule, onPress }: RulesListItemProps) {
   const { t } = useTranslation();
 
+  const handlePress = () => {
+    console.log('DEBUG: RulesListItem button pressed for rule:', rule.id);
+    alert(`DEBUG: Rule ${rule.id} button pressed`);
+    onPress();
+  };
+
   // Group actions by splitIndex to handle split transactions
   const actionSplits = groupActionsBySplitIndex(rule.actions);
   const hasSplits = actionSplits.length > 1;
@@ -42,7 +48,7 @@ export function RulesListItem({ rule, onPress }: RulesListItemProps) {
         padding: '8px 16px',
         gap: 12,
       }}
-      onPress={onPress}
+      onPress={handlePress}
     >
       {/* Column 1: PRE/POST pill */}
       <View

@@ -87,12 +87,14 @@ export function MobileRulesPage() {
 
   const handleRulePress = useCallback(
     (rule: RuleEntity) => {
+      console.log('DEBUG: handleRulePress called for rule:', rule.id);
       navigate('/rules/edit', {
         state: {
           rule,
           onRuleSaved: () => loadRules(),
         },
       });
+      console.log('DEBUG: navigate called to /rules/edit');
     },
     [navigate, loadRules],
   );

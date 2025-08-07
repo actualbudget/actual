@@ -13,11 +13,14 @@ export function AddRuleButton({ onRuleAdded }: AddRuleButtonProps) {
   const navigate = useNavigate();
 
   const handleAddRule = useCallback(() => {
+    console.log('DEBUG: handleAddRule called');
+    alert('DEBUG: Add rule button pressed');
     navigate('/rules/edit', {
       state: {
         onRuleSaved: onRuleAdded,
       },
     });
+    console.log('DEBUG: navigate called to /rules/edit');
   }, [navigate, onRuleAdded]);
 
   return (
