@@ -32,7 +32,11 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
-import { groupById, integerToCurrency } from 'loot-core/shared/util';
+import {
+  groupById,
+  type IntegerAmount,
+  integerToCurrency,
+} from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type TransactionEntity,
@@ -84,6 +88,8 @@ function Loading({ style, 'aria-label': ariaLabel }: LoadingProps) {
 type TransactionListProps = {
   isLoading: boolean;
   transactions: readonly TransactionEntity[];
+  showBalances?: boolean;
+  runningBalances?: Map<TransactionEntity['id'], IntegerAmount>;
   onOpenTransaction?: (transaction: TransactionEntity) => void;
   isLoadingMore: boolean;
   onLoadMore: () => void;
@@ -93,6 +99,8 @@ type TransactionListProps = {
 export function TransactionList({
   isLoading,
   transactions,
+  showBalances,
+  runningBalances,
   onOpenTransaction,
   isLoadingMore,
   onLoadMore,
@@ -198,10 +206,13 @@ export function TransactionList({
                 t => !isPreviewId(t.id) || !t.is_child,
               )}
               addIdAndValue
+              dependencies={[transactions, showBalances, runningBalances]}
             >
               {transaction => (
                 <TransactionListItem
                   key={transaction.id}
+                  showBalance={showBalances}
+                  balance={runningBalances?.get(transaction.id)}
                   value={transaction}
                   onPress={trans => onTransactionPress(trans)}
                   onLongPress={trans => onTransactionPress(trans, true)}
