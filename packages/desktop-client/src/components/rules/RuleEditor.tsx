@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+// @ts-strict-ignore
+import {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  type CSSProperties,
+} from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -276,12 +283,15 @@ function ConditionEditor({
       <GenericInput
         key={inputKey}
         field={field}
+        subfield={null}
         type={type}
         value={value}
         op={op}
         multi={op === 'oneOf' || op === 'notOneOf'}
         onChange={v => onChange('value', v)}
         numberFormatType="currency"
+        ref={null}
+        style={{}}
       />
     );
   }
@@ -292,8 +302,15 @@ function ConditionEditor({
         fields={translatedConditions}
         value={field}
         onChange={value => onChange('field', value)}
+        style={{}}
       />
-      <OpSelect ops={ops} value={op} type={type} onChange={onChange} />
+      <OpSelect
+        ops={ops}
+        value={op}
+        type={type}
+        onChange={onChange}
+        style={{}}
+      />
 
       <View style={{ flex: 1 }}>{valueEditor}</View>
 
@@ -370,7 +387,8 @@ function ScheduleDescription({ id }) {
           </Trans>
         </Text>
       </View>
-      <StatusBadge status={status} />
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <StatusBadge status={status as any} />
     </View>
   );
 }
@@ -426,23 +444,30 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
             ops={['set', 'prepend-notes', 'append-notes']}
             value={op}
             onChange={onChange}
+            type="string"
+            style={{}}
           />
 
           <FieldSelect
             fields={fields}
             value={field}
             onChange={value => onChange('field', value)}
+            style={{}}
           />
 
           <View style={{ flex: 1 }}>
             <GenericInput
               key={inputKey}
               field={field}
+              subfield={null}
               type={templated ? 'string' : type}
               op={op}
               value={options?.template ?? value}
               onChange={v => onChange('value', v)}
               numberFormatType="currency"
+              multi={false}
+              ref={null}
+              style={{}}
             />
           </View>
           {/*Due to that these fields have id's as value it is not helpful to have templating here*/}
@@ -480,6 +505,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
             options={getAllocationMethodOptions()}
             value={options.method}
             onChange={onChange}
+            style={{}}
           />
 
           <View style={{ flex: 1 }}>
@@ -487,6 +513,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
               <GenericInput
                 key={inputKey}
                 field={field}
+                subfield={null}
                 op={op}
                 type="number"
                 numberFormatType={
@@ -494,6 +521,9 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
                 }
                 value={value}
                 onChange={v => onChange('value', v)}
+                multi={false}
+                ref={null}
+                style={{}}
               />
             )}
           </View>
@@ -516,16 +546,22 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
             ops={['set', 'prepend-notes', 'append-notes']}
             value={op}
             onChange={onChange}
+            type="string"
+            style={{}}
           />
 
           <View style={{ flex: 1 }}>
             <GenericInput
               key={inputKey}
               field={field}
+              subfield={null}
               type="string"
               op={op}
               value={value}
               onChange={v => onChange('value', v)}
+              multi={false}
+              ref={null}
+              style={{}}
             />
           </View>
         </>
@@ -647,7 +683,8 @@ function ConditionsList({
     onChangeConditions(
       updateValue(conditions, cond, () => {
         if (field === 'field') {
-          const newCond = { field: value };
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const newCond: any = { field: value };
 
           if (value === 'amount-inflow') {
             newCond.field = 'amount';
@@ -792,13 +829,13 @@ const conditionFields = [
     ['amount-outflow', mapField('amount', { outflow: true })],
   ]);
 
-export interface RuleEditorProps {
+export type RuleEditorProps = {
   rule: RuleEntity | NewRuleEntity;
   onSave: (rule: RuleEntity | NewRuleEntity) => Promise<void>;
   onCancel?: () => void;
   showTransactionPreview?: boolean;
-  style?: React.CSSProperties;
-}
+  style?: CSSProperties;
+};
 
 export function RuleEditor({
   rule: defaultRule,
@@ -829,7 +866,7 @@ export function RuleEditor({
   const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
-  const scrollableEl = useRef();
+  const scrollableEl = useRef<HTMLDivElement>(null);
 
   const isSchedule = getActions(actionSplits).some(
     action => action.op === 'link-schedule',
@@ -1019,7 +1056,8 @@ export function RuleEditor({
 
   async function handleSave() {
     setIsLoading(true);
-    const rule = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rule: any = {
       ...defaultRule,
       stage,
       conditionsOp,
@@ -1028,21 +1066,27 @@ export function RuleEditor({
     };
 
     const method = rule.id ? 'rule-update' : 'rule-add';
-    const { error, id: newId } = await send(method, rule);
+    const response = await send(method, rule);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error, id: newId } = response as any;
 
     if (error) {
-      if (error.conditionErrors) {
-        setConditions(applyErrors(conditions, error.conditionErrors));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((error as any).conditionErrors) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setConditions(applyErrors(conditions, (error as any).conditionErrors));
       }
 
-      if (error.actionErrors) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((error as any).actionErrors) {
         let usedErrorIdx = 0;
         setActionSplits(
           actionSplits.map(item => ({
             ...item,
             actions: item.actions.map(action => ({
               ...action,
-              error: error.actionErrors[usedErrorIdx++] ?? null,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              error: (error as any).actionErrors[usedErrorIdx++] ?? null,
             })),
           })),
         );
@@ -1053,7 +1097,7 @@ export function RuleEditor({
         rule.id = newId;
       }
 
-      await onSave(rule);
+      await onSave(rule as RuleEntity | NewRuleEntity);
     }
     setIsLoading(false);
   }
@@ -1079,18 +1123,21 @@ export function RuleEditor({
           <StageButton
             selected={stage === 'pre'}
             onSelect={() => onChangeStage('pre')}
+            style={{}}
           >
             <Trans>Pre</Trans>
           </StageButton>
           <StageButton
             selected={stage === null}
             onSelect={() => onChangeStage(null)}
+            style={{}}
           >
             <Trans>Default</Trans>
           </StageButton>
           <StageButton
             selected={stage === 'post'}
             onSelect={() => onChangeStage('post')}
+            style={{}}
           >
             <Trans>Post</Trans>
           </StageButton>
@@ -1102,7 +1149,9 @@ export function RuleEditor({
       <View
         innerRef={scrollableEl}
         style={{
-          borderBottom: showTransactionPreview ? '1px solid ' + theme.tableBorder : 'none',
+          borderBottom: showTransactionPreview
+            ? '1px solid ' + theme.tableBorder
+            : 'none',
           padding: 20,
           overflow: 'auto',
           maxHeight: showTransactionPreview ? 'calc(100% - 300px)' : 'auto',
@@ -1164,11 +1213,7 @@ export function RuleEditor({
                   }
                 >
                   {actionSplits.length > 1 && (
-                    <Stack
-                      direction="row"
-                      justify="space-between"
-                      spacing={1}
-                    >
+                    <Stack direction="row" justify="space-between" spacing={1}>
                       <Text
                         style={{
                           ...styles.smallText,
@@ -1204,12 +1249,6 @@ export function RuleEditor({
                     {actions.map((action, actionIndex) => (
                       <View key={actionIndex}>
                         <ActionEditor
-                          ops={[
-                            'set',
-                            'link-schedule',
-                            'prepend-notes',
-                            'append-notes',
-                          ]}
                           action={action}
                           editorStyle={styles.editorPill}
                           onChange={(name, value) => {
@@ -1217,10 +1256,7 @@ export function RuleEditor({
                           }}
                           onDelete={() => onRemoveAction(action)}
                           onAdd={() =>
-                            addActionToSplitAfterIndex(
-                              splitIndex,
-                              actionIndex,
-                            )
+                            addActionToSplitAfterIndex(splitIndex, actionIndex)
                           }
                         />
                       </View>
@@ -1230,9 +1266,7 @@ export function RuleEditor({
                   {actions.length === 0 && (
                     <Button
                       style={{ alignSelf: 'flex-start', marginTop: 5 }}
-                      onPress={() =>
-                        addActionToSplitAfterIndex(splitIndex, -1)
-                      }
+                      onPress={() => addActionToSplitAfterIndex(splitIndex, -1)}
                     >
                       <Trans>Add action</Trans>
                     </Button>
@@ -1290,13 +1324,14 @@ export function RuleEditor({
                 border: '1px solid ' + theme.tableBorder,
                 borderRadius: '6px 6px 0 0',
               }}
+              renderEmpty={
+                <div>
+                  <Trans>No transactions match this rule</Trans>
+                </div>
+              }
             />
 
-            <Stack
-              direction="row"
-              justify="flex-end"
-              style={{ marginTop: 20 }}
-            >
+            <Stack direction="row" justify="flex-end" style={{ marginTop: 20 }}>
               {onCancel && (
                 <Button onPress={onCancel}>
                   <Trans>Cancel</Trans>

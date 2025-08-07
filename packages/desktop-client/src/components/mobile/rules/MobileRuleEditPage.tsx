@@ -1,21 +1,22 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useLocation } from 'react-router';
+import { useLocation } from 'react-router';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { type RuleEntity, type NewRuleEntity } from 'loot-core/types/models';
 
-import { RuleEditor } from '@desktop-client/components/rules/RuleEditor';
-import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
+import { MobilePageHeader, Page } from '@desktop-client/components/Page';
+import { RuleEditor } from '@desktop-client/components/rules/RuleEditor';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 export function MobileRuleEditPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Get rule data from location state
   const rule = location.state?.rule as RuleEntity | NewRuleEntity | undefined;
   const onRuleSaved = location.state?.onRuleSaved as (() => void) | undefined;
@@ -42,12 +43,12 @@ export function MobileRuleEditPage() {
     ],
   };
 
-  const handleSave = async (savedRule: RuleEntity | NewRuleEntity) => {
+  const handleSave = async () => {
     // Call the callback if provided
     if (onRuleSaved) {
       onRuleSaved();
     }
-    
+
     // Navigate back to rules list
     navigate('/rules');
   };
@@ -56,7 +57,7 @@ export function MobileRuleEditPage() {
     navigate('/rules');
   };
 
-  const isEditing = Boolean(rule?.id);
+  const isEditing = Boolean(rule && 'id' in rule && rule.id);
   const pageTitle = isEditing ? t('Edit Rule') : t('Create Rule');
 
   return (

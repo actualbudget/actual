@@ -14,7 +14,7 @@ export function EditRuleModal({
 }) {
   const { t } = useTranslation();
 
-  const handleSave = async (rule) => {
+  const handleSave = async rule => {
     if (originalOnSave) {
       await originalOnSave(rule);
     }
@@ -30,7 +30,7 @@ export function EditRuleModal({
           />
           <RuleEditor
             rule={defaultRule}
-            onSave={async (rule) => {
+            onSave={async rule => {
               await handleSave(rule);
               close();
             }}

@@ -1,8 +1,9 @@
 import React from 'react';
-import { useNavigate } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
+
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
 type AddRuleButtonProps = {
   onRuleAdded: () => void;
