@@ -16,7 +16,7 @@ import {
   getStatus,
   recurConfigToRSchedule,
 } from '../../shared/schedules';
-import { ScheduleEntity } from '../../types/models';
+import { RuleConditionEntity, ScheduleEntity } from '../../types/models';
 import { addTransactions } from '../accounts/sync';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';
@@ -47,7 +47,10 @@ function zip(arr1, arr2) {
   return result;
 }
 
-export function updateConditions(conditions, newConditions) {
+export function updateConditions(
+  conditions: RuleConditionEntity[],
+  newConditions: RuleConditionEntity[],
+) {
   const scheduleConds = extractScheduleConds(conditions);
   const newScheduleConds = extractScheduleConds(newConditions);
 
@@ -443,11 +446,14 @@ async function postTransactionForSchedule({
 
 async function advanceSchedulesService(syncSuccess) {
   // Move all paid schedules
-  const { data: schedules } = await aqlQuery(
+  const { data: schedulesData } = await aqlQuery(
     q('schedules')
       .filter({ completed: false, '_account.closed': false })
       .select('*'),
   );
+
+  const schedules = schedulesData as ScheduleEntity[];
+
   const { data: hasTransData } = await aqlQuery(
     getHasTransactionsQuery(schedules),
   );
@@ -483,7 +489,7 @@ async function advanceSchedulesService(syncSuccess) {
             // find the rule
           }
         } else {
-          if (schedule._date < currentDay()) {
+          if (schedule._date.start < currentDay()) {
             // Complete any single schedules
             await updateSchedule({
               schedule: { id: schedule.id, completed: true },
