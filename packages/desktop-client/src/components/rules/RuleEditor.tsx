@@ -1197,9 +1197,10 @@ export function RuleEditor({
         innerRef={scrollableEl}
         style={{
           borderBottom: '1px solid ' + theme.tableBorder,
-          padding: 20,
+          padding: '0 20px 20px 20px',
           overflow: 'auto',
           maxHeight: 'calc(100% - 300px)',
+          minHeight: 100,
         }}
       >
         <View style={{ flexShrink: 0 }}>
