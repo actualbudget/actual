@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 
 import { generateAccount } from 'loot-core/mocks';
 import { q } from 'loot-core/shared/query';
-import { type AccountEntity, type _SyncFields } from 'loot-core/types/models';
+import { type AccountEntity } from 'loot-core/types/models';
 
 import { ReconcilingMessage, ReconcileMenu } from './Reconcile';
 
@@ -163,9 +163,11 @@ describe('ReconcileMenu arithmetic evaluation', () => {
     const onClose = vi.fn();
 
     // Ensure the account is the connected variant so balance_current is a number
-    const connectedAccount =
-      generateAccount('Checking', true, false) as AccountEntity &
-        _SyncFields<true>;
+    const connectedAccount = generateAccount(
+      'Checking',
+      true,
+      false,
+    ) as AccountEntity;
     connectedAccount.balance_current = 4321;
 
     render(
