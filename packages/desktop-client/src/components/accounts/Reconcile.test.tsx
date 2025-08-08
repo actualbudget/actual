@@ -7,7 +7,6 @@ import { type AccountEntity } from 'loot-core/types/models';
 
 import { ReconcilingMessage, ReconcileMenu } from './Reconcile';
 
-
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { TestProvider } from '@desktop-client/redux/mock';
 
