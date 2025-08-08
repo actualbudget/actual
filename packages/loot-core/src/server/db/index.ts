@@ -42,6 +42,7 @@ import {
   DbCategoryMapping,
   DbClockMessage,
   DbPayee,
+  DbPayeeGeolocation,
   DbPayeeMapping,
   DbTag,
   DbTransaction,
@@ -583,6 +584,19 @@ export async function deleteTransferPayee(payee: Pick<DbPayee, 'id'>) {
 export function updatePayee(payee: WithRequired<Partial<DbPayee>, 'id'>) {
   payee = payeeModel.validate(payee, { update: true });
   return update('payees', payee);
+}
+
+export async function getPayeeGeolocations(): Promise<DbPayeeGeolocation[]> {
+  return all<DbPayeeGeolocation>(
+    'SELECT * FROM payee_geolocations',
+  );
+}
+
+export async function insertPayeeGeolocation(
+  payeeGeolocation: WithRequired<Partial<DbPayeeGeolocation>, 'payee_id' | 'latitude' | 'longitude'>,
+) {
+  const geolocationId = await insertWithUUID('payee_geolocations', payeeGeolocation);
+  return geolocationId;
 }
 
 export async function mergePayees(

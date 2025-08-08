@@ -332,3 +332,10 @@ export type DbTag = {
   description?: string | null;
   tombstone: 1 | 0;
 };
+
+export type DbPayeeGeolocation = {
+  id: string;
+  payee_id: DbPayee['id'];
+  latitude: number;
+  longitude: number;
+};

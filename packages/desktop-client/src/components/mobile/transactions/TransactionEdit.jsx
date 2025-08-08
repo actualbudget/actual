@@ -71,6 +71,7 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useNearbyPayees } from '@desktop-client/hooks/useNearbyPayees';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
   SingleActiveEditFormProvider,
@@ -1224,6 +1225,8 @@ function TransactionEditUnconnected({
     [dateFormat, transactions],
   );
 
+  const { assignPayeesToGeolocation: assignPayeesToLocation } = useNearbyPayees();
+
   const onSave = useCallback(
     async newTransactions => {
       if (isDeleted.current) {
@@ -1255,8 +1258,10 @@ function TransactionEditUnconnected({
         // about
         dispatch(setLastTransaction({ transaction: newTransactions[0] }));
       }
+
+      await assignPayeesToLocation(newTransactions.map(t => t.payee));
     },
-    [dispatch, fetchedTransactions],
+    [assignPayeesToLocation, dispatch, fetchedTransactions],
   );
 
   const onDelete = useCallback(
