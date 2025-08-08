@@ -13,7 +13,8 @@ import { View } from '@actual-app/components/view';
 import { t } from 'i18next';
 
 import { type Query } from 'loot-core/shared/query';
-import { currencyToInteger, tsToRelativeTime } from 'loot-core/shared/util';
+import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import { currencyToInteger, tsToRelativeTime, amountToInteger } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
@@ -154,8 +155,8 @@ export function ReconcileMenu({
       return;
     }
 
-    const amount =
-      inputValue != null ? currencyToInteger(inputValue) : clearedBalance;
+    const evaluatedAmount = inputValue != null ? evalArithmetic(inputValue) : null;
+    const amount = evaluatedAmount != null ? amountToInteger(evaluatedAmount) : clearedBalance;
 
     onReconcile(amount);
     onClose();
