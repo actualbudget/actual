@@ -25,6 +25,7 @@ type ServerContextValue = {
   url: string | null;
   version: string;
   multiuserEnabled: boolean;
+  loginMethod?: string;
   availableLoginMethods: LoginMethod[];
   setURL: (
     url: string,
@@ -32,19 +33,22 @@ type ServerContextValue = {
   ) => Promise<{ error?: string }>;
   refreshLoginMethods: () => Promise<void>;
   setMultiuserEnabled: (enabled: boolean) => void;
-  setLoginMethods: (methods: LoginMethod[]) => void;
+  setLoginMethod: (method: string) => void;
+  setAvailableLoginMethods: (methods: LoginMethod[]) => void;
 };
 
 const ServerContext = createContext<ServerContextValue>({
   url: null,
   version: '',
   multiuserEnabled: false,
+  loginMethod: undefined,
   availableLoginMethods: [],
   setURL: () => Promise.reject(new Error('ServerContext not initialized')),
   refreshLoginMethods: () =>
     Promise.reject(new Error('ServerContext not initialized')),
   setMultiuserEnabled: () => {},
-  setLoginMethods: () => {},
+  setAvailableLoginMethods: () => {},
+  setLoginMethod: () => {},
 });
 
 export const useServerURL = () => useContext(ServerContext).url;
@@ -56,15 +60,8 @@ export const useMultiuserEnabled = () => {
   return multiuserEnabled && loginMethod === 'openid';
 };
 
-export const useLoginMethod = () => {
-  const availableLoginMethods = useContext(ServerContext).availableLoginMethods;
+export const useLoginMethod = () => useContext(ServerContext).loginMethod;
 
-  if (!availableLoginMethods || availableLoginMethods.length === 0) {
-    return 'password';
-  }
-
-  return availableLoginMethods.filter(m => m.active)[0]?.method ?? 'password';
-};
 export const useAvailableLoginMethods = () =>
   useContext(ServerContext).availableLoginMethods;
 
@@ -82,8 +79,10 @@ export const useRefreshLoginMethods = () =>
 export const useSetMultiuserEnabled = () =>
   useContext(ServerContext).setMultiuserEnabled;
 
-export const useSetLoginMethods = () =>
-  useContext(ServerContext).setLoginMethods;
+export const useSetAvailableLoginMethods = () =>
+  useContext(ServerContext).setAvailableLoginMethods;
+
+export const useSetLoginMethod = () => useContext(ServerContext).setLoginMethod;
 
 export function ServerProvider({ children }: { children: ReactNode }) {
   const dispatch = useDispatch();
@@ -93,6 +92,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
   const [availableLoginMethods, setAvailableLoginMethods] = useState<
     LoginMethod[]
   >([]);
+  const [loginMethod, setLoginMethod] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     async function run() {
@@ -135,6 +135,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
         (data: Awaited<ReturnType<Handlers['subscribe-needs-bootstrap']>>) => {
           if ('hasServer' in data && data.hasServer) {
             setAvailableLoginMethods(data.availableLoginMethods || []);
+            setLoginMethod(data.loginMethod || undefined);
             setMultiuserEnabled(data.multiuser || false);
           }
         },
@@ -161,11 +162,13 @@ export function ServerProvider({ children }: { children: ReactNode }) {
         url: serverURL,
         multiuserEnabled,
         availableLoginMethods,
+        loginMethod,
         setURL,
         version: version ? `v${version}` : 'N/A',
         refreshLoginMethods,
         setMultiuserEnabled,
-        setLoginMethods: setAvailableLoginMethods,
+        setAvailableLoginMethods,
+        setLoginMethod,
       }}
     >
       {children}
