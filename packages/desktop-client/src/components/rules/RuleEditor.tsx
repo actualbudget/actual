@@ -22,6 +22,7 @@ import {
 } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Select } from '@actual-app/components/select';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -392,32 +393,33 @@ function ScheduleDescription({ id }) {
 
   return (
     <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-      <View style={{ marginRight: 15, flexDirection: 'row' }}>
-        <Text
-          style={{
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          <Trans>Payee:</Trans>{' '}
+      <SpaceBetween
+        gap={5}
+        style={{
+          marginRight: 15,
+        }}
+      >
+        <SpaceBetween gap={5}>
+          <Trans>Payee:</Trans>
           <DisplayId
             type="payees"
             id={schedule._payee}
             noneColor={theme.pageTextLight}
           />
-        </Text>
-        <Text style={{ margin: '0 5px' }}> — </Text>
+        </SpaceBetween>
+
         <Text style={{ flexShrink: 0 }}>
+          <Text> — </Text>
           <Trans>Amount:</Trans> {formatAmount(schedule._amount)}
         </Text>
-        <Text style={{ margin: '0 5px' }}> — </Text>
+
         <Text style={{ flexShrink: 0 }}>
+          <Text> — </Text>
           <Trans>
             Next: {{ month: monthUtils.format(schedule.next_date, dateFormat) }}
           </Trans>
         </Text>
-      </View>
+      </SpaceBetween>
       {/* @ts-expect-error fix this */}
       <StatusBadge status={status} />
     </View>
@@ -1339,10 +1341,13 @@ export function RuleEditor({
 
       <SelectedProvider instance={selectedInst}>
         <View style={{ padding: '20px', flex: 1 }}>
-          <View
+          <SpaceBetween
+            direction="horizontal"
+            gap={5}
             style={{
               flexDirection: 'row',
-              alignItems: 'center',
+              flexWrap: 'no-wrap',
+              justifyContent: 'space-between',
               marginBottom: 12,
             }}
           >
@@ -1350,14 +1355,13 @@ export function RuleEditor({
               <Trans>This rule applies to these transactions:</Trans>
             </Text>
 
-            <View style={{ flex: 1 }} />
             <Button
               isDisabled={selectedInst.items.size === 0}
               onPress={onApply}
             >
               <Trans>Apply actions</Trans> ({selectedInst.items.size})
             </Button>
-          </View>
+          </SpaceBetween>
 
           {/* @ts-expect-error fix this */}
           <SimpleTransactionsTable

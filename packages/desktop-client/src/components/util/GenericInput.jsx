@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
 
@@ -22,7 +23,8 @@ import { RecurringSchedulePicker } from '@desktop-client/components/select/Recur
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useReports } from '@desktop-client/hooks/useReports';
-import { useSelector } from '@desktop-client/redux';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 export function GenericInput({
   field,
@@ -36,6 +38,8 @@ export function GenericInput({
   onChange,
   op = undefined,
 }) {
+  const dispatch = useDispatch();
+  const { isNarrowWidth } = useResponsive();
   const { t } = useTranslation();
   const { grouped: categoryGroups } = useCategories();
   const { data: savedReports } = useReports();
@@ -91,12 +95,30 @@ export function GenericInput({
             <PayeeAutocomplete
               type={autocompleteType}
               showMakeTransfer={false}
-              openOnFocus={true}
+              openOnFocus={!isNarrowWidth}
               value={value}
               onSelect={onChange}
               inputProps={{
                 ref,
                 ...(showPlaceholder ? { placeholder: t('nothing') } : null),
+                onClick: () => {
+                  if (!isNarrowWidth) {
+                    return;
+                  }
+
+                  dispatch(
+                    pushModal({
+                      modal: {
+                        name: 'payee-autocomplete',
+                        options: {
+                          onSelect: newValue => {
+                            onChange(multi ? [...value, newValue] : newValue);
+                          },
+                        },
+                      },
+                    }),
+                  );
+                },
               }}
             />
           );
@@ -113,11 +135,31 @@ export function GenericInput({
                 <AccountAutocomplete
                   type={autocompleteType}
                   value={value}
-                  openOnFocus={true}
+                  openOnFocus={!isNarrowWidth}
                   onSelect={onChange}
                   inputProps={{
                     ref,
                     ...(showPlaceholder ? { placeholder: t('nothing') } : null),
+                    onClick: () => {
+                      if (!isNarrowWidth) {
+                        return;
+                      }
+
+                      dispatch(
+                        pushModal({
+                          modal: {
+                            name: 'account-autocomplete',
+                            options: {
+                              onSelect: newValue => {
+                                onChange(
+                                  multi ? [...value, newValue] : newValue,
+                                );
+                              },
+                            },
+                          },
+                        }),
+                      );
+                    },
                   }}
                 />
               );
@@ -131,12 +173,30 @@ export function GenericInput({
               type={autocompleteType}
               categoryGroups={categoryGroups}
               value={value}
-              openOnFocus={true}
+              openOnFocus={!isNarrowWidth}
               onSelect={onChange}
               showHiddenCategories={false}
               inputProps={{
                 ref,
                 ...(showPlaceholder ? { placeholder: t('nothing') } : null),
+                onClick: () => {
+                  if (!isNarrowWidth) {
+                    return;
+                  }
+
+                  dispatch(
+                    pushModal({
+                      modal: {
+                        name: 'category-autocomplete',
+                        options: {
+                          onSelect: newValue => {
+                            onChange(multi ? [...value, newValue] : newValue);
+                          },
+                        },
+                      },
+                    }),
+                  );
+                },
               }}
             />
           );

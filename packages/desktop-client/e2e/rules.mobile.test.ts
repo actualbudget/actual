@@ -52,24 +52,18 @@ test.describe('Mobile Rules', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('clicking add button opens rule creation modal', async () => {
+  test('clicking add button opens rule creation form', async () => {
     await rulesPage.clickAddRule();
 
-    // Check that edit rule modal is opened
-    const modal = page.getByRole('dialog');
-    await expect(modal).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('clicking on a rule opens edit modal', async () => {
+  test('clicking on a rule opens edit form', async () => {
     const ruleCount = await rulesPage.getRuleCount();
     expect(ruleCount).toBeGreaterThan(0);
 
     await rulesPage.clickRule(0);
 
-    // Check that edit rule modal is opened
-    const modal = page.getByRole('dialog');
-    await expect(modal).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
   });
 

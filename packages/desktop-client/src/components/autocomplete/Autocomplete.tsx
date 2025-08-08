@@ -261,11 +261,12 @@ function SingleAutocomplete<T extends AutocompleteItem>({
   const itemsViewRef = useRef(null);
 
   const { isNarrowWidth } = useResponsive();
-  const narrowInputStyle = isNarrowWidth
-    ? {
-        ...styles.mobileMenuItem,
-      }
-    : {};
+  const narrowInputStyle =
+    embedded && isNarrowWidth
+      ? {
+          ...styles.mobileMenuItem,
+        }
+      : {};
 
   inputProps = {
     ...inputProps,
@@ -278,7 +279,9 @@ function SingleAutocomplete<T extends AutocompleteItem>({
   // Update the selected item if the suggestion list or initial
   // input value has changed
   useEffect(() => {
-    setSelectedItem(findItem(strict, suggestions, initialValue));
+    const newSelectedItem = findItem(strict, suggestions, initialValue);
+    setSelectedItem(newSelectedItem);
+    setValue(newSelectedItem ? getItemName(newSelectedItem) : '');
   }, [initialValue, suggestions, strict]);
 
   function resetState(newValue?: string) {
