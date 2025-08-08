@@ -13,7 +13,7 @@ export function ConditionsOpMenu({
   onChange,
   conditions,
 }: {
-  conditionsOp: string;
+  conditionsOp: 'and' | 'or';
   onChange: (value: 'and' | 'or') => void;
   conditions: RuleConditionEntity[];
 }) {

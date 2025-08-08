@@ -674,10 +674,11 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
                   htmlFor="amount-field"
                   style={{ margin: 0, flex: 1 }}
                 />
-                {/* @ts-expect-error should be auto-patched once GenericInput is converted to TS */}
                 <OpSelect
                   ops={['isapprox', 'is', 'isbetween']}
-                  value={state.fields.amountOp}
+                  value={
+                    state.fields.amountOp as 'isapprox' | 'is' | 'isbetween'
+                  }
                   formatOp={op => {
                     switch (op) {
                       case 'is':

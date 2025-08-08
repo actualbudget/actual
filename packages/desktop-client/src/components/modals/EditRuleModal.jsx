@@ -14,12 +14,6 @@ export function EditRuleModal({
 }) {
   const { t } = useTranslation();
 
-  const handleSave = async rule => {
-    if (originalOnSave) {
-      await originalOnSave(rule);
-    }
-  };
-
   return (
     <Modal name="edit-rule">
       {({ state: { close } }) => (
@@ -30,10 +24,7 @@ export function EditRuleModal({
           />
           <RuleEditor
             rule={defaultRule}
-            onSave={async rule => {
-              await handleSave(rule);
-              close();
-            }}
+            onSave={originalOnSave}
             onCancel={close}
             style={{
               maxWidth: '100%',

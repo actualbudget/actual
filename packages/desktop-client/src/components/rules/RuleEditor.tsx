@@ -5,6 +5,7 @@ import {
   useRef,
   useMemo,
   type CSSProperties,
+  type ReactNode,
 } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
@@ -50,7 +51,11 @@ import {
   integerToAmount,
   amountToInteger,
 } from 'loot-core/shared/util';
-import { type RuleEntity, type NewRuleEntity } from 'loot-core/types/models';
+import {
+  type RuleEntity,
+  type NewRuleEntity,
+  type RuleActionEntity,
+} from 'loot-core/types/models';
 
 import { StatusBadge } from '@desktop-client/components/schedules/StatusBadge';
 import { SimpleTransactionsTable } from '@desktop-client/components/transactions/SimpleTransactionsTable';
@@ -102,7 +107,19 @@ function getTransactionFields(conditions, actions) {
   return fields;
 }
 
-export function FieldSelect({ fields, style, value, onChange }) {
+type FieldSelectProps<T extends string> = {
+  fields: [T, string][];
+  style?: CSSProperties;
+  value: T;
+  onChange: (value: T) => void;
+};
+
+export function FieldSelect<T extends string>({
+  fields,
+  style,
+  value,
+  onChange,
+}: FieldSelectProps<T>) {
   return (
     <View style={style} data-testid="field-select">
       <Select
@@ -119,14 +136,23 @@ export function FieldSelect({ fields, style, value, onChange }) {
   );
 }
 
-export function OpSelect({
+type OpSelectProps<T extends string> = {
+  ops: T[];
+  type?: string;
+  style?: CSSProperties;
+  value: T;
+  formatOp?: (op: string, type: string) => string;
+  onChange: (name: string, value: T) => void;
+};
+
+export function OpSelect<T extends string>({
   ops,
   type,
   style,
   value,
   formatOp = friendlyOp,
   onChange,
-}) {
+}: OpSelectProps<T>) {
   const opOptions = useMemo(() => {
     const options = ops
       // We don't support the `contains`, `doesNotContain`, `matches` operators
@@ -140,6 +166,7 @@ export function OpSelect({
       .map(op => [op, formatOp(op, type)]);
 
     if (type === 'string' || type === 'id') {
+      // @ts-expect-error fix this
       options.splice(Math.ceil(options.length / 2), 0, Menu.line);
     }
 
@@ -150,6 +177,7 @@ export function OpSelect({
     <View data-testid="op-select">
       <Select
         bare
+        // @ts-expect-error fix this
         options={opOptions}
         value={value}
         onChange={value => onChange('op', value)}
@@ -159,7 +187,18 @@ export function OpSelect({
   );
 }
 
-function SplitAmountMethodSelect({ options, style, value, onChange }) {
+type SplitAmountMethodSelectProps = {
+  options: [string, string][];
+  style?: CSSProperties;
+  value: string;
+  onChange: (name: string, value: string) => void;
+};
+function SplitAmountMethodSelect({
+  options,
+  style,
+  value,
+  onChange,
+}: SplitAmountMethodSelectProps) {
   return (
     <View
       style={{ color: theme.pageTextPositive, ...style }}
@@ -280,18 +319,16 @@ function ConditionEditor({
     );
   } else {
     valueEditor = (
+      // @ts-expect-error fix this
       <GenericInput
         key={inputKey}
         field={field}
-        subfield={null}
         type={type}
         value={value}
         op={op}
         multi={op === 'oneOf' || op === 'notOneOf'}
         onChange={v => onChange('value', v)}
         numberFormatType="currency"
-        ref={null}
-        style={{}}
       />
     );
   }
@@ -299,18 +336,12 @@ function ConditionEditor({
   return (
     <Editor style={editorStyle} error={error}>
       <FieldSelect
+        // @ts-expect-error fix this
         fields={translatedConditions}
         value={field}
         onChange={value => onChange('field', value)}
-        style={{}}
       />
-      <OpSelect
-        ops={ops}
-        value={op}
-        type={type}
-        onChange={onChange}
-        style={{}}
-      />
+      <OpSelect ops={ops} value={op} type={type} onChange={onChange} />
 
       <View style={{ flex: 1 }}>{valueEditor}</View>
 
@@ -387,8 +418,8 @@ function ScheduleDescription({ id }) {
           </Trans>
         </Text>
       </View>
-      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-      <StatusBadge status={status as any} />
+      {/* @ts-expect-error fix this */}
+      <StatusBadge status={status} />
     </View>
   );
 }
@@ -414,7 +445,26 @@ function getSplitActionFields() {
 function getAllocationMethodOptions() {
   return Object.entries(getAllocationMethods());
 }
-function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
+
+type ActionEditorProps = {
+  action: RuleActionEntity & {
+    field: string;
+    type: string;
+    error: unknown;
+    inputKey?: string;
+  };
+  editorStyle: CSSProperties;
+  onChange: (name: string, value: unknown) => void;
+  onDelete: () => void;
+  onAdd: () => void;
+};
+function ActionEditor({
+  action,
+  editorStyle,
+  onChange,
+  onDelete,
+  onAdd,
+}: ActionEditorProps) {
   const { t } = useTranslation();
   const {
     field,
@@ -423,6 +473,7 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
     type,
     error,
     inputKey = 'initial',
+    // @ts-expect-error fix this
     options,
   } = action;
 
@@ -444,30 +495,25 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
             ops={['set', 'prepend-notes', 'append-notes']}
             value={op}
             onChange={onChange}
-            type="string"
-            style={{}}
           />
 
           <FieldSelect
+            // @ts-expect-error fix this
             fields={fields}
             value={field}
             onChange={value => onChange('field', value)}
-            style={{}}
           />
 
           <View style={{ flex: 1 }}>
+            {/* @ts-expect-error fix this */}
             <GenericInput
               key={inputKey}
               field={field}
-              subfield={null}
               type={templated ? 'string' : type}
               op={op}
               value={options?.template ?? value}
               onChange={v => onChange('value', v)}
               numberFormatType="currency"
-              multi={false}
-              ref={null}
-              style={{}}
             />
           </View>
           {/*Due to that these fields have id's as value it is not helpful to have templating here*/}
@@ -505,15 +551,14 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
             options={getAllocationMethodOptions()}
             value={options.method}
             onChange={onChange}
-            style={{}}
           />
 
           <View style={{ flex: 1 }}>
             {options.method !== 'remainder' && (
+              // @ts-expect-error fix this
               <GenericInput
                 key={inputKey}
                 field={field}
-                subfield={null}
                 op={op}
                 type="number"
                 numberFormatType={
@@ -521,9 +566,6 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
                 }
                 value={value}
                 onChange={v => onChange('value', v)}
-                multi={false}
-                ref={null}
-                style={{}}
               />
             )}
           </View>
@@ -546,22 +588,17 @@ function ActionEditor({ action, editorStyle, onChange, onDelete, onAdd }) {
             ops={['set', 'prepend-notes', 'append-notes']}
             value={op}
             onChange={onChange}
-            type="string"
-            style={{}}
           />
 
           <View style={{ flex: 1 }}>
+            {/* @ts-expect-error fix this */}
             <GenericInput
               key={inputKey}
               field={field}
-              subfield={null}
               type="string"
               op={op}
               value={value}
               onChange={v => onChange('value', v)}
-              multi={false}
-              ref={null}
-              style={{}}
             />
           </View>
         </>
@@ -608,7 +645,18 @@ function StageInfo() {
   );
 }
 
-function StageButton({ selected, children, style, onSelect }) {
+type StageButtonProps = {
+  selected: boolean;
+  children: ReactNode;
+  style?: CSSProperties;
+  onSelect: () => void;
+};
+function StageButton({
+  selected,
+  children,
+  style,
+  onSelect,
+}: StageButtonProps) {
   return (
     <Button
       variant="bare"
@@ -645,7 +693,7 @@ function ConditionsList({
       });
     }
 
-    // (remove the inflow and outflow pseudo-fields since they'd be a pain to get right)
+    // (remove the inflow and outflow pseudo-fields since they’d be a pain to get right)
     let fields = conditionFields
       .map(f => f[0])
       .filter(f => f !== 'amount-inflow' && f !== 'amount-outflow');
@@ -683,31 +731,36 @@ function ConditionsList({
     onChangeConditions(
       updateValue(conditions, cond, () => {
         if (field === 'field') {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const newCond: any = { field: value };
+          const newCond = { field: value };
 
           if (value === 'amount-inflow') {
             newCond.field = 'amount';
+            // @ts-expect-error fix this
             newCond.options = { inflow: true };
           } else if (value === 'amount-outflow') {
             newCond.field = 'amount';
+            // @ts-expect-error fix this
             newCond.options = { outflow: true };
           }
 
+          // @ts-expect-error fix this
           newCond.type = FIELD_TYPES.get(newCond.field);
 
           const prevType = FIELD_TYPES.get(cond.field);
           if (
             (prevType === 'string' || prevType === 'number') &&
+            // @ts-expect-error fix this
             prevType === newCond.type &&
             cond.op !== 'isbetween' &&
             isValidOp(newCond.field, cond.op)
           ) {
             // Don't clear the value & op if the type is string/number and
             // the type hasn't changed
+            // @ts-expect-error fix this
             newCond.op = cond.op;
             return newInput(makeValue(cond.value, newCond));
           } else {
+            // @ts-expect-error fix this
             newCond.op = getValidOps(newCond.field)[0];
             return newInput(makeValue(null, newCond));
           }
@@ -829,7 +882,7 @@ const conditionFields = [
     ['amount-outflow', mapField('amount', { outflow: true })],
   ]);
 
-export type RuleEditorProps = {
+type RuleEditorProps = {
   rule: RuleEntity | NewRuleEntity;
   onSave: (rule: RuleEntity | NewRuleEntity) => Promise<void>;
   onCancel?: () => void;
@@ -838,7 +891,7 @@ export type RuleEditorProps = {
 
 export function RuleEditor({
   rule: defaultRule,
-  onSave,
+  onSave: originalOnSave = undefined,
   onCancel,
   style,
 }: RuleEditorProps) {
@@ -862,9 +915,8 @@ export function RuleEditor({
   const [stage, setStage] = useState(defaultRule.stage);
   const [conditionsOp, setConditionsOp] = useState(defaultRule.conditionsOp);
   const [transactions, setTransactions] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
-  const scrollableEl = useRef<HTMLDivElement>(null);
+  const scrollableEl = useRef(undefined);
 
   const isSchedule = getActions(actionSplits).some(
     action => action.op === 'link-schedule',
@@ -873,7 +925,7 @@ export function RuleEditor({
   useEffect(() => {
     dispatch(initiallyLoadPayees());
 
-    // Disable undo while this editor is open
+    // Disable undo while this modal is open
     disableUndo();
     return () => enableUndo();
   }, [dispatch]);
@@ -1052,10 +1104,8 @@ export function RuleEditor({
     });
   }
 
-  async function handleSave() {
-    setIsLoading(true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rule: any = {
+  async function onSave(close) {
+    const rule = {
       ...defaultRule,
       stage,
       conditionsOp,
@@ -1063,28 +1113,28 @@ export function RuleEditor({
       actions: getUnparsedActions(actionSplits),
     };
 
+    // @ts-expect-error fix this
     const method = rule.id ? 'rule-update' : 'rule-add';
-    const response = await send(method, rule);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error, id: newId } = response as any;
+    // @ts-expect-error fix this
+    const { error, id: newId } = await send(method, rule);
 
     if (error) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((error as any).conditionErrors) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setConditions(applyErrors(conditions, (error as any).conditionErrors));
+      // @ts-expect-error fix this
+      if (error.conditionErrors) {
+        // @ts-expect-error fix this
+        setConditions(applyErrors(conditions, error.conditionErrors));
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((error as any).actionErrors) {
+      // @ts-expect-error fix this
+      if (error.actionErrors) {
         let usedErrorIdx = 0;
         setActionSplits(
           actionSplits.map(item => ({
             ...item,
             actions: item.actions.map(action => ({
               ...action,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              error: (error as any).actionErrors[usedErrorIdx++] ?? null,
+              // @ts-expect-error fix this
+              error: error.actionErrors[usedErrorIdx++] ?? null,
             })),
           })),
         );
@@ -1092,12 +1142,14 @@ export function RuleEditor({
     } else {
       // If adding a rule, we got back an id
       if (newId) {
+        // @ts-expect-error fix this
         rule.id = newId;
       }
 
-      await onSave(rule as RuleEntity | NewRuleEntity);
+      // @ts-expect-error fix this
+      originalOnSave?.(rule);
+      close();
     }
-    setIsLoading(false);
   }
 
   // Enable editing existing split rules even if the feature has since been disabled.
@@ -1121,21 +1173,18 @@ export function RuleEditor({
           <StageButton
             selected={stage === 'pre'}
             onSelect={() => onChangeStage('pre')}
-            style={{}}
           >
             <Trans>Pre</Trans>
           </StageButton>
           <StageButton
             selected={stage === null}
             onSelect={() => onChangeStage(null)}
-            style={{}}
           >
             <Trans>Default</Trans>
           </StageButton>
           <StageButton
             selected={stage === 'post'}
             onSelect={() => onChangeStage('post')}
-            style={{}}
           >
             <Trans>Post</Trans>
           </StageButton>
@@ -1162,8 +1211,8 @@ export function RuleEditor({
                   data-testid="conditions-op"
                   style={{ display: 'inline-flex' }}
                   fields={[
-                    ['and', 'all'],
-                    ['or', 'any'],
+                    ['and', t('all')],
+                    ['or', t('any')],
                   ]}
                   value={conditionsOp}
                   onChange={onChangeConditionsOp}
@@ -1309,6 +1358,7 @@ export function RuleEditor({
             </Button>
           </View>
 
+          {/* @ts-expect-error fix this */}
           <SimpleTransactionsTable
             transactions={transactions}
             fields={getTransactionFields(conditions, getActions(actionSplits))}
@@ -1316,24 +1366,13 @@ export function RuleEditor({
               border: '1px solid ' + theme.tableBorder,
               borderRadius: '6px 6px 0 0',
             }}
-            renderEmpty={
-              <div>
-                <Trans>No transactions match this rule</Trans>
-              </div>
-            }
           />
 
           <Stack direction="row" justify="flex-end" style={{ marginTop: 20 }}>
-            {onCancel && (
-              <Button onPress={onCancel}>
-                <Trans>Cancel</Trans>
-              </Button>
-            )}
-            <Button
-              variant="primary"
-              onPress={handleSave}
-              isDisabled={isLoading}
-            >
+            <Button onClick={onCancel}>
+              <Trans>Cancel</Trans>
+            </Button>
+            <Button variant="primary" onPress={() => onSave(onCancel)}>
               <Trans>Save</Trans>
             </Button>
           </Stack>

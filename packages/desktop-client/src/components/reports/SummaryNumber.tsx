@@ -42,7 +42,7 @@ export function SummaryNumber({
   let displayAmount =
     contentType === 'percentage'
       ? format(Math.abs(value), 'number')
-      : format(Math.round(value), 'financial');
+      : format(Math.abs(Math.round(value)), 'financial');
 
   displayAmount += suffix;
 
