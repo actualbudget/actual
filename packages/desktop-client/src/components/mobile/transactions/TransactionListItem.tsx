@@ -47,7 +47,7 @@ import { usePayee } from '@desktop-client/hooks/usePayee';
 import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 import { useSelector } from '@desktop-client/redux';
 
-const ROW_HEIGHT = 60;
+export const ROW_HEIGHT = 60;
 
 const getTextStyle = ({
   isPreview,
