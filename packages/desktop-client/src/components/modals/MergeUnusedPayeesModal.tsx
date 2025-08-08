@@ -157,7 +157,7 @@ export function MergeUnusedPayeesModal({
               </Trans>
               {!isEditingRule && (
                 <Trans>
-                  If checked below, a rule will be created to do this rename
+                  {' '}If checked below, a rule will be created to do this rename
                   while importing transactions.
                 </Trans>
               )}
