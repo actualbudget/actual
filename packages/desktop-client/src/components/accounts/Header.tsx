@@ -30,6 +30,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { formatDate } from 'date-fns';
 
 import { tsToRelativeTime } from 'loot-core/shared/util';
 import {
@@ -50,12 +51,11 @@ import { FiltersStack } from '@desktop-client/components/filters/FiltersStack';
 import { type SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
 import { NotesButton } from '@desktop-client/components/NotesButton';
 import { SelectedTransactionsButton } from '@desktop-client/components/transactions/SelectedTransactionsButton';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
-import { formatDate } from 'date-fns';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 
 type AccountHeaderProps = {
   tableRef: TableRef;
