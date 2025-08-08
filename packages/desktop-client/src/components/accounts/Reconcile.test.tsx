@@ -3,6 +3,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { generateAccount } from 'loot-core/mocks';
+import { q } from 'loot-core/shared/query';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { ReconcilingMessage, ReconcileMenu } from './Reconcile';
@@ -26,9 +28,9 @@ describe('ReconcilingMessage math & UI', () => {
 
   function makeBalanceQuery() {
     return {
-      name: 'balance-query-test',
-      query: { filter: () => ({}) },
-    } as const;
+      name: 'balance-query-test' as const,
+      query: q('transactions'),
+    };
   }
 
   test('shows "All reconciled!" when target matches cleared', async () => {
@@ -121,14 +123,8 @@ describe('ReconcileMenu arithmetic evaluation', () => {
     vi.clearAllMocks();
   });
 
-  const baseAccount = {
-    id: 'acct-1',
-    name: 'Checking',
-    last_reconciled: null,
-    offbudget: false,
-    closed: false,
-    balance_current: 5555, // 55.55
-  } as const;
+  // Create a valid offline account entity
+  const baseAccount: AccountEntity = generateAccount('Checking', false, false);
 
   test('defaults input to cleared balance and submits evaluated integer amount', async () => {
     // clearedBalance = 123.45
@@ -169,7 +165,11 @@ describe('ReconcileMenu arithmetic evaluation', () => {
     render(
       <TestProvider>
         <ReconcileMenu
-          account={{ ...baseAccount, balance_current: 4321 } as AccountEntity}
+          account={{
+            // Use a connected account shape so balance_current is allowed
+            ...generateAccount('Checking', true, false),
+            balance_current: 4321,
+          }}
           onReconcile={onReconcile}
           onClose={onClose}
         />
