@@ -392,14 +392,21 @@ function ScheduleDescription({ id }) {
   const status = schedule && statusLabels.get(schedule.id);
 
   return (
-    <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+    <View
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+    >
       <SpaceBetween
         gap={5}
         style={{
           marginRight: 15,
         }}
       >
-        <SpaceBetween gap={5}>
+        <SpaceBetween gap={5} style={{ flexWrap: 'no-wrap' }}>
           <Trans>Payee:</Trans>
           <DisplayId
             type="payees"
