@@ -54,6 +54,8 @@ import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
+import { formatDate } from 'date-fns';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 
 type AccountHeaderProps = {
   tableRef: TableRef;
@@ -198,6 +200,7 @@ export function AccountHeader({
   const isServerOffline = syncServerStatus === 'offline';
   const [_, setExpandSplitsPref] = useLocalPref('expand-splits');
 
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const locale = useLocale();
 
   let canSync = !!(account?.account_id && isUsingServer);
@@ -389,7 +392,7 @@ export function AccountHeader({
                 }}
                 content={
                   account?.last_reconciled
-                    ? `${t('Reconciled')} ${tsToRelativeTime(account.last_reconciled, locale)}`
+                    ? `${t('Reconciled')} ${tsToRelativeTime(account.last_reconciled, locale)} (${formatDate(new Date(parseInt(account.last_reconciled ?? '0', 10)), dateFormat, { locale })})`
                     : t('Not yet reconciled')
                 }
                 placement="top"

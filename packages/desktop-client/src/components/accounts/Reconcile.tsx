@@ -21,6 +21,8 @@ import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import * as bindings from '@desktop-client/spreadsheet/bindings';
+import { formatDate } from 'date-fns';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 
 type ReconcilingMessageProps = {
   balanceQuery: { name: `balance-query-${string}`; query: Query };
@@ -136,6 +138,7 @@ export function ReconcileMenu({
   });
   const lastSyncedBalance = account.balance_current;
   const format = useFormat();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const locale = useLocale();
 
   const [inputValue, setInputValue] = useState<string | null>();
@@ -197,10 +200,15 @@ export function ReconcileMenu({
         )}
         <Text style={{ color: theme.pageTextSubdued, paddingBottom: 6 }}>
           {account?.last_reconciled
-            ? t('Reconciled {{ relativeTimeAgo }}', {
+            ? t('Reconciled {{ relativeTimeAgo }} ({{ absoluteDate }})', {
                 relativeTimeAgo: tsToRelativeTime(
                   account.last_reconciled,
                   locale,
+                ),
+                absoluteDate: formatDate(
+                  new Date(parseInt(account.last_reconciled ?? '0', 10)),
+                  dateFormat,
+                  { locale },
                 ),
               })
             : t('Not yet reconciled')}
