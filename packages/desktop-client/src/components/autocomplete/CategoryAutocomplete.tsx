@@ -10,7 +10,7 @@ import React, {
   type CSSProperties,
   useCallback,
 } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgSplit } from '@actual-app/components/icons/v0';
@@ -77,16 +77,9 @@ function CategoryList({
   showHiddenItems,
   showBalances,
 }: CategoryListProps) {
-  const { t } = useTranslation();
   let lastGroup: string | undefined | null = null;
 
-  const filteredItems = useMemo(
-    () =>
-      showHiddenItems
-        ? items
-        : items.filter(item => !item.hidden && !item.group?.hidden),
-    [showHiddenItems, items],
-  );
+  const filteredItems = items;
 
   return (
     <View>
@@ -110,7 +103,7 @@ function CategoryList({
 
           const groupId = item.group?.id;
           const showGroup = groupId !== lastGroup;
-          const groupName = `${item.group?.name}${item.group?.hidden ? ' ' + t('(hidden)') : ''}`;
+          const groupName = item.group?.name || '';
           lastGroup = groupId;
           return (
             <Fragment key={item.id}>
@@ -133,7 +126,9 @@ function CategoryList({
                   embedded,
                   style: {
                     ...(showHiddenItems &&
-                      item.hidden && { color: theme.pageTextSubdued }),
+                      (item.hidden || item.group?.hidden) && {
+                        color: theme.pageTextSubdued,
+                      }),
                   },
                   showBalances,
                 })}
@@ -193,24 +188,37 @@ export function CategoryAutocomplete({
   ...props
 }: CategoryAutocompleteProps) {
   const { grouped: defaultCategoryGroups = [] } = useCategories();
-  const categorySuggestions: CategoryAutocompleteItem[] = useMemo(
-    () =>
-      (categoryGroups || defaultCategoryGroups).reduce(
-        (list, group) =>
-          list.concat(
-            (group.categories || [])
-              .filter(category => category.group === group.id)
-              .map(category => ({
-                ...category,
-                group,
-              })),
-          ),
-        showSplitOption
-          ? [{ id: 'split', name: '' } as CategoryAutocompleteItem]
-          : [],
-      ),
-    [defaultCategoryGroups, categoryGroups, showSplitOption],
-  );
+  const categorySuggestions: CategoryAutocompleteItem[] = useMemo(() => {
+    const allSuggestions = (categoryGroups || defaultCategoryGroups).reduce(
+      (list, group) =>
+        list.concat(
+          (group.categories || [])
+            .filter(category => category.group === group.id)
+            .map(category => ({
+              ...category,
+              group,
+            })),
+        ),
+      showSplitOption
+        ? [{ id: 'split', name: '' } as CategoryAutocompleteItem]
+        : [],
+    );
+
+    if (!showHiddenCategories) {
+      return allSuggestions.filter(
+        suggestion =>
+          suggestion.id === 'split' ||
+          (!suggestion.hidden && !suggestion.group?.hidden),
+      );
+    }
+
+    return allSuggestions;
+  }, [
+    defaultCategoryGroups,
+    categoryGroups,
+    showSplitOption,
+    showHiddenCategories,
+  ]);
 
   const filterSuggestions = useCallback(
     (
@@ -379,7 +387,6 @@ function CategoryItem({
   showBalances,
   ...props
 }: CategoryItemProps) {
-  const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const narrowStyle = isNarrowWidth
     ? {
@@ -427,10 +434,7 @@ function CategoryItem({
       {...props}
     >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <TextOneLine>
-          {item.name}
-          {item.hidden ? ' ' + t('(hidden)') : null}
-        </TextOneLine>
+        <TextOneLine>{item.name}</TextOneLine>
         <TextOneLine
           style={{
             display: !showBalances ? 'none' : undefined,
