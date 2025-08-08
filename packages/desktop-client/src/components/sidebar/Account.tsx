@@ -353,6 +353,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
       placement="right top"
       triggerProps={{
         delay: 1000,
+        closeDelay: 250,
         isDisabled: menuOpen,
       }}
     >

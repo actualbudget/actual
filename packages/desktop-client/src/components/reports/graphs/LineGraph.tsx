@@ -16,10 +16,6 @@ import {
 } from 'recharts';
 
 import {
-  amountToCurrency,
-  amountToCurrencyNoDecimal,
-} from 'loot-core/shared/util';
-import {
   type balanceTypeOpType,
   type DataEntity,
   type RuleConditionEntity,
@@ -32,6 +28,7 @@ import { getCustomTick } from '@desktop-client/components/reports/getCustomTick'
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -50,6 +47,7 @@ type CustomTooltipProps = {
   tooltip: string;
   active?: boolean;
   payload?: PayloadItem[];
+  format: (value: unknown, type: FormatType) => string;
 };
 
 const CustomTooltip = ({
@@ -57,6 +55,7 @@ const CustomTooltip = ({
   tooltip,
   active,
   payload,
+  format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
   if (active && payload && payload.length) {
@@ -87,7 +86,7 @@ const CustomTooltip = ({
                     <AlignedText
                       key={index}
                       left={p.dataKey}
-                      right={amountToCurrency(p.value)}
+                      right={format(p.value, 'financial')}
                       style={{
                         color: p.color,
                         textDecoration:
@@ -100,7 +99,7 @@ const CustomTooltip = ({
             {payload.length > 5 && compact && '...'}
             <AlignedText
               left={t('Total')}
-              right={amountToCurrency(sumTotals)}
+              right={format(sumTotals, 'financial')}
               style={{
                 fontWeight: 600,
               }}
@@ -141,6 +140,8 @@ export function LineGraph({
   const categories = useCategories();
   const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
+  const format = useFormat();
+
   const [pointer, setPointer] = useState('');
   const [tooltip, setTooltip] = useState('');
 
@@ -190,7 +191,11 @@ export function LineGraph({
                 {showTooltip && (
                   <Tooltip
                     content={
-                      <CustomTooltip compact={compact} tooltip={tooltip} />
+                      <CustomTooltip
+                        compact={compact}
+                        tooltip={tooltip}
+                        format={format}
+                      />
                     }
                     formatter={numberFormatterTooltip}
                     isAnimationActive={false}
@@ -208,7 +213,7 @@ export function LineGraph({
                   <YAxis
                     tickFormatter={value =>
                       getCustomTick(
-                        amountToCurrencyNoDecimal(value),
+                        format(value, 'financial-no-decimals'),
                         privacyMode,
                       )
                     }

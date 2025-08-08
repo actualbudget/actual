@@ -4,7 +4,13 @@ import { type RuleConditionEntity } from './rule';
 export type TimeFrame = {
   start: string;
   end: string;
-  mode: 'sliding-window' | 'static' | 'full' | 'lastYear' | 'yearToDate';
+  mode:
+    | 'sliding-window'
+    | 'static'
+    | 'full'
+    | 'lastYear'
+    | 'yearToDate'
+    | 'priorYearToDate';
 };
 
 type AbstractWidget<

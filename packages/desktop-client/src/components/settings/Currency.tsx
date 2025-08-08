@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
@@ -17,6 +17,30 @@ import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 export function CurrencySettings() {
   const { t } = useTranslation();
 
+  const currencyTranslations = useMemo(
+    () =>
+      new Map<string, string>([
+        ['', t('None')],
+        ['AUD', t('Australian Dollar')],
+        ['CAD', t('Canadian Dollar')],
+        ['CHF', t('Swiss Franc')],
+        ['CNY', t('Yuan Renminbi')],
+        ['EUR', t('Euro')],
+        ['GBP', t('Pound Sterling')],
+        ['HKD', t('Hong Kong Dollar')],
+        ['INR', t('Indian Rupee')],
+        // ['JPY', t('Yen')],
+        ['PHP', t('Philippine Peso')],
+        ['PLN', t('Polish Złoty')],
+        ['SEK', t('Swedish Krona')],
+        ['SGD', t('Singapore Dollar')],
+        ['TRY', t('Turkish Lira')],
+        ['USD', t('US Dollar')],
+        ['QAR', t('Qatari Riyal')],
+      ]),
+    [t],
+  );
+
   const [defaultCurrencyCode, setDefaultCurrencyCodePref] = useSyncedPref(
     'defaultCurrencyCode',
   );
@@ -34,24 +58,6 @@ export function CurrencySettings() {
       backgroundColor: theme.buttonNormalBackgroundHover,
     },
   });
-
-  const currencyTranslations = new Map([
-    ['', t('None')],
-    ['AUD', t('Australian Dollar')],
-    ['CAD', t('Canadian Dollar')],
-    ['CHF', t('Swiss Franc')],
-    ['CNY', t('Yuan Renminbi')],
-    ['EUR', t('Euro')],
-    ['GBP', t('Pound Sterling')],
-    ['HKD', t('Hong Kong Dollar')],
-    // ['JPY', t('Yen')],
-    ['PLN', t('Polish Złoty')],
-    ['SEK', t('Swedish Krona')],
-    ['SGD', t('Singapore Dollar')],
-    ['TRY', t('Turkish Lira')],
-    ['USD', t('US Dollar')],
-    ['QAR', t('Qatari Riyal')],
-  ]);
 
   const currencyOptions: [string, string][] = currencies.map(currency => {
     const translatedName =
