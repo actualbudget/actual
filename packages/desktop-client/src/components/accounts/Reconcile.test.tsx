@@ -1,11 +1,15 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
+import { type AccountEntity } from 'loot-core/types/models';
 
 import { ReconcilingMessage, ReconcileMenu } from './Reconcile';
 
+
+import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { TestProvider } from '@desktop-client/redux/mock';
-import { useSheetValue } from '../../hooks/useSheetValue';
 
 vi.mock('../../hooks/useSheetValue', () => ({
   useSheetValue: vi.fn(),
@@ -136,7 +140,7 @@ describe('ReconcileMenu arithmetic evaluation', () => {
     render(
       <TestProvider>
         <ReconcileMenu
-          account={baseAccount as any}
+          account={baseAccount as AccountEntity}
           onReconcile={onReconcile}
           onClose={onClose}
         />
@@ -166,7 +170,7 @@ describe('ReconcileMenu arithmetic evaluation', () => {
     render(
       <TestProvider>
         <ReconcileMenu
-          account={{ ...baseAccount, balance_current: 4321 } as any}
+          account={{ ...baseAccount, balance_current: 4321 } as AccountEntity}
           onReconcile={onReconcile}
           onClose={onClose}
         />
@@ -189,7 +193,7 @@ describe('ReconcileMenu arithmetic evaluation', () => {
     render(
       <TestProvider>
         <ReconcileMenu
-          account={baseAccount as any}
+          account={baseAccount as AccountEntity}
           onReconcile={onReconcile}
           onClose={onClose}
         />
@@ -213,7 +217,7 @@ describe('ReconcileMenu arithmetic evaluation', () => {
     render(
       <TestProvider>
         <ReconcileMenu
-          account={baseAccount as any}
+          account={baseAccount as AccountEntity}
           onReconcile={onReconcile}
           onClose={onClose}
         />
