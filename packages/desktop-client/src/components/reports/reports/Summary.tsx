@@ -466,7 +466,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
             <PrivacyFilter>
               {content.type === 'percentage'
                 ? format(Math.abs(data?.total ?? 0), 'number')
-                : format(Math.round(data?.total ?? 0), 'financial')}
+                : format(Math.abs(Math.round(data?.total ?? 0)), 'financial')}
               {content.type === 'percentage' ? '%' : ''}
             </PrivacyFilter>
           </View>
