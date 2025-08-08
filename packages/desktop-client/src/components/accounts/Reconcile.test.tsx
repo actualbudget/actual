@@ -78,7 +78,9 @@ describe('ReconcilingMessage math & UI', () => {
     // Positive diff shows plus sign
     expect(screen.getByText('+70.00')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByText('Create reconciliation transaction'));
+    await userEvent.click(
+      screen.getByText('Create reconciliation transaction'),
+    );
     expect(onCreateTransaction).toHaveBeenCalledWith(7000);
   });
 
@@ -102,7 +104,9 @@ describe('ReconcilingMessage math & UI', () => {
     expect(screen.getByText('100.00')).toBeInTheDocument();
     expect(screen.getByText('-20.00')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByText('Create reconciliation transaction'));
+    await userEvent.click(
+      screen.getByText('Create reconciliation transaction'),
+    );
     expect(onCreateTransaction).toHaveBeenCalledWith(-2000);
   });
 });
