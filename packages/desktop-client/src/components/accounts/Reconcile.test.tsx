@@ -12,7 +12,7 @@ import { ReconcilingMessage, ReconcileMenu } from './Reconcile';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { TestProvider } from '@desktop-client/redux/mock';
 
-vi.mock('../../hooks/useSheetValue', () => ({
+vi.mock('@desktop-client/hooks/useSheetValue', () => ({
   useSheetValue: vi.fn(),
 }));
 
@@ -152,6 +152,35 @@ describe('ReconcileMenu arithmetic evaluation', () => {
 
     // 100 + 25.50 - 10 = 115.50 -> 11550 integer
     expect(onReconcile).toHaveBeenCalledWith(11550);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  test('defaults input to cleared balance and submits evaluated invalid amount & use cleared balance', async () => {
+    // clearedBalance = 1234.56
+    vi.mocked(useSheetValue).mockReturnValue(123456);
+    const onReconcile = vi.fn();
+    const onClose = vi.fn();
+
+    render(
+      <TestProvider>
+        <ReconcileMenu
+          account={baseAccount as AccountEntity}
+          onReconcile={onReconcile}
+          onClose={onClose}
+        />
+      </TestProvider>,
+    );
+
+    const input = screen.getByRole('textbox');
+    // Replace with arithmetic expression
+    await userEvent.clear(input);
+    await userEvent.type(input, '100+25.50-abcd-10');
+
+    // Submit
+    await userEvent.click(screen.getByRole('button', { name: 'Reconcile' }));
+
+    // Input contains invalid characters, so it should use cleared balance for reconciliation
+    expect(onReconcile).toHaveBeenCalledWith(123456);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
