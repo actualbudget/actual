@@ -10,6 +10,7 @@ import {
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
   SvgDelete,
   SvgAdd,
@@ -65,7 +66,10 @@ import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import {
+  useSchedules,
+  type ScheduleStatusType,
+} from '@desktop-client/hooks/useSchedules';
 import {
   useSelected,
   SelectedProvider,
@@ -369,6 +373,7 @@ function formatAmount(amount) {
 }
 
 function ScheduleDescription({ id }) {
+  const { isNarrowWidth } = useResponsive();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const scheduleQuery = useMemo(
     () => q('schedules').filter({ id }).select('*'),
@@ -384,12 +389,13 @@ function ScheduleDescription({ id }) {
     return null;
   }
 
-  if (schedules.length === 0) {
+  const [schedule] = schedules;
+
+  if (schedule && schedules.length === 0) {
     return <View style={{ flex: 1 }}>{id}</View>;
   }
 
-  const [schedule] = schedules;
-  const status = schedule && statusLabels.get(schedule.id);
+  const status = statusLabels.get(schedule.id) as ScheduleStatusType;
 
   return (
     <View
@@ -427,8 +433,7 @@ function ScheduleDescription({ id }) {
           </Trans>
         </Text>
       </SpaceBetween>
-      {/* @ts-expect-error fix this */}
-      <StatusBadge status={status} />
+      {!isNarrowWidth && <StatusBadge status={status} />}
     </View>
   );
 }
