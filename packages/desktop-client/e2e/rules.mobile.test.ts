@@ -64,6 +64,10 @@ test.describe('Mobile Rules', () => {
 
     await rulesPage.clickRule(0);
 
+    // Click on the header to have consistent focused element
+    // (otherwise sometimes the condition field is "hovered" and thus has a different background color)
+    await page.getByRole('heading', { name: 'Edit Rule' }).click();
+
     await expect(page).toMatchThemeScreenshots();
   });
 
