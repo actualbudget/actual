@@ -66,15 +66,31 @@ async function saveDiff(diff, learnCategories) {
   return {};
 }
 
-async function saveDiffAndApply(diff, changes, onChange, learnCategories) {
+function getIsUserEditing(tableRef) {
+  const editingState = tableRef.current?.getEditingState?.();
+  return editingState?.editingId !== null;
+}
+
+async function saveDiffAndApply(
+  diff,
+  changes,
+  onChange,
+  learnCategories,
+  tableRef,
+) {
   const remoteDiff = await saveDiff(diff, learnCategories);
-  onChange(
-    // TODO:
-    // @ts-ignore testing
-    applyTransactionDiff(changes.newTransaction, remoteDiff),
-    // @ts-ignore testing
-    applyChanges(remoteDiff, changes.data),
-  );
+
+  const isUserEditing = getIsUserEditing(tableRef);
+
+  if (!isUserEditing) {
+    onChange(
+      // TODO:
+      // @ts-ignore testing
+      applyTransactionDiff(changes.newTransaction, remoteDiff),
+      // @ts-ignore testing
+      applyChanges(remoteDiff, changes.data),
+    );
+  }
 }
 
 type TransactionListProps = Pick<
@@ -206,11 +222,12 @@ export function TransactionList({
             changes,
             onChange,
             isLearnCategoriesEnabled,
+            tableRef,
           );
         }
       }
     },
-    [isLearnCategoriesEnabled, onChange, onRefetch],
+    [isLearnCategoriesEnabled, onChange, onRefetch, tableRef],
   );
 
   const onAddSplit = useCallback(
@@ -222,10 +239,11 @@ export function TransactionList({
         changes,
         onChange,
         isLearnCategoriesEnabled,
+        tableRef,
       );
       return changes.diff.added[0].id;
     },
-    [isLearnCategoriesEnabled, onChange],
+    [isLearnCategoriesEnabled, onChange, tableRef],
   );
 
   const onSplit = useCallback(
@@ -237,10 +255,11 @@ export function TransactionList({
         changes,
         onChange,
         isLearnCategoriesEnabled,
+        tableRef,
       );
       return changes.diff.added[0].id;
     },
-    [isLearnCategoriesEnabled, onChange],
+    [isLearnCategoriesEnabled, onChange, tableRef],
   );
 
   const onApplyRules = useCallback(
