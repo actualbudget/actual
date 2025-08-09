@@ -52,7 +52,12 @@ test.describe('Rules', () => {
     });
 
     const rule = rulesPage.getNthRule(0);
-    await expect(rule.conditions).toHaveText(['payee is Fast Internet']);
+    await expect(rule.conditions).toHaveText([
+      'payee is Fast Internet',
+      'and account is Bank of America',
+      'and date is 12/31/2016',
+      'and amount is approx -140.00',
+    ]);
     await expect(rule.actions).toHaveText(['set category to General']);
     await expect(page).toMatchThemeScreenshots();
 

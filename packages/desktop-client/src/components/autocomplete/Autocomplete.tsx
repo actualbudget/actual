@@ -261,11 +261,12 @@ function SingleAutocomplete<T extends AutocompleteItem>({
   const itemsViewRef = useRef(null);
 
   const { isNarrowWidth } = useResponsive();
-  const narrowInputStyle = isNarrowWidth
-    ? {
-        ...styles.mobileMenuItem,
-      }
-    : {};
+  const narrowInputStyle =
+    embedded && isNarrowWidth
+      ? {
+          ...styles.mobileMenuItem,
+        }
+      : {};
 
   inputProps = {
     ...inputProps,
