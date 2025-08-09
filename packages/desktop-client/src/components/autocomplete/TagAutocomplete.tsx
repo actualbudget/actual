@@ -1,8 +1,10 @@
-import React, {
+import {
   Fragment,
   type ComponentProps,
   type ComponentPropsWithoutRef,
   type ReactElement,
+  type KeyboardEvent,
+  type FocusEvent,
   useMemo,
   useCallback,
 } from 'react';
@@ -67,7 +69,7 @@ function TagList({
 
 type TagAutocompleteProps = Omit<
   ComponentProps<typeof Autocomplete<TagAutocompleteItem>>,
-  'value' | 'onSelect'
+  'value' | 'onSelect' | 'type'
 > & {
   value: string;
   onSelect: (value: string) => void;
@@ -85,7 +87,8 @@ export function TagAutocomplete({
 }: TagAutocompleteProps) {
   const { t } = useTranslation();
   const tags = useTags();
-  const getTagCSS = useTagCSS();
+  // Intentionally unused here; styling is applied within TagItem
+  // (no-op)
 
   const suggestions: TagAutocompleteItem[] = useMemo(() => {
     if (!tags || tags.length === 0) {
@@ -95,7 +98,7 @@ export function TagAutocomplete({
       id: `#${tag.tag}`,
       name: `#${tag.tag}`,
       tag: tag.tag,
-      color: tag.color,
+      color: tag.color ?? undefined,
     }));
   }, [tags]);
 
@@ -146,7 +149,7 @@ export function TagAutocomplete({
   );
 
   const handleMultiInputKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
+    (e: KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Enter' && e.currentTarget.value.trim()) {
         const newTag = e.currentTarget.value.trim();
         const formattedTag = formatTag(newTag);
@@ -193,7 +196,7 @@ export function TagAutocomplete({
   );
 
   const handleBlur = useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
+    (e: FocusEvent<HTMLInputElement>) => {
       const typedValue = e.target.value.trim();
       if (!typedValue) {
         inputProps?.onBlur?.(e);
@@ -247,7 +250,10 @@ export function TagAutocomplete({
           },
           onBlur: handleBlur,
         }}
-        {...(props as any)}
+        {...(props as unknown as Omit<
+          ComponentProps<typeof Autocomplete<TagAutocompleteItem>>,
+          'value' | 'onSelect' | 'type'
+        >)}
       />
     );
   }
@@ -267,7 +273,10 @@ export function TagAutocomplete({
         placeholder: placeholder || t('nothing'),
         onBlur: handleBlur,
       }}
-      {...(props as any)}
+      {...(props as unknown as Omit<
+        ComponentProps<typeof Autocomplete<TagAutocompleteItem>>,
+        'value' | 'onSelect' | 'type'
+      >)}
     />
   );
 }

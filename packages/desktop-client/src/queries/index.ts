@@ -109,7 +109,10 @@ export function transactionsSearch(
     parsedDate = parseDate(searchWithoutTags, dateFormat, new Date());
   }
 
-  const searchConditions: any = {
+  const searchConditions: Record<string, unknown> & {
+    $or: Array<unknown>;
+    $and?: Array<unknown>;
+  } = {
     'payee.name': { $like: `%${searchWithoutTags}%` },
     'payee.transfer_acct.name': { $like: `%${searchWithoutTags}%` },
     notes: { $like: `%${searchWithoutTags}%` },
