@@ -556,6 +556,7 @@ export class Condition {
         return tagMatches.every(tag => {
           const regex = new RegExp(
             `${tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
+            'i',
           );
           return regex.test(fieldValue);
         });
@@ -575,6 +576,7 @@ export class Condition {
         return anyTagMatches.some(tag => {
           const regex = new RegExp(
             `${tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
+            'i',
           );
           return regex.test(fieldValue);
         });
