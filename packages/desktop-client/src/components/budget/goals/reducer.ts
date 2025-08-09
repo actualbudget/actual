@@ -58,9 +58,10 @@ const changeType = (
       return {
         displayType: visualType,
         template: {
-          directive: '',
+          directive: 'template',
           type: 'simple',
           monthly: 500,
+          priority: 0,
         },
       };
     case 'percentage':
@@ -70,11 +71,12 @@ const changeType = (
       return {
         displayType: visualType,
         template: {
-          directive: '',
+          directive: 'template',
           type: 'percentage',
           percent: 15,
           previous: false,
           category: 'total',
+          priority: 0,
         },
       };
     case 'schedule':
@@ -84,9 +86,10 @@ const changeType = (
       return {
         displayType: visualType,
         template: {
-          directive: '',
+          directive: 'template',
           type: 'schedule',
           name: '',
+          priority: 0,
         },
       };
     case 'week':
@@ -96,7 +99,7 @@ const changeType = (
       return {
         displayType: visualType,
         template: {
-          directive: '',
+          directive: 'template',
           type: 'periodic',
           amount: 500,
           period: {
@@ -104,6 +107,7 @@ const changeType = (
             amount: 1,
           },
           starting: '',
+          priority: 0,
         },
       };
     case 'historical':
@@ -116,9 +120,10 @@ const changeType = (
       return {
         displayType: visualType,
         template: {
-          directive: '',
+          directive: 'template',
           type: 'average',
           numMonths: 3,
+          priority: 0,
         },
       };
     default:
@@ -140,9 +145,10 @@ function mapTemplateTypesForUpdate(
             displayType: 'historical',
             template: {
               ...template,
-              directive: '',
+              directive: 'template',
               type: 'copy',
               lookBack: state.template.numMonths,
+              priority: state.template.priority,
             },
           };
         default:
@@ -157,9 +163,10 @@ function mapTemplateTypesForUpdate(
             displayType: 'historical',
             template: {
               ...template,
-              directive: '',
+              directive: 'template',
               type: 'average',
               numMonths: state.template.lookBack,
+              priority: state.template.priority,
             },
           };
         default:
@@ -171,7 +178,7 @@ function mapTemplateTypesForUpdate(
   }
 
   if (!template.type || state.template.type === template.type) {
-    const { type: _, ...rest } = template;
+    const { type: _1, directive: _2, ...rest } = template;
     return {
       ...state,
       ...getInitialState({

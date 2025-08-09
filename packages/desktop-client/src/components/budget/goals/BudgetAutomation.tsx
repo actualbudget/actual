@@ -26,9 +26,10 @@ type BudgetAutomationProps = {
 };
 
 const DEFAULT_TEMPLATE: Template = {
-  directive: '',
+  directive: 'template',
   type: 'simple',
   monthly: 0,
+  priority: 0,
 };
 
 export const BudgetAutomation = ({

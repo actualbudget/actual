@@ -13,6 +13,7 @@ export async function resetCategoryGoalDefsWithNoTemplates(): Promise<void> {
                        FROM notes n
                        WHERE lower(note) LIKE '%${TEMPLATE_PREFIX}%'
                           OR lower(note) LIKE '%${GOAL_PREFIX}%')
+        AND template_source <> 'ui'
     `,
   );
 }
@@ -37,6 +38,7 @@ export async function getCategoriesWithTemplateNotes(): Promise<
              JOIN categories c ON n.id = c.id
       WHERE c.id = n.id
         AND c.tombstone = 0
+        AND c.template_source <> 'ui'
         AND (lower(note) LIKE '%${TEMPLATE_PREFIX}%'
         OR lower(note) LIKE '%${GOAL_PREFIX}%')
     `,

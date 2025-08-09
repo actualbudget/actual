@@ -6,7 +6,7 @@ import {
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
-import { checkTemplates, storeTemplates } from './template-notes';
+import { checkTemplateNotes, storeNoteTemplates } from './template-notes';
 
 vi.mock('../db');
 vi.mock('./statements');
@@ -25,7 +25,7 @@ function mockDbUpdate() {
   vi.mocked(db.update).mockResolvedValue(undefined);
 }
 
-describe('storeTemplates', () => {
+describe('storeNoteTemplates', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -131,7 +131,7 @@ describe('storeTemplates', () => {
       mockDbUpdate();
 
       // When
-      await storeTemplates();
+      await storeNoteTemplates();
 
       // Then
       if (expectedTemplates.length === 0) {
@@ -266,7 +266,7 @@ describe('checkTemplates', () => {
       mockGetActiveSchedules(mockSchedules);
 
       // When
-      const result = await checkTemplates();
+      const result = await checkTemplateNotes();
 
       // Then
       expect(result).toEqual(expected);

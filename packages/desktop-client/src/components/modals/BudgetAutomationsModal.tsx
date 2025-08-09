@@ -29,7 +29,8 @@ export function BudgetAutomationsModal() {
     {
       type: 'average',
       numMonths: 3,
-      directive: '',
+      directive: 'template',
+      priority: 0,
       id: uniqueId(),
     },
   ]);
@@ -44,7 +45,13 @@ export function BudgetAutomationsModal() {
   const onAdd = () => {
     setTemplates([
       ...templates,
-      { type: 'average', numMonths: 3, directive: '', id: uniqueId() },
+      {
+        type: 'average',
+        numMonths: 3,
+        directive: 'template',
+        priority: 0,
+        id: uniqueId(),
+      },
     ]);
   };
   const onSave = () => {};
