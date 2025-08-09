@@ -219,3 +219,9 @@ export const tooltipBackground = colorPalette.gray800;
 export const tooltipBorder = colorPalette.gray600;
 
 export const calendarCellBackground = colorPalette.navy900;
+export const keyboardBackground = colorPalette.gray900;
+export const keyboardBorder = colorPalette.gray600;
+export const keyboardText = buttonNormalText;
+export const keyboardButtonBackground = buttonNormalBackground;
+export const keyboardButtonShadow = 'rgba(0, 0, 0, 0.4)';
+export const keyboardButtonSecondaryBackground = colorPalette.gray400;
