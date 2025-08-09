@@ -101,7 +101,7 @@ export function GenericInput({
               inputProps={{
                 ref,
                 ...(showPlaceholder ? { placeholder: t('nothing') } : null),
-                onClick: () => {
+                onClick: event => {
                   if (!isNarrowWidth) {
                     return;
                   }
@@ -113,6 +113,7 @@ export function GenericInput({
                         options: {
                           onSelect: newValue => {
                             onChange(multi ? [...value, newValue] : newValue);
+                            setTimeout(() => event.target.blur(), 1);
                           },
                         },
                       },
@@ -140,7 +141,7 @@ export function GenericInput({
                   inputProps={{
                     ref,
                     ...(showPlaceholder ? { placeholder: t('nothing') } : null),
-                    onClick: () => {
+                    onClick: event => {
                       if (!isNarrowWidth) {
                         return;
                       }
@@ -154,6 +155,7 @@ export function GenericInput({
                                 onChange(
                                   multi ? [...value, newValue] : newValue,
                                 );
+                                setTimeout(() => event.target.blur(), 1);
                               },
                             },
                           },
@@ -179,7 +181,7 @@ export function GenericInput({
               inputProps={{
                 ref,
                 ...(showPlaceholder ? { placeholder: t('nothing') } : null),
-                onClick: () => {
+                onClick: event => {
                   if (!isNarrowWidth) {
                     return;
                   }
@@ -191,6 +193,7 @@ export function GenericInput({
                         options: {
                           onSelect: newValue => {
                             onChange(multi ? [...value, newValue] : newValue);
+                            setTimeout(() => event.target.blur(), 1);
                           },
                         },
                       },

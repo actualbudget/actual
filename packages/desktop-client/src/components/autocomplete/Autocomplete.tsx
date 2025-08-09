@@ -279,12 +279,8 @@ function SingleAutocomplete<T extends AutocompleteItem>({
   // Update the selected item if the suggestion list or initial
   // input value has changed
   useEffect(() => {
-    const newSelectedItem = findItem(strict, suggestions, initialValue);
-    setSelectedItem(newSelectedItem);
-    if (!embedded) {
-      setValue(newSelectedItem ? getItemName(newSelectedItem) : '');
-    }
-  }, [initialValue, suggestions, strict, embedded]);
+    setSelectedItem(findItem(strict, suggestions, initialValue));
+  }, [initialValue, suggestions, strict]);
 
   function resetState(newValue?: string) {
     const val = newValue === undefined ? initialValue : newValue;
