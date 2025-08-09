@@ -22,6 +22,7 @@ import {
 } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Select } from '@actual-app/components/select';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -391,33 +392,41 @@ function ScheduleDescription({ id }) {
   const status = schedule && statusLabels.get(schedule.id);
 
   return (
-    <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-      <View style={{ marginRight: 15, flexDirection: 'row' }}>
-        <Text
-          style={{
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          <Trans>Payee:</Trans>{' '}
+    <View
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+    >
+      <SpaceBetween
+        gap={5}
+        style={{
+          marginRight: 15,
+        }}
+      >
+        <SpaceBetween gap={5} style={{ flexWrap: 'no-wrap' }}>
+          <Trans>Payee:</Trans>
           <DisplayId
             type="payees"
             id={schedule._payee}
             noneColor={theme.pageTextLight}
           />
-        </Text>
-        <Text style={{ margin: '0 5px' }}> — </Text>
+        </SpaceBetween>
+
         <Text style={{ flexShrink: 0 }}>
+          <Text> — </Text>
           <Trans>Amount:</Trans> {formatAmount(schedule._amount)}
         </Text>
-        <Text style={{ margin: '0 5px' }}> — </Text>
+
         <Text style={{ flexShrink: 0 }}>
+          <Text> — </Text>
           <Trans>
             Next: {{ month: monthUtils.format(schedule.next_date, dateFormat) }}
           </Trans>
         </Text>
-      </View>
+      </SpaceBetween>
       {/* @ts-expect-error fix this */}
       <StatusBadge status={status} />
     </View>
