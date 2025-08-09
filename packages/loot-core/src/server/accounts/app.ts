@@ -436,6 +436,10 @@ async function closeAccount({
         throw APIError('balance is non-zero: transferAccountId is required');
       }
 
+      if (id === transferAccountId) {
+        throw APIError('transfer account can not be the account being closed');
+      }
+
       await db.update('accounts', { id, closed: 1 });
 
       // If there is a balance we need to transfer it to the specified

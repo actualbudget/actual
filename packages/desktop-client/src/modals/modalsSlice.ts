@@ -225,6 +225,7 @@ export type Modal =
       options: {
         onSelect: (accountId: string, accountName: string) => void;
         includeClosedAccounts?: boolean;
+        hiddenAccounts?: AccountEntity['id'][];
         onClose?: () => void;
       };
     }
@@ -277,7 +278,6 @@ export type Modal =
         onReopenAccount: (accountId: AccountEntity['id']) => void;
         onEditNotes: (id: NoteEntity['id']) => void;
         onClose?: () => void;
-        onToggleRunningBalance?: () => void;
       };
     }
   | {

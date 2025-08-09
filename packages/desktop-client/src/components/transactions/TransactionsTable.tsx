@@ -44,6 +44,7 @@ import { View } from '@actual-app/components/view';
 import { format as formatDate, parseISO } from 'date-fns';
 
 import * as monthUtils from 'loot-core/shared/months';
+import { getStatusLabel } from 'loot-core/shared/schedules';
 import {
   addSplitTransaction,
   deleteTransaction,
@@ -527,7 +528,7 @@ function PayeeCell({
       <CellButton
         bare
         style={{
-          alignSelf: 'flex-start',
+          alignSelf: 'stretch',
           borderRadius: 4,
           border: '1px solid transparent', // so it doesn't shift on hover
           ':hover': isPreview
@@ -575,6 +576,7 @@ function PayeeCell({
               width: 14,
               height: 14,
               marginRight: 5,
+              flexShrink: 0,
             }}
           />
           <Text
@@ -582,6 +584,10 @@ function PayeeCell({
               fontStyle: 'italic',
               fontWeight: 300,
               userSelect: 'none',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              minWidth: 0,
               borderBottom: importedPayee
                 ? `1px dashed ${theme.pageTextSubdued}`
                 : 'none',
@@ -1066,6 +1072,11 @@ const Transaction = memo(function Transaction({
     _unmatched = false,
   } = transaction;
 
+  const { schedules = [] } = useCachedSchedules();
+  const schedule = transaction.schedule
+    ? schedules.find(s => s.id === transaction.schedule)
+    : null;
+
   const previewStatus = forceUpcoming ? 'upcoming' : categoryId;
 
   // Join in some data
@@ -1362,7 +1373,7 @@ const Transaction = memo(function Transaction({
         textAlign="flex"
         exposed={focusedField === 'notes'}
         focused={focusedField === 'notes'}
-        value={notes || ''}
+        value={notes ?? schedule?.name ?? ''}
         valueStyle={valueStyle}
         formatter={value =>
           NotesTagFormatter({ notes: value, onNotesTagClick })
@@ -1416,7 +1427,7 @@ const Transaction = memo(function Transaction({
                 display: 'inline-block',
               }}
             >
-              {titleFirst(previewStatus ?? '')}
+              {titleFirst(getStatusLabel(previewStatus ?? ''))}
             </View>
           )}
           <CellButton
