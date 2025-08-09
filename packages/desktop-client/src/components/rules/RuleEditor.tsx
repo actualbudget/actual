@@ -406,7 +406,7 @@ function ScheduleDescription({ id }) {
           marginRight: 15,
         }}
       >
-        <SpaceBetween gap={5} style={{ flexWrap: 'no-wrap' }}>
+        <SpaceBetween gap={5} style={{ flexWrap: 'nowrap' }}>
           <Trans>Payee:</Trans>
           <DisplayId
             type="payees"
@@ -1353,7 +1353,7 @@ export function RuleEditor({
             gap={5}
             style={{
               flexDirection: 'row',
-              flexWrap: 'no-wrap',
+              flexWrap: 'nowrap',
               justifyContent: 'space-between',
               marginBottom: 12,
             }}
