@@ -19,7 +19,7 @@ The formatting options allow you to select the following:
 
 ### Encryption
 
-End-to-end encryption allows you to encrypt the data on your remote server with a password. If you don't trust the server's owners, enable this setting to fully encrypt the data. Read more about this feature on the [Syncing Across Devices page.](../getting-started/sync.md/#end-to-end-encryption)
+End-to-end encryption allows you to encrypt the data on your remote server with a password. If you don't trust the server's owners, enable this setting to fully encrypt the data. Read more about this feature on the [Syncing Across Devices page.](/docs/getting-started/sync/#end-to-end-encryption)
 
 ![](/img/using-actual/settings-encryption.png)
 

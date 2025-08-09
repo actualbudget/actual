@@ -11,7 +11,7 @@ If you have any unused payees, they are readily available by clicking on the _Sh
 
 
 
-![](/static/img/a-tour-of-actual/tour-payees-overview.png)
+![](/img/a-tour-of-actual/tour-payees-overview.png)
 
 
 ## Deleting or merging payees
@@ -23,6 +23,6 @@ If you need to undo a merge or a delete operation, you can press <Key mod="Ctrl"
 Windows machine, or <Key mod="Cmd" k="Z" /> on a Mac.
 
 
-![](/static/img/a-tour-of-actual/tour-payees-delete-merge.png)
+![](/img/a-tour-of-actual/tour-payees-delete-merge.png)
 
 

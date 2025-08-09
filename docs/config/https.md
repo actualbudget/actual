@@ -25,7 +25,7 @@ Once you have the certificate, you’ll need to configure Actual to use it. Ther
 
 ### Configuring with `config.json`
 
-Create a `config.json` file in the same folder where you run the Actual Sync Server. If you are [building from source](docs/install/build-from-source) this will be in `packages/sync-server/`. Put the paths to the `.key` and `.crt` files in the config file. Note: if you’re using Docker or a similar container environment, make sure the paths are accessible to the container.
+Create a `config.json` file in the same folder where you run the Actual Sync Server. If you are [building from source](/docs/install/build-from-source) this will be in `packages/sync-server/`. Put the paths to the `.key` and `.crt` files in the config file. Note: if you’re using Docker or a similar container environment, make sure the paths are accessible to the container.
 
 If using a Docker container, this folder is `/data` within the container. If you mounted a volume for the container, the folder on the host where `/data` is mounted is where you can place the `config.json` file.
 

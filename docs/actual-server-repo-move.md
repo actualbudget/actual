@@ -50,13 +50,13 @@ The reasons for this change are as follows:
   yarn build:server
   ```
 
-  5. If you have a [config.json](docs/config/) file you will need to copy it into the following directory:
+  5. If you have a [config.json](/docs/config/) file you will need to copy it into the following directory:
 
   ```
   packages/sync-server
   ```
 
-  You may need to make some adjustments (e.g., `ACTUAL_DATA_DIR` becomes `dataDir`), please refer to [troubleshooting the server](docs/troubleshooting/server.md) for some help 6. Copy over the data from your `actual-server` directory (`user-files`, `server-files`, and `.migrate`) into the `packages/sync-server` directory. 7. Run the server with:
+  You may need to make some adjustments (e.g., `ACTUAL_DATA_DIR` becomes `dataDir`), please refer to [troubleshooting the server](/docs/troubleshooting/server) for some help 6. Copy over the data from your `actual-server` directory (`user-files`, `server-files`, and `.migrate`) into the `packages/sync-server` directory. 7. Run the server with:
 
   ```
   yarn start:server

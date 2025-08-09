@@ -25,7 +25,7 @@ If your bank doesn’t support downloading financial files, you can import a CSV
    - You can toggle on “Add Multiplier” to add a multiplier to all of the amounts in the CSV file. This can be useful if you want to make an approximate currency conversion.
 5. Once you’re happy with the settings, press **Import**.
 
-![CSV Import](/static/img/import/import-csv@2x.png)
+![CSV Import](/img/import/import-csv@2x.png)
 
 ## Manually Add Transactions
 

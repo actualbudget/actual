@@ -24,4 +24,4 @@ Actual does **not** sync bank data automatically. To fetch new transactions manu
 - To sync all accounts: click **All Accounts** in the sidebar, then click **Bank Sync**.
 - To sync a single account: open the account and click the Bank Sync button.
 
-  ![](/static/img/connecting-your-bank/connecting-your-bank-simplefin-10.png)
+  ![](/img/connecting-your-bank/connecting-your-bank-simplefin-10.png)

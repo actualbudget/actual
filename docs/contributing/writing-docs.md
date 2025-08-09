@@ -2,7 +2,8 @@
 
 Except for a few sections, most of the documentation is aimed at end users. It is important to keep this in mind when writing documentation. In practice, this means that it is better to be a bit verbose and write out every step in a process than to assume that the reader is on the writer's technical level.
 
-<details><summary>Read example</summary>
+<details>
+<summary>Read example</summary>
 
 For those with experience, the process is straightforward and familiar: _To update with our latest releases, simply use the `git pull` command from the `master` branch of your local directory of Actual. Once the changes are updated, execute the `yarn install` to download the latest updates from the releases._
 
@@ -78,7 +79,8 @@ The documentation folder structure should follow the structure in the left of th
 This means sections with more than one page have their own directories.
 
 
-<details><summary>Click here to get an overview of the folder structure</summary>
+<details>
+<summary>Click here to get an overview of the folder structure</summary>
 
 ```
 website # the root directory of the documentation site
@@ -236,13 +238,17 @@ Your warning content
 ### Hiding and showing  information
 
 
-<details><summary>This is a summary box, click here to see how it's made</summary>
+<details>
+<summary>This is a summary box, click here to see how it's made</summary>
 
-`<details><summary>The title of the summary</summary>`
+```
+<details>
+<summary>The title of the summary</summary>
 
 Place the content inside the details-tags.
 
-`</details>`
+</details>
+```
 
 
 </details>
@@ -252,7 +258,7 @@ Place the content inside the details-tags.
 As part of the build process, GitHub actions runs a spell checker bot on the documentation. If the bot finds any spelling error, it will be reported in the build output on GitHub. You must fix this by editing the file and correcting the spelling error.
 
 
-![Image of spelling bot error](/static/img/repo/spellingbot-example.png)
+![Image of spelling bot error](/img/repo/spellingbot-example.png)
 
 
 
@@ -314,21 +320,22 @@ We have a few suggestions when annotating screenshots:
 #### Do Use Boxes Over Arrows
 Arrows can inadvertently be misunderstood as pointing _from_ something rather than _to_. As we see in the example below, the reader can not be sure if the arrow means the column, the column header or if _To Budget_ is involved.
 
-![Image of the budget view annotated by a box and an arrow](/static/img/repo/annotation-boxes-over-arrows.png)
+![Image of the budget view annotated by a box and an arrow](/img/repo/annotation-boxes-over-arrows.png)
 
 
 #### Use "Steps" When Referring to Several Elements
 
 Use running numbers or letters inside circles, also known as "steps", when addressing more than one element in the screenshot. If there is a sequence to what a user is going to click on, use step numbers; if you want to address various elements, letters are preferred.
 
-![Image with 3 annotation steps](/static/img/repo/annotation-steps.png)
+![Image with 3 annotation steps](/img/repo/annotation-steps.png)
 
 If the annotation tool doesn't support 'steps ', use boxes in different colors and incorporate these colors into the explanation. This will help guide the reader's attention effectively.
 
-![Image with 3 different colored boxes](/static/img/repo/annotation-colour-boxes.png)
+![Image with 3 different colored boxes](/img/repo/annotation-colour-boxes.png)
 
 
-<details><summary>Read example description of this way of annotating</summary>
+<details>
+<summary>Read example description of this way of annotating</summary>
 
 
 **Using _steps_**
@@ -357,7 +364,7 @@ Do not use free hand "marker pens", boxes or arrows, as these kind of annotation
 [Actual Budget #documentation Discord channel](https://discord.com/channels/937901803608096828/1027831463103696928)
 if you need to annotate images but are not able to do it yourself.
 
-![Image with ugly free-hand annotations](/static/img/repo/annotation-free-hand.png)
+![Image with ugly free-hand annotations](/img/repo/annotation-free-hand.png)
 
 
 #### Annotation Colors
@@ -378,7 +385,7 @@ We suggest using the following colors (RGB values):
 | Blue       | 112, 175, 253 | 70 AF FD |
 | Green      |   0, 187, 161 | 00 BB A1 |
 
-![Annotation colors as seen in the table](/static/img/repo/annotation-colours.png)
+![Annotation colors as seen in the table](/img/repo/annotation-colours.png)
 
 For accessibility reasons (color blindness), avoid using red and green annotation colors on the same image.
 
@@ -387,13 +394,14 @@ For accessibility reasons (color blindness), avoid using red and green annotatio
 Different annotation tools handle this in various ways, which means we will get inconsistent screenshots. Secondly, unless you can control the opacity and color of the highlight, using highlighting could easily confuse more than enlighten the reader. Can you quickly find the highlighted number in the screenshot below?
 
 
-![Image of the budget view using the dark theme showing how highlights or spotlight annotations make the image hard to read](/static/img/repo/annotation-highlights-are-bad.png)
+![Image of the budget view using the dark theme showing how highlights or spotlight annotations make the image hard to read](/img/repo/annotation-highlights-are-bad.png)
 
-<details><summary>It might work when using the light theme</summary>
+<details>
+<summary>It might work when using the light theme</summary>
 
 However, because we dim down the rest of the image, this breaks over the notion that images should be clear and crisp.
 
-![Image of the budget view using the light theme showing that highlights may work](/static/img/repo/annotation-highlights-ligth-theme.png)
+![Image of the budget view using the light theme showing that highlights may work](/img/repo/annotation-highlights-ligth-theme.png)
 
 </details>
 

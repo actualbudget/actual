@@ -80,7 +80,7 @@ hide your data from prying eyes.
 
 To do this: click on the eye icon in the top right corner of the app.
 
-![Top right corner](/static/img/a-tour-of-actual/tour-overview-top-right.png)
+![Top right corner](/img/a-tour-of-actual/tour-overview-top-right.png)
 
 This will scramble all of your data, including payees, categories, and
 transactions.
@@ -89,7 +89,7 @@ This is useful if you want to create a screenshot of your data without
 showing your actual data. This is useful when you need to show your
 budget to someone else, like other Actual users in our Discord.
 
-![Top right corner](/static/img/tips-tricks/scrambled-clear-view.png)
+![Top right corner](/img/tips-tricks/scrambled-clear-view.png)
 
 
 :::note
@@ -99,7 +99,7 @@ This only hide data - no data is lost or encrypted.
 To unhide the data, click on the eye icon again. This will show the data in
 its original form.
 
-![Top right corner](/static/img/tips-tricks/scrambled-scrambled-view.png)
+![Top right corner](/img/tips-tricks/scrambled-scrambled-view.png)
 
 
 ## Show The Running Balance

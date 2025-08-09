@@ -8,15 +8,15 @@ Use this page to manage users who have access to the Actual Budget instance.
 
 To access the **User Directory** page, access the menu from the server:
 
-![](/static/img/multiuser/user-directory.png)
+![](/img/multiuser/user-directory.png)
 
 Users can be added, disabled, enabled, removed from this page:
 
-![](/static/img/multiuser/user-directory-overview.png)
+![](/img/multiuser/user-directory-overview.png)
 
 There are two user roles _Basic_ or _Admin_.
 
-- The Basic role: 
+- The Basic role:
 Users with the Basic role can create new budgets and collaborate on budgets made by others.
 This role is ideal for users who primarily need to manage and participate in shared budget activities.
 
@@ -31,10 +31,10 @@ Use this page to manage user access to the current open budget file.
 :::info
 The **User Access Management** menu is only visible from within an open budget:
 
-![](/static/img/multiuser/user-access.png)
+![](/img/multiuser/user-access.png)
 
 :::
 
 This screen is where you assign, give and revoke budget access and transfer ownership:
 
-![](/static/img/multiuser/user-access-overview.png)
+![](/img/multiuser/user-access-overview.png)

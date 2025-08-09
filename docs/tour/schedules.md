@@ -13,6 +13,6 @@ The system is very flexible, and you can schedule based on various factors:
 
 The manual's [Schedules](/docs/schedules) section contains all the details surrounding scheduling in Actual Budget.
 
-![Overvieds of the scheduldes screen](/static/img/a-tour-of-actual/tour-schedules-overview.png)
+![Overvieds of the scheduldes screen](/img/a-tour-of-actual/tour-schedules-overview.png)
 
 

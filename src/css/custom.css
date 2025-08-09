@@ -8,7 +8,9 @@
 
 h1,
 .serif-header {
-  font-family: Libre Baskerville, serif;
+  font-family:
+    Libre Baskerville,
+    serif;
   text-wrap: balance;
 }
 h1 {
@@ -55,7 +57,11 @@ h1 {
   opacity: 0.5;
 }
 
-.menu__list-item-collapsible > .menu__link:not([aria-expanded]) {
+.no-indent > .menu__list {
+  padding-left: 0;
+}
+
+.menu__list-item-collapsible > .menu__link:not([href]) {
   pointer-events: none;
   user-select: none;
   text-transform: uppercase;
@@ -63,20 +69,9 @@ h1 {
   padding-top: 16px;
   padding-bottom: 3px;
 }
-.theme-doc-sidebar-item-category-level-1
-  > .menu__list-item-collapsible
-  .menu__link:not([aria-expanded]) {
-  padding-top: 22px;
-  padding-bottom: 3px;
-}
 
-.menu__list-item-collapsible:has(> .menu__link:not([aria-expanded]))
-  + .menu__list {
-  padding-left: 0;
-}
-
-.menu__list-item-collapsible:has(.menu__link:not([aria-expanded])) {
-  pointer-events: none;
+.menu__list-item-collapsible:has(> .menu__link:not([href])):hover {
+  background: initial;
 }
 
 img {

@@ -38,7 +38,7 @@ When the template input mode is active you can type your template into the input
 | payee_name            | string  |                                                                                                                 |
 | imported_payee        | string  |                                                                                                                 |
 | notes                 | string  |                                                                                                                 |
-| amount                | number  | This is stored without the decimal place. ie. 152 will be 15200. {{div amount 100}} can be used to convert back |
+| amount                | number  | This is stored without the decimal place. ie. 152 will be 15200. `{{div amount 100}}` can be used to convert back |
 | cleared               | boolean |                                                                                                                 |
 | reconciled            | boolean |                                                                                                                 |
 | imported_id           | id      | ID of the transaction provided from an import source (eg. bank sync/QFX)                                        |
@@ -72,8 +72,8 @@ When the template input mode is active you can type your template into the input
 | Function   | Arguments                   | Notes                                                                                                      |
 |------------|-----------------------------|------------------------------------------------------------------------------------------------------------|
 | regex      | value, regex, replacement   |                                                                                                            |
-| replace    | value, pattern, replacement | Mimics js replace. When pattern is not as /regex/flags it just uses raw value as opposed to {{regex ...    |
-| replaceAll | value, pattern, replacement | Mimics js replaceAll. When pattern is not as /regex/flags it just uses raw value as opposed to {{regex ... |
+| replace    | value, pattern, replacement | Mimics js replace. When pattern is not as /regex/flags it just uses raw value as opposed to `{{regex ...`   |
+| replaceAll | value, pattern, replacement | Mimics js replaceAll. When pattern is not as /regex/flags it just uses raw value as opposed to `{{regex ...` |
 | concat     | values...                   | Joins all arguments together                                                                               |
 
 ### Date

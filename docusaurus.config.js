@@ -1,15 +1,11 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+const { themes } = require('prism-react-renderer');
 
 const defaultOptions = {
   editUrl: 'https://github.com/actualbudget/docs/tree/master/',
-  beforeDefaultRemarkPlugins: [
-    require('./src/remark/rewrite-images'),
-    require('./src/remark/mentions'),
-  ],
+  beforeDefaultRemarkPlugins: [require('./src/remark/mentions')],
 };
 
 /** @type {import('@docusaurus/types').Config} */
@@ -30,6 +26,12 @@ module.exports = {
     locales: ['en'],
   },
 
+  markdown: {
+    mermaid: true,
+  },
+
+  themes: ['@docusaurus/theme-mermaid'],
+
   presets: [
     [
       'classic',
@@ -42,6 +44,14 @@ module.exports = {
         },
         blog: {
           ...defaultOptions,
+          feedOptions: {
+            type: 'rss',
+            title: 'Actual Budget Blog',
+            description:
+              'Stay updated with the latest blog posts from Actual Budget',
+            copyright: `Copyright © ${new Date().getFullYear()} Actual Budget. All rights reserved.`,
+          },
+          onUntruncatedBlogPosts: 'ignore',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -128,15 +138,47 @@ module.exports = {
           },
           {
             label: 'RSS Feed',
-            href: '/blog/rss.xml',
+            href: 'https://actualbudget.org/blog/rss.xml',
           },
         ],
         copyright: `Copyright © ${new Date().getFullYear()} Actual Budget. Built with Docusaurus.`,
       },
       prism: {
-        theme: lightCodeTheme,
-        darkTheme: darkCodeTheme,
+        theme: themes.github,
+        darkTheme: themes.dracula,
         additionalLanguages: ['nginx'],
+      },
+
+      colorMode: {
+        defaultMode: 'light',
+        disableSwitch: false,
+        respectPrefersColorScheme: true,
+      },
+
+      zoom: {
+        // See: https://github.com/timmywil/panzoom for available options
+        disableZoom: true,
+        // A list of selectors to look for elements to enable pan and zoom
+        selectors: [
+          'div.mermaid[data-processed="true"]:not(.panzoom-exclude *)',
+          'div.docusaurus-mermaid-container:not(.panzoom-exclude *)',
+          '.drawio',
+          '.panzoom-example',
+        ],
+
+        // Whether to wrap the panzoom items in a div with overflow:hidden
+        // This constrains the pan zoom detail into the original container
+        wrap: true,
+
+        // The amount of time to wait in MS before the plugin client module tries to look for
+        // and alter pan zoom elements. Some renders take a little bit before they appear in the
+        // dom to find.
+        timeout: 2000,
+        excludeClass: 'panzoom-exclude',
+
+        toolbar: {
+          enabled: true,
+        },
       },
     }),
   plugins: [
@@ -164,5 +206,6 @@ module.exports = {
       },
     ],
     ['@docusaurus/plugin-ideal-image', { disableInDev: false }],
+    '@r74tech/docusaurus-plugin-panzoom',
   ],
 };

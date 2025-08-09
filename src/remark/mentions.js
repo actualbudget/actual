@@ -1,9 +1,9 @@
-const visit = require('unist-util-visit-parents');
+const { visitParents } = require('unist-util-visit-parents');
 
 function githubMentionPlugin() {
   const pattern = /@([\w-]+)/g;
   const transformer = async (ast, file) => {
-    visit(ast, 'text', (node, ancestors) => {
+    visitParents(ast, 'text', (node, ancestors) => {
       const text = node.value;
       let match;
       let lastIndex = 0;

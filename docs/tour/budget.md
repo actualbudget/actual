@@ -3,18 +3,18 @@
 This view lets you manage your budget for various months. You'll find more information about how to do budgeting with Actual
 in the [Budgeting](/docs/budgeting/) part of this manual.
 
-![](/static/img/a-tour-of-actual/tour-budget-overview.png)
+![](/img/a-tour-of-actual/tour-budget-overview.png)
 
 
 The number of months you can see at any one time is defined by the width of your screen.
 
 However, you can select fewer months than the screen can display by clicking on the corresponding numbers of calendar icons in the top left corner.
 
-![](/static/img/a-tour-of-actual/tour-budget-calendar.png)
+![](/img/a-tour-of-actual/tour-budget-calendar.png)
 
 Based on this, you can then choose which months to show:
 
-![](/static/img/a-tour-of-actual/tour-budget-calendar-choose.png)
+![](/img/a-tour-of-actual/tour-budget-calendar-choose.png)
 
 
 
@@ -31,11 +31,11 @@ At the top of each month, you have a couple of choices in the user interface.
   * Set budgets to 3 months average.
 
 
-![](/static/img/a-tour-of-actual/tour-budget-top-expanded.png)
+![](/img/a-tour-of-actual/tour-budget-top-expanded.png)
 
 When the top is minimized, you can still access the same functionality as when the top section is expanded.
 
-![](/static/img/a-tour-of-actual/tour-budget-top-minimized.png)
+![](/img/a-tour-of-actual/tour-budget-top-minimized.png)
 
 
 ## The Budget Table
@@ -57,7 +57,7 @@ and delete the category group.
 Let's look at a category (as seen in the purple box). We have the same functionality as on the group level: hide, rename and delete. And, of course, you
 can also add a note here, with information specific to the category.
 
-![](/static/img/a-tour-of-actual/tour-budget-details.png)
+![](/img/a-tour-of-actual/tour-budget-details.png)
 
 ### The middle - the budget section
 

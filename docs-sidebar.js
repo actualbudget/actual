@@ -49,6 +49,7 @@ const sidebars = {
       type: 'category',
       label: 'Getting Started',
       collapsible: false,
+      className: 'no-indent',
       items: [
         'getting-started/roadmap-for-new-users',
         'getting-started/envelope-budgeting',
@@ -65,6 +66,7 @@ const sidebars = {
               type: 'category',
               label: 'On Your Own Machine',
               collapsible: false,
+              className: 'no-indent',
               items: [
                 'install/docker',
                 'install/cli-tool',
@@ -77,13 +79,14 @@ const sidebars = {
               type: 'category',
               label: 'In the Cloud',
               collapsible: false,
+              className: 'no-indent',
               items: ['install/pikapods', 'install/fly'],
             },
-
             {
               type: 'category',
               label: 'Configuration',
               collapsible: false,
+              className: 'no-indent',
               items: [
                 'config/index',
                 'config/https',
@@ -112,6 +115,7 @@ const sidebars = {
       type: 'category',
       label: 'Using Actual',
       collapsible: false,
+      className: 'no-indent',
       items: [
         'getting-started/starting-fresh',
         {
@@ -187,7 +191,6 @@ const sidebars = {
             'advanced/scripts/modify-transfers',
           ],
         },
-
         {
           type: 'category',
           label: 'Reports',
@@ -250,6 +253,7 @@ const sidebars = {
       type: 'category',
       label: 'Help & Support',
       collapsible: false,
+      className: 'no-indent',
       items: [
         'faq',
         'actual-server-repo-move',
@@ -310,12 +314,14 @@ const sidebars = {
           type: 'category',
           label: 'Documentation',
           collapsible: false,
+          className: 'no-indent',
           items: ['contributing/writing-docs'],
         },
         {
           type: 'category',
           label: 'Project Leadership',
           collapsible: false,
+          className: 'no-indent',
           items: [
             'contributing/leadership/funding',
             'contributing/leadership/triaging-issues',

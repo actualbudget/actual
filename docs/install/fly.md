@@ -23,7 +23,8 @@ To install the `fly` command line tool on your local machine, you’ll need to s
 
 Next, follow [the instructions to install the `fly` command line tool](https://fly.io/docs/hands-on/install-flyctl/). When entering the commands, make sure _not_ to include the `$` character at the beginning of each line.
 
-<details><summary>Detailed instructions with screenshots for Windows</summary>
+<details>
+<summary>Detailed instructions with screenshots for Windows</summary>
 
 Note: the exact commands you’ll need to run may have changed, check the website linked above to make sure you have the latest ones.
 
@@ -42,7 +43,8 @@ Note: the exact commands you’ll need to run may have changed, check the websit
 
 </details>
 
-<details><summary>Detailed instructions with screenshots for macOS</summary>
+<details>
+<summary>Detailed instructions with screenshots for macOS</summary>
 
 Note: the exact commands you’ll need to run may have changed, check the website linked above to make sure you have the latest ones.
 
@@ -113,7 +115,8 @@ You can now visit your very own instance of Actual by opening the link on the la
 Now that Actual has been launched, you should be able to navigate to Actual using the URL
 provided by the Fly command above earlier.
 
-<details><summary>Forgot the URL? Here’s how to find it</summary>
+<details>
+<summary>Forgot the URL? Here’s how to find it</summary>
 
 If you forget the URL, you can always find it by opening [https://fly.io/dashboard](https://fly.io/dashboard) in a browser. Click on the application you created:
 

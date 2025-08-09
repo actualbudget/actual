@@ -1,21 +1,19 @@
-import React from 'react';
 import Layout from '@theme/Layout';
 import ThemedImage from '@theme/ThemedImage';
 import Link from '@docusaurus/Link';
 
 import Button from '../components/Button';
-import Image from '../components/Image';
 
 import classes from './index.module.css';
 
 export default function Hello() {
   return (
     <Layout title="Actual" style={{ position: 'relative' }}>
-      <img alt="" src="/img/homepage/hero-bg.svg" class={classes.heroBg} />
+      <img alt="" src="/img/homepage/hero-bg.svg" className={classes.heroBg} />
 
-      <div class={`${classes.main} ${classes.container}`}>
+      <div className={`${classes.main} ${classes.container}`}>
         <h1>Your Finances — made simple</h1>
-        <p class={classes.heroText}>
+        <p className={classes.heroText}>
           Actual Budget is a super fast and privacy-focused app for managing
           your finances. At its heart is the well proven and much loved Envelope
           Budgeting methodology.
@@ -43,11 +41,11 @@ export default function Hello() {
             <Button to="/docs/install/">Set up manually</Button>
           </div>
         </div>
-        <div class={classes.heroImage}>
+        <div className={classes.heroImage}>
           <ThemedImage
             sources={{
-              light: "/img/homepage/actual-main-budget.png",
-              dark: "/img/homepage/actual-main-budget-dark.png",
+              light: '/img/homepage/actual-main-budget.png',
+              dark: '/img/homepage/actual-main-budget-dark.png',
             }}
             alt="Actual Budget"
           />
@@ -55,7 +53,7 @@ export default function Hello() {
             to="https://demo.actualbudget.org/"
             className={classes.demoButton}
           >
-            <div class={classes.demoButtonContent}>
+            <div className={classes.demoButtonContent}>
               <div style={{ width: 24, height: 24 }}>{icons.play}</div> Try the
               demo
             </div>
@@ -78,9 +76,9 @@ export default function Hello() {
           media={
             <video
               loop
-              muted="muted"
-              autoplay=""
-              playsinline=""
+              muted
+              autoPlay
+              playsInline
               src="/img/homepage/design.mp4"
               style={{ width: '100%' }}
             />
@@ -132,30 +130,29 @@ export default function Hello() {
           transactions and transfers all in the same editor.
         </BigFeature>
 
-
         <BigFeature
           title="Oh my, the reports"
           srcLight="/img/homepage/actual-report-dashboard-light.png"
           srcDark="/img/homepage/actual-report-dashboard-dark.png"
         >
           Intuitive reports give you a quick way to learn about your finances.
-          By default, we include net worth and cash flow reports.  Actual also
-          includes a powerful custom report engine to design your own reports
-          to fit your needs.
+          By default, we include net worth and cash flow reports. Actual also
+          includes a powerful custom report engine to design your own reports to
+          fit your needs.
         </BigFeature>
       </div>
 
-      <div class={classes.featuresSection}>
+      <div className={classes.featuresSection}>
         <img
           alt=""
           src="/img/homepage/features-bg.svg"
-          class={classes.featuresBg}
+          className={classes.featuresBg}
         />
 
-        <h2 class={`${classes.featuresSectionHeader} serif-header`}>
+        <h2 className={`${classes.featuresSectionHeader} serif-header`}>
           So many features!
         </h2>
-        <div class={`${classes.smallFeaturesGrid} ${classes.container}`}>
+        <div className={`${classes.smallFeaturesGrid} ${classes.container}`}>
           <SmallFeature
             title="Everything in one place"
             icon={icons.smileyBlessedAlternate}
@@ -222,10 +219,7 @@ export default function Hello() {
             We provide builtin YNAB4 & nYNAB importers that keep all of your
             history. There are many more available from the Actual Community.
           </SmallFeature>
-          <SmallFeature
-            title="Dark Mode"
-            icon={icons.moon}
-          >
+          <SmallFeature title="Dark Mode" icon={icons.moon}>
             Choose your own style with a built in dark mode and dynamic theming
             using your system default.
           </SmallFeature>
@@ -239,9 +233,9 @@ export default function Hello() {
             runs on your local data.
           </SmallFeature>
         </div>
-        <div class={`${classes.ownYourDataSection} ${classes.container}`}>
-          <h3 class="serif-header">Own your data</h3>
-          <div class={classes.ownYourDataContent}>
+        <div className={`${classes.ownYourDataSection} ${classes.container}`}>
+          <h3 className="serif-header">Own your data</h3>
+          <div className={classes.ownYourDataContent}>
             {icons.shieldLock}
             <div>
               Actual allows you to effortlessly sync changes by running your own
@@ -253,7 +247,7 @@ export default function Hello() {
         </div>
 
         <p
-          class={classes.container}
+          className={classes.container}
           style={{ maxWidth: 500, marginTop: '12em', marginBottom: '-12em' }}
         >
           <small style={{ opacity: 0.6 }}>
@@ -276,11 +270,11 @@ export default function Hello() {
 
 function SmallFeature({ title, icon, learnMore, children }) {
   return (
-    <div class={classes.smallFeature}>
-      <div class={classes.smallFeatureIcon}>{icon}</div>
-      <div class={classes.smallFeatureContent}>
-        <h3 class={classes.smallFeatureTitle}>{title}</h3>
-        <p class={classes.smallFeatureText}>
+    <div className={classes.smallFeature}>
+      <div className={classes.smallFeatureIcon}>{icon}</div>
+      <div className={classes.smallFeatureContent}>
+        <h3 className={classes.smallFeatureTitle}>{title}</h3>
+        <p className={classes.smallFeatureText}>
           {children}{' '}
           {learnMore ? <Link to={learnMore}>Learn&nbsp;more</Link> : null}
         </p>
@@ -292,34 +286,42 @@ function SmallFeature({ title, icon, learnMore, children }) {
 function MediumFeature({ title, media, src, flip, children }) {
   return (
     <div
-      class={`${classes.mediumFeature} ${
+      className={`${classes.mediumFeature} ${
         flip ? classes.mediumFeature_flip : ''
       }`}
     >
-      <div class={classes.mediumFeatureContent}>
-        <h2 class="serif-header">{title}</h2>
+      <div className={classes.mediumFeatureContent}>
+        <h2 className="serif-header">{title}</h2>
         {children}
       </div>
       {media ? (
-        <div class={classes.mediumFeatureMedia}>{media}</div>
+        <div className={classes.mediumFeatureMedia}>{media}</div>
       ) : (
-        <img src={src} alt="" class={classes.mediumFeatureMedia} />
+        <img src={src} alt="" className={classes.mediumFeatureMedia} />
       )}
     </div>
   );
 }
 
-function BigFeature({ title, media, srcLight, srcDark=null, flip, children }) {
+function BigFeature({
+  title,
+  media,
+  srcLight,
+  srcDark = null,
+  flip,
+  children,
+}) {
   const imgDark = srcDark ? srcDark : srcLight;
   return (
-    <div class={classes.bigFeature}>
-      <h2 class="serif-header">{title}</h2>
-      <div class={classes.bigFeatureContent}>{children}</div>
+    <div className={classes.bigFeature}>
+      <h2 className="serif-header">{title}</h2>
+      <div className={classes.bigFeatureContent}>{children}</div>
       {media ? (
-        <div class={classes.bigFeatureMedia}>{media}</div>
+        <div className={classes.bigFeatureMedia}>{media}</div>
       ) : (
         <ThemedImage
-          alt="" class={classes.bigFeatureMedia}
+          alt=""
+          className={classes.bigFeatureMedia}
           sources={{
             light: srcLight,
             dark: imgDark,
@@ -411,16 +413,16 @@ const icons = {
   ),
   bank: (
     <svg viewBox="0 0 24 24">
-      <path d="M10.8321 1.24802C11.5779 0.917327 12.4221 0.917327 13.1679 1.24802L21.7995 5.0754C23.7751 5.95141 23.1703 9 21.0209 9H2.97906C0.829669 9 0.224891 5.9514 2.20047 5.0754L10.8321 1.24802ZM12.3893 3.12765C12.1407 3.01742 11.8593 3.01742 11.6107 3.12765L3.41076 6.76352C3.31198 6.80732 3.34324 6.95494 3.45129 6.95494H20.5487C20.6568 6.95494 20.688 6.80732 20.5892 6.76352L12.3893 3.12765Z"/>
-      <path d="M2 22C2 21.4477 2.44772 21 3 21H21C21.5523 21 22 21.4477 22 22C22 22.5523 21.5523 23 21 23H3C2.44772 23 2 22.5523 2 22Z"/>
-      <path d="M11 19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19V11C13 10.4477 12.5523 10 12 10C11.4477 10 11 10.4477 11 11V19Z"/>
-      <path d="M6 20C5.44772 20 5 19.5523 5 19L5 11C5 10.4477 5.44771 10 6 10C6.55228 10 7 10.4477 7 11L7 19C7 19.5523 6.55229 20 6 20Z"/>
-      <path d="M17 19C17 19.5523 17.4477 20 18 20C18.5523 20 19 19.5523 19 19V11C19 10.4477 18.5523 10 18 10C17.4477 10 17 10.4477 17 11V19Z"/>
+      <path d="M10.8321 1.24802C11.5779 0.917327 12.4221 0.917327 13.1679 1.24802L21.7995 5.0754C23.7751 5.95141 23.1703 9 21.0209 9H2.97906C0.829669 9 0.224891 5.9514 2.20047 5.0754L10.8321 1.24802ZM12.3893 3.12765C12.1407 3.01742 11.8593 3.01742 11.6107 3.12765L3.41076 6.76352C3.31198 6.80732 3.34324 6.95494 3.45129 6.95494H20.5487C20.6568 6.95494 20.688 6.80732 20.5892 6.76352L12.3893 3.12765Z" />
+      <path d="M2 22C2 21.4477 2.44772 21 3 21H21C21.5523 21 22 21.4477 22 22C22 22.5523 21.5523 23 21 23H3C2.44772 23 2 22.5523 2 22Z" />
+      <path d="M11 19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19V11C13 10.4477 12.5523 10 12 10C11.4477 10 11 10.4477 11 11V19Z" />
+      <path d="M6 20C5.44772 20 5 19.5523 5 19L5 11C5 10.4477 5.44771 10 6 10C6.55228 10 7 10.4477 7 11L7 19C7 19.5523 6.55229 20 6 20Z" />
+      <path d="M17 19C17 19.5523 17.4477 20 18 20C18.5523 20 19 19.5523 19 19V11C19 10.4477 18.5523 10 18 10C17.4477 10 17 10.4477 17 11V19Z" />
     </svg>
   ),
   moon: (
-    <svg viewBox="0 0 24 24" >
-      <path d="M21.0672 11.8568L20.4253 11.469L21.0672 11.8568ZM12.1432 2.93276L11.7553 2.29085V2.29085L12.1432 2.93276ZM21.25 12C21.25 17.1086 17.1086 21.25 12 21.25V22.75C17.9371 22.75 22.75 17.9371 22.75 12H21.25ZM12 21.25C6.89137 21.25 2.75 17.1086 2.75 12H1.25C1.25 17.9371 6.06294 22.75 12 22.75V21.25ZM2.75 12C2.75 6.89137 6.89137 2.75 12 2.75V1.25C6.06294 1.25 1.25 6.06294 1.25 12H2.75ZM15.5 14.25C12.3244 14.25 9.75 11.6756 9.75 8.5H8.25C8.25 12.5041 11.4959 15.75 15.5 15.75V14.25ZM20.4253 11.469C19.4172 13.1373 17.5882 14.25 15.5 14.25V15.75C18.1349 15.75 20.4407 14.3439 21.7092 12.2447L20.4253 11.469ZM9.75 8.5C9.75 6.41182 10.8627 4.5828 12.531 3.57467L11.7553 2.29085C9.65609 3.5593 8.25 5.86509 8.25 8.5H9.75ZM12 2.75C11.9115 2.75 11.8077 2.71008 11.7324 2.63168C11.6686 2.56527 11.6538 2.50244 11.6503 2.47703C11.6461 2.44587 11.6482 2.35557 11.7553 2.29085L12.531 3.57467C13.0342 3.27065 13.196 2.71398 13.1368 2.27627C13.0754 1.82126 12.7166 1.25 12 1.25V2.75ZM21.7092 12.2447C21.6444 12.3518 21.5541 12.3539 21.523 12.3497C21.4976 12.3462 21.4347 12.3314 21.3683 12.2676C21.2899 12.1923 21.25 12.0885 21.25 12H22.75C22.75 11.2834 22.1787 10.9246 21.7237 10.8632C21.286 10.804 20.7293 10.9658 20.4253 11.469L21.7092 12.2447Z"/>
+    <svg viewBox="0 0 24 24">
+      <path d="M21.0672 11.8568L20.4253 11.469L21.0672 11.8568ZM12.1432 2.93276L11.7553 2.29085V2.29085L12.1432 2.93276ZM21.25 12C21.25 17.1086 17.1086 21.25 12 21.25V22.75C17.9371 22.75 22.75 17.9371 22.75 12H21.25ZM12 21.25C6.89137 21.25 2.75 17.1086 2.75 12H1.25C1.25 17.9371 6.06294 22.75 12 22.75V21.25ZM2.75 12C2.75 6.89137 6.89137 2.75 12 2.75V1.25C6.06294 1.25 1.25 6.06294 1.25 12H2.75ZM15.5 14.25C12.3244 14.25 9.75 11.6756 9.75 8.5H8.25C8.25 12.5041 11.4959 15.75 15.5 15.75V14.25ZM20.4253 11.469C19.4172 13.1373 17.5882 14.25 15.5 14.25V15.75C18.1349 15.75 20.4407 14.3439 21.7092 12.2447L20.4253 11.469ZM9.75 8.5C9.75 6.41182 10.8627 4.5828 12.531 3.57467L11.7553 2.29085C9.65609 3.5593 8.25 5.86509 8.25 8.5H9.75ZM12 2.75C11.9115 2.75 11.8077 2.71008 11.7324 2.63168C11.6686 2.56527 11.6538 2.50244 11.6503 2.47703C11.6461 2.44587 11.6482 2.35557 11.7553 2.29085L12.531 3.57467C13.0342 3.27065 13.196 2.71398 13.1368 2.27627C13.0754 1.82126 12.7166 1.25 12 1.25V2.75ZM21.7092 12.2447C21.6444 12.3518 21.5541 12.3539 21.523 12.3497C21.4976 12.3462 21.4347 12.3314 21.3683 12.2676C21.2899 12.1923 21.25 12.0885 21.25 12H22.75C22.75 11.2834 22.1787 10.9246 21.7237 10.8632C21.286 10.804 20.7293 10.9658 20.4253 11.469L21.7092 12.2447Z" />
     </svg>
   ),
 };

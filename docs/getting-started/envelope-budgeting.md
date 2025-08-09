@@ -354,8 +354,8 @@ Now you are in deficit in the *Gift* category.
 
 You should not really have a deficit in your budget, so you exercise the **Flexibility** principle by reducing money
 from one of the other categories. You do not want to use your savings - as this is a **Goal**. *Dining out* is
-not essential so you move 5 from *Available Week 2* into *Gifts*. These additional $ 5 will be added to the existing $ 5. 
-This will make the total available equal to the $ 10 spending. 
+not essential so you move 5 from *Available Week 2* into *Gifts*. These additional $ 5 will be added to the existing $ 5.
+This will make the total available equal to the $ 10 spending.
 
 ### Updated week 3 availability
 
@@ -432,7 +432,4 @@ Therefore, we need to increase next month's budget for Groceries.
 - We will also increase the Gas budget by $ 10 because if we had to fill gas in week 4, we would have faced a
 deficit and need to cover it from other categories.
 
-The rest we put into our Savings category
-
-| Categories      | Available after week 4 | February Budget | To be allocated |
-|-----------------|----------------------
+The rest we put into our Savings category.

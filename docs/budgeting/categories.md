@@ -7,7 +7,7 @@ Get some background information and recommendations on budget categories in our
 
 ## Add a Category
 
-1. Hover over the category group and press the down arrow 
+1. Hover over the category group and press the down arrow
 
 ![](/img/categories/CategoryGroupRename.png)
 
@@ -73,11 +73,11 @@ Hidden categories, when shown, are displayed in a lower-contrast color. If you f
 
 It is possible to add notes to Categories. To do this, hover over the category that you would like to add a note to. A paper icon will appear.
 
-![](/static/img/categories/CategoryGroupRename.png)
+![](/img/categories/CategoryGroupRename.png)
 
 Click the paper icon and type in your note.
 
-![](/static/img/categories/CategoryAddNote.png)
+![](/img/categories/CategoryAddNote.png)
 
 Notes support Markdown syntax for formatted notes.
 
@@ -87,8 +87,8 @@ Once a Category has been given a note it is possible to view it in one of two wa
 
 1. Hover over the paper icon on the category and the note contents will appear for you to view.
 
-![](/static/img/categories/CategoryViewNoteHover.png)
+![](/img/categories/CategoryViewNoteHover.png)
 
 2. Click the paper icon. This will open the edit box where you can see the note content and also edit the note, should you wish.
 
-![](/static/img/categories/CategoryEditNote.png)
+![](/img/categories/CategoryEditNote.png)

@@ -8,7 +8,7 @@ Standard on most screens:
 * The server and sync status (if used) are shown in the red box in the upper right corner.
 * The content of the rest of the interface depends on the functionality you have chosen in the sidebar. This screenshot shows an example of a Budget view.
 
-![](/static/img/a-tour-of-actual/tour-overview-of-user-interface.png)
+![](/img/a-tour-of-actual/tour-overview-of-user-interface.png)
 
 ## Top Right Corner
 
@@ -16,7 +16,7 @@ Standard on most screens:
 * If clicking on the sync icon, your local file will sync to the server.
 * The current text, _Server online_ shows the connection status. Thus, it could easily read _Server offline_ if you are not connected to a server. If you click on this text, you can change your password, sign out of the server or change the server URL.
 
-![](/static/img/a-tour-of-actual/tour-overview-top-right.png)
+![](/img/a-tour-of-actual/tour-overview-top-right.png)
 
 ## The Sidebar
 
@@ -29,4 +29,4 @@ From the sidebar, you have easy access to all Actual's functionality.
 
 Most of these will we cover later in the tour.
 
-![](/static/img/a-tour-of-actual/tour-overview-sidebar.png)
+![](/img/a-tour-of-actual/tour-overview-sidebar.png)

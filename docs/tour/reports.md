@@ -5,7 +5,7 @@ This view gives you access to both the two built in reports, _Net Worth_ and _Ca
 All reports in this view are shown in their small, tiled, version. Clicking on a tile will take you to that very report.
 
 
-![Reports overview](/static/img/a-tour-of-actual/tour-reports-overview.png)
+![Reports overview](/img/a-tour-of-actual/tour-reports-overview.png)
 
 ## The built in reports
 
@@ -19,7 +19,7 @@ your available money over time. By considering your budgeted accounts as “cash
 
 These reports are detailed in the [reports section](/docs/reports/) in the manual.
 
-![Cashflow report](/static/img/a-tour-of-actual/tour-reports-cashflow.png)
+![Cashflow report](/img/a-tour-of-actual/tour-reports-cashflow.png)
 
 
 ## Custom reports
@@ -32,6 +32,6 @@ Below are examples of reports covering our _Daily Expenses_ over the last six m
 the other as a table. Note that the table version also shows the sum and average (over six months)
 for the various categories.
 
-![Custom report showing daily expenses as graph](/static/img/a-tour-of-actual/tour-reports-daily-expenses-graph.png)
+![Custom report showing daily expenses as graph](/img/a-tour-of-actual/tour-reports-daily-expenses-graph.png)
 
-![Custom report showing daily expenses as table](/static/img/a-tour-of-actual/tour-reports-daily-expenses-table.png)
+![Custom report showing daily expenses as table](/img/a-tour-of-actual/tour-reports-daily-expenses-table.png)

@@ -3,7 +3,7 @@
 This view lets you manage your transactions for an account. Consult the [Accounts & Transaction](/docs/accounts/) section in
 the manual for detailed information on how to work with this view.
 
-![](/static/img/a-tour-of-actual/tour-account-register-overview.png)
+![](/img/a-tour-of-actual/tour-account-register-overview.png)
 
 ## The Account Header
 
@@ -27,7 +27,7 @@ This is also where you can show the account's running balance (as seen in the fi
 also hide/show both reconciled transactions as well as the cleared checkbox column to the far right of the transaction's row.
 
 
-![](/static/img/a-tour-of-actual/tour-account-register-header.png)
+![](/img/a-tour-of-actual/tour-account-register-header.png)
 
 Clicking on **Import** will let you [import transactions](/docs/transactions/importing) from CSV, QIF, OFX and QFX files.
 
@@ -35,7 +35,7 @@ Manually adding transactions can be done by clicking on **Add New**. The Payee a
 a dropdown menu of available options. You can add new payees directly from this view, but if you need to add a new category,
 you can only do so from the [Budget View](./budget).
 
-![](/static/img/a-tour-of-actual/tour-account-register-adding-transaction.png)
+![](/img/a-tour-of-actual/tour-account-register-adding-transaction.png)
 
 
 ## Filtering on transactions
@@ -48,7 +48,7 @@ on the right side in the header. Provide a name to save the filter under for fut
 
 Consult [filtering transactions](/docs/transactions/filters) in the manual for more information.
 
-![](/static/img/a-tour-of-actual/tour-account-register-filter.png)
+![](/img/a-tour-of-actual/tour-account-register-filter.png)
 
 
 ## Working on selected transactions
@@ -61,5 +61,5 @@ transactions.
 
 Another powerful feature allows you to do [bulk editing](/docs/transactions/bulk-editing).
 
-![](/static/img/a-tour-of-actual/tour-account-register-selected-transactions.png)
+![](/img/a-tour-of-actual/tour-account-register-selected-transactions.png)
 
