@@ -1,6 +1,6 @@
-import { Template } from '../../types/models/templates';
-import * as db from '../db';
+import type { Template } from '../../types/models/templates';
 
+import { storeTemplates } from './goal-template';
 import { parse } from './goal-template.pegjs';
 import {
   CategoryWithTemplateNote,
@@ -19,28 +19,21 @@ type Notification = {
 export const TEMPLATE_PREFIX = '#template';
 export const GOAL_PREFIX = '#goal';
 
-export async function storeTemplates(): Promise<void> {
+export async function storeNoteTemplates(): Promise<void> {
   const categoriesWithTemplates = await getCategoriesWithTemplates();
 
-  for (const { id, templates } of categoriesWithTemplates) {
-    const goalDefs = JSON.stringify(templates);
-
-    await db.update('categories', {
-      id,
-      goal_def: goalDefs,
-    });
-  }
+  await storeTemplates({ categoriesWithTemplates, source: 'notes' });
 
   await resetCategoryGoalDefsWithNoTemplates();
 }
 
-type CategoryWithTemplates = {
+type CategoryWithTemplateNotes = {
   id: string;
   name: string;
   templates: Template[];
 };
 
-export async function checkTemplates(): Promise<Notification> {
+export async function checkTemplateNotes(): Promise<Notification> {
   const categoryWithTemplates = await getCategoriesWithTemplates();
   const schedules = await getActiveSchedules();
   const scheduleNames = schedules.map(({ name }) => name);
@@ -78,8 +71,10 @@ export async function checkTemplates(): Promise<Notification> {
   };
 }
 
-async function getCategoriesWithTemplates(): Promise<CategoryWithTemplates[]> {
-  const templatesForCategory: CategoryWithTemplates[] = [];
+async function getCategoriesWithTemplates(): Promise<
+  CategoryWithTemplateNotes[]
+> {
+  const templatesForCategory: CategoryWithTemplateNotes[] = [];
   const templateNotes = await getCategoriesWithTemplateNotes();
 
   templateNotes.forEach(({ id, name, note }: CategoryWithTemplateNote) => {

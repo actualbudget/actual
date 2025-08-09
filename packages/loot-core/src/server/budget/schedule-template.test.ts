@@ -27,7 +27,8 @@ describe('runSchedule', () => {
       {
         type: 'schedule',
         name: 'Test Schedule',
-        directive: '#template schedule Test Schedule',
+        priority: 0,
+        directive: 'template',
       } as const,
     ];
     const current_month = '2024-08-01';
@@ -97,7 +98,8 @@ describe('runSchedule', () => {
       {
         type: 'schedule',
         name: 'Test Schedule',
-        directive: '#template schedule Test Schedule',
+        directive: 'template',
+        priority: 0,
       } as const,
     ];
     const current_month = '2024-09-01';
