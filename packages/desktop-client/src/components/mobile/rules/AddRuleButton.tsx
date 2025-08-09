@@ -18,6 +18,7 @@ export function AddRuleButton() {
     <Button
       variant="bare"
       aria-label={t('Add new rule')}
+      style={{ margin: 10 }}
       onPress={handleAddRule}
     >
       <SvgAdd width={20} height={20} />
