@@ -1002,6 +1002,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
               required
               style={{ color: theme.tableText, minWidth: '150px' }}
               defaultValue={dateDefaultValue}
+              onBlur={onClearActiveEdit}
               onFocus={() =>
                 onRequestActiveEdit(getFieldName(transaction.id, 'date'))
               }
