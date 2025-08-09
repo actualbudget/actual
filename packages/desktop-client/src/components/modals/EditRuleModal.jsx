@@ -1,6 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { theme } from '@actual-app/components/theme';
+
 import {
   Modal,
   ModalCloseButton,
@@ -34,6 +36,7 @@ export function EditRuleModal({
               flexShrink: 0,
               flexBasis: 'auto',
               overflow: 'hidden',
+              color: theme.pageTextLight,
             }}
           />
         </>

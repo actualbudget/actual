@@ -20,7 +20,6 @@ export function NarrowAlternate({
   name: keyof typeof WideComponents & keyof typeof NarrowComponents;
 }) {
   const { isNarrowWidth } = useResponsive();
-
   return (
     <LoadComponent
       name={name}
