@@ -3,6 +3,8 @@ import { type Template } from 'loot-core/types/models/templates';
 import { type Action } from './actions';
 import { type ReducerState, type DisplayTemplateType } from './constants';
 
+export const DEFAULT_PRIORITY = 1;
+
 export const getInitialState = (template: Template | null): ReducerState => {
   const type = template?.type;
   switch (type) {
@@ -61,7 +63,7 @@ const changeType = (
           directive: 'template',
           type: 'simple',
           monthly: 500,
-          priority: 0,
+          priority: DEFAULT_PRIORITY,
         },
       };
     case 'percentage':
@@ -76,7 +78,7 @@ const changeType = (
           percent: 15,
           previous: false,
           category: 'total',
-          priority: 0,
+          priority: DEFAULT_PRIORITY,
         },
       };
     case 'schedule':
@@ -89,7 +91,7 @@ const changeType = (
           directive: 'template',
           type: 'schedule',
           name: '',
-          priority: 0,
+          priority: DEFAULT_PRIORITY,
         },
       };
     case 'week':
@@ -107,7 +109,7 @@ const changeType = (
             amount: 1,
           },
           starting: '',
-          priority: 0,
+          priority: DEFAULT_PRIORITY,
         },
       };
     case 'historical':
@@ -123,7 +125,7 @@ const changeType = (
           directive: 'template',
           type: 'average',
           numMonths: 3,
-          priority: 0,
+          priority: DEFAULT_PRIORITY,
         },
       };
     default:

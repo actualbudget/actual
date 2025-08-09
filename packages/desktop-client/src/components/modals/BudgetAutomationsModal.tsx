@@ -10,6 +10,7 @@ import { q } from 'loot-core/shared/query';
 import { type Template } from 'loot-core/types/models/templates';
 
 import { BudgetAutomation } from '@desktop-client/components/budget/goals/BudgetAutomation';
+import { DEFAULT_PRIORITY } from '@desktop-client/components/budget/goals/reducer';
 import { useBudgetAutomationCategories } from '@desktop-client/components/budget/goals/useBudgetAutomationCategories';
 import {
   Modal,
@@ -30,7 +31,7 @@ export function BudgetAutomationsModal() {
       type: 'average',
       numMonths: 3,
       directive: 'template',
-      priority: 0,
+      priority: DEFAULT_PRIORITY,
       id: uniqueId(),
     },
   ]);
@@ -49,7 +50,7 @@ export function BudgetAutomationsModal() {
         type: 'average',
         numMonths: 3,
         directive: 'template',
-        priority: 0,
+        priority: DEFAULT_PRIORITY,
         id: uniqueId(),
       },
     ]);

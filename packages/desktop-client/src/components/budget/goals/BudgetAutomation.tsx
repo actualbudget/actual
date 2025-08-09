@@ -12,7 +12,7 @@ import { type Template } from 'loot-core/types/models/templates';
 import { type Action } from './actions';
 import { BudgetAutomationEditor } from './BudgetAutomationEditor';
 import { BudgetAutomationReadOnly } from './BudgetAutomationReadOnly';
-import { getInitialState, templateReducer } from './reducer';
+import { DEFAULT_PRIORITY, getInitialState, templateReducer } from './reducer';
 
 type BudgetAutomationProps = {
   categories: CategoryGroupEntity[];
@@ -29,7 +29,7 @@ const DEFAULT_TEMPLATE: Template = {
   directive: 'template',
   type: 'simple',
   monthly: 0,
-  priority: 0,
+  priority: DEFAULT_PRIORITY,
 };
 
 export const BudgetAutomation = ({
