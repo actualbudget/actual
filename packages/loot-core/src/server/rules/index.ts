@@ -542,7 +542,7 @@ export class Condition {
         }
         return this.value.indexOf(fieldValue) !== -1;
 
-      case 'hasTags':
+      case 'hasTags': {
         if (fieldValue === null) {
           return false;
         }
@@ -559,8 +559,9 @@ export class Condition {
           );
           return regex.test(fieldValue);
         });
+      }
 
-      case 'hasAnyTags':
+      case 'hasAnyTags': {
         if (fieldValue === null) {
           return false;
         }
@@ -577,6 +578,7 @@ export class Condition {
           );
           return regex.test(fieldValue);
         });
+      }
 
       case 'notOneOf':
         if (fieldValue === null) {

@@ -145,7 +145,14 @@ export function transactionsSearch(
     searchConditions.$and = tagConditions;
   }
 
-  return currentQuery.filter({
-    $or: searchConditions,
-  });
+  // Build a combined filter where `$or` receives an array and `$and` (for tags)
+  // is included alongside `$or` at the top level.
+  const { $and: tagAnd, ...baseConditions } = searchConditions;
+
+  const combinedFilter: Record<string, unknown> = {
+    $or: [baseConditions],
+    ...(tagAnd ? { $and: tagAnd } : {}),
+  };
+
+  return currentQuery.filter(combinedFilter);
 }

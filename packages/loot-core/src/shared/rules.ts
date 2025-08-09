@@ -66,7 +66,7 @@ type FieldInfoConstraint = Record<
 const FIELD_INFO = {
   imported_payee: {
     type: 'string',
-    disallowedOps: new Set(['hasTags']),
+    disallowedOps: new Set(['hasTags', 'hasAnyTags']),
   },
   payee: { type: 'id', disallowedOps: new Set(['onBudget', 'offBudget']) },
   payee_name: { type: 'string' },
