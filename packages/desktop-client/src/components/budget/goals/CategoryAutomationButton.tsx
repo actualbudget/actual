@@ -5,33 +5,32 @@ import { Button } from '@actual-app/components/button';
 import { SvgChartPie } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
 
-import { type Template } from 'loot-core/types/models/templates';
+import { type CategoryEntity } from 'loot-core/types/models';
 
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type CategoryAutomationButtonProps = {
+  category: CategoryEntity;
   width?: number;
   height?: number;
   defaultColor?: string;
   style?: CSSProperties;
 };
 export function CategoryAutomationButton({
+  category,
   width = 12,
   height = 12,
   defaultColor = theme.buttonNormalText,
   style,
 }: CategoryAutomationButtonProps) {
   const { t } = useTranslation();
-
-  const automations: Template[] = [];
-  const hasAutomations = !!automations.length;
-
   const dispatch = useDispatch();
 
   const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
+  const hasAutomations = !!category.goal_def;
 
   if (!goalTemplatesEnabled || !goalTemplatesUIEnabled) {
     return null;
@@ -48,7 +47,14 @@ export function CategoryAutomationButton({
         ...(hasAutomations && { display: 'flex !important' }),
       }}
       onPress={() => {
-        dispatch(pushModal({ modal: { name: 'category-automations-edit' } }));
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'category-automations-edit',
+              options: { categoryId: category.id },
+            },
+          }),
+        );
       }}
     >
       <SvgChartPie style={{ width, height, flexShrink: 0 }} />
