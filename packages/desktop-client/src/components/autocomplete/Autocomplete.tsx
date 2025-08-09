@@ -281,8 +281,10 @@ function SingleAutocomplete<T extends AutocompleteItem>({
   useEffect(() => {
     const newSelectedItem = findItem(strict, suggestions, initialValue);
     setSelectedItem(newSelectedItem);
-    setValue(newSelectedItem ? getItemName(newSelectedItem) : '');
-  }, [initialValue, suggestions, strict]);
+    if (!embedded) {
+      setValue(newSelectedItem ? getItemName(newSelectedItem) : '');
+    }
+  }, [initialValue, suggestions, strict, embedded]);
 
   function resetState(newValue?: string) {
     const val = newValue === undefined ? initialValue : newValue;
