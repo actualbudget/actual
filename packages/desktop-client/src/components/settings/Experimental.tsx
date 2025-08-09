@@ -111,6 +111,12 @@ export function ExperimentalFeatures() {
             >
               <Trans>Currency support</Trans>
             </FeatureToggle>
+            <FeatureToggle
+              flag="subCategoryGroups"
+              feedbackLink="https://github.com/actualbudget/actual/pull/5268"
+            >
+              <Trans>Sub category groups</Trans>
+            </FeatureToggle>
           </View>
         ) : (
           <Link
