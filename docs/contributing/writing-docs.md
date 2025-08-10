@@ -131,7 +131,7 @@ Below are some basic guidelines on how the documentation should be formatted. Ev
 
 When writing documentation, please use the English language. At this time, the documentation team doesn't have any translators available to translate documents into other languages, but this is something we would like to do in the future.
 
-Docusaurus 2 provides translation using [i18n](https://docusaurus.io/docs/i18n/introduction). If this is something you would like to pursue, please feel free to open a PR.
+Docusaurus 3 provides translation using [i18n](https://docusaurus.io/docs/i18n/introduction). If this is something you would like to pursue, please feel free to open a PR.
 
 ### Tone and Voice
 

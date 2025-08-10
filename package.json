@@ -16,23 +16,22 @@
     "lint": "prettier --check ."
   },
   "dependencies": {
-    "@cmfcmf/docusaurus-search-local": "^1.2.0",
     "@docusaurus/core": "^3.8.1",
     "@docusaurus/plugin-content-docs": "^3.8.1",
     "@docusaurus/plugin-ideal-image": "^3.8.1",
     "@docusaurus/preset-classic": "^3.8.1",
     "@docusaurus/theme-mermaid": "^3.8.1",
-    "@easyops-cn/docusaurus-search-local": "^0.35.0",
-    "@mdx-js/react": "^3.0.0",
+    "@easyops-cn/docusaurus-search-local": "^0.52.1",
+    "@mdx-js/react": "^3.1.0",
     "@r74tech/docusaurus-plugin-panzoom": "^2.4.0",
-    "clsx": "^2.0.0",
-    "prism-react-renderer": "^2.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "clsx": "^2.1.1",
+    "prism-react-renderer": "^2.4.1",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^3.8.1",
-    "prettier": "^3.0.0"
+    "prettier": "^3.6.2"
   },
   "browserslist": {
     "production": [
@@ -47,7 +46,7 @@
     ]
   },
   "engines": {
-    "node": ">=18.0"
+    "node": ">=20"
   },
   "packageManager": "yarn@3.4.1"
 }

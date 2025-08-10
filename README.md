@@ -1,8 +1,8 @@
 # Actual Budget Community Documentation
 
-This repo is the Actual Budget community documentation website, built using [Docusaurus 2](https://docusaurus.io/), a modern static website generator.
+This repo is the Actual Budget community documentation website, built using [Docusaurus 3](https://docusaurus.io/), a modern static website generator.
 
-[Docusaurus 2](https://docusaurus.io/) uses Node.js, so if you are running Actual on your local machine, you should be able to easily run [Docusaurus 2](https://docusaurus.io/).
+[Docusaurus 3](https://docusaurus.io/) uses Node.js, so if you are running Actual on your local machine, you should be able to easily run [Docusaurus 3](https://docusaurus.io/).
 
 ## Welcome
 
@@ -50,7 +50,7 @@ $ yarn
 
 ### Local Development
 
-To start [Docusaurus 2](https://docusaurus.io/) navigate to the folder where the repo resides from a command prompt and issue the following command.
+To start [Docusaurus 3](https://docusaurus.io/) navigate to the folder where the repo resides from a command prompt and issue the following command.
 
 ```
 $ yarn start
