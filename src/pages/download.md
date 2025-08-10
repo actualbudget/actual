@@ -3,6 +3,9 @@ title: Downloads
 hide_table_of_contents: true
 ---
 
+<div className="container" style={{maxWidth: '800px', margin: '0 auto'}}>
+
+
 import Winsvg from '../../static/img/win.svg'
 import Macsvg from '../../static/img/apple.svg'
 import Linuxsvg from '../../static/img/linux.svg'
@@ -25,3 +28,5 @@ Actual has two parts, the client and a sync server.  The primary task of the syn
 * [Fly.io](/docs/install/fly)
 * [Docker Install](/docs/install/docker)
 * [Build from source](/docs/install/build-from-source)
+
+</div>
