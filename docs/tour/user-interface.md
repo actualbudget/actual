@@ -8,15 +8,15 @@ Standard on most screens:
 * The server and sync status (if used) are shown in the red box in the upper right corner.
 * The content of the rest of the interface depends on the functionality you have chosen in the sidebar. This screenshot shows an example of a Budget view.
 
-![](/img/a-tour-of-actual/tour-overview-of-user-interface.png)
+![Full user interface with top right conner highlighted](/img/a-tour-of-actual/tour-overview-of-user-interface.png)
 
 ## Top Right Corner
 
-* The eye icon will scramble the numbers on the screen. This is useful if you need to report a bug to the Actual team but want to keep your numbers private.
+* The eye icon will scramble the numbers on the screen. This is useful if you need to report a bug to the Actual team but want to keep your numbers private. There are some caveats to this, so please read the [Scramble and Hide Data](/docs/getting-started/tips-tricks#scramble-and-hide-data) section in the Tips & Tricks guide.
 * If clicking on the sync icon, your local file will sync to the server.
 * The current text, _Server online_ shows the connection status. Thus, it could easily read _Server offline_ if you are not connected to a server. If you click on this text, you can change your password, sign out of the server or change the server URL.
 
-![](/img/a-tour-of-actual/tour-overview-top-right.png)
+![Top right corner](/img/a-tour-of-actual/tour-overview-top-right.png)
 
 ## The Sidebar
 
@@ -29,4 +29,4 @@ From the sidebar, you have easy access to all Actual's functionality.
 
 Most of these will we cover later in the tour.
 
-![](/img/a-tour-of-actual/tour-overview-sidebar.png)
+![The Actual Budget Sidebar](/img/a-tour-of-actual/tour-overview-sidebar.png)
