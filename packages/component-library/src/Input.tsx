@@ -47,6 +47,7 @@ export type InputProps = ComponentPropsWithRef<typeof ReactAriaInput> & {
     event: ChangeEvent<HTMLInputElement>,
   ) => void;
   onUpdate?: (newValue: string, event: FocusEvent<HTMLInputElement>) => void;
+  useKeyDown?: boolean;
 };
 
 export function Input({
@@ -56,6 +57,7 @@ export function Input({
   onChangeValue,
   onUpdate,
   className,
+  useKeyDown = false,
   ...props
 }: InputProps) {
   return (
@@ -67,15 +69,30 @@ export function Input({
           : cx(defaultInputClassName, className)
       }
       {...props}
+      onKeyDown={e => {
+        props.onKeyDown?.(e);
+
+        if (useKeyDown) {
+          if (e.key === 'Enter' && onEnter) {
+            onEnter(e.currentTarget.value, e);
+          }
+
+          if (e.key === 'Escape' && onEscape) {
+            onEscape(e.currentTarget.value, e);
+          }
+        }
+      }}
       onKeyUp={e => {
         props.onKeyUp?.(e);
 
-        if (e.key === 'Enter' && onEnter) {
-          onEnter(e.currentTarget.value, e);
-        }
+        if (!useKeyDown) {
+          if (e.key === 'Enter' && onEnter) {
+            onEnter(e.currentTarget.value, e);
+          }
 
-        if (e.key === 'Escape' && onEscape) {
-          onEscape(e.currentTarget.value, e);
+          if (e.key === 'Escape' && onEscape) {
+            onEscape(e.currentTarget.value, e);
+          }
         }
       }}
       onBlur={e => {
