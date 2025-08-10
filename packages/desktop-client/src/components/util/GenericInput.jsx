@@ -46,6 +46,25 @@ export function GenericInput({
   const saved = useSelector(state => state.queries.saved);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
+  // Helper function to open autocomplete modal with safe event handling
+  const openAutocompleteModal = (modalName, event) => {
+    const target = event.currentTarget;
+
+    dispatch(
+      pushModal({
+        modal: {
+          name: modalName,
+          options: {
+            onSelect: newValue => {
+              onChange(multi ? [...value, newValue] : newValue);
+              setTimeout(() => target.blur(), 1);
+            },
+          },
+        },
+      }),
+    );
+  };
+
   const getNumberInputByFormatType = numberFormatType => {
     switch (numberFormatType) {
       case 'currency':
@@ -106,19 +125,7 @@ export function GenericInput({
                     return;
                   }
 
-                  dispatch(
-                    pushModal({
-                      modal: {
-                        name: 'payee-autocomplete',
-                        options: {
-                          onSelect: newValue => {
-                            onChange(multi ? [...value, newValue] : newValue);
-                            setTimeout(() => event.target.blur(), 1);
-                          },
-                        },
-                      },
-                    }),
-                  );
+                  openAutocompleteModal('payee-autocomplete', event);
                 },
               }}
             />
@@ -146,21 +153,7 @@ export function GenericInput({
                         return;
                       }
 
-                      dispatch(
-                        pushModal({
-                          modal: {
-                            name: 'account-autocomplete',
-                            options: {
-                              onSelect: newValue => {
-                                onChange(
-                                  multi ? [...value, newValue] : newValue,
-                                );
-                                setTimeout(() => event.target.blur(), 1);
-                              },
-                            },
-                          },
-                        }),
-                      );
+                      openAutocompleteModal('account-autocomplete', event);
                     },
                   }}
                 />
@@ -186,19 +179,7 @@ export function GenericInput({
                     return;
                   }
 
-                  dispatch(
-                    pushModal({
-                      modal: {
-                        name: 'category-autocomplete',
-                        options: {
-                          onSelect: newValue => {
-                            onChange(multi ? [...value, newValue] : newValue);
-                            setTimeout(() => event.target.blur(), 1);
-                          },
-                        },
-                      },
-                    }),
-                  );
+                  openAutocompleteModal('category-autocomplete', event);
                 },
               }}
             />
