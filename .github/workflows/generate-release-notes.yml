@@ -1,0 +1,21 @@
+name: Generate Release Notes
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+      - run: npm install -g yarn
+      - run: yarn
+      - run: yarn generate:release-notes
+      - name: Upload release notes
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-notes
+          path: packages/sync-server/RELEASE_NOTES.md
