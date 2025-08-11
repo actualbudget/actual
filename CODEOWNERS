@@ -4,3 +4,5 @@
 
 /packages/api/                  @MatissJanis
 /packages/component-library/    @MatissJanis
+
+/packages/loot-core/src/server/budget @youngcw
