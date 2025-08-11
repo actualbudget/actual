@@ -4,7 +4,7 @@ import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 
-import { integerToCurrency } from 'loot-core/shared/util';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 
 export function Change({
   amount,
@@ -13,6 +13,8 @@ export function Change({
   amount: number;
   style?: CSSProperties;
 }) {
+  const format = useFormat();
+
   return (
     <Block
       style={{
@@ -22,7 +24,7 @@ export function Change({
       }}
     >
       {amount >= 0 ? '+' : ''}
-      {integerToCurrency(amount)}
+      {format(amount, 'financial')}
     </Block>
   );
 }

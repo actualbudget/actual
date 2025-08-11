@@ -8,10 +8,10 @@ import { t } from 'i18next';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
-import { integerToCurrency, integerToAmount } from 'loot-core/shared/util';
 import { type RuleConditionEntity } from 'loot-core/types/models';
 
 import { runAll, indexCashFlow } from '@desktop-client/components/reports/util';
+import { type FormatType } from '@desktop-client/hooks/useFormat';
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 export function simpleCashFlow(
@@ -77,6 +77,7 @@ export function cashFlowByDate(
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or',
   locale: Locale,
+  format: (value: unknown, type?: FormatType) => string,
 ) {
   const start = monthUtils.firstDayOfMonth(startMonth);
   const end = monthUtils.lastDayOfMonth(endMonth);
@@ -137,7 +138,7 @@ export function cashFlowByDate(
         makeQuery().filter({ amount: { $lt: 0 } }),
       ],
       data => {
-        setData(recalculate(data, start, fixedEnd, isConcise, locale));
+        setData(recalculate(data, start, fixedEnd, isConcise, locale, format));
       },
     );
   };
@@ -153,6 +154,7 @@ function recalculate(
   end: string,
   isConcise: boolean,
   locale: Locale,
+  format: (value: unknown, type?: FormatType) => string,
 ) {
   const [startingBalance, income, expense] = data;
   const convIncome = income.map(trans => {
@@ -219,39 +221,39 @@ function recalculate(
           <div style={{ lineHeight: 1.5 }}>
             <AlignedText
               left={t('Income:')}
-              right={integerToCurrency(income)}
+              right={format(income, 'financial')}
             />
             <AlignedText
               left={t('Expenses:')}
-              right={integerToCurrency(expense)}
+              right={format(expense, 'financial')}
             />
             <AlignedText
               left={t('Change:')}
-              right={<strong>{integerToCurrency(income + expense)}</strong>}
+              right={<strong>{format(income + expense, 'financial')}</strong>}
             />
             {creditTransfers + debitTransfers !== 0 && (
               <AlignedText
                 left={t('Transfers:')}
-                right={integerToCurrency(creditTransfers + debitTransfers)}
+                right={format(creditTransfers + debitTransfers, 'financial')}
               />
             )}
             <AlignedText
               left={t('Balance:')}
-              right={integerToCurrency(balance)}
+              right={format(balance, 'financial')}
             />
           </div>
         </div>
       );
 
-      res.income.push({ x, y: integerToAmount(income) });
-      res.expenses.push({ x, y: integerToAmount(expense) });
+      res.income.push({ x, y: income });
+      res.expenses.push({ x, y: expense });
       res.transfers.push({
         x,
-        y: integerToAmount(creditTransfers + debitTransfers),
+        y: creditTransfers + debitTransfers,
       });
       res.balances.push({
         x,
-        y: integerToAmount(balance),
+        y: balance,
         premadeLabel: label,
         amount: balance,
       });

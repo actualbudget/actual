@@ -1,5 +1,5 @@
 import React, { type ReactElement } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
@@ -27,6 +27,7 @@ function checkDate(date: string) {
 }
 
 export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
+  const { t } = useTranslation();
   const locale = useLocale();
   const checkStart = checkDate(start);
   const checkEnd = checkDate(end);
@@ -49,7 +50,7 @@ export function DateRange({ start, end, type }: DateRangeProps): ReactElement {
   let typeOrFormattedEndDate: string;
 
   if (type && ['budget', 'average'].includes(type)) {
-    typeOrFormattedEndDate = type === 'budget' ? 'budgeted' : type;
+    typeOrFormattedEndDate = type === 'budget' ? t('budgeted') : t('average');
   } else {
     typeOrFormattedEndDate = formattedEndDate;
   }

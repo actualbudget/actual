@@ -4,6 +4,7 @@ import { MobileAccountPage } from './mobile-account-page';
 import { MobileAccountsPage } from './mobile-accounts-page';
 import { MobileBudgetPage } from './mobile-budget-page';
 import { MobileReportsPage } from './mobile-reports-page';
+import { MobileRulesPage } from './mobile-rules-page';
 import { MobileTransactionEntryPage } from './mobile-transaction-entry-page';
 import { SettingsPage } from './settings-page';
 
@@ -20,6 +21,7 @@ const ROUTES_BY_PAGE = {
   Accounts: '/accounts',
   Transaction: '/transactions/new',
   Reports: '/reports',
+  Rules: '/rules',
   Settings: '/settings',
 };
 
@@ -161,6 +163,13 @@ export class MobileNavigation {
     return await this.navigateToPage(
       'Reports',
       () => new MobileReportsPage(this.page),
+    );
+  }
+
+  async goToRulesPage() {
+    return await this.navigateToPage(
+      'Rules',
+      () => new MobileRulesPage(this.page),
     );
   }
 
