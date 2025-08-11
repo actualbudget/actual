@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 
+import { logger } from 'loot-core/platform/server/log';
 import { q, type Query } from 'loot-core/shared/query';
 import {
   getStatus,
@@ -16,7 +17,6 @@ import { useSyncedPref } from './useSyncedPref';
 
 import { accountFilter } from '@desktop-client/queries';
 import { liveQuery, type LiveQuery } from '@desktop-client/queries/liveQuery';
-import { logger } from 'loot-core/platform/server/log';
 
 export type ScheduleStatusType = ReturnType<typeof getStatus>;
 export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
@@ -35,16 +35,9 @@ function loadStatuses(
   return liveQuery<TransactionEntity>(getHasTransactionsQuery(schedules), {
     onData: data => {
       const hasTrans = data.filter(Boolean).map(row => row.schedule);
-       logger.info(
-          'Schedules #:',
-          schedules.length,
-          schedules,
-        );
+      logger.info('Schedules #:', schedules.length, schedules);
 
-        logger.info(
-          'trans #:',
-          hasTrans,
-        );
+      logger.info('trans #:', hasTrans);
 
       const scheduleStatuses = new Map(
         schedules.map(s => [
@@ -58,11 +51,7 @@ function loadStatuses(
         ]),
       ) as ScheduleStatuses;
 
-
-        logger.info(
-          'statuses:',
-          scheduleStatuses,
-        );
+      logger.info('statuses:', scheduleStatuses);
 
       onData?.(scheduleStatuses);
     },
@@ -171,7 +160,7 @@ export function accountSchedulesQuery(
     .filter({
       $and: [{ '_account.closed': false }],
     });
-    
+
   if (accountId) {
     if (accountId === 'uncategorized') {
       query = query.filter({ next_date: null });
@@ -182,10 +171,7 @@ export function accountSchedulesQuery(
     }
   }
 
-    logger.info(
-        'query #:',
-        query,
-    );
+  logger.info('query #:', query);
 
   return query.orderBy({ next_date: 'desc' });
 }
