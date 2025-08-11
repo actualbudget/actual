@@ -10,7 +10,7 @@ import React, {
   type CSSProperties,
   useCallback,
 } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgSplit } from '@actual-app/components/icons/v0';
@@ -77,6 +77,7 @@ function CategoryList({
   showHiddenItems,
   showBalances,
 }: CategoryListProps) {
+  const { t } = useTranslation();
   let lastGroup: string | undefined | null = null;
 
   const filteredItems = items;
@@ -103,7 +104,7 @@ function CategoryList({
 
           const groupId = item.group?.id;
           const showGroup = groupId !== lastGroup;
-          const groupName = item.group?.name || '';
+          const groupName = `${item.group?.name}${item.group?.hidden ? ' ' + t('(hidden)') : ''}`;
           lastGroup = groupId;
           return (
             <Fragment key={item.id}>
@@ -387,6 +388,7 @@ function CategoryItem({
   showBalances,
   ...props
 }: CategoryItemProps) {
+  const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const narrowStyle = isNarrowWidth
     ? {
@@ -434,7 +436,10 @@ function CategoryItem({
       {...props}
     >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <TextOneLine>{item.name}</TextOneLine>
+        <TextOneLine>
+          {item.name}
+          {item.hidden || item.group?.hidden ? ' ' + t('(hidden)') : ''}
+        </TextOneLine>
         <TextOneLine
           style={{
             display: !showBalances ? 'none' : undefined,
