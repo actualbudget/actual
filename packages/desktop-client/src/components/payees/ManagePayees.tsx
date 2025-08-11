@@ -38,10 +38,6 @@ import { useDispatch } from '@desktop-client/redux';
 
 const getPayeesById = memoizeOne((payees: PayeeEntity[]) => groupById(payees));
 
-function plural(count: number, singleText: string, pluralText: string) {
-  return count === 1 ? singleText : pluralText;
-}
-
 function PayeeTableHeader() {
   const dispatchSelected = useSelectedDispatch();
   const selectedItems = useSelectedItems();
@@ -238,9 +234,9 @@ export const ManagePayees = ({
           >
             {buttonsDisabled
               ? t('No payees selected')
-              : selected.items.size +
-                ' ' +
-                t(plural(selected.items.size, 'payee', 'payees'))}
+              : t('{{count}} payees', {
+                  count: selected.items.size,
+                })}
             <SvgExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
           </Button>
 
@@ -275,13 +271,9 @@ export const ManagePayees = ({
             >
               {orphanedOnly
                 ? t('Show all payees')
-                : t(
-                    `Show ${
-                      orphanedPayees.length === 1
-                        ? '1 unused payee'
-                        : `${orphanedPayees.length} unused payees`
-                    }`,
-                  )}
+                : t('Show {{count}} unused payees', {
+                    count: orphanedPayees.length,
+                  })}
             </Button>
           )}
         </View>

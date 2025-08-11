@@ -16,10 +16,6 @@ import {
 } from 'recharts';
 
 import {
-  amountToCurrency,
-  amountToCurrencyNoDecimal,
-} from 'loot-core/shared/util';
-import {
   type balanceTypeOpType,
   type DataEntity,
 } from 'loot-core/types/models';
@@ -28,6 +24,7 @@ import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 
 import { Container } from '@desktop-client/components/reports/Container';
+import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type PayloadItem = {
@@ -45,12 +42,14 @@ type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
   balanceTypeOp: balanceTypeOpType;
+  format: (value: unknown, type: FormatType) => string;
 };
 
 const CustomTooltip = ({
   active,
   payload,
   balanceTypeOp,
+  format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
 
@@ -75,25 +74,25 @@ const CustomTooltip = ({
             {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Assets:')}
-                right={amountToCurrency(payload[0].payload.totalAssets)}
+                right={format(payload[0].payload.totalAssets, 'financial')}
               />
             )}
             {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Debts:')}
-                right={amountToCurrency(payload[0].payload.totalDebts)}
+                right={format(payload[0].payload.totalDebts, 'financial')}
               />
             )}
             {['netAssets'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net Assets:')}
-                right={amountToCurrency(payload[0].payload.netAssets)}
+                right={format(payload[0].payload.netAssets, 'financial')}
               />
             )}
             {['netDebts'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net Debts:')}
-                right={amountToCurrency(payload[0].payload.netDebts)}
+                right={format(payload[0].payload.netDebts, 'financial')}
               />
             )}
             {['totalTotals'].includes(balanceTypeOp) && (
@@ -101,7 +100,7 @@ const CustomTooltip = ({
                 left={t('Net:')}
                 right={
                   <strong>
-                    {amountToCurrency(payload[0].payload.totalTotals)}
+                    {format(payload[0].payload.totalTotals, 'financial')}
                   </strong>
                 }
               />
@@ -127,10 +126,12 @@ const customLabel = ({
   props,
   width,
   end,
+  format,
 }: {
   props: PropsItem;
   width: number;
   end: number;
+  format: (value: unknown, type: FormatType) => string;
 }) => {
   //Add margin to first and last object
   const calcX =
@@ -142,7 +143,7 @@ const customLabel = ({
   const textAnchor = props.index === 0 ? 'left' : 'middle';
   const display =
     typeof props.value !== 'string' && props.value !== 0
-      ? `${amountToCurrencyNoDecimal(props.value || 0)}`
+      ? `${format(props.value || 0, 'financial-no-decimals')}`
       : '';
   const textSize = adjustTextSize({ sized: width, type: 'area' });
 
@@ -166,6 +167,8 @@ export function AreaGraph({
   viewLabels,
   showTooltip = true,
 }: AreaGraphProps) {
+  const format = useFormat();
+
   const privacyMode = usePrivacyMode();
   const dataMax = Math.max(...data.intervalData.map(i => i[balanceTypeOp]));
   const dataMin = Math.min(...data.intervalData.map(i => i[balanceTypeOp]));
@@ -189,7 +192,7 @@ export function AreaGraph({
   const lastLabel = data.intervalData.length - 1;
 
   const tickFormatter = (tick: number) => {
-    if (!privacyMode) return `${amountToCurrencyNoDecimal(tick)}`; // Formats the tick values as strings with commas
+    if (!privacyMode) return `${format(tick, 'financial-no-decimals')}`; // Formats the tick values as strings with commas
     return '...';
   };
 
@@ -255,7 +258,12 @@ export function AreaGraph({
                 )}
                 {showTooltip && (
                   <Tooltip
-                    content={<CustomTooltip balanceTypeOp={balanceTypeOp} />}
+                    content={
+                      <CustomTooltip
+                        balanceTypeOp={balanceTypeOp}
+                        format={format}
+                      />
+                    }
                     isAnimationActive={false}
                   />
                 )}
@@ -312,7 +320,12 @@ export function AreaGraph({
                     <LabelList
                       dataKey={balanceTypeOp}
                       content={props =>
-                        customLabel({ props, width, end: lastLabel })
+                        customLabel({
+                          props,
+                          width,
+                          end: lastLabel,
+                          format,
+                        })
                       }
                     />
                   )}
