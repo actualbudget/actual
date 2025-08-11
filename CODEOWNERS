@@ -1,0 +1,7 @@
+# CODEOWNERS file for Actual Budget
+# Please add your name to code-paths that you feel especially 
+# passionate about. You will be notified for any PRs there.
+
+# Component Library Package
+/packages/api/                  @matiss
+/packages/component-library/    @matiss
