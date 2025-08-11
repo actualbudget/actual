@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 
+import type { RuleEntity, NewRuleEntity } from 'loot-core/types/models';
+
 import {
   Modal,
   ModalCloseButton,
@@ -10,10 +12,15 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { RuleEditor } from '@desktop-client/components/rules/RuleEditor';
 
+type EditRuleModalProps = {
+  rule: RuleEntity | NewRuleEntity;
+  onSave?: (rule: RuleEntity) => void;
+};
+
 export function EditRuleModal({
   rule: defaultRule,
-  onSave: originalOnSave = undefined,
-}) {
+  onSave = undefined,
+}: EditRuleModalProps) {
   const { t } = useTranslation();
 
   return (
@@ -26,7 +33,7 @@ export function EditRuleModal({
           />
           <RuleEditor
             rule={defaultRule}
-            onSave={originalOnSave}
+            onSave={onSave}
             onCancel={close}
             style={{
               maxWidth: '100%',
