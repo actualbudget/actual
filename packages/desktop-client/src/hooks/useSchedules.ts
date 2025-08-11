@@ -16,6 +16,7 @@ import { useSyncedPref } from './useSyncedPref';
 
 import { accountFilter } from '@desktop-client/queries';
 import { liveQuery, type LiveQuery } from '@desktop-client/queries/liveQuery';
+import { logger } from 'loot-core/platform/server/log';
 
 export type ScheduleStatusType = ReturnType<typeof getStatus>;
 export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
@@ -33,21 +34,35 @@ function loadStatuses(
 ) {
   return liveQuery<TransactionEntity>(getHasTransactionsQuery(schedules), {
     onData: data => {
-      const hasTrans = new Set(data.filter(Boolean).map(row => row.schedule));
+      const hasTrans = data.filter(Boolean).map(row => row.schedule);
+       logger.info(
+          'Schedules #:',
+          schedules.length,
+          schedules,
+        );
 
-      const firstItem = [schedules[0]];
+        logger.info(
+          'trans #:',
+          hasTrans,
+        );
 
       const scheduleStatuses = new Map(
-        firstItem.map(s => [
+        schedules.map(s => [
           s.id,
           getStatus(
             s.next_date,
             s.completed,
-            hasTrans.has(s.id),
+            hasTrans.includes(s.id),
             upcomingLength,
           ),
         ]),
       ) as ScheduleStatuses;
+
+
+        logger.info(
+          'statuses:',
+          scheduleStatuses,
+        );
 
       onData?.(scheduleStatuses);
     },
@@ -156,7 +171,7 @@ export function accountSchedulesQuery(
     .filter({
       $and: [{ '_account.closed': false }],
     });
-
+    
   if (accountId) {
     if (accountId === 'uncategorized') {
       query = query.filter({ next_date: null });
@@ -166,6 +181,11 @@ export function accountSchedulesQuery(
       });
     }
   }
+
+    logger.info(
+        'query #:',
+        query,
+    );
 
   return query.orderBy({ next_date: 'desc' });
 }
