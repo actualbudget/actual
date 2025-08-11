@@ -88,7 +88,7 @@ There are some basic configuration checks when clicking 'OK', but if you somehow
 :::
 
 :::tip
-When configuring your OpenID provider, be sure to register the following **redirect URI** with the provider: `https://<your-domain.tld>/path/openid/callback`
+When configuring your OpenID provider, be sure to register the following **redirect URI** with the provider: `https://<actual.myserver.com>/openid/callback`
 :::
 
 #### Tested Providers
@@ -118,8 +118,9 @@ When setup is done, you will be redirected to the _login_ page:
 
 #### `ACTUAL_OPENID_DISCOVERY_URL`
 
-- **Purpose:** If your OpenID provider supports discovery, this is the URL where discovery metadata can be found.
-  **Example Value:** `https://provider.tld/.well-known/openid-configuration`
+- **Purpose:** If your OpenID provider supports discovery, this is the URL where discovery metadata can be found.  
+**Example Value:** `https://<openid-provider.com>/.well-known/openid-configuration`
+
 
 #### `ACTUAL_OPENID_CLIENT_ID`
 
@@ -133,23 +134,24 @@ When setup is done, you will be redirected to the _login_ page:
 
 #### `ACTUAL_OPENID_SERVER_HOSTNAME`
 
-- **Purpose:** The public URL of your Actual Server, which the provider redirects to after authentication.
-  **Example Value:** `https://actual.myserver.com`
+- **Purpose:** The public URL of your Actual Server, which the provider redirects to after authentication.  
+**Example Value:** `https://<actual.myserver.com>`
 
 #### `ACTUAL_OPENID_AUTHORIZATION_ENDPOINT`
 
-- **Purpose:** Provider’s authorization endpoint (for providers that don’t support discovery).
-  **Example Value:** `https://provider.com/oauth2/authorize`
+- **Purpose:** Provider’s authorization endpoint (for providers that don’t support discovery).  
+**Example Value:** `https://<openid-provider.com>/oauth2/authorize`
 
 #### `ACTUAL_OPENID_TOKEN_ENDPOINT`
 
-- **Purpose:** Provider’s token endpoint (for providers that don’t support discovery).
-  **Example Value:** `https://provider.com/oauth2/token`
+- **Purpose:** Provider’s token endpoint (for providers that don’t support discovery).  
+**Example Value:** `https://<openid-provider.com>/oauth2/token`
 
 #### `ACTUAL_OPENID_USERINFO_ENDPOINT`
 
-- **Purpose:** Provider’s user-info endpoint (for providers that don’t support discovery).
-  **Example Value:** `https://provider.com/oauth2/userinfo`
+- **Purpose:** Provider’s user-info endpoint (for providers that don’t support discovery).  
+**Example Value:** `https://<openid-provider.com>/oauth2/userinfo`
+
 
 #### `ACTUAL_OPENID_AUTH_METHOD`
 
@@ -158,7 +160,9 @@ When setup is done, you will be redirected to the _login_ page:
   - `openid` (default)
   - `oauth2`
 
-**Tip:** Use `oauth2` for providers like GitHub that don’t fully support OpenID discovery.
+:::tip
+Use `oauth2` for providers like GitHub that don’t fully support OpenID discovery.
+:::
 
 #### `ACTUAL_OPENID_ENFORCE`
 
@@ -175,3 +179,4 @@ When setup is done, you will be redirected to the _login_ page:
 
 :::tip
 Configuring the OpenID provider from options supports discovery; otherwise, use [file configuration](oauth-auth#config-using-configuration-file)
+:::

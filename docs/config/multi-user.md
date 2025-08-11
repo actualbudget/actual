@@ -1,6 +1,10 @@
 # Managing Multi-User Support
 
-This feature requires you have setup an [OpenID Provider](oauth-auth). The usernames will be fetched from the provider.
+:::caution
+
+This feature requires you to have set up an [OpenID Provider](/docs/config/oauth-auth). The usernames which people will log into your Actual instance will be fetched from the provider.
+
+:::
 
 ## User Directory
 
