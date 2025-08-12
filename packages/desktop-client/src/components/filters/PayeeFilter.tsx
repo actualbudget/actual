@@ -39,10 +39,11 @@ export const PayeeFilter = ({ value, op, onChange }: PayeeFilterProps) => {
   if (multi) {
     coercedValue = Array.isArray(value) ? value : [];
   } else {
-    coercedValue = Array.isArray(value) ? value[0] ?? null : value;
+    coercedValue = Array.isArray(value) ? (value[0] ?? null) : value;
   }
 
-  const placeholder = multi && coercedValue.length > 0 ? undefined : t('nothing');
+  const placeholder =
+    multi && coercedValue.length > 0 ? undefined : t('nothing');
 
   return (
     // @ts-ignore: typing is not playing nicely with the union type of AutocompleteProps.
