@@ -80,8 +80,6 @@ function CategoryList({
   const { t } = useTranslation();
   let lastGroup: string | undefined | null = null;
 
-  const filteredItems = items;
-
   return (
     <View>
       <View
@@ -92,7 +90,7 @@ function CategoryList({
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
-        {filteredItems.map((item, idx) => {
+        {items.map((item, idx) => {
           if (item.id === 'split') {
             return renderSplitTransactionButton({
               key: 'split',
