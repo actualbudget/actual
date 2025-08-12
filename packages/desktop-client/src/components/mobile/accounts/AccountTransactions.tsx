@@ -204,7 +204,7 @@ function TransactionListWithPreviews({
       balanceCleared={balanceBindings.cleared}
       balanceUncleared={balanceBindings.uncleared}
       runningBalances={allBalances}
-      showBalances={isSearching ? false : showRunningBalances === 'true'}
+      showRunningBalances={isSearching ? false : showRunningBalances === 'true'}
       isLoadingMore={isLoadingMore}
       onLoadMore={loadMoreTransactions}
       searchPlaceholder={t('Search {{accountName}}', {
