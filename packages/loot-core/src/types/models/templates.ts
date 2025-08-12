@@ -86,6 +86,7 @@ export interface RemainderTemplate extends BaseTemplate {
     start?: string;
   };
   directive: 'template';
+  priority: null;
 }
 
 export interface GoalTemplate extends BaseTemplate {

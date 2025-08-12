@@ -134,10 +134,7 @@ export class CategoryTemplateContext {
     if (this.limitMet) return 0;
 
     const t = this.templates.filter(
-      t =>
-        t.directive === 'template' &&
-        t.type !== 'remainder' &&
-        t.priority === priority,
+      t => t.directive === 'template' && t.priority === priority,
     );
     let available = budgetAvail || 0;
     let toBudget = 0;
