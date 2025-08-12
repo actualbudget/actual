@@ -94,9 +94,10 @@ const AmountInput = memo(function AmountInput({
   };
 
   const applyText = () => {
-    const parsed = (hasArithmeticOperator(text)
-      ? evalArithmetic(text)
-      : currencyToAmount(text)) ?? 0;
+    const parsed =
+      (hasArithmeticOperator(text)
+        ? evalArithmetic(text)
+        : currencyToAmount(text)) ?? 0;
 
     const newValue = editing ? parsed : value;
 
