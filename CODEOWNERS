@@ -1,0 +1,10 @@
+# CODEOWNERS file for Actual Budget
+# Please add your name to code-paths that you feel especially 
+# passionate about. You will be notified for any PRs there.
+
+/packages/api/                                    @MatissJanis
+/packages/component-library/                      @MatissJanis
+/packages/desktop-client/src/components/mobile    @joel-jeremy 
+/packages/desktop-electron/                       @MikesGlitch
+/packages/loot-core/src/server/budget             @youngcw
+/packages/sync-server/                            @matt-fidd
