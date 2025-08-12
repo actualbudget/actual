@@ -68,7 +68,7 @@ export function AmountKeyboard(props: AmountKeyboardProps) {
   const keyboardRefProp = props.keyboardRef;
 
   const mergedRef = useCallback(
-    r => {
+    (r: SimpleKeyboard) => {
       keyboardRef.current = r;
       keyboardRefProp?.(r);
     },

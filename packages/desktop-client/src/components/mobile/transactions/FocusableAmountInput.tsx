@@ -94,9 +94,9 @@ const AmountInput = memo(function AmountInput({
   };
 
   const applyText = () => {
-    const parsed = hasArithmeticOperator(text)
+    const parsed = (hasArithmeticOperator(text)
       ? evalArithmetic(text)
-      : currencyToAmount(text) || 0;
+      : currencyToAmount(text)) ?? 0;
 
     const newValue = editing ? parsed : value;
 
@@ -150,7 +150,7 @@ const AmountInput = memo(function AmountInput({
         } else {
           // Evaluate the left side of the expression whenever an operator is added
           const left = text.slice(0, lastOperatorIndex);
-          const leftEvaluated = evalArithmetic(left);
+          const leftEvaluated = evalArithmetic(left) ?? 0;
           const leftEvaluatedWithDecimal = appendDecimals(
             reapplyThousandSeparators(String(amountToInteger(leftEvaluated))),
             hideFraction,
