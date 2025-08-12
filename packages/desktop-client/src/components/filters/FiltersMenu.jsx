@@ -87,6 +87,18 @@ function ConfigureField({
     ops = ['is'];
   }
 
+  const formattedValue = useMemo(() => {
+    if (
+      field === 'date' &&
+      subfield === 'month' &&
+      /^\d{4}-\d{2}$/.test(value)
+    ) {
+      const [year, month] = value.split('-');
+      return `${month}/${year}`;
+    }
+    return value;
+  }, [value, field, subfield]);
+
   return (
     <FocusScope>
       <View style={{ marginBottom: 10 }}>
@@ -231,7 +243,7 @@ function ConfigureField({
                 ? 'string'
                 : type
             }
-            value={value}
+            value={formattedValue}
             multi={op === 'oneOf' || op === 'notOneOf'}
             op={op}
             style={{ marginTop: 10 }}
@@ -441,6 +453,9 @@ export function FilterButton({ onApply, compact, hover, exclude }) {
 }
 
 export function FilterEditor({ field, op, value, options, onSave, onClose }) {
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const { t } = useTranslation();
+
   const [state, dispatch] = useReducer(
     (state, action) => {
       switch (action.type) {
@@ -464,6 +479,31 @@ export function FilterEditor({ field, op, value, options, onSave, onClose }) {
       dispatch={dispatch}
       onApply={cond => {
         cond = unparse({ ...cond, type: FIELD_TYPES.get(cond.field) });
+
+        if (cond.type === 'date' && cond.options) {
+          if (cond.options.month && !/\d{4}-\d{2}/.test(cond.value)) {
+            const date = parseDate(
+              cond.value,
+              getMonthYearFormat(dateFormat),
+              new Date(),
+            );
+            if (isDateValid(date)) {
+              cond.value = formatDate(date, 'yyyy-MM');
+            } else {
+              alert(t('Invalid date format'));
+              return;
+            }
+          } else if (cond.options.year) {
+            const date = parseDate(cond.value, 'yyyy', new Date());
+            if (isDateValid(date)) {
+              cond.value = formatDate(date, 'yyyy');
+            } else {
+              alert(t('Invalid date format'));
+              return;
+            }
+          }
+        }
+
         onSave(cond);
         onClose();
       }}

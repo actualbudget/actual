@@ -6,7 +6,6 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type NetWorthWidget,
@@ -22,7 +21,9 @@ import { ReportCardName } from '@desktop-client/components/reports/ReportCardNam
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '@desktop-client/components/reports/spreadsheets/net-worth-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type NetWorthCardProps = {
   widgetId: string;
@@ -44,6 +45,10 @@ export function NetWorthCard({
   const locale = useLocale();
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
+  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
+  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+
+  const format = useFormat();
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
@@ -61,8 +66,21 @@ export function NetWorthCard({
         meta?.conditions,
         meta?.conditionsOp,
         locale,
+        meta?.interval || 'Monthly',
+        firstDayOfWeekIdx,
+        format,
       ),
-    [start, end, accounts, meta?.conditions, meta?.conditionsOp, locale],
+    [
+      start,
+      end,
+      accounts,
+      meta?.conditions,
+      meta?.conditionsOp,
+      locale,
+      meta?.interval,
+      firstDayOfWeekIdx,
+      format,
+    ],
   );
   const data = useReport('net_worth', params);
 
@@ -125,7 +143,7 @@ export function NetWorthCard({
                 }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  {integerToCurrency(data.netWorth)}
+                  {format(data.netWorth, 'financial')}
                 </PrivacyFilter>
               </Block>
               <PrivacyFilter activationFilters={[!isCardHovered]}>
@@ -140,6 +158,7 @@ export function NetWorthCard({
             graphData={data.graphData}
             compact={true}
             showTooltip={!isEditing && !isNarrowWidth}
+            interval={meta?.interval || 'Monthly'}
             style={{ height: 'auto', flex: 1 }}
           />
         ) : (

@@ -23,6 +23,7 @@ type AccountAutocompleteModalProps = Extract<
 export function AccountAutocompleteModal({
   onSelect,
   includeClosedAccounts,
+  hiddenAccounts,
   onClose,
 }: AccountAutocompleteModalProps) {
   const { t } = useTranslation();
@@ -83,6 +84,7 @@ export function AccountAutocompleteModal({
                 {...defaultAutocompleteProps}
                 onSelect={onSelect}
                 includeClosedAccounts={includeClosedAccounts}
+                hiddenAccounts={hiddenAccounts}
                 value={null}
               />
             </View>

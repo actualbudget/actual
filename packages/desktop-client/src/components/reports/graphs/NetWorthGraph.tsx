@@ -1,11 +1,12 @@
 // @ts-strict-ignore
-import React, { useId } from 'react';
+import React, { useId, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { type CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
+import { parse, getDay } from 'date-fns';
 import {
   AreaChart,
   Area,
@@ -16,10 +17,11 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import { amountToCurrencyNoDecimal } from 'loot-core/shared/util';
+import { computePadding } from './util/computePadding';
 
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type NetWorthGraphProps = {
@@ -40,6 +42,7 @@ type NetWorthGraphProps = {
   };
   compact?: boolean;
   showTooltip?: boolean;
+  interval?: string;
 };
 
 export function NetWorthGraph({
@@ -47,15 +50,21 @@ export function NetWorthGraph({
   graphData,
   compact = false,
   showTooltip = true,
+  interval = 'Monthly',
 }: NetWorthGraphProps) {
   const { t } = useTranslation();
   const privacyMode = usePrivacyMode();
   const id = useId();
+  const format = useFormat();
+
+  // Use more aggressive smoothening for high-frequency data
+  const interpolationType =
+    interval === 'Daily' || interval === 'Weekly' ? 'basis' : 'monotone';
 
   const tickFormatter = tick => {
     const res = privacyMode
       ? '...'
-      : `${amountToCurrencyNoDecimal(Math.round(tick))}`; // Formats the tick values as strings with commas
+      : `${format(Math.round(tick), 'financial-no-decimals')}`;
 
     return res;
   };
@@ -76,6 +85,19 @@ export function NetWorthGraph({
 
   const off = gradientOffset();
   const gradientId = `splitColor-${id}`;
+
+  // Generate weekly tick positions when viewing Daily data
+  const weeklyTicks = useMemo(() => {
+    if (interval !== 'Daily') {
+      return undefined;
+    }
+    return graphData.data
+      .filter(point => {
+        const date = parse(point.x, 'yy-MM-dd', new Date());
+        return getDay(date) === 1; // Monday
+      })
+      .map(point => point.x);
+  }, [interval, graphData.data]);
 
   type PayloadItem = {
     payload: {
@@ -153,7 +175,12 @@ export function NetWorthGraph({
                 margin={{
                   top: 0,
                   right: 0,
-                  left: compact ? 0 : computePadding(graphData.data),
+                  left: compact
+                    ? 0
+                    : computePadding(
+                        graphData.data.map(item => item.y),
+                        value => format(value, 'financial-no-decimals'),
+                      ),
                   bottom: 0,
                 }}
               >
@@ -165,6 +192,7 @@ export function NetWorthGraph({
                   hide={compact}
                   tick={{ fill: theme.pageText }}
                   tickLine={{ stroke: theme.pageText }}
+                  ticks={weeklyTicks}
                 />
                 <YAxis
                   dataKey="y"
@@ -197,14 +225,16 @@ export function NetWorthGraph({
                 </defs>
 
                 <Area
-                  type="monotone"
+                  type={interpolationType}
                   dot={false}
                   activeDot={false}
                   animationDuration={0}
                   dataKey="y"
                   stroke={theme.reportsBlue}
+                  strokeWidth={2}
                   fill={`url(#${gradientId})`}
                   fillOpacity={1}
+                  connectNulls={true}
                 />
               </AreaChart>
             </div>
@@ -213,23 +243,4 @@ export function NetWorthGraph({
       }
     </Container>
   );
-}
-
-/**
- * Add left padding for Y-axis for when large amounts get clipped
- * @param netWorthData
- * @returns left padding for Net worth graph
- */
-function computePadding(netWorthData: Array<{ y: number }>) {
-  /**
-   * Convert to string notation, get longest string length
-   */
-  const maxLength = Math.max(
-    ...netWorthData.map(({ y }) => {
-      return amountToCurrencyNoDecimal(Math.round(y)).length;
-    }),
-  );
-
-  // No additional left padding is required for upto 5 characters
-  return Math.max(0, (maxLength - 5) * 5);
 }

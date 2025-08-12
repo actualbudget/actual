@@ -4,7 +4,13 @@ import { type RuleConditionEntity } from './rule';
 export type TimeFrame = {
   start: string;
   end: string;
-  mode: 'sliding-window' | 'static' | 'full' | 'lastYear' | 'yearToDate';
+  mode:
+    | 'sliding-window'
+    | 'static'
+    | 'full'
+    | 'lastYear'
+    | 'yearToDate'
+    | 'priorYearToDate';
 };
 
 type AbstractWidget<
@@ -28,6 +34,7 @@ export type NetWorthWidget = AbstractWidget<
     conditions?: RuleConditionEntity[];
     conditionsOp?: 'and' | 'or';
     timeFrame?: TimeFrame;
+    interval?: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
   } | null
 >;
 export type CashFlowWidget = AbstractWidget<

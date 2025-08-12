@@ -12,8 +12,9 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { t } from 'i18next';
 
+import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { type Query } from 'loot-core/shared/query';
-import { currencyToInteger, tsToRelativeTime } from 'loot-core/shared/util';
+import { tsToRelativeTime, amountToInteger } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
@@ -154,8 +155,12 @@ export function ReconcileMenu({
       return;
     }
 
+    const evaluatedAmount =
+      inputValue != null ? evalArithmetic(inputValue) : null;
     const amount =
-      inputValue != null ? currencyToInteger(inputValue) : clearedBalance;
+      evaluatedAmount != null
+        ? amountToInteger(evaluatedAmount)
+        : clearedBalance;
 
     onReconcile(amount);
     onClose();
@@ -170,13 +175,15 @@ export function ReconcileMenu({
             reconcile with:
           </Trans>
         </Text>
-        <InitialFocus>
-          <Input
-            value={inputValue ?? ''}
-            onChangeValue={setInputValue}
-            style={{ margin: '7px 0' }}
-          />
-        </InitialFocus>
+        {inputValue != null && (
+          <InitialFocus>
+            <Input
+              value={inputValue}
+              onChangeValue={setInputValue}
+              style={{ margin: '7px 0' }}
+            />
+          </InitialFocus>
+        )}
         {lastSyncedBalance != null && (
           <View>
             <Text>

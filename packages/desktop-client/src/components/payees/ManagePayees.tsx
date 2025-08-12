@@ -8,7 +8,7 @@ import {
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgExpandArrow } from '@actual-app/components/icons/v0';
+import { SvgExpandArrow, SvgSubtract } from '@actual-app/components/icons/v0';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -38,10 +38,6 @@ import { useDispatch } from '@desktop-client/redux';
 
 const getPayeesById = memoizeOne((payees: PayeeEntity[]) => groupById(payees));
 
-function plural(count: number, singleText: string, pluralText: string) {
-  return count === 1 ? singleText : pluralText;
-}
-
 function PayeeTableHeader() {
   const dispatchSelected = useSelectedDispatch();
   const selectedItems = useSelectedItems();
@@ -61,6 +57,7 @@ function PayeeTableHeader() {
           exposed={true}
           focused={false}
           selected={selectedItems.size > 0}
+          icon={<SvgSubtract width={6} height={6} />}
           onSelect={e =>
             dispatchSelected({ type: 'select-all', isRangeSelect: e.shiftKey })
           }
@@ -237,9 +234,9 @@ export const ManagePayees = ({
           >
             {buttonsDisabled
               ? t('No payees selected')
-              : selected.items.size +
-                ' ' +
-                t(plural(selected.items.size, 'payee', 'payees'))}
+              : t('{{count}} payees', {
+                  count: selected.items.size,
+                })}
             <SvgExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
           </Button>
 
@@ -274,13 +271,9 @@ export const ManagePayees = ({
             >
               {orphanedOnly
                 ? t('Show all payees')
-                : t(
-                    `Show ${
-                      orphanedPayees.length === 1
-                        ? '1 unused payee'
-                        : `${orphanedPayees.length} unused payees`
-                    }`,
-                  )}
+                : t('Show {{count}} unused payees', {
+                    count: orphanedPayees.length,
+                  })}
             </Button>
           )}
         </View>
@@ -323,7 +316,7 @@ export const ManagePayees = ({
               onUpdate={onUpdate}
               onViewRules={onViewRules}
               onCreateRule={onCreateRule}
-              onDelete={id => onDelete([{ id }])}
+              onDelete={ids => onDelete(ids.map(id => ({ id })))}
             />
           )}
         </View>

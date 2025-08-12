@@ -20,6 +20,19 @@ describe('BoursoBank', () => {
         'Carte 03/02/25 2,80 NZD / 1 euro = 1,818181818',
       ],
       [
+        [
+          '2,80 NZD / 1 euro = 1,818181818',
+          'CARTE 03/02/25 PAYEE NAME CB*1234',
+        ],
+        'Payee Name',
+        'Carte 03/02/25 2,80 NZD / 1 euro = 1,818181818',
+      ],
+      [
+        ['110,04 GBP / 1 euro = 0,860763454', 'CARTE 13/07/25 PAYEE NAME'],
+        'Payee Name',
+        'Carte 13/07/25 110,04 GBP / 1 euro = 0,860763454',
+      ],
+      [
         ['RETRAIT DAB 01/03/25 My location CB*9876'],
         'Retrait DAB',
         'Retrait 01/03/25 My location',
@@ -28,6 +41,14 @@ describe('BoursoBank', () => {
         [
           'RETRAIT DAB 01/03/25 My location CB*9876',
           '2,80 NZD / 1 euro = 1,818181818',
+        ],
+        'Retrait DAB',
+        'Retrait 01/03/25 My location 2,80 NZD / 1 euro = 1,818181818',
+      ],
+      [
+        [
+          '2,80 NZD / 1 euro = 1,818181818',
+          'RETRAIT DAB 01/03/25 My location CB*9876',
         ],
         'Retrait DAB',
         'Retrait 01/03/25 My location 2,80 NZD / 1 euro = 1,818181818',

@@ -203,6 +203,7 @@ export const reportsInnerLabel = colorPalette.navy800;
 
 export const noteTagBackground = colorPalette.purple800;
 export const noteTagBackgroundHover = colorPalette.purple600;
+export const noteTagDefault = colorPalette.purple700;
 export const noteTagText = colorPalette.purple100;
 
 export const budgetOtherMonth = colorPalette.gray700;

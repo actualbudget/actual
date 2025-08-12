@@ -4,11 +4,12 @@ import { q } from '../../shared/query';
 import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
 import { Template } from '../../types/models/templates';
 import { aqlQuery } from '../aql';
+import * as db from '../db';
 import { batchMessages } from '../sync';
 
 import { isReflectBudget, getSheetValue, setGoal, setBudget } from './actions';
 import { CategoryTemplateContext } from './category-template-context';
-import { checkTemplates, storeTemplates } from './template-notes';
+import { checkTemplateNotes, storeNoteTemplates } from './template-notes';
 
 type Notification = {
   type?: 'message' | 'error' | 'warning' | undefined;
@@ -18,12 +19,35 @@ type Notification = {
   sticky?: boolean | undefined;
 };
 
+export async function storeTemplates({
+  categoriesWithTemplates,
+  source,
+}: {
+  categoriesWithTemplates: {
+    id: string;
+    templates: Template[];
+  }[];
+  source: 'notes' | 'ui';
+}): Promise<void> {
+  await batchMessages(async () => {
+    for (const { id, templates } of categoriesWithTemplates) {
+      const goalDefs = JSON.stringify(templates);
+
+      await db.updateWithSchema('categories', {
+        id,
+        goal_def: goalDefs,
+        template_settings: { source },
+      });
+    }
+  });
+}
+
 export async function applyTemplate({
   month,
 }: {
   month: string;
 }): Promise<Notification> {
-  await storeTemplates();
+  await storeNoteTemplates();
   const categoryTemplates = await getTemplates();
   const ret = await processTemplate(month, false, categoryTemplates);
   return ret;
@@ -34,7 +58,7 @@ export async function overwriteTemplate({
 }: {
   month: string;
 }): Promise<Notification> {
-  await storeTemplates();
+  await storeNoteTemplates();
   const categoryTemplates = await getTemplates();
   const ret = await processTemplate(month, true, categoryTemplates);
   return ret;
@@ -52,7 +76,7 @@ export async function applyMultipleCategoryTemplates({
       .filter({ id: { $oneof: categoryIds } })
       .select('*'),
   );
-  await storeTemplates();
+  await storeNoteTemplates();
   const categoryTemplates = await getTemplates(c => categoryIds.includes(c.id));
   const ret = await processTemplate(
     month,
@@ -73,7 +97,7 @@ export async function applySingleCategoryTemplate({
   const { data: categoryData }: { data: CategoryEntity[] } = await aqlQuery(
     q('categories').filter({ id: category }).select('*'),
   );
-  await storeTemplates();
+  await storeNoteTemplates();
   const categoryTemplates = await getTemplates(c => c.id === category);
   const ret = await processTemplate(
     month,
@@ -85,7 +109,7 @@ export async function applySingleCategoryTemplate({
 }
 
 export function runCheckTemplates() {
-  return checkTemplates();
+  return checkTemplateNotes();
 }
 
 async function getCategories(): Promise<CategoryEntity[]> {
@@ -113,6 +137,12 @@ async function getTemplates(
     );
   }
   return categoryTemplates;
+}
+
+export async function getTemplatesForCategory(
+  categoryId: CategoryEntity['id'],
+): Promise<Record<CategoryEntity['id'], Template[]>> {
+  return getTemplates(c => c.id === categoryId);
 }
 
 type TemplateBudget = {
@@ -158,8 +188,8 @@ async function processTemplate(
   categories: CategoryEntity[] = [],
 ): Promise<Notification> {
   // setup categories
+  const isReflect = isReflectBudget();
   if (!categories.length) {
-    const isReflect = isReflectBudget();
     categories = (await getCategories()).filter(c => isReflect || !c.is_income);
   }
 
@@ -169,8 +199,7 @@ async function processTemplate(
     monthUtils.sheetForMonth(month),
     `to-budget`,
   );
-  let priorities: number[] = [];
-  let remainderWeight = 0;
+  const prioritiesSet = new Set<number>();
   const errors: string[] = [];
   const budgetList: TemplateBudget[] = [];
   const goalList: TemplateGoal[] = [];
@@ -183,9 +212,6 @@ async function processTemplate(
 
     // only run categories that are unbudgeted or if we are forcing it
     if ((budgeted === 0 || force) && templates) {
-      // add to available budget
-      // gather needed priorities
-      // gather remainder weights
       try {
         const templateContext = await CategoryTemplateContext.init(
           templates,
@@ -198,8 +224,7 @@ async function processTemplate(
           availBudget += budgeted;
         }
         availBudget += templateContext.getLimitExcess();
-        priorities = [...priorities, ...templateContext.getPriorities()];
-        remainderWeight += templateContext.getRemainderWeight();
+        templateContext.getPriorities().forEach(p => prioritiesSet.add(p));
         templateContexts.push(templateContext);
       } catch (e) {
         errors.push(`${category.name}: ${e.message}`);
@@ -233,13 +258,7 @@ async function processTemplate(
     };
   }
 
-  //compress to needed, sorted priorities
-  priorities = priorities
-    .sort((a, b) => {
-      return a - b;
-    })
-    .filter((item, idx, curr) => curr.indexOf(item) === idx);
-
+  const priorities = new Int32Array([...prioritiesSet]).sort();
   // run each priority level
   for (const priority of priorities) {
     const availStart = availBudget;
@@ -252,13 +271,21 @@ async function processTemplate(
       availBudget -= budget;
     }
   }
+
   // run remainder
-  if (availBudget > 0 && remainderWeight) {
+  let remainderContexts = templateContexts.filter(c => c.hasRemainder());
+  while (availBudget > 0 && remainderContexts.length > 0) {
+    let remainderWeight = 0;
+    remainderContexts.forEach(
+      context => (remainderWeight += context.getRemainderWeight()),
+    );
     const perWeight = availBudget / remainderWeight;
-    templateContexts.forEach(context => {
+    remainderContexts.forEach(context => {
       availBudget -= context.runRemainder(availBudget, perWeight);
     });
+    remainderContexts = templateContexts.filter(c => c.hasRemainder());
   }
+
   // finish
   templateContexts.forEach(context => {
     const values = context.getValues();

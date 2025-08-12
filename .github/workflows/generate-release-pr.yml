@@ -24,8 +24,29 @@ jobs:
         id: bump_package_versions
         shell: bash
         run: |
-          .github/actions/bump-package-versions ${{ github.event.inputs.version }}
-          echo "version=$(jq -r .version packages/desktop-client/package.json)" > $GITHUB_OUTPUT
+          declare -A packages=(
+            [web]="desktop-client"
+            [electron]="desktop-electron"
+            [sync]="sync-server"
+            [api]="api"
+          )
+
+          for key in "${!packages[@]}"; do
+            pkg="${packages[$key]}"
+
+            if [[ -n "${{ github.event.inputs.version }}" ]]; then
+              version="${{ github.event.inputs.version }}"
+            else
+              version=$(node ./.github/actions/get-next-package-version.js \
+                --package-json "./packages/$pkg/package.json" \
+                --type auto \
+                --update)
+            fi
+
+            eval "NEW_${key^^}_VERSION=\"$version\""
+          done
+
+          echo "version=$NEW_WEB_VERSION" >> "$GITHUB_OUTPUT"
       - name: Create PR
         uses: peter-evans/create-pull-request@v7
         with:

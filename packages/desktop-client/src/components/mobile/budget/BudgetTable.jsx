@@ -91,7 +91,11 @@ function ToBudget({ toBudget, onPress, show3Columns }) {
     >
       <Button variant="bare" onPress={onPress}>
         <View>
-          <Label
+          <AutoTextSize
+            as={Label}
+            minFontSizePx={6}
+            maxFontSizePx={12}
+            mode="oneline"
             title={amount < 0 ? t('Overbudgeted') : t('To Budget')}
             style={{
               ...(amount < 0 ? styles.smallText : {}),
@@ -323,7 +327,7 @@ export function BudgetTable({
 }) {
   const { t } = useTranslation();
   const { width } = useResponsive();
-  const show3Columns = width >= 360;
+  const show3Columns = width >= 300;
 
   // let editMode = false; // neuter editMode -- sorry, not rewriting drag-n-drop right now
 
@@ -567,15 +571,21 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
   );
 }
 
-function OverspendingBanner({ month, onBudgetAction, ...props }) {
+function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
   const { t } = useTranslation();
 
   const { list: categories, grouped: categoryGroups } = useCategories();
   const categoriesById = groupById(categories);
+  const groupsById = groupById(categoryGroups);
 
   const dispatch = useDispatch();
 
-  const overspentCategories = useOverspentCategories({ month });
+  const overspentCategories = useOverspentCategories({ month }).filter(c => {
+    if (budgetType === 'tracking') {
+      return !c.hidden && !groupsById[c.group].hidden;
+    }
+    return true;
+  });
 
   const categoryGroupsToShow = useMemo(
     () =>
@@ -633,18 +643,29 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
         modal: {
           name: 'category-autocomplete',
           options: {
-            title: t('Cover overspending'),
+            title:
+              budgetType === 'envelope'
+                ? t('Cover overspending')
+                : t('Overspent categories'),
             month,
             categoryGroups: categoryGroupsToShow,
             showHiddenCategories: true,
-            onSelect: onOpenCoverCategoryModal,
+            onSelect:
+              budgetType === 'envelope' ? onOpenCoverCategoryModal : null,
             clearOnSelect: true,
             closeOnSelect: false,
           },
         },
       }),
     );
-  }, [categoryGroupsToShow, dispatch, month, onOpenCoverCategoryModal, t]);
+  }, [
+    categoryGroupsToShow,
+    dispatch,
+    month,
+    onOpenCoverCategoryModal,
+    t,
+    budgetType,
+  ]);
 
   const numberOfOverspentCategories = overspentCategories.length;
   if (numberOfOverspentCategories === 0) {
@@ -676,7 +697,8 @@ function OverspendingBanner({ month, onBudgetAction, ...props }) {
             </Text>
           </View>
           <Button onPress={onOpenCategorySelectionModal} style={PILL_STYLE}>
-            <Trans>Cover</Trans>
+            {budgetType === 'envelope' && <Trans>Cover</Trans>}
+            {budgetType === 'tracking' && <Trans>View</Trans>}
           </Button>
         </View>
       </Banner>
@@ -694,7 +716,11 @@ function Banners({ month, onBudgetAction }) {
       style={{ backgroundColor: theme.mobilePageBackground }}
     >
       <UncategorizedTransactionsBanner />
-      <OverspendingBanner month={month} onBudgetAction={onBudgetAction} />
+      <OverspendingBanner
+        month={month}
+        onBudgetAction={onBudgetAction}
+        budgetType={budgetType}
+      />
       {budgetType === 'envelope' && (
         <OverbudgetedBanner month={month} onBudgetAction={onBudgetAction} />
       )}
@@ -805,7 +831,11 @@ function BudgetTableHeader({
                         }}
                       />
                     )}
-                    <Label
+                    <AutoTextSize
+                      as={Label}
+                      minFontSizePx={6}
+                      maxFontSizePx={12}
+                      mode="oneline"
                       title={t('Budgeted')}
                       style={{ color: theme.formInputText, paddingRight: 4 }}
                     />
@@ -867,7 +897,11 @@ function BudgetTableHeader({
                         }}
                       />
                     )}
-                    <Label
+                    <AutoTextSize
+                      as={Label}
+                      minFontSizePx={6}
+                      maxFontSizePx={12}
+                      mode="oneline"
                       title={t('Spent')}
                       style={{ color: theme.formInputText, paddingRight: 4 }}
                     />
@@ -904,8 +938,12 @@ function BudgetTableHeader({
         >
           {({ type, value }) => (
             <View style={{ width: columnWidth }}>
-              <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                <Label
+              <View style={{ flex: 1, alignItems: 'flex-end !important' }}>
+                <AutoTextSize
+                  as={Label}
+                  minFontSizePx={6}
+                  maxFontSizePx={12}
+                  mode="oneline"
                   title={t('Balance')}
                   style={{ color: theme.formInputText }}
                 />
