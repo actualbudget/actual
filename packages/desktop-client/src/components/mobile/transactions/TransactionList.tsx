@@ -85,7 +85,7 @@ function Loading({ style, 'aria-label': ariaLabel }: LoadingProps) {
 type TransactionListProps = {
   isLoading: boolean;
   transactions: readonly TransactionEntity[];
-  showBalances?: boolean;
+  showRunningBalances?: boolean;
   runningBalances?: Map<TransactionEntity['id'], IntegerAmount>;
   onOpenTransaction?: (transaction: TransactionEntity) => void;
   isLoadingMore: boolean;
@@ -96,7 +96,7 @@ type TransactionListProps = {
 export function TransactionList({
   isLoading,
   transactions,
-  showBalances,
+  showRunningBalances,
   runningBalances,
   onOpenTransaction,
   isLoadingMore,
@@ -207,13 +207,17 @@ export function TransactionList({
                 t => !isPreviewId(t.id) || !t.is_child,
               )}
               addIdAndValue
-              dependencies={[transactions, showBalances, runningBalances]}
+              dependencies={[
+                transactions,
+                showRunningBalances,
+                runningBalances,
+              ]}
             >
               {transaction => (
                 <TransactionListItem
                   key={transaction.id}
-                  showBalance={showBalances}
-                  balance={runningBalances?.get(transaction.id)}
+                  showRunningBalance={showRunningBalances}
+                  runningBalance={runningBalances?.get(transaction.id)}
                   value={transaction}
                   onPress={trans => onTransactionPress(trans)}
                   onLongPress={trans => onTransactionPress(trans, true)}
