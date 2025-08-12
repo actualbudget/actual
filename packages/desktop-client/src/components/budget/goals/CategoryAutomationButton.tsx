@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgChartPie } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
+import { cx, css } from '@emotion/css';
 
 import { type CategoryEntity } from 'loot-core/types/models';
 
@@ -17,6 +18,7 @@ type CategoryAutomationButtonProps = {
   height?: number;
   defaultColor?: string;
   style?: CSSProperties;
+  showPlaceholder?: boolean;
 };
 export function CategoryAutomationButton({
   category,
@@ -24,6 +26,7 @@ export function CategoryAutomationButton({
   height = 12,
   defaultColor = theme.buttonNormalText,
   style,
+  showPlaceholder = false,
 }: CategoryAutomationButtonProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -40,12 +43,17 @@ export function CategoryAutomationButton({
     <Button
       variant="bare"
       aria-label={t('Change category automations')}
-      className={!hasAutomations ? 'hover-visible' : ''}
-      style={{
-        color: defaultColor,
-        ...style,
-        ...(hasAutomations && { display: 'flex !important' }),
-      }}
+      className={cx(
+        !hasAutomations && !showPlaceholder ? 'hover-visible' : '',
+        css({
+          color: defaultColor,
+          opacity: hasAutomations || !showPlaceholder ? 1 : 0.3,
+          '&:hover': {
+            opacity: 1,
+          },
+          ...style,
+        }),
+      )}
       onPress={() => {
         dispatch(
           pushModal({
