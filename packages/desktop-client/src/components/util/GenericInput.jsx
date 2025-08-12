@@ -133,7 +133,7 @@ export function GenericInput({
               value={value}
               openOnFocus={true}
               onSelect={onChange}
-              showHiddenCategories={false}
+              showHiddenCategories={true}
               inputProps={{
                 ref,
                 ...(showPlaceholder ? { placeholder: t('nothing') } : null),
