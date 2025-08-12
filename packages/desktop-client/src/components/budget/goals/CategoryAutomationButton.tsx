@@ -44,7 +44,6 @@ export function CategoryAutomationButton({
       style={{
         color: defaultColor,
         ...style,
-        ...(hasAutomations && { display: 'flex !important' }),
       }}
       onPress={() => {
         dispatch(

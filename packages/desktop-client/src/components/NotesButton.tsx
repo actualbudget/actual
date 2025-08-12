@@ -77,7 +77,6 @@ export function NotesButton({
           style={{
             color: defaultColor,
             ...style,
-            ...(hasNotes && { display: 'flex !important' }),
             ...(isOpen && { color: theme.buttonNormalText }),
           }}
           onPress={() => {

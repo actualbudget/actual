@@ -187,11 +187,12 @@ export function SidebarGroup({
         backgroundColor: theme.tableRowHeaderBackground,
         overflow: 'hidden',
         '& .hover-visible': {
-          display: 'none',
+          opacity: 0.2,
+          transition: 'opacity .25s',
         },
         ...(!dragPreview && {
           '&:hover .hover-visible': {
-            display: 'flex',
+            opacity: 1,
           },
         }),
         ...(dragPreview && {
