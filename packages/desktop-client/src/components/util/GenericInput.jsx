@@ -57,7 +57,6 @@ export function GenericInput({
           options: {
             onSelect: newValue => {
               onChange(multi ? [...value, newValue] : newValue);
-              setTimeout(() => target.blur(), 1);
             },
           },
         },
@@ -115,6 +114,7 @@ export function GenericInput({
               type={autocompleteType}
               showMakeTransfer={false}
               openOnFocus={!isNarrowWidth}
+              updateOnValueChange={isNarrowWidth}
               value={value}
               onSelect={onChange}
               inputProps={{
@@ -144,6 +144,7 @@ export function GenericInput({
                   type={autocompleteType}
                   value={value}
                   openOnFocus={!isNarrowWidth}
+                  updateOnValueChange={isNarrowWidth}
                   onSelect={onChange}
                   inputProps={{
                     ref,
@@ -169,6 +170,7 @@ export function GenericInput({
               categoryGroups={categoryGroups}
               value={value}
               openOnFocus={!isNarrowWidth}
+              updateOnValueChange={isNarrowWidth}
               onSelect={onChange}
               showHiddenCategories={false}
               inputProps={{
