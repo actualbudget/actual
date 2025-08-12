@@ -54,6 +54,8 @@ export interface BudgetHandlers {
   'category-group-move': typeof moveCategoryGroup;
   'category-group-delete': typeof deleteCategoryGroup;
   'must-category-transfer': typeof isCategoryTransferRequired;
+  'budget/get-category-automations': typeof goalActions.getTemplatesForCategory;
+  'budget/set-category-automations': typeof goalActions.storeTemplates;
 }
 
 export const app = createApp<BudgetHandlers>();
@@ -139,6 +141,15 @@ app.method('category-group-update', mutator(undoable(updateCategoryGroup)));
 app.method('category-group-move', mutator(undoable(moveCategoryGroup)));
 app.method('category-group-delete', mutator(undoable(deleteCategoryGroup)));
 app.method('must-category-transfer', isCategoryTransferRequired);
+
+app.method(
+  'budget/get-category-automations',
+  goalActions.getTemplatesForCategory,
+);
+app.method(
+  'budget/set-category-automations',
+  mutator(undoable(goalActions.storeTemplates)),
+);
 
 // Server must return AQL entities not the raw DB data
 async function getCategories() {
