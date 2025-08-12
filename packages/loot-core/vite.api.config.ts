@@ -50,7 +50,7 @@ export default defineConfig(({ mode }) => {
         },
         {
           find: /^@actual-app\/crdt(\/.*)?$/,
-          replacement: path.resolve(`${crdtDir}/src$1`),
+          replacement: path.resolve(crdtDir, 'src') + '$1',
         },
       ],
     },
