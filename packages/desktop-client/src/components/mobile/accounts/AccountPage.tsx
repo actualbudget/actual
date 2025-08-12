@@ -202,7 +202,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
             ...(styles.lineClamp(2) as CSSProperties),
           }}
         >
-          {account.closed ? `${t('Closed')}: ${account.name}` : account.name}
+          {account.closed ? `${t('Closed: ')}${account.name}` : account.name}
         </Text>
       </Button>
     </View>
