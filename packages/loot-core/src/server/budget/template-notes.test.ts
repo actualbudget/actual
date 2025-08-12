@@ -22,7 +22,7 @@ function mockGetActiveSchedules(schedules: db.DbSchedule[]) {
 }
 
 function mockDbUpdate() {
-  vi.mocked(db.update).mockResolvedValue(undefined);
+  vi.mocked(db.updateWithSchema).mockResolvedValue(undefined);
 }
 
 describe('storeNoteTemplates', () => {
@@ -135,13 +135,13 @@ describe('storeNoteTemplates', () => {
 
       // Then
       if (expectedTemplates.length === 0) {
-        expect(db.update).not.toHaveBeenCalled();
+        expect(db.updateWithSchema).not.toHaveBeenCalled();
         expect(resetCategoryGoalDefsWithNoTemplates).toHaveBeenCalled();
         return;
       }
 
       mockTemplateNotes.forEach(({ id }) => {
-        expect(db.update).toHaveBeenCalledWith('categories', {
+        expect(db.updateWithSchema).toHaveBeenCalledWith('categories', {
           id,
           goal_def: JSON.stringify(expectedTemplates),
           template_settings: { source: 'notes' },

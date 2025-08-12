@@ -136,7 +136,7 @@ const changeType = (
 
 function mapTemplateTypesForUpdate(
   state: ReducerState,
-  template: Partial<Template>,
+  template: Partial<Template> & Pick<Template, 'type'>,
 ): ReducerState {
   switch (state.template.type) {
     case 'average':
@@ -179,7 +179,7 @@ function mapTemplateTypesForUpdate(
       break;
   }
 
-  if (!template.type || state.template.type === template.type) {
+  if (state.template.type === template.type) {
     const { type: _1, directive: _2, ...rest } = template;
     return {
       ...state,
