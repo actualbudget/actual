@@ -32,10 +32,10 @@ export async function storeTemplates({
   for (const { id, templates } of categoriesWithTemplates) {
     const goalDefs = JSON.stringify(templates);
 
-    await db.update('categories', {
+    await db.updateWithSchema('categories', {
       id,
       goal_def: goalDefs,
-      template_source: source,
+      template_settings: { source },
     });
   }
 }

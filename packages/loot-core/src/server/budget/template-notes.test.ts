@@ -144,7 +144,7 @@ describe('storeNoteTemplates', () => {
         expect(db.update).toHaveBeenCalledWith('categories', {
           id,
           goal_def: JSON.stringify(expectedTemplates),
-          template_source: 'notes',
+          template_settings: { source: 'notes' },
         });
       });
       expect(resetCategoryGoalDefsWithNoTemplates).toHaveBeenCalled();
