@@ -47,9 +47,7 @@ export function GenericInput({
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   // Helper function to open autocomplete modal with safe event handling
-  const openAutocompleteModal = (modalName, event) => {
-    const target = event.currentTarget;
-
+  const openAutocompleteModal = modalName => {
     dispatch(
       pushModal({
         modal: {
@@ -120,12 +118,12 @@ export function GenericInput({
               inputProps={{
                 ref,
                 ...(showPlaceholder ? { placeholder: t('nothing') } : null),
-                onClick: event => {
+                onClick: () => {
                   if (!isNarrowWidth) {
                     return;
                   }
 
-                  openAutocompleteModal('payee-autocomplete', event);
+                  openAutocompleteModal('payee-autocomplete');
                 },
               }}
             />
@@ -149,12 +147,12 @@ export function GenericInput({
                   inputProps={{
                     ref,
                     ...(showPlaceholder ? { placeholder: t('nothing') } : null),
-                    onClick: event => {
+                    onClick: () => {
                       if (!isNarrowWidth) {
                         return;
                       }
 
-                      openAutocompleteModal('account-autocomplete', event);
+                      openAutocompleteModal('account-autocomplete');
                     },
                   }}
                 />
@@ -176,12 +174,12 @@ export function GenericInput({
               inputProps={{
                 ref,
                 ...(showPlaceholder ? { placeholder: t('nothing') } : null),
-                onClick: event => {
+                onClick: () => {
                   if (!isNarrowWidth) {
                     return;
                   }
 
-                  openAutocompleteModal('category-autocomplete', event);
+                  openAutocompleteModal('category-autocomplete');
                 },
               }}
             />
