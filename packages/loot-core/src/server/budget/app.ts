@@ -146,7 +146,10 @@ app.method(
   'budget/get-category-automations',
   goalActions.getTemplatesForCategory,
 );
-app.method('budget/set-category-automations', goalActions.storeTemplates);
+app.method(
+  'budget/set-category-automations',
+  mutator(undoable(goalActions.storeTemplates)),
+);
 
 // Server must return AQL entities not the raw DB data
 async function getCategories() {
