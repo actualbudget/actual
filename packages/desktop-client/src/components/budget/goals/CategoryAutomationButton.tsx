@@ -30,7 +30,7 @@ export function CategoryAutomationButton({
 
   const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
-  const hasAutomations = !!category.goal_def;
+  const hasAutomations = !!category.goal_def?.length;
 
   if (!goalTemplatesEnabled || !goalTemplatesUIEnabled) {
     return null;
