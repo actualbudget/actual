@@ -95,6 +95,7 @@ export function AccountPage() {
 
 function AccountHeader({ account }: { readonly account: AccountEntity }) {
   const failedAccounts = useFailedAccounts();
+  const { t } = useTranslation();
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
   const pending = useMemo(
     () => syncingAccountIds.includes(account.id),
@@ -201,7 +202,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
             ...(styles.lineClamp(2) as CSSProperties),
           }}
         >
-          {`${account.closed ? 'Closed: ' : ''}${account.name}`}
+          {account.closed ? `${t('Closed')}: ${account.name}` : account.name}
         </Text>
       </Button>
     </View>
