@@ -29,15 +29,17 @@ export async function storeTemplates({
   }[];
   source: 'notes' | 'ui';
 }): Promise<void> {
-  for (const { id, templates } of categoriesWithTemplates) {
-    const goalDefs = JSON.stringify(templates);
+  await batchMessages(async () => {
+    for (const { id, templates } of categoriesWithTemplates) {
+      const goalDefs = JSON.stringify(templates);
 
-    await db.updateWithSchema('categories', {
-      id,
-      goal_def: goalDefs,
-      template_settings: { source },
-    });
-  }
+      await db.updateWithSchema('categories', {
+        id,
+        goal_def: goalDefs,
+        template_settings: { source },
+      });
+    }
+  });
 }
 
 export async function applyTemplate({
