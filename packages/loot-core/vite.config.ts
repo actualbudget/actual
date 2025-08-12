@@ -32,7 +32,7 @@ export default defineConfig(({ mode }) => {
           chunkFileNames: isDev
             ? '[name].kcab.worker.dev.js'
             : '[id].[name].kcab.worker.[hash].js',
-          format: 'umd',
+          format: 'iife',
           name: 'backend',
           globals: {
             buffer: 'Buffer',
@@ -61,14 +61,6 @@ export default defineConfig(({ mode }) => {
         '.json',
       ],
       alias: [
-        // Node.js polyfills
-        {
-          find: 'vite-plugin-node-polyfills',
-          replacement: path.resolve(
-            require.resolve('vite-plugin-node-polyfills'),
-            '../../', // The plugin points to a subdirectory, putting it back to the root
-          ),
-        },
         {
           find: /^@actual-app\/crdt(\/.*)?$/,
           replacement: path.resolve(crdtDir, 'src') + '$1',
@@ -85,7 +77,6 @@ export default defineConfig(({ mode }) => {
     plugins: [
       peggyLoader(),
       nodePolyfills({
-        exclude: ['buffer'],
         globals: {
           process: true,
           global: true,
