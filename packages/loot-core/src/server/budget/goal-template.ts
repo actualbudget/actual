@@ -4,11 +4,12 @@ import { q } from '../../shared/query';
 import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
 import { Template } from '../../types/models/templates';
 import { aqlQuery } from '../aql';
+import * as db from '../db';
 import { batchMessages } from '../sync';
 
 import { isReflectBudget, getSheetValue, setGoal, setBudget } from './actions';
 import { CategoryTemplateContext } from './category-template-context';
-import { checkTemplates, storeTemplates } from './template-notes';
+import { checkTemplateNotes, storeNoteTemplates } from './template-notes';
 
 type Notification = {
   type?: 'message' | 'error' | 'warning' | undefined;
@@ -18,12 +19,35 @@ type Notification = {
   sticky?: boolean | undefined;
 };
 
+export async function storeTemplates({
+  categoriesWithTemplates,
+  source,
+}: {
+  categoriesWithTemplates: {
+    id: string;
+    templates: Template[];
+  }[];
+  source: 'notes' | 'ui';
+}): Promise<void> {
+  await batchMessages(async () => {
+    for (const { id, templates } of categoriesWithTemplates) {
+      const goalDefs = JSON.stringify(templates);
+
+      await db.updateWithSchema('categories', {
+        id,
+        goal_def: goalDefs,
+        template_settings: { source },
+      });
+    }
+  });
+}
+
 export async function applyTemplate({
   month,
 }: {
   month: string;
 }): Promise<Notification> {
-  await storeTemplates();
+  await storeNoteTemplates();
   const categoryTemplates = await getTemplates();
   const ret = await processTemplate(month, false, categoryTemplates);
   return ret;
@@ -34,7 +58,7 @@ export async function overwriteTemplate({
 }: {
   month: string;
 }): Promise<Notification> {
-  await storeTemplates();
+  await storeNoteTemplates();
   const categoryTemplates = await getTemplates();
   const ret = await processTemplate(month, true, categoryTemplates);
   return ret;
@@ -52,7 +76,7 @@ export async function applyMultipleCategoryTemplates({
       .filter({ id: { $oneof: categoryIds } })
       .select('*'),
   );
-  await storeTemplates();
+  await storeNoteTemplates();
   const categoryTemplates = await getTemplates(c => categoryIds.includes(c.id));
   const ret = await processTemplate(
     month,
@@ -73,7 +97,7 @@ export async function applySingleCategoryTemplate({
   const { data: categoryData }: { data: CategoryEntity[] } = await aqlQuery(
     q('categories').filter({ id: category }).select('*'),
   );
-  await storeTemplates();
+  await storeNoteTemplates();
   const categoryTemplates = await getTemplates(c => c.id === category);
   const ret = await processTemplate(
     month,
@@ -85,7 +109,7 @@ export async function applySingleCategoryTemplate({
 }
 
 export function runCheckTemplates() {
-  return checkTemplates();
+  return checkTemplateNotes();
 }
 
 async function getCategories(): Promise<CategoryEntity[]> {
@@ -113,6 +137,12 @@ async function getTemplates(
     );
   }
   return categoryTemplates;
+}
+
+export async function getTemplatesForCategory(
+  categoryId: CategoryEntity['id'],
+): Promise<Record<CategoryEntity['id'], Template[]>> {
+  return getTemplates(c => c.id === categoryId);
 }
 
 type TemplateBudget = {
