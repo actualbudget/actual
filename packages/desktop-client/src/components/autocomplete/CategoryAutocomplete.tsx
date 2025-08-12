@@ -9,11 +9,13 @@ import React, {
   type ReactElement,
   type CSSProperties,
   useCallback,
+  useState,
 } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgSplit } from '@actual-app/components/icons/v0';
+import { SvgViewShow } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
@@ -62,6 +64,9 @@ type CategoryListProps = {
   renderCategoryItem?: (
     props: ComponentPropsWithoutRef<typeof CategoryItem>,
   ) => ReactElement<typeof CategoryItem>;
+  renderToggleHiddenButton?: (
+    props: ComponentPropsWithoutRef<typeof ToggleHiddenButton>,
+  ) => ReactElement<typeof ToggleHiddenButton>;
   showHiddenItems?: boolean;
   showBalances?: boolean;
 };
@@ -74,19 +79,13 @@ function CategoryList({
   renderSplitTransactionButton = defaultRenderSplitTransactionButton,
   renderCategoryItemGroupHeader = defaultRenderCategoryItemGroupHeader,
   renderCategoryItem = defaultRenderCategoryItem,
+  renderToggleHiddenButton = defaultRenderToggleHiddenButton,
   showHiddenItems,
   showBalances,
 }: CategoryListProps) {
-  const { t } = useTranslation();
   let lastGroup: string | undefined | null = null;
 
-  const filteredItems = useMemo(
-    () =>
-      showHiddenItems
-        ? items
-        : items.filter(item => !item.hidden && !item.group?.hidden),
-    [showHiddenItems, items],
-  );
+  const filteredItems = items;
 
   return (
     <View>
@@ -108,9 +107,18 @@ function CategoryList({
             });
           }
 
+          if (item.id === 'toggle-hidden') {
+            return renderToggleHiddenButton({
+              key: 'toggle-hidden',
+              ...(getItemProps ? getItemProps({ item }) : null),
+              highlighted: highlightedIndex === idx,
+              embedded,
+            });
+          }
+
           const groupId = item.group?.id;
           const showGroup = groupId !== lastGroup;
-          const groupName = `${item.group?.name}${item.group?.hidden ? ' ' + t('(hidden)') : ''}`;
+          const groupName = item.group?.name || '';
           lastGroup = groupId;
           return (
             <Fragment key={item.id}>
@@ -133,7 +141,9 @@ function CategoryList({
                   embedded,
                   style: {
                     ...(showHiddenItems &&
-                      item.hidden && { color: theme.pageTextSubdued }),
+                      (item.hidden || item.group?.hidden) && {
+                        color: theme.pageTextSubdued,
+                      }),
                   },
                   showBalances,
                 })}
@@ -151,6 +161,9 @@ function customSort(obj: CategoryAutocompleteItem, value: string): number {
   const name = getNormalisedString(obj.name);
   const groupName = obj.group ? getNormalisedString(obj.group.name) : '';
   if (obj.id === 'split') {
+    return -3;
+  }
+  if (obj.id === 'toggle-hidden') {
     return -2;
   }
   if (name.includes(value)) {
@@ -177,6 +190,9 @@ type CategoryAutocompleteProps = ComponentProps<
   renderCategoryItem?: (
     props: ComponentPropsWithoutRef<typeof CategoryItem>,
   ) => ReactElement<typeof CategoryItem>;
+  renderToggleHiddenButton?: (
+    props: ComponentPropsWithoutRef<typeof ToggleHiddenButton>,
+  ) => ReactElement<typeof ToggleHiddenButton>;
   showHiddenCategories?: boolean;
 };
 
@@ -189,28 +205,61 @@ export function CategoryAutocomplete({
   renderSplitTransactionButton,
   renderCategoryItemGroupHeader,
   renderCategoryItem,
+  renderToggleHiddenButton,
   showHiddenCategories,
   ...props
 }: CategoryAutocompleteProps) {
   const { grouped: defaultCategoryGroups = [] } = useCategories();
-  const categorySuggestions: CategoryAutocompleteItem[] = useMemo(
-    () =>
-      (categoryGroups || defaultCategoryGroups).reduce(
-        (list, group) =>
-          list.concat(
-            (group.categories || [])
-              .filter(category => category.group === group.id)
-              .map(category => ({
-                ...category,
-                group,
-              })),
-          ),
-        showSplitOption
-          ? [{ id: 'split', name: '' } as CategoryAutocompleteItem]
-          : [],
-      ),
-    [defaultCategoryGroups, categoryGroups, showSplitOption],
-  );
+  const [internalShowHidden, setInternalShowHidden] = useState(false);
+  const effectiveShowHidden = showHiddenCategories === false ? internalShowHidden : showHiddenCategories ?? internalShowHidden;
+  const hasHiddenCategories = useMemo(() => {
+    return (categoryGroups || defaultCategoryGroups).some(
+      group => group.hidden || group.categories?.some(cat => cat.hidden)
+    );
+  }, [defaultCategoryGroups, categoryGroups]);
+
+  const categorySuggestions: CategoryAutocompleteItem[] = useMemo(() => {
+    const specialItems = [];
+    
+    if (showSplitOption) {
+      specialItems.push({ id: 'split', name: '' } as CategoryAutocompleteItem);
+    }
+    
+    if (showHiddenCategories === false && hasHiddenCategories && !internalShowHidden) {
+      specialItems.push({ id: 'toggle-hidden', name: '' } as CategoryAutocompleteItem);
+    }
+
+    const allSuggestions = (categoryGroups || defaultCategoryGroups).reduce(
+      (list, group) =>
+        list.concat(
+          (group.categories || [])
+            .filter(category => category.group === group.id)
+            .map(category => ({
+              ...category,
+              group,
+            })),
+        ),
+      specialItems,
+    );
+
+    if (!effectiveShowHidden) {
+      return allSuggestions.filter(
+        suggestion =>
+          suggestion.id === 'split' ||
+          suggestion.id === 'toggle-hidden' ||
+          (!suggestion.hidden && !suggestion.group?.hidden),
+      );
+    }
+
+    return allSuggestions;
+  }, [
+    defaultCategoryGroups,
+    categoryGroups,
+    showSplitOption,
+    showHiddenCategories,
+    effectiveShowHidden,
+    hasHiddenCategories,
+  ]);
 
   const filterSuggestions = useCallback(
     (
@@ -219,7 +268,7 @@ export function CategoryAutocomplete({
     ): CategoryAutocompleteItem[] => {
       return suggestions
         .filter(suggestion => {
-          if (suggestion.id === 'split') {
+          if (suggestion.id === 'split' || suggestion.id === 'toggle-hidden') {
             return true;
           }
 
@@ -254,10 +303,15 @@ export function CategoryAutocomplete({
       getHighlightedIndex={suggestions => {
         if (suggestions.length === 0) {
           return null;
-        } else if (suggestions[0].id === 'split') {
-          return suggestions.length > 1 ? 1 : null;
         }
-        return 0;
+        
+        for (let i = 0; i < suggestions.length; i++) {
+          if (suggestions[i].id !== 'split' && suggestions[i].id !== 'toggle-hidden') {
+            return i;
+          }
+        }
+        
+        return null;
       }}
       filterSuggestions={filterSuggestions}
       suggestions={categorySuggestions}
@@ -265,12 +319,31 @@ export function CategoryAutocomplete({
         <CategoryList
           items={items}
           embedded={embedded}
-          getItemProps={getItemProps}
+          getItemProps={(params) => {
+            const baseProps = getItemProps ? getItemProps(params) : {};
+            if (params.item.id === 'toggle-hidden') {
+              return {
+                ...baseProps,
+                onMouseDown: (e: React.MouseEvent) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setInternalShowHidden(true);
+                },
+                onClick: (e: React.MouseEvent) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setInternalShowHidden(true);
+                },
+              };
+            }
+            return baseProps;
+          }}
           highlightedIndex={highlightedIndex}
           renderSplitTransactionButton={renderSplitTransactionButton}
           renderCategoryItemGroupHeader={renderCategoryItemGroupHeader}
           renderCategoryItem={renderCategoryItem}
-          showHiddenItems={showHiddenCategories}
+          renderToggleHiddenButton={renderToggleHiddenButton}
+          showHiddenItems={effectiveShowHidden}
           showBalances={showBalances}
         />
       )}
@@ -355,6 +428,49 @@ function SplitTransactionButton({
   );
 }
 
+type ToggleHiddenButtonProps = {
+  highlighted?: boolean;
+  embedded?: boolean;
+  style?: CSSProperties;
+};
+
+function ToggleHiddenButton({
+  highlighted,
+  embedded,
+  style,
+  ...props
+}: ToggleHiddenButtonProps) {
+  return (
+    <View
+      role="button"
+      style={{
+        backgroundColor: highlighted
+          ? theme.menuAutoCompleteBackgroundHover
+          : 'transparent',
+        borderRadius: embedded ? 4 : 0,
+        flexShrink: 0,
+        flexDirection: 'row',
+        alignItems: 'center',
+        fontSize: 11,
+        fontWeight: 500,
+        color: theme.noticeTextMenu,
+        padding: '6px 8px',
+        ':active': {
+          backgroundColor: 'rgba(100, 100, 100, .25)',
+        },
+        ...style,
+      }}
+      data-testid="toggle-hidden-categories-button"
+      {...props}
+    >
+      <Text style={{ lineHeight: 0 }}>
+        <SvgViewShow width={10} height={10} style={{ marginRight: 5 }} />
+      </Text>
+      <Trans>Show Hidden Categories</Trans>
+    </View>
+  );
+}
+
 function defaultRenderSplitTransactionButton(
   props: SplitTransactionButtonProps,
 ): ReactElement<typeof SplitTransactionButton> {
@@ -379,7 +495,6 @@ function CategoryItem({
   showBalances,
   ...props
 }: CategoryItemProps) {
-  const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const narrowStyle = isNarrowWidth
     ? {
@@ -427,10 +542,7 @@ function CategoryItem({
       {...props}
     >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <TextOneLine>
-          {item.name}
-          {item.hidden ? ' ' + t('(hidden)') : null}
-        </TextOneLine>
+        <TextOneLine>{item.name}</TextOneLine>
         <TextOneLine
           style={{
             display: !showBalances ? 'none' : undefined,
@@ -459,4 +571,10 @@ function defaultRenderCategoryItem(
   props: ComponentPropsWithoutRef<typeof CategoryItem>,
 ): ReactElement<typeof CategoryItem> {
   return <CategoryItem {...props} />;
+}
+
+function defaultRenderToggleHiddenButton(
+  props: ComponentPropsWithoutRef<typeof ToggleHiddenButton>,
+): ReactElement<typeof ToggleHiddenButton> {
+  return <ToggleHiddenButton {...props} />;
 }
