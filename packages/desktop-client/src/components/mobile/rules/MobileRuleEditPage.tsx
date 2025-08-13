@@ -99,7 +99,7 @@ export function MobileRuleEditPage() {
             alignItems: 'center',
           }}
         >
-          <span>{t('Loading rule...')}</span>
+          <Text><Trans>Loading rule...<Trans></Text>
         </View>
       </Page>
     );
