@@ -150,9 +150,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     `show-balances-${account.id}`,
   );
   const onToggleRunningBalance = useCallback(() => {
-    setShowRunningBalances(
-      showRunningBalances === 'true' ? 'false' : 'true'
-    );
+    setShowRunningBalances(showRunningBalances === 'true' ? 'false' : 'true');
     dispatch(
       collapseModals({
         rootModalName: 'account-menu',
