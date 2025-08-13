@@ -165,7 +165,14 @@ export function TransactionList({
         aria-label={t('Transaction list')}
         selectionMode={selectedTransactions.size > 0 ? 'multiple' : 'single'}
         selectedKeys={selectedTransactions}
-        dependencies={[selectedTransactions]}
+        dependencies={[
+          selectedTransactions,
+          locale,
+          onTransactionPress,
+          runningBalances,
+          showRunningBalances,
+          t,
+        ]}
         renderEmptyState={() =>
           !isLoading && (
             <View
@@ -207,11 +214,6 @@ export function TransactionList({
                 t => !isPreviewId(t.id) || !t.is_child,
               )}
               addIdAndValue
-              dependencies={[
-                transactions,
-                showRunningBalances,
-                runningBalances,
-              ]}
             >
               {transaction => (
                 <TransactionListItem
