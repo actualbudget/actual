@@ -55,7 +55,7 @@ function UncategorizedButton() {
     <Link
       variant="button"
       buttonVariant="bare"
-      to="/accounts/uncategorized"
+      to="/categories/uncategorized"
       style={{
         color: theme.errorText,
       }}

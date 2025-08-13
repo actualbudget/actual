@@ -1,24 +1,46 @@
 // @ts-strict-ignore
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { GridList, GridListItem } from 'react-aria-components';
+import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { Card } from '@actual-app/components/card';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
+import { SvgLogo } from '@actual-app/components/icons/logo';
+import {
+  SvgArrowThinLeft,
+  SvgArrowThinRight,
+  SvgCheveronRight,
+} from '@actual-app/components/icons/v1';
+import {
+  SvgArrowButtonDown1,
+  SvgCalendar,
+} from '@actual-app/components/icons/v2';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
+import { groupById } from 'loot-core/shared/util';
 
-import { BudgetTable } from './BudgetTable';
+import { BudgetTable, PILL_STYLE } from './BudgetTable';
 
 import { sync } from '@desktop-client/app/appSlice';
 import { prewarmMonth } from '@desktop-client/components/budget/util';
+import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useOverspentCategories } from '@desktop-client/hooks/useOverspentCategories';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
+import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
 import {
   applyBudgetAction,
@@ -30,12 +52,17 @@ import {
   updateGroup,
 } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
+import {
+  envelopeBudget,
+  uncategorizedCount,
+} from '@desktop-client/spreadsheet/bindings';
 
 function isBudgetType(input?: string): input is 'envelope' | 'tracking' {
   return ['envelope', 'tracking'].includes(input);
 }
 
-export function Budget() {
+export function BudgetPage() {
+  const { t } = useTranslation();
   const locale = useLocale();
   const { list: categories, grouped: categoryGroups } = useCategories();
   const [budgetTypePref] = useSyncedPref('budgetType');
@@ -45,7 +72,7 @@ export function Budget() {
   const currMonth = monthUtils.currentMonth();
   const [startMonth = currMonth, setStartMonthPref] =
     useLocalPref('budget.startMonth');
-  const [bounds, setBounds] = useState({
+  const [monthBounds, setMonthBounds] = useState({
     start: startMonth,
     end: startMonth,
   });
@@ -59,7 +86,7 @@ export function Budget() {
   useEffect(() => {
     async function init() {
       const { start, end } = await send('get-budget-bounds');
-      setBounds({ start, end });
+      setMonthBounds({ start, end });
 
       await prewarmMonth(budgetType, spreadsheet, startMonth);
 
@@ -525,33 +552,443 @@ export function Budget() {
   }
 
   return (
-    <SheetNameProvider name={monthUtils.sheetForMonth(startMonth)}>
-      <SyncRefresh
-        onSync={async () => {
-          dispatch(sync());
-        }}
+    <Page
+      padding={0}
+      header={
+        <MobilePageHeader
+          title={
+            <MonthSelector
+              month={startMonth}
+              monthBounds={monthBounds}
+              onOpenMonthMenu={onOpenBudgetMonthMenu}
+              onPrevMonth={onPrevMonth}
+              onNextMonth={onNextMonth}
+            />
+          }
+          leftContent={
+            <Button
+              variant="bare"
+              style={{ margin: 10 }}
+              onPress={onOpenBudgetPageMenu}
+              aria-label={t('Budget page menu')}
+            >
+              <SvgLogo
+                style={{ color: theme.mobileHeaderText }}
+                width="20"
+                height="20"
+              />
+              <SvgCheveronRight
+                style={{ flexShrink: 0, color: theme.mobileHeaderTextSubdued }}
+                width="14"
+                height="14"
+              />
+            </Button>
+          }
+          rightContent={
+            !monthUtils.isCurrentMonth(startMonth) && (
+              <Button
+                variant="bare"
+                onPress={onCurrentMonth}
+                aria-label={t('Today')}
+                style={{ margin: 10 }}
+              >
+                <SvgCalendar width={20} height={20} />
+              </Button>
+            )
+          }
+        />
+      }
+    >
+      <SheetNameProvider name={monthUtils.sheetForMonth(startMonth)}>
+        <SyncRefresh
+          onSync={async () => {
+            dispatch(sync());
+          }}
+        >
+          {({ onRefresh }) => (
+            <>
+              <Banners month={startMonth} onBudgetAction={onBudgetAction} />
+              <BudgetTable
+                // This key forces the whole table rerender when the number
+                // format changes
+                key={`${numberFormat}${hideFraction}`}
+                categoryGroups={categoryGroups}
+                month={startMonth}
+                onShowBudgetSummary={onShowBudgetSummary}
+                onBudgetAction={onBudgetAction}
+                onRefresh={onRefresh}
+                onEditCategoryGroup={onOpenCategoryGroupMenuModal}
+                onEditCategory={onOpenCategoryMenuModal}
+              />
+            </>
+          )}
+        </SyncRefresh>
+      </SheetNameProvider>
+    </Page>
+  );
+}
+
+function Banners({ month, onBudgetAction }) {
+  const { t } = useTranslation();
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
+
+  return (
+    <GridList
+      aria-label={t('Banners')}
+      style={{ backgroundColor: theme.mobilePageBackground }}
+    >
+      <UncategorizedTransactionsBanner />
+      <OverspendingBanner
+        month={month}
+        onBudgetAction={onBudgetAction}
+        budgetType={budgetType}
+      />
+      {budgetType === 'envelope' && (
+        <OverbudgetedBanner month={month} onBudgetAction={onBudgetAction} />
+      )}
+    </GridList>
+  );
+}
+
+function Banner({ type = 'info', children }) {
+  return (
+    <Card
+      style={{
+        height: 50,
+        marginTop: 10,
+        marginBottom: 10,
+        padding: 10,
+        justifyContent: 'center',
+        backgroundColor:
+          type === 'critical'
+            ? theme.errorBackground
+            : type === 'warning'
+              ? theme.warningBackground
+              : theme.noticeBackground,
+      }}
+    >
+      {children}
+    </Card>
+  );
+}
+
+function UncategorizedTransactionsBanner(props) {
+  const count = useSheetValue(uncategorizedCount());
+  const navigate = useNavigate();
+
+  if (count === null || count <= 0) {
+    return null;
+  }
+
+  return (
+    <GridListItem textValue="Uncategorized transactions banner" {...props}>
+      <Banner type="warning">
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Trans count={count}>
+            You have {{ count }} uncategorized transactions
+          </Trans>
+          <Button
+            onPress={() => navigate('/categories/uncategorized')}
+            style={PILL_STYLE}
+          >
+            <Text>
+              <Trans>Categorize</Trans>
+            </Text>
+          </Button>
+        </View>
+      </Banner>
+    </GridListItem>
+  );
+}
+
+function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
+  const { t } = useTranslation();
+  const toBudgetAmount = useSheetValue<
+    'envelope-budget',
+    typeof envelopeBudget.toBudget
+  >(envelopeBudget.toBudget);
+  const dispatch = useDispatch();
+  const { showUndoNotification } = useUndo();
+  const { list: categories } = useCategories();
+  const categoriesById = useMemo(() => groupById(categories), [categories]);
+
+  const openCoverOverbudgetedModal = useCallback(() => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'cover',
+          options: {
+            title: t('Cover overbudgeted'),
+            month,
+            showToBeBudgeted: false,
+            onSubmit: categoryId => {
+              onBudgetAction(month, 'cover-overbudgeted', {
+                category: categoryId,
+              });
+              showUndoNotification({
+                message: t('Covered overbudgeted from {{categoryName}}', {
+                  categoryName: categoriesById[categoryId].name,
+                }),
+              });
+            },
+          },
+        },
+      }),
+    );
+  }, [
+    categoriesById,
+    dispatch,
+    month,
+    onBudgetAction,
+    showUndoNotification,
+    t,
+  ]);
+
+  if (!toBudgetAmount || toBudgetAmount >= 0) {
+    return null;
+  }
+
+  return (
+    <GridListItem textValue="Overbudgeted banner" {...props}>
+      <Banner type="critical">
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 10,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 10,
+              }}
+            >
+              <SvgArrowButtonDown1 style={{ width: 15, height: 15 }} />
+              <Text>
+                <Trans>You have budgeted more than your available funds</Trans>
+              </Text>
+            </View>
+          </View>
+          <Button onPress={openCoverOverbudgetedModal} style={PILL_STYLE}>
+            <Trans>Cover</Trans>
+          </Button>
+        </View>
+      </Banner>
+    </GridListItem>
+  );
+}
+
+function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
+  const { t } = useTranslation();
+
+  const { list: categories, grouped: categoryGroups } = useCategories();
+  const categoriesById = useMemo(() => groupById(categories), [categories]);
+  const groupsById = useMemo(() => groupById(categoryGroups), [categoryGroups]);
+
+  const dispatch = useDispatch();
+
+  const overspentCategories = useOverspentCategories({ month }).filter(c => {
+    if (budgetType === 'tracking') {
+      return !c.hidden && !groupsById[c.group].hidden;
+    }
+    return true;
+  });
+
+  const categoryGroupsToShow = useMemo(
+    () =>
+      categoryGroups
+        .filter(g => overspentCategories.some(c => c.group === g.id))
+        .map(g => ({
+          ...g,
+          categories: overspentCategories.filter(c => c.group === g.id),
+        })),
+    [categoryGroups, overspentCategories],
+  );
+
+  const { showUndoNotification } = useUndo();
+
+  const onOpenCoverCategoryModal = useCallback(
+    categoryId => {
+      const category = categoriesById[categoryId];
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'cover',
+            options: {
+              title: category.name,
+              month,
+              categoryId: category.id,
+              onSubmit: fromCategoryId => {
+                onBudgetAction(month, 'cover-overspending', {
+                  to: category.id,
+                  from: fromCategoryId,
+                });
+                showUndoNotification({
+                  message: t(
+                    `Covered {{toCategoryName}} overspending from {{fromCategoryName}}.`,
+                    {
+                      toCategoryName: category.name,
+                      fromCategoryName:
+                        fromCategoryId === 'to-budget'
+                          ? t('To Budget')
+                          : categoriesById[fromCategoryId].name,
+                    },
+                  ),
+                });
+              },
+            },
+          },
+        }),
+      );
+    },
+    [categoriesById, dispatch, month, onBudgetAction, showUndoNotification, t],
+  );
+
+  const onOpenCategorySelectionModal = useCallback(() => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'category-autocomplete',
+          options: {
+            title:
+              budgetType === 'envelope'
+                ? t('Cover overspending')
+                : t('Overspent categories'),
+            month,
+            categoryGroups: categoryGroupsToShow,
+            showHiddenCategories: true,
+            onSelect:
+              budgetType === 'envelope' ? onOpenCoverCategoryModal : null,
+            clearOnSelect: true,
+            closeOnSelect: false,
+          },
+        },
+      }),
+    );
+  }, [
+    categoryGroupsToShow,
+    dispatch,
+    month,
+    onOpenCoverCategoryModal,
+    t,
+    budgetType,
+  ]);
+
+  const numberOfOverspentCategories = overspentCategories.length;
+  if (numberOfOverspentCategories === 0) {
+    return null;
+  }
+
+  return (
+    <GridListItem textValue="Overspent banner" {...props}>
+      <Banner type="critical">
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 10,
+            }}
+          >
+            <Text>
+              <Trans count={numberOfOverspentCategories}>
+                You have {{ count: numberOfOverspentCategories }} overspent
+                categories
+              </Trans>
+            </Text>
+          </View>
+          <Button onPress={onOpenCategorySelectionModal} style={PILL_STYLE}>
+            {budgetType === 'envelope' && <Trans>Cover</Trans>}
+            {budgetType === 'tracking' && <Trans>View</Trans>}
+          </Button>
+        </View>
+      </Banner>
+    </GridListItem>
+  );
+}
+
+function MonthSelector({
+  month,
+  monthBounds,
+  onOpenMonthMenu,
+  onPrevMonth,
+  onNextMonth,
+}) {
+  const locale = useLocale();
+  const { t } = useTranslation();
+  const prevEnabled = month > monthBounds.start;
+  const nextEnabled = month < monthUtils.subMonths(monthBounds.end, 1);
+
+  const arrowButtonStyle = {
+    padding: 10,
+    margin: 2,
+  };
+
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'row',
+      }}
+    >
+      <Button
+        aria-label={t('Previous month')}
+        variant="bare"
+        isDisabled={!prevEnabled}
+        onPress={onPrevMonth}
+        style={{ ...arrowButtonStyle, opacity: prevEnabled ? 1 : 0.6 }}
       >
-        {({ onRefresh }) => (
-          <BudgetTable
-            // This key forces the whole table rerender when the number
-            // format changes
-            key={`${numberFormat}${hideFraction}`}
-            categoryGroups={categoryGroups}
-            month={startMonth}
-            monthBounds={bounds}
-            onShowBudgetSummary={onShowBudgetSummary}
-            onPrevMonth={onPrevMonth}
-            onNextMonth={onNextMonth}
-            onCurrentMonth={onCurrentMonth}
-            onBudgetAction={onBudgetAction}
-            onRefresh={onRefresh}
-            onEditCategoryGroup={onOpenCategoryGroupMenuModal}
-            onEditCategory={onOpenCategoryMenuModal}
-            onOpenBudgetPageMenu={onOpenBudgetPageMenu}
-            onOpenBudgetMonthMenu={onOpenBudgetMonthMenu}
-          />
-        )}
-      </SyncRefresh>
-    </SheetNameProvider>
+        <SvgArrowThinLeft width="15" height="15" />
+      </Button>
+      <Button
+        variant="bare"
+        style={{
+          textAlign: 'center',
+          fontSize: 16,
+          fontWeight: 500,
+        }}
+        onPress={() => {
+          onOpenMonthMenu?.(month);
+        }}
+        data-month={month}
+      >
+        <Text style={styles.underlinedText}>
+          {monthUtils.format(month, 'MMMM ‘yy', locale)}
+        </Text>
+      </Button>
+      <Button
+        aria-label={t('Next month')}
+        variant="bare"
+        isDisabled={!nextEnabled}
+        onPress={onNextMonth}
+        style={{ ...arrowButtonStyle, opacity: nextEnabled ? 1 : 0.6 }}
+      >
+        <SvgArrowThinRight width="15" height="15" />
+      </Button>
+    </View>
   );
 }
