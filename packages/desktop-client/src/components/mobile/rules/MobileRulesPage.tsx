@@ -87,7 +87,7 @@ export function MobileRulesPage() {
 
   const handleRulePress = useCallback(
     (rule: RuleEntity) => {
-      navigate(`/rules/edit/${rule.id}`);
+      navigate(`/rules/${rule.id}`);
     },
     [navigate],
   );

@@ -11,7 +11,7 @@ export function AddRuleButton() {
   const navigate = useNavigate();
 
   const handleAddRule = useCallback(() => {
-    navigate('/rules/edit');
+    navigate('/rules');
   }, [navigate]);
 
   return (
