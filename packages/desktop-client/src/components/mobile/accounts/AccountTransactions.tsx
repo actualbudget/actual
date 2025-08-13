@@ -49,6 +49,9 @@ function TransactionListWithPreviews({
   readonly account: AccountEntity;
 }) {
   const { t } = useTranslation();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const baseTransactionsQuery = useCallback(
     () =>
@@ -92,21 +95,11 @@ function TransactionListWithPreviews({
     accountId: account?.id,
   });
 
-  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
   const onRefresh = useCallback(() => {
     if (account.id) {
       dispatch(syncAndDownload({ accountId: account.id }));
     }
   }, [account.id, dispatch]);
-
-  const { isSearching, search: onSearch } = useTransactionsSearch({
-    updateQuery: setTransactionsQuery,
-    resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
-    dateFormat,
-  });
 
   const allBalances = useMemo(
     () =>
