@@ -67,7 +67,7 @@ export function MobileRuleEditPage() {
     ],
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     // Navigate back to rules list
     navigate('/rules');
   };
