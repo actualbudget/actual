@@ -462,7 +462,7 @@ async function closeAccount({
           amount: -balance,
           account: id,
           date: monthUtils.currentDay(),
-          notes: t('Closing account'),
+          notes: 'Closing account',
           category: categoryId,
         });
       }
