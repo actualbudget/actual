@@ -303,15 +303,15 @@ export function TransactionListItem({
                 >
                   {integerToCurrency(amount)}
                 </Text>
-                {showRunningBalance && (
+                {showRunningBalance && runningBalance !== undefined && (
                   <Text
                     style={{
                       fontSize: 11,
                       fontWeight: '400',
-                      ...makeBalanceAmountStyle(runningBalance || 0),
+                      ...makeBalanceAmountStyle(runningBalance),
                     }}
                   >
-                    {integerToCurrency(runningBalance || 0)}
+                    {integerToCurrency(runningBalance)}
                   </Text>
                 )}
               </View>
