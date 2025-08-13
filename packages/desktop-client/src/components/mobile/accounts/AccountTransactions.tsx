@@ -60,6 +60,16 @@ function TransactionListWithPreviews({
   const [transactionsQuery, setTransactionsQuery] = useState<Query>(
     baseTransactionsQuery(),
   );
+
+  const { isSearching, search: onSearch } = useTransactionsSearch({
+    updateQuery: setTransactionsQuery,
+    resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
+    dateFormat,
+  });
+
+  const shouldCalculateRunningBalances =
+    showRunningBalances === 'true' && !!account?.id && !isSearching;
+
   const {
     transactions,
     runningBalances,
@@ -70,7 +80,7 @@ function TransactionListWithPreviews({
   } = useTransactions({
     query: transactionsQuery,
     options: {
-      calculateRunningBalances: true,
+      calculateRunningBalances: shouldCalculateRunningBalances,
     },
   });
 
