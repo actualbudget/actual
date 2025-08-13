@@ -62,8 +62,8 @@ export const HistoricalAutomation = ({
             dispatch(
               updateTemplate(
                 template.type === 'average'
-                  ? { numMonths: value }
-                  : { lookBack: value },
+                  ? { type: 'average', numMonths: value }
+                  : { type: 'copy', lookBack: value },
               ),
             )
           }

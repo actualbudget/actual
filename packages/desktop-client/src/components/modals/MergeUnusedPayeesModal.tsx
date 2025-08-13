@@ -156,10 +156,13 @@ export function MergeUnusedPayeesModal({
                 the new payee.
               </Trans>
               {!isEditingRule && (
-                <Trans>
-                  If checked below, a rule will be created to do this rename
-                  while importing transactions.
-                </Trans>
+                <>
+                  {' '}
+                  <Trans>
+                    If checked below, a rule will be created to do this rename
+                    while importing transactions.
+                  </Trans>
+                </>
               )}
             </Information>
 

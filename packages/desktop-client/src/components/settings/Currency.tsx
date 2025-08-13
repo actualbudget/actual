@@ -31,6 +31,7 @@ export function CurrencySettings() {
         ['INR', t('Indian Rupee')],
         // ['JPY', t('Yen')],
         ['PHP', t('Philippine Peso')],
+        ['PLN', t('Polish Złoty')],
         ['SEK', t('Swedish Krona')],
         ['SGD', t('Singapore Dollar')],
         ['TRY', t('Turkish Lira')],
