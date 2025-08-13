@@ -28,6 +28,18 @@ export default defineConfig(({ mode }) => {
           isDev ? 'kcab.worker.dev.js' : `kcab.worker.[hash].js`,
       },
       rollupOptions: {
+        onwarn(warning, warn) {
+          // Suppress sourcemap warnings from peggy-loader
+          if (
+            warning.plugin === 'peggy-loader' &&
+            warning.message?.includes('Sourcemap')
+          ) {
+            return;
+          }
+
+          // Use default warning handler for other warnings
+          warn(warning);
+        },
         output: {
           chunkFileNames: isDev
             ? '[name].kcab.worker.dev.js'
@@ -77,6 +89,15 @@ export default defineConfig(({ mode }) => {
     plugins: [
       peggyLoader(),
       nodePolyfills({
+        include: [
+          'process',
+          'stream',
+          'path',
+          'zlib',
+          'fs',
+          'assert',
+          'buffer',
+        ],
         globals: {
           process: true,
           global: true,
