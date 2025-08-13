@@ -170,7 +170,7 @@ export function GenericInput({
               openOnFocus={!isNarrowWidth}
               updateOnValueChange={isNarrowWidth}
               onSelect={onChange}
-              showHiddenCategories={false}
+              showHiddenCategories={true}
               inputProps={{
                 ref,
                 ...(showPlaceholder ? { placeholder: t('nothing') } : null),

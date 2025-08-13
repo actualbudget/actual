@@ -898,7 +898,7 @@ const conditionFields = [
 
 type RuleEditorProps = {
   rule: RuleEntity | NewRuleEntity;
-  onSave: (rule: RuleEntity | NewRuleEntity) => Promise<void>;
+  onSave?: (rule: RuleEntity) => void;
   onCancel?: () => void;
   style?: CSSProperties;
 };

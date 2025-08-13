@@ -494,7 +494,7 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
 
 AccountList.displayName = 'AccountList';
 
-export function Accounts() {
+export function AccountsPage() {
   const dispatch = useDispatch();
   const accounts = useAccounts();
   const [_numberFormat] = useSyncedPref('numberFormat');
