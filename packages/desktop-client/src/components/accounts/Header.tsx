@@ -30,7 +30,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { formatDate } from 'date-fns';
+import { format as formatDate } from 'date-fns';
 
 import { tsToRelativeTime } from 'loot-core/shared/util';
 import {
