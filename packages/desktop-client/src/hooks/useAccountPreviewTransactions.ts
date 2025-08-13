@@ -15,7 +15,7 @@ import { useSheetValue } from './useSheetValue';
 import { useSyncedPref } from './useSyncedPref';
 import { calculateRunningBalancesBottomUp } from './useTransactions';
 
-import { accountBalance } from '@desktop-client/spreadsheet/bindings';
+import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 type UseAccountPreviewTransactionsProps = {
   accountId?: AccountEntity['id'] | undefined;
@@ -26,8 +26,9 @@ type UseAccountPreviewTransactionsResult = ReturnType<
 >;
 
 /**
- * Preview transactions for a given account. This will invert the payees, accounts,
- * and amounts depending on which account the preview transactions are being viewed from.
+ * Preview transactions for a given account or all accounts if no `accountId` is provided.
+ * This will invert the payees, accounts, and amounts accordingly depending on which account
+ * the preview transactions are being viewed from.
  */
 export function useAccountPreviewTransactions({
   accountId,
@@ -66,8 +67,13 @@ export function useAccountPreviewTransactions({
     [accountId, getTransferAccountByPayee],
   );
 
-  const accountBalanceValue = useSheetValue<'account', 'balance'>(
-    accountBalance(accountId || ''),
+  const accountBalanceValue = useSheetValue<
+    'account',
+    'balance' | 'accounts-balance'
+  >(
+    accountId
+      ? bindings.accountBalance(accountId)
+      : bindings.allAccountBalance(),
   );
 
   const [showBalances] = useSyncedPref(`show-balances-${accountId}`);
