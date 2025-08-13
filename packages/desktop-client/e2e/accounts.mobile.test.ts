@@ -38,8 +38,6 @@ test.describe('Mobile Accounts', () => {
   });
 
   test('opens individual account page and checks that filtering is working', async () => {
-    test.slow();
-
     const accountsPage = await navigation.goToAccountsPage();
     await accountsPage.waitFor();
 
