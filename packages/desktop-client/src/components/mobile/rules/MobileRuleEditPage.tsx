@@ -82,6 +82,11 @@ export function MobileRuleEditPage() {
   };
 
   const handleDelete = () => {
+    // Runtime guard to ensure id exists
+    if (!id || id === 'new') {
+      throw new Error('Cannot delete rule: invalid id');
+    }
+
     dispatch(
       pushModal({
         modal: {
@@ -89,16 +94,28 @@ export function MobileRuleEditPage() {
           options: {
             message: t('Are you sure you want to delete this rule?'),
             onConfirm: async () => {
-              await send('rule-delete', id);
-              dispatch(
-                addNotification({
-                  notification: {
-                    type: 'message',
-                    message: t('Rule deleted successfully'),
-                  },
-                }),
-              );
-              navigate('/rules');
+              try {
+                await send('rule-delete', id);
+                dispatch(
+                  addNotification({
+                    notification: {
+                      type: 'message',
+                      message: t('Rule deleted successfully'),
+                    },
+                  }),
+                );
+                navigate('/rules');
+              } catch (error) {
+                console.error('Failed to delete rule:', error);
+                dispatch(
+                  addNotification({
+                    notification: {
+                      type: 'error',
+                      message: t('Failed to delete rule. Please try again.'),
+                    },
+                  }),
+                );
+              }
             },
           },
         },

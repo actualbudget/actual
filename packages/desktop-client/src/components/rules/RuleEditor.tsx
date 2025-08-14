@@ -1394,13 +1394,13 @@ export function RuleEditor({
             }}
           >
             {onDelete && (
-              <Button onClick={onDelete}>
+              <Button onPress={onDelete}>
                 <Trans>Delete</Trans>
               </Button>
             )}
 
             <SpaceBetween>
-              <Button onClick={onCancel}>
+              <Button onPress={onCancel}>
                 <Trans>Cancel</Trans>
               </Button>
               <Button variant="primary" onPress={() => onSave(onCancel)}>
