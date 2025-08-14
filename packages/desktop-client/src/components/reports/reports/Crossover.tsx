@@ -195,10 +195,10 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   }, [widget?.meta?.timeFrame]);
 
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
-    if(mode === "sliding-window") {
+    if (mode === 'sliding-window') {
       // This is because we don't include the current month in the sliding window
-      start = monthUtils.subMonths(start, 1)
-      end = monthUtils.subMonths(end, 1)
+      start = monthUtils.subMonths(start, 1);
+      end = monthUtils.subMonths(end, 1);
     }
     setStart(start);
     setEnd(end);
@@ -345,7 +345,6 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         allMonths={allMonths || []}
         earliestTransaction={earliestTransactionDate}
         onChangeDates={onChangeDates}
-        filters={null}
         conditionsOp="and"
         onUpdateFilter={() => {}}
         onDeleteFilter={() => {}}
