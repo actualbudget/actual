@@ -262,9 +262,8 @@ function recalculate(
   if (historicalBalances.length >= 2) {
     // Use the starting balance (end of first month) and final balance (end of last month) for CAGR calculation
     // The starting balance represents the account balance at the end of the first month
-    const startingBalance = historicalBalances[0]
-    const finalBalance =
-      historicalBalances[historicalBalances.length - 1]
+    const startingBalance = historicalBalances[0];
+    const finalBalance = historicalBalances[historicalBalances.length - 1];
     const n = historicalBalances.length - 1; // Number of months between start and end
 
     if (startingBalance > 0 && finalBalance > 0 && n > 0) {
