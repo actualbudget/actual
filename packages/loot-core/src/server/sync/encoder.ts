@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import {
   Timestamp,
   createMessage,
@@ -92,7 +93,7 @@ export async function decode(
   const responsePb = fromBinary(SyncResponseSchema, data);
   const merkle = JSON.parse(responsePb.merkle);
   const list = responsePb.messages;
-  const messages = [];
+  const messages: Message[] = [];
 
   for (let i = 0; i < list.length; i++) {
     const envelopePb = list[i];
@@ -125,10 +126,10 @@ export async function decode(
 
     messages.push({
       timestamp,
-      dataset: msg.getDataset(),
-      row: msg.getRow(),
-      column: msg.getColumn(),
-      value: msg.getValue(),
+      dataset: msg.dataset,
+      row: msg.row,
+      column: msg.column,
+      value: msg.value,
     });
   }
 
