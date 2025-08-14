@@ -8,6 +8,7 @@ export { Account as Accounts } from '../accounts/Account';
 export { Account } from '../accounts/Account';
 
 export { ManageRulesPage as Rules } from '../ManageRulesPage';
+export { ManageRulesPage as RuleEdit } from '../ManageRulesPage';
 
 export { UserDirectoryPage } from '../admin/UserDirectory/UserDirectoryPage';
 
