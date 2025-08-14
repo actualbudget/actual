@@ -82,7 +82,7 @@ This is useful for transactions that occur on multiple days of the month, such a
 ![Example of changing the frequencey of a schedule](/img/schedules/schedules-add-repeat.png)
 
 
-The **Move schedule** checkbox allows you to move the schedule either to before of after a weekend, if the selected date falls on a weekend.
+The **Move schedule** checkbox allows you to move the schedule either before or after a weekend, if the selected date falls on a weekend.
 
 
 :::note
