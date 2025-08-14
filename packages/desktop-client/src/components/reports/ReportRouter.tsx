@@ -4,6 +4,7 @@ import { Route, Routes } from 'react-router';
 import { Overview } from './Overview';
 import { Calendar } from './reports/Calendar';
 import { CashFlow } from './reports/CashFlow';
+import { Crossover } from './reports/Crossover';
 import { CustomReport } from './reports/CustomReport';
 import { NetWorth } from './reports/NetWorth';
 import { Spending } from './reports/Spending';
@@ -15,6 +16,8 @@ export function ReportRouter() {
       <Route path="/" element={<Overview />} />
       <Route path="/net-worth" element={<NetWorth />} />
       <Route path="/net-worth/:id" element={<NetWorth />} />
+      <Route path="/crossover" element={<Crossover />} />
+      <Route path="/crossover/:id" element={<Crossover />} />
       <Route path="/cash-flow" element={<CashFlow />} />
       <Route path="/cash-flow/:id" element={<CashFlow />} />
       <Route path="/custom" element={<CustomReport />} />
