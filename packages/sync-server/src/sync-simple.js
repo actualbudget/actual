@@ -1,7 +1,12 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { merkle, SyncProtoBuf, Timestamp } from '@actual-app/crdt';
+import {
+  createMessage,
+  merkle,
+  MessageEnvelopeSchema,
+  Timestamp,
+} from '@actual-app/crdt';
 
 import { openDatabase } from './db.js';
 import { sqlDir } from './load-config.js';
@@ -31,15 +36,11 @@ function addMessages(db, messages) {
         const info = db.mutate(
           `INSERT OR IGNORE INTO messages_binary (timestamp, is_encrypted, content)
              VALUES (?, ?, ?)`,
-          [
-            msg.getTimestamp(),
-            msg.getIsencrypted() ? 1 : 0,
-            Buffer.from(msg.getContent()),
-          ],
+          [msg.timestamp, msg.isEncrypted ? 1 : 0, Buffer.from(msg.content)],
         );
 
         if (info.changes > 0) {
-          trie = merkle.insert(trie, Timestamp.parse(msg.getTimestamp()));
+          trie = merkle.insert(trie, Timestamp.parse(msg.timestamp));
         }
       }
     }
@@ -85,10 +86,10 @@ export function sync(messages, since, groupId) {
   return {
     trie,
     newMessages: newMessages.map(msg => {
-      const envelopePb = new SyncProtoBuf.MessageEnvelope();
-      envelopePb.setTimestamp(msg.timestamp);
-      envelopePb.setIsencrypted(msg.is_encrypted);
-      envelopePb.setContent(msg.content);
+      const envelopePb = createMessage(MessageEnvelopeSchema);
+      envelopePb.timestamp = msg.timestamp;
+      envelopePb.isEncrypted = msg.is_encrypted;
+      envelopePb.content = msg.content;
       return envelopePb;
     }),
   };

@@ -27,7 +27,7 @@
     "health-check": "yarn build && node build/src/scripts/health-check.js"
   },
   "dependencies": {
-    "@actual-app/crdt": "2.1.0",
+    "@actual-app/crdt": "workspace:*",
     "@actual-app/web": "workspace:*",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.2.0",
