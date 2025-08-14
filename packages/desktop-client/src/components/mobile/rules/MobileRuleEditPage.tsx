@@ -13,11 +13,15 @@ import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackBu
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { RuleEditor } from '@desktop-client/components/rules/RuleEditor';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 export function MobileRuleEditPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id?: string }>();
+  const dispatch = useDispatch();
 
   const [rule, setRule] = useState<RuleEntity | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -77,6 +81,31 @@ export function MobileRuleEditPage() {
     navigate('/rules');
   };
 
+  const handleDelete = () => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'confirm-delete',
+          options: {
+            message: t('Are you sure you want to delete this rule?'),
+            onConfirm: async () => {
+              await send('rule-delete', id);
+              dispatch(
+                addNotification({
+                  notification: {
+                    type: 'message',
+                    message: t('Rule deleted successfully'),
+                  },
+                }),
+              );
+              navigate('/rules');
+            },
+          },
+        },
+      }),
+    );
+  };
+
   const isEditing = Boolean(id && id !== 'new' && rule);
   const pageTitle = isEditing ? t('Edit Rule') : t('Create Rule');
 
@@ -122,6 +151,7 @@ export function MobileRuleEditPage() {
         rule={defaultRule}
         onSave={handleSave}
         onCancel={handleCancel}
+        onDelete={isEditing ? handleDelete : undefined}
         style={{
           paddingTop: 10,
           flex: 1,

@@ -309,12 +309,12 @@ export function useTransactionBatchActions() {
       dispatch(
         pushModal({
           modal: {
-            name: 'confirm-transaction-delete',
+            name: 'confirm-delete',
             options: {
               message:
                 ids.length > 1
                   ? `Are you sure you want to delete these ${ids.length} transaction${ids.length > 1 ? 's' : ''}?`
-                  : undefined,
+                  : 'Are you sure you want to delete the transaction?',
               onConfirm: async () => {
                 const { data } = await aqlQuery(
                   q('transactions')

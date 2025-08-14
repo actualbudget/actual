@@ -900,12 +900,14 @@ type RuleEditorProps = {
   rule: RuleEntity | NewRuleEntity;
   onSave?: (rule: RuleEntity) => void;
   onCancel?: () => void;
+  onDelete?: () => void;
   style?: CSSProperties;
 };
 
 export function RuleEditor({
   rule: defaultRule,
   onSave: originalOnSave = undefined,
+  onDelete,
   onCancel,
   style,
 }: RuleEditorProps) {
@@ -1385,14 +1387,27 @@ export function RuleEditor({
             }}
           />
 
-          <Stack direction="row" justify="flex-end" style={{ marginTop: 20 }}>
-            <Button onClick={onCancel}>
-              <Trans>Cancel</Trans>
-            </Button>
-            <Button variant="primary" onPress={() => onSave(onCancel)}>
-              <Trans>Save</Trans>
-            </Button>
-          </Stack>
+          <SpaceBetween
+            style={{
+              marginTop: 20,
+              justifyContent: onDelete ? 'space-between' : 'flex-end',
+            }}
+          >
+            {onDelete && (
+              <Button onClick={onDelete}>
+                <Trans>Delete</Trans>
+              </Button>
+            )}
+
+            <SpaceBetween>
+              <Button onClick={onCancel}>
+                <Trans>Cancel</Trans>
+              </Button>
+              <Button variant="primary" onPress={() => onSave(onCancel)}>
+                <Trans>Save</Trans>
+              </Button>
+            </SpaceBetween>
+          </SpaceBetween>
         </View>
       </SelectedProvider>
     </View>
