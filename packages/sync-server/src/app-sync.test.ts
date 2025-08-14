@@ -2,7 +2,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 
-import { SyncRequestSchema, createMessage } from '@actual-app/crdt';
+import { SyncRequestSchema, createMessage, toBinary } from '@actual-app/crdt';
 import request from 'supertest';
 
 import { getAccountDb } from './account-db.js';
@@ -865,7 +865,7 @@ function createMinimalSyncRequest(fileId, groupId, keyId) {
 }
 
 async function sendSyncRequest(syncRequest) {
-  const serializedRequest = syncRequest.serializeBinary();
+  const serializedRequest = toBinary(SyncRequestSchema, syncRequest);
   // Convert Uint8Array to Buffer
   const bufferRequest = Buffer.from(serializedRequest);
 

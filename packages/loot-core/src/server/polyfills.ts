@@ -1,1 +1,1 @@
-// // Polyfills for browser/web worker environment
+// Polyfills for browser/web worker environment
