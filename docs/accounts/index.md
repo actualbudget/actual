@@ -37,7 +37,7 @@ Off budget means that the balance is not reflected when you assign money to cate
 Here you can see how that looks when the options are completed.
 
 :::note
-If you select the Off budget checkbox then change the account type the Off budget checkbox will reset and will need to be re-selected each time the account type is changed
+If you select the Off budget checkbox then change the account type, the Off budget checkbox will reset and will need to be re-selected each time the account type is changed.
 :::
 
 ![](/img/add-account/NewBudget.png)
