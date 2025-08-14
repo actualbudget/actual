@@ -39,7 +39,7 @@ In this example we are finding out how much the Mercedes car cost to run during 
 
 ![](/img/filtering/multiple-filters.png)
 
-Now we want to see the total spent on the Mercedes car in 2021. This is shown at the top center of the page.
+Now we want to see the total spent on the Mercedes car in 2024. This is shown at the top center of the page.
 
 ![](/img/filtering/filtered-total.png)
 
