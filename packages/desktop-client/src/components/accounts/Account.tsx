@@ -5,6 +5,7 @@ import React, {
   useMemo,
   type ReactElement,
   useEffect,
+  useRef,
 } from 'react';
 import { Trans } from 'react-i18next';
 import { Navigate, useParams, useLocation } from 'react-router';
@@ -147,6 +148,9 @@ function AllTransactions({
       ? (balances[transactions[0].id] ?? 0)
       : 0;
   }, [showBalances, balances, transactions]);
+
+  const runningBalanceRef = useRef(runningBalance);
+  runningBalanceRef.current = runningBalance;
 
   const prependBalances = useMemo(() => {
     if (!showBalances) {
