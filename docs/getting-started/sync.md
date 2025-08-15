@@ -43,7 +43,7 @@ When downloading data on other devices, you will need to enter the same password
 
 **Do not lose this password**. You will not be able to recover your data if you forget it. If you forget it and you still have a copy of your data locally, you can reset your key which will do a [sync reset](#what-does-resetting-sync-mean) and generate a new key.
 
-## What Does Resetting Sync" Mean?
+## What Does "Resetting Sync" Mean?
 
 There are many reasons why you might want to "start fresh" with syncing. This doesn't mean you lose any of your local data, but it means for one reason or another you want to forget about all synced data and start as if the current version of your file is the "true" version of it.
 
