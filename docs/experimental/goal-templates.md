@@ -169,6 +169,7 @@ Here are some examples of how this is used
 |---|:---:| :---: |:---:|
 |`#template 50 up to 100`| $ 80 | $ 20 | $ 100 |
 |`#template 50 up to 100`| $ 20 | $ 50 | $ 70 |
+
 Isn't that neat!
 This is especially useful for budget categories that have month to month variation in spending such as groceries.
 You can budget the same amount per month, but save up from one month to the next without having to worry about building up more funds than you need.
@@ -182,6 +183,7 @@ Here is how it works:
 |---|:---:| :---: |:---:|
 |`#template up to 150`| $ 10 | $ 140  | $ 150 |
 |`#template up to 150`| $ -20 | $ 170  | $ 150 |
+
 Cool, right! This is another way to gracefully handle categories that have month to month variation.
 This will always give you the same amount available each month no matter what you spend the previous month and not ever build up more funds than you need.
 This variation along with the previous variation, are probably the most used templates.
@@ -220,6 +222,7 @@ If the new car will cost $ 10,000 and you plan to buy it in December, you will u
 |Syntax| Budgeted Amount |
 |---|:---:|
 |`#template 10000 by 2025-12` | $ 833.33 |
+
 That example is pretty basic.
 The by template is smarter than just 10000/12.
 Lets say the example is the same, but you already have $ 1,500 saved.
@@ -233,7 +236,7 @@ In that case you get this.
 Nice!
 This even works if you add more funds later.
 The template will always divide up the remaining amount you need by the remaining number of months.
-If you need to pull funds away from your car savings to cover an emergency house repair, the template will budget more in the coming months to say on track.
+If you need to pull funds away from your car savings to cover an emergency house repair, the template will budget more in the coming months to stay on track.
 If you have extra funds one month and add that to your car savings, the template will budget less in the coming months since you need less.
 
 **Note**: The date must be in YYYY-MM format.
