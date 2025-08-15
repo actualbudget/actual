@@ -295,6 +295,40 @@ async function downloadPluggyAiTransactions(
   return retVal;
 }
 
+async function downloadEnableBankingTransactions(
+  acctId: AccountEntity['id'],
+  since: string,
+) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return;
+
+  console.log(`Pulling transactions from enablebanking since ${since}`);
+
+  const res = await post(
+    getServer().ENABLEBANKING_SERVER + '/transactions',
+    {
+      accountId: acctId,
+      startDate: since,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+    60000,
+  );
+
+  console.log(res)
+
+  let retVal = {};
+  const singleRes = res as BankSyncResponse;
+  retVal = {
+    transactions: singleRes.transactions.all,
+  };
+
+  console.log('Response:', retVal);
+  return retVal;
+}
+
+
 async function resolvePayee(trans, payeeName, payeesToCreate) {
   if (trans.payee == null && payeeName) {
     // First check our registry of new payees (to avoid a db access)
@@ -991,6 +1025,10 @@ export async function syncAccount(
       syncStartDate,
       newAccount,
     );
+  } else if (acctRow.account_sync_source === "enablebanking"){
+    download = await downloadEnableBankingTransactions(
+      acctId, syncStartDate
+    )
   } else {
     throw new Error(
       `Unrecognized bank-sync provider: ${acctRow.account_sync_source}`,

@@ -55,7 +55,9 @@ export async function post(
       },
     });
     clearTimeout(timeoutId);
+    console.log(res)
     text = await res.text();
+    console.log(text)
   } catch (err) {
     throw new PostError('network-failure');
   }
@@ -66,6 +68,7 @@ export async function post(
 
   try {
     responseData = JSON.parse(text);
+    console.log(responseData)
   } catch (err) {
     // Something seriously went wrong. TODO handle errors
     throw new PostError('parse-json', { meta: text });

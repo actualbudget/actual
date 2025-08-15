@@ -36,6 +36,9 @@ import { undoable, withUndo } from '../undo';
 import * as link from './link';
 import { getStartingBalancePayee } from './payees';
 import * as bankSync from './sync';
+import { array } from 'jsverify';
+import { send } from 'loot-core/platform/client/fetch';
+import {app as enableBankingApp, AccountHandlers as EnableBankingAccountHandlers} from './enablebanking';
 
 export type AccountHandlers = {
   'account-update': typeof updateAccount;
@@ -64,7 +67,8 @@ export type AccountHandlers = {
   'simplefin-batch-sync': typeof simpleFinBatchSync;
   'transactions-import': typeof importTransactions;
   'account-unlink': typeof unlinkAccount;
-};
+  'debug-set-bank-sync': typeof debugSetBankSync;
+} & EnableBankingAccountHandlers;
 
 async function updateAccount({
   id,
@@ -492,7 +496,7 @@ async function setSecret({
   value: string | null;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
-
+  console.log(userToken)
   if (!userToken) {
     return { error: 'unauthorized' };
   }
@@ -514,6 +518,7 @@ async function setSecret({
       },
     );
   } catch (error) {
+    console.log("this errored somehow")
     return {
       error: 'failed',
       reason: error instanceof PostError ? error.reason : undefined,
@@ -531,11 +536,12 @@ async function checkSecret(name: string) {
   if (!serverConfig) {
     throw new Error('Failed to get server config.');
   }
+  console.log("ready to retrieve data")
 
   try {
-    return await get(serverConfig.BASE_SERVER + '/secret/' + name, {
+    return await get(serverConfig.BASE_SERVER + '/secret/' + name, {headers:{
       'X-ACTUAL-TOKEN': userToken,
-    });
+    }});
   } catch (error) {
     console.error(error);
     return { error: 'failed' };
@@ -899,6 +905,7 @@ async function accountsBankSync({
 }): Promise<SyncResponseWithErrors> {
   const { 'user-id': userId, 'user-key': userKey } =
     await asyncStorage.multiGet(['user-id', 'user-key']);
+    console.log(ids)
 
   const accounts = await db.runQuery<
     db.DbAccount & { bankId: db.DbBank['bank_id'] }
@@ -914,6 +921,7 @@ async function accountsBankSync({
     ids,
     true,
   );
+  console.log(accounts)
 
   const errors: ReturnType<typeof handleSyncError>[] = [];
   const newTransactions: Array<TransactionEntity['id']> = [];
@@ -1210,6 +1218,24 @@ async function unlinkAccount({ id }: { id: AccountEntity['id'] }) {
   return 'ok';
 }
 
+async function debugSetBankSync({ id }: { id: AccountEntity['id'] }){
+  const res = await link.findOrCreateBank({name:'abn'},'yanky')
+
+  await db.updateAccount({
+    id,
+    account_id: "4e17ae78-83b4-47e6-ac94-9d5d0dffca16",
+    bank: res.id,
+    balance_current: null,
+    balance_available: null,
+    balance_limit: null,
+    account_sync_source: "enablebanking",
+  });
+}
+
+async function enableBankingStatus(){
+  
+}
+
 export const app = createApp<AccountHandlers>();
 
 app.method('account-update', mutator(undoable(updateAccount)));
@@ -1238,3 +1264,5 @@ app.method('accounts-bank-sync', accountsBankSync);
 app.method('simplefin-batch-sync', simpleFinBatchSync);
 app.method('transactions-import', mutator(undoable(importTransactions)));
 app.method('account-unlink', mutator(unlinkAccount));
+app.method('debug-set-bank-sync',debugSetBankSync);
+app.combine(enableBankingApp);

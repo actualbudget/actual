@@ -44,6 +44,8 @@ import { type TableRef } from './Account';
 import { Balances } from './Balance';
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
 
+import { send } from 'loot-core/platform/client/fetch';
+
 import { AnimatedRefresh } from '@desktop-client/components/AnimatedRefresh';
 import { Search } from '@desktop-client/components/common/Search';
 import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
@@ -328,6 +330,9 @@ export function AccountHeader({
               {isServerOffline ? t('Bank Sync Offline') : t('Bank Sync')}
             </Button>
           )}
+          <DebugCreateSync 
+              account={account}
+            />
 
           {account && !account.closed && (
             <Button variant="bare" onPress={onImport}>
@@ -591,6 +596,34 @@ function AccountSyncSidebar({
     />
   );
 }
+
+//DEBUG
+function onDebugCreateSync(account){
+  console.log("trying to send")
+  console.log(account)
+  const test = send("debug-set-bank-sync", {id: account.id})
+
+}
+
+function DebugCreateSync({
+  account
+}: {account: AccountEntity}) {
+  return (
+    <Button
+              variant="bare"
+              onPress={() => onDebugCreateSync(account)}
+            >
+              <AnimatedRefresh
+                width={13}
+                height={13}
+                animating={false}
+              />
+              Debug account sync
+            </Button>
+  );
+}
+
+//DEBUG
 
 type AccountNameFieldProps = {
   account?: AccountEntity;

@@ -80,6 +80,8 @@ import { useModalState } from '@desktop-client/hooks/useModalState';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { closeModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { EnableBankingInitialiseModal } from './modals/EnableBankingInitialiseModal';
+import { EnableBankingSetupAccountModal } from './modals/EnableBankingSetupAccountModal';
 
 export function Modals() {
   const location = useLocation();
@@ -159,6 +161,12 @@ export function Modals() {
 
         case 'simplefin-init':
           return <SimpleFinInitialiseModal key={key} {...modal.options} />;
+        
+        case 'enablebanking-init':
+          return <EnableBankingInitialiseModal key={key} {...modal.options} />;
+
+        case 'enablebanking-setup-account':
+          return <EnableBankingSetupAccountModal key={key} {...modal.options} />;
 
         case 'pluggyai-init':
           return <PluggyAiInitialiseModal key={key} {...modal.options} />;

@@ -100,7 +100,27 @@ export type Modal =
       options: {
         onSuccess: () => void;
       };
+    } 
+  | {
+      name: "enablebanking-init",
+      options:{
+          onSuccess: () => void;
+      }
     }
+  | {
+      name: "enablebanking-setup-account",
+      options: {
+        onMoveExternal: (arg: {
+          institutionId: string;
+        }) => Promise<
+          | { error: 'timeout' }
+          | { error: 'unknown'; message?: string }
+          | { data: GoCardlessToken }
+        >;
+        onClose?: (() => void) | undefined;
+        onSuccess: (data: GoCardlessToken) => Promise<void>;
+      }
+  }
   | {
       name: 'pluggyai-init';
       options: {

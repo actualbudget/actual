@@ -12,6 +12,7 @@ export async function findOrCreateBank(institution, requisitionId) {
   if (bank) {
     return bank;
   }
+  console.log(institution)
 
   const bankData = {
     id: uuidv4(),

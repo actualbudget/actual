@@ -36,6 +36,7 @@ import {
 } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { useEnableBankingStatus } from '@desktop-client/hooks/useEnableBankingStatus';
 
 type CreateAccountModalProps = Extract<
   ModalType,
@@ -55,6 +56,9 @@ export function CreateAccountModal({
     boolean | null
   >(null);
   const [isSimpleFinSetupComplete, setIsSimpleFinSetupComplete] = useState<
+    boolean | null
+  >(null);
+  const [isEnableBankingSetupComplete, setIsEnableBankingSetupComplete] = useState<
     boolean | null
   >(null);
   const [isPluggyAiSetupComplete, setIsPluggyAiSetupComplete] = useState<
@@ -145,6 +149,31 @@ export function CreateAccountModal({
 
     setLoadingSimpleFinAccounts(false);
   };
+
+  const onConnectEnableBanking = async () =>{
+    if(!isEnableBankingSetupComplete){
+      onEnableBankingInit();
+      return;
+    }
+
+    dispatch(
+      pushModal({
+        modal:{
+          name: "enablebanking-setup-account",
+          options:{
+            onSuccess: async (data) =>{console.log("success")},
+            onMoveExternal: async ({institutionId})=> {
+              console.log(`moving ${institutionId}`);
+              return {data: {id:null, accounts:null}}
+            },
+            onClose: ()=>{console.log("closing")}
+
+          }
+        }
+      })
+    )
+
+  }
 
   const onConnectPluggyAi = async () => {
     if (!isPluggyAiSetupComplete) {
@@ -248,6 +277,19 @@ export function CreateAccountModal({
     );
   };
 
+  const onEnableBankingInit = () =>{
+    dispatch(
+      pushModal({
+        modal:{
+          name: 'enablebanking-init',
+          options: {
+            onSuccess: () => setIsEnableBankingSetupComplete(true),
+          },
+        },
+      }),
+    )
+  }
+
   const onPluggyAiInit = () => {
     dispatch(
       pushModal({
@@ -289,6 +331,20 @@ export function CreateAccountModal({
     });
   };
 
+  const onEnableBankingReset = () => {
+    send('secret-set', {
+      name: 'enablebanking_applicationId',
+      value: null,
+    }).then(() => {
+      send('secret-set', {
+        name: 'enablebanking_secret',
+        value: null,
+      }).then(() => {
+        setIsEnableBankingSetupComplete(false);
+      });
+    });
+  }
+
   const onPluggyAiReset = () => {
     send('secret-set', {
       name: 'pluggyai_clientId',
@@ -321,6 +377,11 @@ export function CreateAccountModal({
   useEffect(() => {
     setIsSimpleFinSetupComplete(configuredSimpleFin);
   }, [configuredSimpleFin]);
+
+  const {configuredEnableBanking, isLoading:configuredEnableBankingIsLoading} = useEnableBankingStatus();
+  useEffect(()=>{
+    setIsEnableBankingSetupComplete(configuredEnableBanking);
+  },[configuredEnableBanking]);
 
   const { configuredPluggyAi } = usePluggyAiStatus();
   useEffect(() => {
@@ -510,6 +571,71 @@ export function CreateAccountModal({
                             Link a <em>North American</em> bank account
                           </strong>{' '}
                           to automatically download transactions. SimpleFIN
+                          provides reliable, up-to-date information from
+                          hundreds of banks.
+                        </Trans>
+                      </Text>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          gap: 10,
+                          marginTop: '18px',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <ButtonWithLoading
+                          isDisabled={syncServerStatus !== 'online'}
+                          isLoading={configuredEnableBankingIsLoading}
+                          style={{
+                            padding: '10px 0',
+                            fontSize: 15,
+                            fontWeight: 600,
+                            flex: 1,
+                          }}
+                          onPress={onConnectEnableBanking}
+                        >
+                          {isEnableBankingSetupComplete
+                            ? t('Link bank account with Enable Banking')
+                            : t('Set up Enable Banking for bank sync')}
+                        </ButtonWithLoading>
+                        {isEnableBankingSetupComplete && (
+                          <DialogTrigger>
+                            <Button
+                              variant="bare"
+                              aria-label={t('EnableBanking menu')}
+                            >
+                              <SvgDotsHorizontalTriple
+                                width={15}
+                                height={15}
+                                style={{ transform: 'rotateZ(90deg)' }}
+                              />
+                            </Button>
+                            <Popover>
+                              <Dialog>
+                                <Menu
+                                  onMenuSelect={item => {
+                                    if (item === 'reconfigure') {
+                                      onEnableBankingReset();
+                                    }
+                                  }}
+                                  items={[
+                                    {
+                                      name: 'reconfigure',
+                                      text: t('Reset EnableBanking credentials'),
+                                    },
+                                  ]}
+                                />
+                              </Dialog>
+                            </Popover>
+                          </DialogTrigger>
+                        )}
+                      </View>
+                      <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                        <Trans>
+                          <strong>
+                            Link a <em>European</em> bank account
+                          </strong>{' '}
+                          to automatically download transactions. Enable Bankin
                           provides reliable, up-to-date information from
                           hundreds of banks.
                         </Trans>
