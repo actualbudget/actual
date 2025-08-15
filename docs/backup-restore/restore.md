@@ -3,7 +3,7 @@
 ## Restoring a Manual Backup
 
 If you previously followed the [steps](./backup.md) to back up your data and have an Actual
-zip export, you can restore this backup by importing it using the web version of
+zip export, you can restore this backup by importing it using the Import File button in the Switch File page.
 
 ### Steps to Restore a Backup:
 
