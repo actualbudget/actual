@@ -81,8 +81,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
     resetInputs();
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => tableNavigator.onEdit('new-tag', 'tag'), []);
+  useEffect(() => tableNavigator.onEdit('new-tag', 'tag'), [tableNavigator]);
 
   return (
     <View
