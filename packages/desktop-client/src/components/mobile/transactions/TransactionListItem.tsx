@@ -71,22 +71,23 @@ const getScheduleIconStyle = ({ isPreview }: { isPreview: boolean }) => ({
   color: isPreview ? theme.pageTextLight : theme.menuItemText,
 });
 
-type TransactionListItemProps = ComponentPropsWithoutRef<
-  typeof ListBoxItem<TransactionEntity>
+type TransactionListItemProps = Omit<
+  ComponentPropsWithoutRef<typeof ListBoxItem<TransactionEntity>>,
+  'onPress' | 'onLongPress'
 > & {
+  value: TransactionEntity;
   onPress: (transaction: TransactionEntity) => void;
   onLongPress: (transaction: TransactionEntity) => void;
 };
 
 export function TransactionListItem({
+  value: transaction,
   onPress,
   onLongPress,
   ...props
 }: TransactionListItemProps) {
   const { t } = useTranslation();
   const { list: categories } = useCategories();
-
-  const { value: transaction } = props;
 
   const payee = usePayee(transaction?.payee || '');
   const displayPayee = useDisplayPayee({ transaction });
