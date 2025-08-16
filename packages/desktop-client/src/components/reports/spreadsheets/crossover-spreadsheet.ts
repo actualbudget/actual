@@ -63,7 +63,6 @@ export function createCrossoverSpreadsheet({
     _spreadsheet: ReturnType<typeof useSpreadsheet>,
     setData: (data: ReturnType<typeof recalculate>) => void,
   ) => {
-    // Validate that start and end are valid month strings (should be in yyyy-MM format)
     if (!start || !end || incomeAccountIds.length === 0) {
       setData({
         graphData: {
@@ -84,16 +83,16 @@ export function createCrossoverSpreadsheet({
 
     // Aggregate monthly expenses for selected categories (expenses are negative amounts)
     const expensesPromise = (async () => {
-      let query = q('transactions');
-      // Constrain to selected categories if provided; otherwise include all expenses
-      if (expenseCategoryIds.length > 0) {
-        query = query.filter({
-          $or: expenseCategoryIds.map(id => ({ category: id })),
-        });
+      if (!expenseCategoryIds.length) {
+        return monthUtils
+          .rangeInclusive(start, end)
+          .map(date => ({ date, amount: 0 }));
       }
-      query = query
+
+      const query = q('transactions')
         .filter({
           $and: [
+            { $or: expenseCategoryIds.map(id => ({ category: id })) },
             { date: { $gte: monthUtils.firstDayOfMonth(start) } },
             { date: { $lte: monthUtils.lastDayOfMonth(end) } },
           ],
