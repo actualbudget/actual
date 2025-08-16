@@ -2,7 +2,6 @@ import * as d from 'date-fns';
 
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
-import { integerToAmount } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
@@ -244,8 +243,8 @@ function recalculate(
     const spend = expenseMap.get(month) || 0;
     data.push({
       x: d.format(d.parseISO(month + '-01'), 'MMM yyyy'),
-      investmentIncome: integerToAmount(Math.round(monthlyIncome)),
-      expenses: integerToAmount(spend),
+      investmentIncome: Math.round(monthlyIncome),
+      expenses: spend,
     });
     lastBalance = balance;
     lastExpense = spend;
@@ -339,8 +338,8 @@ function recalculate(
 
       data.push({
         x: d.format(monthCursor, 'MMM yyyy'),
-        investmentIncome: integerToAmount(Math.round(projectedIncome)),
-        expenses: integerToAmount(projectedExpenses),
+        investmentIncome: Math.round(projectedIncome),
+        expenses: projectedExpenses,
         isProjection: true,
       });
 

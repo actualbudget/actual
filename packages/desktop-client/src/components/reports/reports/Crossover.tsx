@@ -14,7 +14,6 @@ import * as d from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type CrossoverWidget,
   type TimeFrame,
@@ -39,6 +38,7 @@ import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { useWidget } from '@desktop-client/hooks/useWidget';
@@ -87,9 +87,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   const dispatch = useDispatch();
   const allAccounts = useAccounts();
   const categories = useCategories();
-
-  // Use all accounts (including closed) for selection
-  const accounts = allAccounts;
+  const format = useFormat();
 
   const [allMonths, setAllMonths] = useState<Array<{
     name: string;
@@ -528,7 +526,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                   <Trans>Target Monthly Income</Trans>:{' '}
                   <PrivacyFilter>
                     {targetMonthlyIncome != null && !isNaN(targetMonthlyIncome)
-                      ? integerToCurrency(Math.round(targetMonthlyIncome * 100))
+                      ? format(targetMonthlyIncome, 'financial')
                       : 'N/A'}
                   </PrivacyFilter>
                 </span>

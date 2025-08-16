@@ -15,12 +15,8 @@ import {
   ReferenceLine,
 } from 'recharts';
 
-import {
-  amountToCurrencyNoDecimal,
-  amountToCurrency,
-} from 'loot-core/shared/util';
-
 import { Container } from '@desktop-client/components/reports/Container';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type CrossoverGraphProps = {
@@ -48,12 +44,13 @@ export function CrossoverGraph({
 }: CrossoverGraphProps) {
   const { t } = useTranslation();
   const privacyMode = usePrivacyMode();
+  const format = useFormat();
 
   const tickFormatter = (tick: number) => {
     if (privacyMode) {
       return '...';
     }
-    return `${amountToCurrencyNoDecimal(Math.round(tick))}`;
+    return `${format(Math.round(tick), 'financial-no-decimals')}`;
   };
 
   type PayloadItem = {
@@ -105,9 +102,7 @@ export function CrossoverGraph({
                   <Trans>Monthly investment income:</Trans>
                 </div>
                 <div>
-                  {amountToCurrency(
-                    Number(payload[0].payload.investmentIncome),
-                  )}
+                  {format(payload[0].payload.investmentIncome, 'financial')}
                 </div>
               </View>
               <View
@@ -119,9 +114,7 @@ export function CrossoverGraph({
                 <div>
                   <Trans>Monthly expenses:</Trans>
                 </div>
-                <div>
-                  {amountToCurrency(Number(payload[0].payload.expenses))}
-                </div>
+                <div>{format(payload[0].payload.expenses, 'financial')}</div>
               </View>
             </div>
           </div>
