@@ -85,9 +85,14 @@ type CrossoverInnerProps = { widget?: CrossoverWidget };
 function CrossoverInner({ widget }: CrossoverInnerProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const allAccounts = useAccounts();
+  const accounts = useAccounts();
   const categories = useCategories();
   const format = useFormat();
+
+  const expenseCategoryGroups = categories.grouped.filter(
+    group => !group.is_income,
+  );
+  const expenseCategories = categories.list.filter(c => !c.is_income);
 
   const [allMonths, setAllMonths] = useState<Array<{
     name: string;
@@ -101,12 +106,11 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   const [earliestTransactionDate, setEarliestTransactionDate] =
     useState<string>('');
 
-  const [selectedExpenseCategories, setSelectedExpenseCategories] = useState<
-    Array<CategoryEntity>
-  >([]);
+  const [selectedExpenseCategories, setSelectedExpenseCategories] =
+    useState<Array<CategoryEntity>>(expenseCategories);
   const [selectedIncomeAccountIds, setSelectedIncomeAccountIds] = useState<
     string[]
-  >([]);
+  >(accounts.map(a => a.id));
 
   const [swr, setSwr] = useState(0.04);
   const [estimatedReturn, setEstimatedReturn] = useState<number | null>(null);
@@ -382,7 +386,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                 style={{ maxHeight: 220, overflowY: 'auto', marginBottom: 12 }}
               >
                 <CategorySelector
-                  categoryGroups={categories.grouped}
+                  categoryGroups={expenseCategoryGroups}
                   selectedCategories={selectedExpenseCategories}
                   setSelectedCategories={setSelectedExpenseCategories}
                   showHiddenCategories={false}
