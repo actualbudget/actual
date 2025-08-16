@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 
+import { logger } from 'loot-core/platform/server/log';
 import { q, type Query } from 'loot-core/shared/query';
 import {
   getStatus,
@@ -33,7 +34,10 @@ function loadStatuses(
 ) {
   return liveQuery<TransactionEntity>(getHasTransactionsQuery(schedules), {
     onData: data => {
-      const hasTrans = new Set(data.filter(Boolean).map(row => row.schedule));
+      const hasTrans = data.filter(Boolean).map(row => row.schedule);
+      logger.info('Schedules #:', schedules.length, schedules);
+
+      logger.info('trans #:', hasTrans);
 
       const scheduleStatuses = new Map(
         schedules.map(s => [
@@ -41,11 +45,13 @@ function loadStatuses(
           getStatus(
             s.next_date,
             s.completed,
-            hasTrans.has(s.id),
+            hasTrans.includes(s.id),
             upcomingLength,
           ),
         ]),
       ) as ScheduleStatuses;
+
+      logger.info('statuses:', scheduleStatuses);
 
       onData?.(scheduleStatuses);
     },
@@ -165,6 +171,8 @@ export function getSchedulesQuery(
       });
     }
   }
+
+  logger.info('query #:', query);
 
   return query.orderBy({ next_date: 'desc' });
 }

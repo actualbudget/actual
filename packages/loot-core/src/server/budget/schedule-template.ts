@@ -5,7 +5,7 @@ import {
   getDateWithSkippedWeekend,
   extractScheduleConds,
 } from '../../shared/schedules';
-import { CategoryEntity } from '../../types/models';
+import { CategoryEntity, RecurConfig } from '../../types/models';
 import { ScheduleTemplate, Template } from '../../types/models/templates';
 import * as db from '../db';
 import { getRuleForSchedule } from '../schedules/app';
@@ -29,7 +29,7 @@ async function createScheduleList(
   current_month: string,
   category: CategoryEntity,
 ) {
-  const t: Array<ScheduleTemplateTarget> = [];
+  const ScheduleTemplateTargetArray: Array<ScheduleTemplateTarget> = [];
   const errors: string[] = [];
 
   for (const template of templates) {
@@ -43,11 +43,13 @@ async function createScheduleList(
     const conditions = rule.serialize().conditions;
     const { date: dateConditions, amount: amountCondition } =
       extractScheduleConds(conditions);
-    let scheduleAmount =
+    let scheduleAmount: number =
       amountCondition.op === 'isbetween'
-        ? Math.round(amountCondition.value.num1 + amountCondition.value.num2) /
-          2
-        : amountCondition.value;
+        ? Math.round(
+            (amountCondition.value as { num1: number }).num1 +
+              (amountCondition.value as { num2: number }).num2,
+          ) / 2
+        : (amountCondition.value as number);
     // Apply adjustment percentage if specified
     if (template.adjustment) {
       const adjustmentFactor = 1 + template.adjustment / 100;
@@ -74,13 +76,13 @@ async function createScheduleList(
       dateConditions,
       monthUtils._parse(current_month),
     );
-    const target_interval = dateConditions.value.interval
-      ? dateConditions.value.interval
+    const target_interval = (dateConditions.value as RecurConfig).interval
+      ? (dateConditions.value as RecurConfig).interval
       : 1;
-    const target_frequency = dateConditions.value.frequency;
+    const target_frequency = (dateConditions.value as RecurConfig).frequency;
     const isRepeating =
       Object(dateConditions.value) === dateConditions.value &&
-      'frequency' in dateConditions.value;
+      'frequency' in (dateConditions.value as RecurConfig);
     const num_months = monthUtils.differenceInCalendarMonths(
       next_date_string,
       current_month,
@@ -89,7 +91,7 @@ async function createScheduleList(
       //non-repeating schedules could be negative
       errors.push(`Schedule ${template.name} is in the Past.`);
     } else {
-      t.push({
+      ScheduleTemplateTargetArray.push({
         target,
         next_date_string,
         target_interval,
@@ -106,18 +108,19 @@ async function createScheduleList(
           let monthlyTarget = 0;
           const nextMonth = monthUtils.addMonths(
             current_month,
-            t[t.length - 1].num_months + 1,
+            ScheduleTemplateTargetArray[ScheduleTemplateTargetArray.length - 1]
+              .num_months + 1,
           );
           let nextBaseDate = getNextDate(
             dateConditions,
             monthUtils._parse(current_month),
             true,
           );
-          let nextDate = dateConditions.value.skipWeekend
+          let nextDate = (dateConditions.value as RecurConfig).skipWeekend
             ? monthUtils.dayFromDate(
                 getDateWithSkippedWeekend(
                   monthUtils._parse(nextBaseDate),
-                  dateConditions.value.weekendSolveMode,
+                  (dateConditions.value as RecurConfig).weekendSolveMode,
                 ),
               )
             : nextBaseDate;
@@ -130,11 +133,11 @@ async function createScheduleList(
               monthUtils._parse(oneDayLater),
               true,
             );
-            nextDate = dateConditions.value.skipWeekend
+            nextDate = (dateConditions.value as RecurConfig).skipWeekend
               ? monthUtils.dayFromDate(
                   getDateWithSkippedWeekend(
                     monthUtils._parse(nextBaseDate),
-                    dateConditions.value.weekendSolveMode,
+                    (dateConditions.value as RecurConfig).weekendSolveMode,
                   ),
                 )
               : nextBaseDate;
@@ -147,7 +150,9 @@ async function createScheduleList(
               break;
             }
           }
-          t[t.length - 1].target = -monthlyTarget;
+          ScheduleTemplateTargetArray[
+            ScheduleTemplateTargetArray.length - 1
+          ].target = -monthlyTarget;
         }
       } else {
         errors.push(
@@ -156,7 +161,12 @@ async function createScheduleList(
       }
     }
   }
-  return { t: t.filter(c => c.completed === 0), errors };
+  return {
+    ScheduleTemplateTargetArray: ScheduleTemplateTargetArray.filter(
+      c => c.completed === 0,
+    ),
+    errors,
+  };
 }
 
 function getPayMonthOfTotal(t: ScheduleTemplateTarget[]) {
@@ -259,14 +269,16 @@ export async function runSchedule(
   errors: string[],
   category: CategoryEntity,
 ) {
-  const scheduleTemplates = template_lines.filter(t => t.type === 'schedule');
+  const scheduleTemplates = template_lines.filter(
+    template => template.type === 'schedule',
+  );
 
-  const t = await createScheduleList(
+  const template = await createScheduleList(
     scheduleTemplates,
     current_month,
     category,
   );
-  errors = errors.concat(t.errors);
+  errors = errors.concat(template.errors);
 
   const isPayMonthOf = c =>
     c.full ||
@@ -277,10 +289,11 @@ export async function runSchedule(
     (c.target_frequency === 'daily' && c.target_interval <= 31) ||
     isReflectBudget();
 
-  const t_payMonthOf = t.t.filter(isPayMonthOf);
-  const t_sinking = t.t
-    .filter(c => !isPayMonthOf(c))
-    .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
+  const t_payMonthOf =
+    template.ScheduleTemplateTargetArray.filter(isPayMonthOf);
+  const t_sinking = template.ScheduleTemplateTargetArray.filter(
+    c => !isPayMonthOf(c),
+  ).sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
   const totalPayMonthOf = getPayMonthOfTotal(t_payMonthOf);
   const totalSinking = getSinkingTotal(t_sinking);
   const totalSinkingBaseContribution =
