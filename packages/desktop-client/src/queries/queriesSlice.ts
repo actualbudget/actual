@@ -12,6 +12,7 @@ import {
   type AccountEntity,
   type PayeeEntity,
   type Tag,
+  type PayeeGeolocationEntity,
 } from 'loot-core/types/models';
 
 import { resetApp } from '@desktop-client/app/appSlice';
@@ -43,6 +44,8 @@ type QueriesState = {
   payeesLoaded: boolean;
   tags: Tag[];
   tagsLoaded: boolean;
+  payeeGeolocations: PayeeGeolocationEntity[];
+  payeeGeolocationsLoaded: boolean;
 };
 
 const initialState: QueriesState = {
@@ -63,6 +66,8 @@ const initialState: QueriesState = {
   payeesLoaded: false,
   tags: [],
   tagsLoaded: false,
+  payeeGeolocations: [],
+  payeeGeolocationsLoaded: false,
 };
 
 type SetNewTransactionsPayload = {
@@ -192,6 +197,31 @@ const queriesSlice = createSlice({
 
     builder.addCase(findTags.fulfilled, (state, action) => {
       state.tags = action.payload;
+    });
+
+    // Payee geolocations
+    builder.addCase(getPayeeGeolocations.fulfilled, (state, action) => {
+      state.payeeGeolocations = action.payload;
+      state.payeeGeolocationsLoaded = true;
+    });
+
+    builder.addCase(assignPayeeGeolocation.fulfilled, (state, action) => {
+      const index = state.payeeGeolocations.findIndex(
+        p => p.payee_id === action.meta.arg.payeeId,
+      );
+      if (index !== -1) {
+        state.payeeGeolocations[index] = {
+          payee_id: action.meta.arg.payeeId,
+          latitude: action.meta.arg.latitude,
+          longitude: action.meta.arg.longitude,
+        };
+      } else {
+        state.payeeGeolocations.push({
+          payee_id: action.meta.arg.payeeId,
+          latitude: action.meta.arg.latitude,
+          longitude: action.meta.arg.longitude,
+        });
+      }
     });
   },
 });
@@ -449,6 +479,28 @@ export const getPayees = createAppAsyncThunk(
   async () => {
     const payees: PayeeEntity[] = await send('payees-get');
     return payees;
+  },
+);
+
+export const getPayeeGeolocations = createAppAsyncThunk(
+  `${sliceName}/getPayeeGeolocations`,
+  async () => {
+    const payeeGeolocations: PayeeGeolocationEntity[] = await send('payees-geolocation-get');
+    return payeeGeolocations;
+  },
+);
+
+type AssignPayeeGeolocationPayload = {
+  payeeId: PayeeEntity['id'];
+  latitude: number;
+  longitude: number;
+}
+
+export const assignPayeeGeolocation = createAppAsyncThunk(
+  `${sliceName}/assignPayeeGeolocation`,
+  async ({ payeeId, latitude, longitude }: AssignPayeeGeolocationPayload) => {
+    const geolocationId = await send('payees-geolocation-assign', { payeeId, latitude, longitude });
+    return geolocationId;
   },
 );
 
@@ -961,6 +1013,8 @@ export const actions = {
   moveCategoryGroup,
   initiallyLoadPayees,
   getTags,
+  getPayeeGeolocations,
+  assignPayeeGeolocation,
 };
 
 export const {
