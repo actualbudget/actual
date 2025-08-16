@@ -1,5 +1,6 @@
 import { type CustomReportEntity } from './reports';
 import { type RuleConditionEntity } from './rule';
+import { type SpreadsheetRowData } from './spreadsheet-reports';
 
 export type TimeFrame = {
   start: string;
@@ -68,13 +69,24 @@ export type MarkdownWidget = AbstractWidget<
   { content: string; text_align?: 'left' | 'right' | 'center' }
 >;
 
+export type SpreadsheetWidget = AbstractWidget<
+  'spreadsheet-card',
+  {
+    id?: string;
+    name?: string;
+    rows?: SpreadsheetRowData[];
+    showFormulaColumn?: boolean;
+  } | null
+>;
+
 type SpecializedWidget =
   | NetWorthWidget
   | CashFlowWidget
   | SpendingWidget
   | MarkdownWidget
   | SummaryWidget
-  | CalendarWidget;
+  | CalendarWidget
+  | SpreadsheetWidget;
 export type Widget = SpecializedWidget | CustomReportWidget;
 export type NewWidget = Omit<Widget, 'id' | 'tombstone'>;
 
