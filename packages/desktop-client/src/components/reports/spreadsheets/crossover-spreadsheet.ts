@@ -11,6 +11,9 @@ type MonthlyAgg = { date: string; amount: number };
 
 // Utility functions for Hampel identifier
 function calculateMedian(values: number[]): number {
+  if (values.length === 0) return 0;
+  if (values.length === 1) return values[0];
+
   const sorted = [...values].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
   return sorted.length % 2 === 0
@@ -208,14 +211,12 @@ function recalculate(
     let runningBalance = acct.starting;
 
     // Process each month in order
+    const byMonth = new Map(acct.balances.map(b => [b.date, b.amount]));
     for (let i = 0; i < months.length; i++) {
       const month = months[i];
-      const found = acct.balances.find(b => b.date === month);
+      const delta = byMonth.get(month) ?? 0;
 
-      if (found) {
-        // Add the monthly change to get the balance at the END of this month
-        runningBalance += found.amount;
-      }
+      runningBalance += delta;
 
       // Add this account's balance to the total for this month
       historicalBalances[i] += runningBalance;
@@ -346,7 +347,10 @@ function recalculate(
         isProjection: true,
       });
 
-      if (crossoverIndex == null && projectedIncome >= projectedExpenses) {
+      if (
+        crossoverIndex == null &&
+        Math.round(projectedIncome) >= Math.round(projectedExpenses)
+      ) {
         crossoverIndex = months.length + (i - 1);
         break;
       }
