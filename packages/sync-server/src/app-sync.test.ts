@@ -2,7 +2,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 
-import { SyncProtoBuf } from '@actual-app/crdt';
+import { SyncRequestSchema, createMessage, toBinary } from '@actual-app/crdt';
 import request from 'supertest';
 
 import { getAccountDb } from './account-db.js';
@@ -762,7 +762,7 @@ describe('/sync', () => {
       'group-id',
       'key-id',
     );
-    syncRequest.setSince(undefined);
+    syncRequest.since = undefined;
 
     const res = await sendSyncRequest(syncRequest);
 
@@ -855,17 +855,17 @@ function addMockFile(fileId, groupId, keyId, encryptMeta, syncVersion) {
 }
 
 function createMinimalSyncRequest(fileId, groupId, keyId) {
-  const syncRequest = new SyncProtoBuf.SyncRequest();
-  syncRequest.setFileid(fileId);
-  syncRequest.setGroupid(groupId);
-  syncRequest.setKeyid(keyId);
-  syncRequest.setSince('2024-01-01T00:00:00.000Z');
-  syncRequest.setMessagesList([]);
+  const syncRequest = createMessage(SyncRequestSchema);
+  syncRequest.fileId = fileId;
+  syncRequest.groupId = groupId;
+  syncRequest.keyId = keyId;
+  syncRequest.since = '2024-01-01T00:00:00.000Z';
+  syncRequest.messages = [];
   return syncRequest;
 }
 
 async function sendSyncRequest(syncRequest) {
-  const serializedRequest = syncRequest.serializeBinary();
+  const serializedRequest = toBinary(SyncRequestSchema, syncRequest);
   // Convert Uint8Array to Buffer
   const bufferRequest = Buffer.from(serializedRequest);
 
