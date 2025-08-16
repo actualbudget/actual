@@ -42,6 +42,7 @@
     "test:debug": "yarn workspaces foreach --all --verbose run test",
     "e2e": "yarn workspaces foreach --all --exclude desktop-electron --parallel --verbose run e2e",
     "e2e:desktop": "yarn build:desktop --skip-exe-build && yarn workspace desktop-electron e2e",
+    "playwright": "yarn workspace @actual-app/web run playwright",
     "vrt": "yarn workspaces foreach --all --parallel --verbose run vrt",
     "vrt:docker": "./bin/run-vrt",
     "rebuild-electron": "./node_modules/.bin/electron-rebuild -f -m ./packages/loot-core",

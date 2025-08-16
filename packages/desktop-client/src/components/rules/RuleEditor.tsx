@@ -10,6 +10,7 @@ import {
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
   SvgDelete,
   SvgAdd,
@@ -65,7 +66,10 @@ import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import {
+  useSchedules,
+  type ScheduleStatusType,
+} from '@desktop-client/hooks/useSchedules';
 import {
   useSelected,
   SelectedProvider,
@@ -369,6 +373,7 @@ function formatAmount(amount) {
 }
 
 function ScheduleDescription({ id }) {
+  const { isNarrowWidth } = useResponsive();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const scheduleQuery = useMemo(
     () => q('schedules').filter({ id }).select('*'),
@@ -384,12 +389,13 @@ function ScheduleDescription({ id }) {
     return null;
   }
 
-  if (schedules.length === 0) {
+  const [schedule] = schedules;
+
+  if (schedule && schedules.length === 0) {
     return <View style={{ flex: 1 }}>{id}</View>;
   }
 
-  const [schedule] = schedules;
-  const status = schedule && statusLabels.get(schedule.id);
+  const status = statusLabels.get(schedule.id) as ScheduleStatusType;
 
   return (
     <View
@@ -427,8 +433,7 @@ function ScheduleDescription({ id }) {
           </Trans>
         </Text>
       </SpaceBetween>
-      {/* @ts-expect-error fix this */}
-      <StatusBadge status={status} />
+      {!isNarrowWidth && <StatusBadge status={status} />}
     </View>
   );
 }
@@ -895,12 +900,14 @@ type RuleEditorProps = {
   rule: RuleEntity | NewRuleEntity;
   onSave?: (rule: RuleEntity) => void;
   onCancel?: () => void;
+  onDelete?: () => void;
   style?: CSSProperties;
 };
 
 export function RuleEditor({
   rule: defaultRule,
   onSave: originalOnSave = undefined,
+  onDelete,
   onCancel,
   style,
 }: RuleEditorProps) {
@@ -1206,9 +1213,10 @@ export function RuleEditor({
         innerRef={scrollableEl}
         style={{
           borderBottom: '1px solid ' + theme.tableBorder,
-          padding: 20,
+          padding: '0 20px 20px 20px',
           overflow: 'auto',
           maxHeight: 'calc(100% - 300px)',
+          minHeight: 100,
         }}
       >
         <View style={{ flexShrink: 0 }}>
@@ -1347,10 +1355,13 @@ export function RuleEditor({
 
       <SelectedProvider instance={selectedInst}>
         <View style={{ padding: '20px', flex: 1 }}>
-          <View
+          <SpaceBetween
+            direction="horizontal"
+            gap={5}
             style={{
               flexDirection: 'row',
-              alignItems: 'center',
+              flexWrap: 'nowrap',
+              justifyContent: 'space-between',
               marginBottom: 12,
             }}
           >
@@ -1358,14 +1369,13 @@ export function RuleEditor({
               <Trans>This rule applies to these transactions:</Trans>
             </Text>
 
-            <View style={{ flex: 1 }} />
             <Button
               isDisabled={selectedInst.items.size === 0}
               onPress={onApply}
             >
               <Trans>Apply actions</Trans> ({selectedInst.items.size})
             </Button>
-          </View>
+          </SpaceBetween>
 
           {/* @ts-expect-error fix this */}
           <SimpleTransactionsTable
@@ -1377,14 +1387,27 @@ export function RuleEditor({
             }}
           />
 
-          <Stack direction="row" justify="flex-end" style={{ marginTop: 20 }}>
-            <Button onClick={onCancel}>
-              <Trans>Cancel</Trans>
-            </Button>
-            <Button variant="primary" onPress={() => onSave(onCancel)}>
-              <Trans>Save</Trans>
-            </Button>
-          </Stack>
+          <SpaceBetween
+            style={{
+              marginTop: 20,
+              justifyContent: onDelete ? 'space-between' : 'flex-end',
+            }}
+          >
+            {onDelete && (
+              <Button onPress={onDelete}>
+                <Trans>Delete</Trans>
+              </Button>
+            )}
+
+            <SpaceBetween>
+              <Button onPress={onCancel}>
+                <Trans>Cancel</Trans>
+              </Button>
+              <Button variant="primary" onPress={() => onSave(onCancel)}>
+                <Trans>Save</Trans>
+              </Button>
+            </SpaceBetween>
+          </SpaceBetween>
         </View>
       </SelectedProvider>
     </View>

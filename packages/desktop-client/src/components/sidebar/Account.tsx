@@ -269,10 +269,10 @@ export function Account<FieldName extends SheetFields<'account'>>({
                   setMenuOpen(false);
                 }}
                 items={[
-                  { name: 'rename', text: 'Rename' },
+                  { name: 'rename', text: t('Rename') },
                   account.closed
-                    ? { name: 'reopen', text: 'Reopen' }
-                    : { name: 'close', text: 'Close' },
+                    ? { name: 'reopen', text: t('Reopen') }
+                    : { name: 'close', text: t('Close') },
                 ]}
               />
             </Popover>

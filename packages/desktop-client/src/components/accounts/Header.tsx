@@ -392,19 +392,22 @@ export function AccountHeader({
                 }}
                 content={
                   account?.last_reconciled
-                    ? t('Reconciled {{relativeTimeAgo}} ({{absoluteDate}})', {
-                        relativeTimeAgo: tsToRelativeTime(
-                          account.last_reconciled,
-                          locale,
-                        ),
-                        absoluteDate: formatDate(
-                          new Date(
-                            parseInt(account.last_reconciled ?? '0', 10),
+                    ? t(
+                        'Reconciled {{ relativeTimeAgo }} ({{ absoluteDate }})',
+                        {
+                          relativeTimeAgo: tsToRelativeTime(
+                            account.last_reconciled,
+                            locale,
                           ),
-                          dateFormat,
-                          { locale },
-                        ),
-                      })
+                          absoluteDate: formatDate(
+                            new Date(
+                              parseInt(account.last_reconciled ?? '0', 10),
+                            ),
+                            dateFormat,
+                            { locale },
+                          ),
+                        },
+                      )
                     : t('Not yet reconciled')
                 }
                 placement="top"

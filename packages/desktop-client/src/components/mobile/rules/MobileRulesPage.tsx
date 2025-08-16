@@ -18,16 +18,15 @@ import { ruleToString } from '@desktop-client/components/ManageRules';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 const PAGE_SIZE = 50;
 
 export function MobileRulesPage() {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [allRules, setAllRules] = useState<RuleEntity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMoreRules, setHasMoreRules] = useState(true);
@@ -86,29 +85,18 @@ export function MobileRulesPage() {
     loadRules();
   }, [loadRules]);
 
-  const handleRulePress = (rule: RuleEntity) => {
-    dispatch(
-      pushModal({
-        modal: {
-          name: 'edit-rule',
-          options: {
-            rule,
-            onSave: () => loadRules(),
-          },
-        },
-      }),
-    );
-  };
+  const handleRulePress = useCallback(
+    (rule: RuleEntity) => {
+      navigate(`/rules/${rule.id}`);
+    },
+    [navigate],
+  );
 
   const handleLoadMore = useCallback(() => {
     if (!isLoading && hasMoreRules && !filter) {
       loadRules(true);
     }
   }, [isLoading, hasMoreRules, filter, loadRules]);
-
-  const handleRuleAdded = () => {
-    loadRules();
-  };
 
   const onSearchChange = useCallback(
     (value: string) => {
@@ -120,10 +108,7 @@ export function MobileRulesPage() {
   return (
     <Page
       header={
-        <MobilePageHeader
-          title={t('Rules')}
-          rightContent={<AddRuleButton onRuleAdded={handleRuleAdded} />}
-        />
+        <MobilePageHeader title={t('Rules')} rightContent={<AddRuleButton />} />
       }
       padding={0}
     >

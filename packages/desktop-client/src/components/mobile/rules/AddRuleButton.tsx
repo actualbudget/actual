@@ -1,59 +1,23 @@
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
 
-import { type NewRuleEntity } from 'loot-core/types/models';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+export function AddRuleButton() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
 
-type AddRuleButtonProps = {
-  onRuleAdded: () => void;
-};
-
-export function AddRuleButton({ onRuleAdded }: AddRuleButtonProps) {
-  const dispatch = useDispatch();
-
-  const handleAddRule = () => {
-    const newRule: NewRuleEntity = {
-      stage: 'pre',
-      conditionsOp: 'and',
-      conditions: [
-        {
-          field: 'payee',
-          op: 'is',
-          value: '',
-          type: 'id',
-        },
-      ],
-      actions: [
-        {
-          field: 'category',
-          op: 'set',
-          value: '',
-          type: 'id',
-        },
-      ],
-    };
-
-    dispatch(
-      pushModal({
-        modal: {
-          name: 'edit-rule',
-          options: {
-            rule: newRule,
-            onSave: onRuleAdded,
-          },
-        },
-      }),
-    );
-  };
+  const handleAddRule = useCallback(() => {
+    navigate('/rules/new');
+  }, [navigate]);
 
   return (
     <Button
       variant="bare"
-      aria-label="Add new rule"
+      aria-label={t('Add new rule')}
       style={{ margin: 10 }}
       onPress={handleAddRule}
     >
