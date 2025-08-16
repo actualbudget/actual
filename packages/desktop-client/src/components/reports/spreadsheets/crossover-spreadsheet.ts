@@ -249,7 +249,7 @@ function recalculate(
     lastBalance = balance;
     lastExpense = spend;
 
-    if(Math.round(monthlyIncome) >= spend){
+    if (Math.round(monthlyIncome) >= spend) {
       crossoverIndex = idx;
     }
   });
@@ -283,7 +283,6 @@ function recalculate(
     }
   }
 
-  
   if (months.length > 0 && crossoverIndex == null) {
     // If no explicit return provided, use the calculated default
     if (monthlyReturn == null) {
