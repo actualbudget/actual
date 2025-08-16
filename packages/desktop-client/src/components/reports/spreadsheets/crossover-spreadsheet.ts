@@ -236,6 +236,7 @@ function recalculate(
 
   let lastBalance = 0;
   let lastExpense = 0;
+  let crossoverIndex: number | null = null;
   months.forEach((month, idx) => {
     const balance = historicalBalances[idx]; // Use historical balances for data generation
     const monthlyIncome = balance * monthlySWR;
@@ -247,6 +248,10 @@ function recalculate(
     });
     lastBalance = balance;
     lastExpense = spend;
+
+    if(Math.round(monthlyIncome) >= spend){
+      crossoverIndex = idx;
+    }
   });
 
   // If estimatedReturn provided, project future months until investment income exceeds expenses
@@ -278,8 +283,8 @@ function recalculate(
     }
   }
 
-  let crossoverIndex: number | null = null;
-  if (months.length > 0) {
+  
+  if (months.length > 0 && crossoverIndex == null) {
     // If no explicit return provided, use the calculated default
     if (monthlyReturn == null) {
       monthlyReturn = defaultMonthlyReturn;
@@ -338,7 +343,7 @@ function recalculate(
       data.push({
         x: d.format(monthCursor, 'MMM yyyy'),
         investmentIncome: Math.round(projectedIncome),
-        expenses: projectedExpenses,
+        expenses: Math.round(projectedExpenses),
         isProjection: true,
       });
 
