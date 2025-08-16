@@ -457,6 +457,7 @@ export default pluginTypescript.config(
         'warn',
         {
           varsIgnorePattern: '^(_|React)',
+          argsIgnorePattern: '^(_|React)',
           ignoreRestSiblings: true,
           caughtErrors: 'none',
         },
