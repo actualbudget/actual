@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
+import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 import type { PeriodicTemplate } from 'loot-core/types/models/templates';
 
 import {
@@ -23,10 +24,15 @@ export const WeekAutomation = ({ template, dispatch }: WeekAutomationProps) => {
       <AmountInput
         id="amount-field"
         key="amount-input"
-        value={template.amount ?? 0}
+        value={amountToInteger(template.amount ?? 0)}
         zeroSign="+"
         onUpdate={(value: number) =>
-          dispatch(updateTemplate({ type: 'periodic', amount: value }))
+          dispatch(
+            updateTemplate({
+              type: 'periodic',
+              amount: integerToAmount(value),
+            }),
+          )
         }
       />
     </FormField>
