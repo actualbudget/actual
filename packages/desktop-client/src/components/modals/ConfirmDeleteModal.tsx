@@ -15,15 +15,15 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
-type ConfirmTransactionDeleteModalProps = Extract<
+type ConfirmDeleteModalProps = Extract<
   ModalType,
-  { name: 'confirm-transaction-delete' }
+  { name: 'confirm-delete' }
 >['options'];
 
-export function ConfirmTransactionDeleteModal({
-  message = 'Are you sure you want to delete the transaction?',
+export function ConfirmDeleteModal({
+  message,
   onConfirm,
-}: ConfirmTransactionDeleteModalProps) {
+}: ConfirmDeleteModalProps) {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const narrowButtonStyle = isNarrowWidth
@@ -33,7 +33,7 @@ export function ConfirmTransactionDeleteModal({
     : {};
 
   return (
-    <Modal name="confirm-transaction-delete">
+    <Modal name="confirm-delete">
       {({ state: { close } }) => (
         <>
           <ModalHeader
