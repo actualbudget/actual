@@ -118,8 +118,7 @@ export function createCrossoverSpreadsheet({
               date: { $lte: monthUtils.lastDayOfMonth(start) },
             })
             .calculate({ $sum: '$amount' }),
-        ).then(({ data }) => data as number);
-
+        ).then(({ data }) => (typeof data === 'number' ? data : 0));
         // Get all transactions from the start month onwards for balance calculations
         // We need to exclude the first month since we already have its ending balance as starting
         // Instead of adding months (which can cause invalid month strings), we'll filter out the first month later
@@ -258,7 +257,8 @@ function recalculate(
   // Use either provided estimatedReturn or simple trailing growth from balances
   // Determine default return from historical balances if not provided
   const annualReturn = params.estimatedReturn ?? null; // e.g. 0.05
-  let monthlyReturn = annualReturn != null ? annualReturn / 12 : null;
+  let monthlyReturn =
+    annualReturn != null ? Math.pow(1 + annualReturn, 1 / 12) - 1 : null;
 
   // Always calculate the default return for display purposes
   let defaultMonthlyReturn: number | null = null;
@@ -383,7 +383,9 @@ function recalculate(
     lastKnownMonthlyExpenses: lastExpense,
     // Return the calculated default return for display purposes
     historicalReturn:
-      defaultMonthlyReturn != null ? defaultMonthlyReturn * 12 : null,
+      defaultMonthlyReturn != null
+        ? Math.pow(1 + defaultMonthlyReturn, 12) - 1
+        : null,
     // Years to retire calculation
     yearsToRetire,
     // Target monthly income at crossover point
