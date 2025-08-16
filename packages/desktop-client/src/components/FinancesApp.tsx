@@ -13,6 +13,7 @@ import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
 import { BankSync } from './banksync';
 import { BankSyncStatus } from './BankSyncStatus';
 import { CommandBar } from './CommandBar';
+import { Future } from './future';
 import { GlobalKeys } from './GlobalKeys';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
@@ -243,6 +244,15 @@ export function FinancesApp() {
                 <Route
                   path="/budget"
                   element={<NarrowAlternate name="Budget" />}
+                />
+
+                <Route
+                  path="/future"
+                  element={
+                    <NarrowNotSupported>
+                      <Future />
+                    </NarrowNotSupported>
+                  }
                 />
 
                 <Route
