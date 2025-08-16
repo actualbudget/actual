@@ -239,7 +239,8 @@ function ConfigureField({
               (op === 'contains' ||
                 op === 'matches' ||
                 op === 'doesNotContain' ||
-                op === 'hasTags')
+                op === 'hasTags' ||
+                op === 'hasAnyTags')
                 ? 'string'
                 : type
             }
