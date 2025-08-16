@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState, type CSSProperties } from 'react';
+import React, { useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -58,8 +58,8 @@ const CustomTooltip = ({
   format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
+  const sumTotals = useRef(0);
   if (active && payload && payload.length) {
-    let sumTotals = 0;
     return (
       <div
         className={css({
@@ -80,7 +80,7 @@ const CustomTooltip = ({
             {payload
               .sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
               .map((p: PayloadItem, index: number) => {
-                sumTotals += p.value;
+                sumTotals.current += p.value;
                 return (
                   (compact ? index < 4 : true) && (
                     <AlignedText
@@ -99,7 +99,7 @@ const CustomTooltip = ({
             {payload.length > 5 && compact && '...'}
             <AlignedText
               left={t('Total')}
-              right={format(sumTotals, 'financial')}
+              right={format(sumTotals.current, 'financial')}
               style={{
                 fontWeight: 600,
               }}

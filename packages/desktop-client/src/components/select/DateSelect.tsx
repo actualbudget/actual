@@ -43,6 +43,7 @@ import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
 
 import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 const pickerStyles: CSSProperties = {
@@ -269,11 +270,13 @@ export function DateSelect({
   const [open, setOpen] = useState(embedded || isOpen || false);
   const inputRef = useRef(null);
 
-  useLayoutEffect(() => {
-    if (originalInputRef) {
-      originalInputRef.current = inputRef.current;
-    }
-  }, []);
+  // useLayoutEffect(() => {
+  //   if (originalInputRef) {
+  //     originalInputRef.current = inputRef.current;
+  //   }
+  // }, []);
+
+  const mergedInputRefs = useMergedRefs(originalInputRef, inputRef);
 
   // This is confusing, so let me explain: `selectedValue` should be
   // renamed to `currentValue`. It represents the current highlighted
@@ -400,7 +403,7 @@ export function DateSelect({
       <Input
         id={id}
         {...inputProps}
-        ref={inputRef}
+        ref={mergedInputRefs}
         value={value}
         onPointerUp={() => {
           if (!embedded) {

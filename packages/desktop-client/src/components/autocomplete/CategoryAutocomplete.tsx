@@ -9,6 +9,7 @@ import React, {
   type ReactElement,
   type CSSProperties,
   useCallback,
+  useRef,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -78,7 +79,7 @@ function CategoryList({
   showBalances,
 }: CategoryListProps) {
   const { t } = useTranslation();
-  let lastGroup: string | undefined | null = null;
+  const lastGroup = useRef<CategoryGroupEntity['id'] | null>(null);
 
   return (
     <View>
@@ -101,9 +102,9 @@ function CategoryList({
           }
 
           const groupId = item.group?.id;
-          const showGroup = groupId !== lastGroup;
+          const showGroup = groupId !== lastGroup.current;
           const groupName = `${item.group?.name}${item.group?.hidden ? ' ' + t('(hidden)') : ''}`;
-          lastGroup = groupId;
+          lastGroup.current = groupId;
           return (
             <Fragment key={item.id}>
               {showGroup && item.group?.name && (

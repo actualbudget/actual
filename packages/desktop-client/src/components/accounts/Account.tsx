@@ -5,6 +5,7 @@ import React, {
   useMemo,
   type ReactElement,
   useEffect,
+  useRef,
 } from 'react';
 import { Trans } from 'react-i18next';
 import { Navigate, useParams, useLocation } from 'react-router';
@@ -138,7 +139,7 @@ function AllTransactions({
 
   transactions ??= [];
 
-  let runningBalance = useMemo(() => {
+  const runningBalance = useMemo(() => {
     if (!showBalances) {
       return 0;
     }
@@ -147,6 +148,9 @@ function AllTransactions({
       ? (balances[transactions[0].id]?.balance ?? 0)
       : 0;
   }, [showBalances, balances, transactions]);
+
+  const runningBalanceRef = useRef(runningBalance);
+  runningBalanceRef.current = runningBalance;
 
   const prependBalances = useMemo(() => {
     if (!showBalances) {
@@ -159,8 +163,7 @@ function AllTransactions({
       .map(previewTransaction => {
         if (!previewTransaction.is_child) {
           return {
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-            balance: (runningBalance += previewTransaction.amount),
+            balance: (runningBalanceRef.current += previewTransaction.amount),
             id: previewTransaction.id,
           };
         } else {
@@ -171,7 +174,7 @@ function AllTransactions({
         }
       });
     return groupById(previewBalances);
-  }, [showBalances, previewTransactions, runningBalance]);
+  }, [showBalances, previewTransactions]);
 
   const allTransactions = useMemo(() => {
     // Don't prepend scheduled transactions if we are filtering

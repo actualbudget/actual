@@ -48,7 +48,7 @@ export function SavedFilterMenuButton({
   const [menuItem, setMenuItem] = useState('');
   const [name, setName] = useState(filterId?.name ?? '');
   const id = filterId?.id;
-  let savedFilter: SavedFilter;
+  const savedFilter = useRef<SavedFilter | null>(null);
 
   const onFilterMenuSelect = async (item: string) => {
     setMenuItem(item);
@@ -68,7 +68,7 @@ export function SavedFilterMenuButton({
         setErr(null);
         setAdding(false);
         setMenuOpen(false);
-        savedFilter = {
+        savedFilter.current = {
           conditions,
           conditionsOp,
           id: filterId?.id,
@@ -86,7 +86,7 @@ export function SavedFilterMenuButton({
           return;
         }
 
-        onReloadSavedFilter(savedFilter, 'update');
+        onReloadSavedFilter(savedFilter.current, 'update');
         break;
       case 'save-filter':
         setErr(null);
@@ -96,11 +96,11 @@ export function SavedFilterMenuButton({
         break;
       case 'reload-filter':
         setMenuOpen(false);
-        savedFilter = {
-          ...savedFilter,
+        savedFilter.current = {
+          ...savedFilter.current,
           status: 'saved',
         };
-        onReloadSavedFilter(savedFilter, 'reload');
+        onReloadSavedFilter(savedFilter.current, 'reload');
         break;
       case 'clear-filter':
         setMenuOpen(false);
