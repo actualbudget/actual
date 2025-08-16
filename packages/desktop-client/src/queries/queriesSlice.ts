@@ -277,12 +277,13 @@ export const getAccounts = createAppAsyncThunk(
 
 type CreateCategoryGroupPayload = {
   name: CategoryGroupEntity['name'];
+  parentId?: CategoryGroupEntity['parent_id'];
 };
 
 export const createGroup = createAppAsyncThunk(
   `${sliceName}/createGroup`,
-  async ({ name }: CreateCategoryGroupPayload) => {
-    const id = await send('category-group-create', { name });
+  async ({ name, parentId }: CreateCategoryGroupPayload) => {
+    const id = await send('category-group-create', { name, parentId });
     return id;
   },
 );
@@ -405,8 +406,16 @@ export const moveCategoryGroup = createAppAsyncThunk(
 export const getCategories = createAppAsyncThunk(
   `${sliceName}/getCategories`,
   async () => {
+    // Always fetch categories in their raw, flat structure from the backend.
+    // The UI will be responsible for building the hierarchical view.
     const categories: CategoryViews = await send('get-categories');
-    return categories;
+
+    // The API now returns { grouped: ..., list: ... }
+    // The thunk should return this structure to be stored in the state
+    return categories as {
+      grouped: CategoryGroupEntity[];
+      list: CategoryEntity[];
+    };
   },
 );
 
@@ -925,11 +934,19 @@ export const getPayeesById = memoizeOne(
 export const getCategoriesById = memoizeOne(
   (categoryGroups: CategoryGroupEntity[] | null | undefined) => {
     const res: { [id: CategoryGroupEntity['id']]: CategoryEntity } = {};
-    categoryGroups?.forEach(group => {
-      group.categories.forEach(cat => {
-        res[cat.id] = cat;
+
+    function addGroups(groups: CategoryGroupEntity[]) {
+      groups?.forEach(group => {
+        group.categories.forEach(cat => {
+          res[cat.id] = cat;
+        });
+        if (group.children) {
+          addGroups(group.children);
+        }
       });
-    });
+    }
+
+    addGroups(categoryGroups);
     return res;
   },
 );

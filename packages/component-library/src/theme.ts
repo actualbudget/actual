@@ -34,6 +34,7 @@ export const theme = {
   tableRowBackgroundHighlightText:
     'var(--color-tableRowBackgroundHighlightText)',
   tableRowHeaderBackground: 'var(--color-tableRowHeaderBackground)',
+  tableRowSubHeaderBackground: 'var(--color-tableRowSubHeaderBackground)',
   tableRowHeaderText: 'var(--color-tableRowHeaderText)',
   sidebarBackground: 'var(--color-sidebarBackground)',
   sidebarItemBackgroundPending: 'var(--color-sidebarItemBackgroundPending)',
