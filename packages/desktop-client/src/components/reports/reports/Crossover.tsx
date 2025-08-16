@@ -209,7 +209,15 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
 
   async function onSaveWidget() {
     if (!widget) {
-      throw new Error('No widget that could be saved.');
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t('Save failed: No widget found to save.'),
+          },
+        }),
+      );
+      return;
     }
 
     await send('dashboard-update-widget', {
@@ -289,7 +297,15 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   const title = widget?.meta?.name || t('Crossover Point');
   const onSaveWidgetName = async (newName: string) => {
     if (!widget) {
-      throw new Error('No widget that could be saved.');
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t('Save failed: No widget found to save.'),
+          },
+        }),
+      );
+      return;
     }
 
     const name = newName || t('Crossover Point');
