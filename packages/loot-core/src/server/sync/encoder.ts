@@ -79,7 +79,7 @@ export async function encode(
 
   requestPb.groupId = groupId;
   requestPb.fileId = fileId;
-  requestPb.keyId = encryptKeyId;
+  requestPb.keyId = encryptKeyId || undefined; // protobuf needs undefined instead of null - nulls are stringified as 'null'
   requestPb.since = since.toString();
 
   return toBinary(SyncRequestSchema, requestPb);
