@@ -37,6 +37,8 @@ import {
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { useEnableBankingStatus } from '@desktop-client/hooks/useEnableBankingStatus';
+import { SyncServerGoCardlessAccount } from 'loot-core/types/models';
+import { EnableBankingToken } from 'loot-core/types/models/enablebanking';
 
 type CreateAccountModalProps = Extract<
   ModalType,
@@ -161,12 +163,29 @@ export function CreateAccountModal({
         modal:{
           name: "enablebanking-setup-account",
           options:{
-            onSuccess: async (data) =>{console.log("success")},
-            onMoveExternal: async ({institutionId})=> {
-              console.log(`moving ${institutionId}`);
-              return {data: {id:null, accounts:null}}
-            },
-            onClose: ()=>{console.log("closing")}
+            onSuccess: async (data) =>{
+                            // converting accounts to "GoCardlessAccounts"
+              // RANT: it seems BankSync could be much more standardized. Apart from init ofcourse.
+              const accounts:SyncServerGoCardlessAccount[] = data.accounts.map(enableBankingAccount =>{
+                return {
+                  ...enableBankingAccount,
+                  institution:{name:enableBankingAccount.institution},
+                  mask:"",
+                  official_name:enableBankingAccount.name
+                }
+              });
+              dispatch(
+                pushModal({
+                  modal: {
+                    name: 'select-linked-accounts',
+                    options: {
+                      requisitionId: data.bank_id,
+                      externalAccounts: accounts,
+                      syncSource: 'enablebanking',
+                    },
+                  },
+                }),
+              );},
 
           }
         }

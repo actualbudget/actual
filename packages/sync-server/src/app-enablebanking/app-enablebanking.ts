@@ -1,39 +1,29 @@
-import https from 'https';
-
 import express from 'express';
 
 import { Request, Response } from 'express';
 
 import { handleError } from '../app-gocardless/util/handle-error.js';
-import { SecretName, secretsService } from '../services/secrets-service.js';
-import { requestLoggerMiddleware } from '../util/middlewares.js';
+import { requestLoggerMiddleware, validateSessionMiddleware } from '../util/middlewares.js';
 import { BankSyncTransaction, type BankSyncResponse } from './models/bank-sync.js';
 
-
-import { getJWT } from './utils.js';
 import { enableBankingservice } from './services/enablebanking-services.js';
 
 const app = express();
-export { app as handlers };
-app.use(express.json());
 app.use(requestLoggerMiddleware);
+export { app as handlers };
+
+app.use(express.json());
+app.use(validateSessionMiddleware);
 
 app.post(
     '/configure',
     handleError(async (req, res) => {
         const { applicationId, secret } = req.body || {};
-        console.log(req.body);
-        
-        secretsService.set(SecretName.enablebanking_applicationId,applicationId);
-        secretsService.set(SecretName.enablebaanking_secret,secret);  
-        const configured = applicationId != null && 
-            secret != null;
+
+        enableBankingservice.setupSecrets(applicationId, secret);
     
         res.send({
           status: 'ok',
-          data: {
-            configured,
-          },
         });
       }),
 )
@@ -41,64 +31,93 @@ app.post(
 app.post(
   '/status',
   handleError(async (req, res) => {
-    if (!!enableBankingservice.isConfigured()){
-      res.send({
-        status: 'ok',
-        data: {
-          configured: false
-        },
-      });
-      return;
-    }
-
-    const applicationResponse = await enableBankingservice.getApplication();
-    if(applicationResponse.status != 200){
-      console.log("nope")
-      res.send({
-        status: 'ok',
-        data: {
-          configured: false
-        },
-      });
-      return;
-    }
-
-    const resp = await applicationResponse.json();
-
-
     res.send({
       status: 'ok',
       data: {
-        configured:resp['active'],
-        application:resp
+        configured:await enableBankingservice.isConfigured()
       },
     });
   }),
 );
 
-app.post('/get_balance',
-    handleError(async (req:Request, res:Response)=> {
-        const {account_uid} = req.body;
-        const jwt = enableBankingservice.getJWT();
+app.post('/countries',
+  handleError(async (req:Request, res:Response)=>{
+    const application = await enableBankingservice.getApplication();
+    res.send({
+      status:"ok",
+      data: application.countries
+    })
+  })
+)
 
-        console.log({account_uid,jwt})
+app.post("/get_aspsps",
+  handleError(async (req:Request, res:Response)=>{
+    res.send({
+      status:"ok",
+      data: (await enableBankingservice.getASPSPs()).aspsps
+    })
+  })
+);
 
-        const baseHeaders = {
-          Authorization: `Bearer ${jwt}`,
-          "Content-Type": "application/json"
-        }
+app.post("/start_auth",
+  handleError(async (req:Request, res:Response)=>{
+    const {aspsp, country} = req.body || {}
+    const resp =await enableBankingservice.startAuth(country, aspsp, req.headers.origin, 3600);
+    res.send({
+      status:"ok",
+      data: resp
+    })
+  })
+)
 
-        const accountBalancesResponse = await fetch(`https://api.enablebanking.com/accounts/${account_uid}/balances`, {
-          headers: baseHeaders
-        })
-        console.log(await accountBalancesResponse.text())
+app.post("/get_session",
+  handleError(async (req:Request, res:Response)=>{
+    const {state} = req.body || {};
+      if(req.app.locals.enablebanking_cache === undefined){
+        req.app.locals.enablebanking_cache = {};
+      }
 
+      if(!(state in req.app.locals.enablebanking_cache)){
+        res.send({status:"ok"});
+        return;
+      }
+    const session_id = req.app.locals.enablebanking_cache[state];
 
+    const response = await enableBankingservice.getAccounts(session_id);
 
-        res.send({
-          status: "ok",
-        })
-    }),
+    res.send({
+      status:"ok",
+      data:response
+    });
+  })
+)
+
+app.post("/complete_auth", 
+  handleError(async (req:Request, res:Response)=>{
+  const {state, code} = req.body || {};
+
+  const session_id = await enableBankingservice.authorizeSession(state,code);
+  if(req.app.locals.enablebanking_cache === undefined){
+    req.app.locals.enablebanking_cache = {};
+  }
+  
+  req.app.locals.enablebanking_cache[state] = session_id;
+
+  res.send({
+    status:"ok"
+  }
+  )
+}))
+
+app.post("/get_accounts",
+  handleError(async (req:Request, res:Response)=>{
+    const {session_id} = req.body||{};
+    const resp = await enableBankingservice.getAccounts(session_id);
+    res.send({
+      status:"ok",
+      data:resp
+    })
+  })
 );
 
 
@@ -126,7 +145,6 @@ app.post('/transactions',
       var finished = false;
       const transactions = [];
       while(!finished){
-        console.log(params.toString())
 
         const response: globalThis.Response = await fetch(`https://api.enablebanking.com/accounts/${accountId}/transactions?`+params.toString(), {
           headers: baseHeaders
@@ -139,19 +157,12 @@ app.post('/transactions',
           finished = true;
         }
       }
-      console.log(`found ${transactions.length} transactions:`)
-
-      
-
-
 
       res.send({
         status: "ok",
         data:{transactions: {all:transactions.map(t => {
           const transaction: BankSyncTransaction = {...t};
           const isDebtor = t['credit_debit_indicator'] == 'DBIT'
-
-          console.log(transaction)
           const payeeRole = isDebtor? 'creditor' : 'debtor';
 
 

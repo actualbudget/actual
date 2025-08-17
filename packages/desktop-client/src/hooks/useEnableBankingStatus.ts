@@ -8,7 +8,6 @@ export function useEnableBankingStatus() {
   const [configuredEnableBanking, setConfiguredEnableBanking] = useState<
     boolean | null
   >(null);
-  const [enableBankingCountries, setEnableBankingCountries] = useState<Array<string> |null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const status = useSyncServerStatus();
 
@@ -17,9 +16,9 @@ export function useEnableBankingStatus() {
       setIsLoading(true);
 
       const results = await send('enablebanking-status');
+      console.log(results)
 
       setConfiguredEnableBanking(results.configured || false);
-      setEnableBankingCountries(results.application.countries || null);
       setIsLoading(false);
     }
 
@@ -30,7 +29,6 @@ export function useEnableBankingStatus() {
 
   return {
     configuredEnableBanking: configuredEnableBanking,
-    countries: enableBankingCountries,
     isLoading,
   };
 }

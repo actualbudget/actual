@@ -9,10 +9,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { sendCatch } from 'loot-core/platform/client/fetch';
-import {
-  type GoCardlessInstitution,
-  type GoCardlessToken,
-} from 'loot-core/types/models';
 
 import { Error, Warning } from '@desktop-client/components/alerts';
 import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
@@ -24,55 +20,59 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { COUNTRY_OPTIONS } from '@desktop-client/components/util/countries';
-import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import {
   type Modal as ModalType,
   pushModal,
 } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { useEnableBankingStatus } from '@desktop-client/hooks/useEnableBankingStatus';
+import { EnableBankingBank, EnableBankingToken, ErrorResponse, isErrorResponse } from 'loot-core/types/models/enablebanking';
+import { count } from 'console';
 
-function useAvailableBanks(country: string) {
-  const [banks, setBanks] = useState<GoCardlessInstitution[]>([]);
+import { send } from 'loot-core/platform/client/fetch';
+
+
+function useAvailableBanks(isConfigured) {
+  const [banks, setBanks] = useState<EnableBankingBank[]>([]);
+  const [countries, setCountries] = useState<typeof COUNTRY_OPTIONS>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     async function fetch() {
-      setIsError(false);
-
-      if (!country) {
-        setBanks([]);
-        setIsLoading(false);
+      if(!isConfigured){
         return;
       }
-
+      setIsError(false);
       setIsLoading(true);
 
-      const { data, error } = await sendCatch('gocardless-get-banks', country);
+      const { data, error } = await sendCatch('enablebanking-banks');
 
       if (error || !Array.isArray(data)) {
         setIsError(true);
         setBanks([]);
       } else {
         setBanks(data);
+        let cids = new Set(data.map(bank => bank.country))
+        setCountries(COUNTRY_OPTIONS.filter((val) => cids.has(val.id)))
       }
 
       setIsLoading(false);
     }
 
     fetch();
-  }, [setBanks, setIsLoading, country]);
+  }, [isConfigured,setBanks, setIsLoading]);
 
   return {
-    data: banks,
+    banks,
+    countries,
     isLoading,
     isError,
   };
 }
 
 function renderError(
-  error: { code: 'unknown' | 'timeout'; message?: string },
+  error: { code: string; message?: string },
   t: ReturnType<typeof useTranslation>['t'],
 ) {
   return (
@@ -93,9 +93,7 @@ type EnableBankingSetupAccountModalProps = Extract<
 >['options'];
 
 export function EnableBankingSetupAccountModal({
-  onMoveExternal,
   onSuccess,
-  onClose,
 }: EnableBankingSetupAccountModalProps) {
   const { t } = useTranslation();
 
@@ -103,43 +101,61 @@ export function EnableBankingSetupAccountModal({
 
   const [waiting, setWaiting] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
+  const [country, setCountry] = useState<string | null>(null);
   const [institutionId, setInstitutionId] = useState<string>();
-  const [country, setCountry] = useState<string>();
   const [error, setError] = useState<{
-    code: 'unknown' | 'timeout';
+    code: string;
     message?: string;
   } | null>(null);
   const [isEnableBankingSetupComplete, setIsEnableBankingSetupComplete] = useState<
     boolean | null
   >(null);
-  const data = useRef<GoCardlessToken | null>(null);
+  const data = useRef<EnableBankingToken | null>(null);
 
-  const {
-    data: bankOptions,
-    isLoading: isBankOptionsLoading,
-    isError: isBankOptionError,
-  } = useAvailableBanks(country);
   const {
     configuredEnableBanking: isConfigured,
     isLoading: isConfigurationLoading,
-    countries: availableCountries,
   } = useEnableBankingStatus();
+
+  const {
+    banks: bankOptions,
+    countries: countryOptions,
+    isLoading: isBankOptionsLoading,
+    isError: isBankOptionError,
+  } = useAvailableBanks(isConfigured);
+
+  async function onClose(){
+    const resp = await send("enablebanking-stoppolling",);
+  }
 
   async function onJump() {
     setError(null);
     setWaiting('browser');
 
-    const res = await onMoveExternal({ institutionId });
-    if ('error' in res) {
+    const resp = await send("enablebanking-startauth",{country, aspsp:institutionId});
+
+    if ('error' in resp){
       setError({
-        code: res.error,
-        message: 'message' in res ? res.message : undefined,
+        code: resp.error,
+        message: 'message' in resp ? resp.message : undefined,
       });
       setWaiting(null);
       return;
     }
+    const { redirect_url, state } = resp;
+    window.Actual.openURLInBrowser(redirect_url);
+    //polling starts here.
+    const polling_response = await send("enablebanking-pollauth", {state});
 
-    data.current = res.data;
+    if (isErrorResponse(polling_response)) {
+      setError({
+        code: polling_response.error_code,
+        message: 'message' in polling_response ? polling_response.error_type : undefined,
+      });
+      setWaiting(null);
+      return;
+    }
+    data.current = polling_response;
     setWaiting(null);
     setSuccess(true);
   }
@@ -150,11 +166,11 @@ export function EnableBankingSetupAccountModal({
     setWaiting(null);
   }
 
-  const onGoCardlessInit = () => {
+  const onEnableBankingInit = () => {
     dispatch(
       pushModal({
         modal: {
-          name: 'gocardless-init',
+          name: 'enablebanking-init',
           options: {
             onSuccess: () => setIsEnableBankingSetupComplete(true),
           },
@@ -165,32 +181,14 @@ export function EnableBankingSetupAccountModal({
   const renderLinkButton = () => {
     return (
       <View style={{ gap: 10 }}>
-        <FormField>
-          <FormLabel
-            title={t('Choose your country:')}
-            htmlFor="country-field"
-          />
-          <Autocomplete
-            strict
-            highlightFirst
-            suggestions={COUNTRY_OPTIONS}
-            onSelect={setCountry}
-            value={country}
-            inputProps={{
-              id: 'country-field',
-              placeholder: t('(please select)'),
-            }}
-          />
-        </FormField>
-
         {isBankOptionError ? (
           <Error>
             <Trans>
-              Failed loading available banks: GoCardless access credentials
+              Failed loading available banks: Enable Banking access credentials
               might be misconfigured. Please{' '}
               <Link
                 variant="text"
-                onClick={onGoCardlessInit}
+                onClick={onEnableBankingInit}
                 style={{ color: theme.formLabelText, display: 'inline' }}
               >
                 set them up
@@ -199,28 +197,50 @@ export function EnableBankingSetupAccountModal({
             </Trans>
           </Error>
         ) : (
-          country &&
           (isBankOptionsLoading ? (
             t('Loading banks...')
           ) : (
-            <FormField>
-              <FormLabel title={t('Choose your bank:')} htmlFor="bank-field" />
-              <Autocomplete
-                focused
-                strict
-                highlightFirst
-                suggestions={bankOptions}
-                onSelect={setInstitutionId}
-                value={institutionId}
-                inputProps={{
-                  id: 'bank-field',
-                  placeholder: t('(please select)'),
-                }}
-              />
-            </FormField>
+            <View>
+              <FormField>
+                <FormLabel title={t("Choose the country of your bank:")} htmlFor='country-field' />
+                <Autocomplete
+                  focused
+                  strict
+                  highlightFirst
+                  suggestions={countryOptions.sort((a,b)=>a.name.localeCompare(b.name))}
+                  onSelect={(val)=>{
+                    setCountry(val)
+                    setInstitutionId("")
+                  }}
+                  value={country}
+                  inputProps={{
+                    id: 'country-field',
+                    placeholder: t('(please select)'),
+                  }}
+                  />
+              </FormField>
+              {(country &&
+                <FormField>
+                  <FormLabel title={t('Choose your bank:')} htmlFor="bank-field" />
+                  <Autocomplete
+                    focused
+                    strict
+                    highlightFirst
+                    key={country}
+                    suggestions={bankOptions.map((bank)=>{return{id:bank.name,...bank}}).filter(bank => bank.country==country).sort((a,b)=>a.name.localeCompare(b.name))}
+                    onSelect={setInstitutionId}
+                    value={institutionId}
+                    inputProps={{
+                      id: 'bank-field',
+                      placeholder: t('(please select)'),
+                    }}
+                  />
+                </FormField>
+              )}
+            </View>
           ))
         )}
-
+        {(country && institutionId &&
         <Warning>
           <Trans>
             By enabling bank sync, you will be granting Enable Banking (a third
@@ -236,7 +256,7 @@ export function EnableBankingSetupAccountModal({
             </Link>{' '}
             before proceeding.
           </Trans>
-        </Warning>
+        </Warning>)}
 
         <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
           <Button
@@ -278,7 +298,6 @@ export function EnableBankingSetupAccountModal({
                 will not be able to withdraw funds from your accounts.
               </Trans>
             </Paragraph>
-            {availableCountries}
 
             {error && renderError(error, t)}
 
@@ -343,7 +362,7 @@ export function EnableBankingSetupAccountModal({
                     GoCardless integration has not yet been configured.
                   </Trans>
                 </Paragraph>
-                <Button variant="primary" onPress={onGoCardlessInit}>
+                <Button variant="primary" onPress={onEnableBankingInit}>
                   <Trans>Configure GoCardless integration</Trans>
                 </Button>
               </>
@@ -354,3 +373,4 @@ export function EnableBankingSetupAccountModal({
     </Modal>
   );
 }
+
