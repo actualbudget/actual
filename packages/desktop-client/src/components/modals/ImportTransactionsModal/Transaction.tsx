@@ -275,7 +275,7 @@ export function Transaction({
           }}
           title={
             amount === null
-              ? t('Invalid: unable to parse the value', {
+              ? t('Invalid: unable to parse the value ({{amount}})', {
                   amount: transaction.amount,
                 })
               : amountToCurrency(amount)
