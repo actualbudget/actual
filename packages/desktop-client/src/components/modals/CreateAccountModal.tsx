@@ -13,6 +13,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
+import { type SyncServerGoCardlessAccount } from 'loot-core/types/models';
 
 import { useAuth } from '@desktop-client/auth/AuthProvider';
 import { Permissions } from '@desktop-client/auth/types';
@@ -25,6 +26,7 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
 import { authorizeBank } from '@desktop-client/gocardless';
+import { useEnableBankingStatus } from '@desktop-client/hooks/useEnableBankingStatus';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
@@ -36,9 +38,6 @@ import {
 } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
-import { useEnableBankingStatus } from '@desktop-client/hooks/useEnableBankingStatus';
-import { SyncServerGoCardlessAccount } from 'loot-core/types/models';
-import { EnableBankingToken } from 'loot-core/types/models/enablebanking';
 
 type CreateAccountModalProps = Extract<
   ModalType,
@@ -60,9 +59,8 @@ export function CreateAccountModal({
   const [isSimpleFinSetupComplete, setIsSimpleFinSetupComplete] = useState<
     boolean | null
   >(null);
-  const [isEnableBankingSetupComplete, setIsEnableBankingSetupComplete] = useState<
-    boolean | null
-  >(null);
+  const [isEnableBankingSetupComplete, setIsEnableBankingSetupComplete] =
+    useState<boolean | null>(null);
   const [isPluggyAiSetupComplete, setIsPluggyAiSetupComplete] = useState<
     boolean | null
   >(null);
@@ -152,28 +150,30 @@ export function CreateAccountModal({
     setLoadingSimpleFinAccounts(false);
   };
 
-  const onConnectEnableBanking = async () =>{
-    if(!isEnableBankingSetupComplete){
+  const onConnectEnableBanking = async () => {
+    if (!isEnableBankingSetupComplete) {
       onEnableBankingInit();
       return;
     }
 
     dispatch(
       pushModal({
-        modal:{
-          name: "enablebanking-setup-account",
-          options:{
-            onSuccess: async (data) =>{
-                            // converting accounts to "GoCardlessAccounts"
+        modal: {
+          name: 'enablebanking-setup-account',
+          options: {
+            onSuccess: async data => {
+              // converting accounts to "GoCardlessAccounts"
               // RANT: it seems BankSync could be much more standardized. Apart from init ofcourse.
-              const accounts:SyncServerGoCardlessAccount[] = data.accounts.map(enableBankingAccount =>{
-                return {
-                  ...enableBankingAccount,
-                  institution:{name:enableBankingAccount.institution},
-                  mask:"",
-                  official_name:enableBankingAccount.name
-                }
-              });
+              const accounts: SyncServerGoCardlessAccount[] = data.accounts.map(
+                enableBankingAccount => {
+                  return {
+                    ...enableBankingAccount,
+                    institution: { name: enableBankingAccount.institution },
+                    mask: '',
+                    official_name: enableBankingAccount.name,
+                  };
+                },
+              );
               dispatch(
                 pushModal({
                   modal: {
@@ -185,14 +185,13 @@ export function CreateAccountModal({
                     },
                   },
                 }),
-              );},
-
-          }
-        }
-      })
-    )
-
-  }
+              );
+            },
+          },
+        },
+      }),
+    );
+  };
 
   const onConnectPluggyAi = async () => {
     if (!isPluggyAiSetupComplete) {
@@ -296,18 +295,18 @@ export function CreateAccountModal({
     );
   };
 
-  const onEnableBankingInit = () =>{
+  const onEnableBankingInit = () => {
     dispatch(
       pushModal({
-        modal:{
+        modal: {
           name: 'enablebanking-init',
           options: {
             onSuccess: () => setIsEnableBankingSetupComplete(true),
           },
         },
       }),
-    )
-  }
+    );
+  };
 
   const onPluggyAiInit = () => {
     dispatch(
@@ -362,7 +361,7 @@ export function CreateAccountModal({
         setIsEnableBankingSetupComplete(false);
       });
     });
-  }
+  };
 
   const onPluggyAiReset = () => {
     send('secret-set', {
@@ -397,10 +396,13 @@ export function CreateAccountModal({
     setIsSimpleFinSetupComplete(configuredSimpleFin);
   }, [configuredSimpleFin]);
 
-  const {configuredEnableBanking, isLoading:configuredEnableBankingIsLoading} = useEnableBankingStatus();
-  useEffect(()=>{
+  const {
+    configuredEnableBanking,
+    isLoading: configuredEnableBankingIsLoading,
+  } = useEnableBankingStatus();
+  useEffect(() => {
     setIsEnableBankingSetupComplete(configuredEnableBanking);
-  },[configuredEnableBanking]);
+  }, [configuredEnableBanking]);
 
   const { configuredPluggyAi } = usePluggyAiStatus();
   useEffect(() => {
@@ -640,7 +642,9 @@ export function CreateAccountModal({
                                   items={[
                                     {
                                       name: 'reconfigure',
-                                      text: t('Reset EnableBanking credentials'),
+                                      text: t(
+                                        'Reset EnableBanking credentials',
+                                      ),
                                     },
                                   ]}
                                 />

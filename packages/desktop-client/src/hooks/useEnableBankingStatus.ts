@@ -16,7 +16,7 @@ export function useEnableBankingStatus() {
       setIsLoading(true);
 
       const results = await send('enablebanking-status');
-      console.log(results)
+      console.log(results);
 
       setConfiguredEnableBanking(results.configured || false);
       setIsLoading(false);
@@ -28,7 +28,7 @@ export function useEnableBankingStatus() {
   }, [status]);
 
   return {
-    configuredEnableBanking: configuredEnableBanking,
+    configuredEnableBanking,
     isLoading,
   };
 }

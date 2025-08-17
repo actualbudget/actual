@@ -12,7 +12,6 @@ import { send } from 'loot-core/platform/client/fetch';
 import { getSecretsError } from 'loot-core/shared/errors';
 
 import { Error } from '@desktop-client/components/alerts';
-import { Link } from '@desktop-client/components/common/Link';
 import {
   Modal,
   ModalButtons,
@@ -39,14 +38,14 @@ export const EnableBankingInitialiseModal = ({
     t('It is required to provide both the secret id and secret key.'),
   );
 
-  const onSecretKey = (file) =>{
+  const onSecretKey = file => {
     const reader = new FileReader();
-    reader.onloadend = (e)=>{
+    reader.onloadend = () => {
       setSecretKey(reader.result as string);
       setIsValid(true);
-    }
+    };
     reader.readAsText(file);
-  }
+  };
 
   const onSubmit = async (close: () => void) => {
     if (!applicationId || !secretKey) {
@@ -71,7 +70,6 @@ export const EnableBankingInitialiseModal = ({
       setError(getSecretsError(error, reason));
       return;
     } else {
-
       ({ error, reason } =
         (await send('secret-set', {
           name: 'enablebanking_secret',
@@ -86,14 +84,18 @@ export const EnableBankingInitialiseModal = ({
     }
 
     // check if correct
-    const res = await send("enablebanking-status");
+    const res = await send('enablebanking-status');
 
-    if(!res['configured']){
+    if (!res['configured']) {
       setIsLoading(false);
-        setIsValid(false);
-        setError(getSecretsError(t("The provided credentials are not correct"), t("The provided credentials are not correct")));
-        return;
-
+      setIsValid(false);
+      setError(
+        getSecretsError(
+          t('The provided credentials are not correct'),
+          t('The provided credentials are not correct'),
+        ),
+      );
+      return;
     }
 
     setIsValid(true);
@@ -103,7 +105,10 @@ export const EnableBankingInitialiseModal = ({
   };
 
   return (
-    <Modal name="enablebanking-init" containerProps={{ style: { width: '30vw' } }}>
+    <Modal
+      name="enablebanking-init"
+      containerProps={{ style: { width: '30vw' } }}
+    >
       {({ state: { close } }) => (
         <>
           <ModalHeader
@@ -113,14 +118,16 @@ export const EnableBankingInitialiseModal = ({
           <View style={{ display: 'flex', gap: 10 }}>
             <Text>
               <Trans>
-                In order to enable bank sync via Enable Banking (only for EU banks)
-                you will need to create application credentials. 
-                .
+                In order to enable bank sync via Enable Banking (only for EU
+                banks) you will need to create application credentials. .
               </Trans>
             </Text>
 
             <FormField>
-              <FormLabel title={t('Application Id:')} htmlFor="secret-id-field" />
+              <FormLabel
+                title={t('Application Id:')}
+                htmlFor="secret-id-field"
+              />
               <InitialFocus>
                 <Input
                   id="application-id-field"
@@ -141,9 +148,8 @@ export const EnableBankingInitialiseModal = ({
                 type="file"
                 defaultValue=""
                 accept=".pem"
-                onChange={e=>{
+                onChange={e => {
                   onSecretKey(e.target.files[0]);
-                  
                 }}
               />
             </FormField>

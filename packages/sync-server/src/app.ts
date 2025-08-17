@@ -9,15 +9,14 @@ import rateLimit from 'express-rate-limit';
 import { bootstrap } from './account-db.js';
 import * as accountApp from './app-account.js';
 import * as adminApp from './app-admin.js';
+import * as enablebankingApp from './app-enablebanking/app-enablebanking.js';
 import * as goCardlessApp from './app-gocardless/app-gocardless.js';
 import * as openidApp from './app-openid.js';
 import * as pluggai from './app-pluggyai/app-pluggyai.js';
 import * as secretApp from './app-secrets.js';
 import * as simpleFinApp from './app-simplefin/app-simplefin.js';
 import * as syncApp from './app-sync.js';
-import * as enablebankingApp from './app-enablebanking/app-enablebanking.js';
 import { config } from './load-config.js';
-
 
 const app = express();
 

@@ -1,18 +1,21 @@
-export function isErrorResponse(response:any): response is ErrorResponse {
-  return (<ErrorResponse>response).error_type !== undefined && (<ErrorResponse> response).error_code !== undefined;
+export function isErrorResponse(response: unknown): response is ErrorResponse {
+  return (
+    (response as ErrorResponse).error_type !== undefined &&
+    (response as ErrorResponse).error_code !== undefined
+  );
 }
 
 export type ErrorResponse = {
-    error_code:string,
-    error_type?:string,
-}
+  error_code: string;
+  error_type?: string;
+};
 
 export type EnableBankingBank = {
-    name: string;
-    logo: string;
-    BIC: string;
-    country: string;
-}
+  name: string;
+  logo: string;
+  BIC: string;
+  country: string;
+};
 
 export type EnableBankingToken = {
   bank_id: string;
@@ -21,8 +24,8 @@ export type EnableBankingToken = {
 };
 
 export type SyncServerEnableBankingAccount = {
-    account_id:string;
-    name: string;
-    institution:string;
-    balance:number;
-}
+  account_id: string;
+  name: string;
+  institution: string;
+  balance: number;
+};

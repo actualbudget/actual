@@ -1,10 +1,10 @@
-import express from 'express';
-
-import { Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 
 import { handleError } from '../app-gocardless/util/handle-error.js';
-import { requestLoggerMiddleware, validateSessionMiddleware } from '../util/middlewares.js';
-import { BankSyncTransaction, type BankSyncResponse } from './models/bank-sync.js';
+import {
+  requestLoggerMiddleware,
+  validateSessionMiddleware,
+} from '../util/middlewares.js';
 
 import { enableBankingservice } from './services/enablebanking-services.js';
 
@@ -16,163 +16,180 @@ app.use(express.json());
 app.use(validateSessionMiddleware);
 
 app.post(
-    '/configure',
-    handleError(async (req:Request, res:Response) => {
-        const { applicationId, secret } = req.body || {};
+  '/configure',
+  handleError(async (req: Request, res: Response) => {
+    const { applicationId, secret } = req.body || {};
 
-        enableBankingservice.setupSecrets(applicationId, secret);
-    
-        res.send({
-          status: 'ok',
-        });
-      }),
-)
+    enableBankingservice.setupSecrets(applicationId, secret);
+
+    res.send({
+      status: 'ok',
+    });
+  }),
+);
 
 app.post(
   '/status',
-  handleError(async (req:Request, res:Response) => {
+  handleError(async (req: Request, res: Response) => {
     res.send({
       status: 'ok',
       data: {
-        configured:await enableBankingservice.isConfigured()
+        configured: await enableBankingservice.isConfigured(),
       },
     });
   }),
 );
 
-app.post('/countries',
-  handleError(async (req:Request, res:Response)=>{
+app.post(
+  '/countries',
+  handleError(async (req: Request, res: Response) => {
     const application = await enableBankingservice.getApplication();
     res.send({
-      status:"ok",
-      data: application.countries
-    })
-  })
-)
-
-app.post("/get_aspsps",
-  handleError(async (req:Request, res:Response)=>{
-    res.send({
-      status:"ok",
-      data: (await enableBankingservice.getASPSPs()).aspsps
-    })
-  })
+      status: 'ok',
+      data: application.countries,
+    });
+  }),
 );
 
-app.post("/start_auth",
-  handleError(async (req:Request, res:Response)=>{
-    const {aspsp, country} = req.body || {}
+app.post(
+  '/get_aspsps',
+  handleError(async (req: Request, res: Response) => {
+    res.send({
+      status: 'ok',
+      data: (await enableBankingservice.getASPSPs()).aspsps,
+    });
+  }),
+);
+
+app.post(
+  '/start_auth',
+  handleError(async (req: Request, res: Response) => {
+    const { aspsp, country } = req.body || {};
 
     const origin = req.headers.origin;
-    if(!origin){
-      res.sendStatus(400).send({message:"No origin in header."})
+    if (!origin) {
+      res.sendStatus(400).send({ message: 'No origin in header.' });
       return;
     }
 
-    const resp =await enableBankingservice.startAuth(country, aspsp, origin, 3600);
+    const resp = await enableBankingservice.startAuth(
+      country,
+      aspsp,
+      origin,
+      3600,
+    );
     res.send({
-      status:"ok",
-      data: resp
-    })
-  })
-)
+      status: 'ok',
+      data: resp,
+    });
+  }),
+);
 
-app.post("/get_session",
-  handleError(async (req:Request, res:Response)=>{
-    const {state} = req.body || {};
+app.post(
+  '/get_session',
+  handleError(async (req: Request, res: Response) => {
+    const { state } = req.body || {};
 
     const session_id = enableBankingservice.getSessionIdFromState(state);
-    if(!session_id){
-      res.send({status:"ok"});
+    if (!session_id) {
+      res.send({ status: 'ok' });
       return;
     }
     const response = await enableBankingservice.getAccounts(session_id);
 
     res.send({
-      status:"ok",
-      data:response
+      status: 'ok',
+      data: response,
     });
-  })
-)
-
-app.post("/complete_auth", 
-  handleError(async (req:Request, res:Response)=>{
-  const {state, code} = req.body || {};
-
-  const session_id = await enableBankingservice.authorizeSession(state,code);
-
-  res.send({
-    status:"ok"
-  }
-  )
-}))
-
-app.post("/get_accounts",
-  handleError(async (req:Request, res:Response)=>{
-    const {session_id} = req.body||{};
-    const resp = await enableBankingservice.getAccounts(session_id);
-    res.send({
-      status:"ok",
-      data:resp
-    })
-  })
+  }),
 );
 
+app.post(
+  '/complete_auth',
+  handleError(async (req: Request, res: Response) => {
+    const { state, code } = req.body || {};
 
-app.post('/transactions',
-  handleError(async (req:Request, res:Response)=> {
+    await enableBankingservice.authorizeSession(state, code);
 
+    res.send({
+      status: 'ok',
+    });
+  }),
+);
+
+app.post(
+  '/get_accounts',
+  handleError(async (req: Request, res: Response) => {
+    const { session_id } = req.body || {};
+    const resp = await enableBankingservice.getAccounts(session_id);
+    res.send({
+      status: 'ok',
+      data: resp,
+    });
+  }),
+);
+
+app.post(
+  '/transactions',
+  handleError(async (req: Request, res: Response) => {
     const {
       startDate,
       endDate,
       accountId,
       includeBalance = true,
     } = req.body || {};
-      const jwt = enableBankingservice.getJWT();
+    const jwt = enableBankingservice.getJWT();
 
-      const baseHeaders = {
-        Authorization: `Bearer ${jwt}`,
-        "Content-Type": "application/json"
+    const baseHeaders = {
+      Authorization: `Bearer ${jwt}`,
+      'Content-Type': 'application/json',
+    };
+
+    const params = new URLSearchParams();
+    if (typeof startDate !== 'undefined') {
+      params.set('date_from', startDate);
+    }
+
+    let finished = false;
+    const transactions = [];
+    while (!finished) {
+      const response: globalThis.Response = await fetch(
+        `https://api.enablebanking.com/accounts/${accountId}/transactions?` +
+          params.toString(),
+        {
+          headers: baseHeaders,
+        },
+      );
+      const data = await response.json();
+      transactions.push(...data['transactions']);
+      if (data['continuation_key'] != null) {
+        params.set('continuation_key', data['continuation_key']);
+      } else {
+        finished = true;
       }
+    }
 
-      const params = new URLSearchParams();
-      if(typeof startDate !== 'undefined'){
-        params.set("date_from", startDate)
-      }
+    res.send({
+      status: 'ok',
+      data: {
+        transactions: {
+          all: transactions.map(t => {
+            const isDebtor = t['credit_debit_indicator'] === 'DBIT';
+            const payeeRole = isDebtor ? 'creditor' : 'debtor';
 
-      var finished = false;
-      const transactions = [];
-      while(!finished){
-
-        const response: globalThis.Response = await fetch(`https://api.enablebanking.com/accounts/${accountId}/transactions?`+params.toString(), {
-          headers: baseHeaders
-        })
-        const data = await response.json();
-        transactions.push(...data['transactions'])
-        if(data['continuation_key'] != null){
-          params.set("continuation_key", data['continuation_key'])
-        } else{
-          finished = true;
-        }
-      }
-
-      res.send({
-        status: "ok",
-        data:{transactions: {all:transactions.map(t => {
-          const transaction: BankSyncTransaction = {...t};
-          const isDebtor = t['credit_debit_indicator'] == 'DBIT'
-          const payeeRole = isDebtor? 'creditor' : 'debtor';
-
-
-          return {
-            original_transaction:t,
-            amount: t['transaction_amount']['amount'] * (isDebtor?-1:1),
-            payeeName: t[payeeRole] == null? t['remittance_information'][0]: t[payeeRole]['name'],
-            notes : t['remittance_information'].join(" "),
-            date: t['transaction_date']
-          }
-        })}
-      }
-      })
+            return {
+              original_transaction: t,
+              amount: t['transaction_amount']['amount'] * (isDebtor ? -1 : 1),
+              payeeName:
+                t[payeeRole] === null
+                  ? t['remittance_information'][0]
+                  : t[payeeRole]['name'],
+              notes: t['remittance_information'].join(' '),
+              date: t['transaction_date'],
+            };
+          }),
+        },
+      },
+    });
   }),
 );

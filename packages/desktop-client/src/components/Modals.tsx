@@ -27,6 +27,8 @@ import { EditUserAccess } from './modals/EditAccess';
 import { EditFieldModal } from './modals/EditFieldModal';
 import { EditRuleModal } from './modals/EditRuleModal';
 import { EditUserFinanceApp } from './modals/EditUser';
+import { EnableBankingInitialiseModal } from './modals/EnableBankingInitialiseModal';
+import { EnableBankingSetupAccountModal } from './modals/EnableBankingSetupAccountModal';
 import { EnvelopeBalanceMenuModal } from './modals/EnvelopeBalanceMenuModal';
 import { EnvelopeBudgetMenuModal } from './modals/EnvelopeBudgetMenuModal';
 import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuModal';
@@ -80,8 +82,6 @@ import { useModalState } from '@desktop-client/hooks/useModalState';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { closeModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
-import { EnableBankingInitialiseModal } from './modals/EnableBankingInitialiseModal';
-import { EnableBankingSetupAccountModal } from './modals/EnableBankingSetupAccountModal';
 
 export function Modals() {
   const location = useLocation();
@@ -161,12 +161,14 @@ export function Modals() {
 
         case 'simplefin-init':
           return <SimpleFinInitialiseModal key={key} {...modal.options} />;
-        
+
         case 'enablebanking-init':
           return <EnableBankingInitialiseModal key={key} {...modal.options} />;
 
         case 'enablebanking-setup-account':
-          return <EnableBankingSetupAccountModal key={key} {...modal.options} />;
+          return (
+            <EnableBankingSetupAccountModal key={key} {...modal.options} />
+          );
 
         case 'pluggyai-init':
           return <PluggyAiInitialiseModal key={key} {...modal.options} />;

@@ -44,7 +44,7 @@ app.post('/', async (req, res) => {
       return;
     }
   }
-  console.log("got here")
+  console.log('got here');
 
   secretsService.set(name, value);
 

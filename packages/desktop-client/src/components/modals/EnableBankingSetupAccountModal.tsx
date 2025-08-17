@@ -8,7 +8,12 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { sendCatch } from 'loot-core/platform/client/fetch';
+import { sendCatch, send } from 'loot-core/platform/client/fetch';
+import {
+  type EnableBankingBank,
+  type EnableBankingToken,
+  isErrorResponse,
+} from 'loot-core/types/models/enablebanking';
 
 import { Error, Warning } from '@desktop-client/components/alerts';
 import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
@@ -20,17 +25,12 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { COUNTRY_OPTIONS } from '@desktop-client/components/util/countries';
+import { useEnableBankingStatus } from '@desktop-client/hooks/useEnableBankingStatus';
 import {
   type Modal as ModalType,
   pushModal,
 } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
-import { useEnableBankingStatus } from '@desktop-client/hooks/useEnableBankingStatus';
-import { EnableBankingBank, EnableBankingToken, ErrorResponse, isErrorResponse } from 'loot-core/types/models/enablebanking';
-import { count } from 'console';
-
-import { send } from 'loot-core/platform/client/fetch';
-
 
 function useAvailableBanks(isConfigured) {
   const [banks, setBanks] = useState<EnableBankingBank[]>([]);
@@ -40,7 +40,7 @@ function useAvailableBanks(isConfigured) {
 
   useEffect(() => {
     async function fetch() {
-      if(!isConfigured){
+      if (!isConfigured) {
         return;
       }
       setIsError(false);
@@ -53,15 +53,15 @@ function useAvailableBanks(isConfigured) {
         setBanks([]);
       } else {
         setBanks(data);
-        let cids = new Set(data.map(bank => bank.country))
-        setCountries(COUNTRY_OPTIONS.filter((val) => cids.has(val.id)))
+        const cids = new Set(data.map(bank => bank.country));
+        setCountries(COUNTRY_OPTIONS.filter(val => cids.has(val.id)));
       }
 
       setIsLoading(false);
     }
 
     fetch();
-  }, [isConfigured,setBanks, setIsLoading]);
+  }, [isConfigured, setBanks, setIsLoading]);
 
   return {
     banks,
@@ -107,9 +107,8 @@ export function EnableBankingSetupAccountModal({
     code: string;
     message?: string;
   } | null>(null);
-  const [isEnableBankingSetupComplete, setIsEnableBankingSetupComplete] = useState<
-    boolean | null
-  >(null);
+  const [isEnableBankingSetupComplete, setIsEnableBankingSetupComplete] =
+    useState<boolean | null>(null);
   const data = useRef<EnableBankingToken | null>(null);
 
   const {
@@ -124,17 +123,20 @@ export function EnableBankingSetupAccountModal({
     isError: isBankOptionError,
   } = useAvailableBanks(isConfigured);
 
-  async function onClose(){
-    const resp = await send("enablebanking-stoppolling",);
+  async function onClose() {
+    await send('enablebanking-stoppolling');
   }
 
   async function onJump() {
     setError(null);
     setWaiting('browser');
 
-    const resp = await send("enablebanking-startauth",{country, aspsp:institutionId});
+    const resp = await send('enablebanking-startauth', {
+      country,
+      aspsp: institutionId,
+    });
 
-    if ('error' in resp){
+    if ('error' in resp) {
       setError({
         code: resp.error,
         message: 'message' in resp ? resp.message : undefined,
@@ -145,12 +147,15 @@ export function EnableBankingSetupAccountModal({
     const { redirect_url, state } = resp;
     window.Actual.openURLInBrowser(redirect_url);
     //polling starts here.
-    const polling_response = await send("enablebanking-pollauth", {state});
+    const polling_response = await send('enablebanking-pollauth', { state });
 
     if (isErrorResponse(polling_response)) {
       setError({
         code: polling_response.error_code,
-        message: 'message' in polling_response ? polling_response.error_type : undefined,
+        message:
+          'message' in polling_response
+            ? polling_response.error_type
+            : undefined,
       });
       setWaiting(null);
       return;
@@ -196,67 +201,79 @@ export function EnableBankingSetupAccountModal({
               again.
             </Trans>
           </Error>
+        ) : isBankOptionsLoading ? (
+          t('Loading banks...')
         ) : (
-          (isBankOptionsLoading ? (
-            t('Loading banks...')
-          ) : (
-            <View>
+          <View>
+            <FormField>
+              <FormLabel
+                title={t('Choose the country of your bank:')}
+                htmlFor="country-field"
+              />
+              <Autocomplete
+                focused
+                strict
+                highlightFirst
+                suggestions={countryOptions.sort((a, b) =>
+                  a.name.localeCompare(b.name),
+                )}
+                onSelect={val => {
+                  setCountry(val);
+                  setInstitutionId('');
+                }}
+                value={country}
+                inputProps={{
+                  id: 'country-field',
+                  placeholder: t('(please select)'),
+                }}
+              />
+            </FormField>
+            {country && (
               <FormField>
-                <FormLabel title={t("Choose the country of your bank:")} htmlFor='country-field' />
+                <FormLabel
+                  title={t('Choose your bank:')}
+                  htmlFor="bank-field"
+                />
                 <Autocomplete
                   focused
                   strict
                   highlightFirst
-                  suggestions={countryOptions.sort((a,b)=>a.name.localeCompare(b.name))}
-                  onSelect={(val)=>{
-                    setCountry(val)
-                    setInstitutionId("")
-                  }}
-                  value={country}
+                  key={country}
+                  suggestions={bankOptions
+                    .map(bank => {
+                      return { id: bank.name, ...bank };
+                    })
+                    .filter(bank => bank.country === country)
+                    .sort((a, b) => a.name.localeCompare(b.name))}
+                  onSelect={setInstitutionId}
+                  value={institutionId}
                   inputProps={{
-                    id: 'country-field',
+                    id: 'bank-field',
                     placeholder: t('(please select)'),
                   }}
-                  />
+                />
               </FormField>
-              {(country &&
-                <FormField>
-                  <FormLabel title={t('Choose your bank:')} htmlFor="bank-field" />
-                  <Autocomplete
-                    focused
-                    strict
-                    highlightFirst
-                    key={country}
-                    suggestions={bankOptions.map((bank)=>{return{id:bank.name,...bank}}).filter(bank => bank.country==country).sort((a,b)=>a.name.localeCompare(b.name))}
-                    onSelect={setInstitutionId}
-                    value={institutionId}
-                    inputProps={{
-                      id: 'bank-field',
-                      placeholder: t('(please select)'),
-                    }}
-                  />
-                </FormField>
-              )}
-            </View>
-          ))
+            )}
+          </View>
         )}
-        {(country && institutionId &&
-        <Warning>
-          <Trans>
-            By enabling bank sync, you will be granting Enable Banking (a third
-            party service) read-only access to your entire account’s transaction
-            history. This service is not affiliated with Actual in any way. Make
-            sure you’ve read and understand Enable Banking’s{' '}
-            <Link
-              variant="external"
-              to="https://gocardless.com/privacy/"
-              linkColor="purple"
-            >
-              Privacy Policy
-            </Link>{' '}
-            before proceeding.
-          </Trans>
-        </Warning>)}
+        {country && institutionId && (
+          <Warning>
+            <Trans>
+              By enabling bank sync, you will be granting Enable Banking (a
+              third party service) read-only access to your entire account’s
+              transaction history. This service is not affiliated with Actual in
+              any way. Make sure you’ve read and understand Enable Banking’s{' '}
+              <Link
+                variant="external"
+                to="https://gocardless.com/privacy/"
+                linkColor="purple"
+              >
+                Privacy Policy
+              </Link>{' '}
+              before proceeding.
+            </Trans>
+          </Warning>
+        )}
 
         <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
           <Button
@@ -294,8 +311,8 @@ export function EnableBankingSetupAccountModal({
             <Paragraph style={{ fontSize: 15 }}>
               <Trans>
                 To link your bank account, you will be redirected to a new page
-                where EnableBanking will ask to connect to your bank. Enable Banking
-                will not be able to withdraw funds from your accounts.
+                where EnableBanking will ask to connect to your bank. Enable
+                Banking will not be able to withdraw funds from your accounts.
               </Trans>
             </Paragraph>
 
@@ -349,14 +366,6 @@ export function EnableBankingSetupAccountModal({
               renderLinkButton()
             ) : (
               <>
-              <div dangerouslySetInnerHTML={{__html: `
-        <enablebanking-consent
-          id="enablebanking-consent"
-          authorization="a8bfe9f4-dfdf-4c86-9a94-9db7660bd4bd"
-          locale="SV"
-          can-cancel
-          sandbox></enablebanking-consent>
-          `}} />
                 <Paragraph style={{ color: theme.errorText }}>
                   <Trans>
                     GoCardless integration has not yet been configured.
@@ -373,4 +382,3 @@ export function EnableBankingSetupAccountModal({
     </Modal>
   );
 }
-
