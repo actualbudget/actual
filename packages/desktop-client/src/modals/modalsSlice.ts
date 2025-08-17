@@ -225,6 +225,7 @@ export type Modal =
       options: {
         onSelect: (accountId: string, accountName: string) => void;
         includeClosedAccounts?: boolean;
+        hiddenAccounts?: AccountEntity['id'][];
         onClose?: () => void;
       };
     }
@@ -481,9 +482,9 @@ export type Modal =
       };
     }
   | {
-      name: 'confirm-transaction-delete';
+      name: 'confirm-delete';
       options: {
-        message?: string | undefined;
+        message: string;
         onConfirm: () => void;
       };
     }

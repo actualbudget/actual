@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
@@ -20,6 +21,8 @@ export function InOutOption({
   onToggle,
   onChangeText,
 }: InOutOptionProps) {
+  const { t } = useTranslation();
+
   return (
     <View style={{ flexDirection: 'row', gap: 10, height: 28 }}>
       <CheckboxOption
@@ -29,15 +32,15 @@ export function InOutOption({
         onChange={onToggle}
       >
         {inOutMode
-          ? 'In/Out outflow value'
-          : 'Select column to specify if amount goes in/out'}
+          ? t('In/Out outflow value')
+          : t('Select column to specify if amount goes in/out')}
       </CheckboxOption>
       {inOutMode && (
         <Input
           type="text"
           value={outValue}
           onChangeValue={onChangeText}
-          placeholder="Value for out rows, e.g: ‘Credit’"
+          placeholder={t('Value for out rows, e.g: ‘Credit’')}
         />
       )}
     </View>

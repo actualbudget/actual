@@ -30,3 +30,7 @@ Syntax and Formatting
 - Use the "function" keyword for pure functions.
 - Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements.
 - Use declarative JSX, keeping JSX minimal and readable.
+
+Change validation
+
+- Run `yarn typecheck` in the root directory to validate that the generated TypeScript code is correct

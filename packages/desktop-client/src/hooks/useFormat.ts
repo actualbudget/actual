@@ -155,7 +155,7 @@ export function useFormat(): UseFormatResult {
       const styledAmount =
         position === 'after'
           ? `${valueWithoutSign}${space}${currencySymbol}`
-          : `${currencySymbol}${space}${valueWithoutSign}`;
+          : `\u202A${currencySymbol}\u202C${space}${valueWithoutSign}`;
 
       return sign + styledAmount;
     },

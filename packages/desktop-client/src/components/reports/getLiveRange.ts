@@ -32,6 +32,15 @@ export function getLiveRange(
           '-31',
       );
       break;
+    case 'priorYearToDate':
+      [dateStart, dateEnd] = validateRange(
+        earliestTransaction,
+        monthUtils.getYearStart(
+          monthUtils.prevYear(monthUtils.currentMonth()),
+        ) + '-01',
+        monthUtils.prevYear(monthUtils.currentDate(), 'yyyy-MM-dd'),
+      );
+      break;
     case 'allTime':
       dateStart = earliestTransaction;
       dateEnd = monthUtils.currentDay();

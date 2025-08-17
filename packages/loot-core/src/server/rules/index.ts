@@ -38,7 +38,7 @@ import {
 import { fastSetMerge } from '../../shared/util';
 import { RuleConditionEntity, RuleEntity } from '../../types/models';
 import { RuleError } from '../errors';
-import { Schedule as RSchedule } from '../util/rschedule';
+import { RSchedule } from '../util/rschedule';
 
 function registerHandlebarsHelpers() {
   const regexTest = /^\/(.*)\/([gimuy]*)$/;

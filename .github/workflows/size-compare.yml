@@ -81,7 +81,7 @@ jobs:
           base-stats-json-path: ./base/web-stats.json
           title: desktop-client
 
-      - uses: github/webpack-bundlesize-compare-action@v2.1.0
+      - uses: twk3/rollup-size-compare-action@v1.1.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           current-stats-json-path: ./head/loot-core-stats.json

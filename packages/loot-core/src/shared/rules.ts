@@ -115,11 +115,13 @@ export function getValidOps(field: keyof FieldValueTypes) {
   );
 }
 
-export const ALLOCATION_METHODS = {
-  'fixed-amount': 'a fixed amount',
-  'fixed-percent': 'a fixed percent of the remainder',
-  remainder: 'an equal portion of the remainder',
-};
+export function getAllocationMethods() {
+  return {
+    'fixed-amount': t('a fixed amount'),
+    'fixed-percent': t('a fixed percent of the remainder'),
+    remainder: t('an equal portion of the remainder'),
+  };
+}
 
 export function mapField(field, opts?) {
   opts = opts || {};
@@ -227,6 +229,17 @@ export function friendlyOp(op, type?) {
       return t('is on budget');
     case 'offBudget':
       return t('is off budget');
+    default:
+      return '';
+  }
+}
+
+export function translateRuleStage(stage: string): string {
+  switch (stage) {
+    case 'pre':
+      return t('Pre');
+    case 'post':
+      return t('Post');
     default:
       return '';
   }

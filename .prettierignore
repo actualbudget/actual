@@ -7,6 +7,8 @@ packages/api/migrations
 packages/crdt/dist
 packages/component-library/src/icons/**/*
 packages/desktop-client/bundle.browser.js
+packages/desktop-client/stats.json
+packages/desktop-client/.swc/
 packages/desktop-client/build/
 packages/desktop-client/locale/
 packages/desktop-client/build-electron/
@@ -23,5 +25,6 @@ packages/desktop-electron/dist/
 packages/loot-core/**/node_modules/*
 packages/loot-core/**/lib-dist/*
 packages/loot-core/**/proto/*
+packages/sync-server/coverage/
 .yarn/*
 upcoming-release-notes/*

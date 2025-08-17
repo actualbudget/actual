@@ -47,7 +47,7 @@ import { usePayee } from '@desktop-client/hooks/usePayee';
 import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 import { useSelector } from '@desktop-client/redux';
 
-const ROW_HEIGHT = 60;
+export const ROW_HEIGHT = 60;
 
 const getTextStyle = ({
   isPreview,
@@ -135,11 +135,11 @@ export function TransactionListItem({
   const isAdded = newTransactions.includes(id);
   const categoryName = lookupName(categories, categoryId);
   const specialCategory = account?.offbudget
-    ? 'Off budget'
+    ? t('Off budget')
     : transferAccount && !transferAccount.offbudget
-      ? 'Transfer'
+      ? t('Transfer')
       : isParent
-        ? 'Split'
+        ? t('Split')
         : null;
 
   const prettyCategory = specialCategory || categoryName;
@@ -264,7 +264,7 @@ export function TransactionListItem({
                         textAlign: 'left',
                       }}
                     >
-                      {prettyCategory || 'Uncategorized'}
+                      {prettyCategory || t('Uncategorized')}
                     </TextOneLine>
                   </View>
                 )}
