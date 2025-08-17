@@ -16,7 +16,12 @@ export const SimpleAutomationReadOnly = ({
   return (
     <Trans>
       Budget{' '}
-      {{ monthly: format(amountToInteger(template.monthly ?? 0), 'financial') }}{' '}
+      {{
+        monthly: format(
+          amountToInteger(template.monthly ?? 0, format.currency.decimalPlaces),
+          'financial',
+        ),
+      }}{' '}
       each month
     </Trans>
   );

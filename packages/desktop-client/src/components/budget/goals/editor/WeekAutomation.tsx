@@ -9,6 +9,7 @@ import {
 } from '@desktop-client/components/budget/goals/actions';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { AmountInput } from '@desktop-client/components/util/AmountInput';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 
 type WeekAutomationProps = {
   template: PeriodicTemplate;
@@ -17,6 +18,7 @@ type WeekAutomationProps = {
 
 export const WeekAutomation = ({ template, dispatch }: WeekAutomationProps) => {
   const { t } = useTranslation();
+  const { currency } = useFormat();
 
   return (
     <FormField style={{ flex: 1 }}>
@@ -24,13 +26,13 @@ export const WeekAutomation = ({ template, dispatch }: WeekAutomationProps) => {
       <AmountInput
         id="amount-field"
         key="amount-input"
-        value={amountToInteger(template.amount ?? 0)}
+        value={amountToInteger(template.amount ?? 0, currency.decimalPlaces)}
         zeroSign="+"
         onUpdate={(value: number) =>
           dispatch(
             updateTemplate({
               type: 'periodic',
-              amount: integerToAmount(value),
+              amount: integerToAmount(value, currency.decimalPlaces),
             }),
           )
         }

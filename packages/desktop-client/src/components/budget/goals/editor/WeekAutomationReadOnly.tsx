@@ -16,7 +16,13 @@ export const WeekAutomationReadOnly = ({
 
   return (
     <Trans>
-      Budget {{ amount: format(amountToInteger(template.amount), 'financial') }}{' '}
+      Budget{' '}
+      {{
+        amount: format(
+          amountToInteger(template.amount, format.currency.decimalPlaces),
+          'financial',
+        ),
+      }}{' '}
       each week
     </Trans>
   );
