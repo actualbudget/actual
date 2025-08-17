@@ -1,4 +1,4 @@
-import { EnableBankingAuthenticationStartResponse } from 'loot-core/types/models/enablebanking.js';
+import { EnableBankingAuthenticationStartResponse } from '../models/enablebanking.js';
 import { SecretName, secretsService } from '../../services/secrets-service.js';
 import {
   Account,

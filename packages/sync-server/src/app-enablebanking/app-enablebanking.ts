@@ -7,7 +7,7 @@ import {
 } from '../util/middlewares.js';
 
 import { enableBankingservice } from './services/enablebanking-services.js';
-import {EnableBankingAuthenticationStartResponse, EnableBankingBank, EnableBankingStatusResponse, EnableBankingTransactionsResponse} from 'loot-core/types/models/enablebanking.js';
+import {EnableBankingAuthenticationStartResponse, EnableBankingBank, EnableBankingStatusResponse, EnableBankingTransactionsResponse} from './models/enablebanking.js';
 import { HalTransactions, Transaction } from './models/models-enablebanking.js';
 
 const app = express();
