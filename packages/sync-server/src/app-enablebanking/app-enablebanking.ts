@@ -17,7 +17,7 @@ app.use(validateSessionMiddleware);
 
 app.post(
     '/configure',
-    handleError(async (req, res) => {
+    handleError(async (req:Request, res:Response) => {
         const { applicationId, secret } = req.body || {};
 
         enableBankingservice.setupSecrets(applicationId, secret);
@@ -30,7 +30,7 @@ app.post(
 
 app.post(
   '/status',
-  handleError(async (req, res) => {
+  handleError(async (req:Request, res:Response) => {
     res.send({
       status: 'ok',
       data: {
@@ -62,7 +62,14 @@ app.post("/get_aspsps",
 app.post("/start_auth",
   handleError(async (req:Request, res:Response)=>{
     const {aspsp, country} = req.body || {}
-    const resp =await enableBankingservice.startAuth(country, aspsp, req.headers.origin, 3600);
+
+    const origin = req.headers.origin;
+    if(!origin){
+      res.sendStatus(400).send({message:"No origin in header."})
+      return;
+    }
+
+    const resp =await enableBankingservice.startAuth(country, aspsp, origin, 3600);
     res.send({
       status:"ok",
       data: resp
@@ -73,16 +80,12 @@ app.post("/start_auth",
 app.post("/get_session",
   handleError(async (req:Request, res:Response)=>{
     const {state} = req.body || {};
-      if(req.app.locals.enablebanking_cache === undefined){
-        req.app.locals.enablebanking_cache = {};
-      }
 
-      if(!(state in req.app.locals.enablebanking_cache)){
-        res.send({status:"ok"});
-        return;
-      }
-    const session_id = req.app.locals.enablebanking_cache[state];
-
+    const session_id = enableBankingservice.getSessionIdFromState(state);
+    if(!session_id){
+      res.send({status:"ok"});
+      return;
+    }
     const response = await enableBankingservice.getAccounts(session_id);
 
     res.send({
@@ -97,11 +100,6 @@ app.post("/complete_auth",
   const {state, code} = req.body || {};
 
   const session_id = await enableBankingservice.authorizeSession(state,code);
-  if(req.app.locals.enablebanking_cache === undefined){
-    req.app.locals.enablebanking_cache = {};
-  }
-  
-  req.app.locals.enablebanking_cache[state] = session_id;
 
   res.send({
     status:"ok"

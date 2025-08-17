@@ -4,7 +4,7 @@ export function isErrorResponse(response:any): response is ErrorResponse {
 
 export type ErrorResponse = {
     error_code:string,
-    error_type:string,
+    error_type?:string,
 }
 
 export type EnableBankingBank = {

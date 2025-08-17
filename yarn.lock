@@ -93,6 +93,7 @@ __metadata:
     "@types/cors": "npm:^2.8.19"
     "@types/express": "npm:^5.0.3"
     "@types/express-actuator": "npm:^1.8.3"
+    "@types/jws": "npm:^3.2.10"
     "@types/node": "npm:^22.17.0"
     "@types/supertest": "npm:^6.0.3"
     "@vitest/coverage-v8": "npm:3.2.4"
@@ -6662,6 +6663,15 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: 10/309fda20eb5f1cf68f2df28931afdf189c5e7e6bec64ac783ce737bb98908d57f6f58757ad5da9be37b815645a6f914e2d4f3ac66c574b8fe1ba6616284d0e97
+  languageName: node
+  linkType: hard
+
+"@types/jws@npm:^3.2.10":
+  version: 3.2.10
+  resolution: "@types/jws@npm:3.2.10"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10/144a6f990ecc53fe6c4bae52a45fdea259d25ae425fd2bec6c82c321c8762b470819c08649e615c4ef2943b4de2fd4c5c1e7f57e8b07ced862f91a376e7d1949
   languageName: node
   linkType: hard
 

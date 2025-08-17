@@ -201,7 +201,7 @@ async function linkSimpleFinAccount({
 
   const bank = await link.findOrCreateBank(
     institution,
-    externalAccount.orgDomain ?? externalAccount.orgId,
+    externalAccount.orgDomain ?? externalAccount.orgId ?? "unknown",
   );
 
   if (upgradingId) {
@@ -271,7 +271,7 @@ async function linkPluggyAiAccount({
 
   const bank = await link.findOrCreateBank(
     institution,
-    externalAccount.orgDomain ?? externalAccount.orgId,
+    externalAccount.orgDomain ?? externalAccount.orgId ?? "unknown",
   );
 
   if (upgradingId) {

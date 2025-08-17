@@ -8,6 +8,10 @@ import { start } from 'repl';
 async function post(endpoint:string, data?:unknown){
   const userToken = await asyncStorage.getItem('user-token');
   const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
   return await _post(
         serverConfig.ENABLEBANKING_SERVER + endpoint,
         data,

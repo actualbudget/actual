@@ -1,6 +1,6 @@
-import jws from 'jws';
+import { sign, Header } from 'jws';
 
-  const getJWTHeader = (applicationId:string) => {
+  const getJWTHeader = (applicationId:string):Header => {
     return {
       typ: "JWT",
       alg: "RS256",
@@ -23,7 +23,7 @@ import jws from 'jws';
     const jwtHeaders = getJWTHeader(applicationId)
     const jwtBody = getJWTBody(exp);
 
-    return jws.sign({
+    return sign({
       header:jwtHeaders,
       payload:jwtBody,
       secret:secretKey

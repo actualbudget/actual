@@ -1,8 +1,14 @@
 
-type EnableBankingErrorResponse = {
+export type EnableBankingErrorResponse = {
     message:string,
     code:number,
     detail:any,
+}
+
+export class EnableBankingSetupError extends Error {
+    constructor(){
+        super("The Enable Banking secrets are not setup yet.");
+    }
 }
 
 
