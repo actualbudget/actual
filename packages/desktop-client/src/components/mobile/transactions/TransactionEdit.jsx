@@ -743,8 +743,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
         dispatch(
           pushModal({
             modal: {
-              name: 'confirm-transaction-delete',
+              name: 'confirm-delete',
               options: {
+                message: t('Are you sure you want to delete the transaction?'),
                 onConfirm: () => {
                   onDelete(id);
 
@@ -778,7 +779,14 @@ const TransactionEditInner = memo(function TransactionEditInner({
         onConfirmDelete();
       }
     },
-    [dispatch, navigate, onClearActiveEdit, onDelete, unserializedTransactions],
+    [
+      dispatch,
+      navigate,
+      onClearActiveEdit,
+      onDelete,
+      unserializedTransactions,
+      t,
+    ],
   );
 
   const scrollChildTransactionIntoView = useCallback(id => {

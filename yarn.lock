@@ -14111,7 +14111,6 @@ __metadata:
     path-browserify: "npm:^1.0.1"
     peggy: "npm:3.0.2"
     process: "npm:^0.11.10"
-    reselect: "npm:^4.1.8"
     rollup-plugin-visualizer: "npm:^6.0.3"
     slash: "npm:3.0.0"
     source-map: "npm:^0.7.4"
@@ -17562,13 +17561,6 @@ __metadata:
   version: 1.0.0
   resolution: "requires-port@npm:1.0.0"
   checksum: 10/878880ee78ccdce372784f62f52a272048e2d0827c29ae31e7f99da18b62a2b9463ea03a75f277352f4697c100183debb0532371ad515a2d49d4bfe596dd4c20
-  languageName: node
-  linkType: hard
-
-"reselect@npm:^4.1.8":
-  version: 4.1.8
-  resolution: "reselect@npm:4.1.8"
-  checksum: 10/199984d9872f71cd207f4aa6e6fd2bd48d95154f7aa9b3aee3398335f39f5491059e732f28c12e9031d5d434adab2c458dc8af5afb6564d0ad37e1644445e09c
   languageName: node
   linkType: hard
 
