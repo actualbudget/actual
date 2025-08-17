@@ -1,3 +1,4 @@
+import { EnableBankingAuthenticationStartResponse } from 'loot-core/types/models/enablebanking.js';
 import { SecretName, secretsService } from '../../services/secrets-service.js';
 import {
   Account,
@@ -119,7 +120,7 @@ export const enableBankingservice = {
     aspsp: string,
     host: string,
     exp: number,
-  ): Promise<AuthenticationStartResponse> | never => {
+  ): Promise<EnableBankingAuthenticationStartResponse> | never => {
     const valid_until = new Date();
     valid_until.setSeconds(valid_until.getSeconds() + exp);
 
@@ -195,4 +196,8 @@ export const enableBankingservice = {
       accounts,
     };
   },
+
+  getTransactions: async (account_id:string, start_date, end_date ) => {
+
+  }
 };

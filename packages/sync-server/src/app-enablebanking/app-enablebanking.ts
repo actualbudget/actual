@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { Request, response, Response } from 'express';
 
 import { handleError } from '../app-gocardless/util/handle-error.js';
 import {
@@ -7,6 +7,8 @@ import {
 } from '../util/middlewares.js';
 
 import { enableBankingservice } from './services/enablebanking-services.js';
+import {EnableBankingAuthenticationStartResponse, EnableBankingBank, EnableBankingStatusResponse, EnableBankingTransactionsResponse} from 'loot-core/types/models/enablebanking.js';
+import { HalTransactions, Transaction } from './models/models-enablebanking.js';
 
 const app = express();
 app.use(requestLoggerMiddleware);
@@ -31,11 +33,11 @@ app.post(
 app.post(
   '/status',
   handleError(async (req: Request, res: Response) => {
+    const data: EnableBankingStatusResponse = {configured: await enableBankingservice.isConfigured()}
+
     res.send({
       status: 'ok',
-      data: {
-        configured: await enableBankingservice.isConfigured(),
-      },
+      data: data,
     });
   }),
 );
@@ -54,9 +56,10 @@ app.post(
 app.post(
   '/get_aspsps',
   handleError(async (req: Request, res: Response) => {
+    const responseData:EnableBankingBank[] = (await enableBankingservice.getASPSPs()).aspsps;
     res.send({
       status: 'ok',
-      data: (await enableBankingservice.getASPSPs()).aspsps,
+      data: responseData,
     });
   }),
 );
@@ -72,15 +75,14 @@ app.post(
       return;
     }
 
-    const resp = await enableBankingservice.startAuth(
-      country,
-      aspsp,
-      origin,
-      3600,
-    );
     res.send({
       status: 'ok',
-      data: resp,
+      data: await enableBankingservice.startAuth(
+        country,
+        aspsp,
+        origin,
+        3600,
+      ),
     });
   }),
 );
@@ -144,6 +146,7 @@ app.post(
       Authorization: `Bearer ${jwt}`,
       'Content-Type': 'application/json',
     };
+    console.log("got here")
 
     const params = new URLSearchParams();
     if (typeof startDate !== 'undefined') {
@@ -151,7 +154,7 @@ app.post(
     }
 
     let finished = false;
-    const transactions = [];
+    const transactions:Transaction[] = [];
     while (!finished) {
       const response: globalThis.Response = await fetch(
         `https://api.enablebanking.com/accounts/${accountId}/transactions?` +
@@ -160,36 +163,37 @@ app.post(
           headers: baseHeaders,
         },
       );
-      const data = await response.json();
-      transactions.push(...data['transactions']);
-      if (data['continuation_key'] != null) {
-        params.set('continuation_key', data['continuation_key']);
+      const data = await response.json() as HalTransactions;
+      console.log("printing data", data);
+      if(data.transactions){
+        transactions.push(...data.transactions);
+      }
+      if (data.continuation_key) {
+        params.set('continuation_key', data.continuation_key);
       } else {
         finished = true;
       }
     }
 
+    const data:EnableBankingTransactionsResponse = {
+      transactions: transactions.map( t =>{
+        const isDebtor = t.credit_debit_indicator == 'DBIT';
+
+        const payeeObject = isDebtor? t.creditor:t.debtor;
+
+        const payeeName = payeeObject? payeeObject.name:t.remittance_information[0];
+        return {
+          amount:parseFloat(t.transaction_amount.amount)*(isDebtor? -1:1),
+          payee: payeeName,
+          notes:t.remittance_information.join(""),
+          date:t.transaction_date
+        }  
+      })
+    }
+
     res.send({
       status: 'ok',
-      data: {
-        transactions: {
-          all: transactions.map(t => {
-            const isDebtor = t['credit_debit_indicator'] === 'DBIT';
-            const payeeRole = isDebtor ? 'creditor' : 'debtor';
-
-            return {
-              original_transaction: t,
-              amount: t['transaction_amount']['amount'] * (isDebtor ? -1 : 1),
-              payeeName:
-                t[payeeRole] === null
-                  ? t['remittance_information'][0]
-                  : t[payeeRole]['name'],
-              notes: t['remittance_information'].join(' '),
-              date: t['transaction_date'],
-            };
-          }),
-        },
-      },
+      data,
     });
   }),
 );

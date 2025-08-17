@@ -1,15 +1,19 @@
+import { AccountEntity, BankSyncResponse } from 'loot-core/types/models';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import {
   EnableBankingBank,
   EnableBankingToken,
   ErrorResponse,
   isErrorResponse,
+  EnableBankingStatusResponse,
+  EnableBankingAuthenticationStartResponse,
+  EnableBankingTransactionsResponse
 } from '../../types/models/enablebanking';
 import { createApp } from '../app';
 import { get as _get, post as _post } from '../post';
 import { getServer } from '../server-config';
 
-async function post(endpoint: string, data?: unknown) {
+async function post<T>(endpoint: string, data?: unknown) {
   const userToken = await asyncStorage.getItem('user-token');
   const serverConfig = getServer();
   if (!serverConfig) {
@@ -18,11 +22,11 @@ async function post(endpoint: string, data?: unknown) {
 
   return await _post(serverConfig.ENABLEBANKING_SERVER + endpoint, data, {
     'X-ACTUAL-TOKEN': userToken,
-  });
+  }) as T;
 }
 
-async function getStatus(): Promise<{ configured: boolean }> | never {
-  const resp = await post('/status');
+async function getStatus(): Promise<EnableBankingStatusResponse> | never {
+  const resp:EnableBankingStatusResponse = await post('/status');
   return resp;
 }
 
@@ -31,7 +35,7 @@ async function getCountries(): Promise<{ countries: string[] }> | never {
 }
 
 async function getBanks(): Promise<EnableBankingBank[]> | never {
-  const resp = await post('/get_aspsps');
+  const resp:EnableBankingBank[] = await post('/get_aspsps');
   return resp;
 }
 
@@ -41,8 +45,8 @@ async function startAuth({
 }: {
   country: string;
   aspsp: string;
-}) {
-  const resp = await post('/start_auth', { country, aspsp });
+}):Promise<EnableBankingAuthenticationStartResponse> | never {
+  const resp:EnableBankingAuthenticationStartResponse = await post('/start_auth', { country, aspsp });
   return resp;
 }
 
@@ -112,8 +116,28 @@ async function stopAuthPoll() {
 }
 
 async function completeAuth({ state, code }: { state: string; code: string }) {
-  const resp = await post('/complete_auth', { state, code });
-  return resp;
+  //erro handling
+  await post('/complete_auth', { state, code });
+  return;
+}
+
+
+export async function downloadEnableBankingTransactions(
+  acctId: AccountEntity['id'],
+  since: string,
+) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return;
+
+  console.log(`Pulling transactions from enablebanking since ${since}`);
+
+  const res:EnableBankingTransactionsResponse = await post('/transactions',
+    {
+      accountId: acctId,
+      startDate: since,
+    }
+  );
+  return res;
 }
 
 export type AccountHandlers = {

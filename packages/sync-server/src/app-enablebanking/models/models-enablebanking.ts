@@ -114,6 +114,12 @@ export type BalanceStatus =
   | 'VALU'
   | 'XPCD';
 
+
+export type BankTransactionCode = {
+    description?:string;
+    code?:string;
+    sub_code?:string;
+}
 export type CashAccountType =
   | 'CACC'
   | 'CARD'
@@ -127,6 +133,11 @@ export type ClearingSystemMemberIdentification = {
   member_id?: false;
 };
 
+export type ContactDetails = {
+    email?:string;
+    phone_number?:string;
+}
+
 export type Credential = {
   name: string;
   title: string;
@@ -134,6 +145,8 @@ export type Credential = {
   description?: string;
   template?: string;
 };
+
+export type CreditDebitIndicator = "CRDT" | "DBIT";
 export type EnableBankingToken = {
   bank_id: string;
   session_id: string;
@@ -141,6 +154,14 @@ export type EnableBankingToken = {
 };
 
 export type Environment = 'PRODUCTION' | 'SANDBOX';
+
+export type ExchangeRate = {
+    unit_currency: {CurrencyCode:string};
+    exchange_rate:string;
+    rate_type:RateType;
+    contract_identification:string;
+    instructed_amount:AmountType;
+}
 
 export type FinancialInstitutionIdentification = {
   bic_fi?: string;
@@ -183,6 +204,19 @@ export type HalBalances = {
   balances: BalanceResource[];
 };
 
+export type HalTransactions = {
+    transactions: Transaction[];
+    continuation_key?:string;
+}
+
+export type PartyIdentification ={
+    name?:string;
+    postal_address?:PostalAddress;
+    organisation_id?:GenericIdentification;
+    private_id?:GenericIdentification;
+    contact_details?:ContactDetails;
+}
+
 export type PostalAddress = {
   adress_type?: AdressType;
   department?: string;
@@ -197,6 +231,8 @@ export type PostalAddress = {
 };
 
 export type PSUType = 'business' | 'personal';
+
+export type RateType = "AGRD" | "SALE" | "SPOT";
 
 export type ResponsePaymentType = {
   max_transactions?: number;
@@ -214,6 +250,8 @@ export type ResponsePaymentType = {
   // creditor_postal
 };
 
+export type ReferenceNumberScheme = "BERF" | "FIRF" | "INTL" |
+    "NORF" | "SDDM" | "SEBG";
 export type SandboxInfo = { users?: SandboxUser[] };
 
 export type SandboxUser = {
@@ -272,5 +310,35 @@ export type StartAuthorizationResponse = {
   authorization_id: string;
   psu_id_hash: string;
 };
+
+export type Transaction = {
+    entry_reference?:string;
+    merchant_category_code?:string;
+    transaction_amount:AmountType;
+    creditor?:PartyIdentification;
+    creditor_account?:AccountIdentification;
+    creditor_agent?:FinancialInstitutionIdentification;
+    debtor?:PartyIdentification;
+    debtor_account?:AccountIdentification;
+    debtor_agent?:FinancialInstitutionIdentification;
+    bank_transaction_code?:BankTransactionCode;
+    credit_debit_indicator:CreditDebitIndicator;
+    status:TransactionStatus;
+    booking_date?: string;
+    value_date?: string;
+    transaction_date?: string;
+    balance_after_transaction?: AmountType;
+    reference_number?:string;
+    reference_number_schema?:ReferenceNumberScheme;
+    remittance_information?:string[];
+    debtor_account_additional_identification?:GenericIdentification[];
+    creditor_account_additional_identification?:GenericIdentification[];
+    exchange_rate?:ExchangeRate;
+    note?:string;
+    transaction_id?:string;
+}
+
+export type TransactionStatus = "BOOK" | "CNCL" | "HOLD" |
+    "OTHR" | "PNDG" | "RJCT" | "SCHD";
 
 export type Usage = 'ORGA' | 'PRIV';

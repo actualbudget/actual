@@ -13,8 +13,13 @@ export type ErrorResponse = {
 export type EnableBankingBank = {
   name: string;
   logo: string;
-  BIC: string;
+  BIC?: string;
   country: string;
+};
+
+export type EnableBankingAuthenticationStartResponse = {
+  redirect_url: string;
+  state: string;
 };
 
 export type EnableBankingToken = {
@@ -29,3 +34,18 @@ export type SyncServerEnableBankingAccount = {
   institution: string;
   balance: number;
 };
+
+export type EnableBankingStatusResponse = {
+  configured:boolean;
+}
+
+export type EnableBankingTransaction = {
+  amount:number;
+  payee:string;
+  notes:string;
+  date:string;
+}
+
+export type EnableBankingTransactionsResponse = {
+  transactions:EnableBankingTransaction[];
+}
