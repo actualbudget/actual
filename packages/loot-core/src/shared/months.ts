@@ -164,8 +164,8 @@ export function nextMonth(month: DateLike): string {
   return d.format(d.addMonths(_parse(month), 1), 'yyyy-MM');
 }
 
-export function prevYear(month: DateLike): string {
-  return d.format(d.subMonths(_parse(month), 12), 'yyyy-MM');
+export function prevYear(month: DateLike, format = 'yyyy-MM'): string {
+  return d.format(d.subMonths(_parse(month), 12), format);
 }
 
 export function prevMonth(month: DateLike): string {

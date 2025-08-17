@@ -10,13 +10,16 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { format as formatDate } from 'date-fns';
 import { t } from 'i18next';
 
+import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { type Query } from 'loot-core/shared/query';
-import { currencyToInteger, tsToRelativeTime } from 'loot-core/shared/util';
+import { tsToRelativeTime, amountToInteger } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
@@ -136,6 +139,7 @@ export function ReconcileMenu({
   });
   const lastSyncedBalance = account.balance_current;
   const format = useFormat();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const locale = useLocale();
 
   const [inputValue, setInputValue] = useState<string | null>();
@@ -154,8 +158,12 @@ export function ReconcileMenu({
       return;
     }
 
+    const evaluatedAmount =
+      inputValue != null ? evalArithmetic(inputValue) : null;
     const amount =
-      inputValue != null ? currencyToInteger(inputValue) : clearedBalance;
+      evaluatedAmount != null
+        ? amountToInteger(evaluatedAmount)
+        : clearedBalance;
 
     onReconcile(amount);
     onClose();
@@ -197,10 +205,15 @@ export function ReconcileMenu({
         )}
         <Text style={{ color: theme.pageTextSubdued, paddingBottom: 6 }}>
           {account?.last_reconciled
-            ? t('Reconciled {{ relativeTimeAgo }}', {
+            ? t('Reconciled {{ relativeTimeAgo }} ({{ absoluteDate }})', {
                 relativeTimeAgo: tsToRelativeTime(
                   account.last_reconciled,
                   locale,
+                ),
+                absoluteDate: formatDate(
+                  new Date(parseInt(account.last_reconciled ?? '0', 10)),
+                  dateFormat,
+                  { locale },
                 ),
               })
             : t('Not yet reconciled')}

@@ -30,6 +30,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { format as formatDate } from 'date-fns';
 
 import { tsToRelativeTime } from 'loot-core/shared/util';
 import {
@@ -50,6 +51,7 @@ import { FiltersStack } from '@desktop-client/components/filters/FiltersStack';
 import { type SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
 import { NotesButton } from '@desktop-client/components/NotesButton';
 import { SelectedTransactionsButton } from '@desktop-client/components/transactions/SelectedTransactionsButton';
+import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
@@ -198,6 +200,7 @@ export function AccountHeader({
   const isServerOffline = syncServerStatus === 'offline';
   const [_, setExpandSplitsPref] = useLocalPref('expand-splits');
 
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const locale = useLocale();
 
   let canSync = !!(account?.account_id && isUsingServer);
@@ -389,7 +392,22 @@ export function AccountHeader({
                 }}
                 content={
                   account?.last_reconciled
-                    ? `${t('Reconciled')} ${tsToRelativeTime(account.last_reconciled, locale)}`
+                    ? t(
+                        'Reconciled {{ relativeTimeAgo }} ({{ absoluteDate }})',
+                        {
+                          relativeTimeAgo: tsToRelativeTime(
+                            account.last_reconciled,
+                            locale,
+                          ),
+                          absoluteDate: formatDate(
+                            new Date(
+                              parseInt(account.last_reconciled ?? '0', 10),
+                            ),
+                            dateFormat,
+                            { locale },
+                          ),
+                        },
+                      )
                     : t('Not yet reconciled')
                 }
                 placement="top"

@@ -489,7 +489,11 @@ function RecurringScheduleTooltip({
         </Text>
         <Input
           id="interval"
-          style={{ width: 40 }}
+          style={{
+            minWidth: '7ch',
+            width: `${String(config.interval || 1).length + 4}ch`,
+            maxWidth: '12ch',
+          }}
           type="number"
           min={1}
           onChangeValue={value => updateField('interval', value)}
@@ -626,7 +630,7 @@ export function RecurringSchedulePicker({
 
       <Popover
         triggerRef={triggerRef}
-        style={{ padding: 10, width: 380 }}
+        style={{ padding: 10, minWidth: 380, width: 'auto', maxWidth: '100%' }}
         placement="bottom start"
         isOpen={isOpen}
         onOpenChange={() => setIsOpen(false)}

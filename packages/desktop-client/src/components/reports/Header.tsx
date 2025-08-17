@@ -160,7 +160,7 @@ export function Header({
             {show1Month && (
               <Button
                 variant="bare"
-                onPress={() => onChangeDates(...getLatestRange(1))}
+                onPress={() => onChangeDates(...getLatestRange(0))}
               >
                 <Trans>1 month</Trans>
               </Button>
@@ -218,6 +218,24 @@ export function Header({
               }
             >
               <Trans>Last year</Trans>
+            </Button>
+            <Button
+              variant="bare"
+              onPress={() =>
+                onChangeDates(
+                  ...convertToMonth(
+                    ...getLiveRange(
+                      'Prior year to date',
+                      earliestTransaction,
+                      false,
+                      firstDayOfWeekIdx,
+                    ),
+                    'priorYearToDate',
+                  ),
+                )
+              }
+            >
+              <Trans>Prior year to date</Trans>
             </Button>
             <Button
               variant="bare"

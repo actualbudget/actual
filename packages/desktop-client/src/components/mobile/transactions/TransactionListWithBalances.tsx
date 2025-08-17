@@ -6,10 +6,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  type AccountEntity,
-  type TransactionEntity,
-} from 'loot-core/types/models';
+import { type TransactionEntity } from 'loot-core/types/models';
 
 import { TransactionList } from './TransactionList';
 
@@ -92,7 +89,7 @@ type TransactionListWithBalancesProps = {
   onLoadMore: () => void;
   onOpenTransaction: (transaction: TransactionEntity) => void;
   onRefresh?: () => void;
-  account?: AccountEntity;
+  showMakeTransfer?: boolean;
 };
 
 export function TransactionListWithBalances({
@@ -107,7 +104,7 @@ export function TransactionListWithBalances({
   onLoadMore,
   onOpenTransaction,
   onRefresh,
-  account,
+  showMakeTransfer = false,
 }: TransactionListWithBalancesProps) {
   const selectedInst = useSelected('transactions', [...transactions], []);
 
@@ -142,7 +139,7 @@ export function TransactionListWithBalances({
           />
         </View>
         <PullToRefresh
-          isPullable={!!onRefresh}
+          isPullable={!isLoading && !!onRefresh}
           onRefresh={async () => onRefresh?.()}
         >
           <TransactionList
@@ -151,7 +148,7 @@ export function TransactionListWithBalances({
             isLoadingMore={isLoadingMore}
             onLoadMore={onLoadMore}
             onOpenTransaction={onOpenTransaction}
-            account={account}
+            showMakeTransfer={showMakeTransfer}
           />
         </PullToRefresh>
       </>

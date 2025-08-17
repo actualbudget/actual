@@ -4,12 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { View } from '@actual-app/components/view';
 import { debounce } from 'debounce';
 
-import { amountToCurrency } from 'loot-core/shared/util';
-
 import { chartTheme } from './chart-theme';
 import { LoadingIndicator } from './LoadingIndicator';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
@@ -18,6 +17,7 @@ const CONTAINER_MARGIN = 8;
 
 type SummaryNumberProps = {
   value: number;
+  contentType: string;
   animate?: boolean;
   suffix?: string;
   loading?: boolean;
@@ -27,6 +27,7 @@ type SummaryNumberProps = {
 
 export function SummaryNumber({
   value,
+  contentType,
   animate = false,
   suffix = '',
   loading = true,
@@ -36,7 +37,14 @@ export function SummaryNumber({
   const { t } = useTranslation();
   const [fontSize, setFontSize] = useState<number>(initialFontSize);
   const refDiv = useRef<HTMLDivElement>(null);
-  const displayAmount = amountToCurrency(Math.abs(value)) + suffix;
+  const format = useFormat();
+
+  let displayAmount =
+    contentType === 'percentage'
+      ? format(Math.abs(value), 'number')
+      : format(Math.abs(Math.round(value)), 'financial');
+
+  displayAmount += suffix;
 
   const handleResize = debounce(() => {
     if (!refDiv.current) return;

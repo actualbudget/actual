@@ -23,7 +23,11 @@ export const View = forwardRef<HTMLDivElement, ViewProps>((props, ref) => {
       {...restProps}
       ref={innerRef ?? ref}
       style={nativeStyle}
-      className={cx('view', className, css(style))}
+      className={cx(
+        'view',
+        className,
+        style && Object.keys(style).length > 0 ? css(style) : undefined,
+      )}
     />
   );
 });

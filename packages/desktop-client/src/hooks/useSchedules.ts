@@ -143,11 +143,12 @@ export function useSchedules({
     ...data,
   };
 }
-export function accountSchedulesQuery(
-  accountId?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized',
+
+export function getSchedulesQuery(
+  view?: AccountEntity['id'] | 'onbudget' | 'offbudget' | 'uncategorized',
 ) {
-  const filterByAccount = accountFilter(accountId, '_account');
-  const filterByPayee = accountFilter(accountId, '_payee.transfer_acct');
+  const filterByAccount = accountFilter(view, '_account');
+  const filterByPayee = accountFilter(view, '_payee.transfer_acct');
 
   let query = q('schedules')
     .select('*')
@@ -155,8 +156,8 @@ export function accountSchedulesQuery(
       $and: [{ '_account.closed': false }],
     });
 
-  if (accountId) {
-    if (accountId === 'uncategorized') {
+  if (view) {
+    if (view === 'uncategorized') {
       query = query.filter({ next_date: null });
     } else {
       query = query.filter({
