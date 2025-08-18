@@ -287,7 +287,7 @@ export async function getScheduleById(
 
 // Runner
 export async function runRules(
-  trans: TransactionEntity,
+  trans,
   accounts: Map<string, db.DbAccount> | null = null,
 ) {
   let accountsMap: Map<string, db.DbAccount> = null;
@@ -311,7 +311,7 @@ export async function runRules(
 
     rule.apply(finalTrans);
   } else {
-    console.log('schedule has a value');
+    console.log('schedule is null');
     const rules = rankRules(
       fastSetMerge(
         firstcharIndexer.getApplicableRules(trans),
