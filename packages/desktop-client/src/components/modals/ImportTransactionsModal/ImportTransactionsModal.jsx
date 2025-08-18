@@ -718,10 +718,10 @@ export function ImportTransactionsModal({
   ]);
 
   const headers = [
-    { name: 'Date', width: 200 },
-    { name: 'Payee', width: 'flex' },
-    { name: 'Notes', width: 'flex' },
-    { name: 'Category', width: 'flex' },
+    { name: t('Date'), width: 200 },
+    { name: t('Payee'), width: 'flex' },
+    { name: t('Notes'), width: 'flex' },
+    { name: t('Category'), width: 'flex' },
   ];
 
   if (reconcile) {

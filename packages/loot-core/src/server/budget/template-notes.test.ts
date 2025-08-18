@@ -6,7 +6,7 @@ import {
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
-import { checkTemplates, storeTemplates } from './template-notes';
+import { checkTemplateNotes, storeNoteTemplates } from './template-notes';
 
 vi.mock('../db');
 vi.mock('./statements');
@@ -22,10 +22,10 @@ function mockGetActiveSchedules(schedules: db.DbSchedule[]) {
 }
 
 function mockDbUpdate() {
-  vi.mocked(db.update).mockResolvedValue(undefined);
+  vi.mocked(db.updateWithSchema).mockResolvedValue(undefined);
 }
 
-describe('storeTemplates', () => {
+describe('storeNoteTemplates', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -131,19 +131,20 @@ describe('storeTemplates', () => {
       mockDbUpdate();
 
       // When
-      await storeTemplates();
+      await storeNoteTemplates();
 
       // Then
       if (expectedTemplates.length === 0) {
-        expect(db.update).not.toHaveBeenCalled();
+        expect(db.updateWithSchema).not.toHaveBeenCalled();
         expect(resetCategoryGoalDefsWithNoTemplates).toHaveBeenCalled();
         return;
       }
 
       mockTemplateNotes.forEach(({ id }) => {
-        expect(db.update).toHaveBeenCalledWith('categories', {
+        expect(db.updateWithSchema).toHaveBeenCalledWith('categories', {
           id,
           goal_def: JSON.stringify(expectedTemplates),
+          template_settings: { source: 'notes' },
         });
       });
       expect(resetCategoryGoalDefsWithNoTemplates).toHaveBeenCalled();
@@ -266,7 +267,7 @@ describe('checkTemplates', () => {
       mockGetActiveSchedules(mockSchedules);
 
       // When
-      const result = await checkTemplates();
+      const result = await checkTemplateNotes();
 
       // Then
       expect(result).toEqual(expected);

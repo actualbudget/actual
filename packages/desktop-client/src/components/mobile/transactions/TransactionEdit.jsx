@@ -70,6 +70,7 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
@@ -486,6 +487,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
   const transactions = useMemo(
     () =>
       unserializedTransactions.map(t => serializeTransaction(t, dateFormat)) ||
@@ -647,6 +649,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   name: 'category-autocomplete',
                   options: {
                     categoryGroups,
+                    showHiddenCategories,
                     month: monthUtils.monthFromDate(
                       unserializedTransaction.date,
                     ),
@@ -728,6 +731,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
       transaction.id,
       transactions,
       unserializedTransactions,
+      showHiddenCategories,
     ],
   );
 
@@ -739,8 +743,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
         dispatch(
           pushModal({
             modal: {
-              name: 'confirm-transaction-delete',
+              name: 'confirm-delete',
               options: {
+                message: t('Are you sure you want to delete the transaction?'),
                 onConfirm: () => {
                   onDelete(id);
 
@@ -774,7 +779,14 @@ const TransactionEditInner = memo(function TransactionEditInner({
         onConfirmDelete();
       }
     },
-    [dispatch, navigate, onClearActiveEdit, onDelete, unserializedTransactions],
+    [
+      dispatch,
+      navigate,
+      onClearActiveEdit,
+      onDelete,
+      unserializedTransactions,
+      t,
+    ],
   );
 
   const scrollChildTransactionIntoView = useCallback(id => {

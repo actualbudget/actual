@@ -1,17 +1,20 @@
 interface BaseTemplate {
   type: string;
-  priority?: number;
-  directive: string;
+  directive: 'template' | 'goal' | 'error';
+}
+interface BaseTemplateWithPriority extends BaseTemplate {
+  priority: number;
+  directive: 'template';
 }
 
-export interface PercentageTemplate extends BaseTemplate {
+export interface PercentageTemplate extends BaseTemplateWithPriority {
   type: 'percentage';
   percent: number;
   previous: boolean;
   category: string;
 }
 
-export interface PeriodicTemplate extends BaseTemplate {
+export interface PeriodicTemplate extends BaseTemplateWithPriority {
   type: 'periodic';
   amount: number;
   period: {
@@ -27,7 +30,7 @@ export interface PeriodicTemplate extends BaseTemplate {
   };
 }
 
-export interface ByTemplate extends BaseTemplate {
+export interface ByTemplate extends BaseTemplateWithPriority {
   type: 'by';
   amount: number;
   month: string;
@@ -36,7 +39,7 @@ export interface ByTemplate extends BaseTemplate {
   from?: string;
 }
 
-export interface SpendTemplate extends BaseTemplate {
+export interface SpendTemplate extends BaseTemplateWithPriority {
   type: 'spend';
   amount: number;
   month: string;
@@ -45,7 +48,7 @@ export interface SpendTemplate extends BaseTemplate {
   repeat?: number;
 }
 
-export interface SimpleTemplate extends BaseTemplate {
+export interface SimpleTemplate extends BaseTemplateWithPriority {
   type: 'simple';
   monthly?: number;
   limit?: {
@@ -56,11 +59,21 @@ export interface SimpleTemplate extends BaseTemplate {
   };
 }
 
-export interface ScheduleTemplate extends BaseTemplate {
+export interface ScheduleTemplate extends BaseTemplateWithPriority {
   type: 'schedule';
   name: string;
   full?: boolean;
   adjustment?: number;
+}
+
+export interface AverageTemplate extends BaseTemplateWithPriority {
+  type: 'average';
+  numMonths: number;
+}
+
+export interface CopyTemplate extends BaseTemplateWithPriority {
+  type: 'copy';
+  lookBack: number;
 }
 
 export interface RemainderTemplate extends BaseTemplate {
@@ -72,27 +85,21 @@ export interface RemainderTemplate extends BaseTemplate {
     period?: 'daily' | 'weekly' | 'monthly';
     start?: string;
   };
-}
-
-export interface AverageTemplate extends BaseTemplate {
-  type: 'average';
-  numMonths: number;
+  directive: 'template';
+  priority: null;
 }
 
 export interface GoalTemplate extends BaseTemplate {
   type: 'goal';
   amount: number;
-}
-
-export interface CopyTemplate extends BaseTemplate {
-  type: 'copy';
-  lookBack: number;
+  directive: 'goal';
 }
 
 interface ErrorTemplate extends BaseTemplate {
   type: 'error';
   line: string;
   error: string;
+  directive: 'error';
 }
 
 export type Template =

@@ -51,6 +51,7 @@ type CommonAutocompleteProps<T extends AutocompleteItem> = {
   clearOnSelect?: boolean;
   closeOnBlur?: boolean;
   closeOnSelect?: boolean;
+  updateOnValueChange?: boolean;
   onClose?: () => void;
 };
 
@@ -234,6 +235,7 @@ function SingleAutocomplete<T extends AutocompleteItem>({
   clearOnSelect = false,
   closeOnBlur = true,
   closeOnSelect = !clearOnSelect,
+  updateOnValueChange = false,
   onClose,
   value: initialValue,
 }: SingleAutocompleteProps<T>) {
@@ -261,11 +263,12 @@ function SingleAutocomplete<T extends AutocompleteItem>({
   const itemsViewRef = useRef(null);
 
   const { isNarrowWidth } = useResponsive();
-  const narrowInputStyle = isNarrowWidth
-    ? {
-        ...styles.mobileMenuItem,
-      }
-    : {};
+  const narrowInputStyle =
+    embedded && isNarrowWidth
+      ? {
+          ...styles.mobileMenuItem,
+        }
+      : {};
 
   inputProps = {
     ...inputProps,
@@ -280,6 +283,16 @@ function SingleAutocomplete<T extends AutocompleteItem>({
   useEffect(() => {
     setSelectedItem(findItem(strict, suggestions, initialValue));
   }, [initialValue, suggestions, strict]);
+
+  // Sometimes (khem, khem.. on mobile) we want to force update
+  // the "value" field (which is also used as a search term) if
+  // the initial value changes.
+  useEffect(() => {
+    if (updateOnValueChange) {
+      const item = findItem(strict, suggestions, initialValue);
+      setValue(item ? getItemName(item) : '');
+    }
+  }, [strict, suggestions, initialValue, updateOnValueChange]);
 
   function resetState(newValue?: string) {
     const val = newValue === undefined ? initialValue : newValue;

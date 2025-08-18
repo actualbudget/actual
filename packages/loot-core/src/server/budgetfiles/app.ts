@@ -622,6 +622,9 @@ async function _loadBudget(id: Budget['id']): Promise<{
 
       await cloudStorage.possiblyUpload();
     }
+  } else {
+    // we're in a test - disable the sync
+    setSyncingMode('disabled');
   }
 
   app.events.emit('load-budget', { id });

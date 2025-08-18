@@ -80,14 +80,6 @@ function CategoryList({
   const { t } = useTranslation();
   let lastGroup: string | undefined | null = null;
 
-  const filteredItems = useMemo(
-    () =>
-      showHiddenItems
-        ? items
-        : items.filter(item => !item.hidden && !item.group?.hidden),
-    [showHiddenItems, items],
-  );
-
   return (
     <View>
       <View
@@ -98,7 +90,7 @@ function CategoryList({
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
-        {filteredItems.map((item, idx) => {
+        {items.map((item, idx) => {
           if (item.id === 'split') {
             return renderSplitTransactionButton({
               key: 'split',
@@ -133,7 +125,9 @@ function CategoryList({
                   embedded,
                   style: {
                     ...(showHiddenItems &&
-                      item.hidden && { color: theme.pageTextSubdued }),
+                      (item.hidden || item.group?.hidden) && {
+                        color: theme.pageTextSubdued,
+                      }),
                   },
                   showBalances,
                 })}
@@ -193,24 +187,37 @@ export function CategoryAutocomplete({
   ...props
 }: CategoryAutocompleteProps) {
   const { grouped: defaultCategoryGroups = [] } = useCategories();
-  const categorySuggestions: CategoryAutocompleteItem[] = useMemo(
-    () =>
-      (categoryGroups || defaultCategoryGroups).reduce(
-        (list, group) =>
-          list.concat(
-            (group.categories || [])
-              .filter(category => category.group === group.id)
-              .map(category => ({
-                ...category,
-                group,
-              })),
-          ),
-        showSplitOption
-          ? [{ id: 'split', name: '' } as CategoryAutocompleteItem]
-          : [],
-      ),
-    [defaultCategoryGroups, categoryGroups, showSplitOption],
-  );
+  const categorySuggestions: CategoryAutocompleteItem[] = useMemo(() => {
+    const allSuggestions = (categoryGroups || defaultCategoryGroups).reduce(
+      (list, group) =>
+        list.concat(
+          (group.categories || [])
+            .filter(category => category.group === group.id)
+            .map(category => ({
+              ...category,
+              group,
+            })),
+        ),
+      showSplitOption
+        ? [{ id: 'split', name: '' } as CategoryAutocompleteItem]
+        : [],
+    );
+
+    if (!showHiddenCategories) {
+      return allSuggestions.filter(
+        suggestion =>
+          suggestion.id === 'split' ||
+          (!suggestion.hidden && !suggestion.group?.hidden),
+      );
+    }
+
+    return allSuggestions;
+  }, [
+    defaultCategoryGroups,
+    categoryGroups,
+    showSplitOption,
+    showHiddenCategories,
+  ]);
 
   const filterSuggestions = useCallback(
     (
@@ -429,7 +436,7 @@ function CategoryItem({
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
         <TextOneLine>
           {item.name}
-          {item.hidden ? ' ' + t('(hidden)') : null}
+          {item.hidden || item.group?.hidden ? ' ' + t('(hidden)') : ''}
         </TextOneLine>
         <TextOneLine
           style={{
