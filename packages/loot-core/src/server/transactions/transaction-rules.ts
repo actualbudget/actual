@@ -34,6 +34,7 @@ import {
 import { batchMessages, addSyncListener } from '../sync';
 
 import { batchUpdateTransactions } from '.';
+import type { ScheduleEntity } from '../../types/models';
 
 // TODO: Detect if it looks like the user is creating a rename rule
 // and prompt to create it in the pre phase instead
@@ -275,12 +276,19 @@ function onApplySync(oldValues, newValues) {
   }
 }
 
+export async function getScheduleById(id: string): Promise<ScheduleEntity | null> {
+  return await db.first<ScheduleEntity>(
+    'SELECT * FROM schedules WHERE id = ?',
+    [id]
+  );
+}
+
 // Runner
 export async function runRules(
-  trans,
+  trans: TransactionEntity,
   accounts: Map<string, db.DbAccount> | null = null,
 ) {
-  let accountsMap = null;
+  let accountsMap: Map<string, db.DbAccount> = null;
   if (accounts === null) {
     accountsMap = new Map(
       (await db.getAccounts()).map(account => [account.id, account]),
@@ -289,8 +297,21 @@ export async function runRules(
     accountsMap = accounts;
   }
 
+  // figure out how get schedules based off account. 
+console.log(`before processing ${trans.schedule};`);
+
+    let schedule = await getScheduleById(trans.schedule)
+
   let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap);
 
+    if (schedule != null || schedule != undefined) {
+console.log("schedule has a value");
+        let rule = allRules.get(schedule.rule)
+
+        rule.apply(finalTrans);
+
+    } else {
+        console.log("schedule has a value");
   const rules = rankRules(
     fastSetMerge(
       firstcharIndexer.getApplicableRules(trans),
@@ -298,9 +319,13 @@ export async function runRules(
     ),
   );
 
-  for (let i = 0; i < rules.length; i++) {
+    for (let i = 0; i < rules.length; i++) {
     finalTrans = rules[i].apply(finalTrans);
   }
+
+    }
+console.log(`after processing ${finalTrans.schedule};`);
+
 
   return await finalizeTransactionForRules(finalTrans);
 }

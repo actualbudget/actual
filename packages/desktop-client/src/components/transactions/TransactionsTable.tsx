@@ -2341,6 +2341,7 @@ export const TransactionTable = forwardRef(
 
     const transactionsWithExpandedSplits = useMemo(() => {
       let result: TransactionEntity[];
+
       if (splitsExpanded.state.transitionId != null) {
         const index = props.transactions.findIndex(
           t => t.id === splitsExpanded.state.transitionId,
@@ -2376,11 +2377,13 @@ export const TransactionTable = forwardRef(
       prevSplitsExpanded.current = splitsExpanded;
       return result;
     }, [props.transactions, splitsExpanded]);
+
     const transactionMap = useMemo(() => {
       return new Map(
         transactionsWithExpandedSplits.map(trans => [trans.id, trans]),
       );
     }, [transactionsWithExpandedSplits]);
+    
     const transactionsByParent = useMemo(() => {
       return props.transactions.reduce(
         (acc, trans) => {

@@ -34,10 +34,7 @@ function loadStatuses(
 ) {
   return liveQuery<TransactionEntity>(getHasTransactionsQuery(schedules), {
     onData: data => {
-      const hasTrans = data.filter(Boolean).map(row => row.schedule);
-      logger.info('Schedules #:', schedules.length, schedules);
-
-      logger.info('trans #:', hasTrans);
+     const hasTrans = new Set(data.filter(Boolean).map(row => row.schedule));
 
       const scheduleStatuses = new Map(
         schedules.map(s => [
@@ -45,13 +42,11 @@ function loadStatuses(
           getStatus(
             s.next_date,
             s.completed,
-            hasTrans.includes(s.id),
+            hasTrans.has(s.id),
             upcomingLength,
           ),
         ]),
       ) as ScheduleStatuses;
-
-      logger.info('statuses:', scheduleStatuses);
 
       onData?.(scheduleStatuses);
     },
@@ -170,8 +165,6 @@ export function accountSchedulesQuery(
       });
     }
   }
-
-  logger.info('query #:', query);
 
   return query.orderBy({ next_date: 'desc' });
 }

@@ -346,6 +346,11 @@ export function usePreviewTransactions({
       return;
     }
 
+    console.log("before promise:");
+scheduleTransactions.forEach(item => {
+  console.log(item.schedule);
+});
+
     setIsLoading(true);
 
     Promise.all(
@@ -368,7 +373,7 @@ export function usePreviewTransactions({
               }),
             ),
           }));
-
+          
           const ungroupedTransactions = ungroupTransactions(withDefaults);
           setPreviewTransactions(ungroupedTransactions);
 
@@ -399,6 +404,11 @@ export function usePreviewTransactions({
       isUnmounted = true;
     };
   }, [scheduleTransactions, schedules, statuses, upcomingLength]);
+
+    console.log("after promise:");
+previewTransactions.forEach(item => {
+  console.log(item.schedule);
+});
 
   const returnError = error || scheduleQueryError;
   return {
