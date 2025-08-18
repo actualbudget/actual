@@ -65,8 +65,10 @@ export function SpendingCard({
         : monthUtils.getDay(monthUtils.currentDay()) - 1;
   const difference =
     data &&
-    data.intervalData[todayDay][selection] -
-      data.intervalData[todayDay].compare;
+    Math.round(
+      data.intervalData[todayDay][selection] -
+        data.intervalData[todayDay].compare,
+    );
 
   return (
     <ReportCard

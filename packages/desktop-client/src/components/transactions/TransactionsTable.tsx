@@ -109,6 +109,7 @@ import {
 import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { usePrevious } from '@desktop-client/hooks/usePrevious';
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
@@ -866,6 +867,7 @@ type TransactionProps = {
   listContainerRef?: RefObject<HTMLDivElement>;
   showSelection?: boolean;
   allowSplitTransaction?: boolean;
+  showHiddenCategories?: boolean;
 };
 
 const Transaction = memo(function Transaction({
@@ -912,6 +914,7 @@ const Transaction = memo(function Transaction({
   listContainerRef,
   showSelection,
   allowSplitTransaction,
+  showHiddenCategories,
 }: TransactionProps) {
   const { t } = useTranslation();
 
@@ -1567,7 +1570,7 @@ const Transaction = memo(function Transaction({
                 inputProps={{ onBlur, onKeyDown, style: inputStyle }}
                 onUpdate={onUpdate}
                 onSelect={onSave}
-                showHiddenCategories={false}
+                showHiddenCategories={showHiddenCategories}
               />
             </SheetNameProvider>
           )}
@@ -1771,6 +1774,7 @@ type NewTransactionProps = {
   transferAccountsByTransaction: {
     [id: TransactionEntity['id']]: AccountEntity | null;
   };
+  showHiddenCategories?: boolean;
 };
 function NewTransaction({
   transactions,
@@ -1800,6 +1804,7 @@ function NewTransaction({
   onNavigateToSchedule,
   onNotesTagClick,
   balance,
+  showHiddenCategories,
 }: NewTransactionProps) {
   const error = transactions[0].error;
   const isDeposit = transactions[0].amount > 0;
@@ -1862,6 +1867,7 @@ function NewTransaction({
           balance={balance ?? 0}
           showSelection={true}
           allowSplitTransaction={true}
+          showHiddenCategories={showHiddenCategories}
         />
       ))}
       <View
@@ -1980,6 +1986,7 @@ type TransactionTableInnerProps = {
   onManagePayees: (id?: PayeeEntity['id']) => void;
 
   onSort: (field: string, ascDesc: 'asc' | 'desc') => void;
+  showHiddenCategories?: boolean;
 };
 
 function TransactionTableInner({
@@ -1989,6 +1996,7 @@ function TransactionTableInner({
   dateFormat = 'MM/dd/yyyy',
   newNavigator,
   renderEmpty,
+  showHiddenCategories,
   ...props
 }: TransactionTableInnerProps) {
   const containerRef = createRef<HTMLDivElement>();
@@ -2153,6 +2161,7 @@ function TransactionTableInner({
         listContainerRef={listContainerRef}
         showSelection={showSelection}
         allowSplitTransaction={allowSplitTransaction}
+        showHiddenCategories={showHiddenCategories}
       />
     );
   };
@@ -2215,6 +2224,7 @@ function TransactionTableInner({
               onNavigateToSchedule={onNavigateToSchedule}
               onNotesTagClick={onNotesTagClick}
               onDistributeRemainder={props.onDistributeRemainder}
+              showHiddenCategories={showHiddenCategories}
             />
           </View>
         )}
@@ -2325,6 +2335,7 @@ export const TransactionTable = forwardRef(
     const { t } = useTranslation();
 
     const dispatch = useDispatch();
+    const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
     const [newTransactions, setNewTransactions] = useState<
       TransactionEntity[] | null
     >(null);
@@ -2948,6 +2959,7 @@ export const TransactionTable = forwardRef(
         newNavigator={newNavigator}
         showSelection={props.showSelection}
         allowSplitTransaction={props.allowSplitTransaction}
+        showHiddenCategories={showHiddenCategories}
       />
     );
   },

@@ -17,5 +17,5 @@ do
     cp "${f}" "${d}"
 done
 cd "$ROOT"
-yarn webpack --config ./webpack/webpack.api.config.js;
+yarn vite build --config ./vite.api.config.ts;
 ./bin/copy-migrations ../api

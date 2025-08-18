@@ -33,7 +33,7 @@ import {
   updateRule,
 } from '../transactions/transaction-rules';
 import { undoable } from '../undo';
-import { Schedule as RSchedule } from '../util/rschedule';
+import { RSchedule } from '../util/rschedule';
 
 import { findSchedules } from './find-schedules';
 

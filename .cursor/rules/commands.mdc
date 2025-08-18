@@ -1,0 +1,12 @@
+---
+alwaysApply: true
+---
+
+When running yarn commands - always run them in the root directory. Do not run them in child workspaces.
+
+The following commands can be useful:
+
+- `yarn typecheck` to run typechecker
+- `yarn lint` to run the code linter and formatter
+- `yarn lint:fix` to fix some of the code lint issues (running this is preferred over `yarn lint`)
+- `yarn test` to run all the tests
