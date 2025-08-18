@@ -97,7 +97,7 @@ test.describe('Schedules', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-    test('creates two new schedules, posts both transactions and later completes one', async () => {
+  test('creates two new schedules, posts both transactions and later completes one', async () => {
     test.setTimeout(40000);
 
     // Adding two schedules with the same payee and account and amount, mimicking two different subscriptions
