@@ -113,26 +113,26 @@ test.describe('Schedules', () => {
       amount: 5,
     });
 
-    const schedule = schedulesPage.getNthSchedule(2);
+    const schedule = schedulesPage.getNthSchedule(3);
     await expect(schedule.payee).toHaveText('Apple');
     await expect(schedule.account).toHaveText('HSBC');
     await expect(schedule.amount).toHaveText('~5.00');
     await expect(schedule.status).toHaveText('Due');
     await expect(page).toMatchThemeScreenshots();
 
-    const schedule2 = schedulesPage.getNthSchedule(3);
+    const schedule2 = schedulesPage.getNthSchedule(4);
     await expect(schedule2.payee).toHaveText('Apple');
     await expect(schedule2.account).toHaveText('HSBC');
     await expect(schedule2.amount).toHaveText('~5.00');
     await expect(schedule2.status).toHaveText('Due');
     await expect(page).toMatchThemeScreenshots();
 
-    await schedulesPage.postNthSchedule(2);
-    await expect(schedulesPage.getNthSchedule(2).status).toHaveText('Paid');
+    await schedulesPage.postNthSchedule(3);
+    await expect(schedulesPage.getNthSchedule(3).status).toHaveText('Paid');
     await expect(page).toMatchThemeScreenshots();
 
-    await schedulesPage.postNthSchedule(3);
-    await expect(schedulesPage.getNthSchedule(2).status).toHaveText('Paid');
+    await schedulesPage.postNthSchedule(4);
+    await expect(schedulesPage.getNthSchedule(4).status).toHaveText('Paid');
     await expect(page).toMatchThemeScreenshots();
 
     // Go to transactions page
