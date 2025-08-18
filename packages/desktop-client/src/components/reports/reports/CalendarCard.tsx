@@ -376,6 +376,7 @@ function CalendarCardInner({
             containerWidth > suitableFormat.width
           ) {
             setMonthNameFormats(prev => {
+              if (prev[index] === suitableFormat.format) return prev;
               const newArray = [...prev];
               newArray[index] = suitableFormat.format;
               return newArray;
