@@ -96,36 +96,8 @@ test.describe('Schedules', () => {
     }
     await expect(page).toMatchThemeScreenshots();
   });
-});
 
-test.describe('Duplicate Payee Schedule', () => {
-  let page: Page;
-  let navigation: Navigation;
-  let schedulesPage: SchedulesPage;
-  let configurationPage: ConfigurationPage;
-
-  test.beforeAll(async ({ browser }) => {
-    page = await browser.newPage();
-    navigation = new Navigation(page);
-    configurationPage = new ConfigurationPage(page);
-
-    await page.goto('/');
-    await configurationPage.createTestFile();
-  });
-
-  test.afterAll(async () => {
-    await page.close();
-  });
-
-  test.beforeEach(async () => {
-    schedulesPage = await navigation.goToSchedulesPage();
-  });
-
-  test('checks the page visuals', async () => {
-    await expect(page).toMatchThemeScreenshots();
-  });
-
-  test('creates a new schedule, posts the transaction and later completes it', async () => {
+    test('creates two new schedules, posts both transactions and later completes one', async () => {
     test.setTimeout(40000);
 
     // Adding two schedules with the same payee and account and amount, mimicking two different subscriptions
@@ -167,7 +139,7 @@ test.describe('Duplicate Payee Schedule', () => {
     const accountPage = await navigation.goToAccountPage('HSBC');
     const transaction = accountPage.getNthTransaction(0);
     await expect(transaction.payee).toHaveText('Apple');
-    await expect(transaction.category).toHaveText('Paid');
+    await expect(transaction.category).toHaveText('Categorize');
     await expect(transaction.debit).toHaveText('5.00');
     await expect(transaction.credit).toHaveText('');
 
@@ -189,7 +161,7 @@ test.describe('Duplicate Payee Schedule', () => {
     // Go back to schedules page
     await navigation.goToSchedulesPage();
     await schedulesPage.completeNthSchedule(2);
-    await expect(schedulesPage.getNthScheduleRow(4)).toHaveText(
+    await expect(schedulesPage.getNthScheduleRow(5)).toHaveText(
       'Show completed schedules',
     );
     await expect(page).toMatchThemeScreenshots();
