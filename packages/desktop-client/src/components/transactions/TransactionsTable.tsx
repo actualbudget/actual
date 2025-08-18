@@ -2383,7 +2383,7 @@ export const TransactionTable = forwardRef(
         transactionsWithExpandedSplits.map(trans => [trans.id, trans]),
       );
     }, [transactionsWithExpandedSplits]);
-    
+
     const transactionsByParent = useMemo(() => {
       return props.transactions.reduce(
         (acc, trans) => {

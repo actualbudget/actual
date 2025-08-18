@@ -14,7 +14,7 @@ import {
   type TransactionEntity,
   type RuleActionEntity,
   type RuleEntity,
-} from '../../types/models';
+type  ScheduleEntity } from '../../types/models';
 import { schemaConfig } from '../aql';
 import * as db from '../db';
 import { getPayee, getPayeeByName, insertPayee, getAccount } from '../db';
@@ -34,7 +34,6 @@ import {
 import { batchMessages, addSyncListener } from '../sync';
 
 import { batchUpdateTransactions } from '.';
-import type { ScheduleEntity } from '../../types/models';
 
 // TODO: Detect if it looks like the user is creating a rename rule
 // and prompt to create it in the pre phase instead
@@ -276,10 +275,12 @@ function onApplySync(oldValues, newValues) {
   }
 }
 
-export async function getScheduleById(id: string): Promise<ScheduleEntity | null> {
+export async function getScheduleById(
+  id: string,
+): Promise<ScheduleEntity | null> {
   return await db.first<ScheduleEntity>(
     'SELECT * FROM schedules WHERE id = ?',
-    [id]
+    [id],
   );
 }
 
@@ -297,34 +298,31 @@ export async function runRules(
     accountsMap = accounts;
   }
 
-  // figure out how get schedules based off account. 
-console.log(`before processing ${trans.schedule};`);
+  // figure out how get schedules based off account.
+  console.log(`before processing ${trans.schedule};`);
 
   let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap);
 
-    if (trans.schedule != null) {
-        let schedule = await getScheduleById(trans.schedule)
-console.log("schedule has a value");
-        let rule = allRules.get(schedule.rule)
+  if (trans.schedule != null) {
+    const schedule = await getScheduleById(trans.schedule);
+    console.log('schedule has a value');
+    const rule = allRules.get(schedule.rule);
 
-        rule.apply(finalTrans);
-
-    } else {
-        console.log("schedule has a value");
-  const rules = rankRules(
-    fastSetMerge(
-      firstcharIndexer.getApplicableRules(trans),
-      payeeIndexer.getApplicableRules(trans),
-    ),
-  );
+    rule.apply(finalTrans);
+  } else {
+    console.log('schedule has a value');
+    const rules = rankRules(
+      fastSetMerge(
+        firstcharIndexer.getApplicableRules(trans),
+        payeeIndexer.getApplicableRules(trans),
+      ),
+    );
 
     for (let i = 0; i < rules.length; i++) {
-    finalTrans = rules[i].apply(finalTrans);
-  }
-
+      finalTrans = rules[i].apply(finalTrans);
     }
-console.log(`after processing ${finalTrans.schedule};`);
-
+  }
+  console.log(`after processing ${finalTrans.schedule};`);
 
   return await finalizeTransactionForRules(finalTrans);
 }

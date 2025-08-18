@@ -33,7 +33,7 @@ function loadStatuses(
 ) {
   return liveQuery<TransactionEntity>(getHasTransactionsQuery(schedules), {
     onData: data => {
-     const hasTrans = new Set(data.filter(Boolean).map(row => row.schedule));
+      const hasTrans = new Set(data.filter(Boolean).map(row => row.schedule));
 
       const scheduleStatuses = new Map(
         schedules.map(s => [

@@ -346,10 +346,10 @@ export function usePreviewTransactions({
       return;
     }
 
-    console.log("before promise:");
-scheduleTransactions.forEach(item => {
-  console.log(item.schedule);
-});
+    console.log('before promise:');
+    scheduleTransactions.forEach(item => {
+      console.log(item.schedule);
+    });
 
     setIsLoading(true);
 
@@ -373,7 +373,7 @@ scheduleTransactions.forEach(item => {
               }),
             ),
           }));
-          
+
           const ungroupedTransactions = ungroupTransactions(withDefaults);
           setPreviewTransactions(ungroupedTransactions);
 
@@ -405,10 +405,10 @@ scheduleTransactions.forEach(item => {
     };
   }, [scheduleTransactions, schedules, statuses, upcomingLength]);
 
-    console.log("after promise:");
-previewTransactions.forEach(item => {
-  console.log(item.schedule);
-});
+  console.log('after promise:');
+  previewTransactions.forEach(item => {
+    console.log(item.schedule);
+  });
 
   const returnError = error || scheduleQueryError;
   return {
