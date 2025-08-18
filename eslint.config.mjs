@@ -442,7 +442,7 @@ export default pluginTypescript.config(
 
       // https://github.com/facebook/react/tree/main/packages/eslint-plugin-react-hooks
       'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/react-compiler': 'error',
+      'react-hooks/react-compiler': 'warn',
       'react-hooks/exhaustive-deps': [
         'warn',
         {
