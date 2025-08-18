@@ -85,16 +85,6 @@ test.describe('Schedules', () => {
       'Show completed schedules',
     );
     await expect(page).toMatchThemeScreenshots();
-
-    // Schedules search shouldn't shrink with many schedules
-    for (let i = 0; i < 10; i++) {
-      await schedulesPage.addNewSchedule({
-        payee: 'Home Depot',
-        account: 'HSBC',
-        amount: 0,
-      });
-    }
-    await expect(page).toMatchThemeScreenshots();
   });
 
   test('creates two new schedules, posts both transactions and later completes one', async () => {
@@ -166,4 +156,16 @@ test.describe('Schedules', () => {
     );
     await expect(page).toMatchThemeScreenshots();
   });
+
+    test('creates a "full" list of schedules', async () => {
+        // Schedules search shouldn't shrink with many schedules
+        for (let i = 0; i < 10; i++) {
+        await schedulesPage.addNewSchedule({
+            payee: 'Home Depot',
+            account: 'HSBC',
+            amount: 0,
+        });
+        }
+        await expect(page).toMatchThemeScreenshots();
+    });
 });
