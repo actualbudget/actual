@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 
-import { logger } from 'loot-core/platform/server/log';
 import { q, type Query } from 'loot-core/shared/query';
 import {
   getStatus,
