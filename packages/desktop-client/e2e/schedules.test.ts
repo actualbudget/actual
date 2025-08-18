@@ -157,15 +157,15 @@ test.describe('Schedules', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-    test('creates a "full" list of schedules', async () => {
-        // Schedules search shouldn't shrink with many schedules
-        for (let i = 0; i < 10; i++) {
-        await schedulesPage.addNewSchedule({
-            payee: 'Home Depot',
-            account: 'HSBC',
-            amount: 0,
-        });
-        }
-        await expect(page).toMatchThemeScreenshots();
-    });
+  test('creates a "full" list of schedules', async () => {
+    // Schedules search shouldn't shrink with many schedules
+    for (let i = 0; i < 10; i++) {
+      await schedulesPage.addNewSchedule({
+        payee: 'Home Depot',
+        account: 'HSBC',
+        amount: 0,
+      });
+    }
+    await expect(page).toMatchThemeScreenshots();
+  });
 });
