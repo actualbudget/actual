@@ -70,19 +70,21 @@ function ToBudget({ toBudget, onPress, show3Columns }) {
     >
       <Button variant="bare" onPress={onPress}>
         <View>
-          <AutoTextSize
-            as={Label}
-            minFontSizePx={6}
-            maxFontSizePx={12}
-            mode="oneline"
-            title={amount < 0 ? t('Overbudgeted') : t('To Budget')}
-            style={{
-              ...(amount < 0 ? styles.smallText : {}),
-              color: theme.formInputText,
-              flexShrink: 0,
-              textAlign: 'left',
-            }}
-          />
+          <View>
+            <AutoTextSize
+              as={Label}
+              minFontSizePx={6}
+              maxFontSizePx={12}
+              mode="oneline"
+              title={amount < 0 ? t('Overbudgeted') : t('To Budget')}
+              style={{
+                ...(amount < 0 ? styles.smallText : {}),
+                color: theme.formInputText,
+                flexShrink: 0,
+                textAlign: 'left',
+              }}
+            />
+          </View>
           <CellValue binding={toBudget} type="financial">
             {({ type, value }) => (
               <View>
@@ -458,14 +460,16 @@ function BudgetTableHeader({
                         }}
                       />
                     )}
-                    <AutoTextSize
-                      as={Label}
-                      minFontSizePx={6}
-                      maxFontSizePx={12}
-                      mode="oneline"
-                      title={t('Budgeted')}
-                      style={{ color: theme.formInputText, paddingRight: 4 }}
-                    />
+                    <View>
+                      <AutoTextSize
+                        as={Label}
+                        minFontSizePx={6}
+                        maxFontSizePx={12}
+                        mode="oneline"
+                        title={t('Budgeted')}
+                        style={{ color: theme.formInputText, paddingRight: 4 }}
+                      />
+                    </View>
                   </View>
                   <View>
                     <PrivacyFilter>
@@ -524,14 +528,16 @@ function BudgetTableHeader({
                         }}
                       />
                     )}
-                    <AutoTextSize
-                      as={Label}
-                      minFontSizePx={6}
-                      maxFontSizePx={12}
-                      mode="oneline"
-                      title={t('Spent')}
-                      style={{ color: theme.formInputText, paddingRight: 4 }}
-                    />
+                    <View>
+                      <AutoTextSize
+                        as={Label}
+                        minFontSizePx={6}
+                        maxFontSizePx={12}
+                        mode="oneline"
+                        title={t('Spent')}
+                        style={{ color: theme.formInputText, paddingRight: 4 }}
+                      />
+                    </View>
                   </View>
                   <View>
                     <PrivacyFilter>
@@ -566,14 +572,16 @@ function BudgetTableHeader({
           {({ type, value }) => (
             <View style={{ width: columnWidth }}>
               <View style={{ flex: 1, alignItems: 'flex-end !important' }}>
-                <AutoTextSize
-                  as={Label}
-                  minFontSizePx={6}
-                  maxFontSizePx={12}
-                  mode="oneline"
-                  title={t('Balance')}
-                  style={{ color: theme.formInputText }}
-                />
+                <View>
+                  <AutoTextSize
+                    as={Label}
+                    minFontSizePx={6}
+                    maxFontSizePx={12}
+                    mode="oneline"
+                    title={t('Balance')}
+                    style={{ color: theme.formInputText }}
+                  />
+                </View>
                 <View>
                   <PrivacyFilter>
                     <AutoTextSize
