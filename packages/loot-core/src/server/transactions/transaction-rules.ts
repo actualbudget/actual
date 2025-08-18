@@ -300,11 +300,10 @@ export async function runRules(
   // figure out how get schedules based off account. 
 console.log(`before processing ${trans.schedule};`);
 
-    let schedule = await getScheduleById(trans.schedule)
-
   let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap);
 
-    if (schedule != null || schedule != undefined) {
+    if (trans.schedule != null) {
+        let schedule = await getScheduleById(trans.schedule)
 console.log("schedule has a value");
         let rule = allRules.get(schedule.rule)
 
