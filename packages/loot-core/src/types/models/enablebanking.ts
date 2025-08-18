@@ -1,12 +1,11 @@
 export function isErrorResponse(response: unknown): response is ErrorResponse {
-  return (
-    (response as ErrorResponse).error_type !== undefined &&
-    (response as ErrorResponse).error_code !== undefined
-  );
+  return (response as ErrorResponse).error_code !== undefined;
 }
 
+export type ErrorCode = "SERVER"|"ENABLEBANKING_SESSION_CLOSED"|"TIME_OUT";
+
 export type ErrorResponse = {
-  error_code: string;
+  error_code: ErrorCode;
   error_type?: string;
 };
 

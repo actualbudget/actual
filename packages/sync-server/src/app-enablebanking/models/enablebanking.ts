@@ -41,7 +41,7 @@ export type EnableBankingStatusResponse = {
 
 export type EnableBankingTransaction = {
   amount:number;
-  payee:string;
+  payeeName:string;
   notes:string;
   date:string;
 }

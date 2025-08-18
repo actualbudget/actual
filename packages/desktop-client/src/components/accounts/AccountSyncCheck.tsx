@@ -12,10 +12,12 @@ import { type AccountEntity } from 'loot-core/types/models';
 
 import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
 import { Link } from '@desktop-client/components/common/Link';
-import { authorizeBank } from '@desktop-client/gocardless';
+import { authorizeBank } from '@desktop-client/banksync/gocardless';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useDispatch } from '@desktop-client/redux';
+import { ErrorCode as EnableBankingErrorCode } from 'loot-core/types/models/enablebanking';
+import { authorizeEnableBankingSession } from '@desktop-client/banksync/enablebanking';
 
 function useErrorMessage() {
   const { t } = useTranslation();
@@ -68,6 +70,13 @@ function useErrorMessage() {
           </Trans>
         );
 
+      case 'ENABLEBANKING_SESSION_CLOSED':
+        return (
+          <Trans>
+            The Enable Banking session has expired.
+          </Trans>
+        )
+
       default:
     }
 
@@ -99,7 +108,16 @@ export function AccountSyncCheck() {
       setOpen(false);
 
       if (acc.account_id) {
-        authorizeBank(dispatch);
+        switch (acc.account_sync_source){
+          case "goCardless":
+            authorizeBank(dispatch);
+            return;
+          case "enablebanking":
+            //TODO: skip choosing the bank since we have that info
+            authorizeEnableBankingSession(dispatch, acc, ()=> unlink(acc));
+            return;
+
+        }
       }
     },
     [dispatch],
@@ -131,9 +149,11 @@ export function AccountSyncCheck() {
   }
 
   const { type, code } = error;
+  console.log(error);
   const showAuth =
     (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
-    (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN');
+    (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN')||
+    (type === 'ENABLEBANKING_SESSION_CLOSED');
 
   return (
     <View>

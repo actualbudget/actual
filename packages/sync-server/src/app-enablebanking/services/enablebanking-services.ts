@@ -3,13 +3,16 @@ import { SecretName, secretsService } from '../../services/secrets-service.js';
 import {
   Account,
   AccountResource,
+  ASPSPData,
   AuthenticationStartResponse,
   EnableBankingToken,
   GetApplicationResponse,
   GetAspspsResponse,
   GetSessionResponse,
   HalBalances,
+  HalTransactions,
   StartAuthorizationResponse,
+  Transaction,
 } from '../models/models-enablebanking.js';
 import {
   handleEnableBankingError,
@@ -115,16 +118,26 @@ export const enableBankingservice = {
     return await enableBankingservice.get(`aspsps?${params.join('&')}`);
   },
 
+  getASPSP: async (country: string, name:string): Promise<ASPSPData> =>{
+    return await enableBankingservice.getASPSPs(country)
+    .then(resp => resp.aspsps.filter(aspsp => aspsp.name === name).at(0));
+  },
+
   startAuth: async (
     country: string,
     aspsp: string,
     host: string,
     exp: number,
   ): Promise<EnableBankingAuthenticationStartResponse> | never => {
+
+    const aspspData = await enableBankingservice.getASPSP(country, aspsp);
+    console.log(aspspData);
+    exp = Math.min(exp, aspspData.maximum_consent_validity);
+
     const valid_until = new Date();
     valid_until.setSeconds(valid_until.getSeconds() + exp);
 
-    const state = crypto.randomUUID();
+    const state = crypto.randomUUID();    
 
     const body = {
       access: {
@@ -150,6 +163,10 @@ export const enableBankingservice = {
   },
 
   authorizeSession: async (state: string, code: string) => {
+    if (enableBankingservice.getSessionIdFromState(state)){
+      return enableBankingservice.getSessionIdFromState(state);
+    }
+    console.log({code})
     const { session_id } = await enableBankingservice.post<{
       session_id: string;
     }>('sessions', { code });
@@ -197,7 +214,33 @@ export const enableBankingservice = {
     };
   },
 
-  getTransactions: async (account_id:string, start_date, end_date ) => {
+  getTransactions: async (account_id:string, date_from?:string, date_to?:string, bank_id?:string) => {
+    const params = new URLSearchParams();
+    if (date_from) {
+      params.set('date_from', date_from);
+    }
+    if(date_to){
+      params.set('date_to',date_to);
+    }
+
+    let finished = false;
+    const transactions:Transaction[] = [];
+    while (!finished) {
+      const data: HalTransactions = await enableBankingservice.get(`accounts/${account_id}/transactions?${params.toString()}`)
+
+      if(data.transactions){
+        transactions.push(...data.transactions);
+      }
+      if (data.continuation_key) {
+        params.set('continuation_key', data.continuation_key);
+      } else {
+        finished = true;
+      }
+    }
+
+    console.log(JSON.stringify(transactions.slice(0,10),null,2));
+
+    return transactions;
 
   }
 };

@@ -1,14 +1,13 @@
 import express, { Request, response, Response } from 'express';
 
-import { handleError } from '../app-gocardless/util/handle-error.js';
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '../util/middlewares.js';
 
 import { enableBankingservice } from './services/enablebanking-services.js';
-import {EnableBankingAuthenticationStartResponse, EnableBankingBank, EnableBankingStatusResponse, EnableBankingTransactionsResponse} from './models/enablebanking.js';
-import { HalTransactions, Transaction } from './models/models-enablebanking.js';
+import { EnableBankingAuthenticationStartResponse, EnableBankingBank, EnableBankingStatusResponse, EnableBankingTransactionsResponse, EnableBankingToken} from './models/enablebanking.js';
+import { BadRequestError, badRequestVariableError, ClosedSessionError, handleErrorInHandler, NotReadyError } from './utils/errors.js';
 
 const app = express();
 app.use(requestLoggerMiddleware);
@@ -19,163 +18,121 @@ app.use(validateSessionMiddleware);
 
 app.post(
   '/configure',
-  handleError(async (req: Request, res: Response) => {
+  handleErrorInHandler(async (req: Request) => {
     const { applicationId, secret } = req.body || {};
 
     enableBankingservice.setupSecrets(applicationId, secret);
-
-    res.send({
-      status: 'ok',
-    });
+    return;
   }),
 );
 
 app.post(
   '/status',
-  handleError(async (req: Request, res: Response) => {
+  handleErrorInHandler<EnableBankingStatusResponse>(async (req: Request) => {
     const data: EnableBankingStatusResponse = {configured: await enableBankingservice.isConfigured()}
-
-    res.send({
-      status: 'ok',
-      data: data,
-    });
+    return data;
   }),
 );
 
 app.post(
   '/countries',
-  handleError(async (req: Request, res: Response) => {
+  handleErrorInHandler(async (req: Request) => {
     const application = await enableBankingservice.getApplication();
-    res.send({
-      status: 'ok',
-      data: application.countries,
-    });
+    return application.countries;
   }),
 );
 
 app.post(
   '/get_aspsps',
-  handleError(async (req: Request, res: Response) => {
-    const responseData:EnableBankingBank[] = (await enableBankingservice.getASPSPs()).aspsps;
-    res.send({
-      status: 'ok',
-      data: responseData,
-    });
+  handleErrorInHandler<EnableBankingBank[]>(async (req: Request) => {
+    const responseData = (await enableBankingservice.getASPSPs()).aspsps;
+    return responseData;
   }),
 );
 
 app.post(
   '/start_auth',
-  handleError(async (req: Request, res: Response) => {
+  handleErrorInHandler<EnableBankingAuthenticationStartResponse>(async (req: Request) => {
     const { aspsp, country } = req.body || {};
 
     const origin = req.headers.origin;
     if (!origin) {
-      res.sendStatus(400).send({ message: 'No origin in header.' });
-      return;
+      throw new BadRequestError("'origin' header should be passed to '/start_auth'.")
     }
-
-    res.send({
-      status: 'ok',
-      data: await enableBankingservice.startAuth(
-        country,
-        aspsp,
-        origin,
-        3600,
-      ),
-    });
+    return await enableBankingservice.startAuth(
+      country,
+      aspsp,
+      origin,
+      180*24*3600,
+    );
   }),
 );
 
 app.post(
   '/get_session',
-  handleError(async (req: Request, res: Response) => {
+  handleErrorInHandler<EnableBankingToken>(async (req: Request) => {
     const { state } = req.body || {};
+    if(!state){
+      throw new BadRequestError("Variable 'state' should be passed to '/enable_banking/get_session'.")
+    }
 
     const session_id = enableBankingservice.getSessionIdFromState(state);
     if (!session_id) {
-      res.send({ status: 'ok' });
-      return;
+      throw new NotReadyError("Authorization flow has not yet finished.");
     }
-    const response = await enableBankingservice.getAccounts(session_id);
-
-    res.send({
-      status: 'ok',
-      data: response,
-    });
+    return await enableBankingservice.getAccounts(session_id);
   }),
 );
 
 app.post(
   '/complete_auth',
-  handleError(async (req: Request, res: Response) => {
+  handleErrorInHandler(async (req: Request) => {
     const { state, code } = req.body || {};
+
+    if(!state){
+      throw badRequestVariableError('state', '/enable_banking/complete_auth');
+    }
+
+    if(!code){
+      throw badRequestVariableError('code', '/enable_banking/complete_auth');
+    }
 
     await enableBankingservice.authorizeSession(state, code);
 
-    res.send({
-      status: 'ok',
-    });
+    return;
   }),
 );
 
 app.post(
   '/get_accounts',
-  handleError(async (req: Request, res: Response) => {
+  handleErrorInHandler<EnableBankingToken>(async (req: Request) => {
     const { session_id } = req.body || {};
-    const resp = await enableBankingservice.getAccounts(session_id);
-    res.send({
-      status: 'ok',
-      data: resp,
-    });
+
+    if (!session_id){
+      throw badRequestVariableError('session_id', '/enable_banking/get_accounts');
+    }
+
+    return await enableBankingservice.getAccounts(session_id);
   }),
 );
 
 app.post(
   '/transactions',
-  handleError(async (req: Request, res: Response) => {
+  handleErrorInHandler<EnableBankingTransactionsResponse>(async (req: Request) => {
     const {
       startDate,
       endDate,
-      accountId,
-      includeBalance = true,
+      account_id,
+      bank_id,
     } = req.body || {};
-    const jwt = enableBankingservice.getJWT();
 
-    const baseHeaders = {
-      Authorization: `Bearer ${jwt}`,
-      'Content-Type': 'application/json',
-    };
-    console.log("got here")
-
-    const params = new URLSearchParams();
-    if (typeof startDate !== 'undefined') {
-      params.set('date_from', startDate);
+    if(!account_id){
+      throw badRequestVariableError("accountId", "/enablebanking/transactions");
     }
+    const transactions = await enableBankingservice.getTransactions(account_id, startDate, endDate, bank_id);
 
-    let finished = false;
-    const transactions:Transaction[] = [];
-    while (!finished) {
-      const response: globalThis.Response = await fetch(
-        `https://api.enablebanking.com/accounts/${accountId}/transactions?` +
-          params.toString(),
-        {
-          headers: baseHeaders,
-        },
-      );
-      const data = await response.json() as HalTransactions;
-      console.log("printing data", data);
-      if(data.transactions){
-        transactions.push(...data.transactions);
-      }
-      if (data.continuation_key) {
-        params.set('continuation_key', data.continuation_key);
-      } else {
-        finished = true;
-      }
-    }
 
-    const data:EnableBankingTransactionsResponse = {
+    return {
       transactions: transactions.map( t =>{
         const isDebtor = t.credit_debit_indicator == 'DBIT';
 
@@ -184,16 +141,11 @@ app.post(
         const payeeName = payeeObject? payeeObject.name:t.remittance_information[0];
         return {
           amount:parseFloat(t.transaction_amount.amount)*(isDebtor? -1:1),
-          payee: payeeName,
+          payeeName: payeeName,
           notes:t.remittance_information.join(""),
-          date:t.transaction_date
+          date:t.transaction_date??t.booking_date??t.value_date
         }  
       })
-    }
-
-    res.send({
-      status: 'ok',
-      data,
-    });
+      }
   }),
 );

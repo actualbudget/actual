@@ -155,6 +155,54 @@ export type EnableBankingToken = {
 
 export type Environment = 'PRODUCTION' | 'SANDBOX';
 
+export type ErrorCode =
+  | 'ACCESS_DENIED' // Access to this resource is denied. Check services available for your application.
+  | 'ACCOUNT_DOES_NOT_EXIST' // No account found matching provided id
+  | 'ALREADY_AUTHORIZED' // Session is already authorized
+  | 'ASPSP_ACCOUNT_NOT_ACCESSIBLE' // The PSU does not have access to the requested account or it doesn't exist
+  | 'ASPSP_ERROR' // Error interacting with ASPSP
+  | 'ASPSP_PAYMENT_NOT_ACCESSIBLE' // Payment can not be requested from the ASPSP
+  | 'ASPSP_PSU_ACTION_REQUIRED' // PSU action is required to proceed
+  | 'ASPSP_RATE_LIMIT_EXCEEDED' // ASPSP Rate limit exceeded
+  | 'ASPSP_TIMEOUT' // Timeout interacting with ASPSP
+  | 'AUTHORIZATION_NOT_PROVIDED' // Authorization header is not provided
+  | 'CLOSED_SESSION' // Session is closed
+  | 'DATE_FROM_IN_FUTURE' // date_from can not be in the future
+  | 'DATE_TO_WITHOUT_DATE_FROM' // date_from must be provided if date_to provided
+  | 'EXPIRED_AUTHORIZATION_CODE' // Authorization code is expired
+  | 'EXPIRED_SESSION' // Session is expired
+  | 'INVALID_ACCOUNT_ID' // Either iban or other account identification is required
+  | 'INVALID_HOST' // Invalid host
+  | 'INVALID_PAYMENT' // Invalid or expired payment provided
+  | 'NO_ACCOUNTS_ADDED' // No allowed accounts added to the application
+  | 'PAYMENT_LIMIT_EXCEEDED' // The amount value or the number of transactions exceeds the limit
+  | 'PAYMENT_NOT_FOUND' // Payment not found
+  | 'PSU_HEADER_NOT_PROVIDED' // Required PSU header not provided
+  | 'REDIRECT_URI_NOT_ALLOWED' // Redirect URI not allowed
+  | 'REVOKED_SESSION' // Session is revoked
+  | 'SESSION_DOES_NOT_EXIST' // No session found matching provided id
+  | 'TRANSACTION_DOES_NOT_EXIST' // No transaction found matching provided id
+  | 'UNAUTHORIZED_ACCESS' // Unauthorized access
+  | 'UNAUTHORIZED_IP' // Used IP address is not authorized to access the resource
+  | 'UNTRUSTED_PAYMENT_PARTY' // Either creditor or debtor account is not trusted
+  | 'WEBHOOK_URI_NOT_ALLOWED' // Webhook URI not allowed
+  | 'WRONG_ASPSP_PROVIDED' // Wrong ASPSP name provided
+  | 'WRONG_AUTHORIZATION_CODE' // Wrong authorization code provided
+  | 'WRONG_CONTINUATION_KEY' // Wrong continuation key provided
+  | 'WRONG_CREDENTIALS_PROVIDED' // Wrong credentials provided
+  | 'WRONG_DATE_INTERVAL' // date_from should be less than or equal date_to
+  | 'WRONG_REQUEST_PARAMETERS' // Wrong request parameters provided
+  | 'WRONG_SESSION_STATUS' // Wrong session status
+  | 'WRONG_TRANSACTIONS_PERIOD'; // Wrong transactions period requested
+
+
+export type ErrorResponse = {
+  message: string;
+  code: number;
+  detail: string;
+  error: ErrorCode;
+};
+
 export type ExchangeRate = {
     unit_currency: {CurrencyCode:string};
     exchange_rate:string;

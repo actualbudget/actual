@@ -12,17 +12,24 @@ import {
 import { createApp } from '../app';
 import { get as _get, post as _post } from '../post';
 import { getServer } from '../server-config';
+import { BankSyncError } from '../errors';
 
-async function post<T>(endpoint: string, data?: unknown) {
+async function post<T>(endpoint: string, data?: unknown, throw_error=true) {
   const userToken = await asyncStorage.getItem('user-token');
   const serverConfig = getServer();
   if (!serverConfig) {
     throw new Error('Failed to get server config.');
   }
 
-  return await _post(serverConfig.ENABLEBANKING_SERVER + endpoint, data, {
+  const response =  await _post(serverConfig.ENABLEBANKING_SERVER + endpoint, data, {
     'X-ACTUAL-TOKEN': userToken,
-  }) as T;
+  });
+
+  if(isErrorResponse(response)){
+    throw new BankSyncError(response.error_type, response.error_code, response.error_code);
+  }
+
+  return response as T;
 }
 
 async function getStatus(): Promise<EnableBankingStatusResponse> | never {
@@ -72,20 +79,21 @@ async function pollAuth({ state }: { state: string }) {
       return;
     }
 
-    const data: EnableBankingToken | ErrorResponse = await post(
-      '/get_session',
-      { state },
-    );
+    try{
+      const data: EnableBankingToken = await post(
+        '/get_session',
+        { state },
+      )
 
-    if (data) {
-      if (isErrorResponse(data)) {
-        console.error('Failed linking Enable Banking account:', data);
-        cb({ status: 'unknown', message: data.error_type });
-      } else {
-        cb({ status: 'success', data });
-      }
-    } else {
-      setTimeout(() => pollFunction(cb), 3000);
+      cb({status: 'success', data})
+
+    } catch (e){
+        if(e instanceof BankSyncError && e.code == "NOT_READY"){
+          setTimeout(() => pollFunction(cb), 3000);
+          return;
+        }
+        console.error('Failed linking Enable Banking account:', e.code);
+        cb({ status: 'unknown', message: e.reason??e.message??"unknown" });
     }
   }
   return new Promise<EnableBankingToken | ErrorResponse>(resolve => {
@@ -97,14 +105,14 @@ async function pollAuth({ state }: { state: string }) {
 
       if (data.status === 'timeout') {
         resolve({
-          error_code: 'timeout',
+          error_code: 'TIME_OUT',
           error_type: 'Time out has been reached',
         });
         return;
       }
 
       resolve({
-        error_code: 'unknown',
+        error_code: "SERVER",
         error_type: data.message,
       });
     });
@@ -125,18 +133,21 @@ async function completeAuth({ state, code }: { state: string; code: string }) {
 export async function downloadEnableBankingTransactions(
   acctId: AccountEntity['id'],
   since: string,
+  bankId: string,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
 
   console.log(`Pulling transactions from enablebanking since ${since}`);
 
-  const res:EnableBankingTransactionsResponse = await post('/transactions',
+  const res = await post('/transactions',
     {
-      accountId: acctId,
+      account_id: acctId,
       startDate: since,
+      bank_id: bankId,
     }
   );
+  console.log(res);
   return res;
 }
 

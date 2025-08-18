@@ -994,7 +994,7 @@ export async function syncAccount(
       newAccount,
     );
   } else if (acctRow.account_sync_source === 'enablebanking') {
-    download = await downloadEnableBankingTransactions(acctId, syncStartDate);
+    download = await downloadEnableBankingTransactions(acctId, syncStartDate, bankId);
   } else {
     throw new Error(
       `Unrecognized bank-sync provider: ${acctRow.account_sync_source}`,

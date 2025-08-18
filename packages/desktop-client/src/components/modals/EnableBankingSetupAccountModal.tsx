@@ -136,14 +136,6 @@ export function EnableBankingSetupAccountModal({
       aspsp: institutionId,
     });
 
-    if ('error' in resp) {
-      setError({
-        code: resp.error,
-        message: 'message' in resp ? resp.message : undefined,
-      });
-      setWaiting(null);
-      return;
-    }
     const { redirect_url, state } = resp;
     window.Actual.openURLInBrowser(redirect_url);
     //polling starts here.

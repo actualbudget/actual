@@ -25,7 +25,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
-import { authorizeBank } from '@desktop-client/gocardless';
+import { authorizeBank } from '@desktop-client/banksync/gocardless';
 import { useEnableBankingStatus } from '@desktop-client/hooks/useEnableBankingStatus';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
@@ -38,6 +38,7 @@ import {
 } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { authorizeEnableBankingSession } from '@desktop-client/banksync/enablebanking';
 
 type CreateAccountModalProps = Extract<
   ModalType,
@@ -155,42 +156,7 @@ export function CreateAccountModal({
       onEnableBankingInit();
       return;
     }
-
-    dispatch(
-      pushModal({
-        modal: {
-          name: 'enablebanking-setup-account',
-          options: {
-            onSuccess: async data => {
-              // converting accounts to "GoCardlessAccounts"
-              // RANT: it seems BankSync could be much more standardized. Apart from init ofcourse.
-              const accounts: SyncServerGoCardlessAccount[] = data.accounts.map(
-                enableBankingAccount => {
-                  return {
-                    ...enableBankingAccount,
-                    institution: { name: enableBankingAccount.institution },
-                    mask: '',
-                    official_name: enableBankingAccount.name,
-                  };
-                },
-              );
-              dispatch(
-                pushModal({
-                  modal: {
-                    name: 'select-linked-accounts',
-                    options: {
-                      requisitionId: data.bank_id,
-                      externalAccounts: accounts,
-                      syncSource: 'enablebanking',
-                    },
-                  },
-                }),
-              );
-            },
-          },
-        },
-      }),
-    );
+    authorizeEnableBankingSession(dispatch);
   };
 
   const onConnectPluggyAi = async () => {

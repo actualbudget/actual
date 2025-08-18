@@ -31,12 +31,12 @@ export function EnableBankingCallback() {
         return;
       }
       await send('enablebanking-completeauth', { state, code });
-      window.opener = null;
-      window.open('', '_self');
+      console.log("this is going great");
       window.close();
+      console.log("not so much");
     };
     fetchData();
-  });
+  },[]);
   return (
     <Modal name="enablebanking-callback" isDismissable={false}>
       <ModalHeader title={t('Account sync')} />
