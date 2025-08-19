@@ -602,8 +602,8 @@ export const getCommonPayees = createAppAsyncThunk(
     condition: (_, { getState }) => {
       const { queries } = getState();
       return (
-        queries.isCommonPayeesDirty ||
-        (!queries.isCommonPayeesLoading && !queries.isCommonPayeesLoaded)
+        !queries.isCommonPayeesLoading &&
+        (queries.isCommonPayeesDirty || !queries.isCommonPayeesLoaded)
       );
     },
   },
