@@ -49,7 +49,7 @@ export const ClosedSessionError = makeErrorClass(
 );
 export const BadRequestError = makeErrorClass('BAD_REQUEST');
 export const NotReadyError = makeErrorClass('NOT_READY');
-export const ResourceNotFoundError = makeErrorClass("NOT_FOUND");
+export const ResourceNotFoundError = makeErrorClass('NOT_FOUND');
 
 export function badRequestVariableError(name: string, endpoint: string) {
   return new BadRequestError(

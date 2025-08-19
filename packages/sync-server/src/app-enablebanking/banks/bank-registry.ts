@@ -16,7 +16,8 @@ class ProcessorRegistry {
     this.map.set(id, ctor);
   }
   get(id: string) {
-    let Ctor: new () => BankProcessor = this.map.get(id) ?? FallbackBankProcessor;
+    const Ctor: new () => BankProcessor =
+      this.map.get(id) ?? FallbackBankProcessor;
     if (Ctor === FallbackBankProcessor) {
       console.log(`Enable Banking: No dedicated processor found for ${id}`);
     }
