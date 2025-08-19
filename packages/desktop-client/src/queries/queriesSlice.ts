@@ -652,8 +652,7 @@ export const getTags = createAppAsyncThunk(
     condition: (_, { getState }) => {
       const { queries } = getState();
       return (
-        !queries.isTagsLoading &&
-        (queries.isTagsDirty || !queries.isTagsLoaded)
+        !queries.isTagsLoading && (queries.isTagsDirty || !queries.isTagsLoaded)
       );
     },
   },
