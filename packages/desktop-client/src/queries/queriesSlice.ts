@@ -311,7 +311,7 @@ export const getAccounts = createAppAsyncThunk(
       const { queries } = getState();
       return !queries.accountsLoading && !queries.accountsLoaded;
     },
-  }
+  },
 );
 
 // Category actions
@@ -454,7 +454,7 @@ export const getCategories = createAppAsyncThunk(
       const { queries } = getState();
       return !queries.categoriesLoading && !queries.categoriesLoaded;
     },
-  }
+  },
 );
 
 // Payee actions
@@ -494,7 +494,7 @@ export const getCommonPayees = createAppAsyncThunk(
       const { queries } = getState();
       return !queries.commonPayeesLoading && !queries.commonPayeesLoaded;
     },
-  }
+  },
 );
 
 export const getPayees = createAppAsyncThunk(
@@ -508,7 +508,7 @@ export const getPayees = createAppAsyncThunk(
       const { queries } = getState();
       return !queries.payeesLoading && !queries.payeesLoaded;
     },
-  }
+  },
 );
 
 export const getTags = createAppAsyncThunk(
@@ -522,7 +522,7 @@ export const getTags = createAppAsyncThunk(
       const { queries } = getState();
       return !queries.tagsLoading && !queries.tagsLoaded;
     },
-  }
+  },
 );
 
 export const createTag = createAppAsyncThunk(
