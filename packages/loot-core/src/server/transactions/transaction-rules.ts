@@ -305,8 +305,10 @@ export async function runRules(
   let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap);
 
   if (trans.schedule != null) {
-    const schedule = await getScheduleById(trans.schedule);
     console.log('schedule has a value');
+    
+    const schedule = await getScheduleById(trans.schedule);
+    
     const rule = allRules.get(schedule.rule);
 
     rule.apply(finalTrans);
