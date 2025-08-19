@@ -12,15 +12,21 @@ class ProcessorRegistry {
   private map = new Map<string, new () => BankProcessor>();
 
   register(id: string, ctor: new () => BankProcessor) {
-    if (this.map.has(id)) throw new Error(`Duplicate processor id: ${id}`);
+    if (this.map.has(id)) throw new Error(`Duplicate bank processor id: ${id}`);
     this.map.set(id, ctor);
   }
   get(id: string) {
-    const Ctor: new () => BankProcessor =
-      this.map.get(id) ?? FallbackBankProcessor;
-    if (Ctor === FallbackBankProcessor) {
+    const Ctor: (new () => BankProcessor) | undefined = this.map.get(id);
+    if (!Ctor) {
       console.log(`Enable Banking: No dedicated processor found for '${id}'`);
+      return new FallbackBankProcessor();
     }
+
+    if (!(Ctor.prototype instanceof FallbackBankProcessor)) {
+      console.warn(`Enable Banking: Unsafe ctor for '${id}', using fallback.`);
+      return new FallbackBankProcessor();
+    }
+
     const processor = new Ctor();
     console.debug(
       `Enable Banking: Using '${processor.name}' to process '${id}'.`,
