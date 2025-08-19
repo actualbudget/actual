@@ -7,14 +7,13 @@ import { useSelector, useDispatch } from '@desktop-client/redux';
 
 export function useCategories() {
   const dispatch = useDispatch();
-  const categoriesLoaded = useSelector(state => state.queries.categoriesLoaded);
   const isInitialMount = useInitialMount();
 
   useEffect(() => {
-    if (isInitialMount && !categoriesLoaded) {
+    if (isInitialMount) {
       dispatch(getCategories());
     }
-  }, [categoriesLoaded, dispatch, isInitialMount]);
+  }, [dispatch, isInitialMount]);
 
   return useSelector(state => state.queries.categories);
 }

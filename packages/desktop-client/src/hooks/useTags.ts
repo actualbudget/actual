@@ -2,18 +2,18 @@ import { useEffect } from 'react';
 
 import { useInitialMount } from './useInitialMount';
 
-import { getAccounts } from '@desktop-client/queries/queriesSlice';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { getTags } from '@desktop-client/queries/queriesSlice';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
-export function useAccounts() {
+export function useTags() {
   const dispatch = useDispatch();
   const isInitialMount = useInitialMount();
 
   useEffect(() => {
     if (isInitialMount) {
-      dispatch(getAccounts());
+      dispatch(getTags());
     }
   }, [dispatch, isInitialMount]);
 
-  return useSelector(state => state.queries.accounts);
+  return useSelector(state => state.queries.tags);
 }

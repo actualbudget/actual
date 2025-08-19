@@ -34,14 +34,19 @@ type QueriesState = {
   lastTransaction: TransactionEntity | null;
   updatedAccounts: Array<AccountEntity['id']>;
   accounts: AccountEntity[];
+  accountsLoading: boolean;
   accountsLoaded: boolean;
   categories: CategoryViews;
+  categoriesLoading: boolean;
   categoriesLoaded: boolean;
+  commonPayeesLoading: boolean;
   commonPayeesLoaded: boolean;
   commonPayees: PayeeEntity[];
   payees: PayeeEntity[];
+  payeesLoading: boolean;
   payeesLoaded: boolean;
   tags: Tag[];
+  tagsLoading: boolean;
   tagsLoaded: boolean;
 };
 
@@ -51,17 +56,22 @@ const initialState: QueriesState = {
   lastTransaction: null,
   updatedAccounts: [],
   accounts: [],
+  accountsLoading: false,
   accountsLoaded: false,
   categories: {
     grouped: [],
     list: [],
   },
+  categoriesLoading: false,
   categoriesLoaded: false,
   commonPayees: [],
+  commonPayeesLoading: false,
   commonPayeesLoaded: false,
   payees: [],
+  payeesLoading: false,
   payeesLoaded: false,
   tags: [],
+  tagsLoading: false,
   tagsLoaded: false,
 };
 
@@ -140,26 +150,46 @@ const queriesSlice = createSlice({
 
     builder.addCase(getAccounts.fulfilled, (state, action) => {
       state.accounts = action.payload;
+      state.accountsLoading = false;
       state.accountsLoaded = true;
+    });
+
+    builder.addCase(getAccounts.pending, state => {
+      state.accountsLoading = true;
     });
 
     // Categories
 
     builder.addCase(getCategories.fulfilled, (state, action) => {
       state.categories = action.payload;
+      state.categoriesLoading = false;
       state.categoriesLoaded = true;
+    });
+
+    builder.addCase(getCategories.pending, state => {
+      state.categoriesLoading = true;
     });
 
     // Payees
 
     builder.addCase(getCommonPayees.fulfilled, (state, action) => {
       state.commonPayees = action.payload;
+      state.commonPayeesLoading = false;
       state.commonPayeesLoaded = true;
+    });
+
+    builder.addCase(getCommonPayees.pending, state => {
+      state.commonPayeesLoading = true;
     });
 
     builder.addCase(getPayees.fulfilled, (state, action) => {
       state.payees = action.payload;
+      state.payeesLoading = false;
       state.payeesLoaded = true;
+    });
+
+    builder.addCase(getPayees.pending, state => {
+      state.payeesLoading = true;
     });
 
     // App
@@ -170,7 +200,12 @@ const queriesSlice = createSlice({
 
     builder.addCase(getTags.fulfilled, (state, action) => {
       state.tags = action.payload;
+      state.tagsLoading = false;
       state.tagsLoaded = true;
+    });
+
+    builder.addCase(getTags.pending, state => {
+      state.tagsLoading = true;
     });
 
     builder.addCase(createTag.fulfilled, (state, action) => {
@@ -271,6 +306,12 @@ export const getAccounts = createAppAsyncThunk(
     const accounts = (await send('accounts-get')) as AccountEntity[];
     return accounts;
   },
+  {
+    condition: (_, { getState }) => {
+      const { queries } = getState();
+      return !queries.accountsLoading && !queries.accountsLoaded;
+    },
+  }
 );
 
 // Category actions
@@ -408,6 +449,12 @@ export const getCategories = createAppAsyncThunk(
     const categories: CategoryViews = await send('get-categories');
     return categories;
   },
+  {
+    condition: (_, { getState }) => {
+      const { queries } = getState();
+      return !queries.categoriesLoading && !queries.categoriesLoaded;
+    },
+  }
 );
 
 // Payee actions
@@ -442,6 +489,12 @@ export const getCommonPayees = createAppAsyncThunk(
     const payees: PayeeEntity[] = await send('common-payees-get');
     return payees;
   },
+  {
+    condition: (_, { getState }) => {
+      const { queries } = getState();
+      return !queries.commonPayeesLoading && !queries.commonPayeesLoaded;
+    },
+  }
 );
 
 export const getPayees = createAppAsyncThunk(
@@ -450,12 +503,27 @@ export const getPayees = createAppAsyncThunk(
     const payees: PayeeEntity[] = await send('payees-get');
     return payees;
   },
+  {
+    condition: (_, { getState }) => {
+      const { queries } = getState();
+      return !queries.payeesLoading && !queries.payeesLoaded;
+    },
+  }
 );
 
-export const getTags = createAppAsyncThunk(`${sliceName}/getTags`, async () => {
-  const tags: Tag[] = await send('tags-get');
-  return tags;
-});
+export const getTags = createAppAsyncThunk(
+  `${sliceName}/getTags`,
+  async () => {
+    const tags: Tag[] = await send('tags-get');
+    return tags;
+  },
+  {
+    condition: (_, { getState }) => {
+      const { queries } = getState();
+      return !queries.tagsLoading && !queries.tagsLoaded;
+    },
+  }
+);
 
 export const createTag = createAppAsyncThunk(
   `${sliceName}/createTag`,
