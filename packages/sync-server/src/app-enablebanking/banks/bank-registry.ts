@@ -22,11 +22,14 @@ class ProcessorRegistry {
       return new FallbackBankProcessor();
     }
 
-    if (!(Ctor.prototype instanceof FallbackBankProcessor)) {
+    if (
+      !(Ctor.prototype instanceof FallbackBankProcessor) ||
+      typeof Ctor != 'function'
+    ) {
+      console.log(typeof Ctor);
       console.warn(`Enable Banking: Unsafe ctor for '${id}', using fallback.`);
       return new FallbackBankProcessor();
     }
-
     const processor = new Ctor();
     console.debug(
       `Enable Banking: Using '${processor.name}' to process '${id}'.`,

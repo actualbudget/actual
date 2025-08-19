@@ -11,7 +11,7 @@ export function isKeyValueCache(remittance_information: string[]):
     const matches = line.match(/^(?<key>[a-zA-Z]*): (?<value>.*)/);
     if (matches) {
       const { key, value } = matches.groups || {};
-      if (!key || !value) {
+      if (key && value) {
         currentKey = key;
         map.set(key, value);
       }
