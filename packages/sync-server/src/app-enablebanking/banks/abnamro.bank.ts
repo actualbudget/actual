@@ -11,7 +11,6 @@ export class ABNAmroBankProcessor extends FallbackBankProcessor {
     const keyValueCache = isKeyValueCache(remittance_information);
     if (keyValueCache) {
       const notes_parts: string[] = [];
-      console.log(keyValueCache.map.keys());
       if (keyValueCache.map.has('Omschrijving')) {
         notes_parts.push(keyValueCache.map.get('Omschrijving') as string);
       }

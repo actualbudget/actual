@@ -132,6 +132,15 @@ export const enableBankingservice = {
         `The aspsp ${name} in ${country} is not available.`,
       );
     });
+    return await enableBankingservice.getASPSPs(country).then(resp => {
+      const res = resp.aspsps.filter(aspsp => aspsp.name === name).at(0);
+      if (res) {
+        return res;
+      }
+      throw new ResourceNotFoundError(
+        `The aspsp ${name} in ${country} is not available.`,
+      );
+    });
   },
 
   startAuth: async (
@@ -257,9 +266,26 @@ export const enableBankingservice = {
     const registry = await getLoadedRegistry();
 
     const bankProcessor = registry.get(bank_id ?? 'fallback');
-    console.log(bankProcessor);
+    if (bankProcessor.debug) {
+      console.debug(
+        `--- Debugging BankProcessor ${bankProcessor}: showing first 10 transactions with processed transactions.---`,
+      );
+      transactions.slice(0, 10).forEach(transaction => {
+        console.debug('# ORIGINAL:');
+        console.debug(JSON.stringify(transaction, null, 2));
+        console.debug('## BECOMES:');
+        console.debug(
+          JSON.stringify(
+            bankProcessor.normalizeTransaction(transaction),
+            null,
+            2,
+          ),
+        );
+      });
+      console.log(JSON.stringify(transactions.slice(0, 10), null, 2));
 
-    console.log(JSON.stringify(transactions.slice(0, 10), null, 2));
+      console.debug(`--- End of transactions ---`);
+    }
 
     return transactions.map(
       bankProcessor.normalizeTransaction.bind(bankProcessor),

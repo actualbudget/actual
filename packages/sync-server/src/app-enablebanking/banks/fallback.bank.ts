@@ -3,6 +3,7 @@ import { EnableBankingTransaction } from '../models/enablebanking.js';
 import { Transaction } from '../models/models-enablebanking.js';
 
 export class FallbackBankProcessor implements BankProcessor {
+  debug = true;
   normalizeTransaction(t: Transaction): EnableBankingTransaction {
     const isDebtor = t.credit_debit_indicator === 'DBIT';
 
