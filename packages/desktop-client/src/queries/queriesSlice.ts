@@ -561,8 +561,8 @@ export const getCategories = createAppAsyncThunk(
     condition: (_, { getState }) => {
       const { queries } = getState();
       return (
-        queries.isCategoriesDirty ||
-        (!queries.isCategoriesLoading && !queries.isCategoriesLoaded)
+        !queries.isCategoriesLoading &&
+        (queries.isCategoriesDirty || !queries.isCategoriesLoaded)
       );
     },
   },
