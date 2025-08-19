@@ -2,7 +2,7 @@ export function isErrorResponse(response: unknown): response is ErrorResponse {
   return (response as ErrorResponse).error_code !== undefined;
 }
 
-export type ErrorCode = "SERVER"|"ENABLEBANKING_SESSION_CLOSED"|"TIME_OUT";
+export type ErrorCode = 'SERVER' | 'ENABLEBANKING_SESSION_CLOSED' | 'TIME_OUT';
 
 export type ErrorResponse = {
   error_code: ErrorCode;
@@ -35,16 +35,16 @@ export type SyncServerEnableBankingAccount = {
 };
 
 export type EnableBankingStatusResponse = {
-  configured:boolean;
-}
+  configured: boolean;
+};
 
 export type EnableBankingTransaction = {
-  amount:number;
-  payee:string;
-  notes:string;
-  date:string;
-}
+  amount: number;
+  payee: string;
+  notes: string;
+  date: string;
+};
 
 export type EnableBankingTransactionsResponse = {
-  transactions:EnableBankingTransaction[];
-}
+  transactions: EnableBankingTransaction[];
+};

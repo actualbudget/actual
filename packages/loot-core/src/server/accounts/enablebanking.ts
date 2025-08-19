@@ -1,4 +1,5 @@
-import { AccountEntity, BankSyncResponse } from 'loot-core/types/models';
+import { AccountEntity } from 'loot-core/types/models';
+
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import {
   EnableBankingBank,
@@ -7,33 +8,40 @@ import {
   isErrorResponse,
   EnableBankingStatusResponse,
   EnableBankingAuthenticationStartResponse,
-  EnableBankingTransactionsResponse
 } from '../../types/models/enablebanking';
 import { createApp } from '../app';
+import { BankSyncError } from '../errors';
 import { get as _get, post as _post } from '../post';
 import { getServer } from '../server-config';
-import { BankSyncError } from '../errors';
 
-async function post<T>(endpoint: string, data?: unknown, throw_error=true) {
+async function post<T>(endpoint: string, data?: unknown) {
   const userToken = await asyncStorage.getItem('user-token');
   const serverConfig = getServer();
   if (!serverConfig) {
     throw new Error('Failed to get server config.');
   }
 
-  const response =  await _post(serverConfig.ENABLEBANKING_SERVER + endpoint, data, {
-    'X-ACTUAL-TOKEN': userToken,
-  });
+  const response = await _post(
+    serverConfig.ENABLEBANKING_SERVER + endpoint,
+    data,
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
 
-  if(isErrorResponse(response)){
-    throw new BankSyncError(response.error_type, response.error_code, response.error_code);
+  if (isErrorResponse(response)) {
+    throw new BankSyncError(
+      response.error_type,
+      response.error_code,
+      response.error_code,
+    );
   }
 
   return response as T;
 }
 
 async function getStatus(): Promise<EnableBankingStatusResponse> | never {
-  const resp:EnableBankingStatusResponse = await post('/status');
+  const resp: EnableBankingStatusResponse = await post('/status');
   return resp;
 }
 
@@ -42,7 +50,7 @@ async function getCountries(): Promise<{ countries: string[] }> | never {
 }
 
 async function getBanks(): Promise<EnableBankingBank[]> | never {
-  const resp:EnableBankingBank[] = await post('/get_aspsps');
+  const resp: EnableBankingBank[] = await post('/get_aspsps');
   return resp;
 }
 
@@ -52,8 +60,11 @@ async function startAuth({
 }: {
   country: string;
   aspsp: string;
-}):Promise<EnableBankingAuthenticationStartResponse> | never {
-  const resp:EnableBankingAuthenticationStartResponse = await post('/start_auth', { country, aspsp });
+}): Promise<EnableBankingAuthenticationStartResponse> | never {
+  const resp: EnableBankingAuthenticationStartResponse = await post(
+    '/start_auth',
+    { country, aspsp },
+  );
   return resp;
 }
 
@@ -79,21 +90,17 @@ async function pollAuth({ state }: { state: string }) {
       return;
     }
 
-    try{
-      const data: EnableBankingToken = await post(
-        '/get_session',
-        { state },
-      )
+    try {
+      const data: EnableBankingToken = await post('/get_session', { state });
 
-      cb({status: 'success', data})
-
-    } catch (e){
-        if(e instanceof BankSyncError && e.code == "NOT_READY"){
-          setTimeout(() => pollFunction(cb), 3000);
-          return;
-        }
-        console.error('Failed linking Enable Banking account:', e.code);
-        cb({ status: 'unknown', message: e.reason??e.message??"unknown" });
+      cb({ status: 'success', data });
+    } catch (e) {
+      if (e instanceof BankSyncError && e.code === 'NOT_READY') {
+        setTimeout(() => pollFunction(cb), 3000);
+        return;
+      }
+      console.error('Failed linking Enable Banking account:', e.code);
+      cb({ status: 'unknown', message: e.reason ?? e.message ?? 'unknown' });
     }
   }
   return new Promise<EnableBankingToken | ErrorResponse>(resolve => {
@@ -112,7 +119,7 @@ async function pollAuth({ state }: { state: string }) {
       }
 
       resolve({
-        error_code: "SERVER",
+        error_code: 'SERVER',
         error_type: data.message,
       });
     });
@@ -129,7 +136,6 @@ async function completeAuth({ state, code }: { state: string; code: string }) {
   return;
 }
 
-
 export async function downloadEnableBankingTransactions(
   acctId: AccountEntity['id'],
   since: string,
@@ -140,13 +146,11 @@ export async function downloadEnableBankingTransactions(
 
   console.log(`Pulling transactions from enablebanking since ${since}`);
 
-  const res = await post('/transactions',
-    {
-      account_id: acctId,
-      startDate: since,
-      bank_id: bankId,
-    }
-  );
+  const res = await post('/transactions', {
+    account_id: acctId,
+    startDate: since,
+    bank_id: bankId,
+  });
   console.log(res);
   return res;
 }

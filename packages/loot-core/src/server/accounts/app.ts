@@ -138,7 +138,7 @@ async function linkGoCardlessAccount({
       : { name: account.institution as string };
   const bank = await link.findOrCreateBank(institution, requisitionId);
   if (upgradingId) {
-    console.log("upgrading", upgradingId)
+    console.log('upgrading', upgradingId);
     const accRow = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ?',
       [upgradingId],
@@ -153,10 +153,10 @@ async function linkGoCardlessAccount({
       id,
       account_id: account.account_id,
       bank: bank.id,
-      official_name:account.official_name,
+      official_name: account.official_name,
       account_sync_source: syncSource,
     });
-    console.log("upgrading finished.")
+    console.log('upgrading finished.');
   } else {
     id = uuidv4();
     await db.insertWithUUID('accounts', {

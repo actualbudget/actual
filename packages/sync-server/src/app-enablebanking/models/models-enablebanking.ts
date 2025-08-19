@@ -114,12 +114,11 @@ export type BalanceStatus =
   | 'VALU'
   | 'XPCD';
 
-
 export type BankTransactionCode = {
-    description?:string;
-    code?:string;
-    sub_code?:string;
-}
+  description?: string;
+  code?: string;
+  sub_code?: string;
+};
 export type CashAccountType =
   | 'CACC'
   | 'CARD'
@@ -134,9 +133,9 @@ export type ClearingSystemMemberIdentification = {
 };
 
 export type ContactDetails = {
-    email?:string;
-    phone_number?:string;
-}
+  email?: string;
+  phone_number?: string;
+};
 
 export type Credential = {
   name: string;
@@ -146,7 +145,7 @@ export type Credential = {
   template?: string;
 };
 
-export type CreditDebitIndicator = "CRDT" | "DBIT";
+export type CreditDebitIndicator = 'CRDT' | 'DBIT';
 export type EnableBankingToken = {
   bank_id: string;
   session_id: string;
@@ -195,7 +194,6 @@ export type ErrorCode =
   | 'WRONG_SESSION_STATUS' // Wrong session status
   | 'WRONG_TRANSACTIONS_PERIOD'; // Wrong transactions period requested
 
-
 export type ErrorResponse = {
   message: string;
   code: number;
@@ -204,12 +202,12 @@ export type ErrorResponse = {
 };
 
 export type ExchangeRate = {
-    unit_currency: {CurrencyCode:string};
-    exchange_rate:string;
-    rate_type:RateType;
-    contract_identification:string;
-    instructed_amount:AmountType;
-}
+  unit_currency: { CurrencyCode: string };
+  exchange_rate: string;
+  rate_type: RateType;
+  contract_identification: string;
+  instructed_amount: AmountType;
+};
 
 export type FinancialInstitutionIdentification = {
   bic_fi?: string;
@@ -253,17 +251,17 @@ export type HalBalances = {
 };
 
 export type HalTransactions = {
-    transactions: Transaction[];
-    continuation_key?:string;
-}
+  transactions: Transaction[];
+  continuation_key?: string;
+};
 
-export type PartyIdentification ={
-    name?:string;
-    postal_address?:PostalAddress;
-    organisation_id?:GenericIdentification;
-    private_id?:GenericIdentification;
-    contact_details?:ContactDetails;
-}
+export type PartyIdentification = {
+  name?: string;
+  postal_address?: PostalAddress;
+  organisation_id?: GenericIdentification;
+  private_id?: GenericIdentification;
+  contact_details?: ContactDetails;
+};
 
 export type PostalAddress = {
   adress_type?: AdressType;
@@ -280,7 +278,7 @@ export type PostalAddress = {
 
 export type PSUType = 'business' | 'personal';
 
-export type RateType = "AGRD" | "SALE" | "SPOT";
+export type RateType = 'AGRD' | 'SALE' | 'SPOT';
 
 export type ResponsePaymentType = {
   max_transactions?: number;
@@ -298,8 +296,13 @@ export type ResponsePaymentType = {
   // creditor_postal
 };
 
-export type ReferenceNumberScheme = "BERF" | "FIRF" | "INTL" |
-    "NORF" | "SDDM" | "SEBG";
+export type ReferenceNumberScheme =
+  | 'BERF'
+  | 'FIRF'
+  | 'INTL'
+  | 'NORF'
+  | 'SDDM'
+  | 'SEBG';
 export type SandboxInfo = { users?: SandboxUser[] };
 
 export type SandboxUser = {
@@ -360,33 +363,39 @@ export type StartAuthorizationResponse = {
 };
 
 export type Transaction = {
-    entry_reference?:string;
-    merchant_category_code?:string;
-    transaction_amount:AmountType;
-    creditor?:PartyIdentification;
-    creditor_account?:AccountIdentification;
-    creditor_agent?:FinancialInstitutionIdentification;
-    debtor?:PartyIdentification;
-    debtor_account?:AccountIdentification;
-    debtor_agent?:FinancialInstitutionIdentification;
-    bank_transaction_code?:BankTransactionCode;
-    credit_debit_indicator:CreditDebitIndicator;
-    status:TransactionStatus;
-    booking_date?: string;
-    value_date?: string;
-    transaction_date?: string;
-    balance_after_transaction?: AmountType;
-    reference_number?:string;
-    reference_number_schema?:ReferenceNumberScheme;
-    remittance_information?:string[];
-    debtor_account_additional_identification?:GenericIdentification[];
-    creditor_account_additional_identification?:GenericIdentification[];
-    exchange_rate?:ExchangeRate;
-    note?:string;
-    transaction_id?:string;
-}
+  entry_reference?: string;
+  merchant_category_code?: string;
+  transaction_amount: AmountType;
+  creditor?: PartyIdentification;
+  creditor_account?: AccountIdentification;
+  creditor_agent?: FinancialInstitutionIdentification;
+  debtor?: PartyIdentification;
+  debtor_account?: AccountIdentification;
+  debtor_agent?: FinancialInstitutionIdentification;
+  bank_transaction_code?: BankTransactionCode;
+  credit_debit_indicator: CreditDebitIndicator;
+  status: TransactionStatus;
+  booking_date?: string;
+  value_date?: string;
+  transaction_date?: string;
+  balance_after_transaction?: AmountType;
+  reference_number?: string;
+  reference_number_schema?: ReferenceNumberScheme;
+  remittance_information?: string[];
+  debtor_account_additional_identification?: GenericIdentification[];
+  creditor_account_additional_identification?: GenericIdentification[];
+  exchange_rate?: ExchangeRate;
+  note?: string;
+  transaction_id?: string;
+};
 
-export type TransactionStatus = "BOOK" | "CNCL" | "HOLD" |
-    "OTHR" | "PNDG" | "RJCT" | "SCHD";
+export type TransactionStatus =
+  | 'BOOK'
+  | 'CNCL'
+  | 'HOLD'
+  | 'OTHR'
+  | 'PNDG'
+  | 'RJCT'
+  | 'SCHD';
 
 export type Usage = 'ORGA' | 'PRIV';

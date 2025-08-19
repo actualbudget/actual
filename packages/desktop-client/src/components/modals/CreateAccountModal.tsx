@@ -13,10 +13,11 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { type SyncServerGoCardlessAccount } from 'loot-core/types/models';
 
 import { useAuth } from '@desktop-client/auth/AuthProvider';
 import { Permissions } from '@desktop-client/auth/types';
+import { authorizeEnableBankingSession } from '@desktop-client/banksync/enablebanking';
+import { authorizeBank } from '@desktop-client/banksync/gocardless';
 import { Warning } from '@desktop-client/components/alerts';
 import { Link } from '@desktop-client/components/common/Link';
 import {
@@ -25,7 +26,6 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
-import { authorizeBank } from '@desktop-client/banksync/gocardless';
 import { useEnableBankingStatus } from '@desktop-client/hooks/useEnableBankingStatus';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
@@ -38,7 +38,6 @@ import {
 } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
-import { authorizeEnableBankingSession } from '@desktop-client/banksync/enablebanking';
 
 type CreateAccountModalProps = Extract<
   ModalType,

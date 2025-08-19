@@ -36,16 +36,17 @@ export type SyncServerEnableBankingAccount = {
 };
 
 export type EnableBankingStatusResponse = {
-  configured:boolean;
-}
+  configured: boolean;
+};
 
 export type EnableBankingTransaction = {
-  amount:number;
-  payeeName:string;
-  notes:string;
-  date:string;
-}
+  amount: number;
+  payeeName: string;
+  notes: string;
+  date: string;
+  [x: string]: unknown;
+};
 
 export type EnableBankingTransactionsResponse = {
-  transactions:EnableBankingTransaction[];
-}
+  transactions: EnableBankingTransaction[];
+};

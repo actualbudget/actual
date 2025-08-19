@@ -1,10 +1,13 @@
-import { EnableBankingAuthenticationStartResponse } from '../models/enablebanking.js';
 import { SecretName, secretsService } from '../../services/secrets-service.js';
+import { getLoadedRegistry } from '../banks/bank-registry.js';
+import {
+  EnableBankingAuthenticationStartResponse,
+  EnableBankingTransaction,
+} from '../models/enablebanking.js';
 import {
   Account,
   AccountResource,
   ASPSPData,
-  AuthenticationStartResponse,
   EnableBankingToken,
   GetApplicationResponse,
   GetAspspsResponse,
@@ -118,9 +121,10 @@ export const enableBankingservice = {
     return await enableBankingservice.get(`aspsps?${params.join('&')}`);
   },
 
-  getASPSP: async (country: string, name:string): Promise<ASPSPData> =>{
-    return await enableBankingservice.getASPSPs(country)
-    .then(resp => resp.aspsps.filter(aspsp => aspsp.name === name).at(0));
+  getASPSP: async (country: string, name: string): Promise<ASPSPData> => {
+    return await enableBankingservice
+      .getASPSPs(country)
+      .then(resp => resp.aspsps.filter(aspsp => aspsp.name === name).at(0));
   },
 
   startAuth: async (
@@ -129,15 +133,13 @@ export const enableBankingservice = {
     host: string,
     exp: number,
   ): Promise<EnableBankingAuthenticationStartResponse> | never => {
-
     const aspspData = await enableBankingservice.getASPSP(country, aspsp);
-    console.log(aspspData);
-    exp = Math.min(exp, aspspData.maximum_consent_validity);
+    exp = Math.min(exp, aspspData.maximum_consent_validity - 3600);
 
     const valid_until = new Date();
     valid_until.setSeconds(valid_until.getSeconds() + exp);
 
-    const state = crypto.randomUUID();    
+    const state = crypto.randomUUID();
 
     const body = {
       access: {
@@ -163,10 +165,10 @@ export const enableBankingservice = {
   },
 
   authorizeSession: async (state: string, code: string) => {
-    if (enableBankingservice.getSessionIdFromState(state)){
+    if (enableBankingservice.getSessionIdFromState(state)) {
       return enableBankingservice.getSessionIdFromState(state);
     }
-    console.log({code})
+    console.log({ code });
     const { session_id } = await enableBankingservice.post<{
       session_id: string;
     }>('sessions', { code });
@@ -214,21 +216,28 @@ export const enableBankingservice = {
     };
   },
 
-  getTransactions: async (account_id:string, date_from?:string, date_to?:string, bank_id?:string) => {
+  getTransactions: async (
+    account_id: string,
+    date_from?: string,
+    date_to?: string,
+    bank_id?: string,
+  ): Promise<EnableBankingTransaction[]> => {
     const params = new URLSearchParams();
     if (date_from) {
       params.set('date_from', date_from);
     }
-    if(date_to){
-      params.set('date_to',date_to);
+    if (date_to) {
+      params.set('date_to', date_to);
     }
 
     let finished = false;
-    const transactions:Transaction[] = [];
+    const transactions: Transaction[] = [];
     while (!finished) {
-      const data: HalTransactions = await enableBankingservice.get(`accounts/${account_id}/transactions?${params.toString()}`)
+      const data: HalTransactions = await enableBankingservice.get(
+        `accounts/${account_id}/transactions?${params.toString()}`,
+      );
 
-      if(data.transactions){
+      if (data.transactions) {
         transactions.push(...data.transactions);
       }
       if (data.continuation_key) {
@@ -238,9 +247,15 @@ export const enableBankingservice = {
       }
     }
 
-    console.log(JSON.stringify(transactions.slice(0,10),null,2));
+    const registry = await getLoadedRegistry();
 
-    return transactions;
+    const bankProcessor = registry.get(bank_id);
+    console.log(bankProcessor);
 
-  }
+    console.log(JSON.stringify(transactions.slice(0, 10), null, 2));
+
+    return transactions.map(
+      bankProcessor.normalizeTransaction.bind(bankProcessor),
+    );
+  },
 };
