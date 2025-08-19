@@ -154,6 +154,10 @@ const queriesSlice = createSlice({
       state.accountsLoaded = true;
     });
 
+    builder.addCase(getAccounts.rejected, state => {
+      state.accountsLoading = false;
+    });
+
     builder.addCase(getAccounts.pending, state => {
       state.accountsLoading = true;
     });
@@ -164,6 +168,10 @@ const queriesSlice = createSlice({
       state.categories = action.payload;
       state.categoriesLoading = false;
       state.categoriesLoaded = true;
+    });
+
+    builder.addCase(getCategories.rejected, state => {
+      state.categoriesLoading = false;
     });
 
     builder.addCase(getCategories.pending, state => {
@@ -178,6 +186,10 @@ const queriesSlice = createSlice({
       state.commonPayeesLoaded = true;
     });
 
+    builder.addCase(getCommonPayees.rejected, state => {
+      state.commonPayeesLoading = false;
+    });
+
     builder.addCase(getCommonPayees.pending, state => {
       state.commonPayeesLoading = true;
     });
@@ -186,6 +198,10 @@ const queriesSlice = createSlice({
       state.payees = action.payload;
       state.payeesLoading = false;
       state.payeesLoaded = true;
+    });
+
+    builder.addCase(getPayees.rejected, state => {
+      state.payeesLoading = false;
     });
 
     builder.addCase(getPayees.pending, state => {
@@ -202,6 +218,10 @@ const queriesSlice = createSlice({
       state.tags = action.payload;
       state.tagsLoading = false;
       state.tagsLoaded = true;
+    });
+
+    builder.addCase(getTags.rejected, state => {
+      state.tagsLoading = false;
     });
 
     builder.addCase(getTags.pending, state => {
