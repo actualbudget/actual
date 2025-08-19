@@ -405,8 +405,8 @@ export const getAccounts = createAppAsyncThunk(
     condition: (_, { getState }) => {
       const { queries } = getState();
       return (
-        queries.isAccountsDirty ||
-        (!queries.isAccountsLoading && !queries.isAccountsLoaded)
+        !queries.isAccountsLoading &&
+        (queries.isAccountsDirty || !queries.isAccountsLoaded)
       );
     },
   },
