@@ -20,6 +20,7 @@ import {
 import {
   handleEnableBankingError,
   EnableBankingSetupError,
+  ResourceNotFoundError,
 } from '../utils/errors.js';
 import { getJWT } from '../utils/jwt.js';
 
@@ -124,7 +125,13 @@ export const enableBankingservice = {
   getASPSP: async (country: string, name: string): Promise<ASPSPData> => {
     return await enableBankingservice
       .getASPSPs(country)
-      .then(resp => resp.aspsps.filter(aspsp => aspsp.name === name).at(0));
+      .then(resp => {
+        const res = resp.aspsps.filter(aspsp => aspsp.name === name).at(0)
+        if(res){
+          return res;
+        }
+        throw new ResourceNotFoundError(`The aspsp ${name} in ${country} is not available.`);
+      });
   },
 
   startAuth: async (
@@ -249,7 +256,7 @@ export const enableBankingservice = {
 
     const registry = await getLoadedRegistry();
 
-    const bankProcessor = registry.get(bank_id);
+    const bankProcessor = registry.get(bank_id ?? "fallback");
     console.log(bankProcessor);
 
     console.log(JSON.stringify(transactions.slice(0, 10), null, 2));

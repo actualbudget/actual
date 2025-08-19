@@ -8,7 +8,8 @@ export type ErrorCode =
   | 'INTERNAL_ERROR'
   | 'ENABLEBANKING_SESSION_CLOSED'
   | 'BAD_REQUEST'
-  | 'NOT_READY';
+  | 'NOT_READY'
+  | 'NOT_FOUND';
 
 export type EnableBankingErrorInterface = {
   error_code: ErrorCode;
@@ -48,6 +49,7 @@ export const ClosedSessionError = makeErrorClass(
 );
 export const BadRequestError = makeErrorClass('BAD_REQUEST');
 export const NotReadyError = makeErrorClass('NOT_READY');
+export const ResourceNotFoundError = makeErrorClass("NOT_FOUND");
 
 export function badRequestVariableError(name: string, endpoint: string) {
   return new BadRequestError(

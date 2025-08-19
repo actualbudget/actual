@@ -16,11 +16,11 @@ class ProcessorRegistry {
     this.map.set(id, ctor);
   }
   get(id: string) {
-    const Ctor = this.map.get(id);
-    if (!Ctor) {
+    let Ctor: new () => BankProcessor = this.map.get(id) ?? FallbackBankProcessor;
+    if (Ctor === FallbackBankProcessor) {
       console.log(`Enable Banking: No dedicated processor found for ${id}`);
     }
-    const processor = Ctor ? new Ctor() : new FallbackBankProcessor();
+    const processor = new Ctor();
     console.debug(`Enable Banking: Using ${processor} to process ${id}.`);
     return processor;
   }
@@ -31,6 +31,7 @@ class ProcessorRegistry {
 
 export const registry = new ProcessorRegistry();
 
+//This is a decorator that allows a class to be added to the registry when in'app-enablebanking/banks/*.banks.*'.
 export function BankProcessorFor(bankIds: string[]) {
   return function <T extends new () => BankProcessor>(ctor: T) {
     for (const bankId of bankIds) {

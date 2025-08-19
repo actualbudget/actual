@@ -31,7 +31,7 @@ async function post<T>(endpoint: string, data?: unknown) {
 
   if (isErrorResponse(response)) {
     throw new BankSyncError(
-      response.error_type,
+      response.error_type??response.error_code,
       response.error_code,
       response.error_code,
     );
@@ -95,12 +95,17 @@ async function pollAuth({ state }: { state: string }) {
 
       cb({ status: 'success', data });
     } catch (e) {
-      if (e instanceof BankSyncError && e.code === 'NOT_READY') {
-        setTimeout(() => pollFunction(cb), 3000);
+      if (e instanceof BankSyncError ) {
+        if (e.code === 'NOT_READY'){
+          setTimeout(() => pollFunction(cb), 3000);
+          return
+        }
+        console.error('Failed linking Enable Banking account:', e.code);
+        cb({status:'unknown', message:e.reason});
         return;
       }
-      console.error('Failed linking Enable Banking account:', e.code);
-      cb({ status: 'unknown', message: e.reason ?? e.message ?? 'unknown' });
+      console.error('Failed linking Enable Banking account:', (e as Error).name);
+      cb({ status: 'unknown', message: e instanceof Error ?  e.message: 'unknown' });
     }
   }
   return new Promise<EnableBankingToken | ErrorResponse>(resolve => {

@@ -8,15 +8,16 @@ export class FallbackBankProcessor implements BankProcessor {
 
     const payeeObject = isDebtor ? t.creditor : t.debtor;
 
-    const payeeName = payeeObject
+    const payeeName = payeeObject && payeeObject.name
       ? payeeObject.name
-      : t.remittance_information[0];
+      : "";
     return {
       ...t,
+      payeeObject:payeeObject,
       amount: parseFloat(t.transaction_amount.amount) * (isDebtor ? -1 : 1),
       payeeName,
-      notes: t.remittance_information.join(''),
-      date: t.transaction_date ?? t.booking_date ?? t.value_date,
+      notes: t.remittance_information? t.remittance_information.join(''):"",
+      date: t.transaction_date ?? t.booking_date ?? t.value_date??"",
     };
   }
 }
