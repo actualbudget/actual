@@ -701,8 +701,8 @@ export const updateTag = createAppAsyncThunk(
 export const findTags = createAppAsyncThunk(
   `${sliceName}/findTags`,
   async () => {
-    const id = await send('tags-find');
-    return id;
+    const tags: Tag[] = await send('tags-find');
+    return tags;
   },
 );
 
