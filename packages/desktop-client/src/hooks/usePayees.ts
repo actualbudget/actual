@@ -11,12 +11,15 @@ import { useSelector, useDispatch } from '@desktop-client/redux';
 export function useCommonPayees() {
   const dispatch = useDispatch();
   const isInitialMount = useInitialMount();
+  const isCommonPayeesDirty = useSelector(
+    state => state.queries.isCommonPayeesDirty,
+  );
 
   useEffect(() => {
-    if (isInitialMount) {
+    if (isInitialMount || isCommonPayeesDirty) {
       dispatch(getCommonPayees());
     }
-  }, [dispatch, isInitialMount]);
+  }, [dispatch, isInitialMount, isCommonPayeesDirty]);
 
   return useSelector(state => state.queries.commonPayees);
 }
@@ -24,12 +27,13 @@ export function useCommonPayees() {
 export function usePayees() {
   const dispatch = useDispatch();
   const isInitialMount = useInitialMount();
+  const isPayeesDirty = useSelector(state => state.queries.isPayeesDirty);
 
   useEffect(() => {
-    if (isInitialMount) {
+    if (isInitialMount || isPayeesDirty) {
       dispatch(getPayees());
     }
-  }, [dispatch, isInitialMount]);
+  }, [dispatch, isInitialMount, isPayeesDirty]);
 
   return useSelector(state => state.queries.payees);
 }

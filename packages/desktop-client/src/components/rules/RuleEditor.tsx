@@ -75,7 +75,7 @@ import {
   SelectedProvider,
 } from '@desktop-client/hooks/useSelected';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { initiallyLoadPayees } from '@desktop-client/queries/queriesSlice';
+import { getPayees } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { enableUndo, disableUndo } from '@desktop-client/undo';
 
@@ -939,7 +939,7 @@ export function RuleEditor({
   );
 
   useEffect(() => {
-    dispatch(initiallyLoadPayees());
+    dispatch(getPayees());
 
     // Disable undo while this modal is open
     disableUndo();
