@@ -144,7 +144,7 @@ test.describe('Schedules', () => {
     await icon.hover();
     await expect(page).toMatchThemeScreenshots();
 
-    const icon2 = transaction.payee.getByTestId('schedule-icon');
+    const icon2 = transaction2.payee.getByTestId('schedule-icon');
     await icon2.hover();
     await expect(page).toMatchThemeScreenshots();
 
