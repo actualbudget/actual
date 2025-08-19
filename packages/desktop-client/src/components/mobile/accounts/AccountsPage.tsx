@@ -403,7 +403,7 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
     const syncingAccountIds = useSelector(
       state => state.account.accountsSyncing,
     );
-    const updatedAccounts = useSelector(state => state.queries.updatedAccounts);
+    const updatedAccounts = useSelector(state => state.account.updatedAccounts);
     const dispatch = useDispatch();
 
     const { dragAndDropHooks } = useDragAndDrop({

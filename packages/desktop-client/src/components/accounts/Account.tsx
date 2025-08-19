@@ -42,7 +42,12 @@ import {
 import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
 
-import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
+import {
+  unlinkAccount,
+  reopenAccount,
+  updateAccount,
+  markAccountRead,
+} from '@desktop-client/accounts/accountsSlice';
 import { syncAndDownload } from '@desktop-client/app/appSlice';
 import { type SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
 import { TransactionList } from '@desktop-client/components/transactions/TransactionList';
@@ -82,9 +87,6 @@ import {
 import {
   createPayee,
   getPayees,
-  markAccountRead,
-  reopenAccount,
-  updateAccount,
   updateNewTransactions,
 } from '@desktop-client/queries/queriesSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';

@@ -3,6 +3,7 @@ import { t } from 'i18next';
 
 import { listen, send } from 'loot-core/platform/client/fetch';
 
+import { reloadAccounts } from './accounts/accountsSlice';
 import { resetSync, sync } from './app/appSlice';
 import { closeAndDownloadBudget, uploadBudget } from './budgets/budgetsSlice';
 import { pushModal } from './modals/modalsSlice';
@@ -11,11 +12,7 @@ import {
   type Notification,
 } from './notifications/notificationsSlice';
 import { loadPrefs } from './prefs/prefsSlice';
-import {
-  reloadAccounts,
-  reloadCategories,
-  reloadPayees,
-} from './queries/queriesSlice';
+import { reloadCategories, reloadPayees } from './queries/queriesSlice';
 import { type AppStore } from './redux/store';
 import { signOut } from './users/usersSlice';
 
