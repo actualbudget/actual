@@ -312,23 +312,6 @@ const queriesSlice = createSlice({
       state.isTagsLoading = true;
     });
 
-    // builder.addCase(createTag.fulfilled, (state, action) => {
-    //   state.tags.push(action.payload);
-    // });
-
-    // builder.addCase(deleteTag.fulfilled, (state, action) => {
-    //   state.tags = state.tags.filter(tag => tag.id !== action.payload);
-    // });
-
-    // builder.addCase(deleteAllTags.fulfilled, (state, action) => {
-    //   state.tags = state.tags.filter(tag => !action.payload.includes(tag.id));
-    // });
-
-    // builder.addCase(updateTag.fulfilled, (state, action) => {
-    //   const tagIdx = state.tags.findIndex(tag => tag.id === action.payload.id);
-    //   state.tags[tagIdx] = action.payload;
-    // });
-
     builder.addCase(findTags.fulfilled, (state, action) => {
       _loadTags(state, action.payload);
     });
