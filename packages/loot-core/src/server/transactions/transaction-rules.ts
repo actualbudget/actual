@@ -299,13 +299,10 @@ export async function runRules(
     accountsMap = accounts;
   }
 
-  // figure out how get schedules based off account.
-  console.log(`before processing ${trans.schedule};`);
-
   let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap);
 
   if (trans.schedule != null) {
-    console.log('schedule has a value');
+    console.log('Applying schedule rules to transaction');
 
     const schedule = await getScheduleById(trans.schedule);
 
@@ -313,7 +310,7 @@ export async function runRules(
 
     rule.apply(finalTrans);
   } else {
-    console.log('schedule is null');
+    console.log('Applying all applicable rules to transaction');
     const rules = rankRules(
       fastSetMerge(
         firstcharIndexer.getApplicableRules(trans),
@@ -325,7 +322,6 @@ export async function runRules(
       finalTrans = rules[i].apply(finalTrans);
     }
   }
-  console.log(`after processing ${finalTrans.schedule};`);
 
   return await finalizeTransactionForRules(finalTrans);
 }

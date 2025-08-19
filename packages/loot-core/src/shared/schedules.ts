@@ -4,9 +4,6 @@ import * as d from 'date-fns';
 import { Locale } from 'date-fns';
 import { t } from 'i18next';
 
-import { ScheduleEntity } from 'loot-core/types/models';
-import { RuleConditionEntity } from 'loot-core/types/models/rule';
-
 import { Condition } from '../server/rules';
 
 import * as monthUtils from './months';
@@ -55,7 +52,7 @@ export function getStatusLabel(status: string) {
   }
 }
 
-export function getHasTransactionsQuery(schedules: readonly ScheduleEntity[]) {
+export function getHasTransactionsQuery(schedules) {
   const filters = schedules.map(schedule => {
     const dateCond = schedule._conditions.find(c => c.field === 'date');
     return {
@@ -303,13 +300,17 @@ export function recurConfigToRSchedule(config) {
   }
 }
 
-export function extractScheduleConds(conditions: RuleConditionEntity[]) {
+export function extractScheduleConds(conditions) {
   return {
     payee:
       conditions.find(cond => cond.op === 'is' && cond.field === 'payee') ||
+      conditions.find(
+        cond => cond.op === 'is' && cond.field === 'description',
+      ) ||
       null,
     account:
       conditions.find(cond => cond.op === 'is' && cond.field === 'account') ||
+      conditions.find(cond => cond.op === 'is' && cond.field === 'acct') ||
       null,
     amount:
       conditions.find(
@@ -442,7 +443,7 @@ export function getUpcomingDays(
   }
 }
 
-export function scheduleIsRecurring(dateCond: RuleConditionEntity | null) {
+export function scheduleIsRecurring(dateCond: Condition | null) {
   if (!dateCond) {
     return false;
   }

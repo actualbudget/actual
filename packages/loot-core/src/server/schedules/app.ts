@@ -16,7 +16,7 @@ import {
   getStatus,
   recurConfigToRSchedule,
 } from '../../shared/schedules';
-import { RuleConditionEntity, ScheduleEntity } from '../../types/models';
+import { ScheduleEntity } from '../../types/models';
 import { addTransactions } from '../accounts/sync';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';
@@ -47,10 +47,7 @@ function zip(arr1, arr2) {
   return result;
 }
 
-export function updateConditions(
-  conditions: RuleConditionEntity[],
-  newConditions: RuleConditionEntity[],
-) {
+export function updateConditions(conditions, newConditions) {
   const scheduleConds = extractScheduleConds(conditions);
   const newScheduleConds = extractScheduleConds(newConditions);
 
