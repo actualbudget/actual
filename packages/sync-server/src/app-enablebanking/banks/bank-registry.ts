@@ -19,10 +19,12 @@ class ProcessorRegistry {
     const Ctor: new () => BankProcessor =
       this.map.get(id) ?? FallbackBankProcessor;
     if (Ctor === FallbackBankProcessor) {
-      console.log(`Enable Banking: No dedicated processor found for ${id}`);
+      console.log(`Enable Banking: No dedicated processor found for '${id}'`);
     }
     const processor = new Ctor();
-    console.debug(`Enable Banking: Using ${processor} to process ${id}.`);
+    console.debug(
+      `Enable Banking: Using '${processor.name}' to process '${id}'.`,
+    );
     return processor;
   }
   list() {

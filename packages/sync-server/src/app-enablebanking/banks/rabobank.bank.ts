@@ -5,7 +5,8 @@ import { BankProcessorFor } from './bank-registry.js';
 import { FallbackBankProcessor } from './fallback.bank.js';
 
 @BankProcessorFor(['NL_Rabobank'])
-export class RabobankProcessor extends FallbackBankProcessor {
+export class RabobankBankProcessor extends FallbackBankProcessor {
+  name = 'RabobankBankProcessor';
   normalizeTransaction(t: Transaction): EnableBankingTransaction {
     const transaction = super.normalizeTransaction(t);
     return transaction;
