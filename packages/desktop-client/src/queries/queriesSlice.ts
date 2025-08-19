@@ -627,8 +627,8 @@ export const getPayees = createAppAsyncThunk(
     condition: (_, { getState }) => {
       const { queries } = getState();
       return (
-        queries.isPayeesDirty ||
-        (!queries.isPayeesLoading && !queries.isPayeesLoaded)
+        !queries.isPayeesLoading &&
+        (queries.isPayeesDirty || !queries.isPayeesLoaded)
       );
     },
   },
