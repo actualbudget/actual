@@ -18,9 +18,7 @@ import type {
   NewRuleEntity,
   RuleEntity,
   TransactionEntity,
-  DiscoverScheduleEntity,
   ScheduleEntity,
-  RecurConfig,
 } from './models';
 
 export interface ApiHandlers {
