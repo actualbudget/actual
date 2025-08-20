@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { listen } from 'loot-core/platform/client/fetch';
-import { q } from 'loot-core/shared/query';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { type TransactionEntity } from 'loot-core/types/models';
 
@@ -11,19 +10,15 @@ import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
+import { uncategorizedTransactions } from '@desktop-client/queries';
 import { useDispatch } from '@desktop-client/redux';
 import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 export function UncategorizedTransactions() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const baseTransactionsQuery = useCallback(
-    () =>
-      q('transactions')
-        .options({ splits: 'inline' })
-        .filter({ $and: [{ category: null }, { 'account.offbudget': false }] })
-        .select('*'),
+    () => uncategorizedTransactions().options({ splits: 'inline' }).select('*'),
     [],
   );
 

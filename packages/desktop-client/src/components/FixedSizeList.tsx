@@ -477,7 +477,6 @@ export class FixedSizeList extends PureComponent<
     return style;
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _getItemStyleCache = memoizeOne((_, __, ___) => ({}));
 
   _getRangeToRender() {

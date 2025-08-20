@@ -38,7 +38,7 @@ import {
   SelectedProvider,
 } from '@desktop-client/hooks/useSelected';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { initiallyLoadPayees } from '@desktop-client/queries/queriesSlice';
+import { getPayees } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 export type FilterData = {
@@ -197,7 +197,7 @@ export function ManageRules({
       await loadRules();
       setLoading(false);
 
-      await dispatch(initiallyLoadPayees());
+      await dispatch(getPayees());
     }
 
     if (payeeId) {

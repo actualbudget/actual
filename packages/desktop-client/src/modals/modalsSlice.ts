@@ -542,6 +542,9 @@ export type Modal =
     }
   | {
       name: 'category-automations-edit';
+      options: {
+        categoryId: CategoryEntity['id'];
+      };
     };
 
 type OpenAccountCloseModalPayload = {

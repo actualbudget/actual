@@ -20,9 +20,9 @@ import {
   SelectedProvider,
   useSelected,
 } from '@desktop-client/hooks/useSelected';
+import { useTags } from '@desktop-client/hooks/useTags';
 import { deleteAllTags, findTags } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
-import { useTags } from '@desktop-client/style/tags';
 
 export function ManageTags() {
   const { t } = useTranslation();

@@ -45,11 +45,11 @@ import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
 import {
   applyBudgetAction,
   createCategory,
-  createGroup,
+  createCategoryGroup,
   deleteCategory,
-  deleteGroup,
+  deleteCategoryGroup,
   updateCategory,
-  updateGroup,
+  updateCategoryGroup,
 } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 import {
@@ -139,7 +139,7 @@ export function BudgetPage() {
             onValidate: name => (!name ? 'Name is required.' : null),
             onSubmit: async name => {
               dispatch(collapseModals({ rootModalName: 'budget-page-menu' }));
-              dispatch(createGroup({ name }));
+              dispatch(createCategoryGroup({ name }));
             },
           },
         },
@@ -173,7 +173,7 @@ export function BudgetPage() {
 
   const onSaveGroup = useCallback(
     group => {
-      dispatch(updateGroup({ group }));
+      dispatch(updateCategoryGroup({ group }));
     },
     [dispatch],
   );
@@ -221,7 +221,10 @@ export function BudgetPage() {
                     collapseModals({ rootModalName: 'category-group-menu' }),
                   );
                   dispatch(
-                    deleteGroup({ id: groupId, transferId: transferCategory }),
+                    deleteCategoryGroup({
+                      id: groupId,
+                      transferId: transferCategory,
+                    }),
                   );
                 },
               },
@@ -230,7 +233,7 @@ export function BudgetPage() {
         );
       } else {
         dispatch(collapseModals({ rootModalName: 'category-group-menu' }));
-        dispatch(deleteGroup({ id: groupId }));
+        dispatch(deleteCategoryGroup({ id: groupId }));
       }
     },
     [categoryGroups, dispatch],
