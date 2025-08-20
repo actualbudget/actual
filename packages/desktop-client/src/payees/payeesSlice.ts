@@ -9,10 +9,6 @@ import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
 import { resetApp } from '@desktop-client/app/appSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 
-
-
-
-
 const sliceName = 'payees';
 
 type PayeesState = {
