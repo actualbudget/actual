@@ -12,11 +12,9 @@ on:
     branches:
       - master
   pull_request:
-  repository_dispatch:
-    types: [vrt_updated]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.client_payload.pr_number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
@@ -24,8 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.client_payload.branch || github.ref }}
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build API
@@ -42,8 +38,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.client_payload.branch || github.ref }}
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build CRDT
@@ -60,8 +54,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.client_payload.branch || github.ref }}
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Web
@@ -81,8 +73,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.client_payload.branch || github.ref }}
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Server
