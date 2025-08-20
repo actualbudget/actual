@@ -17,7 +17,11 @@ import {
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
 import { Handlers } from '../types/handlers';
-import { AccountEntity, CategoryGroupEntity } from '../types/models';
+import {
+  AccountEntity,
+  CategoryGroupEntity,
+  ScheduleEntity,
+} from '../types/models';
 import { ServerHandlers } from '../types/server-handlers';
 
 import { addTransactions } from './accounts/sync';
@@ -28,6 +32,9 @@ import {
   categoryGroupModel,
   payeeModel,
   remoteFileModel,
+  scheduleModel,
+  APIScheduleEntity,
+  AmountOPType,
 } from './api-models';
 import { aqlQuery } from './aql';
 import * as cloudStorage from './cloud-storage';
@@ -766,6 +773,140 @@ handlers['api/rule-update'] = withMutation(async function ({ rule }) {
 handlers['api/rule-delete'] = withMutation(async function (id) {
   checkFileOpen();
   return handlers['rule-delete'](id);
+});
+
+handlers['api/schedules-get'] = withMutation(async function () {
+  checkFileOpen();
+  const { data } = await aqlQuery(
+    q('schedules').select('*'),
+  );
+  const schedules = data as ScheduleEntity[];
+
+  return schedules.map(schedule => scheduleModel.toExternal(schedule));
+});
+
+handlers['api/schedule-create'] = withMutation(async function (schedule) {
+  checkFileOpen();
+  const internalSchedule = scheduleModel.fromExternal(schedule);
+  const partialSchedule = {
+    name: internalSchedule.name,
+    posts_transaction: internalSchedule.posts_transaction,
+  };
+  return handlers['schedule/create']({
+    schedule: partialSchedule,
+    conditions: internalSchedule._conditions,
+  });
+});
+
+handlers['api/schedule-update'] = withMutation(async function ({
+  id,
+  fields,
+  resetNextDate,
+}) {
+  checkFileOpen();
+  const { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
+  const sched = data[0] as ScheduleEntity;
+  let conditionsUpdated = false as boolean;
+
+  for (const key in fields) {
+    const typedKey = key as keyof APIScheduleEntity;
+    const value = fields[typedKey];
+
+    switch (typedKey) {
+      case 'name':
+        const newName = value as string;
+        const { data } = await aqlQuery(
+          q('schedules').filter({ newName }).select('*'),
+        );
+        if (!data || data.length === 0 || data[0].id === sched.id) {
+          sched.name = newName;
+          conditionsUpdated = true;
+        } else {
+          console.warn('There is already a schedule with this name');
+          return;
+        }
+        break;
+      case 'rule':
+        console.warn('Editing `rule` is not allowed via schedule-update.');
+        break;
+
+      case 'next_date':
+      case 'completed':
+        console.warn(
+          `Field ‘${typedKey}’ is system-managed and not user-editable.`,
+        );
+        break;
+
+      case 'posts_transaction':
+        sched.posts_transaction = value as boolean;
+        conditionsUpdated = true;
+        break;
+
+      case 'payee':
+        sched._conditions[0].value = value;
+        conditionsUpdated = true;
+        break;
+
+      case 'account':
+        sched._conditions[1].value = value;
+        conditionsUpdated = true;
+        break;
+
+      case 'amountOp':
+        sched._conditions[3].op = value as AmountOPType;
+        conditionsUpdated = true;
+        break;
+
+      case 'amount':
+        sched._conditions[3].value = value;
+        conditionsUpdated = true;
+        break;
+
+      case 'date':
+        sched._conditions[2].value = value;
+        conditionsUpdated = true;
+        break;
+
+      default:
+        console.warn(`Unhandled field: ${typedKey}`);
+        break;
+    }
+  }
+  if (conditionsUpdated) {
+    return handlers['schedule/update']({
+      schedule: {
+        id: sched.id,
+        posts_transaction: sched.posts_transaction,
+        name: sched.name,
+      },
+      conditions: sched._conditions,
+      resetNextDate,
+    });
+  } else {
+    return null;
+  }
+});
+
+handlers['api/schedule-delete'] = withMutation(async function (id: string) {
+  checkFileOpen();
+  return handlers['schedule/delete']({ id });
+});
+
+handlers['api/get-id-by-name'] = withMutation(async function ({ type, name }) {
+  const allowedTypes = ['payees', 'categories', 'schedules', 'accounts'];
+  if (!allowedTypes.includes(type)) {
+    return 'Error: Provide a valid type';
+  }
+  const { data } = await aqlQuery(q(type).filter({ name }).select('*'));
+  if (!data || data.length === 0) {
+    return 'Error: Not found';
+  }
+  return data[0].id;
+});
+
+handlers['api/get-server-version'] = withMutation(async function () {
+  checkFileOpen();
+  return handlers['get-server-version']();
 });
 
 export function installAPI(serverHandlers: ServerHandlers) {
