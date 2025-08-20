@@ -10,9 +10,9 @@ import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
+import { uncategorizedTransactionsQuery } from '@desktop-client/queries';
 import { useDispatch } from '@desktop-client/redux';
 import * as bindings from '@desktop-client/spreadsheet/bindings';
-import { uncategorizedTransactionsQuery } from '@desktop-client/queries';
 
 export function UncategorizedTransactions() {
   const dispatch = useDispatch();

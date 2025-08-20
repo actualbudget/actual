@@ -7,6 +7,7 @@ import {
   type Binding,
   type SheetNames,
 } from '.';
+
 import { uncategorizedTransactionsQuery } from '@desktop-client/queries';
 
 type BudgetType<SheetName extends SheetNames> = Record<
