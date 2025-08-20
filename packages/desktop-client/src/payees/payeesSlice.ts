@@ -1,13 +1,11 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { t } from 'i18next';
-import { v4 as uuidv4 } from 'uuid';
+import { createSlice } from '@reduxjs/toolkit';
 
 import { resetApp } from '@desktop-client/app/appSlice';
 import { AccountEntity, PayeeEntity } from 'loot-core/types/models';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 import { send } from 'loot-core/platform/client/fetch';
 import memoizeOne from 'memoize-one';
-import { getAccountsById } from '@desktop-client/queries/queriesSlice';
+import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
 import { groupById } from 'loot-core/shared/util';
 
 const sliceName = 'payees';
@@ -96,7 +94,6 @@ const payeesSlice = createSlice({
     });
   },
 });
-
 
 type CreatePayeePayload = {
   name: PayeeEntity['name'];
@@ -191,9 +188,7 @@ export const actions = {
   reloadPayees,
 };
 
-export const {
-  markPayeesDirty
-} = payeesSlice.actions;
+export const { markPayeesDirty } = payeesSlice.actions;
 
 function _loadCommonPayees(
   state: PayeesState,

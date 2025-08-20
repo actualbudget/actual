@@ -84,10 +84,7 @@ import {
   pagedQuery,
   type PagedQuery,
 } from '@desktop-client/queries/pagedQuery';
-import {
-  createPayee,
-  getPayees,
-} from '@desktop-client/payees/payeesSlice';
+import { createPayee, getPayees } from '@desktop-client/payees/payeesSlice';
 import { updateNewTransactions } from '@desktop-client/queries/queriesSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
