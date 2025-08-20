@@ -1,7 +1,9 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import memoizeOne from 'memoize-one';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { type SyncResponseWithErrors } from 'loot-core/server/accounts/app';
+import { groupById } from 'loot-core/shared/util';
 import {
   type SyncServerGoCardlessAccount,
   type AccountEntity,
@@ -19,8 +21,6 @@ import {
 } from '@desktop-client/queries/queriesSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
-import memoizeOne from 'memoize-one';
-import { groupById } from 'loot-core/shared/util';
 
 const sliceName = 'account';
 
