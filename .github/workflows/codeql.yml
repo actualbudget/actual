@@ -4,13 +4,11 @@ on:
   push:
     branches: [master]
   pull_request:
-  repository_dispatch:
-    types: [vrt_updated]
   schedule:
     - cron: '23 11 * * 6'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.client_payload.pr_number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
@@ -25,8 +23,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.client_payload.branch || github.ref }}
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
