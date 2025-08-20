@@ -38,7 +38,7 @@ import {
   SelectedProvider,
 } from '@desktop-client/hooks/useSelected';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { getPayees } from '@desktop-client/queries/queriesSlice';
+import { getPayees } from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 export type FilterData = {

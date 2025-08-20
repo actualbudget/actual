@@ -11,7 +11,8 @@ import {
   addNotification,
 } from './notifications/notificationsSlice';
 import { loadPrefs } from './prefs/prefsSlice';
-import { reloadCategories, reloadPayees } from './queries/queriesSlice';
+import { reloadPayees } from './payees/payeesSlice';
+import { reloadCategories } from './queries/queriesSlice';
 import { type AppStore } from './redux/store';
 import * as syncEvents from './sync-events';
 

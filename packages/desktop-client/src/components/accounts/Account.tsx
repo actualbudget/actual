@@ -87,8 +87,8 @@ import {
 import {
   createPayee,
   getPayees,
-  updateNewTransactions,
-} from '@desktop-client/queries/queriesSlice';
+} from '@desktop-client/payees/payeesSlice';
+import { updateNewTransactions } from '@desktop-client/queries/queriesSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
 

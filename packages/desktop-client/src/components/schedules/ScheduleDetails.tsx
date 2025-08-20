@@ -56,7 +56,7 @@ import {
 } from '@desktop-client/modals/modalsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { liveQuery } from '@desktop-client/queries/liveQuery';
-import { getPayeesById } from '@desktop-client/queries/queriesSlice';
+import { getPayeesById } from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type Fields = {

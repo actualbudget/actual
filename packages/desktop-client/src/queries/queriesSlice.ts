@@ -4,20 +4,14 @@ import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { groupById } from 'loot-core/shared/util';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
   type TransactionEntity,
-  type AccountEntity,
-  type PayeeEntity,
   type Tag,
 } from 'loot-core/types/models';
 
-import {
-  getAccountsById,
-  markUpdatedAccounts,
-} from '@desktop-client/accounts/accountsSlice';
+import { markUpdatedAccounts } from '@desktop-client/accounts/accountsSlice';
 import { resetApp } from '@desktop-client/app/appSlice';
 import {
   addGenericErrorNotification,
@@ -40,14 +34,6 @@ type QueriesState = {
   isCategoriesLoading: boolean;
   isCategoriesLoaded: boolean;
   isCategoriesDirty: boolean;
-  commonPayees: PayeeEntity[];
-  isCommonPayeesLoading: boolean;
-  isCommonPayeesLoaded: boolean;
-  isCommonPayeesDirty: boolean;
-  payees: PayeeEntity[];
-  isPayeesLoading: boolean;
-  isPayeesLoaded: boolean;
-  isPayeesDirty: boolean;
   tags: Tag[];
   isTagsLoading: boolean;
   isTagsLoaded: boolean;
@@ -65,14 +51,6 @@ const initialState: QueriesState = {
   isCategoriesLoading: false,
   isCategoriesLoaded: false,
   isCategoriesDirty: false,
-  commonPayees: [],
-  isCommonPayeesLoading: false,
-  isCommonPayeesLoaded: false,
-  isCommonPayeesDirty: false,
-  payees: [],
-  isPayeesLoading: false,
-  isPayeesLoaded: false,
-  isPayeesDirty: false,
   tags: [],
   isTagsLoading: false,
   isTagsLoaded: false,
@@ -128,9 +106,6 @@ const queriesSlice = createSlice({
     markCategoriesDirty(state) {
       _markCategoriesDirty(state);
     },
-    markPayeesDirty(state) {
-      _markPayeesDirty(state);
-    },
     markTagsDirty(state) {
       _markTagsDirty(state);
     },
@@ -169,58 +144,6 @@ const queriesSlice = createSlice({
 
     builder.addCase(getCategories.pending, state => {
       state.isCategoriesLoading = true;
-    });
-
-    // Payees
-
-    builder.addCase(createPayee.fulfilled, _markPayeesDirty);
-
-    builder.addCase(reloadCommonPayees.fulfilled, (state, action) => {
-      _loadCommonPayees(state, action.payload);
-    });
-
-    builder.addCase(reloadCommonPayees.rejected, state => {
-      state.isCommonPayeesLoading = false;
-    });
-
-    builder.addCase(reloadCommonPayees.pending, state => {
-      state.isCommonPayeesLoading = true;
-    });
-
-    builder.addCase(getCommonPayees.fulfilled, (state, action) => {
-      _loadCommonPayees(state, action.payload);
-    });
-
-    builder.addCase(getCommonPayees.rejected, state => {
-      state.isCommonPayeesLoading = false;
-    });
-
-    builder.addCase(getCommonPayees.pending, state => {
-      state.isCommonPayeesLoading = true;
-    });
-
-    builder.addCase(reloadPayees.fulfilled, (state, action) => {
-      _loadPayees(state, action.payload);
-    });
-
-    builder.addCase(reloadPayees.rejected, state => {
-      state.isPayeesLoading = false;
-    });
-
-    builder.addCase(reloadPayees.pending, state => {
-      state.isPayeesLoading = true;
-    });
-
-    builder.addCase(getPayees.fulfilled, (state, action) => {
-      _loadPayees(state, action.payload);
-    });
-
-    builder.addCase(getPayees.rejected, state => {
-      state.isPayeesLoading = false;
-    });
-
-    builder.addCase(getPayees.pending, state => {
-      state.isPayeesLoading = true;
     });
 
     // App
@@ -423,72 +346,6 @@ export const reloadCategories = createAppAsyncThunk(
   async () => {
     const categories: CategoryViews = await send('get-categories');
     return categories;
-  },
-);
-
-// Payee actions
-
-type CreatePayeePayload = {
-  name: PayeeEntity['name'];
-};
-
-export const createPayee = createAppAsyncThunk(
-  `${sliceName}/createPayee`,
-  async ({ name }: CreatePayeePayload) => {
-    const id: PayeeEntity['id'] = await send('payee-create', {
-      name: name.trim(),
-    });
-    return id;
-  },
-);
-
-export const getCommonPayees = createAppAsyncThunk(
-  `${sliceName}/getCommonPayees`,
-  async () => {
-    const payees: PayeeEntity[] = await send('common-payees-get');
-    return payees;
-  },
-  {
-    condition: (_, { getState }) => {
-      const { queries } = getState();
-      return (
-        !queries.isCommonPayeesLoading &&
-        (queries.isCommonPayeesDirty || !queries.isCommonPayeesLoaded)
-      );
-    },
-  },
-);
-
-export const reloadCommonPayees = createAppAsyncThunk(
-  `${sliceName}/reloadCommonPayees`,
-  async () => {
-    const payees: PayeeEntity[] = await send('common-payees-get');
-    return payees;
-  },
-);
-
-export const getPayees = createAppAsyncThunk(
-  `${sliceName}/getPayees`,
-  async () => {
-    const payees: PayeeEntity[] = await send('payees-get');
-    return payees;
-  },
-  {
-    condition: (_, { getState }) => {
-      const { queries } = getState();
-      return (
-        !queries.isPayeesLoading &&
-        (queries.isPayeesDirty || !queries.isPayeesLoaded)
-      );
-    },
-  },
-);
-
-export const reloadPayees = createAppAsyncThunk(
-  `${sliceName}/reloadPayees`,
-  async () => {
-    const payees: PayeeEntity[] = await send('payees-get');
-    return payees;
   },
 );
 
@@ -966,23 +823,6 @@ export const importTransactions = createAppAsyncThunk(
 
 // Helper functions
 
-export const getActivePayees = memoizeOne(
-  (payees: PayeeEntity[], accounts: AccountEntity[]) => {
-    const accountsById = getAccountsById(accounts);
-
-    return payees.filter(payee => {
-      if (payee.transfer_acct) {
-        const account = accountsById[payee.transfer_acct];
-        return account != null && !account.closed;
-      }
-      return true;
-    });
-  },
-);
-
-export const getPayeesById = memoizeOne(
-  (payees: PayeeEntity[] | null | undefined) => groupById(payees),
-);
 export const getCategoriesById = memoizeOne(
   (categoryGroups: CategoryGroupEntity[] | null | undefined) => {
     const res: { [id: CategoryGroupEntity['id']]: CategoryEntity } = {};
@@ -1000,11 +840,6 @@ export const getCategoriesById = memoizeOne(
 export const { name, reducer, getInitialState } = queriesSlice;
 export const actions = {
   ...queriesSlice.actions,
-  createPayee,
-  getCommonPayees,
-  reloadCommonPayees,
-  getPayees,
-  reloadPayees,
   importPreviewTransactions,
   importTransactions,
   applyBudgetAction,
@@ -1031,7 +866,6 @@ export const {
   updateNewTransactions,
   setLastTransaction,
   markCategoriesDirty,
-  markPayeesDirty,
   markTagsDirty,
 } = queriesSlice.actions;
 
@@ -1047,28 +881,6 @@ function _loadCategories(
 
 function _markCategoriesDirty(state: QueriesState) {
   state.isCategoriesDirty = true;
-}
-
-function _loadCommonPayees(
-  state: QueriesState,
-  commonPayees: QueriesState['commonPayees'],
-) {
-  state.commonPayees = commonPayees;
-  state.isCommonPayeesLoading = false;
-  state.isCommonPayeesLoaded = true;
-  state.isCommonPayeesDirty = false;
-}
-
-function _loadPayees(state: QueriesState, payees: QueriesState['payees']) {
-  state.payees = payees;
-  state.isPayeesLoading = false;
-  state.isPayeesLoaded = true;
-  state.isPayeesDirty = false;
-}
-
-function _markPayeesDirty(state: QueriesState) {
-  state.isCommonPayeesDirty = true;
-  state.isPayeesDirty = true;
 }
 
 function _loadTags(state: QueriesState, tags: QueriesState['tags']) {
