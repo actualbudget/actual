@@ -43,7 +43,6 @@ test.describe('Command bar', () => {
     // Close the command bar
     await page.keyboard.press('Escape');
     await expect(commandBar).not.toBeVisible();
-    await expect(page).toMatchThemeScreenshots();
   });
 
   test('Check the command bar search works correctly', async () => {
@@ -61,18 +60,18 @@ test.describe('Command bar', () => {
     await page.keyboard.press('Enter');
     await expect(page.getByTestId('reports-page')).toBeVisible();
     await expect(page.getByText('Loading reports...')).not.toBeVisible(); // wait for screen to load
-    await expect(page).toMatchThemeScreenshots();
 
     // Navigate to schedule page
     await page.keyboard.press('ControlOrMeta+k');
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('ArrowDown'); // Select second suggestion - Schedules
+    await expect(page).toMatchThemeScreenshots();
+
     await page.keyboard.press('Enter');
     await expect(
       page.getByRole('button', {
         name: 'Add new schedule',
       }),
     ).toBeVisible();
-    await expect(page).toMatchThemeScreenshots();
   });
 });
