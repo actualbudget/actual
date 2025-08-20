@@ -41,9 +41,9 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useSyncedPrefs } from '@desktop-client/hooks/useSyncedPrefs';
 import {
-  getPayees,
   importPreviewTransactions,
   importTransactions,
+  reloadPayees,
 } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -679,7 +679,7 @@ export function ImportTransactionsModal({
       }),
     ).unwrap();
     if (didChange) {
-      await dispatch(getPayees());
+      await dispatch(reloadPayees());
     }
 
     if (onImported) {

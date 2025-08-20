@@ -13,8 +13,8 @@ import {
 import { resetApp } from '@desktop-client/app/appSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import {
-  getAccounts,
-  getPayees,
+  markAccountsDirty,
+  markPayeesDirty,
   setNewTransactions,
 } from '@desktop-client/queries/queriesSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
@@ -86,7 +86,7 @@ export const unlinkAccount = createAppAsyncThunk(
     const { markAccountSuccess } = accountsSlice.actions;
     await send('account-unlink', { id });
     dispatch(markAccountSuccess({ id }));
-    dispatch(getAccounts());
+    dispatch(markAccountsDirty());
   },
 );
 
@@ -109,8 +109,8 @@ export const linkAccount = createAppAsyncThunk(
       upgradingId,
       offBudget,
     });
-    dispatch(getPayees());
-    dispatch(getAccounts());
+    dispatch(markPayeesDirty());
+    dispatch(markAccountsDirty());
   },
 );
 
@@ -131,8 +131,8 @@ export const linkAccountSimpleFin = createAppAsyncThunk(
       upgradingId,
       offBudget,
     });
-    dispatch(getPayees());
-    dispatch(getAccounts());
+    dispatch(markPayeesDirty());
+    dispatch(markAccountsDirty());
   },
 );
 
@@ -153,8 +153,8 @@ export const linkAccountPluggyAi = createAppAsyncThunk(
       upgradingId,
       offBudget,
     });
-    dispatch(getPayees());
-    dispatch(getAccounts());
+    dispatch(markPayeesDirty());
+    dispatch(markAccountsDirty());
   },
 );
 
@@ -215,7 +215,7 @@ function handleSyncResponse(
   resMatchedTransactions.push(...matchedTransactions);
   resUpdatedAccounts.push(...updatedAccounts);
 
-  dispatch(getAccounts());
+  dispatch(markAccountsDirty());
 
   return newTransactions.length > 0 || matchedTransactions.length > 0;
 }
@@ -359,8 +359,8 @@ export const moveAccount = createAppAsyncThunk(
   `${sliceName}/moveAccount`,
   async ({ id, targetId }: MoveAccountPayload, { dispatch }) => {
     await send('account-move', { id, targetId });
-    dispatch(getAccounts());
-    dispatch(getPayees());
+    dispatch(markAccountsDirty());
+    dispatch(markPayeesDirty());
   },
 );
 

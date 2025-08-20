@@ -11,7 +11,11 @@ import {
   type Notification,
 } from './notifications/notificationsSlice';
 import { loadPrefs } from './prefs/prefsSlice';
-import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
+import {
+  reloadAccounts,
+  reloadCategories,
+  reloadPayees,
+} from './queries/queriesSlice';
 import { type AppStore } from './redux/store';
 import { signOut } from './users/usersSlice';
 
@@ -67,7 +71,7 @@ export function listenForSyncEvent(store: AppStore) {
         tables.includes('category_groups') ||
         tables.includes('category_mapping')
       ) {
-        store.dispatch(getCategories());
+        store.dispatch(reloadCategories());
       }
 
       if (
@@ -76,11 +80,11 @@ export function listenForSyncEvent(store: AppStore) {
         tables.includes('payees') ||
         tables.includes('payee_mapping')
       ) {
-        store.dispatch(getPayees());
+        store.dispatch(reloadPayees());
       }
 
       if (tables.includes('accounts')) {
-        store.dispatch(getAccounts());
+        store.dispatch(reloadAccounts());
       }
     } else if (event.type === 'error') {
       let notif: Notification | null = null;

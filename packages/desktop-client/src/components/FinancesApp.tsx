@@ -86,7 +86,7 @@ export function FinancesApp() {
   const { t } = useTranslation();
 
   const accounts = useAccounts();
-  const accountsLoaded = useSelector(state => state.queries.accountsLoaded);
+  const isAccountsLoaded = useSelector(state => state.queries.isAccountsLoaded);
 
   const [lastUsedVersion, setLastUsedVersion] = useLocalPref(
     'flags.updateNotificationShownForVersion',
@@ -224,7 +224,7 @@ export function FinancesApp() {
                 <Route
                   path="/"
                   element={
-                    accountsLoaded ? (
+                    isAccountsLoaded ? (
                       accounts.length > 0 ? (
                         <Navigate to="/budget" replace />
                       ) : (

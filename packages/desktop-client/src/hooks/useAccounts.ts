@@ -7,14 +7,14 @@ import { useSelector, useDispatch } from '@desktop-client/redux';
 
 export function useAccounts() {
   const dispatch = useDispatch();
-  const accountsLoaded = useSelector(state => state.queries.accountsLoaded);
   const isInitialMount = useInitialMount();
+  const isAccountsDirty = useSelector(state => state.queries.isAccountsDirty);
 
   useEffect(() => {
-    if (isInitialMount && !accountsLoaded) {
+    if (isInitialMount || isAccountsDirty) {
       dispatch(getAccounts());
     }
-  }, [accountsLoaded, dispatch, isInitialMount]);
+  }, [dispatch, isInitialMount, isAccountsDirty]);
 
   return useSelector(state => state.queries.accounts);
 }
