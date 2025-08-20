@@ -3,6 +3,11 @@ import { type Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
 
+const getCommandBar = (page: Page) =>
+  page.getByRole('combobox', {
+    name: 'Command Bar',
+  });
+
 test.describe('Command bar', () => {
   let page: Page;
   let configurationPage: ConfigurationPage;
@@ -18,7 +23,12 @@ test.describe('Command bar', () => {
     // sometimes the mouse hovers on a budget element thus rendering an input box
     // and this breaks screenshot tests
     await page.mouse.move(0, 0);
-    expect(page.getByRole('button', { name: 'Help' })).toBeVisible(); // ensure page is loaded
+
+    // ensure page is loaded
+    expect(page.getByTestId('budget-table')).toBeVisible();
+    expect(page.getByRole('button', { name: 'Add group' })).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test.afterAll(async () => {
@@ -26,32 +36,25 @@ test.describe('Command bar', () => {
   });
 
   test('Check the command bar visuals', async () => {
+    // Open the command bar
     await page.keyboard.press('ControlOrMeta+k');
-
-    const commandBarSearchBox = page.getByRole('combobox', {
-      name: 'Command Bar',
-    });
-
-    expect(commandBarSearchBox).toBeVisible();
-
+    expect(getCommandBar(page)).toBeVisible();
     await expect(page).toMatchThemeScreenshots();
+
+    // Close the command bar
     await page.keyboard.press('Escape');
-    expect(commandBarSearchBox).not.toBeVisible();
+    expect(getCommandBar(page)).not.toBeVisible();
     await expect(page).toMatchThemeScreenshots();
   });
 
   test('Check the command bar search works correctly', async () => {
     await page.keyboard.press('ControlOrMeta+k');
 
-    const commandBarSearchBox = page.getByRole('combobox', {
-      name: 'Command Bar',
-    });
-
-    expect(commandBarSearchBox).toBeVisible();
-    await expect(commandBarSearchBox).toHaveValue('');
+    expect(getCommandBar(page)).toBeVisible();
+    await expect(getCommandBar(page)).toHaveValue('');
 
     // Search and navigate to reports
-    await commandBarSearchBox.fill('reports');
+    await getCommandBar(page).fill('reports');
     await page.keyboard.press('Enter');
     expect(page.getByTestId('reports-page')).toBeVisible();
     expect(page.getByText('Loading reports...')).not.toBeVisible(); // wait for screen to load
