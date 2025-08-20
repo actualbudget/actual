@@ -1,7 +1,9 @@
 import { Trans } from 'react-i18next';
 
-import { integerToCurrency } from 'loot-core/shared/util';
+import { amountToInteger } from 'loot-core/shared/util';
 import type { SimpleTemplate } from 'loot-core/types/models/templates';
+
+import { useFormat } from '@desktop-client/hooks/useFormat';
 
 type SimpleAutomationReadOnlyProps = {
   template: SimpleTemplate;
@@ -10,9 +12,17 @@ type SimpleAutomationReadOnlyProps = {
 export const SimpleAutomationReadOnly = ({
   template,
 }: SimpleAutomationReadOnlyProps) => {
+  const format = useFormat();
   return (
     <Trans>
-      Budget {{ monthly: integerToCurrency(template.monthly ?? 0) }} each month
+      Budget{' '}
+      {{
+        monthly: format(
+          amountToInteger(template.monthly ?? 0, format.currency.decimalPlaces),
+          'financial',
+        ),
+      }}{' '}
+      each month
     </Trans>
   );
 };

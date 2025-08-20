@@ -35,19 +35,41 @@ type FormLabelProps = {
   style?: CSSProperties;
 };
 
+const defaultLabelStyle: CSSProperties = {
+  fontSize: 13,
+  marginBottom: 3,
+  color: theme.tableText,
+};
+
 export const FormLabel = ({ style, title, id, htmlFor }: FormLabelProps) => {
   return (
     <Text
       style={{
-        fontSize: 13,
-        marginBottom: 3,
-        color: theme.tableText,
+        ...defaultLabelStyle,
         ...style,
       }}
     >
       <label htmlFor={htmlFor} id={id}>
         {title}
       </label>
+    </Text>
+  );
+};
+
+export const FormTextLabel = ({
+  style,
+  title,
+  id,
+}: Omit<FormLabelProps, 'htmlFor'>) => {
+  return (
+    <Text
+      style={{
+        ...defaultLabelStyle,
+        cursor: 'default',
+        ...style,
+      }}
+    >
+      <span id={id}>{title}</span>
     </Text>
   );
 };
