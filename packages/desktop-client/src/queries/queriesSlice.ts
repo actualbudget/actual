@@ -14,7 +14,10 @@ import {
   type Tag,
 } from 'loot-core/types/models';
 
-import { markUpdatedAccounts } from '@desktop-client/accounts/accountsSlice';
+import {
+  getAccountsById,
+  markUpdatedAccounts,
+} from '@desktop-client/accounts/accountsSlice';
 import { resetApp } from '@desktop-client/app/appSlice';
 import {
   addGenericErrorNotification,
@@ -977,9 +980,6 @@ export const getActivePayees = memoizeOne(
   },
 );
 
-export const getAccountsById = memoizeOne(
-  (accounts: AccountEntity[] | null | undefined) => groupById(accounts),
-);
 export const getPayeesById = memoizeOne(
   (payees: PayeeEntity[] | null | undefined) => groupById(payees),
 );

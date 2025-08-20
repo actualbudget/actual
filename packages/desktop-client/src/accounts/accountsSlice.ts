@@ -19,6 +19,8 @@ import {
 } from '@desktop-client/queries/queriesSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
+import memoizeOne from 'memoize-one';
+import { groupById } from 'loot-core/shared/util';
 
 const sliceName = 'account';
 
@@ -518,6 +520,10 @@ export const moveAccount = createAppAsyncThunk(
     dispatch(markAccountsDirty());
     dispatch(markPayeesDirty());
   },
+);
+
+export const getAccountsById = memoizeOne(
+  (accounts: AccountEntity[] | null | undefined) => groupById(accounts),
 );
 
 export const { name, reducer, getInitialState } = accountsSlice;
