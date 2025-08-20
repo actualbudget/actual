@@ -8,7 +8,7 @@ import {
   type SheetNames,
 } from '.';
 
-import { uncategorizedTransactionsQuery } from '@desktop-client/queries';
+import { uncategorizedTransactions } from '@desktop-client/queries';
 
 type BudgetType<SheetName extends SheetNames> = Record<
   string,
@@ -139,14 +139,14 @@ export function categoryBalanceUncleared(
 export function uncategorizedBalance<SheetName extends SheetNames>() {
   return {
     name: 'uncategorized-balance',
-    query: uncategorizedTransactionsQuery().calculate({ $sum: '$amount' }),
+    query: uncategorizedTransactions().calculate({ $sum: '$amount' }),
   } satisfies Binding<SheetName, 'uncategorized-balance'>;
 }
 
 export function uncategorizedCount<SheetName extends SheetNames>() {
   return {
     name: 'uncategorized-amount',
-    query: uncategorizedTransactionsQuery().calculate({ $count: '$id' }),
+    query: uncategorizedTransactions().calculate({ $count: '$id' }),
   } satisfies Binding<SheetName, 'uncategorized-amount'>;
 }
 

@@ -118,7 +118,7 @@ export function transactionsSearch(
   });
 }
 
-export function uncategorizedTransactionsQuery() {
+export function uncategorizedTransactions() {
   return q('transactions').filter({
     'account.offbudget': false,
     category: null,
