@@ -126,6 +126,7 @@ import {
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
 import {
   getPayeesById,
   getCategoriesById,
