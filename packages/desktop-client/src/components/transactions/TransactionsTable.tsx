@@ -82,7 +82,6 @@ import {
 } from './table/utils';
 import { TransactionMenu } from './TransactionMenu';
 
-import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
 import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
