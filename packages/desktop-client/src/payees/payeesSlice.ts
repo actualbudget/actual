@@ -1,12 +1,17 @@
 import { createSlice } from '@reduxjs/toolkit';
-
-import { resetApp } from '@desktop-client/app/appSlice';
-import { AccountEntity, PayeeEntity } from 'loot-core/types/models';
-import { createAppAsyncThunk } from '@desktop-client/redux';
-import { send } from 'loot-core/platform/client/fetch';
 import memoizeOne from 'memoize-one';
-import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
+
+import { send } from 'loot-core/platform/client/fetch';
 import { groupById } from 'loot-core/shared/util';
+import { type AccountEntity, type PayeeEntity } from 'loot-core/types/models';
+
+import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
+import { resetApp } from '@desktop-client/app/appSlice';
+import { createAppAsyncThunk } from '@desktop-client/redux';
+
+
+
+
 
 const sliceName = 'payees';
 

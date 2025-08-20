@@ -74,8 +74,8 @@ import {
   useSelected,
   SelectedProvider,
 } from '@desktop-client/hooks/useSelected';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { getPayees } from '@desktop-client/payees/payeesSlice';
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
 import { enableUndo, disableUndo } from '@desktop-client/undo';
 
