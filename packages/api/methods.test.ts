@@ -815,7 +815,7 @@ test('Schedules: successfully complete schedules operations', async () => {
       expect.objectContaining({
         id: ScheduleId1,
         posts_transaction: true,
-        amount: -5000,
+        amount: -10000,
         amountOp: 'is',
         date: {
           frequency: 'monthly',
