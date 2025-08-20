@@ -35,7 +35,7 @@ import {
   moveCategoryGroup,
   updateCategory,
   updateCategoryGroup,
-} from '@desktop-client/queries/queriesSlice';
+} from '@desktop-client/budget/budgetSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type TrackingReportComponents = {
