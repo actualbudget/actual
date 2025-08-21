@@ -28,6 +28,10 @@ import {
 } from './utils';
 
 import {
+  importPreviewTransactions,
+  importTransactions,
+} from '@desktop-client/accounts/accountsSlice';
+import {
   Modal,
   ModalCloseButton,
   ModalHeader,
@@ -42,10 +46,6 @@ import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useSyncedPrefs } from '@desktop-client/hooks/useSyncedPrefs';
 import { reloadPayees } from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
-import {
-  importPreviewTransactions,
-  importTransactions,
-} from '@desktop-client/accounts/accountssSlice';
 
 function getFileType(filepath) {
   const m = filepath.match(/\.([^.]*)$/);
