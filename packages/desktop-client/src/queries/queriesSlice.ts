@@ -2,16 +2,11 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { send } from 'loot-core/platform/client/fetch';
-import {
-  type TransactionEntity,
-  type Tag,
-} from 'loot-core/types/models';
+import { type TransactionEntity, type Tag } from 'loot-core/types/models';
 
 import { markUpdatedAccounts } from '@desktop-client/accounts/accountsSlice';
 import { resetApp } from '@desktop-client/app/appSlice';
-import {
-  addNotification,
-} from '@desktop-client/notifications/notificationsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 
 const sliceName = 'queries';

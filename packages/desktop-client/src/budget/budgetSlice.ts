@@ -3,7 +3,10 @@ import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { type CategoryEntity, type CategoryGroupEntity } from 'loot-core/types/models';
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/types/models';
 
 import { resetApp } from '@desktop-client/app/appSlice';
 import {
@@ -11,7 +14,6 @@ import {
   addNotification,
 } from '@desktop-client/notifications/notificationsSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
-
 
 const sliceName = 'budget';
 
