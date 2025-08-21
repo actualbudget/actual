@@ -147,9 +147,10 @@ export function useOverspentCategories({
       ]),
     );
 
-    const totalAmount = amountsByCategory
-      .values()
-      .reduce((sum, value) => sum + value, 0);
+    const totalAmount = Array.from(amountsByCategory.values()).reduce(
+      (sum, value) => sum + value,
+      0,
+    );
 
     return {
       categories: categoriesToReturn,
