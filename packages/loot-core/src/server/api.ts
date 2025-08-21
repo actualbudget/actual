@@ -775,13 +775,13 @@ handlers['api/rule-delete'] = withMutation(async function (id) {
   return handlers['rule-delete'](id);
 });
 
-handlers['api/schedules-get'] = withMutation(async function () {
+handlers['api/schedules-get'] = async function () {
   checkFileOpen();
   const { data } = await aqlQuery(q('schedules').select('*'));
   const schedules = data as ScheduleEntity[];
 
   return schedules.map(schedule => scheduleModel.toExternal(schedule));
-});
+};
 
 handlers['api/schedule-create'] = withMutation(async function (schedule) {
   checkFileOpen();
@@ -835,7 +835,9 @@ handlers['api/schedule-update'] = withMutation(async function ({
       }
       case 'next_date':
       case 'completed': {
-        throw APIError(`Field "${typedKey}" is system-managed and not user-editable.`);
+        throw APIError(
+          `Field ${typedKey} is system-managed and not user-editable.`,
+        );
       }
       case 'posts_transaction': {
         sched.posts_transaction = Boolean(value);
@@ -910,7 +912,7 @@ handlers['api/schedule-update'] = withMutation(async function ({
       resetNextDate,
     });
   } else {
-    return null;
+    return sched.id;
   }
 });
 
@@ -919,22 +921,33 @@ handlers['api/schedule-delete'] = withMutation(async function (id: string) {
   return handlers['schedule/delete']({ id });
 });
 
-handlers['api/get-id-by-name'] = withMutation(async function ({ type, name }) {
-  const allowedTypes = ['payees', 'categories', 'schedules', 'accounts'];
-  if (!allowedTypes.includes(type)) {
-    return 'Error: Provide a valid type';
-  }
-  const { data } = await aqlQuery(q(type).filter({ name }).select('*'));
-  if (!data || data.length === 0) {
-    return 'Error: Not found';
-  }
-  return data[0].id;
-});
+handlers['api/get-id-by-name'] = async function ({ type, name }) {
+  checkFileOpen();
 
-handlers['api/get-server-version'] = withMutation(async function () {
+  const allowedTypes = [
+    'payees',
+    'categories',
+    'schedules',
+    'accounts',
+  ] as const;
+
+  if (!allowedTypes.includes(type as any)) {
+    throw APIError('Provide a valid type');
+  }
+
+  const { data } = await aqlQuery(q(type).filter({ name }).select('*'));
+
+  if (!data || data.length === 0) {
+    throw APIError(`Not found: ${type} with name "${name}"`);
+  }
+
+  return data[0].id;
+};
+
+handlers['api/get-server-version'] = async function () {
   checkFileOpen();
   return handlers['get-server-version']();
-});
+};
 
 export function installAPI(serverHandlers: ServerHandlers) {
   const merged = Object.assign({}, serverHandlers, handlers);
