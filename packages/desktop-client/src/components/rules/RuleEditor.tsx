@@ -8,6 +8,7 @@ import {
   type CSSProperties,
   type ReactNode,
   type MouseEvent as ReactMouseEvent,
+  type TouchEvent as ReactTouchEvent,
 } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
@@ -983,7 +984,7 @@ export function RuleEditor({
   }, [actionSplits, conditions, conditionsOp]);
 
   // Resize handlers
-  const handleStart = useCallback((e: ReactMouseEvent | React.TouchEvent) => {
+  const handleStart = useCallback((e: ReactMouseEvent | ReactTouchEvent) => {
     e.preventDefault();
     setIsResizing(true);
   }, []);
@@ -1281,10 +1282,13 @@ export function RuleEditor({
             bottom: 0,
             left: 0,
             right: 0,
-            height: '4px',
+            height: '20px',
             cursor: 'ns-resize',
             backgroundColor: 'transparent',
             zIndex: 10,
+            // Add a subtle visual indicator for mobile
+            borderTop: '2px solid transparent',
+            borderBottom: '2px solid transparent',
           }}
           onMouseDown={handleStart}
           onTouchStart={handleStart}
