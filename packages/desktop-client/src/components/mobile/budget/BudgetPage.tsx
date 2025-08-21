@@ -686,6 +686,9 @@ function UncategorizedTransactionsBanner(props) {
 
   const { transactions, isLoading } = useTransactions({
     query: transactionsQuery,
+    options: {
+      pageCount: 1000,
+    },
   });
 
   if (isLoading || transactions.length === 0) {
@@ -694,7 +697,7 @@ function UncategorizedTransactionsBanner(props) {
   console.log(transactions);
 
   const totalUncategorizedAmount = transactions.reduce(
-    (sum, t) => sum + t.amount || 0,
+    (sum, t) => sum + (t.amount ?? 0),
     0,
   );
 

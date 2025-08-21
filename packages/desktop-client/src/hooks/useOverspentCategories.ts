@@ -30,7 +30,10 @@ export function useOverspentCategories({
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
   const { list: categories, grouped: categoryGroups } = useCategories();
-  const groupsById = useMemo(() => groupById(categoryGroups), [categoryGroups]);
+  const categoryGroupsById = useMemo(
+    () => groupById(categoryGroups),
+    [categoryGroups],
+  );
 
   const categoryBalanceBindings = useMemo(
     () =>
@@ -133,7 +136,7 @@ export function useOverspentCategories({
       )
       .filter(category =>
         budgetType === 'tracking'
-          ? !category.hidden && !groupsById[category.group].hidden
+          ? !category.hidden && !categoryGroupsById[category.group]?.hidden
           : true,
       );
 
@@ -157,7 +160,7 @@ export function useOverspentCategories({
     budgetType,
     carryoverFlagByCategory,
     categories,
-    groupsById,
+    categoryGroupsById,
     overspendingByCategory,
   ]);
 }
