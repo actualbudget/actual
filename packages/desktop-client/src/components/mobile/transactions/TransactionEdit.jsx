@@ -32,7 +32,6 @@ import {
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import * as Platform from 'loot-core/shared/platform';
 import { q } from 'loot-core/shared/query';
 import { getStatusLabel } from 'loot-core/shared/schedules';
 import {
@@ -510,7 +509,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const [totalAmountFocused, setTotalAmountFocused] = useState(
     // iOS does not support automatically opening up the keyboard for the
     // total amount field. Hence we should not focus on it on page render.
-    !Platform.isIOSAgent,
+    true,
   );
   const childTransactionElementRefMap = useRef({});
   const hasAccountChanged = useRef(false);
@@ -528,7 +527,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const isInitialMount = useInitialMount();
 
   useEffect(() => {
-    if (isInitialMount && isAdding && !Platform.isIOSAgent) {
+    if (isInitialMount && isAdding) {
       onTotalAmountEdit();
     }
   }, [isAdding, isInitialMount, onTotalAmountEdit]);

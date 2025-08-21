@@ -25,6 +25,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { useDrag } from '@use-gesture/react';
 
+import { useNavigableFocusFunction } from '@desktop-client/components/NavigableFocusProvider';
 import { useScrollListener } from '@desktop-client/components/ScrollProvider';
 
 const COLUMN_COUNT = 3;
@@ -67,6 +68,8 @@ export function MobileNavTabs() {
     [api, OPEN_FULL_Y],
   );
 
+  const focusInput = useNavigableFocusFunction();
+
   const openDefault = useCallback(
     (velocity = 0) => {
       setNavbarState('default');
@@ -103,6 +106,7 @@ export function MobileNavTabs() {
       path: '/transactions/new',
       style: navTabStyle,
       Icon: SvgAdd,
+      focus: { inputmode: 'decimal' as const },
     },
     {
       name: t('Accounts'),
@@ -141,7 +145,16 @@ export function MobileNavTabs() {
       Icon: SvgCog,
     },
   ].map(tab => (
-    <NavTab key={tab.path} onClick={() => openDefault()} {...tab} />
+    <NavTab
+      key={tab.path}
+      onClick={() => {
+        if (tab.focus) {
+          focusInput(tab.focus);
+        }
+        openDefault();
+      }}
+      {...tab}
+    />
   ));
 
   const bufferTabsCount = COLUMN_COUNT - (navTabs.length % COLUMN_COUNT);

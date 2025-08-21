@@ -6,6 +6,7 @@ export class MobileTransactionEntryPage {
   readonly page: Page;
   readonly header: Locator;
   readonly amountField: Locator;
+  readonly globalAmountField: Locator;
   readonly transactionForm: Locator;
   readonly footer: Locator;
   readonly addTransactionButton: Locator;
@@ -15,6 +16,7 @@ export class MobileTransactionEntryPage {
     this.header = page.getByRole('heading');
     this.transactionForm = page.getByTestId('transaction-form');
     this.amountField = this.transactionForm.getByTestId('amount-input');
+    this.globalAmountField = page.getByTestId('navigable-focus-input');
     this.footer = page.getByTestId('transaction-form-footer');
     this.addTransactionButton = this.footer.getByRole('button', {
       name: 'Add transaction',
