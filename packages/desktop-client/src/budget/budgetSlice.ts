@@ -1,16 +1,17 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { t } from 'i18next';
+import memoizeOne from 'memoize-one';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { CategoryEntity, CategoryGroupEntity } from 'loot-core/types/models';
+import { type CategoryEntity, type CategoryGroupEntity } from 'loot-core/types/models';
 
-import { createAppAsyncThunk } from '@desktop-client/redux';
+import { resetApp } from '@desktop-client/app/appSlice';
 import {
   addGenericErrorNotification,
   addNotification,
 } from '@desktop-client/notifications/notificationsSlice';
-import { t, TReturnOptionalNull } from 'i18next';
-import { resetApp } from '@desktop-client/app/appSlice';
-import memoizeOne from 'memoize-one';
+import { createAppAsyncThunk } from '@desktop-client/redux';
+
 
 const sliceName = 'budget';
 

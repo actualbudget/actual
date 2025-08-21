@@ -1,12 +1,8 @@
 // @ts-strict-ignore
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { t } from 'i18next';
-import memoizeOne from 'memoize-one';
 
 import { send } from 'loot-core/platform/client/fetch';
 import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
   type TransactionEntity,
   type Tag,
 } from 'loot-core/types/models';
@@ -14,7 +10,6 @@ import {
 import { markUpdatedAccounts } from '@desktop-client/accounts/accountsSlice';
 import { resetApp } from '@desktop-client/app/appSlice';
 import {
-  addGenericErrorNotification,
   addNotification,
 } from '@desktop-client/notifications/notificationsSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';

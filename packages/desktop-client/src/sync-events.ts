@@ -5,6 +5,7 @@ import { listen, send } from 'loot-core/platform/client/fetch';
 
 import { reloadAccounts } from './accounts/accountsSlice';
 import { resetSync, sync } from './app/appSlice';
+import { reloadCategories } from './budget/budgetSlice';
 import {
   closeAndDownloadBudget,
   uploadBudget,
@@ -16,7 +17,6 @@ import {
 } from './notifications/notificationsSlice';
 import { reloadPayees } from './payees/payeesSlice';
 import { loadPrefs } from './prefs/prefsSlice';
-import { reloadCategories } from './budget/budgetSlice';
 import { type AppStore } from './redux/store';
 import { signOut } from './users/usersSlice';
 
