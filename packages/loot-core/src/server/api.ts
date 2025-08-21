@@ -45,7 +45,6 @@ import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
 import { setSyncingMode, batchMessages } from './sync';
-import { boolean } from 'fast-check';
 
 let IMPORT_MODE = false;
 
@@ -836,9 +835,7 @@ handlers['api/schedule-update'] = withMutation(async function ({
       }
       case 'next_date':
       case 'completed': {
-        throw APIError(
-          `Field '${typedKey}' is system-managed and not user-editable.`,
-        );
+        throw APIError(`Field "${typedKey}" is system-managed and not user-editable.`);
       }
       case 'posts_transaction': {
         sched.posts_transaction = Boolean(value);
