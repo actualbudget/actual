@@ -1,31 +1,43 @@
+import createClient from 'openapi-fetch';
+
 import { SecretName, secretsService } from '../../services/secrets-service.js';
 import { getLoadedRegistry } from '../banks/bank-registry.js';
 import {
+  components,
+  operations,
+  paths,
+} from '../models/enablebanking-openapi.js';
+import {
+  Account,
   EnableBankingAuthenticationStartResponse,
+  EnableBankingToken,
   EnableBankingTransaction,
 } from '../models/enablebanking.js';
 import {
-  Account,
-  AccountResource,
-  ASPSPData,
-  EnableBankingToken,
-  GetApplicationResponse,
-  GetAspspsResponse,
-  GetSessionResponse,
-  HalBalances,
-  HalTransactions,
-  StartAuthorizationResponse,
-  Transaction,
-} from '../models/models-enablebanking.js';
-import {
-  handleEnableBankingError,
+  ApplicationInactiveError,
+  EnableBankingError,
   EnableBankingSetupError,
+  handleErrorResponse,
+  isErrorResponse,
   ResourceNotFoundError,
 } from '../utils/errors.js';
 import { getJWT } from '../utils/jwt.js';
 
+function isDefined<T>(value: T | undefined): asserts value is T {
+  if (value === undefined) {
+    console.error(
+      `A required value is undefined. This should not happen. Please report this issue.`,
+    );
+    throw new EnableBankingError(
+      'INTERNAL_ERROR',
+      `Something went wrong while using the Enable Banking API. Please try again later.`,
+    );
+  }
+}
+
 export const enableBankingservice = {
   HOSTNAME: 'https://api.enablebanking.com/',
+
   _activeAuths: new Map<string, string>(),
   setupSecrets: async (applicationId: string, secretKey: string) => {
     // Check if we can get a jwt with provided data.
@@ -39,13 +51,7 @@ export const enableBankingservice = {
     }
 
     // Check if jwt is recognized by Enable Banking
-    const responseData: GetApplicationResponse = await enableBankingservice.get(
-      'application',
-      jwt,
-    );
-    if (!responseData.active) {
-      return false;
-    }
+    await enableBankingservice.getApplication(jwt);
     secretsService.set(SecretName.enablebanking_applicationId, applicationId);
     secretsService.set(SecretName.enablebaanking_secret, secretKey);
     return true;
@@ -61,8 +67,8 @@ export const enableBankingservice = {
     if (!enableBankingservice.secretsAreSetup()) {
       return false;
     }
-    const responseData = await enableBankingservice.getApplication();
-    return responseData.active;
+    await enableBankingservice.getApplication();
+    return true;
   },
 
   getJWT: () => {
@@ -75,54 +81,66 @@ export const enableBankingservice = {
     }
     return getJWT(applicationId, secretKey);
   },
-
-  get: async <T>(endpoint: string, jwt?: string): Promise<T> | never => {
+  getClient: (jwt?: string) => {
     const baseHeaders = {
       Authorization: `Bearer ${jwt ? jwt : enableBankingservice.getJWT()}`,
       'Content-Type': 'application/json',
     };
-
-    const response = await fetch(
-      `${enableBankingservice.HOSTNAME}${endpoint}`,
-      {
-        headers: baseHeaders,
+    const client = createClient<paths>({
+      baseUrl: enableBankingservice.HOSTNAME,
+      headers: baseHeaders,
+    });
+    client.use({
+      async onResponse(options) {
+        const { response } = options;
+        if (response.status >= 400) {
+          const error_data = await response
+            .clone()
+            .json()
+            .then(data => {
+              if (isErrorResponse(data)) {
+                return handleErrorResponse(data);
+              } else {
+                console.error(`Enable Banking API returned an error:`, data);
+                return new EnableBankingError(
+                  'INTERNAL_ERROR',
+                  `Something went wrong while using the Enable Banking API. Please try again later.`,
+                );
+              }
+            });
+          throw error_data;
+        }
+        return undefined; // continue with the response
       },
-    );
-    return (await handleEnableBankingError(response)) as T;
-  },
-  post: async <T>(
-    endpoint: string,
-    payload: unknown,
-    jwt?: string,
-  ): Promise<T> | never => {
-    const baseHeaders = {
-      Authorization: `Bearer ${jwt ? jwt : enableBankingservice.getJWT()}`,
-      'Content-Type': 'application/json',
-    };
-
-    const response = await fetch(
-      `${enableBankingservice.HOSTNAME}${endpoint}`,
-      {
-        headers: baseHeaders,
-        method: 'POST',
-        body: JSON.stringify(payload),
-      },
-    );
-    return (await handleEnableBankingError(response)) as T;
+    });
+    return client;
   },
 
-  getApplication: async (): Promise<GetApplicationResponse> | never => {
-    return await enableBankingservice.get('application');
-  },
-  getASPSPs: async (country?: string): Promise<GetAspspsResponse> | never => {
-    const params: string[] = ['service=AIS'];
-    if (country) {
-      params.push(`country=${country}`);
+  getApplication: async (jwt?: string) => {
+    const { data } = await enableBankingservice
+      .getClient(jwt)
+      .GET('/application');
+    isDefined(data);
+    if (!data.active) {
+      throw new ApplicationInactiveError();
     }
-    return await enableBankingservice.get(`aspsps?${params.join('&')}`);
+    return data;
   },
 
-  getASPSP: async (country: string, name: string): Promise<ASPSPData> => {
+  getASPSPs: async (country?: string) => {
+    const { data } = await enableBankingservice.getClient().GET('/aspsps', {
+      params: {
+        query: {
+          service: 'AIS',
+          country,
+        },
+      },
+    });
+    isDefined(data);
+    return data;
+  },
+
+  getASPSP: async (country: string, name: string) => {
     return await enableBankingservice.getASPSPs(country).then(resp => {
       const res = resp.aspsps.filter(aspsp => aspsp.name === name).at(0);
       if (res) {
@@ -148,25 +166,30 @@ export const enableBankingservice = {
 
     const state = crypto.randomUUID();
 
-    const body = {
-      access: {
-        valid_until: valid_until.toISOString(),
-      },
-      aspsp: {
-        name: aspsp,
-        country,
-      },
-      state,
-      redirect_url: `${host.replace('http', 'https')}/enablebanking/auth_callback`,
-    };
+    // The redirect URL is the host with https, because Enable Banking requires it.
+    // Since we don't have ssl in dev. The redirect URL needs to be changed manually in browser.
+    const redirect_url = `${host.replace('http:', 'https:')}/enablebanking/auth_callback`;
 
-    const resp: StartAuthorizationResponse = await enableBankingservice.post(
-      'auth',
-      body,
-    );
+    const { data } = await enableBankingservice.getClient().POST('/auth', {
+      body: {
+        access: {
+          valid_until: valid_until.toISOString(),
+          balances: true,
+          transactions: true,
+        },
+        aspsp: {
+          name: aspsp,
+          country,
+        },
+        credentials_autosubmit: true,
+        state,
+        redirect_url,
+      },
+    });
+    isDefined(data);
 
     return {
-      redirect_url: resp['url'],
+      redirect_url: data.url,
       state,
     };
   },
@@ -175,12 +198,12 @@ export const enableBankingservice = {
     if (enableBankingservice.getSessionIdFromState(state)) {
       return enableBankingservice.getSessionIdFromState(state);
     }
-    console.log({ code });
-    const { session_id } = await enableBankingservice.post<{
-      session_id: string;
-    }>('sessions', { code });
-    enableBankingservice._activeAuths.set(state, session_id);
-    return session_id;
+    const { data } = await enableBankingservice.getClient().POST('/sessions', {
+      body: { code },
+    });
+    isDefined(data);
+    enableBankingservice._activeAuths.set(state, data.session_id);
+    return data.session_id;
   },
 
   getSessionIdFromState: (state: string): string | undefined => {
@@ -190,21 +213,29 @@ export const enableBankingservice = {
   getAccounts: async (
     session_id: string,
   ): Promise<EnableBankingToken> | never => {
-    const session_response: GetSessionResponse = await enableBankingservice.get(
-      `/sessions/${session_id}`,
-    );
-    const bank_id = [
-      session_response.aspsp.country,
-      session_response.aspsp.name,
-    ].join('_');
+    const client = enableBankingservice.getClient();
+
+    const { data } = await client.GET('/sessions/{session_id}', {
+      params: {
+        path: { session_id },
+      },
+    });
+    isDefined(data);
+    const bank_id = [data.aspsp.country, data.aspsp.name].join('_');
     const accounts: Account[] = [];
-    for (const account_id of session_response.accounts) {
-      const account: AccountResource = await enableBankingservice.get(
-        `/accounts/${account_id}/details`,
+    for (const account_id of data.accounts) {
+      const { data: account } = await client.GET(
+        `/accounts/{account_id}/details`,
+        {
+          params: { path: { account_id } },
+        },
       );
-      const balance: HalBalances = await enableBankingservice.get(
-        `/accounts/${account_id}/balances`,
+      isDefined(account);
+      const { data: balance } = await client.GET(
+        `/accounts/{account_id}/balances`,
+        { params: { path: { account_id } } },
       );
+      isDefined(balance);
       const name = account.account_id
         ? (account.account_id.iban ?? 'unknown')
         : 'unknown';
@@ -213,7 +244,7 @@ export const enableBankingservice = {
         account_id,
         name,
         balance: parseFloat(balance.balances[0].balance_amount.amount),
-        institution: session_response.aspsp.name,
+        institution: data.aspsp.name,
       });
     }
     return {
@@ -229,39 +260,41 @@ export const enableBankingservice = {
     date_to?: string,
     bank_id?: string,
   ): Promise<EnableBankingTransaction[]> => {
-    const params = new URLSearchParams();
+    const client = enableBankingservice.getClient();
+    const query: operations['get_account_transactions_accounts__account_id__transactions_get']['parameters']['query'] =
+      {};
     if (date_from) {
-      params.set('date_from', date_from);
+      query.date_from = date_from;
     }
     if (date_to) {
-      params.set('date_to', date_to);
+      query.date_to = date_to;
     }
 
-    let finished = false;
-    const transactions: Transaction[] = [];
-    while (!finished) {
-      const data: HalTransactions = await enableBankingservice.get(
-        `accounts/${account_id}/transactions?${params.toString()}`,
-      );
-
-      if (data.transactions) {
-        transactions.push(...data.transactions);
-      }
-      if (data.continuation_key) {
-        params.set('continuation_key', data.continuation_key);
-      } else {
-        finished = true;
-      }
-    }
+    const transactions: components['schemas']['Transaction'][] = [];
+    do {
+      const { data }: { data?: components['schemas']['HalTransactions'] } =
+        await client.GET('/accounts/{account_id}/transactions', {
+          params: {
+            path: { account_id },
+            query,
+          },
+        });
+      isDefined(data);
+      transactions.push(...(data.transactions || []));
+      query.continuation_key = data.continuation_key;
+    } while (query.continuation_key);
 
     const registry = await getLoadedRegistry();
 
     const bankProcessor = registry.get(bank_id ?? 'fallback');
+    console.log(
+      `Enable Banking: Processing ${transactions.length} transactions from ${date_from} to ${date_to} with ${bankProcessor.name}`,
+    );
     if (bankProcessor.debug) {
       console.debug(
         `--- Debugging '${bankProcessor.name}': showing first 5 transactions with processed transactions.---`,
       );
-      transactions.slice(0, 5).forEach(transaction => {
+      transactions.slice(0, 2).forEach(transaction => {
         console.debug('# ORIGINAL:');
         console.debug(JSON.stringify(transaction, null, 2));
         console.debug('## BECOMES:');
@@ -276,8 +309,8 @@ export const enableBankingservice = {
       console.debug(`--- End of transactions ---`);
     }
 
-    return transactions.map(
-      bankProcessor.normalizeTransaction.bind(bankProcessor),
+    return transactions.map(transaction =>
+      bankProcessor.normalizeTransaction(transaction),
     );
   },
 };

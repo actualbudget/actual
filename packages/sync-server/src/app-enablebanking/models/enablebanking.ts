@@ -50,3 +50,10 @@ export type EnableBankingTransaction = {
 export type EnableBankingTransactionsResponse = {
   transactions: EnableBankingTransaction[];
 };
+
+export type Account = {
+  account_id: string;
+  name: string;
+  institution: string;
+  balance: number;
+};

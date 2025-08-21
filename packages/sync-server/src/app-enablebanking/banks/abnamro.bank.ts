@@ -1,5 +1,5 @@
+import { components } from '../models/enablebanking-openapi.js';
 import { EnableBankingTransaction } from '../models/enablebanking.js';
-import { Transaction } from '../models/models-enablebanking.js';
 
 import { BankProcessorFor } from './bank-registry.js';
 import { FallbackBankProcessor } from './fallback.bank.js';
@@ -28,7 +28,9 @@ export class ABNAmroBankProcessor extends FallbackBankProcessor {
     return remittance_information.join('');
   }
 
-  normalizeTransaction(t: Transaction): EnableBankingTransaction {
+  normalizeTransaction(
+    t: components['schemas']['Transaction'],
+  ): EnableBankingTransaction {
     const transaction = super.normalizeTransaction(t);
     if (transaction.remittance_information) {
       transaction.notes = this.getNoteFromRemittance(
