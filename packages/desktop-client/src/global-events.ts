@@ -10,8 +10,9 @@ import {
   addGenericErrorNotification,
   addNotification,
 } from './notifications/notificationsSlice';
+import { reloadPayees } from './payees/payeesSlice';
 import { loadPrefs } from './prefs/prefsSlice';
-import { reloadCategories, reloadPayees } from './queries/queriesSlice';
+import { reloadCategories } from './queries/queriesSlice';
 import { type AppStore } from './redux/store';
 import * as syncEvents from './sync-events';
 

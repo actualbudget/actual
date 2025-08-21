@@ -78,17 +78,14 @@ import {
   replaceModal,
 } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { createPayee, getPayees } from '@desktop-client/payees/payeesSlice';
 import * as queries from '@desktop-client/queries';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import {
   pagedQuery,
   type PagedQuery,
 } from '@desktop-client/queries/pagedQuery';
-import {
-  createPayee,
-  getPayees,
-  updateNewTransactions,
-} from '@desktop-client/queries/queriesSlice';
+import { updateNewTransactions } from '@desktop-client/queries/queriesSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
 

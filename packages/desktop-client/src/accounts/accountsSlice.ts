@@ -15,10 +15,8 @@ import {
 
 import { resetApp } from '@desktop-client/app/appSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import {
-  markPayeesDirty,
-  setNewTransactions,
-} from '@desktop-client/queries/queriesSlice';
+import { markPayeesDirty } from '@desktop-client/payees/payeesSlice';
+import { setNewTransactions } from '@desktop-client/queries/queriesSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
 
