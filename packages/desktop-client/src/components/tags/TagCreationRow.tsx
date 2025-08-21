@@ -14,7 +14,7 @@ import { Stack } from '@actual-app/components/stack';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type Tag } from 'loot-core/types/models';
+import { type TagEntity } from 'loot-core/types/models';
 
 import {
   InputCell,
@@ -23,11 +23,11 @@ import {
 } from '@desktop-client/components/table';
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 import { useTagCSS } from '@desktop-client/hooks/useTagCSS';
-import { createTag } from '@desktop-client/queries/queriesSlice';
+import { createTag } from '@desktop-client/tags/tagsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type TagCreationRowProps = {
-  tags: Tag[];
+  tags: TagEntity[];
   onClose: () => void;
 };
 
