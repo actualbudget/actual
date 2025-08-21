@@ -694,7 +694,6 @@ function UncategorizedTransactionsBanner(props) {
   if (isLoading || transactions.length === 0) {
     return null;
   }
-  console.log(transactions);
 
   const totalUncategorizedAmount = transactions.reduce(
     (sum, t) => sum + (t.amount ?? 0),
