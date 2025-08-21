@@ -557,7 +557,13 @@ function ActionEditor({
         </>
       ) : op === 'set-split-amount' ? (
         <>
-          <View style={{ padding: '5px 10px', lineHeight: '1em' }}>
+          <View
+            style={{
+              padding: '5px 10px',
+              lineHeight: '1em',
+              flexShrink: 0,
+            }}
+          >
             {t('allocate')}
           </View>
 
@@ -567,23 +573,27 @@ function ActionEditor({
             onChange={onChange}
           />
 
-          {options.method !== 'remainder' && (
-            // @ts-expect-error fix this
-            <GenericInput
-              key={inputKey}
-              field={field}
-              op={op}
-              type="number"
-              numberFormatType={
-                options.method === 'fixed-percent' ? 'percentage' : 'currency'
-              }
-              value={value}
-              onChange={v => onChange('value', v)}
-              style={{
-                minWidth: 45,
-              }}
-            />
-          )}
+          <View
+            style={{
+              flex: 1,
+              minWidth: options.method === 'fixed-percent' ? 45 : 70,
+            }}
+          >
+            {options.method !== 'remainder' && (
+              // @ts-expect-error fix this
+              <GenericInput
+                key={inputKey}
+                field={field}
+                op={op}
+                type="number"
+                numberFormatType={
+                  options.method === 'fixed-percent' ? 'percentage' : 'currency'
+                }
+                value={value}
+                onChange={v => onChange('value', v)}
+              />
+            )}
+          </View>
         </>
       ) : op === 'link-schedule' ? (
         <>
@@ -619,7 +629,7 @@ function ActionEditor({
         </>
       ) : null}
 
-      <Stack direction="row">
+      <Stack direction="row" style={{ flexShrink: 0 }}>
         <EditorButtons
           onAdd={onAdd}
           onDelete={
