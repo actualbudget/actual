@@ -4,8 +4,10 @@ import {
   useEffect,
   useRef,
   useMemo,
+  useCallback,
   type CSSProperties,
   type ReactNode,
+  type MouseEvent as ReactMouseEvent,
 } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
@@ -931,6 +933,8 @@ export function RuleEditor({
   const [stage, setStage] = useState(defaultRule.stage);
   const [conditionsOp, setConditionsOp] = useState(defaultRule.conditionsOp);
   const [transactions, setTransactions] = useState([]);
+  const [sectionHeight, setSectionHeight] = useState(400);
+  const [isResizing, setIsResizing] = useState(false);
   const dispatch = useDispatch();
   const scrollableEl = useRef(undefined);
 
@@ -977,6 +981,51 @@ export function RuleEditor({
     }
     run();
   }, [actionSplits, conditions, conditionsOp]);
+
+  // Resize handlers
+  const handleMouseDown = useCallback((e: ReactMouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isResizing) return;
+
+      const container = scrollableEl.current?.parentElement;
+      if (!container) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const newHeight = e.clientY - containerRect.top;
+
+      // Apply min/max constraints
+      const minHeight = 100;
+      const maxHeight = window.innerHeight - 300;
+      const constrainedHeight = Math.max(
+        minHeight,
+        Math.min(maxHeight, newHeight),
+      );
+
+      setSectionHeight(constrainedHeight - 50);
+    },
+    [isResizing],
+  );
+
+  const handleMouseUp = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isResizing, handleMouseMove, handleMouseUp]);
 
   const selectedInst = useSelected('transactions', transactions, []);
 
@@ -1215,10 +1264,25 @@ export function RuleEditor({
           borderBottom: '1px solid ' + theme.tableBorder,
           padding: '0 20px 20px 20px',
           overflow: 'auto',
-          maxHeight: 'calc(100% - 300px)',
+          height: sectionHeight,
           minHeight: 100,
+          position: 'relative',
         }}
       >
+        {/* Resize handle */}
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '4px',
+            cursor: 'ns-resize',
+            backgroundColor: 'transparent',
+            zIndex: 10,
+          }}
+          onMouseDown={handleMouseDown}
+        />
         <View style={{ flexShrink: 0 }}>
           <View style={{ marginBottom: 30 }}>
             <Text style={{ marginBottom: 15 }}>
