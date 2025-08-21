@@ -983,20 +983,21 @@ export function RuleEditor({
   }, [actionSplits, conditions, conditionsOp]);
 
   // Resize handlers
-  const handleMouseDown = useCallback((e: ReactMouseEvent) => {
+  const handleStart = useCallback((e: ReactMouseEvent | React.TouchEvent) => {
     e.preventDefault();
     setIsResizing(true);
   }, []);
 
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
+  const handleMove = useCallback(
+    (e: MouseEvent | TouchEvent) => {
       if (!isResizing) return;
 
       const container = scrollableEl.current?.parentElement;
       if (!container) return;
 
       const containerRect = container.getBoundingClientRect();
-      const newHeight = e.clientY - containerRect.top;
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+      const newHeight = clientY - containerRect.top;
 
       // Apply min/max constraints
       const minHeight = 100;
@@ -1011,21 +1012,25 @@ export function RuleEditor({
     [isResizing],
   );
 
-  const handleMouseUp = useCallback(() => {
+  const handleEnd = useCallback(() => {
     setIsResizing(false);
   }, []);
 
   useEffect(() => {
     if (isResizing) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('mousemove', handleMove);
+      document.addEventListener('mouseup', handleEnd);
+      document.addEventListener('touchmove', handleMove);
+      document.addEventListener('touchend', handleEnd);
 
       return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('mousemove', handleMove);
+        document.removeEventListener('mouseup', handleEnd);
+        document.removeEventListener('touchmove', handleMove);
+        document.removeEventListener('touchend', handleEnd);
       };
     }
-  }, [isResizing, handleMouseMove, handleMouseUp]);
+  }, [isResizing, handleMove, handleEnd]);
 
   const selectedInst = useSelected('transactions', transactions, []);
 
@@ -1281,7 +1286,8 @@ export function RuleEditor({
             backgroundColor: 'transparent',
             zIndex: 10,
           }}
-          onMouseDown={handleMouseDown}
+          onMouseDown={handleStart}
+          onTouchStart={handleStart}
         />
         <View style={{ flexShrink: 0 }}>
           <View style={{ marginBottom: 30 }}>
