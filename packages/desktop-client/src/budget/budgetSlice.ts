@@ -550,9 +550,9 @@ export const applyBudgetAction = createAppAsyncThunk(
 
 export const getCategoriesById = memoizeOne(
   (categoryGroups: CategoryGroupEntity[] | null | undefined) => {
-    const res: { [id: CategoryGroupEntity['id']]: CategoryEntity } = {};
+    const res: { [id: CategoryEntity['id']]: CategoryEntity } = {};
     categoryGroups?.forEach(group => {
-      group.categories.forEach(cat => {
+      group.categories?.forEach(cat => {
         res[cat.id] = cat;
       });
     });
