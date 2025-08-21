@@ -804,7 +804,7 @@ handlers['api/schedule-update'] = withMutation(async function ({
   checkFileOpen();
   const { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
   if (!data || data.length === 0) {
-    throw APIError('Schedule not found');
+    throw APIError(`Schedule ${id} not found `);
   }
 
   const sched = data[0] as ScheduleEntity;
@@ -829,7 +829,7 @@ handlers['api/schedule-update'] = withMutation(async function ({
           sched.name = newName;
           conditionsUpdated = true;
         } else {
-          throw APIError('There is already a schedule with this name');
+          throw APIError(`There is already a schedule named: ${newName}`);
         }
         break;
       }
@@ -924,14 +924,9 @@ handlers['api/schedule-delete'] = withMutation(async function (id: string) {
 handlers['api/get-id-by-name'] = async function ({ type, name }) {
   checkFileOpen();
 
-  const allowedTypes = [
-    'payees',
-    'categories',
-    'schedules',
-    'accounts',
-  ] as const;
+  const allowedTypes = ['payees', 'categories', 'schedules', 'accounts'];
 
-  if (!allowedTypes.includes(type as any)) {
+  if (!allowedTypes.includes(type)) {
     throw APIError('Provide a valid type');
   }
 
