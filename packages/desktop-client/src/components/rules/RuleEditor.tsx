@@ -567,22 +567,23 @@ function ActionEditor({
             onChange={onChange}
           />
 
-          <View style={{ flex: 1 }}>
-            {options.method !== 'remainder' && (
-              // @ts-expect-error fix this
-              <GenericInput
-                key={inputKey}
-                field={field}
-                op={op}
-                type="number"
-                numberFormatType={
-                  options.method === 'fixed-percent' ? 'percentage' : 'currency'
-                }
-                value={value}
-                onChange={v => onChange('value', v)}
-              />
-            )}
-          </View>
+          {options.method !== 'remainder' && (
+            // @ts-expect-error fix this
+            <GenericInput
+              key={inputKey}
+              field={field}
+              op={op}
+              type="number"
+              numberFormatType={
+                options.method === 'fixed-percent' ? 'percentage' : 'currency'
+              }
+              value={value}
+              onChange={v => onChange('value', v)}
+              style={{
+                minWidth: 45,
+              }}
+            />
+          )}
         </>
       ) : op === 'link-schedule' ? (
         <>
