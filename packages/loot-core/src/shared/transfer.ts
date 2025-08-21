@@ -5,10 +5,9 @@ export function validForTransfer(
   toTransaction: TransactionEntity,
 ) {
   if (
-    // no subtransactions
     // not already a transfer
     [fromTransaction, toTransaction].every(tran => {
-      return tran.transfer_id == null && tran.is_child === false;
+      return tran.transfer_id == null;
     }) &&
     fromTransaction.account !== toTransaction.account && // belong to different accounts
     fromTransaction.amount + toTransaction.amount === 0 // amount must zero each other out
