@@ -6,8 +6,8 @@ import { ColorPicker } from '@actual-app/components/color-picker';
 import { type TagEntity } from 'loot-core/types/models';
 
 import { useTagCSS } from '@desktop-client/hooks/useTagCSS';
-import { updateTag } from '@desktop-client/tags/tagsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { updateTag } from '@desktop-client/tags/tagsSlice';
 
 type TagEditorProps = {
   tag: TagEntity;
