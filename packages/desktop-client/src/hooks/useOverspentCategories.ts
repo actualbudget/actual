@@ -19,7 +19,7 @@ type UseOverspentCategoriesProps = {
 
 type UseOverspentCategoriesResult = {
   categories: CategoryEntity[];
-  amountByCategory: Map<CategoryEntity['id'], IntegerAmount>;
+  amountsByCategory: Map<CategoryEntity['id'], IntegerAmount>;
   totalAmount: IntegerAmount;
 };
 
@@ -137,17 +137,21 @@ export function useOverspentCategories({
           : true,
       );
 
-    const mapToReturn = new Map(
+    const amountsByCategory = new Map(
       categoriesToReturn.map(category => [
         category.id,
         overspendingByCategory[category.id],
       ]),
     );
 
+    const totalAmount = amountsByCategory
+      .values()
+      .reduce((sum, value) => sum + value, 0);
+
     return {
       categories: categoriesToReturn,
-      amountByCategory: mapToReturn,
-      totalAmount: mapToReturn.values().reduce((sum, value) => sum + value, 0),
+      amountsByCategory,
+      totalAmount,
     };
   }, [
     budgetType,
