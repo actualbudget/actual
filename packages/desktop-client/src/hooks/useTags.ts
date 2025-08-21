@@ -2,13 +2,13 @@ import { useEffect } from 'react';
 
 import { useInitialMount } from './useInitialMount';
 
-import { getTags } from '@desktop-client/queries/queriesSlice';
+import { getTags } from '@desktop-client/tags/tagsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
 
 export function useTags() {
   const dispatch = useDispatch();
   const isInitialMount = useInitialMount();
-  const isTagsDirty = useSelector(state => state.queries.isTagsDirty);
+  const isTagsDirty = useSelector(state => state.tags.isTagsDirty);
 
   useEffect(() => {
     if (isInitialMount || isTagsDirty) {
@@ -16,5 +16,5 @@ export function useTags() {
     }
   }, [dispatch, isInitialMount, isTagsDirty]);
 
-  return useSelector(state => state.queries.tags);
+  return useSelector(state => state.tags.tags);
 }

@@ -21,7 +21,7 @@ import {
   useSelected,
 } from '@desktop-client/hooks/useSelected';
 import { useTags } from '@desktop-client/hooks/useTags';
-import { deleteAllTags, findTags } from '@desktop-client/queries/queriesSlice';
+import { deleteAllTags, findTags } from '@desktop-client/tags/tagsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 export function ManageTags() {

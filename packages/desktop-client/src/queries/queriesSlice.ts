@@ -2,7 +2,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { type TransactionEntity, type Tag } from 'loot-core/types/models';
+import { type TransactionEntity } from 'loot-core/types/models';
 
 import { markUpdatedAccounts } from '@desktop-client/accounts/accountsSlice';
 import { resetApp } from '@desktop-client/app/appSlice';
@@ -15,20 +15,12 @@ type QueriesState = {
   newTransactions: Array<TransactionEntity['id']>;
   matchedTransactions: Array<TransactionEntity['id']>;
   lastTransaction: TransactionEntity | null;
-  tags: Tag[];
-  isTagsLoading: boolean;
-  isTagsLoaded: boolean;
-  isTagsDirty: boolean;
 };
 
 const initialState: QueriesState = {
   newTransactions: [],
   matchedTransactions: [],
   lastTransaction: null,
-  tags: [],
-  isTagsLoading: false,
-  isTagsLoaded: false,
-  isTagsDirty: false,
 };
 
 type SetNewTransactionsPayload = {
@@ -77,123 +69,11 @@ const queriesSlice = createSlice({
     ) {
       state.lastTransaction = action.payload.transaction;
     },
-    markTagsDirty(state) {
-      _markTagsDirty(state);
-    },
   },
   extraReducers: builder => {
-    // App
-
     builder.addCase(resetApp, () => initialState);
-
-    // Tags
-
-    builder.addCase(createTag.fulfilled, _markTagsDirty);
-    builder.addCase(deleteTag.fulfilled, _markTagsDirty);
-    builder.addCase(deleteAllTags.fulfilled, _markTagsDirty);
-    builder.addCase(updateTag.fulfilled, _markTagsDirty);
-
-    builder.addCase(reloadTags.fulfilled, (state, action) => {
-      _loadTags(state, action.payload);
-    });
-
-    builder.addCase(reloadTags.rejected, state => {
-      state.isTagsLoading = false;
-    });
-
-    builder.addCase(reloadTags.pending, state => {
-      state.isTagsLoading = true;
-    });
-
-    builder.addCase(getTags.fulfilled, (state, action) => {
-      _loadTags(state, action.payload);
-    });
-
-    builder.addCase(getTags.rejected, state => {
-      state.isTagsLoading = false;
-    });
-
-    builder.addCase(getTags.pending, state => {
-      state.isTagsLoading = true;
-    });
-
-    builder.addCase(findTags.fulfilled, (state, action) => {
-      _loadTags(state, action.payload);
-    });
-
-    builder.addCase(findTags.rejected, state => {
-      state.isTagsLoading = false;
-    });
-
-    builder.addCase(findTags.pending, state => {
-      state.isTagsLoading = true;
-    });
   },
 });
-
-export const getTags = createAppAsyncThunk(
-  `${sliceName}/getTags`,
-  async () => {
-    const tags: Tag[] = await send('tags-get');
-    return tags;
-  },
-  {
-    condition: (_, { getState }) => {
-      const { queries } = getState();
-      return (
-        !queries.isTagsLoading && (queries.isTagsDirty || !queries.isTagsLoaded)
-      );
-    },
-  },
-);
-
-export const reloadTags = createAppAsyncThunk(
-  `${sliceName}/reloadTags`,
-  async () => {
-    const tags: Tag[] = await send('tags-get');
-    return tags;
-  },
-);
-
-export const createTag = createAppAsyncThunk(
-  `${sliceName}/createTag`,
-  async ({ tag, color, description }: Omit<Tag, 'id'>) => {
-    const id = await send('tags-create', { tag, color, description });
-    return id;
-  },
-);
-
-export const deleteTag = createAppAsyncThunk(
-  `${sliceName}/deleteTag`,
-  async (tag: Tag) => {
-    const id = await send('tags-delete', tag);
-    return id;
-  },
-);
-
-export const deleteAllTags = createAppAsyncThunk(
-  `${sliceName}/deleteAllTags`,
-  async (ids: Array<Tag['id']>) => {
-    const id = await send('tags-delete-all', ids);
-    return id;
-  },
-);
-
-export const updateTag = createAppAsyncThunk(
-  `${sliceName}/updateTag`,
-  async (tag: Tag) => {
-    const id = await send('tags-update', tag);
-    return id;
-  },
-);
-
-export const findTags = createAppAsyncThunk(
-  `${sliceName}/findTags`,
-  async () => {
-    const tags: Tag[] = await send('tags-find');
-    return tags;
-  },
-);
 
 // Transaction actions
 
@@ -297,28 +177,7 @@ export const actions = {
   ...queriesSlice.actions,
   importPreviewTransactions,
   importTransactions,
-  getTags,
-  createTag,
-  updateTag,
-  deleteTag,
-  deleteAllTags,
-  findTags,
 };
 
-export const {
-  setNewTransactions,
-  updateNewTransactions,
-  setLastTransaction,
-  markTagsDirty,
-} = queriesSlice.actions;
-
-function _loadTags(state: QueriesState, tags: QueriesState['tags']) {
-  state.tags = tags;
-  state.isTagsLoading = false;
-  state.isTagsLoaded = true;
-  state.isTagsDirty = false;
-}
-
-function _markTagsDirty(state: QueriesState) {
-  state.isTagsDirty = true;
-}
+export const { setNewTransactions, updateNewTransactions, setLastTransaction } =
+  queriesSlice.actions;
