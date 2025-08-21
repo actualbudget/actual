@@ -10,7 +10,11 @@ import {
   addNotification,
 } from './notifications/notificationsSlice';
 import { loadPrefs } from './prefs/prefsSlice';
-import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
+import {
+  reloadAccounts,
+  reloadCategories,
+  reloadPayees,
+} from './queries/queriesSlice';
 import { type AppStore } from './redux/store';
 import * as syncEvents from './sync-events';
 
@@ -54,7 +58,7 @@ export function handleGlobalEvents(store: AppStore) {
       tables.includes('category_groups') ||
       tables.includes('category_mapping')
     ) {
-      promises.push(store.dispatch(getCategories()));
+      promises.push(store.dispatch(reloadCategories()));
     }
 
     if (
@@ -62,11 +66,11 @@ export function handleGlobalEvents(store: AppStore) {
       tables.includes('payees') ||
       tables.includes('payee_mapping')
     ) {
-      promises.push(store.dispatch(getPayees()));
+      promises.push(store.dispatch(reloadPayees()));
     }
 
     if (tables.includes('accounts')) {
-      promises.push(store.dispatch(getAccounts()));
+      promises.push(store.dispatch(reloadAccounts()));
     }
 
     const tagged = undo.getTaggedState(undoTag);

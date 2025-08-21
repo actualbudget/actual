@@ -1376,7 +1376,7 @@ const Transaction = memo(function Transaction({
         textAlign="flex"
         exposed={focusedField === 'notes'}
         focused={focusedField === 'notes'}
-        value={notes ?? schedule?.name ?? ''}
+        value={notes ?? (isPreview ? schedule?.name : null) ?? ''}
         valueStyle={valueStyle}
         formatter={value =>
           NotesTagFormatter({ notes: value, onNotesTagClick })

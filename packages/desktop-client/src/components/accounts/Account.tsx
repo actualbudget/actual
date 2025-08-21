@@ -81,7 +81,7 @@ import {
 } from '@desktop-client/queries/pagedQuery';
 import {
   createPayee,
-  initiallyLoadPayees,
+  getPayees,
   markAccountRead,
   reopenAccount,
   updateAccount,
@@ -391,7 +391,7 @@ class AccountInternal extends PureComponent<
 
     // Important that any async work happens last so that the
     // listeners are set up synchronously
-    await this.props.dispatch(initiallyLoadPayees());
+    await this.props.dispatch(getPayees());
     await this.fetchTransactions(this.state.filterConditions);
 
     // If there is a pending undo, apply it immediately (this happens
