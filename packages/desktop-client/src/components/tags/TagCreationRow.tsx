@@ -23,8 +23,8 @@ import {
 } from '@desktop-client/components/table';
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 import { useTagCSS } from '@desktop-client/hooks/useTagCSS';
-import { createTag } from '@desktop-client/tags/tagsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { createTag } from '@desktop-client/tags/tagsSlice';
 
 type TagCreationRowProps = {
   tags: TagEntity[];

@@ -22,8 +22,8 @@ import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
-import { deleteTag, updateTag } from '@desktop-client/tags/tagsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { deleteTag, updateTag } from '@desktop-client/tags/tagsSlice';
 
 type TagRowProps = {
   tag: TagEntity;

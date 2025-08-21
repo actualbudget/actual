@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 
 import { useInitialMount } from './useInitialMount';
 
-import { getTags } from '@desktop-client/tags/tagsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
+import { getTags } from '@desktop-client/tags/tagsSlice';
 
 export function useTags() {
   const dispatch = useDispatch();
