@@ -45,6 +45,7 @@ import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
 import { setSyncingMode, batchMessages } from './sync';
+import { boolean } from 'fast-check';
 
 let IMPORT_MODE = false;
 
@@ -803,73 +804,101 @@ handlers['api/schedule-update'] = withMutation(async function ({
 }) {
   checkFileOpen();
   const { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
-  const sched = data[0] as ScheduleEntity;
-  let conditionsUpdated = false as boolean;
+  if (!data || data.length === 0) {
+  throw APIError('Schedule not found');
+  }
 
+  const sched = data[0] as ScheduleEntity;
+  let conditionsUpdated = false;
+  // Find all indices to avoid direct assignment
+  const payeeIndex = sched._conditions.findIndex(c => c.field === 'payee');
+  const accountIndex = sched._conditions.findIndex(c => c.field === 'account');
+  const dateIndex = sched._conditions.findIndex(c => c.field === 'date');
+  const amountIndex = sched._conditions.findIndex(c => c.field === 'amount');
+  
   for (const key in fields) {
     const typedKey = key as keyof APIScheduleEntity;
     const value = fields[typedKey];
-
+    
     switch (typedKey) {
-      case 'name':
-        const newName = value as string;
-        const { data } = await aqlQuery(
-          q('schedules').filter({ newName }).select('*'),
+      case 'name': {
+        const newName = String(value);
+        const { data: existing } = await aqlQuery(
+          q('schedules').filter({ name: newName }).select('*'),
         );
-        if (!data || data.length === 0 || data[0].id === sched.id) {
+        if (!existing || existing.length === 0 || existing[0].id === sched.id) {
           sched.name = newName;
           conditionsUpdated = true;
         } else {
-          console.warn('There is already a schedule with this name');
-          return;
+          throw APIError('There is already a schedule with this name');
         }
         break;
-      case 'rule':
-        console.warn('Editing `rule` is not allowed via schedule-update.');
-        break;
-
+      }
       case 'next_date':
-      case 'completed':
-        console.warn(
-          `Field ‘${typedKey}’ is system-managed and not user-editable.`,
-        );
+      case 'completed': {
+        throw APIError(`Field '${typedKey}' is system-managed and not user-editable.`);
         break;
-
-      case 'posts_transaction':
-        sched.posts_transaction = value as boolean;
+      }
+      case 'posts_transaction': {
+        sched.posts_transaction = Boolean(value);
         conditionsUpdated = true;
         break;
-
-      case 'payee':
-        sched._conditions[0].value = value;
-        conditionsUpdated = true;
+      }
+      case 'payee': {
+        if (payeeIndex !== -1) {
+          sched._conditions[payeeIndex].value = value;
+          conditionsUpdated = true;
+        }
         break;
-
-      case 'account':
-        sched._conditions[1].value = value;
-        conditionsUpdated = true;
+      }
+      case 'account': {
+        if (accountIndex !== -1) {
+          sched._conditions[accountIndex].value = value;
+          conditionsUpdated = true;
+        }
         break;
-
-      case 'amountOp':
-        sched._conditions[3].op = value as AmountOPType;
-        conditionsUpdated = true;
+      }
+      case 'amountOp': {
+        if (amountIndex !== -1) {
+          let convertedOp: AmountOPType;
+          switch (value) {
+            case 'is':
+              convertedOp = 'is';
+              break;
+            case 'isapprox':
+              convertedOp = 'isapprox';
+              break;
+            case 'isbetween':
+              convertedOp = 'isbetween';
+              break;
+            default:
+              throw APIError(`Invalid amount operator: ${value}. Expected: is, isapprox, or isbetween`);
+         `` }
+          sched._conditions[amountIndex].op = convertedOp;
+          conditionsUpdated = true;
+        }
         break;
-
-      case 'amount':
-        sched._conditions[3].value = value;
-        conditionsUpdated = true;
+      }
+      case 'amount': {
+        if (amountIndex !== -1) {
+          sched._conditions[amountIndex].value = value;
+          conditionsUpdated = true;
+        }
         break;
-
-      case 'date':
-        sched._conditions[2].value = value;
-        conditionsUpdated = true;
+      }
+      case 'date': {
+        if (dateIndex !== -1) {
+          sched._conditions[dateIndex].value = value;
+          conditionsUpdated = true;
+        }
         break;
-
-      default:
-        console.warn(`Unhandled field: ${typedKey}`);
-        break;
+      }
+      default: {
+        throw APIError(`Unhandled field: ${typedKey}`);
+      }
     }
   }
+  
   if (conditionsUpdated) {
     return handlers['schedule/update']({
       schedule: {
