@@ -14,6 +14,10 @@ import {
   type Tag,
 } from 'loot-core/types/models';
 
+import {
+  getAccountsById,
+  markUpdatedAccounts,
+} from '@desktop-client/accounts/accountsSlice';
 import { resetApp } from '@desktop-client/app/appSlice';
 import {
   addGenericErrorNotification,
@@ -32,11 +36,6 @@ type QueriesState = {
   newTransactions: Array<TransactionEntity['id']>;
   matchedTransactions: Array<TransactionEntity['id']>;
   lastTransaction: TransactionEntity | null;
-  updatedAccounts: Array<AccountEntity['id']>;
-  accounts: AccountEntity[];
-  isAccountsLoading: boolean;
-  isAccountsLoaded: boolean;
-  isAccountsDirty: boolean;
   categories: CategoryViews;
   isCategoriesLoading: boolean;
   isCategoriesLoaded: boolean;
@@ -59,11 +58,6 @@ const initialState: QueriesState = {
   newTransactions: [],
   matchedTransactions: [],
   lastTransaction: null,
-  updatedAccounts: [],
-  accounts: [],
-  isAccountsLoading: false,
-  isAccountsLoaded: false,
-  isAccountsDirty: false,
   categories: {
     grouped: [],
     list: [],
@@ -86,9 +80,8 @@ const initialState: QueriesState = {
 };
 
 type SetNewTransactionsPayload = {
-  newTransactions: QueriesState['newTransactions'];
-  matchedTransactions: QueriesState['matchedTransactions'];
-  updatedAccounts: QueriesState['updatedAccounts'];
+  newTransactions: Array<TransactionEntity['id']>;
+  matchedTransactions: Array<TransactionEntity['id']>;
 };
 
 type UpdateNewTransactionsPayload = {
@@ -97,10 +90,6 @@ type UpdateNewTransactionsPayload = {
 
 type SetLastTransactionPayload = {
   transaction: TransactionEntity;
-};
-
-type MarkAccountReadPayload = {
-  id: AccountEntity['id'];
 };
 
 const queriesSlice = createSlice({
@@ -118,10 +107,6 @@ const queriesSlice = createSlice({
       state.matchedTransactions = action.payload.matchedTransactions
         ? [...state.matchedTransactions, ...action.payload.matchedTransactions]
         : state.matchedTransactions;
-
-      state.updatedAccounts = action.payload.updatedAccounts
-        ? [...state.updatedAccounts, ...action.payload.updatedAccounts]
-        : state.updatedAccounts;
     },
     updateNewTransactions(
       state,
@@ -140,14 +125,6 @@ const queriesSlice = createSlice({
     ) {
       state.lastTransaction = action.payload.transaction;
     },
-    markAccountRead(state, action: PayloadAction<MarkAccountReadPayload>) {
-      state.updatedAccounts = state.updatedAccounts.filter(
-        id => id !== action.payload.id,
-      );
-    },
-    markAccountsDirty(state) {
-      _markAccountsDirty(state);
-    },
     markCategoriesDirty(state) {
       _markCategoriesDirty(state);
     },
@@ -159,37 +136,6 @@ const queriesSlice = createSlice({
     },
   },
   extraReducers: builder => {
-    // Accounts
-
-    builder.addCase(createAccount.fulfilled, _markAccountsDirty);
-    builder.addCase(updateAccount.fulfilled, _markAccountsDirty);
-    builder.addCase(closeAccount.fulfilled, _markAccountsDirty);
-    builder.addCase(reopenAccount.fulfilled, _markAccountsDirty);
-
-    builder.addCase(reloadAccounts.fulfilled, (state, action) => {
-      _loadAccounts(state, action.payload);
-    });
-
-    builder.addCase(reloadAccounts.rejected, state => {
-      state.isAccountsLoading = false;
-    });
-
-    builder.addCase(reloadAccounts.pending, state => {
-      state.isAccountsLoading = true;
-    });
-
-    builder.addCase(getAccounts.fulfilled, (state, action) => {
-      _loadAccounts(state, action.payload);
-    });
-
-    builder.addCase(getAccounts.rejected, state => {
-      state.isAccountsLoading = false;
-    });
-
-    builder.addCase(getAccounts.pending, state => {
-      state.isAccountsLoading = true;
-    });
-
     // Categories
 
     builder.addCase(createCategoryGroup.fulfilled, _markCategoriesDirty);
@@ -325,102 +271,6 @@ const queriesSlice = createSlice({
     });
   },
 });
-
-// Account actions
-
-type CreateAccountPayload = {
-  name: AccountEntity['name'];
-  balance: AccountEntity['balance_current'];
-  offBudget: boolean;
-};
-
-export const createAccount = createAppAsyncThunk(
-  `${sliceName}/createAccount`,
-  async ({ name, balance, offBudget }: CreateAccountPayload) => {
-    const id: AccountEntity['id'] = await send('account-create', {
-      name,
-      balance,
-      offBudget,
-    });
-    return id;
-  },
-);
-
-type CloseAccountPayload = {
-  id: AccountEntity['id'];
-  transferAccountId?: AccountEntity['id'];
-  categoryId?: CategoryEntity['id'];
-  forced?: boolean;
-};
-
-export const closeAccount = createAppAsyncThunk(
-  `${sliceName}/closeAccount`,
-  async ({
-    id,
-    transferAccountId,
-    categoryId,
-    forced,
-  }: CloseAccountPayload) => {
-    await send('account-close', {
-      id,
-      transferAccountId: transferAccountId || null,
-      categoryId: categoryId || null,
-      forced,
-    });
-  },
-);
-
-type ReopenAccountPayload = {
-  id: AccountEntity['id'];
-};
-
-export const reopenAccount = createAppAsyncThunk(
-  `${sliceName}/reopenAccount`,
-  async ({ id }: ReopenAccountPayload) => {
-    await send('account-reopen', { id });
-  },
-);
-
-type UpdateAccountPayload = {
-  account: AccountEntity;
-};
-
-export const updateAccount = createAppAsyncThunk(
-  `${sliceName}/updateAccount`,
-  async ({ account }: UpdateAccountPayload) => {
-    await send('account-update', account);
-    return account;
-  },
-);
-
-export const getAccounts = createAppAsyncThunk(
-  `${sliceName}/getAccounts`,
-  async () => {
-    // TODO: Force cast to AccountEntity.
-    // Server is currently returning the DB model it should return the entity model instead.
-    const accounts = (await send('accounts-get')) as AccountEntity[];
-    return accounts;
-  },
-  {
-    condition: (_, { getState }) => {
-      const { queries } = getState();
-      return (
-        !queries.isAccountsLoading &&
-        (queries.isAccountsDirty || !queries.isAccountsLoaded)
-      );
-    },
-  },
-);
-
-export const reloadAccounts = createAppAsyncThunk(
-  `${sliceName}/reloadAccounts`,
-  async () => {
-    // TODO: Force cast to AccountEntity.
-    // Server is currently returning the DB model it should return the entity model instead.
-    const accounts = (await send('accounts-get')) as AccountEntity[];
-    return accounts;
-  },
-);
 
 // Category actions
 
@@ -1101,7 +951,12 @@ export const importTransactions = createAppAsyncThunk(
       setNewTransactions({
         newTransactions: added,
         matchedTransactions: updated,
-        updatedAccounts: added.length > 0 ? [accountId] : [],
+      }),
+    );
+
+    dispatch(
+      markUpdatedAccounts({
+        ids: added.length > 0 ? [accountId] : [],
       }),
     );
 
@@ -1125,9 +980,6 @@ export const getActivePayees = memoizeOne(
   },
 );
 
-export const getAccountsById = memoizeOne(
-  (accounts: AccountEntity[] | null | undefined) => groupById(accounts),
-);
 export const getPayeesById = memoizeOne(
   (payees: PayeeEntity[] | null | undefined) => groupById(payees),
 );
@@ -1148,19 +1000,16 @@ export const getCategoriesById = memoizeOne(
 export const { name, reducer, getInitialState } = queriesSlice;
 export const actions = {
   ...queriesSlice.actions,
-  updateAccount,
-  getAccounts,
-  reloadAccounts,
-  closeAccount,
-  reopenAccount,
-  getCategories,
   createPayee,
   getCommonPayees,
+  reloadCommonPayees,
   getPayees,
+  reloadPayees,
   importPreviewTransactions,
   importTransactions,
   applyBudgetAction,
-  createAccount,
+  getCategories,
+  reloadCategories,
   createCategoryGroup,
   updateCategoryGroup,
   deleteCategoryGroup,
@@ -1170,32 +1019,21 @@ export const actions = {
   moveCategory,
   moveCategoryGroup,
   getTags,
+  createTag,
+  updateTag,
+  deleteTag,
+  deleteAllTags,
+  findTags,
 };
 
 export const {
-  markAccountRead,
-  markAccountsDirty,
+  setNewTransactions,
+  updateNewTransactions,
+  setLastTransaction,
   markCategoriesDirty,
   markPayeesDirty,
   markTagsDirty,
-  setLastTransaction,
-  updateNewTransactions,
-  setNewTransactions,
-} = actions;
-
-function _loadAccounts(
-  state: QueriesState,
-  accounts: QueriesState['accounts'],
-) {
-  state.accounts = accounts;
-  state.isAccountsLoading = false;
-  state.isAccountsLoaded = true;
-  state.isAccountsDirty = false;
-}
-
-function _markAccountsDirty(state: QueriesState) {
-  state.isAccountsDirty = true;
-}
+} = queriesSlice.actions;
 
 function _loadCategories(
   state: QueriesState,

@@ -9,6 +9,7 @@ import {
   type TransactionEntity,
 } from 'loot-core/types/models';
 
+import { markAccountRead } from '@desktop-client/accounts/accountsSlice';
 import { syncAndDownload } from '@desktop-client/app/appSlice';
 import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
 import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
@@ -20,7 +21,6 @@ import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
 import * as queries from '@desktop-client/queries';
-import { markAccountRead } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 import * as bindings from '@desktop-client/spreadsheet/bindings';
 
