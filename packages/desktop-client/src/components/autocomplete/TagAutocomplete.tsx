@@ -15,10 +15,11 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
+
 import { Autocomplete } from './Autocomplete';
 
-import { useTags } from '../../hooks/useTags';
-import { useTagCSS } from '../../hooks/useTagCSS';
+import { useTagCSS } from '@desktop-client/hooks/useTagCSS';
+import { useTags } from '@desktop-client/hooks/useTags';
 
 type TagAutocompleteItem = {
   id: string;
