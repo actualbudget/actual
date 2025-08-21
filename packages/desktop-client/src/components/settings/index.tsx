@@ -27,7 +27,7 @@ import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
-import { closeBudget } from '@desktop-client/budgets/budgetsSlice';
+import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { Link } from '@desktop-client/components/common/Link';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';

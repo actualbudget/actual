@@ -15,7 +15,7 @@ import { type Budget } from 'loot-core/types/budget';
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 import { type Handlers } from 'loot-core/types/handlers';
 
-import { closeAndLoadBudget } from '@desktop-client/budgets/budgetsSlice';
+import { closeAndLoadBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import {
   Modal,
   ModalCloseButton,
@@ -45,7 +45,7 @@ export function TransferOwnership({
   const [error, setError] = useState<string | null>(null);
   const [availableUsers, setAvailableUsers] = useState<[string, string][]>([]);
   const [cloudFileId] = useMetadataPref('cloudFileId');
-  const allFiles = useSelector(state => state.budgets.allFiles || []);
+  const allFiles = useSelector(state => state.budgetfiles.allFiles || []);
   const remoteFiles = allFiles.filter(
     f => f.state === 'remote' || f.state === 'synced' || f.state === 'detached',
   ) as (SyncedLocalFile | RemoteFile)[];

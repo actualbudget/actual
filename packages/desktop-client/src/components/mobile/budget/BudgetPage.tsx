@@ -28,6 +28,15 @@ import { groupById } from 'loot-core/shared/util';
 import { BudgetTable, PILL_STYLE } from './BudgetTable';
 
 import { sync } from '@desktop-client/app/appSlice';
+import {
+  applyBudgetAction,
+  createCategory,
+  createCategoryGroup,
+  deleteCategory,
+  deleteCategoryGroup,
+  updateCategory,
+  updateCategoryGroup,
+} from '@desktop-client/budget/budgetSlice';
 import { prewarmMonth } from '@desktop-client/components/budget/util';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
@@ -42,15 +51,6 @@ import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
-import {
-  applyBudgetAction,
-  createCategory,
-  createCategoryGroup,
-  deleteCategory,
-  deleteCategoryGroup,
-  updateCategory,
-  updateCategoryGroup,
-} from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 import {
   envelopeBudget,

@@ -7,7 +7,7 @@ import { resetApp } from '@desktop-client/app/appSlice';
 import {
   closeBudget,
   loadAllFiles,
-} from '@desktop-client/budgets/budgetsSlice';
+} from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { loadGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 

@@ -10,7 +10,7 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
 
-import { closeBudget } from '@desktop-client/budgets/budgetsSlice';
+import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { Error as ErrorAlert } from '@desktop-client/components/alerts';
 import {
   Modal,
