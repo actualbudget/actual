@@ -300,20 +300,6 @@ export const importTransactions = createAppAsyncThunk(
   },
 );
 
-// Helper functions
-
-export const getCategoriesById = memoizeOne(
-  (categoryGroups: CategoryGroupEntity[] | null | undefined) => {
-    const res: { [id: CategoryGroupEntity['id']]: CategoryEntity } = {};
-    categoryGroups?.forEach(group => {
-      group.categories.forEach(cat => {
-        res[cat.id] = cat;
-      });
-    });
-    return res;
-  },
-);
-
 // Slice exports
 
 export const { name, reducer, getInitialState } = queriesSlice;

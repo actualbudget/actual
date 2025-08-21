@@ -5,7 +5,10 @@ import { listen, send } from 'loot-core/platform/client/fetch';
 
 import { reloadAccounts } from './accounts/accountsSlice';
 import { resetSync, sync } from './app/appSlice';
-import { closeAndDownloadBudget, uploadBudget } from './budgetfiles/budgetfilesSlice';
+import {
+  closeAndDownloadBudget,
+  uploadBudget,
+} from './budgetfiles/budgetfilesSlice';
 import { pushModal } from './modals/modalsSlice';
 import {
   addNotification,

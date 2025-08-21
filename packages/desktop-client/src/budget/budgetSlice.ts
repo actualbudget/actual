@@ -4,9 +4,13 @@ import { send } from 'loot-core/platform/client/fetch';
 import { CategoryEntity, CategoryGroupEntity } from 'loot-core/types/models';
 
 import { createAppAsyncThunk } from '@desktop-client/redux';
-import { addGenericErrorNotification, addNotification } from '@desktop-client/notifications/notificationsSlice';
+import {
+  addGenericErrorNotification,
+  addNotification,
+} from '@desktop-client/notifications/notificationsSlice';
 import { t, TReturnOptionalNull } from 'i18next';
 import { resetApp } from '@desktop-client/app/appSlice';
+import memoizeOne from 'memoize-one';
 
 const sliceName = 'budget';
 
@@ -53,27 +57,27 @@ const budgetSlice = createSlice({
     builder.addCase(moveCategory.fulfilled, _markCategoriesDirty);
 
     builder.addCase(reloadCategories.fulfilled, (state, action) => {
-        _loadCategories(state, action.payload);
+      _loadCategories(state, action.payload);
     });
 
     builder.addCase(reloadCategories.rejected, state => {
-        state.isCategoriesLoading = false;
+      state.isCategoriesLoading = false;
     });
 
     builder.addCase(reloadCategories.pending, state => {
-        state.isCategoriesLoading = true;
+      state.isCategoriesLoading = true;
     });
 
     builder.addCase(getCategories.fulfilled, (state, action) => {
-        _loadCategories(state, action.payload);
+      _loadCategories(state, action.payload);
     });
 
     builder.addCase(getCategories.rejected, state => {
-        state.isCategoriesLoading = false;
+      state.isCategoriesLoading = false;
     });
 
     builder.addCase(getCategories.pending, state => {
-        state.isCategoriesLoading = true;
+      state.isCategoriesLoading = true;
     });
   },
 });
@@ -538,6 +542,18 @@ export const applyBudgetAction = createAppAsyncThunk(
       default:
         console.log(`Invalid action type: ${type}`);
     }
+  },
+);
+
+export const getCategoriesById = memoizeOne(
+  (categoryGroups: CategoryGroupEntity[] | null | undefined) => {
+    const res: { [id: CategoryGroupEntity['id']]: CategoryEntity } = {};
+    categoryGroups?.forEach(group => {
+      group.categories.forEach(cat => {
+        res[cat.id] = cat;
+      });
+    });
+    return res;
   },
 );
 
