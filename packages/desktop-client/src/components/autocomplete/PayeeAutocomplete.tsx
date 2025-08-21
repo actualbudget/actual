@@ -37,7 +37,7 @@ import { useCommonPayees, usePayees } from '@desktop-client/hooks/usePayees';
 import {
   createPayee,
   getActivePayees,
-} from '@desktop-client/queries/queriesSlice';
+} from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 export type PayeeAutocompleteItem = PayeeEntity;

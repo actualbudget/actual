@@ -10,7 +10,7 @@ import { ManagePayees } from './ManagePayees';
 
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { getPayees, reloadPayees } from '@desktop-client/queries/queriesSlice';
+import { getPayees, reloadPayees } from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type ManagePayeesWithDataProps = {

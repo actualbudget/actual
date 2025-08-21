@@ -16,6 +16,10 @@ import { AllAccountTransactions } from './AllAccountTransactions';
 import { OffBudgetAccountTransactions } from './OffBudgetAccountTransactions';
 import { OnBudgetAccountTransactions } from './OnBudgetAccountTransactions';
 
+import {
+  reopenAccount,
+  updateAccount,
+} from '@desktop-client/accounts/accountsSlice';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import { AddTransactionButton } from '@desktop-client/components/mobile/transactions/AddTransactionButton';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
@@ -26,10 +30,6 @@ import {
   openAccountCloseModal,
   pushModal,
 } from '@desktop-client/modals/modalsSlice';
-import {
-  reopenAccount,
-  updateAccount,
-} from '@desktop-client/queries/queriesSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
 
 export function AccountPage() {

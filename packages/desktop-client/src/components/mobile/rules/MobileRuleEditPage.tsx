@@ -52,7 +52,7 @@ export function MobileRuleEditPage() {
 
   // If no rule is provided, create a new one
   const defaultRule: NewRuleEntity = rule || {
-    stage: 'pre',
+    stage: null,
     conditionsOp: 'and',
     conditions: [
       {
