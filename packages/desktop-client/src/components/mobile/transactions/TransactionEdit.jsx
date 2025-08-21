@@ -79,8 +79,8 @@ import {
 } from '@desktop-client/hooks/useSingleActiveEditForm';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { setLastTransaction } from '@desktop-client/queries/queriesSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
+import { setLastTransaction } from '@desktop-client/transactions/transactionsSlice';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;
