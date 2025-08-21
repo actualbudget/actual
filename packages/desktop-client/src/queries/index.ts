@@ -156,3 +156,16 @@ export function transactionsSearch(
 
   return currentQuery.filter(combinedFilter);
 }
+
+export function uncategorizedTransactions() {
+  return q('transactions').filter({
+    'account.offbudget': false,
+    category: null,
+    $or: [
+      {
+        'payee.transfer_acct.offbudget': true,
+        'payee.transfer_acct': null,
+      },
+    ],
+  });
+}

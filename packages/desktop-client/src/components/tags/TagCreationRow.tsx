@@ -22,9 +22,9 @@ import {
   useTableNavigator,
 } from '@desktop-client/components/table';
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
+import { useTagCSS } from '@desktop-client/hooks/useTagCSS';
 import { createTag } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
-import { useTagCSS } from '@desktop-client/style/tags';
 
 type TagCreationRowProps = {
   tags: Tag[];

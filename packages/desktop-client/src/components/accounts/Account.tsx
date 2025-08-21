@@ -42,7 +42,12 @@ import {
 import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
 
-import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
+import {
+  unlinkAccount,
+  reopenAccount,
+  updateAccount,
+  markAccountRead,
+} from '@desktop-client/accounts/accountsSlice';
 import { syncAndDownload } from '@desktop-client/app/appSlice';
 import { type SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
 import { TransactionList } from '@desktop-client/components/transactions/TransactionList';
@@ -73,20 +78,14 @@ import {
   replaceModal,
 } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { createPayee, getPayees } from '@desktop-client/payees/payeesSlice';
 import * as queries from '@desktop-client/queries';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import {
   pagedQuery,
   type PagedQuery,
 } from '@desktop-client/queries/pagedQuery';
-import {
-  createPayee,
-  initiallyLoadPayees,
-  markAccountRead,
-  reopenAccount,
-  updateAccount,
-  updateNewTransactions,
-} from '@desktop-client/queries/queriesSlice';
+import { updateNewTransactions } from '@desktop-client/queries/queriesSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
 
@@ -391,7 +390,7 @@ class AccountInternal extends PureComponent<
 
     // Important that any async work happens last so that the
     // listeners are set up synchronously
-    await this.props.dispatch(initiallyLoadPayees());
+    await this.props.dispatch(getPayees());
     await this.fetchTransactions(this.state.filterConditions);
 
     // If there is a pending undo, apply it immediately (this happens

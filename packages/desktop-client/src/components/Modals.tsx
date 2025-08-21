@@ -102,7 +102,9 @@ export function Modals() {
           return budgetId ? <GoalTemplateModal key={key} /> : null;
 
         case 'category-automations-edit':
-          return budgetId ? <BudgetAutomationsModal key={name} /> : null;
+          return budgetId ? (
+            <BudgetAutomationsModal key={name} {...modal.options} />
+          ) : null;
 
         case 'keyboard-shortcuts':
           // don't show the hotkey help modal when a budget is not open

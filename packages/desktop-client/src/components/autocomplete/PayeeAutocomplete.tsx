@@ -37,7 +37,7 @@ import { useCommonPayees, usePayees } from '@desktop-client/hooks/usePayees';
 import {
   createPayee,
   getActivePayees,
-} from '@desktop-client/queries/queriesSlice';
+} from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 export type PayeeAutocompleteItem = PayeeEntity;
@@ -88,16 +88,13 @@ function getPayeeSuggestions(
 
 function filterActivePayees(
   payees: PayeeAutocompleteItem[],
-  focusTransferPayees: boolean,
   accounts: AccountEntity[],
 ) {
-  let activePayees = accounts ? getActivePayees(payees, accounts) : payees;
+  return accounts ? getActivePayees(payees, accounts) : payees;
+}
 
-  if (focusTransferPayees && activePayees) {
-    activePayees = activePayees.filter(p => !!p.transfer_acct);
-  }
-
-  return activePayees || [];
+function filterTransferPayees(payees: PayeeAutocompleteItem[]) {
+  return payees.filter(payee => !!payee.transfer_acct);
 }
 
 function makeNew(id, rawPayee) {
@@ -256,6 +253,7 @@ function PayeeList({
 export type PayeeAutocompleteProps = ComponentProps<
   typeof Autocomplete<PayeeAutocompleteItem>
 > & {
+  showInactivePayees?: boolean;
   showMakeTransfer?: boolean;
   showManagePayees?: boolean;
   embedded?: boolean;
@@ -276,6 +274,7 @@ export type PayeeAutocompleteProps = ComponentProps<
 export function PayeeAutocomplete({
   value,
   inputProps,
+  showInactivePayees = false,
   showMakeTransfer = true,
   showManagePayees = false,
   clearOnBlur = true,
@@ -307,18 +306,30 @@ export function PayeeAutocomplete({
   const hasPayeeInput = !!rawPayee;
   const payeeSuggestions: PayeeAutocompleteItem[] = useMemo(() => {
     const suggestions = getPayeeSuggestions(commonPayees, payees);
-    const filteredSuggestions = filterActivePayees(
-      suggestions,
-      focusTransferPayees,
-      accounts,
-    );
+
+    let filteredSuggestions: PayeeAutocompleteItem[] = [...suggestions];
+
+    if (!showInactivePayees) {
+      filteredSuggestions = filterActivePayees(filteredSuggestions, accounts);
+    }
+
+    if (focusTransferPayees) {
+      filteredSuggestions = filterTransferPayees(filteredSuggestions);
+    }
 
     if (!hasPayeeInput) {
       return filteredSuggestions;
     }
 
     return [{ id: 'new', favorite: false, name: '' }, ...filteredSuggestions];
-  }, [commonPayees, payees, focusTransferPayees, accounts, hasPayeeInput]);
+  }, [
+    commonPayees,
+    payees,
+    focusTransferPayees,
+    accounts,
+    hasPayeeInput,
+    showInactivePayees,
+  ]);
 
   const dispatch = useDispatch();
 

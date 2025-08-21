@@ -4,16 +4,14 @@ import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { groupById } from 'loot-core/shared/util';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
   type TransactionEntity,
-  type AccountEntity,
-  type PayeeEntity,
   type Tag,
 } from 'loot-core/types/models';
 
+import { markUpdatedAccounts } from '@desktop-client/accounts/accountsSlice';
 import { resetApp } from '@desktop-client/app/appSlice';
 import {
   addGenericErrorNotification,
@@ -32,43 +30,36 @@ type QueriesState = {
   newTransactions: Array<TransactionEntity['id']>;
   matchedTransactions: Array<TransactionEntity['id']>;
   lastTransaction: TransactionEntity | null;
-  updatedAccounts: Array<AccountEntity['id']>;
-  accounts: AccountEntity[];
-  accountsLoaded: boolean;
   categories: CategoryViews;
-  categoriesLoaded: boolean;
-  commonPayeesLoaded: boolean;
-  commonPayees: PayeeEntity[];
-  payees: PayeeEntity[];
-  payeesLoaded: boolean;
+  isCategoriesLoading: boolean;
+  isCategoriesLoaded: boolean;
+  isCategoriesDirty: boolean;
   tags: Tag[];
-  tagsLoaded: boolean;
+  isTagsLoading: boolean;
+  isTagsLoaded: boolean;
+  isTagsDirty: boolean;
 };
 
 const initialState: QueriesState = {
   newTransactions: [],
   matchedTransactions: [],
   lastTransaction: null,
-  updatedAccounts: [],
-  accounts: [],
-  accountsLoaded: false,
   categories: {
     grouped: [],
     list: [],
   },
-  categoriesLoaded: false,
-  commonPayees: [],
-  commonPayeesLoaded: false,
-  payees: [],
-  payeesLoaded: false,
+  isCategoriesLoading: false,
+  isCategoriesLoaded: false,
+  isCategoriesDirty: false,
   tags: [],
-  tagsLoaded: false,
+  isTagsLoading: false,
+  isTagsLoaded: false,
+  isTagsDirty: false,
 };
 
 type SetNewTransactionsPayload = {
-  newTransactions: QueriesState['newTransactions'];
-  matchedTransactions: QueriesState['matchedTransactions'];
-  updatedAccounts: QueriesState['updatedAccounts'];
+  newTransactions: Array<TransactionEntity['id']>;
+  matchedTransactions: Array<TransactionEntity['id']>;
 };
 
 type UpdateNewTransactionsPayload = {
@@ -77,10 +68,6 @@ type UpdateNewTransactionsPayload = {
 
 type SetLastTransactionPayload = {
   transaction: TransactionEntity;
-};
-
-type MarkAccountReadPayload = {
-  id: AccountEntity['id'];
 };
 
 const queriesSlice = createSlice({
@@ -98,10 +85,6 @@ const queriesSlice = createSlice({
       state.matchedTransactions = action.payload.matchedTransactions
         ? [...state.matchedTransactions, ...action.payload.matchedTransactions]
         : state.matchedTransactions;
-
-      state.updatedAccounts = action.payload.updatedAccounts
-        ? [...state.updatedAccounts, ...action.payload.updatedAccounts]
-        : state.updatedAccounts;
     },
     updateNewTransactions(
       state,
@@ -120,46 +103,47 @@ const queriesSlice = createSlice({
     ) {
       state.lastTransaction = action.payload.transaction;
     },
-    markAccountRead(state, action: PayloadAction<MarkAccountReadPayload>) {
-      state.updatedAccounts = state.updatedAccounts.filter(
-        id => id !== action.payload.id,
-      );
+    markCategoriesDirty(state) {
+      _markCategoriesDirty(state);
+    },
+    markTagsDirty(state) {
+      _markTagsDirty(state);
     },
   },
   extraReducers: builder => {
-    // Accounts
-    builder.addCase(updateAccount.fulfilled, (state, action) => {
-      const payloadAccount = action.payload;
-      state.accounts = state.accounts.map(account => {
-        if (account.id === payloadAccount.id) {
-          return { ...account, ...payloadAccount };
-        }
-        return account;
-      });
-    });
-
-    builder.addCase(getAccounts.fulfilled, (state, action) => {
-      state.accounts = action.payload;
-      state.accountsLoaded = true;
-    });
-
     // Categories
 
+    builder.addCase(createCategoryGroup.fulfilled, _markCategoriesDirty);
+    builder.addCase(updateCategoryGroup.fulfilled, _markCategoriesDirty);
+    builder.addCase(deleteCategoryGroup.fulfilled, _markCategoriesDirty);
+    builder.addCase(createCategory.fulfilled, _markCategoriesDirty);
+    builder.addCase(updateCategory.fulfilled, _markCategoriesDirty);
+    builder.addCase(deleteCategory.fulfilled, _markCategoriesDirty);
+    builder.addCase(moveCategoryGroup.fulfilled, _markCategoriesDirty);
+    builder.addCase(moveCategory.fulfilled, _markCategoriesDirty);
+
+    builder.addCase(reloadCategories.fulfilled, (state, action) => {
+      _loadCategories(state, action.payload);
+    });
+
+    builder.addCase(reloadCategories.rejected, state => {
+      state.isCategoriesLoading = false;
+    });
+
+    builder.addCase(reloadCategories.pending, state => {
+      state.isCategoriesLoading = true;
+    });
+
     builder.addCase(getCategories.fulfilled, (state, action) => {
-      state.categories = action.payload;
-      state.categoriesLoaded = true;
+      _loadCategories(state, action.payload);
     });
 
-    // Payees
-
-    builder.addCase(getCommonPayees.fulfilled, (state, action) => {
-      state.commonPayees = action.payload;
-      state.commonPayeesLoaded = true;
+    builder.addCase(getCategories.rejected, state => {
+      state.isCategoriesLoading = false;
     });
 
-    builder.addCase(getPayees.fulfilled, (state, action) => {
-      state.payees = action.payload;
-      state.payeesLoaded = true;
+    builder.addCase(getCategories.pending, state => {
+      state.isCategoriesLoading = true;
     });
 
     // App
@@ -168,110 +152,48 @@ const queriesSlice = createSlice({
 
     // Tags
 
+    builder.addCase(createTag.fulfilled, _markTagsDirty);
+    builder.addCase(deleteTag.fulfilled, _markTagsDirty);
+    builder.addCase(deleteAllTags.fulfilled, _markTagsDirty);
+    builder.addCase(updateTag.fulfilled, _markTagsDirty);
+
+    builder.addCase(reloadTags.fulfilled, (state, action) => {
+      _loadTags(state, action.payload);
+    });
+
+    builder.addCase(reloadTags.rejected, state => {
+      state.isTagsLoading = false;
+    });
+
+    builder.addCase(reloadTags.pending, state => {
+      state.isTagsLoading = true;
+    });
+
     builder.addCase(getTags.fulfilled, (state, action) => {
-      state.tags = action.payload;
-      state.tagsLoaded = true;
+      _loadTags(state, action.payload);
     });
 
-    builder.addCase(createTag.fulfilled, (state, action) => {
-      state.tags.push(action.payload);
+    builder.addCase(getTags.rejected, state => {
+      state.isTagsLoading = false;
     });
 
-    builder.addCase(deleteTag.fulfilled, (state, action) => {
-      state.tags = state.tags.filter(tag => tag.id !== action.payload);
-    });
-
-    builder.addCase(deleteAllTags.fulfilled, (state, action) => {
-      state.tags = state.tags.filter(tag => !action.payload.includes(tag.id));
-    });
-
-    builder.addCase(updateTag.fulfilled, (state, action) => {
-      const tagIdx = state.tags.findIndex(tag => tag.id === action.payload.id);
-      state.tags[tagIdx] = action.payload;
+    builder.addCase(getTags.pending, state => {
+      state.isTagsLoading = true;
     });
 
     builder.addCase(findTags.fulfilled, (state, action) => {
-      state.tags = action.payload;
+      _loadTags(state, action.payload);
+    });
+
+    builder.addCase(findTags.rejected, state => {
+      state.isTagsLoading = false;
+    });
+
+    builder.addCase(findTags.pending, state => {
+      state.isTagsLoading = true;
     });
   },
 });
-
-// Account actions
-
-type CreateAccountPayload = {
-  name: AccountEntity['name'];
-  balance: AccountEntity['balance_current'];
-  offBudget: boolean;
-};
-
-export const createAccount = createAppAsyncThunk(
-  `${sliceName}/createAccount`,
-  async ({ name, balance, offBudget }: CreateAccountPayload) => {
-    const id: AccountEntity['id'] = await send('account-create', {
-      name,
-      balance,
-      offBudget,
-    });
-    return id;
-  },
-);
-
-type CloseAccountPayload = {
-  id: AccountEntity['id'];
-  transferAccountId?: AccountEntity['id'];
-  categoryId?: CategoryEntity['id'];
-  forced?: boolean;
-};
-
-export const closeAccount = createAppAsyncThunk(
-  `${sliceName}/closeAccount`,
-  async ({
-    id,
-    transferAccountId,
-    categoryId,
-    forced,
-  }: CloseAccountPayload) => {
-    await send('account-close', {
-      id,
-      transferAccountId: transferAccountId || null,
-      categoryId: categoryId || null,
-      forced,
-    });
-  },
-);
-
-type ReopenAccountPayload = {
-  id: AccountEntity['id'];
-};
-
-export const reopenAccount = createAppAsyncThunk(
-  `${sliceName}/reopenAccount`,
-  async ({ id }: ReopenAccountPayload) => {
-    await send('account-reopen', { id });
-  },
-);
-
-type UpdateAccountPayload = {
-  account: AccountEntity;
-};
-
-export const updateAccount = createAppAsyncThunk(
-  `${sliceName}/updateAccount`,
-  async ({ account }: UpdateAccountPayload) => {
-    await send('account-update', account);
-    return account;
-  },
-);
-
-export const getAccounts = createAppAsyncThunk(
-  `${sliceName}/getAccounts`,
-  async () => {
-    // TODO: Force cast to AccountEntity.
-    // Server is currently returning the DB model it should return the entity model instead.
-    const accounts = (await send('accounts-get')) as AccountEntity[];
-    return accounts;
-  },
-);
 
 // Category actions
 
@@ -279,8 +201,8 @@ type CreateCategoryGroupPayload = {
   name: CategoryGroupEntity['name'];
 };
 
-export const createGroup = createAppAsyncThunk(
-  `${sliceName}/createGroup`,
+export const createCategoryGroup = createAppAsyncThunk(
+  `${sliceName}/createCategoryGroup`,
   async ({ name }: CreateCategoryGroupPayload) => {
     const id = await send('category-group-create', { name });
     return id;
@@ -291,8 +213,8 @@ type UpdateCategoryGroupPayload = {
   group: CategoryGroupEntity;
 };
 
-export const updateGroup = createAppAsyncThunk(
-  `${sliceName}/updateGroup`,
+export const updateCategoryGroup = createAppAsyncThunk(
+  `${sliceName}/updateCategoryGroup`,
   async ({ group }: UpdateCategoryGroupPayload) => {
     // Strip off the categories field if it exist. It's not a real db
     // field but groups have this extra field in the client most of the time
@@ -306,8 +228,8 @@ type DeleteCategoryGroupPayload = {
   transferId?: CategoryGroupEntity['id'];
 };
 
-export const deleteGroup = createAppAsyncThunk(
-  `${sliceName}/deleteGroup`,
+export const deleteCategoryGroup = createAppAsyncThunk(
+  `${sliceName}/deleteCategoryGroup`,
   async ({ id, transferId }: DeleteCategoryGroupPayload) => {
     await send('category-group-delete', { id, transferId });
   },
@@ -408,54 +330,48 @@ export const getCategories = createAppAsyncThunk(
     const categories: CategoryViews = await send('get-categories');
     return categories;
   },
-);
-
-// Payee actions
-
-type CreatePayeePayload = {
-  name: PayeeEntity['name'];
-};
-
-export const createPayee = createAppAsyncThunk(
-  `${sliceName}/createPayee`,
-  async ({ name }: CreatePayeePayload) => {
-    const id: PayeeEntity['id'] = await send('payee-create', {
-      name: name.trim(),
-    });
-    return id;
+  {
+    condition: (_, { getState }) => {
+      const { queries } = getState();
+      return (
+        !queries.isCategoriesLoading &&
+        (queries.isCategoriesDirty || !queries.isCategoriesLoaded)
+      );
+    },
   },
 );
 
-export const initiallyLoadPayees = createAppAsyncThunk(
-  `${sliceName}/initiallyLoadPayees`,
-  async (_, { dispatch, getState }) => {
-    const queriesState = getState().queries;
-    if (queriesState.payees.length === 0) {
-      dispatch(getPayees());
-    }
-  },
-);
-
-export const getCommonPayees = createAppAsyncThunk(
-  `${sliceName}/getCommonPayees`,
+export const reloadCategories = createAppAsyncThunk(
+  `${sliceName}/reloadCategories`,
   async () => {
-    const payees: PayeeEntity[] = await send('common-payees-get');
-    return payees;
+    const categories: CategoryViews = await send('get-categories');
+    return categories;
   },
 );
 
-export const getPayees = createAppAsyncThunk(
-  `${sliceName}/getPayees`,
+export const getTags = createAppAsyncThunk(
+  `${sliceName}/getTags`,
   async () => {
-    const payees: PayeeEntity[] = await send('payees-get');
-    return payees;
+    const tags: Tag[] = await send('tags-get');
+    return tags;
+  },
+  {
+    condition: (_, { getState }) => {
+      const { queries } = getState();
+      return (
+        !queries.isTagsLoading && (queries.isTagsDirty || !queries.isTagsLoaded)
+      );
+    },
   },
 );
 
-export const getTags = createAppAsyncThunk(`${sliceName}/getTags`, async () => {
-  const tags: Tag[] = await send('tags-get');
-  return tags;
-});
+export const reloadTags = createAppAsyncThunk(
+  `${sliceName}/reloadTags`,
+  async () => {
+    const tags: Tag[] = await send('tags-get');
+    return tags;
+  },
+);
 
 export const createTag = createAppAsyncThunk(
   `${sliceName}/createTag`,
@@ -492,8 +408,8 @@ export const updateTag = createAppAsyncThunk(
 export const findTags = createAppAsyncThunk(
   `${sliceName}/findTags`,
   async () => {
-    const id = await send('tags-find');
-    return id;
+    const tags: Tag[] = await send('tags-find');
+    return tags;
   },
 );
 
@@ -892,7 +808,12 @@ export const importTransactions = createAppAsyncThunk(
       setNewTransactions({
         newTransactions: added,
         matchedTransactions: updated,
-        updatedAccounts: added.length > 0 ? [accountId] : [],
+      }),
+    );
+
+    dispatch(
+      markUpdatedAccounts({
+        ids: added.length > 0 ? [accountId] : [],
       }),
     );
 
@@ -902,26 +823,6 @@ export const importTransactions = createAppAsyncThunk(
 
 // Helper functions
 
-export const getActivePayees = memoizeOne(
-  (payees: PayeeEntity[], accounts: AccountEntity[]) => {
-    const accountsById = getAccountsById(accounts);
-
-    return payees.filter(payee => {
-      if (payee.transfer_acct) {
-        const account = accountsById[payee.transfer_acct];
-        return account != null && !account.closed;
-      }
-      return true;
-    });
-  },
-);
-
-export const getAccountsById = memoizeOne(
-  (accounts: AccountEntity[] | null | undefined) => groupById(accounts),
-);
-export const getPayeesById = memoizeOne(
-  (payees: PayeeEntity[] | null | undefined) => groupById(payees),
-);
 export const getCategoriesById = memoizeOne(
   (categoryGroups: CategoryGroupEntity[] | null | undefined) => {
     const res: { [id: CategoryGroupEntity['id']]: CategoryEntity } = {};
@@ -939,33 +840,56 @@ export const getCategoriesById = memoizeOne(
 export const { name, reducer, getInitialState } = queriesSlice;
 export const actions = {
   ...queriesSlice.actions,
-  updateAccount,
-  getAccounts,
-  closeAccount,
-  reopenAccount,
-  getCategories,
-  createPayee,
-  getCommonPayees,
-  getPayees,
   importPreviewTransactions,
   importTransactions,
   applyBudgetAction,
-  createAccount,
-  createGroup,
-  updateGroup,
-  deleteGroup,
+  getCategories,
+  reloadCategories,
+  createCategoryGroup,
+  updateCategoryGroup,
+  deleteCategoryGroup,
   createCategory,
   updateCategory,
   deleteCategory,
   moveCategory,
   moveCategoryGroup,
-  initiallyLoadPayees,
   getTags,
+  createTag,
+  updateTag,
+  deleteTag,
+  deleteAllTags,
+  findTags,
 };
 
 export const {
-  markAccountRead,
-  setLastTransaction,
-  updateNewTransactions,
   setNewTransactions,
-} = actions;
+  updateNewTransactions,
+  setLastTransaction,
+  markCategoriesDirty,
+  markTagsDirty,
+} = queriesSlice.actions;
+
+function _loadCategories(
+  state: QueriesState,
+  categories: QueriesState['categories'],
+) {
+  state.categories = categories;
+  state.isCategoriesLoading = false;
+  state.isCategoriesLoaded = true;
+  state.isCategoriesDirty = false;
+}
+
+function _markCategoriesDirty(state: QueriesState) {
+  state.isCategoriesDirty = true;
+}
+
+function _loadTags(state: QueriesState, tags: QueriesState['tags']) {
+  state.tags = tags;
+  state.isTagsLoading = false;
+  state.isTagsLoaded = true;
+  state.isTagsDirty = false;
+}
+
+function _markTagsDirty(state: QueriesState) {
+  state.isTagsDirty = true;
+}

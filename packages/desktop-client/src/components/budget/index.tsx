@@ -27,14 +27,14 @@ import { addNotification } from '@desktop-client/notifications/notificationsSlic
 import {
   applyBudgetAction,
   createCategory,
-  createGroup,
+  createCategoryGroup,
   deleteCategory,
-  deleteGroup,
+  deleteCategoryGroup,
   getCategories,
   moveCategory,
   moveCategoryGroup,
   updateCategory,
-  updateGroup,
+  updateCategoryGroup,
 } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -217,9 +217,9 @@ function BudgetInner(props: BudgetInnerProps) {
 
   const onSaveGroup = group => {
     if (group.id === 'new') {
-      dispatch(createGroup({ name: group.name }));
+      dispatch(createCategoryGroup({ name: group.name }));
     } else {
-      dispatch(updateGroup({ group }));
+      dispatch(updateCategoryGroup({ group }));
     }
   };
 
@@ -242,14 +242,16 @@ function BudgetInner(props: BudgetInnerProps) {
             options: {
               group: id,
               onDelete: transferCategory => {
-                dispatch(deleteGroup({ id, transferId: transferCategory }));
+                dispatch(
+                  deleteCategoryGroup({ id, transferId: transferCategory }),
+                );
               },
             },
           },
         }),
       );
     } else {
-      dispatch(deleteGroup({ id }));
+      dispatch(deleteCategoryGroup({ id }));
     }
   };
 
