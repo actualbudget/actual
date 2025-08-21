@@ -7,7 +7,7 @@ import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 
-import { type Tag } from 'loot-core/types/models';
+import { type TagEntity } from 'loot-core/types/models';
 
 import { TagEditor } from './TagEditor';
 
@@ -22,11 +22,11 @@ import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
-import { deleteTag, updateTag } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { deleteTag, updateTag } from '@desktop-client/tags/tagsSlice';
 
 type TagRowProps = {
-  tag: Tag;
+  tag: TagEntity;
   hovered?: boolean;
   selected?: boolean;
   onHover: (id?: string) => void;
