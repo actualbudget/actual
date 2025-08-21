@@ -445,7 +445,11 @@ export class Condition {
       return false;
     }
 
-    if (typeof fieldValue === 'string') {
+    if (
+      typeof fieldValue === 'string' &&
+      this.op !== 'hasTags' &&
+      this.op !== 'hasAnyTags'
+    ) {
       fieldValue = fieldValue.toLowerCase();
     }
 
@@ -547,7 +551,7 @@ export class Condition {
           return false;
         }
         // Extract all tags from the condition value
-        const tagMatches = this.value.match(/#[^#\s]+/g);
+        const tagMatches = this.value.match(/(?<!#)(#[^#\s]+)/g);
         if (!tagMatches || tagMatches.length === 0) {
           return false;
         }
@@ -555,8 +559,7 @@ export class Condition {
         // Check if ALL tags are present (AND logic)
         return tagMatches.every(tag => {
           const regex = new RegExp(
-            `${tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
-            'i',
+            `(?<!#)${tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
           );
           return regex.test(fieldValue);
         });
@@ -567,7 +570,7 @@ export class Condition {
           return false;
         }
         // Extract all tags from the condition value
-        const anyTagMatches = this.value.match(/#[^#\s]+/g);
+        const anyTagMatches = this.value.match(/(?<!#)(#[^#\s]+)/g);
         if (!anyTagMatches || anyTagMatches.length === 0) {
           return false;
         }
@@ -575,8 +578,7 @@ export class Condition {
         // Check if ANY tag is present (OR logic)
         return anyTagMatches.some(tag => {
           const regex = new RegExp(
-            `${tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
-            'i',
+            `(?<!#)${tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
           );
           return regex.test(fieldValue);
         });

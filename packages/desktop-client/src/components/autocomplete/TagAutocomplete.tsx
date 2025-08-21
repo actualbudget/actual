@@ -17,7 +17,8 @@ import { css } from '@emotion/css';
 
 import { Autocomplete } from './Autocomplete';
 
-import { useTags, useTagCSS } from '@desktop-client/style/tags';
+import { useTags } from '../../hooks/useTags';
+import { useTagCSS } from '../../hooks/useTagCSS';
 
 type TagAutocompleteItem = {
   id: string;

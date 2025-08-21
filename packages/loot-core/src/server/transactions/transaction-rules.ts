@@ -411,7 +411,8 @@ export function conditionsToAQL(
       } else if (type === 'string') {
         return {
           [field]: {
-            $transform: '$lower',
+            $transform:
+              op !== 'hasTags' && op !== 'hasAnyTags' ? '$lower' : undefined,
             [aqlOp]: value,
           },
         };
@@ -537,9 +538,8 @@ export function conditionsToAQL(
       case 'hasTags': {
         const tagValues = [] as string[];
         for (const [_, tag] of value.matchAll(/(?<!#)(#[^#\s]+)/g)) {
-          const lowered = tag.toLowerCase();
-          if (!tagValues.find(t => t === lowered)) {
-            tagValues.push(lowered);
+          if (!tagValues.includes(tag)) {
+            tagValues.push(tag);
           }
         }
 
@@ -559,9 +559,8 @@ export function conditionsToAQL(
       case 'hasAnyTags': {
         const anyTagValues = [] as string[];
         for (const [_, tag] of value.matchAll(/(?<!#)(#[^#\s]+)/g)) {
-          const lowered = tag.toLowerCase();
-          if (!anyTagValues.includes(lowered)) {
-            anyTagValues.push(lowered);
+          if (!anyTagValues.includes(tag)) {
+            anyTagValues.push(tag);
           }
         }
 
