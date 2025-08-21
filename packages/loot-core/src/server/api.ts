@@ -805,7 +805,7 @@ handlers['api/schedule-update'] = withMutation(async function ({
   checkFileOpen();
   const { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
   if (!data || data.length === 0) {
-  throw APIError('Schedule not found');
+    throw APIError('Schedule not found');
   }
 
   const sched = data[0] as ScheduleEntity;
@@ -815,11 +815,11 @@ handlers['api/schedule-update'] = withMutation(async function ({
   const accountIndex = sched._conditions.findIndex(c => c.field === 'account');
   const dateIndex = sched._conditions.findIndex(c => c.field === 'date');
   const amountIndex = sched._conditions.findIndex(c => c.field === 'amount');
-  
+
   for (const key in fields) {
     const typedKey = key as keyof APIScheduleEntity;
     const value = fields[typedKey];
-    
+
     switch (typedKey) {
       case 'name': {
         const newName = String(value);
@@ -836,8 +836,9 @@ handlers['api/schedule-update'] = withMutation(async function ({
       }
       case 'next_date':
       case 'completed': {
-        throw APIError(`Field '${typedKey}' is system-managed and not user-editable.`);
-        break;
+        throw APIError(
+          `Field '${typedKey}' is system-managed and not user-editable.`,
+        );
       }
       case 'posts_transaction': {
         sched.posts_transaction = Boolean(value);
@@ -872,8 +873,11 @@ handlers['api/schedule-update'] = withMutation(async function ({
               convertedOp = 'isbetween';
               break;
             default:
-              throw APIError(`Invalid amount operator: ${value}. Expected: is, isapprox, or isbetween`);
-         `` }
+              throw APIError(
+                `Invalid amount operator: ${value}. Expected: is, isapprox, or isbetween`,
+              );
+              ``;
+          }
           sched._conditions[amountIndex].op = convertedOp;
           conditionsUpdated = true;
         }
@@ -898,7 +902,7 @@ handlers['api/schedule-update'] = withMutation(async function ({
       }
     }
   }
-  
+
   if (conditionsUpdated) {
     return handlers['schedule/update']({
       schedule: {
