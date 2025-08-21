@@ -778,7 +778,8 @@ handlers['api/rule-delete'] = withMutation(async function (id) {
 handlers['api/schedules-get'] = async function () {
   checkFileOpen();
   const { data } = await aqlQuery(q('schedules').select('*'));
-  return data.map(schedule => scheduleModel.toExternal(schedule));
+  const schedules = data as ScheduleEntity[];
+  return schedules.map(schedule => scheduleModel.toExternal(schedule));
 };
 
 handlers['api/schedule-create'] = withMutation(async function (schedule) {
