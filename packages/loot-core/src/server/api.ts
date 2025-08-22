@@ -822,7 +822,7 @@ handlers['api/schedule-update'] = withMutation(async function ({
     amountIndex === -1
   ) {
     throw APIError(
-      `Required condition not found in schedule, please report a bug ${sched._conditions}`,
+      `Required condition not found in schedule, please report a bug ${sched._conditions[0].field} ${sched._conditions[1].field} ${sched._conditions[2].field} ${sched._conditions[3].field}`,
     );
   }
 
