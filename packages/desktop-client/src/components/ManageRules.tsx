@@ -21,7 +21,11 @@ import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { q } from 'loot-core/shared/query';
 import { mapField, friendlyOp } from 'loot-core/shared/rules';
 import { describeSchedule } from 'loot-core/shared/schedules';
-import { type RuleEntity, type NewRuleEntity } from 'loot-core/types/models';
+import {
+  type RuleEntity,
+  type NewRuleEntity,
+  type ScheduleEntity,
+} from 'loot-core/types/models';
 
 import { InfiniteScrollWrapper } from './common/InfiniteScrollWrapper';
 import { Link } from './common/Link';
@@ -38,13 +42,20 @@ import {
   SelectedProvider,
 } from '@desktop-client/hooks/useSelected';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { initiallyLoadPayees } from '@desktop-client/queries/queriesSlice';
+import { getPayees } from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
-function mapValue(
-  field,
-  value,
-  { payees = [], categories = [], accounts = [] },
+export type FilterData = {
+  payees?: Array<{ id: string; name: string }>;
+  categories?: Array<{ id: string; name: string }>;
+  accounts?: Array<{ id: string; name: string }>;
+  schedules?: readonly ScheduleEntity[];
+};
+
+export function mapValue(
+  field: string,
+  value: unknown,
+  { payees = [], categories = [], accounts = [] }: Partial<FilterData>,
 ) {
   if (!value) return '';
 
@@ -64,12 +75,14 @@ function mapValue(
   return '(deleted)';
 }
 
-function ruleToString(rule, data) {
+export function ruleToString(rule: RuleEntity, data: FilterData) {
   const conditions = rule.conditions.flatMap(cond => [
     mapField(cond.field),
     friendlyOp(cond.op),
     cond.op === 'oneOf' || cond.op === 'notOneOf'
-      ? cond.value.map(v => mapValue(cond.field, v, data)).join(', ')
+      ? Array.isArray(cond.value)
+        ? cond.value.map(v => mapValue(cond.field, v, data)).join(', ')
+        : mapValue(cond.field, cond.value, data)
       : mapValue(cond.field, cond.value, data),
   ]);
   const actions = rule.actions.flatMap(action => {
@@ -81,19 +94,19 @@ function ruleToString(rule, data) {
         mapValue(action.field, action.value, data),
       ];
     } else if (action.op === 'link-schedule') {
-      const schedule = data.schedules.find(s => s.id === action.value);
+      const schedule = data.schedules?.find(s => s.id === String(action.value));
       return [
         friendlyOp(action.op),
-        describeSchedule(
-          schedule,
-          data.payees.find(p => p.id === schedule._payee),
-        ),
+        schedule
+          ? describeSchedule(
+              schedule,
+              data.payees?.find(p => p.id === schedule._payee),
+            )
+          : '-',
       ];
     } else if (action.op === 'prepend-notes' || action.op === 'append-notes') {
-      return [
-        friendlyOp(action.op),
-        '“' + mapValue(action.field, action.value, data) + '”',
-      ];
+      const noteValue = String(action.value || '');
+      return [friendlyOp(action.op), '\u201c' + noteValue + '\u201d'];
     } else {
       return [];
     }
@@ -185,7 +198,7 @@ export function ManageRules({
       await loadRules();
       setLoading(false);
 
-      await dispatch(initiallyLoadPayees());
+      await dispatch(getPayees());
     }
 
     if (payeeId) {

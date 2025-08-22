@@ -54,6 +54,8 @@ export interface BudgetHandlers {
   'category-group-move': typeof moveCategoryGroup;
   'category-group-delete': typeof deleteCategoryGroup;
   'must-category-transfer': typeof isCategoryTransferRequired;
+  'budget/get-category-automations': typeof goalActions.getTemplatesForCategory;
+  'budget/set-category-automations': typeof goalActions.storeTemplates;
 }
 
 export const app = createApp<BudgetHandlers>();
@@ -139,6 +141,15 @@ app.method('category-group-update', mutator(undoable(updateCategoryGroup)));
 app.method('category-group-move', mutator(undoable(moveCategoryGroup)));
 app.method('category-group-delete', mutator(undoable(deleteCategoryGroup)));
 app.method('must-category-transfer', isCategoryTransferRequired);
+
+app.method(
+  'budget/get-category-automations',
+  goalActions.getTemplatesForCategory,
+);
+app.method(
+  'budget/set-category-automations',
+  mutator(undoable(goalActions.storeTemplates)),
+);
 
 // Server must return AQL entities not the raw DB data
 async function getCategories() {
@@ -305,7 +316,7 @@ async function moveCategory({
 }: {
   id: CategoryEntity['id'];
   groupId: CategoryGroupEntity['id'];
-  targetId: CategoryEntity['id'];
+  targetId: CategoryEntity['id'] | null;
 }): Promise<void> {
   await batchMessages(async () => {
     await db.moveCategory(id, groupId, targetId);
@@ -317,7 +328,7 @@ async function deleteCategory({
   transferId,
 }: {
   id: CategoryEntity['id'];
-  transferId?: CategoryEntity['id'];
+  transferId?: CategoryEntity['id'] | null;
 }): Promise<{ error?: 'no-categories' | 'category-type' }> {
   let result = {};
   await batchMessages(async () => {
@@ -396,7 +407,7 @@ async function moveCategoryGroup({
   targetId,
 }: {
   id: CategoryGroupEntity['id'];
-  targetId: CategoryGroupEntity['id'];
+  targetId: CategoryGroupEntity['id'] | null;
 }): Promise<void> {
   await batchMessages(async () => {
     await db.moveCategoryGroup(id, targetId);
@@ -408,7 +419,7 @@ async function deleteCategoryGroup({
   transferId,
 }: {
   id: CategoryGroupEntity['id'];
-  transferId: CategoryGroupEntity['id'];
+  transferId?: CategoryGroupEntity['id'] | null;
 }): Promise<void> {
   const groupCategories = await db.all<Pick<CategoryEntity, 'id'>>(
     'SELECT id FROM categories WHERE cat_group = ? AND tombstone = 0',

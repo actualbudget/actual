@@ -33,7 +33,7 @@ import {
   FormLabel,
   Checkbox,
 } from '@desktop-client/components/forms';
-import { OpSelect } from '@desktop-client/components/modals/EditRuleModal';
+import { OpSelect } from '@desktop-client/components/rules/RuleEditor';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import { RecurringSchedulePicker } from '@desktop-client/components/select/RecurringSchedulePicker';
 import { SelectedItemsButton } from '@desktop-client/components/table';
@@ -54,9 +54,9 @@ import {
   type Modal as ModalType,
   pushModal,
 } from '@desktop-client/modals/modalsSlice';
+import { getPayeesById } from '@desktop-client/payees/payeesSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { liveQuery } from '@desktop-client/queries/liveQuery';
-import { getPayeesById } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type Fields = {
@@ -674,10 +674,11 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
                   htmlFor="amount-field"
                   style={{ margin: 0, flex: 1 }}
                 />
-                {/* @ts-expect-error should be auto-patched once GenericInput is converted to TS */}
                 <OpSelect
                   ops={['isapprox', 'is', 'isbetween']}
-                  value={state.fields.amountOp}
+                  value={
+                    state.fields.amountOp as 'isapprox' | 'is' | 'isbetween'
+                  }
                   formatOp={op => {
                     switch (op) {
                       case 'is':

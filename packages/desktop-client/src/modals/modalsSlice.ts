@@ -482,9 +482,9 @@ export type Modal =
       };
     }
   | {
-      name: 'confirm-transaction-delete';
+      name: 'confirm-delete';
       options: {
-        message?: string | undefined;
+        message: string;
         onConfirm: () => void;
       };
     }
@@ -542,6 +542,9 @@ export type Modal =
     }
   | {
       name: 'category-automations-edit';
+      options: {
+        categoryId: CategoryEntity['id'];
+      };
     };
 
 type OpenAccountCloseModalPayload = {
@@ -563,7 +566,7 @@ export const openAccountCloseModal = createAppAsyncThunk(
         id: accountId,
       },
     );
-    const account = getState().queries.accounts.find(
+    const account = getState().account.accounts.find(
       acct => acct.id === accountId,
     );
 

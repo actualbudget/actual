@@ -133,7 +133,9 @@ export class CategoryTemplateContext {
     if (!this.priorities.has(priority)) return 0;
     if (this.limitMet) return 0;
 
-    const t = this.templates.filter(t => t.priority === priority);
+    const t = this.templates.filter(
+      t => t.directive === 'template' && t.priority === priority,
+    );
     let available = budgetAvail || 0;
     let toBudget = 0;
     let byFlag = false;
@@ -708,7 +710,7 @@ export class CategoryTemplateContext {
         );
       }
       savedInfo.push({ numMonths, period });
-      if (numMonths < shortNumMonths || !shortNumMonths) {
+      if (numMonths < shortNumMonths || shortNumMonths === undefined) {
         shortNumMonths = numMonths;
       }
     }

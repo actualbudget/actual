@@ -25,6 +25,10 @@ import { type AccountEntity } from 'loot-core/types/models';
 
 import { BalanceHistoryGraph } from './BalanceHistoryGraph';
 
+import {
+  reopenAccount,
+  updateAccount,
+} from '@desktop-client/accounts/accountsSlice';
 import { Link } from '@desktop-client/components/common/Link';
 import { Notes } from '@desktop-client/components/Notes';
 import {
@@ -40,10 +44,6 @@ import { useDragRef } from '@desktop-client/hooks/useDragRef';
 import { useNotes } from '@desktop-client/hooks/useNotes';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { openAccountCloseModal } from '@desktop-client/modals/modalsSlice';
-import {
-  reopenAccount,
-  updateAccount,
-} from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { type SheetFields, type Binding } from '@desktop-client/spreadsheet';
 
@@ -269,10 +269,10 @@ export function Account<FieldName extends SheetFields<'account'>>({
                   setMenuOpen(false);
                 }}
                 items={[
-                  { name: 'rename', text: 'Rename' },
+                  { name: 'rename', text: t('Rename') },
                   account.closed
-                    ? { name: 'reopen', text: 'Reopen' }
-                    : { name: 'close', text: 'Close' },
+                    ? { name: 'reopen', text: t('Reopen') }
+                    : { name: 'close', text: t('Close') },
                 ]}
               />
             </Popover>
@@ -353,6 +353,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
       placement="right top"
       triggerProps={{
         delay: 1000,
+        closeDelay: 250,
         isDisabled: menuOpen,
       }}
     >

@@ -15,7 +15,7 @@ import {
   ExpenseGroupListItem,
 } from './ExpenseGroupListItem';
 
-import { moveCategoryGroup } from '@desktop-client/queries/queriesSlice';
+import { moveCategoryGroup } from '@desktop-client/budget/budgetSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type ExpenseGroupListProps = {

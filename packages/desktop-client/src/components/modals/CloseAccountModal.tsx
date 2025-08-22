@@ -16,6 +16,7 @@ import { integerToCurrency } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
+import { closeAccount } from '@desktop-client/accounts/accountsSlice';
 import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import { Link } from '@desktop-client/components/common/Link';
@@ -30,7 +31,6 @@ import {
   type Modal as ModalType,
   pushModal,
 } from '@desktop-client/modals/modalsSlice';
-import { closeAccount } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 function needsCategory(

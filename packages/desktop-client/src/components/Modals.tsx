@@ -16,7 +16,7 @@ import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
 import { CloseAccountModal } from './modals/CloseAccountModal';
 import { ConfirmCategoryDeleteModal } from './modals/ConfirmCategoryDeleteModal';
-import { ConfirmTransactionDeleteModal } from './modals/ConfirmTransactionDeleteModal';
+import { ConfirmDeleteModal } from './modals/ConfirmDeleteModal';
 import { ConfirmTransactionEditModal } from './modals/ConfirmTransactionEditModal';
 import { ConfirmUnlinkAccountModal } from './modals/ConfirmUnlinkAccountModal';
 import { CoverModal } from './modals/CoverModal';
@@ -102,7 +102,9 @@ export function Modals() {
           return budgetId ? <GoalTemplateModal key={key} /> : null;
 
         case 'category-automations-edit':
-          return budgetId ? <BudgetAutomationsModal key={name} /> : null;
+          return budgetId ? (
+            <BudgetAutomationsModal key={name} {...modal.options} />
+          ) : null;
 
         case 'keyboard-shortcuts':
           // don't show the hotkey help modal when a budget is not open
@@ -132,8 +134,8 @@ export function Modals() {
         case 'confirm-transaction-edit':
           return <ConfirmTransactionEditModal key={key} {...modal.options} />;
 
-        case 'confirm-transaction-delete':
-          return <ConfirmTransactionDeleteModal key={key} {...modal.options} />;
+        case 'confirm-delete':
+          return <ConfirmDeleteModal key={key} {...modal.options} />;
 
         case 'load-backup':
           return (

@@ -28,7 +28,10 @@ import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
 
 import { setAppState, sync } from '@desktop-client/app/appSlice';
-import { closeBudget, loadBudget } from '@desktop-client/budgets/budgetsSlice';
+import {
+  closeBudget,
+  loadBudget,
+} from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { handleGlobalEvents } from '@desktop-client/global-events';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { SpreadsheetProvider } from '@desktop-client/hooks/useSpreadsheet';
@@ -147,7 +150,7 @@ function AppInner() {
             sticky: true,
             message: t('Login expired, please log in again.'),
             button: {
-              title: t('Go to log in'),
+              title: t('Go to login'),
               action: () => {
                 dispatch(signOut());
               },

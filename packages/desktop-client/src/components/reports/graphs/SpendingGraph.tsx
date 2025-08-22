@@ -15,14 +15,13 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-import {
-  amountToCurrency,
-  amountToCurrencyNoDecimal,
-} from 'loot-core/shared/util';
 import { type SpendingEntity } from 'loot-core/types/models';
+
+import { computePadding } from './util/computePadding';
 
 import { Container } from '@desktop-client/components/reports/Container';
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
+import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type PayloadItem = {
@@ -48,6 +47,7 @@ type CustomTooltipProps = {
   balanceTypeOp: 'cumulative';
   selection: string | 'budget' | 'average';
   compare: string;
+  format: (value: unknown, type?: FormatType) => string;
 };
 
 const CustomTooltip = ({
@@ -56,6 +56,7 @@ const CustomTooltip = ({
   balanceTypeOp,
   selection,
   compare,
+  format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
 
@@ -93,8 +94,9 @@ const CustomTooltip = ({
             {payload[0].payload.months[compare]?.cumulative ? (
               <AlignedText
                 left={t('Compare:')}
-                right={amountToCurrency(
+                right={format(
                   payload[0].payload.months[compare]?.cumulative * -1,
+                  'financial',
                 )}
               />
             ) : null}
@@ -107,15 +109,18 @@ const CustomTooltip = ({
                       ? t('Budgeted:')
                       : t('To:')
                 }
-                right={amountToCurrency(comparison)}
+                right={format(Math.round(comparison), 'financial')}
               />
             )}
             {payload[0].payload.months[compare]?.cumulative ? (
               <AlignedText
                 left={t('Difference:')}
-                right={amountToCurrency(
-                  payload[0].payload.months[compare]?.cumulative * -1 -
-                    comparison,
+                right={format(
+                  Math.round(
+                    payload[0].payload.months[compare]?.cumulative * -1 -
+                      comparison,
+                  ),
+                  'financial',
                 )}
               />
             ) : null}
@@ -145,6 +150,7 @@ export function SpendingGraph({
 }: SpendingGraphProps) {
   const privacyMode = usePrivacyMode();
   const balanceTypeOp = 'cumulative';
+  const format = useFormat();
 
   const selection = mode === 'single-month' ? compareTo : mode;
 
@@ -170,7 +176,7 @@ export function SpendingGraph({
   );
 
   const tickFormatter: ComponentProps<typeof YAxis>['tickFormatter'] = tick => {
-    if (!privacyMode) return `${amountToCurrencyNoDecimal(tick)}`; // Formats the tick values as strings with commas
+    if (!privacyMode) return `${format(tick, 'financial-no-decimals')}`;
     return '...';
   };
 
@@ -219,7 +225,12 @@ export function SpendingGraph({
                 margin={{
                   top: 0,
                   right: 0,
-                  left: 0,
+                  left: computePadding(
+                    data.intervalData
+                      .map(item => getVal(item, maxYAxis ? compare : selection))
+                      .filter(value => value !== undefined),
+                    (value: number) => format(value, 'financial-no-decimals'),
+                  ),
                   bottom: 0,
                 }}
               >
@@ -249,6 +260,7 @@ export function SpendingGraph({
                       balanceTypeOp={balanceTypeOp}
                       selection={selection}
                       compare={compare}
+                      format={format}
                     />
                   }
                   formatter={numberFormatterTooltip}

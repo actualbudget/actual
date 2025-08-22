@@ -10,10 +10,7 @@ import { ManagePayees } from './ManagePayees';
 
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
-import {
-  getPayees,
-  initiallyLoadPayees,
-} from '@desktop-client/queries/queriesSlice';
+import { getPayees, reloadPayees } from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type ManagePayeesWithDataProps = {
@@ -42,7 +39,7 @@ export function ManagePayeesWithData({
 
   useEffect(() => {
     async function loadData() {
-      await dispatch(initiallyLoadPayees());
+      await dispatch(getPayees());
       await refetchRuleCounts();
       await refetchOrphanedPayees();
     }
@@ -152,7 +149,7 @@ export function ManagePayeesWithData({
           );
         });
 
-        await dispatch(getPayees());
+        await dispatch(reloadPayees());
         setOrphans(filtedOrphans);
         setRuleCounts({ value: ruleCounts.value });
       }}

@@ -81,7 +81,7 @@ test.describe('Mobile Transactions', () => {
     );
   });
 
-  test('creates an uncategorized transaction from `/accounts/uncategorized` page', async () => {
+  test('creates an uncategorized transaction from `/categories/uncategorized` page', async () => {
     // Create uncategorized transaction
     let transactionEntryPage = await navigation.goToTransactionEntryPage();
     await transactionEntryPage.amountField.fill('12.35');
@@ -114,7 +114,7 @@ test.describe('Mobile Transactions', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('creates a categorized transaction from `/accounts/uncategorized` page', async () => {
+  test('creates a categorized transaction from `/categories/uncategorized` page', async () => {
     // Create uncategorized transaction
     let transactionEntryPage = await navigation.goToTransactionEntryPage();
     await transactionEntryPage.amountField.fill('12.35');

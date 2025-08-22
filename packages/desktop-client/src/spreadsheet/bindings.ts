@@ -8,6 +8,8 @@ import {
   type SheetNames,
 } from '.';
 
+import { uncategorizedTransactions } from '@desktop-client/queries';
+
 type BudgetType<SheetName extends SheetNames> = Record<
   string,
   SheetFields<SheetName> | ((id: string) => SheetFields<SheetName>)
@@ -133,28 +135,18 @@ export function categoryBalanceUncleared(
       .calculate({ $sum: '$amount' }),
   } satisfies Binding<'category', 'balanceUncleared'>;
 }
-const uncategorizedQuery = q('transactions').filter({
-  'account.offbudget': false,
-  category: null,
-  $or: [
-    {
-      'payee.transfer_acct.offbudget': true,
-      'payee.transfer_acct': null,
-    },
-  ],
-});
 
 export function uncategorizedBalance<SheetName extends SheetNames>() {
   return {
     name: 'uncategorized-balance',
-    query: uncategorizedQuery.calculate({ $sum: '$amount' }),
+    query: uncategorizedTransactions().calculate({ $sum: '$amount' }),
   } satisfies Binding<SheetName, 'uncategorized-balance'>;
 }
 
 export function uncategorizedCount<SheetName extends SheetNames>() {
   return {
     name: 'uncategorized-amount',
-    query: uncategorizedQuery.calculate({ $count: '$id' }),
+    query: uncategorizedTransactions().calculate({ $count: '$id' }),
   } satisfies Binding<SheetName, 'uncategorized-amount'>;
 }
 

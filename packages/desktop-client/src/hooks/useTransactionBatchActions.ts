@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
@@ -58,6 +60,7 @@ type BatchUnlinkScheduleProps = {
 
 export function useTransactionBatchActions() {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
 
   const onBatchEdit = async ({ name, ids, onSuccess }: BatchEditProps) => {
     const { data } = await aqlQuery(
@@ -108,10 +111,10 @@ export function useTransactionBatchActions() {
         if (name === 'notes') {
           if (mode === 'prepend') {
             valueToSet =
-              trans.notes === null ? value : value + ' ' + trans.notes;
+              trans.notes === null ? value : `${value}${trans.notes}`;
           } else if (mode === 'append') {
             valueToSet =
-              trans.notes === null ? value : trans.notes + ' ' + value;
+              trans.notes === null ? value : `${trans.notes}${value}`;
           } else if (mode === 'replace') {
             valueToSet = value;
           }
@@ -309,12 +312,15 @@ export function useTransactionBatchActions() {
       dispatch(
         pushModal({
           modal: {
-            name: 'confirm-transaction-delete',
+            name: 'confirm-delete',
             options: {
               message:
                 ids.length > 1
-                  ? `Are you sure you want to delete these ${ids.length} transaction${ids.length > 1 ? 's' : ''}?`
-                  : undefined,
+                  ? t(
+                      'Are you sure you want to delete these {{count}} transactions?',
+                      { count: ids.length },
+                    )
+                  : t('Are you sure you want to delete the transaction?'),
               onConfirm: async () => {
                 const { data } = await aqlQuery(
                   q('transactions')

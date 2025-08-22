@@ -47,7 +47,7 @@ import { usePayee } from '@desktop-client/hooks/usePayee';
 import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 import { useSelector } from '@desktop-client/redux';
 
-const ROW_HEIGHT = 60;
+export const ROW_HEIGHT = 60;
 
 const getTextStyle = ({
   isPreview,
@@ -95,7 +95,9 @@ export function TransactionListItem({
   const transferAccount = useAccount(payee?.transfer_acct || '');
   const isPreview = isPreviewId(transaction?.id || '');
 
-  const newTransactions = useSelector(state => state.queries.newTransactions);
+  const newTransactions = useSelector(
+    state => state.transactions.newTransactions,
+  );
 
   const { longPressProps } = useLongPress({
     accessibilityDescription: 'Long press to select multiple transactions',
