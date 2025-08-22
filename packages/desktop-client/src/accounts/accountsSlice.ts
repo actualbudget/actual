@@ -253,8 +253,10 @@ export const syncAccounts = createAppAsyncThunk(
     }
 
     const queriesState = getState().queries;
+    // Figure out which accounts to sync
     let accountIdsToSync: string[];
     if (id === 'offbudget' || id === 'onbudget') {
+      // Sync only offbudget or onbudget accounts
       const targetOffbudget = id === 'offbudget' ? 1 : 0;
       accountIdsToSync = queriesState.accounts
         .filter(
@@ -264,9 +266,10 @@ export const syncAccounts = createAppAsyncThunk(
         .sort((a, b) => a.sort_order - b.sort_order)
         .map(({ id }) => id);
     } else if (id) {
+      // Sync only the specified account
       accountIdsToSync = [id];
     } else {
-      // Default: all accounts
+      // Default: sync all accounts
       accountIdsToSync = queriesState.accounts
         .filter(
           ({ bank, closed, tombstone }) => !!bank && !closed && !tombstone,
@@ -286,6 +289,8 @@ export const syncAccounts = createAppAsyncThunk(
     const accountsData = (await send(
       'accounts-get',
     )) as unknown as AccountEntity[];
+
+    // Filter out the SimpleFin Accounts
     const simpleFinAccounts = accountsData.filter(
       a =>
         a.account_sync_source === 'simpleFin' &&
@@ -293,6 +298,9 @@ export const syncAccounts = createAppAsyncThunk(
     );
 
     let isSyncSuccess = false;
+
+    // These variables will be used to store the results of the sync.
+    // THESE ARE CHANGED IN PLACE by handleSyncResponse.
     const newTransactions: Array<TransactionEntity['id']> = [];
     const matchedTransactions: Array<TransactionEntity['id']> = [];
     const updatedAccounts: Array<AccountEntity['id']> = [];
@@ -319,6 +327,8 @@ export const syncAccounts = createAppAsyncThunk(
       accountIdsToSync = accountIdsToSync.filter(
         id => !simpleFinAccounts.find(sfa => sfa.id === id),
       );
+      // Update the accounts state to remove the SimpleFin accounts
+      dispatch(setAccountsSyncing({ ids: accountIdsToSync }));
     }
 
     // Loop through the accounts and perform sync operation.. one by one

@@ -3,22 +3,14 @@ import { inspect } from 'util';
 import { Request, Response } from 'express';
 
 import { components } from '../models/enablebanking-openapi.js';
+import {
+  EnableBankingErrorInterface,
+  EnableBankingErrorCode,
+  EnableBankingResponse,
+  EnableBankingEndpoints,
+} from '../models/enablebanking.js';
 
 type ErrorResponse = components['schemas']['ErrorResponse'];
-
-export type EnableBankingErrorCode =
-  | 'ENABLEBANKING_SECRETS_INVALID'
-  | 'ENABLEBANKING_APPLICATION_INACTIVE'
-  | 'INTERNAL_ERROR'
-  | 'ENABLEBANKING_SESSION_CLOSED'
-  | 'BAD_REQUEST'
-  | 'NOT_READY'
-  | 'NOT_FOUND';
-
-export type EnableBankingErrorInterface = {
-  error_code: EnableBankingErrorCode;
-  error_type: string;
-};
 
 export class EnableBankingError extends Error {
   error_code: EnableBankingErrorCode;
@@ -149,15 +141,21 @@ export async function handleEnableBankingError(response: globalThis.Response) {
   throw new Error('Not Implemented');
 }
 
-export function handleErrorInHandler<T>(
-  func: (req: Request) => Promise<T> | never,
+export function handleErrorInHandler<T extends keyof EnableBankingEndpoints>(
+  func: (
+    req: Request,
+  ) => Promise<EnableBankingEndpoints[T]['response']> | never,
 ) {
-  return (req: Request, res: Response) => {
+  return (
+    req: Request,
+    res: Response<{ status: 'ok'; data: EnableBankingResponse<T> }>,
+  ) => {
+    // Makes sure we respond with a valid JSON Response
     func(req)
       .then(data => {
         res.send({
           status: 'ok',
-          data,
+          data: { data },
         });
       })
       .catch(err => {
@@ -175,7 +173,7 @@ export function handleErrorInHandler<T>(
         }
         res.send({
           status: 'ok',
-          data: err.data(),
+          data: { error: err.data() },
         });
       });
   };
