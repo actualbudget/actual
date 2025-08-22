@@ -815,10 +815,17 @@ test('Schedules: successfully complete schedules operations', async () => {
     schedAccountId1,
   );
 
-  await api.updateSchedule(ScheduleId1, { amount: -10000 , account: schedAccountId1});
-  await api.deleteSchedule(ScheduleId2);
+  //check getIDByName works on accounts
+  const schedPayeeId1 = await api.createPayee({ name: 'sched-test-payee1' });
+
+  expect(await api.getIDByName('payees', 'sched-test-payee1')).toEqual(
+    schedPayeeId1,
+  );
 
   // schedules successfully updated, and one of them deleted
+  await api.updateSchedule(ScheduleId1, { amount: -10000 , account: schedAccountId1, payee: schedPayeeId1});
+  await api.deleteSchedule(ScheduleId2);
+
   schedules = await api.getSchedules();
   expect(schedules).toEqual(
     expect.arrayContaining([
@@ -827,6 +834,7 @@ test('Schedules: successfully complete schedules operations', async () => {
         posts_transaction: true,
         amount: -10000,
         account: schedAccountId1,
+        payee: schedPayeeId1,
         amountOp: 'is',
         date: {
           frequency: 'monthly',
