@@ -828,7 +828,11 @@ test('Schedules: successfully complete schedules operations', async () => {
   await api.deleteSchedule(ScheduleId2);
 
   // schedules successfully updated, and one of them deleted
-  await api.updateSchedule(ScheduleId1, { amount: -10000 , account: schedAccountId1, payee: schedPayeeId1});
+  await api.updateSchedule(ScheduleId1, {
+    amount: -10000,
+    account: schedAccountId1,
+    payee: schedPayeeId1,
+  });
   await api.deleteSchedule(ScheduleId2);
 
   schedules = await api.getSchedules();
