@@ -29,8 +29,6 @@ import {
 } from 'date-fns';
 import Pikaday from 'pikaday';
 
-import 'pikaday/css/pikaday.css';
-
 import {
   getDayMonthFormat,
   getDayMonthRegex,
@@ -39,11 +37,17 @@ import {
   currentDate,
 } from 'loot-core/shared/months';
 
+import { InputField } from '@desktop-client/components/mobile/MobileForms';
+
+import 'pikaday/css/pikaday.css';
+
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
 
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
 const pickerStyles: CSSProperties = {
   '& .pika-single.actual-date-picker': {
@@ -239,7 +243,7 @@ type DateSelectProps = {
   onSelect: (selectedDate: string) => void;
 };
 
-export function DateSelect({
+function DateSelectDesktop({
   id,
   containerProps,
   inputProps,
@@ -458,4 +462,28 @@ export function DateSelect({
       )}
     </View>
   );
+}
+
+function DateSelectMobile(props: DateSelectProps) {
+  return (
+    <InputField
+      type="date"
+      defaultValue={props.value}
+      onChange={event => {
+        props.onSelect(event.target.value);
+      }}
+      style={{ height: 28 }}
+      {...props.inputProps}
+    />
+  );
+}
+
+export function DateSelect(props: DateSelectProps) {
+  const { isNarrowWidth } = useResponsive();
+
+  if (isNarrowWidth) {
+    return <DateSelectMobile {...props} />;
+  }
+
+  return <DateSelectDesktop {...props} />;
 }
