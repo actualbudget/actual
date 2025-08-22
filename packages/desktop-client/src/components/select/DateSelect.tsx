@@ -37,13 +37,12 @@ import {
   currentDate,
 } from 'loot-core/shared/months';
 
-import { InputField } from '@desktop-client/components/mobile/MobileForms';
-
 import 'pikaday/css/pikaday.css';
 
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
 
+import { InputField } from '@desktop-client/components/mobile/MobileForms';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
