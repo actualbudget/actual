@@ -815,7 +815,7 @@ test('Schedules: successfully complete schedules operations', async () => {
     schedAccountId1,
   );
 
-  //check getIDByName works on accounts
+  //check getIDByName works on payees
   const schedPayeeId1 = await api.createPayee({ name: 'sched-test-payee1' });
 
   expect(await api.getIDByName('payees', 'sched-test-payee1')).toEqual(
