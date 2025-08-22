@@ -169,7 +169,7 @@ function AccountListItem({
             borderWidth: '0 0 1px 0',
             borderColor: theme.tableBorder,
             borderStyle: 'solid',
-            paddingLeft: 20
+            paddingLeft: 20,
           }}
           data-testid="account-list-item"
           onPress={() => onSelect(account)}
