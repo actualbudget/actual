@@ -465,8 +465,9 @@ function DateSelectDesktop({
 function DateSelectMobile(props: DateSelectProps) {
   return (
     <InputField
+      id={props.id}
       type="date"
-      defaultValue={props.value}
+      value={props.value ?? ''}
       onChange={event => {
         props.onSelect(event.target.value);
       }}
