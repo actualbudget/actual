@@ -782,7 +782,9 @@ handlers['api/schedules-get'] = async function () {
   return schedules.map(schedule => scheduleModel.toExternal(schedule));
 };
 
-handlers['api/schedule-create'] = withMutation(async function (schedule: APIScheduleEntity) {
+handlers['api/schedule-create'] = withMutation(async function (
+  schedule: APIScheduleEntity,
+) {
   checkFileOpen();
   const internalSchedule = scheduleModel.fromExternal(schedule);
   const partialSchedule = {
