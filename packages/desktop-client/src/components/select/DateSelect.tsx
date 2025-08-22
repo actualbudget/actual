@@ -12,6 +12,7 @@ import React, {
   type RefObject,
 } from 'react';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
 import { Popover } from '@actual-app/components/popover';
 import { styles, type CSSProperties } from '@actual-app/components/styles';
@@ -45,8 +46,6 @@ import DateSelectRight from './DateSelect.right.png';
 import { InputField } from '@desktop-client/components/mobile/MobileForms';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-
-import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
 const pickerStyles: CSSProperties = {
   '& .pika-single.actual-date-picker': {
