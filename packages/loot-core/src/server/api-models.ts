@@ -204,7 +204,7 @@ export const scheduleModel = {
       _date: schedule.date,
       _conditions: [
         { op: 'is', field: 'payee', value: schedule.payee },
-        { op: 'is', field: 'account', value: schedule.account},
+        { op: 'is', field: 'account', value: schedule.account },
         { op: 'isapprox', field: 'date', value: schedule.date },
         { op: schedule.amountOp, field: 'amount', value: schedule.amount },
       ],
