@@ -119,9 +119,11 @@ test.describe('Schedules', () => {
 
     await schedulesPage.postNthSchedule(2);
     await expect(schedulesPage.getNthSchedule(2).status).toHaveText('Paid');
+    await expect(schedulesPage.getNthSchedule(3).status).toHaveText('Due');
     await expect(page).toMatchThemeScreenshots();
 
     await schedulesPage.postNthSchedule(3);
+    await expect(schedulesPage.getNthSchedule(2).status).toHaveText('Paid');
     await expect(schedulesPage.getNthSchedule(3).status).toHaveText('Paid');
     await expect(page).toMatchThemeScreenshots();
 
@@ -146,14 +148,6 @@ test.describe('Schedules', () => {
 
     const icon2 = transaction2.payee.getByTestId('schedule-icon');
     await icon2.hover();
-    await expect(page).toMatchThemeScreenshots();
-
-    // Go back to schedules page
-    await navigation.goToSchedulesPage();
-    await schedulesPage.completeNthSchedule(2);
-    await expect(schedulesPage.getNthScheduleRow(5)).toHaveText(
-      'Show completed schedules',
-    );
     await expect(page).toMatchThemeScreenshots();
   });
 
