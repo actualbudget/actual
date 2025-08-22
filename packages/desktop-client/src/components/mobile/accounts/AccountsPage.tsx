@@ -250,7 +250,7 @@ type AllAccountListProps = {
   getAccountBalance: (
     accountId: AccountEntity['id'],
   ) => Binding<'account', 'balance'>;
-  getAllAccountBalance: () => Binding<'account', 'accounts-balance'>;
+  getAllAccountsBalance: () => Binding<'account', 'accounts-balance'>;
   getOnBudgetBalance: () => Binding<'account', 'onbudget-accounts-balance'>;
   getOffBudgetBalance: () => Binding<'account', 'offbudget-accounts-balance'>;
   getClosedAccountsBalance: () => Binding<'account', 'closed-accounts-balance'>;
@@ -262,7 +262,7 @@ type AllAccountListProps = {
 function AllAccountList({
   accounts,
   getAccountBalance,
-  getAllAccountBalance,
+  getAllAccountsBalance,
   getOnBudgetBalance,
   getOffBudgetBalance,
   getClosedAccountsBalance,
@@ -326,7 +326,7 @@ function AllAccountList({
           <AccountHeader
             id="all"
             name={t('All accounts')}
-            amount={getAllAccountBalance()}
+            amount={getAllAccountsBalance()}
           />
           {onBudgetAccounts.length > 0 && (
             <AccountHeader
@@ -527,7 +527,7 @@ export function AccountsPage() {
         key={numberFormat + hideFraction}
         accounts={accounts}
         getAccountBalance={bindings.accountBalance}
-        getAllAccountBalance={bindings.allAccountBalance}
+        getAllAccountsBalance={bindings.allAccountBalance}
         getOnBudgetBalance={bindings.onBudgetAccountBalance}
         getOffBudgetBalance={bindings.offBudgetAccountBalance}
         getClosedAccountsBalance={bindings.closedAccountBalance}
