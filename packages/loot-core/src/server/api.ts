@@ -847,10 +847,12 @@ handlers['api/schedule-update'] = withMutation(async function ({
         if (payeeIndex !== -1) {
           sched._conditions[payeeIndex].value = value;
           conditionsUpdated = true;
-        }
-        else
-        {
-          sched._conditions.push({field: 'payee', op: 'is' , value: String(value) });
+        } else {
+          sched._conditions.push({
+            field: 'payee',
+            op: 'is',
+            value: String(value),
+          });
         }
         break;
       }
@@ -858,10 +860,12 @@ handlers['api/schedule-update'] = withMutation(async function ({
         if (accountIndex !== -1) {
           sched._conditions[accountIndex].value = value;
           conditionsUpdated = true;
-        }
-        else
-        {
-          sched._conditions.push({field: 'account', op: 'is' , value: String(value) });
+        } else {
+          sched._conditions.push({
+            field: 'account',
+            op: 'is',
+            value: String(value),
+          });
         }
         break;
       }
@@ -892,12 +896,8 @@ handlers['api/schedule-update'] = withMutation(async function ({
         if (amountIndex !== -1) {
           sched._conditions[amountIndex].value = value;
           conditionsUpdated = true;
-        }
-        else
-        {
-          throw APIError(
-                `Ammount can not be found. There is a bug here`,
-              );
+        } else {
+          throw APIError(`Ammount can not be found. There is a bug here`);
         }
         break;
       }
@@ -905,12 +905,10 @@ handlers['api/schedule-update'] = withMutation(async function ({
         if (dateIndex !== -1) {
           sched._conditions[dateIndex].value = value;
           conditionsUpdated = true;
-        }
-        else
-        {
+        } else {
           throw APIError(
-                `Date can not be found. Schedules can not be created without a date there is a bug here`,
-              );
+            `Date can not be found. Schedules can not be created without a date there is a bug here`,
+          );
         }
         break;
       }
