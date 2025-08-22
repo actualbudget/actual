@@ -49,7 +49,7 @@ import { useDispatch, useSelector } from '@desktop-client/redux';
 import { type Binding, type SheetFields } from '@desktop-client/spreadsheet';
 import * as bindings from '@desktop-client/spreadsheet/bindings';
 
-const ROW_HEIGHT = 50;
+const ROW_HEIGHT = 60;
 
 type AccountHeaderProps<SheetFieldName extends SheetFields<'account'>> = {
   id: string;
