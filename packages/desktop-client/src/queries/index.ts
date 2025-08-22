@@ -135,9 +135,11 @@ export function transactionsSearch(
 
   // Add tag-specific filtering if tags are found
   if (tags.length > 0) {
-    const tagConditions = tags.map(tag => ({
+    // Deduplicate tags to avoid duplicate $and conditions
+    const uniqueTags = [...new Set(tags)];
+    const tagConditions = uniqueTags.map(tag => ({
       notes: {
-        $regexp: `(?<!#)${tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
+        $regexp: `(?<!#)#${tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
       },
     }));
 
