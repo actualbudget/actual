@@ -748,7 +748,7 @@ test('Schedules: successfully complete schedules operations', async () => {
   const ScheduleId1 = await api.createSchedule({
     name: 'test-schedule 1',
     posts_transaction: true,
-    amount: -5000,
+//    amount: -5000,
     amountOp: 'is',
     date: {
       frequency: 'monthly',
@@ -776,7 +776,7 @@ test('Schedules: successfully complete schedules operations', async () => {
       expect.objectContaining({
         name: 'test-schedule 1',
         posts_transaction: true,
-        amount: -5000,
+//       amount: -5000,
         amountOp: 'is',
         date: {
           frequency: 'monthly',

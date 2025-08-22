@@ -814,21 +814,10 @@ handlers['api/schedule-update'] = withMutation(async function ({
   const dateIndex = sched._conditions.findIndex(c => c.field === 'date');
   const amountIndex = sched._conditions.findIndex(c => c.field === 'amount');
 
-  // Check for missing required conditions
-  if (
-    payeeIndex === -1 ||
-    accountIndex === -1 ||
-    dateIndex === -1 ||
-    amountIndex === -1
-  ) {
-    throw APIError(
-      `Required condition not found in schedule, please report a bug ${sched._conditions[0]} ${sched._conditions[1]} ${sched._conditions[2]} ${sched._conditions[3]}`,
-    );
-  }
-
   for (const key in fields) {
     const typedKey = key as keyof APIScheduleEntity;
     const value = fields[typedKey];
+
     switch (typedKey) {
       case 'name': {
         const newName = String(value);
@@ -855,44 +844,74 @@ handlers['api/schedule-update'] = withMutation(async function ({
         break;
       }
       case 'payee': {
-        sched._conditions[payeeIndex].value = value;
-        conditionsUpdated = true;
+        if (payeeIndex !== -1) {
+          sched._conditions[payeeIndex].value = value;
+          conditionsUpdated = true;
+        }
+        else
+        {
+          sched._conditions.push({field: 'payee', op: 'is' , value: String(value) });
+        }
         break;
       }
       case 'account': {
-        sched._conditions[accountIndex].value = value;
-        conditionsUpdated = true;
+        if (accountIndex !== -1) {
+          sched._conditions[accountIndex].value = value;
+          conditionsUpdated = true;
+        }
+        else
+        {
+          sched._conditions.push({field: 'account', op: 'is' , value: String(value) });
+        }
         break;
       }
       case 'amountOp': {
-        let convertedOp: AmountOPType;
-        switch (value) {
-          case 'is':
-            convertedOp = 'is';
-            break;
-          case 'isapprox':
-            convertedOp = 'isapprox';
-            break;
-          case 'isbetween':
-            convertedOp = 'isbetween';
-            break;
-          default:
-            throw APIError(
-              `Invalid amount operator: ${value}. Expected: is, isapprox, or isbetween`,
-            );
+        if (amountIndex !== -1) {
+          let convertedOp: AmountOPType;
+          switch (value) {
+            case 'is':
+              convertedOp = 'is';
+              break;
+            case 'isapprox':
+              convertedOp = 'isapprox';
+              break;
+            case 'isbetween':
+              convertedOp = 'isbetween';
+              break;
+            default:
+              throw APIError(
+                `Invalid amount operator: ${value}. Expected: is, isapprox, or isbetween`,
+              );
+          }
+          sched._conditions[amountIndex].op = convertedOp;
+          conditionsUpdated = true;
         }
-        sched._conditions[amountIndex].op = convertedOp;
-        conditionsUpdated = true;
         break;
       }
       case 'amount': {
-        sched._conditions[amountIndex].value = value;
-        conditionsUpdated = true;
+        if (amountIndex !== -1) {
+          sched._conditions[amountIndex].value = value;
+          conditionsUpdated = true;
+        }
+        else
+        {
+          throw APIError(
+                `Ammount can not be found. There is a bug here`,
+              );
+        }
         break;
       }
       case 'date': {
-        sched._conditions[dateIndex].value = value;
-        conditionsUpdated = true;
+        if (dateIndex !== -1) {
+          sched._conditions[dateIndex].value = value;
+          conditionsUpdated = true;
+        }
+        else
+        {
+          throw APIError(
+                `Date can not be found. Schedules can not be created without a date there is a bug here`,
+              );
+        }
         break;
       }
       default: {
