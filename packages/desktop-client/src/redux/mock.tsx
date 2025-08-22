@@ -14,9 +14,13 @@ import {
   reducer as appSliceReducer,
 } from '@desktop-client/app/appSlice';
 import {
-  name as budgetsSliceName,
-  reducer as budgetsSliceReducer,
-} from '@desktop-client/budgets/budgetsSlice';
+  name as budgetSliceName,
+  reducer as budgetSliceReducer,
+} from '@desktop-client/budget/budgetSlice';
+import {
+  name as budgetfilesSliceName,
+  reducer as budgetfilesSliceReducer,
+} from '@desktop-client/budgetfiles/budgetfilesSlice';
 import {
   name as modalsSliceName,
   reducer as modalsSliceReducer,
@@ -26,13 +30,21 @@ import {
   reducer as notificationsSliceReducer,
 } from '@desktop-client/notifications/notificationsSlice';
 import {
+  name as payeesSliceName,
+  reducer as payeesSliceReducer,
+} from '@desktop-client/payees/payeesSlice';
+import {
   name as prefsSliceName,
   reducer as prefsSliceReducer,
 } from '@desktop-client/prefs/prefsSlice';
 import {
-  name as queriesSliceName,
-  reducer as queriesSliceReducer,
-} from '@desktop-client/queries/queriesSlice';
+  name as tagsSliceName,
+  reducer as tagsSliceReducer,
+} from '@desktop-client/tags/tagsSlice';
+import {
+  name as transactionsSliceName,
+  reducer as transactionsSliceReducer,
+} from '@desktop-client/transactions/transactionsSlice';
 import {
   name as usersSliceName,
   reducer as usersSliceReducer,
@@ -41,11 +53,14 @@ import {
 const appReducer = combineReducers({
   [accountsSliceName]: accountsSliceReducer,
   [appSliceName]: appSliceReducer,
-  [budgetsSliceName]: budgetsSliceReducer,
+  [budgetSliceName]: budgetSliceReducer,
+  [budgetfilesSliceName]: budgetfilesSliceReducer,
   [modalsSliceName]: modalsSliceReducer,
   [notificationsSliceName]: notificationsSliceReducer,
+  [payeesSliceName]: payeesSliceReducer,
   [prefsSliceName]: prefsSliceReducer,
-  [queriesSliceName]: queriesSliceReducer,
+  [transactionsSliceName]: transactionsSliceReducer,
+  [tagsSliceName]: tagsSliceReducer,
   [usersSliceName]: usersSliceReducer,
 });
 

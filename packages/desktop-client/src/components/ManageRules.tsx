@@ -21,7 +21,11 @@ import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { q } from 'loot-core/shared/query';
 import { mapField, friendlyOp } from 'loot-core/shared/rules';
 import { describeSchedule } from 'loot-core/shared/schedules';
-import { type RuleEntity, type NewRuleEntity } from 'loot-core/types/models';
+import {
+  type RuleEntity,
+  type NewRuleEntity,
+  type ScheduleEntity,
+} from 'loot-core/types/models';
 
 import { InfiniteScrollWrapper } from './common/InfiniteScrollWrapper';
 import { Link } from './common/Link';
@@ -38,19 +42,14 @@ import {
   SelectedProvider,
 } from '@desktop-client/hooks/useSelected';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { initiallyLoadPayees } from '@desktop-client/queries/queriesSlice';
+import { getPayees } from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 export type FilterData = {
   payees?: Array<{ id: string; name: string }>;
   categories?: Array<{ id: string; name: string }>;
   accounts?: Array<{ id: string; name: string }>;
-  schedules?: readonly {
-    id: string;
-    rule: string;
-    _payee: string;
-    completed: boolean;
-  }[];
+  schedules?: readonly ScheduleEntity[];
 };
 
 export function mapValue(
@@ -98,10 +97,12 @@ export function ruleToString(rule: RuleEntity, data: FilterData) {
       const schedule = data.schedules?.find(s => s.id === String(action.value));
       return [
         friendlyOp(action.op),
-        describeSchedule(
-          schedule,
-          data.payees?.find(p => p.id === schedule?._payee),
-        ),
+        schedule
+          ? describeSchedule(
+              schedule,
+              data.payees?.find(p => p.id === schedule._payee),
+            )
+          : '-',
       ];
     } else if (action.op === 'prepend-notes' || action.op === 'append-notes') {
       const noteValue = String(action.value || '');
@@ -197,7 +198,7 @@ export function ManageRules({
       await loadRules();
       setLoading(false);
 
-      await dispatch(initiallyLoadPayees());
+      await dispatch(getPayees());
     }
 
     if (payeeId) {

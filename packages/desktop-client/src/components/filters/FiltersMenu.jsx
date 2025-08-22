@@ -35,6 +35,7 @@ import { titleFirst } from 'loot-core/shared/util';
 import { CompactFiltersButton } from './CompactFiltersButton';
 import { FiltersButton } from './FiltersButton';
 import { OpButton } from './OpButton';
+import { PayeeFilter } from './PayeeFilter';
 import { subfieldFromFilter } from './subfieldFromFilter';
 import { subfieldToOptions } from './subfieldToOptions';
 import { updateFilterReducer } from './updateFilterReducer';
@@ -229,7 +230,7 @@ function ConfigureField({
           });
         }}
       >
-        {type !== 'boolean' && (
+        {type !== 'boolean' && field !== 'payee' && (
           <GenericInput
             ref={inputRef}
             field={field}
@@ -250,6 +251,14 @@ function ConfigureField({
             onChange={v => {
               dispatch({ type: 'set-value', value: v });
             }}
+          />
+        )}
+
+        {field === 'payee' && (
+          <PayeeFilter
+            value={formattedValue}
+            op={op}
+            onChange={v => dispatch({ type: 'set-value', value: v })}
           />
         )}
 

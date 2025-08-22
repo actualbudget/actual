@@ -15,12 +15,10 @@ import {
   type CategoryEntity,
 } from 'loot-core/types/models';
 
-import { CategoryAutomationButton } from './goals/CategoryAutomationButton';
+import { SidebarCategoryButtons } from './SidebarCategoryButtons';
 
-import { NotesButton } from '@desktop-client/components/NotesButton';
 import { InputCell } from '@desktop-client/components/table';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 type SidebarCategoryProps = {
@@ -56,7 +54,6 @@ export function SidebarCategory({
   onHideNewCategory,
 }: SidebarCategoryProps) {
   const { t } = useTranslation();
-  const isGoalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
 
@@ -128,22 +125,11 @@ export function SidebarCategory({
           />
         </Popover>
       </View>
-      <View style={{ flex: 1 }} />
-      {!goalsShown && isGoalTemplatesUIEnabled && (
-        <View style={{ flexShrink: 0 }}>
-          <CategoryAutomationButton
-            style={dragging && { color: 'currentColor' }}
-            defaultColor={theme.pageTextLight}
-          />
-        </View>
-      )}
-      <View style={{ flexShrink: 0 }}>
-        <NotesButton
-          id={category.id}
-          style={dragging && { color: 'currentColor' }}
-          defaultColor={theme.pageTextLight}
-        />
-      </View>
+      <SidebarCategoryButtons
+        category={category}
+        dragging={dragging}
+        goalsShown={goalsShown}
+      />
     </View>
   );
 

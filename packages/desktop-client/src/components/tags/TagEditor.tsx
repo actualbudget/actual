@@ -3,14 +3,14 @@ import { type RefObject } from 'react';
 import { Button } from '@actual-app/components/button';
 import { ColorPicker } from '@actual-app/components/color-picker';
 
-import { type Tag } from 'loot-core/types/models';
+import { type TagEntity } from 'loot-core/types/models';
 
-import { updateTag } from '@desktop-client/queries/queriesSlice';
+import { useTagCSS } from '@desktop-client/hooks/useTagCSS';
 import { useDispatch } from '@desktop-client/redux';
-import { useTagCSS } from '@desktop-client/style/tags';
+import { updateTag } from '@desktop-client/tags/tagsSlice';
 
 type TagEditorProps = {
-  tag: Tag;
+  tag: TagEntity;
   ref: RefObject<HTMLButtonElement | null>;
 };
 
