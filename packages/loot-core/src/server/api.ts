@@ -782,7 +782,7 @@ handlers['api/schedules-get'] = async function () {
   return schedules.map(schedule => scheduleModel.toExternal(schedule));
 };
 
-handlers['api/schedule-create'] = withMutation(async function (schedule) {
+handlers['api/schedule-create'] = withMutation(async function (schedule: APIScheduleEntity) {
   checkFileOpen();
   const internalSchedule = scheduleModel.fromExternal(schedule);
   const partialSchedule = {
@@ -803,7 +803,7 @@ handlers['api/schedule-update'] = withMutation(async function ({
   checkFileOpen();
   const { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
   if (!data || data.length === 0) {
-    throw APIError(`Schedule ${id} not found `);
+    throw APIError(`Schedule ${id} not found`);
   }
 
   const sched = data[0] as ScheduleEntity;
