@@ -807,15 +807,18 @@ test('Schedules: successfully complete schedules operations', async () => {
 
   //check getIDByName works on accounts
   const schedAccountId1 = await api.createAccount(
-      { name: 'sched-test-account1', offbudget: true },
-      1000,
-    );
+    { name: 'sched-test-account1', offbudget: true },
+    1000,
+  );
 
   expect(await api.getIDByName('accounts', 'sched-test-account1')).toEqual(
     schedAccountId1,
   );
 
-  await api.updateSchedule(ScheduleId1, { amount: -10000 , account: schedAccountId1});
+  await api.updateSchedule(ScheduleId1, {
+    amount: -10000,
+    account: schedAccountId1,
+  });
   await api.deleteSchedule(ScheduleId2);
 
   // schedules successfully updated, and one of them deleted
