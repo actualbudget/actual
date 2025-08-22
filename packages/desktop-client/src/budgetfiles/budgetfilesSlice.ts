@@ -14,7 +14,7 @@ import { loadGlobalPrefs, loadPrefs } from '@desktop-client/prefs/prefsSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 import { signOut } from '@desktop-client/users/usersSlice';
 
-const sliceName = 'budgets';
+const sliceName = 'budgetfiles';
 
 export const loadBudgets = createAppAsyncThunk(
   `${sliceName}/loadBudgets`,
@@ -42,7 +42,7 @@ export const loadAllFiles = createAppAsyncThunk(
 
     await dispatch(setAllFiles({ budgets, remoteFiles: files }));
 
-    return getState().budgets.allFiles;
+    return getState().budgetfiles.allFiles;
   },
 );
 
@@ -432,8 +432,8 @@ type SetAllFilesPayload = {
   remoteFiles: RemoteFile[];
 };
 
-const budgetsSlice = createSlice({
-  name: 'budgets',
+const budgetfilesSlice = createSlice({
+  name: sliceName,
   initialState,
   reducers: {
     setBudgets(state, action: PayloadAction<SetBudgetsPayload>) {
@@ -467,10 +467,10 @@ const budgetsSlice = createSlice({
   },
 });
 
-export const { name, reducer, getInitialState } = budgetsSlice;
+export const { name, reducer, getInitialState } = budgetfilesSlice;
 
 export const actions = {
-  ...budgetsSlice.actions,
+  ...budgetfilesSlice.actions,
   loadBudgets,
   loadRemoteFiles,
   loadAllFiles,

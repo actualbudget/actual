@@ -1,5 +1,4 @@
-// @ts-strict-ignore
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
 
@@ -7,11 +6,8 @@ import { send } from 'loot-core/platform/client/fetch';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
-  type TransactionEntity,
-  type Tag,
 } from 'loot-core/types/models';
 
-import { markUpdatedAccounts } from '@desktop-client/accounts/accountsSlice';
 import { resetApp } from '@desktop-client/app/appSlice';
 import {
   addGenericErrorNotification,
@@ -19,31 +15,21 @@ import {
 } from '@desktop-client/notifications/notificationsSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 
-const sliceName = 'queries';
+const sliceName = 'budget';
 
 type CategoryViews = {
   grouped: CategoryGroupEntity[];
   list: CategoryEntity[];
 };
 
-type QueriesState = {
-  newTransactions: Array<TransactionEntity['id']>;
-  matchedTransactions: Array<TransactionEntity['id']>;
-  lastTransaction: TransactionEntity | null;
+type BudgetState = {
   categories: CategoryViews;
   isCategoriesLoading: boolean;
   isCategoriesLoaded: boolean;
   isCategoriesDirty: boolean;
-  tags: Tag[];
-  isTagsLoading: boolean;
-  isTagsLoaded: boolean;
-  isTagsDirty: boolean;
 };
 
-const initialState: QueriesState = {
-  newTransactions: [],
-  matchedTransactions: [],
-  lastTransaction: null,
+const initialState: BudgetState = {
   categories: {
     grouped: [],
     list: [],
@@ -51,67 +37,18 @@ const initialState: QueriesState = {
   isCategoriesLoading: false,
   isCategoriesLoaded: false,
   isCategoriesDirty: false,
-  tags: [],
-  isTagsLoading: false,
-  isTagsLoaded: false,
-  isTagsDirty: false,
 };
 
-type SetNewTransactionsPayload = {
-  newTransactions: Array<TransactionEntity['id']>;
-  matchedTransactions: Array<TransactionEntity['id']>;
-};
-
-type UpdateNewTransactionsPayload = {
-  id: TransactionEntity['id'];
-};
-
-type SetLastTransactionPayload = {
-  transaction: TransactionEntity;
-};
-
-const queriesSlice = createSlice({
+const budgetSlice = createSlice({
   name: sliceName,
   initialState,
   reducers: {
-    setNewTransactions(
-      state,
-      action: PayloadAction<SetNewTransactionsPayload>,
-    ) {
-      state.newTransactions = action.payload.newTransactions
-        ? [...state.newTransactions, ...action.payload.newTransactions]
-        : state.newTransactions;
-
-      state.matchedTransactions = action.payload.matchedTransactions
-        ? [...state.matchedTransactions, ...action.payload.matchedTransactions]
-        : state.matchedTransactions;
-    },
-    updateNewTransactions(
-      state,
-      action: PayloadAction<UpdateNewTransactionsPayload>,
-    ) {
-      state.newTransactions = state.newTransactions.filter(
-        id => id !== action.payload.id,
-      );
-      state.matchedTransactions = state.matchedTransactions.filter(
-        id => id !== action.payload.id,
-      );
-    },
-    setLastTransaction(
-      state,
-      action: PayloadAction<SetLastTransactionPayload>,
-    ) {
-      state.lastTransaction = action.payload.transaction;
-    },
     markCategoriesDirty(state) {
       _markCategoriesDirty(state);
     },
-    markTagsDirty(state) {
-      _markTagsDirty(state);
-    },
   },
   extraReducers: builder => {
-    // Categories
+    builder.addCase(resetApp, () => initialState);
 
     builder.addCase(createCategoryGroup.fulfilled, _markCategoriesDirty);
     builder.addCase(updateCategoryGroup.fulfilled, _markCategoriesDirty);
@@ -145,57 +82,8 @@ const queriesSlice = createSlice({
     builder.addCase(getCategories.pending, state => {
       state.isCategoriesLoading = true;
     });
-
-    // App
-
-    builder.addCase(resetApp, () => initialState);
-
-    // Tags
-
-    builder.addCase(createTag.fulfilled, _markTagsDirty);
-    builder.addCase(deleteTag.fulfilled, _markTagsDirty);
-    builder.addCase(deleteAllTags.fulfilled, _markTagsDirty);
-    builder.addCase(updateTag.fulfilled, _markTagsDirty);
-
-    builder.addCase(reloadTags.fulfilled, (state, action) => {
-      _loadTags(state, action.payload);
-    });
-
-    builder.addCase(reloadTags.rejected, state => {
-      state.isTagsLoading = false;
-    });
-
-    builder.addCase(reloadTags.pending, state => {
-      state.isTagsLoading = true;
-    });
-
-    builder.addCase(getTags.fulfilled, (state, action) => {
-      _loadTags(state, action.payload);
-    });
-
-    builder.addCase(getTags.rejected, state => {
-      state.isTagsLoading = false;
-    });
-
-    builder.addCase(getTags.pending, state => {
-      state.isTagsLoading = true;
-    });
-
-    builder.addCase(findTags.fulfilled, (state, action) => {
-      _loadTags(state, action.payload);
-    });
-
-    builder.addCase(findTags.rejected, state => {
-      state.isTagsLoading = false;
-    });
-
-    builder.addCase(findTags.pending, state => {
-      state.isTagsLoading = true;
-    });
   },
 });
-
-// Category actions
 
 type CreateCategoryGroupPayload = {
   name: CategoryGroupEntity['name'];
@@ -225,7 +113,7 @@ export const updateCategoryGroup = createAppAsyncThunk(
 
 type DeleteCategoryGroupPayload = {
   id: CategoryGroupEntity['id'];
-  transferId?: CategoryGroupEntity['id'];
+  transferId?: CategoryGroupEntity['id'] | null;
 };
 
 export const deleteCategoryGroup = createAppAsyncThunk(
@@ -267,7 +155,7 @@ export const updateCategory = createAppAsyncThunk(
 
 type DeleteCategoryPayload = {
   id: CategoryEntity['id'];
-  transferId?: CategoryEntity['id'];
+  transferId?: CategoryEntity['id'] | null;
 };
 
 export const deleteCategory = createAppAsyncThunk(
@@ -332,10 +220,10 @@ export const getCategories = createAppAsyncThunk(
   },
   {
     condition: (_, { getState }) => {
-      const { queries } = getState();
+      const { budget } = getState();
       return (
-        !queries.isCategoriesLoading &&
-        (queries.isCategoriesDirty || !queries.isCategoriesLoaded)
+        !budget.isCategoriesLoading &&
+        (budget.isCategoriesDirty || !budget.isCategoriesLoaded)
       );
     },
   },
@@ -348,72 +236,6 @@ export const reloadCategories = createAppAsyncThunk(
     return categories;
   },
 );
-
-export const getTags = createAppAsyncThunk(
-  `${sliceName}/getTags`,
-  async () => {
-    const tags: Tag[] = await send('tags-get');
-    return tags;
-  },
-  {
-    condition: (_, { getState }) => {
-      const { queries } = getState();
-      return (
-        !queries.isTagsLoading && (queries.isTagsDirty || !queries.isTagsLoaded)
-      );
-    },
-  },
-);
-
-export const reloadTags = createAppAsyncThunk(
-  `${sliceName}/reloadTags`,
-  async () => {
-    const tags: Tag[] = await send('tags-get');
-    return tags;
-  },
-);
-
-export const createTag = createAppAsyncThunk(
-  `${sliceName}/createTag`,
-  async ({ tag, color, description }: Omit<Tag, 'id'>) => {
-    const id = await send('tags-create', { tag, color, description });
-    return id;
-  },
-);
-
-export const deleteTag = createAppAsyncThunk(
-  `${sliceName}/deleteTag`,
-  async (tag: Tag) => {
-    const id = await send('tags-delete', tag);
-    return id;
-  },
-);
-
-export const deleteAllTags = createAppAsyncThunk(
-  `${sliceName}/deleteAllTags`,
-  async (ids: Array<Tag['id']>) => {
-    const id = await send('tags-delete-all', ids);
-    return id;
-  },
-);
-
-export const updateTag = createAppAsyncThunk(
-  `${sliceName}/updateTag`,
-  async (tag: Tag) => {
-    const id = await send('tags-update', tag);
-    return id;
-  },
-);
-
-export const findTags = createAppAsyncThunk(
-  `${sliceName}/findTags`,
-  async () => {
-    const tags: Tag[] = await send('tags-find');
-    return tags;
-  },
-);
-
-// Budget actions
 
 type ApplyBudgetActionPayload =
   | {
@@ -726,108 +548,11 @@ export const applyBudgetAction = createAppAsyncThunk(
   },
 );
 
-// Transaction actions
-
-type ImportPreviewTransactionsPayload = {
-  accountId: string;
-  transactions: TransactionEntity[];
-};
-
-export const importPreviewTransactions = createAppAsyncThunk(
-  `${sliceName}/importPreviewTransactions`,
-  async (
-    { accountId, transactions }: ImportPreviewTransactionsPayload,
-    { dispatch },
-  ) => {
-    const { errors = [], updatedPreview } = await send('transactions-import', {
-      accountId,
-      transactions,
-      isPreview: true,
-    });
-
-    errors.forEach(error => {
-      dispatch(
-        addNotification({
-          notification: {
-            type: 'error',
-            message: error.message,
-          },
-        }),
-      );
-    });
-
-    return updatedPreview;
-  },
-);
-
-type ImportTransactionsPayload = {
-  accountId: string;
-  transactions: TransactionEntity[];
-  reconcile: boolean;
-};
-
-export const importTransactions = createAppAsyncThunk(
-  `${sliceName}/importTransactions`,
-  async (
-    { accountId, transactions, reconcile }: ImportTransactionsPayload,
-    { dispatch },
-  ) => {
-    if (!reconcile) {
-      await send('api/transactions-add', {
-        accountId,
-        transactions,
-      });
-
-      return true;
-    }
-
-    const {
-      errors = [],
-      added,
-      updated,
-    } = await send('transactions-import', {
-      accountId,
-      transactions,
-      isPreview: false,
-    });
-
-    errors.forEach(error => {
-      dispatch(
-        addNotification({
-          notification: {
-            type: 'error',
-            message: error.message,
-          },
-        }),
-      );
-    });
-
-    const { setNewTransactions } = queriesSlice.actions;
-
-    dispatch(
-      setNewTransactions({
-        newTransactions: added,
-        matchedTransactions: updated,
-      }),
-    );
-
-    dispatch(
-      markUpdatedAccounts({
-        ids: added.length > 0 ? [accountId] : [],
-      }),
-    );
-
-    return added.length > 0 || updated.length > 0;
-  },
-);
-
-// Helper functions
-
 export const getCategoriesById = memoizeOne(
   (categoryGroups: CategoryGroupEntity[] | null | undefined) => {
-    const res: { [id: CategoryGroupEntity['id']]: CategoryEntity } = {};
+    const res: { [id: CategoryEntity['id']]: CategoryEntity } = {};
     categoryGroups?.forEach(group => {
-      group.categories.forEach(cat => {
+      group.categories?.forEach(cat => {
         res[cat.id] = cat;
       });
     });
@@ -835,13 +560,10 @@ export const getCategoriesById = memoizeOne(
   },
 );
 
-// Slice exports
+export const { name, reducer, getInitialState } = budgetSlice;
 
-export const { name, reducer, getInitialState } = queriesSlice;
 export const actions = {
-  ...queriesSlice.actions,
-  importPreviewTransactions,
-  importTransactions,
+  ...budgetSlice.actions,
   applyBudgetAction,
   getCategories,
   reloadCategories,
@@ -853,25 +575,13 @@ export const actions = {
   deleteCategory,
   moveCategory,
   moveCategoryGroup,
-  getTags,
-  createTag,
-  updateTag,
-  deleteTag,
-  deleteAllTags,
-  findTags,
 };
 
-export const {
-  setNewTransactions,
-  updateNewTransactions,
-  setLastTransaction,
-  markCategoriesDirty,
-  markTagsDirty,
-} = queriesSlice.actions;
+export const { markCategoriesDirty } = budgetSlice.actions;
 
 function _loadCategories(
-  state: QueriesState,
-  categories: QueriesState['categories'],
+  state: BudgetState,
+  categories: BudgetState['categories'],
 ) {
   state.categories = categories;
   state.isCategoriesLoading = false;
@@ -879,17 +589,6 @@ function _loadCategories(
   state.isCategoriesDirty = false;
 }
 
-function _markCategoriesDirty(state: QueriesState) {
+function _markCategoriesDirty(state: BudgetState) {
   state.isCategoriesDirty = true;
-}
-
-function _loadTags(state: QueriesState, tags: QueriesState['tags']) {
-  state.tags = tags;
-  state.isTagsLoading = false;
-  state.isTagsLoaded = true;
-  state.isTagsDirty = false;
-}
-
-function _markTagsDirty(state: QueriesState) {
-  state.isTagsDirty = true;
 }

@@ -563,7 +563,13 @@ function ActionEditor({
         </>
       ) : op === 'set-split-amount' ? (
         <>
-          <View style={{ padding: '5px 10px', lineHeight: '1em' }}>
+          <View
+            style={{
+              padding: '5px 10px',
+              lineHeight: '1em',
+              flexShrink: 0,
+            }}
+          >
             {t('allocate')}
           </View>
 
@@ -573,7 +579,12 @@ function ActionEditor({
             onChange={onChange}
           />
 
-          <View style={{ flex: 1 }}>
+          <View
+            style={{
+              flex: 1,
+              minWidth: options.method === 'fixed-percent' ? 45 : 70,
+            }}
+          >
             {options.method !== 'remainder' && (
               // @ts-expect-error fix this
               <GenericInput
@@ -624,7 +635,7 @@ function ActionEditor({
         </>
       ) : null}
 
-      <Stack direction="row">
+      <Stack direction="row" style={{ flexShrink: 0 }}>
         <EditorButtons
           onAdd={onAdd}
           onDelete={
