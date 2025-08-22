@@ -1,0 +1,55 @@
+# fly.toml app configuration file generated for actual-server-web on 2024-07-26T11:50:38-03:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'actual-server-web'
+primary_region = 'gru'
+
+[experimental]
+  cmd = ['node', '--max-old-space-size=180', 'build/app.js']
+  auto_rollback = true
+
+[build]
+  dockerfile = "sync-server.Dockerfile"
+  
+[build.args]
+  BUILDKIT_INLINE_CACHE = "1"
+
+[env]
+  PORT = '5006'
+  TINI_SUBREAPER = '1'
+  ACTUAL_HOSTNAME = '0.0.0.0'
+
+[[mounts]]
+  source = 'actual_data'
+  destination = '/data'
+
+[[services]]
+  protocol = 'tcp'
+  internal_port = 5006
+  processes = ['app']
+
+  [[services.ports]]
+    port = 80
+    handlers = ['http']
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ['tls', 'http']
+
+  [services.concurrency]
+    type = 'connections'
+    hard_limit = 25
+    soft_limit = 20
+
+  [[services.tcp_checks]]
+    interval = '15s'
+    timeout = '2s'
+    grace_period = '10s'
+
+[[vm]]
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 256
