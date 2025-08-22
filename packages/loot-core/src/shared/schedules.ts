@@ -4,6 +4,8 @@ import * as d from 'date-fns';
 import { Locale } from 'date-fns';
 import { t } from 'i18next';
 
+import { type PayeeEntity, type ScheduleEntity } from 'loot-core/types/models';
+
 import { Condition } from '../server/rules';
 
 import * as monthUtils from './months';
@@ -394,7 +396,10 @@ export function getScheduledAmount(
   return inverse ? -Math.round(avg) : Math.round(avg);
 }
 
-export function describeSchedule(schedule, payee) {
+export function describeSchedule(
+  schedule: ScheduleEntity,
+  payee?: PayeeEntity,
+) {
   if (payee) {
     return `${payee.name} (${schedule.next_date})`;
   } else {

@@ -12,7 +12,7 @@ import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
 import { getOpenIdErrors } from 'loot-core/shared/errors';
 import { type OpenIdConfig } from 'loot-core/types/models';
 
-import { closeBudget } from '@desktop-client/budgets/budgetsSlice';
+import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { Error } from '@desktop-client/components/alerts';
 import {
   Modal,

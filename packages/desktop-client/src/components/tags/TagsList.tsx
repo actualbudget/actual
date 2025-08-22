@@ -1,13 +1,13 @@
 import React from 'react';
 
-import { type Tag } from 'loot-core/types/models';
+import { type TagEntity } from 'loot-core/types/models';
 
 import { TagRow } from './TagRow';
 
 import { Table, useTableNavigator } from '@desktop-client/components/table';
 
 type TagsListProps = {
-  tags: Tag[];
+  tags: TagEntity[];
   selectedItems: Set<string>;
   hoveredTag?: string;
   onHover: (id?: string) => void;

@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { InitialFocus } from '@actual-app/components/initial-focus';
@@ -20,7 +21,11 @@ import { ScheduleAutomation } from './editor/ScheduleAutomation';
 import { SimpleAutomation } from './editor/SimpleAutomation';
 import { WeekAutomation } from './editor/WeekAutomation';
 
-import { FormField, FormLabel } from '@desktop-client/components/forms';
+import {
+  FormField,
+  FormLabel,
+  FormTextLabel,
+} from '@desktop-client/components/forms';
 
 type BudgetAutomationEditorProps = {
   inline: boolean;
@@ -73,7 +78,7 @@ export function BudgetAutomationEditor({
 }: BudgetAutomationEditorProps) {
   const { t } = useTranslation();
 
-  let automationEditor;
+  let automationEditor: ReactNode;
   switch (state.displayType) {
     case 'simple':
       automationEditor = (
@@ -144,7 +149,7 @@ export function BudgetAutomationEditor({
           </InitialFocus>
         </FormField>
         <FormField style={{ flex: 1 }}>
-          <FormLabel title={t('Description')} />
+          <FormTextLabel title={t('Description')} />
           <Text>
             {displayTypeToDescription[state.displayType] ?? (
               <Trans>No description available</Trans>

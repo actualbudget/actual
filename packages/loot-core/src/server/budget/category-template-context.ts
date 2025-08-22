@@ -710,7 +710,7 @@ export class CategoryTemplateContext {
         );
       }
       savedInfo.push({ numMonths, period });
-      if (numMonths < shortNumMonths || !shortNumMonths) {
+      if (numMonths < shortNumMonths || shortNumMonths === undefined) {
         shortNumMonths = numMonths;
       }
     }

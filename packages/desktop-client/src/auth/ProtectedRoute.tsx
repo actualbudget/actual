@@ -25,7 +25,7 @@ export const ProtectedRoute = ({
   const { hasPermission } = useAuth();
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [cloudFileId] = useMetadataPref('cloudFileId');
-  const allFiles = useSelector(state => state.budgets.allFiles || []);
+  const allFiles = useSelector(state => state.budgetfiles.allFiles || []);
   const remoteFiles = allFiles.filter(
     (f): f is SyncedLocalFile | RemoteFile =>
       f.state === 'remote' || f.state === 'synced' || f.state === 'detached',
