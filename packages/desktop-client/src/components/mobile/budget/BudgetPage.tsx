@@ -41,6 +41,7 @@ import { prewarmMonth } from '@desktop-client/components/budget/util';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
@@ -49,13 +50,12 @@ import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
+import { uncategorizedTransactions } from '@desktop-client/queries';
 import { useDispatch } from '@desktop-client/redux';
-import {
-  envelopeBudget,
-  uncategorizedCount,
-} from '@desktop-client/spreadsheet/bindings';
+import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
 function isBudgetType(input?: string): input is 'envelope' | 'tracking' {
   return ['envelope', 'tracking'].includes(input);
@@ -676,12 +676,29 @@ function Banner({ type = 'info', children }) {
 }
 
 function UncategorizedTransactionsBanner(props) {
-  const count = useSheetValue(uncategorizedCount());
   const navigate = useNavigate();
+  const format = useFormat();
 
-  if (count === null || count <= 0) {
+  const transactionsQuery = useMemo(
+    () => uncategorizedTransactions().select('*'),
+    [],
+  );
+
+  const { transactions, isLoading } = useTransactions({
+    query: transactionsQuery,
+    options: {
+      pageCount: 1000,
+    },
+  });
+
+  if (isLoading || transactions.length === 0) {
     return null;
   }
+
+  const totalUncategorizedAmount = transactions.reduce(
+    (sum, t) => sum + (t.amount ?? 0),
+    0,
+  );
 
   return (
     <GridListItem textValue="Uncategorized transactions banner" {...props}>
@@ -694,8 +711,9 @@ function UncategorizedTransactionsBanner(props) {
             justifyContent: 'space-between',
           }}
         >
-          <Trans count={count}>
-            You have {{ count }} uncategorized transactions
+          <Trans count={transactions.length}>
+            You have {{ count: transactions.length }} uncategorized transactions
+            ({{ amount: format(totalUncategorizedAmount, 'financial') }})
           </Trans>
           <Button
             onPress={() => navigate('/categories/uncategorized')}
@@ -802,16 +820,12 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
 
   const { list: categories, grouped: categoryGroups } = useCategories();
   const categoriesById = useMemo(() => groupById(categories), [categories]);
-  const groupsById = useMemo(() => groupById(categoryGroups), [categoryGroups]);
 
   const dispatch = useDispatch();
+  const format = useFormat();
 
-  const overspentCategories = useOverspentCategories({ month }).filter(c => {
-    if (budgetType === 'tracking') {
-      return !c.hidden && !groupsById[c.group].hidden;
-    }
-    return true;
-  });
+  const { categories: overspentCategories, totalAmount: totalOverspending } =
+    useOverspentCategories({ month });
 
   const categoryGroupsToShow = useMemo(
     () =>
@@ -918,7 +932,8 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
             <Text>
               <Trans count={numberOfOverspentCategories}>
                 You have {{ count: numberOfOverspentCategories }} overspent
-                categories
+                categories ({{ amount: format(totalOverspending, 'financial') }}
+                )
               </Trans>
             </Text>
           </View>
