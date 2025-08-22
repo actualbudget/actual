@@ -21,8 +21,8 @@ import {
   useSelected,
 } from '@desktop-client/hooks/useSelected';
 import { useTags } from '@desktop-client/hooks/useTags';
-import { deleteAllTags, findTags } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { deleteAllTags, findTags } from '@desktop-client/tags/tagsSlice';
 
 export function ManageTags() {
   const { t } = useTranslation();

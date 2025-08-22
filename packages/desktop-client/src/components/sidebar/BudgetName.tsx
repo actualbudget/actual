@@ -13,7 +13,7 @@ import { View } from '@actual-app/components/view';
 
 import * as Platform from 'loot-core/shared/platform';
 
-import { closeBudget } from '@desktop-client/budgets/budgetsSlice';
+import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';

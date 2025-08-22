@@ -85,9 +85,9 @@ import {
   pagedQuery,
   type PagedQuery,
 } from '@desktop-client/queries/pagedQuery';
-import { updateNewTransactions } from '@desktop-client/queries/queriesSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
+import { updateNewTransactions } from '@desktop-client/transactions/transactionsSlice';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
 
@@ -1932,9 +1932,11 @@ export function Account() {
   const location = useLocation();
 
   const { grouped: categoryGroups } = useCategories();
-  const newTransactions = useSelector(state => state.queries.newTransactions);
+  const newTransactions = useSelector(
+    state => state.transactions.newTransactions,
+  );
   const matchedTransactions = useSelector(
-    state => state.queries.matchedTransactions,
+    state => state.transactions.matchedTransactions,
   );
   const accounts = useAccounts();
   const payees = usePayees();

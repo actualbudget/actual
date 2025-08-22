@@ -16,9 +16,9 @@ import {
 import { resetApp } from '@desktop-client/app/appSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { markPayeesDirty } from '@desktop-client/payees/payeesSlice';
-import { setNewTransactions } from '@desktop-client/queries/queriesSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 import { type AppDispatch } from '@desktop-client/redux/store';
+import { setNewTransactions } from '@desktop-client/transactions/transactionsSlice';
 
 const sliceName = 'account';
 
@@ -517,6 +517,97 @@ export const moveAccount = createAppAsyncThunk(
     await send('account-move', { id, targetId });
     dispatch(markAccountsDirty());
     dispatch(markPayeesDirty());
+  },
+);
+
+type ImportPreviewTransactionsPayload = {
+  accountId: string;
+  transactions: TransactionEntity[];
+};
+
+export const importPreviewTransactions = createAppAsyncThunk(
+  `${sliceName}/importPreviewTransactions`,
+  async (
+    { accountId, transactions }: ImportPreviewTransactionsPayload,
+    { dispatch },
+  ) => {
+    const { errors = [], updatedPreview } = await send('transactions-import', {
+      accountId,
+      transactions,
+      isPreview: true,
+    });
+
+    errors.forEach(error => {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: error.message,
+          },
+        }),
+      );
+    });
+
+    return updatedPreview;
+  },
+);
+
+type ImportTransactionsPayload = {
+  accountId: string;
+  transactions: TransactionEntity[];
+  reconcile: boolean;
+};
+
+export const importTransactions = createAppAsyncThunk(
+  `${sliceName}/importTransactions`,
+  async (
+    { accountId, transactions, reconcile }: ImportTransactionsPayload,
+    { dispatch },
+  ) => {
+    if (!reconcile) {
+      await send('api/transactions-add', {
+        accountId,
+        transactions,
+      });
+
+      return true;
+    }
+
+    const {
+      errors = [],
+      added,
+      updated,
+    } = await send('transactions-import', {
+      accountId,
+      transactions,
+      isPreview: false,
+    });
+
+    errors.forEach(error => {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: error.message,
+          },
+        }),
+      );
+    });
+
+    dispatch(
+      setNewTransactions({
+        newTransactions: added,
+        matchedTransactions: updated,
+      }),
+    );
+
+    dispatch(
+      markUpdatedAccounts({
+        ids: added.length > 0 ? [accountId] : [],
+      }),
+    );
+
+    return added.length > 0 || updated.length > 0;
   },
 );
 
