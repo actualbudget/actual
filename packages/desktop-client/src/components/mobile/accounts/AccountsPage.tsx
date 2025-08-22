@@ -49,6 +49,8 @@ import { useDispatch, useSelector } from '@desktop-client/redux';
 import { type Binding, type SheetFields } from '@desktop-client/spreadsheet';
 import * as bindings from '@desktop-client/spreadsheet/bindings';
 
+const ROW_HEIGHT = 50;
+
 type AccountHeaderProps<SheetFieldName extends SheetFields<'account'>> = {
   id: string;
   name: string;
@@ -77,14 +79,10 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
       aria-label={t('View {{name}} transactions', { name })}
       onPress={onPress ? onPress : () => navigate(`/accounts/${id}`)}
       style={{
-        flex: 1,
-        flexDirection: 'row',
-        paddingTop: 15,
-        paddingBottom: 15,
-        paddingLeft: 0,
-        paddingRight: 0,
-        color: theme.pageTextLight,
+        height: ROW_HEIGHT,
         width: '100%',
+        padding: '0 10px',
+        color: theme.pageTextLight,
         ...style,
       }}
       // to match the feel of the other account buttons
@@ -163,11 +161,15 @@ function AccountListItem({
         <Button
           {...itemProps}
           style={{
+            height: ROW_HEIGHT,
             width: '100%',
-            border: `1px solid ${theme.pillBorder}`,
-            borderRadius: 6,
-            boxShadow: `0 1px 1px ${theme.mobileAccountShadow}`,
-            marginTop: 10,
+            backgroundColor: theme.tableBackground,
+            border: 0,
+            borderRadius: 0,
+            borderWidth: '0 0 1px 0',
+            borderColor: theme.tableBorder,
+            borderStyle: 'solid',
+            paddingLeft: 20
           }}
           data-testid="account-list-item"
           onPress={() => onSelect(account)}
@@ -175,48 +177,41 @@ function AccountListItem({
           <View
             style={{
               flex: 1,
-              margin: '10px 0',
+              alignItems: 'center',
+              flexDirection: 'row',
             }}
           >
-            <View
+            {
+              /* TODO: Should bankId be part of the AccountEntity type? */
+              'bankId' in account && account.bankId ? (
+                <View
+                  style={{
+                    backgroundColor: isPending
+                      ? theme.sidebarItemBackgroundPending
+                      : isFailed
+                        ? theme.sidebarItemBackgroundFailed
+                        : theme.sidebarItemBackgroundPositive,
+                    marginRight: '8px',
+                    width: 8,
+                    flexShrink: 0,
+                    height: 8,
+                    borderRadius: 8,
+                    opacity: isConnected ? 1 : 0,
+                  }}
+                />
+              ) : null
+            }
+            <TextOneLine
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
+                ...styles.text,
+                fontSize: 17,
+                fontWeight: 600,
+                color: isUpdated ? theme.mobileAccountText : theme.pillText,
               }}
+              data-testid="account-name"
             >
-              {
-                /* TODO: Should bankId be part of the AccountEntity type? */
-                'bankId' in account && account.bankId ? (
-                  <View
-                    style={{
-                      backgroundColor: isPending
-                        ? theme.sidebarItemBackgroundPending
-                        : isFailed
-                          ? theme.sidebarItemBackgroundFailed
-                          : theme.sidebarItemBackgroundPositive,
-                      marginRight: '8px',
-                      width: 8,
-                      flexShrink: 0,
-                      height: 8,
-                      borderRadius: 8,
-                      opacity: isConnected ? 1 : 0,
-                    }}
-                  />
-                ) : null
-              }
-              <TextOneLine
-                style={{
-                  ...styles.text,
-                  fontSize: 17,
-                  fontWeight: 600,
-                  color: isUpdated ? theme.mobileAccountText : theme.pillText,
-                  paddingRight: 30,
-                }}
-                data-testid="account-name"
-              >
-                {account.name}
-              </TextOneLine>
-            </View>
+              {account.name}
+            </TextOneLine>
           </View>
           <CellValue binding={getBalanceQuery(account.id)} type="financial">
             {props => (
@@ -255,6 +250,7 @@ type AllAccountListProps = {
   getAccountBalance: (
     accountId: AccountEntity['id'],
   ) => Binding<'account', 'balance'>;
+  getAllAccountBalance: () => Binding<'account', 'accounts-balance'>;
   getOnBudgetBalance: () => Binding<'account', 'onbudget-accounts-balance'>;
   getOffBudgetBalance: () => Binding<'account', 'offbudget-accounts-balance'>;
   getClosedAccountsBalance: () => Binding<'account', 'closed-accounts-balance'>;
@@ -266,6 +262,7 @@ type AllAccountListProps = {
 function AllAccountList({
   accounts,
   getAccountBalance,
+  getAllAccountBalance,
   getOnBudgetBalance,
   getOffBudgetBalance,
   getClosedAccountsBalance,
@@ -324,8 +321,13 @@ function AllAccountList({
       <PullToRefresh onRefresh={onSync}>
         <View
           aria-label={t('Account list')}
-          style={{ margin: 10, paddingBottom: MOBILE_NAV_HEIGHT }}
+          style={{ paddingBottom: MOBILE_NAV_HEIGHT }}
         >
+          <AccountHeader
+            id="all"
+            name={t('All')}
+            amount={getAllAccountBalance()}
+          />
           {onBudgetAccounts.length > 0 && (
             <AccountHeader
               id="onbudget"
@@ -344,7 +346,6 @@ function AllAccountList({
               id="offbudget"
               name={t('Off budget')}
               amount={getOffBudgetBalance()}
-              style={{ marginTop: 30 }}
             />
           )}
           <AccountList
@@ -526,6 +527,7 @@ export function AccountsPage() {
         key={numberFormat + hideFraction}
         accounts={accounts}
         getAccountBalance={bindings.accountBalance}
+        getAllAccountBalance={bindings.allAccountBalance}
         getOnBudgetBalance={bindings.onBudgetAccountBalance}
         getOffBudgetBalance={bindings.offBudgetAccountBalance}
         getClosedAccountsBalance={bindings.closedAccountBalance}
