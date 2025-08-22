@@ -325,7 +325,7 @@ function AllAccountList({
         >
           <AccountHeader
             id="all"
-            name={t('All')}
+            name={t('All accounts')}
             amount={getAllAccountBalance()}
           />
           {onBudgetAccounts.length > 0 && (
