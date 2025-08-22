@@ -38,13 +38,13 @@ import {
   reducer as prefsSliceReducer,
 } from '@desktop-client/prefs/prefsSlice';
 import {
-  name as queriesSliceName,
-  reducer as queriesSliceReducer,
-} from '@desktop-client/queries/queriesSlice';
-import {
   name as tagsSliceName,
   reducer as tagsSliceReducer,
 } from '@desktop-client/tags/tagsSlice';
+import {
+  name as transactionsSliceName,
+  reducer as transactionsSliceReducer,
+} from '@desktop-client/transactions/transactionsSlice';
 import {
   name as usersSliceName,
   reducer as usersSliceReducer,
@@ -59,7 +59,7 @@ const appReducer = combineReducers({
   [notificationsSliceName]: notificationsSliceReducer,
   [payeesSliceName]: payeesSliceReducer,
   [prefsSliceName]: prefsSliceReducer,
-  [queriesSliceName]: queriesSliceReducer,
+  [transactionsSliceName]: transactionsSliceReducer,
   [tagsSliceName]: tagsSliceReducer,
   [usersSliceName]: usersSliceReducer,
 });

@@ -28,6 +28,10 @@ import {
 } from './utils';
 
 import {
+  importPreviewTransactions,
+  importTransactions,
+} from '@desktop-client/accounts/accountsSlice';
+import {
   Modal,
   ModalCloseButton,
   ModalHeader,
@@ -41,10 +45,6 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useSyncedPrefs } from '@desktop-client/hooks/useSyncedPrefs';
 import { reloadPayees } from '@desktop-client/payees/payeesSlice';
-import {
-  importPreviewTransactions,
-  importTransactions,
-} from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 function getFileType(filepath) {
