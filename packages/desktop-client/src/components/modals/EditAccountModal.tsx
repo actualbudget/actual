@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useState, useEffect } from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation, Trans } from 'react-i18next';
 
@@ -14,8 +14,9 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { toRelaxedNumber } from 'loot-core/shared/util';
+import { type AccountEntity } from 'loot-core/types/models';
 
-import { createAccount } from '@desktop-client/accounts/accountsSlice';
+import { updateAccount } from '@desktop-client/accounts/accountsSlice';
 import { Link } from '@desktop-client/components/common/Link';
 import {
   Modal,
@@ -31,26 +32,26 @@ import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { closeModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
-export function CreateLocalAccountModal() {
+type EditAccountModalProps = {
+  account: AccountEntity;
+};
+
+export function EditAccountModal({ account }: EditAccountModalProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const accounts = useAccounts.useAccounts();
-  const [name, setName] = useState('');
-  const [offbudget, setOffbudget] = useState(false);
-  const [balance, setBalance] = useState('0');
-  const [type, setType] = useState('Bank');
-  const [cycleStart, setCycleStart] = useState('1');
-  const [cycleEnd, setCycleEnd] = useState('31');
+  const [name, setName] = useState(account.name);
+  const [offbudget, setOffbudget] = useState(account.offbudget === 1);
+  const [type, setType] = useState(account.type || 'Bank');
+  const [cycleStart, setCycleStart] = useState(String(account.cycle_start || 1));
+  const [cycleEnd, setCycleEnd] = useState(String(account.cycle_end || 31));
 
   const [nameError, setNameError] = useState(null);
-  const [balanceError, setBalanceError] = useState(false);
   const [cycleError, setCycleError] = useState(null);
 
-  const validateBalance = balance => !isNaN(parseFloat(balance));
-
   const validateAndSetName = (name: string) => {
-    const nameError = validateAccountName(name, '', accounts);
+    const nameError = validateAccountName(name, account.id, accounts);
     if (nameError) {
       setNameError(nameError);
     } else {
@@ -73,22 +74,19 @@ export function CreateLocalAccountModal() {
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const nameError = validateAccountName(name, '', accounts);
-    const balanceError = !validateBalance(balance);
+    const nameError = validateAccountName(name, account.id, accounts);
     let cycleIsValid = true;
     if (type === 'Credit') {
       cycleIsValid = validateCycle();
     }
 
     setNameError(nameError);
-    setBalanceError(balanceError);
 
-    if (!nameError && !balanceError && cycleIsValid) {
-      dispatch(closeModal());
+    if (!nameError && cycleIsValid) {
       const accountData = {
+        id: account.id,
         name,
-        balance: toRelaxedNumber(balance),
-        offBudget: offbudget,
+        offbudget: offbudget ? 1 : 0,
         type,
       };
 
@@ -97,17 +95,17 @@ export function CreateLocalAccountModal() {
         accountData.cycle_end = parseInt(cycleEnd);
       }
 
-      const id = await dispatch(createAccount(accountData)).unwrap();
-      navigate('/accounts/' + id);
+      dispatch(updateAccount({ account: accountData }));
+      dispatch(closeModal());
     }
   };
   return (
-    <Modal name="add-local-account">
+    <Modal name="edit-account">
       {({ state: { close } }) => (
         <>
           <ModalHeader
             title={
-              <ModalTitle title={t('Create Local Account')} shrinkOnOverflow />
+              <ModalTitle title={t('Edit Account')} shrinkOnOverflow />
             }
             rightContent={<ModalCloseButton onPress={close} />}
           />
@@ -193,6 +191,7 @@ export function CreateLocalAccountModal() {
                       name="offbudget"
                       checked={offbudget}
                       onChange={() => setOffbudget(!offbudget)}
+                      disabled={true}
                     />
                     <label
                       htmlFor="offbudget"
@@ -214,53 +213,23 @@ export function CreateLocalAccountModal() {
                   >
                     <Text>
                       <Trans>
-                        This cannot be changed later. See{' '}
-                        <Link
-                          variant="external"
-                          linkColor="muted"
-                          to="https://actualbudget.org/docs/accounts/#off-budget-accounts"
-                        >
-                          Accounts Overview
-                        </Link>{' '}
-                        for more information.
+                        This cannot be changed later.
                       </Trans>
                     </Text>
                   </div>
                 </View>
               </View>
 
-              <InlineField label={t('Balance')} width="100%">
-                <Input
-                  name="balance"
-                  inputMode="decimal"
-                  value={balance}
-                  onChangeValue={setBalance}
-                  onUpdate={value => {
-                    const balance = value.trim();
-                    setBalance(balance);
-                    if (validateBalance(balance) && balanceError) {
-                      setBalanceError(false);
-                    }
-                  }}
-                  style={{ flex: 1 }}
-                />
-              </InlineField>
-              {balanceError && (
-                <FormError style={{ marginLeft: 75 }}>
-                  <Trans>Balance must be a number</Trans>
-                </FormError>
-              )}
-
               <ModalButtons>
                 <Button onPress={close}>
-                  <Trans>Back</Trans>
+                  <Trans>Cancel</Trans>
                 </Button>
                 <Button
                   type="submit"
                   variant="primary"
                   style={{ marginLeft: 10 }}
                 >
-                  <Trans>Create</Trans>
+                  <Trans>Save</Trans>
                 </Button>
               </ModalButtons>
             </Form>

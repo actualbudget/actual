@@ -65,6 +65,10 @@ export const accountModel = {
       update,
     );
 
+    if (account.type === 'Credit') {
+      requiredFields('account', account, ['cycle_start', 'cycle_end']);
+    }
+
     return account as DbAccount;
   },
 };

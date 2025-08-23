@@ -1,11 +1,14 @@
 export type AccountEntity = {
   id: string;
   name: string;
+  type?: 'Bank' | 'Credit';
   offbudget: 0 | 1;
   closed: 0 | 1;
   sort_order: number;
   last_reconciled: string | null;
   tombstone: 0 | 1;
+  cycle_start?: number | null;
+  cycle_end?: number | null;
 } & (_SyncFields<true> | _SyncFields<false>);
 
 export type _SyncFields<T> = {
