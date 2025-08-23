@@ -19,7 +19,8 @@ import { q } from 'loot-core/shared/query';
 import * as accountsSlice from './accounts/accountsSlice';
 import * as appSlice from './app/appSlice';
 import { AuthProvider } from './auth/AuthProvider';
-import * as budgetsSlice from './budgets/budgetsSlice';
+import * as budgetSlice from './budget/budgetSlice';
+import * as budgetfilesSlice from './budgetfiles/budgetfilesSlice';
 // See https://github.com/WICG/focus-visible. Only makes the blue
 // focus outline appear from keyboard events.
 import 'focus-visible';
@@ -28,10 +29,12 @@ import { NavigableFocusProvider } from './components/NavigableFocusProvider';
 import { ServerProvider } from './components/ServerContext';
 import * as modalsSlice from './modals/modalsSlice';
 import * as notificationsSlice from './notifications/notificationsSlice';
+import * as payeesSlice from './payees/payeesSlice';
 import * as prefsSlice from './prefs/prefsSlice';
 import { aqlQuery } from './queries/aqlQuery';
-import * as queriesSlice from './queries/queriesSlice';
 import { store } from './redux/store';
+import * as tagsSlice from './tags/tagsSlice';
+import * as transactionsSlice from './transactions/transactionsSlice';
 import { redo, undo } from './undo';
 import * as usersSlice from './users/usersSlice';
 
@@ -39,11 +42,14 @@ const boundActions = bindActionCreators(
   {
     ...accountsSlice.actions,
     ...appSlice.actions,
-    ...budgetsSlice.actions,
+    ...budgetSlice.actions,
+    ...budgetfilesSlice.actions,
     ...modalsSlice.actions,
     ...notificationsSlice.actions,
+    ...payeesSlice.actions,
     ...prefsSlice.actions,
-    ...queriesSlice.actions,
+    ...transactionsSlice.actions,
+    ...tagsSlice.actions,
     ...usersSlice.actions,
   },
   store.dispatch,

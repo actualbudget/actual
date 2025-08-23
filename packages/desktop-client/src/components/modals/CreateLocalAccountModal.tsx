@@ -14,6 +14,7 @@ import { View } from '@actual-app/components/view';
 
 import { toRelaxedNumber } from 'loot-core/shared/util';
 
+import { createAccount } from '@desktop-client/accounts/accountsSlice';
 import { Link } from '@desktop-client/components/common/Link';
 import {
   Modal,
@@ -27,7 +28,6 @@ import { validateAccountName } from '@desktop-client/components/util/accountVali
 import * as useAccounts from '@desktop-client/hooks/useAccounts';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { closeModal } from '@desktop-client/modals/modalsSlice';
-import { createAccount } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 export function CreateLocalAccountModal() {
