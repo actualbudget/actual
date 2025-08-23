@@ -308,7 +308,7 @@ export async function runRules(
 
     const rule = allRules.get(schedule.rule);
 
-    rule.apply(finalTrans);
+    finalTrans = rule.apply(finalTrans);
   } else {
     console.log('Applying all applicable rules to transaction');
     const rules = rankRules(
