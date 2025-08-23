@@ -1,3 +1,6 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
+import storybook from 'eslint-plugin-storybook';
+
 import globals from 'globals';
 
 import pluginImport from 'eslint-plugin-import';
@@ -799,4 +802,5 @@ export default pluginTypescript.config(
       'import/no-default-export': 'off',
     },
   },
+  storybook.configs['flat/recommended'],
 );
