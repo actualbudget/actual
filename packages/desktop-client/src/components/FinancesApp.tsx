@@ -86,7 +86,7 @@ export function FinancesApp() {
   const { t } = useTranslation();
 
   const accounts = useAccounts();
-  const isAccountsLoaded = useSelector(state => state.queries.isAccountsLoaded);
+  const isAccountsLoaded = useSelector(state => state.account.isAccountsLoaded);
 
   const [lastUsedVersion, setLastUsedVersion] = useLocalPref(
     'flags.updateNotificationShownForVersion',

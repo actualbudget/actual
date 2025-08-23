@@ -2,19 +2,17 @@
 import { listen } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 
+import { reloadAccounts } from './accounts/accountsSlice';
 import { setAppState } from './app/appSlice';
-import { closeBudgetUI } from './budgets/budgetsSlice';
+import { reloadCategories } from './budget/budgetSlice';
+import { closeBudgetUI } from './budgetfiles/budgetfilesSlice';
 import { closeModal, pushModal, replaceModal } from './modals/modalsSlice';
 import {
   addGenericErrorNotification,
   addNotification,
 } from './notifications/notificationsSlice';
+import { reloadPayees } from './payees/payeesSlice';
 import { loadPrefs } from './prefs/prefsSlice';
-import {
-  reloadAccounts,
-  reloadCategories,
-  reloadPayees,
-} from './queries/queriesSlice';
 import { type AppStore } from './redux/store';
 import * as syncEvents from './sync-events';
 

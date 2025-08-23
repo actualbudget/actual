@@ -82,6 +82,8 @@ import {
 } from './table/utils';
 import { TransactionMenu } from './TransactionMenu';
 
+import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
+import { getCategoriesById } from '@desktop-client/budget/budgetSlice';
 import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
@@ -125,11 +127,7 @@ import {
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import {
-  getAccountsById,
-  getPayeesById,
-  getCategoriesById,
-} from '@desktop-client/queries/queriesSlice';
+import { getPayeesById } from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type TransactionHeaderProps = {

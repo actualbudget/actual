@@ -24,7 +24,7 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useReports } from '@desktop-client/hooks/useReports';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch } from '@desktop-client/redux';
 
 export function GenericInput({
   field,
@@ -43,7 +43,6 @@ export function GenericInput({
   const { t } = useTranslation();
   const { grouped: categoryGroups } = useCategories();
   const { data: savedReports } = useReports();
-  const saved = useSelector(state => state.queries.saved);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   // Helper function to open autocomplete modal with safe event handling
@@ -196,7 +195,6 @@ export function GenericInput({
           content = (
             <FilterAutocomplete
               type={autocompleteType}
-              saved={saved}
               value={value}
               openOnFocus={true}
               onSelect={onChange}

@@ -394,7 +394,7 @@ export function updateCategoryGroup(
 
 export async function moveCategoryGroup(
   id: DbCategoryGroup['id'],
-  targetId: DbCategoryGroup['id'],
+  targetId?: DbCategoryGroup['id'] | null,
 ) {
   const groups = await all<Pick<DbCategoryGroup, 'id' | 'sort_order'>>(
     `SELECT id, sort_order FROM category_groups WHERE tombstone = 0 ORDER BY sort_order, id`,
@@ -409,7 +409,7 @@ export async function moveCategoryGroup(
 
 export async function deleteCategoryGroup(
   group: Pick<DbCategoryGroup, 'id'>,
-  transferId?: DbCategory['id'],
+  transferId?: DbCategory['id'] | null,
 ) {
   const categories = await all<DbCategory>(
     'SELECT * FROM categories WHERE cat_group = ?',
@@ -491,7 +491,7 @@ export function updateCategory(
 export async function moveCategory(
   id: DbCategory['id'],
   groupId: DbCategoryGroup['id'],
-  targetId: DbCategory['id'] | null,
+  targetId?: DbCategory['id'] | null,
 ) {
   if (!groupId) {
     throw new Error('moveCategory: groupId is required');
@@ -511,7 +511,7 @@ export async function moveCategory(
 
 export async function deleteCategory(
   category: Pick<DbCategory, 'id'>,
-  transferId?: DbCategory['id'],
+  transferId?: DbCategory['id'] | null,
 ) {
   if (transferId) {
     // We need to update all the deleted categories that currently

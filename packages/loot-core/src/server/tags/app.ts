@@ -1,4 +1,4 @@
-import { Tag } from '../../types/models';
+import { TagEntity } from '../../types/models';
 import { createApp } from '../app';
 import * as db from '../db';
 import { mutator } from '../mutators';
@@ -22,7 +22,7 @@ app.method('tags-delete-all', mutator(deleteAllTags));
 app.method('tags-update', mutator(undoable(updateTag)));
 app.method('tags-find', mutator(findTags));
 
-async function getTags(): Promise<Tag[]> {
+async function getTags(): Promise<TagEntity[]> {
   return await db.getTags();
 }
 
@@ -30,7 +30,7 @@ async function createTag({
   tag,
   color = null,
   description = null,
-}: Omit<Tag, 'id'>): Promise<Tag> {
+}: Omit<TagEntity, 'id'>): Promise<TagEntity> {
   const allTags = await db.getAllTags();
 
   const { id: tagId = null } = allTags.find(t => t.tag === tag) || {};
@@ -54,12 +54,14 @@ async function createTag({
   return { id, tag, color, description };
 }
 
-async function deleteTag(tag: Tag): Promise<Tag['id']> {
+async function deleteTag(tag: TagEntity): Promise<TagEntity['id']> {
   await db.deleteTag(tag);
   return tag.id;
 }
 
-async function deleteAllTags(ids: Array<Tag['id']>): Promise<Array<Tag['id']>> {
+async function deleteAllTags(
+  ids: Array<TagEntity['id']>,
+): Promise<Array<TagEntity['id']>> {
   await batchMessages(async () => {
     for (const id of ids) {
       await db.deleteTag({ id });
@@ -68,12 +70,12 @@ async function deleteAllTags(ids: Array<Tag['id']>): Promise<Array<Tag['id']>> {
   return ids;
 }
 
-async function updateTag(tag: Tag): Promise<Tag> {
+async function updateTag(tag: TagEntity): Promise<TagEntity> {
   await db.updateTag(tag);
   return tag;
 }
 
-async function findTags(): Promise<Tag[]> {
+async function findTags(): Promise<TagEntity[]> {
   const taggedNotes = await db.findTags();
 
   const tags = await getTags();
