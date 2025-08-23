@@ -2,7 +2,8 @@
   "references": [
     // TODO: enable once every project is ts
     // { "path": "./packages/api" },
-    // { "path": "./packages/desktop-client" }
+    // { "path": "./packages/desktop-client" },
+    { "path": "./packages/component-library" }
   ],
   "compilerOptions": {
     // "composite": true,
