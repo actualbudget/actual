@@ -276,13 +276,15 @@ function onApplySync(oldValues, newValues) {
   }
 }
 
-export async function getScheduleById(
-  id: string,
-): Promise<ScheduleEntity | null> {
-  return await db.first<ScheduleEntity>(
-    'SELECT * FROM schedules WHERE id = ?',
-    [id],
+export async function getRuleIDFromScheduleID(
+  scheduleID: string,
+): Promise<string | null> {
+   let scheduleRule = await db.first<db.DbSchedule>(
+    'SELECT rule FROM schedules WHERE id = ?',
+    [scheduleID],
   );
+
+  return scheduleRule.rule || null;
 }
 
 // Runner
@@ -304,9 +306,9 @@ export async function runRules(
   if (trans.schedule != null) {
     console.log('Applying schedule rules to transaction');
 
-    const schedule = await getScheduleById(trans.schedule);
+    const ruleID = await getRuleIDFromScheduleID(trans.schedule);
 
-    const rule = allRules.get(schedule.rule);
+    const rule = allRules.get(ruleID);
 
     finalTrans = rule.apply(finalTrans);
   } else {
