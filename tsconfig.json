@@ -45,7 +45,8 @@
   },
   "include": ["packages/**/*", "bin/*.ts"],
   "exclude": [
-    "**/.*/",
+    "**/.*/*",
+    "!**/.storybook/**",
     "node_modules",
     "**/node_modules/*",
     "**/build/*",
