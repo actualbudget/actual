@@ -276,11 +276,11 @@ function onApplySync(oldValues, newValues) {
 }
 
 export async function getRuleIdFromScheduleId(
-  scheduleID: string,
+  scheduleId: string,
 ): Promise<string | null> {
   const row = await db.first<Pick<db.DbSchedule, 'rule'>>(
     'SELECT rule FROM schedules WHERE id = ?',
-    [scheduleID],
+    [scheduleId],
   );
 
   return row?.rule || null;
@@ -305,11 +305,10 @@ export async function runRules(
   let scheduleRuleRun = false;
   // If the transaction is associated with a schedule, only run that rule
   if (trans.schedule != null) {
-    const ruleID = await getRuleIdFromScheduleId(trans.schedule);
-    if (ruleID != null) {
-      const rule = allRules.get(ruleID);
+    const ruleId = await getRuleIdFromScheduleId(trans.schedule);
+    if (ruleId != null) {
+      const rule = allRules.get(ruleId);
       if (rule != null) {
-        console.log('Applying schedule rules to transaction');
         finalTrans = rule.apply(finalTrans);
         scheduleRuleRun = true;
       }
@@ -318,7 +317,6 @@ export async function runRules(
 
   // if schedule rule doesn't exist or wasn't run, run all other applicable rules
   if (scheduleRuleRun === false) {
-    console.log('Applying all applicable rules to transaction');
     const rules = rankRules(
       fastSetMerge(
         firstcharIndexer.getApplicableRules(trans),
