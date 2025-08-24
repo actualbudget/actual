@@ -275,7 +275,7 @@ function onApplySync(oldValues, newValues) {
   }
 }
 
-export async function getRuleIDFromScheduleID(
+export async function getRuleIdFromScheduleId(
   scheduleID: string,
 ): Promise<string | null> {
   let scheduleRule = await db.first<db.DbSchedule>(
@@ -302,15 +302,22 @@ export async function runRules(
 
   let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap);
 
+  let scheduleRuleRun = false;
+  // If the transaction is associated with a schedule, only run that rule
   if (trans.schedule != null) {
-    console.log('Applying schedule rules to transaction');
+    const ruleID = await getRuleIdFromScheduleId(trans.schedule);
+    if (ruleID != null) {
+      const rule = allRules.get(ruleID);
+      if (rule != null) {
+        console.log('Applying schedule rules to transaction');
+        finalTrans = rule.apply(finalTrans);
+        scheduleRuleRun = true;
+      }
+    }
+  }
 
-    const ruleID = await getRuleIDFromScheduleID(trans.schedule);
-
-    const rule = allRules.get(ruleID);
-
-    finalTrans = rule.apply(finalTrans);
-  } else {
+  // if schedule rule doesn't exist or wasn't run, run all other applicable rules
+  if (scheduleRuleRun == false) {
     console.log('Applying all applicable rules to transaction');
     const rules = rankRules(
       fastSetMerge(
