@@ -303,7 +303,7 @@ export async function runRules(
   let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap);
 
   let scheduleRuleRun = false;
-  // If the transaction is posted by a schedule, only run the rule associated with that schedule. 
+  // If the transaction is posted by a schedule, only run the rule associated with that schedule.
   if (trans.schedule != null) {
     const ruleId = await getRuleIdFromScheduleId(trans.schedule);
     if (ruleId != null) {
