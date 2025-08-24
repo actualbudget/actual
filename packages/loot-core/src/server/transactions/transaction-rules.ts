@@ -14,7 +14,6 @@ import {
   type TransactionEntity,
   type RuleActionEntity,
   type RuleEntity,
-  type ScheduleEntity,
 } from '../../types/models';
 import { schemaConfig } from '../aql';
 import * as db from '../db';
