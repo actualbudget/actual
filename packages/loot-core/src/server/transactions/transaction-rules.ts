@@ -279,12 +279,12 @@ function onApplySync(oldValues, newValues) {
 export async function getRuleIDFromScheduleID(
   scheduleID: string,
 ): Promise<string | null> {
-   let scheduleRule = await db.first<db.DbSchedule>(
+  let scheduleRule = await db.first<db.DbSchedule>(
     'SELECT rule FROM schedules WHERE id = ?',
     [scheduleID],
   );
 
-  return scheduleRule.rule || null;
+  return scheduleRule?.rule || null;
 }
 
 // Runner
