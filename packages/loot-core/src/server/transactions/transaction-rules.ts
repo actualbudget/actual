@@ -278,7 +278,7 @@ function onApplySync(oldValues, newValues) {
 export async function getRuleIdFromScheduleId(
   scheduleID: string,
 ): Promise<string | null> {
-  let scheduleRule = await db.first<db.DbSchedule>(
+  const scheduleRule = await db.first<db.DbSchedule>(
     'SELECT rule FROM schedules WHERE id = ?',
     [scheduleID],
   );
@@ -317,7 +317,7 @@ export async function runRules(
   }
 
   // if schedule rule doesn't exist or wasn't run, run all other applicable rules
-  if (scheduleRuleRun == false) {
+  if (scheduleRuleRun === false) {
     console.log('Applying all applicable rules to transaction');
     const rules = rankRules(
       fastSetMerge(
