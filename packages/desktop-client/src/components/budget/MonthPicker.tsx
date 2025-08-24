@@ -50,11 +50,11 @@ export const MonthPicker = ({
   const range = monthUtils.rangeInclusive(
     monthUtils.subMonths(
       firstSelectedMonth,
-      Math.ceil(targetMonthCount / 2 - numDisplayed / 2),
+      Math.floor(targetMonthCount / 2 - numDisplayed / 2),
     ),
     monthUtils.addMonths(
       lastSelectedMonth,
-      Math.ceil(targetMonthCount / 2 - numDisplayed / 2),
+      Math.floor(targetMonthCount / 2 - numDisplayed / 2),
     ),
   );
 
