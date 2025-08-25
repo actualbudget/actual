@@ -19,6 +19,10 @@ export function useBudgetAutomations({
     let mounted = true;
     async function fetchAutomations() {
       setLoading(true);
+
+      // Always import notes first; the query will automatically ignore UI-based categories.
+      await send('budget/store-note-templates');
+
       const result = await send('budget/get-category-automations', categoryId);
       if (mounted) {
         setAutomations(result);
