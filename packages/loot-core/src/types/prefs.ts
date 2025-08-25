@@ -2,7 +2,6 @@ export type FeatureFlag =
   | 'goalTemplatesEnabled'
   | 'goalTemplatesUIEnabled'
   | 'actionTemplating'
-  | 'pluggyAiBankSync'
   | 'currency';
 
 /**

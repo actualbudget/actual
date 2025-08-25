@@ -100,12 +100,6 @@ export function ExperimentalFeatures() {
               <Trans>Rule action templating</Trans>
             </FeatureToggle>
             <FeatureToggle
-              flag="pluggyAiBankSync"
-              feedbackLink="https://github.com/actualbudget/actual/pull/4049"
-            >
-              <Trans>Pluggy.ai Bank Sync (Brazilian banks only)</Trans>
-            </FeatureToggle>
-            <FeatureToggle
               flag="currency"
               feedbackLink="https://github.com/actualbudget/actual/issues/5191"
             >
