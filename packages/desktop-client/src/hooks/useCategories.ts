@@ -2,14 +2,14 @@ import { useEffect } from 'react';
 
 import { useInitialMount } from './useInitialMount';
 
-import { getCategories } from '@desktop-client/queries/queriesSlice';
+import { getCategories } from '@desktop-client/budget/budgetSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
 
 export function useCategories() {
   const dispatch = useDispatch();
   const isInitialMount = useInitialMount();
   const isCategoriesDirty = useSelector(
-    state => state.queries.isCategoriesDirty,
+    state => state.budget.isCategoriesDirty,
   );
 
   useEffect(() => {
@@ -18,5 +18,5 @@ export function useCategories() {
     }
   }, [dispatch, isInitialMount, isCategoriesDirty]);
 
-  return useSelector(state => state.queries.categories);
+  return useSelector(state => state.budget.categories);
 }

@@ -2,17 +2,14 @@ import { useEffect } from 'react';
 
 import { useInitialMount } from './useInitialMount';
 
-import {
-  getCommonPayees,
-  getPayees,
-} from '@desktop-client/queries/queriesSlice';
+import { getCommonPayees, getPayees } from '@desktop-client/payees/payeesSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
 
 export function useCommonPayees() {
   const dispatch = useDispatch();
   const isInitialMount = useInitialMount();
   const isCommonPayeesDirty = useSelector(
-    state => state.queries.isCommonPayeesDirty,
+    state => state.payees.isCommonPayeesDirty,
   );
 
   useEffect(() => {
@@ -21,13 +18,13 @@ export function useCommonPayees() {
     }
   }, [dispatch, isInitialMount, isCommonPayeesDirty]);
 
-  return useSelector(state => state.queries.commonPayees);
+  return useSelector(state => state.payees.commonPayees);
 }
 
 export function usePayees() {
   const dispatch = useDispatch();
   const isInitialMount = useInitialMount();
-  const isPayeesDirty = useSelector(state => state.queries.isPayeesDirty);
+  const isPayeesDirty = useSelector(state => state.payees.isPayeesDirty);
 
   useEffect(() => {
     if (isInitialMount || isPayeesDirty) {
@@ -35,5 +32,5 @@ export function usePayees() {
     }
   }, [dispatch, isInitialMount, isPayeesDirty]);
 
-  return useSelector(state => state.queries.payees);
+  return useSelector(state => state.payees.payees);
 }

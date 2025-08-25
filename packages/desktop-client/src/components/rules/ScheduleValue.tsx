@@ -12,7 +12,7 @@ import { Value } from './Value';
 
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import { getPayeesById } from '@desktop-client/queries/queriesSlice';
+import { getPayeesById } from '@desktop-client/payees/payeesSlice';
 
 type ScheduleValueProps = {
   value: ScheduleEntity;

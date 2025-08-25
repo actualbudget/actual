@@ -10,7 +10,10 @@ import { View } from '@actual-app/components/view';
 import { send, listen } from 'loot-core/platform/client/fetch';
 import { type Backup } from 'loot-core/server/budgetfiles/backups';
 
-import { loadBackup, makeBackup } from '@desktop-client/budgets/budgetsSlice';
+import {
+  loadBackup,
+  makeBackup,
+} from '@desktop-client/budgetfiles/budgetfilesSlice';
 import {
   Modal,
   ModalCloseButton,
