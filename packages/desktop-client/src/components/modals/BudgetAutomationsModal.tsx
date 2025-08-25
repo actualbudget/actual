@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { type CSSProperties, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -44,7 +44,7 @@ function BudgetAutomationList({
   setAutomations: (fn: (prev: Template[]) => Template[]) => void;
   schedules: readonly ScheduleEntity[];
   categories: CategoryGroupEntity[];
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }) {
   const [automationIds, setAutomationIds] = useState(() => {
     // automations don't have ids, so we need to generate them
@@ -109,7 +109,7 @@ function BudgetAutomationMigrationWarning({
   style,
 }: {
   categoryId: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }) {
   const notes = useNotes(categoryId);
 
