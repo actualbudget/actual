@@ -65,7 +65,7 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-hooks": "6.0.0-rc.1",
     "eslint-plugin-typescript-paths": "^0.0.33",
     "globals": "^15.15.0",
     "html-to-image": "^1.11.13",
