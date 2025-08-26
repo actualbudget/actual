@@ -200,13 +200,7 @@ export function TransactionList({
           await saveDiff(changes.diff, isLearnCategoriesEnabled);
           onRefetch();
         } else {
-          onChange(changes.newTransaction, changes.data);
-          saveDiffAndApply(
-            changes.diff,
-            changes,
-            onChange,
-            isLearnCategoriesEnabled,
-          );
+          await saveDiff(changes.diff, isLearnCategoriesEnabled);
         }
       }
     },
