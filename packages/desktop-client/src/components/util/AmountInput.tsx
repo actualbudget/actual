@@ -5,7 +5,7 @@ import React, {
   useState,
   useEffect,
   type FocusEventHandler,
-  type KeyboardEventHandler,
+  type KeyboardEvent,
   type CSSProperties,
   useCallback,
 } from 'react';
@@ -29,7 +29,7 @@ type AmountInputProps = {
   onChangeValue?: (value: string) => void;
   onFocus?: FocusEventHandler<HTMLInputElement>;
   onBlur?: FocusEventHandler<HTMLInputElement>;
-  onEnter?: KeyboardEventHandler<HTMLInputElement>;
+  onEnter?: (event: KeyboardEvent<HTMLInputElement>, amount?: number) => void;
   onUpdate?: (amount: number) => void;
   style?: CSSProperties;
   inputStyle?: CSSProperties;
@@ -197,11 +197,10 @@ export function AmountInput({
           onInputAmountBlur(e);
         }}
         onEnter={(_, e) => {
-          onEnter?.(e);
           const amount = getAmount();
           fireUpdate(amount);
+          onEnter?.(e, amount);
         }}
-        useKeyDown={true}
         onChangeValue={onInputTextChange}
       />
     </View>
