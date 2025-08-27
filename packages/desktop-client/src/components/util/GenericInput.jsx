@@ -35,6 +35,7 @@ export function GenericInput({
   ref,
   style,
   onChange,
+  onEnter,
   op = undefined,
 }) {
   const dispatch = useDispatch();
@@ -68,6 +69,7 @@ export function GenericInput({
             inputRef={ref}
             value={value}
             onUpdate={v => onChange(v)}
+            onEnter={(e, updatedValue) => onEnter?.(e, updatedValue)}
           />
         );
       case 'percentage':
