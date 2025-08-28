@@ -230,8 +230,12 @@ function ConfigureField({
           });
         }}
         onKeyDown={e => {
-          // For amount fields, prevent default form submission to let AmountInput handle it on KeyUp
-          if (e.key === 'Enter' && field === 'amount') {
+          // For amount fields, prevent default form submission to let AmountInput handle Enter via Input.onEnter
+          if (
+            e.key === 'Enter' &&
+            field === 'amount' &&
+            (e.target?.tagName === 'INPUT' || e.target?.tagName === 'TEXTAREA')
+          ) {
             e.preventDefault();
           }
         }}
