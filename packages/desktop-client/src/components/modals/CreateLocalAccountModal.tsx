@@ -25,7 +25,7 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { Checkbox } from '@desktop-client/components/forms';
 import { validateAccountName } from '@desktop-client/components/util/accountValidation';
-import * as useAccounts from '@desktop-client/hooks/useAccounts';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { closeModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
@@ -34,7 +34,7 @@ export function CreateLocalAccountModal() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const accounts = useAccounts.useAccounts();
+  const accounts = useAccounts();
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
   const [balance, setBalance] = useState('0');
