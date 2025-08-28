@@ -286,6 +286,7 @@ type AccountInternalState = {
     prevAscDesc?: 'asc' | 'desc' | undefined;
   } | null;
   filteredAmount: null | number;
+  cycleFilter: 'all' | 'current' | 'last';
 };
 
 export type TableRef = RefObject<{
@@ -330,6 +331,7 @@ class AccountInternal extends PureComponent<
       isAdding: false,
       sort: null,
       filteredAmount: null,
+      cycleFilter: 'all',
     };
   }
 
@@ -1205,6 +1207,69 @@ class AccountInternal extends PureComponent<
     });
   };
 
+  onCycleFilter = (filter: 'all' | 'current' | 'last') => {
+    this.setState({ cycleFilter: filter });
+
+    const otherFilters = this.state.filterConditions.filter(
+      c => c.customName !== 'Cycle' && c.field !== 'date',
+    );
+
+    if (filter === 'all') {
+      this.applyFilters(otherFilters);
+      return;
+    }
+
+    const account = this.props.accounts.find(a => a.id === this.props.accountId);
+    if (account && account.type === 'Credit' && account.cycle_start && account.cycle_end) {
+      const { cycle_start, cycle_end } = account;
+      const today = new Date();
+      const today_d = today.getDate();
+      const today_m = today.getMonth();
+      const today_y = today.getFullYear();
+      let startDate, endDate;
+
+      if (filter === 'current') {
+        if (cycle_start <= cycle_end) {
+          startDate = new Date(today_y, today_m, cycle_start);
+          endDate = new Date(today_y, today_m, cycle_end);
+        } else {
+          if (today_d >= cycle_start) {
+            startDate = new Date(today_y, today_m, cycle_start);
+            endDate = new Date(today_y, today_m + 1, cycle_end);
+          } else {
+            startDate = new Date(today_y, today_m - 1, cycle_start);
+            endDate = new Date(today_y, today_m, cycle_end);
+          }
+        }
+      } else { // 'last'
+        if (cycle_start <= cycle_end) {
+          startDate = new Date(today_y, today_m - 1, cycle_start);
+          endDate = new Date(today_y, today_m - 1, cycle_end);
+        } else {
+          if (today_d >= cycle_start) {
+            startDate = new Date(today_y, today_m - 1, cycle_start);
+            endDate = new Date(today_y, today_m, cycle_end);
+          } else {
+            startDate = new Date(today_y, today_m - 2, cycle_start);
+            endDate = new Date(today_y, today_m - 1, cycle_end);
+          }
+        }
+      }
+
+      const dateFilter = {
+        customName: 'Cycle',
+        queryFilter: {
+          $and: [
+            { date: { $gte: startDate.toISOString().slice(0, 10) } },
+            { date: { $lte: endDate.toISOString().slice(0, 10) } },
+          ],
+        },
+      };
+
+      this.applyFilters([...otherFilters, dateFilter]);
+    }
+  };
+
   checkForReconciledTransactions = async (
     ids: string[],
     confirmReason: string,
@@ -1802,6 +1867,8 @@ class AccountInternal extends PureComponent<
                 onMakeAsSplitTransaction={this.onMakeAsSplitTransaction}
                 onMakeAsNonSplitTransactions={this.onMakeAsNonSplitTransactions}
                 onMergeTransactions={this.onMergeTransactions}
+                onCycleFilter={this.onCycleFilter}
+                cycleFilter={this.state.cycleFilter}
               />
 
               <View style={{ flex: 1 }}>

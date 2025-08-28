@@ -56,6 +56,8 @@ import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 type AccountHeaderProps = {
   tableRef: TableRef;
@@ -130,7 +132,10 @@ type AccountHeaderProps = {
     | 'onConditionsOpChange'
     | 'onClearFilters'
     | 'onReloadSavedFilter'
-  >;
+  > & {
+    onCycleFilter: (filter: 'all' | 'current' | 'last') => void;
+    cycleFilter: 'all' | 'current' | 'last';
+  };
 
 export function AccountHeader({
   tableRef,
@@ -188,6 +193,8 @@ export function AccountHeader({
   onMakeAsSplitTransaction,
   onMakeAsNonSplitTransactions,
   onMergeTransactions,
+  onCycleFilter,
+  cycleFilter,
 }: AccountHeaderProps) {
   const { t } = useTranslation();
 
@@ -345,6 +352,28 @@ export function AccountHeader({
               <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
               <Trans>Add New</Trans>
             </Button>
+          )}
+          {account && account.type === 'Credit' && (
+            <Stack direction="row" spacing={1} style={{ marginLeft: 10 }}>
+              <Button
+                variant={cycleFilter === 'all' ? 'primary' : 'normal'}
+                onClick={() => onCycleFilter('all')}
+              >
+                All
+              </Button>
+              <Button
+                variant={cycleFilter === 'current' ? 'primary' : 'normal'}
+                onClick={() => onCycleFilter('current')}
+              >
+                Current Cycle
+              </Button>
+              <Button
+                variant={cycleFilter === 'last' ? 'primary' : 'normal'}
+                onClick={() => onCycleFilter('last')}
+              >
+                Last Cycle
+              </Button>
+            </Stack>
           )}
           <View style={{ flexShrink: 0 }}>
             {/* @ts-expect-error fix me */}
@@ -743,14 +772,22 @@ function AccountMenu({
 }: AccountMenuProps) {
   const { t } = useTranslation();
   const syncServerStatus = useSyncServerStatus();
+  const dispatch = useDispatch();
 
   return (
     <Menu
       slot="close"
       onMenuSelect={item => {
-        onMenuSelect(item);
+        if (item === 'edit') {
+          dispatch(
+            pushModal({ modal: { name: 'edit-account', options: { account } } }),
+          );
+        } else {
+          onMenuSelect(item);
+        }
       }}
       items={[
+        { name: 'edit', text: t('Edit account') },
         ...(isSorted
           ? [
               {
