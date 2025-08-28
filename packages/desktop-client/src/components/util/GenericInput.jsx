@@ -35,7 +35,7 @@ export function GenericInput({
   ref,
   style,
   onChange,
-  onEnter,
+  onEnter = undefined,
   op = undefined,
 }) {
   const dispatch = useDispatch();
