@@ -1,12 +1,18 @@
+import type { Template } from '../../types/models/templates';
 import * as db from '../db';
 
+import { parse } from './goal-template.pegjs';
 import {
   CategoryWithTemplateNote,
   getActiveSchedules,
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
-import { checkTemplateNotes, storeNoteTemplates } from './template-notes';
+import {
+  checkTemplateNotes,
+  storeNoteTemplates,
+  unparse,
+} from './template-notes';
 
 vi.mock('../db');
 vi.mock('./statements');
@@ -297,3 +303,54 @@ function mockSchedules(): db.DbSchedule[] {
     },
   ];
 }
+
+describe('unparse/parse round-trip', () => {
+  const cases: string[] = [
+    // simple
+    '#template 10',
+    '#template up to 50',
+    '#template up to 25 per day hold',
+    '#template up to 100 per week starting 2025-01-01',
+    '#template-2 123.45',
+    // schedule
+    '#template schedule Rent',
+    '#template schedule full Mortgage',
+    '#template schedule Netflix [increase 10%]',
+    '#template schedule full Groceries [decrease 5%]',
+    // percentage
+    '#template 50% of Utilities',
+    '#template 75% of previous Dining Out',
+    // periodic
+    '#template 200 repeat every 2 months starting 2025-06-01',
+    '#template 300 repeat every week starting 2025-01-07',
+    '#template 400 repeat every year starting 2025-01-01 up to 50',
+    // by / spend
+    '#template 500 by 2025-12',
+    '#template 600 by 2025-11 repeat every month',
+    '#template 700 by 2025-10 repeat every 2 months',
+    '#template 800 by 2025-09 repeat every year',
+    '#template 900 by 2025-08 repeat every 3 years',
+    '#template 1000 by 2025-07 spend from 2025-01 repeat every month',
+    '#template 1100 by 2025-06 spend from 2025-02 repeat every 2 months',
+    // remainder
+    '#template remainder',
+    '#template remainder 2',
+    '#template remainder 3 up to 10',
+    // average
+    '#template average 6 months',
+    '#template-5 average 12 months',
+    // copy
+    '#template copy from 3 months ago',
+    '#template copy from 6 months ago',
+    // goal
+    '#goal 1234',
+  ];
+
+  it.each(cases)('round-trips: %s', async original => {
+    const parsed: Template = parse(original);
+    const serialized = await unparse([parsed]);
+    const reparsed: Template = parse(serialized);
+
+    expect(parsed).toEqual(reparsed);
+  });
+});
