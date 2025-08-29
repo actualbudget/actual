@@ -140,15 +140,12 @@ async function saveDiffAndApply(diff, changes, onChange, learnCategories) {
   const transactionId = diff.updated?.[0]?.id;
 
   if (!transactionId) {
-    console.error(
-      'Transaction missing ID in saveDiffAndApply:',
-      {
-        diff,
-        hasChanges: !!changes,
-        newTransactionId: changes?.newTransaction?.id,
-        dataLength: changes?.data?.length,
-      },
-    );
+    console.error('Transaction missing ID in saveDiffAndApply:', {
+      diff,
+      hasChanges: !!changes,
+      newTransactionId: changes?.newTransaction?.id,
+      dataLength: changes?.data?.length,
+    });
     return;
   }
 
