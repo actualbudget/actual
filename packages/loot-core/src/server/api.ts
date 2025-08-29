@@ -855,6 +855,7 @@ handlers['api/schedule-update'] = withMutation(async function ({
             op: 'is',
             value: String(value),
           });
+          conditionsUpdated = true;
         }
         break;
       }
@@ -868,6 +869,7 @@ handlers['api/schedule-update'] = withMutation(async function ({
             op: 'is',
             value: String(value),
           });
+          conditionsUpdated = true;
         }
         break;
       }
@@ -891,6 +893,8 @@ handlers['api/schedule-update'] = withMutation(async function ({
           }
           sched._conditions[amountIndex].op = convertedOp;
           conditionsUpdated = true;
+        } else {
+          throw APIError(`Ammount can not be found. There is a bug here`);
         }
         break;
       }
