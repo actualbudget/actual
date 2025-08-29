@@ -6,7 +6,6 @@ import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
 
 import { getMonthYearFormat } from 'loot-core/shared/months';
-import { integerToAmount, amountToInteger } from 'loot-core/shared/util';
 
 import { AmountInput } from './AmountInput';
 import { PercentInput } from './PercentInput';
@@ -36,6 +35,7 @@ export function GenericInput({
   ref,
   style,
   onChange,
+  onEnter = undefined,
   op = undefined,
 }) {
   const dispatch = useDispatch();
@@ -67,8 +67,9 @@ export function GenericInput({
         return (
           <AmountInput
             inputRef={ref}
-            value={amountToInteger(value)}
-            onUpdate={v => onChange(integerToAmount(v))}
+            value={value}
+            onUpdate={v => onChange(v)}
+            onEnter={(e, updatedValue) => onEnter?.(e, updatedValue)}
           />
         );
       case 'percentage':
