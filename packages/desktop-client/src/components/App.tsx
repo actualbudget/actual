@@ -242,7 +242,9 @@ export function App() {
                       <AppInner />
                     </ErrorBoundary>
                     <ThemeStyle />
-                    <Modals />
+                    <ErrorBoundary FallbackComponent={FatalError}>
+                      <Modals />
+                    </ErrorBoundary>
                     <UpdateNotification />
                   </View>
                 </View>
