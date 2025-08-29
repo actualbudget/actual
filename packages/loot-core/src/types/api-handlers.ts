@@ -8,6 +8,7 @@ import type {
   APICategoryGroupEntity,
   APIFileEntity,
   APIPayeeEntity,
+  APIScheduleEntity,
 } from '../server/api-models';
 import { BudgetFileHandlers } from '../server/budgetfiles/app';
 import { type batchUpdateTransactions } from '../server/transactions';
@@ -17,6 +18,7 @@ import type {
   NewRuleEntity,
   RuleEntity,
   TransactionEntity,
+  ScheduleEntity,
 } from './models';
 
 export interface ApiHandlers {
@@ -188,4 +190,25 @@ export interface ApiHandlers {
   'api/rule-update': (arg: { rule: RuleEntity }) => Promise<RuleEntity>;
 
   'api/rule-delete': (id: string) => Promise<boolean>;
+
+  'api/schedule-create': (
+    schedule: APIScheduleEntity,
+  ) => Promise<ScheduleEntity['id']>;
+
+  'api/schedule-update': (arg: {
+    id: ScheduleEntity['id'];
+    fields: Partial<APIScheduleEntity>;
+    resetNextDate?: boolean;
+  }) => Promise<ScheduleEntity['id']>;
+
+  'api/schedule-delete': (id: string) => Promise<void>;
+
+  'api/schedules-get': () => Promise<APIScheduleEntity[]>;
+  'api/get-id-by-name': (arg: {
+    type: string;
+    name: string;
+  }) => Promise<string>;
+  'api/get-server-version': () => Promise<
+    { error?: string } | { version: string }
+  >;
 }
