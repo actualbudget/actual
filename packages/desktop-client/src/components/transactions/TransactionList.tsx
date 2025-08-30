@@ -12,7 +12,11 @@ import {
   splitTransaction,
   updateTransaction,
 } from 'loot-core/shared/transactions';
-import { applyChanges, getChangedValues } from 'loot-core/shared/util';
+import {
+  applyChanges,
+  getChangedValues,
+  type Diff,
+} from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type CategoryEntity,
@@ -54,6 +58,28 @@ import { useDispatch } from '@desktop-client/redux';
 // differently than a full refresh. It's up to you to decide which
 // one to use when doing updates.
 
+const pendingBatch: {
+  transactions: Map<
+    string,
+    {
+      diff: Partial<Diff<TransactionEntity>>;
+      changes: ReturnType<typeof updateTransaction>;
+      onChange: (
+        transaction: TransactionEntity,
+        transactions: TransactionEntity[],
+      ) => void;
+      learnCategories: boolean;
+      timestamp: number;
+    }
+  >;
+  timer: NodeJS.Timeout | null;
+} = {
+  transactions: new Map(),
+  timer: null,
+};
+
+const BATCH_TIMEOUT_MS = 500;
+
 async function saveDiff(diff, learnCategories) {
   const remoteUpdates = await send('transactions-batch-update', {
     ...diff,
@@ -66,15 +92,80 @@ async function saveDiff(diff, learnCategories) {
   return {};
 }
 
+async function processBatch() {
+  if (pendingBatch.transactions.size === 0) return;
+
+  const batchSnapshot = new Map(pendingBatch.transactions);
+  pendingBatch.transactions.clear();
+  pendingBatch.timer = null;
+
+  const transactionEntries = Array.from(batchSnapshot.entries());
+
+  const [_, firstTransactionData] = transactionEntries[0] || [];
+  const learnCategories = firstTransactionData?.learnCategories || false;
+
+  const combinedDiff = {
+    added: transactionEntries.flatMap(([_, data]) => data.diff.added || []),
+    updated: transactionEntries.flatMap(([_, data]) => data.diff.updated || []),
+    deleted: transactionEntries.flatMap(([_, data]) => data.diff.deleted || []),
+  };
+
+  const remoteDiff = await saveDiff(combinedDiff, learnCategories);
+
+  if (
+    remoteDiff.updates &&
+    remoteDiff.updates.updated &&
+    remoteDiff.updates.updated.length > 0
+  ) {
+    for (const [transactionId, data] of batchSnapshot) {
+      const remoteUpdate = remoteDiff.updates.updated.find(
+        u => u.id === transactionId,
+      );
+      if (remoteUpdate) {
+        data.onChange(
+          // TODO:
+          // @ts-ignore testing
+          applyTransactionDiff(data.changes.newTransaction, {
+            updated: [remoteUpdate],
+          }),
+          // @ts-ignore testing
+          applyChanges({ updated: [remoteUpdate] }, data.changes.data),
+        );
+      }
+    }
+  }
+}
+
 async function saveDiffAndApply(diff, changes, onChange, learnCategories) {
-  const remoteDiff = await saveDiff(diff, learnCategories);
-  onChange(
-    // TODO:
-    // @ts-ignore testing
-    applyTransactionDiff(changes.newTransaction, remoteDiff),
-    // @ts-ignore testing
-    applyChanges(remoteDiff, changes.data),
-  );
+  const transactionId = diff.updated?.[0]?.id;
+
+  if (!transactionId) {
+    console.error('Transaction missing ID in saveDiffAndApply:', {
+      diff,
+      hasChanges: !!changes,
+      newTransactionId: changes?.newTransaction?.id,
+      dataLength: changes?.data?.length,
+    });
+    return;
+  }
+
+  if (pendingBatch.timer) {
+    clearTimeout(pendingBatch.timer);
+  }
+
+  pendingBatch.transactions.set(transactionId, {
+    diff,
+    changes,
+    onChange,
+    learnCategories,
+    timestamp: Date.now(),
+  });
+
+  pendingBatch.timer = setTimeout(() => {
+    processBatch().catch(error => {
+      console.error('Failed to process transaction batch:', error);
+    });
+  }, BATCH_TIMEOUT_MS);
 }
 
 type TransactionListProps = Pick<
