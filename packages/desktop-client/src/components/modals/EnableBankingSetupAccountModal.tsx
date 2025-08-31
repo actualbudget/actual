@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
@@ -7,13 +7,13 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { sendCatch, send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/fetch';
 import {
-  EnableBankingAuthenticationStartResponse,
-  EnableBankingBank,
-  EnableBankingErrorCode,
-  EnableBankingErrorInterface,
-  EnableBankingToken,
+  type EnableBankingAuthenticationStartResponse,
+  type EnableBankingBank,
+  type EnableBankingErrorCode,
+  type EnableBankingErrorInterface,
+  type EnableBankingToken,
 } from 'loot-core/types/models/enablebanking';
 
 import { Error, Warning } from '@desktop-client/components/alerts';
@@ -27,25 +27,21 @@ import {
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { COUNTRY_OPTIONS } from '@desktop-client/components/util/countries';
 import { useEnableBankingStatus } from '@desktop-client/hooks/useEnableBankingStatus';
-import {
-  type Modal as ModalType,
-  pushModal,
-} from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import { start } from 'repl';
+import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 // TODO: Errorhandling
-
 
 function renderError(
   error: EnableBankingErrorInterface,
   t: ReturnType<typeof useTranslation>['t'],
 ) {
-  const error_messages:Partial<Record<EnableBankingErrorCode,string>> = {
-    "TIME_OUT": t('Timed out. Please try again.'),
-    "ENABLEBANKING_APPLICATION_INACTIVE": t('Your Enable Banking application is inactive. Please reconfigure.'),
-    "INTERNAL_ERROR": t('An internal error occurred. Please try again.'),
-  }
+  const error_messages: Partial<Record<EnableBankingErrorCode, string>> = {
+    TIME_OUT: t('Timed out. Please try again.'),
+    ENABLEBANKING_APPLICATION_INACTIVE: t(
+      'Your Enable Banking application is inactive. Please reconfigure.',
+    ),
+    INTERNAL_ERROR: t('An internal error occurred. Please try again.'),
+  };
 
   return (
     <Error style={{ alignSelf: 'center', marginBottom: 10 }}>
@@ -59,110 +55,115 @@ function renderError(
   );
 }
 
-type EnableBankingSetupAccountModalProps = Extract<
-  ModalType,
-  { name: 'enablebanking-setup-account' }
->['options'];
+const WaitingIndicator = ({ message }: { message: string }) => {
+  return (
+    <View style={{ alignItems: 'center', marginTop: 15 }}>
+      <AnimatedLoading
+        color={theme.pageTextDark}
+        style={{ width: 20, height: 20 }}
+      />
+      <View style={{ marginTop: 10, color: theme.pageText }}>{message}</View>
+    </View>
+  );
+};
 
-export function EnableBankingSetupAccountModal({
-  onSuccess,
-}: EnableBankingSetupAccountModalProps) {
+const AspspSelector = ({
+  init_country,
+  init_aspsp,
+  onComplete,
+  onError,
+}: {
+  init_country?: string;
+  init_aspsp?: string;
+  onComplete: (data: EnableBankingAuthenticationStartResponse) => void;
+  onError: (error: EnableBankingErrorInterface) => void;
+}) => {
   const { t } = useTranslation();
 
-  const dispatch = useDispatch();
-  const [error, setError] = useState<EnableBankingErrorInterface | null>(null);
+  const [availableCountries, setAvailableCountries] = useState<
+    { id: string; name: string }[] | null
+  >(null);
+  const [availableAspsps, setAvailableAspsps] = useState<
+    EnableBankingBank[] | null
+  >(null);
+  const [country, setCountry] = useState<{ id: string; name: string } | null>(
+    COUNTRY_OPTIONS.find(country => country.id === init_country) ?? null,
+  );
+  const [aspsp, setAspsp] = useState<string | null>(
+    init_aspsp ? init_aspsp : null,
+  );
+  const [startingAuth, setStartingAuth] = useState<boolean>(false);
 
-  const {
-    configuredEnableBanking: isConfigured,
-    isLoading: isConfigurationLoading,
-  } = useEnableBankingStatus();
+  useEffect(() => {
+    send('enablebanking-countries').then(({ data, error }) => {
+      if (data) {
+        const cids = new Set(data);
+        const availableCountries = COUNTRY_OPTIONS.filter(val =>
+          cids.has(val.id),
+        );
+        setAvailableCountries(availableCountries);
+        return;
+      }
+      onError(error);
+    });
+  }, [onError]);
 
-  async function onClose() {
-    await send('enablebanking-stoppolling');
-  }
+  useEffect(() => {
+    console.log(country);
+    if (country) {
+      send('enablebanking-banks', { country: country.id }).then(
+        ({ data, error }) => {
+          console.log(data, error);
+          if (data) {
+            setAvailableAspsps(data);
+            return;
+          }
+          onError(error);
+        },
+      );
+    }
+  }, [country, onError]);
 
-  const WaitingIndicator = ({message}:{message:string}) =>{
+  const onSelectCountry = (country_id: string) => {
+    if (!country || country_id !== country.id) {
+      setCountry(
+        COUNTRY_OPTIONS.find(country => country.id === country_id) ?? null,
+      );
+      setAspsp(null);
+      setAvailableAspsps(null);
+    }
+  };
+
+  const onLink = async () => {
+    if (country === null || aspsp === null) {
+      onError({ error_code: 'INTERNAL_ERROR', error_type: '' });
+      return;
+    }
+    setStartingAuth(true);
+    const { data, error } = await send('enablebanking-startauth', {
+      country: country.id,
+      aspsp,
+    });
+    if (error) {
+      // Handle the error from start auth.
+      onError(error);
+      setStartingAuth(false);
+      return;
+    }
+
+    onComplete(data);
+    setStartingAuth(false);
+  };
+
+  if (availableCountries === null) {
     return (
-      <View style={{ alignItems: 'center', marginTop: 15 }}>
-        <AnimatedLoading
-          color={theme.pageTextDark}
-          style={{ width: 20, height: 20 }}
-        />
-        <View style={{ marginTop: 10, color: theme.pageText }}>
-          {message}
-        </View>
-      </View>
+      <WaitingIndicator
+        message={t('Getting the available countries from Enable Banking.')}
+      />
     );
   }
 
-  const AspspSelector = ({init_country, init_aspsp,onComplete,onError}:
-    {init_country?:string, init_aspsp?:string,onComplete:(data:EnableBankingAuthenticationStartResponse)=> void, onError:(error:EnableBankingErrorInterface)=>void}) =>{
-    const [availableCountries, setAvailableCountries] = useState<{id:string, name:string}[]|null>(null);
-    const [availableAspsps, setAvailableAspsps] = useState<EnableBankingBank[] |null> (null);
-    const [country, setCountry] = useState<{id:string, name:string}|null>(init_country?availableCountries.find((country) => country.id === init_country):null);
-    const [aspsp, setAspsp] = useState<string|null>(init_aspsp?init_aspsp:null);
-    const [startingAuth, setStartingAuth] = useState<boolean>(false);
-
-    useEffect(()=>{
-      send("enablebanking-countries")
-        .then(({data,error}) =>{
-          if(data){
-            const cids = new Set(data);
-            const availableCountries = COUNTRY_OPTIONS.filter(val => cids.has(val.id));
-            setAvailableCountries(availableCountries);
-            return;
-          }
-          onError(error);
-        })
-
-    },[send])
-
-    useEffect(()=>{
-      console.log(country)
-      if(country){
-        send("enablebanking-banks",{country:country.id})
-        .then(({data,error})=>{
-          if(data){
-            setAvailableAspsps(data)
-            return;
-          }
-          onError(error);
-        })
-      }
-
-    },[country])
-
-    const onSelectCountry = (country_id) => {
-      if(!country || country_id != country.id){
-        setCountry(availableCountries.find((country) => country.id === country_id));
-        setAspsp(null);
-        setAvailableAspsps(null);
-        }
-    }
-
-    const onLink = async () =>{
-      setStartingAuth(true);
-      const {data,error} = await send('enablebanking-startauth', {
-        country:country.id,
-        aspsp: aspsp,
-      });
-      if (error) {
-        // Handle the error from start auth.
-        onError(error);
-        setStartingAuth(false);
-        return;
-      }
-      
-      onComplete(data);
-      setStartingAuth(false);
-    }
-
-
-    if(availableCountries === null){
-      return <WaitingIndicator message={t("Getting the available countries from Enable Banking.")} />
-    }
-
-    return (
+  return (
     <View>
       <FormField>
         <FormLabel
@@ -177,107 +178,118 @@ export function EnableBankingSetupAccountModal({
             a.name.localeCompare(b.name),
           )}
           onSelect={onSelectCountry}
-          value={country? country.id :null}
+          value={country ? country.id : null}
           inputProps={{
             id: 'country-field',
             placeholder: t('(please select)'),
           }}
         />
       </FormField>
-      {(country && !availableAspsps && <WaitingIndicator message = {`Getting aspsps for ${country.name}.`}/>)}
+      {country && !availableAspsps && (
+        <WaitingIndicator message={`Getting aspsps for ${country.name}.`} />
+      )}
 
-      {(availableAspsps && 
-      <FormField>
-        <FormLabel
-          title={t('Choose your bank:')}
-          htmlFor="bank-field"
-        />
-        <Autocomplete
-          focused
-          strict
-          highlightFirst
-          key={country.id}
-          suggestions={availableAspsps
-            .map(bank => {
-              return { id: bank.name, ...bank };
-            })
-            .sort((a, b) => a.name.localeCompare(b.name))}
-          onSelect={setAspsp}
-          value={aspsp}
-          inputProps={{
-            id: 'bank-field',
-            placeholder: t('(please select)'),
-          }}
-        />
-      </FormField>)}
-      {(country && aspsp &&
-      <View>
-        <Warning>
-        <Trans>
-          By enabling bank sync, you will be granting Enable Banking (a
-          third party service) read-only access to your entire account’s
-          transaction history. This service is not affiliated with Actual in
-          any way. Make sure you’ve read and understand Enable Banking’s{' '}
-          <Link
-            variant="external"
-            to="https://gocardless.com/privacy/"
-            linkColor="purple"
-          >
-            Privacy Policy
-          </Link>{' '}
-          before proceeding.
-        </Trans>
-      </Warning>
-      <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
-          <ButtonWithLoading
-            variant="primary"
-            autoFocus
-            style={{
-              padding: '10px 0',
-              fontSize: 15,
-              fontWeight: 600,
-              flexGrow: 1,
+      {country && availableAspsps && (
+        <FormField>
+          <FormLabel title={t('Choose your bank:')} htmlFor="bank-field" />
+          <Autocomplete
+            focused
+            strict
+            highlightFirst
+            key={country.id}
+            suggestions={availableAspsps
+              .map(bank => {
+                return { id: bank.name, ...bank };
+              })
+              .sort((a, b) => a.name.localeCompare(b.name))}
+            onSelect={setAspsp}
+            value={aspsp}
+            inputProps={{
+              id: 'bank-field',
+              placeholder: t('(please select)'),
             }}
-            onPress={onLink}
-            isLoading = {startingAuth}
-          >
-            <Trans>Link bank in browser</Trans> &rarr;
-          </ButtonWithLoading>
-        </View>
+          />
+        </FormField>
+      )}
+      {country && aspsp && (
+        <View>
+          <Warning>
+            <Trans>
+              By enabling bank sync, you will be granting Enable Banking (a
+              third party service) read-only access to your entire account’s
+              transaction history. This service is not affiliated with Actual in
+              any way. Make sure you’ve read and understand Enable Banking’s{' '}
+              <Link
+                variant="external"
+                to="https://gocardless.com/privacy/"
+                linkColor="purple"
+              >
+                Privacy Policy
+              </Link>{' '}
+              before proceeding.
+            </Trans>
+          </Warning>
+          <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+            <ButtonWithLoading
+              variant="primary"
+              autoFocus
+              style={{
+                padding: '10px 0',
+                fontSize: 15,
+                fontWeight: 600,
+                flexGrow: 1,
+              }}
+              onPress={onLink}
+              isLoading={startingAuth}
+            >
+              <Trans>Link bank in browser</Trans> &rarr;
+            </ButtonWithLoading>
+          </View>
         </View>
       )}
-      
+    </View>
+  );
+};
 
-    </View>);
-  }
+const PollingComponent = ({
+  authenticationStartResponse,
+  onComplete,
+  onError,
+}: {
+  authenticationStartResponse: EnableBankingAuthenticationStartResponse;
+  onComplete: (token: EnableBankingToken) => void;
+  onError: (error: EnableBankingErrorInterface) => void;
+}) => {
+  const { t } = useTranslation();
+  useEffect(() => {
+    (async () => {
+      const { redirect_url, state } = authenticationStartResponse;
+      //open redirect_url in browser
+      window.Actual.openURLInBrowser(redirect_url);
+      //polling starts here.
+      const { data, error } = await send('enablebanking-pollauth', { state });
 
-  const PollingComponent = ({authenticationStartResponse, onComplete, onError}:
-    {authenticationStartResponse:EnableBankingAuthenticationStartResponse, 
-      onComplete:(token:EnableBankingToken)=>void,
-      onError:(error)=>void}) =>{
-    useEffect(()=>{
-      (async () =>{
-        const { redirect_url, state } = authenticationStartResponse;
-        //open redirect_url in browser
-        window.Actual.openURLInBrowser(redirect_url);
-        //polling starts here.
-        const {data,error} = await send('enablebanking-pollauth', { state });
+      if (error) {
+        onError(error);
+        return;
+      }
+      onComplete(data);
+    })();
+  }, [authenticationStartResponse, onComplete, onError]);
 
-        if (error) {
-          onError(error);
-          return;
-        }
-        onComplete(data);
-      })();
+  return (
+    <WaitingIndicator
+      message={t('Please complete the authentication in the opened window.')}
+    />
+  );
+};
 
-    }, [authenticationStartResponse])
-
-    return <WaitingIndicator message={t("Please complete the authentication in the opened window.")} />
-    
-  }
-
-  const CompletedAuthorizationIndicator = ({onContinue}:{onContinue:()=> void}) =>{
-    return (
+const CompletedAuthorizationIndicator = ({
+  onContinue,
+}: {
+  onContinue: () => void;
+}) => {
+  return (
     <Button
       variant="primary"
       autoFocus
@@ -291,48 +303,96 @@ export function EnableBankingSetupAccountModal({
     >
       <Trans>Success! Click to continue</Trans> &rarr;
     </Button>
-              );
+  );
+};
 
+type EnableBankingSetupAccountModalProps = Extract<
+  ModalType,
+  { name: 'enablebanking-setup-account' }
+>['options'];
+
+export function EnableBankingSetupAccountModal({
+  onSuccess,
+}: EnableBankingSetupAccountModalProps) {
+  const { t } = useTranslation();
+
+  const [error, setError] = useState<EnableBankingErrorInterface | null>(null);
+
+  const { isLoading: isConfigurationLoading } = useEnableBankingStatus();
+
+  async function onClose() {
+    await send('enablebanking-stoppolling');
   }
 
-  const [phase, setPhase] = useState<"checkingAvailable"|"selectingAspsp"|"polling"|"done">("checkingAvailable");
-  const [authenticationStartResponse, setAuthenticationStartResponse] = useState<EnableBankingAuthenticationStartResponse|null>(null);
-  const [token, setToken] = useState<EnableBankingToken|null>(null);
+  const [phase, setPhase] = useState<
+    'checkingAvailable' | 'selectingAspsp' | 'polling' | 'done'
+  >('checkingAvailable');
+  const [authenticationStartResponse, setAuthenticationStartResponse] =
+    useState<EnableBankingAuthenticationStartResponse | null>(null);
+  const [token, setToken] = useState<EnableBankingToken | null>(null);
 
-  const resetState = ()=>{
-    setPhase("checkingAvailable");
+  const resetState = () => {
+    setPhase('checkingAvailable');
     setAuthenticationStartResponse(null);
     setToken(null);
-  }
+  };
 
-  useEffect(()=>{
-    if(!isConfigurationLoading && phase == "checkingAvailable"){
-      setPhase("selectingAspsp");
+  useEffect(() => {
+    if (!isConfigurationLoading && phase === 'checkingAvailable') {
+      setPhase('selectingAspsp');
     }
-  }, [isConfigurationLoading]);
+  }, [isConfigurationLoading, phase]);
 
-  let component = <WaitingIndicator message="Checking if Enable Banking is available..." />
+  let component = (
+    <WaitingIndicator message="Checking if Enable Banking is available..." />
+  );
 
-  switch(phase){
-    case "selectingAspsp":
-      component = <AspspSelector onComplete = {(response:EnableBankingAuthenticationStartResponse)=>{
-        setAuthenticationStartResponse(response);
-        setPhase("polling");
-      }} onError = {(error)=>{setError(error); resetState();}}/>;
+  switch (phase) {
+    case 'selectingAspsp':
+      component = (
+        <AspspSelector
+          onComplete={(response: EnableBankingAuthenticationStartResponse) => {
+            setAuthenticationStartResponse(response);
+            setPhase('polling');
+          }}
+          onError={error => {
+            setError(error);
+            resetState();
+          }}
+        />
+      );
       break;
-    case "polling":
-      component = <PollingComponent authenticationStartResponse={authenticationStartResponse} onComplete={(token)=>{
-        setToken(token);
-        setPhase("done");
-      }}  onError={(error)=>{
-        setError(error)
-        resetState();
-      }} />;
+    case 'polling':
+      if (authenticationStartResponse === null) {
+        setPhase('selectingAspsp');
+        break;
+      }
+      component = (
+        <PollingComponent
+          authenticationStartResponse={authenticationStartResponse}
+          onComplete={token => {
+            setToken(token);
+            setPhase('done');
+          }}
+          onError={error => {
+            setError(error);
+            resetState();
+          }}
+        />
+      );
       break;
-    case "done":
-      component = <CompletedAuthorizationIndicator onContinue={async ()=>{
-        await onSuccess(token);
-      }} />
+    case 'done':
+      if (token === null) {
+        setPhase('polling');
+        break;
+      }
+      component = (
+        <CompletedAuthorizationIndicator
+          onContinue={async () => {
+            await onSuccess(token);
+          }}
+        />
+      );
   }
   return (
     <Modal
@@ -355,7 +415,7 @@ export function EnableBankingSetupAccountModal({
                 Banking will not be able to withdraw funds from your accounts.
               </Trans>
             </Paragraph>
-            {(component)}
+            {component}
           </View>
         </>
       )}

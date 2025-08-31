@@ -16,7 +16,10 @@ import { send } from 'loot-core/platform/client/fetch';
 
 import { useAuth } from '@desktop-client/auth/AuthProvider';
 import { Permissions } from '@desktop-client/auth/types';
-import { authorizeEnableBankingSession, deconfigureEnableBanking } from '@desktop-client/banksync/enablebanking';
+import {
+  authorizeEnableBankingSession,
+  deconfigureEnableBanking,
+} from '@desktop-client/banksync/enablebanking';
 import { authorizeBank } from '@desktop-client/banksync/gocardless';
 import { Warning } from '@desktop-client/components/alerts';
 import { Link } from '@desktop-client/components/common/Link';
@@ -316,8 +319,8 @@ export function CreateAccountModal({
 
   const onEnableBankingReset = () => {
     deconfigureEnableBanking().then(() => {
-        setIsEnableBankingSetupComplete(false);
-      });
+      setIsEnableBankingSetupComplete(false);
+    });
   };
 
   const onPluggyAiReset = () => {

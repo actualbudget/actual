@@ -1,12 +1,13 @@
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { send } from 'loot-core/platform/client/fetch';
 
 import { useSyncServerStatus } from './useSyncServerStatus';
-import { useDispatch } from '@desktop-client/redux';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useTranslation } from 'react-i18next';
+
 import { deconfigureEnableBanking } from '@desktop-client/banksync/enablebanking';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
 export function useEnableBankingStatus() {
   const [configuredEnableBanking, setConfiguredEnableBanking] = useState<
     boolean | null
@@ -21,24 +22,26 @@ export function useEnableBankingStatus() {
       setIsLoading(true);
 
       const results = await send('enablebanking-status');
-      if(results.error){
+      if (results.error) {
         setConfiguredEnableBanking(false);
-        if(results.error.error_code === "ENABLEBANKING_APPLICATION_INACTIVE"){
-          dispatch(addNotification({
-            notification:{
-              type: "error",
-              message: t("Your Enable Banking application is inactive. Please reconfigure."),
-              button:{
-                title: t("reconfigure"),
-                action: deconfigureEnableBanking
-              
-              }
-            }
-          }))
+        if (results.error.error_code === 'ENABLEBANKING_APPLICATION_INACTIVE') {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'error',
+                message: t(
+                  'Your Enable Banking application is inactive. Please reconfigure.',
+                ),
+                button: {
+                  title: t('reconfigure'),
+                  action: deconfigureEnableBanking,
+                },
+              },
+            }),
+          );
         }
         setIsLoading(false);
         return;
-
       }
 
       setConfiguredEnableBanking(true);
@@ -48,7 +51,7 @@ export function useEnableBankingStatus() {
     if (status === 'online') {
       fetch();
     }
-  }, [status]);
+  }, [status, dispatch, t]);
 
   return {
     configuredEnableBanking,

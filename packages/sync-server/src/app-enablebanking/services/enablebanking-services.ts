@@ -41,12 +41,7 @@ export const enableBankingservice = {
   HOSTNAME: 'https://api.enablebanking.com/',
 
   _activeAuths: new Map<string, string>(),
-  setupSecrets: async (applicationId: string | null, secretKey: string | null) => {
-    if( applicationId == null && secretKey == null){
-      secretsService.delete(SecretName.enablebanking_applicationId);
-      secretsService.delete(SecretName.enablebaanking_secret);
-      return true;
-    }
+  setupSecrets: async (applicationId: string, secretKey: string) => {
     // Check if we can get a jwt with provided data.
     let jwt: string;
     try {
@@ -105,7 +100,7 @@ export const enableBankingservice = {
             .then(data => {
               if (isErrorResponse(data)) {
                 return handleErrorResponse(data);
-              }else if ((data as ErrorResponse).code === 403){
+              } else if ((data as ErrorResponse).code === 403) {
                 return new SecretsInvalidError();
               } else {
                 console.error(`Enable Banking API returned an error:`, data);

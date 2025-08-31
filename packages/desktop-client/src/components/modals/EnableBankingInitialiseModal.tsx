@@ -1,6 +1,6 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
@@ -47,7 +47,7 @@ export const EnableBankingInitialiseModal = ({
   };
 
   const onSubmit = async (close: () => void) => {
-    console.log("here we go.")
+    console.log('here we go.');
     if (!applicationId || !secretKey) {
       setIsValid(false);
       setError(
@@ -58,20 +58,26 @@ export const EnableBankingInitialiseModal = ({
 
     setIsLoading(true);
 
-    const  {error, data} =  await(send('enablebanking-configure',{secret:secretKey, applicationId: applicationId}))
-    if (error){
+    const { error } = await send('enablebanking-configure', {
+      secret: secretKey,
+      applicationId,
+    });
+    if (error) {
       setIsLoading(false);
       setIsValid(false);
-      switch(error.error_code){
-        case "ENABLEBANKING_SECRETS_INVALID":
+      switch (error.error_code) {
+        case 'ENABLEBANKING_SECRETS_INVALID':
           setError(t('The provided credentials are not valid.'));
           break;
-        case "ENABLEBANKING_APPLICATION_INACTIVE":
-          setError(t('The Enable Banking application is inactive. Please create a new application.'))
+        case 'ENABLEBANKING_APPLICATION_INACTIVE':
+          setError(
+            t(
+              'The Enable Banking application is inactive. Please create a new application.',
+            ),
+          );
           break;
         default:
-          setError(t('Something went wrong. Please try again later.'))
-
+          setError(t('Something went wrong. Please try again later.'));
       }
       return;
     }

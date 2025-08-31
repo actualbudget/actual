@@ -2,7 +2,7 @@ export type EnableBankingEndpoints = {
   '/configure': Endpoint<ConfigureBody, void>;
   '/status': Endpoint<undefined, EnableBankingStatusResponse>;
   '/countries': Endpoint<undefined, string[]>;
-  '/get_aspsps': Endpoint<{country?:string}, EnableBankingBank[]>;
+  '/get_aspsps': Endpoint<{ country?: string }, EnableBankingBank[]>;
   '/start_auth': Endpoint<
     { country: string; aspsp: string },
     EnableBankingAuthenticationStartResponse
@@ -19,8 +19,6 @@ export type Endpoint<BodyType, ResponseType> = {
   body: BodyType;
   response: ResponseType;
 };
-
-
 
 export type EnableBankingResponse<T extends keyof EnableBankingEndpoints> =
   | {
@@ -48,7 +46,7 @@ export type EnableBankingErrorInterface = {
 };
 
 export type ConfigureBody = {
-  applicationId: string| null;
+  applicationId: string | null;
   secret: string | null;
 };
 
@@ -56,8 +54,8 @@ export type TransactionsBody = {
   account_id: string;
   startDate?: string;
   endDate?: string;
-  bank_id?:string;
-}
+  bank_id?: string;
+};
 
 export type EnableBankingBank = {
   name: string;

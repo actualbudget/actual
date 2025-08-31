@@ -52,8 +52,8 @@ post('/countries', async () => {
   return application.countries;
 });
 
-post('/get_aspsps', async (req) => {
-  const {country} =req.body;
+post('/get_aspsps', async req => {
+  const { country } = req.body;
   const responseData = (await enableBankingservice.getASPSPs(country)).aspsps;
   return responseData;
 });

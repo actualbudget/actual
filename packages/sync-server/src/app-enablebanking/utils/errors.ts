@@ -171,7 +171,7 @@ export function handleErrorInHandler<T extends keyof EnableBankingEndpoints>(
               'Something went wrong while using the Enable Banking API.',
           );
         }
-        console.log("Returning error", err.data())
+        console.log('Returning error', err.data());
         res.send({
           status: 'ok',
           data: { error: err.data() },
