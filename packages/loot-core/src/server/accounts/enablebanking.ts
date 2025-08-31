@@ -2,56 +2,66 @@ import { AccountEntity } from 'loot-core/types/models';
 
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import {
-  EnableBankingBank,
-  EnableBankingToken,
-  ErrorResponse,
-  isErrorResponse,
-  EnableBankingStatusResponse,
-  EnableBankingAuthenticationStartResponse,
+  EnableBankingEndpoints,
+  EnableBankingResponse,
 } from '../../types/models/enablebanking';
 import { createApp } from '../app';
 import { BankSyncError } from '../errors';
 import { get as _get, post as _post } from '../post';
 import { getServer } from '../server-config';
 
-async function post<T>(endpoint: string, data?: unknown) {
+type EBE = EnableBankingEndpoints;
+
+type KeysRequiringBody = {
+  [K in keyof EBE]: [EBE[K]['body']] extends [undefined] ? never : K
+}[keyof EBE];
+
+type KeysWithoutBody = {
+  [K in keyof EBE]: [EBE[K]['body']] extends [undefined] ? K : never
+}[keyof EBE];
+
+ function post<T extends KeysRequiringBody>(
+  path: T,
+  body: EBE[T]['body'],
+): Promise<EnableBankingResponse<T>>;
+function post<T extends KeysWithoutBody>(
+  path: T,
+): Promise<EnableBankingResponse<T>>;
+
+async function post(path: keyof EBE, body?: unknown){
   const userToken = await asyncStorage.getItem('user-token');
   const serverConfig = getServer();
   if (!serverConfig) {
     throw new Error('Failed to get server config.');
   }
 
-  const response = await _post(
-    serverConfig.ENABLEBANKING_SERVER + endpoint,
-    data,
+  return await _post(
+    serverConfig.ENABLEBANKING_SERVER + path,
+    body,
     {
       'X-ACTUAL-TOKEN': userToken,
     },
   );
-
-  if (isErrorResponse(response)) {
-    throw new BankSyncError(
-      response.error_type ?? response.error_code,
-      response.error_code,
-      response.error_code,
-    );
-  }
-
-  return response as T;
 }
 
-async function getStatus(): Promise<EnableBankingStatusResponse> | never {
-  const resp: EnableBankingStatusResponse = await post('/status');
-  return resp;
+async function configure({secret, applicationId}: {secret: string | null; applicationId: string | null}) {
+  return await post('/configure',{
+    secret,
+    applicationId
+  });
 }
 
-async function getCountries(): Promise<{ countries: string[] }> | never {
+async function getStatus() {
+  return await post('/status');
+}
+
+async function getCountries() {
   return await post('/countries');
 }
 
-async function getBanks(): Promise<EnableBankingBank[]> | never {
-  const resp: EnableBankingBank[] = await post('/get_aspsps');
-  return resp;
+async function getBanks(body:{country?:string}){
+  const {country} = body ||{};
+  return await post('/get_aspsps',{country});
 }
 
 async function startAuth({
@@ -60,81 +70,41 @@ async function startAuth({
 }: {
   country: string;
   aspsp: string;
-}): Promise<EnableBankingAuthenticationStartResponse> | never {
-  const resp: EnableBankingAuthenticationStartResponse = await post(
+}){
+  return await post(
     '/start_auth',
     { country, aspsp },
   );
-  return resp;
 }
 
 let stopPolling = false;
-async function pollAuth({ state }: { state: string }) {
+
+async function pollAuth({ state }: { state: string }):Promise<EnableBankingResponse<'/get_session'>> {
   stopPolling = false;
   const startTime = Date.now();
-
-  async function pollFunction(
-    cb: (
-      data:
-        | { status: 'timeout' }
-        | { status: 'unknown'; message?: string }
-        | { status: 'success'; data: EnableBankingToken },
-    ) => void,
-  ) {
-    if (stopPolling) {
-      return;
+  console.log("starting poll");
+  while(!stopPolling){
+    const resp = await post('/get_session', {state});
+    console.log("poll response", resp);
+    if(resp.data || resp.error.error_code !== 'NOT_READY'){
+      console.log("returning");
+      return resp;
     }
-
     if (Date.now() - startTime >= 1000 * 60 * 10) {
-      cb({ status: 'timeout' });
-      return;
+      console.log("Time out reached after 10 minutes")
+      return{error:{
+        error_code: 'TIME_OUT',
+        error_type: 'Time out has been reached',
+      }};
     }
-
-    try {
-      const data: EnableBankingToken = await post('/get_session', { state });
-
-      cb({ status: 'success', data });
-    } catch (e) {
-      if (e instanceof BankSyncError) {
-        if (e.code === 'NOT_READY') {
-          setTimeout(() => pollFunction(cb), 3000);
-          return;
-        }
-        console.error('Failed linking Enable Banking account:', e.code);
-        cb({ status: 'unknown', message: e.reason });
-        return;
-      }
-      console.error(
-        'Failed linking Enable Banking account:',
-        (e as Error).name,
-      );
-      cb({
-        status: 'unknown',
-        message: e instanceof Error ? e.message : 'unknown',
-      });
-    }
+    console.log("waiting");
+    await new Promise(r => setTimeout(r, 1000));
   }
-  return new Promise<EnableBankingToken | ErrorResponse>(resolve => {
-    pollFunction(data => {
-      if (data.status === 'success') {
-        resolve(data.data);
-        return;
-      }
 
-      if (data.status === 'timeout') {
-        resolve({
-          error_code: 'TIME_OUT',
-          error_type: 'Time out has been reached',
-        });
-        return;
-      }
-
-      resolve({
-        error_code: 'SERVER',
-        error_type: data.message,
-      });
-    });
-  });
+  return {error:{
+    error_code: 'TIME_OUT',
+    error_type: 'Polling was stopped',
+  }};
 }
 
 async function stopAuthPoll() {
@@ -142,31 +112,33 @@ async function stopAuthPoll() {
 }
 
 async function completeAuth({ state, code }: { state: string; code: string }) {
-  //erro handling
-  await post('/complete_auth', { state, code });
-  return;
+  return await post('/complete_auth', { state, code });
 }
 
 export async function downloadEnableBankingTransactions(
   acctId: AccountEntity['id'],
-  since: string,
+  startDate: string,
   bankId: string,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
 
-  console.log(`Pulling transactions from enablebanking since ${since}`);
+  console.log(`Pulling transactions from enablebanking since ${startDate}`);
 
-  const res = await post('/transactions', {
+  const {error,data} =  await post('/transactions', {
     account_id: acctId,
-    startDate: since,
+    startDate: startDate,
     bank_id: bankId,
   });
-  console.log(res);
-  return res;
+  if (error){
+    console.log("got error", error)
+    throw new BankSyncError(error.error_type, error.error_code, error.error_code);
+  }
+  return data;
 }
 
 export type AccountHandlers = {
+  'enablebanking-configure': typeof configure;
   'enablebanking-status': typeof getStatus;
   'enablebanking-banks': typeof getBanks;
   'enablebanking-countries': typeof getCountries;
@@ -177,6 +149,7 @@ export type AccountHandlers = {
 };
 
 export const app = createApp<AccountHandlers>();
+app.method('enablebanking-configure', configure);
 app.method('enablebanking-status', getStatus);
 app.method('enablebanking-banks', getBanks);
 app.method('enablebanking-countries', getCountries);

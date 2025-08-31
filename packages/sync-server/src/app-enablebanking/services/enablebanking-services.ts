@@ -11,15 +11,17 @@ import {
   Account,
   EnableBankingAuthenticationStartResponse,
   EnableBankingToken,
-  EnableBankingTransaction,
+  Transaction,
 } from '../models/enablebanking.js';
 import {
   ApplicationInactiveError,
   EnableBankingError,
   EnableBankingSetupError,
+  ErrorResponse,
   handleErrorResponse,
   isErrorResponse,
   ResourceNotFoundError,
+  SecretsInvalidError,
 } from '../utils/errors.js';
 import { getJWT } from '../utils/jwt.js';
 
@@ -39,15 +41,18 @@ export const enableBankingservice = {
   HOSTNAME: 'https://api.enablebanking.com/',
 
   _activeAuths: new Map<string, string>(),
-  setupSecrets: async (applicationId: string, secretKey: string) => {
+  setupSecrets: async (applicationId: string | null, secretKey: string | null) => {
+    if( applicationId == null && secretKey == null){
+      secretsService.delete(SecretName.enablebanking_applicationId);
+      secretsService.delete(SecretName.enablebaanking_secret);
+      return true;
+    }
     // Check if we can get a jwt with provided data.
     let jwt: string;
     try {
       jwt = getJWT(applicationId, secretKey);
     } catch (error) {
-      // TODO: The only expected error is if the secretKey is not in the right format. Others should be
-      // reported to dev. Pointing to internal server error.
-      return false;
+      throw new SecretsInvalidError();
     }
 
     // Check if jwt is recognized by Enable Banking
@@ -100,6 +105,8 @@ export const enableBankingservice = {
             .then(data => {
               if (isErrorResponse(data)) {
                 return handleErrorResponse(data);
+              }else if ((data as ErrorResponse).code === 403){
+                return new SecretsInvalidError();
               } else {
                 console.error(`Enable Banking API returned an error:`, data);
                 return new EnableBankingError(
@@ -259,7 +266,7 @@ export const enableBankingservice = {
     date_from?: string,
     date_to?: string,
     bank_id?: string,
-  ): Promise<EnableBankingTransaction[]> => {
+  ): Promise<Transaction[]> => {
     const client = enableBankingservice.getClient();
     const query: operations['get_account_transactions_accounts__account_id__transactions_get']['parameters']['query'] =
       {};

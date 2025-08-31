@@ -9,7 +9,6 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { getSecretsError } from 'loot-core/shared/errors';
 
 import { Error } from '@desktop-client/components/alerts';
 import {
@@ -48,6 +47,7 @@ export const EnableBankingInitialiseModal = ({
   };
 
   const onSubmit = async (close: () => void) => {
+    console.log("here we go.")
     if (!applicationId || !secretKey) {
       setIsValid(false);
       setError(
@@ -58,43 +58,21 @@ export const EnableBankingInitialiseModal = ({
 
     setIsLoading(true);
 
-    let { error, reason } =
-      (await send('secret-set', {
-        name: 'enablebanking_applicationId',
-        value: applicationId,
-      })) || {};
-
-    if (error) {
+    const  {error, data} =  await(send('enablebanking-configure',{secret:secretKey, applicationId: applicationId}))
+    if (error){
       setIsLoading(false);
       setIsValid(false);
-      setError(getSecretsError(error, reason));
-      return;
-    } else {
-      ({ error, reason } =
-        (await send('secret-set', {
-          name: 'enablebanking_secret',
-          value: secretKey,
-        })) || {});
-      if (error) {
-        setIsLoading(false);
-        setIsValid(false);
-        setError(getSecretsError(error, reason));
-        return;
+      switch(error.error_code){
+        case "ENABLEBANKING_SECRETS_INVALID":
+          setError(t('The provided credentials are not valid.'));
+          break;
+        case "ENABLEBANKING_APPLICATION_INACTIVE":
+          setError(t('The Enable Banking application is inactive. Please create a new application.'))
+          break;
+        default:
+          setError(t('Something went wrong. Please try again later.'))
+
       }
-    }
-
-    // check if correct
-    const res = await send('enablebanking-status');
-
-    if (!res['configured']) {
-      setIsLoading(false);
-      setIsValid(false);
-      setError(
-        getSecretsError(
-          t('The provided credentials are not correct'),
-          t('The provided credentials are not correct'),
-        ),
-      );
       return;
     }
 

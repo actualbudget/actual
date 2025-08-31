@@ -10,7 +10,7 @@ import {
   EnableBankingEndpoints,
 } from '../models/enablebanking.js';
 
-type ErrorResponse = components['schemas']['ErrorResponse'];
+export type ErrorResponse = components['schemas']['ErrorResponse'];
 
 export class EnableBankingError extends Error {
   error_code: EnableBankingErrorCode;
@@ -66,8 +66,8 @@ export function isErrorResponse(response: unknown): response is ErrorResponse {
   return (
     typeof response === 'object' &&
     response !== null &&
-    'code' in response &&
-    typeof (response as ErrorResponse).code === 'string'
+    'error' in response &&
+    typeof (response as ErrorResponse).error === 'string'
   );
 }
 
@@ -171,6 +171,7 @@ export function handleErrorInHandler<T extends keyof EnableBankingEndpoints>(
               'Something went wrong while using the Enable Banking API.',
           );
         }
+        console.log("Returning error", err.data())
         res.send({
           status: 'ok',
           data: { error: err.data() },

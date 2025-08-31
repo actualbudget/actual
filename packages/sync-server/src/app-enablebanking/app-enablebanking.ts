@@ -36,7 +36,7 @@ function post<T extends keyof EnableBankingEndpoints>(
 post('/configure', async req => {
   const { applicationId, secret } = req.body;
 
-  enableBankingservice.setupSecrets(applicationId, secret);
+  await enableBankingservice.setupSecrets(applicationId, secret);
   return;
 });
 
@@ -52,8 +52,9 @@ post('/countries', async () => {
   return application.countries;
 });
 
-post('/get_aspsps', async () => {
-  const responseData = (await enableBankingservice.getASPSPs()).aspsps;
+post('/get_aspsps', async (req) => {
+  const {country} =req.body;
+  const responseData = (await enableBankingservice.getASPSPs(country)).aspsps;
   return responseData;
 });
 

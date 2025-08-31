@@ -2,12 +2,25 @@ import {
   type AccountEntity,
   type SyncServerGoCardlessAccount,
 } from 'loot-core/types/models';
-import { type EnableBankingToken } from 'loot-core/types/models/enablebanking';
+import { EnableBankingErrorInterface, type EnableBankingToken } from 'loot-core/types/models/enablebanking';
 
 import { linkAccount } from '@desktop-client/accounts/accountsSlice';
 import { closeModal, pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { type AppDispatch } from '@desktop-client/redux/store';
+import { send } from 'loot-core/platform/client/fetch';
+
+// export function handleEnableBankingError(error: EnableBankingErrorInterface){
+//   const dispatch = useDispatch();
+//   switch(error.error_code){
+
+//   }
+// }
+
+
+export async function deconfigureEnableBanking(){
+  await send('enablebanking-configure', {applicationId: null, secret: null});
+}
 
 export function selectEnableBankingAccounts(
   dispatch: AppDispatch,

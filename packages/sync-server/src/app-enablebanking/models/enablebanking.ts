@@ -2,7 +2,7 @@ export type EnableBankingEndpoints = {
   '/configure': Endpoint<ConfigureBody, void>;
   '/status': Endpoint<undefined, EnableBankingStatusResponse>;
   '/countries': Endpoint<undefined, string[]>;
-  '/get_aspsps': Endpoint<undefined, EnableBankingBank[]>;
+  '/get_aspsps': Endpoint<{country?:string}, EnableBankingBank[]>;
   '/start_auth': Endpoint<
     { country: string; aspsp: string },
     EnableBankingAuthenticationStartResponse
@@ -10,10 +10,7 @@ export type EnableBankingEndpoints = {
   '/get_session': Endpoint<{ state: string }, EnableBankingToken>;
   '/complete_auth': Endpoint<{ state: string; code: string }, void>;
   '/get_accounts': Endpoint<{ session_id: string }, EnableBankingToken>;
-  '/transactions': Endpoint<
-    { account_id: string },
-    EnableBankingTransactionsResponse
-  >;
+  '/transactions': Endpoint<TransactionsBody, TransactionsResponse>;
   '/token': Endpoint<undefined, EnableBankingToken>;
   '/accounts': Endpoint<undefined, SyncServerEnableBankingAccount[]>;
 };
@@ -22,6 +19,8 @@ export type Endpoint<BodyType, ResponseType> = {
   body: BodyType;
   response: ResponseType;
 };
+
+
 
 export type EnableBankingResponse<T extends keyof EnableBankingEndpoints> =
   | {
@@ -40,17 +39,25 @@ export type EnableBankingErrorCode =
   | 'ENABLEBANKING_SESSION_CLOSED'
   | 'BAD_REQUEST'
   | 'NOT_READY'
-  | 'NOT_FOUND';
-
-export type ConfigureBody = {
-  applicationId: string;
-  secret: string;
-};
+  | 'NOT_FOUND'
+  | 'TIME_OUT';
 
 export type EnableBankingErrorInterface = {
   error_code: EnableBankingErrorCode;
   error_type: string;
 };
+
+export type ConfigureBody = {
+  applicationId: string| null;
+  secret: string | null;
+};
+
+export type TransactionsBody = {
+  account_id: string;
+  startDate?: string;
+  endDate?: string;
+  bank_id?:string;
+}
 
 export type EnableBankingBank = {
   name: string;
@@ -81,7 +88,7 @@ export type EnableBankingStatusResponse = {
   configured: boolean;
 };
 
-export type EnableBankingTransaction = {
+export type Transaction = {
   amount: number;
   payeeName: string;
   notes: string;
@@ -89,8 +96,8 @@ export type EnableBankingTransaction = {
   [x: string]: unknown;
 };
 
-export type EnableBankingTransactionsResponse = {
-  transactions: EnableBankingTransaction[];
+export type TransactionsResponse = {
+  transactions: Transaction[];
 };
 
 export type Account = {
