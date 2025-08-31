@@ -22,6 +22,7 @@ export function CurrencySettings() {
       new Map<string, string>([
         ['', t('None')],
         ['AUD', t('Australian Dollar')],
+        ['BRL', t('Brazilian Real')],
         ['CAD', t('Canadian Dollar')],
         ['CHF', t('Swiss Franc')],
         ['CNY', t('Yuan Renminbi')],
@@ -29,6 +30,7 @@ export function CurrencySettings() {
         ['GBP', t('Pound Sterling')],
         ['HKD', t('Hong Kong Dollar')],
         ['INR', t('Indian Rupee')],
+        ['JMD', t('Jamaican Dollar')],
         // ['JPY', t('Yen')],
         ['MDL', t('Moldovan Leu')],
         ['PHP', t('Philippine Peso')],
@@ -36,6 +38,7 @@ export function CurrencySettings() {
         ['RON', t('Romanian Leu')],
         ['SEK', t('Swedish Krona')],
         ['SGD', t('Singapore Dollar')],
+        ['THB', t('Thai Baht')],
         ['TRY', t('Turkish Lira')],
         ['USD', t('US Dollar')],
         ['QAR', t('Qatari Riyal')],
