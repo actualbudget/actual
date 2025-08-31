@@ -1184,7 +1184,12 @@ const Transaction = memo(function Transaction({
           triggerRef={triggerRef}
           isOpen
           isNonModal
-          style={{ width: 375, padding: 5, maxHeight: '38px !important' }}
+          style={{
+            maxWidth: 500,
+            minWidth: 375,
+            padding: 5,
+            maxHeight: '38px !important',
+          }}
           shouldFlip={false}
           placement="bottom end"
           UNSTABLE_portalContainer={listContainerRef.current}
@@ -1703,7 +1708,7 @@ function TransactionError({
             }}
             data-testid="transaction-error"
           >
-            <Text>
+            <Text style={{ whiteSpace: 'nowrap' }}>
               <Trans>Amount left:</Trans>{' '}
               <Text style={{ fontWeight: 500 }}>
                 {integerToCurrency(
