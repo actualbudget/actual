@@ -78,13 +78,33 @@ const pendingBatch: {
   timer: null,
 };
 
-const BATCH_TIMEOUT_MS = 500;
+let BATCH_TIMEOUT_MS = 500;
+
+if (typeof window !== 'undefined') {
+  (
+    window as typeof window & { __setBatchTimeout: (ms: number) => void }
+  ).__setBatchTimeout = (ms: number) => {
+    BATCH_TIMEOUT_MS = ms;
+    console.log(`Batch timeout changed to ${ms}ms`);
+    return;
+  };
+  console.log(
+    `Batch timeout: ${BATCH_TIMEOUT_MS}ms | Use __setBatchTimeout(ms) to change`,
+  );
+}
 
 async function saveDiff(diff, learnCategories) {
+  const startTime = performance.now();
+
   const remoteUpdates = await send('transactions-batch-update', {
     ...diff,
     learnCategories,
   });
+
+  const duration = performance.now() - startTime;
+  console.log(
+    `Batch completed: ${diff.updated?.length || 0} transactions (${duration.toFixed(0)}ms)`,
+  );
 
   if (remoteUpdates && remoteUpdates.updated.length > 0) {
     return { updates: remoteUpdates };
@@ -94,6 +114,11 @@ async function saveDiff(diff, learnCategories) {
 
 async function processBatch() {
   if (pendingBatch.transactions.size === 0) return;
+
+  const batchSize = pendingBatch.transactions.size;
+  console.log(
+    `Processing ${batchSize} transaction${batchSize > 1 ? 's' : ''}...`,
+  );
 
   const batchSnapshot = new Map(pendingBatch.transactions);
   pendingBatch.transactions.clear();
@@ -138,6 +163,7 @@ async function processBatch() {
 
 async function saveDiffAndApply(diff, changes, onChange, learnCategories) {
   const transactionId = diff.updated?.[0]?.id;
+  const addToBatchTime = performance.now();
 
   if (!transactionId) {
     console.error('Transaction missing ID in saveDiffAndApply:', {
@@ -158,8 +184,14 @@ async function saveDiffAndApply(diff, changes, onChange, learnCategories) {
     changes,
     onChange,
     learnCategories,
-    timestamp: Date.now(),
+    timestamp: addToBatchTime,
   });
+
+  if (BATCH_TIMEOUT_MS === 0) {
+    console.log(`Added ${transactionId} (immediate)`);
+  } else {
+    console.log(`Added ${transactionId} (${BATCH_TIMEOUT_MS}ms delay)`);
+  }
 
   pendingBatch.timer = setTimeout(() => {
     processBatch().catch(error => {
@@ -276,6 +308,10 @@ export function TransactionList({
 
   const onSave = useCallback(
     async (transaction: TransactionEntity) => {
+      const transactionId = transaction.id;
+
+      console.log(`User changed transaction ${transactionId}`);
+
       const changes = updateTransaction(
         transactionsLatest.current,
         transaction,
@@ -285,13 +321,17 @@ export function TransactionList({
       if (changes.diff.updated.length > 0) {
         const dateChanged = !!changes.diff.updated[0].date;
         if (dateChanged) {
-          // Make sure it stays at the top of the list of transactions
-          // for that date
+          console.log(
+            `Date change detected for ${transactionId} - bypassing batch`,
+          );
           changes.diff.updated[0].sort_order = Date.now();
           await saveDiff(changes.diff, isLearnCategoriesEnabled);
           onRefetch();
         } else {
           onChange(changes.newTransaction, changes.data);
+
+          console.log(`Applied optimistic update for ${transactionId}`);
+
           saveDiffAndApply(
             changes.diff,
             changes,
