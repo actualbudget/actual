@@ -2,6 +2,7 @@ import React, { memo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { BudgetDatePicker } from '@desktop-client/components/budget/tracking/budgetsummary/BudgetDatePicker';
 import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import {
   SvgArrowButtonDown1,
@@ -24,6 +25,7 @@ import { NotesButton } from '@desktop-client/components/NotesButton';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import { Text } from '@actual-app/components/text';
 
 type BudgetSummaryProps = {
   month: string;
@@ -135,6 +137,36 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
           >
             {monthUtils.format(month, 'MMMM', locale)}
           </div>
+
+<View style={{ marginTop: 10, alignItems: 'center' }}>
+  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    <BudgetDatePicker
+      month={month}
+      datatype='StartDate'
+      width={60}
+      style={{
+        backgroundColor: 'transparent',
+        border: 'none'
+      }}
+    />
+    <Text style={{ 
+      fontSize: 14, 
+      color: theme.pageTextLight,
+      marginHorizontal: 4
+    }}>
+      –
+    </Text>
+    <BudgetDatePicker
+      month={month}
+      datatype='EndDate'
+      width={60}
+      style={{
+        backgroundColor: 'transparent',
+        border: 'none'
+      }}
+    />
+  </View>
+</View>
 
           <View
             style={{

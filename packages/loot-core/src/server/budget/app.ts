@@ -1,3 +1,4 @@
+import { set } from 'mockdate';
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
 import { CategoryEntity, CategoryGroupEntity } from '../../types/models';
@@ -16,6 +17,7 @@ import * as actions from './actions';
 import * as budget from './base';
 import * as cleanupActions from './cleanup-template';
 import * as goalActions from './goal-template';
+import { isTypedArray } from 'node:util/types';
 
 export interface BudgetHandlers {
   'budget/budget-amount': typeof actions.setBudget;
@@ -56,6 +58,7 @@ export interface BudgetHandlers {
   'must-category-transfer': typeof isCategoryTransferRequired;
   'budget/get-category-automations': typeof goalActions.getTemplatesForCategory;
   'budget/set-category-automations': typeof goalActions.storeTemplates;
+  'budget/set-date': typeof setDate;
 }
 
 export const app = createApp<BudgetHandlers>();
@@ -150,6 +153,7 @@ app.method(
   'budget/set-category-automations',
   mutator(undoable(goalActions.storeTemplates)),
 );
+app.method('budget/set-date', mutator(undoable(setDate)));
 
 // Server must return AQL entities not the raw DB data
 async function getCategories() {
@@ -235,6 +239,8 @@ async function trackingBudgetMonth({ month }: { month: string }) {
     value('total-spent'),
     value('real-saved'),
     value('total-leftover'),
+    value('budget-start-date'),
+    value('budget-end-date'),
   ];
 
   for (const group of groups) {
@@ -465,3 +471,31 @@ async function isCategoryTransferRequired({
     return value != null && value !== 0;
   });
 }
+
+async function setDate({
+  month,
+  date,
+  type,
+}: {
+  month: string;
+  date: number;
+  type: 'StartDate' | 'EndDate';
+}) {
+  const sheetName = monthUtils.sheetForMonth(month);
+  const dateISO = monthUtils.integerToISO(date);
+  switch (type) {
+    case 'StartDate':
+      sheet.get().set(resolveName(sheetName , 'budget-start-date' ), date);
+      const prevMonthSheetName = monthUtils.sheetForMonth(monthUtils.prevMonth(month));
+      const prevDay = monthUtils.isoToInteger(monthUtils.subDays(dateISO, 1));
+      sheet.get().set(resolveName(prevMonthSheetName , 'budget-end-date' ), prevDay);
+      break;
+    case 'EndDate':
+      sheet.get().set(resolveName(sheetName , 'budget-end-date' ), date);
+      const nextMonthSheetName = monthUtils.sheetForMonth(monthUtils.nextMonth(month));  
+      const nextDay = monthUtils.isoToInteger(monthUtils.addDays(dateISO, 1));
+      sheet.get().set(resolveName(nextMonthSheetName , 'budget-start-date' ), nextDay);    
+      break;
+  }
+}
+

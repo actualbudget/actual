@@ -58,6 +58,8 @@ const budgetSlice = createSlice({
     builder.addCase(deleteCategory.fulfilled, _markCategoriesDirty);
     builder.addCase(moveCategoryGroup.fulfilled, _markCategoriesDirty);
     builder.addCase(moveCategory.fulfilled, _markCategoriesDirty);
+    // ADD THIS LINE - for setBudgetDate
+    builder.addCase(setBudgetDate.fulfilled, _markCategoriesDirty);
 
     builder.addCase(reloadCategories.fulfilled, (state, action) => {
       _loadCategories(state, action.payload);
@@ -209,6 +211,24 @@ export const moveCategoryGroup = createAppAsyncThunk(
   `${sliceName}/moveCategoryGroup`,
   async ({ id, targetId }: MoveCategoryGroupPayload) => {
     await send('category-group-move', { id, targetId });
+  },
+);
+
+// ADD THIS NEW TYPE AND FUNCTION
+type SetBudgetDatePayload = {
+  month: string;
+  date: number;
+  type: 'StartDate' | 'EndDate';
+};
+
+export const setBudgetDate = createAppAsyncThunk(
+  `${sliceName}/setBudgetDate`,
+  async ({ month, date, type }: SetBudgetDatePayload) => {
+    await send('budget/set-date', {
+      month,
+      date,
+      type,
+    });
   },
 );
 
@@ -389,6 +409,15 @@ type ApplyBudgetActionPayload =
       args: {
         category: CategoryEntity['id'];
       };
+    }
+  // ADD THIS NEW UNION MEMBER
+  | {
+      type: 'set-date';
+      month: string;
+      args: {
+        date: number;
+        type: 'StartDate' | 'EndDate';
+      };
     };
 
 export const applyBudgetAction = createAppAsyncThunk(
@@ -542,6 +571,14 @@ export const applyBudgetAction = createAppAsyncThunk(
           category: args.category,
         });
         break;
+      // ADD THIS NEW CASE
+      case 'set-date':
+        await send('budget/set-date', {
+          month,
+          date: args.date,
+          type: args.type,
+        });
+        break;
       default:
         console.log(`Invalid action type: ${type}`);
     }
@@ -575,6 +612,8 @@ export const actions = {
   deleteCategory,
   moveCategory,
   moveCategoryGroup,
+  // ADD THIS TO ACTIONS EXPORT
+  setBudgetDate,
 };
 
 export const { markCategoriesDirty } = budgetSlice.actions;

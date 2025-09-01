@@ -164,6 +164,9 @@ export const envelopeBudget = {
   totalSpent: 'total-spent',
   totalBalance: 'total-leftover',
 
+  startDate: 'budget-start-date',
+  endDate: 'budget-end-date',
+  
   groupSumAmount: envelopeParametrizedField('group-sum-amount'),
   groupIncomeReceived: 'total-income',
 
@@ -186,6 +189,9 @@ export const trackingBudget = {
   totalIncome: 'total-income',
   totalSpent: 'total-spent',
   totalSaved: 'real-saved',
+
+  startDate: 'budget-start-date',
+  endDate: 'budget-end-date',
 
   totalLeftover: 'total-leftover',
   groupSumAmount: trackingParametrizedField('group-sum-amount'),
