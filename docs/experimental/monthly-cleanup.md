@@ -1,7 +1,7 @@
 # End of Month Cleanup
 
 :::warning
-This is an **experimental feature**. That means we’re still working on finishing it. There may be bugs, missing functionality or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please [open an issue](https://github.com/actualbudget/actual/issues) or post a message in the Discord.
+This is an **experimental feature**. That means we’re still working on finishing it. There may be bugs, missing functionality or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please [open an issue](https://github.com/actualbudget/actual/issues) or post a message in the Discord. See [Experimental Features](/docs/experimental/) for instructions to enable experimental features.
 :::
 
 Create a template by adding a note to a category and adding a line that begins with `#cleanup`.

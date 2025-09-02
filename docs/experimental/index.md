@@ -9,7 +9,7 @@ These features are still in active development and therefore it is highly recomm
 
 ## View and enable experimental features
 
-In order to view the currently available experimental features to to Settings -> Show advanced settings -> Experimental features.
+In order to view the currently available experimental features go to `Settings -> Show advanced settings -> Experimental features`.
 
 ![Experimental features](/img/experimental/setting.png)
 
