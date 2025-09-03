@@ -27,7 +27,6 @@ Here are some initial guidelines for how contributions will be treated:
 
 (sorted alphabetically)
 
-- @alecbakholdin
 - @jfdoming
 - @joel-jeremy
 - @lelemm
@@ -42,6 +41,7 @@ Here are some initial guidelines for how contributions will be treated:
 (sorted alphabetically)
 
 - @albertogasparin
+- @alecbakholdin
 - @carkom
 - @j-f1
 - @jlongster
