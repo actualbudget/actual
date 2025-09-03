@@ -2,7 +2,8 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    include: ['.github/actions/**/*.test.js'],
+    globals: true,
+    include: ['src/**/*.test.(js|jsx|ts|tsx)'],
     environment: 'node',
   },
 });

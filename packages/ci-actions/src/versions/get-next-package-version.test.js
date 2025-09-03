@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { getNextVersion } from './get-next-package-version.js';
+
+import { getNextVersion } from './get-next-package-version';
 
 describe('getNextVersion (lib)', () => {
   it('hotfix increments patch', () => {

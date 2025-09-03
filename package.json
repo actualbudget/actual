@@ -37,8 +37,7 @@
     "build:api": "yarn workspace @actual-app/api build",
     "generate:i18n": "yarn workspace @actual-app/web generate:i18n",
     "generate:release-notes": "ts-node ./bin/release-note-generator.ts",
-    "test": "yarn workspaces foreach --all --parallel --verbose run test && yarn test:actions",
-    "test:actions": "vitest run --config .github/actions/vitest.config.js",
+    "test": "yarn workspaces foreach --all --parallel --verbose run test",
     "test:debug": "yarn workspaces foreach --all --verbose run test",
     "e2e": "yarn workspaces foreach --all --exclude desktop-electron --parallel --verbose run e2e",
     "e2e:desktop": "yarn build:desktop --skip-exe-build && yarn workspace desktop-electron e2e",
@@ -82,8 +81,7 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.32.1",
-    "typescript-strict-plugin": "^2.4.4",
-    "vitest": "^3.2.4"
+    "typescript-strict-plugin": "^2.4.4"
   },
   "resolutions": {
     "rollup": "4.40.1",

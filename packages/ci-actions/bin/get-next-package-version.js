@@ -3,9 +3,10 @@
 // This script is used in GitHub Actions to get the next version based on the current package.json version.
 // It supports three types of versioning: nightly, hotfix, and monthly.
 
-const { parseArgs } = require('node:util');
-const fs = require('node:fs');
-const { getNextVersion } = require('./lib/get-next-package-version.js');
+import fs from 'node:fs';
+import { parseArgs } from 'node:util';
+
+import { getNextVersion } from '../src/versions/get-next-package-version';
 
 const args = process.argv;
 

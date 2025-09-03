@@ -33,7 +33,11 @@ function resolveType(type, currentDate, versionYear, versionMonth) {
   return 'monthly';
 }
 
-function getNextVersion({ currentVersion, type, currentDate = new Date() }) {
+export function getNextVersion({
+  currentVersion,
+  type,
+  currentDate = new Date(),
+}) {
   const { versionYear, versionMonth, versionHotfix } =
     parseVersion(currentVersion);
   const { nextVersionYear, nextVersionMonth } = computeNextMonth(
@@ -62,14 +66,7 @@ function getNextVersion({ currentVersion, type, currentDate = new Date() }) {
       return `${nextVersionYear}.${nextVersionMonth}.0`;
     default:
       throw new Error(
-        'Invalid type specified. Use "auto", "nightly", "hotfix", or "monthly".',
+        'Invalid type specified. Use “auto”, “nightly”, “hotfix”, or “monthly”.',
       );
   }
 }
-
-module.exports = {
-  parseVersion,
-  computeNextMonth,
-  resolveType,
-  getNextVersion,
-};
