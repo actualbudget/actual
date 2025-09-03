@@ -73,7 +73,10 @@ try {
     .replaceAll('-', '');
 
   if (values.type === 'auto') {
-    if (currentDate.getDate() <= 25) {
+    const inPatchMonth =
+      currentDate.getFullYear() === 2000 + versionYear &&
+      currentDate.getMonth() + 1 === versionMonth;
+    if (inPatchMonth && currentDate.getDate() <= 25) {
       values.type = 'hotfix';
     } else {
       values.type = 'monthly';
