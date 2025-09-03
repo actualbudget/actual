@@ -3,12 +3,14 @@
 # passionate about. You will be notified for any PRs there.
 
 /packages/api/                                    @MatissJanis
-/packages/api/package.json
 /packages/component-library/                      @MatissJanis
-/packages/component-library/package.json
 /packages/desktop-client/src/components/mobile    @joel-jeremy
 /packages/desktop-electron/                       @MikesGlitch
-/packages/desktop-electron/package.json
 /packages/loot-core/src/server/budget             @youngcw
 /packages/sync-server/                            @matt-fidd
+
+# So releases are possible without a stamp from everyone
+/packages/api/package.json
+/packages/component-library/package.json
+/packages/desktop-electron/package.json
 /packages/sync-server/package.json
