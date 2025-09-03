@@ -56,7 +56,7 @@ export function ResetCache() {
             <Trans>Reset Dashboard</Trans>
           </ButtonWithLoading>
         }
-       />
+      />
     </>
   );
 }
