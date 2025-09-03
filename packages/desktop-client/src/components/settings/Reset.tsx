@@ -15,6 +15,7 @@ import { useDispatch } from '@desktop-client/redux';
 
 export function ResetCache() {
   const [resetting, setResetting] = useState(false);
+  const [resettingDashboard, setResettingDashboard] = useState(false);
 
   async function onResetCache() {
     setResetting(true);
@@ -22,7 +23,14 @@ export function ResetCache() {
     setResetting(false);
   }
 
+  async function onResetDashboard() {
+    setResettingDashboard(true);
+    await send('dashboard-reset');
+    setResettingDashboard(false);
+  }
+
   return (
+    <>
     <Setting
       primaryAction={
         <ButtonWithLoading isLoading={resetting} onPress={onResetCache}>
@@ -40,6 +48,15 @@ export function ResetCache() {
         </Trans>
       </Text>
     </Setting>
+    <Setting
+      primaryAction={
+        <ButtonWithLoading isLoading={resettingDashboard} onPress={onResetDashboard}>
+          <Trans>Reset Dashboard</Trans>
+        </ButtonWithLoading>
+      }
+    >
+    </Setting>
+    </>
   );
 }
 
