@@ -6,7 +6,8 @@
 import fs from 'node:fs';
 import { parseArgs } from 'node:util';
 
-import { getNextVersion } from '../src/versions/get-next-package-version';
+// eslint-disable-next-line import/extensions
+import { getNextVersion } from '../src/versions/get-next-package-version.js';
 
 const args = process.argv;
 
