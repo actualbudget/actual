@@ -14,7 +14,8 @@
   "license": "MIT",
   "workspaces": {
     "packages": [
-      "packages/*"
+      "packages/*",
+      "poc"
     ]
   },
   "scripts": {
