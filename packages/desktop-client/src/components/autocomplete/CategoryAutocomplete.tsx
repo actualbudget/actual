@@ -92,7 +92,7 @@ function CategoryList({
 
         if (!existing) {
           acc.push({
-            group: item.group,
+            group: item.group ?? null,
             categories: [itemWithIndex],
           });
         } else {
@@ -102,7 +102,7 @@ function CategoryList({
         return acc;
       },
       [] as Array<{
-        group: CategoryGroupEntity;
+        group: CategoryGroupEntity | undefined;
         categories: Array<
           CategoryAutocompleteItem & {
             highlightedIndex: number;
@@ -131,8 +131,12 @@ function CategoryList({
             highlighted: highlightedIndex === 0,
             embedded,
           })}
-        {groupedItems.map(({ group, categories }) => (
-          <>
+        {groupedItems.map(({ group, categories }) => {
+          if (!group) {
+            return null;
+          }
+
+          return (
             <Fragment key={group.id}>
               {renderCategoryItemGroupHeader({
                 title: `${group.name}${group.hidden ? ` ${t('(hidden)')}` : ''}`,
@@ -141,26 +145,26 @@ function CategoryList({
                     group.hidden && { color: theme.pageTextSubdued }),
                 },
               })}
+              {categories.map(item => (
+                <Fragment key={item.id}>
+                  {renderCategoryItem({
+                    ...(getItemProps ? getItemProps({ item }) : null),
+                    item,
+                    highlighted: highlightedIndex === item.highlightedIndex,
+                    embedded,
+                    style: {
+                      ...(showHiddenItems &&
+                        (item.hidden || group.hidden) && {
+                          color: theme.pageTextSubdued,
+                        }),
+                    },
+                    showBalances,
+                  })}
+                </Fragment>
+              ))}
             </Fragment>
-            {categories.map(item => (
-              <Fragment key={item.id}>
-                {renderCategoryItem({
-                  ...(getItemProps ? getItemProps({ item }) : null),
-                  item,
-                  highlighted: highlightedIndex === item.highlightedIndex,
-                  embedded,
-                  style: {
-                    ...(showHiddenItems &&
-                      (item.hidden || group.hidden) && {
-                        color: theme.pageTextSubdued,
-                      }),
-                  },
-                  showBalances,
-                })}
-              </Fragment>
-            ))}
-          </>
-        ))}
+          );
+        })}
       </View>
       {footer}
     </View>
