@@ -343,7 +343,18 @@ export function unparse({ error, inputKey, ...item }) {
     case 'number': {
       let unparsed = item.value;
       if (item.field === 'amount' && item.op !== 'isbetween') {
-        unparsed = amountToInteger(unparsed);
+        // Handle both string (formatted) and number inputs
+        if (typeof unparsed === 'string') {
+          // Convert formatted string back to number first
+          unparsed = currencyToAmount(unparsed);
+          if (unparsed !== null && !isNaN(unparsed)) {
+            unparsed = amountToInteger(unparsed);
+          } else {
+            unparsed = null;
+          }
+        } else {
+          unparsed = amountToInteger(unparsed);
+        }
       }
 
       return { ...item, value: unparsed };
