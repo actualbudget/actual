@@ -166,20 +166,45 @@ function PayeeList({
 }: PayeeListProps) {
   const { t } = useTranslation();
 
-  let createNew = null;
-  items = [...items];
-
   // If the "new payee" item exists, create it as a special-cased item
   // with the value of the input so it always shows whatever the user
   // entered
-  if (items[0].id === 'new') {
-    const [first, ...rest] = items;
-    createNew = first;
-    items = rest;
-  }
 
-  const offset = createNew ? 1 : 0;
-  let lastType = null;
+  const { newPayee, suggestedPayees, payees, transferPayees, searchForMore } =
+    useMemo(() => {
+      return items.reduce(
+        (acc, item, index, array) => {
+          if (item.id === 'new') {
+            acc.newPayee = { ...item, highlightedIndex: index };
+          } else if (item.itemType === 'common_payee') {
+            acc.suggestedPayees.push({ ...item, highlightedIndex: index });
+          } else if (item.itemType === 'payee') {
+            acc.payees.push({ ...item, highlightedIndex: index });
+          } else if (item.itemType === 'account') {
+            acc.transferPayees.push({ ...item, highlightedIndex: index });
+          }
+
+          acc.searchForMore = index === array.length - 1 && array.length > 100;
+
+          return acc;
+        },
+        {
+          newPayee: null as PayeeAutocompleteItem & {
+            highlightedIndex: number;
+          },
+          suggestedPayees: [] as Array<
+            PayeeAutocompleteItem & { highlightedIndex: number }
+          >,
+          payees: [] as Array<
+            PayeeAutocompleteItem & { highlightedIndex: number }
+          >,
+          transferPayees: [] as Array<
+            PayeeAutocompleteItem & { highlightedIndex: number }
+          >,
+          searchForMore: false,
+        },
+      );
+    }, [items]);
 
   return (
     <View>
@@ -190,60 +215,65 @@ function PayeeList({
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
-        {createNew &&
+        {newPayee &&
           renderCreatePayeeButton({
-            ...(getItemProps ? getItemProps({ item: createNew }) : null),
+            ...(getItemProps ? getItemProps({ item: newPayee }) : {}),
             payeeName: inputValue,
             highlighted: highlightedIndex === 0,
             embedded,
           })}
 
-        {items.map((item, idx) => {
-          const itemType = item.itemType;
-          let title;
+        {suggestedPayees.length > 0 &&
+          renderPayeeItemGroupHeader({ title: t('Suggested Payees') })}
+        {suggestedPayees.map(item => (
+          <Fragment key={item.id}>
+            {renderPayeeItem({
+              ...(getItemProps ? getItemProps({ item }) : {}),
+              item,
+              highlighted: highlightedIndex === item.highlightedIndex,
+              embedded,
+            })}
+          </Fragment>
+        ))}
 
-          if (itemType === 'common_payee' && lastType !== itemType) {
-            title = t('Suggested Payees');
-          } else if (itemType === 'payee' && lastType !== itemType) {
-            title = t('Payees');
-          } else if (itemType === 'account' && lastType !== itemType) {
-            title = t('Transfer To/From');
-          }
-          const showMoreMessage =
-            idx === items.length - 1 && items.length > 100;
-          lastType = itemType;
+        {payees.length > 0 &&
+          renderPayeeItemGroupHeader({ title: t('Payees') })}
+        {payees.map(item => (
+          <Fragment key={item.id}>
+            {renderPayeeItem({
+              ...(getItemProps ? getItemProps({ item }) : {}),
+              item,
+              highlighted: highlightedIndex === item.highlightedIndex,
+              embedded,
+            })}
+          </Fragment>
+        ))}
 
-          return (
-            <Fragment key={item.id}>
-              {title && (
-                <Fragment key={`title-${idx}`}>
-                  {renderPayeeItemGroupHeader({ title })}
-                </Fragment>
-              )}
-              <Fragment key={item.id}>
-                {renderPayeeItem({
-                  ...(getItemProps ? getItemProps({ item }) : null),
-                  item,
-                  highlighted: highlightedIndex === idx + offset,
-                  embedded,
-                })}
-              </Fragment>
+        {transferPayees.length > 0 &&
+          renderPayeeItemGroupHeader({ title: t('Transfer To/From') })}
+        {transferPayees.map(item => (
+          <Fragment key={item.id}>
+            {renderPayeeItem({
+              ...(getItemProps ? getItemProps({ item }) : {}),
+              item,
+              highlighted: highlightedIndex === item.highlightedIndex,
+              embedded,
+            })}
+          </Fragment>
+        ))}
 
-              {showMoreMessage && (
-                <div
-                  style={{
-                    fontSize: 11,
-                    padding: 5,
-                    color: theme.pageTextLight,
-                    textAlign: 'center',
-                  }}
-                >
-                  <Trans>More payees are available, search to find them</Trans>
-                </div>
-              )}
-            </Fragment>
-          );
-        })}
+        {searchForMore && (
+          <div
+            style={{
+              fontSize: 11,
+              padding: 5,
+              color: theme.pageTextLight,
+              textAlign: 'center',
+            }}
+          >
+            <Trans>More payees are available, search to find them</Trans>
+          </div>
+        )}
       </View>
       {footer}
     </View>
