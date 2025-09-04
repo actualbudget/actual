@@ -21,11 +21,11 @@ __metadata:
 
 "@actual-app/plugins-core@file:../plugins-core::locator=%40actual-app%2Ftest-plugin%40workspace%3A.":
   version: 0.1.0
-  resolution: "@actual-app/plugins-core@file:../plugins-core#../plugins-core::hash=a97aae&locator=%40actual-app%2Ftest-plugin%40workspace%3A."
+  resolution: "@actual-app/plugins-core@file:../plugins-core#../plugins-core::hash=c867b8&locator=%40actual-app%2Ftest-plugin%40workspace%3A."
   peerDependencies:
     react: ^19.0.0
     react-dom: ^19.0.0
-  checksum: 10/5d518d8e310000572dd9ab12906388536d082c19e6dd8076071da6e91894b08cf72d40c9df9d37f144398286a39b63e93902fbb29fd631b0802c6a8c9757cccc
+  checksum: 10/40bcdf7ae760d103c29309f5cbd3539c7d43700c3beef021e6353171f6076681a7d95572fecbac7f94434447b80804db1bf35f6cdcdb65471ca66bebbaf20746
   languageName: node
   linkType: hard
 
