@@ -5,6 +5,7 @@ import React, {
   type ComponentPropsWithoutRef,
   type ReactElement,
   type CSSProperties,
+  useMemo,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -48,7 +49,43 @@ function AccountList({
   renderAccountItem = defaultRenderAccountItem,
 }: AccountListProps) {
   const { t } = useTranslation();
-  let lastItem = null;
+  // Split by onbudget, offbudget, closed and add their indeces relative
+  // to the full list. This is needed to highlight the correct item.
+  const { onBudgetAccounts, offBudgetAccounts, closedAccounts } =
+    useMemo(() => {
+      return items.reduce(
+        (acc, item, index) => {
+          if (item.closed) {
+            acc.closedAccounts.push({
+              ...item,
+              highlightedIndex: index,
+            });
+          } else if (item.offbudget) {
+            acc.offBudgetAccounts.push({
+              ...item,
+              highlightedIndex: index,
+            });
+          } else {
+            acc.onBudgetAccounts.push({
+              ...item,
+              highlightedIndex: index,
+            });
+          }
+          return acc;
+        },
+        {
+          onBudgetAccounts: [] as (AccountAutocompleteItem & {
+            highlightedIndex: number;
+          })[],
+          offBudgetAccounts: [] as (AccountAutocompleteItem & {
+            highlightedIndex: number;
+          })[],
+          closedAccounts: [] as (AccountAutocompleteItem & {
+            highlightedIndex: number;
+          })[],
+        },
+      );
+    }, [items]);
 
   return (
     <View>
@@ -59,38 +96,53 @@ function AccountList({
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
-        {items.map((item, idx) => {
-          const showGroup = lastItem
-            ? (item.offbudget !== lastItem.offbudget && !item.closed) ||
-              (item.closed !== lastItem.closed && !item.offbudget)
-            : true;
+        {onBudgetAccounts.length > 0 && (
+          <Fragment key="On budget">
+            {renderAccountItemGroupHeader({ title: t('On budget') })}
+          </Fragment>
+        )}
+        {onBudgetAccounts.map(item => (
+          <Fragment key={item.id}>
+            {renderAccountItem({
+              ...(getItemProps ? getItemProps({ item }) : {}),
+              item,
+              highlighted: highlightedIndex === item.highlightedIndex,
+              embedded,
+            })}
+          </Fragment>
+        ))}
 
-          const group = `${
-            item.closed
-              ? t('Closed Accounts')
-              : item.offbudget
-                ? t('Off budget')
-                : t('On budget')
-          }`;
+        {offBudgetAccounts.length > 0 && (
+          <Fragment key="Off budget">
+            {renderAccountItemGroupHeader({ title: t('Off budget') })}
+          </Fragment>
+        )}
+        {offBudgetAccounts.map(item => (
+          <Fragment key={item.id}>
+            {renderAccountItem({
+              ...(getItemProps ? getItemProps({ item }) : {}),
+              item,
+              highlighted: highlightedIndex === item.highlightedIndex,
+              embedded,
+            })}
+          </Fragment>
+        ))}
 
-          lastItem = item;
-
-          return [
-            showGroup ? (
-              <Fragment key={group}>
-                {renderAccountItemGroupHeader({ title: group })}
-              </Fragment>
-            ) : null,
-            <Fragment key={item.id}>
-              {renderAccountItem({
-                ...(getItemProps ? getItemProps({ item }) : null),
-                item,
-                highlighted: highlightedIndex === idx,
-                embedded,
-              })}
-            </Fragment>,
-          ];
-        })}
+        {closedAccounts.length > 0 && (
+          <Fragment key="Closed accounts">
+            {renderAccountItemGroupHeader({ title: t('Closed accounts') })}
+          </Fragment>
+        )}
+        {closedAccounts.map(item => (
+          <Fragment key={item.id}>
+            {renderAccountItem({
+              ...(getItemProps ? getItemProps({ item }) : {}),
+              item,
+              highlighted: highlightedIndex === item.highlightedIndex,
+              embedded,
+            })}
+          </Fragment>
+        ))}
       </View>
     </View>
   );
