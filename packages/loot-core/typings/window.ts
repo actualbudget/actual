@@ -49,8 +49,7 @@ declare global {
     __navigate?: import('react-router').NavigateFunction;
   }
 
-   
   var Actual: Actual;
-   
+
   var IS_TESTING: boolean;
 }
