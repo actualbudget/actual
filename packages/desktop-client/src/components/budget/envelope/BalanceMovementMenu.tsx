@@ -25,7 +25,7 @@ export function BalanceMovementMenu({
 
   const [menu, _setMenu] = useState('menu');
 
-  const ref = useRef<HTMLSpanElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   // Keep focus inside the popover on menu change
   const setMenu = useCallback(
     (menu: string) => {
@@ -36,7 +36,7 @@ export function BalanceMovementMenu({
   );
 
   return (
-    <span tabIndex={-1} ref={ref}>
+    <div tabIndex={-1} ref={ref}>
       {menu === 'menu' && (
         <BalanceMenu
           categoryId={categoryId}
@@ -80,6 +80,6 @@ export function BalanceMovementMenu({
           }}
         />
       )}
-    </span>
+    </div>
   );
 }

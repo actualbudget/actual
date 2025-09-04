@@ -22,6 +22,7 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgLogo } from '@actual-app/components/icons/logo';
 import { SvgDelete } from '@actual-app/components/icons/v0';
 import { Input } from '@actual-app/components/input';
+import { type BasicModalProps } from '@actual-app/components/props/modalProps';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
@@ -35,17 +36,6 @@ import { useModalState } from '@desktop-client/hooks/useModalState';
 
 export const MODAL_Z_INDEX = 3000;
 
-type ModalProps = ComponentPropsWithRef<typeof ReactAriaModal> & {
-  name: string;
-  isLoading?: boolean;
-  noAnimation?: boolean;
-  style?: CSSProperties;
-  onClose?: () => void;
-  containerProps?: {
-    style?: CSSProperties;
-  };
-};
-
 export const Modal = ({
   name,
   isLoading = false,
@@ -55,7 +45,8 @@ export const Modal = ({
   onClose,
   containerProps,
   ...props
-}: ModalProps) => {
+}: BasicModalProps &
+  ComponentPropsWithRef<typeof ReactAriaModal> & { name: string }) => {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const { enableScope, disableScope } = useHotkeysContext();

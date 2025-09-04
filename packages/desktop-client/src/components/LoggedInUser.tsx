@@ -14,6 +14,7 @@ import { listen } from 'loot-core/platform/client/fetch';
 import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
 import { type TransObjectLiteral } from 'loot-core/types/util';
 
+import { RenderPluginsComponent } from './plugins/RenderPluginsComponent';
 import { PrivacyFilter } from './PrivacyFilter';
 import { useMultiuserEnabled, useServerURL } from './ServerContext';
 
@@ -22,6 +23,7 @@ import { Permissions } from '@desktop-client/auth/types';
 import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useActualPlugins } from '@desktop-client/plugin/ActualPluginsProvider';
 import { useSelector, useDispatch } from '@desktop-client/redux';
 import { getUserData, signOut } from '@desktop-client/users/usersSlice';
 
@@ -55,6 +57,7 @@ export function LoggedInUser({
   ) as (SyncedLocalFile | RemoteFile)[];
   const currentFile = remoteFiles.find(f => f.cloudFileId === cloudFileId);
   const hasSyncedPrefs = useSelector(state => state.prefs.synced);
+  const { sidebarItems } = useActualPlugins();
 
   const initializeUserData = async () => {
     try {
@@ -222,6 +225,8 @@ export function LoggedInUser({
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', ...style }}>
+      <RenderPluginsComponent toRender={sidebarItems['topbar']} />
+
       <Button
         ref={triggerRef}
         variant="bare"

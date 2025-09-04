@@ -1,12 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
-
-import { send } from 'loot-core/platform/client/fetch';
 import {
   type CategoryEntity,
   type CategoryGroupEntity,
-} from 'loot-core/types/models';
+  type CategoryViews,
+} from 'plugins-core/index';
+
+import { send } from 'loot-core/platform/client/fetch';
 
 import { resetApp } from '@desktop-client/app/appSlice';
 import {
@@ -16,11 +17,6 @@ import {
 import { createAppAsyncThunk } from '@desktop-client/redux';
 
 const sliceName = 'budget';
-
-type CategoryViews = {
-  grouped: CategoryGroupEntity[];
-  list: CategoryEntity[];
-};
 
 type BudgetState = {
   categories: CategoryViews;

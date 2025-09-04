@@ -15,6 +15,9 @@ export type GetDocumentDir = typeof getDocumentDir;
 export declare function getBudgetDir(id: string): string;
 export type GetBudgetDir = typeof getBudgetDir;
 
+export declare function getPluginDir(id: string): string;
+export type GetPluginDir = typeof getPluginDir;
+
 export declare const bundledDatabasePath: string;
 export type BundledDatabasePath = typeof bundledDatabasePath;
 

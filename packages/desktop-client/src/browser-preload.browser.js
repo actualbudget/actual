@@ -2,6 +2,7 @@ import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-th
 // eslint-disable-next-line import/no-unresolved
 import { registerSW } from 'virtual:pwa-register';
 
+import { send } from 'loot-core/platform/client/fetch';
 import * as Platform from 'loot-core/shared/platform';
 
 // eslint-disable-next-line typescript-paths/absolute-parent-import
@@ -42,6 +43,15 @@ function createBackendWorker() {
       'SharedArrayBufferOverride',
     ),
   });
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', async event => {
+      if (event.data.type.startsWith('plugin-')) {
+        const object = await send(event.data.type, event.data.eventData);
+        event.ports[0].postMessage(object);
+      }
+    });
+  }
 }
 
 createBackendWorker();
@@ -190,6 +200,24 @@ global.Actual = {
   },
 
   moveBudgetDirectory: () => {},
+
+  // VitePWA service worker management
+  refreshServiceWorker: async () => {
+    if (window.navigator.serviceWorker == null) return;
+
+    // Unregister all existing service workers for fresh start
+    const registrations =
+      await window.navigator.serviceWorker.getRegistrations();
+    for (const registration of registrations) {
+      await registration.unregister();
+    }
+
+    // Wait for cleanup
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Force VitePWA to re-register with fresh state
+    updateSW();
+  },
 };
 
 function inputFocused(e) {

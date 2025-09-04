@@ -257,6 +257,17 @@ const configSchema = convict({
     default: 'manual',
     env: 'ACTUAL_USER_CREATION_MODE',
   },
+
+  github: {
+    doc: 'GitHub API configuration.',
+
+    token: {
+      doc: 'GitHub Personal Access Token for API authentication.',
+      format: String,
+      default: '',
+      env: 'ACTUAL_GITHUB_TOKEN',
+    },
+  },
 });
 
 let configPath = null;
@@ -304,6 +315,12 @@ const httpsCert = configSchema.get('https.cert');
 if (httpsCert) {
   debug(`HTTPS Cert: ${'*'.repeat(httpsCert.length)}`);
   debugSensitive(`HTTPS Cert: ${httpsCert}`);
+}
+
+const githubToken = configSchema.get('github.token');
+if (githubToken) {
+  debug(`GitHub Token: ${'*'.repeat(Math.min(githubToken.length, 20))}`);
+  debugSensitive(`GitHub Token: ${githubToken}`);
 }
 
 export { configSchema as config };

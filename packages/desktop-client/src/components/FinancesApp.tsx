@@ -18,6 +18,8 @@ import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Notifications } from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
+import { PluginCustomPage } from './plugins/PluginCustomPage';
+import { Plugins } from './plugins/Plugins';
 import { Reports } from './reports';
 import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
@@ -37,6 +39,7 @@ import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useActualPlugins } from '@desktop-client/plugin/ActualPluginsProvider';
 import { useSelector, useDispatch } from '@desktop-client/redux';
 import { getIsOutdated, getLatestVersion } from '@desktop-client/util/versions';
 
@@ -172,6 +175,8 @@ export function FinancesApp() {
 
   const scrollableRef = useRef<HTMLDivElement>(null);
 
+  const { pluginsRoutes } = useActualPlugins();
+
   return (
     <View style={{ height: '100%' }}>
       <RouterBehaviors />
@@ -265,6 +270,7 @@ export function FinancesApp() {
                 />
                 <Route path="/bank-sync" element={<BankSync />} />
                 <Route path="/tags" element={<ManageTagsPage />} />
+                <Route path="/plugins" element={<Plugins />} />
                 <Route path="/settings" element={<Settings />} />
 
                 <Route
@@ -322,6 +328,13 @@ export function FinancesApp() {
                     }
                   />
                 )}
+                {...Array.from(pluginsRoutes.values()).map((plugin, index) => (
+                  <Route
+                    key={`plugin-id-${index}`}
+                    path={plugin.path}
+                    element={<PluginCustomPage parameter={plugin.parameter} />}
+                  />
+                ))}
                 {/* redirect all other traffic to the budget page */}
                 <Route path="/*" element={<Navigate to="/budget" replace />} />
               </Routes>

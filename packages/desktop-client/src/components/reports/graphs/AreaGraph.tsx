@@ -140,7 +140,8 @@ const customLabel = ({
   const calcY =
     (typeof props.y === 'number' ? props.y : 0) -
     ((typeof props.value === 'number' ? props.value : 0) > 0 ? 10 : -10);
-  const textAnchor = props.index === 0 ? 'left' : 'middle';
+  const textAnchor: 'inherit' | 'start' | 'end' | 'middle' =
+    props.index === 0 ? 'start' : 'middle';
   const display =
     typeof props.value !== 'string' && props.value !== 0
       ? `${format(props.value || 0, 'financial-no-decimals')}`
