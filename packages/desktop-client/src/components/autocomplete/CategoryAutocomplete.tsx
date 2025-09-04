@@ -64,6 +64,7 @@ type CategoryListProps = {
   ) => ReactElement<typeof CategoryItem>;
   showHiddenItems?: boolean;
   showBalances?: boolean;
+  showSplitOption?: boolean;
 };
 function CategoryList({
   items,
@@ -76,9 +77,38 @@ function CategoryList({
   renderCategoryItem = defaultRenderCategoryItem,
   showHiddenItems,
   showBalances,
+  showSplitOption,
 }: CategoryListProps) {
   const { t } = useTranslation();
-  let lastGroup: string | undefined | null = null;
+  const groupedItems = useMemo(() => {
+    return items.reduce(
+      (acc, item, index) => {
+        const groupId = item.group?.id || '';
+        const existing = acc.find(x => x.group?.id === groupId);
+        const itemWithIndex = {
+          ...item,
+          highlightedIndex: showSplitOption ? index + 1 : index,
+        };
+
+        if (!existing) {
+          acc.push({
+            group: item.group,
+            categories: [itemWithIndex],
+          });
+        } else {
+          existing.categories.push(itemWithIndex);
+        }
+
+        return acc;
+      },
+      [] as Array<{
+        group: CategoryGroupEntity;
+        categories: (CategoryAutocompleteItem & {
+          highlightedIndex: number;
+        })[];
+      }>,
+    );
+  }, [items, showSplitOption]);
 
   return (
     <View>
@@ -90,51 +120,45 @@ function CategoryList({
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
-        {items.map((item, idx) => {
-          if (item.id === 'split') {
-            return renderSplitTransactionButton({
-              key: 'split',
-              ...(getItemProps ? getItemProps({ item }) : null),
-              highlighted: highlightedIndex === idx,
-              embedded,
-            });
-          }
-
-          const groupId = item.group?.id;
-          const showGroup = groupId !== lastGroup;
-          const groupName = `${item.group?.name}${item.group?.hidden ? ' ' + t('(hidden)') : ''}`;
-          lastGroup = groupId;
-          return (
-            <Fragment key={item.id}>
-              {showGroup && item.group?.name && (
-                <Fragment key={item.group.name}>
-                  {renderCategoryItemGroupHeader({
-                    title: groupName,
-                    style: {
-                      ...(showHiddenItems &&
-                        item.group?.hidden && { color: theme.pageTextSubdued }),
-                    },
-                  })}
-                </Fragment>
-              )}
+        {showSplitOption &&
+          renderSplitTransactionButton({
+            key: 'split',
+            ...(getItemProps
+              ? getItemProps({ item: { id: 'split', name: 'split' } })
+              : {}),
+            highlighted: highlightedIndex === 0,
+            embedded,
+          })}
+        {groupedItems.map(({ group, categories }) => (
+          <>
+            <Fragment key={group.id}>
+              {renderCategoryItemGroupHeader({
+                title: `${group.name}${group.hidden ? ` ${t('(hidden)')}` : ''}`,
+                style: {
+                  ...(showHiddenItems &&
+                    group.hidden && { color: theme.pageTextSubdued }),
+                },
+              })}
+            </Fragment>
+            {categories.map(item => (
               <Fragment key={item.id}>
                 {renderCategoryItem({
                   ...(getItemProps ? getItemProps({ item }) : null),
                   item,
-                  highlighted: highlightedIndex === idx,
+                  highlighted: highlightedIndex === item.highlightedIndex,
                   embedded,
                   style: {
                     ...(showHiddenItems &&
-                      (item.hidden || item.group?.hidden) && {
+                      (item.hidden || group.hidden) && {
                         color: theme.pageTextSubdued,
                       }),
                   },
                   showBalances,
                 })}
               </Fragment>
-            </Fragment>
-          );
-        })}
+            ))}
+          </>
+        ))}
       </View>
       {footer}
     </View>
@@ -198,26 +222,17 @@ export function CategoryAutocomplete({
               group,
             })),
         ),
-      showSplitOption
-        ? [{ id: 'split', name: '' } as CategoryAutocompleteItem]
-        : [],
+      [] as CategoryAutocompleteItem[],
     );
 
     if (!showHiddenCategories) {
       return allSuggestions.filter(
-        suggestion =>
-          suggestion.id === 'split' ||
-          (!suggestion.hidden && !suggestion.group?.hidden),
+        suggestion => !suggestion.hidden && !suggestion.group?.hidden,
       );
     }
 
     return allSuggestions;
-  }, [
-    defaultCategoryGroups,
-    categoryGroups,
-    showSplitOption,
-    showHiddenCategories,
-  ]);
+  }, [defaultCategoryGroups, categoryGroups, showHiddenCategories]);
 
   const filterSuggestions = useCallback(
     (
@@ -226,10 +241,6 @@ export function CategoryAutocomplete({
     ): CategoryAutocompleteItem[] => {
       return suggestions
         .filter(suggestion => {
-          if (suggestion.id === 'split') {
-            return true;
-          }
-
           if (suggestion.group) {
             return (
               getNormalisedString(suggestion.group.name).includes(
@@ -258,14 +269,6 @@ export function CategoryAutocomplete({
       highlightFirst={true}
       embedded={embedded}
       closeOnBlur={closeOnBlur}
-      getHighlightedIndex={suggestions => {
-        if (suggestions.length === 0) {
-          return null;
-        } else if (suggestions[0].id === 'split') {
-          return suggestions.length > 1 ? 1 : null;
-        }
-        return 0;
-      }}
       filterSuggestions={filterSuggestions}
       suggestions={categorySuggestions}
       renderItems={(items, getItemProps, highlightedIndex) => (
@@ -279,6 +282,7 @@ export function CategoryAutocomplete({
           renderCategoryItem={renderCategoryItem}
           showHiddenItems={showHiddenCategories}
           showBalances={showBalances}
+          showSplitOption={showSplitOption}
         />
       )}
       {...props}
