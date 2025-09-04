@@ -1,8 +1,10 @@
 // @ts-strict-ignore
+// @ts-strict-ignore
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { BudgetDatePicker } from './BudgetDatePicker';
 import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import {
   SvgArrowButtonDown1,
@@ -27,10 +29,12 @@ import { NotesButton } from '@desktop-client/components/NotesButton';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useUndo } from '@desktop-client/hooks/useUndo';
+import { Text } from '@actual-app/components/text';
 
 type BudgetSummaryProps = {
   month: string;
 };
+
 export function BudgetSummary({ month }: BudgetSummaryProps) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -42,6 +46,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
   } = useTrackingBudget();
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>("2025-09-01");
   const triggerRef = useRef(null);
   const { showUndoNotification } = useUndo();
 
@@ -51,6 +56,11 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
 
   function onMenuClose() {
     setMenuOpen(false);
+  }
+
+  function handleDateChange(date: string | null) {
+    setSelectedDate(date);
+    // Add any additional logic here if needed
   }
 
   const ExpandOrCollapseIcon = collapsed
@@ -128,6 +138,39 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
           >
             {monthUtils.format(month, 'MMMM', locale)}
           </div>
+          
+      
+<View style={{ marginTop: 10, alignItems: 'center' }}>
+  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    <BudgetDatePicker
+      month={month}
+      datatype='StartDate'
+      onChange={handleDateChange}
+      width={60}
+      style={{
+        backgroundColor: 'transparent',
+        border: 'none'
+      }}
+    />
+    <Text style={{ 
+      fontSize: 14, 
+      color: theme.pageTextLight,
+      marginHorizontal: 4
+    }}>
+      –
+    </Text>
+    <BudgetDatePicker
+      month={month}
+      datatype='EndDate'
+      onChange={handleDateChange}
+      width={60}
+      style={{
+        backgroundColor: 'transparent',
+        border: 'none'
+      }}
+    />
+  </View>
+</View>
 
           <View
             style={{
@@ -172,7 +215,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                     onMenuClose();
                     showUndoNotification({
                       message: t(
-                        '{{displayMonth}} budgets have all been set to last month’s budgeted amounts.',
+                         '{{displayMonth}} budgets have all been set to last month’s budgeted amounts.',
                         { displayMonth },
                       ),
                     });
