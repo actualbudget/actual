@@ -87,11 +87,11 @@ __metadata:
 
 "@actual-app/plugins-core@file:../plugins-core::locator=%40actual-app%2Ftest-plugin%40workspace%3Apackages%2Ftest-plugin":
   version: 0.1.0
-  resolution: "@actual-app/plugins-core@file:../plugins-core#../plugins-core::hash=c867b8&locator=%40actual-app%2Ftest-plugin%40workspace%3Apackages%2Ftest-plugin"
+  resolution: "@actual-app/plugins-core@file:../plugins-core#../plugins-core::hash=48dc2b&locator=%40actual-app%2Ftest-plugin%40workspace%3Apackages%2Ftest-plugin"
   peerDependencies:
     react: ^19.0.0
     react-dom: ^19.0.0
-  checksum: 10/40bcdf7ae760d103c29309f5cbd3539c7d43700c3beef021e6353171f6076681a7d95572fecbac7f94434447b80804db1bf35f6cdcdb65471ca66bebbaf20746
+  checksum: 10/5bcc896f1919451eed831dc43ca8f00a2ac311906d74bb185bd86a946552742ff6ea11d9f9f7d7ce66ac3952363bd8e8b8ea6e41d821c4005810f7526c69fc4c
   languageName: node
   linkType: hard
 
