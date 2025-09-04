@@ -149,7 +149,6 @@ export default pluginTypescript.config(
   },
   pluginReact.configs.flat.recommended,
   pluginReact.configs.flat['jsx-runtime'],
-  pluginReactHooks.configs.recommended,
   pluginTypescript.configs.recommended,
   pluginImport.flatConfigs.recommended,
   {
@@ -165,6 +164,7 @@ export default pluginTypescript.config(
     files: ['**/*.{js,ts,jsx,tsx}'],
     plugins: {
       'jsx-a11y': pluginJSXA11y,
+      'react-hooks': pluginReactHooks,
     },
     rules: {
       // http://eslint.org/docs/rules/
@@ -442,7 +442,6 @@ export default pluginTypescript.config(
 
       // https://github.com/facebook/react/tree/main/packages/eslint-plugin-react-hooks
       'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/react-compiler': 'warn',
       'react-hooks/exhaustive-deps': [
         'warn',
         {
