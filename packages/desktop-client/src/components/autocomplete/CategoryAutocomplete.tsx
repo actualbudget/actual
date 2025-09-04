@@ -102,7 +102,7 @@ function CategoryList({
         return acc;
       },
       [] as Array<{
-        group: CategoryGroupEntity | undefined;
+        group: CategoryGroupEntity | null;
         categories: Array<
           CategoryAutocompleteItem & {
             highlightedIndex: number;
