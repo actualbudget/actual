@@ -92,7 +92,7 @@ function CategoryList({
 
         if (!existing) {
           acc.push({
-            group: item.group,
+            group: item.group || null,
             categories: [itemWithIndex],
           });
         } else {
@@ -102,7 +102,7 @@ function CategoryList({
         return acc;
       },
       [] as Array<{
-        group: CategoryGroupEntity;
+        group: CategoryGroupEntity | null;
         categories: (CategoryAutocompleteItem & {
           highlightedIndex: number;
         })[];
