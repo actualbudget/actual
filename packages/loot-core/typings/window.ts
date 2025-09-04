@@ -49,8 +49,8 @@ declare global {
     __navigate?: import('react-router').NavigateFunction;
   }
 
-  // eslint-disable-next-line no-var
+   
   var Actual: Actual;
-  // eslint-disable-next-line no-var
+   
   var IS_TESTING: boolean;
 }
