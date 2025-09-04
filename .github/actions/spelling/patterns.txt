@@ -76,3 +76,6 @@
 
 # eliminate words like [`nvm`] or [`asdf`] or [heidiSQL] without backquotes
 \[.+?]
+
+# allowlist specific non-English words with non-ASCII characters
+\b(Länsförsäkringar|München|Złoty)\b

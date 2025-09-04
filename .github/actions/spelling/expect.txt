@@ -31,6 +31,7 @@ cimode
 Cloudflare
 CMCIFRPAXXX
 COBADEFF
+CODEOWNERS
 commerzbank
 Copiar
 CREGBEBB
@@ -63,6 +64,7 @@ HELADEF
 INDUSTRIEL
 INGBPLPW
 Ingo
+INR
 INVSTMTMSGSRS
 ISYBANK
 ITBBITMM
@@ -89,12 +91,14 @@ prefs
 Primoco
 Priotecs
 proactively
+Qatari
 QNTOFRP
 QONTO
 Raiffeisen
 revolut
 RIED
 RSchedule
+SEK
 simplefin
 SKHSFI
 Sparkasse
