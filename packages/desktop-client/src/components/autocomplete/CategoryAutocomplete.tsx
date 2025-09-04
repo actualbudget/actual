@@ -103,9 +103,11 @@ function CategoryList({
       },
       [] as Array<{
         group: CategoryGroupEntity;
-        categories: (CategoryAutocompleteItem & {
-          highlightedIndex: number;
-        })[];
+        categories: Array<
+          CategoryAutocompleteItem & {
+            highlightedIndex: number;
+          }
+        >;
       }>,
     );
   }, [items, showSplitOption]);
