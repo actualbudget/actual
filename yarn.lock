@@ -87,7 +87,7 @@ __metadata:
 
 "@actual-app/plugins-core@file:../plugins-core::locator=%40actual-app%2Ftest-plugin%40workspace%3Apackages%2Ftest-plugin":
   version: 0.1.0
-  resolution: "@actual-app/plugins-core@file:../plugins-core#../plugins-core::hash=228c68&locator=%40actual-app%2Ftest-plugin%40workspace%3Apackages%2Ftest-plugin"
+  resolution: "@actual-app/plugins-core@file:../plugins-core#../plugins-core::hash=48dc2b&locator=%40actual-app%2Ftest-plugin%40workspace%3Apackages%2Ftest-plugin"
   peerDependencies:
     react: ^19.0.0
     react-dom: ^19.0.0
