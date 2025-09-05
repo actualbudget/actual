@@ -58,8 +58,7 @@ export const MonthPicker = ({
     ),
   );
 
-  const firstSelectedIndex =
-    Math.floor(range.length / 2) - Math.floor(numDisplayed / 2);
+  const firstSelectedIndex = range.indexOf(firstSelectedMonth);
   const lastSelectedIndex = firstSelectedIndex + numDisplayed - 1;
 
   const [size, setSize] = useState('small');
