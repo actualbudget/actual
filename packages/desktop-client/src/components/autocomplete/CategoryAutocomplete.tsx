@@ -277,6 +277,15 @@ export function CategoryAutocomplete({
       closeOnBlur={closeOnBlur}
       filterSuggestions={filterSuggestions}
       suggestions={categorySuggestions}
+      getHighlightedIndex={suggestions => {
+        if (suggestions.length === 0) {
+          return null;
+        } else if (showSplitOption) {
+          // Highlight the first category since the split option is at index 0.
+          return suggestions.length > 0 ? 1 : null;
+        }
+        return 0;
+      }}
       renderItems={(items, getItemProps, highlightedIndex) => (
         <CategoryList
           items={items}
