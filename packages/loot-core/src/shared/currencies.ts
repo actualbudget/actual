@@ -27,10 +27,13 @@ export const currencies: Currency[] = [
   { code: 'PHP', name: 'Philippine Peso', symbol: '₱', decimalPlaces: 2 },
   { code: 'PLN', name: 'Polish Złoty', symbol: 'zł', decimalPlaces: 2 },
   { code: 'RON', name: 'Romanian Leu', symbol: 'lei', decimalPlaces: 2 },
+  { code: 'RSD', name: 'Serbian Dinar', symbol: 'RSD', decimalPlaces: 2 },
+  { code: 'RUB', name: 'Russian Ruble', symbol: '₽', decimalPlaces: 2 },
   { code: 'SEK', name: 'Swedish Krona', symbol: 'kr', decimalPlaces: 2 },
   { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$', decimalPlaces: 2 },
   { code: 'THB', name: 'Thai Baht', symbol: '฿', decimalPlaces: 2 },
   { code: 'TRY', name: 'Turkish Lira', symbol: '₺', decimalPlaces: 2 },
+  { code: 'UAH', name: 'Ukrainian Hryvnia', symbol: '₴', decimalPlaces: 2 },
   { code: 'USD', name: 'US Dollar', symbol: '$', decimalPlaces: 2 },
   { code: 'QAR', name: 'Qatari Riyal', symbol: 'QAR', decimalPlaces: 2 },
 ];
