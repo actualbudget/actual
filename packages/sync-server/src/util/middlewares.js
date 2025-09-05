@@ -48,7 +48,9 @@ const validateSessionMiddleware = async (req, res, next) => {
 const requestLoggerMiddleware = expressWinston.logger({
   transports: [new winston.transports.Console()],
   format: winston.format.combine(
-    ...(Object.prototype.hasOwnProperty.call(process.env, 'NO_COLOR') ? [] : [winston.format.colorize()]),
+    ...(Object.prototype.hasOwnProperty.call(process.env, 'NO_COLOR')
+      ? []
+      : [winston.format.colorize()]),
     winston.format.timestamp(),
     winston.format.printf(args => {
       const { timestamp, level, meta } = args;
