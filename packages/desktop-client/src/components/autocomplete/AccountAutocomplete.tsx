@@ -5,6 +5,7 @@ import React, {
   type ComponentPropsWithoutRef,
   type ReactElement,
   type CSSProperties,
+  useRef,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -48,7 +49,7 @@ function AccountList({
   renderAccountItem = defaultRenderAccountItem,
 }: AccountListProps) {
   const { t } = useTranslation();
-  let lastItem = null;
+  const lastItem = useRef<AccountAutocompleteItem | null>(null);
 
   return (
     <View>
@@ -60,9 +61,9 @@ function AccountList({
         }}
       >
         {items.map((item, idx) => {
-          const showGroup = lastItem
-            ? (item.offbudget !== lastItem.offbudget && !item.closed) ||
-              (item.closed !== lastItem.closed && !item.offbudget)
+          const showGroup = lastItem.current
+            ? (item.offbudget !== lastItem.current.offbudget && !item.closed) ||
+              (item.closed !== lastItem.current.closed && !item.offbudget)
             : true;
 
           const group = `${
@@ -73,7 +74,7 @@ function AccountList({
                 : t('On budget')
           }`;
 
-          lastItem = item;
+          lastItem.current = item;
 
           return [
             showGroup ? (
