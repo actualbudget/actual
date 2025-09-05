@@ -81,7 +81,7 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
       style={{
         height: ROW_HEIGHT,
         width: '100%',
-        padding: '0 10px',
+        padding: '0 18px',
         color: theme.pageTextLight,
         ...style,
       }}
@@ -164,11 +164,7 @@ function AccountListItem({
             height: ROW_HEIGHT,
             width: '100%',
             backgroundColor: theme.tableBackground,
-            border: 0,
-            borderRadius: 0,
-            borderWidth: '0 0 1px 0',
-            borderColor: theme.tableBorder,
-            borderStyle: 'solid',
+            border: `1px solid ${theme.tableBorder}`,
             paddingLeft: 20,
           }}
           data-testid="account-list-item"
@@ -474,6 +470,7 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
         items={accounts}
         dragAndDropHooks={dragAndDropHooks}
         ref={ref}
+        style={{ display: 'flex', flexDirection: 'column', margin: '0 8px' }}
       >
         {account => (
           <AccountListItem
