@@ -170,41 +170,40 @@ function PayeeList({
   // with the value of the input so it always shows whatever the user
   // entered
 
-  const { newPayee, suggestedPayees, payees, transferPayees, searchForMore } =
-    useMemo(() => {
-      return items.reduce(
-        (acc, item, index, array) => {
-          if (item.id === 'new') {
-            acc.newPayee = { ...item, highlightedIndex: index };
-          } else if (item.itemType === 'common_payee') {
-            acc.suggestedPayees.push({ ...item, highlightedIndex: index });
-          } else if (item.itemType === 'payee') {
-            acc.payees.push({ ...item, highlightedIndex: index });
-          } else if (item.itemType === 'account') {
-            acc.transferPayees.push({ ...item, highlightedIndex: index });
-          }
-
-          acc.searchForMore = index === array.length - 1 && array.length > 100;
-
-          return acc;
+  const { newPayee, suggestedPayees, payees, transferPayees } = useMemo(() => {
+    return items.reduce(
+      (acc, item, index) => {
+        if (item.id === 'new') {
+          acc.newPayee = { ...item, highlightedIndex: index };
+        } else if (item.itemType === 'common_payee') {
+          acc.suggestedPayees.push({ ...item, highlightedIndex: index });
+        } else if (item.itemType === 'payee') {
+          acc.payees.push({ ...item, highlightedIndex: index });
+        } else if (item.itemType === 'account') {
+          acc.transferPayees.push({ ...item, highlightedIndex: index });
+        }
+        return acc;
+      },
+      {
+        newPayee: null as PayeeAutocompleteItem & {
+          highlightedIndex: number;
         },
-        {
-          newPayee: null as PayeeAutocompleteItem & {
-            highlightedIndex: number;
-          },
-          suggestedPayees: [] as Array<
-            PayeeAutocompleteItem & { highlightedIndex: number }
-          >,
-          payees: [] as Array<
-            PayeeAutocompleteItem & { highlightedIndex: number }
-          >,
-          transferPayees: [] as Array<
-            PayeeAutocompleteItem & { highlightedIndex: number }
-          >,
-          searchForMore: false,
-        },
-      );
-    }, [items]);
+        suggestedPayees: [] as Array<
+          PayeeAutocompleteItem & { highlightedIndex: number }
+        >,
+        payees: [] as Array<
+          PayeeAutocompleteItem & { highlightedIndex: number }
+        >,
+        transferPayees: [] as Array<
+          PayeeAutocompleteItem & { highlightedIndex: number }
+        >,
+      },
+    );
+  }, [items]);
+
+  // We limit the number of payees shown to 100.
+  // So we show a hint that more are available via search.
+  const showSearchForMore = items.length > 100;
 
   return (
     <View>
@@ -262,7 +261,7 @@ function PayeeList({
           </Fragment>
         ))}
 
-        {searchForMore && (
+        {showSearchForMore && (
           <div
             style={{
               fontSize: 11,
@@ -462,6 +461,8 @@ export function PayeeAutocomplete({
           }
         });
 
+        // Only show the first 100 results, users can search to find more.
+        // If user want to view all payees, it can be done via the manage payees page.
         filtered = filtered.slice(0, 100);
 
         if (filtered.length >= 2 && filtered[0].id === 'new') {
