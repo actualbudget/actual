@@ -190,6 +190,12 @@ export function ScrollProvider<T extends Element>({
   );
 }
 
+/**
+ * A hook to register a listener when the user scrolls within a ScrollProvider.
+ *
+ * @param listener The scroll listener to register. It is important to wrap this function
+ * in useCallback to avoid unnecessary unregistering and reregistering on each render.
+ */
 export function useScrollListener(listener: ScrollListener) {
   const context = useContext(ScrollContext);
   if (!context) {
