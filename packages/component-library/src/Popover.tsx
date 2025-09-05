@@ -49,7 +49,7 @@ export const Popover = ({
           return shouldCloseOnInteractOutside(element);
         }
 
-        return false;
+        return true;
       }}
       {...props}
     />
