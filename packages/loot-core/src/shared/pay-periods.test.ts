@@ -1,0 +1,48 @@
+import { describe, expect, test } from 'vitest';
+
+import {
+  type PayPeriodConfig,
+  isPayPeriod,
+  getPayPeriodStartDate,
+  getPayPeriodEndDate,
+  getPayPeriodLabel,
+  generatePayPeriods,
+} from './pay-periods';
+
+describe('pay-periods utilities', () => {
+  const baseConfig: PayPeriodConfig = {
+    enabled: true,
+    payFrequency: 'biweekly',
+    startDate: '2024-01-05',
+    yearStart: 2024,
+  };
+
+  test('isPayPeriod detects extended month values', () => {
+    expect(isPayPeriod('2024-12')).toBe(false);
+    expect(isPayPeriod('2024-13')).toBe(true);
+    expect(isPayPeriod('2024-99')).toBe(true);
+  });
+
+  test('getPayPeriodStartDate / EndDate for biweekly periods', () => {
+    const monthId = '2024-13'; // period index 1
+    const start = getPayPeriodStartDate(monthId, baseConfig);
+    const end = getPayPeriodEndDate(monthId, baseConfig);
+    expect(start.toISOString().slice(0, 10)).toBe('2024-01-05');
+    expect(end.toISOString().slice(0, 10)).toBe('2024-01-18');
+  });
+
+  test('getPayPeriodLabel returns stable label', () => {
+    const monthId = '2024-14'; // period index 2
+    const label = getPayPeriodLabel(monthId, baseConfig);
+    expect(label).toContain('Pay Period');
+  });
+
+  test('generatePayPeriods returns sequential extended months within plan year', () => {
+    const periods = generatePayPeriods(2024, baseConfig);
+    expect(periods.length).toBeGreaterThan(20);
+    expect(periods[0].monthId).toBe('2024-13');
+    const last = periods[periods.length - 1];
+    expect(Number(last.monthId.slice(5, 7))).toBeGreaterThanOrEqual(13);
+  });
+});
+
