@@ -483,3 +483,251 @@ export const getShortYearRegex = memoizeOne((format: string) => {
     .replace(/y+/g, '\\d{2}');
   return new RegExp('^' + regex + '$');
 });
+
+// ----------------------------------------------
+// Extended months: Pay Period Support (MM 13-99)
+// ----------------------------------------------
+
+export interface PayPeriodConfig {
+  enabled: boolean;
+  payFrequency: 'weekly' | 'biweekly' | 'semimonthly' | 'monthly';
+  startDate: string; // ISO date string (yyyy-MM-dd)
+  payDayOfWeek?: number; // 0-6 for weekly/biweekly
+  payDayOfMonth?: number; // 1-31 for monthly
+  yearStart: number; // plan year start (e.g. 2024)
+}
+
+let __payPeriodConfig: PayPeriodConfig | null = null;
+
+export function getPayPeriodConfig(): PayPeriodConfig | null {
+  return __payPeriodConfig;
+}
+
+export function setPayPeriodConfig(config: PayPeriodConfig): void {
+  __payPeriodConfig = config;
+}
+
+function getNumericMonthValue(monthId: string): number {
+  // Expect format 'YYYY-MM'
+  if (typeof monthId !== 'string' || monthId.length < 7 || monthId[4] !== '-') {
+    throw new Error("Invalid monthId '" + monthId + "'. Expected YYYY-MM string.");
+  }
+  const value = parseInt(monthId.slice(5, 7));
+  if (!Number.isFinite(value) || value < 1 || value > 99) {
+    throw new Error("Invalid MM in monthId '" + monthId + "'. MM must be 01-99.");
+  }
+  return value;
+}
+
+function getNumericYearValue(monthId: string): number {
+  const value = parseInt(monthId.slice(0, 4));
+  if (!Number.isFinite(value) || value < 1) {
+    throw new Error("Invalid YYYY in monthId '" + monthId + "'.");
+  }
+  return value;
+}
+
+export function isCalendarMonth(monthId: string): boolean {
+  const mm = getNumericMonthValue(monthId);
+  return mm >= 1 && mm <= 12;
+}
+
+export function isPayPeriod(monthId: string): boolean {
+  const mm = getNumericMonthValue(monthId);
+  return mm >= 13 && mm <= 99;
+}
+
+function validatePayPeriodConfig(config: PayPeriodConfig | null | undefined): void {
+  if (!config || config.enabled !== true) return;
+  const validFreq = ['weekly', 'biweekly', 'semimonthly', 'monthly'];
+  if (!validFreq.includes(config.payFrequency)) {
+    throw new Error("Invalid payFrequency '" + String(config.payFrequency) + "'.");
+  }
+  const start = _parse(config.startDate);
+  if (Number.isNaN(start.getTime())) {
+    throw new Error("Invalid startDate '" + String(config.startDate) + "'. Expected ISO date.");
+  }
+  if (!Number.isInteger(config.yearStart) || config.yearStart < 1) {
+    throw new Error("Invalid yearStart '" + String(config.yearStart) + "'.");
+  }
+}
+
+function getCalendarMonthStartDate(monthId: string): Date {
+  return d.startOfMonth(_parse(monthId));
+}
+
+function getCalendarMonthEndDate(monthId: string): Date {
+  return d.endOfMonth(_parse(monthId));
+}
+
+function getCalendarMonthLabel(monthId: string): string {
+  return d.format(_parse(monthId), 'MMMM yyyy');
+}
+
+function getPeriodIndex(monthId: string, config: PayPeriodConfig): number {
+  const year = getNumericYearValue(monthId);
+  if (year !== config.yearStart) {
+    throw new Error(
+      "monthId '" + monthId + "' year " + year + ' does not match plan yearStart ' + String(config.yearStart) + '.',
+    );
+  }
+  const mm = getNumericMonthValue(monthId);
+  if (mm < 13 || mm > 99) {
+    throw new Error("monthId '" + monthId + "' is not a pay period bucket.");
+  }
+  return mm - 12; // 13 -> 1
+}
+
+function computePayPeriodByIndex(
+  periodIndex: number,
+  config: PayPeriodConfig,
+): { startDate: Date; endDate: Date; label: string } {
+  validatePayPeriodConfig(config);
+  if (!config || !config.enabled) {
+    throw new Error('Pay period config disabled or missing for pay period calculations.');
+  }
+  if (!Number.isInteger(periodIndex) || periodIndex < 1) {
+    throw new Error("Invalid periodIndex '" + String(periodIndex) + "'.");
+  }
+
+  const baseStart = _parse(config.startDate);
+  const freq = config.payFrequency;
+
+  let startDate = baseStart;
+  let endDate = baseStart;
+  let label = '';
+
+  if (freq === 'weekly') {
+    startDate = d.addDays(baseStart, (periodIndex - 1) * 7);
+    endDate = d.addDays(startDate, 6);
+    label = 'Pay Period ' + String(periodIndex);
+  } else if (freq === 'biweekly') {
+    startDate = d.addDays(baseStart, (periodIndex - 1) * 14);
+    endDate = d.addDays(startDate, 13);
+    label = 'Pay Period ' + String(periodIndex);
+  } else if (freq === 'monthly') {
+    const planYearStartDate = _parse(String(config.yearStart)); // yields Jan 1 of yearStart at 12:00
+    const anchorMonthStart = d.startOfMonth(planYearStartDate);
+    startDate = d.startOfMonth(d.addMonths(anchorMonthStart, periodIndex - 1));
+    endDate = d.endOfMonth(startDate);
+    label = 'Month ' + String(periodIndex);
+  } else if (freq === 'semimonthly') {
+    const planYearStartDate = _parse(String(config.yearStart));
+    const monthOffset = Math.floor((periodIndex - 1) / 2);
+    const isFirstHalf = (periodIndex - 1) % 2 === 0;
+    const monthStart = d.startOfMonth(d.addMonths(planYearStartDate, monthOffset));
+    if (isFirstHalf) {
+      startDate = monthStart;
+      endDate = d.addDays(monthStart, 14);
+    } else {
+      const mid = d.addDays(monthStart, 15);
+      const end = d.endOfMonth(monthStart);
+      startDate = mid;
+      endDate = end;
+    }
+    label = 'Pay Period ' + String(periodIndex);
+  } else {
+    throw new Error("Unsupported payFrequency '" + String(freq) + "'.");
+  }
+
+  return { startDate, endDate, label };
+}
+
+export function getPayPeriodStartDate(monthId: string, config: PayPeriodConfig): Date {
+  const index = getPeriodIndex(monthId, config);
+  return computePayPeriodByIndex(index, config).startDate;
+}
+
+export function getPayPeriodEndDate(monthId: string, config: PayPeriodConfig): Date {
+  const index = getPeriodIndex(monthId, config);
+  return computePayPeriodByIndex(index, config).endDate;
+}
+
+export function getPayPeriodLabel(monthId: string, config: PayPeriodConfig): string {
+  const index = getPeriodIndex(monthId, config);
+  return computePayPeriodByIndex(index, config).label;
+}
+
+export function getMonthStartDate(
+  monthId: string,
+  config?: PayPeriodConfig,
+): Date {
+  if (isCalendarMonth(monthId)) return getCalendarMonthStartDate(monthId);
+  if (!config || !config.enabled) {
+    throw new Error("Pay period requested for '" + monthId + "' but config is missing/disabled.");
+  }
+  return getPayPeriodStartDate(monthId, config);
+}
+
+export function getMonthEndDate(
+  monthId: string,
+  config?: PayPeriodConfig,
+): Date {
+  if (isCalendarMonth(monthId)) return getCalendarMonthEndDate(monthId);
+  if (!config || !config.enabled) {
+    throw new Error("Pay period requested for '" + monthId + "' but config is missing/disabled.");
+  }
+  return getPayPeriodEndDate(monthId, config);
+}
+
+export function getMonthLabel(
+  monthId: string,
+  config?: PayPeriodConfig,
+): string {
+  if (isCalendarMonth(monthId)) return getCalendarMonthLabel(monthId);
+  if (!config || !config.enabled) {
+    const mm = getNumericMonthValue(monthId);
+    return 'Period ' + String(mm - 12);
+  }
+  return getPayPeriodLabel(monthId, config);
+}
+
+export function resolveMonthRange(
+  monthId: string,
+  config?: PayPeriodConfig,
+): { startDate: Date; endDate: Date; label: string } {
+  if (isCalendarMonth(monthId)) {
+    return {
+      startDate: getCalendarMonthStartDate(monthId),
+      endDate: getCalendarMonthEndDate(monthId),
+      label: getCalendarMonthLabel(monthId),
+    };
+  }
+  if (!config) {
+    throw new Error('Pay period config is required for pay period ranges.');
+  }
+  const index = getPeriodIndex(monthId, config);
+  const { startDate, endDate, label } = computePayPeriodByIndex(index, config);
+  return { startDate, endDate, label };
+}
+
+export function generatePayPeriods(
+  year: number,
+  config: PayPeriodConfig,
+): Array<{ monthId: string; startDate: string; endDate: string; label: string }> {
+  if (!Number.isInteger(year) || year < 1) {
+    throw new Error('Invalid year for generatePayPeriods');
+  }
+  if (!config || !config.enabled) return [];
+  if (config.yearStart !== year) {
+    // Scope to single plan year as per initial implementation
+    return [];
+  }
+
+  const endOfYear = d.endOfYear(_parse(String(year)));
+  const results: Array<{ monthId: string; startDate: string; endDate: string; label: string }> = [];
+
+  let idx = 1;
+  while (true) {
+    const { startDate, endDate, label } = computePayPeriodByIndex(idx, config);
+    if (d.isAfter(startDate, endOfYear)) break;
+    const monthId = String(year) + '-' + String(idx + 12).padStart(2, '0');
+    results.push({ monthId, startDate: dayFromDate(startDate), endDate: dayFromDate(endDate), label });
+    idx += 1;
+
+    // Safety guard: do not exceed 87 periods (13..99)
+    if (idx > 87) break;
+  }
+
+  return results;
+}
