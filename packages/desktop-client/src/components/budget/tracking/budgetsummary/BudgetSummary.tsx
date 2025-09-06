@@ -21,6 +21,8 @@ import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ExpenseTotal } from './ExpenseTotal';
 import { IncomeTotal } from './IncomeTotal';
 import { Saved } from './Saved';
+import { TrackingTotalsList } from './TrackingTotalsList';
+import { TrackingToBudget } from './TrackingToBudget';
 
 import { useTrackingBudget } from '@desktop-client/components/budget/tracking/TrackingBudgetContext';
 import { NotesButton } from '@desktop-client/components/NotesButton';
@@ -187,6 +189,16 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
                       ),
                     });
                   }}
+                  onSetBudgetsToSpent={() => {
+                    onBudgetAction(month, 'set-to-spent');
+                    onMenuClose();
+                    showUndoNotification({
+                      message: t(
+                        '{{displayMonth}} budgets have all been set to spent amounts.',
+                        { displayMonth },
+                      ),
+                    });
+                  }}
                   onSetMonthsAverage={numberOfMonths => {
                     onBudgetAction(month, `set-${numberOfMonths}-avg`);
                     onMenuClose();
@@ -232,19 +244,39 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
         </View>
 
         {!collapsed && (
-          <Stack
-            spacing={2}
-            style={{
-              alignSelf: 'center',
-              backgroundColor: theme.tableRowHeaderBackground,
-              borderRadius: 4,
-              padding: '10px 15px',
-              marginTop: 13,
-            }}
-          >
-            <IncomeTotal />
-            <ExpenseTotal />
-          </Stack>
+          <>
+            <TrackingTotalsList
+              prevMonthName={monthUtils.format(monthUtils.prevMonth(month), 'MMM', locale)}
+              style={{
+                padding: '5px 0',
+                marginTop: 17,
+                backgroundColor: theme.tableRowHeaderBackground,
+                borderTopWidth: 1,
+                borderBottomWidth: 1,
+                borderColor: theme.tableBorder,
+              }}
+            />
+            <View style={{ margin: '23px 0' }}>
+              <TrackingToBudget
+                prevMonthName={monthUtils.format(monthUtils.prevMonth(month), 'MMM', locale)}
+                month={month}
+                onBudgetAction={onBudgetAction}
+              />
+            </View>
+            <Stack
+              spacing={2}
+              style={{
+                alignSelf: 'center',
+                backgroundColor: theme.tableRowHeaderBackground,
+                borderRadius: 4,
+                padding: '10px 15px',
+                marginTop: 13,
+              }}
+            >
+              <IncomeTotal />
+              <ExpenseTotal />
+            </Stack>
+          </>
         )}
 
         {collapsed ? (
@@ -257,7 +289,12 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
               borderTop: '1px solid ' + theme.tableBorder,
             }}
           >
-            <Saved projected={month >= currentMonth} />
+            <TrackingToBudget
+              prevMonthName={monthUtils.format(monthUtils.prevMonth(month), 'MMM', locale)}
+              month={month}
+              onBudgetAction={onBudgetAction}
+              isCollapsed
+            />
           </View>
         ) : (
           <Saved

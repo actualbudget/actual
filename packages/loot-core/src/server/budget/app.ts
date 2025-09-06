@@ -23,6 +23,8 @@ export interface BudgetHandlers {
   'budget/copy-previous-month': typeof actions.copyPreviousMonth;
   'budget/copy-single-month': typeof actions.copySinglePreviousMonth;
   'budget/set-zero': typeof actions.setZero;
+  'budget/set-to-spent': typeof actions.setBudgetsToSpent;
+  'budget/set-single-to-spent': typeof actions.setSingleToSpent;
   'budget/set-3month-avg': typeof actions.set3MonthAvg;
   'budget/set-6month-avg': typeof actions.set6MonthAvg;
   'budget/set-12month-avg': typeof actions.set12MonthAvg;
@@ -72,7 +74,9 @@ app.method(
   'budget/copy-single-month',
   mutator(undoable(actions.copySinglePreviousMonth)),
 );
+app.method('budget/set-single-to-spent', mutator(undoable(actions.setSingleToSpent)));
 app.method('budget/set-zero', mutator(undoable(actions.setZero)));
+app.method('budget/set-to-spent', mutator(undoable(actions.setBudgetsToSpent)));
 app.method('budget/set-3month-avg', mutator(undoable(actions.set3MonthAvg)));
 app.method('budget/set-6month-avg', mutator(undoable(actions.set6MonthAvg)));
 app.method('budget/set-12month-avg', mutator(undoable(actions.set12MonthAvg)));
@@ -236,6 +240,10 @@ async function trackingBudgetMonth({ month }: { month: string }) {
   }
 
   let values = [
+    value('from-last-month'),
+    value('available-funds'),
+    value('to-budget'),
+    value('buffered'),
     value('total-budgeted'),
     value('total-budget-income'),
     value('total-saved'),

@@ -58,7 +58,7 @@ export const useTrackingSheetValue = <
   return useSheetValue(binding);
 };
 
-const TrackingCellValue = <FieldName extends SheetFields<'tracking-budget'>>(
+export const TrackingCellValue = <FieldName extends SheetFields<'tracking-budget'>>(
   props: ComponentProps<typeof CellValue<'tracking-budget', FieldName>>,
 ) => {
   return <CellValue {...props} />;
@@ -314,6 +314,14 @@ export const CategoryMonth = memo(function CategoryMonth({
                   });
                   showUndoNotification({
                     message: `Budget set to last month’s budget.`,
+                  });
+                }}
+                onSetToSpent={() => {
+                  onMenuAction(month, 'set-single-to-spent', {
+                    category: category.id,
+                  });
+                  showUndoNotification({
+                    message: `Budget set to spent amount.`,
                   });
                 }}
                 onSetMonthsAverage={numberOfMonths => {

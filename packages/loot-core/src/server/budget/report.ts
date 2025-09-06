@@ -88,11 +88,40 @@ export function createCategoryGroup(group, sheetName) {
   });
 }
 
-export function createSummary(groups, sheetName) {
+export function createSummary(groups, sheetName, prevSheetName) {
   const incomeGroup = groups.filter(group => group.is_income)[0];
   const expenseGroups = groups.filter(
     group => !group.is_income && !group.hidden,
   );
+
+  // Add rollover balance fields for tracking budget
+  sheet.get().createDynamic(sheetName, 'from-last-month', {
+    initialValue: 0,
+    dependencies: [`${prevSheetName}!to-budget`],
+    run: (toBudget) => safeNumber(number(toBudget)),
+  });
+
+  sheet.get().createDynamic(sheetName, 'available-funds', {
+    initialValue: 0,
+    dependencies: ['total-income', 'from-last-month'],
+    run: (income, fromLastMonth) =>
+      safeNumber(number(income) + number(fromLastMonth)),
+  });
+
+  sheet.get().createDynamic(sheetName, 'to-budget', {
+    initialValue: 0,
+    dependencies: ['available-funds', 'total-budgeted', 'total-budget-income', 'total-income', 'buffered'],
+    run: (available, totalBudgeted, totalBudgetIncome, totalIncome, buffered) => {
+      // In tracking budget, we subtract budgeted expenses and add budgeted income
+      // Budgeted income increases available funds, budgeted expenses consume them
+      // But we only add budgeted income that hasn't been received yet
+      // We also subtract buffered amount (held for next month)
+      const unreceivedBudgetedIncome = Math.max(0, number(totalBudgetIncome) - number(totalIncome));
+      return safeNumber(number(available) - number(totalBudgeted) + unreceivedBudgetedIncome - number(buffered));
+    },
+  });
+
+  sheet.get().createStatic(sheetName, 'buffered', 0);
 
   sheet.get().createDynamic(sheetName, 'total-budgeted', {
     initialValue: 0,

@@ -25,12 +25,15 @@ import { trackingBudget } from '@desktop-client/spreadsheet/bindings';
 type TrackingBudgetMenuModalProps = Omit<
   Extract<ModalType, { name: 'tracking-budget-menu' }>['options'],
   'month'
->;
+> & {
+  onSetToSpent?: () => void;
+};
 
 export function TrackingBudgetMenuModal({
   categoryId,
   onUpdateBudget,
   onCopyLastMonthAverage,
+  onSetToSpent,
   onSetMonthsAverage,
   onApplyBudgetTemplate,
 }: TrackingBudgetMenuModalProps) {
@@ -110,6 +113,7 @@ export function TrackingBudgetMenuModal({
             onCopyLastMonthAverage={onCopyLastMonthAverage}
             onSetMonthsAverage={onSetMonthsAverage}
             onApplyBudgetTemplate={onApplyBudgetTemplate}
+            onSetToSpent={onSetToSpent}
           />
         </>
       )}

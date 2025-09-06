@@ -241,6 +241,32 @@ export async function copySinglePreviousMonth({
   });
 }
 
+export async function setSingleToSpent({
+  month,
+  category,
+}: {
+  month: string;
+  category: string;
+}): Promise<void> {
+  const categoryFromDb = await db.first<Pick<db.DbViewCategory, 'is_income'>>(
+    'SELECT is_income FROM v_categories WHERE id = ?',
+    [category],
+  );
+
+  const spent = await getSheetValue(
+    monthUtils.sheetForMonth(month),
+    'sum-amount-' + category,
+  );
+
+  // For expense categories, we want the negative spent amount
+  // For income categories, we want the positive spent amount
+  const budgetAmount = categoryFromDb.is_income === 0 ? -spent : spent;
+
+  await batchMessages(async () => {
+    setBudget({ category, month, amount: budgetAmount });
+  });
+}
+
 export async function setZero({ month }: { month: string }): Promise<void> {
   const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',
@@ -253,6 +279,31 @@ export async function setZero({ month }: { month: string }): Promise<void> {
       }
       setBudget({ category: cat.id, month, amount: 0 });
     });
+  });
+}
+
+export async function setBudgetsToSpent({ month }: { month: string }): Promise<void> {
+  const categories = await db.all<db.DbViewCategory>(
+    'SELECT * FROM v_categories WHERE tombstone = 0',
+  );
+
+  await batchMessages(async () => {
+    for (const cat of categories) {
+      if (cat.is_income === 1 && !isReflectBudget()) {
+        continue;
+      }
+
+      const spent = await getSheetValue(
+        monthUtils.sheetForMonth(month),
+        'sum-amount-' + cat.id,
+      );
+
+      // For expense categories, we want the negative spent amount
+      // For income categories, we want the positive spent amount
+      const budgetAmount = cat.is_income === 0 ? -spent : spent;
+
+      setBudget({ category: cat.id, month, amount: budgetAmount });
+    }
   });
 }
 
