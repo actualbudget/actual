@@ -13,6 +13,7 @@ Code Style and Structure
 - Prefer iteration and modularization over code duplication.
 - Use descriptive variable names with auxiliary verbs (e.g., isLoaded, hasError).
 - Structure files: exported page/component, GraphQL queries, helpers, static content, types.
+- When creating a new component, place it in its own file rather than grouping multiple components in a single file.
 
 Naming Conventions
 
