@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import * as d from 'date-fns';
 
+import { parseDate, dayFromDate } from './date-utils';
+
 export interface PayPeriodConfig {
   enabled: boolean;
   payFrequency: 'weekly' | 'biweekly' | 'semimonthly' | 'monthly';
@@ -28,28 +30,6 @@ export function isPayPeriod(monthId: string): boolean {
   return Number.isFinite(mm) && mm >= 13 && mm <= 99;
 }
 
-// Local helpers to avoid circular imports with months.ts
-function ppParse(value: string | Date): Date {
-  if (typeof value === 'string') {
-    const [year, month, day] = value.split('-');
-    if (day != null) {
-      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 12);
-    } else if (month != null) {
-      return new Date(parseInt(year), parseInt(month) - 1, 1, 12);
-    } else {
-      return new Date(parseInt(year), 0, 1, 12);
-    }
-  }
-  if (typeof value === 'number') {
-    return new Date(value);
-  }
-  return value;
-}
-
-function ppDayFromDate(date: string | Date): string {
-  return d.format(ppParse(date), 'yyyy-MM-dd');
-}
-
 function getNumericMonthValue(monthId: string): number {
   if (typeof monthId !== 'string' || monthId.length < 7 || monthId[4] !== '-') {
     throw new Error("Invalid monthId '" + monthId + "'. Expected YYYY-MM string.");
@@ -75,7 +55,7 @@ function validatePayPeriodConfig(config: PayPeriodConfig | null | undefined): vo
   if (!validFreq.includes(config.payFrequency)) {
     throw new Error("Invalid payFrequency '" + String(config.payFrequency) + "'.");
   }
-  const start = ppParse(config.startDate);
+  const start = parseDate(config.startDate);
   if (Number.isNaN(start.getTime())) {
     throw new Error("Invalid startDate '" + String(config.startDate) + "'. Expected ISO date.");
   }
@@ -110,7 +90,7 @@ function computePayPeriodByIndex(
     throw new Error("Invalid periodIndex '" + String(periodIndex) + "'.");
   }
 
-  const baseStart = ppParse(config.startDate);
+  const baseStart = parseDate(config.startDate);
   const freq = config.payFrequency;
 
   let startDate = baseStart;
@@ -126,13 +106,13 @@ function computePayPeriodByIndex(
     endDate = d.addDays(startDate, 13);
     label = 'Pay Period ' + String(periodIndex);
   } else if (freq === 'monthly') {
-    const planYearStartDate = ppParse(String(config.yearStart)); // yields Jan 1 of yearStart at 12:00
+    const planYearStartDate = parseDate(String(config.yearStart)); // yields Jan 1 of yearStart at 12:00
     const anchorMonthStart = d.startOfMonth(planYearStartDate);
     startDate = d.startOfMonth(d.addMonths(anchorMonthStart, periodIndex - 1));
     endDate = d.endOfMonth(startDate);
     label = 'Month ' + String(periodIndex);
   } else if (freq === 'semimonthly') {
-    const planYearStartDate = ppParse(String(config.yearStart));
+    const planYearStartDate = parseDate(String(config.yearStart));
     const monthOffset = Math.floor((periodIndex - 1) / 2);
     const isFirstHalf = (periodIndex - 1) % 2 === 0;
     const monthStart = d.startOfMonth(d.addMonths(planYearStartDate, monthOffset));
@@ -181,7 +161,7 @@ export function generatePayPeriods(
     return [];
   }
 
-  const endOfYear = d.endOfYear(ppParse(String(year)));
+  const endOfYear = d.endOfYear(parseDate(String(year)));
   const results: Array<{ monthId: string; startDate: string; endDate: string; label: string }> = [];
 
   let idx = 1;
@@ -189,7 +169,7 @@ export function generatePayPeriods(
     const { startDate, endDate, label } = computePayPeriodByIndex(idx, config);
     if (d.isAfter(startDate, endOfYear)) break;
     const monthId = String(year) + '-' + String(idx + 12).padStart(2, '0');
-    results.push({ monthId, startDate: ppDayFromDate(startDate), endDate: ppDayFromDate(endDate), label });
+    results.push({ monthId, startDate: dayFromDate(startDate), endDate: dayFromDate(endDate), label });
     idx += 1;
 
     // Safety guard: do not exceed 87 periods (13..99)
