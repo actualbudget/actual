@@ -607,6 +607,7 @@ export function RecurringSchedulePicker({
   const [isOpen, setIsOpen] = useState(false);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const locale = useLocale();
+  let isDatepickerClick = false;
 
   function onSave(config: RecurConfig) {
     onChange(config);
@@ -617,6 +618,21 @@ export function RecurringSchedulePicker({
     () => getRecurringDescription(value, dateFormat, locale),
     [locale, value, dateFormat],
   );
+
+  const handleShouldCloseOnInteractOutside = (element: Element) => {
+    // Datepicker selections for some reason register multiple clicks from nested popover elements
+    // We want to keep the popover open after selecting a date.
+    // So we ignore the "close" event on selection + the subsequent event.
+    if (element instanceof HTMLElement && element.dataset.pikaYear) {
+      isDatepickerClick = true;
+      return false;
+    }
+    if (isDatepickerClick) {
+      isDatepickerClick = false;
+      return false;
+    }
+    return true;
+  };
 
   return (
     <View>
@@ -634,6 +650,7 @@ export function RecurringSchedulePicker({
         placement="bottom start"
         isOpen={isOpen}
         onOpenChange={() => setIsOpen(false)}
+        shouldCloseOnInteractOutside={handleShouldCloseOnInteractOutside}
       >
         <RecurringScheduleTooltip
           config={value}
