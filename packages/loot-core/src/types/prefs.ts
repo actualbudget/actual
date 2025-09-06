@@ -19,6 +19,10 @@ export type SyncedPrefs = Partial<
     | 'currencySymbolPosition'
     | 'currencySpaceBetweenAmountAndSymbol'
     | 'defaultCurrencyCode'
+    | 'payPeriodEnabled'
+    | 'payPeriodFrequency'
+    | 'payPeriodStartDate'
+    | 'payPeriodYearStart'
     | `side-nav.show-balance-history-${string}`
     | `show-balances-${string}`
     | `show-extra-balances-${string}`
