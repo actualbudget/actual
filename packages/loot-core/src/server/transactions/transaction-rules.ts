@@ -411,7 +411,8 @@ export function conditionsToAQL(
       } else if (type === 'string') {
         return {
           [field]: {
-            $transform: op !== 'hasTags' ? '$lower' : undefined,
+            $transform:
+              op !== 'hasTags' && op !== 'hasAnyTags' ? '$lower' : undefined,
             [aqlOp]: value,
           },
         };
@@ -534,22 +535,47 @@ export function conditionsToAQL(
         }
         return { $or: values.map(v => apply(field, '$eq', v)) };
 
-      case 'hasTags':
-        const tagValues = [];
+      case 'hasTags': {
+        const tagValues = [] as string[];
         for (const [_, tag] of value.matchAll(/(?<!#)(#[^#\s]+)/g)) {
-          if (!tagValues.find(t => t.tag === tag)) {
+          if (!tagValues.includes(tag)) {
             tagValues.push(tag);
           }
         }
 
+        // Use $and logic for hasTags (all tags must be present)
+        const tagConditions = tagValues.map(v => {
+          const regex = new RegExp(
+            `(?<!#)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
+          );
+          return apply(field, '$regexp', regex.source);
+        });
+
         return {
-          $and: tagValues.map(v => {
-            const regex = new RegExp(
-              `(?<!#)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
-            );
-            return apply(field, '$regexp', regex.source);
-          }),
+          $and: tagConditions,
         };
+      }
+
+      case 'hasAnyTags': {
+        const anyTagValues = [] as string[];
+        for (const [_, tag] of value.matchAll(/(?<!#)(#[^#\s]+)/g)) {
+          if (!anyTagValues.includes(tag)) {
+            anyTagValues.push(tag);
+          }
+        }
+
+        // Use $or logic for hasAnyTags (any tag can be present)
+        const anyTagConditions = anyTagValues.map(v => {
+          const regex = new RegExp(
+            `(?<!#)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
+          );
+          return apply(field, '$regexp', regex.source);
+        });
+
+        return {
+          $or: anyTagConditions,
+        };
+      }
 
       case 'notOneOf':
         const notValues = value;
