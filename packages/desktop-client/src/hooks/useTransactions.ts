@@ -214,7 +214,7 @@ function getCalculateRunningBalancesFn(
 }
 
 export function calculateRunningBalancesBottomUp(
-  transactions: TransactionEntity[],
+  transactions: readonly TransactionEntity[],
   splits: TransactionSplitsOption,
   startingBalance: IntegerAmount = 0,
 ) {
@@ -252,7 +252,7 @@ export function calculateRunningBalancesBottomUp(
 }
 
 export function calculateRunningBalancesTopDown(
-  transactions: TransactionEntity[],
+  transactions: readonly TransactionEntity[],
   splits: TransactionSplitsOption,
   startingBalance: IntegerAmount = 0,
 ) {

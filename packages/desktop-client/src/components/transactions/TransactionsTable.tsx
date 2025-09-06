@@ -57,6 +57,7 @@ import {
 } from 'loot-core/shared/transactions';
 import {
   amountToCurrency,
+  type IntegerAmount,
   integerToCurrency,
   titleFirst,
 } from 'loot-core/shared/util';
@@ -1937,7 +1938,7 @@ type TransactionTableInnerProps = {
   accounts: AccountEntity[];
   categoryGroups: CategoryGroupEntity[];
   payees: PayeeEntity[];
-  balances: Record<TransactionEntity['id'], { balance: number }> | null;
+  balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showBalances: boolean;
   showReconciled: boolean;
   showCleared: boolean;
@@ -2124,7 +2125,7 @@ function TransactionTableInner({
         expanded={isExpanded?.(trans.id)}
         matched={isMatched?.(trans.id)}
         showZeroInDeposit={isChildDeposit}
-        balance={balances?.[trans.id]?.balance ?? 0}
+        balance={balances?.[trans.id] ?? 0}
         focusedField={editing ? tableNavigator.focusedField : undefined}
         accounts={accounts}
         categoryGroups={categoryGroups}
@@ -2284,7 +2285,7 @@ export type TransactionTableProps = {
   accounts: AccountEntity[];
   categoryGroups: CategoryGroupEntity[];
   payees: PayeeEntity[];
-  balances: Record<TransactionEntity['id'], { balance: number }> | null;
+  balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showBalances: boolean;
   showReconciled: boolean;
   showCleared: boolean;
