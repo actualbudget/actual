@@ -4,7 +4,13 @@ import {
   makeClock,
   Timestamp,
   merkle,
-  SyncProtoBuf,
+  createMessage,
+  SyncResponseSchema,
+  MessageEnvelopeSchema,
+  toBinary,
+  fromBinary,
+  MessageSchema,
+  SyncRequestSchema,
 } from '@actual-app/crdt';
 
 import { Message } from '../sync';
@@ -41,41 +47,41 @@ handlers['/'] = () => {
 };
 
 handlers['/sync/sync'] = async (data: Uint8Array): Promise<Uint8Array> => {
-  const requestPb = SyncProtoBuf.SyncRequest.deserializeBinary(data);
-  const since = requestPb.getSince();
-  const messages = requestPb.getMessagesList();
+  const requestPb = fromBinary(SyncRequestSchema, data);
+  const since = requestPb.since;
+  const messages = requestPb.messages;
 
   const newMessages = currentMessages.filter(msg => msg.timestamp > since);
 
   messages.forEach(msg => {
-    if (!currentMessages.find(m => m.timestamp === msg.getTimestamp())) {
+    if (!currentMessages.find(m => m.timestamp === msg.timestamp)) {
       currentMessages.push({
-        timestamp: msg.getTimestamp(),
-        is_encrypted: msg.getIsencrypted(),
-        content: msg.getContent_asU8(),
+        timestamp: msg.timestamp,
+        is_encrypted: msg.isEncrypted,
+        content: msg.content,
       });
 
       currentClock.merkle = merkle.insert(
         currentClock.merkle,
-        Timestamp.parse(msg.getTimestamp()),
+        Timestamp.parse(msg.timestamp),
       );
     }
   });
 
   currentClock.merkle = merkle.prune(currentClock.merkle);
 
-  const responsePb = new SyncProtoBuf.SyncResponse();
-  responsePb.setMerkle(JSON.stringify(currentClock.merkle));
+  const responsePb = createMessage(SyncResponseSchema);
+  responsePb.merkle = JSON.stringify(currentClock.merkle);
 
   newMessages.forEach(msg => {
-    const envelopePb = new SyncProtoBuf.MessageEnvelope();
-    envelopePb.setTimestamp(msg.timestamp);
-    envelopePb.setIsencrypted(msg.is_encrypted);
-    envelopePb.setContent(msg.content);
-    responsePb.addMessages(envelopePb);
+    const envelopePb = createMessage(MessageEnvelopeSchema);
+    envelopePb.timestamp = msg.timestamp;
+    envelopePb.isEncrypted = msg.is_encrypted;
+    envelopePb.content = msg.content;
+    responsePb.messages.push(envelopePb);
   });
 
-  return responsePb.serializeBinary();
+  return toBinary(SyncResponseSchema, responsePb);
 };
 
 handlers['/gocardless/accounts'] = () => {
@@ -101,14 +107,14 @@ export const getClock = (): Clock => {
 export const getMessages = (): Message[] => {
   return currentMessages.map(msg => {
     const { timestamp, content } = msg;
-    const fields = SyncProtoBuf.Message.deserializeBinary(content);
+    const fields = fromBinary(MessageSchema, content);
 
     return {
       timestamp: Timestamp.parse(timestamp),
-      dataset: fields.getDataset(),
-      row: fields.getRow(),
-      column: fields.getColumn(),
-      value: deserializeValue(fields.getValue()),
+      dataset: fields.dataset,
+      row: fields.row,
+      column: fields.column,
+      value: deserializeValue(fields.value),
     };
   });
 };
