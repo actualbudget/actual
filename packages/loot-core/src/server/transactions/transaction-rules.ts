@@ -275,12 +275,23 @@ function onApplySync(oldValues, newValues) {
   }
 }
 
+export async function getRuleIdFromScheduleId(
+  scheduleId: string,
+): Promise<string | null> {
+  const row = await db.first<Pick<db.DbSchedule, 'rule'>>(
+    'SELECT rule FROM schedules WHERE id = ?',
+    [scheduleId],
+  );
+
+  return row?.rule || null;
+}
+
 // Runner
 export async function runRules(
   trans,
   accounts: Map<string, db.DbAccount> | null = null,
 ) {
-  let accountsMap = null;
+  let accountsMap: Map<string, db.DbAccount> = null;
   if (accounts === null) {
     accountsMap = new Map(
       (await db.getAccounts()).map(account => [account.id, account]),
@@ -291,15 +302,31 @@ export async function runRules(
 
   let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap);
 
-  const rules = rankRules(
-    fastSetMerge(
-      firstcharIndexer.getApplicableRules(trans),
-      payeeIndexer.getApplicableRules(trans),
-    ),
-  );
+  let scheduleRuleRun = false;
+  // If the transaction is posted by a schedule, only run the rule associated with that schedule.
+  if (trans.schedule != null) {
+    const ruleId = await getRuleIdFromScheduleId(trans.schedule);
+    if (ruleId != null) {
+      const rule = allRules.get(ruleId);
+      if (rule != null) {
+        finalTrans = rule.apply(finalTrans);
+        scheduleRuleRun = true;
+      }
+    }
+  }
 
-  for (let i = 0; i < rules.length; i++) {
-    finalTrans = rules[i].apply(finalTrans);
+  // if schedule rule doesn't exist or wasn't run, run all other applicable rules
+  if (scheduleRuleRun === false) {
+    const rules = rankRules(
+      fastSetMerge(
+        firstcharIndexer.getApplicableRules(trans),
+        payeeIndexer.getApplicableRules(trans),
+      ),
+    );
+
+    for (let i = 0; i < rules.length; i++) {
+      finalTrans = rules[i].apply(finalTrans);
+    }
   }
 
   return await finalizeTransactionForRules(finalTrans);
