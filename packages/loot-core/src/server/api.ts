@@ -17,7 +17,11 @@ import {
 } from '../shared/transactions';
 import { integerToAmount } from '../shared/util';
 import { Handlers } from '../types/handlers';
-import { AccountEntity, CategoryGroupEntity } from '../types/models';
+import {
+  AccountEntity,
+  CategoryGroupEntity,
+  ScheduleEntity,
+} from '../types/models';
 import { ServerHandlers } from '../types/server-handlers';
 
 import { addTransactions } from './accounts/sync';
@@ -28,6 +32,9 @@ import {
   categoryGroupModel,
   payeeModel,
   remoteFileModel,
+  scheduleModel,
+  APIScheduleEntity,
+  AmountOPType,
 } from './api-models';
 import { aqlQuery } from './aql';
 import * as cloudStorage from './cloud-storage';
@@ -767,6 +774,198 @@ handlers['api/rule-delete'] = withMutation(async function (id) {
   checkFileOpen();
   return handlers['rule-delete'](id);
 });
+
+handlers['api/schedules-get'] = async function () {
+  checkFileOpen();
+  const { data } = await aqlQuery(q('schedules').select('*'));
+  const schedules = data as ScheduleEntity[];
+  return schedules.map(schedule => scheduleModel.toExternal(schedule));
+};
+
+handlers['api/schedule-create'] = withMutation(async function (
+  schedule: APIScheduleEntity,
+) {
+  checkFileOpen();
+  const internalSchedule = scheduleModel.fromExternal(schedule);
+  const partialSchedule = {
+    name: internalSchedule.name,
+    posts_transaction: internalSchedule.posts_transaction,
+  };
+  return handlers['schedule/create']({
+    schedule: partialSchedule,
+    conditions: internalSchedule._conditions,
+  });
+});
+
+handlers['api/schedule-update'] = withMutation(async function ({
+  id,
+  fields,
+  resetNextDate,
+}) {
+  checkFileOpen();
+  const { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
+  if (!data || data.length === 0) {
+    throw APIError(`Schedule ${id} not found`);
+  }
+
+  const sched = data[0] as ScheduleEntity;
+  let conditionsUpdated = false;
+  // Find all indices to avoid direct assignment
+  const payeeIndex = sched._conditions.findIndex(c => c.field === 'payee');
+  const accountIndex = sched._conditions.findIndex(c => c.field === 'account');
+  const dateIndex = sched._conditions.findIndex(c => c.field === 'date');
+  const amountIndex = sched._conditions.findIndex(c => c.field === 'amount');
+
+  for (const key in fields) {
+    const typedKey = key as keyof APIScheduleEntity;
+    const value = fields[typedKey];
+
+    switch (typedKey) {
+      case 'name': {
+        const newName = String(value);
+        const { data: existing } = await aqlQuery(
+          q('schedules').filter({ name: newName }).select('*'),
+        );
+        if (!existing || existing.length === 0 || existing[0].id === sched.id) {
+          sched.name = newName;
+          conditionsUpdated = true;
+        } else {
+          throw APIError(`There is already a schedule named: ${newName}`);
+        }
+        break;
+      }
+      case 'next_date':
+      case 'completed': {
+        throw APIError(
+          `Field ${typedKey} is system-managed and not user-editable.`,
+        );
+      }
+      case 'posts_transaction': {
+        sched.posts_transaction = Boolean(value);
+        conditionsUpdated = true;
+        break;
+      }
+      case 'payee': {
+        if (payeeIndex !== -1) {
+          sched._conditions[payeeIndex].value = value;
+          conditionsUpdated = true;
+        } else {
+          sched._conditions.push({
+            field: 'payee',
+            op: 'is',
+            value: String(value),
+          });
+          conditionsUpdated = true;
+        }
+        break;
+      }
+      case 'account': {
+        if (accountIndex !== -1) {
+          sched._conditions[accountIndex].value = value;
+          conditionsUpdated = true;
+        } else {
+          sched._conditions.push({
+            field: 'account',
+            op: 'is',
+            value: String(value),
+          });
+          conditionsUpdated = true;
+        }
+        break;
+      }
+      case 'amountOp': {
+        if (amountIndex !== -1) {
+          let convertedOp: AmountOPType;
+          switch (value) {
+            case 'is':
+              convertedOp = 'is';
+              break;
+            case 'isapprox':
+              convertedOp = 'isapprox';
+              break;
+            case 'isbetween':
+              convertedOp = 'isbetween';
+              break;
+            default:
+              throw APIError(
+                `Invalid amount operator: ${value}. Expected: is, isapprox, or isbetween`,
+              );
+          }
+          sched._conditions[amountIndex].op = convertedOp;
+          conditionsUpdated = true;
+        } else {
+          throw APIError(`Ammount can not be found. There is a bug here`);
+        }
+        break;
+      }
+      case 'amount': {
+        if (amountIndex !== -1) {
+          sched._conditions[amountIndex].value = value;
+          conditionsUpdated = true;
+        } else {
+          throw APIError(`Ammount can not be found. There is a bug here`);
+        }
+        break;
+      }
+      case 'date': {
+        if (dateIndex !== -1) {
+          sched._conditions[dateIndex].value = value;
+          conditionsUpdated = true;
+        } else {
+          throw APIError(
+            `Date can not be found. Schedules can not be created without a date there is a bug here`,
+          );
+        }
+        break;
+      }
+      default: {
+        throw APIError(`Unhandled field: ${typedKey}`);
+      }
+    }
+  }
+
+  if (conditionsUpdated) {
+    return handlers['schedule/update']({
+      schedule: {
+        id: sched.id,
+        posts_transaction: sched.posts_transaction,
+        name: sched.name,
+      },
+      conditions: sched._conditions,
+      resetNextDate,
+    });
+  } else {
+    return sched.id;
+  }
+});
+
+handlers['api/schedule-delete'] = withMutation(async function (id: string) {
+  checkFileOpen();
+  return handlers['schedule/delete']({ id });
+});
+
+handlers['api/get-id-by-name'] = async function ({ type, name }) {
+  checkFileOpen();
+
+  const allowedTypes = ['payees', 'categories', 'schedules', 'accounts'];
+
+  if (!allowedTypes.includes(type)) {
+    throw APIError('Provide a valid type');
+  }
+
+  const { data } = await aqlQuery(q(type).filter({ name }).select('*'));
+
+  if (!data || data.length === 0) {
+    throw APIError(`Not found: ${type} with name ${name}`);
+  }
+
+  return data[0].id;
+};
+
+handlers['api/get-server-version'] = async function () {
+  checkFileOpen();
+  return handlers['get-server-version']();
+};
 
 export function installAPI(serverHandlers: ServerHandlers) {
   const merged = Object.assign({}, serverHandlers, handlers);
