@@ -25,6 +25,7 @@ import * as budgetfilesSlice from './budgetfiles/budgetfilesSlice';
 // focus outline appear from keyboard events.
 import 'focus-visible';
 import { App } from './components/App';
+import { NavigableFocusProvider } from './components/NavigableFocusProvider';
 import { ServerProvider } from './components/ServerContext';
 import * as modalsSlice from './modals/modalsSlice';
 import * as notificationsSlice from './notifications/notificationsSlice';
@@ -94,7 +95,9 @@ root.render(
   <Provider store={store}>
     <ServerProvider>
       <AuthProvider>
-        <App />
+        <NavigableFocusProvider>
+          <App />
+        </NavigableFocusProvider>
       </AuthProvider>
     </ServerProvider>
   </Provider>,
