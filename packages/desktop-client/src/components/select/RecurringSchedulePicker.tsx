@@ -621,7 +621,7 @@ export function RecurringSchedulePicker({
 
   const handleShouldCloseOnInteractOutside = (element: Element) => {
     // Keep popover open when interacting anywhere within the datepicker DOM.
-   
+
     const target = element instanceof HTMLElement ? element : null;
     const inDatepicker = target?.closest('.pika-single.actual-date-picker');
 
