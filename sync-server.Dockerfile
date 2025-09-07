@@ -27,6 +27,7 @@ WORKDIR /app
 
 COPY packages/ ./packages/
 
+# Increase memory limit for the build process to 8GB
 ENV NODE_OPTIONS=--max_old_space_size=8192
 
 RUN yarn build:server
