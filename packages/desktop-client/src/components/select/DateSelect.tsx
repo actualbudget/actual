@@ -417,15 +417,6 @@ function DateSelectDesktop({
           }
           inputProps?.onFocus?.(e);
         }}
-        onMouseDown={e => {
-          if (!embedded) {
-            if (e.currentTarget === e.target) {
-              e.preventDefault();
-              setOpen(true);
-            }
-          }
-          inputProps?.onMouseDown?.(e);
-        }}
         onBlur={e => {
           if (!embedded) {
             setOpen(false);
