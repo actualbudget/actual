@@ -26,6 +26,9 @@ FROM deps AS builder
 WORKDIR /app
 
 COPY packages/ ./packages/
+
+ENV NODE_OPTIONS=--max_old_space_size=8192
+
 RUN yarn build:server
 
 # Focus the workspaces in production mode (including @actual-app/web you just built)
