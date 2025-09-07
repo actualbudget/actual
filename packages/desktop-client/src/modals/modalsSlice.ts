@@ -16,6 +16,7 @@ import {
   type NewUserEntity,
   type NoteEntity,
 } from 'loot-core/types/models';
+import { type Template } from 'loot-core/types/models/templates';
 
 import { resetApp, setAppState } from '@desktop-client/app/appSlice';
 import { type SelectLinkedAccountsModalProps } from '@desktop-client/components/modals/SelectLinkedAccountsModal';
@@ -542,6 +543,16 @@ export type Modal =
     }
   | {
       name: 'category-automations-edit';
+      options: {
+        categoryId: CategoryEntity['id'];
+      };
+    }
+  | {
+      name: 'category-automations-unmigrate';
+      options: {
+        categoryId: CategoryEntity['id'];
+        templates: Template[];
+      };
     };
 
 type OpenAccountCloseModalPayload = {
@@ -563,7 +574,7 @@ export const openAccountCloseModal = createAppAsyncThunk(
         id: accountId,
       },
     );
-    const account = getState().queries.accounts.find(
+    const account = getState().account.accounts.find(
       acct => acct.id === accountId,
     );
 

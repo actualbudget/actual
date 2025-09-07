@@ -12,7 +12,7 @@ import {
 
 import { ExpenseCategoryListItem } from './ExpenseCategoryListItem';
 
-import { moveCategory } from '@desktop-client/queries/queriesSlice';
+import { moveCategory } from '@desktop-client/budget/budgetSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type ExpenseCategoryListProps = {

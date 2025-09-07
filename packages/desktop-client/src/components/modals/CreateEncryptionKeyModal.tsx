@@ -18,7 +18,7 @@ import { send } from 'loot-core/platform/client/fetch';
 import { getCreateKeyError } from 'loot-core/shared/errors';
 
 import { sync } from '@desktop-client/app/appSlice';
-import { loadAllFiles } from '@desktop-client/budgets/budgetsSlice';
+import { loadAllFiles } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { Link } from '@desktop-client/components/common/Link';
 import {
   Modal,

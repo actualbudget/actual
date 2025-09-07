@@ -54,9 +54,9 @@ import {
   type Modal as ModalType,
   pushModal,
 } from '@desktop-client/modals/modalsSlice';
+import { getPayeesById } from '@desktop-client/payees/payeesSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { liveQuery } from '@desktop-client/queries/liveQuery';
-import { getPayeesById } from '@desktop-client/queries/queriesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type Fields = {

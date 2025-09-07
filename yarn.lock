@@ -34,6 +34,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@actual-app/ci-actions@workspace:packages/ci-actions":
+  version: 0.0.0-use.local
+  resolution: "@actual-app/ci-actions@workspace:packages/ci-actions"
+  dependencies:
+    vitest: "npm:^3.2.4"
+  languageName: unknown
+  linkType: soft
+
 "@actual-app/components@workspace:*, @actual-app/components@workspace:packages/component-library":
   version: 0.0.0-use.local
   resolution: "@actual-app/components@workspace:packages/component-library"
@@ -14206,10 +14214,8 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     path-browserify: "npm:^1.0.1"
     peggy: "npm:3.0.2"
-    process: "npm:^0.11.10"
     rollup-plugin-visualizer: "npm:^6.0.3"
     slash: "npm:3.0.0"
-    source-map: "npm:^0.7.4"
     stream-browserify: "npm:^3.0.0"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.9.2"

@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@actual-app/components/button';
 import { View } from '@actual-app/components/view';
 
-import { useTagCSS } from '@desktop-client/style/tags';
+import { useTagCSS } from '@desktop-client/hooks/useTagCSS';
 
 type DesktopTaggedNotesProps = {
   content: string;

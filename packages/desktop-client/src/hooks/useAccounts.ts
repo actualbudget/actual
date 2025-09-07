@@ -2,19 +2,19 @@ import { useEffect } from 'react';
 
 import { useInitialMount } from './useInitialMount';
 
-import { getAccounts } from '@desktop-client/queries/queriesSlice';
+import { getAccounts } from '@desktop-client/accounts/accountsSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
 
 export function useAccounts() {
   const dispatch = useDispatch();
-  const accountsLoaded = useSelector(state => state.queries.accountsLoaded);
   const isInitialMount = useInitialMount();
+  const isAccountsDirty = useSelector(state => state.account.isAccountsDirty);
 
   useEffect(() => {
-    if (isInitialMount && !accountsLoaded) {
+    if (isInitialMount || isAccountsDirty) {
       dispatch(getAccounts());
     }
-  }, [accountsLoaded, dispatch, isInitialMount]);
+  }, [dispatch, isInitialMount, isAccountsDirty]);
 
-  return useSelector(state => state.queries.accounts);
+  return useSelector(state => state.account.accounts);
 }

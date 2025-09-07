@@ -55,7 +55,7 @@ import {
   downloadBudget,
   loadAllFiles,
   loadBudget,
-} from '@desktop-client/budgets/budgetsSlice';
+} from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
 import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
@@ -544,7 +544,7 @@ export function BudgetFileSelection({
   quickSwitchMode = false,
 }: BudgetFileSelectionProps) {
   const dispatch = useDispatch();
-  const allFiles = useSelector(state => state.budgets.allFiles || []);
+  const allFiles = useSelector(state => state.budgetfiles.allFiles || []);
   const multiuserEnabled = useMultiuserEnabled();
   const [id] = useMetadataPref('id');
   const [currentUserId, setCurrentUserId] = useState('');
@@ -730,7 +730,7 @@ type UserAccessForFileProps = {
 function UserAccessForFile({ fileId, currentUserId }: UserAccessForFileProps) {
   const { t } = useTranslation();
 
-  const allFiles = useSelector(state => state.budgets.allFiles || []);
+  const allFiles = useSelector(state => state.budgetfiles.allFiles || []);
   const remoteFiles = allFiles.filter(
     f => f.state === 'remote' || f.state === 'synced' || f.state === 'detached',
   ) as (SyncedLocalFile | RemoteFile)[];

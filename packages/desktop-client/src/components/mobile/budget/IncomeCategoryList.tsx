@@ -9,7 +9,7 @@ import { type CategoryEntity } from 'loot-core/types/models';
 
 import { IncomeCategoryListItem } from './IncomeCategoryListItem';
 
-import { moveCategory } from '@desktop-client/queries/queriesSlice';
+import { moveCategory } from '@desktop-client/budget/budgetSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type IncomeCategoryListProps = {

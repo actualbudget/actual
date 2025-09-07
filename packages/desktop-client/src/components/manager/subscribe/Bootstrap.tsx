@@ -13,7 +13,7 @@ import { send } from 'loot-core/platform/client/fetch';
 import { useBootstrapped, Title } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
 
-import { createBudget } from '@desktop-client/budgets/budgetsSlice';
+import { createBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { Link } from '@desktop-client/components/common/Link';
 import { useRefreshLoginMethods } from '@desktop-client/components/ServerContext';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
