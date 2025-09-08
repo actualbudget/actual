@@ -44,5 +44,32 @@ describe('pay-periods utilities', () => {
     const last = periods[periods.length - 1];
     expect(Number(last.monthId.slice(5, 7))).toBeGreaterThanOrEqual(13);
   });
+
+  test('handles edge cases for month validation', () => {
+    // Valid calendar months
+    expect(isPayPeriod('2024-01')).toBe(false);
+    expect(isPayPeriod('2024-12')).toBe(false);
+    
+    // Valid pay periods
+    expect(isPayPeriod('2024-13')).toBe(true);
+    expect(isPayPeriod('2024-99')).toBe(true);
+    
+    // Invalid formats
+    expect(isPayPeriod('2024-1')).toBe(false);
+    expect(isPayPeriod('2024-100')).toBe(false);
+    expect(isPayPeriod('invalid')).toBe(false);
+    expect(isPayPeriod('2024-00')).toBe(false);
+  });
+
+  test('handles year boundaries correctly', () => {
+    const config2023 = { ...baseConfig, yearStart: 2023 };
+    const config2025 = { ...baseConfig, yearStart: 2025 };
+    
+    // 2023 pay periods should not be generated for 2024
+    expect(generatePayPeriods(2024, config2023)).toEqual([]);
+    
+    // 2025 pay periods should not be generated for 2024
+    expect(generatePayPeriods(2024, config2025)).toEqual([]);
+  });
 });
 

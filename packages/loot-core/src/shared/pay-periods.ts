@@ -12,6 +12,7 @@ export interface PayPeriodConfig {
   yearStart: number; // plan year start (e.g. 2024)
 }
 
+// Pay period config will be loaded from database preferences
 let __payPeriodConfig: PayPeriodConfig | null = null;
 
 export function getPayPeriodConfig(): PayPeriodConfig | null {
@@ -177,5 +178,106 @@ export function generatePayPeriods(
   }
 
   return results;
+}
+
+// Pay period navigation functions
+export function nextPayPeriod(monthId: string, config: PayPeriodConfig): string {
+  const year = getNumericYearValue(monthId);
+  const periodIndex = getPeriodIndex(monthId, config);
+  
+  // Check if we need to move to next year
+  const nextPeriodIndex = periodIndex + 1;
+  const maxPeriods = getMaxPeriodsForYear(config);
+  
+  if (nextPeriodIndex > maxPeriods) {
+    // Move to first period of next year
+    return String(year + 1) + '-13';
+  }
+  
+  return String(year) + '-' + String(nextPeriodIndex + 12).padStart(2, '0');
+}
+
+export function prevPayPeriod(monthId: string, config: PayPeriodConfig): string {
+  const year = getNumericYearValue(monthId);
+  const periodIndex = getPeriodIndex(monthId, config);
+  
+  const prevPeriodIndex = periodIndex - 1;
+  
+  if (prevPeriodIndex < 1) {
+    // Move to last period of previous year
+    const prevYear = year - 1;
+    const maxPeriods = getMaxPeriodsForYear({ ...config, yearStart: prevYear });
+    return String(prevYear) + '-' + String(maxPeriods + 12).padStart(2, '0');
+  }
+  
+  return String(year) + '-' + String(prevPeriodIndex + 12).padStart(2, '0');
+}
+
+export function addPayPeriods(monthId: string, n: number, config: PayPeriodConfig): string {
+  let current = monthId;
+  for (let i = 0; i < Math.abs(n); i++) {
+    current = n > 0 ? nextPayPeriod(current, config) : prevPayPeriod(current, config);
+  }
+  return current;
+}
+
+// Pay period date conversion functions
+export function getCurrentPayPeriod(date: Date, config: PayPeriodConfig): string {
+  // Find which pay period this date falls into
+  const year = date.getFullYear();
+  const periods = generatePayPeriods(year, config);
+  
+  for (const period of periods) {
+    const startDate = parseDate(period.startDate);
+    const endDate = parseDate(period.endDate);
+    
+    if (d.isWithinInterval(date, { start: startDate, end: endDate })) {
+      return period.monthId;
+    }
+  }
+  
+  // Fallback to current calendar month if not in any pay period
+  return d.format(date, 'yyyy-MM');
+}
+
+export function getPayPeriodFromDate(date: Date, config: PayPeriodConfig): string {
+  return getCurrentPayPeriod(date, config);
+}
+
+// Pay period range generation
+export function generatePayPeriodRange(
+  start: string,
+  end: string,
+  config: PayPeriodConfig,
+  inclusive = false,
+): string[] {
+  const periods: string[] = [];
+  let current = start;
+  
+  while (isPayPeriodBefore(current, end)) {
+    periods.push(current);
+    current = nextPayPeriod(current, config);
+  }
+  
+  if (inclusive) {
+    periods.push(current);
+  }
+  
+  return periods;
+}
+
+// Helper functions
+function getMaxPeriodsForYear(config: PayPeriodConfig): number {
+  switch (config.payFrequency) {
+    case 'weekly': return 52;
+    case 'biweekly': return 26;
+    case 'semimonthly': return 24;
+    case 'monthly': return 12;
+    default: return 12;
+  }
+}
+
+function isPayPeriodBefore(month1: string, month2: string): boolean {
+  return month1 < month2;
 }
 

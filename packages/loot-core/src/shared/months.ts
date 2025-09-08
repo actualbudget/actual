@@ -23,6 +23,11 @@ export function yearFromDate(date: DateLike): string {
 }
 
 export function monthFromDate(date: DateLike): string {
+  const config = getPayPeriodConfig();
+  if (config?.enabled) {
+    return getPayPeriodFromDate(_parse(date), config);
+  }
+  
   return d.format(_parse(date), 'yyyy-MM');
 }
 
@@ -52,9 +57,14 @@ export function dayFromDate(date: DateLike): string {
 export function currentMonth(): string {
   if (global.IS_TESTING || Platform.isPlaywright) {
     return global.currentMonth || '2017-01';
-  } else {
-    return d.format(new Date(), 'yyyy-MM');
   }
+  
+  const config = getPayPeriodConfig();
+  if (config?.enabled) {
+    return getCurrentPayPeriod(new Date(), config);
+  }
+  
+  return d.format(new Date(), 'yyyy-MM');
 }
 
 export function currentWeek(
@@ -96,6 +106,15 @@ export function currentDay(): string {
 }
 
 export function nextMonth(month: DateLike): string {
+  const monthStr = typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+  
+  if (isPayPeriod(monthStr)) {
+    const config = getPayPeriodConfig();
+    if (config?.enabled) {
+      return nextPayPeriod(monthStr, config);
+    }
+  }
+  
   return d.format(d.addMonths(_parse(month), 1), 'yyyy-MM');
 }
 
@@ -104,6 +123,15 @@ export function prevYear(month: DateLike, format = 'yyyy-MM'): string {
 }
 
 export function prevMonth(month: DateLike): string {
+  const monthStr = typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+  
+  if (isPayPeriod(monthStr)) {
+    const config = getPayPeriodConfig();
+    if (config?.enabled) {
+      return prevPayPeriod(monthStr, config);
+    }
+  }
+  
   return d.format(d.subMonths(_parse(month), 1), 'yyyy-MM');
 }
 
@@ -112,6 +140,15 @@ export function addYears(year: DateLike, n: number): string {
 }
 
 export function addMonths(month: DateLike, n: number): string {
+  const monthStr = typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+  
+  if (isPayPeriod(monthStr)) {
+    const config = getPayPeriodConfig();
+    if (config?.enabled) {
+      return addPayPeriods(monthStr, n, config);
+    }
+  }
+  
   return d.format(d.addMonths(_parse(month), n), 'yyyy-MM');
 }
 
@@ -134,6 +171,15 @@ export function differenceInCalendarDays(
 }
 
 export function subMonths(month: string | Date, n: number) {
+  const monthStr = typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+  
+  if (isPayPeriod(monthStr)) {
+    const config = getPayPeriodConfig();
+    if (config?.enabled) {
+      return addPayPeriods(monthStr, -n, config);
+    }
+  }
+  
   return d.format(d.subMonths(_parse(month), n), 'yyyy-MM');
 }
 
@@ -162,7 +208,8 @@ export function isAfter(month1: DateLike, month2: DateLike): boolean {
 }
 
 export function isCurrentMonth(month: DateLike): boolean {
-  return month === currentMonth();
+  const monthStr = typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+  return monthStr === currentMonth();
 }
 
 export function isCurrentDay(day: DateLike): boolean {
@@ -236,6 +283,18 @@ export function _range(
   end: DateLike,
   inclusive = false,
 ): string[] {
+  const startStr = typeof start === 'string' ? start : d.format(_parse(start), 'yyyy-MM');
+  const endStr = typeof end === 'string' ? end : d.format(_parse(end), 'yyyy-MM');
+  
+  // Check if we're dealing with pay periods
+  if (isPayPeriod(startStr) || isPayPeriod(endStr)) {
+    const config = getPayPeriodConfig();
+    if (config?.enabled) {
+      return generatePayPeriodRange(startStr, endStr, config, inclusive);
+    }
+  }
+  
+  // Original calendar month logic
   const months: string[] = [];
   let month = monthFromDate(start);
   const endMonth = monthFromDate(end);
@@ -431,6 +490,12 @@ import {
   getPayPeriodEndDate,
   getPayPeriodLabel,
   generatePayPeriods,
+  nextPayPeriod,
+  prevPayPeriod,
+  addPayPeriods,
+  getCurrentPayPeriod,
+  getPayPeriodFromDate,
+  generatePayPeriodRange,
 } from './pay-periods';
 
 function getNumericMonthValue(monthId: string): number {
