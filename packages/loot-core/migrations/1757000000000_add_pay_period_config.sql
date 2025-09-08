@@ -11,6 +11,6 @@ CREATE TABLE IF NOT EXISTS pay_period_config (
 
 -- Insert default configuration if not exists
 INSERT INTO pay_period_config (id, enabled, pay_frequency, start_date, year_start)
-SELECT 'default', 0, 'monthly', '2024-01-01', 2024
+SELECT 'default', 0, 'monthly', '2025-01-01', 2025
 WHERE NOT EXISTS (SELECT 1 FROM pay_period_config WHERE id = 'default');
 

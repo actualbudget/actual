@@ -2,7 +2,8 @@ export type FeatureFlag =
   | 'goalTemplatesEnabled'
   | 'goalTemplatesUIEnabled'
   | 'actionTemplating'
-  | 'currency';
+  | 'currency'
+  | 'payPeriodsEnabled';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -19,6 +20,7 @@ export type SyncedPrefs = Partial<
     | 'currencySymbolPosition'
     | 'currencySpaceBetweenAmountAndSymbol'
     | 'defaultCurrencyCode'
+    | 'showPayPeriods'
     | 'payPeriodEnabled'
     | 'payPeriodFrequency'
     | 'payPeriodStartDate'
