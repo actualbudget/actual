@@ -44,6 +44,7 @@ export type createCustomSpreadsheetProps = {
   showOffBudget: boolean;
   showHiddenCategories: boolean;
   showUncategorized: boolean;
+  trimIntervals: boolean;
   groupBy?: string;
   balanceTypeOp?: balanceTypeOpType;
   sortByOp?: sortByOpType;
@@ -65,6 +66,7 @@ export function createCustomSpreadsheet({
   showOffBudget,
   showHiddenCategories,
   showUncategorized,
+  trimIntervals,
   groupBy = '',
   balanceTypeOp = 'totalDebts',
   sortByOp = 'desc',
@@ -232,7 +234,7 @@ export function createCustomSpreadsheet({
         netAssets += perIntervalNetAssets;
         netDebts += perIntervalNetDebts;
 
-        if (perIntervalTotals === 0) {
+        if (trimIntervals && perIntervalTotals === 0) {
           return arr; // hide if total 0 - probably wrong but does the job as a test
         }
 
