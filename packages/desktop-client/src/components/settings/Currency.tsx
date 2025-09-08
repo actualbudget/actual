@@ -37,6 +37,8 @@ export function CurrencySettings() {
         ['TRY', t('Turkish Lira')],
         ['USD', t('US Dollar')],
         ['QAR', t('Qatari Riyal')],
+        ['EGP', t('Egyptian Pound')],
+        ['SAR', t('Saudi Riyal')],
       ]),
     [t],
   );
