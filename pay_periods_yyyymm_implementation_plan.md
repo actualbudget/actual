@@ -1,1048 +1,244 @@
-# Pay Periods Implementation Plan
-## YYYYMM-Based Pay Period Support for Actual Budget
+# Pay Period Dates Implementation Plan
 
-### Overview
+## Overview
+The current system assumes all month identifiers follow the YYYY-MM format where MM is 01-12. However, pay periods will use months 13-99 (e.g., 2024-13, 2024-14, etc.) which are not real calendar months. This creates significant challenges across the entire budget system that must be addressed systematically.
 
-This document outlines the implementation plan for adding pay period support to Actual Budget using the "extended months" approach. Instead of changing the core month-based architecture, we'll extend it to support pay periods by using month identifiers 13-99 (MM 13-99) for pay periods while keeping MM 01-12 for calendar months.
+## File Analysis
+Based on the codebase analysis, the following core files are affected by the month format change:
 
-### Core Concept
+### Core Infrastructure
+- `packages/loot-core/src/shared/months.ts` - Core month utilities and validation
+- `packages/loot-core/src/shared/pay-periods.ts` - Pay period configuration and logic
+- `packages/loot-core/src/server/budget/actions.ts` - Database month conversion (`dbMonth` function)
+- `packages/loot-core/src/server/api.ts` - Month validation (`validateMonth` function)
 
-- **Calendar Months**: MM 01-12 (existing behavior unchanged)
-- **Pay Periods**: MM 13-99 (new functionality)
-- **Month ID Format**: `YYYYMM` where MM can be 01-99
-- **Backward Compatibility**: All existing monthly budgets continue to work exactly as before
+### Spreadsheet System
+- `packages/loot-core/src/server/sheet.ts` - Sheet name generation
+- All budget action files that use `sheetForMonth()` (60+ references)
 
-### Architecture Benefits
+### UI Components
+- `packages/desktop-client/src/components/budget/MonthPicker.tsx` - Month navigation UI
+- `packages/desktop-client/src/components/budget/index.tsx` - Budget page orchestrator
+- `packages/desktop-client/src/components/budget/DynamicBudgetTable.tsx` - Month range handling
+- `packages/desktop-client/src/components/budget/MonthsContext.tsx` - Month context provider
 
-1. **Minimal Disruption**: No database schema changes required
-2. **Backward Compatible**: Existing monthly budgets unaffected
-3. **Incremental Implementation**: Can be rolled out gradually
-4. **Performance**: Leverages existing month-based optimizations
-5. **Flexibility**: Supports weekly, biweekly, semimonthly, and monthly pay schedules
+### Database Layer
+- `packages/loot-core/src/server/db/types/index.ts` - Database schema types
+- All budget tables that store month as integer (`zero_budgets`, `reflect_budgets`)
 
----
+## Assumptions
+### Database Storage Specific Concerns
+- **Integer Storage**: Budget tables (`zero_budgets`, `reflect_budgets`) store month as `f('integer')` 
+  - Current: "2024-01" → 202401, "2024-12" → 202412
+  - Pay periods: "2024-13" → 202413, "2024-14" → 202414, etc.
+  - **OPPORTUNITY**: Integer storage is flexible and can handle 202413+ values without schema changes
+- **ID Generation**: Budget records use `${dbMonth(month)}-${category}` format for IDs
+  - Current: "202401-category123", "202412-category123"  
+  - Pay periods: "202413-category123", "202414-category123"
+  - **OPPORTUNITY**: ID format remains consistent and unique across calendar/pay period months
+- **Query Compatibility**: All existing month-based queries will work with pay period integers
+  - **OPPORTUNITY**: No database migration needed - existing queries handle larger integers
 
-## Phase 1: Core Infrastructure (Foundation)
+### Spreadsheet Naming Specific Concerns  
+- **Sheet Name Pattern**: `sheetForMonth()` generates "budget" + month.replace('-', '')
+  - Current: "2024-01" → "budget202401", "2024-12" → "budget202412"
+  - Pay periods: "2024-13" → "budget202413", "2024-14" → "budget202414"
+  - **OPPORTUNITY**: Pattern remains consistent and creates unique sheet names
+- **Sheet Cleanup**: Budget type changes delete sheets matching `/^budget\d+/` pattern
+  - **OPPORTUNITY**: Existing cleanup logic will handle pay period sheets automatically
+- **Cell References**: All 60+ references to `sheetForMonth()` will work with pay period months
+  - **OPPORTUNITY**: No changes needed to existing spreadsheet cell generation
 
-### 1.1 Extend Month Utilities (`packages/loot-core/src/shared/months.ts`)
+## High-Level Impact
 
+### Architecture Changes
+- **Date Arithmetic**: Month addition/subtraction logic needs pay period awareness
+- **Range Generation**: Month ranges need to handle non-calendar sequences
+
+### Data Flow Changes
+- **UI → State**: Month picker needs to display pay period labels instead of calendar months
+- **State → Backend**: Month validation must accept pay period format
+- **Backend → Database**: Month conversion must handle pay period integers
+- **Database → Spreadsheet**: Sheet names must be unique and meaningful for pay periods
+
+### User Experience Impact
+- **Navigation**: Month picker shows "Dec 31 - Jan 14" for pay periods (with "P1" fallback for small spaces)
+- **Display**: All month references need pay period-aware formatting with localized date ranges
+- **Validation**: Error messages must distinguish between calendar months and pay periods
+- **Backward Compatibility**: Existing calendar month data must continue working
+
+## Phased Implementation
+
+### Phase 1: Core Infrastructure Updates
 **Priority**: Critical
-**Estimated Time**: 2-3 days
+**Status**: 100% Complete ✅
 
-#### New Functions to Add:
-```typescript
-// Pay period configuration types
-export type PayPeriodConfig = {
-  enabled: boolean;
-  payFrequency: 'weekly' | 'biweekly' | 'semimonthly' | 'monthly';
-  startDate: string; // ISO date string
-  payDayOfWeek?: number; // 0-6 for weekly/biweekly
-  payDayOfMonth?: number; // 1-31 for monthly
-  yearStart: number;
-};
+#### Files to Modify
+- ✅ `packages/loot-core/src/shared/months.ts` - **COMPLETE** - Pay period integration implemented
+- ✅ `packages/loot-core/src/shared/pay-periods.ts` - **COMPLETE** - Full pay period system implemented
+- ✅ `packages/loot-core/src/server/budget/actions.ts` - **NO CHANGES NEEDED** - `dbMonth()` already works
+- ✅ `packages/loot-core/src/server/api.ts` - **NO CHANGES NEEDED** - `validateMonth()` already works
 
-// Core pay period functions
-export function isPayPeriod(monthId: string): boolean;
-export function isCalendarMonth(monthId: string): boolean;
-export function getPayPeriodConfig(): PayPeriodConfig | null;
-export function setPayPeriodConfig(config: PayPeriodConfig): void;
+#### Implementation Details
+- ✅ **COMPLETE**: Pay period-aware month conversion functions implemented
+- ✅ **COMPLETE**: Month arithmetic (addMonths, subMonths, nextMonth, prevMonth) supports pay periods
+- ✅ **COMPLETE**: Month range generation supports pay periods
+- ✅ **COMPLETE**: Pay period detection and validation implemented
+- ✅ **COMPLETE**: Backward compatibility with calendar months maintained
+- ✅ **VERIFIED**: `dbMonth()` already handles pay period integers (e.g., 202413, 202414)
+- ✅ **VERIFIED**: `validateMonth()` regex already accepts 13-99 range
+- ✅ **COMPLETE**: Comprehensive unit tests for edge cases implemented
 
-// Date range functions for pay periods
-export function getPayPeriodStartDate(monthId: string, config: PayPeriodConfig): Date;
-export function getPayPeriodEndDate(monthId: string, config: PayPeriodConfig): Date;
-export function getPayPeriodLabel(monthId: string, config: PayPeriodConfig): string;
+### Phase 2: Spreadsheet System Updates
+**Priority**: Low (Minimal Changes Needed)
+**Status**: 100% Complete
 
-// Unified functions that work for both calendar months and pay periods
-export function getMonthStartDate(monthId: string, config?: PayPeriodConfig): Date;
-export function getMonthEndDate(monthId: string, config?: PayPeriodConfig): Date;
-export function getMonthLabel(monthId: string, config?: PayPeriodConfig): string;
-export function resolveMonthRange(monthId: string, config?: PayPeriodConfig): {
-  startDate: Date;
-  endDate: Date;
-  label: string;
-};
+#### Files to Modify
+- ✅ `packages/loot-core/src/server/sheet.ts` - **VERIFIED** - Sheet name generation works
+- ✅ All budget action files using `sheetForMonth()` - **NO CHANGES NEEDED**
 
-// Pay period generation
-export function generatePayPeriods(year: number, config: PayPeriodConfig): Array<{
-  monthId: string;
-  startDate: string;
-  endDate: string;
-  label: string;
-}>;
-```
+#### Implementation Details
+- ✅ **VERIFIED**: `sheetForMonth()` already generates unique names
+  - Calendar months: "budget202401", "budget202412" 
+  - Pay periods: "budget202413", "budget202414" (automatically unique)
+- ✅ **VERIFIED**: Pay period sheet names won't conflict with calendar months
+- ✅ **VERIFIED**: Existing `/^budget\d+/` pattern handles pay period sheets
+- ✅ **VERIFIED**: All 60+ references work unchanged with pay period months
 
-#### Implementation Details:
-- Port the POC code from `payPeriodDates.js` to TypeScript
-- Integrate with existing `monthUtils` functions
-- Add proper error handling and validation
-- Maintain UTC date handling for consistency
+### Phase 3: Database Schema Updates
+**Priority**: Low (No Schema Changes Needed)
+**Status**: 100% Complete
 
-### 1.2 Add Pay Period Preferences
+#### Files to Modify
+- ✅ `packages/loot-core/src/server/db/types/index.ts` - **NO CHANGES NEEDED**
+- ✅ Database migration scripts - **NO MIGRATION NEEDED**
 
+#### Implementation Details
+- ✅ **VERIFIED**: Integer fields already handle 202413+ values
+- ✅ **VERIFIED**: Existing data remains valid and compatible
+- ✅ **VERIFIED**: All existing month-based queries work with pay period integers
+- ✅ **VERIFIED**: Pay period IDs (202413-category123) are automatically unique
+- ✅ **VERIFIED**: Calendar month data continues working unchanged
+
+### Phase 4: Pay Period Preferences and Database Integration
 **Priority**: Critical
-**Estimated Time**: 1-2 days
+**Status**: 0% Complete
 
-#### Update `packages/loot-core/src/types/prefs.ts`:
-```typescript
-export type SyncedPrefs = Partial<
-  Record<
-    // ... existing prefs
-    | 'payPeriodEnabled'
-    | 'payPeriodFrequency'
-    | 'payPeriodStartDate'
-    | 'payPeriodYearStart'
-    | string
-  >
->;
-```
+#### Files to Modify
+- ⚠️ `packages/loot-core/src/types/prefs.ts` - Add pay period synced preferences
+- ⚠️ `packages/loot-core/src/server/db/types/index.ts` - Add pay period database types
+- ⚠️ `packages/loot-core/src/server/migrations/` - Create pay period config table migration
+- ⚠️ `packages/desktop-client/src/hooks/useFeatureFlag.ts` - Add pay periods feature flag
+- ⚠️ `packages/desktop-client/src/components/settings/Experimental.tsx` - Add pay period toggle
+- ⚠️ `packages/desktop-client/src/components/settings/PayPeriodSettings.tsx` - Create settings component
 
-#### Add to `packages/loot-core/src/server/db/types/index.ts`:
-```typescript
-export type DbPayPeriodConfig = {
-  id: string;
-  enabled: boolean;
-  pay_frequency: string;
-  start_date: string;
-  pay_day_of_week?: number;
-  pay_day_of_month?: number;
-  year_start: number;
-};
-```
+#### Implementation Details
+- ⚠️ **PENDING**: Add pay period synced preferences (`payPeriodEnabled`, `payPeriodFrequency`, `payPeriodStartDate`, `payPeriodYearStart`)
+- ⚠️ **PENDING**: Create `DbPayPeriodConfig` type for database storage
+- ⚠️ **PENDING**: Create database migration for `pay_period_config` table with default configuration
+- ⚠️ **PENDING**: Add `payPeriodsEnabled` feature flag to experimental features
+- ⚠️ **PENDING**: Create pay period settings UI with frequency and start date configuration
+- ⚠️ **PENDING**: Add `showPayPeriods` synced preference for view toggle
+- ⚠️ **PENDING**: Integrate settings with existing experimental features panel
 
-### 1.3 Database Migration
-
+### Phase 4.1: Database Migration Details
 **Priority**: Critical
 **Estimated Time**: 1 day
 
-#### Create migration file:
-```sql
--- Add pay period configuration table
-CREATE TABLE pay_period_config (
-  id TEXT PRIMARY KEY,
-  enabled INTEGER DEFAULT 0,
-  pay_frequency TEXT DEFAULT 'monthly',
-  start_date TEXT,
-  pay_day_of_week INTEGER,
-  pay_day_of_month INTEGER,
-  year_start INTEGER
-);
+#### Database Schema Changes
+- ⚠️ **PENDING**: Create `pay_period_config` table with columns:
+  - `id` (TEXT PRIMARY KEY) - Configuration identifier
+  - `enabled` (INTEGER DEFAULT 0) - Whether pay periods are enabled
+  - `pay_frequency` (TEXT DEFAULT 'monthly') - Frequency type
+  - `start_date` (TEXT) - ISO date string for pay period start
+  - `pay_day_of_week` (INTEGER) - Day of week for weekly/biweekly (0-6)
+  - `pay_day_of_month` (INTEGER) - Day of month for monthly (1-31)
+  - `year_start` (INTEGER) - Plan year start (e.g. 2024)
 
--- Insert default configuration
-INSERT INTO pay_period_config (id, enabled, pay_frequency, start_date, year_start)
-VALUES ('default', 0, 'monthly', '2024-01-01', 2024);
-```
+#### Default Configuration
+- ⚠️ **PENDING**: Insert default configuration record:
+  - ID: 'default'
+  - Enabled: 0 (disabled by default)
+  - Frequency: 'monthly'
+  - Start Date: '2025-01-01'
+  - Year Start: 2025
 
----
+#### Migration Strategy
+- ⚠️ **PENDING**: Create migration file in `packages/loot-core/src/server/migrations/`
+- ⚠️ **PENDING**: Ensure migration runs automatically on database initialization
+- ⚠️ **PENDING**: Add rollback capability for migration reversal
+- ⚠️ **PENDING**: Test migration with existing database schemas
 
-## Phase 2: Backend Integration
-
-### 2.1 Update Budget Creation Logic
-
+### Phase 5: UI Component Updates
 **Priority**: High
-**Estimated Time**: 2-3 days
-
-#### Modify `packages/loot-core/src/server/budget/base.ts`:
-
-```typescript
-// Update createAllBudgets to include pay periods
-export async function createAllBudgets() {
-  const earliestTransaction = await db.first<db.DbTransaction>(
-    'SELECT * FROM transactions WHERE isChild=0 AND date IS NOT NULL ORDER BY date ASC LIMIT 1',
-  );
-  const earliestDate = earliestTransaction && db.fromDateRepr(earliestTransaction.date);
-  const currentMonth = monthUtils.currentMonth();
-
-  // Get calendar month range
-  const { start, end, range } = getBudgetRange(
-    earliestDate || currentMonth,
-    currentMonth,
-  );
-
-  // Get pay period range if enabled
-  const payPeriodConfig = await getPayPeriodConfig();
-  let payPeriodRange: string[] = [];
-  
-  if (payPeriodConfig?.enabled) {
-    const payPeriods = monthUtils.generatePayPeriods(
-      payPeriodConfig.yearStart,
-      payPeriodConfig
-    );
-    payPeriodRange = payPeriods.map(p => p.monthId);
-  }
-
-  // Combine both ranges
-  const allMonths = [...range, ...payPeriodRange];
-  const newMonths = allMonths.filter(m => !meta.createdMonths.has(m));
-
-  if (newMonths.length > 0) {
-    await createBudget(allMonths);
-  }
-
-  return { start, end, payPeriodRange };
-}
-```
-
-### 2.2 Update API Endpoints
-
-**Priority**: High
-**Estimated Time**: 2 days
-
-#### Modify `packages/loot-core/src/server/api.ts`:
-
-```typescript
-// Add pay period configuration endpoints
-handlers['api/pay-period-config'] = async function() {
-  return await getPayPeriodConfig();
-};
-
-handlers['api/set-pay-period-config'] = withMutation(async function(config) {
-  await setPayPeriodConfig(config);
-  // Regenerate budgets if config changed
-  await budget.createAllBudgets();
-});
-
-// Update month validation to include pay periods
-async function validateMonth(month) {
-  if (!month.match(/^\d{4}-\d{2}$/)) {
-    throw APIError('Invalid month format, use YYYY-MM: ' + month);
-  }
-
-  if (!IMPORT_MODE) {
-    const { start, end, payPeriodRange } = await handlers['get-budget-bounds']();
-    const allValidMonths = [...monthUtils.range(start, end), ...payPeriodRange];
-    
-    if (!allValidMonths.includes(month)) {
-      throw APIError('No budget exists for month: ' + month);
-    }
-  }
-}
-```
-
-### 2.3 Update Budget Actions
-
-**Priority**: High
-**Estimated Time**: 1-2 days
-
-#### Modify `packages/loot-core/src/server/budget/actions.ts`:
-
-```typescript
-// Update getAllMonths to include pay periods
-function getAllMonths(startMonth: string): string[] {
-  const currentMonth = monthUtils.currentMonth();
-  const calendarRange = monthUtils.rangeInclusive(startMonth, currentMonth);
-  
-  // Add pay periods if enabled
-  const payPeriodConfig = getPayPeriodConfig();
-  let payPeriodMonths: string[] = [];
-  
-  if (payPeriodConfig?.enabled) {
-    const payPeriods = monthUtils.generatePayPeriods(
-      payPeriodConfig.yearStart,
-      payPeriodConfig
-    );
-    payPeriodMonths = payPeriods.map(p => p.monthId);
-  }
-  
-  return [...calendarRange, ...payPeriodMonths];
-}
-```
-
----
-
-## Phase 3: Frontend Integration
-
-### 3.1 Pay Period Settings UI
-
-**Priority**: High
-**Estimated Time**: 3-4 days
-
-#### Add Pay Period Feature Flag
-
-First, update the feature flag types and defaults:
-
-**Update `packages/loot-core/src/types/prefs.ts`:**
-```typescript
-export type FeatureFlag =
-  | 'goalTemplatesEnabled'
-  | 'goalTemplatesUIEnabled'
-  | 'actionTemplating'
-  | 'currency'
-  | 'payPeriodsEnabled'; // Add this new feature flag
-```
-
-**Update `packages/desktop-client/src/hooks/useFeatureFlag.ts`:**
-```typescript
-const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
-  goalTemplatesEnabled: false,
-  goalTemplatesUIEnabled: false,
-  actionTemplating: false,
-  currency: false,
-  payPeriodsEnabled: false, // Add this new feature flag
-};
-```
-
-#### Add Pay Period Settings to Experimental Features
-
-**Update `packages/desktop-client/src/components/settings/Experimental.tsx`:**
-```typescript
-export function ExperimentalFeatures() {
-  const [expanded, setExpanded] = useState(false);
-
-  const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
-  const showGoalTemplatesUI =
-    goalTemplatesUIEnabled ||
-    (goalTemplatesEnabled &&
-      localStorage.getItem('devEnableGoalTemplatesUI') === 'true');
-
-  return (
-    <Setting
-      primaryAction={
-        expanded ? (
-          <View style={{ gap: '1em' }}>
-            <FeatureToggle flag="goalTemplatesEnabled">
-              <Trans>Goal templates</Trans>
-            </FeatureToggle>
-            {showGoalTemplatesUI && (
-              <View style={{ paddingLeft: 22 }}>
-                <FeatureToggle flag="goalTemplatesUIEnabled">
-                  <Trans>Subfeature: Budget automations UI</Trans>
-                </FeatureToggle>
-              </View>
-            )}
-            <FeatureToggle
-              flag="actionTemplating"
-              feedbackLink="https://github.com/actualbudget/actual/issues/3606"
-            >
-              <Trans>Rule action templating</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="currency"
-              feedbackLink="https://github.com/actualbudget/actual/issues/5191"
-            >
-              <Trans>Currency support</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="payPeriodsEnabled"
-              feedbackLink="https://github.com/actualbudget/actual/issues/XXXX"
-            >
-              <Trans>Pay periods support</Trans>
-            </FeatureToggle>
-          </View>
-        ) : (
-          <Link
-            variant="text"
-            onClick={() => setExpanded(true)}
-            data-testid="experimental-settings"
-            style={{
-              flexShrink: 0,
-              alignSelf: 'flex-start',
-              color: theme.pageTextPositive,
-            }}
-          >
-            <Trans>I understand the risks, show experimental features</Trans>
-          </Link>
-        )
-      }
-    >
-      <Text>
-        <Trans>
-          <strong>Experimental features.</strong> These features are not fully
-          tested and may not work as expected. THEY MAY CAUSE IRRECOVERABLE DATA
-          LOSS. They may do nothing at all. Only enable them if you know what
-          you are doing.
-        </Trans>
-      </Text>
-    </Setting>
-  );
-}
-```
-
-#### Create Pay Period Settings Component
-
-**Create `packages/desktop-client/src/components/settings/PayPeriodSettings.tsx`:**
-
-```typescript
-import React, { useState, useEffect } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
-
-import { Button } from '@actual-app/components/button';
-import { Input } from '@actual-app/components/input';
-import { Select } from '@actual-app/components/select';
-import { Text } from '@actual-app/components/text';
-import { View } from '@actual-app/components/view';
-
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { send } from '@desktop-client/loot-core';
-
-type PayPeriodConfig = {
-  enabled: boolean;
-  payFrequency: 'weekly' | 'biweekly' | 'semimonthly' | 'monthly';
-  startDate: string;
-  payDayOfWeek?: number;
-  payDayOfMonth?: number;
-  yearStart: number;
-};
-
-export function PayPeriodSettings() {
-  const { t } = useTranslation();
-  const payPeriodsEnabled = useFeatureFlag('payPeriodsEnabled');
-  const [config, setConfig] = useState<PayPeriodConfig | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (payPeriodsEnabled) {
-      loadConfig();
-    }
-  }, [payPeriodsEnabled]);
-
-  const loadConfig = async () => {
-    try {
-      const response = await send('get-pay-period-config');
-      setConfig(response);
-    } catch (error) {
-      console.error('Failed to load pay period config:', error);
-    }
-  };
-
-  const handleSave = async (newConfig: PayPeriodConfig) => {
-    setLoading(true);
-    try {
-      await send('set-pay-period-config', newConfig);
-      setConfig(newConfig);
-      // Show success message
-    } catch (error) {
-      // Show error message
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!payPeriodsEnabled) {
-    return null;
-  }
-
-  return (
-    <View style={{ gap: '1em' }}>
-      <Text>
-        <Trans>Pay Period Settings</Trans>
-      </Text>
-      
-      <View style={{ gap: '0.5em' }}>
-        <Text>
-          <Trans>Pay Frequency</Trans>
-        </Text>
-        <Select
-          value={config?.payFrequency || 'monthly'}
-          onChange={(payFrequency) => setConfig({...config, payFrequency})}
-          options={[
-            { value: 'weekly', label: t('Weekly') },
-            { value: 'biweekly', label: t('Biweekly') },
-            { value: 'semimonthly', label: t('Semimonthly') },
-            { value: 'monthly', label: t('Monthly') },
-          ]}
-        />
-      </View>
-      
-      <View style={{ gap: '0.5em' }}>
-        <Text>
-          <Trans>Start Date</Trans>
-        </Text>
-        <Input
-          type="date"
-          value={config?.startDate || ''}
-          onChange={(startDate) => setConfig({...config, startDate})}
-        />
-      </View>
-      
-      <Button 
-        onClick={() => config && handleSave(config)}
-        disabled={loading || !config}
-      >
-        <Trans>Save Settings</Trans>
-      </Button>
-    </View>
-  );
-}
-```
-
-### 3.2 Update Month Picker Component
-
-**Priority**: High
-**Estimated Time**: 4-5 days
-
-#### Add View Toggle to Budget Page
-
-**Update `packages/desktop-client/src/components/budget/index.tsx`:**
-
-Add a view toggle button in the budget header that switches between calendar months and pay periods:
-
-```typescript
-// Add to imports
-import { SvgViewShow, SvgViewHide } from '@actual-app/components/icons/v2';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-
-// Add to BudgetInner component
-function BudgetInner(props: BudgetInnerProps) {
-  const payPeriodsEnabled = useFeatureFlag('payPeriodsEnabled');
-  const [showPayPeriods, setShowPayPeriods] = useState(false);
-  
-  // ... existing code ...
-
-  return (
-    <View>
-      {/* Add view toggle in budget header */}
-      {payPeriodsEnabled && (
-        <View style={{ 
-          flexDirection: 'row', 
-          alignItems: 'center', 
-          gap: 8,
-          marginBottom: 10 
-        }}>
-          <Button
-            variant="bare"
-            onClick={() => setShowPayPeriods(!showPayPeriods)}
-            style={{
-              padding: 8,
-              borderRadius: 4,
-              backgroundColor: showPayPeriods ? theme.buttonPrimaryBackground : 'transparent',
-              color: showPayPeriods ? theme.buttonPrimaryText : theme.pageText,
-            }}
-            aria-label={showPayPeriods ? 'Switch to Calendar Months' : 'Switch to Pay Periods'}
-          >
-            {showPayPeriods ? (
-              <SvgViewHide style={{ width: 16, height: 16 }} />
-            ) : (
-              <SvgViewShow style={{ width: 16, height: 16 }} />
-            )}
-          </Button>
-          <Text style={{ fontSize: 14, fontWeight: 500 }}>
-            {showPayPeriods ? 'Pay Periods' : 'Calendar Months'}
-          </Text>
-        </View>
-      )}
-      
-      {/* Existing budget content */}
-      {/* ... */}
-    </View>
-  );
-}
-```
-
-#### Modify `packages/desktop-client/src/components/budget/MonthPicker.tsx`:
-
-```typescript
-// Add to imports
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-
-type MonthPickerProps = {
-  startMonth: string;
-  numDisplayed: number;
-  monthBounds: MonthBounds;
-  showPayPeriods?: boolean; // Add this prop
-  onSelect: (month: string) => void;
-};
-
-export const MonthPicker = ({
-  startMonth,
-  numDisplayed,
-  monthBounds,
-  showPayPeriods = false, // Add default value
-  style,
-  onSelect,
-}: MonthPickerProps) => {
-  const payPeriodsEnabled = useFeatureFlag('payPeriodsEnabled');
-  const payPeriodConfig = usePayPeriodConfig();
-
-  // Generate available months based on current view mode
-  const availableMonths = useMemo(() => {
-    if (showPayPeriods && payPeriodsEnabled && payPeriodConfig?.enabled) {
-      return monthUtils.generatePayPeriods(
-        payPeriodConfig.yearStart,
-        payPeriodConfig
-      ).map(p => p.monthId);
-    } else {
-      return monthUtils.rangeInclusive(monthBounds.start, monthBounds.end);
-    }
-  }, [showPayPeriods, payPeriodsEnabled, payPeriodConfig, monthBounds]);
-
-  // Update month formatting to show pay period labels
-  const getMonthLabel = (month: string) => {
-    if (showPayPeriods && monthUtils.isPayPeriod(month) && payPeriodConfig) {
-      return monthUtils.getMonthLabel(month, payPeriodConfig);
-    } else {
-      return monthUtils.format(month, 'MMM', locale);
-    }
-  };
-
-  // Update range calculation for pay periods
-  const range = useMemo(() => {
-    if (showPayPeriods && payPeriodsEnabled && payPeriodConfig?.enabled) {
-      return availableMonths;
-    } else {
-      return monthUtils.rangeInclusive(
-        monthUtils.subMonths(
-          firstSelectedMonth,
-          Math.floor(targetMonthCount / 2 - numDisplayed / 2),
-        ),
-        monthUtils.addMonths(
-          lastSelectedMonth,
-          Math.floor(targetMonthCount / 2 - numDisplayed / 2),
-        ),
-      );
-    }
-  }, [showPayPeriods, payPeriodsEnabled, payPeriodConfig, availableMonths, /* other deps */]);
-
-  return (
-    <View style={style}>
-      {/* Existing month picker logic with updated labels */}
-      {range.map((month, idx) => {
-        const monthName = getMonthLabel(month);
-        const selected = /* existing selection logic */;
-        const hovered = /* existing hover logic */;
-        const current = /* existing current logic */;
-        const year = monthUtils.getYear(month);
-
-        // ... existing year header logic ...
-
-        return (
-          <View key={month}>
-            {/* Year header if needed */}
-            {showYearHeader && (
-              <Text style={yearHeaderStyle}>{year}</Text>
-            )}
-            
-            {/* Month button */}
-            <Button
-              variant="bare"
-              onClick={() => onSelect(month)}
-              style={{
-                /* existing button styles */
-                backgroundColor: selected ? theme.buttonPrimaryBackground : 'transparent',
-                color: selected ? theme.buttonPrimaryText : theme.pageText,
-              }}
-            >
-              <Text style={monthButtonTextStyle}>
-                {monthName}
-              </Text>
-            </Button>
-          </View>
-        );
-      })}
-    </View>
-  );
-};
-```
-
-#### Update Budget Components to Pass View Mode
-
-**Update `packages/desktop-client/src/components/budget/DynamicBudgetTable.tsx`:**
-
-```typescript
-// Add showPayPeriods prop to component
-type DynamicBudgetTableProps = {
-  // ... existing props
-  showPayPeriods?: boolean;
-};
-
-const DynamicBudgetTableInner = ({
-  // ... existing props
-  showPayPeriods = false,
-}: DynamicBudgetTableInnerProps) => {
-  // ... existing code ...
-
-  return (
-    <View>
-      {/* Pass showPayPeriods to MonthPicker */}
-      <MonthPicker
-        startMonth={startMonth}
-        numDisplayed={numMonths}
-        monthBounds={monthBounds}
-        showPayPeriods={showPayPeriods}
-        onSelect={_onMonthSelect}
-      />
-      
-      {/* Rest of component */}
-    </View>
-  );
-};
-```
-
-### 3.3 Update Mobile Budget Page
-
-**Priority**: High
-**Estimated Time**: 2-3 days
-
-#### Add View Toggle to Mobile Budget Page
-
-**Update `packages/desktop-client/src/components/mobile/budget/BudgetPage.tsx`:**
-
-Add the same view toggle functionality to the mobile budget page:
-
-```typescript
-// Add to imports
-import { SvgViewShow, SvgViewHide } from '@actual-app/components/icons/v2';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-
-// Add to BudgetPage component
-export function BudgetPage() {
-  const payPeriodsEnabled = useFeatureFlag('payPeriodsEnabled');
-  const [showPayPeriods, setShowPayPeriods] = useState(false);
-  
-  // ... existing code ...
-
-  return (
-    <View>
-      {/* Add view toggle in mobile budget header */}
-      {payPeriodsEnabled && (
-        <View style={{ 
-          flexDirection: 'row', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          gap: 8,
-          padding: 10,
-          backgroundColor: theme.pageBackground,
-          borderBottom: `1px solid ${theme.borderColor}`,
-        }}>
-          <Button
-            variant="bare"
-            onClick={() => setShowPayPeriods(!showPayPeriods)}
-            style={{
-              padding: 8,
-              borderRadius: 4,
-              backgroundColor: showPayPeriods ? theme.buttonPrimaryBackground : 'transparent',
-              color: showPayPeriods ? theme.buttonPrimaryText : theme.pageText,
-            }}
-            aria-label={showPayPeriods ? 'Switch to Calendar Months' : 'Switch to Pay Periods'}
-          >
-            {showPayPeriods ? (
-              <SvgViewHide style={{ width: 16, height: 16 }} />
-            ) : (
-              <SvgViewShow style={{ width: 16, height: 16 }} />
-            )}
-          </Button>
-          <Text style={{ fontSize: 14, fontWeight: 500 }}>
-            {showPayPeriods ? 'Pay Periods' : 'Calendar Months'}
-          </Text>
-        </View>
-      )}
-      
-      {/* Existing mobile budget content */}
-      {/* ... */}
-    </View>
-  );
-}
-```
-
-#### Update Mobile Month Selector
-
-**Update the MonthSelector component in the same file:**
-
-```typescript
-function MonthSelector({
-  month,
-  monthBounds,
-  onOpenMonthMenu,
-  onPrevMonth,
-  onNextMonth,
-  showPayPeriods = false, // Add this prop
-}) {
-  const locale = useLocale();
-  const { t } = useTranslation();
-  const payPeriodConfig = usePayPeriodConfig();
-  
-  // Update month formatting for pay periods
-  const getMonthLabel = (month: string) => {
-    if (showPayPeriods && monthUtils.isPayPeriod(month) && payPeriodConfig) {
-      return monthUtils.getMonthLabel(month, payPeriodConfig);
-    } else {
-      return monthUtils.format(month, 'MMMM 'yy', locale);
-    }
-  };
-
-  // ... existing logic ...
-
-  return (
-    <View style={{ /* existing styles */ }}>
-      {/* Previous month button */}
-      <Button
-        aria-label={t('Previous month')}
-        variant="bare"
-        isDisabled={!prevEnabled}
-        onPress={onPrevMonth}
-        style={{ /* existing styles */ }}
-      >
-        <SvgArrowThinLeft width="15" height="15" />
-      </Button>
-      
-      {/* Month display */}
-      <Button
-        variant="bare"
-        style={{ /* existing styles */ }}
-        onPress={() => {
-          onOpenMonthMenu?.(month);
-        }}
-        data-month={month}
-      >
-        <Text style={styles.underlinedText}>
-          {getMonthLabel(month)}
-        </Text>
-      </Button>
-      
-      {/* Next month button */}
-      <Button
-        aria-label={t('Next month')}
-        variant="bare"
-        isDisabled={!nextEnabled}
-        onPress={onNextMonth}
-        style={{ /* existing styles */ }}
-      >
-        <SvgArrowThinRight width="15" height="15" />
-      </Button>
-    </View>
-  );
-}
-```
-
-### 3.4 Update Budget Components
-
-**Priority**: Medium
-**Estimated Time**: 3-4 days
-
-#### Modify budget components to handle pay periods:
-
-- **`EnvelopeBudgetComponents.tsx`**: Update month headers and labels
-- **`TrackingBudgetComponents.tsx`**: Update month headers and labels
-- **`BudgetCell.tsx`**: Ensure proper month ID handling
-- **`DynamicBudgetTable.tsx`**: Update month navigation logic
-
-### 3.5 Update Reports
-
-**Priority**: Medium
-**Estimated Time**: 2-3 days
-
-#### Modify report components to support pay periods:
-
-- **`getLiveRange.ts`**: Add pay period range calculations
-- **`spending-spreadsheet.ts`**: Update date range handling
-- **`summary-spreadsheet.ts`**: Update date range handling
-
----
-
-## Phase 4: Advanced Features
-
-### 4.1 Pay Period Migration Tool
-
-**Priority**: Medium
-**Estimated Time**: 2-3 days
-
-#### Create migration utility for existing users:
-
-```typescript
-// packages/loot-core/src/server/migrations/add-pay-period-support.ts
-export async function migrateToPayPeriods() {
-  // Analyze existing budget patterns
-  // Suggest appropriate pay frequency based on budget activity
-  // Create pay period budgets based on existing monthly budgets
-  // Preserve user data and preferences
-}
-```
-
-### 4.2 Pay Period Templates
-
+**Status**: 0% Complete
+
+#### Files to Modify
+- ⚠️ `packages/desktop-client/src/components/budget/MonthPicker.tsx` - Pay period display
+- ⚠️ `packages/desktop-client/src/components/budget/index.tsx` - View toggle and month handling
+- ⚠️ `packages/desktop-client/src/components/budget/DynamicBudgetTable.tsx` - Range logic
+- ⚠️ `packages/desktop-client/src/components/budget/MonthsContext.tsx` - Context updates
+- ⚠️ `packages/desktop-client/src/components/mobile/budget/BudgetPage.tsx` - Mobile support
+
+#### Implementation Details
+- ⚠️ **PENDING**: Add view toggle button using loadbalancer icons (show/hide pay periods)
+- ⚠️ **PENDING**: Update month picker to show "Dec 31 - Jan 14" format (with "P1" fallback)
+- ⚠️ **PENDING**: Modify month navigation to handle pay period sequences
+- ⚠️ **PENDING**: Update month range calculations for pay period modes
+- ⚠️ **PENDING**: Add mobile budget page view toggle support
+- ⚠️ **PENDING**: Ensure proper month context propagation across all components
+
+### Phase 6: Advanced Features (Optional)
 **Priority**: Low
-**Estimated Time**: 2-3 days
+**Status**: 0% Complete
 
-#### Add common pay period templates:
+#### Files to Modify
+- ⚠️ `packages/loot-core/src/server/migrations/` - Migration utilities
+- ⚠️ `packages/loot-core/src/shared/pay-period-templates.ts` - Common templates
+- ⚠️ Report components - Pay period analytics
 
-```typescript
-export const PAY_PERIOD_TEMPLATES = {
-  'biweekly-friday': {
-    payFrequency: 'biweekly',
-    startDate: '2024-01-05', // First Friday
-    payDayOfWeek: 5,
-  },
-  'weekly-monday': {
-    payFrequency: 'weekly',
-    startDate: '2024-01-01', // First Monday
-    payDayOfWeek: 1,
-  },
-  'semimonthly-1-15': {
-    payFrequency: 'semimonthly',
-    startDate: '2024-01-01',
-    payDayOfMonth: 1,
-  },
-};
-```
+#### Implementation Details
+- ⚠️ **PENDING**: Create migration tool for existing users to adopt pay periods
+- ⚠️ **PENDING**: Add common pay period templates (biweekly Friday, weekly Monday, etc.)
+- ⚠️ **PENDING**: Implement pay period specific analytics and reporting
+- ⚠️ **PENDING**: Add pay period vs calendar month comparison features
 
-### 4.3 Pay Period Analytics
-
-**Priority**: Low
-**Estimated Time**: 3-4 days
-
-#### Add pay period specific analytics:
-
-- Pay period spending patterns
-- Pay period budget adherence
-- Pay period carryover analysis
-- Pay period vs calendar month comparisons
-
----
-
-## Phase 5: Testing & Polish
-
-### 5.1 Comprehensive Testing
-
-**Priority**: Critical
-**Estimated Time**: 3-4 days
-
-#### Test Coverage:
-- Unit tests for all new month utilities
-- Integration tests for budget creation with pay periods
-- UI tests for month picker with pay periods
-- End-to-end tests for complete pay period workflow
-- Performance tests with large numbers of pay periods
-- Migration tests for existing users
-
-#### Test Scenarios:
-- Switching between calendar months and pay periods
-- Different pay frequencies (weekly, biweekly, semimonthly)
-- Pay periods spanning month boundaries
-- Pay periods spanning year boundaries
-- Edge cases (leap years, DST transitions)
-- Large datasets with many pay periods
-
-### 5.2 Documentation
-
+### Phase 7: Integration and Testing
 **Priority**: Medium
-**Estimated Time**: 2-3 days
+**Status**: 0% Complete
 
-#### Documentation Updates:
-- User guide for pay period setup
-- Developer documentation for new APIs
-- Migration guide for existing users
-- Troubleshooting guide for common issues
+#### Files to Modify
+- ⚠️ All budget-related components and utilities
+- ⚠️ Test files and integration tests
+- ⚠️ Documentation files
 
-### 5.3 Performance Optimization
-
-**Priority**: Medium
-**Estimated Time**: 2-3 days
-
-#### Optimization Areas:
-- Lazy loading of pay period data
-- Caching of pay period calculations
-- Optimized database queries for pay periods
-- UI performance with many pay periods
-
----
-
-## Implementation Timeline
-
-### Week 1-2: Phase 1 (Core Infrastructure)
-- [ ] Extend month utilities
-- [ ] Add pay period preferences
-- [ ] Create database migration
-- [ ] Basic testing
-
-### Week 3-4: Phase 2 (Backend Integration)
-- [ ] Update budget creation logic
-- [ ] Update API endpoints
-- [ ] Update budget actions
-- [ ] Backend testing
-
-### Week 5-7: Phase 3 (Frontend Integration)
-- [ ] Pay period settings UI
-- [ ] Update month picker
-- [ ] Update budget components
-- [ ] Update reports
-- [ ] Frontend testing
-
-### Week 8-9: Phase 4 (Advanced Features)
-- [ ] Migration tool
-- [ ] Pay period templates
-- [ ] Pay period analytics
-- [ ] Feature testing
-
-### Week 10: Phase 5 (Testing & Polish)
-- [ ] Comprehensive testing
-- [ ] Documentation
-- [ ] Performance optimization
-- [ ] Final polish
-
----
-
-## Risk Mitigation
-
-### Technical Risks
-1. **Performance Impact**: Mitigate with lazy loading and caching
-2. **Data Migration**: Thorough testing with backup/restore procedures
-3. **UI Complexity**: Gradual rollout with feature flags
-4. **Backward Compatibility**: Extensive testing with existing data
-
-### User Experience Risks
-1. **Confusion**: Clear UI indicators and help text
-2. **Data Loss**: Comprehensive backup before migration
-3. **Learning Curve**: Intuitive defaults and guided setup
-
-### Business Risks
-1. **Feature Adoption**: Gradual rollout with user feedback
-2. **Support Load**: Comprehensive documentation and training
-3. **Performance Issues**: Load testing and monitoring
-
----
+#### Implementation Details
+- ⚠️ **PENDING**: Comprehensive integration testing across all components
+- ⚠️ **PENDING**: End-to-end testing of pay period workflows
+- ⚠️ **PENDING**: Performance testing with large pay period ranges
+- ⚠️ **PENDING**: User acceptance testing for pay period UI
+- ⚠️ **PENDING**: Backward compatibility testing with existing data
+- ⚠️ **PENDING**: Create user documentation for pay period setup
+- ⚠️ **PENDING**: Performance optimization for large pay period datasets
 
 ## Success Metrics
+- All existing calendar month functionality continues to work unchanged
+- Pay period months (13-99) are properly validated and stored
+- Month picker correctly displays "Dec 31 - Jan 14" format (with "P1" fallback)
+- Database queries work with both calendar and pay period months
+- Spreadsheet system generates unique, meaningful sheet names
+- User can seamlessly switch between calendar and pay period modes via view toggle
+- Feature flag system properly controls pay period availability
+- Mobile budget page supports pay period view toggle
+- No data loss during migration from calendar to pay period mode
+- Performance remains acceptable with large pay period ranges
 
-### Technical Metrics
-- All existing tests pass
-- New test coverage > 90%
-- Performance impact < 5%
-- Zero data loss during migration
-
-### User Experience Metrics
-- Pay period setup completion rate > 80%
-- User satisfaction score > 4.5/5
-- Support ticket increase < 10%
-- Feature adoption rate > 30% within 3 months
-
-### Business Metrics
-- Increased user engagement
-- Reduced churn rate
-- Positive user feedback
-- Successful migration of existing users
-
----
-
-## Conclusion
-
-This implementation plan provides a comprehensive roadmap for adding pay period support to Actual Budget while maintaining backward compatibility and minimizing risk. The phased approach allows for iterative development, testing, and user feedback, ensuring a successful rollout of this valuable feature.
-
-The "extended months" approach leverages the existing architecture effectively, providing a solid foundation for future enhancements while delivering immediate value to users with non-monthly pay schedules.
-
----
-
-## Key Updates to Implementation Plan
-
-### Experimental Feature Integration
-- **Feature Flag**: Added `payPeriodsEnabled` to the experimental features system
-- **Settings UI**: Integrated pay period settings into the existing experimental features panel
-- **Progressive Rollout**: Users must explicitly enable the feature, ensuring controlled adoption
-
-### View Toggle Implementation
-- **Desktop Budget Page**: Added view toggle button using `SvgViewShow`/`SvgViewHide` icons
-- **Mobile Budget Page**: Added matching view toggle for mobile experience
-- **Month Picker Integration**: Updated MonthPicker to support both calendar months and pay periods
-- **Consistent UX**: Same toggle behavior across desktop and mobile platforms
-
-### Icon Strategy
-- **View Toggle**: Uses `SvgViewShow` (eye icon) and `SvgViewHide` (eye with slash) for intuitive switching
-- **Visual Feedback**: Toggle button changes appearance when pay periods are active
-- **Accessibility**: Proper ARIA labels for screen readers
-
-### User Experience Flow
-1. **Enable Feature**: User enables "Pay periods support" in experimental features
-2. **Configure Settings**: User sets up pay frequency and start date
-3. **Toggle View**: User clicks view toggle to switch between calendar months and pay periods
-4. **Seamless Navigation**: Month picker adapts to show appropriate periods based on current view
-
-This approach ensures a smooth, intuitive user experience while maintaining the experimental nature of the feature during initial rollout.
+## Implementation Notes
+- This implementation must maintain full backward compatibility
+- Pay period mode should be opt-in via experimental feature flag
+- View toggle uses simple synced preference (`showPayPeriods`)
+- All month-related functions must be updated to handle both formats
+- UI components need graceful degradation when pay periods are disabled
+- Testing must cover both calendar and pay period scenarios extensively
+- Advanced features (migration tools, templates, analytics) are optional
+- Mobile support is essential for complete user experience
