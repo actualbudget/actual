@@ -52,7 +52,6 @@ Based on the codebase analysis, the following core files are affected by the mon
 ## High-Level Impact
 
 ### Architecture Changes
-- **Month Validation**: Current regex `/^\d{4}-\d{2}$/` only accepts 01-12, needs to accept 13-99
 - **Date Arithmetic**: Month addition/subtraction logic needs pay period awareness
 - **Range Generation**: Month ranges need to handle non-calendar sequences
 
