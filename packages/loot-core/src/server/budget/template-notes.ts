@@ -136,3 +136,155 @@ async function getCategoriesWithTemplates(): Promise<
 
   return templatesForCategory;
 }
+
+export async function unparse(templates: Template[]): Promise<string> {
+  return templates
+    .flatMap(template => {
+      if (template.type === 'error') {
+        return [];
+      }
+
+      if (template.type === 'goal') {
+        return `${GOAL_PREFIX} ${template.amount}`;
+      }
+
+      const prefix = template.priority
+        ? `${TEMPLATE_PREFIX}-${template.priority}`
+        : TEMPLATE_PREFIX;
+
+      switch (template.type) {
+        case 'simple': {
+          // Simple template syntax: #template[-prio] simple [monthly N] [limit]
+          let result = prefix;
+          if (template.monthly != null) {
+            result += ` ${template.monthly}`;
+          }
+          if (template.limit) {
+            result += ` ${limitToString(template.limit)}`;
+          }
+          return result.trim();
+        }
+        case 'schedule': {
+          // schedule syntax: #template[-prio] schedule <name> [full] [ [increase/decrease N%] ]
+          let result = `${prefix} schedule`;
+          if (template.full) {
+            result += ' full';
+          }
+          result += ` ${template.name}`;
+          if (template.adjustment !== undefined) {
+            const adj = template.adjustment;
+            const op = adj >= 0 ? 'increase' : 'decrease';
+            const val = Math.abs(adj);
+            result += ` [${op} ${val}%]`;
+          }
+          return result;
+        }
+        case 'percentage': {
+          // #template[-prio] <percent>% of [previous ]<category>
+          const prev = template.previous ? 'previous ' : '';
+          return `${prefix} ${trimTrailingZeros(template.percent)}% of ${prev}${template.category}`.trim();
+        }
+        case 'periodic': {
+          // #template[-prio] <amount> repeat every <n> <period>(s) starting <date> [limit]
+          const periodPart = periodToString(template.period);
+          let result = `${prefix} ${template.amount} repeat every ${periodPart} starting ${template.starting}`;
+          if (template.limit) {
+            result += ` ${limitToString(template.limit)}`;
+          }
+          return result;
+        }
+        case 'by':
+        case 'spend': {
+          // #template[-prio] <amount> by <month> [spend from <month>] [repeat every <...>]
+          let result = `${prefix} ${template.amount} by ${template.month}`;
+          if (template.type === 'spend' && template.from) {
+            result += ` spend from ${template.from}`;
+          }
+          // repeat info
+          if (template.annual !== undefined) {
+            const repeatInfo = repeatToString(template.annual, template.repeat);
+            if (repeatInfo) {
+              result += ` repeat every ${repeatInfo}`;
+            }
+          }
+          return result;
+        }
+        case 'remainder': {
+          // #template remainder [weight] [limit]
+          let result = `${prefix} remainder`;
+          if (template.weight !== undefined && template.weight !== 1) {
+            result += ` ${template.weight}`;
+          }
+          if (template.limit) {
+            result += ` ${limitToString(template.limit)}`;
+          }
+          return result;
+        }
+        case 'average': {
+          // #template average <numMonths> months
+          return `${prefix} average ${template.numMonths} months`;
+        }
+        case 'copy': {
+          // #template copy from <lookBack> months ago [limit]
+          const result = `${prefix} copy from ${template.lookBack} months ago`;
+          return result;
+        }
+        default:
+          return [];
+      }
+    })
+    .join('\n');
+}
+
+function limitToString(limit: {
+  amount: number;
+  hold: boolean;
+  period?: 'daily' | 'weekly' | 'monthly';
+  start?: string | undefined;
+}): string {
+  switch (limit.period) {
+    case 'weekly': {
+      // Needs start date per grammar
+      const base = `up to ${limit.amount} per week starting ${limit.start}`;
+      return limit.hold ? `${base} hold` : base;
+    }
+    case 'daily': {
+      const base = `up to ${limit.amount} per day`;
+      return limit.hold ? `${base} hold` : base;
+    }
+    case 'monthly':
+    default: {
+      const base = `up to ${limit.amount}`;
+      return limit.hold ? `${base} hold` : base;
+    }
+  }
+}
+
+function periodToString(p: {
+  period: 'day' | 'week' | 'month' | 'year';
+  amount: number;
+}): string {
+  const { period, amount } = p;
+  if (amount === 1) {
+    return period; // singular
+  }
+  // pluralize simple
+  return `${amount} ${period}s`;
+}
+
+function repeatToString(annual?: boolean, repeat?: number): string | null {
+  if (annual === undefined) return null;
+  if (annual) {
+    if (!repeat || repeat === 1) return 'year';
+    return `${repeat} years`;
+  }
+  // monthly
+  if (!repeat || repeat === 1) return 'month';
+  return `${repeat} months`;
+}
+
+function trimTrailingZeros(n: number): string {
+  const s = n.toString();
+  if (!s.includes('.')) return s;
+  return s.replace(/\.0+$/, '').replace(/(\.[0-9]*[1-9])0+$/, '$1');
+}

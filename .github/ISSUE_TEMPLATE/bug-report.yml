@@ -2,6 +2,7 @@ name: Bug Report
 description: File a bug report also known as an issue or problem.
 title: '[Bug]: '
 labels: ['needs triage', 'bug']
+type: Bug
 body:
   - type: markdown
     attributes:

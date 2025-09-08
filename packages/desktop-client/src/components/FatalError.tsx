@@ -14,6 +14,8 @@ import { Link } from './common/Link';
 import { Modal, ModalHeader } from './common/Modal';
 import { Checkbox } from './forms';
 
+import { useModalState } from '@desktop-client/hooks/useModalState';
+
 type AppError = Error & {
   type?: string;
   IDBFailure?: boolean;
@@ -194,13 +196,16 @@ function SharedArrayBufferOverride() {
 export function FatalError({ error }: FatalErrorProps) {
   const { t } = useTranslation();
 
+  const { modalStack } = useModalState();
+  const lastModal = modalStack[modalStack.length - 1];
+
   const [showError, setShowError] = useState(false);
 
   const showSimpleRender = 'type' in error && error.type === 'app-init-failure';
   const isLazyLoadError = error instanceof LazyLoadFailedError;
 
   return (
-    <Modal name="fatal-error" isDismissable={false}>
+    <Modal name={lastModal?.name ?? 'fatal-error'} isDismissable={false}>
       <ModalHeader
         title={isLazyLoadError ? t('Loading Error') : t('Fatal Error')}
       />
