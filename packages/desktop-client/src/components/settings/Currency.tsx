@@ -45,6 +45,8 @@ export function CurrencySettings() {
         ['UAH', t('Ukrainian Hryvnia')],
         ['USD', t('US Dollar')],
         ['QAR', t('Qatari Riyal')],
+        ['EGP', t('Egyptian Pound')],
+        ['SAR', t('Saudi Riyal')],
       ]),
     [t],
   );
