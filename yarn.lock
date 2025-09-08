@@ -34,6 +34,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@actual-app/ci-actions@workspace:packages/ci-actions":
+  version: 0.0.0-use.local
+  resolution: "@actual-app/ci-actions@workspace:packages/ci-actions"
+  dependencies:
+    vitest: "npm:^3.2.4"
+  languageName: unknown
+  linkType: soft
+
 "@actual-app/components@workspace:*, @actual-app/components@workspace:packages/component-library":
   version: 0.0.0-use.local
   resolution: "@actual-app/components@workspace:packages/component-library"

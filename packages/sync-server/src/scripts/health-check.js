@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 import { config } from '../load-config.js';
 
 const protocol =

@@ -147,7 +147,7 @@ if (process.env.NODE_ENV === 'development') {
 
   app.use(express.static(config.get('webRoot'), { index: false }));
   app.get('/{*splat}', (req, res) =>
-    res.sendFile(config.get('webRoot') + '/index.html'),
+    res.sendFile('index.html', { root: config.get('webRoot') }),
   );
 }
 
