@@ -339,7 +339,7 @@ export async function runRules(
 
   for (let i = 0; i < rules.length; i++) {
     // If there is a scheduleRuleID (meaning this transaction came from a schedule) then exclude rules linked to other schedules.
-    if (scheduleRuleID != '') {
+    if (scheduleRuleID !== '') {
       if (rules[i].id === scheduleRuleID) {
         // if the rule has the same ID that is attached to the schedule then run it (it is the schedules rule).
         finalTrans = rules[i].apply(finalTrans);
