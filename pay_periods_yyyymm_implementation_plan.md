@@ -170,22 +170,23 @@ Based on the codebase analysis, the following core files are affected by the mon
 
 ### Phase 5: UI Component Updates
 **Priority**: High
-**Status**: 0% Complete
+**Status**: 60% Complete
 
 #### Files to Modify
-- ⚠️ `packages/desktop-client/src/components/budget/MonthPicker.tsx` - Pay period display
-- ⚠️ `packages/desktop-client/src/components/budget/index.tsx` - View toggle and month handling
-- ⚠️ `packages/desktop-client/src/components/budget/DynamicBudgetTable.tsx` - Range logic
-- ⚠️ `packages/desktop-client/src/components/budget/MonthsContext.tsx` - Context updates
-- ⚠️ `packages/desktop-client/src/components/mobile/budget/BudgetPage.tsx` - Mobile support
+- ✅ `packages/desktop-client/src/components/budget/MonthPicker.tsx` - Pay period label rendering
+- ✅ `packages/desktop-client/src/components/budget/index.tsx` - View toggle integration and pay period start handling
+- ✅ `packages/desktop-client/src/components/budget/BudgetPageHeader.tsx` - View toggle control (checkbox)
+- ✅ `packages/desktop-client/src/components/budget/MonthsContext.tsx` - Verified month range uses shared utilities
+- ⚠️ `packages/desktop-client/src/components/budget/DynamicBudgetTable.tsx` - Range logic refinements
+- ⚠️ `packages/desktop-client/src/components/mobile/budget/BudgetPage.tsx` - Mobile support (file not present; to be planned)
 
 #### Implementation Details
-- ⚠️ **PENDING**: Add view toggle button using loadbalancer icons (show/hide pay periods)
-- ⚠️ **PENDING**: Update month picker to show "Dec 31 - Jan 14" format (with "P1" fallback)
-- ⚠️ **PENDING**: Modify month navigation to handle pay period sequences
-- ⚠️ **PENDING**: Update month range calculations for pay period modes
+- ✅ **COMPLETE**: Added view toggle control in budget header (checkbox) to show/hide pay periods
+- ✅ **COMPLETE**: Month picker displays pay period ranges (e.g., "Dec 31 - Jan 14") with "P{n}" fallback for compact layout
+- ✅ **COMPLETE**: Navigation respects pay period sequences when pay period view is active
+- ⚠️ **PENDING**: Refine budget month range calculations for pay period mode (ensure bounds and prewarm logic align with plan year)
 - ⚠️ **PENDING**: Add mobile budget page view toggle support
-- ⚠️ **PENDING**: Ensure proper month context propagation across all components
+- ⚠️ **PENDING**: Validate month context propagation across all budget components in pay period mode
 
 ### Phase 6: Advanced Features (Optional)
 **Priority**: Low
