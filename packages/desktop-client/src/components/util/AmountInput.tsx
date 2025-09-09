@@ -37,6 +37,7 @@ type AmountInputProps = {
   focused?: boolean;
   disabled?: boolean;
   autoDecimals?: boolean;
+  options?: { inflow?: boolean; outflow?: boolean };
 };
 
 export function AmountInput({
@@ -55,12 +56,15 @@ export function AmountInput({
   focused,
   disabled = false,
   autoDecimals = false,
+  options,
 }: AmountInputProps) {
   const { t } = useTranslation();
   const format = useFormat();
-  const [symbol, setSymbol] = useState<'+' | '-'>(
-    initialValue === 0 ? zeroSign : initialValue > 0 ? '+' : '-',
-  );
+  const [symbol, setSymbol] = useState<'+' | '-'>(() => {
+    if (options?.inflow) return '+';
+    if (options?.outflow) return '-';
+    return initialValue === 0 ? zeroSign : initialValue > 0 ? '+' : '-';
+  });
 
   const [isFocused, setIsFocused] = useState(focused ?? false);
 
@@ -90,7 +94,19 @@ export function AmountInput({
     }
   }, [focused]);
 
+  useEffect(() => {
+    if (options?.inflow) {
+      setSymbol('+');
+    } else if (options?.outflow) {
+      setSymbol('-');
+    }
+  }, [options]);
+
   function onSwitch() {
+    if (options?.inflow || options?.outflow) {
+      return;
+    }
+    
     const amount = getAmount();
     if (amount === 0) {
       setSymbol(symbol === '+' ? '-' : '+');
@@ -121,10 +137,17 @@ export function AmountInput({
 
   function fireUpdate(amount) {
     onUpdate?.(amount);
-    if (amount > 0) {
+    
+    if (options?.inflow) {
       setSymbol('+');
-    } else if (amount < 0) {
+    } else if (options?.outflow) {
       setSymbol('-');
+    } else {
+      if (amount > 0) {
+        setSymbol('+');
+      } else if (amount < 0) {
+        setSymbol('-');
+      }
     }
     setValue(format(Math.abs(amount), 'financial'));
   }
@@ -153,7 +176,7 @@ export function AmountInput({
     >
       <Button
         variant="bare"
-        isDisabled={disabled}
+        isDisabled={disabled || options?.inflow || options?.outflow}
         aria-label={symbol === '-' ? t('Make positive') : t('Make negative')}
         style={{ padding: '0 7px' }}
         onPress={onSwitch}
