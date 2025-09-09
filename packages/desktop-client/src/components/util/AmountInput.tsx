@@ -106,7 +106,7 @@ export function AmountInput({
     if (options?.inflow || options?.outflow) {
       return;
     }
-    
+
     const amount = getAmount();
     if (amount === 0) {
       setSymbol(symbol === '+' ? '-' : '+');
@@ -137,7 +137,7 @@ export function AmountInput({
 
   function fireUpdate(amount) {
     onUpdate?.(amount);
-    
+
     if (options?.inflow) {
       setSymbol('+');
     } else if (options?.outflow) {
