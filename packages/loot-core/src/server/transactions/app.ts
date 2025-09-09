@@ -33,12 +33,14 @@ async function handleBatchUpdateTransactions({
   deleted,
   updated,
   learnCategories,
+  runTransfers = true,
 }: Parameters<typeof batchUpdateTransactions>[0]) {
   const result = await batchUpdateTransactions({
     added,
     updated,
     deleted,
     learnCategories,
+    runTransfers
   });
 
   return result;
