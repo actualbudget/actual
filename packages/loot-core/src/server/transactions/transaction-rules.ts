@@ -286,7 +286,9 @@ export async function getRuleIdFromScheduleId(
   return row?.rule || null;
 }
 
-export async function getAllRuleIdsFromSchedules(excluding: string): Promise<string[]> {
+export async function getAllRuleIdsFromSchedules(
+  excluding: string,
+): Promise<string[]> {
   const rows = await db.all<Pick<db.DbSchedule, 'rule'>>(
     'SELECT rule FROM schedules',
   );
@@ -297,10 +299,8 @@ export async function getAllRuleIdsFromSchedules(excluding: string): Promise<str
     .filter((rule): rule is string => !!rule)
     .filter(ruleId => ruleId !== excluding);
 
-  // If you want unique rule IDs only:
-  return ruleIds
+  return ruleIds;
 }
-
 
 // Runner
 export async function runRules(
@@ -318,7 +318,7 @@ export async function runRules(
 
   let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap);
 
-  let scheduleRuleID = "";
+  let scheduleRuleID = '';
   // Check if a schedule is attached to this transaction and if so get the rule ID attached to that schedule.
   if (trans.schedule != null) {
     const ruleId = await getRuleIdFromScheduleId(trans.schedule);
@@ -327,34 +327,34 @@ export async function runRules(
     }
   }
 
-  const RuleIdsLinkedToSchedules = await getAllRuleIdsFromSchedules(scheduleRuleID);
+  const RuleIdsLinkedToSchedules =
+    await getAllRuleIdsFromSchedules(scheduleRuleID);
 
-    const rules = rankRules(
-        fastSetMerge(
-        firstcharIndexer.getApplicableRules(trans),
-        payeeIndexer.getApplicableRules(trans),
-        ),
-    );
+  const rules = rankRules(
+    fastSetMerge(
+      firstcharIndexer.getApplicableRules(trans),
+      payeeIndexer.getApplicableRules(trans),
+    ),
+  );
 
-    for (let i = 0; i < rules.length; i++) {
-        
-        // If there is a scheduleRuleID (meaning this transaction came from a schedule) then exclude rules linked to other schedules. 
-        if (scheduleRuleID != "") {
-            if (rules[i].id === scheduleRuleID) {
-                // if the rule has the same ID that is attached to the schedule then run it (it is the schedules rule).
-                finalTrans = rules[i].apply(finalTrans);
-            } else if (RuleIdsLinkedToSchedules.includes(rules[i].id)) {
-                // skip all other rules that are linked to other schedules. 
-                continue;
-            } else {
-                // if a rule is not linked to a schedule, run it.
-                finalTrans = rules[i].apply(finalTrans);
-            }
-        } else {
-            // if there is no scheduleRuleID then just run all rules.
-            finalTrans = rules[i].apply(finalTrans);
-        }
+  for (let i = 0; i < rules.length; i++) {
+    // If there is a scheduleRuleID (meaning this transaction came from a schedule) then exclude rules linked to other schedules.
+    if (scheduleRuleID != '') {
+      if (rules[i].id === scheduleRuleID) {
+        // if the rule has the same ID that is attached to the schedule then run it (it is the schedules rule).
+        finalTrans = rules[i].apply(finalTrans);
+      } else if (RuleIdsLinkedToSchedules.includes(rules[i].id)) {
+        // skip all other rules that are linked to other schedules.
+        continue;
+      } else {
+        // if a rule is not linked to a schedule, run it.
+        finalTrans = rules[i].apply(finalTrans);
+      }
+    } else {
+      // if there is no scheduleRuleID then just run all rules.
+      finalTrans = rules[i].apply(finalTrans);
     }
+  }
 
   return await finalizeTransactionForRules(finalTrans);
 }
