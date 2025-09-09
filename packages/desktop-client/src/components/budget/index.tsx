@@ -29,6 +29,8 @@ import {
 } from '@desktop-client/budget/budgetSlice';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
@@ -80,6 +82,12 @@ function BudgetInner(props: BudgetInnerProps) {
     end: startMonth,
   });
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
+  const payPeriodsFeatureEnabled = useFeatureFlag('payPeriodsEnabled');
+  const [payPeriodEnabled] = useSyncedPref('payPeriodEnabled');
+  const [payPeriodFrequency] = useSyncedPref('payPeriodFrequency');
+  const [payPeriodStartDate] = useSyncedPref('payPeriodStartDate');
+  const [payPeriodYearStart] = useSyncedPref('payPeriodYearStart');
+  const [showPayPeriods] = useSyncedPref('showPayPeriods');
   const [maxMonthsPref] = useGlobalPref('maxMonths');
   const maxMonths = maxMonthsPref || 1;
   const [initialized, setInitialized] = useState(false);
@@ -104,6 +112,27 @@ function BudgetInner(props: BudgetInnerProps) {
 
     run();
   }, []);
+
+  // Wire pay period config from synced prefs into month utils
+  useEffect(() => {
+    const enabled = payPeriodsFeatureEnabled && String(payPeriodEnabled) === 'true';
+    const year = Number(payPeriodYearStart) || new Date().getFullYear();
+    const frequency = (payPeriodFrequency as any) || 'monthly';
+    const start = (payPeriodStartDate as any) || `${year}-01-01`;
+
+    monthUtils.setPayPeriodConfig({
+      enabled,
+      payFrequency: frequency,
+      startDate: start,
+      yearStart: year,
+    } as any);
+  }, [
+    payPeriodsFeatureEnabled,
+    payPeriodEnabled,
+    payPeriodFrequency,
+    payPeriodStartDate,
+    payPeriodYearStart,
+  ]);
 
   useEffect(() => {
     send('get-budget-bounds').then(({ start, end }) => {
@@ -332,6 +361,21 @@ function BudgetInner(props: BudgetInnerProps) {
     return null;
   }
 
+  // Derive the month to render based on pay period view toggle
+  const derivedStartMonth = useMemo(() => {
+    const config = monthUtils.getPayPeriodConfig();
+    const usePayPeriods =
+      payPeriodsFeatureEnabled && String(payPeriodEnabled) === 'true' && String(showPayPeriods) === 'true' && config?.enabled;
+
+    if (!usePayPeriods) return startMonth;
+
+    // If already a pay period id, keep it; otherwise start at first period of plan year
+    const mm = parseInt(startMonth.slice(5, 7));
+    if (Number.isFinite(mm) && mm >= 13) return startMonth;
+
+    return String(config.yearStart) + '-13';
+  }, [startMonth, payPeriodsFeatureEnabled, payPeriodEnabled, showPayPeriods]);
+
   let table;
   if (budgetType === 'tracking') {
     table = (
@@ -342,8 +386,8 @@ function BudgetInner(props: BudgetInnerProps) {
       >
         <DynamicBudgetTable
           type={budgetType}
-          prewarmStartMonth={startMonth}
-          startMonth={startMonth}
+          prewarmStartMonth={derivedStartMonth}
+          startMonth={derivedStartMonth}
           monthBounds={bounds}
           maxMonths={maxMonths}
           dataComponents={trackingComponents}
@@ -369,8 +413,8 @@ function BudgetInner(props: BudgetInnerProps) {
       >
         <DynamicBudgetTable
           type={budgetType}
-          prewarmStartMonth={startMonth}
-          startMonth={startMonth}
+          prewarmStartMonth={derivedStartMonth}
+          startMonth={derivedStartMonth}
           monthBounds={bounds}
           maxMonths={maxMonths}
           dataComponents={envelopeComponents}
@@ -390,7 +434,7 @@ function BudgetInner(props: BudgetInnerProps) {
   }
 
   return (
-    <SheetNameProvider name={monthUtils.sheetForMonth(startMonth)}>
+    <SheetNameProvider name={monthUtils.sheetForMonth(derivedStartMonth)}>
       <View style={{ flex: 1 }}>{table}</View>
     </SheetNameProvider>
   );

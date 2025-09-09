@@ -7,6 +7,8 @@ import { MonthPicker } from './MonthPicker';
 import { getScrollbarWidth } from './util';
 
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type BudgetPageHeaderProps = {
   startMonth: string;
@@ -20,6 +22,9 @@ export const BudgetPageHeader = memo<BudgetPageHeaderProps>(
     const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
     const categoryExpandedState = categoryExpandedStatePref ?? 0;
     const offsetMultipleMonths = numMonths === 1 ? 4 : 0;
+    const payPeriodsEnabled = useFeatureFlag('payPeriodsEnabled');
+    const [payPeriodEnabled] = useSyncedPref('payPeriodEnabled');
+    const [showPayPeriods, setShowPayPeriods] = useSyncedPref('showPayPeriods');
 
     return (
       <View
@@ -29,6 +34,18 @@ export const BudgetPageHeader = memo<BudgetPageHeaderProps>(
           flexShrink: 0,
         }}
       >
+        {payPeriodsEnabled && String(payPeriodEnabled) === 'true' && (
+          <View style={{ alignItems: 'center', marginBottom: 5 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <input
+                type="checkbox"
+                checked={String(showPayPeriods) === 'true'}
+                onChange={e => setShowPayPeriods(e.target.checked ? 'true' : 'false')}
+              />
+              <span>Show pay periods</span>
+            </label>
+          </View>
+        )}
         <View
           style={{
             marginRight: 5 + getScrollbarWidth() - offsetMultipleMonths,
