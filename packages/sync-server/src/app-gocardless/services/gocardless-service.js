@@ -426,16 +426,21 @@ export const goCardlessService = {
       handleGoCardlessError(error);
     }
 
+    // Handle cases where either response is null/undefined
+    const accountDetails = detailedAccount?.account || {};
+    const metadata = metadataAccount || {};
+
     // Some banks provide additional data in both fields, but can do yucky things like have an empty
     // string in one place but not the other. We'll fix this by merging the two objects, but preferring truthy values
     // from the metadata object over the details object.
     const mergedAccount = {};
     const uniqueKeys = new Set([
-      ...Object.keys(detailedAccount.account),
-      ...Object.keys(metadataAccount),
+      ...Object.keys(accountDetails),
+      ...Object.keys(metadata),
     ]);
+
     for (const key of uniqueKeys) {
-      mergedAccount[key] = metadataAccount[key] || detailedAccount.account[key];
+      mergedAccount[key] = metadata[key] || accountDetails[key];
     }
 
     return mergedAccount;
