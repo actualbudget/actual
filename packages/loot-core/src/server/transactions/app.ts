@@ -40,7 +40,7 @@ async function handleBatchUpdateTransactions({
     updated,
     deleted,
     learnCategories,
-    runTransfers
+    runTransfers,
   });
 
   return result;
