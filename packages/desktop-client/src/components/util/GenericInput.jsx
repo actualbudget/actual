@@ -37,6 +37,7 @@ export function GenericInput({
   onChange,
   onEnter = undefined,
   op = undefined,
+  options = undefined,
 }) {
   const dispatch = useDispatch();
   const { isNarrowWidth } = useResponsive();
@@ -70,6 +71,7 @@ export function GenericInput({
             value={value}
             onUpdate={v => onChange(v)}
             onEnter={(e, updatedValue) => onEnter?.(e, updatedValue)}
+            options={options}
           />
         );
       case 'percentage':
