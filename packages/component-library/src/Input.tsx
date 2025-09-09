@@ -67,9 +67,6 @@ export function Input({
           : cx(defaultInputClassName, className)
       }
       {...props}
-      onKeyDown={e => {
-        props.onKeyDown?.(e);
-      }}
       onKeyUp={e => {
         props.onKeyUp?.(e);
 
