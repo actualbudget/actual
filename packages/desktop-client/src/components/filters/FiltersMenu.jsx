@@ -258,6 +258,7 @@ function ConfigureField({
             value={formattedValue}
             multi={op === 'oneOf' || op === 'notOneOf'}
             op={op}
+            options={subfieldToOptions(field, subfield)}
             style={{ marginTop: 10 }}
             onChange={v => {
               dispatch({ type: 'set-value', value: v });
