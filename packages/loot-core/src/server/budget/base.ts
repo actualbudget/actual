@@ -311,7 +311,7 @@ export async function createAllBudgets() {
   if (newMonths.length > 0) {
     await createBudget(range);
   }
-createMonthBoundaries(range);
+//createMonthBoundaries(range);
   return { start, end };
 }
 //this is just a test

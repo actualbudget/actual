@@ -5,7 +5,7 @@ import { captureBreadcrumb } from '../platform/exceptions';
 import * as sqlite from '../platform/server/sqlite';
 import { sheetForMonth } from '../shared/months';
 import * as Platform from '../shared/platform';
-
+import * as monthUtils from '../shared/months';
 import {
   DbPreference,
   DbReflectBudget,
@@ -216,6 +216,48 @@ export async function loadUserBudgets(
       WHERE c.tombstone = 0
     `);
 
+  //Load month Start and End date from DB
+const StartmonthRanges = await db.all<{
+  month: number;
+  startDate: number | null;
+}>(`
+  SELECT 
+    substr(id, 1, 6) AS month,
+    month AS startDate
+  FROM raw_dates
+  WHERE id LIKE '%-StartDate';
+`);
+
+const EndmonthRanges = await db.all<{
+  month: number;
+  endDate: number | null;
+}>(`
+  SELECT 
+    substr(id, 1, 6) AS month,
+    month AS endDate
+  FROM raw_dates
+  WHERE id LIKE '%-EndDate';
+`);
+
+// index results for quick lookup
+const map: Record<string, { month: number, startDate: number|null, endDate: number|null }> = {};
+
+// fill start dates
+for (const r of StartmonthRanges) {
+  map[r.month] = { month: r.month, startDate: r.startDate, endDate: null };
+}
+
+// fill end dates
+for (const r of EndmonthRanges) {
+  if (!map[r.month]) {
+    map[r.month] = { month: r.month, startDate: null, endDate: r.endDate };
+  } else {
+    map[r.month].endDate = r.endDate;
+  }
+}
+
+const monthRanges = Object.values(map);
+
   sheet.startTransaction();
 
   // Load all the budget amounts and carryover values
@@ -231,6 +273,38 @@ export async function loadUserBudgets(
       sheet.set(`${sheetName}!long-goal-${budget.category}`, budget.long_goal);
     }
   }
+
+
+
+  //Assign start and end of the month to proper cells and fall back to first and last date of the month if dates are not available. 
+  for (const budget of budgets) {
+  if (budget.month) {
+    const sheetName = `budget${budget.month}`;
+    const found = monthRanges[budget.month];
+
+    // Convert yyyyMM integer → "yyyy-MM-01" string
+    const year = Math.floor(budget.month / 100);
+    const month = budget.month % 100;
+    const monthStr = `${year}-${String(month).padStart(2, '0')}-01`;
+
+    // Now safe to call bounds
+    const { start: boundStart, end: boundEnd } = monthUtils.bounds(monthStr);
+
+    let startDate: number;
+    let endDate: number;
+
+    if (found) {
+      startDate = found.startDate ?? boundStart;
+      endDate = found.endDate ?? boundEnd;
+    } else {
+      startDate = boundStart;
+      endDate = boundEnd;
+    }
+
+    sheet.set(`${sheetName}!startDate`, startDate);
+    sheet.set(`${sheetName}!endDate`, endDate);
+  }
+}
 
   // For zero-based budgets, load the buffered amounts
   if (budgetType !== 'tracking') {
