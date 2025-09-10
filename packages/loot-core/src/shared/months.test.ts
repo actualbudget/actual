@@ -10,7 +10,6 @@ describe('pay period integration', () => {
     enabled: true,
     payFrequency: 'biweekly',
     startDate: '2024-01-05',
-    yearStart: 2024,
   };
 
   beforeEach(() => {
@@ -18,7 +17,7 @@ describe('pay period integration', () => {
   });
 
   afterEach(() => {
-    setPayPeriodConfig({ enabled: false, payFrequency: 'biweekly', startDate: '2024-01-05', yearStart: 2024 });
+    setPayPeriodConfig({ enabled: false, payFrequency: 'biweekly', startDate: '2024-01-05' });
   });
 
   test('isPayPeriod correctly identifies pay period months', () => {

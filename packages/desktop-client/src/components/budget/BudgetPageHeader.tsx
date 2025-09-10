@@ -22,9 +22,8 @@ export const BudgetPageHeader = memo<BudgetPageHeaderProps>(
     const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
     const categoryExpandedState = categoryExpandedStatePref ?? 0;
     const offsetMultipleMonths = numMonths === 1 ? 4 : 0;
-    const payPeriodsEnabled = useFeatureFlag('payPeriodsEnabled');
-    const [payPeriodEnabled] = useSyncedPref('payPeriodEnabled');
-    const [showPayPeriods, setShowPayPeriods] = useSyncedPref('showPayPeriods');
+    const payPeriodFeatureFlagEnabled = useFeatureFlag('payPeriodsEnabled');
+    const [payPeriodViewEnabled, setPayPeriodViewEnabled] = useSyncedPref('showPayPeriods');
 
     return (
       <View
@@ -34,13 +33,13 @@ export const BudgetPageHeader = memo<BudgetPageHeaderProps>(
           flexShrink: 0,
         }}
       >
-        {payPeriodsEnabled && String(payPeriodEnabled) === 'true' && (
+        {payPeriodFeatureFlagEnabled && (
           <View style={{ alignItems: 'center', marginBottom: 5 }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <input
                 type="checkbox"
-                checked={String(showPayPeriods) === 'true'}
-                onChange={e => setShowPayPeriods(e.target.checked ? 'true' : 'false')}
+                checked={String(payPeriodViewEnabled) === 'true'}
+                onChange={e => setPayPeriodViewEnabled(e.target.checked ? 'true' : 'false')}
               />
               <span>Show pay periods</span>
             </label>

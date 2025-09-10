@@ -35,7 +35,6 @@ import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
@@ -82,12 +81,10 @@ function BudgetInner(props: BudgetInnerProps) {
     end: startMonth,
   });
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
-  const payPeriodsFeatureEnabled = useFeatureFlag('payPeriodsEnabled');
-  const [payPeriodEnabled] = useSyncedPref('payPeriodEnabled');
+  const payPeriodFeatureFlagEnabled = useFeatureFlag('payPeriodsEnabled');
   const [payPeriodFrequency] = useSyncedPref('payPeriodFrequency');
   const [payPeriodStartDate] = useSyncedPref('payPeriodStartDate');
-  const [payPeriodYearStart] = useSyncedPref('payPeriodYearStart');
-  const [showPayPeriods] = useSyncedPref('showPayPeriods');
+  const [payPeriodViewEnabled] = useSyncedPref('showPayPeriods');
   const [maxMonthsPref] = useGlobalPref('maxMonths');
   const maxMonths = maxMonthsPref || 1;
   const [initialized, setInitialized] = useState(false);
@@ -115,23 +112,20 @@ function BudgetInner(props: BudgetInnerProps) {
 
   // Wire pay period config from synced prefs into month utils
   useEffect(() => {
-    const enabled = payPeriodsFeatureEnabled && String(payPeriodEnabled) === 'true';
-    const year = Number(payPeriodYearStart) || new Date().getFullYear();
+    const enabled = payPeriodFeatureFlagEnabled && String(payPeriodViewEnabled) === 'true';
     const frequency = (payPeriodFrequency as any) || 'monthly';
-    const start = (payPeriodStartDate as any) || `${year}-01-01`;
+    const start = (payPeriodStartDate as any) || `${new Date().getFullYear()}-01-01`;
 
     monthUtils.setPayPeriodConfig({
       enabled,
       payFrequency: frequency,
       startDate: start,
-      yearStart: year,
     } as any);
   }, [
-    payPeriodsFeatureEnabled,
-    payPeriodEnabled,
+    payPeriodFeatureFlagEnabled,
+    payPeriodViewEnabled,
     payPeriodFrequency,
     payPeriodStartDate,
-    payPeriodYearStart,
   ]);
 
   useEffect(() => {
@@ -357,24 +351,25 @@ function BudgetInner(props: BudgetInnerProps) {
 
   const { trackingComponents, envelopeComponents } = props;
 
-  if (!initialized || !categoryGroups) {
-    return null;
-  }
-
   // Derive the month to render based on pay period view toggle
   const derivedStartMonth = useMemo(() => {
     const config = monthUtils.getPayPeriodConfig();
-    const usePayPeriods =
-      payPeriodsFeatureEnabled && String(payPeriodEnabled) === 'true' && String(showPayPeriods) === 'true' && config?.enabled;
+    const usePayPeriods = config?.enabled;
 
     if (!usePayPeriods) return startMonth;
 
-    // If already a pay period id, keep it; otherwise start at first period of plan year
+    // If already a pay period id, keep it
     const mm = parseInt(startMonth.slice(5, 7));
     if (Number.isFinite(mm) && mm >= 13) return startMonth;
 
-    return String(config.yearStart) + '-13';
-  }, [startMonth, payPeriodsFeatureEnabled, payPeriodEnabled, showPayPeriods]);
+    // For calendar months, use the current year for pay periods
+    const currentYear = parseInt(startMonth.slice(0, 4));
+    return String(currentYear) + '-13';
+  }, [startMonth, payPeriodViewEnabled]);
+
+  if (!initialized || !categoryGroups) {
+    return null;
+  }
 
   let table;
   if (budgetType === 'tracking') {

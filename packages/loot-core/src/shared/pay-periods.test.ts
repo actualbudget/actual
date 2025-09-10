@@ -14,7 +14,6 @@ describe('pay-periods utilities', () => {
     enabled: true,
     payFrequency: 'biweekly',
     startDate: '2024-01-05',
-    yearStart: 2024,
   };
 
   test('isPayPeriod detects extended month values', () => {
