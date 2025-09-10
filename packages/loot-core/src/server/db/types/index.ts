@@ -253,12 +253,10 @@ export type DbDashboard = {
 
 export type DbPayPeriodConfig = {
   id: string;
-  enabled: 1 | 0;
   pay_frequency: string;
   start_date: string;
   pay_day_of_week?: number | null;
   pay_day_of_month?: number | null;
-  year_start: number;
 };
 
 export type DbViewTransactionInternal = {
