@@ -891,7 +891,7 @@ async function processBankSyncDownload(
     startingBalance: currentBalance,
   } = download;
 
-  if (initialSync && importTransactions) {
+  if (initialSync) {
     const { transactions } = download;
     let balanceToUse = currentBalance;
 
