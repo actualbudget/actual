@@ -963,7 +963,9 @@ async function processBankSyncDownload(
       useStrictIdChecking,
     );
 
-    if (currentBalance) await updateAccountBalance(id, currentBalance);
+    if (currentBalance !== null && currentBalance !== undefined) {
+      await updateAccountBalance(id, currentBalance);
+    }
 
     return result;
   });
