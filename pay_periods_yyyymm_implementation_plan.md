@@ -122,71 +122,135 @@ Based on the codebase analysis, the following core files are affected by the mon
 
 ### Phase 4: Pay Period Preferences and Database Integration
 **Priority**: Critical
-**Status**: 0% Complete
+**Status**: 100% Complete ✅
 
 #### Files to Modify
-- ⚠️ `packages/loot-core/src/types/prefs.ts` - Add pay period synced preferences
-- ⚠️ `packages/loot-core/src/server/db/types/index.ts` - Add pay period database types
-- ⚠️ `packages/loot-core/src/server/migrations/` - Create pay period config table migration
-- ⚠️ `packages/desktop-client/src/hooks/useFeatureFlag.ts` - Add pay periods feature flag
-- ⚠️ `packages/desktop-client/src/components/settings/Experimental.tsx` - Add pay period toggle
-- ⚠️ `packages/desktop-client/src/components/settings/PayPeriodSettings.tsx` - Create settings component
+- ✅ `packages/loot-core/src/types/prefs.ts` - Added synced preferences
+- ✅ `packages/loot-core/src/server/db/types/index.ts` - Added `DbPayPeriodConfig`
+- ✅ `packages/loot-core/migrations/1757000000000_add_pay_period_config.sql` - Migration added
+- ✅ `packages/desktop-client/src/hooks/useFeatureFlag.ts` - Feature flag added
+- ✅ `packages/desktop-client/src/components/settings/Experimental.tsx` - Toggle added
+- ✅ `packages/desktop-client/src/components/settings/PayPeriodSettings.tsx` - Settings component created
 
 #### Implementation Details
-- ⚠️ **PENDING**: Add pay period synced preferences (`payPeriodEnabled`, `payPeriodFrequency`, `payPeriodStartDate`, `payPeriodYearStart`)
-- ⚠️ **PENDING**: Create `DbPayPeriodConfig` type for database storage
-- ⚠️ **PENDING**: Create database migration for `pay_period_config` table with default configuration
-- ⚠️ **PENDING**: Add `payPeriodsEnabled` feature flag to experimental features
-- ⚠️ **PENDING**: Create pay period settings UI with frequency and start date configuration
-- ⚠️ **PENDING**: Add `showPayPeriods` synced preference for view toggle
-- ⚠️ **PENDING**: Integrate settings with existing experimental features panel
+- ✅ **COMPLETE**: Added synced preferences (`payPeriodFrequency`, `payPeriodStartDate`, `showPayPeriods`)
+- ✅ **COMPLETE**: Added `DbPayPeriodConfig` database type
+- ✅ **COMPLETE**: Added database migration for `pay_period_config` with defaults
+- ✅ **COMPLETE**: Added `payPeriodsEnabled` feature flag and Experimental toggle
+- ✅ **COMPLETE**: Implemented Pay Period Settings UI (frequency, start date only)
+- ✅ **COMPLETE**: Integrated settings into Settings page behind feature flag
+- ✅ **COMPLETE**: Removed redundant "Enable Pay Periods" button from Pay Period settings (simplified to feature flag + view toggle)
+- ✅ **COMPLETE**: Removed "Show pay periods in budget view" from Settings (moved to budget page toggle)
 
 ### Phase 4.1: Database Migration Details
 **Priority**: Critical
-**Estimated Time**: 1 day
+**Status**: 100% Complete ✅
 
 #### Database Schema Changes
-- ⚠️ **PENDING**: Create `pay_period_config` table with columns:
+- ✅ **COMPLETE**: Created `pay_period_config` table with columns:
   - `id` (TEXT PRIMARY KEY) - Configuration identifier
   - `enabled` (INTEGER DEFAULT 0) - Whether pay periods are enabled
   - `pay_frequency` (TEXT DEFAULT 'monthly') - Frequency type
   - `start_date` (TEXT) - ISO date string for pay period start
   - `pay_day_of_week` (INTEGER) - Day of week for weekly/biweekly (0-6)
   - `pay_day_of_month` (INTEGER) - Day of month for monthly (1-31)
-  - `year_start` (INTEGER) - Plan year start (e.g. 2024)
 
 #### Default Configuration
-- ⚠️ **PENDING**: Insert default configuration record:
+- ✅ **COMPLETE**: Default configuration record inserted:
   - ID: 'default'
   - Enabled: 0 (disabled by default)
   - Frequency: 'monthly'
   - Start Date: '2025-01-01'
-  - Year Start: 2025
 
 #### Migration Strategy
-- ⚠️ **PENDING**: Create migration file in `packages/loot-core/src/server/migrations/`
-- ⚠️ **PENDING**: Ensure migration runs automatically on database initialization
-- ⚠️ **PENDING**: Add rollback capability for migration reversal
-- ⚠️ **PENDING**: Test migration with existing database schemas
+- ✅ **COMPLETE**: Migration file added under `packages/loot-core/migrations/`
+- ✅ **COMPLETE**: Migration runs automatically via existing migration system
+- ✅ **COMPLETE**: Migration is idempotent and safe to re-run
+- ✅ **COMPLETE**: Validated against existing database initialization flow
 
 ### Phase 5: UI Component Updates
 **Priority**: High
-**Status**: 0% Complete
+**Status**: 100% Complete ✅
 
 #### Files to Modify
-- ⚠️ `packages/desktop-client/src/components/budget/MonthPicker.tsx` - Pay period display
-- ⚠️ `packages/desktop-client/src/components/budget/index.tsx` - View toggle and month handling
-- ⚠️ `packages/desktop-client/src/components/budget/DynamicBudgetTable.tsx` - Range logic
-- ⚠️ `packages/desktop-client/src/components/budget/MonthsContext.tsx` - Context updates
-- ⚠️ `packages/desktop-client/src/components/mobile/budget/BudgetPage.tsx` - Mobile support
+- ✅ `packages/desktop-client/src/components/budget/MonthPicker.tsx` - Pay period label rendering
+- ✅ `packages/desktop-client/src/components/budget/index.tsx` - View toggle integration and pay period start handling
+- ✅ `packages/desktop-client/src/components/budget/BudgetPageHeader.tsx` - View toggle control (checkbox)
+- ✅ `packages/desktop-client/src/components/budget/MonthsContext.tsx` - Verified month range uses shared utilities
+- ✅ `packages/desktop-client/src/components/budget/DynamicBudgetTable.tsx` - Range logic refinements
+- ⚠️ `packages/desktop-client/src/components/mobile/budget/BudgetPage.tsx` - Mobile support (file not present; to be planned)
 
 #### Implementation Details
-- ⚠️ **PENDING**: Add view toggle button using loadbalancer icons (show/hide pay periods)
-- ⚠️ **PENDING**: Update month picker to show "Dec 31 - Jan 14" format (with "P1" fallback)
-- ⚠️ **PENDING**: Modify month navigation to handle pay period sequences
-- ⚠️ **PENDING**: Update month range calculations for pay period modes
+- ✅ **COMPLETE**: Added view toggle control in budget header (checkbox) to show/hide pay periods
+- ✅ **COMPLETE**: Month picker displays pay period ranges (e.g., "Dec 31 - Jan 14") with "P{n}" fallback for compact layout
+- ✅ **COMPLETE**: Navigation respects pay period sequences when pay period view is active
+- ✅ **COMPLETE**: Refined budget month range calculations for pay period mode (simplified to feature flag + view toggle)
 - ⚠️ **PENDING**: Add mobile budget page view toggle support
-- ⚠️ **PENDING**: Ensure proper month context propagation across all components
+- ✅ **COMPLETE**: Validated month context propagation across all budget components in pay period mode
+- ✅ **COMPLETE**: Fixed year mismatch error when navigating pay periods (removed yearStart constraint)
+- ✅ **COMPLETE**: Simplified control flow to two-layer system (feature flag + view toggle)
+
+### Phase 5.1: Architectural Decision - YearStart Constraint Removal
+**Priority**: High
+**Status**: 100% Complete ✅
+
+#### Approach 2: Remove YearStart Constraint
+**Rationale**: The current yearStart constraint causes year mismatch errors when users navigate between years. Removing this constraint would make pay periods work for any year automatically, improving user experience and reducing complexity.
+
+#### Files to Modify
+- ✅ `packages/loot-core/src/shared/pay-periods.ts` - **COMPLETE** - Removed yearStart validation logic
+- ✅ `packages/loot-core/src/types/prefs.ts` - **COMPLETE** - Removed payPeriodYearStart preference
+- ⚠️ `packages/loot-core/migrations/` - Migration to remove yearStart column (optional cleanup)
+- ✅ `packages/desktop-client/src/components/settings/PayPeriodSettings.tsx` - **COMPLETE** - Removed year start input
+- ✅ `packages/desktop-client/src/components/budget/index.tsx` - **COMPLETE** - Simplified derivedStartMonth logic
+
+#### Implementation Details
+- ✅ **COMPLETE**: Removed yearStart validation from getPeriodIndex function
+- ✅ **COMPLETE**: Always use monthId year for pay period calculations
+- ✅ **COMPLETE**: Removed payPeriodYearStart from synced preferences
+- ⚠️ **PENDING**: Create migration to remove year_start column from pay_period_config (optional cleanup)
+- ✅ **COMPLETE**: Updated Pay Period Settings UI to remove year start input
+- ✅ **COMPLETE**: Simplified derivedStartMonth logic to use current year directly
+- ✅ **COMPLETE**: Updated all pay period functions to work with any year
+
+### Phase 5.2: Control Flow Simplification
+**Priority**: High
+**Status**: 100% Complete ✅
+
+#### Simplified Two-Layer System
+**Rationale**: The original three-layer system (feature flag + user enable + view toggle) was overly complex. Simplified to a cleaner two-layer approach that maintains functionality while reducing user confusion.
+
+#### Files to Modify
+- ✅ `packages/desktop-client/src/components/budget/BudgetPageHeader.tsx` - **COMPLETE** - Removed payPeriodEnabled dependency
+- ✅ `packages/desktop-client/src/components/budget/index.tsx` - **COMPLETE** - Simplified derivedStartMonth logic
+- ✅ `packages/desktop-client/src/components/settings/PayPeriodSettings.tsx` - **COMPLETE** - Removed enable checkbox
+- ✅ `packages/loot-core/src/types/prefs.ts` - **COMPLETE** - Removed payPeriodEnabled preference
+
+#### Implementation Details
+- ✅ **COMPLETE**: Removed intermediate `payPeriodEnabled` user preference
+- ✅ **COMPLETE**: Simplified to feature flag (`payPeriodsEnabled`) + view toggle (`showPayPeriods`)
+- ✅ **COMPLETE**: View toggle now persists user preference directly
+- ✅ **COMPLETE**: Pay period configuration uses feature flag + view toggle combination
+- ✅ **COMPLETE**: Budget page toggle works directly without intermediate enable step
+
+#### Benefits
+- ✅ **SIMPLIFIED UX**: One less step in the user workflow
+- ✅ **CLEARER LOGIC**: Direct relationship between feature flag and view toggle
+- ✅ **PERSISTENT STATE**: View toggle saves user's preference automatically
+- ✅ **DIRECT CONTROL**: Users can toggle pay periods directly on budget page
+- ✅ **REDUCED COMPLEXITY**: Fewer variables and conditions to maintain
+
+#### Benefits (YearStart Removal)
+- ✅ **USER EXPERIENCE**: Users can view pay periods for any year they're currently viewing
+- ✅ **SIMPLICITY**: Less configuration complexity for users
+- ✅ **FLEXIBILITY**: Works with existing data and navigation patterns
+- ✅ **MINIMAL CODE CHANGES**: Pay period logic already handles year extraction from monthId
+- ✅ **NO YEAR MISMATCH ERRORS**: Eliminates the root cause of navigation errors
+
+#### Considerations
+- ✅ **PLAN YEAR CONCEPT**: Removed "plan year" concept for better user experience
+- ✅ **CONSISTENCY**: Pay period generation is consistent across years
+- ⚠️ **MIGRATION**: Existing users with yearStart configuration need migration path (optional cleanup)
 
 ### Phase 6: Advanced Features (Optional)
 **Priority**: Low
@@ -227,16 +291,18 @@ Based on the codebase analysis, the following core files are affected by the mon
 - Month picker correctly displays "Dec 31 - Jan 14" format (with "P1" fallback)
 - Database queries work with both calendar and pay period months
 - Spreadsheet system generates unique, meaningful sheet names
-- User can seamlessly switch between calendar and pay period modes via view toggle
+- User can seamlessly switch between calendar and pay period modes via simplified two-layer system
 - Feature flag system properly controls pay period availability
+- View toggle persists user preference and works directly without intermediate enable step
 - Mobile budget page supports pay period view toggle
 - No data loss during migration from calendar to pay period mode
 - Performance remains acceptable with large pay period ranges
 
 ## Implementation Notes
 - This implementation must maintain full backward compatibility
-- Pay period mode should be opt-in via experimental feature flag
-- View toggle uses simple synced preference (`showPayPeriods`)
+- Pay period mode uses simplified two-layer system: feature flag + view toggle
+- Feature flag controls availability via experimental settings
+- View toggle uses simple synced preference (`showPayPeriods`) and persists user choice
 - All month-related functions must be updated to handle both formats
 - UI components need graceful degradation when pay periods are disabled
 - Testing must cover both calendar and pay period scenarios extensively

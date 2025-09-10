@@ -9,7 +9,6 @@ export interface PayPeriodConfig {
   startDate: string; // ISO date string (yyyy-MM-dd)
   payDayOfWeek?: number; // 0-6 for weekly/biweekly
   payDayOfMonth?: number; // 1-31 for monthly
-  yearStart: number; // plan year start (e.g. 2024)
 }
 
 // Pay period config will be loaded from database preferences
@@ -60,18 +59,9 @@ function validatePayPeriodConfig(config: PayPeriodConfig | null | undefined): vo
   if (Number.isNaN(start.getTime())) {
     throw new Error("Invalid startDate '" + String(config.startDate) + "'. Expected ISO date.");
   }
-  if (!Number.isInteger(config.yearStart) || config.yearStart < 1) {
-    throw new Error("Invalid yearStart '" + String(config.yearStart) + "'.");
-  }
 }
 
 function getPeriodIndex(monthId: string, config: PayPeriodConfig): number {
-  const year = getNumericYearValue(monthId);
-  if (year !== config.yearStart) {
-    throw new Error(
-      "monthId '" + monthId + "' year " + year + ' does not match plan yearStart ' + String(config.yearStart) + '.',
-    );
-  }
   const mm = getNumericMonthValue(monthId);
   if (mm < 13 || mm > 99) {
     throw new Error("monthId '" + monthId + "' is not a pay period bucket.");
@@ -107,13 +97,13 @@ function computePayPeriodByIndex(
     endDate = d.addDays(startDate, 13);
     label = 'Pay Period ' + String(periodIndex);
   } else if (freq === 'monthly') {
-    const planYearStartDate = parseDate(String(config.yearStart)); // yields Jan 1 of yearStart at 12:00
+    const planYearStartDate = parseDate(config.startDate);
     const anchorMonthStart = d.startOfMonth(planYearStartDate);
     startDate = d.startOfMonth(d.addMonths(anchorMonthStart, periodIndex - 1));
     endDate = d.endOfMonth(startDate);
     label = 'Month ' + String(periodIndex);
   } else if (freq === 'semimonthly') {
-    const planYearStartDate = parseDate(String(config.yearStart));
+    const planYearStartDate = parseDate(config.startDate);
     const monthOffset = Math.floor((periodIndex - 1) / 2);
     const isFirstHalf = (periodIndex - 1) % 2 === 0;
     const monthStart = d.startOfMonth(d.addMonths(planYearStartDate, monthOffset));
@@ -157,10 +147,6 @@ export function generatePayPeriods(
     throw new Error('Invalid year for generatePayPeriods');
   }
   if (!config || !config.enabled) return [];
-  if (config.yearStart !== year) {
-    // Scope to single plan year as per initial implementation
-    return [];
-  }
 
   const endOfYear = d.endOfYear(parseDate(String(year)));
   const results: Array<{ monthId: string; startDate: string; endDate: string; label: string }> = [];
@@ -206,7 +192,7 @@ export function prevPayPeriod(monthId: string, config: PayPeriodConfig): string 
   if (prevPeriodIndex < 1) {
     // Move to last period of previous year
     const prevYear = year - 1;
-    const maxPeriods = getMaxPeriodsForYear({ ...config, yearStart: prevYear });
+    const maxPeriods = getMaxPeriodsForYear(config);
     return String(prevYear) + '-' + String(maxPeriods + 12).padStart(2, '0');
   }
   
