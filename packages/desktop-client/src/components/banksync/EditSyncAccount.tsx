@@ -136,6 +136,8 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
   const [savedReimportDeleted = true, setSavedReimportDeleted] = useSyncedPref(
     `sync-reimport-deleted-${account.id}`,
   );
+  const [savedImportTransactions = true, setSavedImportTransactions] =
+    useSyncedPref(`sync-import-transactions-${account.id}`);
 
   const [transactionDirection, setTransactionDirection] =
     useState<TransactionDirection>('payment');
@@ -150,6 +152,9 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
   );
   const [mappings, setMappings] = useState<Mappings>(
     mappingsFromString(savedMappings),
+  );
+  const [importTransactions, setImportTransactions] = useState(
+    String(savedImportTransactions) === 'true',
   );
 
   const transactionQuery = useMemo(
@@ -186,6 +191,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
     setSavedImportPending(String(importPending));
     setSavedImportNotes(String(importNotes));
     setSavedReimportDeleted(String(reimportDeleted));
+    setSavedImportTransactions(String(importTransactions));
     close();
   };
 
@@ -289,6 +295,31 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
                 }}
               >
                 <Trans>Reimport deleted transactions</Trans>
+                <SvgQuestion height={12} width={12} cursor="pointer" />
+              </View>
+            </Tooltip>
+          </CheckboxOption>
+
+          <CheckboxOption
+            id="form_import_transactions"
+            checked={!importTransactions}
+            onChange={() => setImportTransactions(!importTransactions)}
+          >
+            <Tooltip
+              content={t(
+                `Selecting this option will disable importing transactions and only import the account balance for use in reconciliation`,
+              )}
+            >
+              <View
+                style={{
+                  display: 'flex',
+                  flexWrap: 'nowrap',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                <Trans>Investment Account</Trans>
                 <SvgQuestion height={12} width={12} cursor="pointer" />
               </View>
             </Tooltip>
