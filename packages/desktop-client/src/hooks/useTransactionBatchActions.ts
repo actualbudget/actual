@@ -484,15 +484,18 @@ export function useTransactionBatchActions() {
           updated: [
             {
               ...fromTrans,
+              category: null,
               payee: toPayee?.id,
               transfer_id: toTrans.id,
             },
             {
               ...toTrans,
+              category: null,
               payee: fromPayee?.id,
               transfer_id: fromTrans.id,
             },
           ],
+          runTransfers: false,
         };
 
         await send('transactions-batch-update', changes);
