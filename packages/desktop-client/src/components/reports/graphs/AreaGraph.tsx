@@ -1,4 +1,4 @@
-import React, { type CSSProperties } from 'react';
+import React, { type SVGAttributes, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -140,7 +140,8 @@ const customLabel = ({
   const calcY =
     (typeof props.y === 'number' ? props.y : 0) -
     ((typeof props.value === 'number' ? props.value : 0) > 0 ? 10 : -10);
-  const textAnchor = props.index === 0 ? 'left' : 'middle';
+  const textAnchor: SVGAttributes<SVGTextElement>['textAnchor'] =
+    props.index === 0 ? 'start' : 'middle';
   const display =
     typeof props.value !== 'string' && props.value !== 0
       ? `${format(props.value || 0, 'financial-no-decimals')}`

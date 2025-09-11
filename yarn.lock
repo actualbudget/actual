@@ -48,10 +48,10 @@ __metadata:
   dependencies:
     "@emotion/css": "npm:^11.13.5"
     "@svgr/cli": "npm:^8.1.0"
-    "@types/react": "npm:^19.1.4"
-    react: "npm:19.1.0"
+    "@types/react": "npm:^19.1.12"
+    react: "npm:19.1.1"
     react-aria-components: "npm:^1.8.0"
-    react-dom: "npm:19.1.0"
+    react-dom: "npm:19.1.1"
     usehooks-ts: "npm:^3.1.1"
     vitest: "npm:^3.2.4"
   peerDependencies:
@@ -7074,15 +7074,6 @@ __metadata:
   dependencies:
     csstype: "npm:^3.0.2"
   checksum: 10/c03d595b84faecb15079757555c96871e84ea6eef9a5eddb13ec1f648f718f9624bebc4199e86267edb825b23df97758324ea39ff840d9ad328386f96971f588
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:^19.1.4":
-  version: 19.1.4
-  resolution: "@types/react@npm:19.1.4"
-  dependencies:
-    csstype: "npm:^3.0.2"
-  checksum: 10/b8744e03bc3f7d4d686681ab039e0b2454fbb2110436b8b7f6ee9e6c5f8f8552231c6c273b908f69b3eae1745aeb7b075949bb3983ba8b36c3b0c2888e22726c
   languageName: node
   linkType: hard
 
@@ -17444,17 +17435,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:19.1.0":
-  version: 19.1.0
-  resolution: "react-dom@npm:19.1.0"
-  dependencies:
-    scheduler: "npm:^0.26.0"
-  peerDependencies:
-    react: ^19.1.0
-  checksum: 10/c5b58605862c7b0bb044416b01c73647bb8e89717fb5d7a2c279b11815fb7b49b619fe685c404e59f55eb52c66831236cc565c25ee1c2d042739f4a2cc538aa2
-  languageName: node
-  linkType: hard
-
 "react-dom@npm:19.1.1":
   version: 19.1.1
   resolution: "react-dom@npm:19.1.1"
@@ -17816,13 +17796,6 @@ __metadata:
     react: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0 || ^19.0.0
   checksum: 10/8f8127369fb3ae1a49987a1e7d2d136f379b71d1b031a4c169389274946eca0248e3fb9130aa8a7ebe82f4ca8aaab58c37252398f8f6220a6eafaa78b8464b6b
-  languageName: node
-  linkType: hard
-
-"react@npm:19.1.0":
-  version: 19.1.0
-  resolution: "react@npm:19.1.0"
-  checksum: 10/d0180689826fd9de87e839c365f6f361c561daea397d61d724687cae88f432a307d1c0f53a0ee95ddbe3352c10dac41d7ff1ad85530fb24951b27a39e5398db4
   languageName: node
   linkType: hard
 
