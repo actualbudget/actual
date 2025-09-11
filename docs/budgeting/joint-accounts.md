@@ -38,8 +38,7 @@ started. If your partner is new to budgeting, consider skipping the part about u
 your initial budget numbers. Another tip is to set aside time each week by going through last week's spending; avoid doing
 this late in the evening when your energies are low.
 
-Another tip is to let your partner be the primary account holder for your joint spending and billing account. Make your
-the partner feels safe about this approach.
+Another tip is to let your partner be the primary account holder for your joint spending and billing account. Make sure the partner feels safe about this approach.
 
 ### Basic setup steps
 
