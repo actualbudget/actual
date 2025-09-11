@@ -5,6 +5,10 @@ Client Version 23.7.0 and
 Server Version 23.7.0 or higher are required for this feature.
 :::
 
+:::warning
+From July 2025 onwards, GoCardless has stopped accepting new Bank Account Data accounts. The below sign up instructions are now outdated, however, if you are an existing user, your account should continue to work.
+:::
+
 ### Create SECRET and KEY for Actual
 
 1. Create an account with GoCardless - https://bankaccountdata.gocardless.com/overview/.
