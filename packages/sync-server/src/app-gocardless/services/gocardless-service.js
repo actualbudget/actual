@@ -334,8 +334,10 @@ export const goCardlessService = {
       try {
         console.log('Failed to link using:');
         console.log(body);
-        console.log('Falling back to accessValidForDays = 90 ' +
-          'and maxHistoricalDays = 89');
+        console.log(
+          'Falling back to accessValidForDays = 90 ' +
+            'and maxHistoricalDays = 89',
+        );
 
         response = await client.initSession({
           ...body,

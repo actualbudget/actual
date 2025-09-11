@@ -29,4 +29,3 @@ export function BankFactory(institutionId) {
     banks.find(b => b.institutionIds.includes(institutionId)) || IntegrationBank
   );
 }
-
