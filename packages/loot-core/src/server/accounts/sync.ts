@@ -963,7 +963,7 @@ async function processBankSyncDownload(
       useStrictIdChecking,
     );
 
-    if (currentBalance != null ) {
+    if (currentBalance != null) {
       await updateAccountBalance(id, currentBalance);
     }
 
