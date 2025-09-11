@@ -29,7 +29,7 @@ import {
   makeChild,
   makeAsNonChildTransactions,
 } from 'loot-core/shared/transactions';
-import { applyChanges, groupById } from 'loot-core/shared/util';
+import { applyChanges, type IntegerAmount } from 'loot-core/shared/util';
 import {
   type NewRuleEntity,
   type RuleActionEntity,
@@ -72,6 +72,7 @@ import {
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useTransactionBatchActions } from '@desktop-client/hooks/useTransactionBatchActions';
 import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
+import { calculateRunningBalancesBottomUp } from '@desktop-client/hooks/useTransactions';
 import {
   openAccountCloseModal,
   pushModal,
@@ -100,12 +101,12 @@ function isTransactionFilterEntity(
 type AllTransactionsProps = {
   account?: AccountEntity | undefined;
   transactions: TransactionEntity[];
-  balances: Record<string, { balance: number }> | null;
+  balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showBalances?: boolean | undefined;
   filtered?: boolean | undefined;
   children: (
     transactions: TransactionEntity[],
-    balances: Record<string, { balance: number }> | null,
+    balances: Record<TransactionEntity['id'], IntegerAmount> | null,
   ) => ReactElement;
 };
 
@@ -137,13 +138,13 @@ function AllTransactions({
 
   transactions ??= [];
 
-  let runningBalance = useMemo(() => {
+  const runningBalance = useMemo(() => {
     if (!showBalances) {
       return 0;
     }
 
     return balances && transactions?.length > 0
-      ? (balances[transactions[0].id]?.balance ?? 0)
+      ? (balances[transactions[0].id] ?? 0)
       : 0;
   }, [showBalances, balances, transactions]);
 
@@ -152,24 +153,13 @@ function AllTransactions({
       return null;
     }
 
-    // Reverse so we can calculate from earliest upcoming schedule.
-    const previewBalances = [...previewTransactions]
-      .reverse()
-      .map(previewTransaction => {
-        if (!previewTransaction.is_child) {
-          return {
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-            balance: (runningBalance += previewTransaction.amount),
-            id: previewTransaction.id,
-          };
-        } else {
-          return {
-            balance: 0,
-            id: previewTransaction.id,
-          };
-        }
-      });
-    return groupById(previewBalances);
+    return Object.fromEntries(
+      calculateRunningBalancesBottomUp(
+        previewTransactions,
+        'all',
+        runningBalance,
+      ),
+    );
   }, [showBalances, previewTransactions, runningBalance]);
 
   const allTransactions = useMemo(() => {
@@ -272,7 +262,7 @@ type AccountInternalState = {
   transactionCount: number;
   transactionsFiltered?: boolean;
   showBalances?: boolean | undefined;
-  balances: Record<string, { balance: number }> | null;
+  balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showCleared?: boolean | undefined;
   prevShowCleared?: boolean | undefined;
   showReconciled: boolean;
@@ -676,13 +666,17 @@ class AccountInternal extends PureComponent<
       return null;
     }
 
-    const { data } = await aqlQuery(
-      this.paged.query
-        .options({ splits: 'none' })
-        .select([{ balance: { $sumOver: '$amount' } }]),
-    );
+    const { data }: { data: { id: string; balance: number }[] } =
+      await aqlQuery(
+        this.paged.query
+          .options({ splits: 'none' })
+          .select([{ balance: { $sumOver: '$amount' } }]),
+      );
 
-    return groupById<{ id: string; balance: number }>(data);
+    return data.reduce((balances: Record<string, number>, row) => {
+      balances[row.id] = row.balance;
+      return balances;
+    }, {});
   }
 
   onRunRules = async (ids: string[]) => {
