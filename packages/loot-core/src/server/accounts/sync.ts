@@ -946,10 +946,6 @@ async function processBankSyncDownload(
     });
   }
 
-  if (originalTransactions.length === 0) {
-    return { added: [], updated: [] };
-  }
-
   const transactions = originalTransactions.map(trans => ({
     ...trans,
     account: id,
