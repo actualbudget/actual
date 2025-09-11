@@ -10,6 +10,7 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, loadEnv, Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
+import reactCompiler from 'babel-plugin-react-compiler';
 
 const addWatchers = (): Plugin => ({
   name: 'add-watchers',
@@ -188,7 +189,7 @@ export default defineConfig(async ({ mode }) => {
       // }),
       react({
         babel: {
-          plugins: ['babel-plugin-react-compiler'],
+          plugins: [reactCompiler],
         },
       }),
       viteTsconfigPaths({ root: '../..' }),
