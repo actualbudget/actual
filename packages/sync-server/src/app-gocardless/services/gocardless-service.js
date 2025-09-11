@@ -342,6 +342,7 @@ export const goCardlessService = {
         response = await client.initSession({
           ...body,
           accessValidForDays: 90,
+          maxHistoricalDays: 89,
         });
       } catch (error) {
         handleGoCardlessError(error);
