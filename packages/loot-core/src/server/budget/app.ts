@@ -17,7 +17,7 @@ import * as actions from './actions';
 import * as budget from './base';
 import * as cleanupActions from './cleanup-template';
 import * as goalActions from './goal-template';
-import { isTypedArray } from 'node:util/types';
+import * as goalNoteActions from './template-notes';
 
 export interface BudgetHandlers {
   'budget/budget-amount': typeof actions.setBudget;
@@ -58,6 +58,8 @@ export interface BudgetHandlers {
   'must-category-transfer': typeof isCategoryTransferRequired;
   'budget/get-category-automations': typeof goalActions.getTemplatesForCategory;
   'budget/set-category-automations': typeof goalActions.storeTemplates;
+  'budget/store-note-templates': typeof goalNoteActions.storeNoteTemplates;
+  'budget/render-note-templates': typeof goalNoteActions.unparse;
   'budget/set-date': typeof setDate;
 }
 
@@ -153,8 +155,12 @@ app.method(
   'budget/set-category-automations',
   mutator(undoable(goalActions.storeTemplates)),
 );
+app.method(
+  'budget/store-note-templates',
+  mutator(goalNoteActions.storeNoteTemplates),
+);
+app.method('budget/render-note-templates', goalNoteActions.unparse);
 app.method('budget/set-date', mutator(undoable(setDate)));
-
 // Server must return AQL entities not the raw DB data
 async function getCategories() {
   const categoryGroups = await getCategoryGroups();
