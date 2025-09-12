@@ -214,49 +214,29 @@ export async function loadUserBudgets(
       SELECT * FROM ${table} b
       LEFT JOIN categories c ON c.id = b.category
       WHERE c.tombstone = 0
+      AND b.category IS NOT NULL 
     `);
-
-  //Load month Start and End date from DB
-const StartmonthRanges = await db.all<{
-  month: number;
+  console.log (budgets);
+  const monthRanges = await db.all<{
+  month: string;
   startDate: number | null;
-}>(`
-  SELECT 
-    substr(id, 1, 6) AS month,
-    month AS startDate
-  FROM raw_dates
-  WHERE id LIKE '%-StartDate';
-`);
-
-const EndmonthRanges = await db.all<{
-  month: number;
   endDate: number | null;
-}>(`
-  SELECT 
+  }>(`
+    SELECT
     substr(id, 1, 6) AS month,
-    month AS endDate
-  FROM raw_dates
-  WHERE id LIKE '%-EndDate';
-`);
+    MAX(CASE WHEN id LIKE '%-StartDate' THEN month END) AS startDate,
+    MAX(CASE WHEN id LIKE '%-EndDate' THEN month END) AS endDate
+    FROM ${table}
+    WHERE id LIKE '%-StartDate' OR id LIKE '%-EndDate'
+    GROUP BY substr(id, 1, 6);
+  `);
+  console.log('table used:', table)
+  console.log(monthRanges);
 
-// index results for quick lookup
-const map: Record<string, { month: number, startDate: number|null, endDate: number|null }> = {};
+  const monthRangesMap = Object.fromEntries(
+  monthRanges.map(item => [item.month, item])
+  );
 
-// fill start dates
-for (const r of StartmonthRanges) {
-  map[r.month] = { month: r.month, startDate: r.startDate, endDate: null };
-}
-
-// fill end dates
-for (const r of EndmonthRanges) {
-  if (!map[r.month]) {
-    map[r.month] = { month: r.month, startDate: null, endDate: r.endDate };
-  } else {
-    map[r.month].endDate = r.endDate;
-  }
-}
-
-const monthRanges = Object.values(map);
 
   sheet.startTransaction();
 
@@ -277,34 +257,35 @@ const monthRanges = Object.values(map);
 
 
   //Assign start and end of the month to proper cells and fall back to first and last date of the month if dates are not available. 
-  for (const budget of budgets) {
-  if (budget.month) {
-    const sheetName = `budget${budget.month}`;
-    const found = monthRanges[budget.month];
 
-    // Convert yyyyMM integer → "yyyy-MM-01" string
-    const year = Math.floor(budget.month / 100);
-    const month = budget.month % 100;
-    const monthStr = `${year}-${String(month).padStart(2, '0')}-01`;
+  const uniqueMonths = [...new Set(budgets.map(b => b.month).filter(Boolean))];
 
-    // Now safe to call bounds
-    const { start: boundStart, end: boundEnd } = monthUtils.bounds(monthStr);
-
-    let startDate: number;
-    let endDate: number;
-
-    if (found) {
-      startDate = found.startDate ?? boundStart;
-      endDate = found.endDate ?? boundEnd;
-    } else {
-      startDate = boundStart;
-      endDate = boundEnd;
-    }
-
-    sheet.set(`${sheetName}!startDate`, startDate);
-    sheet.set(`${sheetName}!endDate`, endDate);
+  for (const month of uniqueMonths) {
+      const sheetName = `budget${month}`;
+      const found = monthRangesMap[month];
+      
+      // Convert yyyyMM integer → "yyyy-MM-01" string
+      const year = Math.floor(month / 100);
+      const monthNum = month % 100;
+      const monthStr = `${year}-${String(monthNum).padStart(2, '0')}-01`;
+      
+      const { start: boundStart, end: boundEnd } = monthUtils.bounds(monthStr);
+      
+      let startDate: number;
+      let endDate: number;
+      
+      if (found) {
+          startDate = found.startDate ?? boundStart;
+          endDate = found.endDate ?? boundEnd;
+      } else {
+          startDate = boundStart;
+          endDate = boundEnd;
+      }
+      
+      sheet.set(`${sheetName}!budget-start-date`, startDate);
+      sheet.set(`${sheetName}!budget-end-date`, endDate);
+      console.log('setting value to:', month, '=>', startDate, '&', endDate);
   }
-}
 
   // For zero-based budgets, load the buffered amounts
   if (budgetType !== 'tracking') {
