@@ -33,23 +33,21 @@ export function BudgetDatePicker({
   );
 
   // Handle date change
-  const handleDateChange = (isoDate: string | null) => {
+  const handleDateChange = (isoDate: string) => {
     console.log('Date changed:', isoDate);
     // Convert ISO date to integer
     const integerDate = monthUtils.isoToInteger(isoDate);
-    if (integerDate !== null) {
-      // Dispatch the setBudgetDate action with the datatype
-      dispatch(
-        setBudgetDate({
-          month,
-          date: integerDate,
-          type: datatype,
-        }),
-      );
-      console.log(
-        `Dispatched ${datatype} update for month ${month} to ${integerDate}`,
-      );
-    }
+    // Dispatch the setBudgetDate action with the datatype
+    dispatch(
+      setBudgetDate({
+        month,
+        date: integerDate,
+        type: datatype,
+      }),
+    );
+    console.log(
+      `Dispatched ${datatype} update for month ${month} to ${integerDate}`,
+    );
     // Call the optional onChange callback if provided
     onChange?.(isoDate);
   };
