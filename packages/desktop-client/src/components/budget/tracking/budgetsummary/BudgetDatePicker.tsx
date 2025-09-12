@@ -5,6 +5,7 @@ import { useTrackingSheetValue } from '@desktop-client/components/budget/trackin
 import { useDispatch } from 'react-redux';
 import { setBudgetDate } from '@desktop-client/budget/budgetSlice'; // Adjust import path
 import type { AppDispatch } from '@desktop-client/redux/store'; // Import AppDispatch type
+import * as monthUtils from 'loot-core/shared/months';
 
 type BudgetDatePickerProps = {
   month: string; // Add month prop to know which month we're updating
@@ -31,32 +32,11 @@ export function BudgetDatePicker({
       : trackingBudget.endDate,
   );
 
-  // Convert string integer date to ISO string for DateSelect
-  const convertToISO = (numberDate: number): string => {
-    // Convert number to string and check if it has exactly 8 digits
-    const stringDate = numberDate.toString();
-    console.log('Converting number to ISO:', numberDate);
-    const year = stringDate.substring(0, 4);
-    const month = stringDate.substring(4, 6);
-    const day = stringDate.substring(6, 8);
-    const isodate = `${year}-${month}-${day}`;
-    console.log('Converted Date', isodate);
-    return isodate;
-  };
-
-  // Convert ISO string to integer date for your system
-  const convertToInteger = (isoDate: string | null): number | null => {
-    if (!isoDate) return null;
-    const integerDate = parseInt(isoDate.replace(/-/g, ''), 10);
-    console.log('Converting ISO to integer:', isoDate, '→', integerDate);
-    return integerDate;
-  };
-
   // Handle date change
   const handleDateChange = (isoDate: string | null) => {
     console.log('Date changed:', isoDate);
     // Convert ISO date to integer
-    const integerDate = convertToInteger(isoDate);
+    const integerDate = monthUtils.isoToInteger(isoDate);
     if (integerDate !== null) {
       // Dispatch the setBudgetDate action with the datatype
       dispatch(
@@ -76,7 +56,7 @@ export function BudgetDatePicker({
 
   return (
     <DateSelect
-      value={convertToISO(sheetValue as number)} //let me fix that later
+      value={String(monthUtils.integerToISO(sheetValue))} //let me fix that later
       dateFormat={dateFormat}
       onSelect={handleDateChange}
       containerProps={{
