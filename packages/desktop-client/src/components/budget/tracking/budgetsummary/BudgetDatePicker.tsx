@@ -54,7 +54,7 @@ export function BudgetDatePicker({
 
   return (
     <DateSelect
-      value={String(monthUtils.integerToISO(sheetValue))} //let me fix that later
+      value={String(monthUtils.integerToISO(sheetValue as number))} //let me fix that later
       dateFormat={dateFormat}
       onSelect={handleDateChange}
       containerProps={{
