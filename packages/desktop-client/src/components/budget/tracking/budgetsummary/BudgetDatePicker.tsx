@@ -30,11 +30,9 @@ export function BudgetDatePicker({
   );
 
   // Convert string integer date to ISO string for DateSelect
-  const convertToISO = (numberDate: number | null): string | null => {
-    if (!numberDate) return null;
+  const convertToISO = (numberDate: number): string=> {
     // Convert number to string and check if it has exactly 8 digits
     const stringDate = numberDate.toString();
-    if (stringDate.length !== 8) return null;
     console.log('Converting number to ISO:', numberDate);
     const year = stringDate.substring(0, 4);
     const month = stringDate.substring(4, 6);
