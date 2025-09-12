@@ -229,6 +229,16 @@ function ConfigureField({
             options: subfieldToOptions(field, subfield),
           });
         }}
+        onKeyDown={e => {
+          // For amount fields, prevent default form submission to let AmountInput handle Enter via Input.onEnter
+          if (
+            e.key === 'Enter' &&
+            field === 'amount' &&
+            (e.target?.tagName === 'INPUT' || e.target?.tagName === 'TEXTAREA')
+          ) {
+            e.preventDefault();
+          }
+        }}
       >
         {type !== 'boolean' && field !== 'payee' && (
           <GenericInput
@@ -244,12 +254,22 @@ function ConfigureField({
                 ? 'string'
                 : type
             }
+            numberFormatType="currency"
             value={formattedValue}
             multi={op === 'oneOf' || op === 'notOneOf'}
             op={op}
+            options={subfieldToOptions(field, subfield)}
             style={{ marginTop: 10 }}
             onChange={v => {
               dispatch({ type: 'set-value', value: v });
+            }}
+            onEnter={(e, updatedValue) => {
+              onApply({
+                field,
+                op,
+                value: updatedValue !== undefined ? updatedValue : value,
+                options: subfieldToOptions(field, subfield),
+              });
             }}
           />
         )}
