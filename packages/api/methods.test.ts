@@ -740,3 +740,122 @@ describe('API CRUD operations', () => {
     expect(transactions[0].notes).toBeNull();
   });
 });
+
+//apis: createSchedule, getSchedules, updateSchedule, deleteSchedule
+test('Schedules: successfully complete schedules operations', async () => {
+  await api.loadBudget(budgetName);
+  //test a schedule with a recuring configuration
+  const ScheduleId1 = await api.createSchedule({
+    name: 'test-schedule 1',
+    posts_transaction: true,
+    //    amount: -5000,
+    amountOp: 'is',
+    date: {
+      frequency: 'monthly',
+      interval: 1,
+      start: '2025-06-13',
+      patterns: [],
+      skipWeekend: false,
+      weekendSolveMode: 'after',
+      endMode: 'never',
+    },
+  });
+  //test the creation of non recurring schedule
+  const ScheduleId2 = await api.createSchedule({
+    name: 'test-schedule 2',
+    posts_transaction: false,
+    amount: 4000,
+    amountOp: 'is',
+    date: '2025-06-13',
+  });
+  let schedules = await api.getSchedules();
+
+  // Schedules successfully created
+  expect(schedules).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        name: 'test-schedule 1',
+        posts_transaction: true,
+        //       amount: -5000,
+        amountOp: 'is',
+        date: {
+          frequency: 'monthly',
+          interval: 1,
+          start: '2025-06-13',
+          patterns: [],
+          skipWeekend: false,
+          weekendSolveMode: 'after',
+          endMode: 'never',
+        },
+      }),
+      expect.objectContaining({
+        name: 'test-schedule 2',
+        posts_transaction: false,
+        amount: 4000,
+        amountOp: 'is',
+        date: '2025-06-13',
+      }),
+    ]),
+  );
+  //check getIDByName works on schedules
+  expect(await api.getIDByName('schedules', 'test-schedule 1')).toEqual(
+    ScheduleId1,
+  );
+  expect(await api.getIDByName('schedules', 'test-schedule 2')).toEqual(
+    ScheduleId2,
+  );
+
+  //check getIDByName works on accounts
+  const schedAccountId1 = await api.createAccount(
+    { name: 'sched-test-account1', offbudget: true },
+    1000,
+  );
+
+  expect(await api.getIDByName('accounts', 'sched-test-account1')).toEqual(
+    schedAccountId1,
+  );
+
+  //check getIDByName works on payees
+  const schedPayeeId1 = await api.createPayee({ name: 'sched-test-payee1' });
+
+  expect(await api.getIDByName('payees', 'sched-test-payee1')).toEqual(
+    schedPayeeId1,
+  );
+  await api.updateSchedule(ScheduleId1, {
+    amount: -10000,
+    account: schedAccountId1,
+  });
+  await api.deleteSchedule(ScheduleId2);
+
+  // schedules successfully updated, and one of them deleted
+  await api.updateSchedule(ScheduleId1, {
+    amount: -10000,
+    account: schedAccountId1,
+    payee: schedPayeeId1,
+  });
+  await api.deleteSchedule(ScheduleId2);
+
+  schedules = await api.getSchedules();
+  expect(schedules).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        id: ScheduleId1,
+        posts_transaction: true,
+        amount: -10000,
+        account: schedAccountId1,
+        payee: schedPayeeId1,
+        amountOp: 'is',
+        date: {
+          frequency: 'monthly',
+          interval: 1,
+          start: '2025-06-13',
+          patterns: [],
+          skipWeekend: false,
+          weekendSolveMode: 'after',
+          endMode: 'never',
+        },
+      }),
+      expect.not.objectContaining({ id: ScheduleId2 }),
+    ]),
+  );
+});

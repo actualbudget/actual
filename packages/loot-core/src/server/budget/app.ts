@@ -161,6 +161,7 @@ app.method(
 );
 app.method('budget/render-note-templates', goalNoteActions.unparse);
 app.method('budget/set-date', mutator(undoable(setDate)));
+
 // Server must return AQL entities not the raw DB data
 async function getCategories() {
   const categoryGroups = await getCategoryGroups();
