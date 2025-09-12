@@ -139,7 +139,7 @@ function CategoryList({
           renderSplitTransactionButton({
             key: 'split',
             ...(getItemProps ? getItemProps({ item: splitTransaction }) : {}),
-            highlighted: highlightedIndex === 0,
+            highlighted: splitTransaction.highlightedIndex === highlightedIndex,
             embedded,
           })}
         {groupedCategories.map(({ group, categories }) => {
