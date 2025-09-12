@@ -96,11 +96,13 @@ export function SavedFilterMenuButton({
         break;
       case 'reload-filter':
         setMenuOpen(false);
-        originalSavedFilter.current = {
-          ...originalSavedFilter.current,
-          status: 'saved',
-        };
-        onReloadSavedFilter(originalSavedFilter.current, 'reload');
+        if (originalSavedFilter.current) {
+          originalSavedFilter.current = {
+            ...originalSavedFilter.current,
+            status: 'saved',
+          };
+          onReloadSavedFilter(originalSavedFilter.current, 'reload');
+        }
         break;
       case 'clear-filter':
         setMenuOpen(false);
