@@ -70,7 +70,7 @@ export function BudgetDatePicker({
 
   return (
     <DateSelect
-      value={convertToISO(sheetValue)}
+      value={convertToISO(sheetValue as number)} //let me fix that later
       dateFormat={dateFormat}
       onSelect={handleDateChange}
       containerProps={{
