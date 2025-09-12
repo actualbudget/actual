@@ -154,9 +154,6 @@ export default pluginTypescript.config(
   {
     plugins: {
       actual: pluginActual,
-      'react-hooks': pluginReactHooks,
-      'jsx-a11y': pluginJSXA11y,
-      'typescript-paths': pluginTypescriptPaths,
     },
     rules: {
       'actual/no-untranslated-strings': 'error',
@@ -165,6 +162,10 @@ export default pluginTypescript.config(
   },
   {
     files: ['**/*.{js,ts,jsx,tsx}'],
+    plugins: {
+      'jsx-a11y': pluginJSXA11y,
+      'react-hooks': pluginReactHooks,
+    },
     rules: {
       // http://eslint.org/docs/rules/
       'array-callback-return': 'warn',
@@ -630,6 +631,9 @@ export default pluginTypescript.config(
   },
   {
     files: ['packages/desktop-client/**/*.{js,ts,jsx,tsx}'],
+    plugins: {
+      'typescript-paths': pluginTypescriptPaths,
+    },
     rules: {
       'typescript-paths/absolute-parent-import': [
         'error',

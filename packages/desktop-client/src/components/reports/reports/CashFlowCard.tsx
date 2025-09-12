@@ -1,4 +1,9 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  type SVGAttributes,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
@@ -57,7 +62,10 @@ function CustomLabel({
     left: -valueLengthOffset + 2,
   };
 
-  const anchorValue = {
+  const anchorValue: {
+    right: SVGAttributes<SVGTextElement>['textAnchor'];
+    left: SVGAttributes<SVGTextElement>['textAnchor'];
+  } = {
     right: 'start',
     left: 'end',
   };
