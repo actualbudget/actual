@@ -30,8 +30,8 @@ export type Spreadsheets = {
     // Common fields
     'uncategorized-amount': number;
     'uncategorized-balance': number;
-    'budget-start-date': number,
-    'budget-end-date': number,
+    'budget-start-date': number;
+    'budget-end-date': number;
     // Envelope budget fields
     'available-funds': number;
     'last-month-overspent': number;
@@ -66,8 +66,8 @@ export type Spreadsheets = {
     'total-income': number;
     'total-spent': number;
     'real-saved': number;
-    'budget-start-date': number,
-    'budget-end-date': number,
+    'budget-start-date': number;
+    'budget-end-date': number;
     'total-leftover': number;
     'group-sum-amount': number;
     'group-budget': number;

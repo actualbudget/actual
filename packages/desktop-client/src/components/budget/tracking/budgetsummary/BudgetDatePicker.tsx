@@ -26,11 +26,13 @@ export function BudgetDatePicker({
 
   // Get the appropriate sheet value based on datatype
   const sheetValue = useTrackingSheetValue(
-    datatype === 'StartDate' ? trackingBudget.startDate : trackingBudget.endDate
+    datatype === 'StartDate'
+      ? trackingBudget.startDate
+      : trackingBudget.endDate,
   );
 
   // Convert string integer date to ISO string for DateSelect
-  const convertToISO = (numberDate: number): string=> {
+  const convertToISO = (numberDate: number): string => {
     // Convert number to string and check if it has exactly 8 digits
     const stringDate = numberDate.toString();
     console.log('Converting number to ISO:', numberDate);
@@ -57,12 +59,16 @@ export function BudgetDatePicker({
     const integerDate = convertToInteger(isoDate);
     if (integerDate !== null) {
       // Dispatch the setBudgetDate action with the datatype
-      dispatch(setBudgetDate({
-        month,
-        date: integerDate,
-        type: datatype,
-      }));
-      console.log(`Dispatched ${datatype} update for month ${month} to ${integerDate}`);
+      dispatch(
+        setBudgetDate({
+          month,
+          date: integerDate,
+          type: datatype,
+        }),
+      );
+      console.log(
+        `Dispatched ${datatype} update for month ${month} to ${integerDate}`,
+      );
     }
     // Call the optional onChange callback if provided
     onChange?.(isoDate);
@@ -76,8 +82,8 @@ export function BudgetDatePicker({
       containerProps={{
         style: {
           width,
-          ...style
-        }
+          ...style,
+        },
       }}
       inputProps={{
         style: {
@@ -85,8 +91,8 @@ export function BudgetDatePicker({
           width: '100%',
           backgroundColor: 'transparent',
           border: 'none',
-          outline: 'none'
-        }
+          outline: 'none',
+        },
       }}
       clearOnBlur={true}
       openOnFocus={true}

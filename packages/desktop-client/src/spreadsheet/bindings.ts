@@ -166,7 +166,7 @@ export const envelopeBudget = {
 
   startDate: 'budget-start-date',
   endDate: 'budget-end-date',
-  
+
   groupSumAmount: envelopeParametrizedField('group-sum-amount'),
   groupIncomeReceived: 'total-income',
 

@@ -40,25 +40,22 @@ export function getBudgetRange(start: string, end: string) {
 
 export function createCategory(cat, sheetName, prevSheetName, start, end) {
   sheet.get().createDynamic(sheetName, 'sum-amount-' + cat.id, {
-          initialValue: 0,
-          dependencies: [
-          `budget-start-date`,
-          `budget-end-date`
-          ],
-          run: (startDate, endDate) => {
-            const rows = db.runQuery<{ amount: number }>(
-            `SELECT SUM(amount) as amount FROM v_transactions_internal_alive t
+    initialValue: 0,
+    dependencies: [`budget-start-date`, `budget-end-date`],
+    run: (startDate, endDate) => {
+      const rows = db.runQuery<{ amount: number }>(
+        `SELECT SUM(amount) as amount FROM v_transactions_internal_alive t
                LEFT JOIN accounts a ON a.id = t.account
              WHERE t.date >= ${startDate} AND t.date <= ${endDate}
                AND category = '${cat.id}' AND a.offbudget = 0`,
-            [],
-            true,
-            );
-            const row = rows[0];
-            const amount = row ? row.amount : 0;
-            return amount || 0;
-          },
-    });
+        [],
+        true,
+      );
+      const row = rows[0];
+      const amount = row ? row.amount : 0;
+      return amount || 0;
+    },
+  });
 
   if (getBudgetType() === 'envelope') {
     envelopeBudget.createCategory(cat, sheetName, prevSheetName);
@@ -311,47 +308,42 @@ export async function createAllBudgets() {
   if (newMonths.length > 0) {
     await createBudget(range);
   }
-//createMonthBoundaries(range);
+  //createMonthBoundaries(range);
   return { start, end };
 }
 //this is just a test
-
-
 
 async function createMonthBoundaries(months) {
   // Get all categories
   const { data: groups } = await aqlQuery(q('category_groups').select('*'));
   const categories = groups.flatMap(group => group.categories);
-  
+
   const cellsToRecompute = [];
-  
+
   months.forEach(month => {
     const sheetName = monthUtils.sheetForMonth(month);
     const { start, end } = monthUtils.bounds(month);
-    
+
     const startCellName = resolveName(sheetName, 'budget-start-date');
     if (!sheet.get().hasCell(startCellName)) {
       sheet.get().createStatic(sheetName, 'budget-start-date', start);
       sheet.get().createStatic(sheetName, 'budget-end-date', end);
-   
+
       // Update dynamic category cells
       categories.forEach(cat => {
         const cellName = `sum-amount-${cat.id}`;
         sheet.get().deleteCell(sheetName, cellName);
         sheet.get().createDynamic(sheetName, cellName, {
           initialValue: 0,
-          dependencies: [
-          `budget-start-date`,
-          `budget-end-date`
-          ],
+          dependencies: [`budget-start-date`, `budget-end-date`],
           run: (startDate, endDate) => {
             const rows = db.runQuery<{ amount: number }>(
-            `SELECT SUM(amount) as amount FROM v_transactions_internal_alive t
+              `SELECT SUM(amount) as amount FROM v_transactions_internal_alive t
                LEFT JOIN accounts a ON a.id = t.account
              WHERE t.date >= ${startDate} AND t.date <= ${endDate}
                AND category = '${cat.id}' AND a.offbudget = 0`,
-            [],
-            true,
+              [],
+              true,
             );
             const row = rows[0];
             const amount = row ? row.amount : 0;
@@ -360,13 +352,10 @@ async function createMonthBoundaries(months) {
         });
       });
     }
-   
   });
-  
 }
 
-
-// here is where it ends 
+// here is where it ends
 
 export async function setType(type) {
   const meta = sheet.get().meta();

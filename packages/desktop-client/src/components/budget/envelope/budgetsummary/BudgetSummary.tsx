@@ -138,35 +138,37 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
             {monthUtils.format(month, 'MMMM', locale)}
           </div>
 
-<View style={{ marginTop: 10, alignItems: 'center' }}>
-  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-    <BudgetDatePicker
-      month={month}
-      datatype='StartDate'
-      width={60}
-      style={{
-        backgroundColor: 'transparent',
-        border: 'none'
-      }}
-    />
-    <Text style={{ 
-      fontSize: 14, 
-      color: theme.pageTextLight,
-      marginHorizontal: 4
-    }}>
-      –
-    </Text>
-    <BudgetDatePicker
-      month={month}
-      datatype='EndDate'
-      width={60}
-      style={{
-        backgroundColor: 'transparent',
-        border: 'none'
-      }}
-    />
-  </View>
-</View>
+          <View style={{ marginTop: 10, alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <BudgetDatePicker
+                month={month}
+                datatype="StartDate"
+                width={60}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                }}
+              />
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: theme.pageTextLight,
+                  marginHorizontal: 4,
+                }}
+              >
+                –
+              </Text>
+              <BudgetDatePicker
+                month={month}
+                datatype="EndDate"
+                width={60}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                }}
+              />
+            </View>
+          </View>
 
           <View
             style={{

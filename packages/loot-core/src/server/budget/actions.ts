@@ -643,25 +643,24 @@ export function setMonthDate({
 }): Promise<void> {
   const table = getBudgetTable(); // Assuming same table as original function
   const recordId = `${dbMonth(month)}-${type}`;
-  
+
   const existing = db.firstSync<
     Pick<db.DbZeroBudget | db.DbReflectBudget, 'id'>
   >(`SELECT id FROM ${table} WHERE id = ?`, [recordId]);
-  
+
   if (existing) {
     // Update existing record - set month field to the date value
-    return db.update(table, { 
-      id: existing.id, 
-      month: date 
+    return db.update(table, {
+      id: existing.id,
+      month: date,
     });
-  }
-  else
-  // Create new record with same logic as original
-  return db.insert(table, {
-    id: recordId,
-    month: date,
-    // Add other fields as needed based on your schema
-    // category: null, // or some default value
-    // amount: 0, // or some default value
-  });
+  } else
+    // Create new record with same logic as original
+    return db.insert(table, {
+      id: recordId,
+      month: date,
+      // Add other fields as needed based on your schema
+      // category: null, // or some default value
+      // amount: 0, // or some default value
+    });
 }

@@ -493,38 +493,46 @@ async function setDate({
   switch (type) {
     case 'StartDate':
       sheet.get().set(resolveName(sheetName, 'budget-start-date'), date);
-      const prevMonthSheetName = monthUtils.sheetForMonth(monthUtils.prevMonth(month));
+      const prevMonthSheetName = monthUtils.sheetForMonth(
+        monthUtils.prevMonth(month),
+      );
       await actions.setMonthDate({
         month: month,
-        date: date, 
-        type: type }); 
-      
+        date: date,
+        type: type,
+      });
+
       const prevDay = monthUtils.isoToInteger(monthUtils.subDays(dateISO, 1));
       const prevMonth = monthUtils.prevMonth(month);
-      sheet.get().set(resolveName(prevMonthSheetName, 'budget-end-date'), prevDay);
-      await actions.setMonthDate({ 
-        month: prevMonth, 
-        date: prevDay, 
-        type: 'EndDate' 
+      sheet
+        .get()
+        .set(resolveName(prevMonthSheetName, 'budget-end-date'), prevDay);
+      await actions.setMonthDate({
+        month: prevMonth,
+        date: prevDay,
+        type: 'EndDate',
       });
       break;
     case 'EndDate':
-      sheet.get().set(resolveName(sheetName , 'budget-end-date' ), date);
+      sheet.get().set(resolveName(sheetName, 'budget-end-date'), date);
       await actions.setMonthDate({
         month: month,
-        date: date, 
-        type: type }); // Added await 
-      const nextMonthSheetName = monthUtils.sheetForMonth(monthUtils.nextMonth(month)); 
+        date: date,
+        type: type,
+      }); // Added await
+      const nextMonthSheetName = monthUtils.sheetForMonth(
+        monthUtils.nextMonth(month),
+      );
       const nextDay = monthUtils.isoToInteger(monthUtils.addDays(dateISO, 1));
       const nextMonth = monthUtils.nextMonth(month);
-      sheet.get().set(resolveName(nextMonthSheetName , 'budget-start-date' ), nextDay);
-      await actions.setMonthDate({ 
-        month: nextMonth, 
-        date: nextDay, 
-        type: 'StartDate' 
-      });   
+      sheet
+        .get()
+        .set(resolveName(nextMonthSheetName, 'budget-start-date'), nextDay);
+      await actions.setMonthDate({
+        month: nextMonth,
+        date: nextDay,
+        type: 'StartDate',
+      });
       break;
   }
 }
-
-
