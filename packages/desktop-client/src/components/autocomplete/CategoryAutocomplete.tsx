@@ -64,7 +64,6 @@ type CategoryListProps = {
   ) => ReactElement<typeof CategoryItem>;
   showHiddenItems?: boolean;
   showBalances?: boolean;
-  showSplitOption?: boolean;
 };
 function CategoryList({
   items,
@@ -77,21 +76,27 @@ function CategoryList({
   renderCategoryItem = defaultRenderCategoryItem,
   showHiddenItems,
   showBalances,
-  showSplitOption,
 }: CategoryListProps) {
   const { t } = useTranslation();
-  const groupedItems = useMemo(() => {
+  const { splitTransaction, groupedCategories } = useMemo(() => {
     return items.reduce(
       (acc, item, index) => {
+        if (item.id === 'split') {
+          acc.splitTransaction = { ...item, highlightedIndex: index };
+          return acc;
+        }
+
         const groupId = item.group?.id || '';
-        const existing = acc.find(x => x.group?.id === groupId);
+        const existing = acc.groupedCategories.find(
+          x => x.group?.id === groupId,
+        );
         const itemWithIndex = {
           ...item,
-          highlightedIndex: showSplitOption ? index + 1 : index,
+          highlightedIndex: index,
         };
 
         if (!existing) {
-          acc.push({
+          acc.groupedCategories.push({
             group: item.group ?? null,
             categories: [itemWithIndex],
           });
@@ -101,16 +106,24 @@ function CategoryList({
 
         return acc;
       },
-      [] as Array<{
-        group: CategoryGroupEntity | null;
-        categories: Array<
-          CategoryAutocompleteItem & {
-            highlightedIndex: number;
-          }
-        >;
-      }>,
+      {
+        splitTransaction: null,
+        groupedCategories: [],
+      } as {
+        splitTransaction:
+          | (CategoryAutocompleteItem & {
+              highlightedIndex: number;
+            })
+          | null;
+        groupedCategories: Array<{
+          group: CategoryGroupEntity | null;
+          categories: Array<
+            CategoryAutocompleteItem & { highlightedIndex: number }
+          >;
+        }>;
+      },
     );
-  }, [items, showSplitOption]);
+  }, [items]);
 
   return (
     <View>
@@ -122,16 +135,14 @@ function CategoryList({
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
-        {showSplitOption &&
+        {splitTransaction &&
           renderSplitTransactionButton({
             key: 'split',
-            ...(getItemProps
-              ? getItemProps({ item: { id: 'split', name: 'split' } })
-              : {}),
+            ...(getItemProps ? getItemProps({ item: splitTransaction }) : {}),
             highlighted: highlightedIndex === 0,
             embedded,
           })}
-        {groupedItems.map(({ group, categories }) => {
+        {groupedCategories.map(({ group, categories }) => {
           if (!group) {
             return null;
           }
@@ -148,7 +159,7 @@ function CategoryList({
               {categories.map(item => (
                 <Fragment key={item.id}>
                   {renderCategoryItem({
-                    ...(getItemProps ? getItemProps({ item }) : null),
+                    ...(getItemProps ? getItemProps({ item }) : {}),
                     item,
                     highlighted: highlightedIndex === item.highlightedIndex,
                     embedded,
@@ -228,17 +239,26 @@ export function CategoryAutocomplete({
               group,
             })),
         ),
-      [] as CategoryAutocompleteItem[],
+      showSplitOption
+        ? [{ id: 'split', name: '' } as CategoryAutocompleteItem]
+        : [],
     );
 
     if (!showHiddenCategories) {
       return allSuggestions.filter(
-        suggestion => !suggestion.hidden && !suggestion.group?.hidden,
+        suggestion =>
+          suggestion.id === 'split' ||
+          (!suggestion.hidden && !suggestion.group?.hidden),
       );
     }
 
     return allSuggestions;
-  }, [defaultCategoryGroups, categoryGroups, showHiddenCategories]);
+  }, [
+    categoryGroups,
+    defaultCategoryGroups,
+    showSplitOption,
+    showHiddenCategories,
+  ]);
 
   const filterSuggestions = useCallback(
     (
@@ -247,6 +267,10 @@ export function CategoryAutocomplete({
     ): CategoryAutocompleteItem[] => {
       return suggestions
         .filter(suggestion => {
+          if (suggestion.id === 'split') {
+            return true;
+          }
+
           if (suggestion.group) {
             return (
               getNormalisedString(suggestion.group.name).includes(
@@ -275,17 +299,17 @@ export function CategoryAutocomplete({
       highlightFirst={true}
       embedded={embedded}
       closeOnBlur={closeOnBlur}
-      filterSuggestions={filterSuggestions}
-      suggestions={categorySuggestions}
       getHighlightedIndex={suggestions => {
         if (suggestions.length === 0) {
           return null;
-        } else if (showSplitOption) {
+        } else if (suggestions[0].id === 'split') {
           // Highlight the first category since the split option is at index 0.
-          return suggestions.length > 0 ? 1 : null;
+          return suggestions.length > 1 ? 1 : null;
         }
         return 0;
       }}
+      filterSuggestions={filterSuggestions}
+      suggestions={categorySuggestions}
       renderItems={(items, getItemProps, highlightedIndex) => (
         <CategoryList
           items={items}
@@ -297,7 +321,6 @@ export function CategoryAutocomplete({
           renderCategoryItem={renderCategoryItem}
           showHiddenItems={showHiddenCategories}
           showBalances={showBalances}
-          showSplitOption={showSplitOption}
         />
       )}
       {...props}
