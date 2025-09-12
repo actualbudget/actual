@@ -655,7 +655,7 @@ export function setMonthDate({
       month: date 
     });
   }
-  
+  else
   // Create new record with same logic as original
   return db.insert(table, {
     id: recordId,
