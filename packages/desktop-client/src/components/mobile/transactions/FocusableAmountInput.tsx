@@ -16,13 +16,23 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import {
+  evalArithmetic,
+  hasArithmeticOperator,
+  lastIndexOfArithmeticOperator,
+} from 'loot-core/shared/arithmetic';
+import {
   amountToCurrency,
+  amountToInteger,
   appendDecimals,
   currencyToAmount,
   reapplyThousandSeparators,
 } from 'loot-core/shared/util';
 
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
+import {
+  AmountKeyboard,
+  type AmountKeyboardRef,
+} from '@desktop-client/components/util/AmountKeyboard';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
@@ -50,7 +60,7 @@ const AmountInput = memo(function AmountInput({
   const [text, setText] = useState('');
   const [value, setValue] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [hideFraction] = useSyncedPref('hideFraction');
+  const [hideFractionPref] = useSyncedPref('hideFraction');
 
   const mergedInputRef = useMergedRefs<HTMLInputElement>(
     props.inputRef,
@@ -58,6 +68,7 @@ const AmountInput = memo(function AmountInput({
   );
 
   const initialValue = Math.abs(props.value);
+  const keyboardRef = useRef<AmountKeyboardRef | null>(null);
 
   useEffect(() => {
     if (focused) {
@@ -83,7 +94,11 @@ const AmountInput = memo(function AmountInput({
   };
 
   const applyText = () => {
-    const parsed = currencyToAmount(text) || 0;
+    const parsed =
+      (hasArithmeticOperator(text)
+        ? evalArithmetic(text)
+        : currencyToAmount(text)) ?? 0;
+
     const newValue = editing ? parsed : value;
 
     setValue(Math.abs(newValue));
@@ -114,10 +129,52 @@ const AmountInput = memo(function AmountInput({
   };
 
   const onChangeText = (text: string) => {
-    text = reapplyThousandSeparators(text);
-    text = appendDecimals(text, String(hideFraction) === 'true');
+    const hideFraction = String(hideFractionPref) === 'true';
+    const lastOperatorIndex = lastIndexOfArithmeticOperator(text);
+    if (lastOperatorIndex > 0) {
+      // This will evaluate the expression whenever an operator is added
+      // so only one operation will be displayed at a given time
+      const isOperatorAtEnd = lastOperatorIndex === text.length - 1;
+      if (isOperatorAtEnd) {
+        const lastOperator = text[lastOperatorIndex];
+        const charIndexPriorToLastOperator = lastOperatorIndex - 1;
+        const charPriorToLastOperator =
+          text.length > 0 ? text[charIndexPriorToLastOperator] : '';
+
+        if (
+          charPriorToLastOperator &&
+          hasArithmeticOperator(charPriorToLastOperator)
+        ) {
+          // Clicked on another operator while there is still an operator
+          // Replace previous operator with the new one
+          text = `${text.slice(0, charIndexPriorToLastOperator)}${lastOperator}`;
+        } else {
+          // Evaluate the left side of the expression whenever an operator is added
+          const left = text.slice(0, lastOperatorIndex);
+          const leftEvaluated = evalArithmetic(left) ?? 0;
+          const leftEvaluatedWithDecimal = appendDecimals(
+            reapplyThousandSeparators(String(amountToInteger(leftEvaluated))),
+            hideFraction,
+          );
+          text = `${leftEvaluatedWithDecimal}${lastOperator}`;
+        }
+      } else {
+        // Append decimals to the right side of the expression
+        const left = text.slice(0, lastOperatorIndex);
+        const right = text.slice(lastOperatorIndex + 1);
+        const lastOperator = text[lastOperatorIndex];
+        const rightWithDecimal = appendDecimals(
+          reapplyThousandSeparators(right),
+          hideFraction,
+        );
+        text = `${left}${lastOperator}${rightWithDecimal}`;
+      }
+    } else {
+      text = appendDecimals(reapplyThousandSeparators(text), hideFraction);
+    }
     setEditing(true);
     setText(text);
+    keyboardRef.current?.setInput(text);
     props.onChangeValue?.(text);
   };
 
@@ -126,11 +183,17 @@ const AmountInput = memo(function AmountInput({
       type="text"
       ref={mergedInputRef}
       value={text}
-      inputMode="decimal"
+      inputMode="none"
       autoCapitalize="none"
       onChange={e => onChangeText(e.target.value)}
       onFocus={onFocus}
-      onBlur={onBlur}
+      onBlur={e => {
+        // Do not blur when clicking on the keyboard elements
+        if (keyboardRef.current?.keyboardDOM.contains(e.relatedTarget)) {
+          return;
+        }
+        onBlur(e);
+      }}
       onKeyUp={onKeyUp}
       data-testid="amount-input"
       style={{ flex: 1, textAlign: 'center', position: 'absolute' }}
@@ -160,6 +223,14 @@ const AmountInput = memo(function AmountInput({
       >
         {editing ? text : amountToCurrency(value)}
       </Text>
+      {focused && (
+        <AmountKeyboard
+          keyboardRef={(r: AmountKeyboardRef) => (keyboardRef.current = r)}
+          onChange={onChangeText}
+          onBlur={onBlur}
+          onEnter={onUpdate}
+        />
+      )}
     </View>
   );
 });
