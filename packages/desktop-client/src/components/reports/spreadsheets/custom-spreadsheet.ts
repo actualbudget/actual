@@ -44,6 +44,7 @@ export type createCustomSpreadsheetProps = {
   showOffBudget: boolean;
   showHiddenCategories: boolean;
   showUncategorized: boolean;
+  trimIntervals: boolean;
   groupBy?: string;
   balanceTypeOp?: balanceTypeOpType;
   sortByOp?: sortByOpType;
@@ -65,6 +66,7 @@ export function createCustomSpreadsheet({
   showOffBudget,
   showHiddenCategories,
   showUncategorized,
+  trimIntervals,
   groupBy = '',
   balanceTypeOp = 'totalDebts',
   sortByOp = 'desc',
@@ -232,6 +234,10 @@ export function createCustomSpreadsheet({
         netAssets += perIntervalNetAssets;
         netDebts += perIntervalNetDebts;
 
+        if (trimIntervals && perIntervalTotals === 0) {
+          return arr; // hide if total 0 - probably wrong but does the job as a test
+        }
+
         arr.push({
           date: d.format(
             d.parseISO(intervalItem),
@@ -273,7 +279,17 @@ export function createCustomSpreadsheet({
     const calcDataFiltered = calcData.filter(i =>
       filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
     );
+    // const calcDataFiltered = calcData;
+    // calcData.forEach(data => {
+    //   data.intervalData = data.intervalData.filter(
+    //     t =>
+    //       t['totalDebts'] !== 0 ||
+    //       t['totalAssets'] !== 0 ||
+    //       t['totalTotals'] !== 0,
+    //   );
+    // });
 
+    // console.info(calcData, balanceTypeOp);
     const sortedCalcDataFiltered = [...calcDataFiltered].sort(
       sortData({ balanceTypeOp, sortByOp }),
     );
