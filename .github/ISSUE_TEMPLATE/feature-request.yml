@@ -2,6 +2,7 @@ name: Feature request
 description: Request a missing feature
 title: '[Feature] '
 labels: ['feature']
+type: Feature
 body:
   - type: markdown
     attributes:

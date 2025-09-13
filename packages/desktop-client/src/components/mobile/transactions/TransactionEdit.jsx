@@ -804,15 +804,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
     [scrollChildTransactionIntoView],
   );
 
-  useEffect(() => {
-    const noAmountChildTransaction = childTransactions.find(
-      t => t.amount === 0,
-    );
-    if (noAmountChildTransaction) {
-      scrollChildTransactionIntoView(noAmountChildTransaction.id);
-    }
-  }, [childTransactions, scrollChildTransactionIntoView]);
-
   // Child transactions should always default to the signage
   // of the parent transaction
   const childAmountSign = transaction.amount <= 0 ? '-' : '+';

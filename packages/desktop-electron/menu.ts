@@ -1,4 +1,10 @@
-import { MenuItemConstructorOptions, Menu, ipcMain, app } from 'electron';
+import {
+  MenuItemConstructorOptions,
+  Menu,
+  ipcMain,
+  app,
+  BrowserWindow,
+} from 'electron';
 
 export function getMenu(
   isDev: boolean,
@@ -14,8 +20,9 @@ export function getMenu(
           enabled: false,
           click(_item, focusedWindow) {
             if (focusedWindow && budgetId) {
-              if (focusedWindow.webContents.getTitle() === 'Actual') {
-                focusedWindow.webContents.executeJavaScript(
+              const browserWindow = focusedWindow as BrowserWindow;
+              if (browserWindow.webContents.getTitle() === 'Actual') {
+                browserWindow.webContents.executeJavaScript(
                   `__actionsForMenu.replaceModal({ modal: { name: 'load-backup', options: { budgetId: '${budgetId}' } } })`,
                 );
               }
@@ -30,8 +37,9 @@ export function getMenu(
           accelerator: 'CmdOrCtrl+O',
           click(_item, focusedWindow) {
             if (focusedWindow) {
-              if (focusedWindow.webContents.getTitle() === 'Actual') {
-                focusedWindow.webContents.executeJavaScript(
+              const browserWindow = focusedWindow as BrowserWindow;
+              if (browserWindow.webContents.getTitle() === 'Actual') {
+                browserWindow.webContents.executeJavaScript(
                   '__actionsForMenu.closeBudget()',
                 );
               } else {
@@ -55,7 +63,8 @@ export function getMenu(
           click: function (_menuItem, focusedWin) {
             // Undo
             if (focusedWin) {
-              focusedWin.webContents.executeJavaScript(
+              const browserWindow = focusedWin as BrowserWindow;
+              browserWindow.webContents.executeJavaScript(
                 '__actionsForMenu.undo()',
               );
             }
@@ -68,7 +77,8 @@ export function getMenu(
           click: function (_menuItem, focusedWin) {
             // Redo
             if (focusedWin) {
-              focusedWin.webContents.executeJavaScript(
+              const browserWindow = focusedWin as BrowserWindow;
+              browserWindow.webContents.executeJavaScript(
                 '__actionsForMenu.redo()',
               );
             }
@@ -105,7 +115,8 @@ export function getMenu(
           accelerator: 'CmdOrCtrl+R',
           click(_item, focusedWindow) {
             if (focusedWindow) {
-              focusedWindow.reload();
+              const browserWindow = focusedWindow as BrowserWindow;
+              browserWindow.reload();
             }
           },
         },
@@ -114,7 +125,10 @@ export function getMenu(
           accelerator:
             process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
           click(_item, focusedWindow) {
-            if (focusedWindow) focusedWindow.webContents.toggleDevTools();
+            if (focusedWindow) {
+              const browserWindow = focusedWindow as BrowserWindow;
+              browserWindow.webContents.toggleDevTools();
+            }
           },
         },
         isDev
@@ -147,7 +161,8 @@ export function getMenu(
           enabled: false,
           click: function (_menuItem, focusedWin) {
             if (focusedWin) {
-              focusedWin.webContents.executeJavaScript(
+              const browserWindow = focusedWin as BrowserWindow;
+              browserWindow.webContents.executeJavaScript(
                 'window.__actionsForMenu && window.__actionsForMenu.pushModal({ modal: { name: "schedules-discover" } })',
               );
             }
@@ -169,17 +184,23 @@ export function getMenu(
         {
           label: 'Documentation',
           click(_menuItem, focusedWin) {
-            focusedWin?.webContents.executeJavaScript(
-              'window.open("https://actualbudget.org/docs", "_blank")',
-            );
+            if (focusedWin) {
+              const browserWindow = focusedWin as BrowserWindow;
+              browserWindow.webContents.executeJavaScript(
+                'window.open("https://actualbudget.org/docs", "_blank")',
+              );
+            }
           },
         },
         {
           label: 'Community Support (Discord)',
           click(_menuItem, focusedWin) {
-            focusedWin?.webContents.executeJavaScript(
-              'window.open("https://discord.gg/pRYNYr4W5A", "_blank")',
-            );
+            if (focusedWin) {
+              const browserWindow = focusedWin as BrowserWindow;
+              browserWindow.webContents.executeJavaScript(
+                'window.open("https://discord.gg/pRYNYr4W5A", "_blank")',
+              );
+            }
           },
         },
         {
@@ -188,7 +209,8 @@ export function getMenu(
           enabled: !!budgetId,
           click: function (_menuItem, focusedWin) {
             if (focusedWin) {
-              focusedWin.webContents.executeJavaScript(
+              const browserWindow = focusedWin as BrowserWindow;
+              browserWindow.webContents.executeJavaScript(
                 'window.__actionsForMenu && !window.__actionsForMenu.inputFocused() && window.__actionsForMenu.pushModal({ modal: { name: "keyboard-shortcuts" } })',
               );
             }

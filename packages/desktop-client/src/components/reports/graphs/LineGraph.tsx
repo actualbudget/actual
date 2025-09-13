@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState, type CSSProperties } from 'react';
+import React, { useMemo, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -58,8 +58,23 @@ const CustomTooltip = ({
   format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
-  if (active && payload && payload.length) {
-    let sumTotals = 0;
+  const { sumTotals, items } = useMemo(() => {
+    return (payload ?? [])
+      .sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
+      .reduce(
+        (acc, item) => {
+          acc.sumTotals += item.value;
+          acc.items.push(item);
+          return acc;
+        },
+        {
+          sumTotals: 0,
+          items: [] as PayloadItem[],
+        },
+      );
+  }, [payload]);
+
+  if (active && items.length) {
     return (
       <div
         className={css({
@@ -77,25 +92,22 @@ const CustomTooltip = ({
             <strong>{payload[0].payload.date}</strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            {payload
-              .sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
-              .map((p: PayloadItem, index: number) => {
-                sumTotals += p.value;
-                return (
-                  (compact ? index < 4 : true) && (
-                    <AlignedText
-                      key={index}
-                      left={p.dataKey}
-                      right={format(p.value, 'financial')}
-                      style={{
-                        color: p.color,
-                        textDecoration:
-                          tooltip === p.dataKey ? 'underline' : 'inherit',
-                      }}
-                    />
-                  )
-                );
-              })}
+            {items.map((p: PayloadItem, index: number) => {
+              return (
+                (compact ? index < 4 : true) && (
+                  <AlignedText
+                    key={index}
+                    left={p.dataKey}
+                    right={format(p.value, 'financial')}
+                    style={{
+                      color: p.color,
+                      textDecoration:
+                        tooltip === p.dataKey ? 'underline' : 'inherit',
+                    }}
+                  />
+                )
+              );
+            })}
             {payload.length > 5 && compact && '...'}
             <AlignedText
               left={t('Total')}
