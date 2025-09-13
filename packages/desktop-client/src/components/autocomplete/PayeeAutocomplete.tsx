@@ -218,7 +218,7 @@ function PayeeList({
           renderCreatePayeeButton({
             ...(getItemProps ? getItemProps({ item: newPayee }) : {}),
             payeeName: inputValue,
-            highlighted: highlightedIndex === 0,
+            highlighted: newPayee.highlightedIndex === highlightedIndex,
             embedded,
           })}
 

@@ -879,6 +879,12 @@ async function processBankSyncDownload(
   // that account sync sources can give two different transaction IDs even though it's the same transaction.
   const useStrictIdChecking = !acctRow.account_sync_source;
 
+  const importTransactions = await aqlQuery(
+    q('preferences')
+      .filter({ id: `sync-import-transactions-${id}` })
+      .select('value'),
+  ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+
   /** Starting balance is actually the current balance of the account. */
   const {
     transactions: originalTransactions,
@@ -940,10 +946,6 @@ async function processBankSyncDownload(
     });
   }
 
-  if (originalTransactions.length === 0) {
-    return { added: [], updated: [] };
-  }
-
   const transactions = originalTransactions.map(trans => ({
     ...trans,
     account: id,
@@ -952,13 +954,14 @@ async function processBankSyncDownload(
   return runMutator(async () => {
     const result = await reconcileTransactions(
       id,
-      transactions,
+      importTransactions ? transactions : [],
       true,
       useStrictIdChecking,
     );
 
-    /** Starting balance is actually the current balance of the account. */
-    if (currentBalance) await updateAccountBalance(id, currentBalance);
+    if (currentBalance != null) {
+      await updateAccountBalance(id, currentBalance);
+    }
 
     return result;
   });
