@@ -448,6 +448,7 @@ async function advanceSchedulesService(syncSuccess) {
       .filter({ completed: false, '_account.closed': false })
       .select('*'),
   );
+
   const { data: hasTransData } = await aqlQuery(
     getHasTransactionsQuery(schedules),
   );
