@@ -20,7 +20,7 @@ const addWatchers = (): Plugin => ({
       ])
       .on('all', function () {
         for (const wsc of server.ws.clients) {
-          wsc.send(JSON.stringify({ type: 'static-changed' }));
+          wsc.send(JSON.stringify({ type: 'full-reload' }));
         }
       });
   },
