@@ -27,6 +27,7 @@ import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import {
+  collapseModals,
   openAccountCloseModal,
   pushModal,
 } from '@desktop-client/modals/modalsSlice';
@@ -145,6 +146,18 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     dispatch(reopenAccount({ id: account.id }));
   }, [account.id, dispatch]);
 
+  const [showRunningBalances, setShowRunningBalances] = useSyncedPref(
+    `show-balances-${account.id}`,
+  );
+  const onToggleRunningBalance = useCallback(() => {
+    setShowRunningBalances(showRunningBalances === 'true' ? 'false' : 'true');
+    dispatch(
+      collapseModals({
+        rootModalName: 'account-menu',
+      }),
+    );
+  }, [showRunningBalances, setShowRunningBalances, dispatch]);
+
   const onClick = useCallback(() => {
     dispatch(
       pushModal({
@@ -156,6 +169,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
             onEditNotes,
             onCloseAccount,
             onReopenAccount,
+            onToggleRunningBalance,
           },
         },
       }),
@@ -167,6 +181,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     onEditNotes,
     onReopenAccount,
     onSave,
+    onToggleRunningBalance,
   ]);
 
   return (
