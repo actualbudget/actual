@@ -26,6 +26,7 @@ export type RuleConditionOp =
   | 'contains'
   | 'doesNotContain'
   | 'hasTags'
+  | 'hasAnyTags'
   | 'and'
   | 'matches'
   | 'onBudget'
@@ -111,6 +112,7 @@ export type RuleConditionEntity =
       | 'doesNotContain'
       | 'matches'
       | 'hasTags'
+      | 'hasAnyTags'
     >
   | BaseConditionEntity<
       'payee',

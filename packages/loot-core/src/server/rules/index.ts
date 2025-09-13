@@ -296,6 +296,7 @@ const CONDITION_TYPES = {
       'doesNotContain',
       'notOneOf',
       'hasTags',
+      'hasAnyTags',
     ],
     nullable: true,
     parse(op, value, fieldName) {
@@ -320,7 +321,8 @@ const CONDITION_TYPES = {
         op === 'contains' ||
         op === 'matches' ||
         op === 'doesNotContain' ||
-        op === 'hasTags'
+        op === 'hasTags' ||
+        op === 'hasAnyTags'
       ) {
         assert(
           value.length > 0,
@@ -329,7 +331,7 @@ const CONDITION_TYPES = {
         );
       }
 
-      if (op === 'hasTags') {
+      if (op === 'hasTags' || op === 'hasAnyTags') {
         return value;
       }
 
@@ -443,7 +445,11 @@ export class Condition {
       return false;
     }
 
-    if (typeof fieldValue === 'string') {
+    if (
+      typeof fieldValue === 'string' &&
+      this.op !== 'hasTags' &&
+      this.op !== 'hasAnyTags'
+    ) {
       fieldValue = fieldValue.toLowerCase();
     }
 
@@ -540,11 +546,43 @@ export class Condition {
         }
         return this.value.indexOf(fieldValue) !== -1;
 
-      case 'hasTags':
+      case 'hasTags': {
         if (fieldValue === null) {
           return false;
         }
-        return String(fieldValue).indexOf(this.value) !== -1;
+        // Extract all tags from the condition value
+        const tagMatches = this.value.match(/(?<!#)(#[^#\s]+)/g);
+        if (!tagMatches || tagMatches.length === 0) {
+          return false;
+        }
+
+        // Check if ALL tags are present (AND logic)
+        return tagMatches.every(tag => {
+          const regex = new RegExp(
+            `(?<!#)${tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
+          );
+          return regex.test(fieldValue);
+        });
+      }
+
+      case 'hasAnyTags': {
+        if (fieldValue === null) {
+          return false;
+        }
+        // Extract all tags from the condition value
+        const anyTagMatches = this.value.match(/(?<!#)(#[^#\s]+)/g);
+        if (!anyTagMatches || anyTagMatches.length === 0) {
+          return false;
+        }
+
+        // Check if ANY tag is present (OR logic)
+        return anyTagMatches.some(tag => {
+          const regex = new RegExp(
+            `(?<!#)${tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
+          );
+          return regex.test(fieldValue);
+        });
+      }
 
       case 'notOneOf':
         if (fieldValue === null) {
@@ -1053,6 +1091,7 @@ const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
   doesNotContain: 0,
   matches: 0,
   hasTags: 0,
+  hasAnyTags: 0,
   onBudget: 0,
   offBudget: 0,
 };
