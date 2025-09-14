@@ -161,7 +161,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     notifyWhenUpdateIsAvailable:
       notifyWhenUpdateIsAvailable === undefined
         ? true
-        : notifyWhenUpdateIsAvailable, // defualt to true
+        : notifyWhenUpdateIsAvailable, // default to true
   };
 }
 
