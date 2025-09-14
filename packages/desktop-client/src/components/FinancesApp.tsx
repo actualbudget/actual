@@ -89,7 +89,6 @@ export function FinancesApp() {
   const isAccountsLoaded = useSelector(state => state.account.isAccountsLoaded);
 
   const versionInfo = useSelector(state => state.app.versionInfo);
-
   const [notifyWhenUpdateIsAvailable] = useGlobalPref(
     'notifyWhenUpdateIsAvailable',
   );
