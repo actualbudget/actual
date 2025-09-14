@@ -29,16 +29,17 @@ import { AdvancedToggle, Setting } from './UI';
 
 import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { Link } from '@desktop-client/components/common/Link';
-import { FormField, FormLabel } from '@desktop-client/components/forms';
+import {
+  Checkbox,
+  FormField,
+  FormLabel,
+} from '@desktop-client/components/forms';
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
 import { Page } from '@desktop-client/components/Page';
 import { useServerVersion } from '@desktop-client/components/ServerContext';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import {
-  useIsOutdated,
-  useLatestVersion,
-} from '@desktop-client/hooks/useLatestVersion';
+import { useLatestVersionInfo } from '@desktop-client/hooks/useLatestVersionInfo';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { loadPrefs } from '@desktop-client/prefs/prefsSlice';
@@ -46,8 +47,9 @@ import { useDispatch } from '@desktop-client/redux';
 
 function About() {
   const version = useServerVersion();
-  const latestVersion = useLatestVersion();
-  const isOutdated = useIsOutdated();
+  const { latestVersion, isOutdated } = useLatestVersionInfo();
+  const [notifyWhenUpdateIsAvailable, setnotifyWhenUpdateIsAvailablePref] =
+    useGlobalPref('notifyWhenUpdateIsAvailable');
 
   return (
     <Setting>
@@ -102,6 +104,20 @@ function About() {
           >
             <Trans>Release Notes</Trans>
           </Link>
+        </Text>
+      </View>
+      <View>
+        <Text style={{ display: 'flex' }}>
+          <Checkbox
+            id="settings-notifyWhenUpdateIsAvailable"
+            checked={notifyWhenUpdateIsAvailable}
+            onChange={e =>
+              setnotifyWhenUpdateIsAvailablePref(e.currentTarget.checked)
+            }
+          />
+          <label htmlFor="settings-notifyWhenUpdateIsAvailable">
+            <Trans>Display a notification when updates are available</Trans>
+          </label>
         </Text>
       </View>
     </Setting>

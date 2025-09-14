@@ -33,12 +33,13 @@ import { sync } from '@desktop-client/app/appSlice';
 import { ProtectedRoute } from '@desktop-client/auth/ProtectedRoute';
 import { Permissions } from '@desktop-client/auth/types';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useLatestVersionInfo } from '@desktop-client/hooks/useLatestVersionInfo';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
-import { getIsOutdated, getLatestVersion } from '@desktop-client/util/versions';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -88,10 +89,14 @@ export function FinancesApp() {
   const accounts = useAccounts();
   const isAccountsLoaded = useSelector(state => state.account.isAccountsLoaded);
 
+  const { latestVersion, isOutdated } = useLatestVersionInfo();
   const [lastUsedVersion, setLastUsedVersion] = useLocalPref(
     'flags.updateNotificationShownForVersion',
   );
 
+  const [notifyWhenUpdateIsAvailable] = useGlobalPref(
+    'notifyWhenUpdateIsAvailable',
+  );
   const multiuserEnabled = useMultiuserEnabled();
 
   useEffect(() => {
@@ -104,7 +109,7 @@ export function FinancesApp() {
 
   useEffect(() => {
     async function run() {
-      await global.Actual.waitForUpdateReadyForDownload();
+      await global.Actual.waitForUpdateReadyForDownload(); // This will only resolve when an update is ready
       dispatch(
         addNotification({
           notification: {
@@ -130,10 +135,7 @@ export function FinancesApp() {
   }, []);
 
   useEffect(() => {
-    async function run() {
-      const latestVersion = await getLatestVersion();
-      const isOutdated = await getIsOutdated(latestVersion);
-
+    if (notifyWhenUpdateIsAvailable) {
       if (isOutdated && lastUsedVersion !== latestVersion) {
         dispatch(
           addNotification({
@@ -166,9 +168,7 @@ export function FinancesApp() {
         );
       }
     }
-
-    run();
-  }, [lastUsedVersion, setLastUsedVersion]);
+  }, [lastUsedVersion, setLastUsedVersion, latestVersion, isOutdated]);
 
   const scrollableRef = useRef<HTMLDivElement>(null);
 
