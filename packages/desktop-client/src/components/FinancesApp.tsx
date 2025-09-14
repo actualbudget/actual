@@ -168,7 +168,15 @@ export function FinancesApp() {
         );
       }
     }
-  }, [lastUsedVersion, setLastUsedVersion, latestVersion, isOutdated]);
+  }, [
+    lastUsedVersion,
+    setLastUsedVersion,
+    latestVersion,
+    isOutdated,
+    notifyWhenUpdateIsAvailable,
+    dispatch,
+    t,
+  ]);
 
   const scrollableRef = useRef<HTMLDivElement>(null);
 
