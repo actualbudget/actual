@@ -82,7 +82,6 @@ export function currentMonth(): string {
   
   const config = getPayPeriodConfig();
   if (config?.enabled) {
-    console.log('getCurrentPayPeriod', new Date(), config);
     return getCurrentPayPeriod(new Date(), config);
   }
   
