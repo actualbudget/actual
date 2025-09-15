@@ -10,6 +10,7 @@ import {
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgAdd, SvgSubtract } from '@actual-app/components/icons/v0';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
@@ -33,6 +34,7 @@ import {
 import { DateSelect } from './DateSelect';
 
 import { Checkbox } from '@desktop-client/components/forms';
+import { Modal } from '@desktop-client/components/common/Modal';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
@@ -603,6 +605,7 @@ export function RecurringSchedulePicker({
   onChange,
 }: RecurringSchedulePickerProps) {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
   const triggerRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
@@ -618,6 +621,14 @@ export function RecurringSchedulePicker({
     [locale, value, dateFormat],
   );
 
+  const tooltip = (
+    <RecurringScheduleTooltip
+      config={value}
+      onClose={() => setIsOpen(false)}
+      onSave={onSave}
+    />
+  );
+
   return (
     <View>
       <Button
@@ -628,19 +639,30 @@ export function RecurringSchedulePicker({
         {value ? recurringDescription : t('No recurring date')}
       </Button>
 
-      <Popover
-        triggerRef={triggerRef}
-        style={{ padding: 10, minWidth: 380, width: 'auto', maxWidth: '100%' }}
-        placement="bottom start"
-        isOpen={isOpen}
-        onOpenChange={() => setIsOpen(false)}
-      >
-        <RecurringScheduleTooltip
-          config={value}
+      {isNarrowWidth ? (
+        <Modal
+          name="recurring-schedule-picker"
+          isOpen={isOpen}
           onClose={() => setIsOpen(false)}
-          onSave={onSave}
-        />
-      </Popover>
+        >
+          {tooltip}
+        </Modal>
+      ) : (
+        <Popover
+          triggerRef={triggerRef}
+          style={{
+            padding: 10,
+            minWidth: 380,
+            width: 'auto',
+            maxWidth: '100%',
+          }}
+          placement="bottom start"
+          isOpen={isOpen}
+          onOpenChange={() => setIsOpen(false)}
+        >
+          {tooltip}
+        </Popover>
+      )}
     </View>
   );
 }
