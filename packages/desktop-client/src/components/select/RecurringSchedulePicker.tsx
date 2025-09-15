@@ -33,8 +33,8 @@ import {
 
 import { DateSelect } from './DateSelect';
 
-import { Checkbox } from '@desktop-client/components/forms';
 import { Modal } from '@desktop-client/components/common/Modal';
+import { Checkbox } from '@desktop-client/components/forms';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 
