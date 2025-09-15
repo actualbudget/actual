@@ -127,21 +127,8 @@ export const MonthPicker = ({
           </View>
         </Link>
         {range.map((month, idx) => {
-          const isPay = monthUtils.isPayPeriod(month);
           const config = monthUtils.getPayPeriodConfig();
-          let displayLabel = monthUtils.format(month, 'MMM', locale);
-          if (isPay && config?.enabled) {
-            try {
-              const start = monthUtils.getMonthStartDate(month, config);
-              const end = monthUtils.getMonthEndDate(month, config);
-              const startLabel = monthUtils.format(start, 'MMM d', locale);
-              const endLabel = monthUtils.format(end, 'MMM d', locale);
-              displayLabel = `${startLabel} - ${endLabel}`;
-            } catch {
-              const pIndex = String(parseInt(month.slice(5, 7)) - 12);
-              displayLabel = `P${pIndex}`;
-            }
-          }
+          const displayLabel = monthUtils.getMonthDisplayName(month, config, locale);
           const selected =
             idx >= firstSelectedIndex && idx <= lastSelectedIndex;
 
@@ -228,7 +215,7 @@ export const MonthPicker = ({
               onMouseLeave={() => setHoverId(null)}
             >
               <View>
-                {isPay
+                {monthUtils.isPayPeriod(month)
                   ? size === 'small'
                     ? `P${String(parseInt(month.slice(5, 7)) - 12)}`
                     : displayLabel

@@ -61,13 +61,15 @@ describe('pay-periods utilities', () => {
   });
 
   test('handles year boundaries correctly', () => {
-    const config2023 = { ...baseConfig, yearStart: 2023 };
-    const config2025 = { ...baseConfig, yearStart: 2025 };
+    const config2023 = { ...baseConfig, startDate: '2023-01-05' };
+    const config2025 = { ...baseConfig, startDate: '2025-01-05' };
     
-    // 2023 pay periods should not be generated for 2024
-    expect(generatePayPeriods(2024, config2023)).toEqual([]);
+    // 2023 config should generate pay periods for 2024 if they fall within 2024
+    const periods2023 = generatePayPeriods(2024, config2023);
+    expect(periods2023.length).toBeGreaterThan(0);
+    expect(periods2023[0].monthId).toBe('2024-13');
     
-    // 2025 pay periods should not be generated for 2024
+    // 2025 config should not generate pay periods for 2024
     expect(generatePayPeriods(2024, config2025)).toEqual([]);
   });
 });

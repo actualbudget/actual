@@ -267,3 +267,67 @@ function isPayPeriodBefore(month1: string, month2: string): boolean {
   return month1 < month2;
 }
 
+// Helper function to count pay periods per calendar month
+export function getPayPeriodCountForMonth(calendarMonth: string, config: PayPeriodConfig): number {
+  if (!config?.enabled) return 0;
+  
+  const year = parseInt(calendarMonth.slice(0, 4));
+  const month = parseInt(calendarMonth.slice(5, 7));
+  
+  if (!Number.isFinite(year) || !Number.isFinite(month) || month < 1 || month > 12) {
+    return 0;
+  }
+  
+  const periods = generatePayPeriods(year, config);
+  let count = 0;
+  
+  for (const period of periods) {
+    const startDate = parseDate(period.startDate);
+    const endDate = parseDate(period.endDate);
+    
+    // Check if this pay period starts in the calendar month
+    // A pay period belongs to the month where it starts, not where it ends
+    const monthStart = d.startOfMonth(parseDate(calendarMonth + '-01'));
+    const monthEnd = d.endOfMonth(monthStart);
+    
+    if (d.isWithinInterval(startDate, { start: monthStart, end: monthEnd })) {
+      count++;
+    }
+  }
+  
+  return count;
+}
+
+// Helper function to get pay period number within a calendar month
+export function getPayPeriodNumberInMonth(monthId: string, config: PayPeriodConfig): number {
+  if (!isPayPeriod(monthId) || !config?.enabled) return 0;
+  
+  const year = parseInt(monthId.slice(0, 4));
+  const periodIndex = getPeriodIndex(monthId, config);
+  const { startDate } = computePayPeriodByIndex(periodIndex, config);
+  
+  // Find which calendar month this pay period starts in
+  const calendarMonth = d.format(startDate, 'yyyy-MM');
+  const periods = generatePayPeriods(year, config);
+  
+  let count = 0;
+  for (const period of periods) {
+    const periodStartDate = parseDate(period.startDate);
+    
+    // Check if this pay period starts in the same calendar month
+    const monthStart = d.startOfMonth(parseDate(calendarMonth + '-01'));
+    const monthEnd = d.endOfMonth(monthStart);
+    
+    if (d.isWithinInterval(periodStartDate, { start: monthStart, end: monthEnd })) {
+      count++;
+      
+      // If this is our target period, return the count
+      if (period.monthId === monthId) {
+        return count;
+      }
+    }
+  }
+  
+  return 0;
+}
+

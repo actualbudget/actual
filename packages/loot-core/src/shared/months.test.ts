@@ -27,11 +27,9 @@ describe('pay period integration', () => {
     expect(monthUtils.isPayPeriod('2024-99')).toBe(true);
   });
 
-  test('isCalendarMonth correctly identifies calendar months', () => {
-    expect(monthUtils.isCalendarMonth('2024-01')).toBe(true);
-    expect(monthUtils.isCalendarMonth('2024-12')).toBe(true);
-    expect(monthUtils.isCalendarMonth('2024-13')).toBe(false);
-    expect(monthUtils.isCalendarMonth('2024-99')).toBe(false);
+  test('calendar months are not pay periods', () => {
+    expect(monthUtils.isPayPeriod('2024-01')).toBe(false);
+    expect(monthUtils.isPayPeriod('2024-12')).toBe(false);
   });
 
   test('addMonths works with pay periods', () => {
