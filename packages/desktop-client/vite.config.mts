@@ -3,7 +3,6 @@ import * as path from 'path';
 
 import inject from '@rollup/plugin-inject';
 import basicSsl from '@vitejs/plugin-basic-ssl';
-// import react from '@vitejs/plugin-react-swc';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 /// <reference types="vitest" />
@@ -178,15 +177,6 @@ export default defineConfig(async ({ mode }) => {
           }),
       injectShims(),
       addWatchers(),
-      // react({
-      //   plugins: [
-      //     [
-      //       '@swc/plugin-react-remove-properties',
-      //       { properties: ['^data-debug'] },
-      //     ],
-      //   ],
-      //   devTarget: 'es2022',
-      // }),
       react({
         babel: {
           plugins: [reactCompiler],
