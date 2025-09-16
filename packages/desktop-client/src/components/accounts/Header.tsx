@@ -479,7 +479,7 @@ export function AccountHeader({
                   />
                 </Button>
 
-                <Popover style={{ width: 275 }}>
+                <Popover style={{ minWidth: 275 }}>
                   <Dialog>
                     <AccountMenu
                       account={account}
