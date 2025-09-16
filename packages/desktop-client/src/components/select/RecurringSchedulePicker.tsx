@@ -37,6 +37,7 @@ import { Modal } from '@desktop-client/components/common/Modal';
 import { Checkbox } from '@desktop-client/components/forms';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
+import { SpaceBetween } from '@actual-app/components/space-between';
 
 // ex: There is no 6th Friday of the Month
 const MAX_DAY_OF_WEEK_INTERVAL = 5;
@@ -479,12 +480,10 @@ function RecurringScheduleTooltip({
           />
         )}
       </div>
-      <Stack
-        direction="row"
-        align="center"
-        justify="flex-start"
+      <SpaceBetween
+        direction="horizontal"
         style={{ marginTop: 10 }}
-        spacing={1}
+        gap={5}
       >
         <Text style={{ whiteSpace: 'nowrap' }}>
           <Trans>Repeat every</Trans>
@@ -505,7 +504,6 @@ function RecurringScheduleTooltip({
           options={FREQUENCY_OPTIONS.map(opt => [opt.id, opt.name])}
           value={config.frequency}
           onChange={value => updateField('frequency', value)}
-          style={{ marginRight: 5 }}
         />
         {config.frequency === 'monthly' &&
         (config.patterns == null || config.patterns.length === 0) ? (
@@ -518,7 +516,7 @@ function RecurringScheduleTooltip({
             <Trans>Add specific days</Trans>
           </Button>
         ) : null}
-      </Stack>
+      </SpaceBetween>
       {config.frequency === 'monthly' &&
         config.patterns &&
         config.patterns.length > 0 && (
