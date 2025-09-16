@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState, type CSSProperties } from 'react';
+import React, { useMemo, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -62,8 +62,24 @@ const CustomTooltip = ({
   format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
-  if (active && payload && payload.length) {
-    let sumTotals = 0;
+  const { sumTotals, items } = useMemo(() => {
+    return (payload ?? [])
+      .slice(0)
+      .reverse()
+      .reduce(
+        (acc, item) => {
+          acc.sumTotals += item.value;
+          acc.items.push(item);
+          return acc;
+        },
+        {
+          sumTotals: 0,
+          items: [] as PayloadItem[],
+        },
+      );
+  }, [payload]);
+
+  if (active && items.length) {
     return (
       <div
         className={css({
@@ -81,27 +97,23 @@ const CustomTooltip = ({
             <strong>{label}</strong>
           </div>
           <div style={{ lineHeight: 1.4 }}>
-            {payload
-              .slice(0)
-              .reverse()
-              .map((pay, i) => {
-                sumTotals += pay.value;
-                return (
-                  pay.value !== 0 &&
-                  (compact ? i < 5 : true) && (
-                    <AlignedText
-                      key={pay.name}
-                      left={pay.name}
-                      right={format(pay.value, 'financial')}
-                      style={{
-                        color: pay.color,
-                        textDecoration:
-                          tooltip === pay.name ? 'underline' : 'inherit',
-                      }}
-                    />
-                  )
-                );
-              })}
+            {items.map((pay, i) => {
+              return (
+                pay.value !== 0 &&
+                (compact ? i < 5 : true) && (
+                  <AlignedText
+                    key={pay.name}
+                    left={pay.name}
+                    right={format(pay.value, 'financial')}
+                    style={{
+                      color: pay.color,
+                      textDecoration:
+                        tooltip === pay.name ? 'underline' : 'inherit',
+                    }}
+                  />
+                )
+              );
+            })}
             {payload.length > 5 && compact && '...'}
             <AlignedText
               left={t('Total')}
