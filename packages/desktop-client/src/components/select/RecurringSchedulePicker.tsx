@@ -607,6 +607,7 @@ export function RecurringSchedulePicker({
   const [isOpen, setIsOpen] = useState(false);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const locale = useLocale();
+  const isDatepickerClick = useRef(false);
 
   function onSave(config: RecurConfig) {
     onChange(config);
@@ -617,6 +618,23 @@ export function RecurringSchedulePicker({
     () => getRecurringDescription(value, dateFormat, locale),
     [locale, value, dateFormat],
   );
+
+  const handleShouldCloseOnInteractOutside = (element: Element) => {
+    // Keep popover open when interacting anywhere within the datepicker DOM.
+
+    const target = element instanceof HTMLElement ? element : null;
+    const inDatepicker = target?.closest('.pika-single.actual-date-picker');
+
+    if (inDatepicker) {
+      isDatepickerClick.current = true;
+      return false;
+    }
+    if (isDatepickerClick.current) {
+      isDatepickerClick.current = false;
+      return false;
+    }
+    return true;
+  };
 
   return (
     <View>
@@ -634,6 +652,7 @@ export function RecurringSchedulePicker({
         placement="bottom start"
         isOpen={isOpen}
         onOpenChange={() => setIsOpen(false)}
+        shouldCloseOnInteractOutside={handleShouldCloseOnInteractOutside}
       >
         <RecurringScheduleTooltip
           config={value}
