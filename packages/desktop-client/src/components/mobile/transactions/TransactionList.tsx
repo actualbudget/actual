@@ -139,11 +139,16 @@ export function TransactionList({
     [dispatchSelected, onOpenTransaction, selectedTransactions],
   );
 
-  useScrollListener(({ hasScrolledToEnd }) => {
-    if (hasScrolledToEnd('down', 100)) {
-      onLoadMore?.();
-    }
-  });
+  useScrollListener(
+    useCallback(
+      ({ hasScrolledToEnd }) => {
+        if (hasScrolledToEnd('down', 100)) {
+          onLoadMore?.();
+        }
+      },
+      [onLoadMore],
+    ),
+  );
 
   return (
     <>
