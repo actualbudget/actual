@@ -1432,6 +1432,7 @@ const Transaction = memo(function Transaction({
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 display: 'inline-block',
+                whiteSpace: 'nowrap',
               }}
             >
               {titleFirst(getStatusLabel(previewStatus ?? ''))}
