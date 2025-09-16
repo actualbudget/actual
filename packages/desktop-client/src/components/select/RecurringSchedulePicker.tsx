@@ -17,6 +17,7 @@ import { Input } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Select } from '@actual-app/components/select';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -37,7 +38,6 @@ import { Modal } from '@desktop-client/components/common/Modal';
 import { Checkbox } from '@desktop-client/components/forms';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
-import { SpaceBetween } from '@actual-app/components/space-between';
 
 // ex: There is no 6th Friday of the Month
 const MAX_DAY_OF_WEEK_INTERVAL = 5;
@@ -480,11 +480,7 @@ function RecurringScheduleTooltip({
           />
         )}
       </div>
-      <SpaceBetween
-        direction="horizontal"
-        style={{ marginTop: 10 }}
-        gap={5}
-      >
+      <SpaceBetween direction="horizontal" style={{ marginTop: 10 }} gap={5}>
         <Text style={{ whiteSpace: 'nowrap' }}>
           <Trans>Repeat every</Trans>
         </Text>
