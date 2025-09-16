@@ -22,6 +22,11 @@ import { filterHiddenItems } from './filterHiddenItems';
 import { makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
 import { sortData } from './sortData';
+import {
+  determineIntervalRange,
+  trimIntervalDataToRange,
+  trimIntervalsToRange,
+} from './trimIntervals';
 
 import {
   categoryLists,
@@ -150,6 +155,7 @@ export function createCustomSpreadsheet({
 
     const groupsByCategory =
       groupByLabel === 'category' || groupByLabel === 'categoryGroup';
+
     const intervalData = intervals.reduce(
       (arr: IntervalEntity[], intervalItem, index) => {
         let perIntervalAssets = 0;
@@ -234,10 +240,6 @@ export function createCustomSpreadsheet({
         netAssets += perIntervalNetAssets;
         netDebts += perIntervalNetDebts;
 
-        if (trimIntervals && perIntervalTotals === 0) {
-          return arr; // hide if total 0 - probably wrong but does the job as a test
-        }
-
         arr.push({
           date: d.format(
             d.parseISO(intervalItem),
@@ -276,26 +278,34 @@ export function createCustomSpreadsheet({
       });
       return { ...calc };
     });
+
+    // Determine interval range across all groups and main intervalData
+    const { startIndex, endIndex } = determineIntervalRange(
+      calcData,
+      intervalData,
+      trimIntervals,
+    );
+
+    // Trim the main intervalData based on the range
+    const trimmedIntervalData = trimIntervalDataToRange(
+      intervalData,
+      startIndex,
+      endIndex,
+    );
+
+    // Trim all calcData based on the interval range to keep consistency
+    trimIntervalsToRange(calcData, startIndex, endIndex);
+
     const calcDataFiltered = calcData.filter(i =>
       filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
     );
-    // const calcDataFiltered = calcData;
-    // calcData.forEach(data => {
-    //   data.intervalData = data.intervalData.filter(
-    //     t =>
-    //       t['totalDebts'] !== 0 ||
-    //       t['totalAssets'] !== 0 ||
-    //       t['totalTotals'] !== 0,
-    //   );
-    // });
 
-    // console.info(calcData, balanceTypeOp);
     const sortedCalcDataFiltered = [...calcDataFiltered].sort(
       sortData({ balanceTypeOp, sortByOp }),
     );
 
     const legend = calculateLegend(
-      intervalData,
+      trimmedIntervalData,
       sortedCalcDataFiltered,
       groupBy,
       graphType,
@@ -304,7 +314,7 @@ export function createCustomSpreadsheet({
 
     setData({
       data: sortedCalcDataFiltered,
-      intervalData,
+      intervalData: trimmedIntervalData,
       legend,
       startDate,
       endDate,
