@@ -26,6 +26,7 @@ type AmountInputProps = {
   inputRef?: Ref<HTMLInputElement>;
   value: number;
   zeroSign?: '-' | '+';
+  sign?: '-' | '+';
   onChangeValue?: (value: string) => void;
   onFocus?: FocusEventHandler<HTMLInputElement>;
   onBlur?: FocusEventHandler<HTMLInputElement>;
@@ -37,7 +38,6 @@ type AmountInputProps = {
   focused?: boolean;
   disabled?: boolean;
   autoDecimals?: boolean;
-  options?: { inflow?: boolean; outflow?: boolean };
 };
 
 export function AmountInput({
@@ -45,6 +45,7 @@ export function AmountInput({
   inputRef,
   value: initialValue,
   zeroSign = '-', // + or -
+  sign,
   onFocus,
   onBlur,
   onChangeValue,
@@ -56,13 +57,11 @@ export function AmountInput({
   focused,
   disabled = false,
   autoDecimals = false,
-  options,
 }: AmountInputProps) {
   const { t } = useTranslation();
   const format = useFormat();
   const [symbol, setSymbol] = useState<'+' | '-'>(() => {
-    if (options?.inflow) return '+';
-    if (options?.outflow) return '-';
+    if (sign) return sign;
     return initialValue === 0 ? zeroSign : initialValue > 0 ? '+' : '-';
   });
 
@@ -95,15 +94,13 @@ export function AmountInput({
   }, [focused]);
 
   useEffect(() => {
-    if (options?.inflow) {
-      setSymbol('+');
-    } else if (options?.outflow) {
-      setSymbol('-');
+    if (sign) {
+      setSymbol(sign);
     }
-  }, [options]);
+  }, [sign]);
 
   function onSwitch() {
-    if (options?.inflow || options?.outflow) {
+    if (sign) {
       return;
     }
 
@@ -138,10 +135,8 @@ export function AmountInput({
   function fireUpdate(amount) {
     onUpdate?.(amount);
 
-    if (options?.inflow) {
-      setSymbol('+');
-    } else if (options?.outflow) {
-      setSymbol('-');
+    if (sign) {
+      setSymbol(sign);
     } else {
       if (amount > 0) {
         setSymbol('+');
@@ -176,7 +171,7 @@ export function AmountInput({
     >
       <Button
         variant="bare"
-        isDisabled={disabled || options?.inflow || options?.outflow}
+        isDisabled={disabled || !!sign}
         aria-label={symbol === '-' ? t('Make positive') : t('Make negative')}
         style={{ padding: '0 7px' }}
         onPress={onSwitch}

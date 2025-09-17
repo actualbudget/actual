@@ -71,7 +71,7 @@ export function GenericInput({
             value={value}
             onUpdate={v => onChange(v)}
             onEnter={(e, updatedValue) => onEnter?.(e, updatedValue)}
-            options={options}
+            sign={options?.inflow || options?.outflow ? '+' : undefined}
           />
         );
       case 'percentage':
