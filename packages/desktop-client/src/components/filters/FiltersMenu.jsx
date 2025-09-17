@@ -42,6 +42,7 @@ import { updateFilterReducer } from './updateFilterReducer';
 
 import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
 
 let isDatepickerClick = false;
@@ -68,6 +69,7 @@ function ConfigureField({
   onApply,
 }) {
   const { t } = useTranslation();
+  const format = useFormat();
   const [subfield, setSubfield] = useState(initialSubfield);
   const inputRef = useRef();
   const prevOp = useRef(null);
@@ -222,22 +224,35 @@ function ConfigureField({
       <Form
         onSubmit={e => {
           e.preventDefault();
+
+          let submitValue = value;
+
+          if (field === 'amount' && inputRef.current) {
+            try {
+              if (inputRef.current.getCurrentAmount) {
+                submitValue = inputRef.current.getCurrentAmount();
+              } else {
+                const rawValue = inputRef.current.value || '';
+                const options = subfieldToOptions(field, subfield);
+
+                if (options?.inflow || options?.outflow) {
+                  const positiveValue = rawValue.replace(/^-/, '');
+                  submitValue = format.fromEdit(positiveValue, 0);
+                } else {
+                  submitValue = format.fromEdit(rawValue, 0);
+                }
+              }
+            } catch {
+              submitValue = value;
+            }
+          }
+
           onApply({
             field,
             op,
-            value,
+            value: submitValue,
             options: subfieldToOptions(field, subfield),
           });
-        }}
-        onKeyDown={e => {
-          // For amount fields, prevent default form submission to let AmountInput handle Enter via Input.onEnter
-          if (
-            e.key === 'Enter' &&
-            field === 'amount' &&
-            (e.target?.tagName === 'INPUT' || e.target?.tagName === 'TEXTAREA')
-          ) {
-            e.preventDefault();
-          }
         }}
       >
         {type !== 'boolean' && field !== 'payee' && (
@@ -262,14 +277,6 @@ function ConfigureField({
             style={{ marginTop: 10 }}
             onChange={v => {
               dispatch({ type: 'set-value', value: v });
-            }}
-            onEnter={(e, updatedValue) => {
-              onApply({
-                field,
-                op,
-                value: updatedValue !== undefined ? updatedValue : value,
-                options: subfieldToOptions(field, subfield),
-              });
             }}
           />
         )}

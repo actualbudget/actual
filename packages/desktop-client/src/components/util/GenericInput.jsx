@@ -35,7 +35,6 @@ export function GenericInput({
   ref,
   style,
   onChange,
-  onEnter = undefined,
   op = undefined,
   options = undefined,
 }) {
@@ -70,7 +69,6 @@ export function GenericInput({
             inputRef={ref}
             value={value}
             onUpdate={v => onChange(v)}
-            onEnter={(e, updatedValue) => onEnter?.(e, updatedValue)}
             sign={options?.inflow || options?.outflow ? '+' : undefined}
           />
         );
