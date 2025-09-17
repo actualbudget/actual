@@ -99,6 +99,19 @@ export function AmountInput({
     }
   }, [sign]);
 
+  const getAmount = useCallback(() => {
+    const signedValued = symbol === '-' ? symbol + value : value;
+    return format.fromEdit(signedValued, 0);
+  }, [symbol, value, format]);
+
+  useEffect(() => {
+    if (ref.current) {
+      (
+        ref.current as HTMLInputElement & { getCurrentAmount?: () => number }
+      ).getCurrentAmount = () => getAmount();
+    }
+  }, [getAmount]);
+
   function onSwitch() {
     if (sign) {
       return;
@@ -109,11 +122,6 @@ export function AmountInput({
       setSymbol(symbol === '+' ? '-' : '+');
     }
     fireUpdate(amount * -1);
-  }
-
-  function getAmount() {
-    const signedValued = symbol === '-' ? symbol + value : value;
-    return format.fromEdit(signedValued, 0);
   }
 
   function onInputTextChange(val) {
