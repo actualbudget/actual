@@ -3,7 +3,7 @@ import * as nordigenNode from 'nordigen-node';
 import { v4 as uuidv4 } from 'uuid';
 
 import { SecretName, secretsService } from '../../services/secrets-service.js';
-import { BankFactory, BANKS_WITH_LIMITED_HISTORY } from '../bank-factory.js';
+import { BankFactory } from '../bank-factory.js';
 import {
   AccessDeniedError,
   AccountNotLinkedToRequisition,
@@ -322,11 +322,7 @@ export const goCardlessService = {
       institutionId,
       referenceId: uuidv4(),
       accessValidForDays: institution.max_access_valid_for_days,
-      maxHistoricalDays: BANKS_WITH_LIMITED_HISTORY.includes(institutionId)
-        ? Number(institution.transaction_total_days) >= 90
-          ? '89'
-          : institution.transaction_total_days
-        : institution.transaction_total_days,
+      maxHistoricalDays: institution.transaction_total_days,
       userLanguage: 'en',
       ssn: null,
       redirectImmediate: false,
@@ -338,11 +334,15 @@ export const goCardlessService = {
       try {
         console.log('Failed to link using:');
         console.log(body);
-        console.log('Falling back to accessValidForDays = 90');
+        console.log(
+          'Falling back to accessValidForDays = 90 ' +
+            'and maxHistoricalDays = 89',
+        );
 
         response = await client.initSession({
           ...body,
           accessValidForDays: 90,
+          maxHistoricalDays: 89,
         });
       } catch (error) {
         handleGoCardlessError(error);
@@ -426,16 +426,21 @@ export const goCardlessService = {
       handleGoCardlessError(error);
     }
 
+    // Handle cases where either response is null/undefined
+    const accountDetails = detailedAccount?.account || {};
+    const metadata = metadataAccount || {};
+
     // Some banks provide additional data in both fields, but can do yucky things like have an empty
     // string in one place but not the other. We'll fix this by merging the two objects, but preferring truthy values
     // from the metadata object over the details object.
     const mergedAccount = {};
     const uniqueKeys = new Set([
-      ...Object.keys(detailedAccount.account),
-      ...Object.keys(metadataAccount),
+      ...Object.keys(accountDetails),
+      ...Object.keys(metadata),
     ]);
+
     for (const key of uniqueKeys) {
-      mergedAccount[key] = metadataAccount[key] || detailedAccount.account[key];
+      mergedAccount[key] = metadata[key] || accountDetails[key];
     }
 
     return mergedAccount;

@@ -60,6 +60,8 @@ function dbMonth(month: string): number {
 // TODO: complete list of fields.
 type BudgetData = {
   is_income: 1 | 0;
+  hidden: 1 | 0;
+  group_hidden: 1 | 0;
   category: string;
   amount: number;
 };
@@ -70,11 +72,16 @@ function getBudgetData<T extends BudgetTable>(
 ): Promise<BudgetData[]> {
   return db.all<
     (db.DbReflectBudget | db.DbZeroBudget) &
-      Pick<db.DbViewCategory, 'is_income'>
+      Pick<
+        db.DbViewCategoryWithGroupHidden,
+        'is_income' | 'hidden' | 'group_hidden'
+      >
   >(
     `
-    SELECT b.*, c.is_income FROM v_categories c
-    LEFT JOIN ${table} b ON b.category = c.id
+    SELECT b.*, c.is_income, c.hidden, g.hidden AS group_hidden
+    FROM ${table} b
+    LEFT JOIN categories c ON b.category = c.id
+    LEFT JOIN category_groups g ON c.cat_group = g.id
     WHERE c.tombstone = 0 AND b.month = ?
   `,
     [month],
@@ -213,6 +220,9 @@ export async function copyPreviousMonth({
   await batchMessages(async () => {
     budgetData.forEach(prevBudget => {
       if (prevBudget.is_income === 1 && !isReflectBudget()) {
+        return;
+      }
+      if (prevBudget.hidden === 1 || prevBudget.group_hidden === 1) {
         return;
       }
       setBudget({

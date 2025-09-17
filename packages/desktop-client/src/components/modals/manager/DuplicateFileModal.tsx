@@ -12,7 +12,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 
-import { duplicateBudget } from '@desktop-client/budgets/budgetsSlice';
+import { duplicateBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import {
   Modal,
   ModalButtons,

@@ -17,7 +17,7 @@ export function BudgetFileSelectionModal() {
   const { t } = useTranslation();
   const [id] = useMetadataPref('id');
   const currentFile = useSelector(state =>
-    state.budgets.allFiles?.find(f => 'id' in f && f.id === id),
+    state.budgetfiles.allFiles?.find(f => 'id' in f && f.id === id),
   );
 
   return (

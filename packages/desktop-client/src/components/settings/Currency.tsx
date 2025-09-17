@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
@@ -17,6 +17,40 @@ import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 export function CurrencySettings() {
   const { t } = useTranslation();
 
+  const currencyTranslations = useMemo(
+    () =>
+      new Map<string, string>([
+        ['', t('None')],
+        ['AUD', t('Australian Dollar')],
+        ['BRL', t('Brazilian Real')],
+        ['CAD', t('Canadian Dollar')],
+        ['CHF', t('Swiss Franc')],
+        ['CNY', t('Yuan Renminbi')],
+        ['EUR', t('Euro')],
+        ['GBP', t('Pound Sterling')],
+        ['HKD', t('Hong Kong Dollar')],
+        ['INR', t('Indian Rupee')],
+        ['JMD', t('Jamaican Dollar')],
+        // ['JPY', t('Yen')],
+        ['MDL', t('Moldovan Leu')],
+        ['PHP', t('Philippine Peso')],
+        ['PLN', t('Polish Złoty')],
+        ['RON', t('Romanian Leu')],
+        ['RSD', t('Serbian Dinar')],
+        ['RUB', t('Russian Ruble')],
+        ['SEK', t('Swedish Krona')],
+        ['SGD', t('Singapore Dollar')],
+        ['THB', t('Thai Baht')],
+        ['TRY', t('Turkish Lira')],
+        ['UAH', t('Ukrainian Hryvnia')],
+        ['USD', t('US Dollar')],
+        ['QAR', t('Qatari Riyal')],
+        ['EGP', t('Egyptian Pound')],
+        ['SAR', t('Saudi Riyal')],
+      ]),
+    [t],
+  );
+
   const [defaultCurrencyCode, setDefaultCurrencyCodePref] = useSyncedPref(
     'defaultCurrencyCode',
   );
@@ -34,20 +68,6 @@ export function CurrencySettings() {
       backgroundColor: theme.buttonNormalBackgroundHover,
     },
   });
-
-  const currencyTranslations = new Map([
-    ['', t('None')],
-    ['AUD', t('Australian Dollar')],
-    ['CAD', t('Canadian Dollar')],
-    ['CHF', t('Swiss Franc')],
-    ['CNY', t('Yuan Renminbi')],
-    ['EUR', t('Euro')],
-    ['GBP', t('Pound Sterling')],
-    ['HKD', t('Hong Kong Dollar')],
-    // ['JPY', t('Yen')],
-    ['SGD', t('Singapore Dollar')],
-    ['USD', t('US Dollar')],
-  ]);
 
   const currencyOptions: [string, string][] = currencies.map(currency => {
     const translatedName =

@@ -38,7 +38,7 @@ import {
 import { fastSetMerge } from '../../shared/util';
 import { RuleConditionEntity, RuleEntity } from '../../types/models';
 import { RuleError } from '../errors';
-import { Schedule as RSchedule } from '../util/rschedule';
+import { RSchedule } from '../util/rschedule';
 
 function registerHandlebarsHelpers() {
   const regexTest = /^\/(.*)\/([gimuy]*)$/;
@@ -327,6 +327,10 @@ const CONDITION_TYPES = {
           'no-empty-string',
           `${op} must have non-empty string (field: ${fieldName})`,
         );
+      }
+
+      if (op === 'hasTags') {
+        return value;
       }
 
       return value.toLowerCase();

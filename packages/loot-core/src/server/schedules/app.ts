@@ -33,7 +33,7 @@ import {
   updateRule,
 } from '../transactions/transaction-rules';
 import { undoable } from '../undo';
-import { Schedule as RSchedule } from '../util/rschedule';
+import { RSchedule } from '../util/rschedule';
 
 import { findSchedules } from './find-schedules';
 
@@ -412,7 +412,13 @@ function onApplySync(oldValues, newValues) {
 // This is the service that move schedules forward automatically and
 // posts transactions
 
-async function postTransactionForSchedule({ id }: { id: string }) {
+async function postTransactionForSchedule({
+  id,
+  today,
+}: {
+  id: string;
+  today?: boolean;
+}) {
   const { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
   const schedule = data[0];
   if (schedule == null || schedule._account == null) {
@@ -423,7 +429,7 @@ async function postTransactionForSchedule({ id }: { id: string }) {
     payee: schedule._payee,
     account: schedule._account,
     amount: getScheduledAmount(schedule._amount),
-    date: currentDay(),
+    date: today ? currentDay() : schedule.next_date,
     schedule: schedule.id,
     cleared: false,
   };
@@ -442,6 +448,7 @@ async function advanceSchedulesService(syncSuccess) {
       .filter({ completed: false, '_account.closed': false })
       .select('*'),
   );
+
   const { data: hasTransData } = await aqlQuery(
     getHasTransactionsQuery(schedules),
   );

@@ -16,11 +16,12 @@ import { subMonths, format, eachMonthOfInterval, parseISO } from 'date-fns';
 import { AreaChart, Area, YAxis, Tooltip as RechartsTooltip } from 'recharts';
 
 import * as monthUtils from 'loot-core/shared/months';
+import { q } from 'loot-core/shared/query';
 import { integerToCurrency } from 'loot-core/shared/util';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import * as queries from '@desktop-client/queries';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 const LABEL_WIDTH = 70;
@@ -41,6 +42,7 @@ export function BalanceHistoryGraph({
   style,
   ref,
 }: BalanceHistoryGraphProps) {
+  const locale = useLocale();
   const [balanceData, setBalanceData] = useState<
     Array<{ date: string; balance: number }>
   >([]);
@@ -73,18 +75,18 @@ export function BalanceHistoryGraph({
 
       const [starting, totals]: [number, Balance[]] = await Promise.all([
         aqlQuery(
-          queries
-            .transactions(accountId)
+          q('transactions')
             .filter({
+              account: accountId,
               date: { $lt: monthUtils.firstDayOfMonth(startDate) },
             })
             .calculate({ $sum: '$amount' }),
         ).then(({ data }) => data),
 
         aqlQuery(
-          queries
-            .transactions(accountId)
+          q('transactions')
             .filter({
+              account: accountId,
               $and: [
                 { date: { $gte: monthUtils.firstDayOfMonth(startDate) } },
                 { date: { $lte: monthUtils.lastDayOfMonth(endDate) } },
@@ -149,12 +151,11 @@ export function BalanceHistoryGraph({
       }
 
       const balances = totals
-        .filter(t => t.balance !== 0)
         .sort((a, b) => monthUtils.differenceInCalendarMonths(a.date, b.date))
         .map(t => {
           return {
             balance: t.balance,
-            date: format(parseISO(t.date), 'MMM yyyy'),
+            date: monthUtils.format(t.date, 'MMM yyyy', locale),
           };
         });
 
@@ -164,7 +165,7 @@ export function BalanceHistoryGraph({
     }
 
     fetchBalanceHistory();
-  }, [accountId]);
+  }, [accountId, locale]);
 
   // State to track if the chart is hovered (used to conditionally render PrivacyFilter)
   const [isHovered, setIsHovered] = useState(false);

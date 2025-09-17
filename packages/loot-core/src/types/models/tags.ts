@@ -1,6 +1,6 @@
-export interface Tag {
+export interface TagEntity {
   id: string;
   tag: string;
-  color: string;
+  color?: string | null;
   description?: string | null;
 }

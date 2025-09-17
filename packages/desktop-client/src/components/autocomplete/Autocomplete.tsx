@@ -25,7 +25,7 @@ import { getNormalisedString } from 'loot-core/shared/normalisation';
 
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 
-type CommonAutocompleteProps<T extends Item> = {
+type CommonAutocompleteProps<T extends AutocompleteItem> = {
   focused?: boolean;
   embedded?: boolean;
   containerProps?: HTMLProps<HTMLDivElement>;
@@ -51,17 +51,18 @@ type CommonAutocompleteProps<T extends Item> = {
   clearOnSelect?: boolean;
   closeOnBlur?: boolean;
   closeOnSelect?: boolean;
+  updateOnValueChange?: boolean;
   onClose?: () => void;
 };
 
-type Item = {
+export type AutocompleteItem = {
   id?: string;
   name: string;
 };
 
 const inst: { lastChangeType?: StateChangeTypes } = {};
 
-function findItem<T extends Item>(
+function findItem<T extends AutocompleteItem>(
   strict: boolean,
   suggestions: T[],
   value: T | T['id'],
@@ -74,7 +75,9 @@ function findItem<T extends Item>(
   return value;
 }
 
-function getItemName<T extends Item>(item: T | T['name'] | null): string {
+function getItemName<T extends AutocompleteItem>(
+  item: T | T['name'] | null,
+): string {
   if (item == null) {
     return '';
   } else if (typeof item === 'string') {
@@ -83,14 +86,14 @@ function getItemName<T extends Item>(item: T | T['name'] | null): string {
   return item.name || '';
 }
 
-function getItemId<T extends Item>(item: T | T['id']) {
+function getItemId<T extends AutocompleteItem>(item: T | T['id']) {
   if (typeof item === 'string') {
     return item;
   }
   return item ? item.id : null;
 }
 
-export function defaultFilterSuggestion<T extends Item>(
+export function defaultFilterSuggestion<T extends AutocompleteItem>(
   suggestion: T,
   value: string,
 ) {
@@ -98,7 +101,7 @@ export function defaultFilterSuggestion<T extends Item>(
   return getNormalisedString(name).includes(getNormalisedString(value));
 }
 
-function defaultFilterSuggestions<T extends Item>(
+function defaultFilterSuggestions<T extends AutocompleteItem>(
   suggestions: T[],
   value: string,
 ) {
@@ -107,7 +110,7 @@ function defaultFilterSuggestions<T extends Item>(
   );
 }
 
-function fireUpdate<T extends Item>(
+function fireUpdate<T extends AutocompleteItem>(
   onUpdate: ((selected: string | null, value: string) => void) | undefined,
   strict: boolean,
   suggestions: T[],
@@ -143,7 +146,7 @@ function defaultRenderInput(props: ComponentProps<typeof Input>) {
   return <Input data-1p-ignore {...props} />;
 }
 
-function defaultRenderItems<T extends Item>(
+function defaultRenderItems<T extends AutocompleteItem>(
   items: T[],
   getItemProps: (arg: { item: T }) => ComponentProps<typeof View>,
   highlightedIndex: number,
@@ -199,17 +202,18 @@ function defaultShouldSaveFromKey(e: KeyboardEvent) {
   return e.code === 'Enter';
 }
 
-function defaultItemToString<T extends Item>(item?: T) {
+function defaultItemToString<T extends AutocompleteItem>(item?: T) {
   return item ? getItemName(item) : '';
 }
 
-type SingleAutocompleteProps<T extends Item> = CommonAutocompleteProps<T> & {
-  type?: 'single' | never;
-  onSelect: (id: T['id'], value: string) => void;
-  value: null | T | T['id'];
-};
+type SingleAutocompleteProps<T extends AutocompleteItem> =
+  CommonAutocompleteProps<T> & {
+    type?: 'single' | never;
+    onSelect: (id: T['id'], value: string) => void;
+    value: null | T | T['id'];
+  };
 
-function SingleAutocomplete<T extends Item>({
+function SingleAutocomplete<T extends AutocompleteItem>({
   focused,
   embedded = false,
   containerProps,
@@ -231,6 +235,7 @@ function SingleAutocomplete<T extends Item>({
   clearOnSelect = false,
   closeOnBlur = true,
   closeOnSelect = !clearOnSelect,
+  updateOnValueChange = false,
   onClose,
   value: initialValue,
 }: SingleAutocompleteProps<T>) {
@@ -258,11 +263,12 @@ function SingleAutocomplete<T extends Item>({
   const itemsViewRef = useRef(null);
 
   const { isNarrowWidth } = useResponsive();
-  const narrowInputStyle = isNarrowWidth
-    ? {
-        ...styles.mobileMenuItem,
-      }
-    : {};
+  const narrowInputStyle =
+    embedded && isNarrowWidth
+      ? {
+          ...styles.mobileMenuItem,
+        }
+      : {};
 
   inputProps = {
     ...inputProps,
@@ -277,6 +283,16 @@ function SingleAutocomplete<T extends Item>({
   useEffect(() => {
     setSelectedItem(findItem(strict, suggestions, initialValue));
   }, [initialValue, suggestions, strict]);
+
+  // Sometimes (khem, khem.. on mobile) we want to force update
+  // the "value" field (which is also used as a search term) if
+  // the initial value changes.
+  useEffect(() => {
+    if (updateOnValueChange) {
+      const item = findItem(strict, suggestions, initialValue);
+      setValue(item ? getItemName(item) : '');
+    }
+  }, [strict, suggestions, initialValue, updateOnValueChange]);
 
   function resetState(newValue?: string) {
     const val = newValue === undefined ? initialValue : newValue;
@@ -649,13 +665,14 @@ const defaultMultiAutocompleteInputClassName = css({
   '&[data-focused]': { border: 0, boxShadow: 'none' },
 });
 
-type MultiAutocompleteProps<T extends Item> = CommonAutocompleteProps<T> & {
-  type: 'multi';
-  onSelect: (ids: T['id'][], id?: T['id']) => void;
-  value: null | T[] | T['id'][];
-};
+type MultiAutocompleteProps<T extends AutocompleteItem> =
+  CommonAutocompleteProps<T> & {
+    type: 'multi';
+    onSelect: (ids: T['id'][], id?: T['id']) => void;
+    value: null | T[] | T['id'][];
+  };
 
-function MultiAutocomplete<T extends Item>({
+function MultiAutocomplete<T extends AutocompleteItem>({
   value: selectedItems = [],
   onSelect,
   suggestions,
@@ -787,11 +804,11 @@ export function AutocompleteFooter({
   );
 }
 
-type AutocompleteProps<T extends Item> =
+type AutocompleteProps<T extends AutocompleteItem> =
   | ComponentProps<typeof SingleAutocomplete<T>>
   | ComponentProps<typeof MultiAutocomplete<T>>;
 
-export function Autocomplete<T extends Item>({
+export function Autocomplete<T extends AutocompleteItem>({
   ...props
 }: AutocompleteProps<T>) {
   if (props.type === 'multi') {

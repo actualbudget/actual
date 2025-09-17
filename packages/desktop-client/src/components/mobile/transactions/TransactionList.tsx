@@ -32,17 +32,10 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
-import {
-  groupById,
-  type IntegerAmount,
-  integerToCurrency,
-} from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type TransactionEntity,
-} from 'loot-core/types/models';
+import { groupById, integerToCurrency } from 'loot-core/shared/util';
+import { type TransactionEntity } from 'loot-core/types/models';
 
-import { TransactionListItem } from './TransactionListItem';
+import { ROW_HEIGHT, TransactionListItem } from './TransactionListItem';
 
 import { FloatingActionBar } from '@desktop-client/components/mobile/FloatingActionBar';
 import { useScrollListener } from '@desktop-client/components/ScrollProvider';
@@ -88,23 +81,19 @@ function Loading({ style, 'aria-label': ariaLabel }: LoadingProps) {
 type TransactionListProps = {
   isLoading: boolean;
   transactions: readonly TransactionEntity[];
-  showBalances?: boolean;
-  runningBalances?: Map<TransactionEntity['id'], IntegerAmount>;
   onOpenTransaction?: (transaction: TransactionEntity) => void;
   isLoadingMore: boolean;
   onLoadMore: () => void;
-  account?: AccountEntity;
+  showMakeTransfer?: boolean;
 };
 
 export function TransactionList({
   isLoading,
   transactions,
-  showBalances,
-  runningBalances,
   onOpenTransaction,
   isLoadingMore,
   onLoadMore,
-  account,
+  showMakeTransfer = false,
 }: TransactionListProps) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -150,36 +139,45 @@ export function TransactionList({
     [dispatchSelected, onOpenTransaction, selectedTransactions],
   );
 
-  useScrollListener(({ hasScrolledToEnd }) => {
-    if (hasScrolledToEnd('down', 100)) {
-      onLoadMore?.();
-    }
-  });
-
-  if (isLoading) {
-    return <Loading aria-label={t('Loading transactions...')} />;
-  }
+  useScrollListener(
+    useCallback(
+      ({ hasScrolledToEnd }) => {
+        if (hasScrolledToEnd('down', 100)) {
+          onLoadMore?.();
+        }
+      },
+      [onLoadMore],
+    ),
+  );
 
   return (
     <>
+      {isLoading && (
+        <Loading
+          style={{ paddingBottom: 8 }}
+          aria-label={t('Loading transactions...')}
+        />
+      )}
       <ListBox
         aria-label={t('Transaction list')}
         selectionMode={selectedTransactions.size > 0 ? 'multiple' : 'single'}
         selectedKeys={selectedTransactions}
         dependencies={[selectedTransactions]}
-        renderEmptyState={() => (
-          <View
-            style={{
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: theme.mobilePageBackground,
-            }}
-          >
-            <Text style={{ fontSize: 15 }}>
-              <Trans>No transactions</Trans>
-            </Text>
-          </View>
-        )}
+        renderEmptyState={() =>
+          !isLoading && (
+            <View
+              style={{
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: theme.mobilePageBackground,
+              }}
+            >
+              <Text style={{ fontSize: 15 }}>
+                <Trans>No transactions</Trans>
+              </Text>
+            </View>
+          )
+        }
         items={sections}
       >
         {section => (
@@ -206,13 +204,10 @@ export function TransactionList({
                 t => !isPreviewId(t.id) || !t.is_child,
               )}
               addIdAndValue
-              dependencies={[transactions, showBalances, runningBalances]}
             >
               {transaction => (
                 <TransactionListItem
                   key={transaction.id}
-                  showBalance={showBalances}
-                  balance={runningBalances?.get(transaction.id)}
                   value={transaction}
                   onPress={trans => onTransactionPress(trans)}
                   onLongPress={trans => onTransactionPress(trans, true)}
@@ -228,7 +223,7 @@ export function TransactionList({
           aria-label={t('Loading more transactions...')}
           style={{
             // Same height as transaction list item
-            height: 60,
+            height: ROW_HEIGHT,
           }}
         />
       )}
@@ -236,7 +231,7 @@ export function TransactionList({
       {selectedTransactions.size > 0 && (
         <SelectedTransactionsFloatingActionBar
           transactions={transactions}
-          showMakeTransfer={!account}
+          showMakeTransfer={showMakeTransfer}
         />
       )}
     </>

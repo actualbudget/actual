@@ -2,15 +2,17 @@
 import { listen } from 'loot-core/platform/client/fetch';
 import * as undo from 'loot-core/platform/client/undo';
 
+import { reloadAccounts } from './accounts/accountsSlice';
 import { setAppState } from './app/appSlice';
-import { closeBudgetUI } from './budgets/budgetsSlice';
+import { reloadCategories } from './budget/budgetSlice';
+import { closeBudgetUI } from './budgetfiles/budgetfilesSlice';
 import { closeModal, pushModal, replaceModal } from './modals/modalsSlice';
 import {
   addGenericErrorNotification,
   addNotification,
 } from './notifications/notificationsSlice';
+import { reloadPayees } from './payees/payeesSlice';
 import { loadPrefs } from './prefs/prefsSlice';
-import { getAccounts, getCategories, getPayees } from './queries/queriesSlice';
 import { type AppStore } from './redux/store';
 import * as syncEvents from './sync-events';
 
@@ -54,7 +56,7 @@ export function handleGlobalEvents(store: AppStore) {
       tables.includes('category_groups') ||
       tables.includes('category_mapping')
     ) {
-      promises.push(store.dispatch(getCategories()));
+      promises.push(store.dispatch(reloadCategories()));
     }
 
     if (
@@ -62,11 +64,11 @@ export function handleGlobalEvents(store: AppStore) {
       tables.includes('payees') ||
       tables.includes('payee_mapping')
     ) {
-      promises.push(store.dispatch(getPayees()));
+      promises.push(store.dispatch(reloadPayees()));
     }
 
     if (tables.includes('accounts')) {
-      promises.push(store.dispatch(getAccounts()));
+      promises.push(store.dispatch(reloadAccounts()));
     }
 
     const tagged = undo.getTaggedState(undoTag);

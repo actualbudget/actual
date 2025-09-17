@@ -115,11 +115,13 @@ export function getValidOps(field: keyof FieldValueTypes) {
   );
 }
 
-export const ALLOCATION_METHODS = {
-  'fixed-amount': 'a fixed amount',
-  'fixed-percent': 'a fixed percent of the remainder',
-  remainder: 'an equal portion of the remainder',
-};
+export function getAllocationMethods() {
+  return {
+    'fixed-amount': t('a fixed amount'),
+    'fixed-percent': t('a fixed percent of the remainder'),
+    remainder: t('an equal portion of the remainder'),
+  };
+}
 
 export function mapField(field, opts?) {
   opts = opts || {};
@@ -232,6 +234,17 @@ export function friendlyOp(op, type?) {
   }
 }
 
+export function translateRuleStage(stage: string): string {
+  switch (stage) {
+    case 'pre':
+      return t('Pre');
+    case 'post':
+      return t('Post');
+    default:
+      return '';
+  }
+}
+
 export function deserializeField(field) {
   if (field === 'amount-inflow') {
     return { field: 'amount', options: { inflow: true } };
@@ -327,7 +340,18 @@ export function unparse({ error, inputKey, ...item }) {
     case 'number': {
       let unparsed = item.value;
       if (item.field === 'amount' && item.op !== 'isbetween') {
-        unparsed = amountToInteger(unparsed);
+        // Handle both string (formatted) and number inputs
+        if (typeof unparsed === 'string') {
+          // Convert formatted string back to number first
+          unparsed = currencyToAmount(unparsed);
+          if (unparsed !== null && !isNaN(unparsed)) {
+            unparsed = amountToInteger(unparsed);
+          } else {
+            unparsed = null;
+          }
+        } else {
+          unparsed = amountToInteger(unparsed);
+        }
       }
 
       return { ...item, value: unparsed };

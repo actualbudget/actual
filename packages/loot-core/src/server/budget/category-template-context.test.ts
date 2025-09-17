@@ -771,6 +771,7 @@ describe('CategoryTemplateContext', () => {
           type: 'remainder',
           weight: 2,
           directive: 'template',
+          priority: null,
         },
       ];
       const instance = new TestCategoryTemplateContext(
@@ -796,6 +797,7 @@ describe('CategoryTemplateContext', () => {
           type: 'remainder',
           weight: 1,
           directive: 'template',
+          priority: null,
         },
       ];
       const instance = new TestCategoryTemplateContext(
@@ -821,6 +823,7 @@ describe('CategoryTemplateContext', () => {
           type: 'remainder',
           weight: 1,
           directive: 'template',
+          priority: null,
         },
       ];
       const instance = new TestCategoryTemplateContext(
@@ -860,6 +863,7 @@ describe('CategoryTemplateContext', () => {
           type: 'remainder',
           weight: 1,
           directive: 'template',
+          priority: null,
         },
       ];
 
@@ -983,6 +987,7 @@ describe('CategoryTemplateContext', () => {
           type: 'remainder',
           weight: 1,
           directive: 'template',
+          priority: null,
         },
       ];
 

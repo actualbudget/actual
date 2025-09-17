@@ -48,6 +48,7 @@ export function MobileNavTabs() {
     flex: `1 1 ${100 / COLUMN_COUNT}%`,
     height: ROW_HEIGHT,
     padding: 10,
+    maxWidth: `${100 / COLUMN_COUNT}%`,
   };
 
   const [{ y }, api] = useSpring(() => ({ y: OPEN_DEFAULT_Y }));
@@ -128,8 +129,8 @@ export function MobileNavTabs() {
       Icon: SvgStoreFront,
     },
     {
-      name: t('Rules (Soon)'),
-      path: '/rules/soon',
+      name: t('Rules'),
+      path: '/rules',
       style: navTabStyle,
       Icon: SvgTuning,
     },
@@ -148,13 +149,18 @@ export function MobileNavTabs() {
     <div key={idx} style={navTabStyle} />
   ));
 
-  useScrollListener(({ isScrolling, hasScrolledToEnd }) => {
-    if (isScrolling('down') && !hasScrolledToEnd('up')) {
-      hide();
-    } else if (isScrolling('up') && !hasScrolledToEnd('down')) {
-      openDefault();
-    }
-  });
+  useScrollListener(
+    useCallback(
+      ({ isScrolling, hasScrolledToEnd }) => {
+        if (isScrolling('down') && !hasScrolledToEnd('up')) {
+          hide();
+        } else if (isScrolling('up') && !hasScrolledToEnd('down')) {
+          openDefault();
+        }
+      },
+      [hide, openDefault],
+    ),
+  );
 
   const bind = useDrag(
     ({
@@ -243,6 +249,7 @@ export function MobileNavTabs() {
 type NavTabIconProps = {
   width: number;
   height: number;
+  style?: CSSProperties;
 };
 
 type NavTabProps = {
@@ -265,12 +272,13 @@ function NavTab({ Icon: TabIcon, name, path, style, onClick }: NavTabProps) {
         flexDirection: 'column',
         textDecoration: 'none',
         textAlign: 'center',
+        textWrap: 'balance',
         userSelect: 'none',
         ...style,
       })}
       onClick={onClick}
     >
-      <TabIcon width={22} height={22} />
+      <TabIcon width={22} height={22} style={{ minHeight: '22px' }} />
       {name}
     </NavLink>
   );

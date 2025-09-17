@@ -275,12 +275,39 @@ function onApplySync(oldValues, newValues) {
   }
 }
 
+export async function getRuleIdFromScheduleId(
+  scheduleId: string,
+): Promise<string | null> {
+  const row = await db.first<Pick<db.DbSchedule, 'rule'>>(
+    'SELECT rule FROM schedules WHERE id = ?',
+    [scheduleId],
+  );
+
+  return row?.rule || null;
+}
+
+export async function getAllRuleIdsFromSchedules(
+  excluding: string,
+): Promise<string[]> {
+  const rows = await db.all<Pick<db.DbSchedule, 'rule'>>(
+    'SELECT rule FROM schedules',
+  );
+
+  // map all rule ids, filter out null/undefined, and de-dupe if needed
+  const ruleIds = rows
+    .map(r => r.rule)
+    .filter((rule): rule is string => !!rule)
+    .filter(ruleId => ruleId !== excluding);
+
+  return ruleIds;
+}
+
 // Runner
 export async function runRules(
   trans,
   accounts: Map<string, db.DbAccount> | null = null,
 ) {
-  let accountsMap = null;
+  let accountsMap: Map<string, db.DbAccount> = null;
   if (accounts === null) {
     accountsMap = new Map(
       (await db.getAccounts()).map(account => [account.id, account]),
@@ -291,6 +318,18 @@ export async function runRules(
 
   let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap);
 
+  let scheduleRuleID = '';
+  // Check if a schedule is attached to this transaction and if so get the rule ID attached to that schedule.
+  if (trans.schedule != null) {
+    const ruleId = await getRuleIdFromScheduleId(trans.schedule);
+    if (ruleId != null) {
+      scheduleRuleID = ruleId;
+    }
+  }
+
+  const RuleIdsLinkedToSchedules =
+    await getAllRuleIdsFromSchedules(scheduleRuleID);
+
   const rules = rankRules(
     fastSetMerge(
       firstcharIndexer.getApplicableRules(trans),
@@ -299,7 +338,22 @@ export async function runRules(
   );
 
   for (let i = 0; i < rules.length; i++) {
-    finalTrans = rules[i].apply(finalTrans);
+    // If there is a scheduleRuleID (meaning this transaction came from a schedule) then exclude rules linked to other schedules.
+    if (scheduleRuleID !== '') {
+      if (rules[i].id === scheduleRuleID) {
+        // if the rule has the same ID that is attached to the schedule then run it (it is the schedules rule).
+        finalTrans = rules[i].apply(finalTrans);
+      } else if (RuleIdsLinkedToSchedules.includes(rules[i].id)) {
+        // skip all other rules that are linked to other schedules.
+        continue;
+      } else {
+        // if a rule is not linked to a schedule, run it.
+        finalTrans = rules[i].apply(finalTrans);
+      }
+    } else {
+      // if there is no scheduleRuleID then just run all rules.
+      finalTrans = rules[i].apply(finalTrans);
+    }
   }
 
   return await finalizeTransactionForRules(finalTrans);
@@ -390,30 +444,35 @@ export function conditionsToAQL(
       }
     }
 
-    const apply = (field, op, value) => {
+    const apply = (field, aqlOp, value) => {
       if (type === 'number') {
         if (options) {
           if (options.outflow) {
             return {
               $and: [
                 { amount: { $lt: 0 } },
-                { [field]: { $transform: '$neg', [op]: value } },
+                { [field]: { $transform: '$neg', [aqlOp]: value } },
               ],
             };
           } else if (options.inflow) {
             return {
-              $and: [{ amount: { $gt: 0 } }, { [field]: { [op]: value } }],
+              $and: [{ amount: { $gt: 0 } }, { [field]: { [aqlOp]: value } }],
             };
           }
         }
 
-        return { amount: { [op]: value } };
+        return { amount: { [aqlOp]: value } };
       } else if (type === 'string') {
-        return { [field]: { $transform: '$lower', [op]: value } };
+        return {
+          [field]: {
+            $transform: op !== 'hasTags' ? '$lower' : undefined,
+            [aqlOp]: value,
+          },
+        };
       } else if (type === 'date') {
-        return { [field]: { [op]: value.date } };
+        return { [field]: { [aqlOp]: value.date } };
       }
-      return { [field]: { [op]: value } };
+      return { [field]: { [aqlOp]: value } };
     };
 
     switch (op) {
@@ -530,24 +589,17 @@ export function conditionsToAQL(
         return { $or: values.map(v => apply(field, '$eq', v)) };
 
       case 'hasTags':
-        const words = value.split(/\s+/);
         const tagValues = [];
-        words.forEach(word => {
-          const startsWithHash = word.startsWith('#');
-          const containsMultipleHash = word.slice(1).includes('#');
-          const correctlyFormatted = word.match(/#[\w\d\p{Emoji}-]+/gu);
-          const validHashtag =
-            startsWithHash && !containsMultipleHash && correctlyFormatted;
-
-          if (validHashtag) {
-            tagValues.push(word);
+        for (const [_, tag] of value.matchAll(/(?<!#)(#[^#\s]+)/g)) {
+          if (!tagValues.find(t => t.tag === tag)) {
+            tagValues.push(tag);
           }
-        });
+        }
 
         return {
           $and: tagValues.map(v => {
             const regex = new RegExp(
-              `(^|\\s)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`,
+              `(?<!#)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
             );
             return apply(field, '$regexp', regex.source);
           }),

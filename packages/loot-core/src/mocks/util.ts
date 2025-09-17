@@ -68,7 +68,7 @@ export function patchFetchForSqlJS(baseURL: string) {
   vi.spyOn(global, 'fetch').mockImplementation(
     async (url: string | URL | Request) => {
       if (typeof url === 'string' && url.startsWith(baseURL)) {
-        return new Response(await fs.readFile(url), {
+        return new Response(new Uint8Array(await fs.readFile(url)), {
           status: 200,
           statusText: 'OK',
           headers: {

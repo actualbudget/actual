@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState, type CSSProperties } from 'react';
+import React, { useMemo, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -16,10 +16,6 @@ import {
 } from 'recharts';
 
 import {
-  amountToCurrency,
-  amountToCurrencyNoDecimal,
-} from 'loot-core/shared/util';
-import {
   type balanceTypeOpType,
   type DataEntity,
   type RuleConditionEntity,
@@ -32,6 +28,7 @@ import { getCustomTick } from '@desktop-client/components/reports/getCustomTick'
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -50,6 +47,7 @@ type CustomTooltipProps = {
   tooltip: string;
   active?: boolean;
   payload?: PayloadItem[];
+  format: (value: unknown, type: FormatType) => string;
 };
 
 const CustomTooltip = ({
@@ -57,10 +55,26 @@ const CustomTooltip = ({
   tooltip,
   active,
   payload,
+  format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
-  if (active && payload && payload.length) {
-    let sumTotals = 0;
+  const { sumTotals, items } = useMemo(() => {
+    return (payload ?? [])
+      .sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
+      .reduce(
+        (acc, item) => {
+          acc.sumTotals += item.value;
+          acc.items.push(item);
+          return acc;
+        },
+        {
+          sumTotals: 0,
+          items: [] as PayloadItem[],
+        },
+      );
+  }, [payload]);
+
+  if (active && items.length) {
     return (
       <div
         className={css({
@@ -78,29 +92,26 @@ const CustomTooltip = ({
             <strong>{payload[0].payload.date}</strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            {payload
-              .sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
-              .map((p: PayloadItem, index: number) => {
-                sumTotals += p.value;
-                return (
-                  (compact ? index < 4 : true) && (
-                    <AlignedText
-                      key={index}
-                      left={p.dataKey}
-                      right={amountToCurrency(p.value)}
-                      style={{
-                        color: p.color,
-                        textDecoration:
-                          tooltip === p.dataKey ? 'underline' : 'inherit',
-                      }}
-                    />
-                  )
-                );
-              })}
+            {items.map((p: PayloadItem, index: number) => {
+              return (
+                (compact ? index < 4 : true) && (
+                  <AlignedText
+                    key={index}
+                    left={p.dataKey}
+                    right={format(p.value, 'financial')}
+                    style={{
+                      color: p.color,
+                      textDecoration:
+                        tooltip === p.dataKey ? 'underline' : 'inherit',
+                    }}
+                  />
+                )
+              );
+            })}
             {payload.length > 5 && compact && '...'}
             <AlignedText
               left={t('Total')}
-              right={amountToCurrency(sumTotals)}
+              right={format(sumTotals, 'financial')}
               style={{
                 fontWeight: 600,
               }}
@@ -141,6 +152,8 @@ export function LineGraph({
   const categories = useCategories();
   const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
+  const format = useFormat();
+
   const [pointer, setPointer] = useState('');
   const [tooltip, setTooltip] = useState('');
 
@@ -190,7 +203,11 @@ export function LineGraph({
                 {showTooltip && (
                   <Tooltip
                     content={
-                      <CustomTooltip compact={compact} tooltip={tooltip} />
+                      <CustomTooltip
+                        compact={compact}
+                        tooltip={tooltip}
+                        format={format}
+                      />
                     }
                     formatter={numberFormatterTooltip}
                     isAnimationActive={false}
@@ -208,7 +225,7 @@ export function LineGraph({
                   <YAxis
                     tickFormatter={value =>
                       getCustomTick(
-                        amountToCurrencyNoDecimal(value),
+                        format(value, 'financial-no-decimals'),
                         privacyMode,
                       )
                     }

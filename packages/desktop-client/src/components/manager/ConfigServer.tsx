@@ -17,7 +17,7 @@ import {
 
 import { Title } from './subscribe/common';
 
-import { createBudget } from '@desktop-client/budgets/budgetsSlice';
+import { createBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { Link } from '@desktop-client/components/common/Link';
 import {
   useServerURL,

@@ -37,7 +37,7 @@ import { useCommonPayees, usePayees } from '@desktop-client/hooks/usePayees';
 import {
   createPayee,
   getActivePayees,
-} from '@desktop-client/queries/queriesSlice';
+} from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 export type PayeeAutocompleteItem = PayeeEntity;
@@ -88,16 +88,13 @@ function getPayeeSuggestions(
 
 function filterActivePayees(
   payees: PayeeAutocompleteItem[],
-  focusTransferPayees: boolean,
   accounts: AccountEntity[],
 ) {
-  let activePayees = accounts ? getActivePayees(payees, accounts) : payees;
+  return accounts ? getActivePayees(payees, accounts) : payees;
+}
 
-  if (focusTransferPayees && activePayees) {
-    activePayees = activePayees.filter(p => !!p.transfer_acct);
-  }
-
-  return activePayees || [];
+function filterTransferPayees(payees: PayeeAutocompleteItem[]) {
+  return payees.filter(payee => !!payee.transfer_acct);
 }
 
 function makeNew(id, rawPayee) {
@@ -169,20 +166,44 @@ function PayeeList({
 }: PayeeListProps) {
   const { t } = useTranslation();
 
-  let createNew = null;
-  items = [...items];
-
   // If the "new payee" item exists, create it as a special-cased item
   // with the value of the input so it always shows whatever the user
   // entered
-  if (items[0].id === 'new') {
-    const [first, ...rest] = items;
-    createNew = first;
-    items = rest;
-  }
 
-  const offset = createNew ? 1 : 0;
-  let lastType = null;
+  const { newPayee, suggestedPayees, payees, transferPayees } = useMemo(() => {
+    return items.reduce(
+      (acc, item, index) => {
+        if (item.id === 'new') {
+          acc.newPayee = { ...item, highlightedIndex: index };
+        } else if (item.itemType === 'common_payee') {
+          acc.suggestedPayees.push({ ...item, highlightedIndex: index });
+        } else if (item.itemType === 'payee') {
+          acc.payees.push({ ...item, highlightedIndex: index });
+        } else if (item.itemType === 'account') {
+          acc.transferPayees.push({ ...item, highlightedIndex: index });
+        }
+        return acc;
+      },
+      {
+        newPayee: null as PayeeAutocompleteItem & {
+          highlightedIndex: number;
+        },
+        suggestedPayees: [] as Array<
+          PayeeAutocompleteItem & { highlightedIndex: number }
+        >,
+        payees: [] as Array<
+          PayeeAutocompleteItem & { highlightedIndex: number }
+        >,
+        transferPayees: [] as Array<
+          PayeeAutocompleteItem & { highlightedIndex: number }
+        >,
+      },
+    );
+  }, [items]);
+
+  // We limit the number of payees shown to 100.
+  // So we show a hint that more are available via search.
+  const showSearchForMore = items.length > 100;
 
   return (
     <View>
@@ -193,60 +214,65 @@ function PayeeList({
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
-        {createNew &&
+        {newPayee &&
           renderCreatePayeeButton({
-            ...(getItemProps ? getItemProps({ item: createNew }) : null),
+            ...(getItemProps ? getItemProps({ item: newPayee }) : {}),
             payeeName: inputValue,
-            highlighted: highlightedIndex === 0,
+            highlighted: newPayee.highlightedIndex === highlightedIndex,
             embedded,
           })}
 
-        {items.map((item, idx) => {
-          const itemType = item.itemType;
-          let title;
+        {suggestedPayees.length > 0 &&
+          renderPayeeItemGroupHeader({ title: t('Suggested Payees') })}
+        {suggestedPayees.map(item => (
+          <Fragment key={item.id}>
+            {renderPayeeItem({
+              ...(getItemProps ? getItemProps({ item }) : {}),
+              item,
+              highlighted: highlightedIndex === item.highlightedIndex,
+              embedded,
+            })}
+          </Fragment>
+        ))}
 
-          if (itemType === 'common_payee' && lastType !== itemType) {
-            title = t('Suggested Payees');
-          } else if (itemType === 'payee' && lastType !== itemType) {
-            title = t('Payees');
-          } else if (itemType === 'account' && lastType !== itemType) {
-            title = t('Transfer To/From');
-          }
-          const showMoreMessage =
-            idx === items.length - 1 && items.length > 100;
-          lastType = itemType;
+        {payees.length > 0 &&
+          renderPayeeItemGroupHeader({ title: t('Payees') })}
+        {payees.map(item => (
+          <Fragment key={item.id}>
+            {renderPayeeItem({
+              ...(getItemProps ? getItemProps({ item }) : {}),
+              item,
+              highlighted: highlightedIndex === item.highlightedIndex,
+              embedded,
+            })}
+          </Fragment>
+        ))}
 
-          return (
-            <Fragment key={item.id}>
-              {title && (
-                <Fragment key={`title-${idx}`}>
-                  {renderPayeeItemGroupHeader({ title })}
-                </Fragment>
-              )}
-              <Fragment key={item.id}>
-                {renderPayeeItem({
-                  ...(getItemProps ? getItemProps({ item }) : null),
-                  item,
-                  highlighted: highlightedIndex === idx + offset,
-                  embedded,
-                })}
-              </Fragment>
+        {transferPayees.length > 0 &&
+          renderPayeeItemGroupHeader({ title: t('Transfer To/From') })}
+        {transferPayees.map(item => (
+          <Fragment key={item.id}>
+            {renderPayeeItem({
+              ...(getItemProps ? getItemProps({ item }) : {}),
+              item,
+              highlighted: highlightedIndex === item.highlightedIndex,
+              embedded,
+            })}
+          </Fragment>
+        ))}
 
-              {showMoreMessage && (
-                <div
-                  style={{
-                    fontSize: 11,
-                    padding: 5,
-                    color: theme.pageTextLight,
-                    textAlign: 'center',
-                  }}
-                >
-                  <Trans>More payees are available, search to find them</Trans>
-                </div>
-              )}
-            </Fragment>
-          );
-        })}
+        {showSearchForMore && (
+          <div
+            style={{
+              fontSize: 11,
+              padding: 5,
+              color: theme.pageTextLight,
+              textAlign: 'center',
+            }}
+          >
+            <Trans>More payees are available, search to find them</Trans>
+          </div>
+        )}
       </View>
       {footer}
     </View>
@@ -256,6 +282,7 @@ function PayeeList({
 export type PayeeAutocompleteProps = ComponentProps<
   typeof Autocomplete<PayeeAutocompleteItem>
 > & {
+  showInactivePayees?: boolean;
   showMakeTransfer?: boolean;
   showManagePayees?: boolean;
   embedded?: boolean;
@@ -276,6 +303,7 @@ export type PayeeAutocompleteProps = ComponentProps<
 export function PayeeAutocomplete({
   value,
   inputProps,
+  showInactivePayees = false,
   showMakeTransfer = true,
   showManagePayees = false,
   clearOnBlur = true,
@@ -307,18 +335,30 @@ export function PayeeAutocomplete({
   const hasPayeeInput = !!rawPayee;
   const payeeSuggestions: PayeeAutocompleteItem[] = useMemo(() => {
     const suggestions = getPayeeSuggestions(commonPayees, payees);
-    const filteredSuggestions = filterActivePayees(
-      suggestions,
-      focusTransferPayees,
-      accounts,
-    );
+
+    let filteredSuggestions: PayeeAutocompleteItem[] = [...suggestions];
+
+    if (!showInactivePayees) {
+      filteredSuggestions = filterActivePayees(filteredSuggestions, accounts);
+    }
+
+    if (focusTransferPayees) {
+      filteredSuggestions = filterTransferPayees(filteredSuggestions);
+    }
 
     if (!hasPayeeInput) {
       return filteredSuggestions;
     }
 
     return [{ id: 'new', favorite: false, name: '' }, ...filteredSuggestions];
-  }, [commonPayees, payees, focusTransferPayees, accounts, hasPayeeInput]);
+  }, [
+    commonPayees,
+    payees,
+    focusTransferPayees,
+    accounts,
+    hasPayeeInput,
+    showInactivePayees,
+  ]);
 
   const dispatch = useDispatch();
 
@@ -421,6 +461,8 @@ export function PayeeAutocomplete({
           }
         });
 
+        // Only show the first 100 results, users can search to find more.
+        // If user want to view all payees, it can be done via the manage payees page.
         filtered = filtered.slice(0, 100);
 
         if (filtered.length >= 2 && filtered[0].id === 'new') {

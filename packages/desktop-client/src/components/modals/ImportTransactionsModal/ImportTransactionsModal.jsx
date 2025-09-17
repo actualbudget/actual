@@ -28,6 +28,10 @@ import {
 } from './utils';
 
 import {
+  importPreviewTransactions,
+  importTransactions,
+} from '@desktop-client/accounts/accountsSlice';
+import {
   Modal,
   ModalCloseButton,
   ModalHeader,
@@ -40,11 +44,7 @@ import {
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useSyncedPrefs } from '@desktop-client/hooks/useSyncedPrefs';
-import {
-  getPayees,
-  importPreviewTransactions,
-  importTransactions,
-} from '@desktop-client/queries/queriesSlice';
+import { reloadPayees } from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 function getFileType(filepath) {
@@ -579,7 +579,7 @@ export function ImportTransactionsModal({
       if (date == null) {
         errorMessage = t(
           'Unable to parse date {{date}} with given date format',
-          { date: trans.date || '(empty)' },
+          { date: trans.date || t('(empty)') },
         );
         break;
       }
@@ -679,7 +679,7 @@ export function ImportTransactionsModal({
       }),
     ).unwrap();
     if (didChange) {
-      await dispatch(getPayees());
+      await dispatch(reloadPayees());
     }
 
     if (onImported) {
@@ -718,10 +718,10 @@ export function ImportTransactionsModal({
   ]);
 
   const headers = [
-    { name: 'Date', width: 200 },
-    { name: 'Payee', width: 'flex' },
-    { name: 'Notes', width: 'flex' },
-    { name: 'Category', width: 'flex' },
+    { name: t('Date'), width: 200 },
+    { name: t('Payee'), width: 'flex' },
+    { name: t('Notes'), width: 'flex' },
+    { name: t('Category'), width: 'flex' },
   ];
 
   if (reconcile) {

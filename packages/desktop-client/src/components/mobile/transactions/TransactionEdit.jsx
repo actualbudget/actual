@@ -34,6 +34,7 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import * as Platform from 'loot-core/shared/platform';
 import { q } from 'loot-core/shared/query';
+import { getStatusLabel } from 'loot-core/shared/schedules';
 import {
   ungroupTransactions,
   updateTransaction,
@@ -69,6 +70,7 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
+import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
@@ -77,8 +79,8 @@ import {
 } from '@desktop-client/hooks/useSingleActiveEditForm';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { setLastTransaction } from '@desktop-client/queries/queriesSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
+import { setLastTransaction } from '@desktop-client/transactions/transactionsSlice';
 
 function getFieldName(transactionId, field) {
   return `${field}-${transactionId}`;
@@ -164,8 +166,10 @@ export function Status({ status, isSplit }) {
       }}
     >
       {isSplit
-        ? t('{{status}} (Split)', { status: titleFirst(status) })
-        : titleFirst(status)}
+        ? t('{{status}} (Split)', {
+            status: titleFirst(getStatusLabel(status)),
+          })
+        : titleFirst(getStatusLabel(status))}
     </Text>
   );
 }
@@ -325,6 +329,7 @@ const ChildTransactionEdit = forwardRef(
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm();
     const prettyPayee = getPrettyPayee({
+      t,
       transaction,
       payee: getPayee(transaction),
       transferAccount: getTransferAccount(transaction),
@@ -482,6 +487,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
   const transactions = useMemo(
     () =>
       unserializedTransactions.map(t => serializeTransaction(t, dateFormat)) ||
@@ -643,6 +649,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   name: 'category-autocomplete',
                   options: {
                     categoryGroups,
+                    showHiddenCategories,
                     month: monthUtils.monthFromDate(
                       unserializedTransaction.date,
                     ),
@@ -724,6 +731,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
       transaction.id,
       transactions,
       unserializedTransactions,
+      showHiddenCategories,
     ],
   );
 
@@ -735,8 +743,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
         dispatch(
           pushModal({
             modal: {
-              name: 'confirm-transaction-delete',
+              name: 'confirm-delete',
               options: {
+                message: t('Are you sure you want to delete the transaction?'),
                 onConfirm: () => {
                   onDelete(id);
 
@@ -770,7 +779,14 @@ const TransactionEditInner = memo(function TransactionEditInner({
         onConfirmDelete();
       }
     },
-    [dispatch, navigate, onClearActiveEdit, onDelete, unserializedTransactions],
+    [
+      dispatch,
+      navigate,
+      onClearActiveEdit,
+      onDelete,
+      unserializedTransactions,
+      t,
+    ],
   );
 
   const scrollChildTransactionIntoView = useCallback(id => {
@@ -788,15 +804,6 @@ const TransactionEditInner = memo(function TransactionEditInner({
     [scrollChildTransactionIntoView],
   );
 
-  useEffect(() => {
-    const noAmountChildTransaction = childTransactions.find(
-      t => t.amount === 0,
-    );
-    if (noAmountChildTransaction) {
-      scrollChildTransactionIntoView(noAmountChildTransaction.id);
-    }
-  }, [childTransactions, scrollChildTransactionIntoView]);
-
   // Child transactions should always default to the signage
   // of the parent transaction
   const childAmountSign = transaction.amount <= 0 ? '-' : '+';
@@ -804,6 +811,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const account = getAccount(transaction);
   const isOffBudget = account && !!account.offbudget;
   const title = getPrettyPayee({
+    t,
     transaction,
     payee: getPayee(transaction),
     transferAccount: getTransferAccount(transaction),
@@ -997,6 +1005,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
               required
               style={{ color: theme.tableText, minWidth: '150px' }}
               defaultValue={dateDefaultValue}
+              onBlur={onClearActiveEdit}
               onFocus={() =>
                 onRequestActiveEdit(getFieldName(transaction.id, 'date'))
               }
@@ -1037,6 +1046,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
             onFocus={() => {
               onRequestActiveEdit(getFieldName(transaction.id, 'notes'));
             }}
+            onBlur={onClearActiveEdit}
             onChange={event =>
               onUpdateInner(transaction, 'notes', event.target.value)
             }
@@ -1330,7 +1340,9 @@ function TransactionEditUnconnected({
 export const TransactionEdit = props => {
   const { list: categories } = useCategories();
   const payees = usePayees();
-  const lastTransaction = useSelector(state => state.queries.lastTransaction);
+  const lastTransaction = useSelector(
+    state => state.transactions.lastTransaction,
+  );
   const accounts = useAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 

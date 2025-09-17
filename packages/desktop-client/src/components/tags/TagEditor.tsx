@@ -1,40 +1,30 @@
 import { type RefObject } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { ColorPicker } from '@actual-app/components/color-picker';
 
-import { type Tag } from 'loot-core/types/models';
+import { type TagEntity } from 'loot-core/types/models';
 
-import { createTag, updateTag } from '@desktop-client/queries/queriesSlice';
+import { useTagCSS } from '@desktop-client/hooks/useTagCSS';
 import { useDispatch } from '@desktop-client/redux';
-import { useTagCSS } from '@desktop-client/style/tags';
+import { updateTag } from '@desktop-client/tags/tagsSlice';
 
 type TagEditorProps = {
-  tag: Tag;
+  tag: TagEntity;
   ref: RefObject<HTMLButtonElement | null>;
 };
 
 export const TagEditor = ({ tag, ref }: TagEditorProps) => {
-  const { t } = useTranslation();
   const dispatch = useDispatch();
   const getTagCSS = useTagCSS();
 
-  const formattedTag = <>#{tag.tag === '*' ? t('Default') : tag.tag}</>;
+  const formattedTag = <>#{tag.tag}</>;
 
   return (
     <ColorPicker
-      value={tag.color}
+      value={tag.color ?? undefined}
       onChange={color => {
-        dispatch(
-          tag.id !== '*'
-            ? updateTag({ ...tag, color: color.toString('hex') })
-            : createTag({
-                tag: tag.tag,
-                color: color.toString('hex'),
-                description: tag.description,
-              }),
-        );
+        dispatch(updateTag({ ...tag, color: color.toString('hex') }));
       }}
     >
       <Button variant="bare" className={getTagCSS(tag.tag)} ref={ref}>

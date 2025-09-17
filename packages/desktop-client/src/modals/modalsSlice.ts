@@ -4,7 +4,6 @@ import { send } from 'loot-core/platform/client/fetch';
 import { type File } from 'loot-core/types/file';
 import {
   type AccountEntity,
-  type AccountSyncSource,
   type CategoryEntity,
   type CategoryGroupEntity,
   type GoCardlessToken,
@@ -17,8 +16,10 @@ import {
   type NewUserEntity,
   type NoteEntity,
 } from 'loot-core/types/models';
+import { type Template } from 'loot-core/types/models/templates';
 
 import { resetApp, setAppState } from '@desktop-client/app/appSlice';
+import { type SelectLinkedAccountsModalProps } from '@desktop-client/components/modals/SelectLinkedAccountsModal';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 import { signOut } from '@desktop-client/users/usersSlice';
 
@@ -53,12 +54,7 @@ export type Modal =
     }
   | {
       name: 'select-linked-accounts';
-      options: {
-        externalAccounts: unknown[];
-        requisitionId?: string;
-        upgradingAccountId?: string | undefined;
-        syncSource?: AccountSyncSource;
-      };
+      options: SelectLinkedAccountsModalProps;
     }
   | {
       name: 'confirm-category-delete';
@@ -230,6 +226,7 @@ export type Modal =
       options: {
         onSelect: (accountId: string, accountName: string) => void;
         includeClosedAccounts?: boolean;
+        hiddenAccounts?: AccountEntity['id'][];
         onClose?: () => void;
       };
     }
@@ -282,7 +279,6 @@ export type Modal =
         onReopenAccount: (accountId: AccountEntity['id']) => void;
         onEditNotes: (id: NoteEntity['id']) => void;
         onClose?: () => void;
-        onToggleRunningBalance?: () => void;
       };
     }
   | {
@@ -443,7 +439,10 @@ export type Modal =
       name: 'scheduled-transaction-menu';
       options: {
         transactionId: TransactionEntity['id'];
-        onPost: (transactionId: TransactionEntity['id']) => void;
+        onPost: (
+          transactionId: TransactionEntity['id'],
+          today?: boolean,
+        ) => void;
         onSkip: (transactionId: TransactionEntity['id']) => void;
         onComplete: (transactionId: TransactionEntity['id']) => void;
       };
@@ -484,9 +483,9 @@ export type Modal =
       };
     }
   | {
-      name: 'confirm-transaction-delete';
+      name: 'confirm-delete';
       options: {
-        message?: string | undefined;
+        message: string;
         onConfirm: () => void;
       };
     }
@@ -544,6 +543,16 @@ export type Modal =
     }
   | {
       name: 'category-automations-edit';
+      options: {
+        categoryId: CategoryEntity['id'];
+      };
+    }
+  | {
+      name: 'category-automations-unmigrate';
+      options: {
+        categoryId: CategoryEntity['id'];
+        templates: Template[];
+      };
     };
 
 type OpenAccountCloseModalPayload = {
@@ -565,7 +574,7 @@ export const openAccountCloseModal = createAppAsyncThunk(
         id: accountId,
       },
     );
-    const account = getState().queries.accounts.find(
+    const account = getState().account.accounts.find(
       acct => acct.id === accountId,
     );
 

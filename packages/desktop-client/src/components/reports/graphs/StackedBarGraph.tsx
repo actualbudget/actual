@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState, type CSSProperties } from 'react';
+import React, { useMemo, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -17,10 +17,6 @@ import {
 } from 'recharts';
 
 import {
-  amountToCurrency,
-  amountToCurrencyNoDecimal,
-} from 'loot-core/shared/util';
-import {
   type balanceTypeOpType,
   type DataEntity,
   type RuleConditionEntity,
@@ -34,6 +30,7 @@ import { getCustomTick } from '@desktop-client/components/reports/getCustomTick'
 import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFormat, type FormatType } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
@@ -53,6 +50,7 @@ type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
   label?: string;
+  format: (value: unknown, type: FormatType) => string;
 };
 
 const CustomTooltip = ({
@@ -61,10 +59,27 @@ const CustomTooltip = ({
   active,
   payload,
   label,
+  format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
-  if (active && payload && payload.length) {
-    let sumTotals = 0;
+  const { sumTotals, items } = useMemo(() => {
+    return (payload ?? [])
+      .slice(0)
+      .reverse()
+      .reduce(
+        (acc, item) => {
+          acc.sumTotals += item.value;
+          acc.items.push(item);
+          return acc;
+        },
+        {
+          sumTotals: 0,
+          items: [] as PayloadItem[],
+        },
+      );
+  }, [payload]);
+
+  if (active && items.length) {
     return (
       <div
         className={css({
@@ -82,31 +97,27 @@ const CustomTooltip = ({
             <strong>{label}</strong>
           </div>
           <div style={{ lineHeight: 1.4 }}>
-            {payload
-              .slice(0)
-              .reverse()
-              .map((pay, i) => {
-                sumTotals += pay.value;
-                return (
-                  pay.value !== 0 &&
-                  (compact ? i < 5 : true) && (
-                    <AlignedText
-                      key={pay.name}
-                      left={pay.name}
-                      right={amountToCurrency(pay.value)}
-                      style={{
-                        color: pay.color,
-                        textDecoration:
-                          tooltip === pay.name ? 'underline' : 'inherit',
-                      }}
-                    />
-                  )
-                );
-              })}
+            {items.map((pay, i) => {
+              return (
+                pay.value !== 0 &&
+                (compact ? i < 5 : true) && (
+                  <AlignedText
+                    key={pay.name}
+                    left={pay.name}
+                    right={format(pay.value, 'financial')}
+                    style={{
+                      color: pay.color,
+                      textDecoration:
+                        tooltip === pay.name ? 'underline' : 'inherit',
+                    }}
+                  />
+                )
+              );
+            })}
             {payload.length > 5 && compact && '...'}
             <AlignedText
               left={t('Total')}
-              right={amountToCurrency(sumTotals)}
+              right={format(sumTotals, 'financial')}
               style={{
                 fontWeight: 600,
               }}
@@ -122,7 +133,8 @@ const customLabel = props => {
   const calcX = props.x + props.width / 2;
   const calcY = props.y + props.height / 2;
   const textAnchor = 'middle';
-  const display = props.value && `${amountToCurrencyNoDecimal(props.value)}`;
+  const display =
+    props.value && `${props.format(props.value, 'financial-no-decimals')}`;
   const textSize = '12px';
   const showLabel = props.height;
   const showLabelThreshold = 20;
@@ -171,6 +183,10 @@ export function StackedBarGraph({
   const categories = useCategories();
   const accounts = useAccounts();
   const privacyMode = usePrivacyMode();
+  const format = useFormat();
+
+  const customLabelWithFormat = props => customLabel({ ...props, format });
+
   const [pointer, setPointer] = useState('');
   const [tooltip, setTooltip] = useState('');
 
@@ -203,7 +219,11 @@ export function StackedBarGraph({
                 {showTooltip && (
                   <Tooltip
                     content={
-                      <CustomTooltip compact={compact} tooltip={tooltip} />
+                      <CustomTooltip
+                        compact={compact}
+                        tooltip={tooltip}
+                        format={format}
+                      />
                     }
                     formatter={numberFormatterTooltip}
                     isAnimationActive={false}
@@ -220,7 +240,7 @@ export function StackedBarGraph({
                   <YAxis
                     tickFormatter={value =>
                       getCustomTick(
-                        amountToCurrencyNoDecimal(value),
+                        format(value, 'financial-no-decimals'),
                         privacyMode,
                       )
                     }
@@ -269,7 +289,10 @@ export function StackedBarGraph({
                       }
                     >
                       {viewLabels && !compact && (
-                        <LabelList dataKey={entry.name} content={customLabel} />
+                        <LabelList
+                          dataKey={entry.name}
+                          content={customLabelWithFormat}
+                        />
                       )}
                     </Bar>
                   ))}
