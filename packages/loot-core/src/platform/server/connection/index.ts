@@ -53,24 +53,9 @@ export const init: T.Init = function (serverChn, handlers) {
 
       const { id, name, args, undoTag, catchErrors } = msg;
 
-      if (name === 'transactions-batch-update') {
-        console.log(
-          `WORKER: Processing ${args?.updated?.length || 0} transactions`,
-        );
-      }
-
       if (handlers[name]) {
-        const handlerStartTime = performance.now();
         runHandler(handlers[name], args, { undoTag, name }).then(
           result => {
-            const handlerDuration = performance.now() - handlerStartTime;
-
-            if (name === 'transactions-batch-update') {
-              console.log(
-                `WORKER: Completed (${handlerDuration.toFixed(0)}ms)`,
-              );
-            }
-
             serverChannel.postMessage({
               type: 'reply',
               id,

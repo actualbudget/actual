@@ -159,22 +159,8 @@ export const send: T.Send = function (
   const [name, args, { catchErrors = false } = {}] = params;
   return new Promise((resolve, reject) => {
     const id = uuidv4();
-    const sendStartTime = performance.now();
 
-    if (name === 'transactions-batch-update') {
-      console.log(`IPC: Sending batch (${args?.updated?.length || 0} updates)`);
-    }
-
-    const originalResolve = resolve;
-    const wrappedResolve = result => {
-      if (name === 'transactions-batch-update') {
-        const duration = performance.now() - sendStartTime;
-        console.log(`IPC: Response received (${duration.toFixed(0)}ms)`);
-      }
-      originalResolve(result);
-    };
-
-    replyHandlers.set(id, { resolve: wrappedResolve, reject });
+    replyHandlers.set(id, { resolve, reject });
     const message = {
       id,
       name,

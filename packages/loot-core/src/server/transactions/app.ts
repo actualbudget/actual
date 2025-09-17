@@ -36,12 +36,6 @@ async function handleBatchUpdateTransactions({
   learnCategories,
   runTransfers = true,
 }: Parameters<typeof batchUpdateTransactions>[0]) {
-  const startTime = performance.now();
-
-  console.log(
-    `Backend processing ${(added?.length || 0) + (updated?.length || 0) + (deleted?.length || 0)} transactions`,
-  );
-
   const result = await batchUpdateTransactions({
     added,
     updated,
@@ -49,9 +43,6 @@ async function handleBatchUpdateTransactions({
     learnCategories,
     runTransfers,
   });
-
-  const duration = performance.now() - startTime;
-  console.log(`Backend completed (${duration.toFixed(0)}ms)`);
 
   return result;
 }
