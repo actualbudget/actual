@@ -95,9 +95,7 @@ describe('BPER Retail BPMOIT22', () => {
         true,
       );
 
-      expect(normalizedTransaction.payeeName).toEqual(
-        'Utility Company S.P.A.',
-      );
+      expect(normalizedTransaction.payeeName).toEqual('Utility Company S.P.A.');
       expect(normalizedTransaction.notes).toEqual(
         'PAGAMENTI DIVERSI DA INTERNET BANKING E CSA PAGAMENTO BOLLETTINO POSTALE 420251388002409360 DEL 22/06/2025 TRAMITE I.B. / CSA TIPO : 896 CCPOST : 000000000000 CREDITORE: UTILITY COMPANY S.P.A.',
       );
@@ -118,9 +116,7 @@ describe('BPER Retail BPMOIT22', () => {
       expect(normalizedTransaction.payeeName).toEqual(
         'Competenze Spese Ed Oneri',
       );
-      expect(normalizedTransaction.notes).toEqual(
-        'COMPETENZE SPESE ED ONERI',
-      );
+      expect(normalizedTransaction.notes).toEqual('COMPETENZE SPESE ED ONERI');
     });
   });
 });
