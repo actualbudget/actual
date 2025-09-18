@@ -63,7 +63,7 @@ const CustomTooltip = ({
   if (active && payload && payload.length) {
     const comparison = ['average', 'budget'].includes(selection)
       ? payload[0].payload[selection] * -1
-      : payload[0].payload.months[selection]?.cumulative * -1;
+      : (payload[0].payload.months[selection]?.cumulative ?? 0) * -1;
     return (
       <div
         className={css({
