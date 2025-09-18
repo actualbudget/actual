@@ -105,6 +105,9 @@ export function ExperimentalFeatures() {
             >
               <Trans>Currency support</Trans>
             </FeatureToggle>
+            <FeatureToggle flag="payPeriodsEnabled">
+              <Trans>Pay periods</Trans>
+            </FeatureToggle>
           </View>
         ) : (
           <Link

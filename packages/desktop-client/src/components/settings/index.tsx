@@ -19,6 +19,7 @@ import { BudgetTypeSettings } from './BudgetTypeSettings';
 import { CurrencySettings } from './Currency';
 import { EncryptionSettings } from './Encryption';
 import { ExperimentalFeatures } from './Experimental';
+import { PayPeriodSettings } from './PayPeriodSettings';
 import { ExportBudget } from './Export';
 import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
@@ -176,6 +177,7 @@ export function Settings() {
   const [budgetName] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
+  const isPayPeriodsEnabled = useFeatureFlag('payPeriodsEnabled');
   const [_, setDefaultCurrencyCodePref] = useSyncedPref('defaultCurrencyCode');
 
   const onCloseBudget = () => {
@@ -238,6 +240,7 @@ export function Settings() {
         <ThemeSettings />
         <FormatSettings />
         {isCurrencyExperimentalEnabled && <CurrencySettings />}
+        {isPayPeriodsEnabled && <PayPeriodSettings />}
         <LanguageSettings />
         <AuthSettings />
         <EncryptionSettings />

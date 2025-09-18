@@ -59,7 +59,8 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
     ? SvgArrowButtonDown1
     : SvgArrowButtonUp1;
 
-  const displayMonth = monthUtils.format(month, 'MMMM ‘yy', locale);
+  const config = monthUtils.getPayPeriodConfig();
+  const displayMonth = monthUtils.getMonthDateRange(month, config, locale);
   const { t } = useTranslation();
 
   return (
@@ -133,7 +134,7 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
               currentMonth === month && { fontWeight: 'bold' },
             ])}
           >
-            {monthUtils.format(month, 'MMMM', locale)}
+            {displayMonth}
           </div>
 
           <View
