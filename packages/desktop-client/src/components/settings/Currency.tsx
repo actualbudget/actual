@@ -89,15 +89,15 @@ export function CurrencySettings() {
     const selectedCurrency = getCurrency(selectedCurrencyCode);
     const symbol = selectedCurrency.symbol || '$';
     const space = spaceEnabled === 'true' ? ' ' : '';
-    
+
     return [
-      { 
-        value: 'before', 
-        label: `${t('Before amount')} (${t('e.g.')} ${symbol}${space}100)` 
+      {
+        value: 'before',
+        label: `${t('Before amount')} (${t('e.g.')} ${symbol}${space}100)`,
       },
-      { 
-        value: 'after', 
-        label: `${t('After amount')} (${t('e.g.')} 100${space}${symbol})` 
+      {
+        value: 'after',
+        label: `${t('After amount')} (${t('e.g.')} 100${space}${symbol})`,
       },
     ];
   }, [selectedCurrencyCode, spaceEnabled, t]);
