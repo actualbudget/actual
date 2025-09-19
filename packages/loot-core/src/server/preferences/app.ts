@@ -48,6 +48,27 @@ async function saveSyncedPrefs({
   }
 
   await db.update('preferences', { id, value });
+
+  // Reload pay period config when pay period preferences change
+  // This ensures backend config stays in sync with frontend changes
+  if (
+    id === 'showPayPeriods' ||
+    id === 'payPeriodFrequency' ||
+    id === 'payPeriodStartDate'
+  ) {
+    try {
+      const { loadPayPeriodConfigFromPrefs } = await import(
+        '../../shared/pay-periods'
+      );
+      const allPrefs = await getSyncedPrefs();
+      loadPayPeriodConfigFromPrefs(allPrefs);
+    } catch (e) {
+      console.warn(
+        'Failed to reload pay period configuration after preference change:',
+        e,
+      );
+    }
+  }
 }
 
 async function getSyncedPrefs(): Promise<SyncedPrefs> {
