@@ -7,16 +7,11 @@ import { theme } from '@actual-app/components/theme';
 import { send } from 'loot-core/platform/client/fetch';
 import {
   addSplitTransaction,
-  applyTransactionDiff,
   realizeTempTransactions,
   splitTransaction,
   updateTransaction,
 } from 'loot-core/shared/transactions';
-import {
-  applyChanges,
-  getChangedValues,
-  type Diff,
-} from 'loot-core/shared/util';
+import { getChangedValues, type Diff } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type CategoryEntity,
@@ -122,15 +117,13 @@ async function processBatch() {
         u => u.id === transactionId,
       );
       if (remoteUpdate) {
-        data.onChange(
-          // TODO:
-          // @ts-ignore testing
-          applyTransactionDiff(data.changes.newTransaction, {
-            updated: [remoteUpdate],
-          }),
-          // @ts-ignore testing
-          applyChanges({ updated: [remoteUpdate] }, data.changes.data),
-        );
+        // Merge the server patch into the latest data and re-derive focused row
+        const baseTx =
+          data.changes.data.find(t => t.id === transactionId) ??
+          data.changes.newTransaction;
+        const mergedTx = { ...baseTx, ...remoteUpdate } as TransactionEntity;
+        const remChanges = updateTransaction(data.changes.data, mergedTx);
+        data.onChange(remChanges.newTransaction, remChanges.data);
       }
     }
   }
