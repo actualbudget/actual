@@ -22,7 +22,7 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { format as formatDate } from 'date-fns';
-import { debounce } from 'debounce';
+import { debounce } from 'lodash';
 
 import * as monthUtils from 'loot-core/shared/months';
 import { type CalendarWidget } from 'loot-core/types/models';
@@ -403,8 +403,9 @@ function CalendarCardInner({
   const monthNameResizeRef = useResizeObserver(debouncedResizeCallback);
 
   useEffect(() => {
+    const toCancel = debouncedResizeCallback;
     return () => {
-      debouncedResizeCallback?.clear();
+      toCancel.cancel();
     };
   }, [debouncedResizeCallback]);
 
