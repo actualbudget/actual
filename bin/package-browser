@@ -14,6 +14,8 @@ git pull
 popd > /dev/null
 packages/desktop-client/bin/remove-untranslated-languages
 
+export NODE_OPTIONS="--max-old-space-size=4096"
+
 yarn workspace loot-core build:browser
 yarn workspace @actual-app/web build:browser
 

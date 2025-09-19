@@ -19,6 +19,7 @@ export type SyncedPrefs = Partial<
     | 'currencySymbolPosition'
     | 'currencySpaceBetweenAmountAndSymbol'
     | 'defaultCurrencyCode'
+    | `show-account-${string}-net-worth-chart`
     | `side-nav.show-balance-history-${string}`
     | `show-balances-${string}`
     | `show-extra-balances-${string}`
@@ -36,6 +37,7 @@ export type SyncedPrefs = Partial<
     | `sync-import-pending-${string}`
     | `sync-reimport-deleted-${string}`
     | `sync-import-notes-${string}`
+    | `sync-import-transactions-${string}`
     | `ofx-fallback-missing-payee-${string}`
     | `flip-amount-${string}-${'csv' | 'qif'}`
     | `flags.${FeatureFlag}`
@@ -98,6 +100,7 @@ export type GlobalPrefs = Partial<{
     autoStart?: boolean;
     port?: number;
   };
+  notifyWhenUpdateIsAvailable: boolean;
 }>;
 
 // GlobalPrefsJson represents what's saved in the global-store.json file
@@ -120,6 +123,7 @@ export type GlobalPrefsJson = Partial<{
   'preferred-dark-theme'?: GlobalPrefs['preferredDarkTheme'];
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
   syncServerConfig?: GlobalPrefs['syncServerConfig'];
+  notifyWhenUpdateIsAvailable?: GlobalPrefs['notifyWhenUpdateIsAvailable'];
 }>;
 
 export type AuthMethods = 'password' | 'openid';
