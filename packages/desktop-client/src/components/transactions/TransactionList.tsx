@@ -137,7 +137,7 @@ async function processBatch() {
 }
 
 async function saveDiffAndApply(diff, changes, onChange, learnCategories) {
-  const transactionId = diff.updated?.[0]?.id;
+  const transactionId = diff.updated?.[0]?.id ?? changes?.newTransaction?.id;
 
   if (!transactionId) {
     console.error('Transaction missing ID in saveDiffAndApply:', {
@@ -149,9 +149,7 @@ async function saveDiffAndApply(diff, changes, onChange, learnCategories) {
     return;
   }
 
-  if (pendingBatch.timer) {
-    clearTimeout(pendingBatch.timer);
-  }
+  if (pendingBatch.timer) clearTimeout(pendingBatch.timer);
 
   pendingBatch.transactions.set(transactionId, {
     diff,
