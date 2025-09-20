@@ -100,22 +100,27 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
 
   useEffect(() => {
     async function run() {
-      const trans = await send('get-earliest-transaction');
+      const earliestTrans = await send('get-earliest-transaction');
+      const latestTrans = await send('get-latest-transaction');
 
-      let earliestMonth = trans
-        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
-        : monthUtils.currentMonth();
+      const currentMonth = monthUtils.currentMonth();
+      let earliestMonth = earliestTrans
+        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(earliestTrans.date)))
+        : currentMonth;
+      const latestMonth = latestTrans
+        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(latestTrans.date)))
+        : currentMonth;
 
       // Make sure the month selects are at least populates with a
       // year's worth of months. We can undo this when we have fancier
       // date selects.
-      const yearAgo = monthUtils.subMonths(monthUtils.currentMonth(), 12);
+      const yearAgo = monthUtils.subMonths(latestMonth, 12);
       if (earliestMonth > yearAgo) {
         earliestMonth = yearAgo;
       }
 
       const allMonths = monthUtils
-        .rangeInclusive(earliestMonth, monthUtils.currentMonth())
+        .rangeInclusive(earliestMonth, latestMonth)
         .map(month => ({
           name: month,
           pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
