@@ -6,9 +6,10 @@ import React, {
   useEffect,
   useCallback,
   useRef,
+  useMemo,
 } from 'react';
 
-import debounce from 'debounce';
+import { debounce } from 'lodash';
 
 type ScrollDirection = 'up' | 'down' | 'left' | 'right';
 
@@ -41,7 +42,7 @@ type ScrollProviderProps<T extends Element> = {
 export function ScrollProvider<T extends Element>({
   scrollableRef,
   isDisabled,
-  delayMs = 10,
+  delayMs = 250,
   children,
 }: ScrollProviderProps<T>) {
   const previousScrollX = useRef<number | undefined>(undefined);
@@ -128,37 +129,46 @@ export function ScrollProvider<T extends Element>({
     }
   }, []);
 
+  const listenToScroll = useMemo(
+    () =>
+      debounce((e: Event) => {
+        const target = e.target;
+        if (target instanceof Element) {
+          previousScrollX.current = scrollX.current;
+          scrollX.current = target.scrollLeft;
+          scrollHeight.current = target.scrollHeight;
+
+          previousScrollY.current = scrollY.current;
+          scrollY.current = target.scrollTop;
+          clientHeight.current = target.clientHeight;
+
+          const currentScrollX = scrollX.current;
+          const currentScrollY = scrollY.current;
+
+          if (currentScrollX !== undefined && currentScrollY !== undefined) {
+            listeners.current.forEach(listener =>
+              listener({
+                scrollX: currentScrollX,
+                scrollY: currentScrollY,
+                isScrolling,
+                hasScrolledToEnd,
+              }),
+            );
+          }
+        }
+      }, delayMs),
+    [delayMs, hasScrolledToEnd, isScrolling],
+  );
+
+  useEffect(() => {
+    const toCancel = listenToScroll;
+    return () => toCancel.cancel();
+  }, [listenToScroll]);
+
   useEffect(() => {
     if (isDisabled) {
       return;
     }
-
-    const listenToScroll = debounce((e: Event) => {
-      const target = e.target;
-      if (target instanceof Element) {
-        previousScrollX.current = scrollX.current;
-        scrollX.current = target.scrollLeft;
-        scrollHeight.current = target.scrollHeight;
-
-        previousScrollY.current = scrollY.current;
-        scrollY.current = target.scrollTop;
-        clientHeight.current = target.clientHeight;
-
-        const currentScrollX = scrollX.current;
-        const currentScrollY = scrollY.current;
-
-        if (currentScrollX !== undefined && currentScrollY !== undefined) {
-          listeners.current.forEach(listener =>
-            listener({
-              scrollX: currentScrollX,
-              scrollY: currentScrollY,
-              isScrolling,
-              hasScrolledToEnd,
-            }),
-          );
-        }
-      }
-    }, delayMs);
 
     const ref = scrollableRef.current;
 
@@ -170,7 +180,7 @@ export function ScrollProvider<T extends Element>({
       ref?.removeEventListener('scroll', listenToScroll, {
         capture: true,
       });
-  }, [delayMs, hasScrolledToEnd, isDisabled, isScrolling, scrollableRef]);
+  }, [isDisabled, listenToScroll, scrollableRef]);
 
   const registerScrollListener: RegisterScrollListener = useCallback(
     listener => {
