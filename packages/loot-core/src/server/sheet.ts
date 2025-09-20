@@ -5,7 +5,7 @@ import { captureBreadcrumb } from '../platform/exceptions';
 import * as sqlite from '../platform/server/sqlite';
 import { sheetForMonth } from '../shared/months';
 import * as Platform from '../shared/platform';
-
+import * as monthUtils from '../shared/months';
 import {
   DbPreference,
   DbReflectBudget,
@@ -214,7 +214,28 @@ export async function loadUserBudgets(
       SELECT * FROM ${table} b
       LEFT JOIN categories c ON c.id = b.category
       WHERE c.tombstone = 0
+      AND b.category IS NOT NULL 
     `);
+  console.log(budgets);
+  const monthRanges = await db.all<{
+    month: string;
+    startDate: number | null;
+    endDate: number | null;
+  }>(`
+    SELECT
+    substr(id, 1, 6) AS month,
+    MAX(CASE WHEN id LIKE '%-StartDate' THEN month END) AS startDate,
+    MAX(CASE WHEN id LIKE '%-EndDate' THEN month END) AS endDate
+    FROM ${table}
+    WHERE id LIKE '%-StartDate' OR id LIKE '%-EndDate'
+    GROUP BY substr(id, 1, 6);
+  `);
+  console.log('table used:', table);
+  console.log(monthRanges);
+
+  const monthRangesMap = Object.fromEntries(
+    monthRanges.map(item => [item.month, item]),
+  );
 
   sheet.startTransaction();
 
@@ -230,6 +251,37 @@ export async function loadUserBudgets(
       sheet.set(`${sheetName}!goal-${budget.category}`, budget.goal);
       sheet.set(`${sheetName}!long-goal-${budget.category}`, budget.long_goal);
     }
+  }
+
+  //Assign start and end of the month to proper cells and fall back to first and last date of the month if dates are not available.
+
+  const uniqueMonths = [...new Set(budgets.map(b => b.month).filter(Boolean))];
+
+  for (const month of uniqueMonths) {
+    const sheetName = `budget${month}`;
+    const found = monthRangesMap[month];
+
+    // Convert yyyyMM integer → "yyyy-MM-01" string
+    const year = Math.floor(month / 100);
+    const monthNum = month % 100;
+    const monthStr = `${year}-${String(monthNum).padStart(2, '0')}-01`;
+
+    const { start: boundStart, end: boundEnd } = monthUtils.bounds(monthStr);
+
+    let startDate: number;
+    let endDate: number;
+
+    if (found) {
+      startDate = found.startDate ?? boundStart;
+      endDate = found.endDate ?? boundEnd;
+    } else {
+      startDate = boundStart;
+      endDate = boundEnd;
+    }
+
+    sheet.set(`${sheetName}!budget-start-date`, startDate);
+    sheet.set(`${sheetName}!budget-end-date`, endDate);
+    console.log('setting value to:', month, '=>', startDate, '&', endDate);
   }
 
   // For zero-based budgets, load the buffered amounts

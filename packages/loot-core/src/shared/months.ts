@@ -483,3 +483,21 @@ export const getShortYearRegex = memoizeOne((format: string) => {
     .replace(/y+/g, '\\d{2}');
   return new RegExp('^' + regex + '$');
 });
+
+export function integerToISO(integerDate: number): DateLike {
+  if (!integerDate) return null;
+
+  const stringDate = integerDate.toString();
+  if (stringDate.length !== 8) return null;
+
+  const year = stringDate.substring(0, 4);
+  const month = stringDate.substring(4, 6);
+  const day = stringDate.substring(6, 8);
+
+  return `${year}-${month}-${day}`;
+}
+
+export function isoToInteger(isoDate: string): number {
+  if (!isoDate) return null;
+  return parseInt(isoDate.replace(/-/g, ''), 10);
+}
