@@ -269,17 +269,19 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
 
       const latestTransaction = await send('get-latest-transaction');
       setLatestTransaction(
-        latestTransaction
-          ? latestTransaction.date
-          : monthUtils.currentDay(),
+        latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
       );
 
       const currentMonth = monthUtils.currentMonth();
       let earliestMonth = earliestTransaction
-        ? monthUtils.monthFromDate(parseISO(fromDateRepr(earliestTransaction.date)))
+        ? monthUtils.monthFromDate(
+            parseISO(fromDateRepr(earliestTransaction.date)),
+          )
         : currentMonth;
       let latestMonth = latestTransaction
-        ? monthUtils.monthFromDate(parseISO(fromDateRepr(latestTransaction.date)))
+        ? monthUtils.monthFromDate(
+            parseISO(fromDateRepr(latestTransaction.date)),
+          )
         : currentMonth;
 
       // Make sure the month selects are at least populates with a

@@ -88,8 +88,12 @@ function CustomReportListCardsInner({
     async function run() {
       const earliestTrans = await send('get-earliest-transaction');
       const latestTrans = await send('get-latest-transaction');
-      setEarliestTransaction(earliestTrans ? earliestTrans.date : monthUtils.currentDay());
-      setLatestTransaction(latestTrans ? latestTrans.date : monthUtils.currentDay());
+      setEarliestTransaction(
+        earliestTrans ? earliestTrans.date : monthUtils.currentDay(),
+      );
+      setLatestTransaction(
+        latestTrans ? latestTrans.date : monthUtils.currentDay(),
+      );
     }
     run();
   }, []);

@@ -299,9 +299,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
 
       const latestTransaction = await send('get-latest-transaction');
       setLatestTransaction(
-        latestTransaction
-          ? latestTransaction.date
-          : monthUtils.currentDay(),
+        latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
       );
 
       const fromDate =
@@ -332,17 +330,13 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         interval === 'Weekly'
           ? monthUtils.weekFromDate(
               d.parseISO(
-                fromDateRepr(
-                  latestTransaction.date || monthUtils.currentDay(),
-                ),
+                fromDateRepr(latestTransaction.date || monthUtils.currentDay()),
               ),
               firstDayOfWeekIdx,
             )
           : monthUtils[fromDate](
               d.parseISO(
-                fromDateRepr(
-                  latestTransaction.date || monthUtils.currentDay(),
-                ),
+                fromDateRepr(latestTransaction.date || monthUtils.currentDay()),
               ),
             );
 
@@ -376,9 +370,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
           earliestTransaction
             ? earliestTransaction.date
             : monthUtils.currentDay(),
-          latestTransaction
-            ? latestTransaction.date
-            : monthUtils.currentDay(),
+          latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
           includeCurrentInterval,
           firstDayOfWeekIdx,
         );
