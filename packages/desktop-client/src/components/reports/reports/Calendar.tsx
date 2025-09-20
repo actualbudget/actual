@@ -260,33 +260,45 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
 
   useEffect(() => {
     async function run() {
-      try {
-        const trans = await send('get-earliest-transaction');
-        const currentMonth = monthUtils.currentMonth();
-        let earliestMonth = trans
-          ? monthUtils.monthFromDate(parseISO(fromDateRepr(trans.date)))
-          : currentMonth;
+      const earliestTransaction = await send('get-earliest-transaction');
+      setEarliestTransaction(
+        earliestTransaction
+          ? earliestTransaction.date
+          : monthUtils.currentDay(),
+      );
 
-        // Make sure the month selects are at least populates with a
-        // year's worth of months. We can undo this when we have fancier
-        // date selects.
-        const yearAgo = monthUtils.subMonths(monthUtils.currentMonth(), 12);
-        if (earliestMonth > yearAgo) {
-          earliestMonth = yearAgo;
-        }
+      const latestTransaction = await send('get-latest-transaction');
+      setLatestTransaction(
+        latestTransaction
+          ? latestTransaction.date
+          : monthUtils.currentDay(),
+      );
 
-        const allMonths = monthUtils
-          .rangeInclusive(earliestMonth, monthUtils.currentMonth())
-          .map(month => ({
-            name: month,
-            pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
-          }))
-          .reverse();
+      const currentMonth = monthUtils.currentMonth();
+      let earliestMonth = earliestTransaction
+        ? monthUtils.monthFromDate(parseISO(fromDateRepr(earliestTransaction.date)))
+        : currentMonth;
+      let latestMonth = latestTransaction
+        ? monthUtils.monthFromDate(parseISO(fromDateRepr(latestTransaction.date)))
+        : currentMonth;
 
-        setAllMonths(allMonths);
-      } catch (error) {
-        console.error('Error fetching earliest transaction:', error);
+      // Make sure the month selects are at least populates with a
+      // year's worth of months. We can undo this when we have fancier
+      // date selects.
+      const yearAgo = monthUtils.subMonths(latestMonth, 12);
+      if (earliestMonth > yearAgo) {
+        earliestMonth = yearAgo;
       }
+
+      const allMonths = monthUtils
+        .rangeInclusive(earliestMonth, latestMonth)
+        .map(month => ({
+          name: month,
+          pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
+        }))
+        .reverse();
+
+      setAllMonths(allMonths);
     }
     run();
   }, [locale]);
@@ -477,7 +489,8 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     },
   );
 
-  const [earliestTransaction, _] = useState('');
+  const [earliestTransaction, setEarliestTransaction] = useState('');
+  const [latestTransaction, setLatestTransaction] = useState('');
 
   return (
     <Page
@@ -512,6 +525,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
           start={start}
           end={end}
           earliestTransaction={earliestTransaction}
+          latestTransaction={latestTransaction}
           firstDayOfWeekIdx={firstDayOfWeekIdx}
           mode={mode}
           onChangeDates={onChangeDates}
