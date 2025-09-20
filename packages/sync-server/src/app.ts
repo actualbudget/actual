@@ -9,6 +9,7 @@ import rateLimit from 'express-rate-limit';
 import { bootstrap } from './account-db.js';
 import * as accountApp from './app-account.js';
 import * as adminApp from './app-admin.js';
+import * as enablebankingApp from './app-enablebanking/app-enablebanking.js';
 import * as goCardlessApp from './app-gocardless/app-gocardless.js';
 import * as openidApp from './app-openid.js';
 import * as pluggai from './app-pluggyai/app-pluggyai.js';
@@ -58,6 +59,7 @@ app.use('/account', accountApp.handlers);
 app.use('/gocardless', goCardlessApp.handlers);
 app.use('/simplefin', simpleFinApp.handlers);
 app.use('/pluggyai', pluggai.handlers);
+app.use('/enablebanking', enablebankingApp.handlers);
 app.use('/secret', secretApp.handlers);
 
 app.use('/admin', adminApp.handlers);

@@ -33,6 +33,7 @@ import {
   mappingsFromString,
 } from '../util/custom-sync-mapping';
 
+import { downloadEnableBankingTransactions } from './enablebanking';
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';
 
@@ -978,6 +979,7 @@ export async function syncAccount(
 
   const syncStartDate = await getAccountSyncStartDate(id);
   const oldestTransaction = await getAccountOldestTransaction(id);
+  console.log(syncStartDate, oldestTransaction);
   const newAccount = oldestTransaction == null;
 
   let download;
@@ -993,6 +995,12 @@ export async function syncAccount(
       bankId,
       syncStartDate,
       newAccount,
+    );
+  } else if (acctRow.account_sync_source === 'enablebanking') {
+    download = await downloadEnableBankingTransactions(
+      acctId,
+      syncStartDate,
+      bankId,
     );
   } else {
     throw new Error(
