@@ -18,6 +18,7 @@ The following are implementations of bank syncing using the Actual API. For inst
 * **Credit Suisse, Cembra Money Bank, DKB, ZKB, and Interactive Brokers CVS import** - https://github.com/wirhabenzeit/actual-budget-cli
 * **ICS Cards Holland CVS exporter** - https://github.com/IeuanK/ICS-Exporter/
 * **ING bank CSV import** - https://github.com/jvmap/ActualBudgetTransformer
+* **Lunch Flow: Import transactions from GoCardless, MX, Finicity, Finverse, and more** - https://github.com/lunchflow/actual-flow
 * **MoneyMan an israel banks importer** - https://github.com/daniel-hauser/moneyman
 * **Monobank bank sync** - https://github.com/dnullproject/mono-to-actualbudget
 * **My Edenred Portugal bank sync** - https://github.com/rodriguestiago0/myedenred-actual
