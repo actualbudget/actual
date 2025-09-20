@@ -248,7 +248,10 @@ export function Header({
               variant="bare"
               onPress={() =>
                 onChangeDates(
-                  ...getFullRange(allMonths[allMonths.length - 1].name),
+                  ...getFullRange(
+                    allMonths[allMonths.length - 1].name,
+                    allMonths[0].name,
+                  ),
                 )
               }
             >
