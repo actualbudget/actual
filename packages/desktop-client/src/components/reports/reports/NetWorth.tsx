@@ -143,7 +143,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
             d.parseISO(fromDateRepr(earliestTransaction.date)),
           )
         : currentMonth;
-      let latestMonth = latestTransaction
+      const latestMonth = latestTransaction
         ? monthUtils.monthFromDate(
             d.parseISO(fromDateRepr(latestTransaction.date)),
           )

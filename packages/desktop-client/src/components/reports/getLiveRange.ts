@@ -13,12 +13,11 @@ export function getLiveRange(
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
 ): [string, string, TimeFrame['mode']] {
   let dateStart = earliestTransaction;
-  let today = monthUtils.currentDay();
   let dateEnd = latestTransaction;
   const rangeName = ReportOptions.dateRangeMap.get(cond);
   switch (rangeName) {
     case 'yearToDate':
-      [dateStart, today] = validateRange(
+      [dateStart, dateEnd] = validateRange(
         earliestTransaction,
         latestTransaction,
         monthUtils.getYearStart(monthUtils.currentMonth()) + '-01',
@@ -26,7 +25,7 @@ export function getLiveRange(
       );
       break;
     case 'lastYear':
-      [dateStart, today] = validateRange(
+      [dateStart, dateEnd] = validateRange(
         earliestTransaction,
         latestTransaction,
         monthUtils.getYearStart(
@@ -37,7 +36,7 @@ export function getLiveRange(
       );
       break;
     case 'priorYearToDate':
-      [dateStart, today] = validateRange(
+      [dateStart, dateEnd] = validateRange(
         earliestTransaction,
         latestTransaction,
         monthUtils.getYearStart(
@@ -52,7 +51,7 @@ export function getLiveRange(
       break;
     default:
       if (typeof rangeName === 'number') {
-        [dateStart, today] = getSpecificRange(
+        [dateStart, dateEnd] = getSpecificRange(
           rangeName,
           ['This month', 'This week'].includes(cond)
             ? null
@@ -65,5 +64,5 @@ export function getLiveRange(
       }
   }
 
-  return [dateStart, today, 'sliding-window'];
+  return [dateStart, dateEnd, 'sliding-window'];
 }
