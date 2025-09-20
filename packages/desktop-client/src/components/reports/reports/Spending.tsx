@@ -107,7 +107,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
       let earliestMonth = earliestTrans
         ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(earliestTrans.date)))
         : currentMonth;
-      let latestMonth = latestTrans
+      const latestMonth = latestTrans
         ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(latestTrans.date)))
         : currentMonth;
 

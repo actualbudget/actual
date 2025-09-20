@@ -278,7 +278,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
             parseISO(fromDateRepr(earliestTransaction.date)),
           )
         : currentMonth;
-      let latestMonth = latestTransaction
+      const latestMonth = latestTransaction
         ? monthUtils.monthFromDate(
             parseISO(fromDateRepr(latestTransaction.date)),
           )
