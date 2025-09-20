@@ -136,9 +136,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
 
       const latestTransaction = await send('get-latest-transaction');
       setLatestTransaction(
-        latestTransaction
-          ? latestTransaction.date
-          : monthUtils.currentDay(),
+        latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
       );
 
       const earliestMonth = earliestTransaction

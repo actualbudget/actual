@@ -134,17 +134,19 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
 
       const latestTransaction = await send('get-latest-transaction');
       setLatestTransaction(
-        latestTransaction
-          ? latestTransaction.date
-          : monthUtils.currentDay(),
+        latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
       );
 
       const currentMonth = monthUtils.currentMonth();
       let earliestMonth = earliestTransaction
-        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(earliestTransaction.date)))
+        ? monthUtils.monthFromDate(
+            d.parseISO(fromDateRepr(earliestTransaction.date)),
+          )
         : currentMonth;
       let latestMonth = latestTransaction
-        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(latestTransaction.date)))
+        ? monthUtils.monthFromDate(
+            d.parseISO(fromDateRepr(latestTransaction.date)),
+          )
         : currentMonth;
 
       // Make sure the month selects are at least populates with a

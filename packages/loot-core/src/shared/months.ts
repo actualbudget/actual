@@ -269,7 +269,7 @@ export function yearRangeInclusive(start: DateLike, end: DateLike): string[] {
 
 export function _weekRange(
   start: DateLike,
-end: DateLike,
+  end: DateLike,
   inclusive = false,
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
 ): string[] {
