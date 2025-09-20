@@ -161,8 +161,7 @@ export function getSpecificRange(
   return [dateStart, dateEnd, 'static'];
 }
 
-export function getFullRange(start: string) {
-  const end = monthUtils.currentMonth();
+export function getFullRange(start: string, end: string) {
   return [start, end, 'full'] as const;
 }
 
@@ -186,7 +185,7 @@ export function calculateTimeRange(
   const mode = timeFrame?.mode ?? defaultTimeFrame?.mode ?? 'sliding-window';
 
   if (mode === 'full') {
-    return getFullRange(start);
+    return getFullRange(start, end);
   }
   if (mode === 'sliding-window') {
     const offset = monthUtils.differenceInCalendarMonths(end, start);
