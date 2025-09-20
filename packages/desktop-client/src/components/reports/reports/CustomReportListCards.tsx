@@ -69,6 +69,7 @@ function CustomReportListCardsInner({
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [earliestTransaction, setEarliestTransaction] = useState('');
+  const [latestTransaction, setLatestTransaction] = useState('');
 
   const payees = usePayees();
   const accounts = useAccounts();
@@ -85,8 +86,10 @@ function CustomReportListCardsInner({
 
   useEffect(() => {
     async function run() {
-      const trans = await send('get-earliest-transaction');
-      setEarliestTransaction(trans ? trans.date : monthUtils.currentDay());
+      const earliestTrans = await send('get-earliest-transaction');
+      const latestTrans = await send('get-latest-transaction');
+      setEarliestTransaction(earliestTrans ? earliestTrans.date : monthUtils.currentDay());
+      setLatestTransaction(latestTrans ? latestTrans.date : monthUtils.currentDay());
     }
     run();
   }, []);
@@ -172,6 +175,7 @@ function CustomReportListCardsInner({
           accounts={accounts}
           categories={categories}
           earliestTransaction={earliestTransaction}
+          latestTransaction={latestTransaction}
           firstDayOfWeekIdx={firstDayOfWeekIdx}
           showTooltip={!isEditing}
         />
