@@ -125,7 +125,7 @@ const AmountInput = memo(function AmountInput({
     <input
       type="text"
       ref={mergedInputRef}
-      value={text}
+      value={amountToCurrency(value)}
       inputMode="decimal"
       autoCapitalize="none"
       onChange={e => onChangeText(e.target.value)}

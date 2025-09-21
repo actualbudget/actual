@@ -441,7 +441,9 @@ export function amountToCurrencyNoDecimal(amount: Amount): CurrencyAmount {
   }).formatter.format(amount);
 }
 
-export function currencyToAmount(currencyAmount: CurrencyAmount): Amount | null {
+export function currencyToAmount(
+  currencyAmount: CurrencyAmount,
+): Amount | null {
   let integer, fraction;
 
   // match the last dot or comma in the string

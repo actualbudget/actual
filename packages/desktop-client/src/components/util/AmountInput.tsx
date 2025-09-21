@@ -94,7 +94,7 @@ export function AmountInput({
   }
 
   function onInputTextChange(val) {
-    val = appendDecimals(val)
+    val = appendDecimals(val);
     setValue(val ? val : '');
     onChangeValue?.(val);
   }
