@@ -101,6 +101,7 @@ export interface ImportTransactionsOpts {
 export function importTransactions(
   accountId: string,
   transactions: ImportTransactionEntity[],
+  dryRun?: boolean,
   opts: ImportTransactionsOpts = {
     defaultCleared: true,
   },
@@ -108,6 +109,7 @@ export function importTransactions(
   return send('api/transactions-import', {
     accountId,
     transactions,
+    isPreview: dryRun,
     opts,
   });
 }
