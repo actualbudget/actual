@@ -63,6 +63,7 @@ type ReportSidebarProps = {
   defaultItems: (item: string) => void;
   defaultModeItems: (graph: string, item: string) => void;
   earliestTransaction: string;
+  latestTransaction: string;
   firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'];
   isComplexCategoryCondition?: boolean;
 };
@@ -93,6 +94,7 @@ export function ReportSidebar({
   defaultItems,
   defaultModeItems,
   earliestTransaction,
+  latestTransaction,
   firstDayOfWeekIdx,
   isComplexCategoryCondition = false,
 }: ReportSidebarProps) {
@@ -110,6 +112,7 @@ export function ReportSidebar({
       ...getLiveRange(
         cond,
         earliestTransaction,
+        latestTransaction,
         customReportItems.includeCurrentInterval,
         firstDayOfWeekIdx,
       ),
@@ -545,6 +548,7 @@ export function ReportSidebar({
                   onChangeDates(
                     ...validateStart(
                       earliestTransaction,
+                      latestTransaction,
                       newValue,
                       customReportItems.endDate,
                       customReportItems.interval,
@@ -578,6 +582,7 @@ export function ReportSidebar({
                   onChangeDates(
                     ...validateEnd(
                       earliestTransaction,
+                      latestTransaction,
                       customReportItems.startDate,
                       newValue,
                       customReportItems.interval,
