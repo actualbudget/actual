@@ -127,7 +127,8 @@ export const MonthPicker = ({
           </View>
         </Link>
         {range.map((month, idx) => {
-          const monthName = monthUtils.format(month, 'MMM', locale);
+          const config = monthUtils.getPayPeriodConfig();
+          const displayLabel = monthUtils.getMonthDisplayName(month, config, locale);
           const selected =
             idx >= firstSelectedIndex && idx <= lastSelectedIndex;
 
@@ -214,7 +215,13 @@ export const MonthPicker = ({
               onMouseLeave={() => setHoverId(null)}
             >
               <View>
-                {size === 'small' ? monthName[0] : monthName}
+                {monthUtils.isPayPeriod(month)
+                  ? size === 'small'
+                    ? `P${String(parseInt(month.slice(5, 7)) - 12)}`
+                    : displayLabel
+                  : size === 'small'
+                    ? displayLabel[0]
+                    : displayLabel}
                 {showYearHeader && (
                   <View
                     style={{

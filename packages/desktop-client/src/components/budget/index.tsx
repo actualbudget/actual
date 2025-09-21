@@ -29,11 +29,12 @@ import {
 } from '@desktop-client/budget/budgetSlice';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
@@ -80,6 +81,10 @@ function BudgetInner(props: BudgetInnerProps) {
     end: startMonth,
   });
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
+  const payPeriodFeatureFlagEnabled = useFeatureFlag('payPeriodsEnabled');
+  const [payPeriodFrequency] = useSyncedPref('payPeriodFrequency');
+  const [payPeriodStartDate] = useSyncedPref('payPeriodStartDate');
+  const [payPeriodViewEnabled] = useSyncedPref('showPayPeriods');
   const [maxMonthsPref] = useGlobalPref('maxMonths');
   const maxMonths = maxMonthsPref || 1;
   const [initialized, setInitialized] = useState(false);
@@ -104,6 +109,24 @@ function BudgetInner(props: BudgetInnerProps) {
 
     run();
   }, []);
+
+  // Wire pay period config from synced prefs into month utils
+  useEffect(() => {
+    const enabled = payPeriodFeatureFlagEnabled && String(payPeriodViewEnabled) === 'true';
+    const frequency = (payPeriodFrequency as any) || 'monthly';
+    const start = (payPeriodStartDate as any) || `${new Date().getFullYear()}-01-01`;
+
+    monthUtils.setPayPeriodConfig({
+      enabled,
+      payFrequency: frequency,
+      startDate: start,
+    } as any);
+  }, [
+    payPeriodFeatureFlagEnabled,
+    payPeriodViewEnabled,
+    payPeriodFrequency,
+    payPeriodStartDate,
+  ]);
 
   useEffect(() => {
     send('get-budget-bounds').then(({ start, end }) => {
@@ -328,6 +351,22 @@ function BudgetInner(props: BudgetInnerProps) {
 
   const { trackingComponents, envelopeComponents } = props;
 
+  // Derive the month to render based on pay period view toggle
+  const derivedStartMonth = useMemo(() => {
+    const config = monthUtils.getPayPeriodConfig();
+    const usePayPeriods = config?.enabled;
+
+    if (!usePayPeriods) return startMonth;
+
+    // If already a pay period id, keep it
+    const mm = parseInt(startMonth.slice(5, 7));
+    if (Number.isFinite(mm) && mm >= 13) return startMonth;
+
+    // For calendar months, use the current year for pay periods
+    const currentYear = parseInt(startMonth.slice(0, 4));
+    return String(currentYear) + '-13';
+  }, [startMonth, payPeriodViewEnabled]);
+
   if (!initialized || !categoryGroups) {
     return null;
   }
@@ -342,8 +381,8 @@ function BudgetInner(props: BudgetInnerProps) {
       >
         <DynamicBudgetTable
           type={budgetType}
-          prewarmStartMonth={startMonth}
-          startMonth={startMonth}
+          prewarmStartMonth={derivedStartMonth}
+          startMonth={derivedStartMonth}
           monthBounds={bounds}
           maxMonths={maxMonths}
           dataComponents={trackingComponents}
@@ -369,8 +408,8 @@ function BudgetInner(props: BudgetInnerProps) {
       >
         <DynamicBudgetTable
           type={budgetType}
-          prewarmStartMonth={startMonth}
-          startMonth={startMonth}
+          prewarmStartMonth={derivedStartMonth}
+          startMonth={derivedStartMonth}
           monthBounds={bounds}
           maxMonths={maxMonths}
           dataComponents={envelopeComponents}
@@ -390,7 +429,7 @@ function BudgetInner(props: BudgetInnerProps) {
   }
 
   return (
-    <SheetNameProvider name={monthUtils.sheetForMonth(startMonth)}>
+    <SheetNameProvider name={monthUtils.sheetForMonth(derivedStartMonth)}>
       <View style={{ flex: 1 }}>{table}</View>
     </SheetNameProvider>
   );
