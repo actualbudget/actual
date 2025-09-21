@@ -6,8 +6,8 @@ import { View } from '@actual-app/components/view';
 import { MonthPicker } from './MonthPicker';
 import { getScrollbarWidth } from './util';
 
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type BudgetPageHeaderProps = {
@@ -23,7 +23,8 @@ export const BudgetPageHeader = memo<BudgetPageHeaderProps>(
     const categoryExpandedState = categoryExpandedStatePref ?? 0;
     const offsetMultipleMonths = numMonths === 1 ? 4 : 0;
     const payPeriodFeatureFlagEnabled = useFeatureFlag('payPeriodsEnabled');
-    const [payPeriodViewEnabled, setPayPeriodViewEnabled] = useSyncedPref('showPayPeriods');
+    const [payPeriodViewEnabled, setPayPeriodViewEnabled] =
+      useSyncedPref('showPayPeriods');
 
     return (
       <View
@@ -39,7 +40,9 @@ export const BudgetPageHeader = memo<BudgetPageHeaderProps>(
               <input
                 type="checkbox"
                 checked={String(payPeriodViewEnabled) === 'true'}
-                onChange={e => setPayPeriodViewEnabled(e.target.checked ? 'true' : 'false')}
+                onChange={e =>
+                  setPayPeriodViewEnabled(e.target.checked ? 'true' : 'false')
+                }
               />
               <span>Show pay periods</span>
             </label>

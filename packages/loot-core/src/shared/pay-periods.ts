@@ -5,7 +5,7 @@ import { parseDate, dayFromDate } from './date-utils';
 
 export interface PayPeriodConfig {
   enabled: boolean;
-  payFrequency: 'weekly' | 'biweekly' | 'semimonthly' | 'monthly';
+  payFrequency: 'weekly' | 'biweekly' | 'semimonthly' | 'bimonthly' | 'monthly';
   startDate: string; // ISO date string (yyyy-MM-dd)
   payDayOfWeek?: number; // 0-6 for weekly/biweekly
   payDayOfMonth?: number; // 1-31 for monthly
@@ -14,12 +14,30 @@ export interface PayPeriodConfig {
 // Pay period config will be loaded from database preferences
 let __payPeriodConfig: PayPeriodConfig | null = null;
 
+// Cache for generated pay periods to avoid regenerating them repeatedly
+const payPeriodCache = new Map<string, Array<{
+  monthId: string;
+  startDate: string;
+  endDate: string;
+  label: string;
+}>>();
+
 export function getPayPeriodConfig(): PayPeriodConfig | null {
   return __payPeriodConfig;
 }
 
 export function setPayPeriodConfig(config: PayPeriodConfig): void {
   __payPeriodConfig = config;
+  
+  // Clear the cache when config changes to ensure we regenerate periods with new settings
+  payPeriodCache.clear();
+  
+  console.log('[PayPeriod] Config set:', {
+    enabled: config.enabled,
+    payFrequency: config.payFrequency,
+    startDate: config.startDate,
+    timestamp: new Date().toISOString()
+  });
 }
 
 export function loadPayPeriodConfigFromPrefs(prefs: {
@@ -27,6 +45,8 @@ export function loadPayPeriodConfigFromPrefs(prefs: {
   payPeriodFrequency?: string;
   payPeriodStartDate?: string;
 }): void {
+  console.log('[PayPeriod] Loading config from preferences:', prefs);
+  
   try {
     const config: PayPeriodConfig = {
       enabled: prefs.showPayPeriods === 'true',
@@ -37,16 +57,19 @@ export function loadPayPeriodConfigFromPrefs(prefs: {
         prefs.payPeriodStartDate || new Date().toISOString().slice(0, 10),
     };
 
+    console.log('[PayPeriod] Parsed config before validation:', config);
+
     // Validate frequency is one of the allowed values
     const validFrequencies: PayPeriodConfig['payFrequency'][] = [
       'weekly',
       'biweekly',
       'semimonthly',
+      'bimonthly',
       'monthly',
     ];
     if (!validFrequencies.includes(config.payFrequency)) {
       console.warn(
-        `Invalid pay period frequency '${config.payFrequency}', defaulting to 'monthly'`,
+        `[PayPeriod] Invalid pay period frequency '${config.payFrequency}', defaulting to 'monthly'`,
       );
       config.payFrequency = 'monthly';
     }
@@ -54,22 +77,24 @@ export function loadPayPeriodConfigFromPrefs(prefs: {
     // Validate startDate is a valid ISO date string
     if (config.startDate && isNaN(Date.parse(config.startDate))) {
       console.warn(
-        `Invalid pay period start date '${config.startDate}', defaulting to today`,
+        `[PayPeriod] Invalid pay period start date '${config.startDate}', defaulting to today`,
       );
       config.startDate = new Date().toISOString().slice(0, 10);
     }
 
     setPayPeriodConfig(config);
-    console.log('Pay period config loaded from preferences:', config);
+    console.log('[PayPeriod] Successfully loaded config from preferences:', config);
   } catch (error) {
-    console.warn('Failed to load pay period config from preferences:', error);
+    console.warn('[PayPeriod] Failed to load pay period config from preferences:', error);
 
     // Set a disabled default config to ensure graceful fallback
-    setPayPeriodConfig({
+    const fallbackConfig = {
       enabled: false,
-      payFrequency: 'monthly',
+      payFrequency: 'monthly' as const,
       startDate: new Date().toISOString().slice(0, 10),
-    });
+    };
+    setPayPeriodConfig(fallbackConfig);
+    console.log('[PayPeriod] Set fallback config due to error:', fallbackConfig);
   }
 }
 
@@ -108,7 +133,7 @@ function validatePayPeriodConfig(
   config: PayPeriodConfig | null | undefined,
 ): void {
   if (!config || config.enabled !== true) return;
-  const validFreq = ['weekly', 'biweekly', 'semimonthly', 'monthly'];
+  const validFreq = ['weekly', 'biweekly', 'semimonthly', 'bimonthly', 'monthly'];
   if (!validFreq.includes(config.payFrequency)) {
     throw new Error(
       "Invalid payFrequency '" + String(config.payFrequency) + "'.",
@@ -154,20 +179,24 @@ function computePayPeriodByIndex(
   let label = '';
 
   if (freq === 'weekly') {
+    // Always generate 52 weeks starting from the configured start date
     startDate = d.addDays(baseStart, (periodIndex - 1) * 7);
     endDate = d.addDays(startDate, 6);
     label = 'Pay Period ' + String(periodIndex);
   } else if (freq === 'biweekly') {
+    // Always generate 26 biweekly periods starting from the configured start date
     startDate = d.addDays(baseStart, (periodIndex - 1) * 14);
     endDate = d.addDays(startDate, 13);
     label = 'Pay Period ' + String(periodIndex);
   } else if (freq === 'monthly') {
+    // Always generate 12 monthly periods starting from the configured start date
     const planYearStartDate = parseDate(config.startDate);
     const anchorMonthStart = d.startOfMonth(planYearStartDate);
     startDate = d.startOfMonth(d.addMonths(anchorMonthStart, periodIndex - 1));
     endDate = d.endOfMonth(startDate);
     label = 'Month ' + String(periodIndex);
   } else if (freq === 'semimonthly') {
+    // Always generate 24 semimonthly periods starting from the configured start date
     const planYearStartDate = parseDate(config.startDate);
     const monthOffset = Math.floor((periodIndex - 1) / 2);
     const isFirstHalf = (periodIndex - 1) % 2 === 0;
@@ -183,6 +212,16 @@ function computePayPeriodByIndex(
       startDate = mid;
       endDate = end;
     }
+    label = 'Pay Period ' + String(periodIndex);
+  } else if (freq === 'bimonthly') {
+    // Always generate 6 bimonthly periods starting from the configured start date
+    const planYearStartDate = parseDate(config.startDate);
+    const monthOffset = (periodIndex - 1) * 2;
+    const monthStart = d.startOfMonth(
+      d.addMonths(planYearStartDate, monthOffset),
+    );
+    startDate = monthStart;
+    endDate = d.endOfMonth(d.addMonths(monthStart, 1));
     label = 'Pay Period ' + String(periodIndex);
   } else {
     throw new Error("Unsupported payFrequency '" + String(freq) + "'.");
@@ -229,7 +268,20 @@ export function generatePayPeriods(
   }
   if (!config || !config.enabled) return [];
 
-  const endOfYear = d.endOfYear(parseDate(String(year)));
+  // Create a cache key based on year and config
+  const cacheKey = `${year}-${config.payFrequency}-${config.startDate}`;
+  
+  // Check if we already have this year's periods cached
+  if (payPeriodCache.has(cacheKey)) {
+    console.log(`[PayPeriod] Using cached pay periods for year ${year}`);
+    return payPeriodCache.get(cacheKey)!;
+  }
+
+  console.log(`[PayPeriod] Generating pay periods for year ${year} with config:`, {
+    payFrequency: config.payFrequency,
+    startDate: config.startDate
+  });
+
   const results: Array<{
     monthId: string;
     startDate: string;
@@ -237,23 +289,25 @@ export function generatePayPeriods(
     label: string;
   }> = [];
 
-  let idx = 1;
-  while (true) {
+  // Always generate a full year's worth of pay periods regardless of start date
+  // This ensures pay periods are always available for budget range calculations
+  const maxPeriods = getMaxPeriodsForYear(config);
+  
+  for (let idx = 1; idx <= maxPeriods; idx++) {
     const { startDate, endDate, label } = computePayPeriodByIndex(idx, config);
-    if (d.isAfter(startDate, endOfYear)) break;
     const monthId = String(year) + '-' + String(idx + 12).padStart(2, '0');
+    
     results.push({
       monthId,
       startDate: dayFromDate(startDate),
       endDate: dayFromDate(endDate),
       label,
     });
-    idx += 1;
-
-    // Safety guard: do not exceed 87 periods (13..99)
-    if (idx > 87) break;
   }
 
+  // Cache the results
+  payPeriodCache.set(cacheKey, results);
+  console.log(`[PayPeriod] Generated and cached ${results.length} pay periods for year ${year}`);
   return results;
 }
 
@@ -369,6 +423,8 @@ function getMaxPeriodsForYear(config: PayPeriodConfig): number {
       return 26;
     case 'semimonthly':
       return 24;
+    case 'bimonthly':
+      return 6;
     case 'monthly':
       return 12;
     default:

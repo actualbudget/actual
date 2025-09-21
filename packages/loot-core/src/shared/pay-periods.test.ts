@@ -64,13 +64,65 @@ describe('pay-periods utilities', () => {
     const config2023 = { ...baseConfig, startDate: '2023-01-05' };
     const config2025 = { ...baseConfig, startDate: '2025-01-05' };
     
-    // 2023 config should generate pay periods for 2024 if they fall within 2024
+    // 2023 config should generate pay periods for 2024
     const periods2023 = generatePayPeriods(2024, config2023);
-    expect(periods2023.length).toBeGreaterThan(0);
+    expect(periods2023.length).toBe(26); // 26 biweekly periods
     expect(periods2023[0].monthId).toBe('2024-13');
     
-    // 2025 config should not generate pay periods for 2024
-    expect(generatePayPeriods(2024, config2025)).toEqual([]);
+    // 2025 config should also generate pay periods for 2024 (always generate full year)
+    const periods2025 = generatePayPeriods(2024, config2025);
+    expect(periods2025.length).toBe(26); // 26 biweekly periods
+    expect(periods2025[0].monthId).toBe('2024-13');
+    
+    // The actual dates should be different based on start date
+    expect(periods2023[0].startDate).not.toBe(periods2025[0].startDate);
+  });
+
+  describe('bimonthly pay periods', () => {
+    const bimonthlyConfig: PayPeriodConfig = {
+      enabled: true,
+      payFrequency: 'bimonthly',
+      startDate: '2024-01-01',
+    };
+
+    test('generates 6 bimonthly periods per year', () => {
+      const periods = generatePayPeriods(2024, bimonthlyConfig);
+      expect(periods.length).toBe(6);
+    });
+
+    test('bimonthly periods span 2 months each', () => {
+      const periods = generatePayPeriods(2024, bimonthlyConfig);
+      
+      // First period: Jan 1 - Feb 29 (2024 is leap year)
+      expect(periods[0].startDate).toBe('2024-01-01');
+      expect(periods[0].endDate).toBe('2024-02-29');
+      
+      // Second period: Mar 1 - Apr 30
+      expect(periods[1].startDate).toBe('2024-03-01');
+      expect(periods[1].endDate).toBe('2024-04-30');
+      
+      // Third period: May 1 - Jun 30
+      expect(periods[2].startDate).toBe('2024-05-01');
+      expect(periods[2].endDate).toBe('2024-06-30');
+    });
+
+    test('bimonthly period labels are correct', () => {
+      const periods = generatePayPeriods(2024, bimonthlyConfig);
+      
+      expect(periods[0].label).toBe('Pay Period 1');
+      expect(periods[1].label).toBe('Pay Period 2');
+      expect(periods[2].label).toBe('Pay Period 3');
+    });
+
+    test('bimonthly periods work with different start dates', () => {
+      const configMarch = { ...bimonthlyConfig, startDate: '2024-03-01' };
+      const periods = generatePayPeriods(2024, configMarch);
+      
+      expect(periods.length).toBe(6);
+      // First period should start from March
+      expect(periods[0].startDate).toBe('2024-03-01');
+      expect(periods[0].endDate).toBe('2024-04-30');
+    });
   });
 });
 

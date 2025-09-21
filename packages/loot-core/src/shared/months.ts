@@ -5,7 +5,6 @@ import memoizeOne from 'memoize-one';
 
 import { type SyncedPrefs } from '../types/prefs';
 
-import * as Platform from './platform';
 import { parseDate as sharedParseDate } from './date-utils';
 
 // ----------------------------------------------
@@ -28,6 +27,7 @@ import {
   generatePayPeriodRange,
   getPayPeriodNumberInMonth,
 } from './pay-periods';
+import * as Platform from './platform';
 
 type DateLike = string | Date;
 type Day = 0 | 1 | 2 | 3 | 4 | 5 | 6;
@@ -48,7 +48,7 @@ export function monthFromDate(date: DateLike): string {
   if (config?.enabled) {
     return getPayPeriodFromDate(_parse(date), config);
   }
-  
+
   return d.format(_parse(date), 'yyyy-MM');
 }
 
@@ -79,12 +79,12 @@ export function currentMonth(): string {
   if (global.IS_TESTING || Platform.isPlaywright) {
     return global.currentMonth || '2017-01';
   }
-  
+
   const config = getPayPeriodConfig();
   if (config?.enabled) {
     return getCurrentPayPeriod(new Date(), config);
   }
-  
+
   return d.format(new Date(), 'yyyy-MM');
 }
 
@@ -127,15 +127,16 @@ export function currentDay(): string {
 }
 
 export function nextMonth(month: DateLike): string {
-  const monthStr = typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
-  
+  const monthStr =
+    typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+
   if (isPayPeriod(monthStr)) {
     const config = getPayPeriodConfig();
     if (config?.enabled) {
       return nextPayPeriod(monthStr, config);
     }
   }
-  
+
   return d.format(d.addMonths(_parse(month), 1), 'yyyy-MM');
 }
 
@@ -144,15 +145,16 @@ export function prevYear(month: DateLike, format = 'yyyy-MM'): string {
 }
 
 export function prevMonth(month: DateLike): string {
-  const monthStr = typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
-  
+  const monthStr =
+    typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+
   if (isPayPeriod(monthStr)) {
     const config = getPayPeriodConfig();
     if (config?.enabled) {
       return prevPayPeriod(monthStr, config);
     }
   }
-  
+
   return d.format(d.subMonths(_parse(month), 1), 'yyyy-MM');
 }
 
@@ -161,15 +163,16 @@ export function addYears(year: DateLike, n: number): string {
 }
 
 export function addMonths(month: DateLike, n: number): string {
-  const monthStr = typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
-  
+  const monthStr =
+    typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+
   if (isPayPeriod(monthStr)) {
     const config = getPayPeriodConfig();
     if (config?.enabled) {
       return addPayPeriods(monthStr, n, config);
     }
   }
-  
+
   return d.format(d.addMonths(_parse(month), n), 'yyyy-MM');
 }
 
@@ -192,15 +195,16 @@ export function differenceInCalendarDays(
 }
 
 export function subMonths(month: string | Date, n: number) {
-  const monthStr = typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
-  
+  const monthStr =
+    typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+
   if (isPayPeriod(monthStr)) {
     const config = getPayPeriodConfig();
     if (config?.enabled) {
       return addPayPeriods(monthStr, -n, config);
     }
   }
-  
+
   return d.format(d.subMonths(_parse(month), n), 'yyyy-MM');
 }
 
@@ -229,7 +233,8 @@ export function isAfter(month1: DateLike, month2: DateLike): boolean {
 }
 
 export function isCurrentMonth(month: DateLike): boolean {
-  const monthStr = typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+  const monthStr =
+    typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
   return monthStr === currentMonth();
 }
 
@@ -240,6 +245,38 @@ export function isCurrentDay(day: DateLike): boolean {
 // TODO: This doesn't really fit in this module anymore, should
 // probably live elsewhere
 export function bounds(month: DateLike): { start: number; end: number } {
+  const monthStr = typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+  
+  // Check if this is a pay period month
+  if (isPayPeriod(monthStr)) {
+    const config = getPayPeriodConfig();
+    if (config?.enabled) {
+      const year = parseInt(monthStr.slice(0, 4));
+      const periodIndex = parseInt(monthStr.slice(5, 7)) - 12; // Convert 13-99 to 1-87
+      
+      if (periodIndex >= 1) {
+        const periods = generatePayPeriods(year, config);
+        const period = periods.find(p => p.monthId === monthStr);
+        
+        if (period) {
+          console.log(`[PayPeriod] Bounds for pay period ${monthStr}:`, {
+            startDate: period.startDate,
+            endDate: period.endDate
+          });
+          
+          return {
+            start: parseInt(period.startDate.replace(/-/g, '')),
+            end: parseInt(period.endDate.replace(/-/g, '')),
+          };
+        }
+      }
+    }
+    
+    // Fallback to calendar month if pay period not found
+    console.warn(`[PayPeriod] Could not find bounds for pay period ${monthStr}, falling back to calendar month`);
+  }
+  
+  // Original calendar month logic
   return {
     start: parseInt(d.format(d.startOfMonth(_parse(month)), 'yyyyMMdd')),
     end: parseInt(d.format(d.endOfMonth(_parse(month)), 'yyyyMMdd')),
@@ -304,17 +341,58 @@ export function _range(
   end: DateLike,
   inclusive = false,
 ): string[] {
-  const startStr = typeof start === 'string' ? start : d.format(_parse(start), 'yyyy-MM');
-  const endStr = typeof end === 'string' ? end : d.format(_parse(end), 'yyyy-MM');
-  
+  const startStr =
+    typeof start === 'string' ? start : d.format(_parse(start), 'yyyy-MM');
+  const endStr =
+    typeof end === 'string' ? end : d.format(_parse(end), 'yyyy-MM');
+
   // Check if we're dealing with pay periods
   if (isPayPeriod(startStr) || isPayPeriod(endStr)) {
     const config = getPayPeriodConfig();
+    console.log('[PayPeriod] Range request for pay periods:', {
+      start: startStr,
+      end: endStr,
+      inclusive,
+      config: config
+        ? { enabled: config.enabled, payFrequency: config.payFrequency }
+        : null,
+    });
     if (config?.enabled) {
-      return generatePayPeriodRange(startStr, endStr, config, inclusive);
+      // Handle mixed ranges by converting calendar months to pay periods
+      let startPeriod = startStr;
+      let endPeriod = endStr;
+
+      // If start is a calendar month, find the first pay period that overlaps with it
+      if (!isPayPeriod(startStr)) {
+        startPeriod = findFirstPayPeriodForCalendarMonth(startStr, config);
+        console.log(
+          `[PayPeriod] Converted calendar month ${startStr} to pay period ${startPeriod}`,
+        );
+      }
+
+      // If end is a calendar month, find the last pay period that overlaps with it
+      if (!isPayPeriod(endStr)) {
+        endPeriod = findLastPayPeriodForCalendarMonth(endStr, config);
+        console.log(
+          `[PayPeriod] Converted calendar month ${endStr} to pay period ${endPeriod}`,
+        );
+      }
+
+      const result = generatePayPeriodRange(
+        startPeriod,
+        endPeriod,
+        config,
+        inclusive,
+      );
+      console.log('[PayPeriod] Generated pay period range:', result);
+      return result;
+    } else {
+      console.log(
+        '[PayPeriod] Pay period config disabled or missing, falling back to calendar months',
+      );
     }
   }
-  
+
   // Original calendar month logic
   const months: string[] = [];
   let month = monthFromDate(start);
@@ -333,6 +411,64 @@ export function _range(
 
 export function range(start: DateLike, end: DateLike): string[] {
   return _range(start, end);
+}
+
+// Helper functions for mixed range handling
+function findFirstPayPeriodForCalendarMonth(
+  calendarMonth: string,
+  config: PayPeriodConfig,
+): string {
+  const year = parseInt(calendarMonth.slice(0, 4));
+  const periods = generatePayPeriods(year, config);
+
+  // Find the first pay period that starts in or overlaps with this calendar month
+  const monthStart = d.startOfMonth(parseDate(calendarMonth + '-01'));
+  const monthEnd = d.endOfMonth(monthStart);
+
+  for (const period of periods) {
+    const periodStart = parseDate(period.startDate);
+    const periodEnd = parseDate(period.endDate);
+
+    // Check if this pay period overlaps with the calendar month
+    if (
+      d.isWithinInterval(periodStart, { start: monthStart, end: monthEnd }) ||
+      d.isWithinInterval(monthStart, { start: periodStart, end: periodEnd })
+    ) {
+      return period.monthId;
+    }
+  }
+
+  // Fallback: return the first pay period of the year
+  return periods[0]?.monthId || `${year}-13`;
+}
+
+function findLastPayPeriodForCalendarMonth(
+  calendarMonth: string,
+  config: PayPeriodConfig,
+): string {
+  const year = parseInt(calendarMonth.slice(0, 4));
+  const periods = generatePayPeriods(year, config);
+
+  // Find the last pay period that starts in or overlaps with this calendar month
+  const monthStart = d.startOfMonth(parseDate(calendarMonth + '-01'));
+  const monthEnd = d.endOfMonth(monthStart);
+
+  let lastMatchingPeriod = periods[periods.length - 1]?.monthId || `${year}-99`;
+
+  for (const period of periods) {
+    const periodStart = parseDate(period.startDate);
+    const periodEnd = parseDate(period.endDate);
+
+    // Check if this pay period overlaps with the calendar month
+    if (
+      d.isWithinInterval(periodStart, { start: monthStart, end: monthEnd }) ||
+      d.isWithinInterval(monthStart, { start: periodStart, end: periodEnd })
+    ) {
+      lastMatchingPeriod = period.monthId;
+    }
+  }
+
+  return lastMatchingPeriod;
 }
 
 export function rangeInclusive(start: DateLike, end: DateLike): string[] {
@@ -499,7 +635,6 @@ export const getShortYearRegex = memoizeOne((format: string) => {
   return new RegExp('^' + regex + '$');
 });
 
-
 export function isPayPeriod(monthId: string): boolean {
   return _isPayPeriod(monthId);
 }
@@ -524,7 +659,11 @@ export function getMonthStartDate(
 ): Date {
   if (isPayPeriod(monthId)) {
     if (!config || !config.enabled) {
-      throw new Error("Pay period requested for '" + monthId + "' but config is missing/disabled.");
+      throw new Error(
+        "Pay period requested for '" +
+          monthId +
+          "' but config is missing/disabled.",
+      );
     }
     return getPayPeriodStartDate(monthId, config);
   }
@@ -537,7 +676,11 @@ export function getMonthEndDate(
 ): Date {
   if (isPayPeriod(monthId)) {
     if (!config || !config.enabled) {
-      throw new Error("Pay period requested for '" + monthId + "' but config is missing/disabled.");
+      throw new Error(
+        "Pay period requested for '" +
+          monthId +
+          "' but config is missing/disabled.",
+      );
     }
     return getPayPeriodEndDate(monthId, config);
   }
@@ -576,7 +719,7 @@ export function getMonthDisplayName(
     const mm = parseInt(monthId.slice(5, 7));
     return 'P' + String(mm - 12);
   }
-  
+
   return d.format(_parse(monthId), 'MMM', { locale });
 }
 
@@ -597,7 +740,7 @@ export function getMonthDateRange(
     // Fallback
     return getMonthLabel(monthId, config);
   }
-  
+
   return d.format(_parse(monthId), 'MMMM yyyy', { locale });
 }
 
@@ -614,7 +757,7 @@ export function resolveMonthRange(
     const label = getPayPeriodLabel(monthId, config);
     return { startDate, endDate, label };
   }
-  
+
   return {
     startDate: getCalendarMonthStartDate(monthId),
     endDate: getCalendarMonthEndDate(monthId),

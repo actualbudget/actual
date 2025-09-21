@@ -128,7 +128,11 @@ export const MonthPicker = ({
         </Link>
         {range.map((month, idx) => {
           const config = monthUtils.getPayPeriodConfig();
-          const displayLabel = monthUtils.getMonthDisplayName(month, config, locale);
+          const displayLabel = monthUtils.getMonthDisplayName(
+            month,
+            config,
+            locale,
+          );
           const selected =
             idx >= firstSelectedIndex && idx <= lastSelectedIndex;
 

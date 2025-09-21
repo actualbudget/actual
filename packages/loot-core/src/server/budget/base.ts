@@ -18,8 +18,11 @@ export function getBudgetType() {
 }
 
 export function getBudgetRange(start: string, end: string) {
+  console.log(`[getBudgetRange] Input: start=${start}, end=${end}`);
+
   start = monthUtils.getMonth(start);
   end = monthUtils.getMonth(end);
+  console.log(`[getBudgetRange] After getMonth: start=${start}, end=${end}`);
 
   // The start date should never be after the end date. If that
   // happened, the month range might be a valid range and weird
@@ -34,8 +37,25 @@ export function getBudgetRange(start: string, end: string) {
   // need to ever have budgets outside that range.
   start = monthUtils.subMonths(start, 3);
   end = monthUtils.addMonths(end, 12);
+  console.log(
+    `[getBudgetRange] After subMonths/addMonths: start=${start}, end=${end}`,
+  );
 
-  return { start, end, range: monthUtils.rangeInclusive(start, end) };
+  const range = monthUtils.rangeInclusive(start, end);
+  console.log(
+    `[getBudgetRange] Generated range (${range.length} items):`,
+    range.slice(0, 10),
+    range.length > 10 ? '...' : '',
+  );
+
+  // Check if any pay periods are in the range
+  const payPeriods = range.filter(month => monthUtils.isPayPeriod(month));
+  console.log(
+    `[getBudgetRange] Pay periods in range (${payPeriods.length}):`,
+    payPeriods,
+  );
+
+  return { start, end, range };
 }
 
 export function createCategory(cat, sheetName, prevSheetName, start, end) {
@@ -43,6 +63,19 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
     initialValue: 0,
     run: () => {
       // Making this sync is faster!
+      console.log(`[createCategory] Querying transactions for category ${cat.id} from ${start} to ${end}`);
+      
+      // First, let's see what transactions exist in this date range
+      const allTransactions = db.runQuery<{ id: string; date: number; amount: number; category: string }>(
+        `SELECT id, date, amount, category FROM v_transactions_internal_alive t
+           LEFT JOIN accounts a ON a.id = t.account
+         WHERE t.date >= ${start} AND t.date <= ${end}
+           AND a.offbudget = 0`,
+        [],
+        true,
+      );
+      console.log(`[createCategory] All transactions in date range ${start}-${end}:`, allTransactions);
+      
       const rows = db.runQuery<{ amount: number }>(
         `SELECT SUM(amount) as amount FROM v_transactions_internal_alive t
            LEFT JOIN accounts a ON a.id = t.account
@@ -51,8 +84,12 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
         [],
         true,
       );
+      
+      console.log(`[createCategory] Query result for category ${cat.id}:`, rows);
+      
       const row = rows[0];
       const amount = row ? row.amount : 0;
+      console.log(`[createCategory] Final amount for category ${cat.id}: ${amount}`);
       return amount || 0;
     },
   });
@@ -247,6 +284,10 @@ export async function createBudget(months) {
       const { start, end } = monthUtils.bounds(month);
       const sheetName = monthUtils.sheetForMonth(month);
       const prevSheetName = monthUtils.sheetForMonth(prevMonth);
+
+      console.log(
+        `[createBudget] Creating sheet for month=${month}, sheetName=${sheetName}, isPayPeriod=${monthUtils.isPayPeriod(month)}`,
+      );
 
       categories.forEach(cat => {
         createCategory(cat, sheetName, prevSheetName, start, end);

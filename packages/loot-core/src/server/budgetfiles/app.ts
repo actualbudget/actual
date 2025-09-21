@@ -617,6 +617,7 @@ async function _loadBudget(id: Budget['id']): Promise<{
   // Load pay period configuration before budget creation
   // This must happen before budget.createAllBudgets() since budget operations
   // may invoke months.ts functions that check pay period config
+  console.log('[PayPeriod] Loading pay period config during budget load...');
   try {
     const { loadPayPeriodConfigFromPrefs } = await import(
       '../../shared/pay-periods'
@@ -626,10 +627,17 @@ async function _loadBudget(id: Budget['id']): Promise<{
       payPeriodFrequency: payPeriodResults[1]?.value,
       payPeriodStartDate: payPeriodResults[2]?.value,
     };
+    console.log(
+      '[PayPeriod] Raw preference values from database:',
+      payPeriodPrefs,
+    );
     loadPayPeriodConfigFromPrefs(payPeriodPrefs);
+    console.log(
+      '[PayPeriod] Successfully loaded pay period config during budget load',
+    );
   } catch (e) {
     console.warn(
-      'Failed to load pay period configuration, continuing with disabled state:',
+      '[PayPeriod] Failed to load pay period configuration, continuing with disabled state:',
       e,
     );
   }
