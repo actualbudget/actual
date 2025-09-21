@@ -2,7 +2,11 @@ import { useEffect } from 'react';
 
 import { useInitialMount } from './useInitialMount';
 
-import { getCommonPayees, getPayees, getPayeesById } from '@desktop-client/payees/payeesSlice';
+import {
+  getCommonPayees,
+  getPayees,
+  getPayeesById,
+} from '@desktop-client/payees/payeesSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
 
 export function useCommonPayees() {

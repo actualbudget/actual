@@ -43,8 +43,7 @@ export function useDisplayPayee({ transaction }: UseDisplayPayeeProps) {
         transaction,
         payee,
         transferAccount: accounts.find(
-          a =>
-            a.id === payeesById[transaction?.payee || '']?.transfer_acct,
+          a => a.id === payeesById[transaction?.payee || '']?.transfer_acct,
         ),
       });
     }
@@ -85,7 +84,8 @@ export function useDisplayPayee({ transaction }: UseDisplayPayeeProps) {
       payee: mostCommonPayee,
       transferAccount: accounts.find(
         a =>
-          a.id === payeesById[mostCommonPayeeTransaction.payee || '']?.transfer_acct,
+          a.id ===
+          payeesById[mostCommonPayeeTransaction.payee || '']?.transfer_acct,
       ),
       numHiddenPayees: numDistinctPayees - 1,
     });
