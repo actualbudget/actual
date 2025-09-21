@@ -17,6 +17,7 @@ import { css } from '@emotion/css';
 
 import {
   amountToCurrency,
+  amountToCurrencyWithDecimal,
   appendDecimals,
   currencyToAmount,
   reapplyThousandSeparators,
@@ -50,7 +51,6 @@ const AmountInput = memo(function AmountInput({
   const [text, setText] = useState('');
   const [value, setValue] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [hideFraction] = useSyncedPref('hideFraction');
 
   const mergedInputRef = useMergedRefs<HTMLInputElement>(
     props.inputRef,
@@ -125,7 +125,7 @@ const AmountInput = memo(function AmountInput({
     <input
       type="text"
       ref={mergedInputRef}
-      value={amountToCurrency(value)}
+      value={amountToCurrencyWithDecimal(value)}
       inputMode="decimal"
       autoCapitalize="none"
       onChange={e => onChangeText(e.target.value)}

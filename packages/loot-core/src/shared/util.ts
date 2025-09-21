@@ -434,10 +434,10 @@ export function amountToCurrency(amount: Amount): CurrencyAmount {
   return getNumberFormat().formatter.format(amount);
 }
 
-export function amountToCurrencyNoDecimal(amount: Amount): CurrencyAmount {
+export function amountToCurrencyWithDecimal(amount: Amount): CurrencyAmount {
   return getNumberFormat({
     ...numberFormatConfig,
-    hideFraction: true,
+    hideFraction: false,
   }).formatter.format(amount);
 }
 

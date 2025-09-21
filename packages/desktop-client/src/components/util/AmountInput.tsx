@@ -72,7 +72,6 @@ export function AmountInput({
   const buttonRef = useRef(null);
   const ref = useRef<HTMLInputElement>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
-  const [hideFraction] = useSyncedPref('hideFraction');
 
   useEffect(() => {
     if (focused) {
