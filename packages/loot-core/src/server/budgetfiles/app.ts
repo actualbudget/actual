@@ -206,6 +206,7 @@ async function downloadBudget({
   }
 
   const id = result.id;
+  await closeBudget();
   await loadBudget({ id });
   result = await syncBudget();
 
@@ -262,7 +263,7 @@ async function closeBudget() {
   sheet.unloadSpreadsheet();
 
   clearFullSyncTimeout();
-  await app.stopServices();
+  await mainApp.stopServices();
 
   await db.closeDatabase();
 

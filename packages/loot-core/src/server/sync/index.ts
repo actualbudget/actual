@@ -625,11 +625,20 @@ async function _fullSync(
   count: number,
   prevDiffTime: number,
 ): Promise<Message[]> {
-  const { cloudFileId, groupId, lastSyncedTimestamp } = prefs.getPrefs() || {};
+  const {
+    id: currentId,
+    cloudFileId,
+    groupId,
+    lastSyncedTimestamp,
+  } = prefs.getPrefs() || {};
 
   clearFullSyncTimeout();
 
-  if (checkSyncingMode('disabled') || checkSyncingMode('offline')) {
+  if (
+    checkSyncingMode('disabled') ||
+    checkSyncingMode('offline') ||
+    !currentId
+  ) {
     return [];
   }
 

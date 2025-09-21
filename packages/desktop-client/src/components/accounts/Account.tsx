@@ -215,6 +215,8 @@ type AccountInternalProps = {
   filterConditions: RuleConditionEntity[];
   showBalances?: boolean;
   setShowBalances: (newValue: boolean) => void;
+  showNetWorthChart: boolean;
+  setShowNetWorthChart: (newValue: boolean) => void;
   showCleared?: boolean;
   setShowCleared: (newValue: boolean) => void;
   showReconciled: boolean;
@@ -758,7 +760,8 @@ class AccountInternal extends PureComponent<
       | 'toggle-balance'
       | 'remove-sorting'
       | 'toggle-cleared'
-      | 'toggle-reconciled',
+      | 'toggle-reconciled'
+      | 'toggle-net-worth-chart',
   ) => {
     const accountId = this.props.accountId!;
     const account = this.props.accounts.find(
@@ -859,6 +862,13 @@ class AccountInternal extends PureComponent<
           this.setState({ showReconciled: true }, () =>
             this.fetchTransactions(this.state.filterConditions),
           );
+        }
+        break;
+      case 'toggle-net-worth-chart':
+        if (this.props.showNetWorthChart) {
+          this.props.setShowNetWorthChart(false);
+        } else {
+          this.props.setShowNetWorthChart(true);
         }
         break;
       default:
@@ -1741,6 +1751,7 @@ class AccountInternal extends PureComponent<
                 tableRef={this.table}
                 isNameEditable={isNameEditable ?? false}
                 workingHard={workingHard ?? false}
+                accountId={accountId}
                 account={account}
                 filterId={filterId}
                 savedFilters={this.props.savedFilters}
@@ -1941,6 +1952,9 @@ export function Account() {
   const [showBalances, setShowBalances] = useSyncedPref(
     `show-balances-${params.id}`,
   );
+  const [showNetWorthChart, setShowNetWorthChart] = useSyncedPref(
+    `show-account-${params.id}-net-worth-chart`,
+  );
   const [hideCleared, setHideCleared] = useSyncedPref(
     `hide-cleared-${params.id}`,
   );
@@ -1978,6 +1992,8 @@ export function Account() {
           setShowBalances={showBalances =>
             setShowBalances(String(showBalances))
           }
+          showNetWorthChart={String(showNetWorthChart) === 'true'}
+          setShowNetWorthChart={val => setShowNetWorthChart(String(val))}
           showCleared={String(hideCleared) !== 'true'}
           setShowCleared={val => setHideCleared(String(!val))}
           showReconciled={String(hideReconciled) !== 'true'}
