@@ -42,7 +42,11 @@ export async function init(config: InitConfig = {}) {
 
 export async function shutdown() {
   if (actualApp) {
-    await actualApp.send('sync');
+    try {
+      await actualApp.send('sync');
+    } catch (e) {
+      // most likely that no budget is loaded, so the sync failed
+    }
     await actualApp.send('close-budget');
     actualApp = null;
   }
