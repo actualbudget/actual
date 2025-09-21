@@ -39,7 +39,6 @@ type AmountInputProps = {
   inputClassName?: string;
   focused?: boolean;
   disabled?: boolean;
-  autoDecimals?: boolean;
 };
 
 export function AmountInput({
@@ -57,7 +56,6 @@ export function AmountInput({
   inputClassName,
   focused,
   disabled = false,
-  autoDecimals = false,
 }: AmountInputProps) {
   const { t } = useTranslation();
   const format = useFormat();
@@ -96,9 +94,7 @@ export function AmountInput({
   }
 
   function onInputTextChange(val) {
-    val = autoDecimals
-      ? appendDecimals(val, String(hideFraction) === 'true')
-      : val;
+    val = appendDecimals(val)
     setValue(val ? val : '');
     onChangeValue?.(val);
   }

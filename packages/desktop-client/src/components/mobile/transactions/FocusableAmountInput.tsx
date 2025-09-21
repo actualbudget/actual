@@ -115,7 +115,7 @@ const AmountInput = memo(function AmountInput({
 
   const onChangeText = (text: string) => {
     text = reapplyThousandSeparators(text);
-    text = appendDecimals(text, String(hideFraction) === 'true');
+    text = appendDecimals(text);
     setEditing(true);
     setText(text);
     props.onChangeValue?.(text);
