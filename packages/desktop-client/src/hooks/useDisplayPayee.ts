@@ -9,8 +9,7 @@ import {
 } from 'loot-core/types/models';
 
 import { useAccounts } from './useAccounts';
-import { usePayee } from './usePayee';
-import { usePayees } from './usePayees';
+import { usePayeesById } from './usePayees';
 import { useTransactions } from './useTransactions';
 
 type Counts = {
@@ -34,8 +33,8 @@ export function useDisplayPayee({ transaction }: UseDisplayPayeeProps) {
   });
 
   const accounts = useAccounts();
-  const payees = usePayees();
-  const payee = usePayee(transaction?.payee || '');
+  const payeesById = usePayeesById();
+  const payee = payeesById[transaction?.payee || ''];
 
   return useMemo(() => {
     if (subtransactions.length === 0) {
@@ -45,8 +44,7 @@ export function useDisplayPayee({ transaction }: UseDisplayPayeeProps) {
         payee,
         transferAccount: accounts.find(
           a =>
-            a.id ===
-            payees.find(p => p.id === transaction?.payee)?.transfer_acct,
+            a.id === payeesById[transaction?.payee || '']?.transfer_acct,
         ),
       });
     }
@@ -73,9 +71,7 @@ export function useDisplayPayee({ transaction }: UseDisplayPayeeProps) {
       return t('Split (no payee)');
     }
 
-    const mostCommonPayee = payees.find(
-      p => p.id === mostCommonPayeeTransaction.payee,
-    );
+    const mostCommonPayee = payeesById[mostCommonPayeeTransaction.payee || ''];
 
     if (!mostCommonPayee) {
       return t('Split (no payee)');
@@ -89,13 +85,11 @@ export function useDisplayPayee({ transaction }: UseDisplayPayeeProps) {
       payee: mostCommonPayee,
       transferAccount: accounts.find(
         a =>
-          a.id ===
-          payees.find(p => p.id === mostCommonPayeeTransaction.payee)
-            ?.transfer_acct,
+          a.id === payeesById[mostCommonPayeeTransaction.payee || '']?.transfer_acct,
       ),
       numHiddenPayees: numDistinctPayees - 1,
     });
-  }, [subtransactions, payees, accounts, transaction, payee, t]);
+  }, [subtransactions, payeesById, accounts, transaction, payee, t]);
 }
 
 type GetPrettyPayeeProps = {
