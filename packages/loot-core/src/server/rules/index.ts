@@ -10,6 +10,7 @@ import {
 } from 'date-fns';
 import * as Handlebars from 'handlebars';
 
+import { logger } from '../../platform/server/log';
 import {
   monthFromDate,
   yearFromDate,
@@ -146,7 +147,7 @@ function registerHandlebarsHelpers() {
       return format(addDays(date, day - actualDay), 'yyyy-MM-dd');
     },
     debug: (value: unknown) => {
-      console.log(value);
+      logger.log(value);
     },
     concat: (...args: unknown[]) => args.join(''),
   } as Record<string, Handlebars.HelperDelegate>;
@@ -594,7 +595,7 @@ export class Condition {
         try {
           return new RegExp(this.value).test(fieldValue);
         } catch (e) {
-          console.log('invalid regexp in matches condition', e);
+          logger.log('invalid regexp in matches condition', e);
           return false;
         }
 
@@ -716,7 +717,7 @@ export class Action {
                 object[this.field] = format(parsed, 'yyyy-MM-dd');
               } else {
                 // Keep original string; log for diagnostics but avoid hard crash
-                console.error(
+                logger.error(
                   `rules: invalid date produced by template for field “${this.field}”:`,
                   object[this.field],
                 );
@@ -1060,7 +1061,7 @@ const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
 function computeScore(rule: Rule): number {
   const initialScore = rule.conditions.reduce((score, condition) => {
     if (OP_SCORES[condition.op] == null) {
-      console.log(`Found invalid operation while ranking: ${condition.op}`);
+      logger.log(`Found invalid operation while ranking: ${condition.op}`);
       return 0;
     }
 

@@ -3,6 +3,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { logger } from '../../platform/server/log';
 import * as sqlite from '../../platform/server/sqlite';
 
 import {
@@ -52,11 +53,11 @@ async function list(db) {
   const all = await getMigrationList(migrationsDir);
   const pending = getPending(applied, all);
 
-  console.log('Applied migrations:');
-  applied.forEach(id => console.log('  ', getUpMigration(id, all)));
+  logger.log('Applied migrations:');
+  applied.forEach(id => logger.log('  ', getUpMigration(id, all)));
 
-  console.log('\nPending migrations:');
-  pending.forEach(name => console.log('  ', name));
+  logger.log('\nPending migrations:');
+  pending.forEach(name => logger.log('  ', name));
 }
 
 const cmd = argv._[0];
@@ -74,9 +75,9 @@ withMigrationsDir(argv.migrationsDir || getMigrationsDir(), async () => {
     case 'migrate':
       const applied = await migrate(getDatabase());
       if (applied.length === 0) {
-        console.log('No pending migrations');
+        logger.log('No pending migrations');
       } else {
-        console.log('Applied migrations:\n' + applied.join('\n'));
+        logger.log('Applied migrations:\n' + applied.join('\n'));
       }
       break;
     case 'list':
@@ -86,7 +87,7 @@ withMigrationsDir(argv.migrationsDir || getMigrationsDir(), async () => {
     default:
       const name = argv.name;
       if (name == null || name === '') {
-        console.log('Must pass a name for the new migration with --name');
+        logger.log('Must pass a name for the new migration with --name');
         process.exit(1);
       }
       await create(name);

@@ -109,7 +109,7 @@ async function getBudgets() {
         try {
           prefs = JSON.parse(await fs.readFile(prefsPath));
         } catch (e) {
-          console.log('Error parsing metadata:', e.stack);
+          logger.log('Error parsing metadata:', e.stack);
           return null;
         }
 
@@ -165,7 +165,7 @@ async function uploadBudget({ id }: { id?: Budget['id'] } = {}): Promise<{
   try {
     await cloudStorage.upload();
   } catch (e) {
-    console.log(e);
+    logger.log(e);
     if (e.type === 'FileUploadError') {
       return { error: e };
     }
@@ -373,7 +373,7 @@ async function duplicateBudget({
   // load in and validate
   const { error } = await _loadBudget(newId);
   if (error) {
-    console.log('Error duplicating budget: ' + error);
+    logger.log('Error duplicating budget: ' + error);
     return error;
   }
 
@@ -381,7 +381,7 @@ async function duplicateBudget({
     try {
       await cloudStorage.upload();
     } catch (error) {
-      console.warn('Failed to sync duplicated budget to cloud:', error);
+      logger.warn('Failed to sync duplicated budget to cloud:', error);
       // Ignore any errors uploading. If they are offline they should
       // still be able to create files.
     }
@@ -437,7 +437,7 @@ async function createBudget({
   // Load it in
   const { error } = await _loadBudget(id);
   if (error) {
-    console.log('Error creating budget: ' + error);
+    logger.log('Error creating budget: ' + error);
     return { error };
   }
 
@@ -544,7 +544,7 @@ async function _loadBudget(id: Budget['id']): Promise<{
   try {
     await updateVersion();
   } catch (e) {
-    console.warn('Error updating', e);
+    logger.warn('Error updating', e);
     let result;
     if (e.message.includes('out-of-sync-migrations')) {
       result = { error: 'out-of-sync-migrations' };
@@ -553,7 +553,7 @@ async function _loadBudget(id: Budget['id']): Promise<{
     } else {
       captureException(e);
       logger.info('Error updating budget ' + id, e);
-      console.log('Error updating budget', e);
+      logger.log('Error updating budget', e);
       result = { error: 'loading-budget' };
     }
 

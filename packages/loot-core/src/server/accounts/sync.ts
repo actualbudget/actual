@@ -139,7 +139,7 @@ async function downloadGoCardlessTransactions(
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
 
-  console.log('Pulling transactions from GoCardless');
+  logger.log('Pulling transactions from GoCardless');
 
   const res = await post(
     getServer().GOCARDLESS_SERVER + '/transactions',
@@ -171,7 +171,7 @@ async function downloadGoCardlessTransactions(
       startingBalance,
     } = res;
 
-    console.log('Response:', res);
+    logger.log('Response:', res);
 
     return {
       transactions: all,
@@ -179,7 +179,7 @@ async function downloadGoCardlessTransactions(
       startingBalance,
     };
   } else {
-    console.log('Response:', res);
+    logger.log('Response:', res);
 
     return {
       transactions: res.transactions.all,
@@ -196,7 +196,7 @@ async function downloadSimpleFinTransactions(
 
   const batchSync = Array.isArray(acctId);
 
-  console.log('Pulling transactions from SimpleFin');
+  logger.log('Pulling transactions from SimpleFin');
 
   let res;
   try {
@@ -213,7 +213,7 @@ async function downloadSimpleFinTransactions(
       Array.isArray(acctId) ? 300000 : 60000,
     );
   } catch (error) {
-    console.error('Suspected timeout during bank sync:', error);
+    logger.error('Suspected timeout during bank sync:', error);
     throw BankSyncError('TIMED_OUT', 'TIMED_OUT');
   }
 
@@ -253,7 +253,7 @@ async function downloadSimpleFinTransactions(
     };
   }
 
-  console.log('Response:', retVal);
+  logger.log('Response:', retVal);
   return retVal;
 }
 
@@ -264,7 +264,7 @@ async function downloadPluggyAiTransactions(
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
 
-  console.log('Pulling transactions from Pluggy.ai');
+  logger.log('Pulling transactions from Pluggy.ai');
 
   const res = await post(
     getServer().PLUGGYAI_SERVER + '/transactions',
@@ -292,7 +292,7 @@ async function downloadPluggyAiTransactions(
     startingBalance: singleRes.startingBalance,
   };
 
-  console.log('Response:', retVal);
+  logger.log('Response:', retVal);
   return retVal;
 }
 

@@ -6,7 +6,7 @@ import * as injectAPI from '@actual-app/api/injected';
 import * as asyncStorage from '../platform/server/asyncStorage';
 import * as connection from '../platform/server/connection';
 import * as fs from '../platform/server/fs';
-import { setVerboseMode } from '../platform/server/log';
+import { logger, setVerboseMode } from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import { q } from '../shared/query';
 import { Handlers } from '../types/handlers';
@@ -201,7 +201,7 @@ export async function initApp(isDev, socketName) {
         }),
       );
     } catch (e) {
-      console.log('Error loading key', e);
+      logger.log('Error loading key', e);
       throw new Error('load-key-error');
     }
   }
