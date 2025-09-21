@@ -6,6 +6,7 @@ import * as injectAPI from '@actual-app/api/injected';
 import * as asyncStorage from '../platform/server/asyncStorage';
 import * as connection from '../platform/server/connection';
 import * as fs from '../platform/server/fs';
+import { setVerboseMode } from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import { q } from '../shared/query';
 import { Handlers } from '../types/handlers';
@@ -229,6 +230,7 @@ export type InitConfig = {
   dataDir?: string;
   serverURL?: string;
   password?: string;
+  quiet?: boolean;
 };
 
 export async function init(config: InitConfig) {
@@ -238,6 +240,11 @@ export async function init(config: InitConfig) {
   if (config) {
     dataDir = config.dataDir;
     serverURL = config.serverURL;
+
+    // Set verbose mode if specified
+    if (config.quiet !== undefined) {
+      setVerboseMode(!config.quiet);
+    }
   } else {
     dataDir = process.env.ACTUAL_DATA_DIR;
     serverURL = process.env.ACTUAL_SERVER_URL;

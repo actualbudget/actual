@@ -3,6 +3,7 @@ import * as dateFns from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as asyncStorage from '../../platform/server/asyncStorage';
+import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
 import {
@@ -487,7 +488,7 @@ export async function reconcileTransactions(
   isPreview = false,
   defaultCleared = true,
 ): Promise<ReconcileTransactionsResult> {
-  console.log('Performing transaction reconciliation');
+  logger.log('Performing transaction reconciliation');
 
   const updated = [];
   const added = [];
@@ -594,7 +595,7 @@ export async function reconcileTransactions(
     await batchUpdateTransactions({ added, updated });
   }
 
-  console.log('Debug data for the operations:', {
+  logger.log('Debug data for the operations:', {
     transactionsStep1,
     transactionsStep2,
     transactionsStep3,
@@ -616,7 +617,7 @@ export async function matchTransactions(
   isBankSyncAccount = false,
   strictIdChecking = true,
 ) {
-  console.log('Performing transaction reconciliation matching');
+  logger.log('Performing transaction reconciliation matching');
 
   const reimportDeleted = await aqlQuery(
     q('preferences')
