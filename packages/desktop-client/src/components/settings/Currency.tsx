@@ -7,7 +7,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { currencies } from 'loot-core/shared/currencies';
+import { currencies, getCurrency } from 'loot-core/shared/currencies';
 
 import { Column, Setting } from './UI';
 
@@ -85,10 +85,22 @@ export function CurrencySettings() {
     setDefaultCurrencyCodePref(code);
   };
 
-  const symbolPositionOptions = [
-    { value: 'before', label: t('Before amount (e.g. $100)') },
-    { value: 'after', label: t('After amount (e.g. 100€)') },
-  ];
+  const symbolPositionOptions = useMemo(() => {
+    const selectedCurrency = getCurrency(selectedCurrencyCode);
+    const symbol = selectedCurrency.symbol || '$';
+    const space = spaceEnabled === 'true' ? ' ' : '';
+
+    return [
+      {
+        value: 'before',
+        label: `${t('Before amount')} (${t('e.g.')} ${symbol}${space}100)`,
+      },
+      {
+        value: 'after',
+        label: `${t('After amount')} (${t('e.g.')} 100${space}${symbol})`,
+      },
+    ];
+  }, [selectedCurrencyCode, spaceEnabled, t]);
 
   return (
     <Setting
