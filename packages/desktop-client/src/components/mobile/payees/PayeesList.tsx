@@ -1,4 +1,4 @@
-import { type UIEvent } from 'react';
+import { useCallback } from 'react';
 import { Trans } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
@@ -11,6 +11,7 @@ import { type PayeeEntity } from 'loot-core/types/models';
 import { PayeesListItem } from './PayeesListItem';
 
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
+import { useScrollListener } from '@desktop-client/components/ScrollProvider';
 
 type PayeesListProps = {
   payees: PayeeEntity[];
@@ -25,6 +26,17 @@ export function PayeesList({
   onPayeePress,
   onLoadMore,
 }: PayeesListProps) {
+  useScrollListener(
+    useCallback(
+      ({ hasScrolledToEnd }) => {
+        if (onLoadMore && !isLoading && hasScrolledToEnd('down')) {
+          onLoadMore();
+        }
+      },
+      [onLoadMore, isLoading],
+    ),
+  );
+
   if (isLoading && payees.length === 0) {
     return (
       <View
@@ -63,20 +75,8 @@ export function PayeesList({
     );
   }
 
-  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
-    if (!onLoadMore) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = event.currentTarget;
-    if (scrollHeight - scrollTop <= clientHeight * 1.5) {
-      onLoadMore();
-    }
-  };
-
   return (
-    <View
-      style={{ flex: 1, paddingBottom: MOBILE_NAV_HEIGHT, overflow: 'auto' }}
-      onScroll={handleScroll}
-    >
+    <View style={{ flex: 1, paddingBottom: MOBILE_NAV_HEIGHT }}>
       {payees.map(payee => (
         <PayeesListItem
           key={payee.id}
