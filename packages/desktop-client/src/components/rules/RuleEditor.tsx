@@ -348,7 +348,7 @@ function ConditionEditor({
       />
       <OpSelect ops={ops} value={op} type={type} onChange={onChange} />
 
-      <View style={{ flex: 1 }}>{valueEditor}</View>
+      <View style={{ flex: 1, minWidth: 80 }}>{valueEditor}</View>
 
       <Stack direction="row">
         <EditorButtons
