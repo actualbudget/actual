@@ -25,7 +25,7 @@ export interface PeriodicTemplate extends BaseTemplateWithPriority {
   limit?: {
     amount: number;
     hold: boolean;
-    period?: 'daily' | 'weekly' | 'monthly';
+    period: 'daily' | 'weekly' | 'monthly';
     start?: string;
   };
 }
@@ -54,7 +54,7 @@ export interface SimpleTemplate extends BaseTemplateWithPriority {
   limit?: {
     amount: number;
     hold: boolean;
-    period?: 'daily' | 'weekly' | 'monthly';
+    period: 'daily' | 'weekly' | 'monthly';
     start?: string;
   };
 }
@@ -82,7 +82,7 @@ export interface RemainderTemplate extends BaseTemplate {
   limit?: {
     amount: number;
     hold: boolean;
-    period?: 'daily' | 'weekly' | 'monthly';
+    period: 'daily' | 'weekly' | 'monthly';
     start?: string;
   };
   directive: 'template';
@@ -99,7 +99,7 @@ export interface LimitTemplate extends BaseTemplate {
   type: 'limit';
   amount: number;
   hold: boolean;
-  period?: 'daily' | 'weekly' | 'monthly';
+  period: 'daily' | 'weekly' | 'monthly';
   start?: 'daily' | 'weekly' | 'monthly';
   directive: 'template';
   priority: null;
