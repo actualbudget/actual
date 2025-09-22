@@ -624,8 +624,6 @@ export function CreateAccountModal({
                           hundreds of banks.
                         </Trans>
                       </Text>
-                      {isPluggyAiEnabled && (
-                        <>
                           <View
                             style={{
                               flexDirection: 'row',
@@ -692,7 +690,6 @@ export function CreateAccountModal({
                       </Text>
                     </>
                   )}
-
                   {(!isGoCardlessSetupComplete ||
                     !isSimpleFinSetupComplete ||
                     !isPluggyAiSetupComplete) &&
