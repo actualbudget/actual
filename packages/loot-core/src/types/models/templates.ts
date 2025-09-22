@@ -101,6 +101,7 @@ export interface LimitTemplate extends BaseTemplate {
   hold: boolean;
   period?: 'daily' | 'weekly' | 'monthly';
   start?: 'daily' | 'weekly' | 'monthly';
+  directive: 'template';
   priority: null;
 }
 
