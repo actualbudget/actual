@@ -2,6 +2,8 @@
 // @ts-strict-ignore
 import * as fs from 'fs';
 
+import { logger } from '../platform/server/log';
+
 import * as db from './db';
 
 const queries = fs
@@ -21,7 +23,7 @@ async function run() {
   await db.openDatabase();
   const start = Date.now();
   runQueries();
-  console.log(Date.now() - start);
+  logger.log(Date.now() - start);
 }
 
 run();

@@ -2,6 +2,7 @@
 import { parse as csv2json } from 'csv-parse/sync';
 
 import * as fs from '../../../platform/server/fs';
+import { logger } from '../../../platform/server/log';
 import { looselyParseAmount } from '../../../shared/util';
 
 import { ofx2json } from './ofx2json';
@@ -169,7 +170,7 @@ async function parseCAMT(
   try {
     data = await xmlCAMT2json(contents);
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     errors.push({
       message: 'Failed importing file',
       internal: err.stack,

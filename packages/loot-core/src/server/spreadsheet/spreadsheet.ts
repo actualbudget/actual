@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import mitt from 'mitt';
 
+import { logger } from '../../platform/server/log';
 import { QueryState } from '../../shared/query';
 import { compileQuery, aqlCompiledQuery, schema, schemaConfig } from '../aql';
 import { BudgetType } from '../prefs';
@@ -104,7 +105,7 @@ export class Spreadsheet {
     try {
       func();
     } catch (e) {
-      console.log(e);
+      logger.log(e);
     }
     return this.endTransaction();
   }
@@ -164,7 +165,7 @@ export class Spreadsheet {
           result = node._run(...args);
 
           if (result instanceof Promise) {
-            console.warn(
+            logger.warn(
               `dynamic cell ${name} returned a promise! this is discouraged because errors are not handled properly`,
             );
           }
@@ -179,7 +180,7 @@ export class Spreadsheet {
           continue;
         }
       } catch (e) {
-        console.log('Error while evaluating ' + name + ':', e);
+        logger.log('Error while evaluating ' + name + ':', e);
         // If an error happens, bail on the rest of the computations
         this.running = false;
         this.computeQueue = [];
@@ -196,7 +197,7 @@ export class Spreadsheet {
           },
           err => {
             // TODO: use captureException here
-            console.warn(`Failed running ${node.name}!`, err);
+            logger.warn(`Failed running ${node.name}!`, err);
             this.runComputations(idx + 1);
           },
         );

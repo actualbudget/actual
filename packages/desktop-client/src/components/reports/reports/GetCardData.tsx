@@ -70,6 +70,7 @@ export function GetCardData({
   accounts,
   categories,
   earliestTransaction,
+  latestTransaction,
   firstDayOfWeekIdx,
   showTooltip,
 }: {
@@ -78,6 +79,7 @@ export function GetCardData({
   accounts: AccountEntity[];
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
   earliestTransaction: string;
+  latestTransaction: string;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
   showTooltip?: boolean;
 }) {
@@ -90,6 +92,7 @@ export function GetCardData({
     const [dateStart, dateEnd] = getLiveRange(
       report.dateRange,
       earliestTransaction,
+      latestTransaction,
       report.includeCurrentInterval,
       firstDayOfWeekIdx,
     );

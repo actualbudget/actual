@@ -2,6 +2,7 @@
 import { getClock } from '@actual-app/crdt';
 
 import * as connection from '../platform/server/connection';
+import { logger } from '../platform/server/log';
 import {
   getBankSyncError,
   getDownloadError,
@@ -233,7 +234,7 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
     cloudFileId: remoteBudget.fileId,
   });
   if (result.error) {
-    console.log('Full error details', result.error);
+    logger.log('Full error details', result.error);
     throw new Error(getDownloadError(result.error));
   }
   await handlers['load-budget']({ id: result.id });
