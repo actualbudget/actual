@@ -7,7 +7,10 @@ import { filterEmptyRows } from './filterEmptyRows';
 import { makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
 import { sortData } from './sortData';
-// import { determineIntervalRange, trimIntervalsToRange } from './trimIntervals';
+import {
+  determineIntervalRange,
+  trimGroupedDataIntervals,
+} from './trimIntervals';
 
 import {
   categoryLists,
@@ -95,7 +98,6 @@ export function createGroupedSpreadsheet({
             ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
           ](startDate, endDate);
 
-    console.info('grouped', { intervals });
     const groupedData: GroupedEntity[] = categoryGroup.map(
       group => {
         const grouped = recalculate({
@@ -136,43 +138,32 @@ export function createGroupedSpreadsheet({
             stackedCategories.filter(i =>
               filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
             ),
-          // categories: stackedCategories,
         };
       },
       [startDate, endDate],
     );
 
-    // // Determine global interval range across all groups (both main groups and nested categories)
-    // let allGroupsData = [...groupedData];
-    // groupedData.forEach(group => {
-    //   if (group.categories) {
-    //     allGroupsData = [...allGroupsData, ...group.categories];
-    //   }
-    // });
+    // Determine interval range across all groups and their nested categories
+    const allGroupsForTrimming: GroupedEntity[] = [];
+    groupedData.forEach(group => {
+      allGroupsForTrimming.push(group);
+      if (group.categories) {
+        allGroupsForTrimming.push(...group.categories);
+      }
+    });
 
-    // const { startIndex, endIndex } = determineIntervalRange(
-    //   allGroupsData,
-    //   [], // No main intervalData in grouped spreadsheet
-    //   trimIntervals,
-    // );
+    const { startIndex, endIndex } = determineIntervalRange(
+      allGroupsForTrimming,
+      groupedData.length > 0 ? groupedData[0].intervalData : [],
+      trimIntervals,
+    );
 
-    // // Apply the global trimming to all groups and their categories
-    // trimIntervalsToRange(groupedData, startIndex, endIndex);
-    // groupedData.forEach(group => {
-    //   if (group.categories) {
-    //     trimIntervalsToRange(group.categories, startIndex, endIndex);
-    //   }
-    // });
+    // Trim all groupedData intervals (including nested categories) based on the range
+    trimGroupedDataIntervals(groupedData, startIndex, endIndex);
 
     const groupedDataFiltered = groupedData.filter(i =>
       filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
     );
-    // .map(group => ({
-    //     ...group,
-    //     categories: group.categories?.filter(i =>
-    //       filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
-    //     ),
-    //   }));
 
     const sortedGroupedDataFiltered = [...groupedDataFiltered]
       .sort(sortData({ balanceTypeOp, sortByOp }))
@@ -183,7 +174,6 @@ export function createGroupedSpreadsheet({
         return g;
       });
 
-    console.info({ sortedGroupedDataFiltered });
     setData(sortedGroupedDataFiltered);
   };
 }

@@ -90,3 +90,41 @@ export function trimIntervalsToRange(
     }
   });
 }
+
+// Trim nested category intervalData within each group
+export function trimGroupedDataIntervals(
+  groupedData: GroupedEntity[],
+  startIndex: number,
+  endIndex: number,
+): void {
+  groupedData.forEach(group => {
+    // Trim the group's own intervalData
+    if (
+      startIndex > endIndex ||
+      startIndex < 0 ||
+      endIndex >= group.intervalData.length
+    ) {
+      group.intervalData = [];
+    } else {
+      group.intervalData = group.intervalData.slice(startIndex, endIndex + 1);
+    }
+
+    // Trim the nested categories' intervalData
+    if (group.categories) {
+      group.categories.forEach(category => {
+        if (
+          startIndex > endIndex ||
+          startIndex < 0 ||
+          endIndex >= category.intervalData.length
+        ) {
+          category.intervalData = [];
+        } else {
+          category.intervalData = category.intervalData.slice(
+            startIndex,
+            endIndex + 1,
+          );
+        }
+      });
+    }
+  });
+}
