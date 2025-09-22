@@ -446,7 +446,7 @@ export class CategoryTemplateContext {
         if (template.limit) {
           limitDef = template.limit;
         } else {
-          break; // may not have a limit defined in the template
+          continue; // may not have a limit defined in the template
         }
       }
 
