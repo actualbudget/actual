@@ -904,7 +904,7 @@ export type TableHandleRef<T extends TableItem = TableItem> = {
 
 type TableWithNavigatorProps<T extends TableItem = TableItem> =
   TableProps<T> & {
-    fields;
+    fields: string[] | ((item?: T) => string[]);
   };
 
 export function TableWithNavigator<T extends TableItem = TableItem>({

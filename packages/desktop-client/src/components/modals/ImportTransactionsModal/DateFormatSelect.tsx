@@ -34,7 +34,7 @@ export function DateFormatSelect({
   let delimiter = '-';
   if (transactions.length > 0 && fieldMappings && fieldMappings.date != null) {
     const date = transactions[0][fieldMappings.date];
-    const m = date && String(date).match(/[/.,-/\\]/);
+    const m = date && String(date).match(/[/.,\-/\\]/);
     delimiter = m ? m[0] : ' ';
   }
 

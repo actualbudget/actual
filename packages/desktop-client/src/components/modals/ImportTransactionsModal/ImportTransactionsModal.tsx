@@ -369,7 +369,7 @@ export function ImportTransactionsModal({
       const transactions = parsedTransactions.map(trans => {
         // Add a transient transaction id to match preview with imported transactions
         // @ts-expect-error - trans is unknown type, adding properties dynamically
-        trans.trx_id = index++;
+        trans.trx_id = String(index++);
         // Select all parsed transactions before first preview run
         // @ts-expect-error - trans is unknown type, adding properties dynamically
         trans.selected = true;

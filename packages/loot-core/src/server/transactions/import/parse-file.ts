@@ -9,6 +9,42 @@ import { ofx2json } from './ofx2json';
 import { qif2json } from './qif2json';
 import { xmlCAMT2json } from './xmlcamt2json';
 
+/**
+ * Parse OFX amount strings to numbers.
+ * Handles various OFX amount formats including currency symbols, parentheses, and multiple decimal places.
+ * Returns null for invalid amounts instead of NaN.
+ */
+function parseOfxAmount(amount: string): number | null {
+  if (!amount || typeof amount !== 'string') {
+    return null;
+  }
+
+  // Handle parentheses for negative amounts (e.g., "(30.00)" -> "-30.00")
+  let cleaned = amount.trim();
+  if (cleaned.startsWith('(') && cleaned.endsWith(')')) {
+    cleaned = '-' + cleaned.slice(1, -1);
+  }
+
+  // Remove currency symbols and other non-numeric characters except decimal point and minus sign
+  cleaned = cleaned.replace(/[^\d.-]/g, '');
+
+  // Handle multiple decimal points by keeping only the first one
+  const decimalIndex = cleaned.indexOf('.');
+  if (decimalIndex !== -1) {
+    const beforeDecimal = cleaned.slice(0, decimalIndex);
+    const afterDecimal = cleaned.slice(decimalIndex + 1).replace(/\./g, '');
+    cleaned = beforeDecimal + '.' + afterDecimal;
+  }
+
+  // Ensure we have a valid number format
+  if (!cleaned || cleaned === '-' || cleaned === '.') {
+    return null;
+  }
+
+  const parsed = parseFloat(cleaned);
+  return isNaN(parsed) ? null : parsed;
+}
+
 type Transaction = {
   amount: number;
   date: string;
@@ -155,8 +191,16 @@ async function parseOFX(
   return {
     errors,
     transactions: data.transactions.map(trans => {
+      const parsedAmount = parseOfxAmount(trans.amount);
+      if (parsedAmount === null) {
+        errors.push({
+          message: `Invalid amount format: ${trans.amount}`,
+          internal: `Failed to parse amount: ${trans.amount}`,
+        });
+      }
+
       return {
-        amount: looselyParseAmount(trans.amount),
+        amount: parsedAmount || 0,
         imported_id: trans.fitId,
         date: trans.date,
         payee_name: trans.name || (useMemoFallback ? trans.memo : null),
