@@ -49,9 +49,6 @@ export function MobilePayeesPage() {
           borderBottomWidth: 2,
           borderBottomStyle: 'solid',
           borderBottomColor: theme.tableBorder,
-          position: 'sticky',
-          top: 0,
-          zIndex: 10,
         }}
       >
         <Search
