@@ -100,7 +100,7 @@ export interface LimitTemplate extends BaseTemplate {
   amount: number;
   hold: boolean;
   period: 'daily' | 'weekly' | 'monthly';
-  start?: 'daily' | 'weekly' | 'monthly';
+  start?: string;
   directive: 'template';
   priority: null;
 }
