@@ -13,11 +13,15 @@ import { PayeesList } from './PayeesList';
 import { Search } from '@desktop-client/components/common/Search';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { usePayees } from '@desktop-client/hooks/usePayees';
+import { useSelector } from '@desktop-client/redux';
 
 export function MobilePayeesPage() {
   const { t } = useTranslation();
   const payees = usePayees();
   const [filter, setFilter] = useState('');
+  const isLoading = useSelector(
+    s => s.payees.isPayeesLoading || s.payees.isCommonPayeesLoading,
+  );
 
   const filteredPayees: PayeeEntity[] = useMemo(() => {
     if (!filter) return payees;
@@ -59,7 +63,11 @@ export function MobilePayeesPage() {
           }}
         />
       </View>
-      <PayeesList payees={filteredPayees} onPayeePress={handlePayeePress} />
+      <PayeesList
+        payees={filteredPayees}
+        isLoading={isLoading}
+        onPayeePress={handlePayeePress}
+      />
     </Page>
   );
 }
