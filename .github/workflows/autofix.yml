@@ -10,11 +10,23 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
+  issues: write
 
 jobs:
   autofix:
     runs-on: ubuntu-latest
     steps:
+      - name: Comment about WIP prefix if present
+        if: |
+          github.event.action == 'opened' &&
+          (contains(github.event.pull_request.title, '[WIP]') || startsWith(github.event.pull_request.title, 'WIP'))
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            :wave: Hi! I have added a WIP prefix to the PR. Please remove it once the PR has all CI checks passed as green and once you are happy for a maintainer to review this PR. Thanks!
+            <!-- wip-prefix-comment -->
       - uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup
