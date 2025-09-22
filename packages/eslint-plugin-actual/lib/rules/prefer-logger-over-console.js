@@ -14,9 +14,10 @@ module.exports = {
   },
 
   create(context) {
-    const filename = context.getFilename();
+    const filenameRaw = context.getFilename();
+    const normalizedFilename = filenameRaw.replace(/\\/g, '/');
 
-    const isLootCoreFile = filename.includes('packages/loot-core/src/server');
+    const isLootCoreFile = normalizedFilename.includes('packages/loot-core/src/server');
 
     if (!isLootCoreFile) {
       return {};
@@ -43,7 +44,7 @@ module.exports = {
     }
 
     function getLoggerImportPath() {
-      const pathParts = filename.split('/');
+      const pathParts = normalizedFilename.split('/');
       const serverIndex = pathParts.indexOf('server');
 
       if (serverIndex > -1) {
