@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Button } from '@actual-app/components/button';
+import { SvgBookmark } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
 
 import { type PayeeEntity } from 'loot-core/types/models';
@@ -26,10 +27,20 @@ export function PayeesListItem({ payee, onPress }: PayeesListItemProps) {
         alignItems: 'center',
         justifyContent: 'flex-start',
         padding: '12px 16px',
-        gap: 12,
+        gap: 5,
       }}
       onPress={onPress}
     >
+      {payee.favorite && (
+        <SvgBookmark
+          width={15}
+          height={15}
+          style={{
+            color: theme.pageText,
+            flexShrink: 0,
+          }}
+        />
+      )}
       <span
         style={{
           fontSize: 15,

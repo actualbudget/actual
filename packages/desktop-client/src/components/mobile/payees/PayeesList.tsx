@@ -61,7 +61,9 @@ export function PayeesList({
   }
 
   return (
-    <View style={{ flex: 1, paddingBottom: MOBILE_NAV_HEIGHT }}>
+    <View
+      style={{ flex: 1, paddingBottom: MOBILE_NAV_HEIGHT, overflow: 'auto' }}
+    >
       {payees.map(payee => (
         <PayeesListItem
           key={payee.id}
