@@ -101,7 +101,7 @@ export interface LimitTemplate extends BaseTemplate {
   hold: boolean;
   period?: 'daily' | 'weekly' | 'monthly';
   start?: 'daily' | 'weekly' | 'monthly';
-  priority: undefined;
+  priority: null;
 }
 
 interface ErrorTemplate extends BaseTemplate {
