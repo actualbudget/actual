@@ -17,7 +17,9 @@ module.exports = {
     const filenameRaw = context.getFilename();
     const normalizedFilename = filenameRaw.replace(/\\/g, '/');
 
-    const isLootCoreFile = normalizedFilename.includes('packages/loot-core/src/server');
+    const isLootCoreFile = normalizedFilename.includes(
+      'packages/loot-core/src/server',
+    );
 
     if (!isLootCoreFile) {
       return {};
@@ -32,15 +34,24 @@ module.exports = {
       groupEnd: 'groupEnd',
     };
 
-    function hasLoggerImport() {
-      const sourceCode = context.getSourceCode();
-      const ast = sourceCode.ast;
-
-      return ast.body.some(
-        node =>
+    function getLoggerImportInfo() {
+      const { ast } = context.getSourceCode();
+      for (const node of ast.body) {
+        if (
           node.type === 'ImportDeclaration' &&
-          node.source.value.includes('platform/server/log'),
-      );
+          typeof node.source.value === 'string' &&
+          node.source.value.includes('platform/server/log')
+        ) {
+          const spec = node.specifiers.find(
+            s => s.type === 'ImportSpecifier' && s.imported.name === 'logger',
+          );
+          if (spec) {
+            return { decl: node, localName: spec.local.name };
+          }
+          return { decl: node, localName: null };
+        }
+      }
+      return { decl: null, localName: null };
     }
 
     function getLoggerImportPath() {
@@ -74,31 +85,60 @@ module.exports = {
               const sourceCode = context.getSourceCode();
               const program = sourceCode.ast;
 
+              const { decl, localName } = getLoggerImportInfo();
+              const loggerIdent = localName || 'logger';
               const fixes = [
-                fixer.replaceText(node.callee, `logger.${methodMap[method]}`),
+                fixer.replaceText(
+                  node.callee,
+                  `${loggerIdent}.${methodMap[method]}`,
+                ),
               ];
 
-              if (!hasLoggerImport()) {
-                const importPath = getLoggerImportPath();
-                const firstImport = program.body.find(
-                  n => n.type === 'ImportDeclaration',
-                );
-                if (firstImport) {
+              if (!localName) {
+                // If the module is already imported, append { logger } to it
+                if (decl && decl.specifiers && decl.specifiers.length > 0) {
+                  const lastSpec = decl.specifiers[decl.specifiers.length - 1];
+                  if (lastSpec.type === 'ImportSpecifier') {
+                    fixes.unshift(fixer.insertTextAfter(lastSpec, ', logger'));
+                  } else {
+                    // Fallback: separate import if default/namespace import only
+                    const importPath = getLoggerImportPath();
+                    fixes.unshift(
+                      fixer.insertTextAfter(
+                        decl,
+                        `\nimport { logger } from '${importPath}';`,
+                      ),
+                    );
+                  }
+                } else if (decl) {
+                  // No specifiers at all; insert a fresh named import after it
+                  const importPath = getLoggerImportPath();
                   fixes.unshift(
                     fixer.insertTextAfter(
-                      firstImport,
-                      // eslint-disable-next-line actual/typography
+                      decl,
                       `\nimport { logger } from '${importPath}';`,
                     ),
                   );
                 } else {
-                  fixes.unshift(
-                    fixer.insertTextBefore(
-                      program.body[0],
-                      // eslint-disable-next-line actual/typography
-                      `import { logger } from '${importPath}';\n`,
-                    ),
+                  const importPath = getLoggerImportPath();
+                  const firstImport = program.body.find(
+                    n => n.type === 'ImportDeclaration',
                   );
+                  if (firstImport) {
+                    fixes.unshift(
+                      fixer.insertTextAfter(
+                        firstImport,
+                        `\nimport { logger } from '${importPath}';`,
+                      ),
+                    );
+                  } else {
+                    fixes.unshift(
+                      fixer.insertTextBefore(
+                        program.body[0],
+                        `import { logger } from '${importPath}';\n`,
+                      ),
+                    );
+                  }
                 }
               }
 

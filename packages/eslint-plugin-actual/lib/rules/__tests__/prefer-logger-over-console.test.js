@@ -105,6 +105,32 @@ logger.log("test");`,
           },
         ],
       },
+      {
+        code: `import { setVerboseMode } from '../platform/server/log';
+console.log("test");`,
+        filename: 'packages/loot-core/src/server/test.ts',
+        output: `import { setVerboseMode, logger } from '../platform/server/log';
+logger.log("test");`,
+        errors: [
+          {
+            messageId: 'preferLogger',
+            data: { method: 'log' },
+          },
+        ],
+      },
+      {
+        code: `import { logger as log } from '../platform/server/log';
+console.log("test");`,
+        filename: 'packages/loot-core/src/server/test.ts',
+        output: `import { logger as log } from '../platform/server/log';
+log.log("test");`,
+        errors: [
+          {
+            messageId: 'preferLogger',
+            data: { method: 'log' },
+          },
+        ],
+      },
     ],
   },
   {
