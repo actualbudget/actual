@@ -443,7 +443,11 @@ export class CategoryTemplateContext {
       if (template.type === 'limit') {
         limitDef = template;
       } else {
-        limitDef = template.limit;
+        if (template.limit) {
+          limitDef = template.limit;
+        } else {
+          break; // may not have a limit defined in the template
+        }
       }
 
       if (limitDef.period === 'daily') {
