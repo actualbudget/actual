@@ -573,7 +573,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
         return lookupName(categories, trans.category);
       }
     },
-    [categories, isBudgetTransfer],
+    [categories, isBudgetTransfer, t],
   );
 
   const onSaveInner = useCallback(() => {
