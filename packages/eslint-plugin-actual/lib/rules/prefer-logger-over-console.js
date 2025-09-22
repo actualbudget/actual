@@ -1,3 +1,5 @@
+/* eslint-disable actual/typography */
+
 /** @type {import('eslint').Rule.RuleModule} */
 module.exports = {
   meta: {
