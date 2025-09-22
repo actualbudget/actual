@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { Trans } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
@@ -11,32 +10,18 @@ import { type PayeeEntity } from 'loot-core/types/models';
 import { PayeesListItem } from './PayeesListItem';
 
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
-import { useScrollListener } from '@desktop-client/components/ScrollProvider';
 
 type PayeesListProps = {
   payees: PayeeEntity[];
   isLoading?: boolean;
   onPayeePress: (payee: PayeeEntity) => void;
-  onLoadMore?: () => void;
 };
 
 export function PayeesList({
   payees,
   isLoading = false,
   onPayeePress,
-  onLoadMore,
 }: PayeesListProps) {
-  useScrollListener(
-    useCallback(
-      ({ hasScrolledToEnd }) => {
-        if (onLoadMore && !isLoading && hasScrolledToEnd('down')) {
-          onLoadMore();
-        }
-      },
-      [onLoadMore, isLoading],
-    ),
-  );
-
   if (isLoading && payees.length === 0) {
     return (
       <View
