@@ -96,6 +96,7 @@ export function addTransactions(
 
 export interface ImportTransactionsOpts {
   defaultCleared?: boolean;
+  dryRun?: boolean;
 }
 
 export function importTransactions(
@@ -103,11 +104,13 @@ export function importTransactions(
   transactions: ImportTransactionEntity[],
   opts: ImportTransactionsOpts = {
     defaultCleared: true,
+    dryRun: false,
   },
 ) {
   return send('api/transactions-import', {
     accountId,
     transactions,
+    isPreview: opts.dryRun,
     opts,
   });
 }
