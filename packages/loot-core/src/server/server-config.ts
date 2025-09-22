@@ -1,4 +1,5 @@
 import * as fs from '../platform/server/fs';
+import { logger } from '../platform/server/log';
 
 type ServerConfig = {
   BASE_SERVER: string;
@@ -46,7 +47,7 @@ export function getServer(url?: string): ServerConfig | null {
         PLUGGYAI_SERVER: joinURL(url, '/pluggyai'),
       };
     } catch (error) {
-      console.warn(
+      logger.warn(
         'Unable to parse server URL - using the global config.',
         { config },
         error,

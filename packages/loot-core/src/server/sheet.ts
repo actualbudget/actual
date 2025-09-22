@@ -2,6 +2,7 @@
 import { type Database } from '@jlongster/sql.js';
 
 import { captureBreadcrumb } from '../platform/exceptions';
+import { logger } from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import { sheetForMonth } from '../shared/months';
 import * as Platform from '../shared/platform';
@@ -156,14 +157,14 @@ export async function loadSpreadsheet(
       [],
       true,
     );
-    console.log(`Loaded spreadsheet from cache (${cachedRows.length} items)`);
+    logger.log(`Loaded spreadsheet from cache (${cachedRows.length} items)`);
 
     for (const row of cachedRows) {
       const parsed = JSON.parse(row.value);
       sheet.load(row.key, parsed);
     }
   } else {
-    console.log('Loading fresh spreadsheet');
+    logger.log('Loading fresh spreadsheet');
     await loadUserBudgets(db);
   }
 

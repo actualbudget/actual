@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import { fetch } from '../platform/server/fetch';
+import { logger } from '../platform/server/log';
 import * as Platform from '../shared/platform';
 
 import { PostError } from './errors';
@@ -72,7 +73,7 @@ export async function post(
   }
 
   if (responseData.status !== 'ok') {
-    console.log(
+    logger.log(
       'API call failed: ' +
         url +
         '\nData: ' +
@@ -122,7 +123,7 @@ export async function del(url, data, headers = {}, timeout = null) {
   }
 
   if (res.status !== 'ok') {
-    console.log(
+    logger.log(
       'API call failed: ' +
         url +
         '\nData: ' +
@@ -170,7 +171,7 @@ export async function patch(url, data, headers = {}, timeout = null) {
   }
 
   if (res.status !== 'ok') {
-    console.log(
+    logger.log(
       'API call failed: ' +
         url +
         '\nData: ' +

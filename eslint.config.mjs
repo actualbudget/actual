@@ -451,6 +451,7 @@ export default pluginTypescript.config(
 
       'actual/typography': 'warn',
       'actual/prefer-if-statement': 'warn',
+      'actual/prefer-logger-over-console': 'error',
 
       // Note: base rule explicitly disabled in favor of the TS one
       'no-unused-vars': 'off',
@@ -775,6 +776,7 @@ export default pluginTypescript.config(
     rules: {
       'actual/typography': 'off',
       'actual/no-untranslated-strings': 'off',
+      'actual/prefer-logger-over-console': 'off',
     },
   },
   {
