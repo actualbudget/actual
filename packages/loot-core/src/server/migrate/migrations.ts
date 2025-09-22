@@ -9,6 +9,7 @@ import m1722717601000 from '../../../migrations/1722717601000_reports_move_selec
 import m1722804019000 from '../../../migrations/1722804019000_create_dashboard_table';
 import m1723665565000 from '../../../migrations/1723665565000_prefs';
 import * as fs from '../../platform/server/fs';
+import { logger } from '../../platform/server/log';
 import * as sqlite from '../../platform/server/sqlite';
 import * as prefs from '../prefs';
 
@@ -119,7 +120,7 @@ async function applySql(db, sql) {
   try {
     await sqlite.execQuery(db, sql);
   } catch (e) {
-    console.log('Error applying sql:', sql);
+    logger.log('Error applying sql:', sql);
     throw e;
   }
 }
@@ -149,7 +150,7 @@ function checkDatabaseValidity(
       i >= available.length ||
       appliedIds[i] !== getMigrationId(available[i])
     ) {
-      console.error('Database is out of sync with migrations:', {
+      logger.error('Database is out of sync with migrations:', {
         appliedIds,
         available,
       });

@@ -6,6 +6,7 @@ import * as injectAPI from '@actual-app/api/injected';
 import * as asyncStorage from '../platform/server/asyncStorage';
 import * as connection from '../platform/server/connection';
 import * as fs from '../platform/server/fs';
+import { logger, setVerboseMode } from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import { q } from '../shared/query';
 import { Handlers } from '../types/handlers';
@@ -200,7 +201,7 @@ export async function initApp(isDev, socketName) {
         }),
       );
     } catch (e) {
-      console.log('Error loading key', e);
+      logger.log('Error loading key', e);
       throw new Error('load-key-error');
     }
   }
@@ -229,6 +230,7 @@ export type InitConfig = {
   dataDir?: string;
   serverURL?: string;
   password?: string;
+  verbose?: boolean;
 };
 
 export async function init(config: InitConfig) {
@@ -238,6 +240,11 @@ export async function init(config: InitConfig) {
   if (config) {
     dataDir = config.dataDir;
     serverURL = config.serverURL;
+
+    // Set verbose mode if specified
+    if (config.verbose !== undefined) {
+      setVerboseMode(config.verbose);
+    }
   } else {
     dataDir = process.env.ACTUAL_DATA_DIR;
     serverURL = process.env.ACTUAL_SERVER_URL;
