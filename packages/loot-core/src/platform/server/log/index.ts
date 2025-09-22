@@ -25,6 +25,11 @@ export const logger = {
   error: (...args: unknown[]) => {
     console.error(...args);
   },
+  debug: (...args: unknown[]) => {
+    if (verboseMode) {
+      console.debug(...args);
+    }
+  },
   group: (...args: unknown[]) => {
     if (verboseMode) {
       console.group(...args);

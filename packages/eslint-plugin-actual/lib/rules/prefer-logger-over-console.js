@@ -32,6 +32,7 @@ module.exports = {
       warn: 'warn',
       error: 'error',
       info: 'info',
+      debug: 'debug',
       group: 'group',
       groupEnd: 'groupEnd',
     };

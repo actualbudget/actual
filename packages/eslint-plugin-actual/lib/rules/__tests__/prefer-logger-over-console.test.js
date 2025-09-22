@@ -15,10 +15,6 @@ runClassic(
         code: 'logger.log("test");',
         filename: 'packages/loot-core/src/server/test.ts',
       },
-      {
-        code: 'console.debug("test");',
-        filename: 'packages/loot-core/src/server/test.ts',
-      },
     ],
     invalid: [
       {
@@ -66,6 +62,18 @@ logger.info("info");`,
           {
             messageId: 'preferLogger',
             data: { method: 'info' },
+          },
+        ],
+      },
+      {
+        code: 'console.debug("debug");',
+        filename: 'packages/loot-core/src/server/test.ts',
+        output: `import { logger } from '../platform/server/log';
+logger.debug("debug");`,
+        errors: [
+          {
+            messageId: 'preferLogger',
+            data: { method: 'debug' },
           },
         ],
       },

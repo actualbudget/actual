@@ -672,7 +672,7 @@ export class Action {
         try {
           this.handlebarsTemplate({});
         } catch (e) {
-          console.debug(e);
+          logger.debug(e);
           assert(false, 'invalid-template', `Invalid Handlebars template`);
         }
       }
