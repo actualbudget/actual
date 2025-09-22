@@ -915,7 +915,7 @@ export function TableWithNavigator<T extends TableItem = TableItem>({
   return <Table {...props} navigator={navigator} />;
 }
 
-type TableItem = { id?: number | string };
+type TableItem = { id: number | string };
 
 export type TableProps<T extends TableItem = TableItem> = {
   items: T[];
