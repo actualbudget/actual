@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
-import { useParams } from 'react-router';
+import { useLocation, useParams } from 'react-router';
 
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -21,6 +21,7 @@ export function MobileRuleEditPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id?: string }>();
+  const location = useLocation();
   const dispatch = useDispatch();
 
   const [rule, setRule] = useState<RuleEntity | null>(null);
@@ -70,6 +71,7 @@ export function MobileRuleEditPage() {
         type: 'id',
       },
     ],
+    ...(location.state.rule || {}),
   };
 
   const handleSave = () => {
@@ -78,7 +80,7 @@ export function MobileRuleEditPage() {
   };
 
   const handleCancel = () => {
-    navigate('/rules');
+    navigate(-1);
   };
 
   const handleDelete = () => {

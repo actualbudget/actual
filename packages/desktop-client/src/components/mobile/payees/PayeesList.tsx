@@ -13,12 +13,14 @@ import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTa
 
 type PayeesListProps = {
   payees: PayeeEntity[];
+  ruleCounts: Map<string, number>;
   isLoading?: boolean;
   onPayeePress: (payee: PayeeEntity) => void;
 };
 
 export function PayeesList({
   payees,
+  ruleCounts,
   isLoading = false,
   onPayeePress,
 }: PayeesListProps) {
@@ -68,6 +70,7 @@ export function PayeesList({
         <PayeesListItem
           key={payee.id}
           payee={payee}
+          ruleCount={ruleCounts.get(payee.id) || 0}
           onPress={() => onPayeePress(payee)}
         />
       ))}
