@@ -230,7 +230,7 @@ export type InitConfig = {
   dataDir?: string;
   serverURL?: string;
   password?: string;
-  quiet?: boolean;
+  verbose?: boolean;
 };
 
 export async function init(config: InitConfig) {
@@ -242,8 +242,8 @@ export async function init(config: InitConfig) {
     serverURL = config.serverURL;
 
     // Set verbose mode if specified
-    if (config.quiet !== undefined) {
-      setVerboseMode(!config.quiet);
+    if (config.verbose !== undefined) {
+      setVerboseMode(config.verbose);
     }
   } else {
     dataDir = process.env.ACTUAL_DATA_DIR;
