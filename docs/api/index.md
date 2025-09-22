@@ -111,7 +111,7 @@ These are the public methods that you can use. The API also exports low-level fu
 
 #### `init`
 
-<Method name="init" argsObject={true} args={[{ properties: [{ name: 'dataDir', type: 'string' }, { name: 'serverURL', type: 'string' }, { name: 'password', type: 'string' }]}]} returns="Promise<void>" />
+<Method name="init" argsObject={true} args={[{ properties: [{ name: 'dataDir', type: 'string' }, { name: 'serverURL', type: 'string' }, { name: 'password', type: 'string' }, { name: 'verbose', type: 'boolean' }]}]} returns="Promise<void>" />
 
 Call this before attempting to use any of the API methods. This will connect to the server using the provided password and load the budget data.
 

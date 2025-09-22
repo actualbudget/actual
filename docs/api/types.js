@@ -65,6 +65,15 @@ export let objects = {
         </span>
       ),
     },
+    {
+      name: 'verbose',
+      type: 'boolean',
+      description: (
+        <span>
+          Enable/disable logging from actual internals
+        </span>
+      ),
+    },
   ],
 
   transaction: [
