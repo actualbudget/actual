@@ -54,7 +54,7 @@ describe('CategoryTemplateContext', () => {
     it('should return limit when monthly is not provided', () => {
       const template: Template = {
         type: 'simple',
-        limit: { amount: 500, hold: false },
+        limit: { amount: 500, hold: false, period: 'monthly' },
         directive: 'template',
         priority: 1,
       };
