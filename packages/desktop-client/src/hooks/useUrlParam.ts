@@ -7,8 +7,19 @@ import { useSearchParams } from 'react-router';
 export function useUrlParam(name: string) {
   const [searchParams, setSearchParams] = useSearchParams();
   const setParam = useCallback(
-    (value: string) => {
-      setSearchParams({ [name]: value });
+    (value: string | null | undefined, opts?: { replace?: boolean }) => {
+      setSearchParams(
+        prev => {
+          const next = new URLSearchParams(prev);
+          if (value == null || value === '') {
+            next.delete(name);
+          } else {
+            next.set(name, value);
+          }
+          return next;
+        },
+        opts?.replace ? { replace: true } : undefined,
+      );
     },
     [name, setSearchParams],
   );

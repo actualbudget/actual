@@ -70,7 +70,7 @@ export function PayeesList({
         <PayeesListItem
           key={payee.id}
           payee={payee}
-          ruleCount={ruleCounts.get(payee.id) || 0}
+          ruleCount={ruleCounts.get(payee.id) ?? 0}
           onPress={() => onPayeePress(payee)}
         />
       ))}

@@ -55,8 +55,10 @@ export function MobileRulesPage() {
       return allRules;
     }
 
-    const visibleRuleIds = visibleRulesParam.split(',').map(id => id.trim());
-    return allRules.filter(rule => visibleRuleIds.includes(rule.id));
+    const visibleRuleIdsSet = new Set(
+      visibleRulesParam.split(',').map(id => id.trim()),
+    );
+    return allRules.filter(rule => visibleRuleIdsSet.has(rule.id));
   }, [allRules, visibleRulesParam]);
 
   const filteredRules = useMemo(() => {

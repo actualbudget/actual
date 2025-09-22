@@ -71,7 +71,7 @@ export function MobileRuleEditPage() {
         type: 'id',
       },
     ],
-    ...(location.state.rule || {}),
+    ...(location.state?.rule || {}),
   };
 
   const handleSave = () => {
