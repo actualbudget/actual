@@ -510,6 +510,7 @@ function PayeeCell({
   onNavigateToSchedule,
 }: PayeeCellProps) {
   const isCreatingPayee = useRef(false);
+  const { t } = useTranslation();
 
   const dispatch = useDispatch();
 
@@ -639,7 +640,7 @@ function PayeeCell({
       }}
       formatter={() => {
         if (!displayPayee && isPreview) {
-          return '(No payee)';
+          return t('(No payee)');
         }
         return displayPayee;
       }}
