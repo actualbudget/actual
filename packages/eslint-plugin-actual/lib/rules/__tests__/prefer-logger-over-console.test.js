@@ -70,6 +70,30 @@ logger.info("info");`,
         ],
       },
       {
+        code: 'console.group("Group Name");',
+        filename: 'packages/loot-core/src/server/test.ts',
+        output: `import { logger } from '../platform/server/log';
+logger.group("Group Name");`,
+        errors: [
+          {
+            messageId: 'preferLogger',
+            data: { method: 'group' },
+          },
+        ],
+      },
+      {
+        code: 'console.groupEnd();',
+        filename: 'packages/loot-core/src/server/test.ts',
+        output: `import { logger } from '../platform/server/log';
+logger.groupEnd();`,
+        errors: [
+          {
+            messageId: 'preferLogger',
+            data: { method: 'groupEnd' },
+          },
+        ],
+      },
+      {
         code: 'console.log("test");',
         filename: 'packages/loot-core/src/server/sync/test.ts',
         output: `import { logger } from '../../platform/server/log';

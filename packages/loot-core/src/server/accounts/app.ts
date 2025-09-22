@@ -924,7 +924,7 @@ async function accountsBankSync({
   for (const acct of accounts) {
     if (acct.bankId && acct.account_id) {
       try {
-        console.group('Bank Sync operation for account:', acct.name);
+        logger.group('Bank Sync operation for account:', acct.name);
         const syncResponse = await bankSync.syncAccount(
           userId as string,
           userKey as string,
@@ -946,7 +946,7 @@ async function accountsBankSync({
           message: 'Failed syncing account “' + acct.name + '.”',
         } as Error);
       } finally {
-        console.groupEnd();
+        logger.groupEnd();
       }
     }
   }
@@ -993,7 +993,7 @@ async function simpleFinBatchSync({
     };
   }> = [];
 
-  console.group('Bank Sync operation for all SimpleFin accounts');
+  logger.group('Bank Sync operation for all SimpleFin accounts');
   try {
     const syncResponses: Array<{
       accountId: AccountEntity['id'];
@@ -1075,7 +1075,7 @@ async function simpleFinBatchSync({
     });
   }
 
-  console.groupEnd();
+  logger.groupEnd();
 
   return retVal;
 }

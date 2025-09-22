@@ -27,6 +27,8 @@ module.exports = {
       warn: 'warn',
       error: 'error',
       info: 'info',
+      group: 'group',
+      groupEnd: 'groupEnd',
     };
 
     function hasLoggerImport() {
