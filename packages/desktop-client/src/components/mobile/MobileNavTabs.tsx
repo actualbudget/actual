@@ -123,8 +123,8 @@ export function MobileNavTabs() {
       Icon: SvgCalendar3,
     },
     {
-      name: t('Payees (Soon)'),
-      path: '/payees/soon',
+      name: t('Payees'),
+      path: '/payees',
       style: navTabStyle,
       Icon: SvgStoreFront,
     },
