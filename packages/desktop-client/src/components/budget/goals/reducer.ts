@@ -33,6 +33,8 @@ export const getInitialState = (template: Template | null): ReducerState => {
       throw new Error('Goal is not yet supported');
     case 'remainder':
       throw new Error('Remainder is not yet supported');
+    case 'limit':
+      throw new Error('Limit is not yet supported');
     case 'average':
     case 'copy':
       return {

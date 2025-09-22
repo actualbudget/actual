@@ -95,6 +95,15 @@ export interface GoalTemplate extends BaseTemplate {
   directive: 'goal';
 }
 
+export interface LimitTemplate extends BaseTemplate {
+  type: 'limit';
+  amount: number;
+  hold: boolean;
+  period?: 'daily' | 'weekly' | 'monthly';
+  start?: 'daily' | 'weekly' | 'monthly';
+  priority: undefined;
+}
+
 interface ErrorTemplate extends BaseTemplate {
   type: 'error';
   line: string;
@@ -113,4 +122,5 @@ export type Template =
   | AverageTemplate
   | GoalTemplate
   | CopyTemplate
+  | LimitTemplate
   | ErrorTemplate;
