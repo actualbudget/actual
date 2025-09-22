@@ -9,10 +9,18 @@ import { ofx2json } from './ofx2json';
 import { qif2json } from './qif2json';
 import { xmlCAMT2json } from './xmlcamt2json';
 
+type Transaction = {
+  amount: number;
+  date: string;
+  payee_name: string;
+  imported_payee: string;
+  notes: string;
+};
+
 type ParseError = { message: string; internal: string };
 export type ParseFileResult = {
-  errors?: ParseError[];
-  transactions?: unknown[];
+  errors: ParseError[];
+  transactions?: Transaction[];
 };
 
 export type ParseFileOptions = {
@@ -67,7 +75,7 @@ async function parseCSV(
     contents = lines.slice(options.skipLines).join('\r\n');
   }
 
-  let data;
+  let data: ReturnType<typeof csv2json>;
   try {
     data = csv2json(contents, {
       columns: options?.hasHeaderRow,
@@ -97,7 +105,7 @@ async function parseQIF(
   const errors = Array<ParseError>();
   const contents = await fs.readFile(filepath);
 
-  let data;
+  let data: ReturnType<typeof qif2json>;
   try {
     data = qif2json(contents);
   } catch (err) {
@@ -129,7 +137,7 @@ async function parseOFX(
   const errors = Array<ParseError>();
   const contents = await fs.readFile(filepath);
 
-  let data;
+  let data: Awaited<ReturnType<typeof ofx2json>>;
   try {
     data = await ofx2json(contents);
   } catch (err) {
@@ -148,7 +156,7 @@ async function parseOFX(
     errors,
     transactions: data.transactions.map(trans => {
       return {
-        amount: trans.amount,
+        amount: Number(trans.amount),
         imported_id: trans.fitId,
         date: trans.date,
         payee_name: trans.name || (useMemoFallback ? trans.memo : null),
@@ -166,7 +174,7 @@ async function parseCAMT(
   const errors = Array<ParseError>();
   const contents = await fs.readFile(filepath);
 
-  let data;
+  let data: Awaited<ReturnType<typeof xmlCAMT2json>>;
   try {
     data = await xmlCAMT2json(contents);
   } catch (err) {

@@ -776,7 +776,7 @@ export function SheetCell<
   );
 }
 
-type TableHeaderProps = ComponentProps<typeof Row> & {
+type TableHeaderProps = Omit<ComponentProps<typeof Row>, 'headers'> & {
   headers?: Array<ComponentProps<typeof Cell>>;
 };
 export function TableHeader({
@@ -902,19 +902,20 @@ export type TableHandleRef<T extends TableItem = TableItem> = {
   isAnchored(): boolean;
 };
 
-type TableWithNavigatorProps = TableProps & {
-  fields;
-};
+type TableWithNavigatorProps<T extends TableItem = TableItem> =
+  TableProps<T> & {
+    fields;
+  };
 
-export function TableWithNavigator({
+export function TableWithNavigator<T extends TableItem = TableItem>({
   fields,
   ...props
-}: TableWithNavigatorProps) {
+}: TableWithNavigatorProps<T>) {
   const navigator = useTableNavigator(props.items, fields);
   return <Table {...props} navigator={navigator} />;
 }
 
-type TableItem = { id: number | string };
+type TableItem = { id?: number | string };
 
 export type TableProps<T extends TableItem = TableItem> = {
   items: T[];
