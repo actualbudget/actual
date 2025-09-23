@@ -1600,10 +1600,13 @@ const Transaction = memo(function Transaction({
           ...styles.tnum,
           ...amountStyle,
         }}
-        inputProps={{
-          value: debit === '' && credit === '' ? amountToCurrency(0) : debit,
-          onUpdate: onUpdate.bind(null, 'debit'),
-        }}
+        inputProps={
+          {
+            value: debit === '' && credit === '' ? amountToCurrency(0) : debit,
+            onUpdate: onUpdate.bind(null, 'debit'),
+            'data-1p-ignore': true,
+          } as Record<string, unknown>
+        }
         privacyFilter={{
           activationFilters: [!isTemporaryId(transaction.id)],
         }}
@@ -1626,10 +1629,13 @@ const Transaction = memo(function Transaction({
           ...styles.tnum,
           ...amountStyle,
         }}
-        inputProps={{
-          value: credit,
-          onUpdate: onUpdate.bind(null, 'credit'),
-        }}
+        inputProps={
+          {
+            value: credit,
+            onUpdate: onUpdate.bind(null, 'credit'),
+            'data-1p-ignore': true,
+          } as Record<string, unknown>
+        }
         privacyFilter={{
           activationFilters: [!isTemporaryId(transaction.id)],
         }}
