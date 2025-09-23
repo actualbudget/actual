@@ -126,7 +126,11 @@ export function MobileRuleEditPage() {
   };
 
   const isEditing = Boolean(id && id !== 'new' && rule);
-  const pageTitle = isEditing ? t('Edit Rule') : t('Create Rule');
+  const pageTitle = location.state?.rule
+    ? t('Rule')
+    : isEditing
+      ? t('Edit Rule')
+      : t('Create Rule');
 
   // Show loading state while fetching rule
   if (isLoading) {
