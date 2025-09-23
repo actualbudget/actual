@@ -15,7 +15,6 @@ import {
   SpendTemplate,
   Template,
   PeriodicTemplate,
-  //LimitTemplate,
 } from '../../types/models/templates';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
