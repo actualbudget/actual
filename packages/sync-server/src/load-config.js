@@ -268,6 +268,16 @@ const configSchema = convict({
       env: 'ACTUAL_GITHUB_TOKEN',
     },
   },
+  corsProxy: {
+    doc: 'CORS proxy configuration for frontend plugins.',
+
+    enabled: {
+      doc: 'Enable the CORS proxy endpoint.',
+      format: Boolean,
+      default: false,
+      env: 'ACTUAL_CORS_PROXY_ENABLED',
+    },
+  },
 });
 
 let configPath = null;
@@ -304,6 +314,8 @@ debug(`User files: ${configSchema.get('userFiles')}`);
 debug(`Web root: ${configSchema.get('webRoot')}`);
 debug(`Login method: ${configSchema.get('loginMethod')}`);
 debug(`Allowed methods: ${configSchema.get('allowedLoginMethods').join(', ')}`);
+const corsProxyEnabled = configSchema.get('corsProxy.enabled');
+debug(`CORS Proxy enabled: ${corsProxyEnabled}`);
 
 const httpsKey = configSchema.get('https.key');
 if (httpsKey) {
