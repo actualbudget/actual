@@ -49,7 +49,7 @@ If your starting date is before the current date, edit the date on the starting 
 
 Once your account has the proper starting balance, add all the transactions between your start date and today.
 You can enter transactions [manually](../transactions/importing.md#manually-add-transactions), via [file import](../transactions/importing.md#import-financial-files), or via bank syncing to pull in transactions.
-For bank syncing, Actual has built-in support for [GoCardless](../advanced/bank-sync.md) which works for most EU/UK banks, and SimpleFIN for US/Canadian banks.
+For bank syncing, Actual has built-in support for [GoCardless](../advanced/bank-sync.md) which works for most EU/UK banks, and SimpleFIN for US/Canadian banks. Note: GoCardless has stopped accepting accounts for this service.
 For other bank syncing options see the [community projects page](../community-repos.md).
 
 An optional step after you have created your accounts and added your transactions is to reconcile the account.
