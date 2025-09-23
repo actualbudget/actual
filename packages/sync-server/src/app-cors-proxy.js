@@ -47,7 +47,8 @@ async function fetchAllowlist() {
   } catch (error) {
     console.error('Failed to fetch plugin allowlist:', error);
     // Return empty array if fetch fails to be safe
-    return [];
+    allowlistedRepos = [];
+    return allowlistedRepos;
   }
 }
 
@@ -104,11 +105,6 @@ function isUrlAllowed(targetUrl) {
   }
   try {
     const url = new URL(targetUrl);
-
-    // Always allow localhost
-    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
-      return true;
-    }
 
     // Always allow the allowlist URL itself
     if (
