@@ -24,6 +24,12 @@ let allowlistedRepos = [];
 let lastAllowlistFetch = 0;
 const ALLOWLIST_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+// Export cache clearing function for testing
+export const clearAllowlistCache = () => {
+  allowlistedRepos = [];
+  lastAllowlistFetch = 0;
+};
+
 async function fetchAllowlist() {
   const now = Date.now();
   if (
@@ -150,7 +156,15 @@ app.use('/', async (req, res) => {
   }
 
   // Fetch the latest allowlist
-  await fetchAllowlist();
+  try {
+    await fetchAllowlist();
+  } catch (error) {
+    console.error('Failed to fetch allowlist:', error);
+    return res.status(403).json({
+      error: 'URL not allowed',
+      message: 'Unable to verify allowlist',
+    });
+  }
 
   // Check if the URL is allowed
   if (!isUrlAllowed(url.href)) {
