@@ -1,6 +1,6 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
-
+import ipaddr from 'ipaddr.js';
 import { config } from './load-config.js';
 import { requestLoggerMiddleware } from './util/middlewares.js';
 import { validateSession } from './util/validate-user.js';
@@ -51,7 +51,57 @@ async function fetchAllowlist() {
   }
 }
 
+/**
+ * Return true only if the URL is on an allowlist and not a local/private address.
+ */
 function isUrlAllowed(targetUrl) {
+  try {
+    const url = new URL(targetUrl);
+    const hostname = url.hostname;
+
+    // Allowlist of valid hostnames. Should be updated to include only trusted domains.
+    const allowedHostnames = [
+      'localhost',
+      '127.0.0.1',
+      // Add other allowed plugin repositories here.
+      'api.github.com',
+      'raw.githubusercontent.com',
+      'github.com',
+      // Possibly add more as needed and ensure they are safe.
+    ];
+    // Directly allow based on allowlist
+    if (allowedHostnames.includes(hostname)) {
+      return true;
+    }
+
+    // Check if host is IP address and block private/local IP addresses
+    let forbidden = false;
+    if (ipaddr.isValid(hostname)) {
+      const ip = ipaddr.parse(hostname);
+      if (
+        ip.range() === 'private' ||
+        ip.range() === 'loopback' ||
+        ip.range() === 'linkLocal' ||
+        ip.range() === 'uniqueLocal' ||
+        ip.range() === 'unspecified'
+      ) {
+        forbidden = true;
+      }
+    }
+    if (forbidden) {
+      console.warn(`Blocked request to private/localhost IP: ${hostname}`);
+      return false;
+    }
+
+    // You may want to perform an asynchronous DNS lookup here and check the result as well.
+
+    // Allow further hostnames as needed by allowlist
+    // If not found in allowed list, block.
+    return false;
+  } catch (e) {
+    // If the URL can't be parsed, don't allow
+    return false;
+  }
   try {
     const url = new URL(targetUrl);
 
