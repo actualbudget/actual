@@ -191,10 +191,11 @@ app.use('/', async (req, res) => {
 
   // Check if the URL is allowed
   if (!isUrlAllowed(url.href)) {
-    console.warn('Blocked request to unauthorized URL:', targetUrl);
+    console.warn('Blocked request to unauthorized URL:', url.href);
     return res.status(403).json({
       error: 'URL not allowed',
-      message: 'Only localhost and allowlisted plugin repositories are allowed',
+      message:
+        'Only allowlisted plugin repositories are allowed (localhost only in development)',
     });
   }
 
