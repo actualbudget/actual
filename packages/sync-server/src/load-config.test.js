@@ -16,6 +16,8 @@ describe('tokenExpiration format', () => {
   });
 
   it('should accept string numbers from environment variables', () => {
+    // Test string number
+    process.env.TEST_TOKEN_EXPIRATION = '86400';
     const testSchema = convict({
       token_expiration: {
         format: 'tokenExpiration',
@@ -23,10 +25,6 @@ describe('tokenExpiration format', () => {
         env: 'TEST_TOKEN_EXPIRATION',
       },
     });
-
-    // Test string number
-    process.env.TEST_TOKEN_EXPIRATION = '86400';
-    testSchema.load({});
     expect(() => testSchema.validate()).not.toThrow();
     expect(testSchema.get('token_expiration')).toBe(86400);
     expect(typeof testSchema.get('token_expiration')).toBe('number');
