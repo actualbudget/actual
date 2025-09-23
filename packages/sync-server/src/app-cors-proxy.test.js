@@ -285,21 +285,17 @@ describe('app-cors-proxy', () => {
     });
 
     it('should allow raw.githubusercontent.com URLs for allowlisted repos', async () => {
-      const res = await request(app)
-        .get('/')
-        .query({
-          url: 'https://raw.githubusercontent.com/user/repo1/main/file.txt',
-        });
+      const res = await request(app).get('/').query({
+        url: 'https://raw.githubusercontent.com/user/repo1/main/file.txt',
+      });
 
       expect(res.statusCode).toBe(200);
     });
 
     it('should allow github.com release URLs for allowlisted repos', async () => {
-      const res = await request(app)
-        .get('/')
-        .query({
-          url: 'https://github.com/user/repo1/releases/download/v1.0.0/file.zip',
-        });
+      const res = await request(app).get('/').query({
+        url: 'https://github.com/user/repo1/releases/download/v1.0.0/file.zip',
+      });
 
       expect(res.statusCode).toBe(200);
     });
@@ -446,11 +442,9 @@ describe('app-cors-proxy', () => {
     it('should add GitHub authentication for raw.githubusercontent.com when token is configured', async () => {
       config.get.mockReturnValue('test-github-token');
 
-      await request(app)
-        .get('/')
-        .query({
-          url: 'https://raw.githubusercontent.com/user/repo1/main/file.txt',
-        });
+      await request(app).get('/').query({
+        url: 'https://raw.githubusercontent.com/user/repo1/main/file.txt',
+      });
 
       expect(global.fetch).toHaveBeenCalledWith(
         'https://raw.githubusercontent.com/user/repo1/main/file.txt',
