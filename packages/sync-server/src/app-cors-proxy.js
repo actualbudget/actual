@@ -1,6 +1,7 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import ipaddr from 'ipaddr.js';
+
 import { config } from './load-config.js';
 import { requestLoggerMiddleware } from './util/middlewares.js';
 import { validateSession } from './util/validate-user.js';
@@ -60,53 +61,24 @@ function isUrlAllowed(targetUrl) {
     const url = new URL(targetUrl);
     const hostname = url.hostname;
 
-    // Allowlist of valid hostnames. Should be updated to include only trusted domains.
-    const allowedHostnames = [
-      'localhost',
-      '127.0.0.1',
-      // Add other allowed plugin repositories here.
-      'api.github.com',
-      'raw.githubusercontent.com',
-      'github.com',
-      // Possibly add more as needed and ensure they are safe.
-    ];
-    // Directly allow based on allowlist
-    if (allowedHostnames.includes(hostname)) {
-      return true;
-    }
-
-    // Check if host is IP address and block private/local IP addresses
-    let forbidden = false;
+    // Block private/local IP addresses
     if (ipaddr.isValid(hostname)) {
       const ip = ipaddr.parse(hostname);
       if (
-        ip.range() === 'private' ||
-        ip.range() === 'loopback' ||
-        ip.range() === 'linkLocal' ||
-        ip.range() === 'uniqueLocal' ||
-        ip.range() === 'unspecified'
+        [
+          'private',
+          'loopback',
+          'linkLocal',
+          'uniqueLocal',
+          'unspecified',
+        ].includes(ip.range())
       ) {
-        forbidden = true;
+        console.warn(`Blocked request to private/localhost IP: ${hostname}`);
+        return false;
       }
     }
-    if (forbidden) {
-      console.warn(`Blocked request to private/localhost IP: ${hostname}`);
-      return false;
-    }
 
-    // You may want to perform an asynchronous DNS lookup here and check the result as well.
-
-    // Allow further hostnames as needed by allowlist
-    // If not found in allowed list, block.
-    return false;
-  } catch (e) {
-    // If the URL can't be parsed, don't allow
-    return false;
-  }
-  try {
-    const url = new URL(targetUrl);
-
-    // Always allow the allowlist URL itself
+    // Always allow the specific plugin-store URL
     if (
       targetUrl ===
       'https://raw.githubusercontent.com/actualbudget/plugin-store/refs/heads/main/plugins.json'
@@ -117,35 +89,18 @@ function isUrlAllowed(targetUrl) {
     // Check against allowlisted repositories
     for (const repoUrl of allowlistedRepos) {
       try {
-        const repoUrlObj = new URL(repoUrl);
-        const repoOwner = repoUrlObj.pathname.split('/')[1];
-        const repoName = repoUrlObj.pathname.split('/')[2];
+        const { pathname } = new URL(repoUrl);
+        const [, repoOwner, repoName] = pathname.split('/');
 
-        // Allow the repository URL itself
-        if (targetUrl === repoUrl || targetUrl.startsWith(repoUrl + '/')) {
-          return true;
-        }
-
-        // Allow GitHub API calls for this repository
         if (
-          url.hostname === 'api.github.com' &&
-          url.pathname.startsWith(`/repos/${repoOwner}/${repoName}`)
-        ) {
-          return true;
-        }
-
-        // Allow raw.githubusercontent.com for this repository
-        if (
-          url.hostname === 'raw.githubusercontent.com' &&
-          url.pathname.startsWith(`/${repoOwner}/${repoName}/`)
-        ) {
-          return true;
-        }
-
-        // Allow github.com releases for this repository
-        if (
-          url.hostname === 'github.com' &&
-          url.pathname.startsWith(`/${repoOwner}/${repoName}/releases/`)
+          targetUrl === repoUrl ||
+          targetUrl.startsWith(repoUrl + '/') ||
+          (hostname === 'api.github.com' &&
+            url.pathname.startsWith(`/repos/${repoOwner}/${repoName}`)) ||
+          (hostname === 'raw.githubusercontent.com' &&
+            url.pathname.startsWith(`/${repoOwner}/${repoName}/`)) ||
+          (hostname === 'github.com' &&
+            url.pathname.startsWith(`/${repoOwner}/${repoName}/releases/`))
         ) {
           return true;
         }
@@ -155,7 +110,6 @@ function isUrlAllowed(targetUrl) {
           repoUrl,
           e.message,
         );
-        continue;
       }
     }
 
@@ -167,6 +121,15 @@ function isUrlAllowed(targetUrl) {
 }
 
 app.use('/', async (req, res) => {
+  // CORS preflight
+  if (req.method === 'OPTIONS') {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type, X-Actual-Token');
+    res.set('Access-Control-Max-Age', '600');
+    return res.status(204).end();
+  }
+
   const targetUrlString = req.query.url;
 
   if (!targetUrlString) {
@@ -206,6 +169,12 @@ app.use('/', async (req, res) => {
       body,
       headers: customHeaders = {},
     } = req.body || {};
+
+    const methodNormalized =
+      typeof method === 'string' ? method.toUpperCase() : 'GET';
+    if (!['GET', 'HEAD'].includes(methodNormalized)) {
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
 
     const requestHeaders = {
       ...req.headers,
