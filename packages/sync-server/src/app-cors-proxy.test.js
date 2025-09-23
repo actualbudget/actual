@@ -5,6 +5,7 @@ import { vi, describe, it, expect, beforeEach, beforeAll } from 'vitest';
 import { handlers as app, clearAllowlistCache } from './app-cors-proxy.js';
 import { config } from './load-config.js';
 import { validateSession } from './util/validate-user.js';
+
 vi.mock('./load-config.js', () => ({
   config: {
     get: vi.fn(),
@@ -31,11 +32,6 @@ vi.mock('ipaddr.js', () => ({
 }));
 
 global.fetch = vi.fn();
-
-import { handlers as app, clearAllowlistCache } from './app-cors-proxy.js';
-import { config } from './load-config.js';
-import { validateSession } from './util/validate-user.js';
-import ipaddr from 'ipaddr.js';
 
 describe('app-cors-proxy', () => {
   const defaultAllowlistedRepos = [
@@ -509,7 +505,6 @@ describe('app-cors-proxy', () => {
     });
 
     it('should handle binary responses', async () => {
-
       const res = await request(app)
         .get('/')
         .query({ url: 'https://github.com/user/repo1/file.bin' });
