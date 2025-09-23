@@ -185,6 +185,8 @@ app.use('/', async (req, res) => {
     // Remove headers that shouldn't be forwarded
     delete requestHeaders['x-actual-token'];
     delete requestHeaders['content-length'];
+    delete requestHeaders['cookie'];
+    delete requestHeaders['cookie2'];
 
     // Add GitHub authentication if token is configured and request is to GitHub
     const githubToken = config.get('github.token');
