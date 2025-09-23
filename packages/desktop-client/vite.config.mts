@@ -1,5 +1,7 @@
 // @ts-strict-ignore
 import * as path from 'path';
+import * as fs from 'fs';
+import * as child_process from 'child_process';
 
 import inject from '@rollup/plugin-inject';
 import basicSsl from '@vitejs/plugin-basic-ssl';
@@ -24,6 +26,47 @@ const addWatchers = (): Plugin => ({
           wsc.send(JSON.stringify({ type: 'static-changed' }));
         }
       });
+  },
+});
+
+const buildServiceWorker = (): Plugin => ({
+  name: 'build-service-worker',
+  buildStart() {
+    // Compile TypeScript service worker
+    try {
+      console.log('Compiling service worker...');
+      child_process.execSync('tsc --project tsconfig.service-worker.json', {
+        stdio: 'inherit',
+        cwd: path.resolve(__dirname),
+      });
+
+      // Rename compiled file to match VitePWA expectations
+      const sourcePath = path.resolve(
+        __dirname,
+        'service-worker',
+        'plugin-service-worker.js',
+      );
+      const destPath = path.resolve(
+        __dirname,
+        'service-worker',
+        'plugin-sw.js',
+      );
+
+      if (fs.existsSync(sourcePath)) {
+        fs.renameSync(sourcePath, destPath);
+        console.log('Service worker compiled and renamed successfully');
+      }
+    } catch (error) {
+      console.error('Failed to compile service worker:', error);
+      throw error;
+    }
+  },
+  generateBundle() {
+    // Ensure service worker is built before bundling
+    const swPath = path.resolve(__dirname, 'service-worker', 'plugin-sw.js');
+    if (!fs.existsSync(swPath)) {
+      throw new Error('Service worker not found. Build may have failed.');
+    }
   },
 });
 
@@ -155,23 +198,47 @@ export default defineConfig(async ({ mode }) => {
       extensions: resolveExtensions,
     },
     plugins: [
+      buildServiceWorker(),
       // electron (desktop) builds do not support PWA
       mode === 'desktop'
         ? undefined
         : VitePWA({
             registerType: 'prompt',
+            strategies: 'injectManifest',
+            srcDir: 'service-worker',
+            filename: 'plugin-sw.js',
+            manifest: {
+              name: 'Actual',
+              short_name: 'Actual',
+              description: 'A local-first personal finance tool',
+              theme_color: '#8812E1',
+              background_color: '#8812E1',
+              display: 'standalone',
+              start_url: './',
+            },
+            injectManifest: {
+              maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
+              swSrc: 'service-worker/plugin-sw.js',
+            },
+            devOptions: {
+              enabled: true, // We need service worker in dev mode to work with plugins
+              type: 'module',
+            },
             workbox: {
               globPatterns: [
                 '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
               ],
               ignoreURLParametersMatching: [/^v$/],
               navigateFallback: '/index.html',
-              maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+              maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
               navigateFallbackDenylist: [
                 /^\/account\/.*$/,
                 /^\/admin\/.*$/,
                 /^\/secret\/.*$/,
                 /^\/openid\/.*$/,
+                /^\/plugins\/.*$/,
+                /^\/kcab\/.*$/,
+                /^\/plugin-data\/.*$/,
               ],
             },
           }),
