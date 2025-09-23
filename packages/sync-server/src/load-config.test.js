@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import convict from 'convict';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 // Import the custom format
 import './load-config.js';
@@ -43,7 +43,7 @@ describe('tokenExpiration format', () => {
 
     // Test different string numbers
     const testCases = ['3600', '7200', '0'];
-    
+
     for (const testValue of testCases) {
       process.env.TEST_TOKEN_EXPIRATION = testValue;
       testSchema.load({});
@@ -100,11 +100,15 @@ describe('tokenExpiration format', () => {
     // Test invalid string
     process.env.TEST_TOKEN_EXPIRATION = 'invalid';
     testSchema.load({});
-    expect(() => testSchema.validate()).toThrow(/Invalid token_expiration value/);
+    expect(() => testSchema.validate()).toThrow(
+      /Invalid token_expiration value/,
+    );
 
     // Test negative number as string
     process.env.TEST_TOKEN_EXPIRATION = '-100';
     testSchema.load({});
-    expect(() => testSchema.validate()).toThrow(/Invalid token_expiration value/);
+    expect(() => testSchema.validate()).toThrow(
+      /Invalid token_expiration value/,
+    );
   });
 });
