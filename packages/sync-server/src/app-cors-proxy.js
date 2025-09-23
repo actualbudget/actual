@@ -121,9 +121,9 @@ function isUrlAllowed(targetUrl) {
 }
 
 app.use('/', async (req, res) => {
-  const targetUrl = req.query.url;
+  const targetUrlString = req.query.url;
 
-  if (!targetUrl) {
+  if (!targetUrlString) {
     return res.status(400).json({ error: 'Missing url parameter' });
   }
 
@@ -133,11 +133,18 @@ app.use('/', async (req, res) => {
     return; // validateSession already sent the response
   }
 
+  let url;
+  try {
+    url = new URL(targetUrlString);
+  } catch (e) {
+    return res.status(400).json({ error: 'Invalid url parameter' });
+  }
+
   // Fetch the latest allowlist
   await fetchAllowlist();
 
   // Check if the URL is allowed
-  if (!isUrlAllowed(targetUrl)) {
+  if (!isUrlAllowed(url.href)) {
     console.warn('Blocked request to unauthorized URL:', targetUrl);
     return res.status(403).json({
       error: 'URL not allowed',
@@ -146,8 +153,6 @@ app.use('/', async (req, res) => {
   }
 
   try {
-    const url = new URL(targetUrl);
-
     // Extract method, body, and headers from the request body (sent by loot-core)
     const {
       method = 'GET',
@@ -180,7 +185,7 @@ app.use('/', async (req, res) => {
       );
     }
 
-    const response = await fetch(targetUrl, {
+    const response = await fetch(url.href, {
       method,
       headers: requestHeaders,
       body: ['GET', 'HEAD'].includes(method)
