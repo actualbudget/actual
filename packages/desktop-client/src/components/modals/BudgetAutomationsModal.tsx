@@ -6,7 +6,7 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { Stack } from '@actual-app/components/stack';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { uniqueId } from 'lodash';
+import uniqueId from 'lodash/uniqueId';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { q } from 'loot-core/shared/query';
