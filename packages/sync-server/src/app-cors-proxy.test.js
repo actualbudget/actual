@@ -1,6 +1,10 @@
+import ipaddr from 'ipaddr.js';
 import request from 'supertest';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach, beforeAll } from 'vitest';
 
+import { handlers as app, clearAllowlistCache } from './app-cors-proxy.js';
+import { config } from './load-config.js';
+import { validateSession } from './util/validate-user.js';
 vi.mock('./load-config.js', () => ({
   config: {
     get: vi.fn(),
@@ -47,7 +51,7 @@ describe('app-cors-proxy', () => {
       proxyResponses = {},
     } = options;
 
-    return vi.fn().mockImplementation((url, requestOptions) => {
+    return vi.fn().mockImplementation((url, _requestOptions) => {
       if (
         url ===
         'https://raw.githubusercontent.com/actualbudget/plugin-store/refs/heads/main/plugins.json'
@@ -505,7 +509,6 @@ describe('app-cors-proxy', () => {
     });
 
     it('should handle binary responses', async () => {
-      const binaryData = new Uint8Array([1, 2, 3, 4, 5]);
 
       const res = await request(app)
         .get('/')
