@@ -1,17 +1,28 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgBookmark } from '@actual-app/components/icons/v1';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 
 import { type PayeeEntity } from 'loot-core/types/models';
 
+import { PayeeRuleCountLabel } from '@desktop-client/components/payees/PayeeRuleCountLabel';
+
 type PayeesListItemProps = {
   payee: PayeeEntity;
+  ruleCount: number;
   onPress: () => void;
 };
 
-export function PayeesListItem({ payee, onPress }: PayeesListItemProps) {
+export function PayeesListItem({
+  payee,
+  ruleCount,
+  onPress,
+}: PayeesListItemProps) {
+  const { t } = useTranslation();
+
   return (
     <Button
       variant="bare"
@@ -41,19 +52,43 @@ export function PayeesListItem({ payee, onPress }: PayeesListItemProps) {
           }}
         />
       )}
-      <span
+      <SpaceBetween
         style={{
-          fontSize: 15,
-          fontWeight: 500,
-          color: theme.pageText,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
+          justifyContent: 'space-between',
+          flex: 1,
+          alignItems: 'flex-start',
         }}
-        title={payee.name}
       >
-        {payee.name}
-      </span>
+        <span
+          style={{
+            fontSize: 15,
+            fontWeight: 500,
+            color: payee.transfer_acct ? theme.pageTextSubdued : theme.pageText,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            flex: 1,
+            textAlign: 'left',
+          }}
+          title={payee.name}
+        >
+          {(payee.transfer_acct ? t('Transfer: ') : '') + payee.name}
+        </span>
+
+        <span
+          style={{
+            borderRadius: 4,
+            padding: '3px 6px',
+            backgroundColor: theme.noticeBackground,
+            border: '1px solid ' + theme.noticeBackground,
+            color: theme.noticeTextDark,
+            fontSize: 12,
+            flexShrink: 0,
+          }}
+        >
+          <PayeeRuleCountLabel count={ruleCount} style={{ fontSize: 12 }} />
+        </span>
+      </SpaceBetween>
     </Button>
   );
 }
