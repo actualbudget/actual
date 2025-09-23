@@ -1,0 +1,22 @@
+{
+  "name": "plugins-service",
+  "version": "0.0.1",
+  "description": "Plugin service worker for Actual",
+  "main": "plugin-sw.js",
+  "scripts": {
+    "build": "cross-env NODE_ENV=production ./bin/build-service-worker",
+    "build-dev": "cross-env NODE_ENV=development ./bin/build-service-worker",
+    "watch": "cross-env NODE_ENV=development ./bin/build-service-worker --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "workbox-precaching": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.17.0",
+    "cross-env": "^7.0.3",
+    "typescript": "^5.9.2",
+    "vite": "^6.3.6"
+  }
+}

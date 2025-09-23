@@ -16670,6 +16670,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"plugins-service@workspace:packages/plugins-service":
+  version: 0.0.0-use.local
+  resolution: "plugins-service@workspace:packages/plugins-service"
+  dependencies:
+    "@types/node": "npm:^22.17.0"
+    cross-env: "npm:^7.0.3"
+    typescript: "npm:^5.9.2"
+    vite: "npm:^6.3.6"
+    workbox-precaching: "npm:^7.0.0"
+  languageName: unknown
+  linkType: soft
+
 "possible-typed-array-names@npm:^1.0.0":
   version: 1.0.0
   resolution: "possible-typed-array-names@npm:1.0.0"
@@ -21460,7 +21472,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"workbox-precaching@npm:7.3.0":
+"workbox-precaching@npm:7.3.0, workbox-precaching@npm:^7.0.0":
   version: 7.3.0
   resolution: "workbox-precaching@npm:7.3.0"
   dependencies:
