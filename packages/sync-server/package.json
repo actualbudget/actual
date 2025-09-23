@@ -38,14 +38,14 @@
     "express": "5.1.0",
     "express-rate-limit": "^8.0.1",
     "express-winston": "^4.2.0",
+    "ipaddr.js": "^2.2.0",
     "jws": "^4.0.0",
     "migrate": "^2.1.0",
     "nordigen-node": "^1.4.1",
     "openid-client": "^5.7.1",
     "pluggy-sdk": "^0.74.0",
     "uuid": "^11.1.0",
-    "winston": "^3.17.0",
-    "ipaddr.js": "^2.2.0"
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",
