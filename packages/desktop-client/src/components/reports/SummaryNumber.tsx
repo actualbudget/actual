@@ -2,7 +2,7 @@ import React, { type Ref, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 
 import { chartTheme } from './chart-theme';
 import { LoadingIndicator } from './LoadingIndicator';

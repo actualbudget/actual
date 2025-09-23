@@ -22,7 +22,7 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { format as formatDate } from 'date-fns';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 
 import * as monthUtils from 'loot-core/shared/months';
 import { type CalendarWidget } from 'loot-core/types/models';

@@ -9,7 +9,7 @@ import React, {
   useMemo,
 } from 'react';
 
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 
 type ScrollDirection = 'up' | 'down' | 'left' | 'right';
 
@@ -136,10 +136,12 @@ export function ScrollProvider<T extends Element>({
         if (target instanceof Element) {
           previousScrollX.current = scrollX.current;
           scrollX.current = target.scrollLeft;
-          scrollHeight.current = target.scrollHeight;
+          scrollWidth.current = target.scrollWidth;
+          clientWidth.current = target.clientWidth;
 
           previousScrollY.current = scrollY.current;
           scrollY.current = target.scrollTop;
+          scrollHeight.current = target.scrollHeight;
           clientHeight.current = target.clientHeight;
 
           const currentScrollX = scrollX.current;
