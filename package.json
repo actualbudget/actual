@@ -38,6 +38,7 @@
     "build:desktop": "./bin/package-electron",
     "build:plugins-service": "yarn workspace plugins-service build",
     "build:api": "yarn workspace @actual-app/api build",
+    "build:plugins-core": "yarn workspace @actual-app/plugins-core build",
     "generate:i18n": "yarn workspace @actual-app/web generate:i18n",
     "generate:release-notes": "ts-node ./bin/release-note-generator.ts",
     "test": "lage test --continue",

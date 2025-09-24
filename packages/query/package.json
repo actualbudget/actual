@@ -1,0 +1,36 @@
+{
+  "name": "@actual-app/query",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Query system and database utilities for Actual Budget",
+  "license": "MIT",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "development": "./src/index.ts"
+    },
+    "./database": {
+      "types": "./src/database.ts",
+      "development": "./src/database.ts"
+    },
+    "./aql-result": {
+      "types": "./src/aql-result.ts",
+      "development": "./src/aql-result.ts"
+    },
+    "./spreadsheet": {
+      "types": "./src/spreadsheet.ts",
+      "development": "./src/spreadsheet.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "@actual-app/shared-types": "workspace:^"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist",
+    "jsx": "react-jsx",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@actual-app/shared-types": ["../shared-types/src/index.ts"],
+      "@actual-app/shared-types/*": ["../shared-types/src/*"],
+      "@actual-app/shared-types/models": [
+        "../shared-types/src/models/index.ts"
+      ],
+      "@actual-app/query": ["../query/src/index.ts"],
+      "@actual-app/query/*": ["../query/src/*"],
+      "@actual-app/components": ["../component-library/src/index.ts"],
+      "@actual-app/components/*": ["../component-library/src/*"]
+    }
+  },
+  "include": ["src"]
+}

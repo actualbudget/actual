@@ -32,8 +32,24 @@
     "paths": {
       // TEMPORARY: Until we can fix the "exports" in the loot-core package.json
       "loot-core/*": ["./packages/loot-core/src/*"],
+      "plugins-core/*": ["./packages/plugins-core/src/*"],
+      "@actual-app/plugins-core": ["./packages/plugins-core/src/index.ts"],
+      "@actual-app/plugins-core/server": [
+        "./packages/plugins-core/src/server.ts"
+      ],
+      "@actual-app/plugins-core/client": [
+        "./packages/plugins-core/src/client.ts"
+      ],
+      "@actual-app/plugins-core/*": ["./packages/plugins-core/src/*"],
       "@desktop-client/*": ["./packages/desktop-client/src/*"],
-      "@desktop-client/e2e/*": ["./packages/desktop-client/e2e/*"]
+      "@desktop-client/e2e/*": ["./packages/desktop-client/e2e/*"],
+      "@actual-app/query": ["./packages/query/src/index.ts"],
+      "@actual-app/query/*": ["./packages/query/src/*"],
+      "@actual-app/shared-types": ["./packages/shared-types/src/index.ts"],
+      "@actual-app/shared-types/*": ["./packages/shared-types/src/*"],
+      "@actual-app/shared-types/models": [
+        "./packages/shared-types/src/models/index.ts"
+      ]
     },
     "plugins": [
       {
@@ -53,7 +69,8 @@
     "**/lib-dist/*",
     "**/test-results/*",
     "**/playwright-report/*",
-    "**/service-worker/*"
+    "**/service-worker/*",
+    "packages/test-plugin/*"
   ],
   "ts-node": {
     "compilerOptions": {

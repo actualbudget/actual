@@ -52,6 +52,14 @@ export default defineConfig(({ mode }) => {
           find: /^@actual-app\/crdt(\/.*)?$/,
           replacement: path.resolve(crdtDir, 'src') + '$1',
         },
+        {
+          find: '@actual-app/query',
+          replacement: path.resolve(__dirname, '../query/src'),
+        },
+        {
+          find: '@actual-app/shared-types',
+          replacement: path.resolve(__dirname, '../shared-types/src'),
+        },
       ],
     },
     plugins: [
