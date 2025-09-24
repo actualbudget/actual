@@ -8,7 +8,6 @@ import {
 import { q } from 'loot-core/shared/query';
 import type { AccountEntity, CategoryEntity } from 'loot-core/types/models';
 
-
 import { uncategorizedTransactions } from '@desktop-client/queries';
 
 type BudgetType<SheetName extends SheetNames> = Record<
