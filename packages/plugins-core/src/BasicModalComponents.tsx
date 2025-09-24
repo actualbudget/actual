@@ -57,6 +57,20 @@ type ModalHeaderProps = {
   rightContent?: ReactNode;
 };
 
+/**
+ * Header used inside modals that centers an optional title and/or logo with
+ * optional left and right content pinned to the edges.
+ *
+ * The center area shows either a logo (when `showLogo` is true), a title (string/number
+ * rendered via ModalTitle), or a custom React node. `leftContent` and `rightContent`
+ * are rendered in absolutely-positioned regions at the left and right edges respectively.
+ *
+ * @param leftContent - Content rendered at the left edge of the header (optional).
+ * @param showLogo - When true, renders the app logo in the centered area.
+ * @param title - Title to display in the center. If a string or number, it's rendered with ModalTitle; otherwise the node is rendered as-is.
+ * @param rightContent - Content rendered at the right edge of the header (optional).
+ * @returns A JSX element representing the modal header.
+ */
 export function ModalHeader({
   leftContent,
   showLogo,
@@ -130,6 +144,20 @@ type ModalTitleProps = {
   onTitleUpdate?: (newName: string) => void;
 };
 
+/**
+ * Displays a modal title that can be edited inline when enabled.
+ *
+ * Renders a centered, bold title. If `isEditable` is true, clicking the title switches it to an input field
+ * so the user can edit the text. Pressing Enter or completing the input will call `onTitleUpdate` with the
+ * new value only if it differs from the original, then exit edit mode. `getStyle` can supply additional
+ * style overrides based on whether the title is currently being edited.
+ *
+ * @param title - The current title text to display.
+ * @param isEditable - If true, the title becomes clickable and editable.
+ * @param getStyle - Optional function that receives `isEditing` and returns CSS overrides merged into the title/input.
+ * @param onTitleUpdate - Optional callback invoked with the new title when the user commits a change (only called if the value changed).
+ * @returns A JSX element: an Input when editing, otherwise a centered span showing the title.
+ */
 export function ModalTitle({
   title,
   isEditable,
@@ -209,6 +237,17 @@ type ModalCloseButtonProps = {
   style?: CSSProperties;
 };
 
+/**
+ * A compact "close" button that renders a small delete icon inside a bare-styled Button.
+ *
+ * The `onPress` handler is forwarded to the Button. The `style` prop customizes the SVG icon's
+ * appearance (it is applied to the `SvgDelete`), not the Button itself. The Button uses fixed
+ * internal padding and the icon is rendered at a width of 10px.
+ *
+ * @param onPress - Optional callback invoked when the button is pressed.
+ * @param style - Optional CSS properties applied to the delete icon SVG.
+ * @returns A JSX element for use in modal headers or other compact UI areas.
+ */
 export function ModalCloseButton({ onPress, style }: ModalCloseButtonProps) {
   return (
     <Button variant="bare" onPress={onPress} style={{ padding: '10px 10px' }}>

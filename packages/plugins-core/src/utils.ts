@@ -3,8 +3,14 @@ import { useState, useEffect } from 'react';
 import { PluginSpreadsheet } from './types/actualPlugin';
 
 /**
- * useReport hook for plugins to manage spreadsheet data
- * This is similar to the useReport hook in desktop-client but adapted for plugins
+ * React hook that fetches and returns report data for a plugin spreadsheet.
+ *
+ * Calls the provided async `getData` function with the spreadsheet and a setter;
+ * the setter updates the returned results when data becomes available.
+ *
+ * @param sheetName - Identifier for the sheet (kept for API compatibility; not used by the hook).
+ * @param getData - Async function that receives the spreadsheet and a `setData` callback to supply results.
+ * @returns The most recent results of type `T`, or `null` if no results have been set yet.
  */
 export function useReport<T>(
   sheetName: string,

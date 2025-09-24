@@ -158,7 +158,10 @@ export class Query {
 }
 
 /**
- * Query builder function - creates a new Query for the given table
+ * Create a new immutable Query preconfigured for the given table.
+ *
+ * @param table - The table name to build the query for.
+ * @returns A new Query instance whose state.table is set to `table`.
  */
 export function q(table: QueryState['table']) {
   return new Query({ table });
@@ -172,7 +175,23 @@ export interface QueryBuilder {
 }
 
 /**
- * Helper function to get primary order by clause
+ * Derives the primary ORDER BY clause for a Query.
+ *
+ * If the query has any order expressions, the first one is normalized into a simple
+ * descriptor. If the first expression is a string it is treated as the field name
+ * with ascending order. If it is an object, the first key is used as the field
+ * and its value as the order.
+ *
+ * When the query has no order expressions and `defaultOrderBy` is provided, the
+ * function returns an object produced by merging `{ order: 'asc' }` with
+ * `defaultOrderBy` (so the default order is ascending unless overridden by the
+ * spread object). If there is no order information and no default, `null` is
+ * returned.
+ *
+ * @param query - The Query instance to inspect.
+ * @param defaultOrderBy - Fallback object expression to use when the query has no order expressions; may be `null`.
+ * @returns An object describing the primary order (commonly `{ field: string, order: 'asc' | 'desc' }`,
+ *          or a merged object when `defaultOrderBy` is used), or `null` if no ordering is available.
  */
 export function getPrimaryOrderBy(
   query: Query,
