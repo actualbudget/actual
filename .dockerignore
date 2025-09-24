@@ -1,0 +1,158 @@
+# flyctl launch added from .gitignore
+# Sample Data
+data/*
+!**/data/.gitkeep
+data2
+**/Actual-*
+!**/actual-server.js
+**/**/xcuserdata/*
+**/export-2020-01-10.csv
+
+# Secrets
+**/.secret-tokens
+
+# MacOS
+**/.DS_Store
+
+# Logs
+**/**/*.log
+
+# JavaScript
+**/node_modules
+**/packages/api/dist
+**/packages/api/@types
+**/packages/crdt/dist
+**/packages/desktop-electron/client-build
+**/packages/desktop-electron/build
+**/packages/desktop-electron/.electron-symbols
+**/packages/desktop-electron/dist
+**/packages/desktop-electron/loot-core
+**/bundle.desktop.js
+**/bundle.desktop.js.map
+**/bundle.mobile.js
+**/bundle.mobile.js.map
+
+# Yarn
+**/.pnp.*
+**/.yarn/*
+!**/.yarn/patches
+!**/.yarn/plugins
+!**/.yarn/releases
+!**/.yarn/sdks
+!**/.yarn/versions
+
+# VSCode
+**/.vscode
+
+# IntelliJ IDEA
+**/.idea
+
+# Misc
+**/.#*
+
+# Local Netlify folder
+**/.netlify
+
+# build output
+**/package.tgz
+
+# Fly.io configuration
+**/fly.toml
+
+# TypeScript cache
+**/build
+
+# .d.ts files aren't type-checked with skipLibCheck set to true
+**/*.d.ts
+
+# flyctl launch added from packages/api/.gitignore
+packages/api/**/app/bundle.api.js*
+packages/api/**/app/stats.json
+packages/api/**/migrations
+packages/api/**/default-db.sqlite
+packages/api/**/mocks/budgets/**/*
+
+# flyctl launch added from packages/component-library/src/icons/.gitignore
+packages/component-library/src/icons/**/index.js
+
+# flyctl launch added from packages/crdt/.gitignore
+packages/crdt/**/bin/protoc-gen-js
+packages/crdt/**/bin/protoc
+
+# flyctl launch added from packages/desktop-client/.gitignore
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# dependencies
+packages/desktop-client/**/node_modules
+
+# testing
+packages/desktop-client/**/coverage
+packages/desktop-client/**/test-results
+packages/desktop-client/**/playwright-report
+
+# production
+packages/desktop-client/**/build
+packages/desktop-client/**/build-electron
+packages/desktop-client/**/build-stats
+packages/desktop-client/**/stats.json
+
+# misc
+packages/desktop-client/**/.DS_Store
+packages/desktop-client/**/.env
+packages/desktop-client/**/npm-debug.log
+packages/desktop-client/**/.swc
+
+packages/desktop-client/**/*kcab.*
+packages/desktop-client/**/public/kcab
+packages/desktop-client/**/public/data
+packages/desktop-client/**/public/data-file-index.txt
+packages/desktop-client/**/public/*.wasm
+
+# translations
+packages/desktop-client/**/locale
+
+# flyctl launch added from packages/desktop-electron/.gitignore
+# testing
+packages/desktop-electron/**/test-results
+packages/desktop-electron/**/playwright-report
+packages/desktop-electron/**/data
+!packages/desktop-electron/**/data/.gitkeep
+
+# flyctl launch added from packages/loot-core/.gitignore
+packages/loot-core/**/lib-node
+packages/loot-core/**/lib-dist
+
+# flyctl launch added from packages/sync-server/.gitignore
+packages/sync-server/**/.DS_Store
+packages/sync-server/**/.#*
+packages/sync-server/**/config.json
+packages/sync-server/**/node_modules
+packages/sync-server/**/log
+packages/sync-server/**/supervise
+packages/sync-server/**/bin/large-sync-data.txt
+packages/sync-server/**/user-files
+packages/sync-server/**/server-files
+packages/sync-server/**/test-user-files
+packages/sync-server/**/test-server-files
+packages/sync-server/**/fly.toml
+packages/sync-server/**/build
+packages/sync-server/**/*.crt
+packages/sync-server/**/*.pem
+packages/sync-server/**/*.key
+packages/sync-server/**/artifacts.json
+packages/sync-server/**/.migrate
+packages/sync-server/**/.migrate-test
+
+# Yarn
+packages/sync-server/**/.pnp.*
+packages/sync-server/**/.yarn/*
+!packages/sync-server/**/.yarn/patches
+!packages/sync-server/**/.yarn/plugins
+!packages/sync-server/**/.yarn/releases
+!packages/sync-server/**/.yarn/sdks
+!packages/sync-server/**/.yarn/versions
+
+packages/sync-server/**/dist
+packages/sync-server/**/.idea
+packages/sync-server/coverage
+packages/sync-server/coverage-e2e
