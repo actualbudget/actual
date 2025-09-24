@@ -159,13 +159,13 @@ export function ExperimentalFeatures() {
             >
               <Trans>Currency support</Trans>
             </FeatureToggle>
-            {/* Commented out until all PR's are merged */}
-            {/* <GlobalFeatureToggle
+            <GlobalFeatureToggle
               prefName="plugins"
+              disableToggle={true}
               feedbackLink="https://github.com/actualbudget/actual/pull/4049"
             >
-              <Trans>Client-Side plugins</Trans>
-            </GlobalFeatureToggle> */}
+              <Trans>Client-Side plugins (soon)</Trans>
+            </GlobalFeatureToggle>
           </View>
         ) : (
           <Link
