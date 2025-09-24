@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 
+import { logger } from '../../platform/server/log';
 import {
   currentDay,
   addDays,
@@ -157,7 +158,7 @@ export function makeRule(data) {
   try {
     rule = new Rule(ruleModel.toJS(data));
   } catch (e) {
-    console.warn('Invalid rule', e);
+    logger.warn('Invalid rule', e);
     if (e instanceof RuleError) {
       return null;
     }
@@ -275,12 +276,39 @@ function onApplySync(oldValues, newValues) {
   }
 }
 
+export async function getRuleIdFromScheduleId(
+  scheduleId: string,
+): Promise<string | null> {
+  const row = await db.first<Pick<db.DbSchedule, 'rule'>>(
+    'SELECT rule FROM schedules WHERE id = ?',
+    [scheduleId],
+  );
+
+  return row?.rule || null;
+}
+
+export async function getAllRuleIdsFromSchedules(
+  excluding: string,
+): Promise<string[]> {
+  const rows = await db.all<Pick<db.DbSchedule, 'rule'>>(
+    'SELECT rule FROM schedules',
+  );
+
+  // map all rule ids, filter out null/undefined, and de-dupe if needed
+  const ruleIds = rows
+    .map(r => r.rule)
+    .filter((rule): rule is string => !!rule)
+    .filter(ruleId => ruleId !== excluding);
+
+  return ruleIds;
+}
+
 // Runner
 export async function runRules(
   trans,
   accounts: Map<string, db.DbAccount> | null = null,
 ) {
-  let accountsMap = null;
+  let accountsMap: Map<string, db.DbAccount> = null;
   if (accounts === null) {
     accountsMap = new Map(
       (await db.getAccounts()).map(account => [account.id, account]),
@@ -291,6 +319,18 @@ export async function runRules(
 
   let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap);
 
+  let scheduleRuleID = '';
+  // Check if a schedule is attached to this transaction and if so get the rule ID attached to that schedule.
+  if (trans.schedule != null) {
+    const ruleId = await getRuleIdFromScheduleId(trans.schedule);
+    if (ruleId != null) {
+      scheduleRuleID = ruleId;
+    }
+  }
+
+  const RuleIdsLinkedToSchedules =
+    await getAllRuleIdsFromSchedules(scheduleRuleID);
+
   const rules = rankRules(
     fastSetMerge(
       firstcharIndexer.getApplicableRules(trans),
@@ -299,7 +339,22 @@ export async function runRules(
   );
 
   for (let i = 0; i < rules.length; i++) {
-    finalTrans = rules[i].apply(finalTrans);
+    // If there is a scheduleRuleID (meaning this transaction came from a schedule) then exclude rules linked to other schedules.
+    if (scheduleRuleID !== '') {
+      if (rules[i].id === scheduleRuleID) {
+        // if the rule has the same ID that is attached to the schedule then run it (it is the schedules rule).
+        finalTrans = rules[i].apply(finalTrans);
+      } else if (RuleIdsLinkedToSchedules.includes(rules[i].id)) {
+        // skip all other rules that are linked to other schedules.
+        continue;
+      } else {
+        // if a rule is not linked to a schedule, run it.
+        finalTrans = rules[i].apply(finalTrans);
+      }
+    } else {
+      // if there is no scheduleRuleID then just run all rules.
+      finalTrans = rules[i].apply(finalTrans);
+    }
   }
 
   return await finalizeTransactionForRules(finalTrans);
@@ -354,7 +409,7 @@ export function conditionsToAQL(
         return new Condition(cond.op, cond.field, cond.value, cond.options);
       } catch (e) {
         errors.push(e.type || 'internal');
-        console.log('conditionsToAQL: invalid condition: ' + e.message);
+        logger.log('conditionsToAQL: invalid condition: ' + e.message);
         return null;
       }
     })
@@ -618,7 +673,7 @@ export async function applyActions(
           action.options,
         );
       } catch (e) {
-        console.log('Action error', e);
+        logger.log('Action error', e);
         return null;
       }
     })

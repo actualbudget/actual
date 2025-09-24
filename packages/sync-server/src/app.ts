@@ -9,6 +9,7 @@ import rateLimit from 'express-rate-limit';
 import { bootstrap } from './account-db.js';
 import * as accountApp from './app-account.js';
 import * as adminApp from './app-admin.js';
+import * as corsApp from './app-cors-proxy.js';
 import * as goCardlessApp from './app-gocardless/app-gocardless.js';
 import * as openidApp from './app-openid.js';
 import * as pluggai from './app-pluggyai/app-pluggyai.js';
@@ -59,6 +60,10 @@ app.use('/gocardless', goCardlessApp.handlers);
 app.use('/simplefin', simpleFinApp.handlers);
 app.use('/pluggyai', pluggai.handlers);
 app.use('/secret', secretApp.handlers);
+
+if (config.get('corsProxy.enabled')) {
+  app.use('/cors-proxy', corsApp.handlers);
+}
 
 app.use('/admin', adminApp.handlers);
 app.use('/openid', openidApp.handlers);
@@ -145,7 +150,7 @@ if (process.env.NODE_ENV === 'development') {
 
   app.use(express.static(config.get('webRoot'), { index: false }));
   app.get('/{*splat}', (req, res) =>
-    res.sendFile(config.get('webRoot') + '/index.html'),
+    res.sendFile('index.html', { root: config.get('webRoot') }),
   );
 }
 

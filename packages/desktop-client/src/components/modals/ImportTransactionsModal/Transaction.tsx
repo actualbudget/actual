@@ -183,7 +183,7 @@ export function Transaction({
               <View>
                 <SvgDownAndRightArrow width={16} height={16} />
               </View>
-              <View>{formatDate(transaction.date, dateFormat)}</View>
+              <View>{formatDate(transaction.date ?? null, dateFormat)}</View>
             </Stack>
           </View>
         ) : showParsed ? (
@@ -193,7 +193,7 @@ export function Transaction({
             date={transaction.date}
           />
         ) : (
-          formatDate(transaction.date, dateFormat)
+          formatDate(transaction.date ?? null, dateFormat)
         )}
       </Field>
       <Field
@@ -208,12 +208,14 @@ export function Transaction({
       <Field
         width="flex"
         title={
-          categoryList.includes(transaction.category)
+          transaction.category && categoryList.includes(transaction.category)
             ? transaction.category
             : undefined
         }
       >
-        {categoryList.includes(transaction.category) && transaction.category}
+        {transaction.category &&
+          categoryList.includes(transaction.category) &&
+          transaction.category}
       </Field>
       {inOutMode && (
         <Field

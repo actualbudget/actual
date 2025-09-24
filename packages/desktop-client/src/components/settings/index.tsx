@@ -27,27 +27,32 @@ import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
+import { getLatestAppVersion } from '@desktop-client/app/appSlice';
 import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { Link } from '@desktop-client/components/common/Link';
-import { FormField, FormLabel } from '@desktop-client/components/forms';
+import {
+  Checkbox,
+  FormField,
+  FormLabel,
+} from '@desktop-client/components/forms';
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
 import { Page } from '@desktop-client/components/Page';
 import { useServerVersion } from '@desktop-client/components/ServerContext';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import {
-  useIsOutdated,
-  useLatestVersion,
-} from '@desktop-client/hooks/useLatestVersion';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { loadPrefs } from '@desktop-client/prefs/prefsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { useSelector, useDispatch } from '@desktop-client/redux';
 
 function About() {
   const version = useServerVersion();
-  const latestVersion = useLatestVersion();
-  const isOutdated = useIsOutdated();
+  const versionInfo = useSelector(state => state.app.versionInfo);
+  const [notifyWhenUpdateIsAvailable, setNotifyWhenUpdateIsAvailablePref] =
+    useGlobalPref('notifyWhenUpdateIsAvailable', () => {
+      dispatch(getLatestAppVersion());
+    });
+  const dispatch = useDispatch();
 
   return (
     <Setting>
@@ -81,17 +86,20 @@ function About() {
         <Text>
           <Trans>Server version: {{ version }}</Trans>
         </Text>
-        {isOutdated ? (
+
+        {notifyWhenUpdateIsAvailable && versionInfo?.isOutdated ? (
           <Link
             variant="external"
             to="https://actualbudget.org/docs/releases"
             linkColor="purple"
           >
-            <Trans>New version available: {{ latestVersion }}</Trans>
+            <Trans>New version available: {versionInfo.latestVersion}</Trans>
           </Link>
         ) : (
           <Text style={{ color: theme.noticeText, fontWeight: 600 }}>
-            <Trans>You’re up to date!</Trans>
+            {notifyWhenUpdateIsAvailable ? (
+              <Trans>You’re up to date!</Trans>
+            ) : null}
           </Text>
         )}
         <Text>
@@ -102,6 +110,20 @@ function About() {
           >
             <Trans>Release Notes</Trans>
           </Link>
+        </Text>
+      </View>
+      <View>
+        <Text style={{ display: 'flex' }}>
+          <Checkbox
+            id="settings-notifyWhenUpdateIsAvailable"
+            checked={notifyWhenUpdateIsAvailable}
+            onChange={e =>
+              setNotifyWhenUpdateIsAvailablePref(e.currentTarget.checked)
+            }
+          />
+          <label htmlFor="settings-notifyWhenUpdateIsAvailable">
+            <Trans>Display a notification when updates are available</Trans>
+          </label>
         </Text>
       </View>
     </Setting>

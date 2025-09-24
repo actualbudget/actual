@@ -160,28 +160,47 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     }>
   >([]);
 
-  const [earliestTransaction, _] = useState('');
+  const [earliestTransaction, setEarliestTransaction] = useState('');
+  const [latestTransaction, setLatestTransaction] = useState('');
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   useEffect(() => {
     async function run() {
-      const trans = await send('get-earliest-transaction');
+      const earliestTransaction = await send('get-earliest-transaction');
+      setEarliestTransaction(
+        earliestTransaction
+          ? earliestTransaction.date
+          : monthUtils.currentDay(),
+      );
+
+      const latestTransaction = await send('get-latest-transaction');
+      setLatestTransaction(
+        latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
+      );
+
       const currentMonth = monthUtils.currentMonth();
-      let earliestMonth = trans
-        ? monthUtils.monthFromDate(parseISO(fromDateRepr(trans.date)))
+      let earliestMonth = earliestTransaction
+        ? monthUtils.monthFromDate(
+            parseISO(fromDateRepr(earliestTransaction.date)),
+          )
+        : currentMonth;
+      const latestMonth = latestTransaction
+        ? monthUtils.monthFromDate(
+            parseISO(fromDateRepr(latestTransaction.date)),
+          )
         : currentMonth;
 
       // Make sure the month selects are at least populates with a
       // year's worth of months. We can undo this when we have fancier
       // date selects.
-      const yearAgo = monthUtils.subMonths(monthUtils.currentMonth(), 12);
+      const yearAgo = monthUtils.subMonths(latestMonth, 12);
       if (earliestMonth > yearAgo) {
         earliestMonth = yearAgo;
       }
 
       const allMonths = monthUtils
-        .rangeInclusive(earliestMonth, monthUtils.currentMonth())
+        .rangeInclusive(earliestMonth, latestMonth)
         .map(month => ({
           name: month,
           pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
@@ -305,6 +324,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         start={start}
         end={end}
         earliestTransaction={earliestTransaction}
+        latestTransaction={latestTransaction}
         firstDayOfWeekIdx={firstDayOfWeekIdx}
         mode={mode}
         onChangeDates={onChangeDates}

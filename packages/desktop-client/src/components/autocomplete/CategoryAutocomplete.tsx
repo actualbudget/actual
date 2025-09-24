@@ -78,7 +78,52 @@ function CategoryList({
   showBalances,
 }: CategoryListProps) {
   const { t } = useTranslation();
-  let lastGroup: string | undefined | null = null;
+  const { splitTransaction, groupedCategories } = useMemo(() => {
+    return items.reduce(
+      (acc, item, index) => {
+        if (item.id === 'split') {
+          acc.splitTransaction = { ...item, highlightedIndex: index };
+          return acc;
+        }
+
+        const groupId = item.group?.id || '';
+        const existing = acc.groupedCategories.find(
+          x => x.group?.id === groupId,
+        );
+        const itemWithIndex = {
+          ...item,
+          highlightedIndex: index,
+        };
+
+        if (!existing) {
+          acc.groupedCategories.push({
+            group: item.group ?? null,
+            categories: [itemWithIndex],
+          });
+        } else {
+          existing.categories.push(itemWithIndex);
+        }
+
+        return acc;
+      },
+      {
+        splitTransaction: null,
+        groupedCategories: [],
+      } as {
+        splitTransaction:
+          | (CategoryAutocompleteItem & {
+              highlightedIndex: number;
+            })
+          | null;
+        groupedCategories: Array<{
+          group: CategoryGroupEntity | null;
+          categories: Array<
+            CategoryAutocompleteItem & { highlightedIndex: number }
+          >;
+        }>;
+      },
+    );
+  }, [items]);
 
   return (
     <View>
@@ -90,48 +135,44 @@ function CategoryList({
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
-        {items.map((item, idx) => {
-          if (item.id === 'split') {
-            return renderSplitTransactionButton({
-              key: 'split',
-              ...(getItemProps ? getItemProps({ item }) : null),
-              highlighted: highlightedIndex === idx,
-              embedded,
-            });
+        {splitTransaction &&
+          renderSplitTransactionButton({
+            key: 'split',
+            ...(getItemProps ? getItemProps({ item: splitTransaction }) : {}),
+            highlighted: splitTransaction.highlightedIndex === highlightedIndex,
+            embedded,
+          })}
+        {groupedCategories.map(({ group, categories }) => {
+          if (!group) {
+            return null;
           }
 
-          const groupId = item.group?.id;
-          const showGroup = groupId !== lastGroup;
-          const groupName = `${item.group?.name}${item.group?.hidden ? ' ' + t('(hidden)') : ''}`;
-          lastGroup = groupId;
           return (
-            <Fragment key={item.id}>
-              {showGroup && item.group?.name && (
-                <Fragment key={item.group.name}>
-                  {renderCategoryItemGroupHeader({
-                    title: groupName,
+            <Fragment key={group.id}>
+              {renderCategoryItemGroupHeader({
+                title: `${group.name}${group.hidden ? ` ${t('(hidden)')}` : ''}`,
+                style: {
+                  ...(showHiddenItems &&
+                    group.hidden && { color: theme.pageTextSubdued }),
+                },
+              })}
+              {categories.map(item => (
+                <Fragment key={item.id}>
+                  {renderCategoryItem({
+                    ...(getItemProps ? getItemProps({ item }) : {}),
+                    item,
+                    highlighted: highlightedIndex === item.highlightedIndex,
+                    embedded,
                     style: {
                       ...(showHiddenItems &&
-                        item.group?.hidden && { color: theme.pageTextSubdued }),
+                        (item.hidden || group.hidden) && {
+                          color: theme.pageTextSubdued,
+                        }),
                     },
+                    showBalances,
                   })}
                 </Fragment>
-              )}
-              <Fragment key={item.id}>
-                {renderCategoryItem({
-                  ...(getItemProps ? getItemProps({ item }) : null),
-                  item,
-                  highlighted: highlightedIndex === idx,
-                  embedded,
-                  style: {
-                    ...(showHiddenItems &&
-                      (item.hidden || item.group?.hidden) && {
-                        color: theme.pageTextSubdued,
-                      }),
-                  },
-                  showBalances,
-                })}
-              </Fragment>
+              ))}
             </Fragment>
           );
         })}
@@ -213,8 +254,8 @@ export function CategoryAutocomplete({
 
     return allSuggestions;
   }, [
-    defaultCategoryGroups,
     categoryGroups,
+    defaultCategoryGroups,
     showSplitOption,
     showHiddenCategories,
   ]);
@@ -262,6 +303,7 @@ export function CategoryAutocomplete({
         if (suggestions.length === 0) {
           return null;
         } else if (suggestions[0].id === 'split') {
+          // Highlight the first category since the split option is at index 0.
           return suggestions.length > 1 ? 1 : null;
         }
         return 0;

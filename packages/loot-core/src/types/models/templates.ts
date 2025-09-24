@@ -25,7 +25,7 @@ export interface PeriodicTemplate extends BaseTemplateWithPriority {
   limit?: {
     amount: number;
     hold: boolean;
-    period?: 'daily' | 'weekly' | 'monthly';
+    period: 'daily' | 'weekly' | 'monthly';
     start?: string;
   };
 }
@@ -54,7 +54,7 @@ export interface SimpleTemplate extends BaseTemplateWithPriority {
   limit?: {
     amount: number;
     hold: boolean;
-    period?: 'daily' | 'weekly' | 'monthly';
+    period: 'daily' | 'weekly' | 'monthly';
     start?: string;
   };
 }
@@ -82,7 +82,7 @@ export interface RemainderTemplate extends BaseTemplate {
   limit?: {
     amount: number;
     hold: boolean;
-    period?: 'daily' | 'weekly' | 'monthly';
+    period: 'daily' | 'weekly' | 'monthly';
     start?: string;
   };
   directive: 'template';
@@ -93,6 +93,16 @@ export interface GoalTemplate extends BaseTemplate {
   type: 'goal';
   amount: number;
   directive: 'goal';
+}
+
+export interface LimitTemplate extends BaseTemplate {
+  type: 'limit';
+  amount: number;
+  hold: boolean;
+  period: 'daily' | 'weekly' | 'monthly';
+  start?: string;
+  directive: 'template';
+  priority: null;
 }
 
 interface ErrorTemplate extends BaseTemplate {
@@ -113,4 +123,5 @@ export type Template =
   | AverageTemplate
   | GoalTemplate
   | CopyTemplate
+  | LimitTemplate
   | ErrorTemplate;
