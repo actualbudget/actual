@@ -140,10 +140,9 @@ export type GlobalPrefsJson = Partial<{
   theme?: GlobalPrefs['theme'];
   'preferred-dark-theme'?: GlobalPrefs['preferredDarkTheme'];
   plugins?: string; // "true" or "false"
-  'plugin-themes'?: string; // JSON string of complete plugin theme (current selected plugin theme)
+  'plugin-theme'?: string; // JSON string of complete plugin theme (current selected plugin theme)
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
   syncServerConfig?: GlobalPrefs['syncServerConfig'];
-  pluginThemes?: GlobalPrefs['pluginThemes']; //All available plugin themes.
   notifyWhenUpdateIsAvailable?: GlobalPrefs['notifyWhenUpdateIsAvailable'];
 }>;
 
