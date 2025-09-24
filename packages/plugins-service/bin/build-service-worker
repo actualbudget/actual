@@ -4,13 +4,13 @@ cd `dirname "$0"`
 ROOT=`pwd -P`
 VITE_ARGS=""
 
-DESKTOP_DIR="$ROOT"/../../desktop-client/
+DESKTOP_DIR="$ROOT"/../../desktop-client
 SERVICE_WORKER_DIR="$DESKTOP_DIR"/service-worker
 mkdir -p "$SERVICE_WORKER_DIR"
 
 # Clean out previous build files
 rm -f ../dist/*
-rm -rf "$DESKTOP_DIR"/service-worker
+rm -rf "$DESKTOP_DIR"/service-worker/*
 
 if [ $NODE_ENV == 'development' ]; then
   if [ "$OSTYPE" == "msys" ]; then
