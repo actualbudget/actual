@@ -17,7 +17,6 @@ import { GlobalKeys } from './GlobalKeys';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Notifications } from './Notifications';
-import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import { Reports } from './reports';
 import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
@@ -267,7 +266,10 @@ export function FinancesApp() {
                   }
                 />
 
-                <Route path="/payees" element={<ManagePayeesPage />} />
+                <Route
+                  path="/payees"
+                  element={<NarrowAlternate name="Payees" />}
+                />
                 <Route
                   path="/rules"
                   element={<NarrowAlternate name="Rules" />}
@@ -346,6 +348,7 @@ export function FinancesApp() {
               <Route path="/settings" element={<MobileNavTabs />} />
               <Route path="/reports" element={<MobileNavTabs />} />
               <Route path="/rules" element={<MobileNavTabs />} />
+              <Route path="/payees" element={<MobileNavTabs />} />
               <Route path="*" element={null} />
             </Routes>
           </ScrollProvider>

@@ -21,6 +21,7 @@ import {
   Row,
   useTableNavigator,
 } from '@desktop-client/components/table';
+import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
 import { useTagCSS } from '@desktop-client/hooks/useTagCSS';
 import { useDispatch } from '@desktop-client/redux';
@@ -81,8 +82,13 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
     resetInputs();
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => tableNavigator.onEdit('new-tag', 'tag'), []);
+  const isInitialMount = useInitialMount();
+
+  useEffect(() => {
+    if (isInitialMount) {
+      tableNavigator.onEdit('new-tag', 'tag');
+    }
+  }, [isInitialMount, tableNavigator]);
 
   return (
     <View

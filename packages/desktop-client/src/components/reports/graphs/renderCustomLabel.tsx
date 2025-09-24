@@ -1,19 +1,19 @@
 // @ts-strict-ignore
-import React from 'react';
+import React, { type SVGAttributes } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 
 export const renderCustomLabel = (
-  calcX: number,
-  calcY: number,
-  textAnchor: string,
+  calcX: SVGAttributes<SVGTextElement>['x'],
+  calcY: SVGAttributes<SVGTextElement>['y'],
+  textAnchor: SVGAttributes<SVGTextElement>['textAnchor'],
   display: string,
-  textSize?: string,
+  textSize?: SVGAttributes<SVGTextElement>['fontSize'],
   showLabel?: number,
   showLabelThreshold?: number,
-  fill: string = theme.pageText,
+  fill: SVGAttributes<SVGTextElement>['fill'] = theme.pageText,
 ) => {
   return !showLabel || Math.abs(showLabel) > showLabelThreshold ? (
     <text

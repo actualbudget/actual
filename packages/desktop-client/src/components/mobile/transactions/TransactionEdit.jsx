@@ -566,14 +566,14 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const getCategory = useCallback(
     (trans, isOffBudget) => {
       if (isOffBudget) {
-        return 'Off budget';
+        return t('Off budget');
       } else if (isBudgetTransfer(trans)) {
-        return 'Transfer';
+        return t('Transfer');
       } else {
         return lookupName(categories, trans.category);
       }
     },
-    [categories, isBudgetTransfer],
+    [categories, isBudgetTransfer, t],
   );
 
   const onSaveInner = useCallback(() => {

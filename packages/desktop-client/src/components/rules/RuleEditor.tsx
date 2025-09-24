@@ -348,7 +348,7 @@ function ConditionEditor({
       />
       <OpSelect ops={ops} value={op} type={type} onChange={onChange} />
 
-      <View style={{ flex: 1 }}>{valueEditor}</View>
+      <View style={{ flex: 1, minWidth: 80 }}>{valueEditor}</View>
 
       <Stack direction="row">
         <EditorButtons
@@ -1131,7 +1131,7 @@ export function RuleEditor({
     });
   }
 
-  async function onSave(close) {
+  async function onSave() {
     const rule = {
       ...defaultRule,
       stage,
@@ -1175,7 +1175,6 @@ export function RuleEditor({
 
       // @ts-expect-error fix this
       originalOnSave?.(rule);
-      close();
     }
   }
 
@@ -1414,7 +1413,7 @@ export function RuleEditor({
               <Button onPress={onCancel}>
                 <Trans>Cancel</Trans>
               </Button>
-              <Button variant="primary" onPress={() => onSave(onCancel)}>
+              <Button variant="primary" onPress={onSave}>
                 <Trans>Save</Trans>
               </Button>
             </SpaceBetween>
