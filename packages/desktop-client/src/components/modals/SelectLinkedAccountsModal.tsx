@@ -71,6 +71,11 @@ export type SelectLinkedAccountsModalProps =
       requisitionId?: undefined;
       externalAccounts: SyncServerPluggyAiAccount[];
       syncSource: 'pluggyai';
+    }
+  | {
+      requisitionId: string;
+      externalAccounts: SyncServerGoCardlessAccount[]; // we are using this here as the "standard" to avoid clutter in the code.
+      syncSource: 'enablebanking';
     };
 
 export function SelectLinkedAccountsModal({
@@ -98,8 +103,9 @@ export function SelectLinkedAccountsModal({
             externalAccounts: toSort as SyncServerPluggyAiAccount[],
           };
         case 'goCardless':
+        case 'enablebanking':
           return {
-            syncSource: 'goCardless',
+            syncSource,
             requisitionId: requisitionId!,
             externalAccounts: toSort as SyncServerGoCardlessAccount[],
           };
@@ -191,6 +197,7 @@ export function SelectLinkedAccountsModal({
                   ? chosenLocalAccountId
                   : undefined,
               offBudget,
+              syncSource,
             }),
           );
         }

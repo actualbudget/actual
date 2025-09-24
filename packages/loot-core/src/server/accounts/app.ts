@@ -34,6 +34,10 @@ import { getServer } from '../server-config';
 import { batchMessages } from '../sync';
 import { undoable, withUndo } from '../undo';
 
+import {
+  app as enableBankingApp,
+  AccountHandlers as EnableBankingAccountHandlers,
+} from './enablebanking';
 import * as link from './link';
 import { getStartingBalancePayee } from './payees';
 import * as bankSync from './sync';
@@ -65,7 +69,7 @@ export type AccountHandlers = {
   'simplefin-batch-sync': typeof simpleFinBatchSync;
   'transactions-import': typeof importTransactions;
   'account-unlink': typeof unlinkAccount;
-};
+} & EnableBankingAccountHandlers;
 
 async function updateAccount({
   id,
@@ -120,16 +124,22 @@ async function linkGoCardlessAccount({
   account,
   upgradingId,
   offBudget = false,
+  syncSource = 'goCardless',
 }: {
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
   upgradingId?: AccountEntity['id'] | undefined;
   offBudget?: boolean | undefined;
+  syncSource?: string | undefined;
 }) {
   let id;
-  const bank = await link.findOrCreateBank(account.institution, requisitionId);
-
+  const institution =
+    (account.institution as { name: string }).name !== undefined
+      ? (account.institution as { name: string })
+      : { name: account.institution as string };
+  const bank = await link.findOrCreateBank(institution, requisitionId);
   if (upgradingId) {
+    console.log('upgrading', upgradingId);
     const accRow = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ?',
       [upgradingId],
@@ -144,8 +154,10 @@ async function linkGoCardlessAccount({
       id,
       account_id: account.account_id,
       bank: bank.id,
-      account_sync_source: 'goCardless',
+      official_name: account.official_name,
+      account_sync_source: syncSource,
     });
+    console.log('upgrading finished.');
   } else {
     id = uuidv4();
     await db.insertWithUUID('accounts', {
@@ -156,7 +168,7 @@ async function linkGoCardlessAccount({
       official_name: account.official_name,
       bank: bank.id,
       offbudget: offBudget ? 1 : 0,
-      account_sync_source: 'goCardless',
+      account_sync_source: syncSource,
     });
     await db.insertPayee({
       name: '',
@@ -197,7 +209,7 @@ async function linkSimpleFinAccount({
 
   const bank = await link.findOrCreateBank(
     institution,
-    externalAccount.orgDomain ?? externalAccount.orgId,
+    externalAccount.orgDomain ?? externalAccount.orgId ?? 'unknown',
   );
 
   if (upgradingId) {
@@ -267,7 +279,7 @@ async function linkPluggyAiAccount({
 
   const bank = await link.findOrCreateBank(
     institution,
-    externalAccount.orgDomain ?? externalAccount.orgId,
+    externalAccount.orgDomain ?? externalAccount.orgId ?? 'unknown',
   );
 
   if (upgradingId) {
@@ -493,7 +505,6 @@ async function setSecret({
   value: string | null;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
-
   if (!userToken) {
     return { error: 'unauthorized' };
   }
@@ -515,6 +526,7 @@ async function setSecret({
       },
     );
   } catch (error) {
+    console.log('this errored somehow');
     return {
       error: 'failed',
       reason: error instanceof PostError ? error.reason : undefined,
@@ -532,10 +544,13 @@ async function checkSecret(name: string) {
   if (!serverConfig) {
     throw new Error('Failed to get server config.');
   }
+  console.log('ready to retrieve data');
 
   try {
     return await get(serverConfig.BASE_SERVER + '/secret/' + name, {
-      'X-ACTUAL-TOKEN': userToken,
+      headers: {
+        'X-ACTUAL-TOKEN': userToken,
+      },
     });
   } catch (error) {
     logger.error(error);
@@ -1239,3 +1254,4 @@ app.method('accounts-bank-sync', accountsBankSync);
 app.method('simplefin-batch-sync', simpleFinBatchSync);
 app.method('transactions-import', mutator(undoable(importTransactions)));
 app.method('account-unlink', mutator(unlinkAccount));
+app.combine(enableBankingApp);

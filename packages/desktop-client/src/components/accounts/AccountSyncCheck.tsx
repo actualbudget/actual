@@ -11,8 +11,9 @@ import { View } from '@actual-app/components/view';
 import { type AccountEntity } from 'loot-core/types/models';
 
 import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
+import { authorizeEnableBankingSession } from '@desktop-client/banksync/enablebanking';
+import { authorizeBank } from '@desktop-client/banksync/gocardless';
 import { Link } from '@desktop-client/components/common/Link';
-import { authorizeBank } from '@desktop-client/gocardless';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useDispatch } from '@desktop-client/redux';
@@ -68,6 +69,9 @@ function useErrorMessage() {
           </Trans>
         );
 
+      case 'ENABLEBANKING_SESSION_CLOSED':
+        return <Trans>The Enable Banking session has expired.</Trans>;
+
       default:
     }
 
@@ -94,17 +98,6 @@ export function AccountSyncCheck() {
   const triggerRef = useRef(null);
   const { getErrorMessage } = useErrorMessage();
 
-  const reauth = useCallback(
-    (acc: AccountEntity) => {
-      setOpen(false);
-
-      if (acc.account_id) {
-        authorizeBank(dispatch);
-      }
-    },
-    [dispatch],
-  );
-
   const unlink = useCallback(
     (acc: AccountEntity) => {
       if (acc.id) {
@@ -114,6 +107,25 @@ export function AccountSyncCheck() {
       setOpen(false);
     },
     [dispatch],
+  );
+
+  const reauth = useCallback(
+    (acc: AccountEntity) => {
+      setOpen(false);
+
+      if (acc.account_id) {
+        switch (acc.account_sync_source) {
+          case 'goCardless':
+            authorizeBank(dispatch);
+            return;
+          case 'enablebanking':
+            //TODO: skip choosing the bank since we have that info
+            authorizeEnableBankingSession(dispatch, acc, () => unlink(acc));
+            return;
+        }
+      }
+    },
+    [dispatch, unlink],
   );
 
   if (!failedAccounts || !id) {
@@ -131,9 +143,11 @@ export function AccountSyncCheck() {
   }
 
   const { type, code } = error;
+  console.log(error);
   const showAuth =
     (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
-    (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN');
+    (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN') ||
+    type === 'ENABLEBANKING_SESSION_CLOSED';
 
   return (
     <View>

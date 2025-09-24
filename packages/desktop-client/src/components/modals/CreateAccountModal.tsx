@@ -16,6 +16,11 @@ import { send } from 'loot-core/platform/client/fetch';
 
 import { useAuth } from '@desktop-client/auth/AuthProvider';
 import { Permissions } from '@desktop-client/auth/types';
+import {
+  authorizeEnableBankingSession,
+  deconfigureEnableBanking,
+} from '@desktop-client/banksync/enablebanking';
+import { authorizeBank } from '@desktop-client/banksync/gocardless';
 import { Warning } from '@desktop-client/components/alerts';
 import { Link } from '@desktop-client/components/common/Link';
 import {
@@ -24,7 +29,10 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
-import { authorizeBank } from '@desktop-client/gocardless';
+
+import { useEnableBankingStatus } from '@desktop-client/hooks/useEnableBankingStatus';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
@@ -54,6 +62,8 @@ export function CreateAccountModal({
   const [isSimpleFinSetupComplete, setIsSimpleFinSetupComplete] = useState<
     boolean | null
   >(null);
+  const [isEnableBankingSetupComplete, setIsEnableBankingSetupComplete] =
+    useState<boolean | null>(null);
   const [isPluggyAiSetupComplete, setIsPluggyAiSetupComplete] = useState<
     boolean | null
   >(null);
@@ -141,6 +151,14 @@ export function CreateAccountModal({
     }
 
     setLoadingSimpleFinAccounts(false);
+  };
+
+  const onConnectEnableBanking = async () => {
+    if (!isEnableBankingSetupComplete) {
+      onEnableBankingInit();
+      return;
+    }
+    authorizeEnableBankingSession(dispatch);
   };
 
   const onConnectPluggyAi = async () => {
@@ -245,6 +263,19 @@ export function CreateAccountModal({
     );
   };
 
+  const onEnableBankingInit = () => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'enablebanking-init',
+          options: {
+            onSuccess: () => setIsEnableBankingSetupComplete(true),
+          },
+        },
+      }),
+    );
+  };
+
   const onPluggyAiInit = () => {
     dispatch(
       pushModal({
@@ -286,6 +317,12 @@ export function CreateAccountModal({
     });
   };
 
+  const onEnableBankingReset = () => {
+    deconfigureEnableBanking().then(() => {
+      setIsEnableBankingSetupComplete(false);
+    });
+  };
+
   const onPluggyAiReset = () => {
     send('secret-set', {
       name: 'pluggyai_clientId',
@@ -318,6 +355,14 @@ export function CreateAccountModal({
   useEffect(() => {
     setIsSimpleFinSetupComplete(configuredSimpleFin);
   }, [configuredSimpleFin]);
+
+  const {
+    configuredEnableBanking,
+    isLoading: configuredEnableBankingIsLoading,
+  } = useEnableBankingStatus();
+  useEffect(() => {
+    setIsEnableBankingSetupComplete(configuredEnableBanking);
+  }, [configuredEnableBanking]);
 
   const { configuredPluggyAi } = usePluggyAiStatus();
   useEffect(() => {
@@ -516,18 +561,85 @@ export function CreateAccountModal({
                         style={{
                           flexDirection: 'row',
                           gap: 10,
+                          marginTop: '18px',
                           alignItems: 'center',
                         }}
                       >
                         <ButtonWithLoading
                           isDisabled={syncServerStatus !== 'online'}
+                          isLoading={configuredEnableBankingIsLoading}
                           style={{
                             padding: '10px 0',
                             fontSize: 15,
                             fontWeight: 600,
                             flex: 1,
                           }}
-                          onPress={onConnectPluggyAi}
+                          onPress={onConnectEnableBanking}
+                        >
+                          {isEnableBankingSetupComplete
+                            ? t('Link bank account with Enable Banking')
+                            : t('Set up Enable Banking for bank sync')}
+                        </ButtonWithLoading>
+                        {isEnableBankingSetupComplete && (
+                          <DialogTrigger>
+                            <Button
+                              variant="bare"
+                              aria-label={t('EnableBanking menu')}
+                            >
+                              <SvgDotsHorizontalTriple
+                                width={15}
+                                height={15}
+                                style={{ transform: 'rotateZ(90deg)' }}
+                              />
+                            </Button>
+                            <Popover>
+                              <Dialog>
+                                <Menu
+                                  onMenuSelect={item => {
+                                    if (item === 'reconfigure') {
+                                      onEnableBankingReset();
+                                    }
+                                  }}
+                                  items={[
+                                    {
+                                      name: 'reconfigure',
+                                      text: t(
+                                        'Reset EnableBanking credentials',
+                                      ),
+                                    },
+                                  ]}
+                                />
+                              </Dialog>
+                            </Popover>
+                          </DialogTrigger>
+                        )}
+                      </View>
+                      <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                        <Trans>
+                          <strong>
+                            Link a <em>European</em> bank account
+                          </strong>{' '}
+                          to automatically download transactions. Enable Bankin
+                          provides reliable, up-to-date information from
+                          hundreds of banks.
+                        </Trans>
+                      </Text>
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              gap: 10,
+                              alignItems: 'center',
+                            }}
+                          >
+                            <ButtonWithLoading
+                              isDisabled={syncServerStatus !== 'online'}
+                              style={{
+                                padding: '10px 0',
+                                fontSize: 15,
+                                fontWeight: 600,
+                                flex: 1,
+                              }}
+                              onPress={onConnectPluggyAi}
                         >
                           {isPluggyAiSetupComplete
                             ? t('Link bank account with Pluggy.ai')
@@ -578,7 +690,6 @@ export function CreateAccountModal({
                       </Text>
                     </>
                   )}
-
                   {(!isGoCardlessSetupComplete ||
                     !isSimpleFinSetupComplete ||
                     !isPluggyAiSetupComplete) &&
