@@ -99,6 +99,7 @@ export default pluginTypescript.config(
       'packages/loot-core/**/lib-dist/*',
       'packages/loot-core/**/proto/*',
       'packages/sync-server/build/',
+      'packages/plugins-service/dist/',
       '.yarn/*',
       '.github/*',
     ],

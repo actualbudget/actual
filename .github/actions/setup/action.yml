@@ -37,9 +37,6 @@ runs:
       run: yarn --immutable
       shell: bash
       if: steps.cache.outputs.cache-hit != 'true'
-    - name: Install TypeScript globally
-      run: npm install -g typescript
-      shell: bash
     - name: Download translations
       uses: actions/checkout@v4
       with:
