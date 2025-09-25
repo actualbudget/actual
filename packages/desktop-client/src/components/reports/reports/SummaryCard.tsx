@@ -38,6 +38,7 @@ export function SummaryCard({
   const locale = useLocale();
   const { t } = useTranslation();
   const [latestTransaction, setLatestTransaction] = useState<string>('');
+  const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -88,8 +89,6 @@ export function SummaryCard({
   );
 
   const data = useReport('summary', params);
-
-  const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   return (
     <ReportCard

@@ -112,6 +112,7 @@ export function CashFlowCard({
 }: CashFlowCardProps) {
   const { t } = useTranslation();
   const [latestTransaction, setLatestTransaction] = useState<string>('');
+  const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -128,7 +129,6 @@ export function CashFlowCard({
     defaultTimeFrame,
     latestTransaction,
   );
-  const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   const params = useMemo(
     () => simpleCashFlow(start, end, meta?.conditions, meta?.conditionsOp),

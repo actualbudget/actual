@@ -49,9 +49,11 @@ export function NetWorthCard({
   const { isNarrowWidth } = useResponsive();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
-
   const format = useFormat();
+
   const [latestTransaction, setLatestTransaction] = useState<string>('');
+  const [nameMenuOpen, setNameMenuOpen] = useState(false);
+  const [isCardHovered, setIsCardHovered] = useState(false);
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -63,14 +65,11 @@ export function NetWorthCard({
     fetchLatestTransaction();
   }, []);
 
-  const [nameMenuOpen, setNameMenuOpen] = useState(false);
-
   const [start, end] = calculateTimeRange(
     meta?.timeFrame,
     undefined,
     latestTransaction,
   );
-  const [isCardHovered, setIsCardHovered] = useState(false);
   const onCardHover = useCallback(() => setIsCardHovered(true), []);
   const onCardHoverEnd = useCallback(() => setIsCardHovered(false), []);
 

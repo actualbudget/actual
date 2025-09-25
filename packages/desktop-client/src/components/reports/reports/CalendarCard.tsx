@@ -66,6 +66,7 @@ export function CalendarCard({
 }: CalendarCardProps) {
   const { t } = useTranslation();
   const format = useFormat();
+
   const [latestTransaction, setLatestTransaction] = useState<string>('');
 
   useEffect(() => {
