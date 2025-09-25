@@ -29,10 +29,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
-
 import { useEnableBankingStatus } from '@desktop-client/hooks/useEnableBankingStatus';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
@@ -624,22 +621,22 @@ export function CreateAccountModal({
                           hundreds of banks.
                         </Trans>
                       </Text>
-                          <View
-                            style={{
-                              flexDirection: 'row',
-                              gap: 10,
-                              alignItems: 'center',
-                            }}
-                          >
-                            <ButtonWithLoading
-                              isDisabled={syncServerStatus !== 'online'}
-                              style={{
-                                padding: '10px 0',
-                                fontSize: 15,
-                                fontWeight: 600,
-                                flex: 1,
-                              }}
-                              onPress={onConnectPluggyAi}
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          gap: 10,
+                          alignItems: 'center',
+                        }}
+                      >
+                        <ButtonWithLoading
+                          isDisabled={syncServerStatus !== 'online'}
+                          style={{
+                            padding: '10px 0',
+                            fontSize: 15,
+                            fontWeight: 600,
+                            flex: 1,
+                          }}
+                          onPress={onConnectPluggyAi}
                         >
                           {isPluggyAiSetupComplete
                             ? t('Link bank account with Pluggy.ai')

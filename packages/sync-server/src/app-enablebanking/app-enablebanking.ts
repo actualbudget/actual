@@ -120,7 +120,7 @@ post('/transactions', async (req: Request) => {
   const { startDate, endDate, account_id, bank_id } = req.body;
 
   if (!account_id) {
-    throw badRequestVariableError('accountId', '/enablebanking/transactions');
+    throw badRequestVariableError('account_id', '/enablebanking/transactions');
   }
   const transactions = await enableBankingservice.getTransactions(
     account_id,
@@ -129,7 +129,18 @@ post('/transactions', async (req: Request) => {
     bank_id,
   );
 
+  const currentBalance =
+    await enableBankingservice.getCurrentBalance(account_id);
+  console.log('current balance', currentBalance);
+
+  const startingBalance = transactions.reduce(
+    (acc, t) => acc - t.amount,
+    currentBalance,
+  );
+  console.log('starting balance', startingBalance);
+
   return {
     transactions,
+    startingBalance: Math.round(startingBalance * 100), // We are sending cents because that is how it is stored in the DB.
   };
 });

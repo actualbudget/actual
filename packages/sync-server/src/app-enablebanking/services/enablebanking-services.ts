@@ -315,4 +315,28 @@ export const enableBankingservice = {
       bankProcessor.normalizeTransaction(transaction),
     );
   },
+
+  getCurrentBalance: async (account_id: string) => {
+    const clients = enableBankingservice.getClient();
+    const { data } = await clients.GET('/accounts/{account_id}/balances', {
+      params: { path: { account_id } },
+    });
+    isDefined(data);
+
+    if (data.balances.length === 0) {
+      throw new ResourceNotFoundError('No balance data available');
+    }
+
+    const preferredBalanceTypes = ['ITBD', 'ITAV', 'CLBD'];
+    const balance = data.balances.sort((a, b) => {
+      const aIndex = preferredBalanceTypes.indexOf(a.balance_type);
+      const bIndex = preferredBalanceTypes.indexOf(b.balance_type);
+      return (
+        (aIndex === -1 ? preferredBalanceTypes.length : aIndex) -
+        (bIndex === -1 ? preferredBalanceTypes.length : bIndex)
+      );
+    })[0];
+
+    return parseFloat(balance.balance_amount.amount);
+  },
 };

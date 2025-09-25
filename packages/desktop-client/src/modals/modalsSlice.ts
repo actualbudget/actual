@@ -16,7 +16,6 @@ import {
   type NewUserEntity,
   type NoteEntity,
 } from 'loot-core/types/models';
-
 import { type EnableBankingToken } from 'loot-core/types/models/enablebanking';
 import { type Template } from 'loot-core/types/models/templates';
 
