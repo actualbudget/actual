@@ -63,19 +63,6 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
     initialValue: 0,
     run: () => {
       // Making this sync is faster!
-      console.log(`[createCategory] Querying transactions for category ${cat.id} from ${start} to ${end}`);
-      
-      // First, let's see what transactions exist in this date range
-      const allTransactions = db.runQuery<{ id: string; date: number; amount: number; category: string }>(
-        `SELECT id, date, amount, category FROM v_transactions_internal_alive t
-           LEFT JOIN accounts a ON a.id = t.account
-         WHERE t.date >= ${start} AND t.date <= ${end}
-           AND a.offbudget = 0`,
-        [],
-        true,
-      );
-      console.log(`[createCategory] All transactions in date range ${start}-${end}:`, allTransactions);
-      
       const rows = db.runQuery<{ amount: number }>(
         `SELECT SUM(amount) as amount FROM v_transactions_internal_alive t
            LEFT JOIN accounts a ON a.id = t.account
@@ -84,13 +71,8 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
         [],
         true,
       );
-      
-      console.log(`[createCategory] Query result for category ${cat.id}:`, rows);
-      
       const row = rows[0];
-      const amount = row ? row.amount : 0;
-      console.log(`[createCategory] Final amount for category ${cat.id}: ${amount}`);
-      return amount || 0;
+      return row ? row.amount || 0 : 0;
     },
   });
 

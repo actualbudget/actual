@@ -246,36 +246,43 @@ export function isCurrentDay(day: DateLike): boolean {
 // probably live elsewhere
 export function bounds(month: DateLike): { start: number; end: number } {
   const monthStr = typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
-  
+
   // Check if this is a pay period month
   if (isPayPeriod(monthStr)) {
     const config = getPayPeriodConfig();
-    if (config?.enabled) {
-      const year = parseInt(monthStr.slice(0, 4));
-      const periodIndex = parseInt(monthStr.slice(5, 7)) - 12; // Convert 13-99 to 1-87
-      
-      if (periodIndex >= 1) {
-        const periods = generatePayPeriods(year, config);
-        const period = periods.find(p => p.monthId === monthStr);
-        
-        if (period) {
-          console.log(`[PayPeriod] Bounds for pay period ${monthStr}:`, {
-            startDate: period.startDate,
-            endDate: period.endDate
-          });
-          
-          return {
-            start: parseInt(period.startDate.replace(/-/g, '')),
-            end: parseInt(period.endDate.replace(/-/g, '')),
-          };
-        }
+    if (!config || !config.enabled) {
+      throw new Error(
+        `Pay period month '${monthStr}' cannot be processed without valid pay period configuration. ` +
+        `Ensure pay period config is loaded before using pay period months.`
+      );
+    }
+
+    const year = parseInt(monthStr.slice(0, 4));
+    const periodIndex = parseInt(monthStr.slice(5, 7)) - 12; // Convert 13-99 to 1-87
+
+    if (periodIndex >= 1) {
+      const periods = generatePayPeriods(year, config);
+      const period = periods.find(p => p.monthId === monthStr);
+
+      if (period) {
+        console.log(`[PayPeriod] Bounds for pay period ${monthStr}:`, {
+          startDate: period.startDate,
+          endDate: period.endDate
+        });
+
+        return {
+          start: parseInt(period.startDate.replace(/-/g, '')),
+          end: parseInt(period.endDate.replace(/-/g, '')),
+        };
       }
     }
-    
-    // Fallback to calendar month if pay period not found
-    console.warn(`[PayPeriod] Could not find bounds for pay period ${monthStr}, falling back to calendar month`);
+
+    throw new Error(
+      `Pay period '${monthStr}' not found in generated periods for year ${year}. ` +
+      `This may indicate an invalid pay period configuration.`
+    );
   }
-  
+
   // Original calendar month logic
   return {
     start: parseInt(d.format(d.startOfMonth(_parse(month)), 'yyyyMMdd')),
@@ -349,48 +356,46 @@ export function _range(
   // Check if we're dealing with pay periods
   if (isPayPeriod(startStr) || isPayPeriod(endStr)) {
     const config = getPayPeriodConfig();
-    console.log('[PayPeriod] Range request for pay periods:', {
+    console.log('[PayPeriod] Range request involving pay periods:', {
       start: startStr,
       end: endStr,
+      startIsPayPeriod: isPayPeriod(startStr),
+      endIsPayPeriod: isPayPeriod(endStr),
       inclusive,
       config: config
         ? { enabled: config.enabled, payFrequency: config.payFrequency }
         : null,
     });
-    if (config?.enabled) {
-      // Handle mixed ranges by converting calendar months to pay periods
-      let startPeriod = startStr;
-      let endPeriod = endStr;
 
-      // If start is a calendar month, find the first pay period that overlaps with it
-      if (!isPayPeriod(startStr)) {
-        startPeriod = findFirstPayPeriodForCalendarMonth(startStr, config);
-        console.log(
-          `[PayPeriod] Converted calendar month ${startStr} to pay period ${startPeriod}`,
-        );
-      }
-
-      // If end is a calendar month, find the last pay period that overlaps with it
-      if (!isPayPeriod(endStr)) {
-        endPeriod = findLastPayPeriodForCalendarMonth(endStr, config);
-        console.log(
-          `[PayPeriod] Converted calendar month ${endStr} to pay period ${endPeriod}`,
-        );
-      }
-
-      const result = generatePayPeriodRange(
-        startPeriod,
-        endPeriod,
-        config,
-        inclusive,
-      );
-      console.log('[PayPeriod] Generated pay period range:', result);
-      return result;
-    } else {
-      console.log(
-        '[PayPeriod] Pay period config disabled or missing, falling back to calendar months',
+    if (!config || !config.enabled) {
+      throw new Error(
+        `Pay period range requested (${startStr} to ${endStr}) but pay period configuration is not available or disabled. ` +
+        `Ensure pay period config is loaded and enabled before generating pay period ranges.`
       );
     }
+
+    // Prevent mixed ranges - both start and end must be pay periods or both must be calendar months
+    const startIsPayPeriod = isPayPeriod(startStr);
+    const endIsPayPeriod = isPayPeriod(endStr);
+
+    if (startIsPayPeriod !== endIsPayPeriod) {
+      throw new Error(
+        `Mixed calendar month and pay period ranges are not allowed. ` +
+        `Range from '${startStr}' (${startIsPayPeriod ? 'pay period' : 'calendar month'}) ` +
+        `to '${endStr}' (${endIsPayPeriod ? 'pay period' : 'calendar month'}) is invalid. ` +
+        `Use either all calendar months (e.g., '2024-01' to '2024-03') or all pay periods (e.g., '2024-13' to '2024-15').`
+      );
+    }
+
+    // Both are pay periods - generate pay period range directly
+    const result = generatePayPeriodRange(
+      startStr,
+      endStr,
+      config,
+      inclusive,
+    );
+    console.log('[PayPeriod] Generated pay period range:', result);
+    return result;
   }
 
   // Original calendar month logic

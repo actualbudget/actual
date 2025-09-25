@@ -5,7 +5,7 @@ import { parseDate, dayFromDate } from './date-utils';
 
 export interface PayPeriodConfig {
   enabled: boolean;
-  payFrequency: 'weekly' | 'biweekly' | 'semimonthly' | 'bimonthly' | 'monthly';
+  payFrequency: 'weekly' | 'biweekly' | 'semimonthly' | 'monthly';
   startDate: string; // ISO date string (yyyy-MM-dd)
   payDayOfWeek?: number; // 0-6 for weekly/biweekly
   payDayOfMonth?: number; // 1-31 for monthly
@@ -64,7 +64,6 @@ export function loadPayPeriodConfigFromPrefs(prefs: {
       'weekly',
       'biweekly',
       'semimonthly',
-      'bimonthly',
       'monthly',
     ];
     if (!validFrequencies.includes(config.payFrequency)) {
@@ -133,7 +132,7 @@ function validatePayPeriodConfig(
   config: PayPeriodConfig | null | undefined,
 ): void {
   if (!config || config.enabled !== true) return;
-  const validFreq = ['weekly', 'biweekly', 'semimonthly', 'bimonthly', 'monthly'];
+  const validFreq = ['weekly', 'biweekly', 'semimonthly', 'monthly'];
   if (!validFreq.includes(config.payFrequency)) {
     throw new Error(
       "Invalid payFrequency '" + String(config.payFrequency) + "'.",
@@ -157,9 +156,40 @@ function getPeriodIndex(monthId: string, config: PayPeriodConfig): number {
   return mm - 12; // 13 -> 1
 }
 
+/**
+ * Finds the first pay period of a target year based on a reference pattern.
+ * Projects the pattern backward/forward to find the first period that starts in the target year.
+ */
+function findFirstPeriodOfYear(
+  referenceStart: Date,
+  dayInterval: number,
+  targetYear: number,
+): Date {
+  // Calculate how many days from Jan 1 of target year to the reference start
+  const targetYearStart = new Date(targetYear, 0, 1); // Jan 1 of target year
+  const daysDiff = Math.floor((referenceStart.getTime() - targetYearStart.getTime()) / (1000 * 60 * 60 * 24));
+
+  // Find how many intervals to go back to get the first period that starts in target year
+  const intervalOffset = Math.floor(daysDiff / dayInterval);
+
+  // Calculate the first period start date
+  let firstPeriodStart = d.addDays(referenceStart, -intervalOffset * dayInterval);
+
+  // Ensure we're actually in the target year (handle edge cases)
+  while (firstPeriodStart.getFullYear() < targetYear) {
+    firstPeriodStart = d.addDays(firstPeriodStart, dayInterval);
+  }
+  while (firstPeriodStart.getFullYear() > targetYear) {
+    firstPeriodStart = d.addDays(firstPeriodStart, -dayInterval);
+  }
+
+  return firstPeriodStart;
+}
+
 function computePayPeriodByIndex(
   periodIndex: number,
   config: PayPeriodConfig,
+  targetYear: number,
 ): { startDate: Date; endDate: Date; label: string } {
   validatePayPeriodConfig(config);
   if (!config || !config.enabled) {
@@ -170,59 +200,48 @@ function computePayPeriodByIndex(
   if (!Number.isInteger(periodIndex) || periodIndex < 1) {
     throw new Error("Invalid periodIndex '" + String(periodIndex) + "'.");
   }
+  if (!Number.isInteger(targetYear) || targetYear < 1) {
+    throw new Error("Invalid targetYear '" + String(targetYear) + "'.");
+  }
 
-  const baseStart = parseDate(config.startDate);
+  const referenceStart = parseDate(config.startDate);
   const freq = config.payFrequency;
 
-  let startDate = baseStart;
-  let endDate = baseStart;
-  let label = '';
+  let startDate: Date;
+  let endDate: Date;
+  let label = 'Pay Period ' + String(periodIndex);
 
   if (freq === 'weekly') {
-    // Always generate 52 weeks starting from the configured start date
-    startDate = d.addDays(baseStart, (periodIndex - 1) * 7);
+    // Find the first weekly period that starts in the target year
+    const firstPeriodStart = findFirstPeriodOfYear(referenceStart, 7, targetYear);
+    startDate = d.addDays(firstPeriodStart, (periodIndex - 1) * 7);
     endDate = d.addDays(startDate, 6);
-    label = 'Pay Period ' + String(periodIndex);
   } else if (freq === 'biweekly') {
-    // Always generate 26 biweekly periods starting from the configured start date
-    startDate = d.addDays(baseStart, (periodIndex - 1) * 14);
+    // Find the first biweekly period that starts in the target year
+    const firstPeriodStart = findFirstPeriodOfYear(referenceStart, 14, targetYear);
+    startDate = d.addDays(firstPeriodStart, (periodIndex - 1) * 14);
     endDate = d.addDays(startDate, 13);
-    label = 'Pay Period ' + String(periodIndex);
   } else if (freq === 'monthly') {
-    // Always generate 12 monthly periods starting from the configured start date
-    const planYearStartDate = parseDate(config.startDate);
-    const anchorMonthStart = d.startOfMonth(planYearStartDate);
-    startDate = d.startOfMonth(d.addMonths(anchorMonthStart, periodIndex - 1));
-    endDate = d.endOfMonth(startDate);
-    label = 'Month ' + String(periodIndex);
+    // Find the first monthly period that starts in the target year
+    // For monthly periods, we use the day of month from reference date
+    const referenceDay = referenceStart.getDate();
+    startDate = new Date(targetYear, 0, referenceDay); // Jan of target year
+    startDate = d.addMonths(startDate, periodIndex - 1);
+    endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, referenceDay - 1);
+    label = 'Pay Period ' + String(periodIndex);
   } else if (freq === 'semimonthly') {
-    // Always generate 24 semimonthly periods starting from the configured start date
-    const planYearStartDate = parseDate(config.startDate);
+    // Two periods per month: 1st-15th and 16th-end of month
     const monthOffset = Math.floor((periodIndex - 1) / 2);
     const isFirstHalf = (periodIndex - 1) % 2 === 0;
-    const monthStart = d.startOfMonth(
-      d.addMonths(planYearStartDate, monthOffset),
-    );
+    const targetMonth = new Date(targetYear, monthOffset, 1);
+
     if (isFirstHalf) {
-      startDate = monthStart;
-      endDate = d.addDays(monthStart, 14);
+      startDate = d.startOfMonth(targetMonth);
+      endDate = new Date(targetYear, monthOffset, 15);
     } else {
-      const mid = d.addDays(monthStart, 15);
-      const end = d.endOfMonth(monthStart);
-      startDate = mid;
-      endDate = end;
+      startDate = new Date(targetYear, monthOffset, 16);
+      endDate = d.endOfMonth(targetMonth);
     }
-    label = 'Pay Period ' + String(periodIndex);
-  } else if (freq === 'bimonthly') {
-    // Always generate 6 bimonthly periods starting from the configured start date
-    const planYearStartDate = parseDate(config.startDate);
-    const monthOffset = (periodIndex - 1) * 2;
-    const monthStart = d.startOfMonth(
-      d.addMonths(planYearStartDate, monthOffset),
-    );
-    startDate = monthStart;
-    endDate = d.endOfMonth(d.addMonths(monthStart, 1));
-    label = 'Pay Period ' + String(periodIndex);
   } else {
     throw new Error("Unsupported payFrequency '" + String(freq) + "'.");
   }
@@ -235,7 +254,8 @@ export function getPayPeriodStartDate(
   config: PayPeriodConfig,
 ): Date {
   const index = getPeriodIndex(monthId, config);
-  return computePayPeriodByIndex(index, config).startDate;
+  const year = getNumericYearValue(monthId);
+  return computePayPeriodByIndex(index, config, year).startDate;
 }
 
 export function getPayPeriodEndDate(
@@ -243,7 +263,8 @@ export function getPayPeriodEndDate(
   config: PayPeriodConfig,
 ): Date {
   const index = getPeriodIndex(monthId, config);
-  return computePayPeriodByIndex(index, config).endDate;
+  const year = getNumericYearValue(monthId);
+  return computePayPeriodByIndex(index, config, year).endDate;
 }
 
 export function getPayPeriodLabel(
@@ -251,7 +272,8 @@ export function getPayPeriodLabel(
   config: PayPeriodConfig,
 ): string {
   const index = getPeriodIndex(monthId, config);
-  return computePayPeriodByIndex(index, config).label;
+  const year = getNumericYearValue(monthId);
+  return computePayPeriodByIndex(index, config, year).label;
 }
 
 export function generatePayPeriods(
@@ -294,7 +316,7 @@ export function generatePayPeriods(
   const maxPeriods = getMaxPeriodsForYear(config);
   
   for (let idx = 1; idx <= maxPeriods; idx++) {
-    const { startDate, endDate, label } = computePayPeriodByIndex(idx, config);
+    const { startDate, endDate, label } = computePayPeriodByIndex(idx, config, year);
     const monthId = String(year) + '-' + String(idx + 12).padStart(2, '0');
     
     results.push({
@@ -423,8 +445,6 @@ function getMaxPeriodsForYear(config: PayPeriodConfig): number {
       return 26;
     case 'semimonthly':
       return 24;
-    case 'bimonthly':
-      return 6;
     case 'monthly':
       return 12;
     default:
@@ -484,7 +504,7 @@ export function getPayPeriodNumberInMonth(
 
   const year = parseInt(monthId.slice(0, 4));
   const periodIndex = getPeriodIndex(monthId, config);
-  const { startDate } = computePayPeriodByIndex(periodIndex, config);
+  const { startDate } = computePayPeriodByIndex(periodIndex, config, year);
 
   // Find which calendar month this pay period starts in
   const calendarMonth = d.format(startDate, 'yyyy-MM');

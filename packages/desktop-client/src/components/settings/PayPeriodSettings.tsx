@@ -21,7 +21,6 @@ export function PayPeriodSettings() {
     ['weekly', t('Weekly')],
     ['biweekly', t('Biweekly')],
     ['semimonthly', t('Semimonthly')],
-    ['bimonthly', t('Bimonthly')],
     ['monthly', t('Monthly')],
   ];
 
