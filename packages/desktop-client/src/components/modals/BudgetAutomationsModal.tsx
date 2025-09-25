@@ -84,6 +84,13 @@ function BudgetAutomationList({
       {automations.map((automation, index) => (
         <BudgetAutomation
           key={automationIds[index]}
+          onSave={template =>
+            setAutomations(prev =>
+              prev.map((oldAutomation, mapIndex) =>
+                mapIndex === index ? template : oldAutomation,
+              ),
+            )
+          }
           onDelete={onDelete(index)}
           template={automation}
           categories={categories}
