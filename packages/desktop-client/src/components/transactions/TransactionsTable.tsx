@@ -510,6 +510,7 @@ function PayeeCell({
   onNavigateToSchedule,
 }: PayeeCellProps) {
   const isCreatingPayee = useRef(false);
+  const { t } = useTranslation();
 
   const dispatch = useDispatch();
 
@@ -639,7 +640,7 @@ function PayeeCell({
       }}
       formatter={() => {
         if (!displayPayee && isPreview) {
-          return '(No payee)';
+          return t('(No payee)');
         }
         return displayPayee;
       }}
@@ -1602,6 +1603,7 @@ const Transaction = memo(function Transaction({
         inputProps={{
           value: debit === '' && credit === '' ? amountToCurrency(0) : debit,
           onUpdate: onUpdate.bind(null, 'debit'),
+          'data-1p-ignore': true,
         }}
         privacyFilter={{
           activationFilters: [!isTemporaryId(transaction.id)],
@@ -1628,6 +1630,7 @@ const Transaction = memo(function Transaction({
         inputProps={{
           value: credit,
           onUpdate: onUpdate.bind(null, 'credit'),
+          'data-1p-ignore': true,
         }}
         privacyFilter={{
           activationFilters: [!isTemporaryId(transaction.id)],

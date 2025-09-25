@@ -6,6 +6,7 @@ import { View } from '@actual-app/components/view';
 
 import {
   dateFormats,
+  type DateFormat,
   type ImportTransaction,
   type FieldMapping,
 } from './utils';
@@ -14,8 +15,8 @@ import { SectionLabel } from '@desktop-client/components/forms';
 
 type DateFormatSelectProps = {
   transactions: ImportTransaction[];
-  fieldMappings: FieldMapping;
-  parseDateFormat?: string;
+  fieldMappings?: FieldMapping;
+  parseDateFormat?: DateFormat;
   onChange: (newValue: string) => void;
 };
 
@@ -33,7 +34,7 @@ export function DateFormatSelect({
   let delimiter = '-';
   if (transactions.length > 0 && fieldMappings && fieldMappings.date != null) {
     const date = transactions[0][fieldMappings.date];
-    const m = date && date.match(/[/.,-/\\]/);
+    const m = date && String(date).match(/[/.,\-/\\]/);
     delimiter = m ? m[0] : ' ';
   }
 

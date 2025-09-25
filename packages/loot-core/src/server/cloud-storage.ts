@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as asyncStorage from '../platform/server/asyncStorage';
 import { fetch } from '../platform/server/fetch';
 import * as fs from '../platform/server/fs';
+import { logger } from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import * as monthUtils from '../shared/months';
 
@@ -82,7 +83,7 @@ export async function checkKey(): Promise<{
       fileId: cloudFileId,
     });
   } catch (e) {
-    console.log(e);
+    logger.log(e);
     return { valid: false, error: { reason: 'network' } };
   }
 
@@ -310,7 +311,7 @@ export async function upload() {
       body: uploadContent,
     });
   } catch (err) {
-    console.log('Upload failure', err);
+    logger.log('Upload failure', err);
 
     if (err instanceof PostError) {
       throw FileUploadError(
@@ -382,12 +383,12 @@ export async function listRemoteFiles(): Promise<RemoteFile[]> {
       },
     });
   } catch (e) {
-    console.log('Unexpected error fetching file list from server', e);
+    logger.log('Unexpected error fetching file list from server', e);
     return null;
   }
 
   if (res.status === 'error') {
-    console.log('Error fetching file list from server', res);
+    logger.log('Error fetching file list from server', res);
     return null;
   }
 
@@ -416,12 +417,12 @@ export async function getRemoteFile(
       },
     });
   } catch (e) {
-    console.log('Unexpected error fetching file from server', e);
+    logger.log('Unexpected error fetching file from server', e);
     return null;
   }
 
   if (res.status === 'error') {
-    console.log('Error fetching file from server', res);
+    logger.log('Error fetching file from server', res);
     return null;
   }
 
@@ -449,7 +450,7 @@ export async function download(cloudFileId) {
       return res.buffer();
     })
     .catch(err => {
-      console.log('Download failure', err);
+      logger.log('Download failure', err);
       throw FileDownloadError('download-failure');
     });
 
@@ -459,7 +460,7 @@ export async function download(cloudFileId) {
       'X-ACTUAL-FILE-ID': cloudFileId,
     },
   }).catch(err => {
-    console.log('Error fetching file info', err);
+    logger.log('Error fetching file info', err);
     throw FileDownloadError('internal', { fileId: cloudFileId });
   });
 
@@ -469,7 +470,7 @@ export async function download(cloudFileId) {
   ]);
 
   if (userFileInfoRes.status !== 'ok') {
-    console.log(
+    logger.log(
       'Could not download file from the server. Are you sure you have the right file ID?',
       userFileInfoRes,
     );

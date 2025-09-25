@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import { Timestamp, SyncProtoBuf } from '@actual-app/crdt';
 
+import { logger } from '../../platform/server/log';
 import * as encryption from '../encryption';
 import { SyncError } from '../errors';
 import * as prefs from '../prefs';
@@ -102,7 +103,7 @@ export async function decode(
           authTag: coerceBuffer(binary.getAuthtag()),
         });
       } catch (e) {
-        console.log(e);
+        logger.log(e);
         throw new SyncError('decrypt-failure', {
           isMissingKey: e.message === 'missing-key',
         });

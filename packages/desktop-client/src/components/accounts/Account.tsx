@@ -12,8 +12,8 @@ import { Navigate, useParams, useLocation } from 'react-router';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { debounce } from 'debounce';
 import { t } from 'i18next';
+import debounce from 'lodash/debounce';
 import { v4 as uuidv4 } from 'uuid';
 
 import { send, listen } from 'loot-core/platform/client/fetch';
