@@ -2,6 +2,7 @@ import React, {
   useState,
   useMemo,
   useCallback,
+  useEffect,
   type SVGAttributes,
 } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +11,8 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { Bar, BarChart, LabelList, ResponsiveContainer } from 'recharts';
 
+import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
 import { type CashFlowWidget } from 'loot-core/types/models';
 
 import { defaultTimeFrame } from './CashFlow';
@@ -108,8 +111,23 @@ export function CashFlowCard({
   onRemove,
 }: CashFlowCardProps) {
   const { t } = useTranslation();
+  const [latestTransaction, setLatestTransaction] = useState<string>('');
 
-  const [start, end] = calculateTimeRange(meta?.timeFrame, defaultTimeFrame);
+  useEffect(() => {
+    async function fetchLatestTransaction() {
+      const latestTrans = await send('get-latest-transaction');
+      setLatestTransaction(
+        latestTrans ? latestTrans.date : monthUtils.currentDay(),
+      );
+    }
+    fetchLatestTransaction();
+  }, []);
+
+  const [start, end] = calculateTimeRange(
+    meta?.timeFrame,
+    defaultTimeFrame,
+    latestTransaction,
+  );
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
   const params = useMemo(

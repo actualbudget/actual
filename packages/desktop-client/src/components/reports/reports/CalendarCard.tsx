@@ -24,6 +24,7 @@ import { View } from '@actual-app/components/view';
 import { format as formatDate } from 'date-fns';
 import debounce from 'lodash/debounce';
 
+import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { type CalendarWidget } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
@@ -65,12 +66,27 @@ export function CalendarCard({
 }: CalendarCardProps) {
   const { t } = useTranslation();
   const format = useFormat();
+  const [latestTransaction, setLatestTransaction] = useState<string>('');
 
-  const [start, end] = calculateTimeRange(meta?.timeFrame, {
-    start: monthUtils.dayFromDate(monthUtils.currentMonth()),
-    end: monthUtils.currentDay(),
-    mode: 'full',
-  });
+  useEffect(() => {
+    async function fetchLatestTransaction() {
+      const latestTrans = await send('get-latest-transaction');
+      setLatestTransaction(
+        latestTrans ? latestTrans.date : monthUtils.currentDay(),
+      );
+    }
+    fetchLatestTransaction();
+  }, []);
+
+  const [start, end] = calculateTimeRange(
+    meta?.timeFrame,
+    {
+      start: monthUtils.dayFromDate(monthUtils.currentMonth()),
+      end: monthUtils.currentDay(),
+      mode: 'full',
+    },
+    latestTransaction,
+  );
   const params = useMemo(
     () =>
       calendarSpreadsheet(
