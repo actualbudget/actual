@@ -76,7 +76,9 @@ function SummaryInner({ widget }: SummaryInnerProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
-  const [start, setStart] = useState(monthUtils.dayFromDate(monthUtils.currentMonth()));
+  const [start, setStart] = useState(
+    monthUtils.dayFromDate(monthUtils.currentMonth()),
+  );
   const [end, setEnd] = useState(monthUtils.currentDay());
   const [mode, setMode] = useState<TimeFrame['mode']>('full');
 

@@ -186,13 +186,15 @@ export function calculateTimeRange(
   const mode = timeFrame?.mode ?? defaultTimeFrame?.mode ?? 'sliding-window';
 
   if (mode === 'full') {
-    const latestTransactionMonth = latestTransaction 
+    const latestTransactionMonth = latestTransaction
       ? monthUtils.monthFromDate(latestTransaction)
       : null;
     const currentMonth = monthUtils.currentMonth();
-    const fullEnd = latestTransactionMonth && monthUtils.isAfter(latestTransactionMonth, currentMonth)
-      ? latestTransactionMonth
-      : currentMonth;
+    const fullEnd =
+      latestTransactionMonth &&
+      monthUtils.isAfter(latestTransactionMonth, currentMonth)
+        ? latestTransactionMonth
+        : currentMonth;
     return getFullRange(start, fullEnd);
   }
   if (mode === 'sliding-window') {

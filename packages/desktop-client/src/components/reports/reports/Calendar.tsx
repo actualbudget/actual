@@ -106,7 +106,9 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
-  const [start, setStart] = useState(monthUtils.dayFromDate(monthUtils.currentMonth()));
+  const [start, setStart] = useState(
+    monthUtils.dayFromDate(monthUtils.currentMonth()),
+  );
   const [end, setEnd] = useState(monthUtils.currentDay());
   const [mode, setMode] = useState<TimeFrame['mode']>('full');
   const [query, setQuery] = useState<Query | undefined>(undefined);
