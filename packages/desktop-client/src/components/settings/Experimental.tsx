@@ -5,13 +5,14 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import type { FeatureFlag } from 'loot-core/types/prefs';
+import type { FeatureFlag, GlobalPrefs } from 'loot-core/types/prefs';
 
 import { Setting } from './UI';
 
 import { Link } from '@desktop-client/components/common/Link';
 import { Checkbox } from '@desktop-client/components/forms';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type FeatureToggleProps = {
@@ -38,6 +39,59 @@ function FeatureToggle({
         checked={enabled}
         onChange={() => {
           setFlagPref(String(!enabled));
+        }}
+        disabled={disableToggle}
+      />
+      <View
+        style={{ color: disableToggle ? theme.pageTextSubdued : 'inherit' }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+          {children}
+          {feedbackLink && (
+            <Link variant="external" to={feedbackLink}>
+              <Trans>(give feedback)</Trans>
+            </Link>
+          )}
+        </View>
+
+        {disableToggle && (
+          <Text
+            style={{
+              color: theme.errorText,
+              fontWeight: 500,
+            }}
+          >
+            {error}
+          </Text>
+        )}
+      </View>
+    </label>
+  );
+}
+
+type GlobalFeatureToggleProps = {
+  prefName: keyof GlobalPrefs;
+  disableToggle?: boolean;
+  error?: ReactNode;
+  children: ReactNode;
+  feedbackLink?: string;
+};
+
+function GlobalFeatureToggle({
+  prefName,
+  disableToggle = false,
+  feedbackLink,
+  error,
+  children,
+}: GlobalFeatureToggleProps) {
+  const [enabled, setEnabled] = useGlobalPref(prefName);
+
+  return (
+    <label style={{ display: 'flex' }}>
+      <Checkbox
+        checked={Boolean(enabled)}
+        onChange={() => {
+          setEnabled(!enabled);
         }}
         disabled={disableToggle}
       />
@@ -105,6 +159,13 @@ export function ExperimentalFeatures() {
             >
               <Trans>Currency support</Trans>
             </FeatureToggle>
+            <GlobalFeatureToggle
+              prefName="plugins"
+              disableToggle={true}
+              feedbackLink="https://github.com/actualbudget/actual/pull/4049"
+            >
+              <Trans>Client-Side plugins (soon)</Trans>
+            </GlobalFeatureToggle>
           </View>
         ) : (
           <Link
