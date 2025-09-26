@@ -251,6 +251,14 @@ export type DbDashboard = {
   tombstone: 1 | 0;
 };
 
+export type DbPayPeriodConfig = {
+  id: string;
+  pay_frequency: string;
+  start_date: string;
+  pay_day_of_week?: number | null;
+  pay_day_of_month?: number | null;
+};
+
 export type DbViewTransactionInternal = {
   id: DbTransaction['id'];
   is_parent: DbTransaction['isParent'];
