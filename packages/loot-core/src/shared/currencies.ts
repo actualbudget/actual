@@ -13,8 +13,9 @@ export type Currency = {
 // the MAX_SAFE_NUMBER in util.ts.
 // When adding a currency, also update the translation map in
 // packages/desktop-client/src/components/settings/Currency.tsx for the translation.
+// Number formats and symbol placement based on CLDR/LDML locale conventions and
+// Intl.NumberFormat standards
 // prettier-ignore
-// Number formats and symbol placement based on CLDR/LDML locale conventions and Intl.NumberFormat standards
 export const currencies: Currency[] = [
   { code: '', name: 'None', symbol: '', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   // Australia (en-AU): Uses comma for thousands, dot for decimals, symbol before amount
