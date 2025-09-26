@@ -277,7 +277,11 @@ export const numberFormats: Array<{
 }> = [
   { value: 'comma-dot', label: '1,000.33', labelNoFraction: '1,000' },
   { value: 'dot-comma', label: '1.000,33', labelNoFraction: '1.000' },
-  { value: 'space-comma', label: '1\xa0000,33', labelNoFraction: '1\xa0000' },
+  {
+    value: 'space-comma',
+    label: '1\u202F000,33',
+    labelNoFraction: '1\u202F000',
+  },
   { value: 'apostrophe-dot', label: '1’000.33', labelNoFraction: '1’000' },
   { value: 'comma-dot-in', label: '1,00,000.33', labelNoFraction: '1,00,000' },
 ];
@@ -327,7 +331,7 @@ export function getNumberFormat({
   switch (format) {
     case 'space-comma':
       locale = 'en-SE';
-      thousandsSeparator = '\xa0';
+      thousandsSeparator = '\u202F';
       decimalSeparator = ',';
       break;
     case 'dot-comma':
