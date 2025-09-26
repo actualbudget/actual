@@ -462,7 +462,10 @@ function compileLiteral(value) {
   } else if (typeof value === 'string') {
     // Allow user to escape $, and quote the string to make it a
     // string literal in the output
-    value = value.replace(/\\\$/g, '$');
+    // Only unescape a leading "\$" so users can write literals starting
+    // with "$" without triggering field reference parsing. Do not
+    // unescape inner "\$" occurrences to preserve regex escaping.
+    value = value.replace(/^\\\$/, '$');
     return typed(value, 'string', { literal: true });
   } else if (typeof value === 'boolean') {
     return typed(value ? 1 : 0, 'boolean', { literal: true });

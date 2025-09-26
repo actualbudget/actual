@@ -161,6 +161,17 @@ describe('sheet language', () => {
     );
   });
 
+  it('does not strip inner regex dollar escapes in string literals', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .filter({ 'payee.name': { $regexp: '\\$end' } })
+        .select(['id'])
+        .serialize(),
+      schemaWithRefs,
+    );
+    expect(result.sql).toMatch("REGEXP('\\\\$end', payees1.name)");
+  });
+
   it('`select` allows selecting all fields with *', () => {
     let result = generateSQLWithState(
       q('accounts').select(['*']).serialize(),
