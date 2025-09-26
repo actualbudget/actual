@@ -42,7 +42,7 @@ type ScrollProviderProps<T extends Element> = {
 export function ScrollProvider<T extends Element>({
   scrollableRef,
   isDisabled,
-  delayMs = 250,
+  delayMs = 100,
   children,
 }: ScrollProviderProps<T>) {
   const previousScrollX = useRef<number | undefined>(undefined);
