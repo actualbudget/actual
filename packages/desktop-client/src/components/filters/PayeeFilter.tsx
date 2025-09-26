@@ -1,14 +1,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { type PayeeEntity } from 'loot-core/types/models';
+
 import {
   PayeeAutocomplete,
-  type PayeeAutocompleteItem,
 } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
 
 type PayeeFilterValue =
-  | PayeeAutocompleteItem['id']
-  | PayeeAutocompleteItem['id'][];
+  | PayeeEntity['id']
+  | PayeeEntity['id'][];
 
 /** This component only supports single- or multi-select operations. */
 type PayeeFilterOp = 'is' | 'isNot' | 'oneOf' | 'notOneOf';
