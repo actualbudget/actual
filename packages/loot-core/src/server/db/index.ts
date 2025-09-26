@@ -140,7 +140,8 @@ export function runQuery<T>(
 
   // Track duplicate expensive queries
   if (isExpensiveQuery) {
-    const queryKey = `${sql.substring(0, 100)}:${JSON.stringify(params)}`;
+    // Use full SQL + params to create unique keys
+    const queryKey = `${sql}:${JSON.stringify(params)}`;
     const count = _queryCounts.get(queryKey) || 0;
     _queryCounts.set(queryKey, count + 1);
 
@@ -154,7 +155,7 @@ export function runQuery<T>(
       `[PERF DEBUG] Expensive DB query starting:`,
       JSON.stringify(
         {
-          sql: sql.substring(0, 200) + (sql.length > 200 ? '...' : ''),
+          sql,
           params,
           fetchAll,
           stack: new Error().stack?.split('\n').slice(1, 8).join('\n'),
@@ -180,7 +181,7 @@ export function runQuery<T>(
         JSON.stringify(
           {
             resultCount: Array.isArray(result) ? result.length : 'not array',
-            sql: sql.substring(0, 100) + (sql.length > 100 ? '...' : ''),
+            sql,
           },
           null,
           2,
