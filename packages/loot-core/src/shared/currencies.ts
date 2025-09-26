@@ -32,7 +32,7 @@ export const currencies: Currency[] = [
   { code: 'PHP', name: 'Philippine Peso', symbol: '₱', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'PLN', name: 'Polish Złoty', symbol: 'zł', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   { code: 'QAR', name: 'Qatari Riyal', symbol: 'QAR', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
-  { code: 'RON', name: 'Romanian Leu', symbol: 'lei', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
+  { code: 'RON', name: 'Romanian Leu', symbol: 'lei', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
   { code: 'RSD', name: 'Serbian Dinar', symbol: 'дин', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
   { code: 'RUB', name: 'Russian Ruble', symbol: '₽', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   { code: 'SAR', name: 'Saudi Riyal', symbol: '﷼', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
