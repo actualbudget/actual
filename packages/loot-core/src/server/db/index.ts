@@ -12,6 +12,7 @@ import { LRUCache } from 'lru-cache';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as fs from '../../platform/server/fs';
+import { logger } from '../../platform/server/log';
 import * as sqlite from '../../platform/server/sqlite';
 import * as monthUtils from '../../shared/months';
 import { groupById } from '../../shared/util';
@@ -109,6 +110,12 @@ export async function loadClock() {
 }
 
 // Functions
+
+// Track duplicate queries to identify the performance issue
+const _queryCounts = new Map<string, number>();
+let _totalQueryCount = 0;
+const MAX_QUERIES_PER_SESSION = 1000; // Circuit breaker to prevent infinite loops
+
 export function runQuery(
   sql: string,
   params?: Array<string | number>,
@@ -125,16 +132,64 @@ export function runQuery<T>(
   sql: string,
   params: (string | number)[],
   fetchAll: boolean,
-) {
-  if (fetchAll) {
-    return sqlite.runQuery<T>(db, sql, params, true);
-  } else {
-    return sqlite.runQuery(db, sql, params, false);
+): T[] | { changes: unknown } {
+  const isExpensiveQuery =
+    sql.includes('v_transactions_internal_alive') ||
+    sql.includes('SUM(') ||
+    sql.includes('COUNT(');
+
+  // Track duplicate expensive queries
+  if (isExpensiveQuery) {
+    _totalQueryCount++;
+
+    // Circuit breaker to prevent infinite loops
+    if (_totalQueryCount > MAX_QUERIES_PER_SESSION) {
+      logger.log(
+        `[PERF DEBUG] CIRCUIT BREAKER TRIGGERED: ${_totalQueryCount} queries exceeded limit of ${MAX_QUERIES_PER_SESSION}`,
+      );
+      throw new Error(
+        `Query limit exceeded: ${_totalQueryCount} queries in this session. This indicates a potential infinite loop or data corruption.`,
+      );
+    }
+
+    // Use full SQL + params to create unique keys
+    const queryKey = `${sql}:${JSON.stringify(params)}`;
+    const count = _queryCounts.get(queryKey) || 0;
+    _queryCounts.set(queryKey, count + 1);
+
+    if (count > 0) {
+      logger.log(`[PERF DEBUG] DUPLICATE QUERY #${count + 1}: ${queryKey}`);
+    }
+  }
+
+  let result;
+  try {
+    if (fetchAll) {
+      result = sqlite.runQuery<T>(db, sql, params, true);
+    } else {
+      result = sqlite.runQuery(db, sql, params, false);
+    }
+
+    return result;
+  } catch (error) {
+    throw error;
   }
 }
 
 export function execQuery(sql: string) {
   sqlite.execQuery(db, sql);
+}
+
+export function clearQueryCounts(): void {
+  const duplicateCount = Array.from(_queryCounts.values()).reduce(
+    (sum, count) => sum + (count - 1),
+    0,
+  );
+  logger.log(
+    `[PERF DEBUG] Query summary: ${_queryCounts.size} unique queries, ${duplicateCount} duplicates, ${_totalQueryCount} total queries`,
+  );
+  _queryCounts.clear();
+  _totalQueryCount = 0;
 }
 
 // This manages an LRU cache of prepared query statements. This is
