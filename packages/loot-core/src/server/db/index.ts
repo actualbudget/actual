@@ -12,6 +12,7 @@ import { LRUCache } from 'lru-cache';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as fs from '../../platform/server/fs';
+import { logger } from '../../platform/server/log';
 import * as sqlite from '../../platform/server/sqlite';
 import * as monthUtils from '../../shared/months';
 import { groupById } from '../../shared/util';
@@ -126,10 +127,53 @@ export function runQuery<T>(
   params: (string | number)[],
   fetchAll: boolean,
 ) {
-  if (fetchAll) {
-    return sqlite.runQuery<T>(db, sql, params, true);
-  } else {
-    return sqlite.runQuery(db, sql, params, false);
+  // Debug logging for performance investigation
+  const startTime = Date.now();
+  const isExpensiveQuery =
+    sql.includes('v_transactions_internal_alive') ||
+    sql.includes('SUM(') ||
+    sql.includes('COUNT(');
+
+  if (isExpensiveQuery) {
+    logger.log(`[PERF DEBUG] Expensive DB query starting:`, 
+      JSON.stringify({
+        sql: sql.substring(0, 200) + (sql.length > 200 ? '...' : ''),
+        params,
+        fetchAll,
+        stack: new Error().stack?.split('\n').slice(1, 8).join('\n'),
+      }, null, 2)
+    );
+  }
+
+  let result;
+  try {
+    if (fetchAll) {
+      result = sqlite.runQuery<T>(db, sql, params, true);
+    } else {
+      result = sqlite.runQuery(db, sql, params, false);
+    }
+
+    if (isExpensiveQuery) {
+      const duration = Date.now() - startTime;
+      logger.log(
+        `[PERF DEBUG] Expensive DB query completed in ${duration}ms:`,
+        JSON.stringify({
+          resultCount: Array.isArray(result) ? result.length : 'not array',
+          sql: sql.substring(0, 100) + (sql.length > 100 ? '...' : ''),
+        }, null, 2)
+      );
+    }
+
+    return result;
+  } catch (error) {
+    if (isExpensiveQuery) {
+      const duration = Date.now() - startTime;
+      logger.log(
+        `[PERF DEBUG] Expensive DB query failed after ${duration}ms:`,
+        JSON.stringify(error, null, 2)
+      );
+    }
+    throw error;
   }
 }
 

@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
 import { getChangedValues } from '../../shared/util';
@@ -148,6 +149,18 @@ function handleBudgetChange(budget) {
 export function triggerBudgetChanges(oldValues, newValues) {
   const { createdMonths = new Set() } = sheet.get().meta();
   const budgetType = getBudgetType();
+
+  // Debug logging for performance investigation
+  logger.log(`[PERF DEBUG] triggerBudgetChanges called:`, 
+    JSON.stringify({
+      budgetType,
+      createdMonthsCount: createdMonths.size,
+      createdMonthsSample: Array.from(createdMonths).slice(0, 5),
+      oldValuesKeys: Array.from(oldValues.keys()),
+      newValuesKeys: Array.from(newValues.keys()),
+      stack: new Error().stack?.split('\n').slice(1, 8).join('\n'),
+    }, null, 2)
+  );
   sheet.startTransaction();
 
   try {

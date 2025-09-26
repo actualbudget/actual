@@ -69,7 +69,33 @@ handlers['query'] = async function (query) {
     throw new Error('query has no table, did you forgot to call `.serialize`?');
   }
 
-  return aqlQuery(query);
+  // Debug logging for performance investigation
+  const startTime = Date.now();
+  logger.log(`[PERF DEBUG] Query handler called for table: ${query.table}`, 
+    JSON.stringify({
+      query: JSON.stringify(query),
+      stack: new Error().stack?.split('\n').slice(1, 10).join('\n'),
+    }, null, 2)
+  );
+
+  try {
+    const result = await aqlQuery(query);
+    const duration = Date.now() - startTime;
+    logger.log(
+      `[PERF DEBUG] Query completed in ${duration}ms for table: ${query.table}`,
+      JSON.stringify({
+        resultCount: Array.isArray(result) ? result.length : 'not array',
+      }, null, 2)
+    );
+    return result;
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    logger.log(
+      `[PERF DEBUG] Query failed after ${duration}ms for table: ${query.table}`,
+      JSON.stringify(error, null, 2)
+    );
+    throw error;
+  }
 };
 
 handlers['get-server-version'] = async function () {
