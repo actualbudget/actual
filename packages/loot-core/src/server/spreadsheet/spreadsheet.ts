@@ -137,14 +137,19 @@ export class Spreadsheet {
     // Debug logging for performance investigation
     const isLargeQueue = cellNames.length > 10;
     if (isLargeQueue) {
-      logger.log(`[PERF DEBUG] Large computation queue being added:`, 
-        JSON.stringify({
-          newCells: cellNames.length,
-          existingQueue: this.computeQueue.length,
-          totalAfter: this.computeQueue.length + cellNames.length,
-          cellSample: cellNames.slice(0, 10),
-          stack: new Error().stack?.split('\n').slice(1, 8).join('\n'),
-        }, null, 2)
+      logger.log(
+        `[PERF DEBUG] Large computation queue being added:`,
+        JSON.stringify(
+          {
+            newCells: cellNames.length,
+            existingQueue: this.computeQueue.length,
+            totalAfter: this.computeQueue.length + cellNames.length,
+            cellSample: cellNames.slice(0, 10),
+            stack: new Error().stack?.split('\n').slice(1, 8).join('\n'),
+          },
+          null,
+          2,
+        ),
       );
     }
 
@@ -165,12 +170,17 @@ export class Spreadsheet {
 
     // Debug logging for performance investigation
     if (idx === 0) {
-      logger.log(`[PERF DEBUG] Starting spreadsheet computations:`, 
-        JSON.stringify({
-          queueLength: this.computeQueue.length,
-          queueSample: this.computeQueue.slice(0, 10),
-          stack: new Error().stack?.split('\n').slice(1, 8).join('\n'),
-        }, null, 2)
+      logger.log(
+        `[PERF DEBUG] Starting spreadsheet computations:`,
+        JSON.stringify(
+          {
+            queueLength: this.computeQueue.length,
+            queueSample: this.computeQueue.slice(0, 10),
+            stack: new Error().stack?.split('\n').slice(1, 8).join('\n'),
+          },
+          null,
+          2,
+        ),
       );
     }
 
@@ -359,13 +369,18 @@ export class Spreadsheet {
 
   recompute(name: string): void {
     // Debug logging for performance investigation
-    logger.log(`[PERF DEBUG] Individual recompute called:`, 
-      JSON.stringify({
-        cellName: name,
-        currentQueueLength: this.computeQueue.length,
-        currentDirtyCells: this.dirtyCells.length,
-        stack: new Error().stack?.split('\n').slice(1, 6).join('\n'),
-      }, null, 2)
+    logger.log(
+      `[PERF DEBUG] Individual recompute called:`,
+      JSON.stringify(
+        {
+          cellName: name,
+          currentQueueLength: this.computeQueue.length,
+          currentDirtyCells: this.dirtyCells.length,
+          stack: new Error().stack?.split('\n').slice(1, 6).join('\n'),
+        },
+        null,
+        2,
+      ),
     );
 
     this.transaction(() => {

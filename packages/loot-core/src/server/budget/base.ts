@@ -151,15 +151,20 @@ export function triggerBudgetChanges(oldValues, newValues) {
   const budgetType = getBudgetType();
 
   // Debug logging for performance investigation
-  logger.log(`[PERF DEBUG] triggerBudgetChanges called:`, 
-    JSON.stringify({
-      budgetType,
-      createdMonthsCount: createdMonths.size,
-      createdMonthsSample: Array.from(createdMonths).slice(0, 5),
-      oldValuesKeys: Array.from(oldValues.keys()),
-      newValuesKeys: Array.from(newValues.keys()),
-      stack: new Error().stack?.split('\n').slice(1, 8).join('\n'),
-    }, null, 2)
+  logger.log(
+    `[PERF DEBUG] triggerBudgetChanges called:`,
+    JSON.stringify(
+      {
+        budgetType,
+        createdMonthsCount: createdMonths.size,
+        createdMonthsSample: Array.from(createdMonths).slice(0, 5),
+        oldValuesKeys: Array.from(oldValues.keys()),
+        newValuesKeys: Array.from(newValues.keys()),
+        stack: new Error().stack?.split('\n').slice(1, 8).join('\n'),
+      },
+      null,
+      2,
+    ),
   );
   sheet.startTransaction();
 
