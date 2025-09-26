@@ -110,6 +110,10 @@ export async function loadClock() {
 }
 
 // Functions
+
+// Track duplicate queries to identify the performance issue
+const _queryCounts = new Map<string, number>();
+
 export function runQuery(
   sql: string,
   params?: Array<string | number>,
@@ -126,13 +130,24 @@ export function runQuery<T>(
   sql: string,
   params: (string | number)[],
   fetchAll: boolean,
-) {
+): T[] | { changes: unknown } {
   // Debug logging for performance investigation
   const startTime = Date.now();
   const isExpensiveQuery =
     sql.includes('v_transactions_internal_alive') ||
     sql.includes('SUM(') ||
     sql.includes('COUNT(');
+
+  // Track duplicate expensive queries
+  if (isExpensiveQuery) {
+    const queryKey = `${sql.substring(0, 100)}:${JSON.stringify(params)}`;
+    const count = _queryCounts.get(queryKey) || 0;
+    _queryCounts.set(queryKey, count + 1);
+
+    if (count > 0) {
+      logger.log(`[PERF DEBUG] DUPLICATE QUERY #${count + 1}: ${queryKey}`);
+    }
+  }
 
   if (isExpensiveQuery) {
     logger.log(
@@ -188,6 +203,17 @@ export function runQuery<T>(
 
 export function execQuery(sql: string) {
   sqlite.execQuery(db, sql);
+}
+
+export function clearQueryCounts(): void {
+  const duplicateCount = Array.from(_queryCounts.values()).reduce(
+    (sum, count) => sum + (count - 1),
+    0,
+  );
+  logger.log(
+    `[PERF DEBUG] Query summary: ${_queryCounts.size} unique queries, ${duplicateCount} duplicates`,
+  );
+  _queryCounts.clear();
 }
 
 // This manages an LRU cache of prepared query statements. This is

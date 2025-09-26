@@ -5,6 +5,7 @@ import { q } from '../../shared/query';
 import { getChangedValues } from '../../shared/util';
 import { CategoryGroupEntity } from '../../types/models';
 import { aqlQuery } from '../aql';
+import { clearQueryCounts } from '../db';
 import * as db from '../db';
 import * as sheet from '../sheet';
 import { resolveName } from '../spreadsheet/util';
@@ -166,6 +167,10 @@ export function triggerBudgetChanges(oldValues, newValues) {
       2,
     ),
   );
+
+  // Clear query counts to start fresh tracking
+  clearQueryCounts();
+
   sheet.startTransaction();
 
   try {
