@@ -113,6 +113,8 @@ export async function loadClock() {
 
 // Track duplicate queries to identify the performance issue
 const _queryCounts = new Map<string, number>();
+let _totalQueryCount = 0;
+const MAX_QUERIES_PER_SESSION = 1000; // Circuit breaker to prevent infinite loops
 
 export function runQuery(
   sql: string,
@@ -131,8 +133,6 @@ export function runQuery<T>(
   params: (string | number)[],
   fetchAll: boolean,
 ): T[] | { changes: unknown } {
-  // Debug logging for performance investigation
-  const startTime = Date.now();
   const isExpensiveQuery =
     sql.includes('v_transactions_internal_alive') ||
     sql.includes('SUM(') ||
@@ -140,6 +140,18 @@ export function runQuery<T>(
 
   // Track duplicate expensive queries
   if (isExpensiveQuery) {
+    _totalQueryCount++;
+
+    // Circuit breaker to prevent infinite loops
+    if (_totalQueryCount > MAX_QUERIES_PER_SESSION) {
+      logger.log(
+        `[PERF DEBUG] CIRCUIT BREAKER TRIGGERED: ${_totalQueryCount} queries exceeded limit of ${MAX_QUERIES_PER_SESSION}`,
+      );
+      throw new Error(
+        `Query limit exceeded: ${_totalQueryCount} queries in this session. This indicates a potential infinite loop or data corruption.`,
+      );
+    }
+
     // Use full SQL + params to create unique keys
     const queryKey = `${sql}:${JSON.stringify(params)}`;
     const count = _queryCounts.get(queryKey) || 0;
@@ -150,22 +162,6 @@ export function runQuery<T>(
     }
   }
 
-  if (isExpensiveQuery) {
-    logger.log(
-      `[PERF DEBUG] Expensive DB query starting:`,
-      JSON.stringify(
-        {
-          sql,
-          params,
-          fetchAll,
-          stack: new Error().stack?.split('\n').slice(1, 8).join('\n'),
-        },
-        null,
-        2,
-      ),
-    );
-  }
-
   let result;
   try {
     if (fetchAll) {
@@ -174,30 +170,8 @@ export function runQuery<T>(
       result = sqlite.runQuery(db, sql, params, false);
     }
 
-    if (isExpensiveQuery) {
-      const duration = Date.now() - startTime;
-      logger.log(
-        `[PERF DEBUG] Expensive DB query completed in ${duration}ms:`,
-        JSON.stringify(
-          {
-            resultCount: Array.isArray(result) ? result.length : 'not array',
-            sql,
-          },
-          null,
-          2,
-        ),
-      );
-    }
-
     return result;
   } catch (error) {
-    if (isExpensiveQuery) {
-      const duration = Date.now() - startTime;
-      logger.log(
-        `[PERF DEBUG] Expensive DB query failed after ${duration}ms:`,
-        JSON.stringify(error, null, 2),
-      );
-    }
     throw error;
   }
 }
@@ -212,9 +186,10 @@ export function clearQueryCounts(): void {
     0,
   );
   logger.log(
-    `[PERF DEBUG] Query summary: ${_queryCounts.size} unique queries, ${duplicateCount} duplicates`,
+    `[PERF DEBUG] Query summary: ${_queryCounts.size} unique queries, ${duplicateCount} duplicates, ${_totalQueryCount} total queries`,
   );
   _queryCounts.clear();
+  _totalQueryCount = 0;
 }
 
 // This manages an LRU cache of prepared query statements. This is
