@@ -62,6 +62,8 @@ export function CurrencySettings() {
   const [spaceEnabled, setSpaceEnabledPref] = useSyncedPref(
     'currencySpaceBetweenAmountAndSymbol',
   );
+  const [, setNumberFormatPref] = useSyncedPref('numberFormat');
+  const [, setHideFractionPref] = useSyncedPref('hideFraction');
 
   const selectButtonClassName = css({
     '&[data-hovered]': {
@@ -83,8 +85,11 @@ export function CurrencySettings() {
 
   const handleCurrencyChange = (code: string) => {
     setDefaultCurrencyCodePref(code);
+    const cur = getCurrency(code);
+    setNumberFormatPref(cur.numberFormat);
+    setHideFractionPref(cur.decimalPlaces === 0 ? 'true' : 'false');
+    setSymbolPositionPref(cur.symbolFirst ? 'before' : 'after');
   };
-
   const symbolPositionOptions = useMemo(() => {
     const selectedCurrency = getCurrency(selectedCurrencyCode);
     const symbol = selectedCurrency.symbol || '$';
@@ -171,7 +176,9 @@ export function CurrencySettings() {
       <Text>
         <Trans>
           <strong>Currency settings</strong> affect how amounts are displayed
-          throughout the application.
+          throughout the application. Changing the currency will affect the
+          number format, symbol position, and whether fractions are shown. These
+          can be adjusted after the currency is set.
         </Trans>
       </Text>
     </Setting>
