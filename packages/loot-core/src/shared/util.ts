@@ -264,7 +264,7 @@ const NUMBER_FORMATS = [
   'comma-dot-in',
 ] as const;
 
-type NumberFormats = (typeof NUMBER_FORMATS)[number];
+export type NumberFormats = (typeof NUMBER_FORMATS)[number];
 
 function isNumberFormat(input: string = ''): input is NumberFormats {
   return (NUMBER_FORMATS as readonly string[]).includes(input);
