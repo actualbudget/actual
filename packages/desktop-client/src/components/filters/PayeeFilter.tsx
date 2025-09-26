@@ -3,13 +3,9 @@ import { useTranslation } from 'react-i18next';
 
 import { type PayeeEntity } from 'loot-core/types/models';
 
-import {
-  PayeeAutocomplete,
-} from '@desktop-client/components/autocomplete/PayeeAutocomplete';
+import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
 
-type PayeeFilterValue =
-  | PayeeEntity['id']
-  | PayeeEntity['id'][];
+type PayeeFilterValue = PayeeEntity['id'] | PayeeEntity['id'][];
 
 /** This component only supports single- or multi-select operations. */
 type PayeeFilterOp = 'is' | 'isNot' | 'oneOf' | 'notOneOf';
