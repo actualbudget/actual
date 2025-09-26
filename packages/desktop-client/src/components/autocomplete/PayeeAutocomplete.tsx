@@ -40,22 +40,22 @@ import {
 } from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
-export type PayeeAutocompleteItem = PayeeEntity;
+type PayeeAutocompleteItem = PayeeEntity & PayeeItemType;
 
 const MAX_AUTO_SUGGESTIONS = 5;
 
 function getPayeeSuggestions(
-  commonPayees: PayeeAutocompleteItem[],
-  payees: PayeeAutocompleteItem[],
-): (PayeeAutocompleteItem & PayeeItemType)[] {
-  const favoritePayees = payees
+  commonPayees: PayeeEntity[],
+  payees: PayeeEntity[],
+): PayeeAutocompleteItem[] {
+  const favoritePayees: PayeeAutocompleteItem[] = payees
     .filter(p => p.favorite)
     .map(p => {
       return { ...p, itemType: determineItemType(p, true) };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  let additionalCommonPayees: (PayeeAutocompleteItem & PayeeItemType)[] = [];
+  let additionalCommonPayees: PayeeAutocompleteItem[] = [];
   if (commonPayees?.length > 0) {
     if (favoritePayees.length < MAX_AUTO_SUGGESTIONS) {
       additionalCommonPayees = commonPayees
@@ -71,10 +71,10 @@ function getPayeeSuggestions(
   }
 
   if (favoritePayees.length + additionalCommonPayees.length) {
-    const filteredPayees: (PayeeAutocompleteItem & PayeeItemType)[] = payees
+    const filteredPayees: PayeeAutocompleteItem[] = payees
       .filter(p => !favoritePayees.find(fp => fp.id === p.id))
       .filter(p => !additionalCommonPayees.find(fp => fp.id === p.id))
-      .map<PayeeAutocompleteItem & PayeeItemType>(p => {
+      .map<PayeeAutocompleteItem>(p => {
         return { ...p, itemType: determineItemType(p, false) };
       });
 
@@ -86,14 +86,14 @@ function getPayeeSuggestions(
   });
 }
 
-function filterActivePayees(
-  payees: PayeeAutocompleteItem[],
+function filterActivePayees<T extends PayeeEntity>(
+  payees: T[],
   accounts: AccountEntity[],
-) {
-  return accounts ? getActivePayees(payees, accounts) : payees;
+): T[] {
+  return accounts ? (getActivePayees(payees, accounts) as T[]) : payees;
 }
 
-function filterTransferPayees(payees: PayeeAutocompleteItem[]) {
+function filterTransferPayees<T extends PayeeEntity>(payees: T[]): T[] {
   return payees.filter(payee => !!payee.transfer_acct);
 }
 
@@ -139,10 +139,7 @@ type PayeeItemType = {
   itemType: ItemTypes;
 };
 
-function determineItemType(
-  item: PayeeAutocompleteItem,
-  isCommon: boolean,
-): ItemTypes {
+function determineItemType(item: PayeeEntity, isCommon: boolean): ItemTypes {
   if (item.transfer_acct) {
     return 'account';
   }
@@ -299,6 +296,17 @@ function PayeeList({
   );
 }
 
+function customSort(obj: PayeeAutocompleteItem, value: string): number {
+  const name = getNormalisedString(obj.name);
+  if (obj.id === 'new') {
+    return -2;
+  }
+  if (name.includes(value)) {
+    return -1;
+  }
+  return 1;
+}
+
 export type PayeeAutocompleteProps = ComponentProps<
   typeof Autocomplete<PayeeAutocompleteItem>
 > & {
@@ -317,7 +325,7 @@ export type PayeeAutocompleteProps = ComponentProps<
     props: ComponentPropsWithoutRef<typeof PayeeItem>,
   ) => ReactElement<typeof PayeeItem>;
   accounts?: AccountEntity[];
-  payees?: PayeeAutocompleteItem[];
+  payees?: PayeeEntity[];
 };
 
 export function PayeeAutocomplete({
@@ -370,7 +378,10 @@ export function PayeeAutocomplete({
       return filteredSuggestions;
     }
 
-    return [{ id: 'new', favorite: false, name: '' }, ...filteredSuggestions];
+    return [
+      { id: 'new', favorite: false, name: '' } as PayeeAutocompleteItem,
+      ...filteredSuggestions,
+    ];
   }, [
     commonPayees,
     payees,
@@ -404,6 +415,38 @@ export function PayeeAutocomplete({
 
   const [payeeFieldFocused, setPayeeFieldFocused] = useState(false);
 
+  const filterSuggestions = (
+    suggestions: PayeeAutocompleteItem[],
+    value: string,
+  ) => {
+    const normalizedValue = getNormalisedString(value);
+    const filtered = suggestions
+      .filter(suggestion => {
+        if (suggestion.id === 'new') {
+          return !value || value === '' || focusTransferPayees ? false : true;
+        }
+
+        return defaultFilterSuggestion(suggestion, value);
+      })
+      .sort(
+        (a, b) =>
+          customSort(a, normalizedValue) - customSort(b, normalizedValue),
+      )
+      // Only show the first 100 results, users can search to find more.
+      // If user want to view all payees, it can be done via the manage payees page.
+      .slice(0, 100);
+
+    if (filtered.length >= 2 && filtered[0].id === 'new') {
+      if (
+        getNormalisedString(filtered[1].name) === normalizedValue &&
+        !filtered[1].transfer_acct
+      ) {
+        return filtered.slice(1);
+      }
+    }
+    return filtered;
+  };
+
   return (
     <Autocomplete
       key={focusTransferPayees ? 'transfers' : 'all'}
@@ -435,66 +478,15 @@ export function PayeeAutocomplete({
       onUpdate={(id, inputValue) => onUpdate?.(id, makeNew(id, inputValue))}
       onSelect={handleSelect}
       getHighlightedIndex={suggestions => {
-        if (suggestions.length > 1 && suggestions[0].id === 'new') {
-          return 1;
+        if (suggestions.length === 0) {
+          return null;
+        } else if (suggestions[0].id === 'new') {
+          // Highlight the first payee since the create payee option is at index 0.
+          return suggestions.length > 1 ? 1 : null;
         }
         return 0;
       }}
-      filterSuggestions={(suggestions, value) => {
-        let filtered = suggestions.filter(suggestion => {
-          if (suggestion.id === 'new') {
-            return !value || value === '' || focusTransferPayees ? false : true;
-          }
-
-          return defaultFilterSuggestion(suggestion, value);
-        });
-
-        filtered.sort((p1, p2) => {
-          const r1 = getNormalisedString(p1.name).startsWith(
-            getNormalisedString(value),
-          );
-          const r2 = getNormalisedString(p2.name).startsWith(
-            getNormalisedString(value),
-          );
-          const r1exact = p1.name.toLowerCase() === value.toLowerCase();
-          const r2exact = p2.name.toLowerCase() === value.toLowerCase();
-
-          // (maniacal laughter) mwahaHAHAHAHAH
-          if (p1.id === 'new') {
-            return -1;
-          } else if (p2.id === 'new') {
-            return 1;
-          } else {
-            if (r1exact && !r2exact) {
-              return -1;
-            } else if (!r1exact && r2exact) {
-              return 1;
-            } else {
-              if (r1 === r2) {
-                return 0;
-              } else if (r1 && !r2) {
-                return -1;
-              } else {
-                return 1;
-              }
-            }
-          }
-        });
-
-        // Only show the first 100 results, users can search to find more.
-        // If user want to view all payees, it can be done via the manage payees page.
-        filtered = filtered.slice(0, 100);
-
-        if (filtered.length >= 2 && filtered[0].id === 'new') {
-          if (
-            filtered[1].name.toLowerCase() === value.toLowerCase() &&
-            !filtered[1].transfer_acct
-          ) {
-            return filtered.slice(1);
-          }
-        }
-        return filtered;
-      }}
+      filterSuggestions={filterSuggestions}
       renderItems={(items, getItemProps, highlightedIndex, inputValue) => (
         <PayeeList
           items={items}
