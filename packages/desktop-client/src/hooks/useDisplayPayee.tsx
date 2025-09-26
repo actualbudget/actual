@@ -39,6 +39,7 @@ export function DisplayPayeeContextProvider({
   );
   const { transactions: allSubtransactions = [] } = useTransactions({
     query: subtransactionsQuery,
+    options: { pageCount: transactions.length * 5 },
   });
 
   const accounts = useAccounts();
