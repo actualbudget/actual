@@ -28,7 +28,7 @@ import { useDrag } from '@use-gesture/react';
 
 import * as Platform from 'loot-core/shared/platform';
 
-import { useScrollListener } from '@desktop-client/components/ScrollProvider';
+import { useScrollListener } from '@desktop-client/hooks/useScrollListener';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 const COLUMN_COUNT = 3;
