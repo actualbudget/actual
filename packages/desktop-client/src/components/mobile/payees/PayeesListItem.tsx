@@ -27,6 +27,7 @@ export function PayeesListItem({
 
   return (
     <GridListItem
+      id={payee.id}
       value={payee}
       textValue={payee.name}
       style={styles.mobileListItem}
