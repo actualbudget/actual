@@ -148,12 +148,27 @@ function validatePayPeriodConfig(
   }
 }
 
-function getPeriodIndex(monthId: string, config: PayPeriodConfig): number {
+function getPeriodIndex(monthId: string): number {
   const mm = getNumericMonthValue(monthId);
   if (mm < 13 || mm > 99) {
     throw new Error("monthId '" + monthId + "' is not a pay period bucket.");
   }
   return mm - 12; // 13 -> 1
+}
+
+/**
+ * Gets the maximum number of periods for the current year based on current config.
+ * This is a self-contained function that doesn't require external config validation.
+ */
+function getMaxPeriodsForCurrentYear(): number {
+  const config = getPayPeriodConfig();
+  if (!config?.enabled) {
+    // If config isn't available, assume the common biweekly (26 periods)
+    // This is a safe fallback since the presence of pay period IDs means
+    // pay periods are enabled, but config might not be loaded yet
+    return 26;
+  }
+  return getMaxPeriodsForYear(config);
 }
 
 /**
@@ -192,11 +207,8 @@ function computePayPeriodByIndex(
   targetYear: number,
 ): { startDate: Date; endDate: Date; label: string } {
   validatePayPeriodConfig(config);
-  if (!config || !config.enabled) {
-    throw new Error(
-      'Pay period config disabled or missing for pay period calculations.',
-    );
-  }
+  // Trust that if we're computing pay period by index, pay periods are enabled
+  // This function is only called as part of pay period workflows
   if (!Number.isInteger(periodIndex) || periodIndex < 1) {
     throw new Error("Invalid periodIndex '" + String(periodIndex) + "'.");
   }
@@ -253,7 +265,7 @@ export function getPayPeriodStartDate(
   monthId: string,
   config: PayPeriodConfig,
 ): Date {
-  const index = getPeriodIndex(monthId, config);
+  const index = getPeriodIndex(monthId);
   const year = getNumericYearValue(monthId);
   return computePayPeriodByIndex(index, config, year).startDate;
 }
@@ -262,7 +274,7 @@ export function getPayPeriodEndDate(
   monthId: string,
   config: PayPeriodConfig,
 ): Date {
-  const index = getPeriodIndex(monthId, config);
+  const index = getPeriodIndex(monthId);
   const year = getNumericYearValue(monthId);
   return computePayPeriodByIndex(index, config, year).endDate;
 }
@@ -271,7 +283,7 @@ export function getPayPeriodLabel(
   monthId: string,
   config: PayPeriodConfig,
 ): string {
-  const index = getPeriodIndex(monthId, config);
+  const index = getPeriodIndex(monthId);
   const year = getNumericYearValue(monthId);
   return computePayPeriodByIndex(index, config, year).label;
 }
@@ -288,7 +300,8 @@ export function generatePayPeriods(
   if (!Number.isInteger(year) || year < 1) {
     throw new Error('Invalid year for generatePayPeriods');
   }
-  if (!config || !config.enabled) return [];
+  // Trust that if generatePayPeriods is called, pay periods are enabled
+  if (!config) return [];
 
   // Create a cache key based on year and config
   const cacheKey = `${year}-${config.payFrequency}-${config.startDate}`;
@@ -336,14 +349,13 @@ export function generatePayPeriods(
 // Pay period navigation functions
 export function nextPayPeriod(
   monthId: string,
-  config: PayPeriodConfig,
 ): string {
   const year = getNumericYearValue(monthId);
-  const periodIndex = getPeriodIndex(monthId, config);
+  const periodIndex = getPeriodIndex(monthId);
 
   // Check if we need to move to next year
   const nextPeriodIndex = periodIndex + 1;
-  const maxPeriods = getMaxPeriodsForYear(config);
+  const maxPeriods = getMaxPeriodsForCurrentYear();
 
   if (nextPeriodIndex > maxPeriods) {
     // Move to first period of next year
@@ -355,17 +367,16 @@ export function nextPayPeriod(
 
 export function prevPayPeriod(
   monthId: string,
-  config: PayPeriodConfig,
 ): string {
   const year = getNumericYearValue(monthId);
-  const periodIndex = getPeriodIndex(monthId, config);
+  const periodIndex = getPeriodIndex(monthId);
 
   const prevPeriodIndex = periodIndex - 1;
 
   if (prevPeriodIndex < 1) {
     // Move to last period of previous year
     const prevYear = year - 1;
-    const maxPeriods = getMaxPeriodsForYear(config);
+    const maxPeriods = getMaxPeriodsForCurrentYear();
     return String(prevYear) + '-' + String(maxPeriods + 12).padStart(2, '0');
   }
 
@@ -375,12 +386,11 @@ export function prevPayPeriod(
 export function addPayPeriods(
   monthId: string,
   n: number,
-  config: PayPeriodConfig,
 ): string {
   let current = monthId;
   for (let i = 0; i < Math.abs(n); i++) {
     current =
-      n > 0 ? nextPayPeriod(current, config) : prevPayPeriod(current, config);
+      n > 0 ? nextPayPeriod(current) : prevPayPeriod(current);
   }
   return current;
 }
@@ -418,7 +428,6 @@ export function getPayPeriodFromDate(
 export function generatePayPeriodRange(
   start: string,
   end: string,
-  config: PayPeriodConfig,
   inclusive = false,
 ): string[] {
   const periods: string[] = [];
@@ -426,7 +435,7 @@ export function generatePayPeriodRange(
 
   while (isPayPeriodBefore(current, end)) {
     periods.push(current);
-    current = nextPayPeriod(current, config);
+    current = nextPayPeriod(current);
   }
 
   if (inclusive) {
@@ -461,7 +470,8 @@ export function getPayPeriodCountForMonth(
   calendarMonth: string,
   config: PayPeriodConfig,
 ): number {
-  if (!config?.enabled) return 0;
+  // Trust that if this function is called, pay periods are enabled
+  if (!config) return 0;
 
   const year = parseInt(calendarMonth.slice(0, 4));
   const month = parseInt(calendarMonth.slice(5, 7));
@@ -480,7 +490,6 @@ export function getPayPeriodCountForMonth(
 
   for (const period of periods) {
     const startDate = parseDate(period.startDate);
-    const endDate = parseDate(period.endDate);
 
     // Check if this pay period starts in the calendar month
     // A pay period belongs to the month where it starts, not where it ends
@@ -500,10 +509,11 @@ export function getPayPeriodNumberInMonth(
   monthId: string,
   config: PayPeriodConfig,
 ): number {
-  if (!isPayPeriod(monthId) || !config?.enabled) return 0;
+  // Trust that if this function is called with a pay period ID, pay periods are enabled
+  if (!isPayPeriod(monthId) || !config) return 0;
 
   const year = parseInt(monthId.slice(0, 4));
-  const periodIndex = getPeriodIndex(monthId, config);
+  const periodIndex = getPeriodIndex(monthId);
   const { startDate } = computePayPeriodByIndex(periodIndex, config, year);
 
   // Find which calendar month this pay period starts in

@@ -8,6 +8,8 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 
+import { createTransactionFilterConditions } from '@desktop-client/hooks/usePayPeriodTranslation';
+
 import { DynamicBudgetTable } from './DynamicBudgetTable';
 import * as envelopeBudget from './envelope/EnvelopeBudgetComponents';
 import { EnvelopeBudgetProvider } from './envelope/EnvelopeBudgetContext';
@@ -308,16 +310,7 @@ function BudgetInner(props: BudgetInnerProps) {
   };
 
   const onShowActivity = (categoryId, month) => {
-    const filterConditions = [
-      { field: 'category', op: 'is', value: categoryId, type: 'id' },
-      {
-        field: 'date',
-        op: 'is',
-        value: month,
-        options: { month: true },
-        type: 'date',
-      },
-    ];
+    const filterConditions = createTransactionFilterConditions(month, categoryId);
     navigate('/accounts', {
       state: {
         goBack: true,
@@ -380,6 +373,10 @@ function BudgetInner(props: BudgetInnerProps) {
     return String(currentYear) + '-13';
   }, [startMonth, payPeriodViewEnabled]);
 
+  // With enhanced comparison functions, we can use original bounds
+  // The getValidMonthBounds function will handle mixed types safely
+  const derivedBounds = bounds;
+
   if (!initialized || !categoryGroups) {
     return null;
   }
@@ -396,7 +393,7 @@ function BudgetInner(props: BudgetInnerProps) {
           type={budgetType}
           prewarmStartMonth={derivedStartMonth}
           startMonth={derivedStartMonth}
-          monthBounds={bounds}
+          monthBounds={derivedBounds}
           maxMonths={maxMonths}
           dataComponents={trackingComponents}
           onMonthSelect={onMonthSelect}
@@ -423,7 +420,7 @@ function BudgetInner(props: BudgetInnerProps) {
           type={budgetType}
           prewarmStartMonth={derivedStartMonth}
           startMonth={derivedStartMonth}
-          monthBounds={bounds}
+          monthBounds={derivedBounds}
           maxMonths={maxMonths}
           dataComponents={envelopeComponents}
           onMonthSelect={onMonthSelect}

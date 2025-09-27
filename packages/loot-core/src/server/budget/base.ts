@@ -18,11 +18,23 @@ export function getBudgetType() {
 }
 
 export function getBudgetRange(start: string, end: string) {
-  console.log(`[getBudgetRange] Input: start=${start}, end=${end}`);
+  // When pay periods are enabled, we need to use monthFromDate for date strings
+  // to ensure we get pay period months instead of calendar months
+  if (start.length > 7) {
+    // This is a date string like '2024-01-10', use monthFromDate
+    start = monthUtils.monthFromDate(start);
+  } else {
+    // This is already a month string like '2024-01' or '2024-13'
+    start = start;
+  }
 
-  start = monthUtils.getMonth(start);
-  end = monthUtils.getMonth(end);
-  console.log(`[getBudgetRange] After getMonth: start=${start}, end=${end}`);
+  if (end.length > 7) {
+    // This is a date string like '2024-01-10', use monthFromDate
+    end = monthUtils.monthFromDate(end);
+  } else {
+    // This is already a month string like '2024-01' or '2024-13'
+    end = end;
+  }
 
   // The start date should never be after the end date. If that
   // happened, the month range might be a valid range and weird
@@ -37,23 +49,8 @@ export function getBudgetRange(start: string, end: string) {
   // need to ever have budgets outside that range.
   start = monthUtils.subMonths(start, 3);
   end = monthUtils.addMonths(end, 12);
-  console.log(
-    `[getBudgetRange] After subMonths/addMonths: start=${start}, end=${end}`,
-  );
 
   const range = monthUtils.rangeInclusive(start, end);
-  console.log(
-    `[getBudgetRange] Generated range (${range.length} items):`,
-    range.slice(0, 10),
-    range.length > 10 ? '...' : '',
-  );
-
-  // Check if any pay periods are in the range
-  const payPeriods = range.filter(month => monthUtils.isPayPeriod(month));
-  console.log(
-    `[getBudgetRange] Pay periods in range (${payPeriods.length}):`,
-    payPeriods,
-  );
 
   return { start, end, range };
 }

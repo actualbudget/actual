@@ -294,6 +294,224 @@ The system includes extensive logging for debugging:
 [PayPeriod] Range request for pay periods: { start: '2024-13', end: '2024-16' }
 ```
 
+## Debugging Systematic Issues: Lessons Learned
+
+### Root Cause Analysis Approach
+
+When encountering mixed month type errors, follow this systematic debugging approach:
+
+#### 1. Identify Symptoms vs. Root Cause
+- **Symptom**: "Mixed calendar month and pay period ranges are not allowed"
+- **Wrong approach**: Add more validation to prevent mixed ranges
+- **Right approach**: Find WHY mixed ranges are being created in the first place
+
+#### 2. Trace Data Flow Systematically
+When debugging month type issues:
+1. **Start at the error point**: Where exactly is the mixed range detected?
+2. **Work backwards**: What function created the mixed values?
+3. **Find the source**: Where do calendar months enter a pay period flow (or vice versa)?
+
+**Example from recent fix**:
+```
+Error in: MonthsProvider → rangeInclusive('2025-31', '2027-07')
+↑ Mixed range
+Caused by: addMonths('2025-31', n) → returned '2027-07' (calendar month)
+↑ Wrong output type
+Root cause: addMonths() falling back to calendar arithmetic for pay period input
+```
+
+#### 3. Apply the "Presence Rule"
+**Key Insight**: If a pay period month ID (like `'2025-31'`) enters a function, that is PROOF that pay periods are enabled. The presence of the pay period ID IS the config check.
+
+**Before (dangerous pattern)**:
+```typescript
+if (isPayPeriod(monthStr)) {
+  const config = getPayPeriodConfig();
+  if (config?.enabled) {
+    return payPeriodFunction(monthStr, config);
+  }
+}
+// ❌ DANGEROUS: Unsafe fallback to calendar logic
+return calendarFunction(monthStr);
+```
+
+**After (safe pattern)**:
+```typescript
+if (isPayPeriod(monthStr)) {
+  return payPeriodFunction(monthStr); // Self-contained
+}
+return calendarFunction(monthStr);
+```
+
+#### 4. Eliminate Config Parameter Passing
+Pay period functions should get their config internally rather than requiring it as a parameter:
+
+```typescript
+// ❌ Before: Config passed around
+function addPayPeriods(monthId: string, n: number, config: PayPeriodConfig) { ... }
+
+// ✅ After: Config retrieved internally
+function addPayPeriods(monthId: string, n: number) {
+  const config = getPayPeriodConfig();
+  if (!config?.enabled) {
+    throw new Error(`Pay period ${monthId} requires enabled config`);
+  }
+  // ... rest of logic
+}
+```
+
+### Systematic Fix Strategy
+
+1. **Phase 1**: Make pay period functions self-contained
+   - Remove config parameters
+   - Add internal config validation with clear errors
+   - Functions fail fast rather than falling back
+
+2. **Phase 2**: Simplify calling code
+   - Remove redundant config checks
+   - Remove unsafe fallback paths
+   - Use clean `if (isPayPeriod) return payPeriodFn()` pattern
+
+### Testing Strategy for Systematic Issues
+
+**Create Reproduction Tests First**:
+```typescript
+test('Should reproduce exact error scenario', () => {
+  // Test the specific values from the error message
+  expect(() => {
+    monthUtils.rangeInclusive('2025-31', '2027-07');
+  }).toThrow('Mixed calendar month and pay period ranges');
+});
+```
+
+**Test the Fix, Not Just the Symptoms**:
+```typescript
+test('Pay period functions never return calendar months', () => {
+  const result = monthUtils.addMonths('2025-31', 50);
+  expect(monthUtils.isPayPeriod(result)).toBe(true);
+  expect(result).not.toMatch(/^\d{4}-(0[1-9]|1[0-2])$/); // Not calendar format
+});
+```
+
+### Key Principles
+
+1. **Trace to the Source**: Don't fix symptoms, fix the root cause
+2. **Trust the Type**: If you have a pay period ID, pay periods must be enabled
+3. **Fail Fast**: Clear errors are better than silent failures or unsafe fallbacks
+4. **Self-Contained Functions**: Functions should manage their own requirements
+5. **Test the Invariant**: Ensure the fundamental rule (pay period in = pay period out) holds
+
+These lessons prevent the need for complex validation layers by ensuring the problem can never occur in the first place.
+
+## Single Source of Truth: Architecture Lessons Learned
+
+### The Core Principle
+
+**If a pay period ID exists in the system, that IS proof that pay periods are enabled.**
+
+This principle eliminates race conditions and creates a clean architectural separation between ID generation and ID processing.
+
+### Sources of Truth Analysis
+
+#### **ID Generation Points** (Should check config.enabled):
+- `currentMonth()` in months.ts - THE decision point that returns pay period ID only if enabled
+- `monthFromDate()` in months.ts - Converts dates to appropriate month type based on config
+
+These functions are the **gatekeepers** that decide whether to generate pay period IDs or calendar month IDs.
+
+#### **ID Processing Points** (Should trust the ID type):
+- All pay period utility functions should trust that if they receive a pay period ID, it's valid
+- No need to check `config.enabled` - the presence of the ID IS the check
+
+### Implementation Strategy
+
+**Before (Violates Single Source of Truth)**:
+```typescript
+// ❌ BAD: Processing function checking enabled state
+function computePayPeriodByIndex(periodIndex, config, year) {
+  if (!config || !config.enabled) {
+    throw new Error('Pay period config disabled');
+  }
+  // ... processing logic
+}
+```
+
+**After (Follows Single Source of Truth)**:
+```typescript
+// ✅ GOOD: Processing function trusts the ID
+function computePayPeriodByIndex(periodIndex, config, year) {
+  // Trust that if this function is called, pay periods are enabled
+  // The ID generation point already made this determination
+  // ... processing logic
+}
+```
+
+### Frontend/Backend Alignment
+
+**Frontend Sources of Truth**:
+- Feature Flag: `useFeatureFlag('payPeriodsEnabled')`
+- User Preference: `useSyncedPref('showPayPeriods')`
+- Combined in budget component: `config.enabled = featureFlag && showPayPeriods`
+
+**Backend Sources of Truth**:
+- Budget Load: Loads config from DB preferences during startup
+- Preference Changes: Reloads config when user changes settings
+
+**Critical Flow**:
+1. Config determines enabled state
+2. `currentMonth()` uses config to decide ID type
+3. Pay period IDs flow through entire system
+4. Processing functions trust the ID type
+
+### Functions Fixed
+
+**Critical Functions** (Were throwing errors during initialization):
+- `computePayPeriodByIndex()` - Removed config.enabled check
+- `bounds()` - Removed config.enabled check
+- `getMonthStartDate()` - Removed config.enabled check
+- `getMonthEndDate()` - Removed config.enabled check
+- `resolveMonthRange()` - Removed config.enabled check
+- `_range()` - Removed config.enabled check
+
+**Supporting Functions**:
+- `generatePayPeriods()` - Removed config.enabled check
+- `getPayPeriodCountForMonth()` - Removed config.enabled check
+- `getPayPeriodNumberInMonth()` - Removed config.enabled check
+- Label functions - Simplified config logic
+
+### Key Benefits
+
+1. **Eliminates Race Conditions**: No more initialization timing issues
+2. **Cleaner Architecture**: Clear separation between decision and processing
+3. **Better Error Messages**: Failures are more specific and actionable
+4. **Maintainability**: Easier to reason about and modify
+5. **Performance**: Fewer redundant config checks
+
+### Testing Strategy for Single Source of Truth
+
+```typescript
+test('Pay period functions trust ID presence', () => {
+  // If a pay period ID exists, functions should process it
+  const result = somePayPeriodFunction('2024-15');
+  expect(result).toBeDefined();
+  // No config.enabled checks needed
+});
+
+test('ID generation respects config', () => {
+  setConfig({ enabled: false });
+  expect(currentMonth()).toMatch(/^\d{4}-(0[1-9]|1[0-2])$/); // Calendar month
+
+  setConfig({ enabled: true });
+  expect(currentMonth()).toMatch(/^\d{4}-(1[3-9]|[2-9][0-9])$/); // Pay period
+});
+```
+
+### Architecture Rule
+
+**Single Source of Truth Rule**: Only one place should determine whether pay periods are enabled for a given context. All downstream functions should trust that determination.
+
+This approach creates a robust, maintainable system where the presence of pay period IDs serves as the definitive proof that pay periods are active.
+
 ## Future Enhancements
 ### Architecture Improvements
 - **Type Safety**: Branded types to prevent calendar/pay period mixing at compile time
