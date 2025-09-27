@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { logger } from '../../platform/server/log';
 import {
   RuleActionEntity,
   TransactionEntity,
@@ -22,7 +23,7 @@ function validateRule(rule: Partial<RuleEntity>) {
         validate(item);
       } catch (e) {
         if (e instanceof RuleError) {
-          console.warn('Invalid rule', e);
+          logger.warn('Invalid rule', e);
           return e.type;
         }
         throw e;

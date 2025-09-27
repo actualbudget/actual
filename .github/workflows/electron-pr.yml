@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-latest
+          - ubuntu-22.04
           - windows-latest
           - macos-latest
     runs-on: ${{ matrix.os }}

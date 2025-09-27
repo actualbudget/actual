@@ -1,4 +1,5 @@
 import * as asyncStorage from '../../platform/server/asyncStorage';
+import { logger } from '../../platform/server/log';
 import { OpenIdConfig } from '../../types/models';
 import { createApp } from '../app';
 import * as encryption from '../encryption';
@@ -196,7 +197,7 @@ async function getUser() {
       tokenExpired,
     };
   } catch (e) {
-    console.log(e);
+    logger.log(e);
     return { offline: true };
   }
 }

@@ -106,19 +106,14 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
-  const [initialStart, initialEnd, initialMode] = calculateTimeRange(
-    widget?.meta?.timeFrame,
-    {
-      start: monthUtils.dayFromDate(monthUtils.currentMonth()),
-      end: monthUtils.currentDay(),
-      mode: 'full',
-    },
+  const [start, setStart] = useState(
+    monthUtils.dayFromDate(monthUtils.currentMonth()),
   );
-  const [start, setStart] = useState(initialStart);
-  const [end, setEnd] = useState(initialEnd);
-  const [mode, setMode] = useState(initialMode);
+  const [end, setEnd] = useState(monthUtils.currentDay());
+  const [mode, setMode] = useState<TimeFrame['mode']>('full');
   const [query, setQuery] = useState<Query | undefined>(undefined);
   const [dirty, setDirty] = useState(false);
+  const [latestTransaction, setLatestTransaction] = useState('');
 
   const { transactions: transactionsGrouped, loadMore: loadMoreTransactions } =
     useTransactions({ query });
@@ -260,36 +255,67 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
 
   useEffect(() => {
     async function run() {
-      try {
-        const trans = await send('get-earliest-transaction');
-        const currentMonth = monthUtils.currentMonth();
-        let earliestMonth = trans
-          ? monthUtils.monthFromDate(parseISO(fromDateRepr(trans.date)))
-          : currentMonth;
+      const earliestTransaction = await send('get-earliest-transaction');
+      setEarliestTransaction(
+        earliestTransaction
+          ? earliestTransaction.date
+          : monthUtils.currentDay(),
+      );
 
-        // Make sure the month selects are at least populates with a
-        // year's worth of months. We can undo this when we have fancier
-        // date selects.
-        const yearAgo = monthUtils.subMonths(monthUtils.currentMonth(), 12);
-        if (earliestMonth > yearAgo) {
-          earliestMonth = yearAgo;
-        }
+      const latestTransaction = await send('get-latest-transaction');
+      setLatestTransaction(
+        latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
+      );
 
-        const allMonths = monthUtils
-          .rangeInclusive(earliestMonth, monthUtils.currentMonth())
-          .map(month => ({
-            name: month,
-            pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
-          }))
-          .reverse();
+      const currentMonth = monthUtils.currentMonth();
+      let earliestMonth = earliestTransaction
+        ? monthUtils.monthFromDate(
+            parseISO(fromDateRepr(earliestTransaction.date)),
+          )
+        : currentMonth;
+      const latestMonth = latestTransaction
+        ? monthUtils.monthFromDate(
+            parseISO(fromDateRepr(latestTransaction.date)),
+          )
+        : currentMonth;
 
-        setAllMonths(allMonths);
-      } catch (error) {
-        console.error('Error fetching earliest transaction:', error);
+      // Make sure the month selects are at least populates with a
+      // year's worth of months. We can undo this when we have fancier
+      // date selects.
+      const yearAgo = monthUtils.subMonths(latestMonth, 12);
+      if (earliestMonth > yearAgo) {
+        earliestMonth = yearAgo;
       }
+
+      const allMonths = monthUtils
+        .rangeInclusive(earliestMonth, latestMonth)
+        .map(month => ({
+          name: month,
+          pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
+        }))
+        .reverse();
+
+      setAllMonths(allMonths);
     }
     run();
   }, [locale]);
+
+  useEffect(() => {
+    if (latestTransaction) {
+      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+        widget?.meta?.timeFrame,
+        {
+          start: monthUtils.dayFromDate(monthUtils.currentMonth()),
+          end: monthUtils.currentDay(),
+          mode: 'full',
+        },
+        latestTransaction,
+      );
+      setStart(initialStart);
+      setEnd(initialEnd);
+      setMode(initialMode);
+    }
+  }, [latestTransaction, widget?.meta?.timeFrame]);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -477,7 +503,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     },
   );
 
-  const [earliestTransaction, _] = useState('');
+  const [earliestTransaction, setEarliestTransaction] = useState('');
 
   return (
     <Page
@@ -512,6 +538,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
           start={start}
           end={end}
           earliestTransaction={earliestTransaction}
+          latestTransaction={latestTransaction}
           firstDayOfWeekIdx={firstDayOfWeekIdx}
           mode={mode}
           onChangeDates={onChangeDates}

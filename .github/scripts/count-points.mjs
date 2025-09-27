@@ -2,7 +2,7 @@ import { Octokit } from '@octokit/rest';
 import { minimatch } from 'minimatch';
 import pLimit from 'p-limit';
 
-const limit = pLimit(30);
+const limit = pLimit(50);
 
 /** Repository-specific configuration for points calculation */
 const REPOSITORY_CONFIG = new Map([
@@ -129,13 +129,13 @@ async function countContributorPoints(repo) {
   // Get all PRs using search
   const searchQuery = `repo:${owner}/${repo} is:pr is:merged merged:${since.toISOString()}..${until.toISOString()}`;
   const recentPRs = await octokit.paginate(
-    octokit.search.issuesAndPullRequests,
+    'GET /search/issues',
     {
       q: searchQuery,
       per_page: 100,
       advanced_search: true,
     },
-    response => response.data,
+    response => response.data.filter(pr => pr.number),
   );
 
   // Get reviews and PR details for each PR

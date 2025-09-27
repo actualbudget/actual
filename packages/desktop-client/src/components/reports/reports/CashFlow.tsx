@@ -91,16 +91,13 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
     pretty: string;
   }>>(null);
 
-  const [initialStart, initialEnd, initialMode] = calculateTimeRange(
-    widget?.meta?.timeFrame,
-    defaultTimeFrame,
-  );
-  const [start, setStart] = useState(initialStart);
-  const [end, setEnd] = useState(initialEnd);
-  const [mode, setMode] = useState(initialMode);
+  const [start, setStart] = useState(monthUtils.currentMonth());
+  const [end, setEnd] = useState(monthUtils.currentMonth());
+  const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
   const [showBalance, setShowBalance] = useState(
     widget?.meta?.showBalance ?? true,
   );
+  const [latestTransaction, setLatestTransaction] = useState('');
 
   const [isConcise, setIsConcise] = useState(() => {
     const numDays = d.differenceInCalendarDays(
@@ -127,13 +124,27 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
 
   useEffect(() => {
     async function run() {
-      const trans = await send('get-earliest-transaction');
-      const earliestMonth = trans
-        ? monthUtils.monthFromDate(d.parseISO(trans.date))
+      const earliestTransaction = await send('get-earliest-transaction');
+      setEarliestTransaction(
+        earliestTransaction
+          ? earliestTransaction.date
+          : monthUtils.currentDay(),
+      );
+
+      const latestTransaction = await send('get-latest-transaction');
+      setLatestTransaction(
+        latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
+      );
+
+      const earliestMonth = earliestTransaction
+        ? monthUtils.monthFromDate(d.parseISO(earliestTransaction.date))
+        : monthUtils.currentMonth();
+      const latestMonth = latestTransaction
+        ? monthUtils.monthFromDate(d.parseISO(latestTransaction.date))
         : monthUtils.currentMonth();
 
       const allMonths = monthUtils
-        .rangeInclusive(earliestMonth, monthUtils.currentMonth())
+        .rangeInclusive(earliestMonth, latestMonth)
         .map(month => ({
           name: month,
           pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
@@ -144,6 +155,19 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
     }
     run();
   }, [locale]);
+
+  useEffect(() => {
+    if (latestTransaction) {
+      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+        widget?.meta?.timeFrame,
+        defaultTimeFrame,
+        latestTransaction,
+      );
+      setStart(initialStart);
+      setEnd(initialEnd);
+      setMode(initialMode);
+    }
+  }, [latestTransaction, widget?.meta?.timeFrame]);
 
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     const numDays = d.differenceInCalendarDays(
@@ -206,7 +230,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
     });
   };
 
-  const [earliestTransaction, _] = useState('');
+  const [earliestTransaction, setEarliestTransaction] = useState('');
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
@@ -248,6 +272,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
         start={start}
         end={end}
         earliestTransaction={earliestTransaction}
+        latestTransaction={latestTransaction}
         firstDayOfWeekIdx={firstDayOfWeekIdx}
         mode={mode}
         show1Month

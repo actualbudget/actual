@@ -203,7 +203,8 @@ const ModalContentContainer = ({
       }
 
       if (isActive) {
-        contentRef.current.style.transform = 'translateY(0px) scale(1)';
+        contentRef.current.style.transform = 'none';
+        contentRef.current.style.willChange = 'auto';
         contentRef.current.style.pointerEvents = 'auto';
       } else {
         contentRef.current.style.transform = `translateY(-40px) scale(.95) rotate(${rotateFactor.current}deg)`;

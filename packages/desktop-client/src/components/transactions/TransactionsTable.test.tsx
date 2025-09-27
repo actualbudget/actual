@@ -75,6 +75,13 @@ vi.mock('../../hooks/usePayees', async importOriginal => {
   return {
     ...actual,
     usePayees: () => payees,
+    usePayeesById: () => {
+      const payeesById: Record<string, PayeeEntity> = {};
+      payees.forEach(payee => {
+        payeesById[payee.id] = payee;
+      });
+      return payeesById;
+    },
   };
 });
 

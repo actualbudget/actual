@@ -17,7 +17,6 @@ import { GlobalKeys } from './GlobalKeys';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Notifications } from './Notifications';
-import { ManagePayeesPage } from './payees/ManagePayeesPage';
 import { Reports } from './reports';
 import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
@@ -29,16 +28,16 @@ import { FloatableSidebar } from './sidebar';
 import { ManageTagsPage } from './tags/ManageTagsPage';
 import { Titlebar } from './Titlebar';
 
-import { sync } from '@desktop-client/app/appSlice';
+import { getLatestAppVersion, sync } from '@desktop-client/app/appSlice';
 import { ProtectedRoute } from '@desktop-client/auth/ProtectedRoute';
 import { Permissions } from '@desktop-client/auth/types';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
-import { getIsOutdated, getLatestVersion } from '@desktop-client/util/versions';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -88,6 +87,10 @@ export function FinancesApp() {
   const accounts = useAccounts();
   const isAccountsLoaded = useSelector(state => state.account.isAccountsLoaded);
 
+  const versionInfo = useSelector(state => state.app.versionInfo);
+  const [notifyWhenUpdateIsAvailable] = useGlobalPref(
+    'notifyWhenUpdateIsAvailable',
+  );
   const [lastUsedVersion, setLastUsedVersion] = useLocalPref(
     'flags.updateNotificationShownForVersion',
   );
@@ -104,7 +107,7 @@ export function FinancesApp() {
 
   useEffect(() => {
     async function run() {
-      await global.Actual.waitForUpdateReadyForDownload();
+      await global.Actual.waitForUpdateReadyForDownload(); // This will only resolve when an update is ready
       dispatch(
         addNotification({
           notification: {
@@ -130,11 +133,15 @@ export function FinancesApp() {
   }, []);
 
   useEffect(() => {
-    async function run() {
-      const latestVersion = await getLatestVersion();
-      const isOutdated = await getIsOutdated(latestVersion);
+    dispatch(getLatestAppVersion());
+  }, [dispatch]);
 
-      if (isOutdated && lastUsedVersion !== latestVersion) {
+  useEffect(() => {
+    if (notifyWhenUpdateIsAvailable && versionInfo) {
+      if (
+        versionInfo.isOutdated &&
+        lastUsedVersion !== versionInfo.latestVersion
+      ) {
         dispatch(
           addNotification({
             notification: {
@@ -148,7 +155,7 @@ export function FinancesApp() {
                     )
                   : t(
                       'Version {{latestVersion}} of Actual was recently released.',
-                      { latestVersion },
+                      { latestVersion: versionInfo.latestVersion },
                     ),
               sticky: true,
               id: 'update-notification',
@@ -159,16 +166,21 @@ export function FinancesApp() {
                 },
               },
               onClose: () => {
-                setLastUsedVersion(latestVersion);
+                setLastUsedVersion(versionInfo.latestVersion);
               },
             },
           }),
         );
       }
     }
-
-    run();
-  }, [lastUsedVersion, setLastUsedVersion]);
+  }, [
+    dispatch,
+    lastUsedVersion,
+    notifyWhenUpdateIsAvailable,
+    setLastUsedVersion,
+    t,
+    versionInfo,
+  ]);
 
   const scrollableRef = useRef<HTMLDivElement>(null);
 
@@ -254,7 +266,10 @@ export function FinancesApp() {
                   }
                 />
 
-                <Route path="/payees" element={<ManagePayeesPage />} />
+                <Route
+                  path="/payees"
+                  element={<NarrowAlternate name="Payees" />}
+                />
                 <Route
                   path="/rules"
                   element={<NarrowAlternate name="Rules" />}
@@ -333,6 +348,7 @@ export function FinancesApp() {
               <Route path="/settings" element={<MobileNavTabs />} />
               <Route path="/reports" element={<MobileNavTabs />} />
               <Route path="/rules" element={<MobileNavTabs />} />
+              <Route path="/payees" element={<MobileNavTabs />} />
               <Route path="*" element={null} />
             </Routes>
           </ScrollProvider>

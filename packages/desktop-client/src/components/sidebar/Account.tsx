@@ -23,12 +23,11 @@ import { css, cx } from '@emotion/css';
 import * as Platform from 'loot-core/shared/platform';
 import { type AccountEntity } from 'loot-core/types/models';
 
-import { BalanceHistoryGraph } from './BalanceHistoryGraph';
-
 import {
   reopenAccount,
   updateAccount,
 } from '@desktop-client/accounts/accountsSlice';
+import { BalanceHistoryGraph } from '@desktop-client/components/accounts/BalanceHistoryGraph';
 import { Link } from '@desktop-client/components/common/Link';
 import { Notes } from '@desktop-client/components/Notes';
 import {
@@ -334,7 +333,10 @@ export function Account<FieldName extends SheetFields<'account'>>({
             </Button>
           </SpaceBetween>
           {showBalanceHistory === 'true' && account && (
-            <BalanceHistoryGraph accountId={account.id} />
+            <BalanceHistoryGraph
+              accountId={account.id}
+              style={{ minWidth: 350, minHeight: 70 }}
+            />
           )}
           {accountNote && (
             <Notes

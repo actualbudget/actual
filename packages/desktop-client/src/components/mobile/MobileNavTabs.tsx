@@ -123,8 +123,8 @@ export function MobileNavTabs() {
       Icon: SvgCalendar3,
     },
     {
-      name: t('Payees (Soon)'),
-      path: '/payees/soon',
+      name: t('Payees'),
+      path: '/payees',
       style: navTabStyle,
       Icon: SvgStoreFront,
     },
@@ -149,13 +149,18 @@ export function MobileNavTabs() {
     <div key={idx} style={navTabStyle} />
   ));
 
-  useScrollListener(({ isScrolling, hasScrolledToEnd }) => {
-    if (isScrolling('down') && !hasScrolledToEnd('up')) {
-      hide();
-    } else if (isScrolling('up') && !hasScrolledToEnd('down')) {
-      openDefault();
-    }
-  });
+  useScrollListener(
+    useCallback(
+      ({ isScrolling, hasScrolledToEnd }) => {
+        if (isScrolling('down') && !hasScrolledToEnd('up')) {
+          hide();
+        } else if (isScrolling('up') && !hasScrolledToEnd('down')) {
+          openDefault();
+        }
+      },
+      [hide, openDefault],
+    ),
+  );
 
   const bind = useDrag(
     ({
