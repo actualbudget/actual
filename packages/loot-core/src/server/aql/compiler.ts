@@ -814,13 +814,39 @@ const compileWhere = saveStack('filter', (state, conds) => {
   return compileAnd(state, conds);
 });
 
-function compileJoins(state, tableRef, internalTableFilters) {
+function compileJoins(state, tableRef, internalTableFilters, schemaConfig) {
   const joins = [];
   state.paths.forEach((desc, path) => {
     const { tableName, tableId, joinField, joinTable, noMapping } =
       state.paths.get(path);
 
-    let on = `${tableId}.id = ${tableRef(joinTable)}.${quoteAlias(joinField)}`;
+    // Apply field mapping for join field (e.g., 'group' -> 'cat_group')
+    const resolvedJoinField = (() => {
+      const views = schemaConfig?.views || {};
+      
+      // We need to find the actual table name that joinTable refers to
+      // joinTable could be either a table name (first level) or a tableId (deeper levels)
+      let actualTableName = joinTable;
+      
+      // If joinTable looks like a table ID (contains numbers), find the actual table name
+      if (typeof joinTable === 'string' && joinTable.match(/\d+$/)) {
+        // Find the table name by looking for a path with this tableId
+        for (const [, pathDesc] of state.paths) {
+          if (pathDesc.tableId === joinTable) {
+            actualTableName = pathDesc.tableName;
+            break;
+          }
+        }
+      }
+      
+      // The joinField belongs to actualTableName (the table we're joining FROM)
+      if (views[actualTableName] && views[actualTableName].fields) {
+        return views[actualTableName].fields[joinField] || joinField;
+      }
+      return joinField;
+    })();
+
+    let on = `${tableId}.id = ${tableRef(joinTable)}.${quoteAlias(resolvedJoinField)}`;
 
     const filters = internalTableFilters(tableName);
     if (filters.length > 0) {
@@ -1158,7 +1184,7 @@ export function compileQuery(
     }
 
     if (state.paths.size > 0) {
-      joins = compileJoins(state, tableRef, internalTableFilters);
+      joins = compileJoins(state, tableRef, internalTableFilters, schemaConfig);
     }
   } catch (e) {
     if (e instanceof CompileError) {

@@ -963,4 +963,44 @@ describe('Type conversions', () => {
     );
     expect(result.sql).toMatch('WHERE (payees1.id IS NOT NULL)');
   });
+
+  it('correctly maps field names in join conditions', () => {
+    // Test the issue from GitHub #5616: category.group.name should use cat_group column
+    const schemaWithMappedFields = {
+      transactions: {
+        id: { type: 'id' },
+        category: { type: 'id', ref: 'categories' },
+        amount: { type: 'integer' },
+      },
+      categories: {
+        id: { type: 'id' },
+        name: { type: 'string' },
+        group: { type: 'id', ref: 'category_groups' },
+      },
+      category_groups: {
+        id: { type: 'id' },
+        name: { type: 'string' },
+      },
+    };
+
+    const schemaConfigWithMapping = {
+      views: {
+        categories: {
+          fields: {
+            group: 'cat_group', // Maps 'group' field to 'cat_group' column
+          },
+        },
+      },
+    };
+
+    const result = generateSQLWithState(
+      q('transactions').select(['category.group.name']).serialize(),
+      schemaWithMappedFields,
+      schemaConfigWithMapping,
+    );
+
+    // The SQL should use cat_group instead of "group" in the join condition
+    expect(result.sql).toMatch(/category_groups\d+\.id = categories\d+\.cat_group/);
+    expect(result.sql).not.toMatch(/categories\d+\."group"/);
+  });
 });
