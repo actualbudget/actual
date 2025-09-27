@@ -154,4 +154,10 @@ export const styles: Record<string, any> = {
     borderRadius: 4,
     padding: '3px 5px',
   },
+  mobileListItem: {
+    borderBottom: `1px solid ${theme.tableBorder}`,
+    backgroundColor: theme.tableBackground,
+    padding: 16,
+    cursor: 'pointer',
+  },
 };

@@ -1,4 +1,5 @@
-import { Trans } from 'react-i18next';
+import { GridList } from 'react-aria-components';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { Text } from '@actual-app/components/text';
@@ -24,6 +25,8 @@ export function PayeesList({
   isLoading = false,
   onPayeePress,
 }: PayeesListProps) {
+  const { t } = useTranslation();
+
   if (isLoading && payees.length === 0) {
     return (
       <View
@@ -66,14 +69,16 @@ export function PayeesList({
     <View
       style={{ flex: 1, paddingBottom: MOBILE_NAV_HEIGHT, overflow: 'auto' }}
     >
-      {payees.map(payee => (
-        <PayeesListItem
-          key={payee.id}
-          payee={payee}
-          ruleCount={ruleCounts.get(payee.id) ?? 0}
-          onPress={() => onPayeePress(payee)}
-        />
-      ))}
+      <GridList aria-label={t('Payees')} items={payees}>
+        {payee => (
+          <PayeesListItem
+            key={payee.id}
+            value={payee}
+            ruleCount={ruleCounts.get(payee.id) ?? 0}
+            onAction={() => onPayeePress(payee)}
+          />
+        )}
+      </GridList>
       {isLoading && (
         <View
           style={{
