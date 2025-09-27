@@ -29,25 +29,25 @@ When the template input mode is active you can type your template into the input
 
 ## Variables
 
-| Variable              | Type    | Notes                                                                                                           |
-|-----------------------|---------|-----------------------------------------------------------------------------------------------------------------|
-| today                 | date    | Today's date                                                                                                    |
-| account               | id      |                                                                                                                 |
-| date                  | date    |                                                                                                                 |
-| payee                 | id      |                                                                                                                 |
-| payee_name            | string  |                                                                                                                 |
-| imported_payee        | string  |                                                                                                                 |
-| notes                 | string  |                                                                                                                 |
+| Variable              | Type    | Notes                                                                                                             |
+|-----------------------|---------|-------------------------------------------------------------------------------------------------------------------|
+| today                 | date    | Today's date                                                                                                      |
+| account               | id      |                                                                                                                   |
+| date                  | date    |                                                                                                                   |
+| payee                 | id      |                                                                                                                   |
+| payee_name            | string  |                                                                                                                   |
+| imported_payee        | string  |                                                                                                                   |
+| notes                 | string  |                                                                                                                   |
 | amount                | number  | This is stored without the decimal place. ie. 152 will be 15200. `{{div amount 100}}` can be used to convert back |
-| cleared               | boolean |                                                                                                                 |
-| reconciled            | boolean |                                                                                                                 |
-| imported_id           | id      | ID of the transaction provided from an import source (eg. bank sync/QFX)                                        |
-| is_child              | boolean | Flag for children in a split transaction                                                                        |
-| is_parent             | boolean | Flag for the parent of a split transaction                                                                      |
-| parent_id             | id      | Set if is_child = true                                                                                          |
-| schedule              | id      |                                                                                                                 |
-| starting_balance_flag | boolean | Set if the transaction is a starting balance transaction                                                        |
-| transfer_id           | id      |                                                                                                                 |
+| cleared               | boolean |                                                                                                                   |
+| reconciled            | boolean |                                                                                                                   |
+| imported_id           | id      | ID of the transaction provided from an import source (eg. bank sync/QFX)                                          |
+| is_child              | boolean | Flag for children in a split transaction                                                                          |
+| is_parent             | boolean | Flag for the parent of a split transaction                                                                        |
+| parent_id             | id      | Set if is_child = true                                                                                            |
+| schedule              | id      |                                                                                                                   |
+| starting_balance_flag | boolean | Set if the transaction is a starting balance transaction                                                          |
+| transfer_id           | id      |                                                                                                                   |
 
 ## Functions
 ### Mathematical
@@ -69,30 +69,30 @@ When the template input mode is active you can type your template into the input
 
 ### Text
 
-| Function   | Arguments                   | Notes                                                                                                      |
-|------------|-----------------------------|------------------------------------------------------------------------------------------------------------|
-| regex      | value, regex, replacement   |                                                                                                            |
-| replace    | value, pattern, replacement | Mimics js replace. When pattern is not as /regex/flags it just uses raw value as opposed to `{{regex ...`   |
+| Function   | Arguments                   | Notes                                                                                                        |
+|------------|-----------------------------|--------------------------------------------------------------------------------------------------------------|
+| regex      | value, regex, replacement   |                                                                                                              |
+| replace    | value, pattern, replacement | Mimics js replace. When pattern is not as /regex/flags it just uses raw value as opposed to `{{regex ...`    |
 | replaceAll | value, pattern, replacement | Mimics js replaceAll. When pattern is not as /regex/flags it just uses raw value as opposed to `{{regex ...` |
-| concat     | values...                   | Joins all arguments together                                                                               |
+| concat     | values...                   | Joins all arguments together                                                                                 |
 
 ### Date
 
-| Function  | Arguments    | Notes                                                         |
-|-----------|--------------|---------------------------------------------------------------|
-| addDays   | date, number |                                                               |
-| subDays   | date, number |                                                               |
-| addWeeks  | date, number |                                                               |
-| subWeeks  | date, number |                                                               |
-| addMonths | date, number |                                                               |
-| subMonths | date, number |                                                               |
-| addYears  | date, number |                                                               |
-| subYears  | date, number |                                                               |
-| setDay    | date, day    | Overflows are handled, 0 will set to last day of month before |
-| day       | date         | Extract the day from a date                                   |
-| month     | date         | Extract the month from a date                                 |
-| year      | date         | Extract the year from a date                                  |
-| format    | date, format |                                                               |
+| Function  | Arguments    | Notes                                                                     |
+|-----------|--------------|---------------------------------------------------------------------------|
+| addDays   | date, number |                                                                           |
+| subDays   | date, number | Subtract days from date                                                   |
+| addWeeks  | date, number |                                                                           |
+| subWeeks  | date, number | Subtract weeks from date                                                  |
+| addMonths | date, number |                                                                           |
+| subMonths | date, number | Subtract months from date                                                 |
+| addYears  | date, number |                                                                           |
+| subYears  | date, number | Subtract years from date                                                  |
+| setDay    | date, day    | Overflows are handled, 0 will set to last day of month before             |
+| day       | date         | Extract the day from a date                                               |
+| month     | date         | Extract the month from a date                                             |
+| year      | date         | Extract the year from a date                                              |
+| format    | date, format | See [date-fns docs](https://date-fns.org/v4.1.0/docs/format) for patterns |
 
 ### Other
 
