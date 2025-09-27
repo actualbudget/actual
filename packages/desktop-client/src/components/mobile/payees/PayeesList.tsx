@@ -66,10 +66,16 @@ export function PayeesList({
   }
 
   return (
-    <View
-      style={{ flex: 1, paddingBottom: MOBILE_NAV_HEIGHT, overflow: 'auto' }}
-    >
-      <GridList aria-label={t('Payees')} items={payees}>
+    <View>
+      <GridList
+        aria-label={t('Payees')}
+        items={payees}
+        style={{
+          flex: 1,
+          paddingBottom: MOBILE_NAV_HEIGHT,
+          overflow: 'auto',
+        }}
+      >
         {payee => (
           <PayeesListItem
             key={payee.id}
@@ -83,7 +89,7 @@ export function PayeesList({
         <View
           style={{
             alignItems: 'center',
-            paddingVertical: 20,
+            paddingTop: 20,
           }}
         >
           <AnimatedLoading style={{ width: 20, height: 20 }} />
