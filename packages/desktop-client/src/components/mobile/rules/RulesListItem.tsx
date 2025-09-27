@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { GridListItem, type GridListItemProps } from 'react-aria-components';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
