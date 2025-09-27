@@ -838,19 +838,21 @@ function compileJoins(state, tableRef, internalTableFilters, schemaConfig) {
           }
         }
       }
-      
+
       // Get the actual table/view that will be used
       const referencedTable = tableRef(joinTable);
-      
+
       // Apply field mapping if:
       // 1. We have field mappings for this table AND
       // 2. We're referencing the base table (not a view that already has proper field names)
       //
       // When joinTable is a tableId (contains numbers), referencedTable will be the tableId
       // When joinTable is a table name, referencedTable will be the resolved table/view
-      const shouldApplyMapping = views[actualTableName] && views[actualTableName].fields && 
+      const shouldApplyMapping =
+        views[actualTableName] &&
+        views[actualTableName].fields &&
         (referencedTable === actualTableName || referencedTable === joinTable);
-      
+
       if (shouldApplyMapping) {
         return views[actualTableName].fields[joinField] || joinField;
       }
