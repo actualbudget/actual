@@ -35,6 +35,7 @@ export function PayeesListItem({
       <SpaceBetween gap={5}>
         {payee.favorite && (
           <SvgBookmark
+            aria-hidden
             width={15}
             height={15}
             style={{
