@@ -1,5 +1,5 @@
-import React, { type ComponentPropsWithoutRef } from 'react';
-import { GridListItem } from 'react-aria-components';
+import React from 'react';
+import { GridListItem, type GridListItemProps } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { SvgBookmark } from '@actual-app/components/icons/v1';
@@ -11,9 +11,7 @@ import { type PayeeEntity } from 'loot-core/types/models';
 
 import { PayeeRuleCountLabel } from '@desktop-client/components/payees/PayeeRuleCountLabel';
 
-type PayeesListItemProps = ComponentPropsWithoutRef<
-  typeof GridListItem<PayeeEntity>
-> & {
+type PayeesListItemProps = Omit<GridListItemProps<PayeeEntity>, 'value'> & {
   value: PayeeEntity;
   ruleCount: number;
 };
