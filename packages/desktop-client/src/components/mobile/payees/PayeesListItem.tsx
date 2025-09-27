@@ -23,11 +23,15 @@ export function PayeesListItem({
 }: PayeesListItemProps) {
   const { t } = useTranslation();
 
+  const label = payee.transfer_acct
+    ? t('Transfer: {{name}}', { name: payee.name })
+    : payee.name;
+
   return (
     <GridListItem
       id={payee.id}
       value={payee}
-      textValue={payee.name}
+      textValue={label}
       style={styles.mobileListItem}
       {...props}
     >
@@ -63,9 +67,9 @@ export function PayeesListItem({
               flex: 1,
               textAlign: 'left',
             }}
-            title={payee.name}
+            title={label}
           >
-            {(payee.transfer_acct ? t('Transfer: ') : '') + payee.name}
+            {label}
           </span>
 
           <span
