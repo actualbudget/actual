@@ -823,11 +823,11 @@ function compileJoins(state, tableRef, internalTableFilters, schemaConfig) {
     // Apply field mapping for join field (e.g., 'group' -> 'cat_group')
     const resolvedJoinField = (() => {
       const views = schemaConfig?.views || {};
-      
+
       // We need to find the actual table name that joinTable refers to
       // joinTable could be either a table name (first level) or a tableId (deeper levels)
       let actualTableName = joinTable;
-      
+
       // If joinTable looks like a table ID (contains numbers), find the actual table name
       if (typeof joinTable === 'string' && joinTable.match(/\d+$/)) {
         // Find the table name by looking for a path with this tableId
@@ -838,7 +838,7 @@ function compileJoins(state, tableRef, internalTableFilters, schemaConfig) {
           }
         }
       }
-      
+
       // The joinField belongs to actualTableName (the table we're joining FROM)
       if (views[actualTableName] && views[actualTableName].fields) {
         return views[actualTableName].fields[joinField] || joinField;

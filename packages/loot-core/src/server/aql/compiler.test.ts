@@ -1000,7 +1000,9 @@ describe('Type conversions', () => {
     );
 
     // The SQL should use cat_group instead of "group" in the join condition
-    expect(result.sql).toMatch(/category_groups\d+\.id = categories\d+\.cat_group/);
+    expect(result.sql).toMatch(
+      /category_groups\d+\.id = categories\d+\.cat_group/,
+    );
     expect(result.sql).not.toMatch(/categories\d+\."group"/);
   });
 });
