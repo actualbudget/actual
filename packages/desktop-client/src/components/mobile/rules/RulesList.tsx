@@ -1,5 +1,5 @@
-import { type UIEvent } from 'react';
-import { useTranslation } from 'react-i18next';
+import { GridList } from 'react-aria-components';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { Text } from '@actual-app/components/text';
@@ -16,15 +16,9 @@ type RulesListProps = {
   rules: RuleEntity[];
   isLoading: boolean;
   onRulePress: (rule: RuleEntity) => void;
-  onLoadMore?: () => void;
 };
 
-export function RulesList({
-  rules,
-  isLoading,
-  onRulePress,
-  onLoadMore,
-}: RulesListProps) {
+export function RulesList({ rules, isLoading, onRulePress }: RulesListProps) {
   const { t } = useTranslation();
 
   if (isLoading && rules.length === 0) {
@@ -65,32 +59,27 @@ export function RulesList({
     );
   }
 
-  const handleScroll = (event: UIEvent<HTMLDivElement>) => {
-    if (!onLoadMore) return;
-
-    const { scrollTop, scrollHeight, clientHeight } = event.currentTarget;
-    if (scrollHeight - scrollTop <= clientHeight * 1.5) {
-      onLoadMore();
-    }
-  };
-
   return (
-    <View
-      style={{ flex: 1, paddingBottom: MOBILE_NAV_HEIGHT, overflow: 'auto' }}
-      onScroll={handleScroll}
-    >
-      {rules.map(rule => (
-        <RulesListItem
-          key={rule.id}
-          rule={rule}
-          onPress={() => onRulePress(rule)}
-        />
-      ))}
+    <View style={{ flex: 1 }}>
+      <GridList
+        aria-label={t('Rules')}
+        aria-busy={isLoading || undefined}
+        items={rules}
+        style={{
+          flex: 1,
+          paddingBottom: MOBILE_NAV_HEIGHT,
+          overflow: 'auto',
+        }}
+      >
+        {rule => (
+          <RulesListItem value={rule} onAction={() => onRulePress(rule)} />
+        )}
+      </GridList>
       {isLoading && (
         <View
           style={{
             alignItems: 'center',
-            paddingVertical: 20,
+            paddingTop: 20,
           }}
         >
           <AnimatedLoading style={{ width: 20, height: 20 }} />
