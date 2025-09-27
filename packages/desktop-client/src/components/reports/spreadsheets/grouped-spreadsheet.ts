@@ -7,6 +7,10 @@ import { filterEmptyRows } from './filterEmptyRows';
 import { makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
 import { sortData } from './sortData';
+import {
+  determineIntervalRange,
+  trimGroupedDataIntervals,
+} from './trimIntervals';
 
 import {
   categoryLists,
@@ -27,6 +31,7 @@ export function createGroupedSpreadsheet({
   showOffBudget,
   showHiddenCategories,
   showUncategorized,
+  trimIntervals,
   balanceTypeOp,
   sortByOp,
   firstDayOfWeekIdx,
@@ -137,6 +142,24 @@ export function createGroupedSpreadsheet({
       },
       [startDate, endDate],
     );
+
+    // Determine interval range across all groups and their nested categories
+    const allGroupsForTrimming: GroupedEntity[] = [];
+    groupedData.forEach(group => {
+      allGroupsForTrimming.push(group);
+      if (group.categories) {
+        allGroupsForTrimming.push(...group.categories);
+      }
+    });
+
+    const { startIndex, endIndex } = determineIntervalRange(
+      allGroupsForTrimming,
+      groupedData.length > 0 ? groupedData[0].intervalData : [],
+      trimIntervals,
+    );
+
+    // Trim all groupedData intervals (including nested categories) based on the range
+    trimGroupedDataIntervals(groupedData, startIndex, endIndex);
 
     const groupedDataFiltered = groupedData.filter(i =>
       filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
