@@ -13,10 +13,22 @@ export function getValidMonthBounds(
   startMonth: undefined | string,
   endMonth: string,
 ) {
-  return {
-    start: startMonth < bounds.start ? bounds.start : startMonth,
-    end: endMonth > bounds.end ? bounds.end : endMonth,
-  };
+  // Use the enhanced comparison functions that handle mixed month types safely
+  try {
+    return {
+      start: startMonth && monthUtils.isBefore(startMonth, bounds.start) ? bounds.start : startMonth,
+      end: monthUtils.isAfter(endMonth, bounds.end) ? bounds.end : endMonth,
+    };
+  } catch (error) {
+    // If comparison fails due to mixed types, prefer start/end over bounds to maintain consistency
+    if (error.message.includes('Cannot compare mixed month types')) {
+      return {
+        start: startMonth || bounds.start,
+        end: endMonth,
+      };
+    }
+    throw error; // Re-throw other errors
+  }
 }
 
 type MonthsContextProps = {
@@ -43,6 +55,8 @@ export function MonthsProvider({
 }: MonthsProviderProps) {
   const endMonth = monthUtils.addMonths(startMonth, numMonths - 1);
   const bounds = getValidMonthBounds(monthBounds, startMonth, endMonth);
+
+
   const months = monthUtils.rangeInclusive(bounds.start, bounds.end);
 
   return (

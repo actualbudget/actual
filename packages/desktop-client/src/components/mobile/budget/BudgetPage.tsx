@@ -995,7 +995,11 @@ function MonthSelector({
         data-month={month}
       >
         <Text style={styles.underlinedText}>
-          {monthUtils.getMonthDateRange(month, monthUtils.getPayPeriodConfig(), locale)}
+          {monthUtils.getMonthDateRange(
+            month,
+            monthUtils.getPayPeriodConfig(),
+            locale,
+          )}
         </Text>
       </Button>
       <Button

@@ -169,15 +169,23 @@ async function getCategories() {
 }
 
 async function getBudgetBounds() {
-  return await budget.createAllBudgets();
+  console.log(`[getBudgetBounds] Called`);
+  const result = await budget.createAllBudgets();
+  console.log(`[getBudgetBounds] Result:`, result);
+  return result;
 }
 
 async function envelopeBudgetMonth({ month }: { month: string }) {
+  console.log(`[envelopeBudgetMonth] Called with month=${month}`);
   const groups = await db.getCategoriesGrouped();
   const sheetName = monthUtils.sheetForMonth(month);
+  console.log(`[envelopeBudgetMonth] Generated sheetName=${sheetName}`);
 
   function value(name: string) {
     const v = sheet.getCellValue(sheetName, name);
+    console.log(
+      `[envelopeBudgetMonth] Getting value for sheet=${sheetName}, name=${name}, value=${v}, type=${typeof v}`,
+    );
     return { value: v === '' ? 0 : v, name: resolveName(sheetName, name) };
   }
 

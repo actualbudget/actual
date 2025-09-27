@@ -1,12 +1,12 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { Column, Setting } from './UI';
-import { Input } from '@actual-app/components/input';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
@@ -20,6 +20,7 @@ export function PayPeriodSettings() {
   const frequencyOptions: [string, string][] = [
     ['weekly', t('Weekly')],
     ['biweekly', t('Biweekly')],
+    ['semimonthly', t('Semimonthly')],
     ['monthly', t('Monthly')],
   ];
 
@@ -49,10 +50,10 @@ export function PayPeriodSettings() {
     >
       <Text>
         <Trans>
-          <strong>Pay period settings.</strong> Configure how pay periods are generated and displayed.
+          <strong>Pay period settings.</strong> Configure how pay periods are
+          generated and displayed.
         </Trans>
       </Text>
     </Setting>
   );
 }
-

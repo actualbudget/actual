@@ -18,8 +18,23 @@ export function getBudgetType() {
 }
 
 export function getBudgetRange(start: string, end: string) {
-  start = monthUtils.getMonth(start);
-  end = monthUtils.getMonth(end);
+  // When pay periods are enabled, we need to use monthFromDate for date strings
+  // to ensure we get pay period months instead of calendar months
+  if (start.length > 7) {
+    // This is a date string like '2024-01-10', use monthFromDate
+    start = monthUtils.monthFromDate(start);
+  } else {
+    // This is already a month string like '2024-01' or '2024-13'
+    start = start;
+  }
+
+  if (end.length > 7) {
+    // This is a date string like '2024-01-10', use monthFromDate
+    end = monthUtils.monthFromDate(end);
+  } else {
+    // This is already a month string like '2024-01' or '2024-13'
+    end = end;
+  }
 
   // The start date should never be after the end date. If that
   // happened, the month range might be a valid range and weird
@@ -35,7 +50,9 @@ export function getBudgetRange(start: string, end: string) {
   start = monthUtils.subMonths(start, 3);
   end = monthUtils.addMonths(end, 12);
 
-  return { start, end, range: monthUtils.rangeInclusive(start, end) };
+  const range = monthUtils.rangeInclusive(start, end);
+
+  return { start, end, range };
 }
 
 export function createCategory(cat, sheetName, prevSheetName, start, end) {
@@ -52,8 +69,7 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
         true,
       );
       const row = rows[0];
-      const amount = row ? row.amount : 0;
-      return amount || 0;
+      return row ? row.amount || 0 : 0;
     },
   });
 
@@ -247,6 +263,10 @@ export async function createBudget(months) {
       const { start, end } = monthUtils.bounds(month);
       const sheetName = monthUtils.sheetForMonth(month);
       const prevSheetName = monthUtils.sheetForMonth(prevMonth);
+
+      console.log(
+        `[createBudget] Creating sheet for month=${month}, sheetName=${sheetName}, isPayPeriod=${monthUtils.isPayPeriod(month)}`,
+      );
 
       categories.forEach(cat => {
         createCategory(cat, sheetName, prevSheetName, start, end);
