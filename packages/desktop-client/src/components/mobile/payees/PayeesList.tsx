@@ -66,7 +66,7 @@ export function PayeesList({
   }
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <GridList
         aria-label={t('Payees')}
         aria-busy={isLoading || undefined}
