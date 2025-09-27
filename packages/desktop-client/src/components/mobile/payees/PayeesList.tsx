@@ -69,6 +69,7 @@ export function PayeesList({
     <View>
       <GridList
         aria-label={t('Payees')}
+        aria-busy={isLoading || undefined}
         items={payees}
         style={{
           flex: 1,
@@ -78,7 +79,6 @@ export function PayeesList({
       >
         {payee => (
           <PayeesListItem
-            key={payee.id}
             value={payee}
             ruleCount={ruleCounts.get(payee.id) ?? 0}
             onAction={() => onPayeePress(payee)}

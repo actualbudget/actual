@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { GridListItem, type GridListItemProps } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
@@ -11,12 +11,12 @@ import { type PayeeEntity } from 'loot-core/types/models';
 
 import { PayeeRuleCountLabel } from '@desktop-client/components/payees/PayeeRuleCountLabel';
 
-type PayeesListItemProps = Omit<GridListItemProps<PayeeEntity>, 'value'> & {
+type PayeesListItemProps = {
   value: PayeeEntity;
   ruleCount: number;
-};
+} & Omit<GridListItemProps<PayeeEntity>, 'value'>;
 
-export function PayeesListItem({
+export const PayeesListItem = memo(function PayeeListItem({
   value: payee,
   ruleCount,
   ...props
@@ -39,6 +39,7 @@ export function PayeesListItem({
         {payee.favorite && (
           <SvgBookmark
             aria-hidden
+            focusable={false}
             width={15}
             height={15}
             style={{
@@ -89,4 +90,4 @@ export function PayeesListItem({
       </SpaceBetween>
     </GridListItem>
   );
-}
+});
