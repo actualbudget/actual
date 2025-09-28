@@ -48,8 +48,8 @@ export class MobileRulesPage {
    */
   getAllRules() {
     return this.page
-      .getByLabel('Rules')
-      .locator('> div')
+      .getByRole('grid', { name: 'Rules' })
+      .getByRole('row')
       .filter({ hasText: /IF|THEN/ });
   }
 
