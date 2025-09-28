@@ -6,22 +6,26 @@ const intervalOptions = [
   {
     description: t('Daily'),
     key: 'Daily',
-    defaultRange: t('This month'),
+    defaultRange: 'This month',
+    defaultRangeLabel: t('This month'),
   },
   {
     description: t('Weekly'),
     key: 'Weekly',
-    defaultRange: t('Last 3 months'),
+    defaultRange: 'Last 3 months',
+    defaultRangeLabel: t('Last 3 months'),
   },
   {
     description: t('Monthly'),
     key: 'Monthly',
-    defaultRange: t('Last 6 months'),
+    defaultRange: 'Last 6 months',
+    defaultRangeLabel: t('Last 6 months'),
   },
   {
     description: t('Yearly'),
     key: 'Yearly',
-    defaultRange: t('Year to date'),
+    defaultRange: 'Year to date',
+    defaultRangeLabel: t('Year to date'),
   },
 ];
 
