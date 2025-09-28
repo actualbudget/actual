@@ -1594,7 +1594,7 @@ const Transaction = memo(function Transaction({
         value={debit === '' && credit === '' ? amountToCurrency(0) : debit}
         formatter={value =>
           // reformat value so since we might have kept decimals
-          value ? amountToCurrency(currencyToAmount(value)) : ''
+          value ? amountToCurrency(currencyToAmount(value) || 0) : ''
         }
         valueStyle={valueStyle}
         textAlign="right"
@@ -1625,7 +1625,7 @@ const Transaction = memo(function Transaction({
         value={credit}
         formatter={value =>
           // reformat value so since we might have kept decimals
-          value ? amountToCurrency(currencyToAmount(value)) : ''
+          value ? amountToCurrency(currencyToAmount(value) || 0) : ''
         }
         valueStyle={valueStyle}
         textAlign="right"
