@@ -70,6 +70,7 @@ export const RulesListItem = memo(function RulesListItem({
                       ? theme.warningText
                       : theme.pillTextSelected,
               }}
+              data-testid="rule-stage-badge"
             >
               {rule.stage === 'pre'
                 ? t('PRE')

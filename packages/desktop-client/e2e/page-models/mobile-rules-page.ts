@@ -112,7 +112,7 @@ export class MobileRulesPage {
    */
   async getRuleStage(index: number) {
     const rule = this.getNthRule(index);
-    const stageBadge = rule.locator('span').first();
+    const stageBadge = rule.getByTestId('rule-stage-badge');
     return await stageBadge.textContent();
   }
 }
