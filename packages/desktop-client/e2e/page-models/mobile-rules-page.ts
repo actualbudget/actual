@@ -41,7 +41,7 @@ export class MobileRulesPage {
    */
   getNthRule(index: number) {
     return this.page
-      .getByRole('button')
+      .getByRole('listitem')
       .filter({ hasText: /IF|THEN/ })
       .nth(index);
   }
@@ -50,7 +50,7 @@ export class MobileRulesPage {
    * Get all visible rule items
    */
   getAllRules() {
-    return this.page.getByRole('button').filter({ hasText: /IF|THEN/ });
+    return this.page.getByRole('listitem').filter({ hasText: /IF|THEN/ });
   }
 
   /**
