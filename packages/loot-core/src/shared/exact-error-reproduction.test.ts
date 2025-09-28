@@ -1,4 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
+
 import * as monthUtils from './months';
 import { loadPayPeriodConfigFromPrefs } from './pay-periods';
 
@@ -8,7 +9,7 @@ describe('Exact Error Reproduction', () => {
     loadPayPeriodConfigFromPrefs({
       showPayPeriods: 'true',
       payPeriodFrequency: 'biweekly',
-      payPeriodStartDate: '2024-01-05'
+      payPeriodStartDate: '2024-01-05',
     });
   });
 
@@ -20,7 +21,9 @@ describe('Exact Error Reproduction', () => {
 
     expect(() => {
       monthUtils.rangeInclusive('2025-31', '2026-09');
-    }).toThrow("Range from '2025-31' (pay period) to '2026-09' (calendar month) is invalid");
+    }).toThrow(
+      "Range from '2025-31' (pay period) to '2026-09' (calendar month) is invalid",
+    );
   });
 
   test('Should work if both values are converted to pay periods', () => {
@@ -69,7 +72,7 @@ describe('Exact Error Reproduction', () => {
       convertedStart,
       convertedEnd,
       startIsPayPeriod: monthUtils.isPayPeriod(convertedStart),
-      endIsPayPeriod: monthUtils.isPayPeriod(convertedEnd)
+      endIsPayPeriod: monthUtils.isPayPeriod(convertedEnd),
     });
 
     expect(convertedStart).toBe('2025-13');
@@ -90,7 +93,9 @@ describe('Exact Error Reproduction', () => {
     // Test various addition amounts to see if any create invalid values
     for (let i = 1; i <= 30; i++) {
       const result = monthUtils.addMonths(startPeriod, i);
-      console.log(`addMonths(${startPeriod}, ${i}) = ${result}, isPayPeriod: ${monthUtils.isPayPeriod(result)}`);
+      console.log(
+        `addMonths(${startPeriod}, ${i}) = ${result}, isPayPeriod: ${monthUtils.isPayPeriod(result)}`,
+      );
 
       expect(monthUtils.isPayPeriod(result)).toBe(true);
     }

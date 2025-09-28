@@ -36,7 +36,7 @@ export type SyncedPrefs = Partial<
     | `csv-skip-lines-${string}`
     | `csv-in-out-mode-${string}`
     | `csv-out-value-${string}`
-    | `csv-has-header-${string}` 
+    | `csv-has-header-${string}`
     | `custom-sync-mappings-${string}`
     | `sync-import-pending-${string}`
     | `sync-reimport-deleted-${string}`

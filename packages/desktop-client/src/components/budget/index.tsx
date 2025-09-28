@@ -7,8 +7,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-
-import { createTransactionFilterConditions } from '@desktop-client/hooks/usePayPeriodTranslation';
+import { loadPayPeriodConfigFromPrefs } from 'loot-core/shared/pay-periods';
 
 import { DynamicBudgetTable } from './DynamicBudgetTable';
 import * as envelopeBudget from './envelope/EnvelopeBudgetComponents';
@@ -32,11 +31,12 @@ import {
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { createTransactionFilterConditions } from '@desktop-client/hooks/usePayPeriodTranslation';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
@@ -114,20 +114,11 @@ function BudgetInner(props: BudgetInnerProps) {
 
   // Wire pay period config from synced prefs into month utils
   useEffect(() => {
-    const enabled =
-      payPeriodFeatureFlagEnabled && String(payPeriodViewEnabled) === 'true';
-    const frequency = (payPeriodFrequency as any) || 'monthly';
-    const start =
-      (payPeriodStartDate as any) || `${new Date().getFullYear()}-01-01`;
+    if (!payPeriodFeatureFlagEnabled) {
+      return;
+    }
 
-    const config = {
-      enabled,
-      payFrequency: frequency,
-      startDate: start,
-    };
-
-    console.log('[PayPeriod] Frontend setting pay period config:', {
-      config,
+    console.log('[PayPeriod] Frontend loading pay period config:', {
       featureFlagEnabled: payPeriodFeatureFlagEnabled,
       viewEnabled: payPeriodViewEnabled,
       frequency: payPeriodFrequency,
@@ -135,7 +126,12 @@ function BudgetInner(props: BudgetInnerProps) {
       timestamp: new Date().toISOString(),
     });
 
-    monthUtils.setPayPeriodConfig(config as any);
+    // Use the existing validation function that handles type safety
+    loadPayPeriodConfigFromPrefs({
+      showPayPeriods: payPeriodViewEnabled,
+      payPeriodFrequency,
+      payPeriodStartDate,
+    });
   }, [
     payPeriodFeatureFlagEnabled,
     payPeriodViewEnabled,
@@ -310,7 +306,10 @@ function BudgetInner(props: BudgetInnerProps) {
   };
 
   const onShowActivity = (categoryId, month) => {
-    const filterConditions = createTransactionFilterConditions(month, categoryId);
+    const filterConditions = createTransactionFilterConditions(
+      month,
+      categoryId,
+    );
     navigate('/accounts', {
       state: {
         goBack: true,

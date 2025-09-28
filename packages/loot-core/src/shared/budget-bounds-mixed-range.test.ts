@@ -1,4 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
+
 import * as monthUtils from './months';
 import { loadPayPeriodConfigFromPrefs } from './pay-periods';
 
@@ -8,7 +9,7 @@ describe('Budget Bounds Mixed Range Issue', () => {
     loadPayPeriodConfigFromPrefs({
       showPayPeriods: 'true',
       payPeriodFrequency: 'biweekly',
-      payPeriodStartDate: '2024-01-05'
+      payPeriodStartDate: '2024-01-05',
     });
   });
 
@@ -57,8 +58,12 @@ describe('Budget Bounds Mixed Range Issue', () => {
       const endMonth = monthUtils.addMonths(payPeriodStartMonth, 11); // 12 months displayed
 
       // getValidMonthBounds equivalent logic - this is the problematic comparison
-      const effectiveStart = payPeriodStartMonth < calendarBounds.start ? calendarBounds.start : payPeriodStartMonth;
-      const effectiveEnd = endMonth > calendarBounds.end ? calendarBounds.end : endMonth;
+      const effectiveStart =
+        payPeriodStartMonth < calendarBounds.start
+          ? calendarBounds.start
+          : payPeriodStartMonth;
+      const effectiveEnd =
+        endMonth > calendarBounds.end ? calendarBounds.end : endMonth;
 
       // Log the values to understand what's happening
       console.log('Comparison results:', {
@@ -69,14 +74,19 @@ describe('Budget Bounds Mixed Range Issue', () => {
         effectiveEnd,
         endMonth,
         isStartPayPeriod: monthUtils.isPayPeriod(effectiveStart),
-        isEndPayPeriod: monthUtils.isPayPeriod(effectiveEnd)
+        isEndPayPeriod: monthUtils.isPayPeriod(effectiveEnd),
       });
 
       // If the comparison results in mixed types, it should fail
-      if (monthUtils.isPayPeriod(effectiveStart) !== monthUtils.isPayPeriod(effectiveEnd)) {
+      if (
+        monthUtils.isPayPeriod(effectiveStart) !==
+        monthUtils.isPayPeriod(effectiveEnd)
+      ) {
         expect(() => {
           monthUtils.rangeInclusive(effectiveStart, effectiveEnd);
-        }).toThrow('Mixed calendar month and pay period ranges are not allowed');
+        }).toThrow(
+          'Mixed calendar month and pay period ranges are not allowed',
+        );
       } else {
         // If both are the same type, it should work
         expect(() => {
@@ -123,8 +133,12 @@ describe('Budget Bounds Mixed Range Issue', () => {
       const endMonth = monthUtils.addMonths(startMonth, 11);
 
       // All should be the same type
-      const allPayPeriods = [currentMonth, startMonth, endMonth].every(monthUtils.isPayPeriod);
-      const allCalendar = [currentMonth, startMonth, endMonth].every(m => !monthUtils.isPayPeriod(m));
+      const allPayPeriods = [currentMonth, startMonth, endMonth].every(
+        monthUtils.isPayPeriod,
+      );
+      const allCalendar = [currentMonth, startMonth, endMonth].every(
+        m => !monthUtils.isPayPeriod(m),
+      );
 
       // Should be either all pay periods or all calendar months, not mixed
       expect(allPayPeriods || allCalendar).toBe(true);

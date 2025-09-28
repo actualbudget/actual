@@ -12,8 +12,6 @@ describe('Debug Data Flow - Direct Investigation', () => {
       enabled: true,
       payFrequency: 'biweekly',
       startDate: '2025-01-01',
-      endDate: null,
-      payDates: [],
     });
   });
 
@@ -35,13 +33,13 @@ describe('Debug Data Flow - Direct Investigation', () => {
       calculatedEndMonth,
       isStartPayPeriod,
       isEndPayPeriod,
-      numMonths
+      numMonths,
     }).toEqual({
       startMonth: '2025-31',
       calculatedEndMonth: expect.any(String), // We want to see what this actually is
       isStartPayPeriod: true,
       isEndPayPeriod: expect.any(Boolean),
-      numMonths: 12
+      numMonths: 12,
     });
   });
 
@@ -50,7 +48,7 @@ describe('Debug Data Flow - Direct Investigation', () => {
     const testCases = [
       '2025-13', // First pay period of 2025
       '2025-31', // Mid-year pay period
-      '2025-38'  // Last pay period of 2025
+      '2025-38', // Last pay period of 2025
     ];
 
     const results = testCases.map(start => ({
@@ -59,7 +57,7 @@ describe('Debug Data Flow - Direct Investigation', () => {
       plus12: monthUtils.addMonths(start, 12),
       isStartPP: monthUtils.isPayPeriod(start),
       isPlus11PP: monthUtils.isPayPeriod(monthUtils.addMonths(start, 11)),
-      isPlus12PP: monthUtils.isPayPeriod(monthUtils.addMonths(start, 12))
+      isPlus12PP: monthUtils.isPayPeriod(monthUtils.addMonths(start, 12)),
     }));
 
     // This will fail and show us the actual values
@@ -70,8 +68,8 @@ describe('Debug Data Flow - Direct Investigation', () => {
         plus12: expect.stringMatching(/^202[56]-\d+$/),
         isStartPP: true,
         isPlus11PP: true,
-        isPlus12PP: true
-      }
+        isPlus12PP: true,
+      },
     ]);
   });
 
@@ -79,7 +77,7 @@ describe('Debug Data Flow - Direct Investigation', () => {
     // Test what happens with calendar month bounds
     const calendarBounds = {
       start: '2025-01',
-      end: '2026-09'
+      end: '2026-09',
     };
 
     const payPeriodStart = '2025-31';
@@ -91,12 +89,14 @@ describe('Debug Data Flow - Direct Investigation', () => {
       addedEnd,
       calendarEnd: calendarBounds.end,
       isAddedEndGreaterThanCalendarEnd: addedEnd > calendarBounds.end,
-      finalEnd: addedEnd > calendarBounds.end ? calendarBounds.end : addedEnd
+      finalEnd: addedEnd > calendarBounds.end ? calendarBounds.end : addedEnd,
     };
 
     // This will show us how we get the mixed range
-    expect(comparisons).toEqual(expect.objectContaining({
-      finalEnd: expect.any(String)
-    }));
+    expect(comparisons).toEqual(
+      expect.objectContaining({
+        finalEnd: expect.any(String),
+      }),
+    );
   });
 });

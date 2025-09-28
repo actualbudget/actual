@@ -15,12 +15,15 @@ export interface PayPeriodConfig {
 let __payPeriodConfig: PayPeriodConfig | null = null;
 
 // Cache for generated pay periods to avoid regenerating them repeatedly
-const payPeriodCache = new Map<string, Array<{
-  monthId: string;
-  startDate: string;
-  endDate: string;
-  label: string;
-}>>();
+const payPeriodCache = new Map<
+  string,
+  Array<{
+    monthId: string;
+    startDate: string;
+    endDate: string;
+    label: string;
+  }>
+>();
 
 export function getPayPeriodConfig(): PayPeriodConfig | null {
   return __payPeriodConfig;
@@ -28,15 +31,15 @@ export function getPayPeriodConfig(): PayPeriodConfig | null {
 
 export function setPayPeriodConfig(config: PayPeriodConfig): void {
   __payPeriodConfig = config;
-  
+
   // Clear the cache when config changes to ensure we regenerate periods with new settings
   payPeriodCache.clear();
-  
+
   console.log('[PayPeriod] Config set:', {
     enabled: config.enabled,
     payFrequency: config.payFrequency,
     startDate: config.startDate,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 }
 
@@ -46,7 +49,7 @@ export function loadPayPeriodConfigFromPrefs(prefs: {
   payPeriodStartDate?: string;
 }): void {
   console.log('[PayPeriod] Loading config from preferences:', prefs);
-  
+
   try {
     const config: PayPeriodConfig = {
       enabled: prefs.showPayPeriods === 'true',
@@ -82,9 +85,15 @@ export function loadPayPeriodConfigFromPrefs(prefs: {
     }
 
     setPayPeriodConfig(config);
-    console.log('[PayPeriod] Successfully loaded config from preferences:', config);
+    console.log(
+      '[PayPeriod] Successfully loaded config from preferences:',
+      config,
+    );
   } catch (error) {
-    console.warn('[PayPeriod] Failed to load pay period config from preferences:', error);
+    console.warn(
+      '[PayPeriod] Failed to load pay period config from preferences:',
+      error,
+    );
 
     // Set a disabled default config to ensure graceful fallback
     const fallbackConfig = {
@@ -93,7 +102,10 @@ export function loadPayPeriodConfigFromPrefs(prefs: {
       startDate: new Date().toISOString().slice(0, 10),
     };
     setPayPeriodConfig(fallbackConfig);
-    console.log('[PayPeriod] Set fallback config due to error:', fallbackConfig);
+    console.log(
+      '[PayPeriod] Set fallback config due to error:',
+      fallbackConfig,
+    );
   }
 }
 
@@ -182,13 +194,19 @@ function findFirstPeriodOfYear(
 ): Date {
   // Calculate how many days from Jan 1 of target year to the reference start
   const targetYearStart = new Date(targetYear, 0, 1); // Jan 1 of target year
-  const daysDiff = Math.floor((referenceStart.getTime() - targetYearStart.getTime()) / (1000 * 60 * 60 * 24));
+  const daysDiff = Math.floor(
+    (referenceStart.getTime() - targetYearStart.getTime()) /
+      (1000 * 60 * 60 * 24),
+  );
 
   // Find how many intervals to go back to get the first period that starts in target year
   const intervalOffset = Math.floor(daysDiff / dayInterval);
 
   // Calculate the first period start date
-  let firstPeriodStart = d.addDays(referenceStart, -intervalOffset * dayInterval);
+  let firstPeriodStart = d.addDays(
+    referenceStart,
+    -intervalOffset * dayInterval,
+  );
 
   // Ensure we're actually in the target year (handle edge cases)
   while (firstPeriodStart.getFullYear() < targetYear) {
@@ -225,12 +243,20 @@ function computePayPeriodByIndex(
 
   if (freq === 'weekly') {
     // Find the first weekly period that starts in the target year
-    const firstPeriodStart = findFirstPeriodOfYear(referenceStart, 7, targetYear);
+    const firstPeriodStart = findFirstPeriodOfYear(
+      referenceStart,
+      7,
+      targetYear,
+    );
     startDate = d.addDays(firstPeriodStart, (periodIndex - 1) * 7);
     endDate = d.addDays(startDate, 6);
   } else if (freq === 'biweekly') {
     // Find the first biweekly period that starts in the target year
-    const firstPeriodStart = findFirstPeriodOfYear(referenceStart, 14, targetYear);
+    const firstPeriodStart = findFirstPeriodOfYear(
+      referenceStart,
+      14,
+      targetYear,
+    );
     startDate = d.addDays(firstPeriodStart, (periodIndex - 1) * 14);
     endDate = d.addDays(startDate, 13);
   } else if (freq === 'monthly') {
@@ -239,7 +265,11 @@ function computePayPeriodByIndex(
     const referenceDay = referenceStart.getDate();
     startDate = new Date(targetYear, 0, referenceDay); // Jan of target year
     startDate = d.addMonths(startDate, periodIndex - 1);
-    endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, referenceDay - 1);
+    endDate = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth() + 1,
+      referenceDay - 1,
+    );
     label = 'Pay Period ' + String(periodIndex);
   } else if (freq === 'semimonthly') {
     // Two periods per month: 1st-15th and 16th-end of month
@@ -305,17 +335,20 @@ export function generatePayPeriods(
 
   // Create a cache key based on year and config
   const cacheKey = `${year}-${config.payFrequency}-${config.startDate}`;
-  
+
   // Check if we already have this year's periods cached
   if (payPeriodCache.has(cacheKey)) {
     console.log(`[PayPeriod] Using cached pay periods for year ${year}`);
     return payPeriodCache.get(cacheKey)!;
   }
 
-  console.log(`[PayPeriod] Generating pay periods for year ${year} with config:`, {
-    payFrequency: config.payFrequency,
-    startDate: config.startDate
-  });
+  console.log(
+    `[PayPeriod] Generating pay periods for year ${year} with config:`,
+    {
+      payFrequency: config.payFrequency,
+      startDate: config.startDate,
+    },
+  );
 
   const results: Array<{
     monthId: string;
@@ -327,11 +360,15 @@ export function generatePayPeriods(
   // Always generate a full year's worth of pay periods regardless of start date
   // This ensures pay periods are always available for budget range calculations
   const maxPeriods = getMaxPeriodsForYear(config);
-  
+
   for (let idx = 1; idx <= maxPeriods; idx++) {
-    const { startDate, endDate, label } = computePayPeriodByIndex(idx, config, year);
+    const { startDate, endDate, label } = computePayPeriodByIndex(
+      idx,
+      config,
+      year,
+    );
     const monthId = String(year) + '-' + String(idx + 12).padStart(2, '0');
-    
+
     results.push({
       monthId,
       startDate: dayFromDate(startDate),
@@ -342,14 +379,14 @@ export function generatePayPeriods(
 
   // Cache the results
   payPeriodCache.set(cacheKey, results);
-  console.log(`[PayPeriod] Generated and cached ${results.length} pay periods for year ${year}`);
+  console.log(
+    `[PayPeriod] Generated and cached ${results.length} pay periods for year ${year}`,
+  );
   return results;
 }
 
 // Pay period navigation functions
-export function nextPayPeriod(
-  monthId: string,
-): string {
+export function nextPayPeriod(monthId: string): string {
   const year = getNumericYearValue(monthId);
   const periodIndex = getPeriodIndex(monthId);
 
@@ -365,9 +402,7 @@ export function nextPayPeriod(
   return String(year) + '-' + String(nextPeriodIndex + 12).padStart(2, '0');
 }
 
-export function prevPayPeriod(
-  monthId: string,
-): string {
+export function prevPayPeriod(monthId: string): string {
   const year = getNumericYearValue(monthId);
   const periodIndex = getPeriodIndex(monthId);
 
@@ -383,14 +418,10 @@ export function prevPayPeriod(
   return String(year) + '-' + String(prevPeriodIndex + 12).padStart(2, '0');
 }
 
-export function addPayPeriods(
-  monthId: string,
-  n: number,
-): string {
+export function addPayPeriods(monthId: string, n: number): string {
   let current = monthId;
   for (let i = 0; i < Math.abs(n); i++) {
-    current =
-      n > 0 ? nextPayPeriod(current) : prevPayPeriod(current);
+    current = n > 0 ? nextPayPeriod(current) : prevPayPeriod(current);
   }
   return current;
 }

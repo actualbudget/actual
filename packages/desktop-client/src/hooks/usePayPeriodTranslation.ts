@@ -1,10 +1,10 @@
 import * as monthUtils from 'loot-core/shared/months';
 import { isPayPeriod } from 'loot-core/shared/pay-periods';
 
-export interface DateRange {
+export type DateRange = {
   start: string;
   end: string;
-}
+};
 
 /**
  * Checks if a month string represents a pay period (YYYY-MM where MM > 12)
@@ -50,7 +50,10 @@ export function convertPayPeriodToDateRange(month: string): DateRange {
  * @param categoryId Category ID to filter by
  * @returns Array of filter conditions for transaction queries
  */
-export function createTransactionFilterConditions(month: string, categoryId: string) {
+export function createTransactionFilterConditions(
+  month: string,
+  categoryId: string,
+) {
   const baseConditions = [
     { field: 'category', op: 'is', value: categoryId, type: 'id' },
   ];

@@ -1,15 +1,20 @@
 import { describe, test, expect, beforeEach } from 'vitest';
+
 import { getValidMonthBounds } from './MonthsContext';
 
 // Mock the monthUtils import
 const mockMonthUtils = {
   isPayPeriod: (monthId: string): boolean => {
-    if (typeof monthId !== 'string' || monthId.length < 7 || monthId[4] !== '-') {
+    if (
+      typeof monthId !== 'string' ||
+      monthId.length < 7 ||
+      monthId[4] !== '-'
+    ) {
       return false;
     }
     const mm = parseInt(monthId.slice(5, 7));
     return Number.isFinite(mm) && mm >= 13 && mm <= 99;
-  }
+  },
 };
 
 // Mock the loot-core/shared/months import
@@ -22,7 +27,11 @@ describe('getValidMonthBounds', () => {
       const payPeriodStart = '2025-31';
       const payPeriodEnd = '2025-32';
 
-      const result = getValidMonthBounds(calendarBounds, payPeriodStart, payPeriodEnd);
+      const result = getValidMonthBounds(
+        calendarBounds,
+        payPeriodStart,
+        payPeriodEnd,
+      );
 
       // Should prefer the pay period values to maintain consistency
       expect(result.start).toBe(payPeriodStart);
@@ -38,7 +47,11 @@ describe('getValidMonthBounds', () => {
       const calendarStart = '2025-03';
       const calendarEnd = '2025-08';
 
-      const result = getValidMonthBounds(calendarBounds, calendarStart, calendarEnd);
+      const result = getValidMonthBounds(
+        calendarBounds,
+        calendarStart,
+        calendarEnd,
+      );
 
       // Should use original logic for same types
       expect(result.start).toBe(calendarStart);
@@ -54,7 +67,11 @@ describe('getValidMonthBounds', () => {
       const payPeriodStart = '2025-15';
       const payPeriodEnd = '2025-20';
 
-      const result = getValidMonthBounds(payPeriodBounds, payPeriodStart, payPeriodEnd);
+      const result = getValidMonthBounds(
+        payPeriodBounds,
+        payPeriodStart,
+        payPeriodEnd,
+      );
 
       // Should use original logic for same types
       expect(result.start).toBe(payPeriodStart);
@@ -78,7 +95,11 @@ describe('getValidMonthBounds', () => {
       // the old logic would clip to bounds.end (calendar month)
       const payPeriodEndBeyondBounds = '2027-15'; // Pay period beyond calendar bounds
 
-      const result = getValidMonthBounds(calendarBounds, payPeriodStart, payPeriodEndBeyondBounds);
+      const result = getValidMonthBounds(
+        calendarBounds,
+        payPeriodStart,
+        payPeriodEndBeyondBounds,
+      );
 
       // Should maintain consistency by using pay period values
       expect(result.start).toBe(payPeriodStart); // '2025-31'
@@ -89,14 +110,20 @@ describe('getValidMonthBounds', () => {
       expect(mockMonthUtils.isPayPeriod(result.end)).toBe(true);
 
       // The problematic result should NOT happen
-      expect(!(result.start === '2025-31' && result.end === '2026-09')).toBe(true);
+      expect(!(result.start === '2025-31' && result.end === '2026-09')).toBe(
+        true,
+      );
     });
 
     test('Should handle undefined startMonth', () => {
       const calendarBounds = { start: '2025-01', end: '2026-09' };
       const payPeriodEnd = '2025-31';
 
-      const result = getValidMonthBounds(calendarBounds, undefined, payPeriodEnd);
+      const result = getValidMonthBounds(
+        calendarBounds,
+        undefined,
+        payPeriodEnd,
+      );
 
       // Should handle undefined gracefully and maintain consistency
       expect(result.start).toBe(calendarBounds.start);
@@ -108,7 +135,11 @@ describe('getValidMonthBounds', () => {
       const calendarStart = '2025-01'; // Before bounds
       const calendarEnd = '2025-12'; // After bounds
 
-      const result = getValidMonthBounds(calendarBounds, calendarStart, calendarEnd);
+      const result = getValidMonthBounds(
+        calendarBounds,
+        calendarStart,
+        calendarEnd,
+      );
 
       // Should clip to bounds
       expect(result.start).toBe(calendarBounds.start);

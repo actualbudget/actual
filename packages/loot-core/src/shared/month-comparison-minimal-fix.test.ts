@@ -1,4 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
+
 import * as monthUtils from './months';
 import { loadPayPeriodConfigFromPrefs } from './pay-periods';
 
@@ -8,7 +9,7 @@ describe('Month Comparison Minimal Fix', () => {
     loadPayPeriodConfigFromPrefs({
       showPayPeriods: 'true',
       payPeriodFrequency: 'biweekly',
-      payPeriodStartDate: '2024-01-05'
+      payPeriodStartDate: '2024-01-05',
     });
   });
 

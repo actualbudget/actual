@@ -1,4 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
+
 import { loadPayPeriodConfigFromPrefs } from 'loot-core/shared/pay-periods';
 
 import {
@@ -14,7 +15,7 @@ beforeEach(() => {
   loadPayPeriodConfigFromPrefs({
     showPayPeriods: 'true',
     payPeriodFrequency: 'biweekly',
-    payPeriodStartDate: '2024-01-05'
+    payPeriodStartDate: '2024-01-05',
   });
 });
 
@@ -34,11 +35,16 @@ describe('Pay Period Translation Utilities', () => {
   });
 
   test('convertPayPeriodToDateRange throws for invalid pay periods', () => {
-    expect(() => convertPayPeriodToDateRange('2024-01')).toThrow('Invalid pay period month: 2024-01');
+    expect(() => convertPayPeriodToDateRange('2024-01')).toThrow(
+      'Invalid pay period month: 2024-01',
+    );
   });
 
   test('createTransactionFilterConditions creates date range filters for pay periods', () => {
-    const conditions = createTransactionFilterConditions('2024-13', 'test-category');
+    const conditions = createTransactionFilterConditions(
+      '2024-13',
+      'test-category',
+    );
 
     expect(conditions).toEqual([
       { field: 'category', op: 'is', value: 'test-category', type: 'id' },
@@ -48,7 +54,10 @@ describe('Pay Period Translation Utilities', () => {
   });
 
   test('createTransactionFilterConditions creates month filters for calendar months', () => {
-    const conditions = createTransactionFilterConditions('2024-01', 'test-category');
+    const conditions = createTransactionFilterConditions(
+      '2024-01',
+      'test-category',
+    );
 
     expect(conditions).toEqual([
       { field: 'category', op: 'is', value: 'test-category', type: 'id' },

@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { type ComponentProps, memo } from 'react';
+import { Trans } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
 
@@ -44,7 +45,9 @@ export const BudgetPageHeader = memo<BudgetPageHeaderProps>(
                   setPayPeriodViewEnabled(e.target.checked ? 'true' : 'false')
                 }
               />
-              <span>Show pay periods</span>
+              <span>
+                <Trans>Show pay periods</Trans>
+              </span>
             </label>
           </View>
         )}

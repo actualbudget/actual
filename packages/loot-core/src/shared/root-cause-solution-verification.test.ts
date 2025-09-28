@@ -1,4 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
+
 import * as monthUtils from './months';
 import { loadPayPeriodConfigFromPrefs } from './pay-periods';
 
@@ -8,7 +9,7 @@ describe('Root Cause Solution Verification', () => {
     loadPayPeriodConfigFromPrefs({
       showPayPeriods: 'true',
       payPeriodFrequency: 'biweekly',
-      payPeriodStartDate: '2024-01-05'
+      payPeriodStartDate: '2024-01-05',
     });
   });
 
@@ -44,7 +45,7 @@ describe('Root Cause Solution Verification', () => {
         startMonth,
         endMonth,
         startIsPayPeriod: monthUtils.isPayPeriod(startMonth),
-        endIsPayPeriod: monthUtils.isPayPeriod(endMonth)
+        endIsPayPeriod: monthUtils.isPayPeriod(endMonth),
       });
 
       // Both should be pay periods now
@@ -76,7 +77,7 @@ describe('Root Cause Solution Verification', () => {
         next,
         prev,
         added,
-        subtracted
+        subtracted,
       });
     });
   });
@@ -87,20 +88,26 @@ describe('Root Cause Solution Verification', () => {
       loadPayPeriodConfigFromPrefs({
         showPayPeriods: 'false',
         payPeriodFrequency: 'biweekly',
-        payPeriodStartDate: '2024-01-05'
+        payPeriodStartDate: '2024-01-05',
       });
 
       expect(() => {
         monthUtils.addMonths('2025-31', 5);
-      }).toThrow('Pay period 2025-31 requires enabled pay period configuration');
+      }).toThrow(
+        'Pay period 2025-31 requires enabled pay period configuration',
+      );
 
       expect(() => {
         monthUtils.nextMonth('2025-31');
-      }).toThrow('Pay period 2025-31 requires enabled pay period configuration');
+      }).toThrow(
+        'Pay period 2025-31 requires enabled pay period configuration',
+      );
 
       expect(() => {
         monthUtils.prevMonth('2025-31');
-      }).toThrow('Pay period 2025-31 requires enabled pay period configuration');
+      }).toThrow(
+        'Pay period 2025-31 requires enabled pay period configuration',
+      );
     });
   });
 

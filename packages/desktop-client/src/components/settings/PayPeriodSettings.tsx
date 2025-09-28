@@ -7,6 +7,7 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
 import { Column, Setting } from './UI';
+
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 

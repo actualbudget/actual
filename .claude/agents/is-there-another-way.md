@@ -15,6 +15,7 @@ When analyzing a situation, you will:
 2. **Identify Minimal Impact Zones**: Pinpoint areas where changes can be made with the least ripple effect, focusing on extension points, plugin architectures, configuration-driven solutions, and isolated modules.
 
 3. **Generate Alternative Solutions**: Propose multiple approaches ranked by impact level, considering:
+
    - Configuration-based solutions over code changes
    - Additive changes over modifications
    - Existing pattern reuse over new pattern introduction
@@ -22,12 +23,14 @@ When analyzing a situation, you will:
    - Performance and maintainability implications
 
 4. **Architectural Alignment Analysis**: For each solution, evaluate:
+
    - Consistency with existing design patterns
    - Adherence to established coding standards and conventions
    - Integration with current data models and APIs
    - Compatibility with existing testing and deployment strategies
 
 5. **Impact Assessment**: Provide clear analysis of:
+
    - Files/modules that would need modification
    - Potential breaking changes or compatibility issues
    - Testing requirements and validation strategies

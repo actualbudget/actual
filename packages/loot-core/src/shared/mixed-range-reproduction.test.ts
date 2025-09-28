@@ -15,8 +15,6 @@ describe('Mixed Range Error Reproduction', () => {
       enabled: true,
       payFrequency: 'biweekly',
       startDate: '2025-01-01',
-      endDate: null,
-      payDates: [],
     });
   });
 
@@ -25,7 +23,7 @@ describe('Mixed Range Error Reproduction', () => {
     expect(() => {
       monthUtils.rangeInclusive('2025-31', '2026-09');
     }).toThrow(
-      "Mixed calendar month and pay period ranges are not allowed. Range from '2025-31' (pay period) to '2026-09' (calendar month) is invalid."
+      "Mixed calendar month and pay period ranges are not allowed. Range from '2025-31' (pay period) to '2026-09' (calendar month) is invalid.",
     );
   });
 
