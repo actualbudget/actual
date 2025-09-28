@@ -12,8 +12,6 @@ describe('derivedBounds Logic Testing', () => {
       enabled: true,
       payFrequency: 'biweekly',
       startDate: '2025-01-01',
-      endDate: null,
-      payDates: [],
     });
   });
 
@@ -21,7 +19,7 @@ describe('derivedBounds Logic Testing', () => {
     // This is the exact logic from index.tsx derivedBounds
     const bounds = {
       start: '2025-01',
-      end: '2026-09'
+      end: '2026-09',
     };
 
     const convertMonthToPayPeriod = (monthStr: string) => {
@@ -47,15 +45,17 @@ describe('derivedBounds Logic Testing', () => {
 
     expect(derivedBounds).toEqual({
       start: '2025-13',
-      end: '2026-38'
+      end: '2026-38',
     });
 
     // Test that this prevents the mixed range issue
     const startMonth = '2025-31';
     const endMonth = monthUtils.addMonths(startMonth, 11);
 
-    const finalStart = startMonth < derivedBounds.start ? derivedBounds.start : startMonth;
-    const finalEnd = endMonth > derivedBounds.end ? derivedBounds.end : endMonth;
+    const finalStart =
+      startMonth < derivedBounds.start ? derivedBounds.start : startMonth;
+    const finalEnd =
+      endMonth > derivedBounds.end ? derivedBounds.end : endMonth;
 
     expect(monthUtils.isPayPeriod(finalStart)).toBe(true);
     expect(monthUtils.isPayPeriod(finalEnd)).toBe(true);
@@ -69,12 +69,12 @@ describe('derivedBounds Logic Testing', () => {
     // Test what happens if derivedBounds isn't being used
     const originalBounds = {
       start: '2025-01',
-      end: '2026-09'
+      end: '2026-09',
     };
 
     const derivedBounds = {
       start: '2025-13',
-      end: '2026-38'
+      end: '2026-38',
     };
 
     // Test with original bounds (should fail)
@@ -82,12 +82,14 @@ describe('derivedBounds Logic Testing', () => {
     const endMonth = monthUtils.addMonths(startMonth, 11);
 
     // With original bounds - FAILS
-    const badFinalEnd = endMonth > originalBounds.end ? originalBounds.end : endMonth;
+    const badFinalEnd =
+      endMonth > originalBounds.end ? originalBounds.end : endMonth;
     expect(badFinalEnd).toBe('2026-09'); // Calendar month!
     expect(monthUtils.isPayPeriod(badFinalEnd)).toBe(false);
 
     // With derived bounds - WORKS
-    const goodFinalEnd = endMonth > derivedBounds.end ? derivedBounds.end : endMonth;
+    const goodFinalEnd =
+      endMonth > derivedBounds.end ? derivedBounds.end : endMonth;
     expect(goodFinalEnd).toBe('2026-16'); // Pay period!
     expect(monthUtils.isPayPeriod(goodFinalEnd)).toBe(true);
   });

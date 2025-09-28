@@ -12,8 +12,6 @@ describe('Root Cause Investigation - Mixed Range Creation', () => {
       enabled: true,
       payFrequency: 'biweekly',
       startDate: '2025-01-01',
-      endDate: null,
-      payDates: [],
     });
   });
 
@@ -23,7 +21,7 @@ describe('Root Cause Investigation - Mixed Range Creation', () => {
     const numMonths = 12;
     const monthBounds = {
       start: '2025-01', // Calendar month bounds
-      end: '2026-09'    // Calendar month bounds - this is the problem!
+      end: '2026-09', // Calendar month bounds - this is the problem!
     };
 
     // Step 1: Calculate end month (this works correctly)
@@ -32,16 +30,31 @@ describe('Root Cause Investigation - Mixed Range Creation', () => {
     expect(monthUtils.isPayPeriod(endMonth)).toBe(true);
 
     // Step 2: Apply bounds validation (THIS IS WHERE THE PROBLEM OCCURS)
-    const finalStart = startMonth < monthBounds.start ? monthBounds.start : startMonth;
+    const finalStart =
+      startMonth < monthBounds.start ? monthBounds.start : startMonth;
     const finalEnd = endMonth > monthBounds.end ? monthBounds.end : endMonth;
 
     // The issue: String comparison between pay period and calendar month
     console.log('String comparison results:');
-    console.log('startMonth < monthBounds.start:', startMonth, '<', monthBounds.start, '=', startMonth < monthBounds.start);
-    console.log('endMonth > monthBounds.end:', endMonth, '>', monthBounds.end, '=', endMonth > monthBounds.end);
+    console.log(
+      'startMonth < monthBounds.start:',
+      startMonth,
+      '<',
+      monthBounds.start,
+      '=',
+      startMonth < monthBounds.start,
+    );
+    console.log(
+      'endMonth > monthBounds.end:',
+      endMonth,
+      '>',
+      monthBounds.end,
+      '=',
+      endMonth > monthBounds.end,
+    );
 
     expect(finalStart).toBe('2025-31'); // Should remain pay period
-    expect(finalEnd).toBe('2026-09');   // THIS IS THE PROBLEM - becomes calendar month!
+    expect(finalEnd).toBe('2026-09'); // THIS IS THE PROBLEM - becomes calendar month!
 
     // This is where the mixed range gets created
     expect(monthUtils.isPayPeriod(finalStart)).toBe(true);
@@ -72,7 +85,7 @@ describe('Root Cause Investigation - Mixed Range Creation', () => {
     // Test the derivedBounds logic that should fix this
     const originalBounds = {
       start: '2025-01',
-      end: '2026-09'
+      end: '2026-09',
     };
 
     // Simulate the derivedBounds conversion from index.tsx
@@ -97,15 +110,17 @@ describe('Root Cause Investigation - Mixed Range Creation', () => {
 
     expect(convertedBounds).toEqual({
       start: '2025-13',
-      end: '2026-38'
+      end: '2026-38',
     });
 
     // Now the same scenario should work
     const startMonth = '2025-31';
     const endMonth = monthUtils.addMonths(startMonth, 11);
 
-    const finalStart = startMonth < convertedBounds.start ? convertedBounds.start : startMonth;
-    const finalEnd = endMonth > convertedBounds.end ? convertedBounds.end : endMonth;
+    const finalStart =
+      startMonth < convertedBounds.start ? convertedBounds.start : startMonth;
+    const finalEnd =
+      endMonth > convertedBounds.end ? convertedBounds.end : endMonth;
 
     // Both should be pay periods now
     expect(monthUtils.isPayPeriod(finalStart)).toBe(true);

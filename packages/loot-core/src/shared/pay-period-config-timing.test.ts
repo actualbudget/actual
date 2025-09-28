@@ -1,11 +1,12 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
+
 import * as monthUtils from './months';
 import {
   getPayPeriodConfig,
   setPayPeriodConfig,
   loadPayPeriodConfigFromPrefs,
   generatePayPeriods,
-  type PayPeriodConfig
+  type PayPeriodConfig,
 } from './pay-periods';
 
 describe('Pay Period Config Timing Tests', () => {
@@ -21,13 +22,17 @@ describe('Pay Period Config Timing Tests', () => {
   describe('Phase 1: Backend Config Loading', () => {
     test('Config loads before any month operations during budget load', () => {
       // Start with no config
-      setPayPeriodConfig({ enabled: false, payFrequency: 'monthly', startDate: '2024-01-01' });
+      setPayPeriodConfig({
+        enabled: false,
+        payFrequency: 'monthly',
+        startDate: '2024-01-01',
+      });
 
       // Simulate database preferences (what would come from budget load)
       const mockPrefs = {
         showPayPeriods: 'true',
         payPeriodFrequency: 'biweekly',
-        payPeriodStartDate: '2024-01-05'
+        payPeriodStartDate: '2024-01-05',
       };
 
       // Load config from preferences (simulates budget loading process)
@@ -58,7 +63,7 @@ describe('Pay Period Config Timing Tests', () => {
       loadPayPeriodConfigFromPrefs({
         showPayPeriods: 'true',
         payPeriodFrequency: 'biweekly',
-        payPeriodStartDate: '2024-01-05'
+        payPeriodStartDate: '2024-01-05',
       });
 
       // Verify config updated immediately
@@ -80,7 +85,7 @@ describe('Pay Period Config Timing Tests', () => {
       loadPayPeriodConfigFromPrefs({
         showPayPeriods: 'true',
         payPeriodFrequency: 'invalid-frequency', // Invalid frequency
-        payPeriodStartDate: 'invalid-date' // Invalid date
+        payPeriodStartDate: 'invalid-date', // Invalid date
       });
 
       // System corrects invalid values but keeps enabled=true
@@ -97,15 +102,19 @@ describe('Pay Period Config Timing Tests', () => {
   describe('Phase 2: Defensive Guard Behavior', () => {
     test('Month operations fail gracefully when config is missing for pay periods', () => {
       // Ensure config is disabled
-      setPayPeriodConfig({ enabled: false, payFrequency: 'monthly', startDate: '2024-01-01' });
+      setPayPeriodConfig({
+        enabled: false,
+        payFrequency: 'monthly',
+        startDate: '2024-01-01',
+      });
 
       // Try to use pay period months without proper config
       expect(() => monthUtils.bounds('2024-13')).toThrow(
-        'Pay period month \'2024-13\' cannot be processed without valid pay period configuration'
+        "Pay period month '2024-13' cannot be processed without valid pay period configuration",
       );
 
       expect(() => monthUtils.range('2024-13', '2024-15')).toThrow(
-        'Pay period range requested (2024-13 to 2024-15) but pay period configuration is not available or disabled'
+        'Pay period range requested (2024-13 to 2024-15) but pay period configuration is not available or disabled',
       );
 
       // Regular calendar months should still work
@@ -115,7 +124,11 @@ describe('Pay Period Config Timing Tests', () => {
 
     test('Pay period operations work after config is properly loaded', () => {
       // Start without config
-      setPayPeriodConfig({ enabled: false, payFrequency: 'monthly', startDate: '2024-01-01' });
+      setPayPeriodConfig({
+        enabled: false,
+        payFrequency: 'monthly',
+        startDate: '2024-01-01',
+      });
 
       // Verify pay period operations fail
       expect(() => monthUtils.bounds('2024-13')).toThrow();
@@ -124,7 +137,7 @@ describe('Pay Period Config Timing Tests', () => {
       loadPayPeriodConfigFromPrefs({
         showPayPeriods: 'true',
         payPeriodFrequency: 'biweekly',
-        payPeriodStartDate: '2024-01-05'
+        payPeriodStartDate: '2024-01-05',
       });
 
       // Now operations should work
@@ -134,7 +147,7 @@ describe('Pay Period Config Timing Tests', () => {
       // Verify actual results are correct (bounds returns integers in YYYYMMDD format)
       const bounds = monthUtils.bounds('2024-13');
       expect(bounds.start).toBe(20240105); // Integer format YYYYMMDD
-      expect(bounds.end).toBe(20240118);   // Integer format YYYYMMDD
+      expect(bounds.end).toBe(20240118); // Integer format YYYYMMDD
 
       const range = monthUtils.range('2024-13', '2024-15');
       expect(range).toContain('2024-13');
@@ -144,7 +157,11 @@ describe('Pay Period Config Timing Tests', () => {
 
     test('Mixed calendar and pay period ranges are always forbidden', () => {
       // Disable pay period config
-      setPayPeriodConfig({ enabled: false, payFrequency: 'monthly', startDate: '2024-01-01' });
+      setPayPeriodConfig({
+        enabled: false,
+        payFrequency: 'monthly',
+        startDate: '2024-01-01',
+      });
 
       // Mixed ranges should fail when pay periods are involved (due to lack of config)
       expect(() => monthUtils.range('2024-01', '2024-13')).toThrow();
@@ -157,15 +174,15 @@ describe('Pay Period Config Timing Tests', () => {
       loadPayPeriodConfigFromPrefs({
         showPayPeriods: 'true',
         payPeriodFrequency: 'biweekly',
-        payPeriodStartDate: '2024-01-05'
+        payPeriodStartDate: '2024-01-05',
       });
 
       // Mixed ranges should still fail - now due to our prevention logic
       expect(() => monthUtils.range('2024-01', '2024-13')).toThrow(
-        'Mixed calendar month and pay period ranges are not allowed'
+        'Mixed calendar month and pay period ranges are not allowed',
       );
       expect(() => monthUtils.range('2024-13', '2024-03')).toThrow(
-        'Mixed calendar month and pay period ranges are not allowed'
+        'Mixed calendar month and pay period ranges are not allowed',
       );
 
       // But pure pay period ranges should work
@@ -177,13 +194,29 @@ describe('Pay Period Config Timing Tests', () => {
     test('Rapid config changes maintain consistency', () => {
       // Simulate rapid preference changes
       const configs = [
-        { showPayPeriods: 'true', payPeriodFrequency: 'biweekly', payPeriodStartDate: '2024-01-05' },
-        { showPayPeriods: 'true', payPeriodFrequency: 'monthly', payPeriodStartDate: '2024-01-01' },
-        { showPayPeriods: 'true', payPeriodFrequency: 'semimonthly', payPeriodStartDate: '2024-01-15' },
-        { showPayPeriods: 'false', payPeriodFrequency: 'biweekly', payPeriodStartDate: '2024-01-05' },
+        {
+          showPayPeriods: 'true',
+          payPeriodFrequency: 'biweekly',
+          payPeriodStartDate: '2024-01-05',
+        },
+        {
+          showPayPeriods: 'true',
+          payPeriodFrequency: 'monthly',
+          payPeriodStartDate: '2024-01-01',
+        },
+        {
+          showPayPeriods: 'true',
+          payPeriodFrequency: 'semimonthly',
+          payPeriodStartDate: '2024-01-15',
+        },
+        {
+          showPayPeriods: 'false',
+          payPeriodFrequency: 'biweekly',
+          payPeriodStartDate: '2024-01-05',
+        },
       ];
 
-      configs.forEach((configPrefs) => {
+      configs.forEach(configPrefs => {
         loadPayPeriodConfigFromPrefs(configPrefs);
         const config = getPayPeriodConfig();
 
@@ -214,7 +247,7 @@ describe('Pay Period Config Timing Tests', () => {
       loadPayPeriodConfigFromPrefs({
         showPayPeriods: 'true',
         payPeriodFrequency: 'biweekly',
-        payPeriodStartDate: '2024-01-05'
+        payPeriodStartDate: '2024-01-05',
       });
 
       const initialConfig = getPayPeriodConfig();
@@ -225,7 +258,7 @@ describe('Pay Period Config Timing Tests', () => {
       loadPayPeriodConfigFromPrefs({
         showPayPeriods: 'true',
         payPeriodFrequency: 'monthly',
-        payPeriodStartDate: 'invalid-date'
+        payPeriodStartDate: 'invalid-date',
       });
 
       const updatedConfig = getPayPeriodConfig();
@@ -243,13 +276,14 @@ describe('Pay Period Config Timing Tests', () => {
 
       // Perform many config changes
       for (let i = 0; i < 100; i++) {
-        const frequency = i % 3 === 0 ? 'biweekly' : i % 3 === 1 ? 'monthly' : 'semimonthly';
+        const frequency =
+          i % 3 === 0 ? 'biweekly' : i % 3 === 1 ? 'monthly' : 'semimonthly';
         const enabled = i % 4 !== 0;
 
         loadPayPeriodConfigFromPrefs({
           showPayPeriods: enabled ? 'true' : 'false',
           payPeriodFrequency: frequency,
-          payPeriodStartDate: `2024-01-${String((i % 28) + 1).padStart(2, '0')}`
+          payPeriodStartDate: `2024-01-${String((i % 28) + 1).padStart(2, '0')}`,
         });
 
         // Force some operations to ensure config is actually used
@@ -279,25 +313,54 @@ describe('Pay Period Config Timing Tests', () => {
       const testCases = [
         // Various edge case configurations
         { showPayPeriods: '', payPeriodFrequency: '', payPeriodStartDate: '' },
-        { showPayPeriods: 'true', payPeriodFrequency: undefined, payPeriodStartDate: undefined },
-        { showPayPeriods: 'false', payPeriodFrequency: 'biweekly', payPeriodStartDate: '2024-01-05' },
-        { showPayPeriods: 'true', payPeriodFrequency: 'biweekly', payPeriodStartDate: '2024-02-29' }, // Leap year
-        { showPayPeriods: 'true', payPeriodFrequency: 'biweekly', payPeriodStartDate: '2023-02-29' }, // Invalid leap year
-        { showPayPeriods: 'maybe', payPeriodFrequency: 'biweekly', payPeriodStartDate: '2024-01-05' }, // Invalid boolean
+        {
+          showPayPeriods: 'true',
+          payPeriodFrequency: undefined,
+          payPeriodStartDate: undefined,
+        },
+        {
+          showPayPeriods: 'false',
+          payPeriodFrequency: 'biweekly',
+          payPeriodStartDate: '2024-01-05',
+        },
+        {
+          showPayPeriods: 'true',
+          payPeriodFrequency: 'biweekly',
+          payPeriodStartDate: '2024-02-29',
+        }, // Leap year
+        {
+          showPayPeriods: 'true',
+          payPeriodFrequency: 'biweekly',
+          payPeriodStartDate: '2023-02-29',
+        }, // Invalid leap year
+        {
+          showPayPeriods: 'maybe',
+          payPeriodFrequency: 'biweekly',
+          payPeriodStartDate: '2024-01-05',
+        }, // Invalid boolean
       ];
 
       testCases.forEach((testCase, index) => {
         expect(() => {
-          loadPayPeriodConfigFromPrefs(testCase as any);
+          loadPayPeriodConfigFromPrefs(
+            testCase as {
+              showPayPeriods?: string;
+              payPeriodFrequency?: string;
+              payPeriodStartDate?: string;
+            },
+          );
           const config = getPayPeriodConfig();
 
           // Config should always be in valid state
           expect(config).toBeDefined();
           expect(typeof config?.enabled).toBe('boolean');
-          expect(['weekly', 'biweekly', 'semimonthly', 'monthly']).toContain(config?.payFrequency);
+          expect(['weekly', 'biweekly', 'semimonthly', 'monthly']).toContain(
+            config?.payFrequency,
+          );
           expect(config?.startDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-
-        }).not.toThrow(`Test case ${index} should not throw: ${JSON.stringify(testCase)}`);
+        }).not.toThrow(
+          `Test case ${index} should not throw: ${JSON.stringify(testCase)}`,
+        );
       });
     });
 
@@ -306,13 +369,13 @@ describe('Pay Period Config Timing Tests', () => {
       const promises = [];
 
       for (let i = 0; i < 50; i++) {
-        const promise = new Promise<void>((resolve) => {
+        const promise = new Promise<void>(resolve => {
           setTimeout(() => {
             const frequency = i % 2 === 0 ? 'biweekly' : 'monthly';
             loadPayPeriodConfigFromPrefs({
               showPayPeriods: 'true',
               payPeriodFrequency: frequency,
-              payPeriodStartDate: '2024-01-05'
+              payPeriodStartDate: '2024-01-05',
             });
 
             // Verify config is consistent

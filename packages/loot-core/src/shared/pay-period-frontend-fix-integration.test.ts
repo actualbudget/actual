@@ -1,8 +1,10 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import * as monthUtils from './months';
+
+import { createAllBudgets } from '../server/budget/base';
 import * as db from '../server/db';
 import * as sheet from '../server/sheet';
-import { createAllBudgets } from '../server/budget/base';
+
+import * as monthUtils from './months';
 import { loadPayPeriodConfigFromPrefs } from './pay-periods';
 
 beforeEach(() => {
@@ -18,7 +20,11 @@ describe('Pay Period Frontend Fix Integration Test', () => {
 
     // Create category groups and categories
     await db.insertCategoryGroup({ id: 'expenses', name: 'Expenses' });
-    await db.insertCategoryGroup({ id: 'income', name: 'Income', is_income: 1 });
+    await db.insertCategoryGroup({
+      id: 'income',
+      name: 'Income',
+      is_income: 1,
+    });
 
     const groceriesId = await db.insertCategory({
       name: 'Groceries',
@@ -31,7 +37,7 @@ describe('Pay Period Frontend Fix Integration Test', () => {
     loadPayPeriodConfigFromPrefs({
       showPayPeriods: 'true',
       payPeriodFrequency: 'biweekly',
-      payPeriodStartDate: '2024-01-05'
+      payPeriodStartDate: '2024-01-05',
     });
 
     return { groceriesId };
@@ -64,8 +70,14 @@ describe('Pay Period Frontend Fix Integration Test', () => {
     const sheetName13 = monthUtils.sheetForMonth('2024-13');
     const sheetName14 = monthUtils.sheetForMonth('2024-14');
 
-    const spentAmount13 = sheet.getCellValue(sheetName13, `sum-amount-${groceriesId}`);
-    const spentAmount14 = sheet.getCellValue(sheetName14, `sum-amount-${groceriesId}`);
+    const spentAmount13 = sheet.getCellValue(
+      sheetName13,
+      `sum-amount-${groceriesId}`,
+    );
+    const spentAmount14 = sheet.getCellValue(
+      sheetName14,
+      `sum-amount-${groceriesId}`,
+    );
 
     expect(spentAmount13).toBe(-3000);
     expect(spentAmount14).toBe(-2000);
@@ -87,7 +99,7 @@ describe('Pay Period Frontend Fix Integration Test', () => {
 
     // Direct database query to verify the logic would work
     const bounds13 = monthUtils.bounds('2024-13');
-    const transactionsInPeriod = db.runQuery<{ amount: number, date: number }>(
+    const transactionsInPeriod = db.runQuery<{ amount: number; date: number }>(
       `SELECT amount, date FROM v_transactions_internal_alive t
          LEFT JOIN accounts a ON a.id = t.account
        WHERE t.date >= ${bounds13.start} AND t.date <= ${bounds13.end}
@@ -100,11 +112,13 @@ describe('Pay Period Frontend Fix Integration Test', () => {
     expect(transactionsInPeriod[0].amount).toBe(-3000);
     expect(transactionsInPeriod[0].date).toBe(20240110);
 
-    console.log('✅ Date range filtering logic works correctly for pay periods');
+    console.log(
+      '✅ Date range filtering logic works correctly for pay periods',
+    );
 
     // Test calendar month filtering still works (compatibility)
     const bounds01 = monthUtils.bounds('2024-01');
-    const allJanTransactions = db.runQuery<{ amount: number, date: number }>(
+    const allJanTransactions = db.runQuery<{ amount: number; date: number }>(
       `SELECT amount, date FROM v_transactions_internal_alive t
          LEFT JOIN accounts a ON a.id = t.account
        WHERE t.date >= ${bounds01.start} AND t.date <= ${bounds01.end}
@@ -125,7 +139,7 @@ describe('Pay Period Frontend Fix Integration Test', () => {
     loadPayPeriodConfigFromPrefs({
       showPayPeriods: 'true',
       payPeriodFrequency: 'biweekly',
-      payPeriodStartDate: '2024-01-05'
+      payPeriodStartDate: '2024-01-05',
     });
 
     // Test first few pay periods

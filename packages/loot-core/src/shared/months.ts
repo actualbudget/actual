@@ -213,8 +213,10 @@ export function subDays(day: DateLike, n: number): string {
 }
 
 export function isBefore(month1: DateLike, month2: DateLike): boolean {
-  const str1 = typeof month1 === 'string' ? month1 : d.format(_parse(month1), 'yyyy-MM');
-  const str2 = typeof month2 === 'string' ? month2 : d.format(_parse(month2), 'yyyy-MM');
+  const str1 =
+    typeof month1 === 'string' ? month1 : d.format(_parse(month1), 'yyyy-MM');
+  const str2 =
+    typeof month2 === 'string' ? month2 : d.format(_parse(month2), 'yyyy-MM');
 
   // Handle mixed month types - pay periods vs calendar months
   const isPP1 = isPayPeriod(str1);
@@ -224,8 +226,8 @@ export function isBefore(month1: DateLike, month2: DateLike): boolean {
     // Mixed types: prevent comparison by throwing early with context
     throw new Error(
       `Cannot compare mixed month types: '${str1}' (${isPP1 ? 'pay period' : 'calendar month'}) ` +
-      `vs '${str2}' (${isPP2 ? 'pay period' : 'calendar month'}). ` +
-      `Ensure consistent month types before comparison.`
+        `vs '${str2}' (${isPP2 ? 'pay period' : 'calendar month'}). ` +
+        `Ensure consistent month types before comparison.`,
     );
   }
 
@@ -240,8 +242,10 @@ export function isBefore(month1: DateLike, month2: DateLike): boolean {
 }
 
 export function isAfter(month1: DateLike, month2: DateLike): boolean {
-  const str1 = typeof month1 === 'string' ? month1 : d.format(_parse(month1), 'yyyy-MM');
-  const str2 = typeof month2 === 'string' ? month2 : d.format(_parse(month2), 'yyyy-MM');
+  const str1 =
+    typeof month1 === 'string' ? month1 : d.format(_parse(month1), 'yyyy-MM');
+  const str2 =
+    typeof month2 === 'string' ? month2 : d.format(_parse(month2), 'yyyy-MM');
 
   const isPP1 = isPayPeriod(str1);
   const isPP2 = isPayPeriod(str2);
@@ -249,8 +253,8 @@ export function isAfter(month1: DateLike, month2: DateLike): boolean {
   if (isPP1 !== isPP2) {
     throw new Error(
       `Cannot compare mixed month types: '${str1}' (${isPP1 ? 'pay period' : 'calendar month'}) ` +
-      `vs '${str2}' (${isPP2 ? 'pay period' : 'calendar month'}). ` +
-      `Ensure consistent month types before comparison.`
+        `vs '${str2}' (${isPP2 ? 'pay period' : 'calendar month'}). ` +
+        `Ensure consistent month types before comparison.`,
     );
   }
 
@@ -274,7 +278,8 @@ export function isCurrentDay(day: DateLike): boolean {
 // TODO: This doesn't really fit in this module anymore, should
 // probably live elsewhere
 export function bounds(month: DateLike): { start: number; end: number } {
-  const monthStr = typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+  const monthStr =
+    typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
 
   // Check if this is a pay period month
   if (isPayPeriod(monthStr)) {
@@ -282,7 +287,7 @@ export function bounds(month: DateLike): { start: number; end: number } {
     const config = getPayPeriodConfig();
     if (!config) {
       throw new Error(
-        `Pay period config not available for '${monthStr}'. This should not happen during normal operation.`
+        `Pay period config not available for '${monthStr}'. This should not happen during normal operation.`,
       );
     }
 
@@ -296,7 +301,7 @@ export function bounds(month: DateLike): { start: number; end: number } {
       if (period) {
         console.log(`[PayPeriod] Bounds for pay period ${monthStr}:`, {
           startDate: period.startDate,
-          endDate: period.endDate
+          endDate: period.endDate,
         });
 
         return {
@@ -308,7 +313,7 @@ export function bounds(month: DateLike): { start: number; end: number } {
 
     throw new Error(
       `Pay period '${monthStr}' not found in generated periods for year ${year}. ` +
-      `This may indicate an invalid pay period configuration.`
+        `This may indicate an invalid pay period configuration.`,
     );
   }
 
@@ -390,20 +395,16 @@ export function _range(
   if (startIsPayPeriod !== endIsPayPeriod) {
     throw new Error(
       `Mixed calendar month and pay period ranges are not allowed. ` +
-      `Range from '${startStr}' (${startIsPayPeriod ? 'pay period' : 'calendar month'}) ` +
-      `to '${endStr}' (${endIsPayPeriod ? 'pay period' : 'calendar month'}) is invalid. ` +
-      `Use either all calendar months (e.g., '2024-01' to '2024-03') or all pay periods (e.g., '2024-13' to '2024-15').`
+        `Range from '${startStr}' (${startIsPayPeriod ? 'pay period' : 'calendar month'}) ` +
+        `to '${endStr}' (${endIsPayPeriod ? 'pay period' : 'calendar month'}) is invalid. ` +
+        `Use either all calendar months (e.g., '2024-01' to '2024-03') or all pay periods (e.g., '2024-13' to '2024-15').`,
     );
   }
 
   if (startIsPayPeriod || endIsPayPeriod) {
     // Both are pay periods - generate pay period range directly
     // The presence of pay period IDs IS proof that pay periods are enabled
-    const result = generatePayPeriodRange(
-      startStr,
-      endStr,
-      inclusive,
-    );
+    const result = generatePayPeriodRange(startStr, endStr, inclusive);
     console.log('[PayPeriod] Generated pay period range:', result);
     return result;
   }
@@ -677,7 +678,7 @@ export function getMonthStartDate(
     const activeConfig = config || getPayPeriodConfig();
     if (!activeConfig) {
       throw new Error(
-        `Pay period config not available for '${monthId}'. This should not happen during normal operation.`
+        `Pay period config not available for '${monthId}'. This should not happen during normal operation.`,
       );
     }
     return getPayPeriodStartDate(monthId, activeConfig);
@@ -694,7 +695,7 @@ export function getMonthEndDate(
     const activeConfig = config || getPayPeriodConfig();
     if (!activeConfig) {
       throw new Error(
-        `Pay period config not available for '${monthId}'. This should not happen during normal operation.`
+        `Pay period config not available for '${monthId}'. This should not happen during normal operation.`,
       );
     }
     return getPayPeriodEndDate(monthId, activeConfig);
@@ -774,7 +775,7 @@ export function resolveMonthRange(
     const activeConfig = config || getPayPeriodConfig();
     if (!activeConfig) {
       throw new Error(
-        `Pay period config not available for '${monthId}'. This should not happen during normal operation.`
+        `Pay period config not available for '${monthId}'. This should not happen during normal operation.`,
       );
     }
     const startDate = getPayPeriodStartDate(monthId, activeConfig);

@@ -1,8 +1,10 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import * as monthUtils from './months';
+
+import { createAllBudgets } from '../server/budget/base';
 import * as db from '../server/db';
 import * as sheet from '../server/sheet';
-import { createAllBudgets } from '../server/budget/base';
+
+import * as monthUtils from './months';
 import { loadPayPeriodConfigFromPrefs } from './pay-periods';
 
 beforeEach(() => {
@@ -18,7 +20,11 @@ describe('Pay Period Transaction Filtering', () => {
 
     // Create category groups and categories
     await db.insertCategoryGroup({ id: 'expenses', name: 'Expenses' });
-    await db.insertCategoryGroup({ id: 'income', name: 'Income', is_income: 1 });
+    await db.insertCategoryGroup({
+      id: 'income',
+      name: 'Income',
+      is_income: 1,
+    });
 
     const groceriesId = await db.insertCategory({
       name: 'Groceries',
@@ -31,7 +37,7 @@ describe('Pay Period Transaction Filtering', () => {
     loadPayPeriodConfigFromPrefs({
       showPayPeriods: 'true',
       payPeriodFrequency: 'biweekly',
-      payPeriodStartDate: '2024-01-05'
+      payPeriodStartDate: '2024-01-05',
     });
 
     return { groceriesId };
@@ -81,7 +87,7 @@ describe('Pay Period Transaction Filtering', () => {
     expect(bounds15.end).toBe(20240215);
 
     // Test SQL queries that would be used for transaction filtering
-    const query13 = db.runQuery<{ amount: number, date: number }>(
+    const query13 = db.runQuery<{ amount: number; date: number }>(
       `SELECT amount, date FROM v_transactions_internal_alive t
          LEFT JOIN accounts a ON a.id = t.account
        WHERE t.date >= ${bounds13.start} AND t.date <= ${bounds13.end}
@@ -90,7 +96,7 @@ describe('Pay Period Transaction Filtering', () => {
       true,
     );
 
-    const query14 = db.runQuery<{ amount: number, date: number }>(
+    const query14 = db.runQuery<{ amount: number; date: number }>(
       `SELECT amount, date FROM v_transactions_internal_alive t
          LEFT JOIN accounts a ON a.id = t.account
        WHERE t.date >= ${bounds14.start} AND t.date <= ${bounds14.end}
@@ -99,7 +105,7 @@ describe('Pay Period Transaction Filtering', () => {
       true,
     );
 
-    const query15 = db.runQuery<{ amount: number, date: number }>(
+    const query15 = db.runQuery<{ amount: number; date: number }>(
       `SELECT amount, date FROM v_transactions_internal_alive t
          LEFT JOIN accounts a ON a.id = t.account
        WHERE t.date >= ${bounds15.start} AND t.date <= ${bounds15.end}
@@ -147,7 +153,11 @@ describe('Pay Period Transaction Filtering', () => {
 
     // Test AQL-style filtering using month transform
     // This simulates what happens when clicking on spent amounts
-    const aqlQuery13 = db.runQuery<{ amount: number, date: number, month: string }>(
+    const aqlQuery13 = db.runQuery<{
+      amount: number;
+      date: number;
+      month: string;
+    }>(
       `SELECT amount, date,
               CASE
                 WHEN date >= 20240105 AND date <= 20240118 THEN '2024-13'
@@ -213,7 +223,10 @@ describe('Pay Period Transaction Filtering', () => {
 
     // 1. Budget view shows spent amount (we tested this is working)
     const sheetName = monthUtils.sheetForMonth(month);
-    const spentAmount = sheet.getCellValue(sheetName, `sum-amount-${groceriesId}`);
+    const spentAmount = sheet.getCellValue(
+      sheetName,
+      `sum-amount-${groceriesId}`,
+    );
     expect(spentAmount).toBe(-5000);
 
     // 2. User clicks on spent amount, this creates filter conditions
@@ -234,7 +247,11 @@ describe('Pay Period Transaction Filtering', () => {
     expect(bounds.end).toBe(20240118);
 
     // 4. Query transactions using the converted bounds
-    const filteredTransactions = db.runQuery<{ amount: number, date: number, category: string }>(
+    const filteredTransactions = db.runQuery<{
+      amount: number;
+      date: number;
+      category: string;
+    }>(
       `SELECT amount, date, category FROM v_transactions_internal_alive t
          LEFT JOIN accounts a ON a.id = t.account
        WHERE t.date >= ${bounds.start} AND t.date <= ${bounds.end}

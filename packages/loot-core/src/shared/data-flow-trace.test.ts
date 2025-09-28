@@ -13,8 +13,6 @@ describe('Data Flow Trace for Mixed Range Issue', () => {
       enabled: true,
       payFrequency: 'biweekly',
       startDate: '2025-01-01',
-      endDate: null,
-      payDates: [],
     });
   });
 
@@ -25,7 +23,7 @@ describe('Data Flow Trace for Mixed Range Issue', () => {
       const numMonths = 12;
       const monthBounds = {
         start: '2025-01', // Calendar month
-        end: '2026-12'    // Calendar month
+        end: '2026-12', // Calendar month
       };
 
       // Calculate what MonthsProvider would do
@@ -38,7 +36,8 @@ describe('Data Flow Trace for Mixed Range Issue', () => {
       // This should fail because getValidMonthBounds doesn't handle mixed types
       expect(() => {
         const bounds = {
-          start: startMonth < monthBounds.start ? monthBounds.start : startMonth,
+          start:
+            startMonth < monthBounds.start ? monthBounds.start : startMonth,
           end: endMonth > monthBounds.end ? monthBounds.end : endMonth,
         };
         console.log('TRACE - final bounds:', bounds);
@@ -59,8 +58,14 @@ describe('Data Flow Trace for Mixed Range Issue', () => {
       const payPeriod = '2025-31';
       const calendarMonth = '2025-01';
 
-      console.log('TRACE - payPeriod < calendarMonth:', payPeriod < calendarMonth);
-      console.log('TRACE - payPeriod > calendarMonth:', payPeriod > calendarMonth);
+      console.log(
+        'TRACE - payPeriod < calendarMonth:',
+        payPeriod < calendarMonth,
+      );
+      console.log(
+        'TRACE - payPeriod > calendarMonth:',
+        payPeriod > calendarMonth,
+      );
 
       // This shows that string comparison doesn't work well with mixed types
       expect(payPeriod < calendarMonth).toBe(false); // '31' > '01'
@@ -71,7 +76,7 @@ describe('Data Flow Trace for Mixed Range Issue', () => {
       const startMonth = '2025-31';
       const monthBounds = {
         start: '2025-01',
-        end: '2026-09'  // This could come from a 9-month range ending in September
+        end: '2026-09', // This could come from a 9-month range ending in September
       };
 
       const endMonth = monthUtils.addMonths(startMonth, 11); // 12 months total
@@ -91,7 +96,7 @@ describe('Data Flow Trace for Mixed Range Issue', () => {
       // Simulate the derivedBounds logic from index.tsx
       const bounds = {
         start: '2025-01',
-        end: '2026-09'
+        end: '2026-09',
       };
 
       // Test the conversion logic
