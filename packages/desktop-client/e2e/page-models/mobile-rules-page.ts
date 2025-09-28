@@ -40,17 +40,17 @@ export class MobileRulesPage {
    * Get the nth rule item (0-based index)
    */
   getNthRule(index: number) {
-    return this.page
-      .getByRole('listitem')
-      .filter({ hasText: /IF|THEN/ })
-      .nth(index);
+    return this.getAllRules().nth(index);
   }
 
   /**
    * Get all visible rule items
    */
   getAllRules() {
-    return this.page.getByRole('listitem').filter({ hasText: /IF|THEN/ });
+    return this.page
+      .getByLabel('Rules')
+      .locator('> div')
+      .filter({ hasText: /IF|THEN|DEFAULT/ });
   }
 
   /**
