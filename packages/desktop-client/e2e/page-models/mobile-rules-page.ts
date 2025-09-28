@@ -50,7 +50,7 @@ export class MobileRulesPage {
     return this.page
       .getByLabel('Rules')
       .locator('> div')
-      .filter({ hasText: /IF|THEN|DEFAULT/ });
+      .filter({ hasText: /IF|THEN/ });
   }
 
   /**
