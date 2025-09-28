@@ -300,27 +300,41 @@ export function ReportSidebar({
           <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
             <Trans>Interval:</Trans>
           </Text>
-          <Select
-            value={customReportItems.interval}
-            onChange={e => {
-              setSessionReport('interval', e);
-              setInterval(e);
-              onReportChange({ type: 'modify' });
-              if (
-                ReportOptions.dateRange
-                  .filter(d => !d[e as keyof dateRangeProps])
-                  .map(int => int.key)
-                  .includes(customReportItems.dateRange)
-              ) {
-                onSelectRange(defaultsList.intervalRange.get(e) || '');
-              }
-            }}
-            options={ReportOptions.interval.map(option => [
-              option.key,
-              option.description,
-            ])}
-            disabledKeys={[]}
-          />
+          <Tooltip
+            content={
+              <Text>
+                <Trans>
+                  Changing the interval will automatically set an appropriate
+                  default range. Current default:{' '}
+                  {defaultsList.intervalRangeLabel.get(
+                    customReportItems.interval,
+                  )}
+                </Trans>
+              </Text>
+            }
+          >
+            <Select
+              value={customReportItems.interval}
+              onChange={e => {
+                setSessionReport('interval', e);
+                setInterval(e);
+                onReportChange({ type: 'modify' });
+                if (
+                  ReportOptions.dateRange
+                    .filter(d => !d[e as keyof dateRangeProps])
+                    .map(int => int.key)
+                    .includes(customReportItems.dateRange)
+                ) {
+                  onSelectRange(defaultsList.intervalRange.get(e) || '');
+                }
+              }}
+              options={ReportOptions.interval.map(option => [
+                option.key,
+                option.description,
+              ])}
+              disabledKeys={[]}
+            />
+          </Tooltip>
         </View>
 
         {!disableSort && (

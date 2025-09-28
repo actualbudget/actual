@@ -229,4 +229,7 @@ export const defaultsList = {
   intervalRange: new Map(
     intervalOptions.map(item => [item.key, item.defaultRange]),
   ),
+  intervalRangeLabel: new Map(
+    intervalOptions.map(item => [item.key, item.defaultRangeLabel]),
+  ),
 };
