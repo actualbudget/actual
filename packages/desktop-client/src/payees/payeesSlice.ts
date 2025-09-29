@@ -127,7 +127,7 @@ export const getCommonPayees = createAppAsyncThunk(
   `${sliceName}/getCommonPayees`,
   async () => {
     const payees: PayeeEntity[] = await send('common-payees-get');
-    return translatePayees(payees);
+    return translatePayees(payees) as PayeeEntity[];
   },
   {
     condition: (_, { getState }) => {
@@ -144,7 +144,7 @@ export const reloadCommonPayees = createAppAsyncThunk(
   `${sliceName}/reloadCommonPayees`,
   async () => {
     const payees: PayeeEntity[] = await send('common-payees-get');
-    return translatePayees(payees);
+    return translatePayees(payees) as PayeeEntity[];
   },
 );
 
@@ -152,7 +152,7 @@ export const getPayees = createAppAsyncThunk(
   `${sliceName}/getPayees`,
   async () => {
     const payees: PayeeEntity[] = await send('payees-get');
-    return translatePayees(payees);
+    return translatePayees(payees) as PayeeEntity[];
   },
   {
     condition: (_, { getState }) => {
@@ -169,7 +169,7 @@ export const reloadPayees = createAppAsyncThunk(
   `${sliceName}/reloadPayees`,
   async () => {
     const payees: PayeeEntity[] = await send('payees-get');
-    return translatePayees(payees);
+    return translatePayees(payees) as PayeeEntity[];
   },
 );
 
@@ -184,7 +184,7 @@ export const getActivePayees = memoizeOne(
           return account != null && !account.closed;
         }
         return true;
-      }),
+      }) as PayeeEntity[],
     );
   },
 );
@@ -211,14 +211,14 @@ function _loadCommonPayees(
   state: PayeesState,
   commonPayees: PayeesState['commonPayees'],
 ) {
-  state.commonPayees = translatePayees(commonPayees);
+  state.commonPayees = translatePayees(commonPayees) as PayeeEntity[];
   state.isCommonPayeesLoading = false;
   state.isCommonPayeesLoaded = true;
   state.isCommonPayeesDirty = false;
 }
 
 function _loadPayees(state: PayeesState, payees: PayeesState['payees']) {
-  state.payees = translatePayees(payees);
+  state.payees = translatePayees(payees) as PayeeEntity[];
   state.isPayeesLoading = false;
   state.isPayeesLoaded = true;
   state.isPayeesDirty = false;
