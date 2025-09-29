@@ -212,8 +212,8 @@ export const moveCategoryGroup = createAppAsyncThunk(
   },
 );
 
-function translateCategories(categories: CategoryEntity[]): void {
-  categories.forEach(cat => {
+function translateCategories(categories: CategoryEntity[] | undefined): void {
+  categories?.forEach(cat => {
     if (cat.name === 'Starting Balances') {
       cat.name = t('Starting Balances');
     }
