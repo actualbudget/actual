@@ -220,7 +220,7 @@ function PayeeList({
 
   // We limit the number of payees shown to 100.
   // So we show a hint that more are available via search.
-  const showSearchForMore = items.length > 100;
+  const showSearchForMore = items.length >= 100;
 
   return (
     <View>
