@@ -32,7 +32,7 @@ export function CurrencySettings() {
         ['HKD', t('Hong Kong Dollar')],
         ['INR', t('Indian Rupee')],
         ['JMD', t('Jamaican Dollar')],
-        ['JPY', t('Japanese Yen')],
+        // ['JPY', t('Japanese Yen')], // Keep commented until amounts with decimal places other than 2 are supported
         ['MDL', t('Moldovan Leu')],
         ['PHP', t('Philippine Peso')],
         ['PLN', t('Polish Złoty')],

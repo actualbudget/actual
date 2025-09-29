@@ -41,7 +41,7 @@ export const currencies: Currency[] = [
   // Jamaica (en-JM): Uses comma for thousands, dot for decimals, symbol before amount
   { code: 'JMD', name: 'Jamaican Dollar', symbol: 'J$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   // Japan (ja-JP): Uses comma for thousands, no decimals typically, symbol before amount
-  { code: 'JPY', name: 'Japanese Yen', symbol: '¥', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: true },
+  // { code: 'JPY', name: 'Japanese Yen', symbol: '¥', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: true }, // Keep commented until amounts with decimal places other than 2 are supported
   // Moldova (ro-MD): Uses dot for thousands, comma for decimals, symbol after amount
   { code: 'MDL', name: 'Moldovan Leu', symbol: 'L', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
   // Philippines (en-PH): Uses comma for thousands, dot for decimals, symbol before amount
