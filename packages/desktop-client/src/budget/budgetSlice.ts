@@ -212,8 +212,13 @@ export const moveCategoryGroup = createAppAsyncThunk(
   },
 );
 
-function translateCategories(categories: CategoryEntity[] | undefined): CategoryEntity[] | undefined {
-  return categories?.map(cat => ({ ...cat, name: cat.name === 'Starting Balances' ? t('Starting Balances') : cat.name }));
+function translateCategories(
+  categories: CategoryEntity[] | undefined,
+): CategoryEntity[] | undefined {
+  return categories?.map(cat => ({
+    ...cat,
+    name: cat.name === 'Starting Balances' ? t('Starting Balances') : cat.name,
+  }));
 }
 
 export const getCategories = createAppAsyncThunk(
@@ -222,7 +227,9 @@ export const getCategories = createAppAsyncThunk(
     const categories: CategoryViews = await send('get-categories');
     categories.list = translateCategories(categories.list) as CategoryEntity[];
     categories.grouped.forEach(group => {
-      group.categories = translateCategories(group.categories) as CategoryEntity[];
+      group.categories = translateCategories(
+        group.categories,
+      ) as CategoryEntity[];
     });
     return categories;
   },
@@ -243,7 +250,9 @@ export const reloadCategories = createAppAsyncThunk(
     const categories: CategoryViews = await send('get-categories');
     categories.list = translateCategories(categories.list) as CategoryEntity[];
     categories.grouped.forEach(group => {
-      group.categories = translateCategories(group.categories) as CategoryEntity[];
+      group.categories = translateCategories(
+        group.categories,
+      ) as CategoryEntity[];
     });
     return categories;
   },
@@ -599,7 +608,9 @@ function _loadCategories(
   state.categories = categories;
   categories.list = translateCategories(categories.list) as CategoryEntity[];
   categories.grouped.forEach(group => {
-    group.categories = translateCategories(group.categories) as CategoryEntity[];
+    group.categories = translateCategories(
+      group.categories,
+    ) as CategoryEntity[];
   });
   state.isCategoriesLoading = false;
   state.isCategoriesLoaded = true;
