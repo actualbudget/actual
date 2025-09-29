@@ -1,7 +1,6 @@
 import React, {
   type ComponentProps,
   type ReactNode,
-  useEffect,
   useRef,
   useState,
 } from 'react';
@@ -204,7 +203,7 @@ export function AccountHeader({
   const isUsingServer = syncServerStatus !== 'no-server';
   const isServerOffline = syncServerStatus === 'offline';
   const [_, setExpandSplitsPref] = useLocalPref('expand-splits');
-  const [showNetWorthChartPref, setShowNetWorthChartPref] = useSyncedPref(
+  const [showNetWorthChartPref, _setShowNetWorthChartPref] = useSyncedPref(
     `show-account-${accountId}-net-worth-chart`,
   );
   const showNetWorthChart = showNetWorthChartPref === 'true';
