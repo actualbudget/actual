@@ -8,6 +8,7 @@ import {
 } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { redo, undo } from '@desktop-client/undo';
+import { useTranslation } from 'react-i18next';
 
 type UndoActions = {
   undo: () => void;
@@ -21,6 +22,7 @@ const timeout = 10000;
 export function useUndo(): UndoActions {
   const dispatch = useDispatch();
   const { isNarrowWidth } = useResponsive();
+  const { t } = useTranslation();
 
   const showUndoNotification = useCallback(
     (notification: Notification) => {
@@ -34,7 +36,7 @@ export function useUndo(): UndoActions {
             type: 'message',
             timeout,
             button: {
-              title: 'Undo',
+              title: t('Undo'),
               action: undo,
             },
             ...notification,
@@ -57,7 +59,7 @@ export function useUndo(): UndoActions {
             type: 'message',
             timeout,
             button: {
-              title: 'Redo',
+              title: t('Redo'),
               action: redo,
             },
             ...notification,

@@ -9,6 +9,8 @@ import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
 import { resetApp } from '@desktop-client/app/appSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 
+import { t } from 'i18next';
+
 const sliceName = 'payees';
 
 type PayeesState = {
@@ -100,6 +102,14 @@ type CreatePayeePayload = {
   name: PayeeEntity['name'];
 };
 
+function translatePayees(payees: PayeeEntity[]): PayeeEntity[] {
+  return payees.map(payee =>
+    payee.name === 'Starting Balance'
+      ? { ...payee, name: t('Starting Balance') }
+      : payee,
+  );
+}
+
 export const createPayee = createAppAsyncThunk(
   `${sliceName}/createPayee`,
   async ({ name }: CreatePayeePayload) => {
@@ -114,7 +124,7 @@ export const getCommonPayees = createAppAsyncThunk(
   `${sliceName}/getCommonPayees`,
   async () => {
     const payees: PayeeEntity[] = await send('common-payees-get');
-    return payees;
+    return translatePayees(payees);
   },
   {
     condition: (_, { getState }) => {
@@ -131,7 +141,7 @@ export const reloadCommonPayees = createAppAsyncThunk(
   `${sliceName}/reloadCommonPayees`,
   async () => {
     const payees: PayeeEntity[] = await send('common-payees-get');
-    return payees;
+    return translatePayees(payees);
   },
 );
 
@@ -139,7 +149,7 @@ export const getPayees = createAppAsyncThunk(
   `${sliceName}/getPayees`,
   async () => {
     const payees: PayeeEntity[] = await send('payees-get');
-    return payees;
+    return translatePayees(payees);
   },
   {
     condition: (_, { getState }) => {
@@ -156,7 +166,7 @@ export const reloadPayees = createAppAsyncThunk(
   `${sliceName}/reloadPayees`,
   async () => {
     const payees: PayeeEntity[] = await send('payees-get');
-    return payees;
+    return translatePayees(payees);
   },
 );
 
@@ -164,18 +174,21 @@ export const getActivePayees = memoizeOne(
   (payees: PayeeEntity[], accounts: AccountEntity[]) => {
     const accountsById = getAccountsById(accounts);
 
-    return payees.filter(payee => {
-      if (payee.transfer_acct) {
-        const account = accountsById[payee.transfer_acct];
-        return account != null && !account.closed;
-      }
-      return true;
-    });
+    return translatePayees(
+      payees.filter(payee => {
+        if (payee.transfer_acct) {
+          const account = accountsById[payee.transfer_acct];
+          return account != null && !account.closed;
+        }
+        return true;
+      }),
+    );
   },
 );
 
 export const getPayeesById = memoizeOne(
-  (payees: PayeeEntity[] | null | undefined) => groupById(payees),
+  (payees: PayeeEntity[] | null | undefined) =>
+    groupById(translatePayees(payees)),
 );
 
 export const { name, reducer, getInitialState } = payeesSlice;
@@ -195,14 +208,14 @@ function _loadCommonPayees(
   state: PayeesState,
   commonPayees: PayeesState['commonPayees'],
 ) {
-  state.commonPayees = commonPayees;
+  state.commonPayees = translatePayees(commonPayees);
   state.isCommonPayeesLoading = false;
   state.isCommonPayeesLoaded = true;
   state.isCommonPayeesDirty = false;
 }
 
 function _loadPayees(state: PayeesState, payees: PayeesState['payees']) {
-  state.payees = payees;
+  state.payees = translatePayees(payees);
   state.isPayeesLoading = false;
   state.isPayeesLoaded = true;
   state.isPayeesDirty = false;

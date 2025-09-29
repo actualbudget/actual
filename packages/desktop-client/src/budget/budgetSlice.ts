@@ -212,10 +212,22 @@ export const moveCategoryGroup = createAppAsyncThunk(
   },
 );
 
+function translateCategories(categories: CategoryEntity[]): void {
+  categories.forEach(cat => {
+    if (cat.name === 'Starting Balances') {
+      cat.name = t('Starting Balances');
+    }
+  });
+}
+
 export const getCategories = createAppAsyncThunk(
   `${sliceName}/getCategories`,
   async () => {
     const categories: CategoryViews = await send('get-categories');
+    translateCategories(categories.list);
+    categories.grouped.forEach(group => {
+      translateCategories(group.categories);
+    });
     return categories;
   },
   {
@@ -233,6 +245,10 @@ export const reloadCategories = createAppAsyncThunk(
   `${sliceName}/reloadCategories`,
   async () => {
     const categories: CategoryViews = await send('get-categories');
+    translateCategories(categories.list);
+    categories.grouped.forEach(group => {
+      translateCategories(group.categories);
+    });
     return categories;
   },
 );
@@ -555,7 +571,9 @@ export const getCategoriesById = memoizeOne(
       group.categories?.forEach(cat => {
         res[cat.id] = cat;
       });
+      translateCategories(group.categories);
     });
+
     return res;
   },
 );
@@ -584,6 +602,10 @@ function _loadCategories(
   categories: BudgetState['categories'],
 ) {
   state.categories = categories;
+  translateCategories(categories.list);
+  categories.grouped.forEach(group => {
+    translateCategories(group.categories);
+  });
   state.isCategoriesLoading = false;
   state.isCategoriesLoaded = true;
   state.isCategoriesDirty = false;
