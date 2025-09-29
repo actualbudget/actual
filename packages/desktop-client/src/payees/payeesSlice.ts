@@ -101,11 +101,15 @@ type CreatePayeePayload = {
   name: PayeeEntity['name'];
 };
 
-function translatePayees(payees: PayeeEntity[]): PayeeEntity[] {
-  return payees.map(payee =>
-    payee.name === 'Starting Balance'
-      ? { ...payee, name: t('Starting Balance') }
-      : payee,
+function translatePayees(
+  payees: PayeeEntity[] | null | undefined,
+): PayeeEntity[] {
+  return (
+    payees?.map(payee =>
+      payee.name === 'Starting Balance'
+        ? { ...payee, name: t('Starting Balance') }
+        : payee,
+    ) ?? payees
   );
 }
 
