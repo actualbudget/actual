@@ -482,7 +482,7 @@ export function PayeeAutocomplete({
           return null;
         } else if (suggestions[0].id === 'new') {
           // Highlight the first payee since the create payee option is at index 0.
-          return suggestions.length > 1 ? 1 : null;
+          return suggestions.length > 1 ? 1 : 0;
         }
         return 0;
       }}
