@@ -437,10 +437,12 @@ export function PayeeAutocomplete({
       .slice(0, 100);
 
     if (filtered.length >= 2 && filtered[0].id === 'new') {
+      const firstFiltered = filtered[1];
       if (
-        getNormalisedString(filtered[1].name) === normalizedValue &&
-        !filtered[1].transfer_acct
+        getNormalisedString(firstFiltered.name) === normalizedValue &&
+        !firstFiltered.transfer_acct
       ) {
+        // Exact match found, remove the 'Create payee` option.
         return filtered.slice(1);
       }
     }
