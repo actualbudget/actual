@@ -44,7 +44,7 @@ export function useUndo(): UndoActions {
         }),
       );
     },
-    [dispatch, isNarrowWidth],
+    [dispatch, isNarrowWidth, t],
   );
 
   const showRedoNotification = useCallback(
@@ -67,7 +67,7 @@ export function useUndo(): UndoActions {
         }),
       );
     },
-    [dispatch, isNarrowWidth],
+    [dispatch, isNarrowWidth, t],
   );
 
   return {
