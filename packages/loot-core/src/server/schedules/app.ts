@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { captureBreadcrumb } from '../../platform/exceptions';
 import * as connection from '../../platform/server/connection';
+import { logger } from '../../platform/server/log';
 import { currentDay, dayFromDate, parseDate } from '../../shared/months';
 import { q } from '../../shared/query';
 import {
@@ -559,8 +560,12 @@ app.events.on('sync', ({ type }) => {
     type === 'success' || type === 'error' || type === 'unauthorized';
 
   if (completeEvent && prefs.getPrefs()) {
-    const { lastScheduleRun } = prefs.getPrefs();
+    if (!db.getDatabase()) {
+      logger.info('database is not available, skipping schedule service');
+      return;
+    }
 
+    const { lastScheduleRun } = prefs.getPrefs();
     if (lastScheduleRun !== currentDay()) {
       runMutator(() => advanceSchedulesService(type === 'success'));
 
