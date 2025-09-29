@@ -186,7 +186,7 @@ function PayeeList({
         return acc;
       },
       {
-        newPayee: null as PayeeAutocompleteItem,
+        newPayee: null as PayeeAutocompleteItem | null,
         suggestedPayees: [] as Array<PayeeAutocompleteItem>,
         payees: [] as Array<PayeeAutocompleteItem>,
         transferPayees: [] as Array<PayeeAutocompleteItem>,
