@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
@@ -8,7 +9,6 @@ import {
 } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { redo, undo } from '@desktop-client/undo';
-import { useTranslation } from 'react-i18next';
 
 type UndoActions = {
   undo: () => void;

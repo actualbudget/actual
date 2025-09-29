@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
 
 import { send } from 'loot-core/platform/client/fetch';
@@ -9,7 +10,6 @@ import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
 import { resetApp } from '@desktop-client/app/appSlice';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 
-import { t } from 'i18next';
 
 const sliceName = 'payees';
 
