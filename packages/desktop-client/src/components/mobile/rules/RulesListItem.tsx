@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { GridListItem, type GridListItemProps } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
@@ -8,16 +8,15 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { type RuleEntity } from 'loot-core/types/models';
+import { type WithRequired } from 'loot-core/types/util';
 
 import { ActionExpression } from '@desktop-client/components/rules/ActionExpression';
 import { ConditionExpression } from '@desktop-client/components/rules/ConditionExpression';
 import { groupActionsBySplitIndex } from '@desktop-client/util/ruleUtils';
 
-type RulesListItemProps = {
-  value: RuleEntity;
-} & Omit<GridListItemProps<RuleEntity>, 'value'>;
+type RulesListItemProps = WithRequired<GridListItemProps<RuleEntity>, 'value'>;
 
-export const RulesListItem = memo(function RulesListItem({
+export function RulesListItem({
   value: rule,
   style,
   ...props
@@ -137,7 +136,7 @@ export const RulesListItem = memo(function RulesListItem({
             {hasSplits
               ? actionSplits.map((split, i) => (
                   <View
-                    key={split.id}
+                    key={i}
                     style={{
                       width: '100%',
                       flexDirection: 'column',
@@ -185,4 +184,4 @@ export const RulesListItem = memo(function RulesListItem({
       </SpaceBetween>
     </GridListItem>
   );
-});
+}

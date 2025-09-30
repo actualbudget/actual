@@ -47,10 +47,7 @@ export class MobileRulesPage {
    * Get all visible rule items
    */
   getAllRules() {
-    return this.page
-      .getByRole('grid', { name: 'Rules' })
-      .getByRole('row')
-      .filter({ hasText: /IF|THEN/ });
+    return this.page.getByRole('grid', { name: 'Rules' }).getByRole('row');
   }
 
   /**
