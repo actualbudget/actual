@@ -109,7 +109,7 @@ __metadata:
     convict: "npm:^6.2.4"
     cors: "npm:^2.8.5"
     date-fns: "npm:^4.1.0"
-    debug: "npm:^4.4.1"
+    debug: "npm:^4.4.3"
     express: "npm:5.1.0"
     express-rate-limit: "npm:^8.0.1"
     express-winston: "npm:^4.2.0"
@@ -9935,6 +9935,18 @@ __metadata:
     supports-color:
       optional: true
   checksum: 10/8e2709b2144f03c7950f8804d01ccb3786373df01e406a0f66928e47001cf2d336cbed9ee137261d4f90d68d8679468c755e3548ed83ddacdc82b194d2468afe
+  languageName: node
+  linkType: hard
+
+"debug@npm:^4.4.3":
+  version: 4.4.3
+  resolution: "debug@npm:4.4.3"
+  dependencies:
+    ms: "npm:^2.1.3"
+  peerDependenciesMeta:
+    supports-color:
+      optional: true
+  checksum: 10/9ada3434ea2993800bd9a1e320bd4aa7af69659fb51cca685d390949434bc0a8873c21ed7c9b852af6f2455a55c6d050aa3937d52b3c69f796dab666f762acad
   languageName: node
   linkType: hard
 
