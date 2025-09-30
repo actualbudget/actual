@@ -17,6 +17,7 @@ import {
   validateSyncedFile,
   validateUploadedFile,
 } from './app-sync/validation.js';
+import { config } from './load-config.js';
 import * as simpleSync from './sync-simple.js';
 import {
   errorMiddleware,
@@ -29,9 +30,19 @@ const app = express();
 app.use(validateSessionMiddleware);
 app.use(errorMiddleware);
 app.use(requestLoggerMiddleware);
-app.use(express.raw({ type: 'application/actual-sync' }));
-app.use(express.raw({ type: 'application/encrypted-file' }));
-app.use(express.json());
+app.use(
+  express.raw({
+    type: 'application/actual-sync',
+    limit: `${config.get('upload.fileSizeSyncLimitMB')}mb`,
+  }),
+);
+app.use(
+  express.raw({
+    type: 'application/encrypted-file',
+    limit: `${config.get('upload.syncEncryptedFileSizeLimitMB')}mb`,
+  }),
+);
+app.use(express.json({ limit: `${config.get('upload.fileSizeLimitMB')}mb` }));
 
 export { app as handlers };
 

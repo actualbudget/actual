@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+// @ts-strict-ignore
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  type ComponentProps,
+} from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
@@ -11,6 +17,7 @@ import { View } from '@actual-app/components/view';
 import deepEqual from 'deep-equal';
 
 import { send } from 'loot-core/platform/client/fetch';
+import { type ParseFileOptions } from 'loot-core/server/transactions/import/parse-file';
 import { amountToInteger } from 'loot-core/shared/util';
 
 import { CheckboxOption } from './CheckboxOption';
@@ -22,9 +29,13 @@ import { Transaction } from './Transaction';
 import {
   applyFieldMappings,
   dateFormats,
+  isDateFormat,
   parseAmountFields,
   parseDate,
   stripCsvImportTransaction,
+  type DateFormat,
+  type FieldMapping,
+  type ImportTransaction,
 } from './utils';
 
 import {
@@ -47,7 +58,7 @@ import { useSyncedPrefs } from '@desktop-client/hooks/useSyncedPrefs';
 import { reloadPayees } from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
-function getFileType(filepath) {
+function getFileType(filepath: string): string {
   const m = filepath.match(/\.([^.]*)$/);
   if (!m) return 'ofx';
   const rawType = m[1].toLowerCase();
@@ -154,18 +165,23 @@ export function ImportTransactionsModal({
   onImported,
 }) {
   const { t } = useTranslation();
-  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const dateFormat = useDateFormat() || ('MM/dd/yyyy' as const);
   const [prefs, savePrefs] = useSyncedPrefs();
   const dispatch = useDispatch();
   const categories = useCategories();
 
   const [multiplierAmount, setMultiplierAmount] = useState('');
-  const [loadingState, setLoadingState] = useState('parsing');
-  const [error, setError] = useState(null);
+  const [loadingState, setLoadingState] = useState<
+    null | 'parsing' | 'importing'
+  >('parsing');
+  const [error, setError] = useState<{
+    parsed: boolean;
+    message: string;
+  } | null>(null);
   const [filename, setFilename] = useState(originalFileName);
-  const [transactions, setTransactions] = useState([]);
-  const [filetype, setFileType] = useState(null);
-  const [fieldMappings, setFieldMappings] = useState(null);
+  const [transactions, setTransactions] = useState<ImportTransaction[]>([]);
+  const [filetype, setFileType] = useState('unknown');
+  const [fieldMappings, setFieldMappings] = useState<FieldMapping | null>(null);
   const [splitMode, setSplitMode] = useState(false);
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
@@ -197,7 +213,9 @@ export function ImportTransactionsModal({
     String(prefs[`ofx-fallback-missing-payee-${accountId}`]) !== 'false',
   );
 
-  const [parseDateFormat, setParseDateFormat] = useState(null);
+  const [parseDateFormat, setParseDateFormat] = useState<DateFormat | null>(
+    null,
+  );
 
   const [clearOnImport, setClearOnImport] = useState(true);
 
@@ -208,7 +226,7 @@ export function ImportTransactionsModal({
       flipAmount,
       fieldMappings,
       splitMode,
-      parseDateFormat,
+      parseDateFormat: DateFormat,
       inOutMode,
       outValue,
       multiplierAmount,
@@ -286,6 +304,7 @@ export function ImportTransactionsModal({
         }),
       ).unwrap();
       const matchedUpdateMap = previewTrx.reduce((map, entry) => {
+        // @ts-expect-error - entry.transaction might not have trx_id property
         map[entry.transaction.trx_id] = entry;
         return map;
       }, {});
@@ -331,7 +350,7 @@ export function ImportTransactionsModal({
   );
 
   const parse = useCallback(
-    async (filename, options) => {
+    async (filename: string, options: ParseFileOptions) => {
       setLoadingState('parsing');
 
       const filetype = getFileType(filename);
@@ -349,8 +368,10 @@ export function ImportTransactionsModal({
       let index = 0;
       const transactions = parsedTransactions.map(trans => {
         // Add a transient transaction id to match preview with imported transactions
-        trans.trx_id = index++;
+        // @ts-expect-error - trans is unknown type, adding properties dynamically
+        trans.trx_id = String(index++);
         // Select all parsed transactions before first preview run
+        // @ts-expect-error - trans is unknown type, adding properties dynamically
         trans.selected = true;
         return trans;
       });
@@ -368,7 +389,7 @@ export function ImportTransactionsModal({
         let flipAmount = false;
         let fieldMappings = null;
         let splitMode = false;
-        let parseDateFormat = null;
+        let parseDateFormat: string | null = null;
 
         if (filetype === 'csv' || filetype === 'qif') {
           flipAmount =
@@ -383,21 +404,27 @@ export function ImportTransactionsModal({
             : getInitialMappings(transactions);
 
           fieldMappings = mappings;
+          // @ts-expect-error - mappings might not have outflow/inflow properties
           setFieldMappings(mappings);
 
           // Set initial split mode based on any saved mapping
+          // @ts-expect-error - mappings might not have outflow/inflow properties
           splitMode = !!(mappings.outflow || mappings.inflow);
           setSplitMode(splitMode);
 
           parseDateFormat =
             prefs[`parse-date-${accountId}-${filetype}`] ||
             getInitialDateFormat(transactions, mappings);
-          setParseDateFormat(parseDateFormat);
+          setParseDateFormat(
+            isDateFormat(parseDateFormat) ? parseDateFormat : null,
+          );
         } else if (filetype === 'qif') {
           parseDateFormat =
             prefs[`parse-date-${accountId}-${filetype}`] ||
             getInitialDateFormat(transactions, { date: 'date' });
-          setParseDateFormat(parseDateFormat);
+          setParseDateFormat(
+            isDateFormat(parseDateFormat) ? parseDateFormat : null,
+          );
         } else {
           setFieldMappings(null);
           setParseDateFormat(null);
@@ -412,7 +439,7 @@ export function ImportTransactionsModal({
           flipAmount,
           fieldMappings,
           splitMode,
-          parseDateFormat,
+          isDateFormat(parseDateFormat) ? parseDateFormat : null,
           inOutMode,
           outValue,
           multiplierAmount,
@@ -511,7 +538,7 @@ export function ImportTransactionsModal({
     runImportPreview();
   }
 
-  function onCheckTransaction(trx_id) {
+  function onCheckTransaction(trx_id: string) {
     const newTransactions = transactions.map(trans => {
       if (trans.trx_id === trx_id) {
         if (trans.existing) {
@@ -717,7 +744,7 @@ export function ImportTransactionsModal({
     multiplierAmount,
   ]);
 
-  const headers = [
+  const headers: ComponentProps<typeof TableHeader>['headers'] = [
     { name: t('Date'), width: 200 },
     { name: t('Payee'), width: 'flex' },
     { name: t('Notes'), width: 'flex' },
@@ -788,7 +815,8 @@ export function ImportTransactionsModal({
             >
               <TableHeader headers={headers} />
 
-              <TableWithNavigator
+              {/* @ts-expect-error - ImportTransaction is not a TableItem */}
+              <TableWithNavigator<ImportTransaction>
                 items={transactions.filter(
                   trans =>
                     !trans.isMatchedTransaction ||
@@ -796,7 +824,7 @@ export function ImportTransactionsModal({
                 )}
                 fields={['payee', 'category', 'amount']}
                 style={{ backgroundColor: theme.tableHeaderBackground }}
-                getItemKey={index => index}
+                getItemKey={index => String(index)}
                 renderEmpty={() => {
                   return (
                     <View
@@ -811,8 +839,8 @@ export function ImportTransactionsModal({
                     </View>
                   );
                 }}
-                renderItem={({ key, style, item }) => (
-                  <View key={key} style={style}>
+                renderItem={({ item }) => (
+                  <View>
                     <Transaction
                       transaction={item}
                       showParsed={filetype === 'csv' || filetype === 'qif'}
@@ -857,7 +885,7 @@ export function ImportTransactionsModal({
               <FieldMappings
                 transactions={transactions}
                 onChange={onUpdateFields}
-                mappings={fieldMappings}
+                mappings={fieldMappings || undefined}
                 splitMode={splitMode}
                 inOutMode={inOutMode}
                 hasHeaderRow={hasHeaderRow}
@@ -927,15 +955,15 @@ export function ImportTransactionsModal({
                 spacing={1}
                 style={{ marginTop: 5 }}
               >
-                {/*Date Format */}
+                {/* Date Format */}
                 <View>
                   {(filetype === 'qif' || filetype === 'csv') && (
                     <DateFormatSelect
                       transactions={transactions}
-                      fieldMappings={fieldMappings}
-                      parseDateFormat={parseDateFormat}
+                      fieldMappings={fieldMappings || undefined}
+                      parseDateFormat={parseDateFormat || undefined}
                       onChange={value => {
-                        setParseDateFormat(value);
+                        setParseDateFormat(isDateFormat(value) ? value : null);
                         runImportPreview();
                       }}
                     />
@@ -1136,7 +1164,7 @@ export function ImportTransactionsModal({
   );
 }
 
-function getParseOptions(fileType, options = {}) {
+function getParseOptions(fileType: string, options: ParseFileOptions = {}) {
   if (fileType === 'csv') {
     const { delimiter, hasHeaderRow, skipLines } = options;
     return { delimiter, hasHeaderRow, skipLines };
@@ -1153,10 +1181,10 @@ function getParseOptions(fileType, options = {}) {
   return { importNotes };
 }
 
-function isOfxFile(fileType) {
+function isOfxFile(fileType: string) {
   return fileType === 'ofx' || fileType === 'qfx';
 }
 
-function isCamtFile(fileType) {
+function isCamtFile(fileType: string) {
   return fileType === 'xml';
 }

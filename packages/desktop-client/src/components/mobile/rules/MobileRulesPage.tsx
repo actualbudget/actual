@@ -21,12 +21,14 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import { useUrlParam } from '@desktop-client/hooks/useUrlParam';
 
 const PAGE_SIZE = 50;
 
 export function MobileRulesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [visibleRulesParam] = useUrlParam('visible-rules');
   const [allRules, setAllRules] = useState<RuleEntity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMoreRules, setHasMoreRules] = useState(true);
@@ -48,8 +50,19 @@ export function MobileRulesPage() {
     [payees, accounts, schedules, categories],
   );
 
+  const visibleRules = useMemo(() => {
+    if (!visibleRulesParam || visibleRulesParam.trim() === '') {
+      return allRules;
+    }
+
+    const visibleRuleIdsSet = new Set(
+      visibleRulesParam.split(',').map(id => id.trim()),
+    );
+    return allRules.filter(rule => visibleRuleIdsSet.has(rule.id));
+  }, [allRules, visibleRulesParam]);
+
   const filteredRules = useMemo(() => {
-    const rules = allRules.filter(rule => {
+    const rules = visibleRules.filter(rule => {
       const schedule = schedules.find(schedule => schedule.rule === rule.id);
       return schedule ? schedule.completed === false : true;
     });
@@ -61,7 +74,7 @@ export function MobileRulesPage() {
             getNormalisedString(filter),
           ),
         );
-  }, [allRules, filter, filterData, schedules]);
+  }, [visibleRules, filter, filterData, schedules]);
 
   const loadRules = useCallback(async (append = false) => {
     try {

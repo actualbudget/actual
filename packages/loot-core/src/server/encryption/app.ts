@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import * as asyncStorage from '../../platform/server/asyncStorage';
+import { logger } from '../../platform/server/log';
 import { Budget } from '../../types/budget';
 import { createApp } from '../app';
 import { post } from '../post';
@@ -83,7 +84,7 @@ async function keyTest({
     });
     validCloudFileId = cloudFileId!;
   } catch (e) {
-    console.log(e);
+    logger.log(e);
     return { error: { reason: 'network' } };
   }
 
@@ -109,7 +110,7 @@ async function keyTest({
   try {
     await encryption.decrypt(Buffer.from(test.value, 'base64'), test.meta);
   } catch (e) {
-    console.log(e);
+    logger.log(e);
 
     // Unload the key, it's invalid
     encryption.unloadKey(key);

@@ -22,8 +22,9 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { format as formatDate } from 'date-fns';
-import { debounce } from 'debounce';
+import debounce from 'lodash/debounce';
 
+import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import { type CalendarWidget } from 'loot-core/types/models';
 import { type SyncedPrefs } from 'loot-core/types/prefs';
@@ -66,11 +67,27 @@ export function CalendarCard({
   const { t } = useTranslation();
   const format = useFormat();
 
-  const [start, end] = calculateTimeRange(meta?.timeFrame, {
-    start: monthUtils.dayFromDate(monthUtils.currentMonth()),
-    end: monthUtils.currentDay(),
-    mode: 'full',
-  });
+  const [latestTransaction, setLatestTransaction] = useState<string>('');
+
+  useEffect(() => {
+    async function fetchLatestTransaction() {
+      const latestTrans = await send('get-latest-transaction');
+      setLatestTransaction(
+        latestTrans ? latestTrans.date : monthUtils.currentDay(),
+      );
+    }
+    fetchLatestTransaction();
+  }, []);
+
+  const [start, end] = calculateTimeRange(
+    meta?.timeFrame,
+    {
+      start: monthUtils.dayFromDate(monthUtils.currentMonth()),
+      end: monthUtils.currentDay(),
+      mode: 'full',
+    },
+    latestTransaction,
+  );
   const params = useMemo(
     () =>
       calendarSpreadsheet(
@@ -403,8 +420,9 @@ function CalendarCardInner({
   const monthNameResizeRef = useResizeObserver(debouncedResizeCallback);
 
   useEffect(() => {
+    const toCancel = debouncedResizeCallback;
     return () => {
-      debouncedResizeCallback?.clear();
+      toCancel.cancel();
     };
   }, [debouncedResizeCallback]);
 
