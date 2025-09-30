@@ -39,7 +39,10 @@ export const MonthPicker = ({
   const [hoverId, setHoverId] = useState(null);
   const [targetMonthCount, setTargetMonthCount] = useState(12);
 
-  const currentMonth = monthUtils.currentMonth();
+  // Don't capture currentMonth during render - calculate it when needed
+  // This ensures pay period config is loaded before determining current month
+  const getCurrentMonth = () => monthUtils.currentMonth();
+  const currentMonth = getCurrentMonth();
   const firstSelectedMonth = startMonth;
 
   const lastSelectedMonth = monthUtils.addMonths(
@@ -93,7 +96,7 @@ export const MonthPicker = ({
         <Link
           variant="button"
           buttonVariant="bare"
-          onPress={() => onSelect(currentMonth)}
+          onPress={() => onSelect(getCurrentMonth())}
           style={{
             padding: '3px 3px',
             marginRight: '12px',

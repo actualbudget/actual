@@ -139,6 +139,72 @@ function BudgetInner(props: BudgetInnerProps) {
     payPeriodStartDate,
   ]);
 
+  // Reset view to current month when toggling between pay periods and calendar months
+  useEffect(() => {
+    if (!payPeriodFeatureFlagEnabled) {
+      return;
+    }
+
+    // Skip initial mount
+    if (!initialized) {
+      return;
+    }
+
+    if (payPeriodViewEnabled === 'false') {
+      // When pay periods are disabled, reset to current calendar month
+      // This ensures we don't have a pay period ID in startMonthPref
+      const calendarMonth = monthUtils.currentMonth();
+      console.log('[PayPeriod] Toggled off, resetting to calendar month:', calendarMonth);
+      setStartMonthPref(calendarMonth);
+    } else if (payPeriodViewEnabled === 'true') {
+      // When pay periods are enabled, reset to current pay period
+      // This ensures we navigate to the correct pay period, not a stale calendar month
+      const currentPayPeriod = monthUtils.currentMonth();
+      console.log('[PayPeriod] Toggled on, resetting to current pay period:', currentPayPeriod);
+      setStartMonthPref(currentPayPeriod);
+    }
+  }, [payPeriodFeatureFlagEnabled, payPeriodViewEnabled, setStartMonthPref, initialized]);
+
+  // Refresh budget bounds when pay period config changes or when toggling pay periods on
+  useEffect(() => {
+    // Skip if feature flag is disabled
+    if (!payPeriodFeatureFlagEnabled) {
+      return;
+    }
+
+    // Skip initial mount - only trigger on actual changes
+    const isInitialMount = !initialized;
+    if (isInitialMount) {
+      return;
+    }
+
+    // Determine if we should refresh:
+    // 1. Toggling pay periods on (to ensure pay period sheets exist)
+    // 2. Config changes while pay periods are enabled (frequency or start date)
+    const shouldRefresh =
+      payPeriodViewEnabled === 'true' &&
+      (payPeriodFrequency || payPeriodStartDate);
+
+    if (shouldRefresh) {
+      console.log('[PayPeriod] Config changed or toggled on, refreshing budget bounds:', {
+        viewEnabled: payPeriodViewEnabled,
+        frequency: payPeriodFrequency,
+        startDate: payPeriodStartDate,
+      });
+
+      send('get-budget-bounds').then(({ start, end }) => {
+        console.log('[PayPeriod] Budget bounds refreshed:', { start, end });
+        setBounds({ start, end });
+      });
+    }
+  }, [
+    payPeriodFeatureFlagEnabled,
+    payPeriodViewEnabled,
+    payPeriodFrequency,
+    payPeriodStartDate,
+    initialized,
+  ]);
+
   useEffect(() => {
     send('get-budget-bounds').then(({ start, end }) => {
       if (bounds.start !== start || bounds.end !== end) {
