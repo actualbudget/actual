@@ -143,9 +143,13 @@ export function createGroupedSpreadsheet({
       [startDate, endDate],
     );
 
+    const groupedDataFiltered = groupedData.filter(i =>
+      filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
+    );
+
     // Determine interval range across all groups and their nested categories
     const allGroupsForTrimming: GroupedEntity[] = [];
-    groupedData.forEach(group => {
+    groupedDataFiltered.forEach(group => {
       allGroupsForTrimming.push(group);
       if (group.categories) {
         allGroupsForTrimming.push(...group.categories);
@@ -154,17 +158,13 @@ export function createGroupedSpreadsheet({
 
     const { startIndex, endIndex } = determineIntervalRange(
       allGroupsForTrimming,
-      groupedData.length > 0 ? groupedData[0].intervalData : [],
+      groupedDataFiltered.length > 0 ? groupedDataFiltered[0].intervalData : [],
       trimIntervals,
       balanceTypeOp,
     );
 
     // Trim all groupedData intervals (including nested categories) based on the range
-    trimGroupedDataIntervals(groupedData, startIndex, endIndex);
-
-    const groupedDataFiltered = groupedData.filter(i =>
-      filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
-    );
+    trimGroupedDataIntervals(groupedDataFiltered, startIndex, endIndex);
 
     const sortedGroupedDataFiltered = [...groupedDataFiltered]
       .sort(sortData({ balanceTypeOp, sortByOp }))
