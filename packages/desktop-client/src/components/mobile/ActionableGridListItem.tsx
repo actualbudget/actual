@@ -89,7 +89,9 @@ export function ActionableGridListItem<T extends object>({
       style={{
         ...styles.mobileListItem,
         padding: 0,
-        backgroundColor: hasActions ? actionsBackgroundColor : 'transparent',
+        backgroundColor: hasActions
+          ? actionsBackgroundColor
+          : (styles.mobileListItem.backgroundColor ?? 'transparent'),
         overflow: 'hidden',
       }}
     >
