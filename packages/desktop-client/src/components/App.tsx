@@ -184,6 +184,41 @@ export function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    const updateVisualViewportHeight = () => {
+      let height = window.innerHeight;
+
+      if (window.visualViewport && window.visualViewport.height > 0) {
+        height = window.visualViewport.height;
+      }
+
+      document.documentElement.style.setProperty(
+        '--visual-viewport-height',
+        `${height}px`,
+      );
+    };
+
+    updateVisualViewportHeight();
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener(
+        'resize',
+        updateVisualViewportHeight,
+      );
+      return () => {
+        window.visualViewport.removeEventListener(
+          'resize',
+          updateVisualViewportHeight,
+        );
+      };
+    } else {
+      window.addEventListener('resize', updateVisualViewportHeight);
+      return () => {
+        window.removeEventListener('resize', updateVisualViewportHeight);
+      };
+    }
+  }, []);
+
+  useEffect(() => {
     function checkScrollbars() {
       if (hiddenScrollbars !== hasHiddenScrollbars()) {
         setHiddenScrollbars(hasHiddenScrollbars());
