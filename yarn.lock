@@ -29,7 +29,7 @@ __metadata:
     node-fetch: "npm:^3.3.2"
     tsc-alias: "npm:^1.8.16"
     typescript: "npm:^5.9.2"
-    uuid: "npm:^11.1.0"
+    uuid: "npm:^13.0.0"
     vitest: "npm:^3.2.4"
   languageName: unknown
   linkType: soft
@@ -81,7 +81,7 @@ __metadata:
     protoc-gen-js: "npm:^3.21.4-4"
     ts-protoc-gen: "npm:^0.15.0"
     typescript: "npm:^5.9.2"
-    uuid: "npm:^11.1.0"
+    uuid: "npm:^13.0.0"
     vitest: "npm:^3.2.4"
   languageName: unknown
   linkType: soft
@@ -123,7 +123,7 @@ __metadata:
     pluggy-sdk: "npm:^0.74.0"
     supertest: "npm:^7.1.4"
     typescript: "npm:^5.9.2"
-    uuid: "npm:^11.1.0"
+    uuid: "npm:^13.0.0"
     vitest: "npm:^3.2.4"
     winston: "npm:^3.17.0"
   bin:
@@ -202,7 +202,7 @@ __metadata:
     rollup-plugin-visualizer: "npm:^5.14.0"
     sass: "npm:^1.89.0"
     usehooks-ts: "npm:^3.1.1"
-    uuid: "npm:^11.1.0"
+    uuid: "npm:^13.0.0"
     vite: "npm:^6.3.6"
     vite-plugin-pwa: "npm:^1.0.0"
     vite-tsconfig-paths: "npm:^4.3.2"
@@ -14445,7 +14445,7 @@ __metadata:
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.9.2"
     ua-parser-js: "npm:^2.0.3"
-    uuid: "npm:^11.1.0"
+    uuid: "npm:^13.0.0"
     vite: "npm:^6.3.6"
     vite-plugin-node-polyfills: "npm:^0.24.0"
     vite-plugin-peggy-loader: "npm:^2.0.1"
@@ -20703,12 +20703,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:^11.1.0":
-  version: 11.1.0
-  resolution: "uuid@npm:11.1.0"
+"uuid@npm:^13.0.0":
+  version: 13.0.0
+  resolution: "uuid@npm:13.0.0"
   bin:
-    uuid: dist/esm/bin/uuid
-  checksum: 10/d2da43b49b154d154574891ced66d0c83fc70caaad87e043400cf644423b067542d6f3eb641b7c819224a7cd3b4c2f21906acbedd6ec9c6a05887aa9115a9cf5
+    uuid: dist-node/bin/uuid
+  checksum: 10/2742b24d1e00257e60612572e4d28679423469998cafbaf1fe9f1482e3edf9c40754b31bfdb3d08d71b29239f227a304588f75210b3b48f2609f0673f1feccef
   languageName: node
   linkType: hard
 

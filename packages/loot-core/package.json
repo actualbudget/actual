@@ -36,7 +36,7 @@
     "mitt": "^3.0.1",
     "slash": "3.0.0",
     "ua-parser-js": "^2.0.3",
-    "uuid": "^11.1.0"
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@actual-app/api": "workspace:^",
