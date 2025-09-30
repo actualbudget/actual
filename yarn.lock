@@ -35,7 +35,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@actual-app/components@workspace:*, @actual-app/components@workspace:^, @actual-app/components@workspace:packages/component-library":
+"@actual-app/components@workspace:*, @actual-app/components@workspace:packages/component-library":
   version: 0.0.0-use.local
   resolution: "@actual-app/components@workspace:packages/component-library"
   dependencies:
@@ -83,21 +83,19 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/plugins-core@workspace:packages/plugins-core"
   dependencies:
-    "@actual-app/components": "workspace:^"
     "@types/react": "npm:^19.1.4"
     "@types/react-dom": "npm:^19.1.4"
-    i18next: "npm:^25.2.1"
-    react: "npm:19.1.0"
-    react-aria-components: "npm:^1.7.1"
-    react-dom: "npm:19.1.0"
     typescript: "npm:^5.5.4"
     typescript-eslint: "npm:^8.18.1"
     typescript-strict-plugin: "npm:^2.4.4"
     vite: "npm:^6.2.0"
     vite-plugin-dts: "npm:^4.5.3"
   peerDependencies:
-    react: ^19.0.0
-    react-dom: ^19.0.0
+    "@actual-app/components": "workspace:^"
+    i18next: ^25.2.1
+    react: 19.1.0
+    react-aria-components: ^1.7.1
+    react-dom: 19.1.0
   languageName: unknown
   linkType: soft
 
@@ -12374,7 +12372,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:^25.2.1, i18next@npm:^25.5.3":
+"i18next@npm:^25.5.3":
   version: 25.5.3
   resolution: "i18next@npm:25.5.3"
   dependencies:
@@ -16539,7 +16537,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-aria-components@npm:^1.13.0, react-aria-components@npm:^1.7.1":
+"react-aria-components@npm:^1.13.0":
   version: 1.13.0
   resolution: "react-aria-components@npm:1.13.0"
   dependencies:
@@ -16663,17 +16661,6 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 10/e27cf5156c306d183585099854c597266eda014c51e7dfca657f7099d5db0a09a4fe07e4c8cbc3b04ca613b805878a8f97f23cc8e13887dbfb1f05efbe5a12e7
-  languageName: node
-  linkType: hard
-
-"react-dom@npm:19.1.0":
-  version: 19.1.0
-  resolution: "react-dom@npm:19.1.0"
-  dependencies:
-    scheduler: "npm:^0.26.0"
-  peerDependencies:
-    react: ^19.1.0
-  checksum: 10/c5b58605862c7b0bb044416b01c73647bb8e89717fb5d7a2c279b11815fb7b49b619fe685c404e59f55eb52c66831236cc565c25ee1c2d042739f4a2cc538aa2
   languageName: node
   linkType: hard
 
@@ -17045,13 +17032,6 @@ __metadata:
     react: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0 || ^19.0.0
   checksum: 10/8f8127369fb3ae1a49987a1e7d2d136f379b71d1b031a4c169389274946eca0248e3fb9130aa8a7ebe82f4ca8aaab58c37252398f8f6220a6eafaa78b8464b6b
-  languageName: node
-  linkType: hard
-
-"react@npm:19.1.0":
-  version: 19.1.0
-  resolution: "react@npm:19.1.0"
-  checksum: 10/d0180689826fd9de87e839c365f6f361c561daea397d61d724687cae88f432a307d1c0f53a0ee95ddbe3352c10dac41d7ff1ad85530fb24951b27a39e5398db4
   languageName: node
   linkType: hard
 
@@ -17841,13 +17821,6 @@ __metadata:
   dependencies:
     xmlchars: "npm:^2.2.0"
   checksum: 10/97b50daf6ca3a153e89842efa18a862e446248296622b7473c169c84c823ee8a16e4a43bac2f73f11fc8cb9168c73fbb0d73340f26552bac17970e9052367aa9
-  languageName: node
-  linkType: hard
-
-"scheduler@npm:^0.26.0":
-  version: 0.26.0
-  resolution: "scheduler@npm:0.26.0"
-  checksum: 10/1ecf2e5d7de1a7a132796834afe14a2d589ba7e437615bd8c06f3e0786a3ac3434655e67aac8755d9b14e05754c177e49c064261de2673aaa3c926bc98caa002
   languageName: node
   linkType: hard
 

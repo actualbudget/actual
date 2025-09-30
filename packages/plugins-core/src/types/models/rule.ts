@@ -1,4 +1,4 @@
-import { type RecurConfig } from './schedule';
+import { ScheduleEntity, type RecurConfig } from './schedule';
 
 export interface NewRuleEntity {
   stage: 'pre' | null | 'post';
@@ -165,7 +165,7 @@ export interface SetSplitAmountRuleActionEntity {
 
 export interface LinkScheduleRuleActionEntity {
   op: 'link-schedule';
-  value: unknown; // Changed from ScheduleEntity to avoid circular dependency
+  value: ScheduleEntity;
 }
 
 export interface PrependNoteRuleActionEntity {
