@@ -205,7 +205,7 @@ export class LiveQuery<TResponse = unknown> {
       // still subscribed (`this.unsubscribeSyncEvent` will exist)
       if (this.inflightRequestId === reqId && this._unsubscribeSyncEvent) {
         const previousData = this.data;
-        
+
         // For calculate queries, data is a raw value, not an array
         // Convert it to an array format to maintain consistency
         if (this._query.state.calculation) {
@@ -213,7 +213,7 @@ export class LiveQuery<TResponse = unknown> {
         } else {
           this.data = data as Data<TResponse>;
         }
-        
+
         this.onData(this.data, previousData);
         this.inflightRequestId = null;
       }
