@@ -279,26 +279,28 @@ export function createCustomSpreadsheet({
       return { ...calc };
     });
 
-    // Determine interval range across all groups and main intervalData
-    const { startIndex, endIndex } = determineIntervalRange(
-      calcData,
-      intervalData,
-      trimIntervals,
-    );
-
-    // Trim the main intervalData based on the range
-    const trimmedIntervalData = trimIntervalDataToRange(
-      intervalData,
-      startIndex,
-      endIndex,
-    );
-
-    // Trim all calcData based on the interval range to keep consistency
-    trimIntervalsToRange(calcData, startIndex, endIndex);
-
+    // First, filter rows so trimming reflects the visible dataset
     const calcDataFiltered = calcData.filter(i =>
       filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
     );
+
+    // Determine interval range across filtered groups and main intervalData
+    const { startIndex, endIndex } = determineIntervalRange(
+      calcDataFiltered,
+      intervalData,
+      trimIntervals,
+      balanceTypeOp, // new param
+    );
+
+    // Trim only if enabled
+    const trimmedIntervalData = trimIntervals
+      ? trimIntervalDataToRange(intervalData, startIndex, endIndex)
+      : intervalData;
+
+    if (trimIntervals) {
+      // Keep group data in sync with the trimmed range
+      trimIntervalsToRange(calcDataFiltered, startIndex, endIndex);
+    }
 
     const sortedCalcDataFiltered = [...calcDataFiltered].sort(
       sortData({ balanceTypeOp, sortByOp }),

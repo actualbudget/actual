@@ -1,17 +1,33 @@
 import {
   type GroupedEntity,
   type IntervalEntity,
+  type balanceTypeOpType,
 } from 'loot-core/types/models';
 
-const isEmptyInterval = (interval: IntervalEntity) =>
-  interval.totalAssets === 0 &&
-  interval.totalDebts === 0 &&
-  interval.totalTotals === 0;
+function isEmptyForMetric(
+  interval: IntervalEntity,
+  metric: balanceTypeOpType,
+): boolean {
+  switch (metric) {
+    case 'totalAssets':
+      return interval.totalAssets === 0;
+    case 'totalDebts':
+      return interval.totalDebts === 0;
+    case 'netAssets':
+      return interval.netAssets === 0;
+    case 'netDebts':
+      return interval.netDebts === 0;
+    case 'totalTotals':
+    default:
+      return interval.totalTotals === 0;
+  }
+}
 
 export function determineIntervalRange(
   data: GroupedEntity[],
   intervalData: IntervalEntity[],
   trimIntervals: boolean,
+  balanceTypeOp: balanceTypeOpType = 'totalTotals',
 ): { startIndex: number; endIndex: number } {
   if (!trimIntervals || intervalData.length === 0) {
     return { startIndex: 0, endIndex: intervalData.length - 1 };
@@ -23,7 +39,7 @@ export function determineIntervalRange(
   // Check each group to find the earliest start and latest end of non-empty data
   data.forEach(item => {
     const startIndex = item.intervalData.findIndex(
-      interval => !isEmptyInterval(interval),
+      interval => !isEmptyForMetric(interval, balanceTypeOp),
     );
 
     if (startIndex !== -1) {
@@ -31,7 +47,10 @@ export function determineIntervalRange(
 
       // Find last non-empty interval for this group
       let endIndex = item.intervalData.length - 1;
-      while (endIndex >= 0 && isEmptyInterval(item.intervalData[endIndex])) {
+      while (
+        endIndex >= 0 &&
+        isEmptyForMetric(item.intervalData[endIndex], balanceTypeOp)
+      ) {
         endIndex--;
       }
       globalEndIndex = Math.max(globalEndIndex, endIndex);
@@ -40,13 +59,17 @@ export function determineIntervalRange(
 
   // Also check the main intervalData for any activity
   const mainStartIndex = intervalData.findIndex(
-    interval => !isEmptyInterval(interval),
+    interval => !isEmptyForMetric(interval, balanceTypeOp),
   );
   if (mainStartIndex !== -1) {
     globalStartIndex = Math.min(globalStartIndex, mainStartIndex);
 
     let mainEndIndex = intervalData.length - 1;
-    while (mainEndIndex >= 0 && isEmptyInterval(intervalData[mainEndIndex])) {
+
+    while (
+      mainEndIndex >= 0 &&
+      isEmptyForMetric(intervalData[mainEndIndex], balanceTypeOp)
+    ) {
       mainEndIndex--;
     }
     globalEndIndex = Math.max(globalEndIndex, mainEndIndex);
