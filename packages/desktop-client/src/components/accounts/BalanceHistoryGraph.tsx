@@ -16,12 +16,12 @@ import { subMonths, format, eachMonthOfInterval } from 'date-fns';
 import { AreaChart, Area, YAxis, Tooltip as RechartsTooltip } from 'recharts';
 
 import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
 import { integerToCurrency } from 'loot-core/shared/util';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { useLocale } from '@desktop-client/hooks/useLocale';
+import * as query from '@desktop-client/queries';
 import { liveQuery } from '@desktop-client/queries/liveQuery';
 
 const LABEL_WIDTH = 70;
@@ -65,14 +65,6 @@ export function BalanceHistoryGraph({
   );
 
   useEffect(() => {
-    if (!accountId) {
-      setBalanceData([]);
-      setLoading(false);
-      setStartingBalance(null);
-      setMonthlyTotals(null);
-      return;
-    }
-
     // Reset state when accountId changes
     setStartingBalance(null);
     setMonthlyTotals(null);
@@ -81,15 +73,15 @@ export function BalanceHistoryGraph({
     const endDate = new Date();
     const startDate = subMonths(endDate, 12);
 
-    const startingBalanceQuery = q('transactions')
+    const startingBalanceQuery = query
+      .transactions(accountId)
       .filter({
-        account: accountId,
         date: { $lt: monthUtils.firstDayOfMonth(startDate) },
       })
       .calculate({ $sum: '$amount' });
-    const monthlyTotalsQuery = q('transactions')
+    const monthlyTotalsQuery = query
+      .transactions(accountId)
       .filter({
-        account: accountId,
         $and: [
           { date: { $gte: monthUtils.firstDayOfMonth(startDate) } },
           { date: { $lte: monthUtils.lastDayOfMonth(endDate) } },
@@ -149,8 +141,8 @@ export function BalanceHistoryGraph({
         monthlyTotalsValue: Array<{ date: string; balance: number }>,
       ) {
         let currentBalance = startingBalanceValue;
-        const totals = [...monthlyTotalsValue].reverse();
-        totals.forEach(month => {
+        const totals = [...monthlyTotalsValue];
+        totals.reverse().forEach(month => {
           currentBalance = currentBalance + month.balance;
           month.balance = currentBalance;
         });
