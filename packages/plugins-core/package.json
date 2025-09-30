@@ -3,8 +3,8 @@
   "private": true,
   "version": "0.1.0",
   "description": "Core plugin system for Actual Budget",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "src/client.ts",
+  "types": "src/client.ts",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -13,13 +13,8 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@actual-app/components": "workspace:^",
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.4",
-    "i18next": "^25.2.1",
-    "react": "19.1.0",
-    "react-aria-components": "^1.7.1",
-    "react-dom": "19.1.0",
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.18.1",
     "typescript-strict-plugin": "^2.4.4",
@@ -27,12 +22,6 @@
     "vite-plugin-dts": "^4.5.3"
   },
   "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "development": "./src/index.ts",
-      "import": "./build/index.js",
-      "require": "./build/index.cjs"
-    },
     "./server": {
       "types": "./src/server.ts",
       "development": "./src/server.ts",
@@ -61,7 +50,10 @@
     "./src/*": "./src/*"
   },
   "peerDependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "@actual-app/components": "workspace:^",
+    "i18next": "^25.2.1",
+    "react": "19.1.0",
+    "react-aria-components": "^1.7.1",
+    "react-dom": "19.1.0"
   }
 }

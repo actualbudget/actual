@@ -211,7 +211,12 @@ type ModalCloseButtonProps = {
 
 export function ModalCloseButton({ onPress, style }: ModalCloseButtonProps) {
   return (
-    <Button variant="bare" onPress={onPress} style={{ padding: '10px 10px' }}>
+    <Button
+      variant="bare"
+      onPress={onPress}
+      aria-label="Close"
+      style={{ padding: '10px 10px' }}
+    >
       <SvgDelete width={10} style={style} />
     </Button>
   );

@@ -1,9 +1,9 @@
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import type { BasicModalProps } from '@actual-app/components/props/modalProps';
 import type { i18n } from 'i18next';
 
-import { Query, QueryBuilder } from '../query';
+import type { Query, QueryBuilder } from '../query';
 
 import type {
   PayeeEntity,
@@ -441,7 +441,7 @@ export type ActualPluginInitialized = Omit<ActualPlugin, 'activate'> & {
 };
 
 export interface ContextEvent {
-  payess: { payess: PayeeEntity[] };
+  payees: { payees: PayeeEntity[] };
   categories: { categories: CategoryEntity[]; groups: CategoryGroupEntity[] };
   accounts: { accounts: AccountEntity[] };
   schedules: { schedules: ScheduleEntity[] };

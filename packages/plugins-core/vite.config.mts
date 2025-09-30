@@ -6,7 +6,6 @@ export default defineConfig({
     outDir: 'build',
     lib: {
       entry: {
-        index: 'src/index.ts',
         server: 'src/server.ts',
         client: 'src/client.ts',
       },
