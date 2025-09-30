@@ -17,6 +17,7 @@ type PayeesListProps = {
   ruleCounts: Map<string, number>;
   isLoading?: boolean;
   onPayeePress: (payee: PayeeEntity) => void;
+  onPayeeDelete: (payee: PayeeEntity) => void;
 };
 
 export function PayeesList({
@@ -24,6 +25,7 @@ export function PayeesList({
   ruleCounts,
   isLoading = false,
   onPayeePress,
+  onPayeeDelete,
 }: PayeesListProps) {
   const { t } = useTranslation();
 
@@ -81,6 +83,7 @@ export function PayeesList({
           <PayeesListItem
             value={payee}
             ruleCount={ruleCounts.get(payee.id) ?? 0}
+            onDelete={() => onPayeeDelete(payee)}
             onAction={() => onPayeePress(payee)}
           />
         )}
