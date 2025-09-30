@@ -156,6 +156,7 @@ export function createGroupedSpreadsheet({
       allGroupsForTrimming,
       groupedData.length > 0 ? groupedData[0].intervalData : [],
       trimIntervals,
+      balanceTypeOp,
     );
 
     // Trim all groupedData intervals (including nested categories) based on the range

@@ -289,7 +289,7 @@ export function createCustomSpreadsheet({
       calcDataFiltered,
       intervalData,
       trimIntervals,
-      balanceTypeOp, // new param
+      balanceTypeOp,
     );
 
     // Trim only if enabled
