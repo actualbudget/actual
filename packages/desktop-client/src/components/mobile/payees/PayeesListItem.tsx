@@ -15,7 +15,7 @@ import { PayeeRuleCountLabel } from '@desktop-client/components/payees/PayeeRule
 
 type PayeesListItemProps = {
   ruleCount: number;
-  onDelete?: () => void;
+  onDelete: () => void;
 } & WithRequired<GridListItemProps<PayeeEntity>, 'value'>;
 
 export const PayeesListItem = memo(function PayeeListItem({
@@ -36,7 +36,6 @@ export const PayeesListItem = memo(function PayeeListItem({
       value={payee}
       textValue={label}
       actions={
-        onDelete &&
         !payee.transfer_acct && (
           <Button
             variant="bare"

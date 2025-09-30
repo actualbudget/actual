@@ -83,14 +83,15 @@ export function ActionableGridListItem<T extends object>({
 
   return (
     <GridListItem
+      {...props}
       value={value}
       textValue={textValue}
       style={{
         ...styles.mobileListItem,
         padding: 0,
         backgroundColor: hasActions ? actionsBackgroundColor : 'transparent',
+        overflow: 'hidden',
       }}
-      {...props}
     >
       <animated.div
         {...(hasActions ? bind() : {})}
