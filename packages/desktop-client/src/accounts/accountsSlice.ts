@@ -425,15 +425,9 @@ export const syncAccounts = createAppAsyncThunk(
 
     dispatch(setAccountsSyncing({ ids: accountIdsToSync }));
 
-    // TODO: Force cast to AccountEntity.
-    // Server is currently returning the DB model it should return the entity model instead.
-    const accountsData = (await send(
-      'accounts-get',
-    )) as unknown as AccountEntity[];
-    const simpleFinAccounts = accountsData.filter(
-      a =>
-        a.account_sync_source === 'simpleFin' &&
-        accountIdsToSync.includes(a.id),
+    const simpleFinAccounts = getSimpleFinAccountsToSync(
+      accounts,
+      accountIdsToSync,
     );
 
     let isSyncSuccess = false;
@@ -442,7 +436,7 @@ export const syncAccounts = createAppAsyncThunk(
     const updatedAccounts: Array<AccountEntity['id']> = [];
 
     if (simpleFinAccounts.length > 0) {
-      console.log('Using SimpleFin batch sync');
+      console.log('Using SimpleFin sync (individual account calls)');
 
       const res = await send('simplefin-batch-sync', {
         ids: simpleFinAccounts.map(a => a.id),
@@ -614,6 +608,17 @@ export const importTransactions = createAppAsyncThunk(
 export const getAccountsById = memoizeOne(
   (accounts: AccountEntity[] | null | undefined) => groupById(accounts),
 );
+
+function getSimpleFinAccountsToSync(
+  accounts: AccountEntity[],
+  accountIdsToSync: string[],
+): AccountEntity[] {
+  return accounts.filter(
+    a =>
+      a.account_sync_source === 'simpleFin' &&
+      accountIdsToSync.includes(a.id),
+  );
+}
 
 export const { name, reducer, getInitialState } = accountsSlice;
 export const actions = {

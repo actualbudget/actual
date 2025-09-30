@@ -968,6 +968,9 @@ async function simpleFinBatchSync({
 }): Promise<
   Array<{ accountId: AccountEntity['id']; res: SyncResponseWithErrors }>
 > {
+  const { 'user-id': userId, 'user-key': userKey } =
+    await asyncStorage.multiGet(['user-id', 'user-key']);
+
   const accounts = await db.runQuery<
     db.DbAccount & { bankId: db.DbBank['bank_id'] }
   >(
@@ -993,78 +996,47 @@ async function simpleFinBatchSync({
     };
   }> = [];
 
-  logger.group('Bank Sync operation for all SimpleFin accounts');
-  try {
-    const syncResponses: Array<{
-      accountId: AccountEntity['id'];
-      res: {
-        error_code: string;
-        error_type: string;
-        added: Array<TransactionEntity['id']>;
-        updated: Array<TransactionEntity['id']>;
-      };
-    }> = await bankSync.simpleFinBatchSync(
-      accounts.map(a => ({
-        id: a.id,
-        account_id: a.account_id || null,
-      })),
-    );
-    for (const syncResponse of syncResponses) {
-      const account = accounts.find(a => a.id === syncResponse.accountId);
-      if (!account) {
-        logger.error(
-          `Invalid account ID found in response: ${syncResponse.accountId}. Proceeding to the next account...`,
-        );
-        continue;
-      }
+  logger.group('Bank Sync operation for SimpleFin accounts (individual calls)');
 
+  // Sync each SimpleFin account individually to properly associate errors with accounts
+  // SimpleFin batch API doesn't properly map errors to specific accounts
+  for (const account of accounts) {
+    if (account.bankId && account.account_id) {
       const errors: ReturnType<typeof handleSyncError>[] = [];
       const newTransactions: Array<TransactionEntity['id']> = [];
       const matchedTransactions: Array<TransactionEntity['id']> = [];
       const updatedAccounts: Array<AccountEntity['id']> = [];
 
-      if (syncResponse.res.error_code) {
-        errors.push(
-          handleSyncError(
-            {
-              type: 'BankSyncError',
-              reason: 'Failed syncing account “' + account.name + '.”',
-              category: syncResponse.res.error_type,
-              code: syncResponse.res.error_code,
-            } as BankSyncError,
-            account,
-          ),
+      try {
+        logger.group('Bank Sync operation for account:', account.name);
+        const syncResponse = await bankSync.syncAccount(
+          userId as string,
+          userKey as string,
+          account.id,
+          account.account_id,
+          account.bankId,
         );
-      } else {
-        const syncResponseData = await handleSyncResponse(
-          syncResponse.res,
-          account,
-        );
+
+        const syncResponseData = await handleSyncResponse(syncResponse, account);
 
         newTransactions.push(...syncResponseData.newTransactions);
         matchedTransactions.push(...syncResponseData.matchedTransactions);
         updatedAccounts.push(...syncResponseData.updatedAccounts);
+      } catch (err) {
+        const error = err as Error;
+        errors.push(handleSyncError(error, account));
+        captureException({
+          ...error,
+          message: 'Failed syncing account "' + account.name + '."',
+        } as Error);
+      } finally {
+        logger.groupEnd();
       }
 
       retVal.push({
-        accountId: syncResponse.accountId,
+        accountId: account.id,
         res: { errors, newTransactions, matchedTransactions, updatedAccounts },
       });
-    }
-  } catch (err) {
-    const errors = [];
-    for (const account of accounts) {
-      retVal.push({
-        accountId: account.id,
-        res: {
-          errors,
-          newTransactions: [],
-          matchedTransactions: [],
-          updatedAccounts: [],
-        },
-      });
-      const error = err as Error;
-      errors.push(handleSyncError(error, account));
     }
   }
 
