@@ -44,7 +44,12 @@ export function ActionableGridListItem<T extends object>({
 
       if (active) {
         dragStartedRef.current = true;
-        api.start({ x: Math.max(-actionsWidth, Math.min(0, currentX)) });
+        api.start({
+          x: Math.max(-actionsWidth, Math.min(0, currentX)),
+          onRest: () => {
+            dragStartedRef.current = false;
+          },
+        });
         return;
       }
 
@@ -90,9 +95,11 @@ export function ActionableGridListItem<T extends object>({
       <animated.div
         {...(hasActions ? bind() : {})}
         style={{
-          ...(hasActions ? { x } : {}),
+          ...(hasActions
+            ? { transform: x.to(v => `translate3d(${v}px,0,0)`) }
+            : {}),
           display: 'flex',
-          touchAction: hasActions ? 'none' : 'auto',
+          touchAction: hasActions ? 'pan-y' : 'auto',
           cursor: hasActions ? 'grab' : 'pointer',
         }}
       >
