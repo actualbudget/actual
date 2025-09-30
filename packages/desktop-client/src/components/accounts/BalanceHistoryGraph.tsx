@@ -151,8 +151,9 @@ export function BalanceHistoryGraph({
       setLoading(false);
     }
 
-    const startingBalanceLive: ReturnType<typeof liveQuery<number>> =
-      liveQuery(startingBalanceQuery, {
+    const startingBalanceLive: ReturnType<typeof liveQuery<number>> = liveQuery(
+      startingBalanceQuery,
+      {
         onData: (data: number[]) => {
           startingBalance = data[0] || 0;
           processData();
@@ -161,7 +162,8 @@ export function BalanceHistoryGraph({
           console.error('Error fetching starting balance:', error);
           setLoading(false);
         },
-      });
+      },
+    );
 
     const monthlyTotalsLive: ReturnType<
       typeof liveQuery<{ date: string; amount: number }>
