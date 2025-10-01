@@ -43,6 +43,12 @@ function getImportFix(sourceCode, importName, moduleName) {
   );
 
   if (existingImport) {
+    if (existingImport.specifiers.length === 0) {
+      const importStatement = `import { ${importName} } from '${moduleName}';\n`;
+      return fixer =>
+        fixer.insertTextAfter(existingImport, `\n${importStatement}`);
+    }
+
     // Add to existing import
     const lastSpecifier =
       existingImport.specifiers[existingImport.specifiers.length - 1];

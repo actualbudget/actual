@@ -1,5 +1,3 @@
-/* eslint-disable actual/typography */
-
 const { ensureImport } = require('../utils/import-helpers');
 
 /** @type {import('eslint').Rule.RuleModule} */
@@ -204,10 +202,10 @@ module.exports = {
         if (isJSXText) {
           // For JSX text, wrap with <Trans>
           fixes.push(fixer.replaceText(node, `<Trans>${node.value}</Trans>`));
-          ensureImport(fixes, sourceCode, fixer, 'Trans');
+          ensureImport(fixes, sourceCode, fixer, 'Trans', 'react-i18next');
         } else {
           // For string literals
-          const text = sourceCode.getText(node).replaceAll('"', "'");
+          const text = sourceCode.getText(node);
 
           if (isInJSXAttribute(node)) {
             fixes.push(fixer.replaceText(node, `{t(${text})}`));
