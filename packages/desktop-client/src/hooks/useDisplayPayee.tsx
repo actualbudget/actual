@@ -1,7 +1,6 @@
 import { createContext, type ReactNode, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { q } from 'loot-core/shared/query';
 import {
   type AccountEntity,
   type PayeeEntity,
@@ -10,7 +9,6 @@ import {
 
 import { useAccounts } from './useAccounts';
 import { usePayeesById } from './usePayees';
-import { useTransactions } from './useTransactions';
 
 type DisplayPayeeContextValue = {
   displayPayees: Record<TransactionEntity['id'], string>;
@@ -30,27 +28,32 @@ export function DisplayPayeeContextProvider({
   children,
 }: DisplayPayeeContextProviderProps) {
   const { t } = useTranslation();
-  const subtransactionsQuery = useMemo(
-    () =>
-      q('transactions')
-        .filter({ parent_id: { $oneof: transactions.map(t => t.id) } })
-        .select('*'),
-    [transactions],
-  );
-  const { transactions: allSubtransactions = [] } = useTransactions({
-    query: subtransactionsQuery,
-    options: { pageCount: transactions.length * 5 },
-  });
 
   const accounts = useAccounts();
   const payeesById = usePayeesById();
 
   const displayPayees = useMemo(() => {
+    // Build a map of parent_id -> child transactions
+    const subtransactionsByParent = new Map<
+      TransactionEntity['id'],
+      TransactionEntity[]
+    >();
+
+    for (const transaction of transactions) {
+      if (transaction.parent_id) {
+        const existing = subtransactionsByParent.get(transaction.parent_id);
+        if (existing) {
+          existing.push(transaction);
+        } else {
+          subtransactionsByParent.set(transaction.parent_id, [transaction]);
+        }
+      }
+    }
+
     return transactions.reduce(
       (acc, transaction) => {
-        const subtransactions = allSubtransactions.filter(
-          st => st.parent_id === transaction.id,
-        );
+        const subtransactions =
+          subtransactionsByParent.get(transaction.id) || [];
 
         if (subtransactions.length === 0) {
           acc[transaction.id] = getPrettyPayee({
@@ -118,7 +121,7 @@ export function DisplayPayeeContextProvider({
       },
       {} as Record<TransactionEntity['id'], string>,
     );
-  }, [transactions, allSubtransactions, payeesById, accounts, t]);
+  }, [transactions, payeesById, accounts, t]);
 
   return (
     <DisplayPayeeContext.Provider value={{ displayPayees }}>
