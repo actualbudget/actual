@@ -434,10 +434,6 @@ export class CategoryTemplateContext {
         t.type === 'limit' ||
         t.type === 'remainder',
     )) {
-      if (this.limitCheck) {
-        throw new Error('Only one `up to` allowed per category');
-      }
-
       let limitDef;
       if (template.type === 'limit') {
         limitDef = template;
@@ -447,6 +443,10 @@ export class CategoryTemplateContext {
         } else {
           continue; // may not have a limit defined in the template
         }
+      }
+
+      if (this.limitCheck) {
+        throw new Error('Only one `up to` allowed per category');
       }
 
       if (limitDef.period === 'daily') {
