@@ -4,7 +4,6 @@ import { logger } from '../../../platform/server/log';
 import type { ParseFileResult } from './parse-file';
 
 // Import pdf-parse for text extraction
-// @ts-expect-error - pdf-parse doesn't have TypeScript definitions
 import pdfParse from 'pdf-parse';
 
 /**
@@ -38,12 +37,18 @@ type PDFParseResult = {
 function detectBank(text: string): 'santander' | 'revolut' | 'unknown' {
   const lowerText = text.toLowerCase();
 
-  if (lowerText.includes('santander') || lowerText.includes('banco santander')) {
-    return 'santander';
-  }
-
+  // Check Revolut first (takes priority as it may contain ES IBAN for transfers)
   if (lowerText.includes('revolut')) {
     return 'revolut';
+  }
+
+  // Santander patterns: "CUENTA" + Spanish IBAN, or "santander" text
+  if (
+    lowerText.includes('santander') ||
+    lowerText.includes('banco santander') ||
+    (lowerText.includes('cuenta') && /ES\d{22}/.test(text))
+  ) {
+    return 'santander';
   }
 
   return 'unknown';
@@ -73,20 +78,41 @@ function extractAccountNumber(text: string, bankType: string): string | undefine
 }
 
 /**
+ * Spanish month names to numbers mapping
+ */
+const SPANISH_MONTHS: Record<string, string> = {
+  ene: '01', feb: '02', mar: '03', abr: '04',
+  may: '05', jun: '06', jul: '07', ago: '08',
+  sep: '09', oct: '10', nov: '11', dic: '12'
+};
+
+/**
  * Parse date string to YYYY-MM-DD format
- * Handles common Spanish date formats: DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY
+ * Handles Spanish date formats: DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY, and "D MMM YYYY"
  */
 function parseDate(dateStr: string): string | null {
   // Remove extra whitespace
   const cleaned = dateStr.trim();
 
-  // Pattern: DD/MM/YYYY or DD-MM-YYYY or DD.MM.YYYY
-  const match = cleaned.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/);
-  if (match) {
-    const day = match[1].padStart(2, '0');
-    const month = match[2].padStart(2, '0');
-    const year = match[3];
+  // Pattern 1: Numeric dates - DD/MM/YYYY or DD-MM-YYYY or DD.MM.YYYY
+  const numericMatch = cleaned.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/);
+  if (numericMatch) {
+    const day = numericMatch[1].padStart(2, '0');
+    const month = numericMatch[2].padStart(2, '0');
+    const year = numericMatch[3];
     return `${year}-${month}-${day}`;
+  }
+
+  // Pattern 2: Spanish month format - "4 ago 2025"
+  const spanishMatch = cleaned.match(/(\d{1,2})\s+(ene|feb|mar|abr|may|jun|jul|ago|sep|oct|nov|dic)\s+(\d{4})/i);
+  if (spanishMatch) {
+    const day = spanishMatch[1].padStart(2, '0');
+    const monthStr = spanishMatch[2].toLowerCase();
+    const month = SPANISH_MONTHS[monthStr];
+    const year = spanishMatch[3];
+    if (month) {
+      return `${year}-${month}-${day}`;
+    }
   }
 
   return null;
@@ -94,10 +120,12 @@ function parseDate(dateStr: string): string | null {
 
 /**
  * Parse amount string to number
- * Handles Spanish format: 1.234,56 (thousands separator: dot, decimal: comma)
+ * Handles both formats:
+ * - Spanish format: 1.234,56 (thousands separator: dot, decimal: comma) - Santander
+ * - International format: €1,234.56 or €1234.56 (decimal: dot) - Revolut
  * Returns negative for expenses, positive for income
  */
-function parseAmount(amountStr: string): number | null {
+function parseAmount(amountStr: string, bankType?: 'santander' | 'revolut'): number | null {
   // Remove whitespace
   let cleaned = amountStr.trim();
 
@@ -105,15 +133,35 @@ function parseAmount(amountStr: string): number | null {
   const isNegative = cleaned.includes('(') || cleaned.includes('-') || cleaned.includes('−');
 
   // Remove currency symbols, parentheses, and non-numeric chars except dots and commas
-  cleaned = cleaned.replace(/[€$£\(\)\-−\s]/g, '');
+  cleaned = cleaned.replace(/[€$£\(\)\-−\sEUR]/gi, '');
 
-  // Spanish format: 1.234,56 -> convert to 1234.56
-  // Replace dots (thousands separator) with empty string
-  cleaned = cleaned.replace(/\./g, '');
-  // Replace comma (decimal separator) with dot
-  cleaned = cleaned.replace(/,/g, '.');
+  if (!cleaned) return null;
 
-  const parsed = parseFloat(cleaned);
+  // Detect format based on presence of comma
+  const hasComma = cleaned.includes(',');
+  const hasDot = cleaned.includes('.');
+
+  let parsed: number;
+
+  if (hasComma && hasDot) {
+    // Has both: determine which is decimal separator
+    const lastCommaPos = cleaned.lastIndexOf(',');
+    const lastDotPos = cleaned.lastIndexOf('.');
+
+    if (lastCommaPos > lastDotPos) {
+      // Spanish format: 1.234,56 (dot=thousands, comma=decimal)
+      cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+    } else {
+      // International format: 1,234.56 (comma=thousands, dot=decimal)
+      cleaned = cleaned.replace(/,/g, '');
+    }
+  } else if (hasComma && !hasDot) {
+    // Only comma - Spanish decimal format: 123,45
+    cleaned = cleaned.replace(',', '.');
+  }
+  // If only dot or neither, it's already in correct format
+
+  parsed = parseFloat(cleaned);
   if (isNaN(parsed)) return null;
 
   return isNegative ? -Math.abs(parsed) : parsed;
@@ -121,6 +169,8 @@ function parseAmount(amountStr: string): number | null {
 
 /**
  * Parse Santander PDF statement
+ * Real format has transactions in table:
+ * "DD/MM/YYYY...Description...-XX,XX EURX.XXX,XX EUR"
  */
 function parseSantanderPDF(text: string): PDFParseResult {
   logger.info('[PDF Adapter] Parsing Santander statement');
@@ -128,64 +178,109 @@ function parseSantanderPDF(text: string): PDFParseResult {
   const transactions: PDFTransaction[] = [];
   const accountNumber = extractAccountNumber(text, 'santander');
 
-  // Santander typical format:
-  // Date    Description    Amount    Balance
-  // DD/MM/YYYY  Text...  -XXX,XX  XXX,XX
+  // Pattern for table rows: [date]...[description][amount] EUR[balance] EUR
+  // The pattern captures: date, description (limited length), amount, and balance
+  // Example: "25/07/2025 Fecha valor:25/07/2025 Pago Movil...Madrid-15,13 EUR9.424,46 EUR"
+  // Limit description to 200 chars to avoid greedy matching
+  const tablePattern = /(\d{2}\/\d{2}\/\d{4})[^€]{1,200}?([\-−]?[\d.,]+)\s*EUR([\d.,]+)\s*EUR/gi;
 
-  // Split into lines and look for transaction patterns
-  const lines = text.split('\n');
+  let match;
+  const seenTransactions = new Set<string>();
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
+  while ((match = tablePattern.exec(text)) !== null) {
+    const dateStr = match[1];
+    const amountStr = match[2];
+    const balanceStr = match[3];
 
-    // Pattern: Date at start of line (DD/MM/YYYY or DD-MM-YYYY)
-    const dateMatch = line.match(/^(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/);
+    // Parse date
+    const date = parseDate(dateStr);
+    if (!date) continue;
 
-    if (dateMatch) {
-      const dateStr = dateMatch[1];
+    // Parse amount
+    const amount = parseAmount(amountStr, 'santander');
+    if (amount === null) continue;
+
+    // Parse balance
+    const balance = parseAmount(balanceStr, 'santander');
+
+    // Extract description - everything between date and amount
+    const startPos = match.index;
+    const fullMatch = match[0];
+    const dateEndPos = fullMatch.indexOf(dateStr) + dateStr.length;
+    const amountStartPos = fullMatch.lastIndexOf(amountStr);
+
+    let description = fullMatch.substring(dateEndPos, amountStartPos).trim();
+
+    // Clean up description
+    description = description
+      .replace(/Fecha valor:\d{2}\/\d{2}\/\d{4}/g, '') // Remove "Fecha valor:XX/XX/XXXX"
+      .replace(/Tarj\.\s*:\*\d+/gi, '') // Remove "Tarj. :*XXXXXX"
+      .replace(/Tarjeta\s+\d+/gi, '') // Remove "Tarjeta XXXXXXXXXX"
+      .replace(/Comision\s+[\d.,]+/gi, '') // Remove "Comision X.XX"
+      .replace(/\s+/g, ' ') // Normalize spaces
+      .replace(/,$/, '') // Remove trailing comma
+      .trim();
+
+    if (!description || description.length < 3) {
+      description = 'Transacción sin descripción';
+    }
+
+    // Create unique key to avoid duplicates
+    const txKey = `${date}-${amount}-${description.substring(0, 20)}`;
+    if (seenTransactions.has(txKey)) continue;
+    seenTransactions.add(txKey);
+
+    const transaction: PDFTransaction = {
+      date,
+      description,
+      amount,
+    };
+
+    if (balance !== null) {
+      transaction.balance = balance;
+    }
+
+    transactions.push(transaction);
+  }
+
+  // Pattern 2: Header line format "Saldo:X EUR a fechaDD/MM/YYYYDescription:XX EUR"
+  if (transactions.length === 0) {
+    logger.info('[PDF Adapter] Trying header pattern for Santander');
+
+    const headerPattern = /Saldo:([\d.,]+)\s*EUR[^a]*a\s*fecha(\d{2}\/\d{2}\/\d{4})([^:]+):([\d.,\-−]+)\s*EUR/gi;
+
+    while ((match = headerPattern.exec(text)) !== null) {
+      const balanceStr = match[1];
+      const dateStr = match[2];
+      let description = match[3];
+      const amountStr = match[4];
+
       const date = parseDate(dateStr);
-
       if (!date) continue;
 
-      // Rest of the line after date
-      const restOfLine = line.substring(dateMatch[0].length).trim();
+      const amount = parseAmount(amountStr, 'santander');
+      if (amount === null) continue;
 
-      // Amount patterns: Look for numbers with comma decimal separator
-      // Typically at the end of the line: -1.234,56 or 1.234,56
-      const amountMatch = restOfLine.match(/([\-−]?\d{1,3}(?:\.\d{3})*,\d{2})\s*(\d{1,3}(?:\.\d{3})*,\d{2})?\s*$/);
+      description = description
+        .replace(/\s+/g, ' ')
+        .replace(/\([^)]*\)/g, '')
+        .trim();
 
-      if (amountMatch) {
-        const amountStr = amountMatch[1];
-        const balanceStr = amountMatch[2];
+      if (!description) description = 'Transacción sin descripción';
 
-        const amount = parseAmount(amountStr);
-        if (amount === null) continue;
+      const balance = parseAmount(balanceStr, 'santander');
 
-        // Description is everything between date and amounts
-        let description = restOfLine.substring(0, restOfLine.indexOf(amountStr)).trim();
+      const transaction: PDFTransaction = {
+        date,
+        description,
+        amount,
+      };
 
-        // Clean up common description artifacts
-        description = description.replace(/\s+/g, ' ').trim();
-
-        if (!description) {
-          description = 'Transacción sin descripción';
-        }
-
-        const transaction: PDFTransaction = {
-          date,
-          description,
-          amount,
-        };
-
-        if (balanceStr) {
-          const balance = parseAmount(balanceStr);
-          if (balance !== null) {
-            transaction.balance = balance;
-          }
-        }
-
-        transactions.push(transaction);
+      if (balance !== null) {
+        transaction.balance = balance;
       }
+
+      transactions.push(transaction);
     }
   }
 
@@ -202,6 +297,8 @@ function parseSantanderPDF(text: string): PDFParseResult {
 
 /**
  * Parse Revolut PDF statement
+ * Real format from table: "3 jul 20254 jul 2025Farmacia Pe40€9.90€90.10"
+ * Pattern: [date1][date2][description]€[amount]€[balance]
  */
 function parseRevolutPDF(text: string): PDFParseResult {
   logger.info('[PDF Adapter] Parsing Revolut statement');
@@ -209,80 +306,75 @@ function parseRevolutPDF(text: string): PDFParseResult {
   const transactions: PDFTransaction[] = [];
   const accountNumber = extractAccountNumber(text, 'revolut');
 
-  // Revolut typical format:
-  // Date    Description    Amount    Balance
-  // MMM DD, YYYY  Text...  -€XXX.XX  €XXX.XX
+  // Spanish month date format: "3 jul 2025"
+  const dateRegex = '\\d{1,2}\\s+(?:ene|feb|mar|abr|may|jun|jul|ago|sep|oct|nov|dic)\\s+\\d{4}';
 
-  const lines = text.split('\n');
+  // Pattern: [date1][date2][description]€[amount]€[balance]
+  // Limit description to avoid greedy matching
+  const transactionPattern = new RegExp(
+    `(${dateRegex})(${dateRegex})([^€]{1,150}?)€([\\d.,]+)€([\\d.,]+)`,
+    'gi'
+  );
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
+  let match;
+  const seenTransactions = new Set<string>();
 
-    // Pattern 1: Date at start (Revolut uses various formats)
-    // Could be: DD/MM/YYYY, DD MMM YYYY, MMM DD YYYY, etc.
-    let dateMatch = line.match(/^(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/);
+  while ((match = transactionPattern.exec(text)) !== null) {
+    const processingDateStr = match[1];
+    const transactionDateStr = match[2];
+    let description = match[3];
+    const amountStr = match[4];
+    const balanceStr = match[5];
 
-    // Pattern 2: Month name format (Jan 15, 2024)
-    if (!dateMatch) {
-      dateMatch = line.match(/^([A-Z][a-z]{2}\s+\d{1,2},\s+\d{4})/);
-    }
-
-    if (dateMatch) {
-      let dateStr = dateMatch[1];
-
-      // Convert month name format to DD/MM/YYYY
-      const monthNameMatch = dateStr.match(/([A-Z][a-z]{2})\s+(\d{1,2}),\s+(\d{4})/);
-      if (monthNameMatch) {
-        const months: Record<string, string> = {
-          Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06',
-          Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12'
-        };
-        const month = months[monthNameMatch[1]];
-        const day = monthNameMatch[2].padStart(2, '0');
-        const year = monthNameMatch[3];
-        dateStr = `${day}/${month}/${year}`;
-      }
-
-      const date = parseDate(dateStr);
+    // Use transaction date (second date) - this is when the transaction actually occurred
+    let date = parseDate(transactionDateStr);
+    if (!date) {
+      date = parseDate(processingDateStr);
       if (!date) continue;
-
-      const restOfLine = line.substring(dateMatch[0].length).trim();
-
-      // Revolut uses dots for thousands and comma for decimals (European format)
-      // Or dots for decimals (UK/US format) depending on account settings
-      // Pattern: €XXX.XX or €X,XXX.XX or -€XXX.XX
-      const amountMatch = restOfLine.match(/([−\-]?[€$£]?\s*\d{1,3}(?:[,\.]\d{3})*[,\.]\d{2})\s*([€$£]?\s*\d{1,3}(?:[,\.]\d{3})*[,\.]\d{2})?\s*$/);
-
-      if (amountMatch) {
-        const amountStr = amountMatch[1];
-        const balanceStr = amountMatch[2];
-
-        const amount = parseAmount(amountStr);
-        if (amount === null) continue;
-
-        let description = restOfLine.substring(0, restOfLine.indexOf(amountStr)).trim();
-        description = description.replace(/\s+/g, ' ').trim();
-
-        if (!description) {
-          description = 'Transaction without description';
-        }
-
-        const transaction: PDFTransaction = {
-          date,
-          description,
-          amount,
-        };
-
-        if (balanceStr) {
-          const balance = parseAmount(balanceStr);
-          if (balance !== null) {
-            transaction.balance = balance;
-          }
-        }
-
-        transactions.push(transaction);
-      }
     }
+
+    // Parse amount - Revolut uses dot as decimal separator
+    const amount = parseAmount('€' + amountStr, 'revolut');
+    if (amount === null) continue;
+
+    // Clean description
+    description = description
+      .replace(/\s+/g, ' ')
+      .replace(/^Pago de /i, '') // Remove "Pago de" prefix
+      .replace(/^De /i, '') // Remove "De" prefix
+      .replace(/^A /i, '') // Remove "A" prefix
+      .replace(/Tarjeta:.*$/i, '') // Remove card info
+      .trim();
+
+    // Split on newlines and take first line as description
+    const lines = description.split('\n');
+    if (lines.length > 0) {
+      description = lines[0].trim();
+    }
+
+    if (!description || description.length < 2) {
+      description = 'Transaction without description';
+    }
+
+    // Parse balance
+    const balance = parseAmount('€' + balanceStr, 'revolut');
+
+    // Avoid duplicates
+    const txKey = `${date}-${amount}-${description.substring(0, 20)}`;
+    if (seenTransactions.has(txKey)) continue;
+    seenTransactions.add(txKey);
+
+    const transaction: PDFTransaction = {
+      date,
+      description,
+      amount: -Math.abs(amount), // Revolut shows expenses as positive, convert to negative
+    };
+
+    if (balance !== null) {
+      transaction.balance = balance;
+    }
+
+    transactions.push(transaction);
   }
 
   logger.info(`[PDF Adapter] Found ${transactions.length} Revolut transactions`);
