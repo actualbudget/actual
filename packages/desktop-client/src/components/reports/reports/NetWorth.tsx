@@ -86,13 +86,11 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     pretty: string;
   }> | null>(null);
 
-  const [initialStart, initialEnd, initialMode] = calculateTimeRange(
-    widget?.meta?.timeFrame,
-  );
-  const [start, setStart] = useState(initialStart);
-  const [end, setEnd] = useState(initialEnd);
-  const [mode, setMode] = useState(initialMode);
+  const [start, setStart] = useState(monthUtils.currentMonth());
+  const [end, setEnd] = useState(monthUtils.currentMonth());
+  const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
   const [interval, setInterval] = useState(widget?.meta?.interval || 'Monthly');
+  const [latestTransaction, setLatestTransaction] = useState('');
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
@@ -170,6 +168,19 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     run();
   }, [locale]);
 
+  useEffect(() => {
+    if (latestTransaction) {
+      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+        widget?.meta?.timeFrame,
+        undefined,
+        latestTransaction,
+      );
+      setStart(initialStart);
+      setEnd(initialEnd);
+      setMode(initialMode);
+    }
+  }, [latestTransaction, widget?.meta?.timeFrame]);
+
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     setStart(start);
     setEnd(end);
@@ -225,7 +236,6 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   };
 
   const [earliestTransaction, setEarliestTransaction] = useState('');
-  const [latestTransaction, setLatestTransaction] = useState('');
 
   if (!allMonths || !data) {
     return null;

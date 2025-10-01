@@ -35,7 +35,28 @@ convict.addFormat({
   validate(val) {
     if (val === 'never' || val === 'openid-provider') return;
     if (typeof val === 'number' && Number.isFinite(val) && val >= 0) return;
-    throw new Error(`Invalid token_expiration value: ${val}`);
+
+    // Handle string values that can be converted to numbers (from env vars)
+    if (typeof val === 'string') {
+      const numVal = Number(val);
+      if (Number.isFinite(numVal) && numVal >= 0) return;
+    }
+
+    throw new Error(
+      `Invalid token_expiration value: ${val}: value was "${val}"`,
+    );
+  },
+  coerce(val) {
+    if (val === 'never' || val === 'openid-provider') return val;
+    if (typeof val === 'number') return val;
+
+    // Convert string values to numbers for environment variables
+    if (typeof val === 'string') {
+      const numVal = Number(val);
+      if (Number.isFinite(numVal) && numVal >= 0) return numVal;
+    }
+
+    return val; // Let validate() handle invalid values
   },
 });
 

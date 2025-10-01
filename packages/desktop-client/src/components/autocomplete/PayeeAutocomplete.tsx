@@ -171,34 +171,54 @@ function PayeeList({
   // entered
 
   const { newPayee, suggestedPayees, payees, transferPayees } = useMemo(() => {
-    return items.reduce(
-      (acc, item, index) => {
+    let currentIndex = 0;
+    const result = items.reduce(
+      (acc, item) => {
         if (item.id === 'new') {
-          acc.newPayee = { ...item, highlightedIndex: index };
+          acc.newPayee = { ...item };
         } else if (item.itemType === 'common_payee') {
-          acc.suggestedPayees.push({ ...item, highlightedIndex: index });
+          acc.suggestedPayees.push({ ...item });
         } else if (item.itemType === 'payee') {
-          acc.payees.push({ ...item, highlightedIndex: index });
+          acc.payees.push({ ...item });
         } else if (item.itemType === 'account') {
-          acc.transferPayees.push({ ...item, highlightedIndex: index });
+          acc.transferPayees.push({ ...item });
         }
         return acc;
       },
       {
-        newPayee: null as PayeeAutocompleteItem & {
-          highlightedIndex: number;
-        },
-        suggestedPayees: [] as Array<
-          PayeeAutocompleteItem & { highlightedIndex: number }
-        >,
-        payees: [] as Array<
-          PayeeAutocompleteItem & { highlightedIndex: number }
-        >,
-        transferPayees: [] as Array<
-          PayeeAutocompleteItem & { highlightedIndex: number }
-        >,
+        newPayee: null as PayeeAutocompleteItem | null,
+        suggestedPayees: [] as Array<PayeeAutocompleteItem>,
+        payees: [] as Array<PayeeAutocompleteItem>,
+        transferPayees: [] as Array<PayeeAutocompleteItem>,
       },
     );
+
+    // assign indexes in render order
+    const newPayeeWithIndex = result.newPayee
+      ? { ...result.newPayee, highlightedIndex: currentIndex++ }
+      : null;
+
+    const suggestedPayeesWithIndex = result.suggestedPayees.map(item => ({
+      ...item,
+      highlightedIndex: currentIndex++,
+    }));
+
+    const payeesWithIndex = result.payees.map(item => ({
+      ...item,
+      highlightedIndex: currentIndex++,
+    }));
+
+    const transferPayeesWithIndex = result.transferPayees.map(item => ({
+      ...item,
+      highlightedIndex: currentIndex++,
+    }));
+
+    return {
+      newPayee: newPayeeWithIndex,
+      suggestedPayees: suggestedPayeesWithIndex,
+      payees: payeesWithIndex,
+      transferPayees: transferPayeesWithIndex,
+    };
   }, [items]);
 
   // We limit the number of payees shown to 100.

@@ -319,6 +319,8 @@ type InputValueProps = Omit<
 > & {
   value?: string;
   onUpdate?: (newValue: string) => void;
+} & {
+  [key: `data-${string}`]: unknown;
 };
 
 function InputValue({
