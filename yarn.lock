@@ -9916,7 +9916,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:^3.2.7":
+"debug@npm:^3.1.0, debug@npm:^3.2.7":
   version: 3.2.7
   resolution: "debug@npm:3.2.7"
   dependencies:
@@ -14430,6 +14430,7 @@ __metadata:
     mockdate: "npm:^3.0.5"
     npm-run-all: "npm:^4.1.5"
     path-browserify: "npm:^1.0.1"
+    pdf-parse: "npm:^1.1.1"
     peggy: "npm:3.0.2"
     rollup-plugin-visualizer: "npm:^6.0.3"
     slash: "npm:3.0.0"
@@ -15795,6 +15796,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"node-ensure@npm:^0.0.0":
+  version: 0.0.0
+  resolution: "node-ensure@npm:0.0.0"
+  checksum: 10/1124623beb1dec66889794286ec1761ac3bfac42ce93b8652903efa5af14227edce5bafa06c4e0675cdc850360931d7c9413e3b5406150f05b2c9bf5bb3ccce4
+  languageName: node
+  linkType: hard
+
 "node-fetch@npm:^2.7.0":
   version: 2.7.0
   resolution: "node-fetch@npm:2.7.0"
@@ -16597,6 +16605,16 @@ __metadata:
     sha.js: "npm:^2.4.11"
     to-buffer: "npm:^1.2.0"
   checksum: 10/980cf2977aa84ec3166fde195a28464ab494131c0a5778fc8f20b8894410747e502159c19ef2b41842c728bc52ba49ffee6847e3ee61ac0d482689f85d8a1b30
+  languageName: node
+  linkType: hard
+
+"pdf-parse@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "pdf-parse@npm:1.1.1"
+  dependencies:
+    debug: "npm:^3.1.0"
+    node-ensure: "npm:^0.0.0"
+  checksum: 10/5ab94d8cdd52975b861d6ca541ad728e127c0aa51c5d8923229f0910ed2931aa703022750632fe2ddf4512fd14dad50501521a35e9a3492d75f80b1f32cc4b86
   languageName: node
   linkType: hard
 

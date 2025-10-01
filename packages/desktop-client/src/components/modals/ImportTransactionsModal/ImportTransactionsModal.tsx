@@ -512,7 +512,7 @@ export function ImportTransactionsModal({
       filters: [
         {
           name: 'Financial Files',
-          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv', 'xml'],
+          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv', 'xml', 'pdf'],
         },
       ],
     });
