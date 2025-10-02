@@ -233,13 +233,13 @@ function ConfigureField({
                 submitValue = inputRef.current.getCurrentAmount();
               } else {
                 const rawValue = inputRef.current.value || '';
-                const options = subfieldToOptions(field, subfield);
-
-                if (options?.inflow || options?.outflow) {
-                  const positiveValue = rawValue.replace(/^-/, '');
-                  submitValue = format.fromEdit(positiveValue, 0);
+                const parsed = format.fromEdit(rawValue, null);
+                if (parsed == null) {
+                  submitValue = value; // keep previous if parsing failed
                 } else {
-                  submitValue = format.fromEdit(rawValue, 0);
+                  const opts = subfieldToOptions(field, subfield);
+                  submitValue =
+                    opts?.inflow || opts?.outflow ? Math.abs(parsed) : parsed;
                 }
               }
             } catch {

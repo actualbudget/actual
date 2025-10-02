@@ -215,7 +215,7 @@ export function AmountInput({
         )}
         onFocus={e => {
           setIsFocused(true);
-          setValue(format.forEdit(Math.abs(initialValue)));
+          setValue(format.forEdit(Math.abs(initialValue ?? 0)));
           onFocus?.(e);
         }}
         onBlur={e => {
