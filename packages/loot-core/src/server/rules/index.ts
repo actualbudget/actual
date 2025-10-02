@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { Action } from './action';
 import { Condition } from './condition';
 import { parseDateString } from './condition-types';

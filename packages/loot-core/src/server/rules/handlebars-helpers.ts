@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import {
   addMonths,
   addWeeks,
@@ -113,7 +112,7 @@ export function registerHandlebarsHelpers() {
       return format(subYears(parseDate(date), years), 'yyyy-MM-dd');
     },
     setDay: (date?: string, day?: number) => {
-      if (!date) return date;
+      if (!date || day == null) return date;
       const actualDay = Number(format(date, 'd'));
       return format(addDays(date, day - actualDay), 'yyyy-MM-dd');
     },
