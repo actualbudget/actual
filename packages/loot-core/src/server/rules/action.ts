@@ -142,7 +142,7 @@ export class Action {
       field: this.field,
       value: this.value,
       type: this.type,
-      ...(this.options ? { options: this.options } : null),
+      ...(this.options ? { options: this.options } : {}),
     };
   }
 }
