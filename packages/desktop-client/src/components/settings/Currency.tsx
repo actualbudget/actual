@@ -21,32 +21,33 @@ export function CurrencySettings() {
     () =>
       new Map<string, string>([
         ['', t('None')],
+        ['AED', t('UAE Dirham')],
         ['AUD', t('Australian Dollar')],
         ['BRL', t('Brazilian Real')],
         ['CAD', t('Canadian Dollar')],
         ['CHF', t('Swiss Franc')],
         ['CNY', t('Yuan Renminbi')],
+        ['EGP', t('Egyptian Pound')],
         ['EUR', t('Euro')],
         ['GBP', t('Pound Sterling')],
         ['HKD', t('Hong Kong Dollar')],
         ['INR', t('Indian Rupee')],
         ['JMD', t('Jamaican Dollar')],
-        // ['JPY', t('Yen')],
+        // ['JPY', t('Japanese Yen')], // Keep commented until amounts with decimal places other than 2 are supported
         ['MDL', t('Moldovan Leu')],
         ['PHP', t('Philippine Peso')],
         ['PLN', t('Polish Złoty')],
+        ['QAR', t('Qatari Riyal')],
         ['RON', t('Romanian Leu')],
         ['RSD', t('Serbian Dinar')],
         ['RUB', t('Russian Ruble')],
+        ['SAR', t('Saudi Riyal')],
         ['SEK', t('Swedish Krona')],
         ['SGD', t('Singapore Dollar')],
         ['THB', t('Thai Baht')],
         ['TRY', t('Turkish Lira')],
         ['UAH', t('Ukrainian Hryvnia')],
         ['USD', t('US Dollar')],
-        ['QAR', t('Qatari Riyal')],
-        ['EGP', t('Egyptian Pound')],
-        ['SAR', t('Saudi Riyal')],
       ]),
     [t],
   );
@@ -62,6 +63,8 @@ export function CurrencySettings() {
   const [spaceEnabled, setSpaceEnabledPref] = useSyncedPref(
     'currencySpaceBetweenAmountAndSymbol',
   );
+  const [, setNumberFormatPref] = useSyncedPref('numberFormat');
+  const [, setHideFractionPref] = useSyncedPref('hideFraction');
 
   const selectButtonClassName = css({
     '&[data-hovered]': {
@@ -83,6 +86,13 @@ export function CurrencySettings() {
 
   const handleCurrencyChange = (code: string) => {
     setDefaultCurrencyCodePref(code);
+    if (code !== '') {
+      const cur = getCurrency(code);
+      setNumberFormatPref(cur.numberFormat);
+      setHideFractionPref(cur.decimalPlaces === 0 ? 'true' : 'false');
+      setSpaceEnabledPref(cur.symbolFirst ? 'false' : 'true');
+      setSymbolPositionPref(cur.symbolFirst ? 'before' : 'after');
+    }
   };
 
   const symbolPositionOptions = useMemo(() => {
@@ -171,7 +181,9 @@ export function CurrencySettings() {
       <Text>
         <Trans>
           <strong>Currency settings</strong> affect how amounts are displayed
-          throughout the application.
+          throughout the application. Changing the currency will affect the
+          number format, symbol position, and whether fractions are shown. These
+          can be adjusted after the currency is set.
         </Trans>
       </Text>
     </Setting>
