@@ -17,7 +17,7 @@
   "dependencies": {
     "google-protobuf": "^3.21.4",
     "murmurhash": "^2.0.1",
-    "uuid": "^11.1.0"
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@types/google-protobuf": "^3.15.12",
