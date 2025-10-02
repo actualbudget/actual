@@ -50,7 +50,6 @@ function loadStatuses(
       onData?.(scheduleStatuses);
     },
     onError,
-    options: { onlySync: true },
   });
 }
 export type UseSchedulesProps = {
