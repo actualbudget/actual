@@ -1,4 +1,5 @@
-import { Trans } from 'react-i18next';
+import { GridList } from 'react-aria-components';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { Text } from '@actual-app/components/text';
@@ -24,6 +25,8 @@ export function PayeesList({
   isLoading = false,
   onPayeePress,
 }: PayeesListProps) {
+  const { t } = useTranslation();
+
   if (isLoading && payees.length === 0) {
     return (
       <View
@@ -63,22 +66,30 @@ export function PayeesList({
   }
 
   return (
-    <View
-      style={{ flex: 1, paddingBottom: MOBILE_NAV_HEIGHT, overflow: 'auto' }}
-    >
-      {payees.map(payee => (
-        <PayeesListItem
-          key={payee.id}
-          payee={payee}
-          ruleCount={ruleCounts.get(payee.id) ?? 0}
-          onPress={() => onPayeePress(payee)}
-        />
-      ))}
+    <View style={{ flex: 1 }}>
+      <GridList
+        aria-label={t('Payees')}
+        aria-busy={isLoading || undefined}
+        items={payees}
+        style={{
+          flex: 1,
+          paddingBottom: MOBILE_NAV_HEIGHT,
+          overflow: 'auto',
+        }}
+      >
+        {payee => (
+          <PayeesListItem
+            value={payee}
+            ruleCount={ruleCounts.get(payee.id) ?? 0}
+            onAction={() => onPayeePress(payee)}
+          />
+        )}
+      </GridList>
       {isLoading && (
         <View
           style={{
             alignItems: 'center',
-            paddingVertical: 20,
+            paddingTop: 20,
           }}
         >
           <AnimatedLoading style={{ width: 20, height: 20 }} />

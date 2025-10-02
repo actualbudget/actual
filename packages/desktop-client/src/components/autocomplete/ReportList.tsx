@@ -1,4 +1,4 @@
-import React, { Fragment, type ComponentProps } from 'react';
+import React, { type ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
@@ -27,7 +27,7 @@ export function ReportList<T extends { id: string; name: string }>({
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
-        <Fragment>{ItemHeader({ title: t('Saved Reports') })}</Fragment>
+        <ItemHeader title={t('Saved Reports')} />
         {items.map((item, idx) => {
           return [
             <div
