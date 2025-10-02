@@ -86,8 +86,8 @@ export function CurrencySettings() {
 
   const handleCurrencyChange = (code: string) => {
     setDefaultCurrencyCodePref(code);
-    const cur = getCurrency(code);
-    if (cur.name !== 'None') {
+    if (code !== '') {
+      const cur = getCurrency(code);
       setNumberFormatPref(cur.numberFormat);
       setHideFractionPref(cur.decimalPlaces === 0 ? 'true' : 'false');
       setSpaceEnabledPref(cur.symbolFirst ? 'false' : 'true');
