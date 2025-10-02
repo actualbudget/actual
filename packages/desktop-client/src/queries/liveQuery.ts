@@ -28,6 +28,7 @@ type Listener<TResponse = unknown> = (
 
 export type LiveQueryOptions = {
   onlySync?: boolean;
+  debounceDelay?: number;
 };
 
 // Subscribe and refetch
@@ -41,6 +42,7 @@ export class LiveQuery<TResponse = unknown> {
   private _onError: (error: Error) => void;
   private _debounceTimeout: ReturnType<typeof setTimeout> | null;
   private _pendingTables: Set<string>;
+  private _debounceDelay: number;
 
   get query() {
     return this._query;
@@ -82,6 +84,7 @@ export class LiveQuery<TResponse = unknown> {
     this._onError = onError || (() => {});
     this._debounceTimeout = null;
     this._pendingTables = new Set();
+    this._debounceDelay = options.debounceDelay ?? 50;
 
     // TODO: error types?
     this._supportedSyncTypes = options.onlySync
@@ -125,11 +128,18 @@ export class LiveQuery<TResponse = unknown> {
         clearTimeout(this._debounceTimeout);
       }
 
-      this._debounceTimeout = setTimeout(() => {
+      if (this._debounceDelay === 0) {
+        // No debouncing - run immediately
         this._pendingTables.clear();
         this._debounceTimeout = null;
         this.run();
-      }, 50);
+      } else {
+        this._debounceTimeout = setTimeout(() => {
+          this._pendingTables.clear();
+          this._debounceTimeout = null;
+          this.run();
+        }, this._debounceDelay);
+      }
     }
   };
 
