@@ -24,13 +24,24 @@ type UseDisplayPayeeProps = {
 
 export function useDisplayPayee({ transaction }: UseDisplayPayeeProps) {
   const { t } = useTranslation();
+
+  const needsSubtransactionQuery =
+    transaction?.is_parent && !transaction?.subtransactions;
+
   const subtransactionsQuery = useMemo(
-    () => q('transactions').filter({ parent_id: transaction?.id }).select('*'),
-    [transaction?.id],
+    () =>
+      needsSubtransactionQuery
+        ? q('transactions').filter({ parent_id: transaction?.id }).select('*')
+        : null,
+    [needsSubtransactionQuery, transaction?.id],
   );
-  const { transactions: subtransactions = [] } = useTransactions({
+
+  const { transactions: queriedSubtransactions = [] } = useTransactions({
     query: subtransactionsQuery,
   });
+
+  const subtransactions =
+    transaction?.subtransactions || queriedSubtransactions;
 
   const accounts = useAccounts();
   const payeesById = usePayeesById();

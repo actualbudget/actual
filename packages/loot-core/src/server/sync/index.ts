@@ -410,12 +410,9 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   _syncListeners.forEach(func => func(oldData, newData));
 
   const tables = getTablesFromMessages(messages.filter(msg => !msg.old));
-  app.events.emit('sync', {
-    type: 'applied',
-    tables,
-    data: newData,
-    prevData: oldData,
-  });
+
+  tables.forEach(table => _PENDING_SYNC_TABLES.add(table));
+  emitDebouncedSyncEvent();
 
   return messages;
 });
@@ -456,6 +453,26 @@ async function _sendMessages(messages: Message[]): Promise<void> {
 
 let IS_BATCHING = false;
 let _BATCHED: Message[] = [];
+let _SYNC_EVENT_TIMEOUT: ReturnType<typeof setTimeout> | null = null;
+const _PENDING_SYNC_TABLES = new Set<string>();
+
+function emitDebouncedSyncEvent() {
+  if (_SYNC_EVENT_TIMEOUT) {
+    clearTimeout(_SYNC_EVENT_TIMEOUT);
+  }
+
+  _SYNC_EVENT_TIMEOUT = setTimeout(() => {
+    const tables = Array.from(_PENDING_SYNC_TABLES);
+    _PENDING_SYNC_TABLES.clear();
+    _SYNC_EVENT_TIMEOUT = null;
+
+    app.events.emit('sync', {
+      type: 'applied',
+      tables,
+    });
+  }, 500);
+}
+
 export async function batchMessages(func: () => Promise<void>): Promise<void> {
   if (IS_BATCHING) {
     await func();
