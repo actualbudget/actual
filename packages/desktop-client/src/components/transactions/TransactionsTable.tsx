@@ -1020,12 +1020,15 @@ const Transaction = memo(function Transaction({
     }
 
     // If entering an amount in either of the credit/debit fields, we
-    // need to clear out the other one so it's always properly
+    // need to clear out the other one or both so it's always properly
     // translated into the desired amount (see
     // `deserializeTransaction`)
     if (name === 'credit') {
       newTransaction['debit'] = '';
     } else if (name === 'debit') {
+      newTransaction['credit'] = '';
+    } else {
+      newTransaction['debit'] = '';
       newTransaction['credit'] = '';
     }
 
