@@ -1,8 +1,15 @@
 // @ts-strict-ignore
 import { logger } from '../../platform/server/log';
 import { RuleConditionEntity } from '../../types/models';
+import { RuleError } from '../errors';
 
 import { Rule } from './rule';
+
+export function assert(test: unknown, type: string, msg: string): asserts test {
+  if (!test) {
+    throw new RuleError(type, msg);
+  }
+}
 
 const OP_SCORES: Record<RuleConditionEntity['op'], number> = {
   is: 10,

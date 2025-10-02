@@ -5,11 +5,7 @@ import { recurConfigToRSchedule } from '../../shared/schedules';
 import { RuleError } from '../errors';
 import { RSchedule } from '../util/rschedule';
 
-function assert(test: unknown, type: string, msg: string): asserts test {
-  if (!test) {
-    throw new RuleError(type, msg);
-  }
-}
+import { assert } from './rule-utils';
 
 function parseRecurDate(desc) {
   try {

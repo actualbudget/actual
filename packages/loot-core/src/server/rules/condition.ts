@@ -19,12 +19,7 @@ import {
 } from '../../shared/rules';
 
 import { CONDITION_TYPES } from './condition-types';
-
-function assert(test: unknown, type: string, msg: string): asserts test {
-  if (!test) {
-    throw new Error(`${type}: ${msg}`);
-  }
-}
+import { assert } from './rule-utils';
 
 export class Condition {
   field;

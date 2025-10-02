@@ -6,12 +6,7 @@ import { logger } from '../../platform/server/log';
 import { parseDate, format, currentDay } from '../../shared/months';
 import { FIELD_TYPES } from '../../shared/rules';
 
-
-function assert(test: unknown, type: string, msg: string): asserts test {
-  if (!test) {
-    throw new Error(`${type}: ${msg}`);
-  }
-}
+import { assert } from './rule-utils';
 
 const ACTION_OPS = [
   'set',
