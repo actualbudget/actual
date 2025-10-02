@@ -40,17 +40,14 @@ export class MobileRulesPage {
    * Get the nth rule item (0-based index)
    */
   getNthRule(index: number) {
-    return this.page
-      .getByRole('button')
-      .filter({ hasText: /IF|THEN/ })
-      .nth(index);
+    return this.getAllRules().nth(index);
   }
 
   /**
    * Get all visible rule items
    */
   getAllRules() {
-    return this.page.getByRole('button').filter({ hasText: /IF|THEN/ });
+    return this.page.getByRole('grid', { name: 'Rules' }).getByRole('row');
   }
 
   /**
@@ -112,7 +109,7 @@ export class MobileRulesPage {
    */
   async getRuleStage(index: number) {
     const rule = this.getNthRule(index);
-    const stageBadge = rule.locator('span').first();
+    const stageBadge = rule.getByTestId('rule-stage-badge');
     return await stageBadge.textContent();
   }
 }
