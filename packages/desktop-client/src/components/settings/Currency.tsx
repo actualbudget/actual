@@ -21,6 +21,7 @@ export function CurrencySettings() {
     () =>
       new Map<string, string>([
         ['', t('None')],
+        ['AED', t('UAE Dirham')],
         ['AUD', t('Australian Dollar')],
         ['BRL', t('Brazilian Real')],
         ['CAD', t('Canadian Dollar')],

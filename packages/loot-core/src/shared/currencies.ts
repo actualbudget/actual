@@ -18,6 +18,8 @@ export type Currency = {
 // prettier-ignore
 export const currencies: Currency[] = [
   { code: '', name: 'None', symbol: '', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
+  // United Arab Emirates (ar-AE): Uses comma for thousands, dot for decimals, symbol before amount
+  { code: 'AED', name: 'UAE Dirham', symbol: 'د.إ', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   // Australia (en-AU): Uses comma for thousands, dot for decimals, symbol before amount
   { code: 'AUD', name: 'Australian Dollar', symbol: 'A$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   // Brazil (pt-BR): Uses dot for thousands, comma for decimals, symbol before amount
@@ -29,7 +31,7 @@ export const currencies: Currency[] = [
   // China (zh-CN): Uses comma for thousands, dot for decimals, symbol before amount
   { code: 'CNY', name: 'Yuan Renminbi', symbol: '¥', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   // Egypt (ar-EG): Uses comma for thousands, dot for decimals, symbol before amount in English contexts
-  { code: 'EGP', name: 'Egyptian Pound', symbol: 'EGP', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
+  { code: 'EGP', name: 'Egyptian Pound', symbol: 'ج.م', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   // Eurozone: Varies by locale - Germany uses dot-comma, France uses space-comma, symbol after amount
   { code: 'EUR', name: 'Euro', symbol: '€', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
   // United Kingdom (en-GB): Uses comma for thousands, dot for decimals, symbol before amount
@@ -49,7 +51,7 @@ export const currencies: Currency[] = [
   // Poland (pl-PL): Uses space for thousands, comma for decimals, symbol after amount
   { code: 'PLN', name: 'Polish Złoty', symbol: 'zł', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   // Qatar (ar-QA): Uses comma for thousands, dot for decimals, symbol before amount in English contexts
-  { code: 'QAR', name: 'Qatari Riyal', symbol: 'QAR', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
+  { code: 'QAR', name: 'Qatari Riyal', symbol: 'ر.ق', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   // Romania (ro-RO): Uses dot for thousands, comma for decimals, symbol after amount
   { code: 'RON', name: 'Romanian Leu', symbol: 'lei', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
   // Serbia (sr-RS): Uses dot for thousands, comma for decimals, symbol after amount
@@ -57,7 +59,7 @@ export const currencies: Currency[] = [
   // Russia (ru-RU): Uses space for thousands, comma for decimals, symbol after amount
   { code: 'RUB', name: 'Russian Ruble', symbol: '₽', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   // Saudi Arabia (ar-SA): Uses comma for thousands, dot for decimals, symbol before amount in English contexts
-  { code: 'SAR', name: 'Saudi Riyal', symbol: '﷼', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
+  { code: 'SAR', name: 'Saudi Riyal', symbol: 'ر.س', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   // Sweden (sv-SE): Uses space for thousands, comma for decimals, symbol after amount
   { code: 'SEK', name: 'Swedish Krona', symbol: 'kr', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   // Singapore (en-SG): Uses comma for thousands, dot for decimals, symbol before amount
