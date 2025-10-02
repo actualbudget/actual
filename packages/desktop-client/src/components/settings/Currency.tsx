@@ -87,11 +87,14 @@ export function CurrencySettings() {
   const handleCurrencyChange = (code: string) => {
     setDefaultCurrencyCodePref(code);
     const cur = getCurrency(code);
-    setNumberFormatPref(cur.numberFormat);
-    setHideFractionPref(cur.decimalPlaces === 0 ? 'true' : 'false');
-    setSpaceEnabledPref(cur.symbolFirst ? 'false' : 'true');
-    setSymbolPositionPref(cur.symbolFirst ? 'before' : 'after');
+    if (cur.name !== 'None') {
+      setNumberFormatPref(cur.numberFormat);
+      setHideFractionPref(cur.decimalPlaces === 0 ? 'true' : 'false');
+      setSpaceEnabledPref(cur.symbolFirst ? 'false' : 'true');
+      setSymbolPositionPref(cur.symbolFirst ? 'before' : 'after');
+    }
   };
+
   const symbolPositionOptions = useMemo(() => {
     const selectedCurrency = getCurrency(selectedCurrencyCode);
     const symbol = selectedCurrency.symbol || '$';
