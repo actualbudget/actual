@@ -3,7 +3,12 @@ import { t } from 'i18next';
 
 import { FieldValueTypes, RuleConditionOp } from '../types/models';
 
-import { integerToAmount, amountToInteger, currencyToAmount } from './util';
+import {
+  integerToAmount,
+  amountToInteger,
+  currencyToAmount,
+  getNumberFormat,
+} from './util';
 
 // For now, this info is duplicated from the backend. Figure out how
 // to share it later.
@@ -374,10 +379,22 @@ export function makeValue(value, cond) {
   switch (cond.type) {
     case 'number': {
       if (cond.op !== 'isbetween') {
+        const stringValue = String(value);
+        const { decimalSeparator } = getNumberFormat();
+
+        // preserve trailing decimal separator to allow decimal input during typing
+        if (stringValue && stringValue.endsWith(decimalSeparator)) {
+          return {
+            ...cond,
+            error: null,
+            value: stringValue,
+          };
+        }
+
         return {
           ...cond,
           error: null,
-          value: value ? currencyToAmount(String(value)) || 0 : 0,
+          value: value ? currencyToAmount(stringValue) || 0 : 0,
         };
       }
       break;
