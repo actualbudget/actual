@@ -93,7 +93,10 @@ describe('liveQuery', () => {
     tracer.start();
 
     const query = q('transactions').select('*');
-    liveQuery(query, { onData: data => tracer.event('data', data) });
+    liveQuery(query, {
+      onData: data => tracer.event('data', data),
+      options: { debounceDelay: 0 },
+    });
 
     await tracer.expect('server-query');
     await tracer.expect('data', ['*']);
@@ -115,7 +118,7 @@ describe('liveQuery', () => {
     const query = q('transactions').select('*');
     liveQuery(query, {
       onData: data => tracer.event('data', data),
-      options: { onlySync: true },
+      options: { onlySync: true, debounceDelay: 0 },
     });
 
     await tracer.expect('server-query');
@@ -138,7 +141,7 @@ describe('liveQuery', () => {
     const query = q('transactions').select('*');
     liveQuery(query, {
       onData: data => tracer.event('data', data),
-      options: { onlySync: true },
+      options: { onlySync: true, debounceDelay: 0 },
     });
 
     await tracer.expect('server-query');
@@ -176,7 +179,7 @@ describe('liveQuery', () => {
     const query = q('transactions').select('*');
     const lq = liveQuery(query, {
       onData: data => tracer.event('data', data),
-      options: { onlySync: true },
+      options: { onlySync: true, debounceDelay: 0 },
     });
 
     // Users should never call `run` manually but we'll do it to
@@ -206,7 +209,7 @@ describe('liveQuery', () => {
 
     liveQuery(query, {
       onData: data => tracer.event('data', data),
-      options: { onlySync: true },
+      options: { onlySync: true, debounceDelay: 0 },
     });
 
     // Simulate a sync event
@@ -235,7 +238,7 @@ describe('liveQuery', () => {
 
     liveQuery(query, {
       onData: data => tracer.event('data', data),
-      options: { onlySync: true },
+      options: { onlySync: true, debounceDelay: 0 },
     });
 
     await tracer.expect('server-query');
@@ -267,6 +270,7 @@ describe('liveQuery', () => {
 
     const lq = liveQuery(query, {
       onData: data => tracer.event('data', data),
+      options: { debounceDelay: 0 },
     });
 
     await tracer.expect('server-query');
