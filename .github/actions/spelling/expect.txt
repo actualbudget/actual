@@ -20,6 +20,8 @@ BOFIIE
 Bourso
 Boursobank
 Boursorama
+BPER
+BPMOIT
 brexplpw
 BYLADEM
 Caddyfile
@@ -67,10 +69,12 @@ INDUSTRIEL
 INGBPLPW
 Ingo
 INR
+Intesa
 INVSTMTMSGSRS
 ISYBANK
 ITBBITMM
 jfdoming
+JMD
 KBCBE
 Keycloak
 KORT
@@ -80,6 +84,7 @@ LHVBEE
 mbank
 mdc
 modals
+Moldovan
 murmurhash
 nginx
 OIDC
@@ -88,6 +93,7 @@ overbudgeting
 Paribas
 passwordless
 pluggyai
+Poste
 PPABPLPK
 prefs
 Primoco
@@ -100,6 +106,7 @@ Raiffeisen
 revolut
 RIED
 RSchedule
+RSD
 SEK
 simplefin
 SKHSFI
@@ -118,13 +125,16 @@ Synology
 systemctl
 tada
 templating
+THB
 touchscreen
 triaging
+UAH
 ubuntu
 userinfo
 Userscripts
 vrt
 VUB
 websecure
+Widiba
 WOR
 youngcw
