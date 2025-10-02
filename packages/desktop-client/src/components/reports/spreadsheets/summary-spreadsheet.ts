@@ -244,7 +244,7 @@ function calculatePerYear(
   const totalAmount = data.reduce((sum, day) => sum + day.amount, 0);
   const totalDays = d.differenceInDays(endDate, startDate) + 1;
   const numYears = totalDays / 365.25;
-  
+
   const averageAmountPerYear = totalAmount / numYears;
 
   return {
