@@ -78,7 +78,7 @@ export function PayeesList({
           paddingBottom: MOBILE_NAV_HEIGHT,
           overflow: 'auto',
         }}
-        dependencies={[isRuleCountsLoading]}
+        dependencies={[ruleCounts, isRuleCountsLoading]}
       >
         {payee => (
           <PayeesListItem
