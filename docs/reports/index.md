@@ -32,7 +32,7 @@ A spending analysis report tracks and compares expenses over a specified period,
 
 ![](/img/reports/text-widget.png)
 
-Use markdown to generate a report.
+Use markdown to generate a text box to use as report headings and organizational labels.
 
 ## Summary Card
 
