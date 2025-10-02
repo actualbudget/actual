@@ -162,8 +162,8 @@ function getAccountResponse(results, accountId, startDate) {
     return;
   }
 
-  const needsAttention = results.sferrors.find(
-    e => e === `Connection to ${account.org.name} may need attention`,
+  const needsAttention = results.sferrors.find(e =>
+    e.startsWith(`Connection to ${account.org.name} may need attention`),
   );
   if (needsAttention) {
     logAccountError(results, accountId, {
