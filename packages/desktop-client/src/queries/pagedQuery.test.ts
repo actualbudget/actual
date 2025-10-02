@@ -189,7 +189,10 @@ describe('pagedQuery', () => {
     tracer.start();
 
     const query = q('transactions').select('*');
-    pagedQuery(query, { onData: data => tracer.event('data', data), options: { debounceDelay: 0 } });
+    pagedQuery(query, {
+      onData: data => tracer.event('data', data),
+      options: { debounceDelay: 0 },
+    });
 
     await tracer.expect('server-query');
     await tracer.expect('data', ['*']);
