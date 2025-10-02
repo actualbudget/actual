@@ -57,6 +57,7 @@ import {
 } from 'loot-core/shared/transactions';
 import {
   amountToCurrency,
+  currencyToAmount,
   type IntegerAmount,
   integerToCurrency,
   titleFirst,
@@ -1591,6 +1592,10 @@ const Transaction = memo(function Transaction({
         exposed={focusedField === 'debit'}
         focused={focusedField === 'debit'}
         value={debit === '' && credit === '' ? amountToCurrency(0) : debit}
+        formatter={value =>
+          // reformat value so since we might have kept decimals
+          value ? amountToCurrency(currencyToAmount(value) || 0) : ''
+        }
         valueStyle={valueStyle}
         textAlign="right"
         title={debit}
@@ -1618,6 +1623,10 @@ const Transaction = memo(function Transaction({
         exposed={focusedField === 'credit'}
         focused={focusedField === 'credit'}
         value={credit}
+        formatter={value =>
+          // reformat value so since we might have kept decimals
+          value ? amountToCurrency(currencyToAmount(value) || 0) : ''
+        }
         valueStyle={valueStyle}
         textAlign="right"
         title={credit}
