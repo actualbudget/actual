@@ -35,6 +35,7 @@
     "memoize-one": "^6.0.0",
     "mitt": "^3.0.1",
     "pdf-parse": "^1.1.1",
+    "pdfjs-dist": "^5.4.149",
     "slash": "3.0.0",
     "ua-parser-js": "^2.0.3",
     "uuid": "^11.1.0"

@@ -6,7 +6,7 @@ import { logger } from '../../../platform/server/log';
 import { looselyParseAmount } from '../../../shared/util';
 
 import { ofx2json } from './ofx2json';
-import { parsePDF } from './pdf-adapter';
+// NOTE: parsePDF is imported dynamically to avoid initialization issues
 import { qif2json } from './qif2json';
 import { xmlCAMT2json } from './xmlcamt2json';
 
@@ -89,8 +89,11 @@ export async function parseFile(
         return parseOFX(filepath, options);
       case '.xml':
         return parseCAMT(filepath, options);
-      case '.pdf':
+      case '.pdf': {
+        // Dynamic import to avoid loading PDF adapter during initialization
+        const { parsePDF } = await import('./pdf-adapter');
         return parsePDF(filepath);
+      }
       default:
     }
   }

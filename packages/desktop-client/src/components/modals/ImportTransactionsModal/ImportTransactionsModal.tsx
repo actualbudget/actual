@@ -244,7 +244,7 @@ export function ImportTransactionsModal({
           ? applyFieldMappings(trans, fieldMappings)
           : trans;
 
-        const date = isOfxFile(filetype)
+        const date = isOfxFile(filetype) || isCamtFile(filetype) || isPdfFile(filetype)
           ? trans.date
           : parseDate(trans.date, parseDateFormat);
         if (date == null) {
@@ -600,7 +600,7 @@ export function ImportTransactionsModal({
       trans = fieldMappings ? applyFieldMappings(trans, fieldMappings) : trans;
 
       const date =
-        isOfxFile(filetype) || isCamtFile(filetype)
+        isOfxFile(filetype) || isCamtFile(filetype) || isPdfFile(filetype)
           ? trans.date
           : parseDate(trans.date, parseDateFormat);
       if (date == null) {
@@ -667,7 +667,7 @@ export function ImportTransactionsModal({
       return;
     }
 
-    if (!isOfxFile(filetype) && !isCamtFile(filetype)) {
+    if (!isOfxFile(filetype) && !isCamtFile(filetype) && !isPdfFile(filetype)) {
       const key = `parse-date-${accountId}-${filetype}`;
       savePrefs({ [key]: parseDateFormat });
     }
@@ -1187,4 +1187,8 @@ function isOfxFile(fileType: string) {
 
 function isCamtFile(fileType: string) {
   return fileType === 'xml';
+}
+
+function isPdfFile(fileType: string) {
+  return fileType === 'pdf';
 }

@@ -1,0 +1,20 @@
+{
+  "name": "anthropic-pdf-agent",
+  "version": "1.0.0",
+  "description": "Anthropic Agent Server for PDF Bank Statement Processing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": ["anthropic", "agent", "pdf", "banking"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.65.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1"
+  }
+}
