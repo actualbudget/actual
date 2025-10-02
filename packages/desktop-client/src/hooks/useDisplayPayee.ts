@@ -32,7 +32,7 @@ export function useDisplayPayee({ transaction }: UseDisplayPayeeProps) {
     () =>
       needsSubtransactionQuery
         ? q('transactions').filter({ parent_id: transaction?.id }).select('*')
-        : null,
+        : undefined,
     [needsSubtransactionQuery, transaction?.id],
   );
 
