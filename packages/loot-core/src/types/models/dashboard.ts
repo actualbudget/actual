@@ -110,7 +110,7 @@ export type SummaryWidget = AbstractWidget<
 >;
 
 export type BaseSummaryContent = {
-  type: 'sum' | 'avgPerMonth' | 'avgPerTransact';
+  type: 'sum' | 'avgPerMonth' | 'avgPerYear' | 'avgPerTransact';
   fontSize?: number;
 };
 
