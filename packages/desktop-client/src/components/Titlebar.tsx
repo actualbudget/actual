@@ -352,7 +352,7 @@ export function Titlebar({ style }: TitlebarProps) {
         <PrivacyButton />
         {serverURL ? <SyncButton /> : null}
         <LoggedInUser />
-        {!isElectron() && <HelpMenu />}
+        <HelpMenu />
       </SpaceBetween>
     </View>
   );

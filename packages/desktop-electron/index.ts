@@ -441,17 +441,6 @@ function updateMenu(budgetId?: string) {
       item.enabled = isBudgetOpen;
     });
 
-  const tools = menu.items.filter(item => item.label === 'Tools')[0];
-  tools.submenu?.items.forEach(item => {
-    item.enabled = isBudgetOpen;
-  });
-
-  const edit = menu.items.filter(item => item.label === 'Edit')[0];
-  const editItems = edit.submenu?.items || [];
-  editItems
-    .filter(item => item.label === 'Undo' || item.label === 'Redo')
-    .map(item => (item.enabled = isBudgetOpen));
-
   if (process.platform === 'win32') {
     if (clientWin) {
       clientWin.setMenu(menu);
