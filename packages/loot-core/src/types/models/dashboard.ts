@@ -73,6 +73,7 @@ export type CrossoverWidget = AbstractWidget<
     safeWithdrawalRate?: number; // 0.04 default
     estimatedReturn?: number | null; // annual
     projectionType?: 'trend' | 'hampel'; // expense projection method
+    showHiddenCategories?: boolean; // show hidden categories in selector
   } | null
 >;
 export type MarkdownWidget = AbstractWidget<

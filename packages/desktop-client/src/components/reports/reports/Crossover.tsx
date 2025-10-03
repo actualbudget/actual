@@ -4,10 +4,12 @@ import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { SvgViewHide, SvgViewShow } from '@actual-app/components/icons/v2';
 import { Input } from '@actual-app/components/input';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Select } from '@actual-app/components/select';
 import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
@@ -117,6 +119,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
   const [projectionType, setProjectionType] = useState<'trend' | 'hampel'>(
     'trend',
   );
+  const [showHiddenCategories, setShowHiddenCategories] = useState(false);
 
   // Initialize state from widget meta when categories and accounts are loaded
   useEffect(() => {
@@ -155,6 +158,9 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
       }
       if (widget.meta.projectionType) {
         setProjectionType(widget.meta.projectionType);
+      }
+      if (widget.meta.showHiddenCategories !== undefined) {
+        setShowHiddenCategories(widget.meta.showHiddenCategories);
       }
     }
   }, [categories.list, accounts, widget?.meta]);
@@ -229,6 +235,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         safeWithdrawalRate: swr,
         estimatedReturn,
         projectionType,
+        showHiddenCategories,
         timeFrame: { start, end, mode },
       },
     });
@@ -367,6 +374,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         onUpdateFilter={() => {}}
         onDeleteFilter={() => {}}
         onConditionsOpChange={() => {}}
+        latestTransaction=""
       >
         {widget && (
           <Button variant="primary" onPress={onSaveWidget}>
@@ -398,6 +406,61 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
               <div style={{ fontWeight: 600, marginBottom: 8 }}>
                 <Trans>Expenses categories</Trans>
               </div>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: 5,
+                  flexShrink: 0,
+                }}
+              >
+                <Button
+                  variant="bare"
+                  onPress={() => setShowHiddenCategories(!showHiddenCategories)}
+                  style={{ padding: 8 }}
+                >
+                  <View>
+                    {showHiddenCategories ? (
+                      <View
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
+                      >
+                        <SvgViewHide
+                          width={15}
+                          height={15}
+                          style={{ marginRight: 5 }}
+                        />
+                        <Text>
+                          <Trans>Hide hidden</Trans>
+                        </Text>
+                      </View>
+                    ) : (
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <SvgViewShow
+                          width={15}
+                          height={15}
+                          style={{ marginRight: 5 }}
+                        />
+                        <Text
+                          style={{
+                            maxWidth: 100,
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
+                          <Trans>Show hidden</Trans>
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </Button>
+                <View style={{ flex: 1 }} />
+              </View>
               <div
                 style={{ maxHeight: 220, overflowY: 'auto', marginBottom: 12 }}
               >
@@ -405,7 +468,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                   categoryGroups={expenseCategoryGroups}
                   selectedCategories={selectedExpenseCategories}
                   setSelectedCategories={setSelectedExpenseCategories}
-                  showHiddenCategories={false}
+                  showHiddenCategories={showHiddenCategories}
                 />
               </div>
 
