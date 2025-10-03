@@ -120,50 +120,42 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     'trend',
   );
   const [showHiddenCategories, setShowHiddenCategories] = useState(false);
+  const [selectionsInitialized, setSelectionsInitialized] = useState(false);
 
-  // Initialize state from widget meta when categories and accounts are loaded
+  // reset when widget changes
   useEffect(() => {
-    if (categories.list.length > 0 && widget?.meta) {
-      // Restore expense categories
-      if (
-        widget.meta.expenseCategoryIds &&
-        widget.meta.expenseCategoryIds.length > 0
-      ) {
-        const savedCategories = categories.list.filter(c =>
-          widget.meta?.expenseCategoryIds?.includes(c.id),
-        );
-        setSelectedExpenseCategories(savedCategories);
-      } else {
-        // Default to all non-income categories if none saved
-        setSelectedExpenseCategories(categories.list.filter(c => !c.is_income));
-      }
+    setSelectionsInitialized(false);
+  }, [widget?.id]);
 
-      // Restore income account IDs
-      if (
-        widget.meta.incomeAccountIds &&
-        widget.meta.incomeAccountIds.length > 0
-      ) {
-        setSelectedIncomeAccountIds(widget.meta.incomeAccountIds);
-      } else {
-        // Default to all accounts if none saved
-        setSelectedIncomeAccountIds(accounts.map(a => a.id));
-      }
-
-      // Restore other settings
-      if (widget.meta.safeWithdrawalRate !== undefined) {
-        setSwr(widget.meta.safeWithdrawalRate);
-      }
-      if (widget.meta.estimatedReturn !== undefined) {
-        setEstimatedReturn(widget.meta.estimatedReturn);
-      }
-      if (widget.meta.projectionType) {
-        setProjectionType(widget.meta.projectionType);
-      }
-      if (widget.meta.showHiddenCategories !== undefined) {
-        setShowHiddenCategories(widget.meta.showHiddenCategories);
-      }
+  // initialize once when data is available
+  useEffect(() => {
+    if (
+      selectionsInitialized ||
+      accounts.length === 0 ||
+      categories.list.length === 0
+    ) {
+      return;
     }
-  }, [categories.list, accounts, widget?.meta]);
+
+    const initialExpenseCategories = widget?.meta?.expenseCategoryIds?.length
+      ? categories.list.filter(c =>
+          widget.meta!.expenseCategoryIds!.includes(c.id),
+        )
+      : categories.list.filter(c => !c.is_income);
+
+    const initialIncomeAccountIds = widget?.meta?.incomeAccountIds?.length
+      ? widget.meta!.incomeAccountIds!
+      : accounts.map(a => a.id);
+
+    setSelectedExpenseCategories(initialExpenseCategories);
+    setSelectedIncomeAccountIds(initialIncomeAccountIds);
+    setSwr(widget?.meta?.safeWithdrawalRate ?? 0.04);
+    setEstimatedReturn(widget?.meta?.estimatedReturn ?? null);
+    setProjectionType(widget?.meta?.projectionType ?? 'trend');
+    setShowHiddenCategories(widget?.meta?.showHiddenCategories ?? false);
+
+    setSelectionsInitialized(true);
+  }, [selectionsInitialized, accounts, categories.list, widget?.meta]);
 
   useEffect(() => {
     async function run() {
