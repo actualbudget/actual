@@ -105,6 +105,13 @@ export function ExperimentalFeatures() {
             >
               <Trans>Currency support</Trans>
             </FeatureToggle>
+
+            <FeatureToggle
+              flag="crossoverReport"
+              feedbackLink="https://github.com/actualbudget/actual/pull/5554"
+            >
+              <Trans>Crossover Report</Trans>
+            </FeatureToggle>
           </View>
         ) : (
           <Link
