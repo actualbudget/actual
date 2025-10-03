@@ -57,6 +57,7 @@ import {
 } from 'loot-core/shared/transactions';
 import {
   amountToCurrency,
+  type IntegerAmount,
   integerToCurrency,
   titleFirst,
 } from 'loot-core/shared/util';
@@ -509,6 +510,7 @@ function PayeeCell({
   onNavigateToSchedule,
 }: PayeeCellProps) {
   const isCreatingPayee = useRef(false);
+  const { t } = useTranslation();
 
   const dispatch = useDispatch();
 
@@ -638,7 +640,7 @@ function PayeeCell({
       }}
       formatter={() => {
         if (!displayPayee && isPreview) {
-          return '(No payee)';
+          return t('(No payee)');
         }
         return displayPayee;
       }}
@@ -1431,6 +1433,7 @@ const Transaction = memo(function Transaction({
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 display: 'inline-block',
+                whiteSpace: 'nowrap',
               }}
             >
               {titleFirst(getStatusLabel(previewStatus ?? ''))}
@@ -1600,6 +1603,7 @@ const Transaction = memo(function Transaction({
         inputProps={{
           value: debit === '' && credit === '' ? amountToCurrency(0) : debit,
           onUpdate: onUpdate.bind(null, 'debit'),
+          'data-1p-ignore': true,
         }}
         privacyFilter={{
           activationFilters: [!isTemporaryId(transaction.id)],
@@ -1626,6 +1630,7 @@ const Transaction = memo(function Transaction({
         inputProps={{
           value: credit,
           onUpdate: onUpdate.bind(null, 'credit'),
+          'data-1p-ignore': true,
         }}
         privacyFilter={{
           activationFilters: [!isTemporaryId(transaction.id)],
@@ -1937,7 +1942,7 @@ type TransactionTableInnerProps = {
   accounts: AccountEntity[];
   categoryGroups: CategoryGroupEntity[];
   payees: PayeeEntity[];
-  balances: Record<TransactionEntity['id'], { balance: number }> | null;
+  balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showBalances: boolean;
   showReconciled: boolean;
   showCleared: boolean;
@@ -2124,7 +2129,7 @@ function TransactionTableInner({
         expanded={isExpanded?.(trans.id)}
         matched={isMatched?.(trans.id)}
         showZeroInDeposit={isChildDeposit}
-        balance={balances?.[trans.id]?.balance ?? 0}
+        balance={balances?.[trans.id] ?? 0}
         focusedField={editing ? tableNavigator.focusedField : undefined}
         accounts={accounts}
         categoryGroups={categoryGroups}
@@ -2284,7 +2289,7 @@ export type TransactionTableProps = {
   accounts: AccountEntity[];
   categoryGroups: CategoryGroupEntity[];
   payees: PayeeEntity[];
-  balances: Record<TransactionEntity['id'], { balance: number }> | null;
+  balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showBalances: boolean;
   showReconciled: boolean;
   showCleared: boolean;
@@ -2355,6 +2360,7 @@ export const TransactionTable = forwardRef(
 
     const transactionsWithExpandedSplits = useMemo(() => {
       let result: TransactionEntity[];
+
       if (splitsExpanded.state.transitionId != null) {
         const index = props.transactions.findIndex(
           t => t.id === splitsExpanded.state.transitionId,
@@ -2390,11 +2396,13 @@ export const TransactionTable = forwardRef(
       prevSplitsExpanded.current = splitsExpanded;
       return result;
     }, [props.transactions, splitsExpanded]);
+
     const transactionMap = useMemo(() => {
       return new Map(
         transactionsWithExpandedSplits.map(trans => [trans.id, trans]),
       );
     }, [transactionsWithExpandedSplits]);
+
     const transactionsByParent = useMemo(() => {
       return props.transactions.reduce(
         (acc, trans) => {

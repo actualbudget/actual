@@ -1,10 +1,18 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  useEffect,
+  type SVGAttributes,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { Bar, BarChart, LabelList, ResponsiveContainer } from 'recharts';
 
+import { send } from 'loot-core/platform/client/fetch';
+import * as monthUtils from 'loot-core/shared/months';
 import { type CashFlowWidget } from 'loot-core/types/models';
 
 import { defaultTimeFrame } from './CashFlow';
@@ -57,7 +65,10 @@ function CustomLabel({
     left: -valueLengthOffset + 2,
   };
 
-  const anchorValue = {
+  const anchorValue: {
+    right: SVGAttributes<SVGTextElement>['textAnchor'];
+    left: SVGAttributes<SVGTextElement>['textAnchor'];
+  } = {
     right: 'start',
     left: 'end',
   };
@@ -100,9 +111,24 @@ export function CashFlowCard({
   onRemove,
 }: CashFlowCardProps) {
   const { t } = useTranslation();
-
-  const [start, end] = calculateTimeRange(meta?.timeFrame, defaultTimeFrame);
+  const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
+
+  useEffect(() => {
+    async function fetchLatestTransaction() {
+      const latestTrans = await send('get-latest-transaction');
+      setLatestTransaction(
+        latestTrans ? latestTrans.date : monthUtils.currentDay(),
+      );
+    }
+    fetchLatestTransaction();
+  }, []);
+
+  const [start, end] = calculateTimeRange(
+    meta?.timeFrame,
+    defaultTimeFrame,
+    latestTransaction,
+  );
 
   const params = useMemo(
     () => simpleCashFlow(start, end, meta?.conditions, meta?.conditionsOp),

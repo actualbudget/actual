@@ -9,7 +9,7 @@ import { CheckboxOption } from './CheckboxOption';
 type InOutOptionProps = {
   inOutMode: boolean;
   outValue: string;
-  disabled: boolean;
+  disabled?: boolean;
   onToggle: () => void;
   onChangeText: (newValue: string) => void;
 };

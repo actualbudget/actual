@@ -86,13 +86,11 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     pretty: string;
   }> | null>(null);
 
-  const [initialStart, initialEnd, initialMode] = calculateTimeRange(
-    widget?.meta?.timeFrame,
-  );
-  const [start, setStart] = useState(initialStart);
-  const [end, setEnd] = useState(initialEnd);
-  const [mode, setMode] = useState(initialMode);
+  const [start, setStart] = useState(monthUtils.currentMonth());
+  const [end, setEnd] = useState(monthUtils.currentMonth());
+  const [mode, setMode] = useState<TimeFrame['mode']>('sliding-window');
   const [interval, setInterval] = useState(widget?.meta?.interval || 'Monthly');
+  const [latestTransaction, setLatestTransaction] = useState('');
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
@@ -125,22 +123,40 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const data = useReport('net_worth', reportParams);
   useEffect(() => {
     async function run() {
-      const trans = await send('get-earliest-transaction');
+      const earliestTransaction = await send('get-earliest-transaction');
+      setEarliestTransaction(
+        earliestTransaction
+          ? earliestTransaction.date
+          : monthUtils.currentDay(),
+      );
+
+      const latestTransaction = await send('get-latest-transaction');
+      setLatestTransaction(
+        latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
+      );
+
       const currentMonth = monthUtils.currentMonth();
-      let earliestMonth = trans
-        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
+      let earliestMonth = earliestTransaction
+        ? monthUtils.monthFromDate(
+            d.parseISO(fromDateRepr(earliestTransaction.date)),
+          )
+        : currentMonth;
+      const latestMonth = latestTransaction
+        ? monthUtils.monthFromDate(
+            d.parseISO(fromDateRepr(latestTransaction.date)),
+          )
         : currentMonth;
 
       // Make sure the month selects are at least populates with a
       // year's worth of months. We can undo this when we have fancier
       // date selects.
-      const yearAgo = monthUtils.subMonths(monthUtils.currentMonth(), 12);
+      const yearAgo = monthUtils.subMonths(latestMonth, 12);
       if (earliestMonth > yearAgo) {
         earliestMonth = yearAgo;
       }
 
       const allMonths = monthUtils
-        .rangeInclusive(earliestMonth, monthUtils.currentMonth())
+        .rangeInclusive(earliestMonth, latestMonth)
         .map(month => ({
           name: month,
           pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
@@ -151,6 +167,19 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     }
     run();
   }, [locale]);
+
+  useEffect(() => {
+    if (latestTransaction) {
+      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+        widget?.meta?.timeFrame,
+        undefined,
+        latestTransaction,
+      );
+      setStart(initialStart);
+      setEnd(initialEnd);
+      setMode(initialMode);
+    }
+  }, [latestTransaction, widget?.meta?.timeFrame]);
 
   function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     setStart(start);
@@ -206,7 +235,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     });
   };
 
-  const [earliestTransaction, _] = useState('');
+  const [earliestTransaction, setEarliestTransaction] = useState('');
 
   if (!allMonths || !data) {
     return null;
@@ -244,6 +273,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         start={start}
         end={end}
         earliestTransaction={earliestTransaction}
+        latestTransaction={latestTransaction}
         firstDayOfWeekIdx={firstDayOfWeekIdx}
         mode={mode}
         onChangeDates={onChangeDates}

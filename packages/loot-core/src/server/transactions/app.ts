@@ -26,6 +26,7 @@ export type TransactionHandlers = {
   'transactions-export-query': typeof exportTransactionsQuery;
   'transactions-merge': typeof mergeTransactions;
   'get-earliest-transaction': typeof getEarliestTransaction;
+  'get-latest-transaction': typeof getLatestTransaction;
 };
 
 async function handleBatchUpdateTransactions({
@@ -33,12 +34,14 @@ async function handleBatchUpdateTransactions({
   deleted,
   updated,
   learnCategories,
+  runTransfers = true,
 }: Parameters<typeof batchUpdateTransactions>[0]) {
   const result = await batchUpdateTransactions({
     added,
     updated,
     deleted,
     learnCategories,
+    runTransfers,
   });
 
   return result;
@@ -102,6 +105,17 @@ async function getEarliestTransaction() {
   return data[0] || null;
 }
 
+async function getLatestTransaction() {
+  const { data } = await aqlQuery(
+    q('transactions')
+      .options({ splits: 'none' })
+      .orderBy({ date: 'desc' })
+      .select('*')
+      .limit(1),
+  );
+  return data[0] || null;
+}
+
 export const app = createApp<TransactionHandlers>();
 
 app.method(
@@ -117,3 +131,4 @@ app.method('transactions-parse-file', mutator(parseTransactionsFile));
 app.method('transactions-export', mutator(exportTransactions));
 app.method('transactions-export-query', mutator(exportTransactionsQuery));
 app.method('get-earliest-transaction', getEarliestTransaction);
+app.method('get-latest-transaction', getLatestTransaction);

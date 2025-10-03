@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 
 import type { Query } from 'loot-core/shared/query';
 
@@ -25,21 +25,27 @@ export function useTransactionsSearch({
 }: UseTransactionsSearchProps): UseTransactionsSearchResult {
   const [isSearching, setIsSearching] = useState(false);
 
+  const updateQueryRef = useRef(updateQuery);
+  updateQueryRef.current = updateQuery;
+
+  const resetQueryRef = useRef(resetQuery);
+  resetQueryRef.current = resetQuery;
+
   const updateSearchQuery = useMemo(
     () =>
       debounce((searchText: string) => {
         if (searchText === '') {
-          resetQuery();
+          resetQueryRef.current?.();
           setIsSearching(false);
         } else if (searchText) {
-          resetQuery();
-          updateQuery(previousQuery =>
+          resetQueryRef.current?.();
+          updateQueryRef.current(previousQuery =>
             queries.transactionsSearch(previousQuery, searchText, dateFormat),
           );
           setIsSearching(true);
         }
       }, delayMs),
-    [dateFormat, delayMs, resetQuery, updateQuery],
+    [dateFormat, delayMs],
   );
 
   useEffect(() => {

@@ -3,12 +3,13 @@ import * as path from 'path';
 
 import inject from '@rollup/plugin-inject';
 import basicSsl from '@vitejs/plugin-basic-ssl';
-import react from '@vitejs/plugin-react-swc';
+import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 /// <reference types="vitest" />
 import { defineConfig, loadEnv, Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
+import reactCompiler from 'babel-plugin-react-compiler';
 
 const addWatchers = (): Plugin => ({
   name: 'add-watchers',
@@ -177,13 +178,9 @@ export default defineConfig(async ({ mode }) => {
       injectShims(),
       addWatchers(),
       react({
-        plugins: [
-          [
-            '@swc/plugin-react-remove-properties',
-            { properties: ['^data-debug'] },
-          ],
-        ],
-        devTarget: 'es2022',
+        babel: {
+          plugins: [reactCompiler],
+        },
       }),
       viteTsconfigPaths({ root: '../..' }),
       visualizer({ template: 'raw-data' }),

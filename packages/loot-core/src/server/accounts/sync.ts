@@ -3,6 +3,7 @@ import * as dateFns from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as asyncStorage from '../../platform/server/asyncStorage';
+import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
 import {
@@ -138,7 +139,7 @@ async function downloadGoCardlessTransactions(
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
 
-  console.log('Pulling transactions from GoCardless');
+  logger.log('Pulling transactions from GoCardless');
 
   const res = await post(
     getServer().GOCARDLESS_SERVER + '/transactions',
@@ -170,7 +171,7 @@ async function downloadGoCardlessTransactions(
       startingBalance,
     } = res;
 
-    console.log('Response:', res);
+    logger.log('Response:', res);
 
     return {
       transactions: all,
@@ -178,7 +179,7 @@ async function downloadGoCardlessTransactions(
       startingBalance,
     };
   } else {
-    console.log('Response:', res);
+    logger.log('Response:', res);
 
     return {
       transactions: res.transactions.all,
@@ -195,7 +196,7 @@ async function downloadSimpleFinTransactions(
 
   const batchSync = Array.isArray(acctId);
 
-  console.log('Pulling transactions from SimpleFin');
+  logger.log('Pulling transactions from SimpleFin');
 
   let res;
   try {
@@ -212,7 +213,7 @@ async function downloadSimpleFinTransactions(
       Array.isArray(acctId) ? 300000 : 60000,
     );
   } catch (error) {
-    console.error('Suspected timeout during bank sync:', error);
+    logger.error('Suspected timeout during bank sync:', error);
     throw BankSyncError('TIMED_OUT', 'TIMED_OUT');
   }
 
@@ -252,7 +253,7 @@ async function downloadSimpleFinTransactions(
     };
   }
 
-  console.log('Response:', retVal);
+  logger.log('Response:', retVal);
   return retVal;
 }
 
@@ -263,7 +264,7 @@ async function downloadPluggyAiTransactions(
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
 
-  console.log('Pulling transactions from Pluggy.ai');
+  logger.log('Pulling transactions from Pluggy.ai');
 
   const res = await post(
     getServer().PLUGGYAI_SERVER + '/transactions',
@@ -291,7 +292,7 @@ async function downloadPluggyAiTransactions(
     startingBalance: singleRes.startingBalance,
   };
 
-  console.log('Response:', retVal);
+  logger.log('Response:', retVal);
   return retVal;
 }
 
@@ -487,7 +488,7 @@ export async function reconcileTransactions(
   isPreview = false,
   defaultCleared = true,
 ): Promise<ReconcileTransactionsResult> {
-  console.log('Performing transaction reconciliation');
+  logger.log('Performing transaction reconciliation');
 
   const updated = [];
   const added = [];
@@ -594,7 +595,7 @@ export async function reconcileTransactions(
     await batchUpdateTransactions({ added, updated });
   }
 
-  console.log('Debug data for the operations:', {
+  logger.log('Debug data for the operations:', {
     transactionsStep1,
     transactionsStep2,
     transactionsStep3,
@@ -616,7 +617,7 @@ export async function matchTransactions(
   isBankSyncAccount = false,
   strictIdChecking = true,
 ) {
-  console.log('Performing transaction reconciliation matching');
+  logger.log('Performing transaction reconciliation matching');
 
   const reimportDeleted = await aqlQuery(
     q('preferences')
@@ -879,6 +880,12 @@ async function processBankSyncDownload(
   // that account sync sources can give two different transaction IDs even though it's the same transaction.
   const useStrictIdChecking = !acctRow.account_sync_source;
 
+  const importTransactions = await aqlQuery(
+    q('preferences')
+      .filter({ id: `sync-import-transactions-${id}` })
+      .select('value'),
+  ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+
   /** Starting balance is actually the current balance of the account. */
   const {
     transactions: originalTransactions,
@@ -940,10 +947,6 @@ async function processBankSyncDownload(
     });
   }
 
-  if (originalTransactions.length === 0) {
-    return { added: [], updated: [] };
-  }
-
   const transactions = originalTransactions.map(trans => ({
     ...trans,
     account: id,
@@ -952,13 +955,14 @@ async function processBankSyncDownload(
   return runMutator(async () => {
     const result = await reconcileTransactions(
       id,
-      transactions,
+      importTransactions ? transactions : [],
       true,
       useStrictIdChecking,
     );
 
-    /** Starting balance is actually the current balance of the account. */
-    if (currentBalance) await updateAccountBalance(id, currentBalance);
+    if (currentBalance != null) {
+      await updateAccountBalance(id, currentBalance);
+    }
 
     return result;
   });

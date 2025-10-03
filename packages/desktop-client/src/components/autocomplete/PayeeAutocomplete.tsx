@@ -166,20 +166,64 @@ function PayeeList({
 }: PayeeListProps) {
   const { t } = useTranslation();
 
-  let createNew = null;
-  items = [...items];
-
   // If the "new payee" item exists, create it as a special-cased item
   // with the value of the input so it always shows whatever the user
   // entered
-  if (items[0].id === 'new') {
-    const [first, ...rest] = items;
-    createNew = first;
-    items = rest;
-  }
 
-  const offset = createNew ? 1 : 0;
-  let lastType = null;
+  const { newPayee, suggestedPayees, payees, transferPayees } = useMemo(() => {
+    let currentIndex = 0;
+    const result = items.reduce(
+      (acc, item) => {
+        if (item.id === 'new') {
+          acc.newPayee = { ...item };
+        } else if (item.itemType === 'common_payee') {
+          acc.suggestedPayees.push({ ...item });
+        } else if (item.itemType === 'payee') {
+          acc.payees.push({ ...item });
+        } else if (item.itemType === 'account') {
+          acc.transferPayees.push({ ...item });
+        }
+        return acc;
+      },
+      {
+        newPayee: null as PayeeAutocompleteItem | null,
+        suggestedPayees: [] as Array<PayeeAutocompleteItem>,
+        payees: [] as Array<PayeeAutocompleteItem>,
+        transferPayees: [] as Array<PayeeAutocompleteItem>,
+      },
+    );
+
+    // assign indexes in render order
+    const newPayeeWithIndex = result.newPayee
+      ? { ...result.newPayee, highlightedIndex: currentIndex++ }
+      : null;
+
+    const suggestedPayeesWithIndex = result.suggestedPayees.map(item => ({
+      ...item,
+      highlightedIndex: currentIndex++,
+    }));
+
+    const payeesWithIndex = result.payees.map(item => ({
+      ...item,
+      highlightedIndex: currentIndex++,
+    }));
+
+    const transferPayeesWithIndex = result.transferPayees.map(item => ({
+      ...item,
+      highlightedIndex: currentIndex++,
+    }));
+
+    return {
+      newPayee: newPayeeWithIndex,
+      suggestedPayees: suggestedPayeesWithIndex,
+      payees: payeesWithIndex,
+      transferPayees: transferPayeesWithIndex,
+    };
+  }, [items]);
+
+  // We limit the number of payees shown to 100.
+  // So we show a hint that more are available via search.
+  const showSearchForMore = items.length > 100;
 
   return (
     <View>
@@ -190,60 +234,65 @@ function PayeeList({
           ...(!embedded && { maxHeight: 175 }),
         }}
       >
-        {createNew &&
+        {newPayee &&
           renderCreatePayeeButton({
-            ...(getItemProps ? getItemProps({ item: createNew }) : null),
+            ...(getItemProps ? getItemProps({ item: newPayee }) : {}),
             payeeName: inputValue,
-            highlighted: highlightedIndex === 0,
+            highlighted: newPayee.highlightedIndex === highlightedIndex,
             embedded,
           })}
 
-        {items.map((item, idx) => {
-          const itemType = item.itemType;
-          let title;
+        {suggestedPayees.length > 0 &&
+          renderPayeeItemGroupHeader({ title: t('Suggested Payees') })}
+        {suggestedPayees.map(item => (
+          <Fragment key={item.id}>
+            {renderPayeeItem({
+              ...(getItemProps ? getItemProps({ item }) : {}),
+              item,
+              highlighted: highlightedIndex === item.highlightedIndex,
+              embedded,
+            })}
+          </Fragment>
+        ))}
 
-          if (itemType === 'common_payee' && lastType !== itemType) {
-            title = t('Suggested Payees');
-          } else if (itemType === 'payee' && lastType !== itemType) {
-            title = t('Payees');
-          } else if (itemType === 'account' && lastType !== itemType) {
-            title = t('Transfer To/From');
-          }
-          const showMoreMessage =
-            idx === items.length - 1 && items.length > 100;
-          lastType = itemType;
+        {payees.length > 0 &&
+          renderPayeeItemGroupHeader({ title: t('Payees') })}
+        {payees.map(item => (
+          <Fragment key={item.id}>
+            {renderPayeeItem({
+              ...(getItemProps ? getItemProps({ item }) : {}),
+              item,
+              highlighted: highlightedIndex === item.highlightedIndex,
+              embedded,
+            })}
+          </Fragment>
+        ))}
 
-          return (
-            <Fragment key={item.id}>
-              {title && (
-                <Fragment key={`title-${idx}`}>
-                  {renderPayeeItemGroupHeader({ title })}
-                </Fragment>
-              )}
-              <Fragment key={item.id}>
-                {renderPayeeItem({
-                  ...(getItemProps ? getItemProps({ item }) : null),
-                  item,
-                  highlighted: highlightedIndex === idx + offset,
-                  embedded,
-                })}
-              </Fragment>
+        {transferPayees.length > 0 &&
+          renderPayeeItemGroupHeader({ title: t('Transfer To/From') })}
+        {transferPayees.map(item => (
+          <Fragment key={item.id}>
+            {renderPayeeItem({
+              ...(getItemProps ? getItemProps({ item }) : {}),
+              item,
+              highlighted: highlightedIndex === item.highlightedIndex,
+              embedded,
+            })}
+          </Fragment>
+        ))}
 
-              {showMoreMessage && (
-                <div
-                  style={{
-                    fontSize: 11,
-                    padding: 5,
-                    color: theme.pageTextLight,
-                    textAlign: 'center',
-                  }}
-                >
-                  <Trans>More payees are available, search to find them</Trans>
-                </div>
-              )}
-            </Fragment>
-          );
-        })}
+        {showSearchForMore && (
+          <div
+            style={{
+              fontSize: 11,
+              padding: 5,
+              color: theme.pageTextLight,
+              textAlign: 'center',
+            }}
+          >
+            <Trans>More payees are available, search to find them</Trans>
+          </div>
+        )}
       </View>
       {footer}
     </View>
@@ -432,6 +481,8 @@ export function PayeeAutocomplete({
           }
         });
 
+        // Only show the first 100 results, users can search to find more.
+        // If user want to view all payees, it can be done via the manage payees page.
         filtered = filtered.slice(0, 100);
 
         if (filtered.length >= 2 && filtered[0].id === 'new') {
