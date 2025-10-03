@@ -435,7 +435,9 @@ export function toRelaxedNumber(currencyAmount: CurrencyAmount): Amount {
 
 export function integerToCurrency(
   integerAmount: IntegerAmount,
-  formatter = getNumberFormat().formatter,
+  formatter:
+    | Intl.NumberFormat
+    | { format: (value: number) => string } = getNumberFormat().formatter,
   decimalPlaces: number = 2,
 ) {
   const divisor = Math.pow(10, decimalPlaces);

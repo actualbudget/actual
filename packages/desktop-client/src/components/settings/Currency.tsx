@@ -77,6 +77,11 @@ export function CurrencySettings() {
   );
   const [, setNumberFormatPref] = useSyncedPref('numberFormat');
   const [, setHideFractionPref] = useSyncedPref('hideFraction');
+  const [enableMultiCurrency, setEnableMultiCurrencyPref] = useSyncedPref(
+    'enableMultiCurrency',
+  );
+  const [enableMultiCurrencyOnBudget, setEnableMultiCurrencyOnBudgetPref] =
+    useSyncedPref('enableMultiCurrencyOnBudget');
 
   const selectButtonClassName = css({
     '&[data-hovered]': {
@@ -84,17 +89,26 @@ export function CurrencySettings() {
     },
   });
 
-  const currencyOptions: [string, string][] = currencies.map(currency => {
-    const translatedName =
-      currencyTranslations.get(currency.code) ?? currency.name;
-    if (currency.code === '') {
-      return [currency.code, translatedName];
-    }
-    return [
-      currency.code,
-      `${currency.code} - ${translatedName} (${currency.symbol})`,
-    ];
-  });
+  const currencyOptions: [string, string][] = currencies
+    .filter(currency => {
+      // Hide "None" option when multi-currency is enabled
+      // since all accounts should have specific currencies
+      if (enableMultiCurrency === 'true' && currency.code === '') {
+        return false;
+      }
+      return true;
+    })
+    .map(currency => {
+      const translatedName =
+        currencyTranslations.get(currency.code) ?? currency.name;
+      if (currency.code === '') {
+        return [currency.code, translatedName];
+      }
+      return [
+        currency.code,
+        `${currency.code} - ${translatedName} (${currency.symbol})`,
+      ];
+    });
 
   const handleCurrencyChange = (code: string) => {
     setDefaultCurrencyCodePref(code);
@@ -167,24 +181,98 @@ export function CurrencySettings() {
             <View
               style={{
                 display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
+                flexDirection: 'column',
+                gap: '1em',
               }}
             >
-              <Checkbox
-                id="settings-spaceEnabled"
-                checked={spaceEnabled === 'true'}
-                onChange={e =>
-                  setSpaceEnabledPref(e.target.checked ? 'true' : 'false')
-                }
-              />
-              <label
-                htmlFor="settings-spaceEnabled"
-                style={{ marginLeft: '0.5em' }}
+              <View
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                }}
               >
-                <Trans>Add space between amount and symbol</Trans>
-              </label>
+                <Checkbox
+                  id="settings-spaceEnabled"
+                  checked={spaceEnabled === 'true'}
+                  onChange={e =>
+                    setSpaceEnabledPref(e.target.checked ? 'true' : 'false')
+                  }
+                />
+                <label
+                  htmlFor="settings-spaceEnabled"
+                  style={{ marginLeft: '0.5em' }}
+                >
+                  <Trans>Add space between amount and symbol</Trans>
+                </label>
+              </View>
+
+              <Text style={{ borderTop: `1px solid ${theme.tableBorder}` }}>
+                <Trans>
+                  <br />
+                  <strong>Multi-currency</strong> support allows you to have
+                  accounts and transactions in different currencies with
+                  automatic exchange rate handling.
+                  <br />
+                  <strong>NOTE:</strong> Multi-currency requires a Default
+                  Currency to be set, and must be unchecked before unsetting the
+                  default currency.
+                </Trans>
+              </Text>
+              <View
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                }}
+              >
+                <Checkbox
+                  id="settings-enableMultiCurrency"
+                  checked={enableMultiCurrency === 'true'}
+                  onChange={e =>
+                    setEnableMultiCurrencyPref(
+                      e.target.checked ? 'true' : 'false',
+                    )
+                  }
+                />
+                <label
+                  htmlFor="settings-enableMultiCurrency"
+                  style={{ marginLeft: '0.5em' }}
+                >
+                  <Trans>Enable multi-currency support (Experimental)</Trans>
+                </label>
+              </View>
+
+              {enableMultiCurrency === 'true' && (
+                <View
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'flex-start',
+                  }}
+                >
+                  <Checkbox
+                    id="settings-enableMultiCurrencyOnBudget"
+                    checked={enableMultiCurrencyOnBudget === 'true'}
+                    onChange={e =>
+                      setEnableMultiCurrencyOnBudgetPref(
+                        e.target.checked ? 'true' : 'false',
+                      )
+                    }
+                  />
+                  <label
+                    htmlFor="settings-enableMultiCurrencyOnBudget"
+                    style={{ marginLeft: '0.5em' }}
+                  >
+                    <Trans>
+                      Allow on-budget accounts to have non-default currency
+                    </Trans>
+                  </label>
+                </View>
+              )}
             </View>
           )}
         </View>
