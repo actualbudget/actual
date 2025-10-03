@@ -41,6 +41,7 @@ import {
 } from '@desktop-client/components/Page';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useDashboard } from '@desktop-client/hooks/useDashboard';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useReports } from '@desktop-client/hooks/useReports';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
@@ -62,6 +63,7 @@ export function Overview() {
   const dispatch = useDispatch();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const crossoverReportEnabled = useFeatureFlag('crossoverReport');
 
   const [isImporting, setIsImporting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -417,10 +419,14 @@ export function Overview() {
                               name: 'net-worth-card' as const,
                               text: t('Net worth graph'),
                             },
-                            {
-                              name: 'crossover-card' as const,
-                              text: t('Crossover point'),
-                            },
+                            ...(crossoverReportEnabled
+                              ? [
+                                  {
+                                    name: 'crossover-card' as const,
+                                    text: t('Crossover point'),
+                                  },
+                                ]
+                              : []),
                             {
                               name: 'spending-card' as const,
                               text: t('Spending analysis'),
@@ -557,7 +563,8 @@ export function Overview() {
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
                     />
-                  ) : item.type === 'crossover-card' ? (
+                  ) : item.type === 'crossover-card' &&
+                    crossoverReportEnabled ? (
                     <CrossoverCard
                       widgetId={item.i}
                       isEditing={isEditing}

@@ -2,7 +2,8 @@ export type FeatureFlag =
   | 'goalTemplatesEnabled'
   | 'goalTemplatesUIEnabled'
   | 'actionTemplating'
-  | 'currency';
+  | 'currency'
+  | 'crossoverReport';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.

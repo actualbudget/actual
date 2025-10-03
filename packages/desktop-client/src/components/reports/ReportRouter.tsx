@@ -10,14 +10,22 @@ import { NetWorth } from './reports/NetWorth';
 import { Spending } from './reports/Spending';
 import { Summary } from './reports/Summary';
 
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+
 export function ReportRouter() {
+  const crossoverReportEnabled = useFeatureFlag('crossoverReport');
+
   return (
     <Routes>
       <Route path="/" element={<Overview />} />
       <Route path="/net-worth" element={<NetWorth />} />
       <Route path="/net-worth/:id" element={<NetWorth />} />
-      <Route path="/crossover" element={<Crossover />} />
-      <Route path="/crossover/:id" element={<Crossover />} />
+      {crossoverReportEnabled && (
+        <>
+          <Route path="/crossover" element={<Crossover />} />
+          <Route path="/crossover/:id" element={<Crossover />} />
+        </>
+      )}
       <Route path="/cash-flow" element={<CashFlow />} />
       <Route path="/cash-flow/:id" element={<CashFlow />} />
       <Route path="/custom" element={<CustomReport />} />
