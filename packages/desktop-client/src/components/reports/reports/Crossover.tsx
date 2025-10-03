@@ -243,9 +243,10 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
 
   // Memoize the derived values to avoid recreating them on every render
   const expenseCategoryIds = useMemo(
-    () => selectedExpenseCategories
-      .filter(c => showHiddenCategories || !c.hidden)
-      .map(c => c.id),
+    () =>
+      selectedExpenseCategories
+        .filter(c => showHiddenCategories || !c.hidden)
+        .map(c => c.id),
     [selectedExpenseCategories, showHiddenCategories],
   );
 
