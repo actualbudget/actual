@@ -535,11 +535,6 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                       ? (estimatedReturn * 100).toString()
                       : ''
                   }
-                  placeholder={
-                    historicalReturn != null
-                      ? `${(historicalReturn * 100).toFixed(1)}%`
-                      : t('Historical based')
-                  }
                   onChange={e => {
                     const val = e.target.value;
                     setEstimatedReturn(
@@ -559,7 +554,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                     }}
                   >
                     <Trans>
-                      Will use historical return:{' '}
+                      Using historical return:{' '}
                       {(historicalReturn * 100).toFixed(1)}%
                     </Trans>
                   </div>
