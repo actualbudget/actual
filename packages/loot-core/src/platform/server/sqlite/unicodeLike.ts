@@ -20,8 +20,7 @@ export function unicodeLike(
     // whether they originate from the user input or from our query compiler.
     // Maybe improve the query compiler to correctly process these characters?
     const processedPattern = pattern
-      .replace(/[.*+^${}()|[\]\\]/g, '\\$&')
-      .replaceAll('?', '.')
+      .replace(/[.*+^${}()|[\]?\\/]/g, '\\$&')
       .replaceAll('%', '.*');
     cachedRegExp = new RegExp(processedPattern, 'i');
     likePatternCache.set(pattern, cachedRegExp);
