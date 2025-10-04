@@ -143,8 +143,8 @@ export type ImportTransaction = {
 export type FieldMapping = {
   date: string | null;
   amount: string | null;
-  payee: string | null;
-  notes: string | null;
+  payee: string | string[] | null;
+  notes: string | string[] | null;
   inOut: string | null;
   category: string | null;
   outflow: string | null;
@@ -158,7 +158,18 @@ export function applyFieldMappings(
   const result: Partial<ImportTransaction> = {};
   for (const [originalField, target] of Object.entries(mappings)) {
     const field = originalField === 'payee' ? 'payee_name' : originalField;
-    result[field] = transaction[target || field];
+
+    // Handle multi-column fields (payee and notes)
+    if (Array.isArray(target)) {
+      // Merge multiple columns with space separator
+      const values = target
+        .map(col => transaction[col])
+        .filter(val => val != null && val !== '')
+        .map(val => String(val).trim());
+      result[field] = values.join(' ');
+    } else {
+      result[field] = transaction[target || field];
+    }
   }
   // Keep preview fields on the mapped transactions
   result.trx_id = transaction.trx_id;

@@ -36,6 +36,7 @@
     "./input": "./src/Input.tsx",
     "./label": "./src/Label.tsx",
     "./menu": "./src/Menu.tsx",
+    "./multi-select": "./src/MultiSelect.tsx",
     "./paragraph": "./src/Paragraph.tsx",
     "./popover": "./src/Popover.tsx",
     "./select": "./src/Select.tsx",
