@@ -20,10 +20,7 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { listen } from 'loot-core/platform/client/fetch';
-import {
-  isDevelopmentEnvironment,
-  isElectron,
-} from 'loot-core/shared/environment';
+import { isDevelopmentEnvironment } from 'loot-core/shared/environment';
 import * as Platform from 'loot-core/shared/platform';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';

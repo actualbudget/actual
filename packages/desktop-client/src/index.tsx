@@ -64,12 +64,12 @@ async function uploadFile(filename: string, contents: ArrayBuffer) {
     contents,
   });
 }
-
-function inputFocused() {
+function inputFocused(e: KeyboardEvent) {
+  const target = e.target as HTMLElement | null;
   return (
-    window.document.activeElement.tagName === 'INPUT' ||
-    window.document.activeElement.tagName === 'TEXTAREA' ||
-    (window.document.activeElement as HTMLElement).isContentEditable
+    target?.tagName === 'INPUT' ||
+    target?.tagName === 'TEXTAREA' ||
+    target?.isContentEditable === true
   );
 }
 
@@ -79,7 +79,6 @@ window.__actionsForMenu = {
   undo,
   redo,
   appFocused,
-  inputFocused,
   uploadFile,
 };
 
@@ -107,7 +106,6 @@ declare global {
       undo: typeof undo;
       redo: typeof redo;
       appFocused: typeof appFocused;
-      inputFocused: typeof inputFocused;
       uploadFile: typeof uploadFile;
     };
 
@@ -116,3 +114,27 @@ declare global {
     $q: typeof q;
   }
 }
+
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey) {
+    // Cmd/Ctrl+o
+    if (e.key === 'o') {
+      e.preventDefault();
+      window.__actionsForMenu.closeBudget();
+    }
+    // Cmd/Ctrl+z
+    else if (e.key.toLowerCase() === 'z') {
+      if (inputFocused(e)) {
+        return;
+      }
+      e.preventDefault();
+      if (e.shiftKey) {
+        // Redo
+        window.__actionsForMenu.redo();
+      } else {
+        // Undo
+        window.__actionsForMenu.undo();
+      }
+    }
+  }
+});
