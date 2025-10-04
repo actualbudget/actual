@@ -64,6 +64,7 @@ async function uploadFile(filename: string, contents: ArrayBuffer) {
     contents,
   });
 }
+
 function inputFocused(e: KeyboardEvent) {
   const target = e.target as HTMLElement | null;
   return (

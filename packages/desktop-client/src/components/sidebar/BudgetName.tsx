@@ -76,7 +76,7 @@ function EditableBudgetName() {
         navigate('/settings');
         break;
       case 'loadBackup':
-        if (isElectron) {
+        if (isElectron()) {
           dispatch(
             pushModal({
               modal: { name: 'load-backup', options: {} },
@@ -94,7 +94,7 @@ function EditableBudgetName() {
   const items = [
     { name: 'rename', text: t('Rename budget') },
     { name: 'settings', text: t('Settings') },
-    isElectron ? { name: 'loadBackup', text: t('Load Backup…') } : null,
+    isElectron() ? { name: 'loadBackup', text: t('Load Backup…') } : null,
     { name: 'close', text: t('Switch file') },
   ].filter(item => item !== null);
 
