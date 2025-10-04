@@ -23,6 +23,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
+import { loadPayPeriodConfigFromPrefs } from 'loot-core/shared/pay-periods';
 import { groupById } from 'loot-core/shared/util';
 
 import { BudgetTable, PILL_STYLE } from './BudgetTable';
@@ -41,6 +42,7 @@ import { prewarmMonth } from '@desktop-client/components/budget/util';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
@@ -68,6 +70,10 @@ export function BudgetPage() {
   const [budgetTypePref] = useSyncedPref('budgetType');
   const budgetType = isBudgetType(budgetTypePref) ? budgetTypePref : 'envelope';
   const spreadsheet = useSpreadsheet();
+  const payPeriodFeatureFlagEnabled = useFeatureFlag('payPeriodsEnabled');
+  const [payPeriodFrequency] = useSyncedPref('payPeriodFrequency');
+  const [payPeriodStartDate] = useSyncedPref('payPeriodStartDate');
+  const [payPeriodViewEnabled] = useSyncedPref('showPayPeriods');
 
   const currMonth = monthUtils.currentMonth();
   const [startMonth = currMonth, setStartMonthPref] =
@@ -95,6 +101,33 @@ export function BudgetPage() {
 
     init();
   }, [budgetType, startMonth, dispatch, spreadsheet]);
+
+  // Wire pay period config from synced prefs into month utils
+  useEffect(() => {
+    if (!payPeriodFeatureFlagEnabled) {
+      return;
+    }
+
+    console.log('[PayPeriod] Mobile loading pay period config:', {
+      featureFlagEnabled: payPeriodFeatureFlagEnabled,
+      viewEnabled: payPeriodViewEnabled,
+      frequency: payPeriodFrequency,
+      startDate: payPeriodStartDate,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Use the existing validation function that handles type safety
+    loadPayPeriodConfigFromPrefs({
+      showPayPeriods: payPeriodViewEnabled,
+      payPeriodFrequency,
+      payPeriodStartDate,
+    });
+  }, [
+    payPeriodFeatureFlagEnabled,
+    payPeriodViewEnabled,
+    payPeriodFrequency,
+    payPeriodStartDate,
+  ]);
 
   const onBudgetAction = useCallback(
     async (month, type, args) => {
