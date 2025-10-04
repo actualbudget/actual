@@ -750,9 +750,10 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
             }
           }
         }
-        // This path uses REGEXP, which is case-sensitive and doesn’t
+        // This path uses `REGEXP`, which is case-sensitive and doesn’t
         // normalize unicode characters, unlike the original path.
-        return `REGEXP('${regex}', ${left})`;
+        const sqlRegex = regex.replace(/'/g, "''");
+        return `REGEXP('${sqlRegex}', ${left})`;
       }
 
       // Original path
