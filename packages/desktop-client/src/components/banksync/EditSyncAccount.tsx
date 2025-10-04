@@ -82,6 +82,7 @@ const mappableFields: MappableField[] = [
       'merchant.name',
       'merchant.businessName',
       'merchant.cnpj',
+      'descriptionRaw',
     ],
   },
   {
