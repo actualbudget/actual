@@ -15,7 +15,6 @@ module.exports = {
   url: 'https://actualbudget.org/',
   baseUrl: '/',
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
 
   // Even if you don't use internalization, you can use this field to set useful
@@ -28,6 +27,9 @@ module.exports = {
 
   markdown: {
     mermaid: true,
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+    },
   },
 
   themes: ['@docusaurus/theme-mermaid'],
