@@ -94,7 +94,7 @@ export function transactionsSearch(
     parsedDate = parseDate(search, dateFormat, new Date());
   }
 
-  const escapedSearch = search.replace(/[_%?]/g, '!$&');
+  const escapedSearch = search.replace(/[!_%?]/g, '!$&');
 
   return currentQuery.filter({
     $or: {
