@@ -475,6 +475,13 @@ export function amountToCurrencyNoDecimal(amount: Amount): CurrencyAmount {
 export function currencyToAmount(currencyAmount: string): Amount | null {
   currencyAmount = currencyAmount.replace(/\u2212/g, '-');
 
+  // Then, remove Unicode directional formatting characters that can be added by currency formatting
+  // This includes RLM (U+200F), LRM (U+200E), and other bidirectional control characters
+  currencyAmount = currencyAmount.replace(
+    /[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g,
+    '',
+  );
+
   let integer, fraction;
 
   // match the last dot or comma in the string
