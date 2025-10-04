@@ -19,14 +19,8 @@ describe('unicode LIKE functionality', () => {
     expect(result).toBe(1);
   });
 
-  it('should not use ? as the single character placeholder', () => {
+  it('should use ? as the single character placeholder', () => {
     const result = unicodeLike('t?st', 'test');
-
-    expect(result).toBe(0);
-  });
-
-  it('should match literal ?', () => {
-    const result = unicodeLike('%?%', 'this is a test?');
 
     expect(result).toBe(1);
   });

@@ -722,8 +722,43 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
       return `${left} IN (` + ids.map(id => `'${id}'`).join(',') + ')';
     }
     case '$like': {
-      const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
-      return `UNICODE_LIKE(${getNormalisedString(right)}, NORMALISE(${left}))`;
+      const [left] = valArray(state, [lhs], ['string']);
+      const pattern = rhs.literal ? rhs.value : null;
+
+      if (pattern && pattern.includes('!')) {
+        let regex = '';
+        let escaped = false;
+        for (const char of pattern) {
+          if (escaped) {
+            if ('.*+?^${}()|[]\\'.includes(char)) {
+              regex += `\\${char}`;
+            } else {
+              regex += char;
+            }
+            escaped = false;
+          } else if (char === '!') {
+            escaped = true;
+          } else if (char === '%') {
+            regex += '.*';
+          } else if (char === '?') {
+            regex += '.';
+          } else {
+            if ('.*+?^${}()|[]\\'.includes(char)) {
+              regex += `\\${char}`;
+            } else {
+              regex += char;
+            }
+          }
+        }
+        // This path uses REGEXP, which is case-sensitive and doesn't
+        // normalize unicode characters, unlike the original path.
+        return `REGEXP('${regex}', ${left})`;
+      }
+
+      // Original path
+      return `UNICODE_LIKE(${getNormalisedString(
+        val(state, rhs, 'string'),
+      )}, NORMALISE(${left}))`;
     }
     case '$regexp': {
       const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
