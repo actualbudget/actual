@@ -591,13 +591,57 @@ async function _loadBudget(id: Budget['id']): Promise<{
     return { error: 'opening-budget' };
   }
 
-  // This is a bit leaky, but we need to set the initial budget type
-  const { value: budgetType = 'envelope' } =
-    (await db.first<Pick<db.DbPreference, 'value'>>(
+  // Load budget type and pay period configuration from preferences
+  const [budgetTypeResult, ...payPeriodResults] = await Promise.all([
+    db.first<Pick<db.DbPreference, 'value'>>(
       'SELECT value from preferences WHERE id = ?',
       ['budgetType'],
-    )) ?? {};
+    ),
+    db.first<Pick<db.DbPreference, 'value'>>(
+      'SELECT value from preferences WHERE id = ?',
+      ['showPayPeriods'],
+    ),
+    db.first<Pick<db.DbPreference, 'value'>>(
+      'SELECT value from preferences WHERE id = ?',
+      ['payPeriodFrequency'],
+    ),
+    db.first<Pick<db.DbPreference, 'value'>>(
+      'SELECT value from preferences WHERE id = ?',
+      ['payPeriodStartDate'],
+    ),
+  ]);
+
+  // Set budget type
+  const { value: budgetType = 'envelope' } = budgetTypeResult ?? {};
   sheet.get().meta().budgetType = budgetType as prefs.BudgetType;
+
+  // Load pay period configuration before budget creation
+  // This must happen before budget.createAllBudgets() since budget operations
+  // may invoke months.ts functions that check pay period config
+  console.log('[PayPeriod] Loading pay period config during budget load...');
+  try {
+    const { loadPayPeriodConfigFromPrefs } = await import(
+      '../../shared/pay-periods'
+    );
+    const payPeriodPrefs = {
+      showPayPeriods: payPeriodResults[0]?.value,
+      payPeriodFrequency: payPeriodResults[1]?.value,
+      payPeriodStartDate: payPeriodResults[2]?.value,
+    };
+    console.log(
+      '[PayPeriod] Raw preference values from database:',
+      payPeriodPrefs,
+    );
+    loadPayPeriodConfigFromPrefs(payPeriodPrefs);
+    console.log(
+      '[PayPeriod] Successfully loaded pay period config during budget load',
+    );
+  } catch (e) {
+    console.warn(
+      '[PayPeriod] Failed to load pay period configuration, continuing with disabled state:',
+      e,
+    );
+  }
   await budget.createAllBudgets();
 
   // Load all the in-memory state
