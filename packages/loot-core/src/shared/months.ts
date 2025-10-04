@@ -763,7 +763,7 @@ export function getMonthDateRange(
     return getMonthLabel(monthId, activeConfig);
   }
 
-  return d.format(_parse(monthId), 'MMMM yyyy', { locale });
+  return d.format(_parse(monthId), 'MMMM yy', { locale });
 }
 
 export function resolveMonthRange(
