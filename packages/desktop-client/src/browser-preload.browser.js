@@ -178,7 +178,6 @@ global.Actual = {
     // Wait for the app to reload
     await new Promise(() => {});
   },
-  updateAppMenu: () => {},
 
   ipcConnect: () => {},
   getServerSocket: async () => {
@@ -191,35 +190,3 @@ global.Actual = {
 
   moveBudgetDirectory: () => {},
 };
-
-function inputFocused(e) {
-  return (
-    e.target.tagName === 'INPUT' ||
-    e.target.tagName === 'TEXTAREA' ||
-    e.target.isContentEditable
-  );
-}
-
-document.addEventListener('keydown', e => {
-  if (e.metaKey || e.ctrlKey) {
-    // Cmd/Ctrl+o
-    if (e.key === 'o') {
-      e.preventDefault();
-      window.__actionsForMenu.closeBudget();
-    }
-    // Cmd/Ctrl+z
-    else if (e.key.toLowerCase() === 'z') {
-      if (inputFocused(e)) {
-        return;
-      }
-      e.preventDefault();
-      if (e.shiftKey) {
-        // Redo
-        window.__actionsForMenu.redo();
-      } else {
-        // Undo
-        window.__actionsForMenu.undo();
-      }
-    }
-  }
-});

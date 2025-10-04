@@ -136,10 +136,6 @@ function AppInner() {
   }, [dispatch, showErrorBoundary]);
 
   useEffect(() => {
-    global.Actual.updateAppMenu(budgetId);
-  }, [budgetId]);
-
-  useEffect(() => {
     if (userData?.tokenExpired) {
       dispatch(
         addNotification({
