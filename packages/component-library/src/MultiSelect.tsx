@@ -128,7 +128,7 @@ export function MultiSelect<const Value = string>({
         triggerRef={triggerRef}
         placement="bottom start"
         isOpen={isOpen}
-        onOpenChange={() => setIsOpen(false)}
+        onOpenChange={setIsOpen}
         style={popoverStyle}
       >
         <Menu
