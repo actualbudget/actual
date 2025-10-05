@@ -23,7 +23,10 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { loadPayPeriodConfigFromPrefs } from 'loot-core/shared/pay-periods';
+import {
+  loadPayPeriodConfigFromPrefs,
+  type PayPeriodConfig,
+} from 'loot-core/shared/pay-periods';
 import { groupById } from 'loot-core/shared/util';
 
 import { BudgetTable, PILL_STYLE } from './BudgetTable';
@@ -571,6 +574,19 @@ export function BudgetPage() {
     onToggleHiddenCategories,
   ]);
 
+  // Create memoized pay period config for MonthSelector reactivity
+  const payPeriodConfig = useMemo<PayPeriodConfig | null>(() => {
+    if (!payPeriodViewEnabled || payPeriodViewEnabled !== 'true') {
+      return null;
+    }
+    return {
+      enabled: true,
+      payFrequency:
+        (payPeriodFrequency as PayPeriodConfig['payFrequency']) || 'monthly',
+      startDate: payPeriodStartDate || new Date().toISOString().slice(0, 10),
+    };
+  }, [payPeriodViewEnabled, payPeriodFrequency, payPeriodStartDate]);
+
   if (!categoryGroups || !initialized) {
     return (
       <View
@@ -599,6 +615,7 @@ export function BudgetPage() {
               onOpenMonthMenu={onOpenBudgetMonthMenu}
               onPrevMonth={onPrevMonth}
               onNextMonth={onNextMonth}
+              payPeriodConfig={payPeriodConfig}
             />
           }
           leftContent={
@@ -986,6 +1003,14 @@ function MonthSelector({
   onOpenMonthMenu,
   onPrevMonth,
   onNextMonth,
+  payPeriodConfig,
+}: {
+  month: string;
+  monthBounds: { start: string; end: string };
+  onOpenMonthMenu?: (month: string) => void;
+  onPrevMonth: () => void;
+  onNextMonth: () => void;
+  payPeriodConfig: PayPeriodConfig | null;
 }) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -1028,11 +1053,7 @@ function MonthSelector({
         data-month={month}
       >
         <Text style={styles.underlinedText}>
-          {monthUtils.getMonthDateRange(
-            month,
-            monthUtils.getPayPeriodConfig(),
-            locale,
-          )}
+          {monthUtils.getMonthDateRange(month, payPeriodConfig, locale)}
         </Text>
       </Button>
       <Button
