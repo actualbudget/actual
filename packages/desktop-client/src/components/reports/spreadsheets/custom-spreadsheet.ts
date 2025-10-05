@@ -219,9 +219,8 @@ export function createCustomSpreadsheet({
           if (balanceTypeOp === 'totalTotals') {
             stackAmounts += netAmounts;
           }
-          if (stackAmounts !== 0) {
-            stacked[item.name] = stackAmounts; // TODO: not sure yet
-          }
+
+          stacked[item.name] = stackAmounts;
 
           perIntervalNetAssets =
             netAmounts > 0
