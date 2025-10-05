@@ -180,7 +180,7 @@ export class LiveQuery<TResponse = unknown> {
 
   protected fetchData = async (
     runQuery: () => Promise<{
-      data: Data<TResponse>;
+      data: Data<TResponse> | TResponse;
       dependencies: string[];
     }>,
   ) => {
@@ -205,7 +205,15 @@ export class LiveQuery<TResponse = unknown> {
       // still subscribed (`this.unsubscribeSyncEvent` will exist)
       if (this.inflightRequestId === reqId && this._unsubscribeSyncEvent) {
         const previousData = this.data;
-        this.data = data;
+
+        // For calculate queries, data is a raw value, not an array
+        // Convert it to an array format to maintain consistency
+        if (this._query.state.calculation) {
+          this.data = [data as TResponse];
+        } else {
+          this.data = data as Data<TResponse>;
+        }
+
         this.onData(this.data, previousData);
         this.inflightRequestId = null;
       }
