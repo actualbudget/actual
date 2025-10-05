@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "25.9.0",
+  "version": "25.10.0",
   "license": "MIT",
   "files": [
     "build"
@@ -73,7 +73,7 @@
     "rollup-plugin-visualizer": "^5.14.0",
     "sass": "^1.89.0",
     "usehooks-ts": "^3.1.1",
-    "uuid": "^11.1.0",
+    "uuid": "^13.0.0",
     "vite": "^6.3.6",
     "vite-plugin-pwa": "^1.0.0",
     "vite-tsconfig-paths": "^4.3.2",
