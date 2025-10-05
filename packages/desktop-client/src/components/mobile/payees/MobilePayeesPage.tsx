@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
@@ -14,6 +14,7 @@ import { PayeesList } from './PayeesList';
 import { Search } from '@desktop-client/components/common/Search';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { usePayeeRuleCounts } from '@desktop-client/hooks/usePayeeRuleCounts';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
@@ -26,7 +27,7 @@ export function MobilePayeesPage() {
   const payees = usePayees();
   const { showUndoNotification } = useUndo();
   const [filter, setFilter] = useState('');
-  const [ruleCounts, setRuleCounts] = useState(new Map<string, number>());
+  const { ruleCounts, isLoading: isRuleCountsLoading } = usePayeeRuleCounts();
   const isLoading = useSelector(
     s => s.payees.isPayeesLoading || s.payees.isCommonPayeesLoading,
   );
@@ -36,16 +37,6 @@ export function MobilePayeesPage() {
     const norm = getNormalisedString(filter);
     return payees.filter(p => getNormalisedString(p.name).includes(norm));
   }, [payees, filter]);
-
-  const refetchRuleCounts = useCallback(async () => {
-    const counts = await send('payees-get-rule-counts');
-    const countsMap = new Map(Object.entries(counts));
-    setRuleCounts(countsMap);
-  }, []);
-
-  useEffect(() => {
-    refetchRuleCounts();
-  }, [refetchRuleCounts]);
 
   const onSearchChange = useCallback((value: string) => {
     setFilter(value);
@@ -142,6 +133,7 @@ export function MobilePayeesPage() {
       <PayeesList
         payees={filteredPayees}
         ruleCounts={ruleCounts}
+        isRuleCountsLoading={isRuleCountsLoading}
         isLoading={isLoading}
         onPayeePress={handlePayeePress}
         onPayeeDelete={handlePayeeDelete}
