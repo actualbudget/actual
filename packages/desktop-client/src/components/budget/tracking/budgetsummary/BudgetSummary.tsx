@@ -25,7 +25,6 @@ import { Saved } from './Saved';
 import { useTrackingBudget } from '@desktop-client/components/budget/tracking/TrackingBudgetContext';
 import { NotesButton } from '@desktop-client/components/NotesButton';
 import { useLocale } from '@desktop-client/hooks/useLocale';
-import { usePayPeriodConfig } from '@desktop-client/hooks/usePayPeriodConfig';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 
@@ -58,7 +57,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
     ? SvgArrowButtonDown1
     : SvgArrowButtonUp1;
 
-  const config = usePayPeriodConfig();
+  const config = monthUtils.getPayPeriodConfig();
   const displayMonth = monthUtils.getMonthDateRange(month, config, locale);
 
   return (

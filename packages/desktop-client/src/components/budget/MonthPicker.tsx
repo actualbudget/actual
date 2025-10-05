@@ -17,7 +17,6 @@ import { type MonthBounds } from './MonthsContext';
 
 import { Link } from '@desktop-client/components/common/Link';
 import { useLocale } from '@desktop-client/hooks/useLocale';
-import { usePayPeriodConfig } from '@desktop-client/hooks/usePayPeriodConfig';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 type MonthPickerProps = {
@@ -37,7 +36,6 @@ export const MonthPicker = ({
 }: MonthPickerProps) => {
   const locale = useLocale();
   const { t } = useTranslation();
-  const config = usePayPeriodConfig();
   const [hoverId, setHoverId] = useState(null);
   const [targetMonthCount, setTargetMonthCount] = useState(12);
 
@@ -132,6 +130,7 @@ export const MonthPicker = ({
           </View>
         </Link>
         {range.map((month, idx) => {
+          const config = monthUtils.getPayPeriodConfig();
           const displayLabel = monthUtils.getMonthDisplayName(
             month,
             config,
