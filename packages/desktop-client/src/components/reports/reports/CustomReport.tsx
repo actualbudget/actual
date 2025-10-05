@@ -256,6 +256,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const [showUncategorized, setShowUncategorized] = useState(
     loadReport.showUncategorized,
   );
+  const [trimIntervals, setTrimIntervals] = useState(loadReport.trimIntervals);
   const [graphType, setGraphType] = useState(loadReport.graphType);
 
   const [dateRange, setDateRange] = useState(loadReport.dateRange);
@@ -435,6 +436,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       showOffBudget,
       showHiddenCategories,
       showUncategorized,
+      trimIntervals,
       balanceTypeOp,
       sortByOp,
       firstDayOfWeekIdx,
@@ -451,6 +453,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     showOffBudget,
     showHiddenCategories,
     showUncategorized,
+    trimIntervals,
     sortByOp,
     firstDayOfWeekIdx,
   ]);
@@ -469,6 +472,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       showOffBudget,
       showHiddenCategories,
       showUncategorized,
+      trimIntervals,
       groupBy,
       balanceTypeOp,
       sortByOp,
@@ -493,6 +497,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     showOffBudget,
     showHiddenCategories,
     showUncategorized,
+    trimIntervals,
     sortByOp,
     graphType,
     firstDayOfWeekIdx,
@@ -519,6 +524,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     showHiddenCategories,
     includeCurrentInterval,
     showUncategorized,
+    trimIntervals,
     graphType,
     conditions,
     conditionsOp,
@@ -664,6 +670,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     setShowHiddenCategories(input.showHiddenCategories);
     setIncludeCurrentInterval(input.includeCurrentInterval);
     setShowUncategorized(input.showUncategorized);
+    setTrimIntervals(input.trimIntervals);
     setGraphType(input.graphType);
     onApplyFilter(null);
     (input.conditions || []).forEach(condition => onApplyFilter(condition));
@@ -804,6 +811,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
             setShowHiddenCategories={setShowHiddenCategories}
             setIncludeCurrentInterval={setIncludeCurrentInterval}
             setShowUncategorized={setShowUncategorized}
+            setTrimIntervals={setTrimIntervals}
             setSelectedCategories={setSelectedCategories}
             onChangeDates={onChangeDates}
             onReportChange={onReportChange}
