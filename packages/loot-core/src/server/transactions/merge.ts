@@ -1,5 +1,7 @@
 import { type TransactionEntity } from '../../types/models';
+import { aqlQuery } from '../aql';
 import * as db from '../db';
+import { q } from 'loot-core/shared/query';
 
 export async function mergeTransactions(
   transactions: Pick<TransactionEntity, 'id'>[],
@@ -15,8 +17,17 @@ export async function mergeTransactions(
 
   // get most recent transactions
   const [a, b]: TransactionEntity[] = await Promise.all(
-    txIds.map(db.getTransaction),
+    txIds.map(async id => {
+      const { data } = await aqlQuery(
+        q('transactions')
+          .filter({ id })
+          .select('*')
+          .options({ splits: 'grouped' }),
+      );
+      return data[0];
+    }),
   );
+
   if (!a || !b) {
     throw new Error('One of the provided transactions does not exist');
   } else if (a.amount !== b.amount) {
@@ -24,17 +35,40 @@ export async function mergeTransactions(
   }
   const { keep, drop } = determineKeepDrop(a, b);
 
-  await Promise.all([
+  const promises = [
     db.updateTransaction({
       id: keep.id,
-      payee: keep.payee || drop.payee,
-      category: keep.category || drop.category,
-      notes: keep.notes || drop.notes,
-      cleared: keep.cleared || drop.cleared,
-      reconciled: keep.reconciled || drop.reconciled,
+      payee: keep.payee ?? drop.payee,
+      category: keep.category ?? drop.category,
+      notes: keep.notes ?? drop.notes,
+      cleared: keep.cleared ?? drop.cleared,
+      reconciled: keep.reconciled ?? drop.reconciled,
+      is_parent: keep.is_parent || drop.is_parent,
     } as TransactionEntity),
     db.deleteTransaction(drop),
-  ]);
+  ];
+
+  // if drop has subtransactions and keep does not re-parent the subtransactions
+  if (!keep.is_parent && drop.is_parent) {
+    const updateSubTransactionPromises = drop.subtransactions?.map(t =>
+      db.updateTransaction({
+        id: t.id,
+        parent_id: keep.id,
+      } as TransactionEntity),
+    ) ?? [];
+    promises.push(...updateSubTransactionPromises);
+  }
+
+  // if both have subtransactions delete the ones from drop
+  else if (keep.is_parent && drop.is_parent) {
+    const deleteSubTransactionPromises = drop.subtransactions?.map(t =>
+      db.deleteTransaction(t),
+    ) ?? [];
+    promises.push(...deleteSubTransactionPromises);
+  }
+
+  await Promise.all(promises);
+
   return keep.id;
 }
 
