@@ -162,7 +162,6 @@ __metadata:
     cross-env: "npm:^10.1.0"
     date-fns: "npm:^4.1.0"
     downshift: "npm:9.0.10"
-    focus-visible: "npm:^4.1.5"
     i18next: "npm:^25.5.3"
     i18next-parser: "npm:^9.3.0"
     i18next-resources-to-backend: "npm:^1.2.1"
@@ -11779,13 +11778,6 @@ __metadata:
   version: 1.1.0
   resolution: "fn.name@npm:1.1.0"
   checksum: 10/000198af190ae02f0138ac5fa4310da733224c628e0230c81e3fff7c4e094af7e0e8bb9f4357cabd21db601759d89f3445da744afbae20623cfa41edf3888397
-  languageName: node
-  linkType: hard
-
-"focus-visible@npm:^4.1.5":
-  version: 4.1.5
-  resolution: "focus-visible@npm:4.1.5"
-  checksum: 10/25abdf16096f4140cc9f7d3c691b3a429a8f6d3c95c5f5ca8869ebc8792662208e1efcc18cc80239702b15cd9d609aefb457c7204e1ebf27e9b82e5366a24105
   languageName: node
   linkType: hard
 
