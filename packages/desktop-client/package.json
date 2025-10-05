@@ -68,7 +68,7 @@
     "recharts": "^2.15.3",
     "rehype-external-links": "^3.0.0",
     "remark-gfm": "^4.0.1",
-    "rollup-plugin-visualizer": "^5.14.0",
+    "rollup-plugin-visualizer": "^6.0.4",
     "sass": "^1.93.2",
     "usehooks-ts": "^3.1.1",
     "uuid": "^13.0.0",

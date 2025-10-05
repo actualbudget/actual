@@ -197,7 +197,7 @@ __metadata:
     recharts: "npm:^2.15.3"
     rehype-external-links: "npm:^3.0.0"
     remark-gfm: "npm:^4.0.1"
-    rollup-plugin-visualizer: "npm:^5.14.0"
+    rollup-plugin-visualizer: "npm:^6.0.4"
     sass: "npm:^1.93.2"
     usehooks-ts: "npm:^3.1.1"
     uuid: "npm:^13.0.0"
@@ -14430,7 +14430,7 @@ __metadata:
     npm-run-all: "npm:^4.1.5"
     path-browserify: "npm:^1.0.1"
     peggy: "npm:3.0.2"
-    rollup-plugin-visualizer: "npm:^6.0.3"
+    rollup-plugin-visualizer: "npm:^6.0.4"
     slash: "npm:3.0.0"
     stream-browserify: "npm:^3.0.0"
     ts-node: "npm:^10.9.2"
@@ -16265,7 +16265,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"open@npm:^8.0.0, open@npm:^8.4.0":
+"open@npm:^8.0.0":
   version: 8.4.2
   resolution: "open@npm:8.4.2"
   dependencies:
@@ -18258,31 +18258,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup-plugin-visualizer@npm:^5.14.0":
-  version: 5.14.0
-  resolution: "rollup-plugin-visualizer@npm:5.14.0"
-  dependencies:
-    open: "npm:^8.4.0"
-    picomatch: "npm:^4.0.2"
-    source-map: "npm:^0.7.4"
-    yargs: "npm:^17.5.1"
-  peerDependencies:
-    rolldown: 1.x
-    rollup: 2.x || 3.x || 4.x
-  peerDependenciesMeta:
-    rolldown:
-      optional: true
-    rollup:
-      optional: true
-  bin:
-    rollup-plugin-visualizer: dist/bin/cli.js
-  checksum: 10/c892a3d36bfa7a26507b8cc0c4c29763ec40de8585115e6655154c2ff35e4bfabc877739e1b9927bb01231b1c51d7dd6b0f2f9c5898826efcbd2dcd60c5d2b73
-  languageName: node
-  linkType: hard
-
-"rollup-plugin-visualizer@npm:^6.0.3":
-  version: 6.0.3
-  resolution: "rollup-plugin-visualizer@npm:6.0.3"
+"rollup-plugin-visualizer@npm:^6.0.4":
+  version: 6.0.4
+  resolution: "rollup-plugin-visualizer@npm:6.0.4"
   dependencies:
     open: "npm:^8.0.0"
     picomatch: "npm:^4.0.2"
@@ -18298,7 +18276,7 @@ __metadata:
       optional: true
   bin:
     rollup-plugin-visualizer: dist/bin/cli.js
-  checksum: 10/9497fa7ca8163bbb41e64df8562583a7114d6fa57ca8cc6b5d1682d49b2d4dec2142d6b4c68d71d30d7a83a9ef86640515fdc5b0e70099b41f4c790f443e829c
+  checksum: 10/a9988d530df9bbf8a57f1b61a7d5a756ba8b25e2887b3b1d65113641d395b005e6a3923afb953b45b38727cb8aaa02478193ca6906138ca4a2488db2d50531cf
   languageName: node
   linkType: hard
 
