@@ -23,7 +23,7 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
-import { loadPayPeriodConfigFromPrefs } from 'loot-core/shared/pay-periods';
+import { type PayPeriodConfig } from 'loot-core/shared/pay-periods';
 import { groupById } from 'loot-core/shared/util';
 
 import { BudgetTable, PILL_STYLE } from './BudgetTable';
@@ -48,6 +48,7 @@ import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useOverspentCategories } from '@desktop-client/hooks/useOverspentCategories';
+import { usePayPeriodConfig } from '@desktop-client/hooks/usePayPeriodConfig';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
@@ -71,9 +72,7 @@ export function BudgetPage() {
   const budgetType = isBudgetType(budgetTypePref) ? budgetTypePref : 'envelope';
   const spreadsheet = useSpreadsheet();
   const payPeriodFeatureFlagEnabled = useFeatureFlag('payPeriodsEnabled');
-  const [payPeriodFrequency] = useSyncedPref('payPeriodFrequency');
-  const [payPeriodStartDate] = useSyncedPref('payPeriodStartDate');
-  const [payPeriodViewEnabled] = useSyncedPref('showPayPeriods');
+  const config = usePayPeriodConfig();
 
   const currMonth = monthUtils.currentMonth();
   const [startMonth = currMonth, setStartMonthPref] =
@@ -101,33 +100,6 @@ export function BudgetPage() {
 
     init();
   }, [budgetType, startMonth, dispatch, spreadsheet]);
-
-  // Wire pay period config from synced prefs into month utils
-  useEffect(() => {
-    if (!payPeriodFeatureFlagEnabled) {
-      return;
-    }
-
-    console.log('[PayPeriod] Mobile loading pay period config:', {
-      featureFlagEnabled: payPeriodFeatureFlagEnabled,
-      viewEnabled: payPeriodViewEnabled,
-      frequency: payPeriodFrequency,
-      startDate: payPeriodStartDate,
-      timestamp: new Date().toISOString(),
-    });
-
-    // Use the existing validation function that handles type safety
-    loadPayPeriodConfigFromPrefs({
-      showPayPeriods: payPeriodViewEnabled,
-      payPeriodFrequency,
-      payPeriodStartDate,
-    });
-  }, [
-    payPeriodFeatureFlagEnabled,
-    payPeriodViewEnabled,
-    payPeriodFrequency,
-    payPeriodStartDate,
-  ]);
 
   const onBudgetAction = useCallback(
     async (month, type, args) => {
@@ -571,6 +543,14 @@ export function BudgetPage() {
     onToggleHiddenCategories,
   ]);
 
+  // Create memoized pay period config for MonthSelector reactivity
+  const payPeriodConfig = useMemo<PayPeriodConfig | null>(() => {
+    if (!config.enabled) {
+      return null;
+    }
+    return config;
+  }, [config]);
+
   if (!categoryGroups || !initialized) {
     return (
       <View
@@ -599,6 +579,7 @@ export function BudgetPage() {
               onOpenMonthMenu={onOpenBudgetMonthMenu}
               onPrevMonth={onPrevMonth}
               onNextMonth={onNextMonth}
+              payPeriodConfig={payPeriodConfig}
             />
           }
           leftContent={
@@ -986,6 +967,14 @@ function MonthSelector({
   onOpenMonthMenu,
   onPrevMonth,
   onNextMonth,
+  payPeriodConfig,
+}: {
+  month: string;
+  monthBounds: { start: string; end: string };
+  onOpenMonthMenu?: (month: string) => void;
+  onPrevMonth: () => void;
+  onNextMonth: () => void;
+  payPeriodConfig: PayPeriodConfig | null;
 }) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -1028,11 +1017,7 @@ function MonthSelector({
         data-month={month}
       >
         <Text style={styles.underlinedText}>
-          {monthUtils.getMonthDateRange(
-            month,
-            monthUtils.getPayPeriodConfig(),
-            locale,
-          )}
+          {monthUtils.getMonthDateRange(month, payPeriodConfig, locale)}
         </Text>
       </Button>
       <Button

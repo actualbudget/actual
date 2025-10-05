@@ -3,7 +3,6 @@ import { describe, test, expect, beforeEach } from 'vitest';
 import { loadPayPeriodConfigFromPrefs } from 'loot-core/shared/pay-periods';
 
 import {
-  isPayPeriodMonth,
   convertPayPeriodToDateRange,
   createTransactionFilterConditions,
   createAQLTransactionFilter,
@@ -20,12 +19,6 @@ beforeEach(() => {
 });
 
 describe('Pay Period Translation Utilities', () => {
-  test('isPayPeriodMonth correctly identifies pay periods', () => {
-    expect(isPayPeriodMonth('2024-13')).toBe(true);
-    expect(isPayPeriodMonth('2024-14')).toBe(true);
-    expect(isPayPeriodMonth('2024-01')).toBe(false);
-    expect(isPayPeriodMonth('2024-12')).toBe(false);
-  });
 
   test('convertPayPeriodToDateRange converts pay periods to date ranges', () => {
     const range = convertPayPeriodToDateRange('2024-13');

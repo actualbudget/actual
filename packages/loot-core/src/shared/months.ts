@@ -299,11 +299,6 @@ export function bounds(month: DateLike): { start: number; end: number } {
       const period = periods.find(p => p.monthId === monthStr);
 
       if (period) {
-        console.log(`[PayPeriod] Bounds for pay period ${monthStr}:`, {
-          startDate: period.startDate,
-          endDate: period.endDate,
-        });
-
         return {
           start: parseInt(period.startDate.replace(/-/g, '')),
           end: parseInt(period.endDate.replace(/-/g, '')),
@@ -404,9 +399,7 @@ export function _range(
   if (startIsPayPeriod || endIsPayPeriod) {
     // Both are pay periods - generate pay period range directly
     // The presence of pay period IDs IS proof that pay periods are enabled
-    const result = generatePayPeriodRange(startStr, endStr, inclusive);
-    console.log('[PayPeriod] Generated pay period range:', result);
-    return result;
+    return generatePayPeriodRange(startStr, endStr, inclusive);
   }
 
   // Original calendar month logic
@@ -427,64 +420,6 @@ export function _range(
 
 export function range(start: DateLike, end: DateLike): string[] {
   return _range(start, end);
-}
-
-// Helper functions for mixed range handling
-function findFirstPayPeriodForCalendarMonth(
-  calendarMonth: string,
-  config: PayPeriodConfig,
-): string {
-  const year = parseInt(calendarMonth.slice(0, 4));
-  const periods = generatePayPeriods(year, config);
-
-  // Find the first pay period that starts in or overlaps with this calendar month
-  const monthStart = d.startOfMonth(parseDate(calendarMonth + '-01'));
-  const monthEnd = d.endOfMonth(monthStart);
-
-  for (const period of periods) {
-    const periodStart = parseDate(period.startDate);
-    const periodEnd = parseDate(period.endDate);
-
-    // Check if this pay period overlaps with the calendar month
-    if (
-      d.isWithinInterval(periodStart, { start: monthStart, end: monthEnd }) ||
-      d.isWithinInterval(monthStart, { start: periodStart, end: periodEnd })
-    ) {
-      return period.monthId;
-    }
-  }
-
-  // Fallback: return the first pay period of the year
-  return periods[0]?.monthId || `${year}-13`;
-}
-
-function findLastPayPeriodForCalendarMonth(
-  calendarMonth: string,
-  config: PayPeriodConfig,
-): string {
-  const year = parseInt(calendarMonth.slice(0, 4));
-  const periods = generatePayPeriods(year, config);
-
-  // Find the last pay period that starts in or overlaps with this calendar month
-  const monthStart = d.startOfMonth(parseDate(calendarMonth + '-01'));
-  const monthEnd = d.endOfMonth(monthStart);
-
-  let lastMatchingPeriod = periods[periods.length - 1]?.monthId || `${year}-99`;
-
-  for (const period of periods) {
-    const periodStart = parseDate(period.startDate);
-    const periodEnd = parseDate(period.endDate);
-
-    // Check if this pay period overlaps with the calendar month
-    if (
-      d.isWithinInterval(periodStart, { start: monthStart, end: monthEnd }) ||
-      d.isWithinInterval(monthStart, { start: periodStart, end: periodEnd })
-    ) {
-      lastMatchingPeriod = period.monthId;
-    }
-  }
-
-  return lastMatchingPeriod;
 }
 
 export function rangeInclusive(start: DateLike, end: DateLike): string[] {
@@ -763,32 +698,7 @@ export function getMonthDateRange(
     return getMonthLabel(monthId, activeConfig);
   }
 
-  return d.format(_parse(monthId), 'MMMM yy', { locale });
-}
-
-export function resolveMonthRange(
-  monthId: string,
-  config?: PayPeriodConfig,
-): { startDate: Date; endDate: Date; label: string } {
-  if (isPayPeriod(monthId)) {
-    // The presence of pay period ID IS proof that pay periods are enabled
-    const activeConfig = config || getPayPeriodConfig();
-    if (!activeConfig) {
-      throw new Error(
-        `Pay period config not available for '${monthId}'. This should not happen during normal operation.`,
-      );
-    }
-    const startDate = getPayPeriodStartDate(monthId, activeConfig);
-    const endDate = getPayPeriodEndDate(monthId, activeConfig);
-    const label = getPayPeriodLabel(monthId, activeConfig);
-    return { startDate, endDate, label };
-  }
-
-  return {
-    startDate: getCalendarMonthStartDate(monthId),
-    endDate: getCalendarMonthEndDate(monthId),
-    label: getCalendarMonthLabel(monthId),
-  };
+  return nameForMonth(monthId, locale);
 }
 
 export { getPayPeriodConfig, setPayPeriodConfig, generatePayPeriods };

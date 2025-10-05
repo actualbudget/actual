@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import * as d from 'date-fns';
+import memoizeOne from 'memoize-one';
 
 import { parseDate, dayFromDate } from './date-utils';
 
@@ -14,33 +15,12 @@ export interface PayPeriodConfig {
 // Pay period config will be loaded from database preferences
 let __payPeriodConfig: PayPeriodConfig | null = null;
 
-// Cache for generated pay periods to avoid regenerating them repeatedly
-const payPeriodCache = new Map<
-  string,
-  Array<{
-    monthId: string;
-    startDate: string;
-    endDate: string;
-    label: string;
-  }>
->();
-
 export function getPayPeriodConfig(): PayPeriodConfig | null {
   return __payPeriodConfig;
 }
 
 export function setPayPeriodConfig(config: PayPeriodConfig): void {
   __payPeriodConfig = config;
-
-  // Clear the cache when config changes to ensure we regenerate periods with new settings
-  payPeriodCache.clear();
-
-  console.log('[PayPeriod] Config set:', {
-    enabled: config.enabled,
-    payFrequency: config.payFrequency,
-    startDate: config.startDate,
-    timestamp: new Date().toISOString(),
-  });
 }
 
 export function loadPayPeriodConfigFromPrefs(prefs: {
@@ -318,7 +298,8 @@ export function getPayPeriodLabel(
   return computePayPeriodByIndex(index, config, year).label;
 }
 
-export function generatePayPeriods(
+// Internal implementation without memoization
+function _generatePayPeriodsImpl(
   year: number,
   config: PayPeriodConfig,
 ): Array<{
@@ -332,23 +313,6 @@ export function generatePayPeriods(
   }
   // Trust that if generatePayPeriods is called, pay periods are enabled
   if (!config) return [];
-
-  // Create a cache key based on year and config
-  const cacheKey = `${year}-${config.payFrequency}-${config.startDate}`;
-
-  // Check if we already have this year's periods cached
-  if (payPeriodCache.has(cacheKey)) {
-    console.log(`[PayPeriod] Using cached pay periods for year ${year}`);
-    return payPeriodCache.get(cacheKey)!;
-  }
-
-  console.log(
-    `[PayPeriod] Generating pay periods for year ${year} with config:`,
-    {
-      payFrequency: config.payFrequency,
-      startDate: config.startDate,
-    },
-  );
 
   const results: Array<{
     monthId: string;
@@ -377,13 +341,11 @@ export function generatePayPeriods(
     });
   }
 
-  // Cache the results
-  payPeriodCache.set(cacheKey, results);
-  console.log(
-    `[PayPeriod] Generated and cached ${results.length} pay periods for year ${year}`,
-  );
   return results;
 }
+
+// Memoized version - automatically handles caching based on inputs
+export const generatePayPeriods = memoizeOne(_generatePayPeriodsImpl);
 
 // Pay period navigation functions
 export function nextPayPeriod(monthId: string): string {
@@ -494,45 +456,6 @@ function getMaxPeriodsForYear(config: PayPeriodConfig): number {
 
 function isPayPeriodBefore(month1: string, month2: string): boolean {
   return month1 < month2;
-}
-
-// Helper function to count pay periods per calendar month
-export function getPayPeriodCountForMonth(
-  calendarMonth: string,
-  config: PayPeriodConfig,
-): number {
-  // Trust that if this function is called, pay periods are enabled
-  if (!config) return 0;
-
-  const year = parseInt(calendarMonth.slice(0, 4));
-  const month = parseInt(calendarMonth.slice(5, 7));
-
-  if (
-    !Number.isFinite(year) ||
-    !Number.isFinite(month) ||
-    month < 1 ||
-    month > 12
-  ) {
-    return 0;
-  }
-
-  const periods = generatePayPeriods(year, config);
-  let count = 0;
-
-  for (const period of periods) {
-    const startDate = parseDate(period.startDate);
-
-    // Check if this pay period starts in the calendar month
-    // A pay period belongs to the month where it starts, not where it ends
-    const monthStart = d.startOfMonth(parseDate(calendarMonth + '-01'));
-    const monthEnd = d.endOfMonth(monthStart);
-
-    if (d.isWithinInterval(startDate, { start: monthStart, end: monthEnd })) {
-      count++;
-    }
-  }
-
-  return count;
 }
 
 // Helper function to get pay period number within a calendar month

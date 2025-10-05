@@ -7,19 +7,12 @@ export type DateRange = {
 };
 
 /**
- * Checks if a month string represents a pay period (YYYY-MM where MM > 12)
- */
-export function isPayPeriodMonth(month: string): boolean {
-  return isPayPeriod(month);
-}
-
-/**
  * Converts a pay period month to a date range
  * @param month Pay period month like '2024-13'
  * @returns Object with start and end dates in YYYY-MM-DD format
  */
 export function convertPayPeriodToDateRange(month: string): DateRange {
-  if (!isPayPeriodMonth(month)) {
+  if (!isPayPeriod(month)) {
     throw new Error(`Invalid pay period month: ${month}`);
   }
 
@@ -58,7 +51,7 @@ export function createTransactionFilterConditions(
     { field: 'category', op: 'is', value: categoryId, type: 'id' },
   ];
 
-  if (isPayPeriodMonth(month)) {
+  if (isPayPeriod(month)) {
     // For pay periods, use date range filtering
     const dateRange = convertPayPeriodToDateRange(month);
     return [
@@ -88,7 +81,7 @@ export function createTransactionFilterConditions(
  * @returns AQL filter object
  */
 export function createAQLTransactionFilter(month: string, categoryId: string) {
-  if (isPayPeriodMonth(month)) {
+  if (isPayPeriod(month)) {
     // For pay periods, use date range filtering instead of $month transform
     const dateRange = convertPayPeriodToDateRange(month);
     return {

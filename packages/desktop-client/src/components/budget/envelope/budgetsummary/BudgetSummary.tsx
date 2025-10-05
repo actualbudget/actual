@@ -22,6 +22,7 @@ import { TotalsList } from './TotalsList';
 import { useEnvelopeBudget } from '@desktop-client/components/budget/envelope/EnvelopeBudgetContext';
 import { NotesButton } from '@desktop-client/components/NotesButton';
 import { useLocale } from '@desktop-client/hooks/useLocale';
+import { usePayPeriodConfig } from '@desktop-client/hooks/usePayPeriodConfig';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 
@@ -59,7 +60,7 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
     ? SvgArrowButtonDown1
     : SvgArrowButtonUp1;
 
-  const config = monthUtils.getPayPeriodConfig();
+  const config = usePayPeriodConfig();
   const displayMonth = monthUtils.getMonthDateRange(month, config, locale);
   const { t } = useTranslation();
 

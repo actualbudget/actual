@@ -33,6 +33,7 @@ import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { usePayPeriodConfig } from '@desktop-client/hooks/usePayPeriodConfig';
 import { createTransactionFilterConditions } from '@desktop-client/hooks/usePayPeriodTranslation';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
@@ -84,9 +85,7 @@ function BudgetInner(props: BudgetInnerProps) {
   });
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const payPeriodFeatureFlagEnabled = useFeatureFlag('payPeriodsEnabled');
-  const [payPeriodFrequency] = useSyncedPref('payPeriodFrequency');
-  const [payPeriodStartDate] = useSyncedPref('payPeriodStartDate');
-  const [payPeriodViewEnabled] = useSyncedPref('showPayPeriods');
+  const config = usePayPeriodConfig();
   const [maxMonthsPref] = useGlobalPref('maxMonths');
   const maxMonths = maxMonthsPref || 1;
   const [initialized, setInitialized] = useState(false);
@@ -118,26 +117,13 @@ function BudgetInner(props: BudgetInnerProps) {
       return;
     }
 
-    console.log('[PayPeriod] Frontend loading pay period config:', {
-      featureFlagEnabled: payPeriodFeatureFlagEnabled,
-      viewEnabled: payPeriodViewEnabled,
-      frequency: payPeriodFrequency,
-      startDate: payPeriodStartDate,
-      timestamp: new Date().toISOString(),
-    });
-
     // Use the existing validation function that handles type safety
     loadPayPeriodConfigFromPrefs({
-      showPayPeriods: payPeriodViewEnabled,
-      payPeriodFrequency,
-      payPeriodStartDate,
+      showPayPeriods: config.enabled ? 'true' : 'false',
+      payPeriodFrequency: config.payFrequency,
+      payPeriodStartDate: config.startDate,
     });
-  }, [
-    payPeriodFeatureFlagEnabled,
-    payPeriodViewEnabled,
-    payPeriodFrequency,
-    payPeriodStartDate,
-  ]);
+  }, [payPeriodFeatureFlagEnabled, config]);
 
   // Reset view to current month when toggling between pay periods and calendar months
   useEffect(() => {
@@ -150,20 +136,18 @@ function BudgetInner(props: BudgetInnerProps) {
       return;
     }
 
-    if (payPeriodViewEnabled === 'false') {
+    if (!config.enabled) {
       // When pay periods are disabled, reset to current calendar month
       // This ensures we don't have a pay period ID in startMonthPref
       const calendarMonth = monthUtils.currentMonth();
-      console.log('[PayPeriod] Toggled off, resetting to calendar month:', calendarMonth);
       setStartMonthPref(calendarMonth);
-    } else if (payPeriodViewEnabled === 'true') {
+    } else if (config.enabled) {
       // When pay periods are enabled, reset to current pay period
       // This ensures we navigate to the correct pay period, not a stale calendar month
       const currentPayPeriod = monthUtils.currentMonth();
-      console.log('[PayPeriod] Toggled on, resetting to current pay period:', currentPayPeriod);
       setStartMonthPref(currentPayPeriod);
     }
-  }, [payPeriodFeatureFlagEnabled, payPeriodViewEnabled, setStartMonthPref, initialized]);
+  }, [payPeriodFeatureFlagEnabled, config.enabled, setStartMonthPref, initialized]);
 
   // Refresh budget bounds when pay period config changes or when toggling pay periods on
   useEffect(() => {
@@ -182,28 +166,14 @@ function BudgetInner(props: BudgetInnerProps) {
     // 1. Toggling pay periods on (to ensure pay period sheets exist)
     // 2. Config changes while pay periods are enabled (frequency or start date)
     const shouldRefresh =
-      payPeriodViewEnabled === 'true' &&
-      (payPeriodFrequency || payPeriodStartDate);
+      config.enabled && (config.payFrequency || config.startDate);
 
     if (shouldRefresh) {
-      console.log('[PayPeriod] Config changed or toggled on, refreshing budget bounds:', {
-        viewEnabled: payPeriodViewEnabled,
-        frequency: payPeriodFrequency,
-        startDate: payPeriodStartDate,
-      });
-
       send('get-budget-bounds').then(({ start, end }) => {
-        console.log('[PayPeriod] Budget bounds refreshed:', { start, end });
         setBounds({ start, end });
       });
     }
-  }, [
-    payPeriodFeatureFlagEnabled,
-    payPeriodViewEnabled,
-    payPeriodFrequency,
-    payPeriodStartDate,
-    initialized,
-  ]);
+  }, [payPeriodFeatureFlagEnabled, config, initialized]);
 
   useEffect(() => {
     send('get-budget-bounds').then(({ start, end }) => {
@@ -424,7 +394,6 @@ function BudgetInner(props: BudgetInnerProps) {
 
   // Derive the month to render based on pay period view toggle
   const derivedStartMonth = useMemo(() => {
-    const config = monthUtils.getPayPeriodConfig();
     const usePayPeriods = config?.enabled;
 
     if (!usePayPeriods) return startMonth;
@@ -436,7 +405,7 @@ function BudgetInner(props: BudgetInnerProps) {
     // For calendar months, use the current year for pay periods
     const currentYear = parseInt(startMonth.slice(0, 4));
     return String(currentYear) + '-13';
-  }, [startMonth, payPeriodViewEnabled]);
+  }, [startMonth, config.enabled]);
 
   // With enhanced comparison functions, we can use original bounds
   // The getValidMonthBounds function will handle mixed types safely
