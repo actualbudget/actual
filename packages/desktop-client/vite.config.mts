@@ -178,6 +178,7 @@ export default defineConfig(async ({ mode }) => {
       addWatchers(),
       react({
         babel: {
+          // n.b. Must be a string to ensure plugin resolution order. See https://github.com/actualbudget/actual/pull/5853
           plugins: ['babel-plugin-react-compiler'],
         },
       }),
