@@ -25,7 +25,7 @@
     "@types/react-grid-layout": "^1",
     "@types/react-modal": "^3.16.3",
     "@use-gesture/react": "^10.3.1",
-    "@vitejs/plugin-basic-ssl": "^1.2.0",
+    "@vitejs/plugin-basic-ssl": "^2.1.0",
     "@vitejs/plugin-react": "^5.0.4",
     "auto-text-size": "^0.2.3",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
