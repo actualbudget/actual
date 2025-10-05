@@ -158,7 +158,6 @@ __metadata:
     "@vitejs/plugin-react": "npm:^5.0.4"
     auto-text-size: "npm:^0.2.3"
     babel-plugin-react-compiler: "npm:19.1.0-rc.3"
-    chokidar: "npm:^3.6.0"
     cmdk: "npm:^1.1.1"
     cross-env: "npm:^7.0.3"
     date-fns: "npm:^4.1.0"
@@ -8781,7 +8780,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chokidar@npm:^3.5.2, chokidar@npm:^3.5.3, chokidar@npm:^3.6.0":
+"chokidar@npm:^3.5.2, chokidar@npm:^3.5.3":
   version: 3.6.0
   resolution: "chokidar@npm:3.6.0"
   dependencies:
