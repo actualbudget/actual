@@ -159,7 +159,7 @@ __metadata:
     auto-text-size: "npm:^0.2.3"
     babel-plugin-react-compiler: "npm:19.1.0-rc.3"
     cmdk: "npm:^1.1.1"
-    cross-env: "npm:^7.0.3"
+    cross-env: "npm:^10.1.0"
     date-fns: "npm:^4.1.0"
     downshift: "npm:7.6.2"
     focus-visible: "npm:^4.1.5"
@@ -2297,6 +2297,13 @@ __metadata:
   version: 0.4.0
   resolution: "@emotion/weak-memoize@npm:0.4.0"
   checksum: 10/db5da0e89bd752c78b6bd65a1e56231f0abebe2f71c0bd8fc47dff96408f7065b02e214080f99924f6a3bfe7ee15afc48dad999d76df86b39b16e513f7a94f52
+  languageName: node
+  linkType: hard
+
+"@epic-web/invariant@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@epic-web/invariant@npm:1.0.0"
+  checksum: 10/28b36a7447f60b84f9d6a23571480042170ef4239a577577ad8447f64a2e4f1a4e57e6fe1b592e61534c5ab53ff67776130e6c88a68cbd997eb6e9c9759a5934
   languageName: node
   linkType: hard
 
@@ -7445,7 +7452,7 @@ __metadata:
     "@types/node": "npm:^22.17.0"
     "@types/prompts": "npm:^2.4.9"
     "@typescript-eslint/parser": "npm:^8.45.0"
-    cross-env: "npm:^7.0.3"
+    cross-env: "npm:^10.1.0"
     eslint: "npm:^9.36.0"
     eslint-config-prettier: "npm:^10.1.8"
     eslint-import-resolver-typescript: "npm:^4.4.4"
@@ -9432,15 +9439,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-env@npm:^7.0.3":
-  version: 7.0.3
-  resolution: "cross-env@npm:7.0.3"
+"cross-env@npm:^10.1.0":
+  version: 10.1.0
+  resolution: "cross-env@npm:10.1.0"
   dependencies:
-    cross-spawn: "npm:^7.0.1"
+    "@epic-web/invariant": "npm:^1.0.0"
+    cross-spawn: "npm:^7.0.6"
   bin:
-    cross-env: src/bin/cross-env.js
-    cross-env-shell: src/bin/cross-env-shell.js
-  checksum: 10/e99911f0d31c20e990fd92d6fd001f4b01668a303221227cc5cb42ed155f086351b1b3bd2699b200e527ab13011b032801f8ce638e6f09f854bdf744095e604c
+    cross-env: dist/bin/cross-env.js
+    cross-env-shell: dist/bin/cross-env-shell.js
+  checksum: 10/0e5d8bdefbbcd000460b69755e0eeb22953510abac8375e4f8b638ff7c45406141acfd57b8a4c1d1cf0b5ea42f33451b302062fb9b34408753b4d465e901b845
   languageName: node
   linkType: hard
 
@@ -10004,7 +10012,7 @@ __metadata:
     "@types/fs-extra": "npm:^11"
     better-sqlite3: "npm:^12.4.1"
     copyfiles: "npm:^2.4.1"
-    cross-env: "npm:^7.0.3"
+    cross-env: "npm:^10.1.0"
     electron: "npm:38.0.0"
     electron-builder: "npm:24.13.3"
     fs-extra: "npm:^11.3.0"
@@ -14347,7 +14355,7 @@ __metadata:
     better-sqlite3: "npm:^12.4.1"
     browserify-zlib: "npm:^0.2.0"
     buffer: "npm:^6.0.3"
-    cross-env: "npm:^7.0.3"
+    cross-env: "npm:^10.1.0"
     csv-parse: "npm:^5.6.0"
     csv-stringify: "npm:^6.5.2"
     date-fns: "npm:^4.1.0"

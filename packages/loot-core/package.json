@@ -52,7 +52,7 @@
     "assert": "^2.1.0",
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.1.0",
     "fake-indexeddb": "^3.1.8",
     "fast-check": "3.23.2",
     "i18next": "^25.5.3",

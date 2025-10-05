@@ -30,7 +30,7 @@
     "auto-text-size": "^0.2.3",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "cmdk": "^1.1.1",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.1.0",
     "date-fns": "^4.1.0",
     "downshift": "7.6.2",
     "focus-visible": "^4.1.5",
