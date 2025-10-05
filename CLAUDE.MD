@@ -754,3 +754,146 @@ The Pay Periods system successfully extends Actual's month-based budgeting to su
 5. **Fail Fast**: Clear errors better than silent failures or unsafe fallbacks
 
 This architecture allows users to budget based on their actual pay schedule while maintaining clean separation of concerns and leveraging the strengths of each runtime environment.
+
+---
+
+## Development Commands
+
+### Building the Project
+
+**Build the browser/web version**:
+```bash
+yarn workspace loot-core build:browser
+```
+
+**Build the entire project for browser**:
+```bash
+./bin/package-browser
+```
+
+**Build the desktop version**:
+```bash
+./bin/package-electron
+```
+
+**Build the API package**:
+```bash
+yarn workspace @actual-app/api build
+```
+
+### Running Tests
+
+**Run all tests across all workspaces**:
+```bash
+yarn test
+```
+
+**Run tests for a specific workspace**:
+```bash
+yarn workspace loot-core test
+```
+
+**Run specific test file(s) with vitest**:
+```bash
+yarn workspace loot-core vitest run src/shared/pay-periods.test.ts
+yarn workspace loot-core vitest run src/shared/months.test.ts
+```
+
+**Run tests in watch mode**:
+```bash
+yarn workspace loot-core vitest watch src/shared/pay-periods.test.ts
+```
+
+**Run tests matching a pattern**:
+```bash
+yarn workspace loot-core vitest run --grep "pay period"
+```
+
+### Development Workflow
+
+**Start the browser development server**:
+```bash
+yarn start:browser
+# This runs both:
+# - loot-core watch:browser (backend)
+# - @actual-app/web start:browser (frontend)
+```
+
+**Start the desktop development environment**:
+```bash
+yarn start:desktop
+# This runs:
+# - loot-core watch:node (backend)
+# - @actual-app/web watch (web UI)
+# - desktop-electron watch (Electron wrapper)
+```
+
+**Start the sync server**:
+```bash
+yarn start:server
+```
+
+### Quick Testing Workflow for Pay Periods
+
+When making changes to pay period code:
+
+1. **Run unit tests** (fastest):
+```bash
+yarn workspace loot-core vitest run src/shared/pay-periods.test.ts
+```
+
+2. **Run integration tests**:
+```bash
+yarn workspace loot-core vitest run src/shared/months.test.ts
+```
+
+3. **Build to verify no compile errors**:
+```bash
+yarn workspace loot-core build:browser
+```
+
+4. **Test in the browser** (if UI changes):
+```bash
+yarn start:browser
+# Navigate to http://localhost:3001
+```
+
+### Troubleshooting Build/Test Issues
+
+**Clear build cache**:
+```bash
+rm -rf packages/loot-core/lib-dist/
+yarn workspace loot-core build:browser
+```
+
+**Reset test database** (if tests fail inconsistently):
+```bash
+# Tests use global.emptyDatabase() automatically
+# But if issues persist, check beforeEach hooks
+```
+
+**Check TypeScript errors**:
+```bash
+yarn workspace loot-core tsc --noEmit
+```
+
+### Pre-Commit Checklist
+
+Before committing changes to pay period code:
+
+```bash
+# 1. Run all pay period tests
+yarn workspace loot-core vitest run src/shared/pay-periods.test.ts
+yarn workspace loot-core vitest run src/shared/months.test.ts
+
+# 2. Build successfully
+yarn workspace loot-core build:browser
+
+# 3. Optional: Run full test suite if changing core logic
+yarn workspace loot-core test
+
+# 4. Format code (if project has formatter)
+yarn format  # or yarn lint
+```
+
+---

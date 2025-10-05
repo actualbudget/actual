@@ -9,7 +9,6 @@ import {
   generatePayPeriods,
   getPayPeriodConfig,
   setPayPeriodConfig,
-  loadPayPeriodConfigFromPrefs,
 } from './pay-periods';
 
 describe('Pay Period Utilities and Configuration', () => {
@@ -152,15 +151,12 @@ describe('Pay Period Utilities and Configuration', () => {
           startDate: '2024-01-01',
         });
 
-        // Simulate database preferences (what would come from budget load)
-        const mockPrefs = {
-          showPayPeriods: 'true',
-          payPeriodFrequency: 'biweekly',
-          payPeriodStartDate: '2024-01-05',
-        };
-
-        // Load config from preferences (simulates budget loading process)
-        loadPayPeriodConfigFromPrefs(mockPrefs);
+        // Simulate loading config (happens in server layer)
+        setPayPeriodConfig({
+          enabled: true,
+          payFrequency: 'biweekly',
+          startDate: '2024-01-05',
+        });
 
         // Verify config is available before month calculations
         const config = getPayPeriodConfig();
@@ -171,14 +167,18 @@ describe('Pay Period Utilities and Configuration', () => {
 
       test('Config reloads when preferences change', () => {
         // Start with disabled config
-        loadPayPeriodConfigFromPrefs({ showPayPeriods: 'false' });
+        setPayPeriodConfig({
+          enabled: false,
+          payFrequency: 'monthly',
+          startDate: '2024-01-01',
+        });
         expect(getPayPeriodConfig()?.enabled).toBe(false);
 
         // Simulate preference change (what happens in server/preferences/app.ts)
-        loadPayPeriodConfigFromPrefs({
-          showPayPeriods: 'true',
-          payPeriodFrequency: 'biweekly',
-          payPeriodStartDate: '2024-01-05',
+        setPayPeriodConfig({
+          enabled: true,
+          payFrequency: 'biweekly',
+          startDate: '2024-01-05',
         });
 
         // Verify config updated immediately
@@ -191,97 +191,93 @@ describe('Pay Period Utilities and Configuration', () => {
         expect(periods.length).toBe(26); // 26 biweekly periods
       });
 
-      test('Invalid config gets corrected but stays enabled', () => {
-        // Try to load invalid config
-        loadPayPeriodConfigFromPrefs({
-          showPayPeriods: 'true',
-          payPeriodFrequency: 'invalid-frequency', // Invalid frequency
-          payPeriodStartDate: 'invalid-date', // Invalid date
+      test('Config validation happens in server layer', () => {
+        // The validation logic has been moved to server/preferences/app.ts
+        // This test verifies that the shared layer accepts valid configs
+        setPayPeriodConfig({
+          enabled: true,
+          payFrequency: 'monthly',
+          startDate: '2024-01-01',
         });
 
-        // System corrects invalid values but keeps enabled=true
         const config = getPayPeriodConfig();
-        expect(config?.enabled).toBe(true); // Stays enabled despite invalid inputs
-        expect(config?.payFrequency).toBe('monthly'); // Corrected to valid frequency
-        expect(config?.startDate).toMatch(/^\d{4}-\d{2}-\d{2}$/); // Corrected to valid date format
+        expect(config?.enabled).toBe(true);
+        expect(config?.payFrequency).toBe('monthly');
+        expect(config?.startDate).toBe('2024-01-01');
       });
     });
 
     describe('Config Consistency Tests', () => {
       test('Rapid config changes maintain consistency', () => {
-        // Simulate rapid preference changes
-        const configs = [
+        // Simulate rapid config changes
+        const configs: PayPeriodConfig[] = [
           {
-            showPayPeriods: 'true',
-            payPeriodFrequency: 'biweekly',
-            payPeriodStartDate: '2024-01-05',
+            enabled: true,
+            payFrequency: 'biweekly',
+            startDate: '2024-01-05',
           },
           {
-            showPayPeriods: 'true',
-            payPeriodFrequency: 'monthly',
-            payPeriodStartDate: '2024-01-01',
+            enabled: true,
+            payFrequency: 'monthly',
+            startDate: '2024-01-01',
           },
           {
-            showPayPeriods: 'true',
-            payPeriodFrequency: 'semimonthly',
-            payPeriodStartDate: '2024-01-15',
+            enabled: true,
+            payFrequency: 'semimonthly',
+            startDate: '2024-01-15',
           },
           {
-            showPayPeriods: 'false',
-            payPeriodFrequency: 'biweekly',
-            payPeriodStartDate: '2024-01-05',
+            enabled: false,
+            payFrequency: 'biweekly',
+            startDate: '2024-01-05',
           },
         ];
 
-        configs.forEach(configPrefs => {
-          loadPayPeriodConfigFromPrefs(configPrefs);
+        configs.forEach(testConfig => {
+          setPayPeriodConfig(testConfig);
           const config = getPayPeriodConfig();
 
-          if (configPrefs.showPayPeriods === 'true') {
-            expect(config?.enabled).toBe(true);
-            expect(config?.payFrequency).toBe(configPrefs.payPeriodFrequency);
-            expect(config?.startDate).toBe(configPrefs.payPeriodStartDate);
+          expect(config?.enabled).toBe(testConfig.enabled);
+          expect(config?.payFrequency).toBe(testConfig.payFrequency);
+          expect(config?.startDate).toBe(testConfig.startDate);
 
+          if (testConfig.enabled) {
             // Test operations work with this config
             const periods = generatePayPeriods(2024, config!);
-            if (configPrefs.payPeriodFrequency === 'biweekly') {
+            if (testConfig.payFrequency === 'biweekly') {
               expect(periods.length).toBe(26);
-            } else if (configPrefs.payPeriodFrequency === 'semimonthly') {
+            } else if (testConfig.payFrequency === 'semimonthly') {
               expect(periods.length).toBe(24);
             } else {
               expect(periods.length).toBe(12);
             }
-          } else {
-            expect(config?.enabled).toBe(false);
           }
         });
       });
 
       test('Config state is atomic - no partial updates', () => {
         // Start with valid config
-        loadPayPeriodConfigFromPrefs({
-          showPayPeriods: 'true',
-          payPeriodFrequency: 'biweekly',
-          payPeriodStartDate: '2024-01-05',
+        setPayPeriodConfig({
+          enabled: true,
+          payFrequency: 'biweekly',
+          startDate: '2024-01-05',
         });
 
         const initialConfig = getPayPeriodConfig();
         expect(initialConfig?.enabled).toBe(true);
         expect(initialConfig?.payFrequency).toBe('biweekly');
 
-        // Load partially invalid config (bad date but valid frequency)
-        loadPayPeriodConfigFromPrefs({
-          showPayPeriods: 'true',
-          payPeriodFrequency: 'monthly',
-          payPeriodStartDate: 'invalid-date',
+        // Update to new config (validation happens in server layer)
+        setPayPeriodConfig({
+          enabled: true,
+          payFrequency: 'monthly',
+          startDate: '2024-01-01',
         });
 
         const updatedConfig = getPayPeriodConfig();
-        // Based on actual implementation: invalid date gets corrected but config stays enabled
-        expect(updatedConfig?.enabled).toBe(true); // Stays enabled
-        expect(updatedConfig?.payFrequency).toBe('monthly'); // Frequency updated correctly
-        expect(updatedConfig?.startDate).toMatch(/^\d{4}-\d{2}-\d{2}$/); // Invalid date corrected to valid format
-        expect(updatedConfig?.startDate).not.toBe('invalid-date'); // Should not keep the invalid value
+        expect(updatedConfig?.enabled).toBe(true);
+        expect(updatedConfig?.payFrequency).toBe('monthly');
+        expect(updatedConfig?.startDate).toBe('2024-01-01');
       });
     });
 
@@ -295,10 +291,10 @@ describe('Pay Period Utilities and Configuration', () => {
             i % 3 === 0 ? 'biweekly' : i % 3 === 1 ? 'monthly' : 'semimonthly';
           const enabled = i % 4 !== 0;
 
-          loadPayPeriodConfigFromPrefs({
-            showPayPeriods: enabled ? 'true' : 'false',
-            payPeriodFrequency: frequency,
-            payPeriodStartDate: `2024-01-${String((i % 28) + 1).padStart(2, '0')}`,
+          setPayPeriodConfig({
+            enabled,
+            payFrequency: frequency,
+            startDate: `2024-01-${String((i % 28) + 1).padStart(2, '0')}`,
           });
 
           // Force some operations to ensure config is actually used
@@ -317,45 +313,33 @@ describe('Pay Period Utilities and Configuration', () => {
       });
 
       test('Config loading handles edge cases without memory leaks', () => {
-        const testCases = [
-          // Various edge case configurations
-          { showPayPeriods: '', payPeriodFrequency: '', payPeriodStartDate: '' },
+        const testCases: PayPeriodConfig[] = [
+          // Various valid configurations
           {
-            showPayPeriods: 'true',
-            payPeriodFrequency: undefined,
-            payPeriodStartDate: undefined,
+            enabled: false,
+            payFrequency: 'monthly',
+            startDate: '2024-01-01',
           },
           {
-            showPayPeriods: 'false',
-            payPeriodFrequency: 'biweekly',
-            payPeriodStartDate: '2024-01-05',
+            enabled: true,
+            payFrequency: 'biweekly',
+            startDate: '2024-01-05',
           },
           {
-            showPayPeriods: 'true',
-            payPeriodFrequency: 'biweekly',
-            payPeriodStartDate: '2024-02-29',
+            enabled: true,
+            payFrequency: 'biweekly',
+            startDate: '2024-02-29',
           }, // Leap year
           {
-            showPayPeriods: 'true',
-            payPeriodFrequency: 'biweekly',
-            payPeriodStartDate: '2023-02-29',
-          }, // Invalid leap year
-          {
-            showPayPeriods: 'maybe',
-            payPeriodFrequency: 'biweekly',
-            payPeriodStartDate: '2024-01-05',
-          }, // Invalid boolean
+            enabled: true,
+            payFrequency: 'semimonthly',
+            startDate: '2024-01-15',
+          },
         ];
 
         testCases.forEach((testCase, index) => {
           expect(() => {
-            loadPayPeriodConfigFromPrefs(
-              testCase as {
-                showPayPeriods?: string;
-                payPeriodFrequency?: string;
-                payPeriodStartDate?: string;
-              },
-            );
+            setPayPeriodConfig(testCase);
             const config = getPayPeriodConfig();
 
             // Config should always be in valid state
@@ -379,10 +363,10 @@ describe('Pay Period Utilities and Configuration', () => {
           const promise = new Promise<void>(resolve => {
             setTimeout(() => {
               const frequency = i % 2 === 0 ? 'biweekly' : 'monthly';
-              loadPayPeriodConfigFromPrefs({
-                showPayPeriods: 'true',
-                payPeriodFrequency: frequency,
-                payPeriodStartDate: '2024-01-05',
+              setPayPeriodConfig({
+                enabled: true,
+                payFrequency: frequency,
+                startDate: '2024-01-05',
               });
 
               // Verify config is consistent

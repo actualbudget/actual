@@ -117,14 +117,6 @@ function BudgetInner(props: BudgetInnerProps) {
       return;
     }
 
-    console.log('[PayPeriod] Frontend loading pay period config:', {
-      featureFlagEnabled: payPeriodFeatureFlagEnabled,
-      viewEnabled: config.enabled,
-      frequency: config.payFrequency,
-      startDate: config.startDate,
-      timestamp: new Date().toISOString(),
-    });
-
     // Use the existing validation function that handles type safety
     loadPayPeriodConfigFromPrefs({
       showPayPeriods: config.enabled ? 'true' : 'false',
@@ -148,13 +140,11 @@ function BudgetInner(props: BudgetInnerProps) {
       // When pay periods are disabled, reset to current calendar month
       // This ensures we don't have a pay period ID in startMonthPref
       const calendarMonth = monthUtils.currentMonth();
-      console.log('[PayPeriod] Toggled off, resetting to calendar month:', calendarMonth);
       setStartMonthPref(calendarMonth);
     } else if (config.enabled) {
       // When pay periods are enabled, reset to current pay period
       // This ensures we navigate to the correct pay period, not a stale calendar month
       const currentPayPeriod = monthUtils.currentMonth();
-      console.log('[PayPeriod] Toggled on, resetting to current pay period:', currentPayPeriod);
       setStartMonthPref(currentPayPeriod);
     }
   }, [payPeriodFeatureFlagEnabled, config.enabled, setStartMonthPref, initialized]);
@@ -179,14 +169,7 @@ function BudgetInner(props: BudgetInnerProps) {
       config.enabled && (config.payFrequency || config.startDate);
 
     if (shouldRefresh) {
-      console.log('[PayPeriod] Config changed or toggled on, refreshing budget bounds:', {
-        viewEnabled: config.enabled,
-        frequency: config.payFrequency,
-        startDate: config.startDate,
-      });
-
       send('get-budget-bounds').then(({ start, end }) => {
-        console.log('[PayPeriod] Budget bounds refreshed:', { start, end });
         setBounds({ start, end });
       });
     }

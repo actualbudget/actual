@@ -5,11 +5,7 @@ import * as db from '../server/db';
 import * as sheet from '../server/sheet';
 
 import * as monthUtils from './months';
-import {
-  loadPayPeriodConfigFromPrefs,
-  setPayPeriodConfig,
-  type PayPeriodConfig,
-} from './pay-periods';
+import { setPayPeriodConfig, type PayPeriodConfig } from './pay-periods';
 
 beforeEach(() => {
   return global.emptyDatabase?.() ?? (() => {});
@@ -327,10 +323,10 @@ describe('Pay Period Integration with Month Utilities', () => {
       await db.insertAccount({ id: 'checking', name: 'Checking Account' });
 
       // Enable pay periods
-      loadPayPeriodConfigFromPrefs({
-        showPayPeriods: 'true',
-        payPeriodFrequency: 'biweekly',
-        payPeriodStartDate: '2024-01-05',
+      setPayPeriodConfig({
+        enabled: true,
+        payFrequency: 'biweekly',
+        startDate: '2024-01-05',
       });
 
       return { groceriesId };
@@ -423,10 +419,10 @@ describe('Pay Period Integration with Month Utilities', () => {
     test('monthFromDate correctly converts transaction dates to pay periods', async () => {
       await setupTestData();
 
-      loadPayPeriodConfigFromPrefs({
-        showPayPeriods: 'true',
-        payPeriodFrequency: 'biweekly',
-        payPeriodStartDate: '2024-01-05',
+      setPayPeriodConfig({
+        enabled: true,
+        payFrequency: 'biweekly',
+        startDate: '2024-01-05',
       });
 
       // Test monthFromDate function which is used in transaction filtering
@@ -484,10 +480,10 @@ describe('Pay Period Integration with Month Utilities', () => {
       const { groceriesId, transportId } = await setupTestData();
 
       // Enable pay periods with biweekly frequency starting 2024-01-05
-      loadPayPeriodConfigFromPrefs({
-        showPayPeriods: 'true',
-        payPeriodFrequency: 'biweekly',
-        payPeriodStartDate: '2024-01-05',
+      setPayPeriodConfig({
+        enabled: true,
+        payFrequency: 'biweekly',
+        startDate: '2024-01-05',
       });
 
       await createAllBudgets();
@@ -572,10 +568,10 @@ describe('Pay Period Integration with Month Utilities', () => {
 
       const { groceriesId } = await setupTestData();
 
-      loadPayPeriodConfigFromPrefs({
-        showPayPeriods: 'true',
-        payPeriodFrequency: 'biweekly',
-        payPeriodStartDate: '2024-01-05',
+      setPayPeriodConfig({
+        enabled: true,
+        payFrequency: 'biweekly',
+        startDate: '2024-01-05',
       });
 
       // Step 1: Create budgets and verify they work
