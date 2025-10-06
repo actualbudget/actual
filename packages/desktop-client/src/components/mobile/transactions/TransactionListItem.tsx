@@ -1,24 +1,41 @@
-import React, {
-  type CSSProperties,
-} from 'react';
+import React, { type CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import {
+  SvgLeftArrow2,
+  SvgRightArrow2,
+  SvgSplit,
+} from '@actual-app/components/icons/v0';
+import {
+  SvgArrowsSynchronize,
+  SvgCalendar3,
+  SvgCheckCircle1,
+  SvgLockClosed,
+} from '@actual-app/components/icons/v2';
+import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
+import { TextOneLine } from '@actual-app/components/text-one-line';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 
 import { isPreviewId } from 'loot-core/shared/transactions';
+import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type AccountEntity,
   type TransactionEntity,
 } from 'loot-core/types/models';
 
-import { lookupName } from './TransactionEdit';
-import { TransactionContent } from './TransactionContent';
+import { lookupName, Status } from './TransactionEdit';
 
+import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
 import { ActionableListBoxItem } from '@desktop-client/components/mobile/ActionableListBoxItem';
 import { useAccount } from '@desktop-client/hooks/useAccount';
+import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
 import { usePayee } from '@desktop-client/hooks/usePayee';
+import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 import { useSelector } from '@desktop-client/redux';
 
 export const ROW_HEIGHT = 60;
@@ -55,7 +72,7 @@ type TransactionListItemProps = {
 export function TransactionListItem({
   value: transaction,
   onPress,
-  onLongPress,
+  onLongPress: _onLongPress,
   onDelete,
 }: TransactionListItemProps) {
   const { t } = useTranslation();
@@ -123,23 +140,119 @@ export function TransactionListItem({
       }
       onAction={() => onPress(transaction)}
     >
-      <TransactionContent
-        transaction={transaction}
-        transferAccount={transferAccount}
-        textStyle={textStyle}
-        isAdded={isAdded}
-        displayPayee={displayPayee}
-        isPreview={isPreview}
-        previewStatus={previewStatus}
-        isParent={isParent}
-        isChild={isChild}
-        isReconciled={isReconciled}
-        isCleared={isCleared}
-        prettyCategory={prettyCategory}
-        specialCategory={specialCategory}
-        notes={notes}
-        amount={amount}
-      />
+      <View
+        style={{
+          flexDirection: 'row',
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 4px',
+        }}
+      >
+        <View style={{ flex: 1 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <PayeeIcons
+              transaction={transaction}
+              transferAccount={transferAccount}
+            />
+            <TextOneLine
+              style={{
+                ...textStyle,
+                fontWeight: isAdded ? '600' : '400',
+                ...(!displayPayee && !isPreview
+                  ? {
+                      color: theme.pageTextLight,
+                      fontStyle: 'italic',
+                    }
+                  : {}),
+              }}
+            >
+              {displayPayee || t('(No payee)')}
+            </TextOneLine>
+          </View>
+          {isPreview ? (
+            <Status status={previewStatus} isSplit={isParent || isChild} />
+          ) : (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginTop: 3,
+              }}
+            >
+              {isReconciled ? (
+                <SvgLockClosed
+                  style={{
+                    width: 11,
+                    height: 11,
+                    color: theme.noticeTextLight,
+                    marginRight: 5,
+                  }}
+                />
+              ) : (
+                <SvgCheckCircle1
+                  style={{
+                    width: 11,
+                    height: 11,
+                    color: isCleared
+                      ? theme.noticeTextLight
+                      : theme.pageTextSubdued,
+                    marginRight: 5,
+                  }}
+                />
+              )}
+              {(isParent || isChild) && (
+                <SvgSplit
+                  style={{
+                    width: 12,
+                    height: 12,
+                    marginRight: 5,
+                  }}
+                />
+              )}
+              <TextOneLine
+                style={{
+                  fontSize: 11,
+                  marginTop: 1,
+                  fontWeight: '400',
+                  color: prettyCategory
+                    ? theme.tableText
+                    : theme.menuItemTextSelected,
+                  fontStyle:
+                    specialCategory || !prettyCategory ? 'italic' : undefined,
+                  textAlign: 'left',
+                }}
+              >
+                {prettyCategory || t('Uncategorized')}
+              </TextOneLine>
+            </View>
+          )}
+          {notes && (
+            <TextOneLine
+              style={{
+                fontSize: 11,
+                marginTop: 4,
+                fontWeight: '400',
+                color: theme.tableText,
+                textAlign: 'left',
+                opacity: 0.85,
+              }}
+            >
+              <NotesTagFormatter notes={notes} />
+            </TextOneLine>
+          )}
+        </View>
+        <View style={{ justifyContent: 'center' }}>
+          <Text
+            style={{
+              ...textStyle,
+              ...makeAmountFullStyle(amount),
+            }}
+          >
+            {integerToCurrency(amount)}
+          </Text>
+        </View>
+      </View>
     </ActionableListBoxItem>
   );
 }
