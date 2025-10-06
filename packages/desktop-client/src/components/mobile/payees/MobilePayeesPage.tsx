@@ -16,12 +16,16 @@ import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayeeRuleCounts } from '@desktop-client/hooks/usePayeeRuleCounts';
 import { usePayees } from '@desktop-client/hooks/usePayees';
-import { useSelector } from '@desktop-client/redux';
+import { useUndo } from '@desktop-client/hooks/useUndo';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 export function MobilePayeesPage() {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const payees = usePayees();
+  const { showUndoNotification } = useUndo();
   const [filter, setFilter] = useState('');
   const { ruleCounts, isLoading: isRuleCountsLoading } = usePayeeRuleCounts();
   const isLoading = useSelector(
@@ -76,6 +80,30 @@ export function MobilePayeesPage() {
     [navigate, ruleCounts],
   );
 
+  const handlePayeeDelete = useCallback(
+    async (payee: PayeeEntity) => {
+      try {
+        await send('payees-batch-change', { deleted: [{ id: payee.id }] });
+        showUndoNotification({
+          message: t('Payee “{{name}}” deleted successfully', {
+            name: payee.name,
+          }),
+        });
+      } catch (error) {
+        console.error('Failed to delete payee:', error);
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'error',
+              message: t('Failed to delete payee. Please try again.'),
+            },
+          }),
+        );
+      }
+    },
+    [dispatch, showUndoNotification, t],
+  );
+
   return (
     <Page header={<MobilePageHeader title={t('Payees')} />} padding={0}>
       <View
@@ -108,6 +136,7 @@ export function MobilePayeesPage() {
         isRuleCountsLoading={isRuleCountsLoading}
         isLoading={isLoading}
         onPayeePress={handlePayeePress}
+        onPayeeDelete={handlePayeeDelete}
       />
     </Page>
   );
