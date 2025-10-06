@@ -71,6 +71,7 @@ export function RulesList({
         aria-label={t('Rules')}
         aria-busy={isLoading || undefined}
         items={rules}
+        dependencies={[rules]}
         style={{
           flex: 1,
           paddingBottom: MOBILE_NAV_HEIGHT,
