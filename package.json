@@ -32,6 +32,8 @@
     "start:browser-backend": "yarn workspace loot-core watch:browser",
     "start:browser-frontend": "yarn workspace @actual-app/web start:browser",
     "build:browser-backend": "yarn workspace loot-core build:browser",
+    "start:ios-client": "yarn build:browser && yarn workspace mobile-client start:ios",
+    "start:android-client": "yarn build:browser && yarn workspace mobile-client start:android",
     "build:server": "yarn build:browser && yarn workspace @actual-app/sync-server build",
     "build:browser": "./bin/package-browser",
     "build:desktop": "./bin/package-electron",

@@ -1,0 +1,23 @@
+{
+  "name": "mobile-client",
+  "version": "25.10.0",
+  "license": "MIT",
+  "files": [
+    "build"
+  ],
+  "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/ios": "^7.4.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3"
+  },
+  "scripts": {
+    "build:ios": "cap sync ios",
+    "build:android": "cap sync android",
+    "build": "yarn build:ios && yarn build:android",
+    "start:ios": "yarn build:ios && cap run ios",
+    "start:android": "yarn build:android && cap run android"
+  }
+}

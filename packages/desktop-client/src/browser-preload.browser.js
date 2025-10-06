@@ -38,9 +38,9 @@ function createBackendWorker() {
     isDev: IS_DEV,
     publicUrl: process.env.PUBLIC_URL,
     hash: process.env.REACT_APP_BACKEND_WORKER_HASH,
-    isSharedArrayBufferOverrideEnabled: localStorage.getItem(
-      'SharedArrayBufferOverride',
-    ),
+    isSharedArrayBufferOverrideEnabled:
+      Platform.env === 'mobile' ||
+      localStorage.getItem('SharedArrayBufferOverride'),
   });
 }
 
