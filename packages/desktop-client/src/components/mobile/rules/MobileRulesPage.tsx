@@ -133,7 +133,7 @@ export function MobileRulesPage() {
         dispatch(
           addNotification({
             notification: {
-              type: 'error',
+              type: 'warning',
               message: t(
                 'This rule could not be deleted because it is linked to a schedule.',
               ),
