@@ -3,13 +3,9 @@ import React, {
   type ComponentPropsWithoutRef,
 } from 'react';
 import { mergeProps } from 'react-aria';
-import { ListBoxItem } from 'react-aria-components';
+import { type ListBoxItem } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
-import {
-  PressResponder,
-  usePress,
-  useLongPress,
-} from '@react-aria/interactions';
+
 
 import { Button } from '@actual-app/components/button';
 import {
@@ -28,6 +24,11 @@ import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import {
+  PressResponder,
+  usePress,
+  useLongPress,
+} from '@react-aria/interactions';
 
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { integerToCurrency } from 'loot-core/shared/util';
@@ -148,7 +149,7 @@ export function TransactionListItem({
 
   const prettyCategory = specialCategory || categoryName;
   const textStyle = getTextStyle({ isPreview });
-  
+
   // Create text content for test compatibility
   const transactionText = `${displayPayee || '(No payee)'}${prettyCategory || 'Uncategorized'}${integerToCurrency(amount)}`;
 
@@ -192,7 +193,16 @@ export function TransactionListItem({
           }}
         >
           {/* Hidden text content for test accessibility */}
-          <span style={{ position: 'absolute', left: '-10000px', top: 'auto', width: '1px', height: '1px', overflow: 'hidden' }}>
+          <span
+            style={{
+              position: 'absolute',
+              left: '-10000px',
+              top: 'auto',
+              width: '1px',
+              height: '1px',
+              overflow: 'hidden',
+            }}
+          >
             {transactionText}
           </span>
           <View style={{ flex: 1 }}>
@@ -295,9 +305,9 @@ export function TransactionListItem({
                 ...makeAmountFullStyle(amount),
               }}
             >
-            {integerToCurrency(amount)}
-          </Text>
-        </View>
+              {integerToCurrency(amount)}
+            </Text>
+          </View>
         </div>
       </PressResponder>
     </ActionableListBoxItem>
