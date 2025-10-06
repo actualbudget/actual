@@ -37,6 +37,7 @@ import {
 } from 'loot-core/types/models';
 
 import { lookupName, Status } from './TransactionEdit';
+import { TransactionContent } from './TransactionContent';
 
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
 import { ActionableListBoxItem } from '@desktop-client/components/mobile/ActionableListBoxItem';
