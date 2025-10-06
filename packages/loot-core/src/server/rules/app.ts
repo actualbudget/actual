@@ -86,7 +86,7 @@ app.method('rule-validate', ruleValidate);
 app.method('rule-add', mutator(addRule));
 app.method('rule-update', mutator(updateRule));
 app.method('rule-delete', mutator(deleteRule));
-app.method('rule-delete-all', mutator(deleteAllRules));
+app.method('rule-delete-all', mutator(undoable(deleteAllRules)));
 app.method('rule-apply-actions', mutator(undoable(applyRuleActions)));
 app.method('rule-add-payee-rename', mutator(addRulePayeeRename));
 app.method('rules-get', getRules);
