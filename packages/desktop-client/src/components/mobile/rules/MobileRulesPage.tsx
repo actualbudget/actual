@@ -5,7 +5,8 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send, listen } from 'loot-core/platform/client/fetch';
+import * as undo from 'loot-core/platform/client/undo';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { q } from 'loot-core/shared/query';
 import { type RuleEntity } from 'loot-core/types/models';
@@ -94,6 +95,20 @@ export function MobileRulesPage() {
 
   useEffect(() => {
     loadRules();
+  }, [loadRules]);
+
+  // Listen for undo events to refresh rules list
+  useEffect(() => {
+    const onUndo = () => {
+      loadRules();
+    };
+
+    const lastUndoEvent = undo.getUndoState('undoEvent');
+    if (lastUndoEvent) {
+      onUndo();
+    }
+
+    return listen('undo-event', onUndo);
   }, [loadRules]);
 
   const handleRulePress = useCallback(
