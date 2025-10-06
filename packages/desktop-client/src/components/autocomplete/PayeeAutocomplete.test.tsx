@@ -44,11 +44,25 @@ function makePayee(name: string, options?: { favorite: boolean }): PayeeEntity {
 }
 
 function extractPayeesAndHeaderNames(screen: Screen) {
-  return [
-    ...screen
-      .getByTestId('autocomplete')
-      .querySelectorAll(`${PAYEE_SELECTOR}, ${PAYEE_SECTION_SELECTOR}`),
-  ]
+  const autocompleteElement = screen.getByTestId('autocomplete');
+
+  // Get all elements that match either selector, but query them separately
+  // and then sort by their position in the DOM to maintain document order
+  const headers = [
+    ...autocompleteElement.querySelectorAll(PAYEE_SECTION_SELECTOR),
+  ];
+  const items = [...autocompleteElement.querySelectorAll(PAYEE_SELECTOR)];
+
+  // Combine all elements and sort by their position in the DOM
+  const allElements = [...headers, ...items];
+  allElements.sort((a, b) => {
+    // Compare document position to maintain DOM order
+    return a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING
+      ? -1
+      : 1;
+  });
+
+  return allElements
     .map(e => e.getAttribute('data-testid'))
     .map(firstOrIncorrect);
 }
@@ -154,15 +168,9 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
     ];
     await clickAutocomplete(renderPayeeAutocomplete({ payees }));
 
-    expect(
-      [
-        ...screen
-          .getByTestId('autocomplete')
-          .querySelectorAll(`${PAYEE_SELECTOR}, ${PAYEE_SECTION_SELECTOR}`),
-      ]
-        .map(e => e.getAttribute('data-testid'))
-        .map(firstOrIncorrect),
-    ).toStrictEqual(expectedPayeeOrder);
+    expect(extractPayeesAndHeaderNames(screen)).toStrictEqual(
+      expectedPayeeOrder,
+    );
   });
 
   test('list with more than the maximum favorites only lists favorites', async () => {
