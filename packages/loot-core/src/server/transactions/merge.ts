@@ -1,7 +1,8 @@
+import { q } from 'loot-core/shared/query';
+
 import { type TransactionEntity } from '../../types/models';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
-import { q } from 'loot-core/shared/query';
 
 export async function mergeTransactions(
   transactions: Pick<TransactionEntity, 'id'>[],
@@ -50,20 +51,20 @@ export async function mergeTransactions(
 
   // if drop has subtransactions and keep does not re-parent the subtransactions
   if (!keep.is_parent && drop.is_parent) {
-    const updateSubTransactionPromises = drop.subtransactions?.map(t =>
-      db.updateTransaction({
-        id: t.id,
-        parent_id: keep.id,
-      } as TransactionEntity),
-    ) ?? [];
+    const updateSubTransactionPromises =
+      drop.subtransactions?.map(t =>
+        db.updateTransaction({
+          id: t.id,
+          parent_id: keep.id,
+        } as TransactionEntity),
+      ) ?? [];
     promises.push(...updateSubTransactionPromises);
   }
 
   // if both have subtransactions delete the ones from drop
   else if (keep.is_parent && drop.is_parent) {
-    const deleteSubTransactionPromises = drop.subtransactions?.map(t =>
-      db.deleteTransaction(t),
-    ) ?? [];
+    const deleteSubTransactionPromises =
+      drop.subtransactions?.map(t => db.deleteTransaction(t)) ?? [];
     promises.push(...deleteSubTransactionPromises);
   }
 
