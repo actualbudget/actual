@@ -18,6 +18,7 @@ type PayeesListProps = {
   isRuleCountsLoading?: boolean;
   isLoading?: boolean;
   onPayeePress: (payee: PayeeEntity) => void;
+  onPayeeDelete: (payee: PayeeEntity) => void;
 };
 
 export function PayeesList({
@@ -26,6 +27,7 @@ export function PayeesList({
   isRuleCountsLoading = false,
   isLoading = false,
   onPayeePress,
+  onPayeeDelete,
 }: PayeesListProps) {
   const { t } = useTranslation();
 
@@ -86,6 +88,7 @@ export function PayeesList({
             ruleCount={ruleCounts.get(payee.id) ?? 0}
             isRuleCountLoading={isRuleCountsLoading}
             onAction={() => onPayeePress(payee)}
+            onDelete={() => onPayeeDelete(payee)}
           />
         )}
       </GridList>
