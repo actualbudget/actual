@@ -149,7 +149,6 @@ function TransactionListWithPreviews() {
         ids: [transaction.id],
         onSuccess: () => {
           showUndoNotification({
-            type: 'warning',
             message: t('Successfully deleted transaction.'),
           });
         },
