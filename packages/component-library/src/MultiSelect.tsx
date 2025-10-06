@@ -142,12 +142,9 @@ export function MultiSelect<const Value = string>({
                   disabled: disabledKeys.includes(item[0]),
                 },
           )}
-          getItemStyle={option => {
-            if (value.includes(option.name)) {
-              return { fontWeight: 'bold' };
-            }
-            return {};
-          }}
+          getItemStyle={option =>
+            value.includes(option.name) ? { fontWeight: 'bold' } : {}
+          }
         />
       </Popover>
     </>
