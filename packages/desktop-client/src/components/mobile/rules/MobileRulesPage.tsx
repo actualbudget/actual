@@ -63,25 +63,9 @@ export function MobileRulesPage() {
     return allRules.filter(rule => visibleRuleIdsSet.has(rule.id));
   }, [allRules, visibleRulesParam]);
 
-  const getRuleSchedule = useCallback(
-    (ruleId: string) => {
-      return schedules.find(schedule => schedule.rule === ruleId);
-    },
-    [schedules],
-  );
-
-  const canDeleteRule = useCallback(
-    (ruleId: string) => {
-      const schedule = getRuleSchedule(ruleId);
-      // Rule can be deleted if it has no schedule or if the schedule is completed
-      return !schedule || schedule.completed === true;
-    },
-    [getRuleSchedule],
-  );
-
   const filteredRules = useMemo(() => {
     const rules = visibleRules.filter(rule => {
-      const schedule = getRuleSchedule(rule.id);
+      const schedule = schedules.find(schedule => schedule.rule === rule.id);
       return schedule ? schedule.completed === false : true;
     });
 
@@ -92,7 +76,7 @@ export function MobileRulesPage() {
             getNormalisedString(filter),
           ),
         );
-  }, [visibleRules, filter, filterData, getRuleSchedule]);
+  }, [visibleRules, filter, filterData, schedules]);
 
   const loadRules = useCallback(async () => {
     try {
@@ -128,28 +112,30 @@ export function MobileRulesPage() {
 
   const handleRuleDelete = useCallback(
     async (rule: RuleEntity) => {
-      // Check if rule can be deleted (no active schedule)
-      if (!canDeleteRule(rule.id)) {
-        dispatch(
-          addNotification({
-            notification: {
-              type: 'warning',
-              message: t(
-                'This rule could not be deleted because it is linked to a schedule.',
-              ),
-            },
-          }),
-        );
-        return;
-      }
-
       try {
-        await send('rule-delete', rule.id);
+        const { someDeletionsFailed } = await send('rule-delete-all', [
+          rule.id,
+        ]);
+
+        if (someDeletionsFailed) {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'warning',
+                message: t(
+                  'This rule could not be deleted because it is linked to a schedule.',
+                ),
+              },
+            }),
+          );
+        } else {
+          showUndoNotification({
+            message: t('Rule deleted successfully'),
+          });
+        }
+
         // Refresh the rules list
         await loadRules();
-        showUndoNotification({
-          message: t('Rule deleted successfully'),
-        });
       } catch (error) {
         console.error('Failed to delete rule:', error);
         dispatch(
@@ -162,7 +148,7 @@ export function MobileRulesPage() {
         );
       }
     },
-    [dispatch, showUndoNotification, t, loadRules, canDeleteRule],
+    [dispatch, showUndoNotification, t, loadRules],
   );
 
   return (

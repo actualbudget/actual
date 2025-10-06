@@ -17,7 +17,7 @@ import { ConditionExpression } from '@desktop-client/components/rules/ConditionE
 import { groupActionsBySplitIndex } from '@desktop-client/util/ruleUtils';
 
 type RulesListItemProps = {
-  onDelete?: () => void;
+  onDelete: () => void;
 } & WithRequired<GridListItemProps<RuleEntity>, 'value'>;
 
 export function RulesListItem({
@@ -39,18 +39,16 @@ export function RulesListItem({
       textValue={t('Rule {{id}}', { id: rule.id })}
       style={{ ...styles.mobileListItem, padding: '8px 16px', ...style }}
       actions={
-        onDelete && (
-          <Button
-            variant="bare"
-            onPress={onDelete}
-            style={{
-              color: theme.errorText,
-              width: '100%',
-            }}
-          >
-            <Trans>Delete</Trans>
-          </Button>
-        )
+        <Button
+          variant="bare"
+          onPress={onDelete}
+          style={{
+            color: theme.errorText,
+            width: '100%',
+          }}
+        >
+          <Trans>Delete</Trans>
+        </Button>
       }
       {...props}
     >

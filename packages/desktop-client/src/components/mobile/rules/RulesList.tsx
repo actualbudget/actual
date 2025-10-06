@@ -16,7 +16,7 @@ type RulesListProps = {
   rules: RuleEntity[];
   isLoading: boolean;
   onRulePress: (rule: RuleEntity) => void;
-  onRuleDelete?: (rule: RuleEntity) => void;
+  onRuleDelete: (rule: RuleEntity) => void;
 };
 
 export function RulesList({
@@ -81,7 +81,7 @@ export function RulesList({
           <RulesListItem
             value={rule}
             onAction={() => onRulePress(rule)}
-            onDelete={onRuleDelete ? () => onRuleDelete(rule) : undefined}
+            onDelete={() => onRuleDelete(rule)}
           />
         )}
       </GridList>
