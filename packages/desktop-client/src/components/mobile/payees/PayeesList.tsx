@@ -19,6 +19,8 @@ type PayeesListProps = {
   isLoading?: boolean;
   onPayeePress: (payee: PayeeEntity) => void;
   onPayeeDelete: (payee: PayeeEntity) => void;
+  onPayeeEdit: (payee: PayeeEntity) => void;
+  actionsResetKey?: number;
 };
 
 export function PayeesList({
@@ -28,6 +30,8 @@ export function PayeesList({
   isLoading = false,
   onPayeePress,
   onPayeeDelete,
+  onPayeeEdit,
+  actionsResetKey,
 }: PayeesListProps) {
   const { t } = useTranslation();
 
@@ -84,11 +88,13 @@ export function PayeesList({
       >
         {payee => (
           <PayeesListItem
+            key={`${payee.id}-${actionsResetKey}`}
             value={payee}
             ruleCount={ruleCounts.get(payee.id) ?? 0}
             isRuleCountLoading={isRuleCountsLoading}
             onAction={() => onPayeePress(payee)}
             onDelete={() => onPayeeDelete(payee)}
+            onEdit={() => onPayeeEdit(payee)}
           />
         )}
       </GridList>
