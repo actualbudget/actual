@@ -1,7 +1,15 @@
-import React, { type CSSProperties } from 'react';
+import React, {
+  type CSSProperties,
+  type ComponentPropsWithoutRef,
+} from 'react';
 import { mergeProps } from 'react-aria';
+import { ListBoxItem } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
-
+import {
+  PressResponder,
+  usePress,
+  useLongPress,
+} from '@react-aria/interactions';
 
 import { Button } from '@actual-app/components/button';
 import {
@@ -69,21 +77,24 @@ const getScheduleIconStyle = ({ isPreview }: { isPreview: boolean }) => ({
   color: isPreview ? theme.pageTextLight : theme.menuItemText,
 });
 
-type TransactionListItemProps = {
-  value: TransactionEntity;
+type TransactionListItemProps = ComponentPropsWithoutRef<
+  typeof ListBoxItem<TransactionEntity>
+> & {
   onPress: (transaction: TransactionEntity) => void;
   onLongPress: (transaction: TransactionEntity) => void;
   onDelete?: (transaction: TransactionEntity) => void;
 };
 
 export function TransactionListItem({
-  value: transaction,
   onPress,
   onLongPress,
   onDelete,
+  ...props
 }: TransactionListItemProps) {
   const { t } = useTranslation();
   const { list: categories } = useCategories();
+
+  const { value: transaction } = props;
 
   const payee = usePayee(transaction?.payee || '');
   const displayPayee = useDisplayPayee({ transaction });
@@ -167,8 +178,9 @@ export function TransactionListItem({
       onAction={() => onPress(transaction)}
     >
       <PressResponder {...mergeProps(pressProps, longPressProps)}>
-        <Button
+        <div
           role="button"
+          tabIndex={0}
           aria-label={transactionText}
           style={{
             flexDirection: 'row',
@@ -181,9 +193,13 @@ export function TransactionListItem({
             width: '100%',
             height: ROW_HEIGHT,
             borderRadius: 0,
+            display: 'flex',
           }}
-          onPress={() => {}}
         >
+          {/* Hidden text content for test accessibility */}
+          <span style={{ position: 'absolute', left: '-10000px', top: 'auto', width: '1px', height: '1px', overflow: 'hidden' }}>
+            {transactionText}
+          </span>
           <View style={{ flex: 1 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <PayeeIcons
@@ -287,7 +303,7 @@ export function TransactionListItem({
             {integerToCurrency(amount)}
           </Text>
         </View>
-        </Button>
+        </div>
       </PressResponder>
     </ActionableListBoxItem>
   );
