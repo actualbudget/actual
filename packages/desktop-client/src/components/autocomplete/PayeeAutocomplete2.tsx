@@ -192,15 +192,6 @@ function PayeeList({
   regularPayees,
   accountPayees,
 }: PayeeListProps) {
-  // useAutocompleteFocusOnInput({
-  //   getFocusedKey: state => {
-  //     const keys = Array.from(state.collection.getKeys());
-  //     return keys
-  //       .map(key => state.collection.getItem(key))
-  //       .find(i => i.type === 'item' && i.key !== 'new')?.key || 'new';
-  //   },
-  // });
-
   return (
     <>
       {showCreatePayee && (
