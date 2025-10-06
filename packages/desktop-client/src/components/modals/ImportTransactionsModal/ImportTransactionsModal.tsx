@@ -200,6 +200,9 @@ export function ImportTransactionsModal({
   const [skipLines, setSkipLines] = useState(
     parseInt(prefs[`csv-skip-lines-${accountId}`], 10) || 0,
   );
+  const [trimLines, setTrimLines] = useState(
+    parseInt(prefs[`csv-trim-lines-${accountId}`], 10) || 0,
+  );
   const [inOutMode, setInOutMode] = useState(
     String(prefs[`csv-in-out-mode-${accountId}`]) === 'true',
   );
@@ -466,6 +469,7 @@ export function ImportTransactionsModal({
       delimiter,
       hasHeaderRow,
       skipLines,
+      trimLines,
       fallbackMissingPayeeToMemo,
       importNotes,
     });
@@ -476,6 +480,7 @@ export function ImportTransactionsModal({
     delimiter,
     hasHeaderRow,
     skipLines,
+    trimLines,
     fallbackMissingPayeeToMemo,
     importNotes,
     parse,
@@ -522,6 +527,7 @@ export function ImportTransactionsModal({
       delimiter,
       hasHeaderRow,
       skipLines,
+      trimLines,
       fallbackMissingPayeeToMemo,
       importNotes,
     });
@@ -687,6 +693,7 @@ export function ImportTransactionsModal({
       savePrefs({ [`csv-delimiter-${accountId}`]: delimiter });
       savePrefs({ [`csv-has-header-${accountId}`]: String(hasHeaderRow) });
       savePrefs({ [`csv-skip-lines-${accountId}`]: String(skipLines) });
+      savePrefs({ [`csv-trim-lines-${accountId}`]: String(trimLines) });
       savePrefs({ [`csv-in-out-mode-${accountId}`]: String(inOutMode) });
       savePrefs({ [`csv-out-value-${accountId}`]: String(outValue) });
     }
@@ -1027,6 +1034,36 @@ export function ImportTransactionsModal({
                               delimiter,
                               hasHeaderRow,
                               skipLines: +value,
+                              trimLines,
+                              importNotes,
+                            }),
+                          );
+                        }}
+                        style={{ width: 50 }}
+                      />
+                    </label>
+                    <label
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        gap: 5,
+                        alignItems: 'baseline',
+                      }}
+                    >
+                      <Trans>Trim lines:</Trans>
+                      <Input
+                        type="number"
+                        value={trimLines}
+                        min="0"
+                        onChangeValue={value => {
+                          setTrimLines(+value);
+                          parse(
+                            filename,
+                            getParseOptions('csv', {
+                              delimiter,
+                              hasHeaderRow,
+                              skipLines,
+                              trimLines: +value,
                               importNotes,
                             }),
                           );
@@ -1045,6 +1082,7 @@ export function ImportTransactionsModal({
                             delimiter,
                             hasHeaderRow: !hasHeaderRow,
                             skipLines,
+                            trimLines,
                             importNotes,
                           }),
                         );
@@ -1166,8 +1204,8 @@ export function ImportTransactionsModal({
 
 function getParseOptions(fileType: string, options: ParseFileOptions = {}) {
   if (fileType === 'csv') {
-    const { delimiter, hasHeaderRow, skipLines } = options;
-    return { delimiter, hasHeaderRow, skipLines };
+    const { delimiter, hasHeaderRow, skipLines, trimLines } = options;
+    return { delimiter, hasHeaderRow, skipLines, trimLines };
   }
   if (isOfxFile(fileType)) {
     const { fallbackMissingPayeeToMemo, importNotes } = options;
