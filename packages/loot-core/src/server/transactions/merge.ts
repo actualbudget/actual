@@ -24,17 +24,62 @@ export async function mergeTransactions(
   }
   const { keep, drop } = determineKeepDrop(a, b);
 
-  await Promise.all([
-    db.updateTransaction({
+  // Load subtransactions for both transactions if they are parents
+  const [keepSubtransactions, dropSubtransactions] = await Promise.all([
+    keep.is_parent
+      ? db.all<TransactionEntity>(
+          'SELECT * FROM v_transactions WHERE parent_id = ?',
+          [keep.id],
+        )
+      : Promise.resolve([]),
+    drop.is_parent
+      ? db.all<TransactionEntity>(
+          'SELECT * FROM v_transactions WHERE parent_id = ?',
+          [drop.id],
+        )
+      : Promise.resolve([]),
+  ]);
+
+  // Determine which transaction has subtransactions (split categories)
+  const keepHasSubtransactions = keepSubtransactions.length > 0;
+  const dropHasSubtransactions = dropSubtransactions.length > 0;
+
+  // If keep doesn't have subtransactions but drop does, transfer them
+  if (!keepHasSubtransactions && dropHasSubtransactions) {
+    // Update each subtransaction to point to the kept parent
+    await Promise.all(
+      dropSubtransactions.map(sub =>
+        db.updateTransaction({
+          id: sub.id,
+          parent_id: keep.id,
+        } as TransactionEntity),
+      ),
+    );
+    // Mark keep as a parent transaction
+    await db.updateTransaction({
+      id: keep.id,
+      is_parent: true,
+      category: null, // Parent transactions with splits shouldn't have a category
+      payee: keep.payee || drop.payee,
+      notes: keep.notes || drop.notes,
+      cleared: keep.cleared || drop.cleared,
+      reconciled: keep.reconciled || drop.reconciled,
+    } as TransactionEntity);
+  } else {
+    // Normal merge without subtransactions
+    await db.updateTransaction({
       id: keep.id,
       payee: keep.payee || drop.payee,
       category: keep.category || drop.category,
       notes: keep.notes || drop.notes,
       cleared: keep.cleared || drop.cleared,
       reconciled: keep.reconciled || drop.reconciled,
-    } as TransactionEntity),
-    db.deleteTransaction(drop),
-  ]);
+    } as TransactionEntity);
+  }
+
+  // Delete the dropped transaction (this will also handle cleanup of any remaining subtransactions)
+  await db.deleteTransaction(drop);
+
   return keep.id;
 }
 
