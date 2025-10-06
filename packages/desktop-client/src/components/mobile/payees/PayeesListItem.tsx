@@ -1,26 +1,29 @@
 import React, { memo } from 'react';
-import { GridListItem, type GridListItemProps } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
+import { type GridListItemProps } from 'react-aria-components';
+import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { SvgBookmark } from '@actual-app/components/icons/v1';
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 
 import { type PayeeEntity } from 'loot-core/types/models';
+import { type WithRequired } from 'loot-core/types/util';
 
+import { ActionableGridListItem } from '@desktop-client/components/mobile/ActionableGridListItem';
 import { PayeeRuleCountLabel } from '@desktop-client/components/payees/PayeeRuleCountLabel';
 
 type PayeesListItemProps = {
-  value: PayeeEntity;
   ruleCount: number;
   isRuleCountLoading?: boolean;
-} & Omit<GridListItemProps<PayeeEntity>, 'value'>;
+  onDelete: () => void;
+} & WithRequired<GridListItemProps<PayeeEntity>, 'value'>;
 
 export const PayeesListItem = memo(function PayeeListItem({
   value: payee,
   ruleCount,
   isRuleCountLoading,
+  onDelete,
   ...props
 }: PayeesListItemProps) {
   const { t } = useTranslation();
@@ -30,14 +33,27 @@ export const PayeesListItem = memo(function PayeeListItem({
     : payee.name;
 
   return (
-    <GridListItem
+    <ActionableGridListItem
       id={payee.id}
       value={payee}
       textValue={label}
-      style={styles.mobileListItem}
+      actions={
+        !payee.transfer_acct && (
+          <Button
+            variant="bare"
+            onPress={onDelete}
+            style={{
+              color: theme.errorText,
+              width: '100%',
+            }}
+          >
+            <Trans>Delete</Trans>
+          </Button>
+        )
+      }
       {...props}
     >
-      <SpaceBetween gap={5}>
+      <SpaceBetween gap={5} style={{ flex: 1 }}>
         {payee.favorite && (
           <SvgBookmark
             aria-hidden
@@ -94,6 +110,6 @@ export const PayeesListItem = memo(function PayeeListItem({
           </span>
         </SpaceBetween>
       </SpaceBetween>
-    </GridListItem>
+    </ActionableGridListItem>
   );
 });
