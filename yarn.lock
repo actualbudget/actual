@@ -101,7 +101,7 @@ __metadata:
     "@types/cors": "npm:^2.8.19"
     "@types/express": "npm:^5.0.3"
     "@types/express-actuator": "npm:^1.8.3"
-    "@types/node": "npm:^22.17.0"
+    "@types/node": "npm:^22.18.8"
     "@types/supertest": "npm:^6.0.3"
     "@vitest/coverage-v8": "npm:3.2.4"
     bcrypt: "npm:^6.0.0"
@@ -6727,12 +6727,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^22.17.0":
-  version: 22.17.0
-  resolution: "@types/node@npm:22.17.0"
+"@types/node@npm:^22.18.8":
+  version: 22.18.8
+  resolution: "@types/node@npm:22.18.8"
   dependencies:
     undici-types: "npm:~6.21.0"
-  checksum: 10/f77b0e1c3c00e438b56c726d6b1170d4969c600cc8d4ecf2c2aa7692243a8ff455a3d530760da95e0b6aab059c4605a384b43d18f96646c745ff133c00b84875
+  checksum: 10/dc8e883680993bebf45ac641af6648fd88a8d6ec0e375ff737221eef6c93b6a4d20311dfc070bb595095adbf9a2a411a9b3d9230a763eb744bb1d8ca831c331c
   languageName: node
   linkType: hard
 
@@ -7484,7 +7484,7 @@ __metadata:
   resolution: "actual@workspace:."
   dependencies:
     "@octokit/rest": "npm:^22.0.0"
-    "@types/node": "npm:^22.17.0"
+    "@types/node": "npm:^22.18.8"
     "@types/prompts": "npm:^2.4.9"
     "@typescript-eslint/parser": "npm:^8.45.0"
     cross-env: "npm:^10.1.0"
@@ -14402,7 +14402,7 @@ __metadata:
     "@types/better-sqlite3": "npm:^7.6.13"
     "@types/emscripten": "npm:^1.40.1"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
-    "@types/node": "npm:^22.17.0"
+    "@types/node": "npm:^22.18.8"
     "@types/pegjs": "npm:^0.10.6"
     absurd-sql: "npm:0.0.54"
     adm-zip: "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch"
