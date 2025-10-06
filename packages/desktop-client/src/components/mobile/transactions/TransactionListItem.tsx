@@ -6,7 +6,6 @@ import { mergeProps } from 'react-aria';
 import { type ListBoxItem } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
-
 import { Button } from '@actual-app/components/button';
 import {
   SvgLeftArrow2,
