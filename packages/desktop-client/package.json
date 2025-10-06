@@ -52,7 +52,7 @@
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "19.2.0",
-    "react-error-boundary": "^5.0.0",
+    "react-error-boundary": "^6.0.0",
     "react-grid-layout": "^1.5.2",
     "react-hotkeys-hook": "^4.6.2",
     "react-i18next": "^15.5.3",
