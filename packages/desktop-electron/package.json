@@ -104,6 +104,6 @@
     "cross-env": "^10.1.0",
     "electron": "38.0.0",
     "electron-builder": "24.13.3",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   }
 }
