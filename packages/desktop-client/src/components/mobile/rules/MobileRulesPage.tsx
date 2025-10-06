@@ -21,15 +21,14 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
-
-const PAGE_SIZE = 50;
+import { useUrlParam } from '@desktop-client/hooks/useUrlParam';
 
 export function MobileRulesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [visibleRulesParam] = useUrlParam('visible-rules');
   const [allRules, setAllRules] = useState<RuleEntity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasMoreRules, setHasMoreRules] = useState(true);
   const [filter, setFilter] = useState('');
 
   const { schedules = [] } = useSchedules({
@@ -48,8 +47,19 @@ export function MobileRulesPage() {
     [payees, accounts, schedules, categories],
   );
 
+  const visibleRules = useMemo(() => {
+    if (!visibleRulesParam || visibleRulesParam.trim() === '') {
+      return allRules;
+    }
+
+    const visibleRuleIdsSet = new Set(
+      visibleRulesParam.split(',').map(id => id.trim()),
+    );
+    return allRules.filter(rule => visibleRuleIdsSet.has(rule.id));
+  }, [allRules, visibleRulesParam]);
+
   const filteredRules = useMemo(() => {
-    const rules = allRules.filter(rule => {
+    const rules = visibleRules.filter(rule => {
       const schedule = schedules.find(schedule => schedule.rule === rule.id);
       return schedule ? schedule.completed === false : true;
     });
@@ -61,18 +71,14 @@ export function MobileRulesPage() {
             getNormalisedString(filter),
           ),
         );
-  }, [allRules, filter, filterData, schedules]);
+  }, [visibleRules, filter, filterData, schedules]);
 
-  const loadRules = useCallback(async (append = false) => {
+  const loadRules = useCallback(async () => {
     try {
       setIsLoading(true);
       const result = await send('rules-get');
-      const newRules = result || [];
-
-      setAllRules(prevRules =>
-        append ? [...prevRules, ...newRules] : newRules,
-      );
-      setHasMoreRules(newRules.length === PAGE_SIZE);
+      const rules = result || [];
+      setAllRules(rules);
     } catch (error) {
       console.error('Failed to load rules:', error);
       setAllRules([]);
@@ -91,12 +97,6 @@ export function MobileRulesPage() {
     },
     [navigate],
   );
-
-  const handleLoadMore = useCallback(() => {
-    if (!isLoading && hasMoreRules && !filter) {
-      loadRules(true);
-    }
-  }, [isLoading, hasMoreRules, filter, loadRules]);
 
   const onSearchChange = useCallback(
     (value: string) => {
@@ -140,7 +140,6 @@ export function MobileRulesPage() {
         rules={filteredRules}
         isLoading={isLoading}
         onRulePress={handleRulePress}
-        onLoadMore={handleLoadMore}
       />
     </Page>
   );

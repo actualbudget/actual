@@ -76,17 +76,11 @@ function SummaryInner({ widget }: SummaryInnerProps) {
   const { t } = useTranslation();
   const format = useFormat();
 
-  const [initialStart, initialEnd, initialMode] = calculateTimeRange(
-    widget?.meta?.timeFrame,
-    {
-      start: monthUtils.dayFromDate(monthUtils.currentMonth()),
-      end: monthUtils.currentDay(),
-      mode: 'full',
-    },
+  const [start, setStart] = useState(
+    monthUtils.dayFromDate(monthUtils.currentMonth()),
   );
-  const [start, setStart] = useState(initialStart);
-  const [end, setEnd] = useState(initialEnd);
-  const [mode, setMode] = useState(initialMode);
+  const [end, setEnd] = useState(monthUtils.currentDay());
+  const [mode, setMode] = useState<TimeFrame['mode']>('full');
 
   const dividendFilters: FilterObject = useRuleConditionFilters(
     widget?.meta?.conditions ?? [],
@@ -160,28 +154,47 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     }>
   >([]);
 
-  const [earliestTransaction, _] = useState('');
+  const [earliestTransaction, setEarliestTransaction] = useState('');
+  const [latestTransaction, setLatestTransaction] = useState('');
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   useEffect(() => {
     async function run() {
-      const trans = await send('get-earliest-transaction');
+      const earliestTransaction = await send('get-earliest-transaction');
+      setEarliestTransaction(
+        earliestTransaction
+          ? earliestTransaction.date
+          : monthUtils.currentDay(),
+      );
+
+      const latestTransaction = await send('get-latest-transaction');
+      setLatestTransaction(
+        latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
+      );
+
       const currentMonth = monthUtils.currentMonth();
-      let earliestMonth = trans
-        ? monthUtils.monthFromDate(parseISO(fromDateRepr(trans.date)))
+      let earliestMonth = earliestTransaction
+        ? monthUtils.monthFromDate(
+            parseISO(fromDateRepr(earliestTransaction.date)),
+          )
+        : currentMonth;
+      const latestMonth = latestTransaction
+        ? monthUtils.monthFromDate(
+            parseISO(fromDateRepr(latestTransaction.date)),
+          )
         : currentMonth;
 
       // Make sure the month selects are at least populates with a
       // year's worth of months. We can undo this when we have fancier
       // date selects.
-      const yearAgo = monthUtils.subMonths(monthUtils.currentMonth(), 12);
+      const yearAgo = monthUtils.subMonths(latestMonth, 12);
       if (earliestMonth > yearAgo) {
         earliestMonth = yearAgo;
       }
 
       const allMonths = monthUtils
-        .rangeInclusive(earliestMonth, monthUtils.currentMonth())
+        .rangeInclusive(earliestMonth, latestMonth)
         .map(month => ({
           name: month,
           pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
@@ -192,6 +205,23 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     }
     run();
   }, [locale]);
+
+  useEffect(() => {
+    if (latestTransaction) {
+      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+        widget?.meta?.timeFrame,
+        {
+          start: monthUtils.dayFromDate(monthUtils.currentMonth()),
+          end: monthUtils.currentDay(),
+          mode: 'full',
+        },
+        latestTransaction,
+      );
+      setStart(initialStart);
+      setEnd(initialEnd);
+      setMode(initialMode);
+    }
+  }, [latestTransaction, widget?.meta?.timeFrame]);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -267,6 +297,8 @@ function SummaryInner({ widget }: SummaryInnerProps) {
   const getDivisorFormatted = (contentType: string, value: number) => {
     if (contentType === 'avgPerMonth') {
       return format(value, 'number');
+    } else if (contentType === 'avgPerYear') {
+      return format(value, 'number');
     } else if (contentType === 'avgPerTransact') {
       return format(value, 'number');
     }
@@ -305,6 +337,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
         start={start}
         end={end}
         earliestTransaction={earliestTransaction}
+        latestTransaction={latestTransaction}
         firstDayOfWeekIdx={firstDayOfWeekIdx}
         mode={mode}
         onChangeDates={onChangeDates}
@@ -345,12 +378,18 @@ function SummaryInner({ widget }: SummaryInnerProps) {
             fields={[
               ['sum', t('Sum')],
               ['avgPerMonth', t('Average per month')],
+              ['avgPerYear', t('Average per year')],
               ['avgPerTransact', t('Average per transaction')],
               ['percentage', t('Percentage')],
             ]}
             value={content.type ?? 'sum'}
             onChange={(
-              newValue: 'sum' | 'avgPerMonth' | 'avgPerTransact' | 'percentage',
+              newValue:
+                | 'sum'
+                | 'avgPerMonth'
+                | 'avgPerYear'
+                | 'avgPerTransact'
+                | 'percentage',
             ) =>
               setContent(
                 (prev: SummaryContent) =>
@@ -477,7 +516,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
 }
 
 type OperatorProps = {
-  type: 'sum' | 'avgPerMonth' | 'avgPerTransact' | 'percentage';
+  type: 'sum' | 'avgPerMonth' | 'avgPerYear' | 'avgPerTransact' | 'percentage';
   dividendFilterObject: FilterObject;
   divisorFilterObject: FilterObject;
   fromRange: string;
@@ -535,7 +574,9 @@ function Operator({
           >
             {type === 'avgPerMonth'
               ? t('number of months')
-              : t('number of transactions')}
+              : type === 'avgPerYear'
+                ? t('number of years')
+                : t('number of transactions')}
           </Text>
         </>
       )}

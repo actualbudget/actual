@@ -430,6 +430,21 @@ export function integerToCurrency(
   return formatter.format(amount);
 }
 
+export function integerToCurrencyWithDecimal(integerAmount: IntegerAmount) {
+  // If decimal digits exist, keep them. Otherwise format them as usual.
+  if (integerAmount % 100 !== 0) {
+    return integerToCurrency(
+      integerAmount,
+      getNumberFormat({
+        ...numberFormatConfig,
+        hideFraction: false,
+      }).formatter,
+    );
+  }
+
+  return integerToCurrency(integerAmount);
+}
+
 export function amountToCurrency(amount: Amount): CurrencyAmount {
   return getNumberFormat().formatter.format(amount);
 }

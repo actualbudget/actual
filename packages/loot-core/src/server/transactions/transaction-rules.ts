@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 
+import { logger } from '../../platform/server/log';
 import {
   currentDay,
   addDays,
@@ -157,7 +158,7 @@ export function makeRule(data) {
   try {
     rule = new Rule(ruleModel.toJS(data));
   } catch (e) {
-    console.warn('Invalid rule', e);
+    logger.warn('Invalid rule', e);
     if (e instanceof RuleError) {
       return null;
     }
@@ -408,7 +409,7 @@ export function conditionsToAQL(
         return new Condition(cond.op, cond.field, cond.value, cond.options);
       } catch (e) {
         errors.push(e.type || 'internal');
-        console.log('conditionsToAQL: invalid condition: ' + e.message);
+        logger.log('conditionsToAQL: invalid condition: ' + e.message);
         return null;
       }
     })
@@ -672,7 +673,7 @@ export async function applyActions(
           action.options,
         );
       } catch (e) {
-        console.log('Action error', e);
+        logger.log('Action error', e);
         return null;
       }
     })

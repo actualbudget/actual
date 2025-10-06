@@ -1,5 +1,5 @@
 ---
-description: 
+description:
 globs: *.ts,*.tsx
 alwaysApply: false
 ---
@@ -21,7 +21,7 @@ Naming Conventions
 
 TypeScript Usage
 
-- Use TypeScript for all code; prefer interfaces over types.
+- Use TypeScript for all code; prefer types over interfaces.
 - Avoid enums; use objects or maps instead.
 - Avoid using `any` or `unknown` unless absolutely necessary. Look for type definitions in the codebase instead.
 - Avoid type assertions with `as` or `!`; prefer using `satisfies`.
