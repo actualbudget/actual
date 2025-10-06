@@ -48,7 +48,8 @@ export const PayeesListItem = memo(function PayeeListItem({
               variant="bare"
               onPress={onEdit}
               style={{
-                color: theme.pageText,
+                color: theme.pageTextLink,
+                backgroundColor: theme.buttonPrimaryBackground,
                 flex: 1,
                 borderRightWidth: 1,
                 borderRightColor: theme.tableBorder,
