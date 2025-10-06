@@ -6470,10 +6470,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/emscripten@npm:^1.40.1":
-  version: 1.40.1
-  resolution: "@types/emscripten@npm:1.40.1"
-  checksum: 10/d1aa8b91416c0d8ea7d2f3b99c8c40327350dff632ad98cb67f9df9afa13efd4d755c273b49a37797390a94180c7cc98397bbbe1d8def4ea1d5d3bff9c816ac9
+"@types/emscripten@npm:^1.41.2":
+  version: 1.41.2
+  resolution: "@types/emscripten@npm:1.41.2"
+  checksum: 10/95bc5acddaab2155a1fbe0c816717a2552b8d4df484d4bb8b6962b9f2e65c7a8d81872d6e80d706384608e9ea0cde07f852b3069e12921c2b445c6fb48bd985b
   languageName: node
   linkType: hard
 
@@ -14331,7 +14331,7 @@ __metadata:
     "@swc/core": "npm:^1.13.5"
     "@types/adm-zip": "npm:^0.5.7"
     "@types/better-sqlite3": "npm:^7.6.13"
-    "@types/emscripten": "npm:^1.40.1"
+    "@types/emscripten": "npm:^1.41.2"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/node": "npm:^22.18.8"
     "@types/pegjs": "npm:^0.10.6"
