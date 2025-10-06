@@ -63,9 +63,25 @@ export function MobileRulesPage() {
     return allRules.filter(rule => visibleRuleIdsSet.has(rule.id));
   }, [allRules, visibleRulesParam]);
 
+  const getRuleSchedule = useCallback(
+    (ruleId: string) => {
+      return schedules.find(schedule => schedule.rule === ruleId);
+    },
+    [schedules],
+  );
+
+  const canDeleteRule = useCallback(
+    (ruleId: string) => {
+      const schedule = getRuleSchedule(ruleId);
+      // Rule can be deleted if it has no schedule or if the schedule is completed
+      return !schedule || schedule.completed === true;
+    },
+    [getRuleSchedule],
+  );
+
   const filteredRules = useMemo(() => {
     const rules = visibleRules.filter(rule => {
-      const schedule = schedules.find(schedule => schedule.rule === rule.id);
+      const schedule = getRuleSchedule(rule.id);
       return schedule ? schedule.completed === false : true;
     });
 
@@ -76,7 +92,7 @@ export function MobileRulesPage() {
             getNormalisedString(filter),
           ),
         );
-  }, [visibleRules, filter, filterData, schedules]);
+  }, [visibleRules, filter, filterData, getRuleSchedule]);
 
   const loadRules = useCallback(async () => {
     try {
@@ -112,6 +128,19 @@ export function MobileRulesPage() {
 
   const handleRuleDelete = useCallback(
     async (rule: RuleEntity) => {
+      // Check if rule can be deleted (no active schedule)
+      if (!canDeleteRule(rule.id)) {
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'error',
+              message: t('Cannot delete rule with an active schedule'),
+            },
+          }),
+        );
+        return;
+      }
+
       try {
         await send('rule-delete', rule.id);
         // Refresh the rules list
@@ -131,7 +160,7 @@ export function MobileRulesPage() {
         );
       }
     },
-    [dispatch, showUndoNotification, t, loadRules],
+    [dispatch, showUndoNotification, t, loadRules, canDeleteRule],
   );
 
   return (
@@ -170,6 +199,7 @@ export function MobileRulesPage() {
         isLoading={isLoading}
         onRulePress={handleRulePress}
         onRuleDelete={handleRuleDelete}
+        canDeleteRule={canDeleteRule}
       />
     </Page>
   );
