@@ -1,7 +1,8 @@
 import React from 'react';
-import { GridListItem, type GridListItemProps } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
+import { type GridListItemProps } from 'react-aria-components';
+import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -10,14 +11,18 @@ import { View } from '@actual-app/components/view';
 import { type RuleEntity } from 'loot-core/types/models';
 import { type WithRequired } from 'loot-core/types/util';
 
+import { ActionableGridListItem } from '@desktop-client/components/mobile/ActionableGridListItem';
 import { ActionExpression } from '@desktop-client/components/rules/ActionExpression';
 import { ConditionExpression } from '@desktop-client/components/rules/ConditionExpression';
 import { groupActionsBySplitIndex } from '@desktop-client/util/ruleUtils';
 
-type RulesListItemProps = WithRequired<GridListItemProps<RuleEntity>, 'value'>;
+type RulesListItemProps = {
+  onDelete?: () => void;
+} & WithRequired<GridListItemProps<RuleEntity>, 'value'>;
 
 export function RulesListItem({
   value: rule,
+  onDelete,
   style,
   ...props
 }: RulesListItemProps) {
@@ -28,11 +33,25 @@ export function RulesListItem({
   const hasSplits = actionSplits.length > 1;
 
   return (
-    <GridListItem
+    <ActionableGridListItem
       id={rule.id}
       value={rule}
       textValue={t('Rule {{id}}', { id: rule.id })}
       style={{ ...styles.mobileListItem, padding: '8px 16px', ...style }}
+      actions={
+        onDelete && (
+          <Button
+            variant="bare"
+            onPress={onDelete}
+            style={{
+              color: theme.errorText,
+              width: '100%',
+            }}
+          >
+            <Trans>Delete</Trans>
+          </Button>
+        )
+      }
       {...props}
     >
       <SpaceBetween gap={12} style={{ alignItems: 'flex-start' }}>
@@ -182,6 +201,6 @@ export function RulesListItem({
           </View>
         </View>
       </SpaceBetween>
-    </GridListItem>
+    </ActionableGridListItem>
   );
 }

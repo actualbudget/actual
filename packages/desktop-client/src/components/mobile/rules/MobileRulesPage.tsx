@@ -21,11 +21,16 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 import { useUrlParam } from '@desktop-client/hooks/useUrlParam';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 export function MobileRulesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { showUndoNotification } = useUndo();
   const [visibleRulesParam] = useUrlParam('visible-rules');
   const [allRules, setAllRules] = useState<RuleEntity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -105,6 +110,30 @@ export function MobileRulesPage() {
     [setFilter],
   );
 
+  const handleRuleDelete = useCallback(
+    async (rule: RuleEntity) => {
+      try {
+        await send('rule-delete', rule.id);
+        // Refresh the rules list
+        await loadRules();
+        showUndoNotification({
+          message: t('Rule deleted successfully'),
+        });
+      } catch (error) {
+        console.error('Failed to delete rule:', error);
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'error',
+              message: t('Failed to delete rule. Please try again.'),
+            },
+          }),
+        );
+      }
+    },
+    [dispatch, showUndoNotification, t, loadRules],
+  );
+
   return (
     <Page
       header={
@@ -140,6 +169,7 @@ export function MobileRulesPage() {
         rules={filteredRules}
         isLoading={isLoading}
         onRulePress={handleRulePress}
+        onRuleDelete={handleRuleDelete}
       />
     </Page>
   );

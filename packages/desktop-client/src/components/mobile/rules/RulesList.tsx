@@ -16,9 +16,15 @@ type RulesListProps = {
   rules: RuleEntity[];
   isLoading: boolean;
   onRulePress: (rule: RuleEntity) => void;
+  onRuleDelete?: (rule: RuleEntity) => void;
 };
 
-export function RulesList({ rules, isLoading, onRulePress }: RulesListProps) {
+export function RulesList({
+  rules,
+  isLoading,
+  onRulePress,
+  onRuleDelete,
+}: RulesListProps) {
   const { t } = useTranslation();
 
   if (isLoading && rules.length === 0) {
@@ -72,7 +78,11 @@ export function RulesList({ rules, isLoading, onRulePress }: RulesListProps) {
         }}
       >
         {rule => (
-          <RulesListItem value={rule} onAction={() => onRulePress(rule)} />
+          <RulesListItem
+            value={rule}
+            onAction={() => onRulePress(rule)}
+            onDelete={onRuleDelete ? () => onRuleDelete(rule) : undefined}
+          />
         )}
       </GridList>
       {isLoading && (
