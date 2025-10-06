@@ -4,7 +4,7 @@ import React, {
 } from 'react';
 import { mergeProps } from 'react-aria';
 import { ListBoxItem } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import {
@@ -39,6 +39,7 @@ import {
 import { lookupName, Status } from './TransactionEdit';
 
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
+import { ActionableGridListItem } from '@desktop-client/components/mobile/ActionableGridListItem';
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -76,11 +77,13 @@ type TransactionListItemProps = ComponentPropsWithoutRef<
 > & {
   onPress: (transaction: TransactionEntity) => void;
   onLongPress: (transaction: TransactionEntity) => void;
+  onDelete?: (transaction: TransactionEntity) => void;
 };
 
 export function TransactionListItem({
   onPress,
   onLongPress,
+  onDelete,
   ...props
 }: TransactionListItemProps) {
   const { t } = useTranslation();
@@ -147,6 +150,151 @@ export function TransactionListItem({
   const prettyCategory = specialCategory || categoryName;
   const textStyle = getTextStyle({ isPreview });
 
+  // Transaction content component
+  const transactionContent = (
+    <View
+      style={{
+        flexDirection: 'row',
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 4px',
+      }}
+    >
+      <View style={{ flex: 1 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <PayeeIcons
+            transaction={transaction}
+            transferAccount={transferAccount}
+          />
+          <TextOneLine
+            style={{
+              ...textStyle,
+              fontWeight: isAdded ? '600' : '400',
+              ...(!displayPayee && !isPreview
+                ? {
+                    color: theme.pageTextLight,
+                    fontStyle: 'italic',
+                  }
+                : {}),
+            }}
+          >
+            {displayPayee || t('(No payee)')}
+          </TextOneLine>
+        </View>
+        {isPreview ? (
+          <Status status={previewStatus} isSplit={isParent || isChild} />
+        ) : (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: 3,
+            }}
+          >
+            {isReconciled ? (
+              <SvgLockClosed
+                style={{
+                  width: 11,
+                  height: 11,
+                  color: theme.noticeTextLight,
+                  marginRight: 5,
+                }}
+              />
+            ) : (
+              <SvgCheckCircle1
+                style={{
+                  width: 11,
+                  height: 11,
+                  color: isCleared
+                    ? theme.noticeTextLight
+                    : theme.pageTextSubdued,
+                  marginRight: 5,
+                }}
+              />
+            )}
+            {(isParent || isChild) && (
+              <SvgSplit
+                style={{
+                  width: 12,
+                  height: 12,
+                  marginRight: 5,
+                }}
+              />
+            )}
+            <TextOneLine
+              style={{
+                fontSize: 11,
+                marginTop: 1,
+                fontWeight: '400',
+                color: prettyCategory
+                  ? theme.tableText
+                  : theme.menuItemTextSelected,
+                fontStyle:
+                  specialCategory || !prettyCategory ? 'italic' : undefined,
+                textAlign: 'left',
+              }}
+            >
+              {prettyCategory || t('Uncategorized')}
+            </TextOneLine>
+          </View>
+        )}
+        {notes && (
+          <TextOneLine
+            style={{
+              fontSize: 11,
+              marginTop: 4,
+              fontWeight: '400',
+              color: theme.tableText,
+              textAlign: 'left',
+              opacity: 0.85,
+            }}
+          >
+            <NotesTagFormatter notes={notes} />
+          </TextOneLine>
+        )}
+      </View>
+      <View style={{ justifyContent: 'center' }}>
+        <Text
+          style={{
+            ...textStyle,
+            ...makeAmountFullStyle(amount),
+          }}
+        >
+          {integerToCurrency(amount)}
+        </Text>
+      </View>
+    </View>
+  );
+
+  // Use ActionableGridListItem only if onDelete is provided and not a preview
+  if (onDelete && !isPreview) {
+    return (
+      <ActionableGridListItem
+        id={id}
+        value={transaction}
+        textValue={id}
+        actions={
+          <Button
+            variant="bare"
+            onPress={() => onDelete(transaction)}
+            style={{
+              color: theme.errorText,
+              width: '100%',
+            }}
+          >
+            <Trans>Delete</Trans>
+          </Button>
+        }
+        onAction={() => onPress(transaction)}
+        {...props}
+      >
+        {transactionContent}
+      </ActionableGridListItem>
+    );
+  }
+
+  // Fallback to regular ListBoxItem for preview transactions or when no delete handler
   return (
     <ListBoxItem textValue={id} {...props}>
       {itemProps => (
@@ -178,124 +326,7 @@ export function TransactionListItem({
                   }),
             }}
           >
-            <View
-              style={{
-                flexDirection: 'row',
-                flex: 1,
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0 4px',
-              }}
-            >
-              <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <PayeeIcons
-                    transaction={transaction}
-                    transferAccount={transferAccount}
-                  />
-                  <TextOneLine
-                    style={{
-                      ...textStyle,
-                      fontWeight: isAdded ? '600' : '400',
-                      ...(!displayPayee && !isPreview
-                        ? {
-                            color: theme.pageTextLight,
-                            fontStyle: 'italic',
-                          }
-                        : {}),
-                    }}
-                  >
-                    {displayPayee || t('(No payee)')}
-                  </TextOneLine>
-                </View>
-                {isPreview ? (
-                  <Status
-                    status={previewStatus}
-                    isSplit={isParent || isChild}
-                  />
-                ) : (
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      marginTop: 3,
-                    }}
-                  >
-                    {isReconciled ? (
-                      <SvgLockClosed
-                        style={{
-                          width: 11,
-                          height: 11,
-                          color: theme.noticeTextLight,
-                          marginRight: 5,
-                        }}
-                      />
-                    ) : (
-                      <SvgCheckCircle1
-                        style={{
-                          width: 11,
-                          height: 11,
-                          color: isCleared
-                            ? theme.noticeTextLight
-                            : theme.pageTextSubdued,
-                          marginRight: 5,
-                        }}
-                      />
-                    )}
-                    {(isParent || isChild) && (
-                      <SvgSplit
-                        style={{
-                          width: 12,
-                          height: 12,
-                          marginRight: 5,
-                        }}
-                      />
-                    )}
-                    <TextOneLine
-                      style={{
-                        fontSize: 11,
-                        marginTop: 1,
-                        fontWeight: '400',
-                        color: prettyCategory
-                          ? theme.tableText
-                          : theme.menuItemTextSelected,
-                        fontStyle:
-                          specialCategory || !prettyCategory
-                            ? 'italic'
-                            : undefined,
-                        textAlign: 'left',
-                      }}
-                    >
-                      {prettyCategory || t('Uncategorized')}
-                    </TextOneLine>
-                  </View>
-                )}
-                {notes && (
-                  <TextOneLine
-                    style={{
-                      fontSize: 11,
-                      marginTop: 4,
-                      fontWeight: '400',
-                      color: theme.tableText,
-                      textAlign: 'left',
-                      opacity: 0.85,
-                    }}
-                  >
-                    <NotesTagFormatter notes={notes} />
-                  </TextOneLine>
-                )}
-              </View>
-              <View style={{ justifyContent: 'center' }}>
-                <Text
-                  style={{
-                    ...textStyle,
-                    ...makeAmountFullStyle(amount),
-                  }}
-                >
-                  {integerToCurrency(amount)}
-                </Text>
-              </View>
-            </View>
+            {transactionContent}
           </Button>
         </PressResponder>
       )}

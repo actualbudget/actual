@@ -17,8 +17,10 @@ import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
+import { useTransactionBatchActions } from '@desktop-client/hooks/useTransactionBatchActions';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
 import * as queries from '@desktop-client/queries';
 import { useDispatch } from '@desktop-client/redux';
@@ -75,6 +77,8 @@ function TransactionListWithPreviews({
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { onBatchDelete } = useTransactionBatchActions();
+  const { showUndoNotification } = useUndo();
 
   const onRefresh = useCallback(() => {
     if (account.id) {
@@ -161,6 +165,21 @@ function TransactionListWithPreviews({
     [dispatch, navigate],
   );
 
+  const onDeleteTransaction = useCallback(
+    (transaction: TransactionEntity) => {
+      onBatchDelete({
+        ids: [transaction.id],
+        onSuccess: () => {
+          showUndoNotification({
+            type: 'warning',
+            message: t('Successfully deleted transaction.'),
+          });
+        },
+      });
+    },
+    [onBatchDelete, showUndoNotification, t],
+  );
+
   const balanceBindings = useMemo(
     () => ({
       balance: bindings.accountBalance(account.id),
@@ -191,6 +210,7 @@ function TransactionListWithPreviews({
       })}
       onSearch={onSearch}
       onOpenTransaction={onOpenTransaction}
+      onDeleteTransaction={onDeleteTransaction}
       onRefresh={onRefresh}
     />
   );

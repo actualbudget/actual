@@ -82,6 +82,7 @@ type TransactionListProps = {
   isLoading: boolean;
   transactions: readonly TransactionEntity[];
   onOpenTransaction?: (transaction: TransactionEntity) => void;
+  onDeleteTransaction?: (transaction: TransactionEntity) => void;
   isLoadingMore: boolean;
   onLoadMore: () => void;
   showMakeTransfer?: boolean;
@@ -91,6 +92,7 @@ export function TransactionList({
   isLoading,
   transactions,
   onOpenTransaction,
+  onDeleteTransaction,
   isLoadingMore,
   onLoadMore,
   showMakeTransfer = false,
@@ -211,6 +213,7 @@ export function TransactionList({
                   value={transaction}
                   onPress={trans => onTransactionPress(trans)}
                   onLongPress={trans => onTransactionPress(trans, true)}
+                  onDelete={onDeleteTransaction}
                 />
               )}
             </Collection>
