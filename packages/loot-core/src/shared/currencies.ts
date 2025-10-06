@@ -13,8 +13,11 @@ export type Currency = {
 // the MAX_SAFE_NUMBER in util.ts.
 // When adding a currency, also update the translation map in
 // packages/desktop-client/src/components/settings/Currency.tsx for the translation.
-// Number formats and symbol placement based on CLDR/LDML locale conventions and
-// Intl.NumberFormat standards
+// Number formats and symbol placement based on CLDR (Common Locale Data Repository) /
+// LDML (Locale Data Markup Language) locale conventions and Intl.NumberFormat standards
+// References:
+// https://www.localeplanet.com/icu/decimal-symbols.html
+// https://www.localeplanet.com/api/auto/currencymap.html
 // prettier-ignore
 export const currencies: Currency[] = [
   { code: '', name: 'None', symbol: '', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
