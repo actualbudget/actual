@@ -39,7 +39,7 @@ import {
 import { lookupName, Status } from './TransactionEdit';
 
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
-import { ActionableGridListItem } from '@desktop-client/components/mobile/ActionableGridListItem';
+import { ActionableListBoxItem } from '@desktop-client/components/mobile/ActionableListBoxItem';
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -267,11 +267,10 @@ export function TransactionListItem({
     </View>
   );
 
-  // Use ActionableGridListItem only if onDelete is provided and not a preview
+  // Use ActionableListBoxItem only if onDelete is provided and not a preview
   if (onDelete && !isPreview) {
     return (
-      <ActionableGridListItem
-        id={id}
+      <ActionableListBoxItem
         value={transaction}
         textValue={id}
         actions={
@@ -290,7 +289,7 @@ export function TransactionListItem({
         {...props}
       >
         {transactionContent}
-      </ActionableGridListItem>
+      </ActionableListBoxItem>
     );
   }
 
