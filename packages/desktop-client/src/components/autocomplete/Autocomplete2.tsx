@@ -120,9 +120,10 @@ function AutocompleteInput({ onKeyUp, ...props }: AutocompleteInputProps) {
 
   useEffect(() => {
     if (state && state.inputValue && !state.selectionManager.focusedKey) {
-      const focusedKey: Key | null = autocompleteInputContext?.getFocusedKey
-        ? autocompleteInputContext.getFocusedKey(state)
-        : defaultGetFocusedKey(state);
+      const focusedKey: Key | null =
+        (autocompleteInputContext?.getFocusedKey
+          ? autocompleteInputContext.getFocusedKey(state)
+          : defaultGetFocusedKey(state)) ?? null;
 
       state.selectionManager.setFocusedKey(focusedKey);
     }
@@ -134,9 +135,11 @@ function AutocompleteInput({ onKeyUp, ...props }: AutocompleteInputProps) {
 function defaultGetFocusedKey<T>(state: ComboBoxState<T>) {
   // Focus on the first suggestion item when typing.
   const keys = Array.from(state.collection.getKeys());
-  return keys
-    .map(key => state.collection.getItem(key))
-    .find(i => i && i.type === 'item')?.key;
+  return (
+    keys
+      .map(key => state.collection.getItem(key))
+      .find(i => i && i.type === 'item')?.key ?? null
+  );
 }
 
 const defaultAutocompleteSectionClassName = css({
