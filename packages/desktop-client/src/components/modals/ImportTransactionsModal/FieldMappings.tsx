@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { Stack } from '@actual-app/components/stack';
 import { View } from '@actual-app/components/view';
 
-import { MultiSelectField } from './MultiSelectField';
 import { SelectField } from './SelectField';
 import { SubLabel } from './SubLabel';
 import {
@@ -13,6 +12,7 @@ import {
   type ImportTransaction,
 } from './utils';
 
+import { FieldAutocomplete } from '@desktop-client/components/autocomplete/FieldAutocomplete';
 import { SectionLabel } from '@desktop-client/components/forms';
 
 type FieldMappingsProps = {
@@ -74,7 +74,7 @@ export function FieldMappings({
         </View>
         <View style={{ flex: 1, marginRight: 10 }}>
           <SubLabel title={t('Payee')} />
-          <MultiSelectField
+          <FieldAutocomplete
             options={options}
             value={toArray(mappings.payee)}
             onChange={values => onChange('payee', values)}
@@ -84,7 +84,7 @@ export function FieldMappings({
         </View>
         <View style={{ flex: 1, marginRight: 10 }}>
           <SubLabel title={t('Notes')} />
-          <MultiSelectField
+          <FieldAutocomplete
             options={options}
             value={toArray(mappings.notes)}
             onChange={values => onChange('notes', values)}
