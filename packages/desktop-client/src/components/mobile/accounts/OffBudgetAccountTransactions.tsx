@@ -16,8 +16,10 @@ import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useOffBudgetAccounts } from '@desktop-client/hooks/useOffBudgetAccounts';
 import { usePreviewTransactions } from '@desktop-client/hooks/usePreviewTransactions';
 import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
+import { useTransactionBatchActions } from '@desktop-client/hooks/useTransactionBatchActions';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
+import { useUndo } from '@desktop-client/hooks/useUndo';
 import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
 import * as queries from '@desktop-client/queries';
 import { useDispatch } from '@desktop-client/redux';
@@ -68,6 +70,8 @@ function TransactionListWithPreviews() {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { onBatchDelete } = useTransactionBatchActions();
+  const { showUndoNotification } = useUndo();
 
   useEffect(() => {
     return listen('sync-event', event => {
@@ -139,6 +143,21 @@ function TransactionListWithPreviews() {
     [dispatch, navigate],
   );
 
+  const onDeleteTransaction = useCallback(
+    (transaction: TransactionEntity) => {
+      onBatchDelete({
+        ids: [transaction.id],
+        onSuccess: () => {
+          showUndoNotification({
+            type: 'warning',
+            message: t('Successfully deleted transaction.'),
+          });
+        },
+      });
+    },
+    [onBatchDelete, showUndoNotification, t],
+  );
+
   const balanceBindings = useMemo(
     () => ({
       balance: bindings.offBudgetAccountBalance(),
@@ -163,6 +182,7 @@ function TransactionListWithPreviews() {
       searchPlaceholder={t('Search Off Budget Accounts')}
       onSearch={onSearch}
       onOpenTransaction={onOpenTransaction}
+      onDeleteTransaction={onDeleteTransaction}
       showMakeTransfer={true}
     />
   );
