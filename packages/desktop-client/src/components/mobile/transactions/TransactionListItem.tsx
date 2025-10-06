@@ -28,11 +28,6 @@ import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import {
-  PressResponder,
-  usePress,
-  useLongPress,
-} from '@react-aria/interactions';
 
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { integerToCurrency } from 'loot-core/shared/util';
