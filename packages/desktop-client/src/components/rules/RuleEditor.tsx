@@ -54,6 +54,7 @@ import {
 
 import { FormulaActionEditor } from './FormulaActionEditor';
 
+import { PayeeAutocomplete2 } from '@desktop-client/components/autocomplete/PayeeAutocomplete2';
 import { StatusBadge } from '@desktop-client/components/schedules/StatusBadge';
 import { SimpleTransactionsTable } from '@desktop-client/components/transactions/SimpleTransactionsTable';
 import { BetweenAmountInput } from '@desktop-client/components/util/AmountInput';
@@ -317,6 +318,13 @@ function ConditionEditor({
         key={inputKey}
         defaultValue={value}
         onChange={v => onChange('value', v)}
+      />
+    );
+  } else if (field === 'payee') {
+    valueEditor = (
+      <PayeeAutocomplete2
+        selectedKey={value}
+        onSelectionChange={id => onChange('value', id)}
       />
     );
   } else {
