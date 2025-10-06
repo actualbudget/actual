@@ -163,6 +163,11 @@ test.describe('Transactions', () => {
     await expect(transaction.category).toHaveText('Transfer');
     await expect(transaction.debit).toHaveText('12.34');
     await expect(transaction.credit).toHaveText('');
+
+    // Wait for balance calculations to complete before taking screenshot
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000); // Give time for balance updates
+
     await expect(page).toMatchThemeScreenshots();
   });
 });
