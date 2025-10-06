@@ -17,7 +17,6 @@ type RulesListProps = {
   isLoading: boolean;
   onRulePress: (rule: RuleEntity) => void;
   onRuleDelete?: (rule: RuleEntity) => void;
-  canDeleteRule?: (ruleId: string) => boolean;
 };
 
 export function RulesList({
@@ -25,7 +24,6 @@ export function RulesList({
   isLoading,
   onRulePress,
   onRuleDelete,
-  canDeleteRule,
 }: RulesListProps) {
   const { t } = useTranslation();
 
@@ -83,11 +81,7 @@ export function RulesList({
           <RulesListItem
             value={rule}
             onAction={() => onRulePress(rule)}
-            onDelete={
-              onRuleDelete && canDeleteRule && canDeleteRule(rule.id)
-                ? () => onRuleDelete(rule)
-                : undefined
-            }
+            onDelete={onRuleDelete ? () => onRuleDelete(rule) : undefined}
           />
         )}
       </GridList>

@@ -134,7 +134,9 @@ export function MobileRulesPage() {
           addNotification({
             notification: {
               type: 'error',
-              message: t('Cannot delete rule with an active schedule'),
+              message: t(
+                'This rule could not be deleted because it is linked to a schedule.',
+              ),
             },
           }),
         );
@@ -199,7 +201,6 @@ export function MobileRulesPage() {
         isLoading={isLoading}
         onRulePress={handleRulePress}
         onRuleDelete={handleRuleDelete}
-        canDeleteRule={canDeleteRule}
       />
     </Page>
   );
