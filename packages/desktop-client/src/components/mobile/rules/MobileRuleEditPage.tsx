@@ -30,16 +30,19 @@ export function MobileRuleEditPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const { schedules = [] } = useSchedules({
-    query: useMemo(() => q('schedules').select('*'), []),
+    query: useMemo(
+      () =>
+        rule?.id
+          ? q('schedules')
+              .filter({ rule: rule.id, completed: false })
+              .select('*')
+          : q('schedules').filter({ id: null }).select('*'), // Return empty result when no rule
+      [rule?.id],
+    ),
   });
 
   // Check if the current rule is linked to a schedule
-  const isLinkedToSchedule = useMemo(() => {
-    if (!rule?.id) return false;
-    return schedules.some(
-      schedule => schedule.rule === rule.id && !schedule.completed,
-    );
-  }, [rule?.id, schedules]);
+  const isLinkedToSchedule = schedules.length > 0;
 
   // Load rule by ID if we're in edit mode
   useEffect(() => {
