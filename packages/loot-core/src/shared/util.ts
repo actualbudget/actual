@@ -330,7 +330,7 @@ export function getNumberFormat({
 
   switch (format) {
     case 'space-comma':
-      locale = 'en-SE';
+      locale = 'fr-FR';
       thousandsSeparator = '\u202F';
       decimalSeparator = ',';
       break;

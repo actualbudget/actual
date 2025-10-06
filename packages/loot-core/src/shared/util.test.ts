@@ -97,7 +97,7 @@ describe('utility functions', () => {
   test('number formatting works with space-comma format', () => {
     setNumberFormat({ format: 'space-comma', hideFraction: false });
     let formatter = getNumberFormat().formatter;
-    // grouping separator space char is a narrow non-breaking space, or UTF-8 \u202F
+    // grouping separator space char is a narrow non-breaking space (U+202F)
     expect(formatter.format(Number('1234.56'))).toBe('1\u202F234,56');
 
     setNumberFormat({ format: 'space-comma', hideFraction: true });
