@@ -2,7 +2,6 @@ import React, { type CSSProperties } from 'react';
 import { mergeProps } from 'react-aria';
 import { Trans, useTranslation } from 'react-i18next';
 
-
 import { Button } from '@actual-app/components/button';
 import {
   SvgLeftArrow2,
