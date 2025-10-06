@@ -51,7 +51,7 @@ export function PayeeAutocomplete2({
   const payees = usePayees();
   const commonPayees = useCommonPayees();
   const accounts = useAccounts();
-  const [focusTransferPayees, setFocusedTransferPayees] = useState(false);
+  const [focusTransferPayees] = useState(false);
 
   const allPayeeSuggestions: PayeeAutocompleteItem[] = useMemo(() => {
     const suggestions = getPayeeSuggestions(commonPayees, payees);
@@ -70,7 +70,7 @@ export function PayeeAutocomplete2({
   }, [commonPayees, payees, showInactive, focusTransferPayees, accounts]);
 
   const [inputValue, setInputValue] = useState(
-    getPayeeName(allPayeeSuggestions, selectedKey),
+    getPayeeName(allPayeeSuggestions, selectedKey || null),
   );
   const [_selectedKey, setSelectedKey] = useState<Key | null>(
     selectedKey || null,
@@ -137,7 +137,7 @@ export function PayeeAutocomplete2({
     const keys = Array.from(state.collection.getKeys());
     const found = keys
       .map(key => state.collection.getItem(key))
-      .find(i => i.type === 'item' && i.key !== 'new');
+      .find(i => i && i.type === 'item' && i.key !== 'new');
 
     // Focus on the first suggestion item when typing.
     // Otherwise, if there are no results, focus on the "new" item to allow creating a new entry.

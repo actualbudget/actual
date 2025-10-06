@@ -111,7 +111,7 @@ function AutocompleteInput({ onKeyUp, ...props }: AutocompleteInputProps) {
   const state = useContext(ComboBoxStateContext);
   const _onKeyUp = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
-      state.revert();
+      state?.revert();
     }
     onKeyUp?.(e);
   };
@@ -120,7 +120,7 @@ function AutocompleteInput({ onKeyUp, ...props }: AutocompleteInputProps) {
 
   useEffect(() => {
     if (state && state.inputValue && !state.selectionManager.focusedKey) {
-      const focusedKey = autocompleteInputContext?.getFocusedKey
+      const focusedKey: Key | null = autocompleteInputContext?.getFocusedKey
         ? autocompleteInputContext.getFocusedKey(state)
         : defaultGetFocusedKey(state);
 
@@ -136,7 +136,7 @@ function defaultGetFocusedKey<T>(state: ComboBoxState<T>) {
   const keys = Array.from(state.collection.getKeys());
   return keys
     .map(key => state.collection.getItem(key))
-    .find(i => i.type === 'item')?.key;
+    .find(i => i && i.type === 'item')?.key;
 }
 
 const defaultAutocompleteSectionClassName = css({
