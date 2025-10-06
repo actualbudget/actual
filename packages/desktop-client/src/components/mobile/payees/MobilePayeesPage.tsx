@@ -130,7 +130,7 @@ export function MobilePayeesPage() {
         updated: [{ id: editingPayee.id, name: editedPayeeName.trim() }],
       });
       showUndoNotification({
-        message: t('Payee "{{oldName}}" renamed to "{{newName}}"', {
+        message: t('Payee {{oldName}} renamed to {{newName}}', {
           oldName: editingPayee.name,
           newName: editedPayeeName.trim(),
         }),
