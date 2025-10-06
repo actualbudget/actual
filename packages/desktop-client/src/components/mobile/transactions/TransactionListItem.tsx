@@ -1,5 +1,7 @@
 import React, { type CSSProperties } from 'react';
+import { mergeProps } from 'react-aria';
 import { Trans, useTranslation } from 'react-i18next';
+
 
 import { Button } from '@actual-app/components/button';
 import {
@@ -18,6 +20,11 @@ import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import {
+  PressResponder,
+  usePress,
+  useLongPress,
+} from '@react-aria/interactions';
 
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { integerToCurrency } from 'loot-core/shared/util';
@@ -72,7 +79,7 @@ type TransactionListItemProps = {
 export function TransactionListItem({
   value: transaction,
   onPress,
-  onLongPress: _onLongPress,
+  onLongPress,
   onDelete,
 }: TransactionListItemProps) {
   const { t } = useTranslation();
@@ -88,6 +95,22 @@ export function TransactionListItem({
   const newTransactions = useSelector(
     state => state.transactions.newTransactions,
   );
+
+  const { longPressProps } = useLongPress({
+    accessibilityDescription: 'Long press to select multiple transactions',
+    onLongPress: () => {
+      if (isPreview) {
+        return;
+      }
+      onLongPress(transaction);
+    },
+  });
+
+  const { pressProps } = usePress({
+    onPress: () => {
+      onPress(transaction);
+    },
+  });
 
   if (!transaction) {
     return null;
@@ -140,119 +163,121 @@ export function TransactionListItem({
       }
       onAction={() => onPress(transaction)}
     >
-      <View
-        style={{
-          flexDirection: 'row',
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 4px',
-        }}
-      >
-        <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <PayeeIcons
-              transaction={transaction}
-              transferAccount={transferAccount}
-            />
-            <TextOneLine
-              style={{
-                ...textStyle,
-                fontWeight: isAdded ? '600' : '400',
-                ...(!displayPayee && !isPreview
-                  ? {
-                      color: theme.pageTextLight,
-                      fontStyle: 'italic',
-                    }
-                  : {}),
-              }}
-            >
-              {displayPayee || t('(No payee)')}
-            </TextOneLine>
-          </View>
-          {isPreview ? (
-            <Status status={previewStatus} isSplit={isParent || isChild} />
-          ) : (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginTop: 3,
-              }}
-            >
-              {isReconciled ? (
-                <SvgLockClosed
+      <PressResponder {...mergeProps(pressProps, longPressProps)}>
+        <View
+          style={{
+            flexDirection: 'row',
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0 4px',
+          }}
+        >
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <PayeeIcons
+                transaction={transaction}
+                transferAccount={transferAccount}
+              />
+              <TextOneLine
+                style={{
+                  ...textStyle,
+                  fontWeight: isAdded ? '600' : '400',
+                  ...(!displayPayee && !isPreview
+                    ? {
+                        color: theme.pageTextLight,
+                        fontStyle: 'italic',
+                      }
+                    : {}),
+                }}
+              >
+                {displayPayee || t('(No payee)')}
+              </TextOneLine>
+            </View>
+            {isPreview ? (
+              <Status status={previewStatus} isSplit={isParent || isChild} />
+            ) : (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginTop: 3,
+                }}
+              >
+                {isReconciled ? (
+                  <SvgLockClosed
+                    style={{
+                      width: 11,
+                      height: 11,
+                      color: theme.noticeTextLight,
+                      marginRight: 5,
+                    }}
+                  />
+                ) : (
+                  <SvgCheckCircle1
+                    style={{
+                      width: 11,
+                      height: 11,
+                      color: isCleared
+                        ? theme.noticeTextLight
+                        : theme.pageTextSubdued,
+                      marginRight: 5,
+                    }}
+                  />
+                )}
+                {(isParent || isChild) && (
+                  <SvgSplit
+                    style={{
+                      width: 12,
+                      height: 12,
+                      marginRight: 5,
+                    }}
+                  />
+                )}
+                <TextOneLine
                   style={{
-                    width: 11,
-                    height: 11,
-                    color: theme.noticeTextLight,
-                    marginRight: 5,
+                    fontSize: 11,
+                    marginTop: 1,
+                    fontWeight: '400',
+                    color: prettyCategory
+                      ? theme.tableText
+                      : theme.menuItemTextSelected,
+                    fontStyle:
+                      specialCategory || !prettyCategory ? 'italic' : undefined,
+                    textAlign: 'left',
                   }}
-                />
-              ) : (
-                <SvgCheckCircle1
-                  style={{
-                    width: 11,
-                    height: 11,
-                    color: isCleared
-                      ? theme.noticeTextLight
-                      : theme.pageTextSubdued,
-                    marginRight: 5,
-                  }}
-                />
-              )}
-              {(isParent || isChild) && (
-                <SvgSplit
-                  style={{
-                    width: 12,
-                    height: 12,
-                    marginRight: 5,
-                  }}
-                />
-              )}
+                >
+                  {prettyCategory || t('Uncategorized')}
+                </TextOneLine>
+              </View>
+            )}
+            {notes && (
               <TextOneLine
                 style={{
                   fontSize: 11,
-                  marginTop: 1,
+                  marginTop: 4,
                   fontWeight: '400',
-                  color: prettyCategory
-                    ? theme.tableText
-                    : theme.menuItemTextSelected,
-                  fontStyle:
-                    specialCategory || !prettyCategory ? 'italic' : undefined,
+                  color: theme.tableText,
                   textAlign: 'left',
+                  opacity: 0.85,
                 }}
               >
-                {prettyCategory || t('Uncategorized')}
+                <NotesTagFormatter notes={notes} />
               </TextOneLine>
-            </View>
-          )}
-          {notes && (
-            <TextOneLine
+            )}
+          </View>
+          <View style={{ justifyContent: 'center' }}>
+            <Text
               style={{
-                fontSize: 11,
-                marginTop: 4,
-                fontWeight: '400',
-                color: theme.tableText,
-                textAlign: 'left',
-                opacity: 0.85,
+                ...textStyle,
+                ...makeAmountFullStyle(amount),
               }}
             >
-              <NotesTagFormatter notes={notes} />
-            </TextOneLine>
-          )}
+              {integerToCurrency(amount)}
+            </Text>
+          </View>
         </View>
-        <View style={{ justifyContent: 'center' }}>
-          <Text
-            style={{
-              ...textStyle,
-              ...makeAmountFullStyle(amount),
-            }}
-          >
-            {integerToCurrency(amount)}
-          </Text>
-        </View>
-      </View>
+      </PressResponder>
     </ActionableListBoxItem>
   );
 }
