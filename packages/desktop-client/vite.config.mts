@@ -9,7 +9,6 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, loadEnv, Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
-import reactCompiler from 'babel-plugin-react-compiler';
 
 const addWatchers = (): Plugin => ({
   name: 'add-watchers',
@@ -179,7 +178,8 @@ export default defineConfig(async ({ mode }) => {
       addWatchers(),
       react({
         babel: {
-          plugins: [reactCompiler],
+          // n.b. Must be a string to ensure plugin resolution order. See https://github.com/actualbudget/actual/pull/5853
+          plugins: ['babel-plugin-react-compiler'],
         },
       }),
       viteTsconfigPaths({ root: '../..' }),
@@ -191,6 +191,7 @@ export default defineConfig(async ({ mode }) => {
       environment: 'jsdom',
       globals: true,
       setupFiles: './src/setupTests.js',
+      testTimeout: 10000,
       onConsoleLog(log: string, type: 'stdout' | 'stderr'): boolean | void {
         // print only console.error
         return type === 'stderr';

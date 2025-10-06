@@ -14,11 +14,13 @@ import { PayeeRuleCountLabel } from '@desktop-client/components/payees/PayeeRule
 type PayeesListItemProps = {
   value: PayeeEntity;
   ruleCount: number;
+  isRuleCountLoading?: boolean;
 } & Omit<GridListItemProps<PayeeEntity>, 'value'>;
 
 export const PayeesListItem = memo(function PayeeListItem({
   value: payee,
   ruleCount,
+  isRuleCountLoading,
   ...props
 }: PayeesListItemProps) {
   const { t } = useTranslation();
@@ -84,7 +86,11 @@ export const PayeesListItem = memo(function PayeeListItem({
               flexShrink: 0,
             }}
           >
-            <PayeeRuleCountLabel count={ruleCount} style={{ fontSize: 12 }} />
+            <PayeeRuleCountLabel
+              count={ruleCount}
+              isLoading={isRuleCountLoading}
+              style={{ fontSize: 12 }}
+            />
           </span>
         </SpaceBetween>
       </SpaceBetween>

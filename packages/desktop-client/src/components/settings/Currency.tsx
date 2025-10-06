@@ -27,6 +27,7 @@ export function CurrencySettings() {
         ['CAD', t('Canadian Dollar')],
         ['CHF', t('Swiss Franc')],
         ['CNY', t('Yuan Renminbi')],
+        ['CRC', t('Costa Rican Colón')],
         ['EGP', t('Egyptian Pound')],
         ['EUR', t('Euro')],
         ['GBP', t('Pound Sterling')],
@@ -34,6 +35,7 @@ export function CurrencySettings() {
         ['INR', t('Indian Rupee')],
         ['JMD', t('Jamaican Dollar')],
         // ['JPY', t('Japanese Yen')], // Keep commented until amounts with decimal places other than 2 are supported
+        ['LKR', t('Sri Lankan Rupee')],
         ['MDL', t('Moldovan Leu')],
         ['PHP', t('Philippine Peso')],
         ['PLN', t('Polish Złoty')],
