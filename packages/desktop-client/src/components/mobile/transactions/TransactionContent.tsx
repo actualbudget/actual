@@ -2,6 +2,12 @@ import React, { type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
+  SvgArrowsSynchronize,
+  SvgCalendar3,
+  SvgLeftArrow2,
+  SvgRightArrow2,
+} from '@actual-app/components/icons/v0';
+import {
   SvgCheckCircle1,
   SvgLockClosed,
   SvgSplit,
@@ -11,6 +17,7 @@ import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { isPreviewId } from 'loot-core/shared/transactions';
 import { integerToCurrency } from 'loot-core/shared/util';
 import {
   type AccountEntity,
@@ -20,6 +27,7 @@ import {
 import { lookupName, Status } from './TransactionEdit';
 
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
+import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 
 type PayeeIconsProps = {
@@ -29,16 +37,8 @@ type PayeeIconsProps = {
 
 function PayeeIcons({ transaction, transferAccount }: PayeeIconsProps) {
   const { id, schedule: scheduleId } = transaction;
-  const { useCachedSchedules } = require('@desktop-client/hooks/useCachedSchedules');
   const { isLoading: isSchedulesLoading, schedules = [] } =
     useCachedSchedules();
-  const { isPreviewId } = require('loot-core/shared/transactions');
-  const {
-    SvgArrowsSynchronize,
-    SvgCalendar3,
-    SvgLeftArrow2,
-    SvgRightArrow2,
-  } = require('@actual-app/components/icons/v0');
 
   const isPreview = isPreviewId(id);
   const schedule = schedules.find((s: any) => s.id === scheduleId);
