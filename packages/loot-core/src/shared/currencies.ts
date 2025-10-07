@@ -13,6 +13,7 @@ export type Currency = {
 export const currencies: Currency[] = [
   { code: '', name: 'None', symbol: '', decimalPlaces: 2 },
   { code: 'AUD', name: 'Australian Dollar', symbol: 'A$', decimalPlaces: 2 },
+  { code: 'ARS', name: 'Argentinian Peso', symbol: 'Arg$', decimalPlaces: 2 },
   { code: 'BRL', name: 'Brazilian Real', symbol: 'R$', decimalPlaces: 2 },
   { code: 'CAD', name: 'Canadian Dollar', symbol: 'CA$', decimalPlaces: 2 },
   { code: 'CHF', name: 'Swiss Franc', symbol: 'Fr.', decimalPlaces: 2 },
