@@ -931,7 +931,6 @@ export function ImportTransactionsModal({
                     delimiter,
                     hasHeaderRow,
                     skipLines,
-                    trimLines,
                     fallbackMissingPayeeToMemo,
                     importNotes: !importNotes,
                   }),
