@@ -107,7 +107,7 @@ export function BudgetPage() {
 
   // Wire pay period config from synced prefs into month utils
   useEffect(() => {
-    if (!payPeriodFeatureFlagEnabled) {
+    if (!payPeriodFeatureFlagEnabled || !initialized) {
       return;
     }
 
@@ -125,11 +125,25 @@ export function BudgetPage() {
       payPeriodFrequency,
       payPeriodStartDate,
     });
+
+    // After loading config, reset to current month/pay period
+    // This ensures we use the correct month type (calendar vs pay period)
+    const currentMonthOrPeriod = monthUtils.currentMonth();
+    setStartMonthPref(currentMonthOrPeriod);
+
+    // Refresh budget bounds to get pay period bounds if enabled
+    if (payPeriodViewEnabled === 'true') {
+      send('get-budget-bounds').then(({ start, end }) => {
+        setMonthBounds({ start, end });
+      });
+    }
   }, [
     payPeriodFeatureFlagEnabled,
     payPeriodViewEnabled,
     payPeriodFrequency,
     payPeriodStartDate,
+    initialized,
+    setStartMonthPref,
   ]);
 
   const onBudgetAction = useCallback(
