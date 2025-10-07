@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -204,16 +205,18 @@ export function MobilePayeesPage() {
             />
           </View>
           <ModalButtons>
-            <Button variant="bare" onPress={handleEditCancel}>
-              <Trans>Cancel</Trans>
-            </Button>
-            <Button
-              variant="primary"
-              onPress={handleEditSave}
-              isDisabled={!editedPayeeName.trim()}
-            >
-              <Trans>Save</Trans>
-            </Button>
+            <SpaceBetween>
+              <Button variant="bare" onPress={handleEditCancel}>
+                <Trans>Cancel</Trans>
+              </Button>
+              <Button
+                variant="primary"
+                onPress={handleEditSave}
+                isDisabled={!editedPayeeName.trim()}
+              >
+                <Trans>Save</Trans>
+              </Button>
+            </SpaceBetween>
           </ModalButtons>
         </Modal>
       )}

@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { type GridListItemProps } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -21,7 +21,7 @@ type PayeesListItemProps = {
   onEdit: () => void;
 } & WithRequired<GridListItemProps<PayeeEntity>, 'value'>;
 
-export const PayeesListItem = memo(function PayeeListItem({
+export function PayeesListItem({
   value: payee,
   ruleCount,
   isRuleCountLoading,
@@ -134,4 +134,4 @@ export const PayeesListItem = memo(function PayeeListItem({
       </SpaceBetween>
     </ActionableGridListItem>
   );
-});
+}
