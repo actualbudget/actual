@@ -40,6 +40,7 @@ export const currencies: Currency[] = [
   { code: 'QAR', name: 'Qatari Riyal', symbol: 'QAR', decimalPlaces: 2 },
   { code: 'EGP', name: 'Egyptian Pound', symbol: 'EGP', decimalPlaces: 2 },
   { code: 'SAR', name: 'Saudi Riyal', symbol: '﷼', decimalPlaces: 2 },
+  { code: 'UZS', name: 'Uzbek Soum', symbol: 'UZS', decimalPlaces: 2 },
 ];
 
 export function getCurrency(code: string): Currency {
