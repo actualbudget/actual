@@ -41,19 +41,20 @@ export const PayeesListItem = memo(function PayeeListItem({
       value={payee}
       textValue={label}
       actionsWidth={160}
-      actions={
+      actions={({ close }) =>
         !payee.transfer_acct && (
           <View style={{ flexDirection: 'row', flex: 1 }}>
             <Button
               variant="bare"
-              onPress={onEdit}
+              onPress={() => {
+                onEdit();
+                close();
+              }}
               style={{
-                color: theme.pageTextLink,
-                backgroundColor: theme.buttonPrimaryBackground,
+                color: theme.pillText,
+                backgroundColor: theme.pillBackground,
                 flex: 1,
-                borderRightWidth: 1,
-                borderRightColor: theme.tableBorder,
-                borderRightStyle: 'solid',
+                borderRadius: 0,
               }}
             >
               <Trans>Edit</Trans>
@@ -64,6 +65,7 @@ export const PayeesListItem = memo(function PayeeListItem({
               style={{
                 color: theme.errorText,
                 flex: 1,
+                borderRadius: 0,
               }}
             >
               <Trans>Delete</Trans>

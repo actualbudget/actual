@@ -37,7 +37,6 @@ export function MobilePayeesPage() {
   const [filter, setFilter] = useState('');
   const [editingPayee, setEditingPayee] = useState<PayeeEntity | null>(null);
   const [editedPayeeName, setEditedPayeeName] = useState('');
-  const [actionsResetKey, setActionsResetKey] = useState(0);
   const { ruleCounts, isLoading: isRuleCountsLoading } = usePayeeRuleCounts();
   const isLoading = useSelector(
     s => s.payees.isPayeesLoading || s.payees.isCommonPayeesLoading,
@@ -137,7 +136,6 @@ export function MobilePayeesPage() {
       });
       setEditingPayee(null);
       setEditedPayeeName('');
-      setActionsResetKey(prev => prev + 1);
     } catch (error) {
       console.error('Failed to update payee:', error);
       dispatch(
@@ -190,7 +188,6 @@ export function MobilePayeesPage() {
         onPayeePress={handlePayeePress}
         onPayeeDelete={handlePayeeDelete}
         onPayeeEdit={handlePayeeEdit}
-        actionsResetKey={actionsResetKey}
       />
 
       {editingPayee && (
