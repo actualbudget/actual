@@ -1021,7 +1021,7 @@ export function ImportTransactionsModal({
                         alignItems: 'baseline',
                       }}
                     >
-                      <Trans>Skip lines:</Trans>
+                      <Trans>Lines to skip:</Trans>
                       <Input
                         type="number"
                         value={skipLines}
@@ -1041,16 +1041,7 @@ export function ImportTransactionsModal({
                         }}
                         style={{ width: 50 }}
                       />
-                    </label>
-                    <label
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        gap: 5,
-                        alignItems: 'baseline',
-                      }}
-                    >
-                      <Trans>Trim lines:</Trans>
+                      <Trans>trim:</Trans>
                       <Input
                         type="number"
                         value={trimLines}
