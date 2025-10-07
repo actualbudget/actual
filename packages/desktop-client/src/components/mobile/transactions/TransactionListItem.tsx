@@ -73,7 +73,7 @@ const getScheduleIconStyle = ({ isPreview }: { isPreview: boolean }) => ({
 
 type TransactionListItemProps = Omit<
   ComponentPropsWithoutRef<typeof ListBoxItem<TransactionEntity>>,
-  'onPress' | 'onLongPress'
+  'onPress'
 > & {
   onPress: (transaction: TransactionEntity) => void;
   onLongPress: (transaction: TransactionEntity) => void;
