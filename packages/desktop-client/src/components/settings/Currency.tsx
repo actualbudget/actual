@@ -49,6 +49,7 @@ export function CurrencySettings() {
         ['QAR', t('Qatari Riyal')],
         ['EGP', t('Egyptian Pound')],
         ['SAR', t('Saudi Riyal')],
+        ['UZS', t('Uzbek Soum')],
       ]),
     [t],
   );
