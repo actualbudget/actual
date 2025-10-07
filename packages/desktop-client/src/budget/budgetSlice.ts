@@ -217,7 +217,10 @@ function translateCategories(
 ): CategoryEntity[] | undefined {
   return categories?.map(cat => ({
     ...cat,
-    name: cat.name === 'Starting Balances' ? t('Starting Balances') : cat.name,
+    name:
+      cat.name?.toLowerCase() === 'starting balances'
+        ? t('Starting Balances')
+        : cat.name,
   }));
 }
 
