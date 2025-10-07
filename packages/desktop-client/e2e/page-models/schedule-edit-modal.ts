@@ -21,7 +21,9 @@ export class ScheduleEditModal {
     this.page = locator.page();
 
     this.heading = locator.getByRole('heading');
-    this.scheduleNameField = locator.getByRole('textbox', { name: 'Schedule Name' });
+    this.scheduleNameField = locator.getByRole('textbox', {
+      name: 'Schedule Name',
+    });
     this.payeeField = locator.getByRole('textbox', { name: 'Payee' });
     this.accountField = locator.getByRole('textbox', { name: 'Account' });
     this.amountField = locator.getByLabel('Amount');

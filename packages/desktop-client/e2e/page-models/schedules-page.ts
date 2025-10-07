@@ -22,9 +22,11 @@ export class SchedulesPage {
   async addNewSchedule() {
     await this.addNewScheduleButton.click();
 
-    return new ScheduleEditModal(this.page.getByRole('dialog', {
-      name: 'Modal dialog',
-    }));
+    return new ScheduleEditModal(
+      this.page.getByRole('dialog', {
+        name: 'Modal dialog',
+      }),
+    );
   }
 
   /**
