@@ -10,7 +10,7 @@ declare global {
   namespace PlaywrightTest {
     // oxlint-disable-next-line typescript/consistent-type-definitions
     interface Matchers<R> {
-      toMatchThemeScreenshots(): Promise<R>;
+      toMatchThemeScreenshots(suffix?: string): Promise<R>;
     }
   }
 }

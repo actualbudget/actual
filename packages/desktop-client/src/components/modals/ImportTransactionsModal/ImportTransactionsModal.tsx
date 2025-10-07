@@ -21,6 +21,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { send } from 'loot-core/platform/client/connection';
 import type { ParseFileOptions } from 'loot-core/server/transactions/import/parse-file';
 import { amountToInteger } from 'loot-core/shared/util';
+import type { CategoryEntity } from 'loot-core/types/models';
 
 import { DateFormatSelect } from './DateFormatSelect';
 import { FieldMappings } from './FieldMappings';
@@ -42,6 +43,7 @@ import {
   useImportPreviewTransactionsMutation,
   useImportTransactionsMutation,
 } from '@desktop-client/accounts';
+import { useCreateCategoryMutation } from '@desktop-client/budget';
 import {
   Modal,
   ModalCloseButton,
@@ -49,6 +51,7 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { SectionLabel } from '@desktop-client/components/forms';
 import { LabeledCheckbox } from '@desktop-client/components/forms/LabeledCheckbox';
+import type { NewCategoryMapping } from '@desktop-client/components/modals/ImportCategoriesModal';
 import {
   TableHeader,
   TableWithNavigator,
@@ -56,7 +59,10 @@ import {
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useSyncedPrefs } from '@desktop-client/hooks/useSyncedPrefs';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { payeeQueries } from '@desktop-client/payees';
+import { useDispatch } from '@desktop-client/redux';
 
 function CheckboxToggle({
   id,
@@ -168,17 +174,99 @@ function getInitialMappings(transactions) {
   };
 }
 
-function parseCategoryFields(trans, categories) {
+function parseCategoryFields(
+  trans: ImportTransaction,
+  categories: CategoryEntity[],
+) {
+  if (trans.category == null) {
+    return null;
+  }
+
+  const rawCategory = trans.category;
   let match = null;
-  categories.forEach(category => {
-    if (category.id === trans.category) {
-      return null;
+  const isStringCategory = typeof rawCategory === 'string';
+  const transCategoryLower = isStringCategory
+    ? rawCategory.toLowerCase()
+    : null;
+
+  for (const category of categories) {
+    // If trans.category is already a valid category ID, short-circuit.
+    if (
+      category.id === rawCategory ||
+      String(category.id) === String(rawCategory)
+    ) {
+      return category.id;
     }
-    if (category.name === trans.category) {
+    // Case-insensitive name comparison to match collectNewCategories behavior
+    if (
+      isStringCategory &&
+      transCategoryLower != null &&
+      category.name != null &&
+      category.name.toLowerCase() === transCategoryLower
+    ) {
       match = category.id;
     }
-  });
+  }
   return match;
+}
+
+function collectNewCategories(
+  transactions: ImportTransaction[],
+  categories: CategoryEntity[],
+  fieldMappings: FieldMapping | null,
+  reconcile: boolean,
+): string[] {
+  const newCategoryNames = new Map<string, string>();
+
+  // Precompute sets for fast existence checks
+  const categoryIds = new Set(categories.map(cat => cat.id));
+  const normalizedCategoryNames = new Set(
+    categories.map(cat => cat.name?.trim().toLowerCase()).filter(Boolean),
+  );
+
+  for (const trans of transactions) {
+    // Skip transactions using the same predicate as onImport:
+    // - matched transactions (existing transaction added to show update changes)
+    // - unselected transactions that are not ignored by the reconciliation algorithm (only when reconciliation is enabled)
+    if (
+      trans.isMatchedTransaction ||
+      (reconcile && !trans.selected && !trans.ignored)
+    ) {
+      continue;
+    }
+
+    // Apply field mappings to get the category value
+    const mappedTrans = fieldMappings
+      ? applyFieldMappings(trans, fieldMappings)
+      : trans;
+
+    const categoryValue = mappedTrans.category;
+
+    // Skip if no category value
+    if (!categoryValue || typeof categoryValue !== 'string') {
+      continue;
+    }
+
+    // Normalize the category value (trim and lowercase for comparison)
+    const trimmed = categoryValue.trim();
+    const normalized = trimmed.toLowerCase();
+
+    // Skip empty strings after trimming
+    if (!normalized) {
+      continue;
+    }
+
+    // Check if it's an existing category (by ID or normalized name) using precomputed sets
+    const isExistingCategory =
+      categoryIds.has(categoryValue) || normalizedCategoryNames.has(normalized);
+
+    if (!isExistingCategory && !newCategoryNames.has(normalized)) {
+      // Store the first-seen trimmed name, keyed by normalized value
+      newCategoryNames.set(normalized, trimmed);
+    }
+  }
+
+  return Array.from(newCategoryNames.values());
 }
 
 export function ImportTransactionsModal({
@@ -187,7 +275,9 @@ export function ImportTransactionsModal({
   onImported,
 }) {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
   const queryClient = useQueryClient();
+  const createCategory = useCreateCategoryMutation();
   const dateFormat = useDateFormat() || ('MM/dd/yyyy' as const);
   const [prefs, savePrefs] = useSyncedPrefs();
   const { data: { list: categories } = { list: [] } } = useCategories();
@@ -213,6 +303,7 @@ export function ImportTransactionsModal({
   const [reconcile, setReconcile] = useState(true);
   const [reimportDeleted, setReimportDeleted] = useState(false);
   const [importNotes, setImportNotes] = useState(true);
+  const [enableCategoryCreation, setEnableCategoryCreation] = useState(false);
 
   // This cannot be set after parsing the file, because changing it
   // requires re-parsing the file. This is different from the other
@@ -580,7 +671,133 @@ export function ImportTransactionsModal({
 
   const importTransactions = useImportTransactionsMutation();
 
+  async function handleCategoryMappings(mappings: NewCategoryMapping[]) {
+    // Create a map from original category names to their final category IDs
+    const categoryMappingMap = new Map<string, string>();
+    const errors: string[] = [];
+
+    for (const mapping of mappings) {
+      if (mapping.existingCategoryId) {
+        // User selected an existing category
+        // Use lowercase normalization for case-insensitive lookup
+        categoryMappingMap.set(
+          mapping.originalName.trim().toLowerCase(),
+          mapping.existingCategoryId,
+        );
+      } else if (mapping.finalName && mapping.groupId) {
+        // User wants to create a new category with specified group
+        try {
+          const newCategoryId = await createCategory.mutateAsync({
+            name: mapping.finalName,
+            groupId: mapping.groupId,
+            isIncome: false,
+            isHidden: false,
+          });
+
+          // Use lowercase normalization for case-insensitive lookup
+          categoryMappingMap.set(
+            mapping.originalName.trim().toLowerCase(),
+            newCategoryId,
+          );
+        } catch (error) {
+          console.error(
+            `Failed to create category ${mapping.finalName}:`,
+            error,
+          );
+          errors.push(mapping.originalName);
+        }
+      }
+    }
+
+    // If any category creations failed, notify the user and throw an error
+    if (errors.length > 0) {
+      const failedCategories = errors.join(', ');
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t(
+              'Failed to create {{count}} categories: {{categories}}',
+              {
+                count: errors.length,
+                categories: failedCategories,
+              },
+            ),
+            sticky: true,
+          },
+        }),
+      );
+
+      throw new Error(
+        'Failed to create ' +
+          errors.length +
+          ' categories: ' +
+          failedCategories,
+      );
+    }
+
+    return categoryMappingMap;
+  }
   async function onImport(close) {
+    // Variable to store category mappings for the import
+    let categoryMappingsForImport = new Map<string, string>();
+
+    // If category creation is enabled, check for new categories first
+    if (enableCategoryCreation) {
+      const newCategories = collectNewCategories(
+        transactions,
+        categories,
+        fieldMappings,
+        reconcile,
+      );
+
+      if (newCategories.length > 0) {
+        // Show the category mapping modal and wait for user action
+        const result = await new Promise<{
+          shouldContinue: boolean;
+          mappings?: Map<string, string>;
+        }>(resolve => {
+          dispatch(
+            pushModal({
+              modal: {
+                name: 'import-categories',
+                options: {
+                  newCategories,
+                  onConfirm: async (mappings: NewCategoryMapping[]) => {
+                    try {
+                      const categoryMappingMap =
+                        await handleCategoryMappings(mappings);
+                      resolve({
+                        shouldContinue: true,
+                        mappings: categoryMappingMap,
+                      });
+                    } catch {
+                      // Error notification is already dispatched by handleCategoryMappings
+                      resolve({ shouldContinue: false, mappings: undefined });
+                      throw new Error('Category mapping failed');
+                    }
+                  },
+                  onCancel: () => {
+                    resolve({ shouldContinue: false });
+                  },
+                },
+              },
+            }),
+          );
+        });
+
+        // If user canceled, abort the import
+        if (!result.shouldContinue) {
+          return;
+        }
+
+        // Store the mappings for use during import
+        if (result.mappings) {
+          categoryMappingsForImport = result.mappings;
+        }
+      }
+    }
+
     setLoadingState('importing');
 
     const finalTransactions = [];
@@ -626,8 +843,43 @@ export function ImportTransactionsModal({
         break;
       }
 
-      const category_id = parseCategoryFields(trans, categories);
-      trans.category = category_id;
+      // Check if there's a category mapping for this transaction
+      // We need to check the category mappings BEFORE parseCategoryFields
+      // because trans.category contains the original category name from the import
+      let category_id = null;
+
+      if (
+        categoryMappingsForImport.size > 0 &&
+        trans.category &&
+        typeof trans.category === 'string'
+      ) {
+        // Normalize the lookup key with trim and lowercase for case-insensitive matching
+        const normalizedCategoryKey = trans.category.trim().toLowerCase();
+        const mappedCategoryId = categoryMappingsForImport.get(
+          normalizedCategoryKey,
+        );
+        if (mappedCategoryId) {
+          category_id = mappedCategoryId;
+        }
+      }
+
+      // If no mapping was found, try to match against existing categories
+      if (!category_id) {
+        // Create a transaction object with trimmed category for parseCategoryFields
+        const transWithTrimmedCategory = {
+          ...trans,
+          category:
+            typeof trans.category === 'string'
+              ? trans.category.trim()
+              : trans.category,
+        };
+        category_id = parseCategoryFields(transWithTrimmedCategory, categories);
+      }
+
+      // Only assign category_id if it's non-null to preserve existing valid IDs
+      if (category_id != null) {
+        trans.category = category_id;
+      }
 
       const {
         inflow: _inflow,
@@ -1260,6 +1512,19 @@ export function ImportTransactionsModal({
               </SpaceBetween>
             </View>
           )}
+
+          {/* Category Creation Option - Available for all file types */}
+          <View style={{ marginTop: 10 }}>
+            <LabeledCheckbox
+              id="enable_category_creation"
+              checked={enableCategoryCreation}
+              onChange={() => {
+                setEnableCategoryCreation(!enableCategoryCreation);
+              }}
+            >
+              <Trans>Create categories from import</Trans>
+            </LabeledCheckbox>
+          </View>
 
           <View style={{ flexDirection: 'row', marginTop: 5 }}>
             {/*Submit Button */}

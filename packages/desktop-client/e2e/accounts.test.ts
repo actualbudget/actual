@@ -6,17 +6,25 @@ import { expect, test } from './fixtures';
 import type { AccountPage } from './page-models/account-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
+import { TransactionsPageModel } from './page-models/transactions-page';
+
+const transactionsCsvPath = join(__dirname, 'data/test.csv');
+const categoriesCsvPath = join(__dirname, 'data/categories.csv');
 
 test.describe('Accounts', () => {
+  test.describe.configure({ mode: 'serial' });
+
   let page: Page;
   let navigation: Navigation;
   let configurationPage: ConfigurationPage;
   let accountPage: AccountPage;
+  let transactionsPage: TransactionsPageModel;
 
   test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();
     navigation = new Navigation(page);
     configurationPage = new ConfigurationPage(page);
+    transactionsPage = new TransactionsPageModel(page);
 
     await page.goto('/');
     await configurationPage.createTestFile();
@@ -59,7 +67,7 @@ test.describe('Accounts', () => {
   test.describe('On Budget Accounts', () => {
     // Reset filters
     test.afterEach(async () => {
-      await accountPage.removeFilter(0);
+      await accountPage?.removeFilter(0);
     });
 
     test('creates a transfer from two existing transactions', async () => {
@@ -116,44 +124,15 @@ test.describe('Accounts', () => {
       await accountPage.waitFor();
     });
 
-    async function importCsv(screenshot = false) {
-      const fileChooserPromise = page.waitForEvent('filechooser');
-      await accountPage.page.getByRole('button', { name: 'Import' }).click();
-
-      const fileChooser = await fileChooserPromise;
-      await fileChooser.setFiles(join(__dirname, 'data/test.csv'));
-
-      const importButton = accountPage.page.getByRole('button', {
-        name: /Import \d+ transactions/,
-      });
-
-      await importButton.waitFor({ state: 'visible' });
-
-      if (screenshot) await expect(page).toMatchThemeScreenshots();
-
-      await importButton.click();
-
-      await expect(importButton).not.toBeVisible();
-    }
-
     test('imports transactions from a CSV file', async () => {
-      await importCsv(true);
+      await transactionsPage.importCsv(true);
     });
 
     test('import csv file twice', async () => {
-      await importCsv(false);
+      await transactionsPage.importCsv(false);
 
-      const fileChooserPromise = page.waitForEvent('filechooser');
-      await accountPage.page.getByRole('button', { name: 'Import' }).click();
-
-      const fileChooser = await fileChooserPromise;
-      await fileChooser.setFiles(join(__dirname, 'data/test.csv'));
-
-      const importButton = accountPage.page.getByRole('button', {
-        name: /Import \d+ transactions/,
-      });
-
-      await importButton.waitFor({ state: 'visible' });
+      const importButton =
+        await transactionsPage.openImportPreview(transactionsCsvPath);
 
       await expect(page).toMatchThemeScreenshots();
 
@@ -166,26 +145,138 @@ test.describe('Accounts', () => {
     });
 
     test('import notes checkbox is not shown for CSV files', async () => {
-      const fileChooserPromise = page.waitForEvent('filechooser');
-      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+      await transactionsPage.openImportPreview(transactionsCsvPath);
 
-      const fileChooser = await fileChooserPromise;
-      await fileChooser.setFiles(join(__dirname, 'data/test.csv'));
-
-      // Verify the import notes checkbox is not visible for CSV files
       const importNotesCheckbox = page.getByRole('checkbox', {
         name: 'Import notes from file',
       });
       await expect(importNotesCheckbox).not.toBeVisible();
 
-      // Import the transactions
       const importButton = page.getByRole('button', {
         name: /Import \d+ transactions/,
       });
       await importButton.click();
 
-      // Verify the transactions were imported
       await expect(importButton).not.toBeVisible();
+    });
+
+    test('with category mapping from CSV', async () => {
+      await test.step('Load CSV and enable create categories from import', async () => {
+        await transactionsPage.openImportPreview(categoriesCsvPath);
+
+        await expect(page.getByText('Corner Market')).toBeVisible();
+
+        await page
+          .getByRole('checkbox', { name: 'Create categories from import' })
+          .click();
+
+        await expect(page).toMatchThemeScreenshots('step-1-create-categories');
+      });
+
+      await test.step('Open Import Categories modal', async () => {
+        await page
+          .getByRole('button', { name: /Import \d+ transactions/ })
+          .click();
+
+        await page.getByRole('heading', { name: 'Import Categories' }).waitFor({
+          state: 'visible',
+        });
+
+        await expect(transactionsPage.getTopDialog()).toMatchThemeScreenshots(
+          'step-2-open-categories-modal',
+        );
+      });
+
+      await test.step('Map category to existing', async () => {
+        const importCategoriesDialog =
+          transactionsPage.getImportCategoriesDialog();
+
+        await importCategoriesDialog.getByRole('textbox').first().click();
+        await page.keyboard.type('Food');
+        await page.getByTestId('Food-category-item').click();
+
+        await expect(transactionsPage.getTopDialog()).toMatchThemeScreenshots(
+          'step-3-map-existing',
+        );
+      });
+
+      await test.step('Assign new category to existing group', async () => {
+        const importCategoriesDialog =
+          transactionsPage.getImportCategoriesDialog();
+
+        await importCategoriesDialog
+          .getByRole('button', { name: 'Usual Expenses' })
+          .first()
+          .click();
+        await page.getByRole('button', { name: 'Bills' }).click();
+
+        await expect(transactionsPage.getTopDialog()).toMatchThemeScreenshots(
+          'step-4-assign-group',
+        );
+      });
+
+      await test.step('Create new category group', async () => {
+        const importCategoriesDialog =
+          transactionsPage.getImportCategoriesDialog();
+
+        await importCategoriesDialog
+          .getByRole('button', { name: 'Usual Expenses' })
+          .click();
+        await page.getByRole('button', { name: /Create new group/ }).click();
+
+        await page
+          .getByRole('heading', { name: 'New Category Group' })
+          .waitFor({
+            state: 'visible',
+          });
+        await page.getByPlaceholder('Category group name').fill('Pets');
+        await expect(transactionsPage.getTopDialog()).toMatchThemeScreenshots(
+          'step-5-new-group',
+        );
+
+        await page
+          .locator('form')
+          .filter({
+            has: page.getByPlaceholder('Category group name'),
+          })
+          .getByRole('button', { name: 'Add' })
+          .click();
+
+        await page.getByRole('heading', { name: 'Import Categories' }).waitFor({
+          state: 'visible',
+        });
+
+        await expect(transactionsPage.getTopDialog()).toMatchThemeScreenshots(
+          'step-6-after-new-group',
+        );
+      });
+
+      await test.step('Continue import', async () => {
+        await page.getByRole('button', { name: 'Continue Import' }).click();
+
+        await page.getByRole('heading', { name: 'Import Categories' }).waitFor({
+          state: 'hidden',
+        });
+
+        await accountPage.waitFor();
+
+        await expect(page).toMatchThemeScreenshots('step-7-imported');
+      });
+
+      await test.step('Assert assigned categories on transactions', async () => {
+        const byPayee = (name: string) =>
+          accountPage.transactionTableRow.filter({ hasText: name });
+
+        await expect(
+          byPayee('Corner Market').getByTestId('category'),
+        ).toHaveText('Food');
+        await expect(byPayee('Hobby Shop').getByTestId('category')).toHaveText(
+          'Model Trains',
+        );
+        await expect(byPayee('Vet Clinic').getByTestId('category')).toHaveText(
+          'Pet Care',
+        );
+      });
     });
   });
 });
