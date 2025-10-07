@@ -212,6 +212,7 @@ export type DbTransactionFilter = {
 export type DbPreference = {
   id: string;
   value: string;
+  isGlobal?: 1 | 0;
 };
 
 export type DbCustomReport = {

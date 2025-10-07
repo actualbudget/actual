@@ -5,14 +5,13 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import type { FeatureFlag, GlobalPrefs } from 'loot-core/types/prefs';
+import type { FeatureFlag, SyncedPrefs } from 'loot-core/types/prefs';
 
 import { Setting } from './UI';
 
 import { Link } from '@desktop-client/components/common/Link';
 import { Checkbox } from '@desktop-client/components/forms';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type FeatureToggleProps = {
@@ -70,7 +69,7 @@ function FeatureToggle({
 }
 
 type GlobalFeatureToggleProps = {
-  prefName: keyof GlobalPrefs;
+  prefName: keyof SyncedPrefs;
   disableToggle?: boolean;
   error?: ReactNode;
   children: ReactNode;
@@ -84,14 +83,14 @@ function GlobalFeatureToggle({
   error,
   children,
 }: GlobalFeatureToggleProps) {
-  const [enabled, setEnabled] = useGlobalPref(prefName);
+  const [enabled, setEnabled] = useSyncedPref(prefName, { isGlobal: true });
 
   return (
     <label style={{ display: 'flex' }}>
       <Checkbox
-        checked={Boolean(enabled)}
+        checked={enabled === 'true'}
         onChange={() => {
-          setEnabled(!enabled);
+          setEnabled(enabled === 'true' ? 'false' : 'true');
         }}
         disabled={disableToggle}
       />
@@ -161,7 +160,6 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             <GlobalFeatureToggle
               prefName="plugins"
-              disableToggle={true}
               feedbackLink="https://github.com/actualbudget/actual/pull/4049"
             >
               <Trans>Client-Side plugins (soon)</Trans>

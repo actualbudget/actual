@@ -108,16 +108,18 @@ export const saveGlobalPrefs = createAppAsyncThunk(
 
 type SaveSyncedPrefsPayload = {
   prefs: SyncedPrefs;
+  isGlobal?: boolean;
 };
 
 export const saveSyncedPrefs = createAppAsyncThunk(
   `${sliceName}/saveSyncedPrefs`,
-  async ({ prefs }: SaveSyncedPrefsPayload, { dispatch }) => {
+  async ({ prefs, isGlobal }: SaveSyncedPrefsPayload, { dispatch }) => {
     await Promise.all(
       Object.entries(prefs).map(([prefName, value]) =>
         send('preferences/save', {
           id: prefName as keyof SyncedPrefs,
           value,
+          isGlobal,
         }),
       ),
     );
