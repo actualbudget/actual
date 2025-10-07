@@ -39,15 +39,21 @@ app.method('load-prefs', loadMetadataPrefs);
 async function saveSyncedPrefs({
   id,
   value,
+  isGlobal,
 }: {
   id: keyof SyncedPrefs;
   value: string | undefined;
+  isGlobal?: boolean;
 }) {
   if (!id) {
     return;
   }
 
-  await db.update('preferences', { id, value });
+  await db.update('preferences', {
+    id,
+    value,
+    ...(isGlobal !== undefined && { isGlobal: isGlobal ? 1 : 0 }),
+  });
 }
 
 async function getSyncedPrefs(): Promise<SyncedPrefs> {

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
@@ -22,16 +22,19 @@ export function CurrencySettings() {
       new Map<string, string>([
         ['', t('None')],
         ['AUD', t('Australian Dollar')],
+        ['ARS', t('Argentinian Peso')],
         ['BRL', t('Brazilian Real')],
         ['CAD', t('Canadian Dollar')],
         ['CHF', t('Swiss Franc')],
         ['CNY', t('Yuan Renminbi')],
+        ['CRC', t('Costa Rican Colón')],
         ['EUR', t('Euro')],
         ['GBP', t('Pound Sterling')],
         ['HKD', t('Hong Kong Dollar')],
         ['INR', t('Indian Rupee')],
         ['JMD', t('Jamaican Dollar')],
         // ['JPY', t('Yen')],
+        ['LKR', t('Sri Lankan Rupee')],
         ['MDL', t('Moldovan Leu')],
         ['PHP', t('Philippine Peso')],
         ['PLN', t('Polish Złoty')],
@@ -47,6 +50,7 @@ export function CurrencySettings() {
         ['QAR', t('Qatari Riyal')],
         ['EGP', t('Egyptian Pound')],
         ['SAR', t('Saudi Riyal')],
+        ['UZS', t('Uzbek Soum')],
       ]),
     [t],
   );

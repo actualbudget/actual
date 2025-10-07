@@ -1,7 +1,6 @@
 import React, {
   type ComponentProps,
   type ReactNode,
-  useEffect,
   useRef,
   useState,
 } from 'react';
@@ -204,7 +203,7 @@ export function AccountHeader({
   const isUsingServer = syncServerStatus !== 'no-server';
   const isServerOffline = syncServerStatus === 'offline';
   const [_, setExpandSplitsPref] = useLocalPref('expand-splits');
-  const [showNetWorthChartPref, setShowNetWorthChartPref] = useSyncedPref(
+  const [showNetWorthChartPref, _setShowNetWorthChartPref] = useSyncedPref(
     `show-account-${accountId}-net-worth-chart`,
   );
   const showNetWorthChart = showNetWorthChartPref === 'true';
@@ -233,30 +232,6 @@ export function AccountHeader({
   }
 
   const graphRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const handleResize = () => {
-      const ele = graphRef.current;
-      if (!ele) return;
-      const clone = ele.cloneNode(true) as HTMLDivElement;
-      Object.assign(clone.style, {
-        visibility: 'hidden',
-        display: 'flex',
-      });
-      ele.after(clone);
-      if (clone.clientHeight < window.innerHeight * 0.15) {
-        setShowNetWorthChartPref('true');
-      } else {
-        setShowNetWorthChartPref('false');
-      }
-      clone.remove();
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [setShowNetWorthChartPref]);
 
   useHotkeys(
     'ctrl+f, cmd+f, meta+f',

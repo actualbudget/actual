@@ -18,7 +18,9 @@ const themes = {
   ...(isNonProductionEnvironment() && {
     development: { name: 'Development', colors: developmentTheme },
   }),
-};
+} as const;
+
+type ThemeKey = keyof typeof themes;
 
 export const themeOptions = Object.entries(themes).map(
   ([key, { name }]) => [key, name] as [Theme, string],
@@ -84,7 +86,7 @@ export function ThemeStyle() {
         );
       };
     } else {
-      setThemeColors(themes[activeTheme]?.colors);
+      setThemeColors(themes[activeTheme as ThemeKey]?.colors);
     }
   }, [activeTheme, darkThemePreference]);
 

@@ -13,16 +13,19 @@ export type Currency = {
 export const currencies: Currency[] = [
   { code: '', name: 'None', symbol: '', decimalPlaces: 2 },
   { code: 'AUD', name: 'Australian Dollar', symbol: 'A$', decimalPlaces: 2 },
+  { code: 'ARS', name: 'Argentinian Peso', symbol: 'Arg$', decimalPlaces: 2 },
   { code: 'BRL', name: 'Brazilian Real', symbol: 'R$', decimalPlaces: 2 },
   { code: 'CAD', name: 'Canadian Dollar', symbol: 'CA$', decimalPlaces: 2 },
   { code: 'CHF', name: 'Swiss Franc', symbol: 'Fr.', decimalPlaces: 2 },
   { code: 'CNY', name: 'Yuan Renminbi', symbol: '¥', decimalPlaces: 2 },
+  { code: 'CRC', name: 'Costa Rican Colón', symbol: '₡', decimalPlaces: 2 },
   { code: 'EUR', name: 'Euro', symbol: '€', decimalPlaces: 2 },
   { code: 'GBP', name: 'Pound Sterling', symbol: '£', decimalPlaces: 2 },
   { code: 'HKD', name: 'Hong Kong Dollar', symbol: 'HK$', decimalPlaces: 2 },
   { code: 'INR', name: 'Indian Rupee', symbol: '₹', decimalPlaces: 2 },
   { code: 'JMD', name: 'Jamaican Dollar', symbol: 'J$', decimalPlaces: 2 },
   // { code: 'JPY', name: 'Yen', symbol: '¥', decimalPlaces: 0 },
+  { code: 'LKR', name: 'Sri Lankan Rupee', symbol: 'Rs.', decimalPlaces: 2 },
   { code: 'MDL', name: 'Moldovan Leu', symbol: 'L', decimalPlaces: 2 },
   { code: 'PHP', name: 'Philippine Peso', symbol: '₱', decimalPlaces: 2 },
   { code: 'PLN', name: 'Polish Złoty', symbol: 'zł', decimalPlaces: 2 },
@@ -38,6 +41,7 @@ export const currencies: Currency[] = [
   { code: 'QAR', name: 'Qatari Riyal', symbol: 'QAR', decimalPlaces: 2 },
   { code: 'EGP', name: 'Egyptian Pound', symbol: 'EGP', decimalPlaces: 2 },
   { code: 'SAR', name: 'Saudi Riyal', symbol: '﷼', decimalPlaces: 2 },
+  { code: 'UZS', name: 'Uzbek Soum', symbol: 'UZS', decimalPlaces: 2 },
 ];
 
 export function getCurrency(code: string): Currency {
