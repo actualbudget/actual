@@ -208,8 +208,8 @@ export function TransactionList({
                 <TransactionListItem
                   key={transaction.id}
                   value={transaction}
-                  onPress={() => onTransactionPress(transaction)}
-                  onLongPress={() => onTransactionPress(transaction, true)}
+                  onPress={trans => onTransactionPress(trans)}
+                  onLongPress={trans => onTransactionPress(trans, true)}
                 />
               )}
             </Collection>

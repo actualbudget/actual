@@ -155,6 +155,8 @@ test.describe('Transactions', () => {
     await expect(transaction.category.locator('input')).toHaveValue('Transfer');
     await expect(page).toMatchThemeScreenshots();
 
+    const balanceBeforeTransaction =
+      await accountPage.accountBalance.textContent();
     await accountPage.addEnteredTransaction();
 
     transaction = accountPage.getNthTransaction(0);
@@ -164,9 +166,12 @@ test.describe('Transactions', () => {
     await expect(transaction.debit).toHaveText('12.34');
     await expect(transaction.credit).toHaveText('');
 
-    // Wait for balance calculations to complete before taking screenshot
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000); // Give time for balance updates
+    // Wait for balance to update after adding transaction
+    await expect(async () => {
+      const balanceAfterTransaction =
+        await accountPage.accountBalance.textContent();
+      expect(balanceAfterTransaction).not.toBe(balanceBeforeTransaction);
+    }).toPass();
 
     await expect(page).toMatchThemeScreenshots();
   });
