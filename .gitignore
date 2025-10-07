@@ -26,6 +26,8 @@ packages/desktop-electron/build
 packages/desktop-electron/.electron-symbols
 packages/desktop-electron/dist
 packages/desktop-electron/loot-core
+packages/desktop-client/service-worker
+packages/plugins-service/dist
 bundle.desktop.js
 bundle.desktop.js.map
 bundle.mobile.js
