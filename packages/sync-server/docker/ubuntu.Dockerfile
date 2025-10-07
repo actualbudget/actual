@@ -16,6 +16,7 @@ COPY packages/desktop-electron/package.json packages/desktop-electron/package.js
 COPY packages/eslint-plugin-actual/package.json packages/eslint-plugin-actual/package.json
 COPY packages/loot-core/package.json packages/loot-core/package.json
 COPY packages/sync-server/package.json packages/sync-server/package.json
+COPY packages/plugins-service/package.json packages/plugins-service/package.json
 
 # Avoiding memory issues with ARMv7
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
