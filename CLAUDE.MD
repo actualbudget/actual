@@ -6,7 +6,7 @@ The Pay Periods feature extends Actual's month-based budgeting to support variou
 
 **Key Design Decision**: Pay periods use the same month ID format (`YYYY-MM`) with MM ranging from 13-99, allowing the system to reuse existing infrastructure without schema changes.
 
-**Architecture Principle**: Different runtime contexts (React frontend vs Node.js backend) require different config management patterns, but share the same utility functions.
+**Architecture Principle**: Single source of truth via module singleton, synchronized from database preferences on both frontend and backend.
 
 ---
 
@@ -76,440 +76,451 @@ This principle:
 
 ---
 
-## Architecture by Context
+## Architecture: Module Singleton Pattern
 
-### Frontend Architecture (React)
+### Source of Truth
 
-**Source of Truth**: React hooks → Config object → Explicit passing
+**Module singleton (`__payPeriodConfig`)** is the single source of truth for the entire application (both frontend and backend).
 
 ```
 Database preferences
   ↓
-useSyncedPref('showPayPeriods')
-useSyncedPref('payPeriodFrequency')
-useSyncedPref('payPeriodStartDate')
+loadPayPeriodConfigFromPrefs()
   ↓
-usePayPeriodConfig() hook (builds config object)
+setPayPeriodConfig() → __payPeriodConfig (module singleton)
   ↓
-Pass config explicitly to month utils
-  ↓
-monthUtils.getMonthDateRange(month, config, locale)
+getPayPeriodConfig() → Used by all month utilities
 ```
 
-**Why this pattern:**
-- React hooks are the source of truth for UI state
-- Config is reactive to preference changes
-- No module-level singleton dependency
-- Explicit dependencies (no hidden state)
+### Frontend Architecture
 
-**Implementation:**
+**Pattern**: React hooks read preferences → Sync to singleton → Month utils use singleton
 
 ```typescript
-// In any React component:
-function BudgetSummary({ month }) {
-  const config = usePayPeriodConfig(); // From useSyncedPref
-
-  const displayMonth = monthUtils.getMonthDateRange(
-    month,
-    config,  // Explicit!
-    locale
-  );
-
-  return <div>{displayMonth}</div>;
-}
-```
-
-**The Hook:**
-
-```typescript
-// packages/desktop-client/src/hooks/usePayPeriodConfig.ts
-export function usePayPeriodConfig(): PayPeriodConfig {
-  const [showPayPeriods] = useSyncedPref('showPayPeriods');
+// In React components:
+function BudgetPage() {
   const [payPeriodFrequency] = useSyncedPref('payPeriodFrequency');
   const [payPeriodStartDate] = useSyncedPref('payPeriodStartDate');
+  const [payPeriodViewEnabled] = useSyncedPref('showPayPeriods');
 
-  return useMemo(() => ({
-    enabled: showPayPeriods === 'true',
-    payFrequency: (payPeriodFrequency as PayPeriodConfig['payFrequency']) || 'monthly',
-    startDate: payPeriodStartDate || new Date().toISOString().slice(0, 10),
-  }), [showPayPeriods, payPeriodFrequency, payPeriodStartDate]);
+  // Sync React state to module singleton
+  useEffect(() => {
+    if (!payPeriodFeatureFlagEnabled) return;
+
+    loadPayPeriodConfigFromPrefs({
+      showPayPeriods: payPeriodViewEnabled,
+      payPeriodFrequency,
+      payPeriodStartDate,
+    });
+  }, [payPeriodFeatureFlagEnabled, payPeriodViewEnabled, payPeriodFrequency, payPeriodStartDate]);
+
+  // Month utils use singleton internally - no config passing needed
+  const currentPayPeriod = monthUtils.currentMonth();
+  const displayName = monthUtils.getMonthDisplayName(month, locale);
+
+  return <div>{displayName}</div>;
 }
-```
-
-### Backend Architecture (Node.js Server)
-
-**Source of Truth**: Database → Module singleton → Internal access
-
-```
-Database preferences table
-  ↓
-loadPayPeriodConfigFromPrefs() (on budget load)
-  ↓
-Module-level singleton (__payPeriodConfig)
-  ↓
-getPayPeriodConfig() accessed internally
-  ↓
-monthUtils internally use config
 ```
 
 **Why this pattern:**
-- Server has no React hooks
-- Module singleton loaded once from DB at startup
-- Stable config during request lifecycle
-- Reloaded when preferences change
+- ✅ Single source of truth (module singleton)
+- ✅ Simple function calls (no config passing)
+- ✅ Clear sync point (one useEffect in main budget component)
+- ✅ Consistent between frontend and backend
 
-**Implementation:**
+### Backend Architecture
+
+**Pattern**: Database → loadPayPeriodConfig() → Singleton → Month utils
 
 ```typescript
-// In server-side code:
-function getBudgetRange(start: string, end: string) {
-  // Config already loaded at startup via loadPayPeriodConfigFromPrefs()
-  start = monthUtils.monthFromDate(start); // Uses getPayPeriodConfig() internally
-  end = monthUtils.monthFromDate(end);
-  // ...
+// Server initialization (budgetfiles/app.ts)
+import { loadPayPeriodConfig } from '../preferences/app';
+
+await loadPayPeriodConfig(); // Loads from DB into singleton
+
+// Server handlers (budget/app.ts)
+export async function getBudgetBounds() {
+  return await budget.createAllBudgets(); // Uses singleton internally
+}
+
+// Budget operations (budget/base.ts)
+export async function createBudget(months) {
+  months.forEach(month => {
+    const { start, end } = monthUtils.bounds(month); // Uses singleton
+    const sheetName = monthUtils.sheetForMonth(month);
+    // ... create category sheets with start/end dates
+  });
 }
 ```
 
-**Initialization:**
+**Automatic Reload**: When preferences are saved, the server automatically reloads the config:
 
 ```typescript
-// packages/loot-core/src/server/budgetfiles/app.ts (on budget load)
-const { loadPayPeriodConfigFromPrefs } = await import('../../shared/pay-periods');
-const payPeriodPrefs = {
-  showPayPeriods: await getPrefs('showPayPeriods'),
-  payPeriodFrequency: await getPrefs('payPeriodFrequency'),
-  payPeriodStartDate: await getPrefs('payPeriodStartDate'),
-};
-loadPayPeriodConfigFromPrefs(payPeriodPrefs);
-```
+// packages/loot-core/src/server/preferences/app.ts
+async function saveSyncedPrefs({ id, value }) {
+  await db.update('preferences', { id, value });
 
-### Shared Utilities Pattern
-
-**Design**: Optional config parameter with singleton fallback
-
-```typescript
-export function getMonthStartDate(
-  monthId: string,
-  config?: PayPeriodConfig,  // Optional!
-): Date {
-  if (isPayPeriod(monthId)) {
-    // Frontend passes config, backend uses singleton fallback
-    const activeConfig = config || getPayPeriodConfig();
-
-    if (!activeConfig) {
-      throw new Error(
-        `Pay period config required for '${monthId}'`
-      );
-    }
-
-    return getPayPeriodStartDate(monthId, activeConfig);
+  // Reload pay period config when pay period preferences change
+  if (
+    id === 'showPayPeriods' ||
+    id === 'payPeriodFrequency' ||
+    id === 'payPeriodStartDate'
+  ) {
+    await loadPayPeriodConfig(); // Updates singleton from DB
   }
-
-  return getCalendarMonthStartDate(monthId);
 }
 ```
-
-**Why this works:**
-- ✅ Frontend MUST pass config (explicit dependency on React state)
-- ✅ Backend can omit config (uses singleton loaded at startup)
-- ✅ Same function works in both contexts
-- ✅ Type-safe with optional parameter
 
 ---
 
-## When Config Is Needed
+## Config Functions
 
-### Config NOT Needed (ID Operations)
+### Module Singleton Functions
 
-Functions that work with month IDs directly:
-
+**`getPayPeriodConfig()`**: Returns the current config from the module singleton
 ```typescript
-// ✅ No config needed - just checking ID format
-isPayPeriod('2024-31')  // true
-
-// ✅ No config needed - string comparison
-isBefore('2024-13', '2024-14')  // true
-
-// ✅ No config needed - ID arithmetic
-addMonths('2024-13', 1)  // '2024-14'
-
-// ✅ No config needed - ID iteration
-rangeInclusive('2024-13', '2024-15')  // ['2024-13', '2024-14', '2024-15']
+const config = getPayPeriodConfig();
+// Returns: PayPeriodConfig | null
 ```
 
-**Why**: These operations only need to know the ID format/structure, not the actual dates or frequency.
-
-### Config REQUIRED (Date/Label Computation)
-
-Functions that need actual config values:
-
+**`setPayPeriodConfig(config)`**: Updates the module singleton (internal use)
 ```typescript
-// ❌ Needs config - computing actual dates
-getMonthStartDate('2024-13', config)  // Needs startDate + frequency
-
-// ❌ Needs config - computing actual dates
-getMonthEndDate('2024-13', config)    // Needs startDate + frequency
-
-// ❌ Needs config - formatting labels
-nameForMonth('2024-13', locale, config)  // Needs frequency for display
-
-// ❌ Needs config - generating periods
-generatePayPeriods(2024, config)  // Needs startDate + frequency
+setPayPeriodConfig({
+  enabled: true,
+  payFrequency: 'biweekly',
+  startDate: '2024-01-05',
+});
 ```
 
-**Why**: These operations need to know the actual `startDate` and `payFrequency` from the config.
+**`loadPayPeriodConfigFromPrefs(prefs)`**: Parses preferences and updates singleton
+```typescript
+// Frontend sync point
+loadPayPeriodConfigFromPrefs({
+  showPayPeriods: 'true',
+  payPeriodFrequency: 'biweekly',
+  payPeriodStartDate: '2024-01-05',
+});
 
-### Rule of Thumb
+// Backend initialization
+export async function loadPayPeriodConfig() {
+  const prefs = await getSyncedPrefs();
+  const config = {
+    enabled: prefs.showPayPeriods === 'true',
+    payFrequency: prefs.payPeriodFrequency || 'monthly',
+    startDate: prefs.payPeriodStartDate || new Date().toISOString().slice(0, 10),
+  };
+  setPayPeriodConfig(config);
+}
+```
 
-**If the function needs to know `startDate` or `payFrequency` values → config required**
-**If the function only checks/manipulates ID strings → no config needed**
+### Month Utility Functions
+
+All month utilities use `getPayPeriodConfig()` internally - **no config parameter needed**:
+
+```typescript
+// ID Generation (checks config.enabled)
+monthUtils.currentMonth()        // → '2024-13' or '2024-10'
+monthUtils.monthFromDate(date)   // → '2024-13' or '2024-10'
+
+// Date Operations (uses config for pay periods)
+monthUtils.bounds(month)                    // → { start: 20240105, end: 20240118 }
+monthUtils.getMonthStartDate(month)         // → Date
+monthUtils.getMonthEndDate(month)           // → Date
+
+// Display/Formatting (uses config for pay periods)
+monthUtils.getMonthDisplayName(month, locale)     // → 'PP 1' or 'Jan'
+monthUtils.nameForMonth(month, locale)            // → 'Pay Period 1' or 'January'
+monthUtils.getMonthDateRange(month, locale)       // → 'Jan 5 - Jan 18' or 'January'
+
+// ID Operations (no config needed - just string manipulation)
+monthUtils.isPayPeriod(month)      // → true/false
+monthUtils.addMonths(month, n)     // → '2024-14'
+monthUtils.prevMonth(month)        // → '2024-12'
+monthUtils.nextMonth(month)        // → '2024-14'
+monthUtils.isBefore(m1, m2)        // → true/false
+```
+
+---
+
+## The Presence Rule in Practice
+
+### ID Generation (Check config.enabled)
+
+Only two functions generate month IDs - they check if pay periods are enabled:
+
+```typescript
+export function currentMonth(): string {
+  if (global.IS_TESTING || Platform.isPlaywright) {
+    return global.currentMonth || '2017-01';
+  }
+
+  const config = getPayPeriodConfig();
+  if (config?.enabled) {
+    return getCurrentPayPeriod(new Date(), config); // → '2024-13'
+  }
+
+  return d.format(new Date(), 'yyyy-MM'); // → '2024-10'
+}
+
+export function monthFromDate(date: DateLike): string {
+  const config = getPayPeriodConfig();
+  if (config?.enabled) {
+    return getPayPeriodFromDate(_parse(date), config); // → '2024-13'
+  }
+
+  return d.format(_parse(date), 'yyyy-MM'); // → '2024-10'
+}
+```
+
+### ID Processing (Trust the ID)
+
+All other functions trust that if they receive a pay period ID, config exists:
+
+```typescript
+export function bounds(month: DateLike): { start: number; end: number } {
+  const monthStr = typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+
+  if (isPayPeriod(monthStr)) {
+    // Presence Rule: If ID is pay period, config must exist
+    const config = getPayPeriodConfig();
+    if (!config) {
+      // Fail fast - this should never happen
+      throw new Error(`Pay period config not available for '${monthStr}'`);
+    }
+
+    const periods = generatePayPeriods(year, config);
+    const period = periods.find(p => p.monthId === monthStr);
+    // ... return period bounds
+  }
+
+  // Calendar month logic
+  return {
+    start: parseInt(d.format(d.startOfMonth(_parse(month)), 'yyyyMMdd')),
+    end: parseInt(d.format(d.endOfMonth(_parse(month)), 'yyyyMMdd')),
+  };
+}
+```
+
+**Anti-Pattern (Redundant Check)**:
+```typescript
+// ❌ BAD: Checking config.enabled when ID presence already proves it
+if (isPayPeriod(monthId)) {
+  const config = getPayPeriodConfig();
+  if (config?.enabled) {  // ❌ Unnecessary!
+    return processPayPeriod(monthId, config);
+  }
+}
+```
+
+**Correct Pattern**:
+```typescript
+// ✅ GOOD: Trust the ID, only verify config exists
+if (isPayPeriod(monthId)) {
+  const config = getPayPeriodConfig();
+  if (!config) {
+    throw new Error(`Config required for '${monthId}'`);
+  }
+  return processPayPeriod(monthId, config);
+}
+```
 
 ---
 
 ## Implementation Patterns
 
-### Pattern 1: Frontend Component
+### Pattern 1: Frontend Component (Main Budget)
 
 ```typescript
-import { usePayPeriodConfig } from '@desktop-client/hooks/usePayPeriodConfig';
+import { loadPayPeriodConfigFromPrefs } from 'loot-core/shared/pay-periods';
 import * as monthUtils from 'loot-core/shared/months';
 
-function BudgetComponent({ month }) {
-  // Get config from React hooks (source of truth)
-  const config = usePayPeriodConfig();
+function BudgetPage() {
+  const [payPeriodFrequency] = useSyncedPref('payPeriodFrequency');
+  const [payPeriodStartDate] = useSyncedPref('payPeriodStartDate');
+  const [payPeriodViewEnabled] = useSyncedPref('showPayPeriods');
+  const payPeriodFeatureFlagEnabled = useFeatureFlag('payPeriodsEnabled');
 
-  // Pass explicitly to utilities
-  const startDate = monthUtils.getMonthStartDate(month, config);
-  const displayName = monthUtils.nameForMonth(month, locale, config);
+  // Sync React preferences to module singleton
+  useEffect(() => {
+    if (!payPeriodFeatureFlagEnabled) return;
 
-  return (
-    <div>
-      <h2>{displayName}</h2>
-      <p>Starts: {startDate.toLocaleDateString()}</p>
-    </div>
-  );
+    loadPayPeriodConfigFromPrefs({
+      showPayPeriods: payPeriodViewEnabled,
+      payPeriodFrequency,
+      payPeriodStartDate,
+    });
+  }, [payPeriodFeatureFlagEnabled, payPeriodViewEnabled, payPeriodFrequency, payPeriodStartDate]);
+
+  // Month utils use singleton - no config passing!
+  const currentPayPeriod = monthUtils.currentMonth();
+  const displayName = monthUtils.getMonthDisplayName(month, locale);
+
+  return <div>{displayName}</div>;
 }
 ```
 
-### Pattern 2: Backend Function
+### Pattern 2: Frontend Component (Other Components)
+
+```typescript
+import * as monthUtils from 'loot-core/shared/months';
+
+function MonthPicker({ month }) {
+  // No config management needed - singleton is already synced from main budget component
+  const currentMonth = monthUtils.currentMonth();
+  const displayName = monthUtils.getMonthDisplayName(month, locale);
+
+  return <div>{displayName}</div>;
+}
+```
+
+### Pattern 3: Backend Function
 
 ```typescript
 import * as monthUtils from '../../shared/months';
 
-function processBudgetData(dateString: string) {
-  // Config already loaded via loadPayPeriodConfigFromPrefs()
-  // monthUtils will use getPayPeriodConfig() internally
+async function createBudget(months: string[]) {
+  // Config already loaded via loadPayPeriodConfig() at server startup
+  // Month utils use singleton internally
 
-  const monthId = monthUtils.monthFromDate(dateString);
-  const startDate = monthUtils.getMonthStartDate(monthId);
-
-  // Process using the dates...
+  months.forEach(month => {
+    const { start, end } = monthUtils.bounds(month);
+    const sheetName = monthUtils.sheetForMonth(month);
+    // ... create spreadsheet cells
+  });
 }
 ```
 
-### Pattern 3: Shared Utility
+### Pattern 4: Tests
 
 ```typescript
-export function getMonthDateRange(
-  monthId: string,
-  config?: PayPeriodConfig,
-  locale?: Locale,
-): string {
-  if (isPayPeriod(monthId)) {
-    // Frontend passes config, backend uses fallback
-    const activeConfig = config || getPayPeriodConfig();
+import { loadPayPeriodConfigFromPrefs } from 'loot-core/src/shared/pay-periods';
 
-    if (!activeConfig) {
-      throw new Error(`Config required for pay period '${monthId}'`);
-    }
+beforeEach(() => {
+  // Set up singleton for tests
+  loadPayPeriodConfigFromPrefs({
+    showPayPeriods: 'true',
+    payPeriodFrequency: 'biweekly',
+    payPeriodStartDate: '2024-01-05',
+  });
+});
 
-    const start = getPayPeriodStartDate(monthId, activeConfig);
-    const end = getPayPeriodEndDate(monthId, activeConfig);
-    return formatDateRange(start, end, locale);
-  }
-
-  return formatCalendarMonth(monthId, locale);
-}
+test('processes pay period data', () => {
+  const monthId = monthUtils.monthFromDate('2024-01-10');
+  expect(monthId).toBe('2024-13');
+});
 ```
 
 ---
 
-## Key Lessons Learned
+## Key Principles
 
-### Lesson 1: Different Contexts Need Different Patterns
+### 1. Single Source of Truth
 
-**The Problem**: Originally tried to use the same module singleton pattern in both frontend and backend.
+**Module singleton (`__payPeriodConfig`)** is the ONLY source of truth.
 
-**The Reality**:
-- React components need reactive hooks
-- Node.js server needs stable singletons
-- Same pattern doesn't fit both contexts
+- ✅ Frontend syncs from React hooks → singleton
+- ✅ Backend loads from database → singleton
+- ✅ All month utilities use singleton
+- ❌ Never have dual state management
 
-**The Solution**:
-- Frontend: `usePayPeriodConfig()` hook from `useSyncedPref`
-- Backend: Module-level `getPayPeriodConfig()` singleton
-- Shared utils: Optional parameter bridges both worlds
+### 2. The Presence Rule
 
-### Lesson 2: Don't Sync React State to Module Singletons
+**If a pay period ID exists, pay periods are enabled.**
 
-**The Problem**: Frontend was calling `loadPayPeriodConfigFromPrefs()` in `useEffect` to sync React state to module singleton.
-
-**The Issues**:
-- Dual state management (hooks AND singleton)
-- Race conditions (config might not be synced when needed)
-- Manual synchronization logic
-- Not reactive to preference changes
-
-**The Solution**:
-- Use React hooks as the ONLY source of truth in frontend
-- Pass config explicitly to functions
-- No manual synchronization needed
-
-**Before (❌ Bad)**:
-```typescript
-function BudgetPage() {
-  const [showPayPeriods] = useSyncedPref('showPayPeriods');
-  const [frequency] = useSyncedPref('payPeriodFrequency');
-  const [startDate] = useSyncedPref('payPeriodStartDate');
-
-  useEffect(() => {
-    // ❌ Manually sync React state to module singleton
-    loadPayPeriodConfigFromPrefs({
-      showPayPeriods,
-      payPeriodFrequency: frequency,
-      payPeriodStartDate: startDate,
-    });
-  }, [showPayPeriods, frequency, startDate]);
-
-  // ❌ Uses module singleton, not React state
-  const displayMonth = monthUtils.getMonthDateRange(month);
-}
-```
-
-**After (✅ Good)**:
-```typescript
-function BudgetPage() {
-  // ✅ Single source of truth from hooks
-  const config = usePayPeriodConfig();
-
-  // ✅ Explicit dependency on React state
-  const displayMonth = monthUtils.getMonthDateRange(month, config, locale);
-}
-```
-
-### Lesson 3: Config Only When You Need Config Values
-
-**Don't need config for**:
-- ✅ ID validation: `isPayPeriod('2024-31')`
-- ✅ ID arithmetic: `addMonths('2024-13', 5)`
-- ✅ ID comparison: `isBefore('2024-13', '2024-14')`
-- ✅ Range generation: `rangeInclusive('2024-13', '2024-15')`
-
-**Do need config for**:
-- ❌ Date calculation: `getMonthStartDate('2024-13', config)`
-- ❌ Label formatting: `nameForMonth('2024-13', locale, config)`
-- ❌ Period generation: `generatePayPeriods(2024, config)`
-
-**Rule of thumb**: If you need to know `startDate` or `payFrequency` actual values, you need config.
-
-### Lesson 4: The Presence Rule Prevents Redundant Checks
-
-**The Principle**: If a pay period ID exists in the system, pay periods are enabled.
-
-**Why**: ID generation functions (`currentMonth`, `monthFromDate`) only return pay period IDs when `config.enabled === true`.
-
-**What this means**:
-- ✅ Processing functions can trust the ID type
-- ✅ No need to check `config?.enabled` in processing code
+- ✅ Only `currentMonth()` and `monthFromDate()` check `config.enabled`
+- ✅ All other functions trust the ID type
 - ✅ Fail fast with clear errors if config missing
+- ❌ Never check `config.enabled` in processing code
 
-**Anti-Pattern (❌ Redundant)**:
-```typescript
-if (isPayPeriod(monthId)) {
-  const config = getPayPeriodConfig();
-  if (config?.enabled) {  // ❌ Redundant! ID presence is proof
-    return computePayPeriod(monthId, config);
-  }
-}
-```
+### 3. Clear Sync Points
 
-**Correct Pattern (✅)**:
+**Exactly one sync point per context:**
+
+- Frontend: `loadPayPeriodConfigFromPrefs()` in budget/index.tsx useEffect
+- Backend: `loadPayPeriodConfig()` on budget load and preference changes
+
+### 4. Simple Function Calls
+
+**Month utilities never require config parameters:**
+
 ```typescript
-if (isPayPeriod(monthId)) {
-  const config = getPayPeriodConfig();
-  if (!config) {
-    // ✅ Fail fast with clear error
-    throw new Error(`Config required for pay period '${monthId}'`);
-  }
-  return computePayPeriod(monthId, config);
-}
+// ✅ Simple - uses singleton
+const month = monthUtils.currentMonth();
+const display = monthUtils.getMonthDisplayName(month, locale);
+
+// ❌ Complex - would require passing config everywhere
+const month = monthUtils.currentMonth(config);
+const display = monthUtils.getMonthDisplayName(month, config, locale);
 ```
 
 ---
 
 ## Anti-Patterns to Avoid
 
-### ❌ Anti-Pattern 1: Frontend Using Module Singleton
+### ❌ Anti-Pattern 1: Passing Config Parameters
 
 ```typescript
-// ❌ BAD: Race condition! Config might not be loaded
-function BudgetSummary({ month }) {
-  const config = monthUtils.getPayPeriodConfig();  // From module singleton
-  const displayMonth = monthUtils.getMonthDateRange(month, config, locale);
-}
+// ❌ BAD: Don't pass config to month utils
+const config = getPayPeriodConfig();
+const month = monthUtils.currentMonth(config);
 ```
 
-**Why it's bad**: Module singleton isn't synced with React state, race conditions possible.
+**Why it's bad**: Creates unnecessary complexity. Singleton already has config.
 
-**Fix**: Use `usePayPeriodConfig()` hook.
+**Fix**: Let month utils use singleton internally.
 
-### ❌ Anti-Pattern 2: Redundant Config Checks
+### ❌ Anti-Pattern 2: Checking config.enabled in Processing
 
 ```typescript
-// ❌ BAD: Checking config.enabled when ID presence already proves it
+// ❌ BAD: Redundant check
 if (isPayPeriod(monthId)) {
   const config = getPayPeriodConfig();
-  if (config?.enabled) {  // ❌ Redundant!
+  if (config?.enabled) {  // ❌ Unnecessary!
     return processPayPeriod(monthId, config);
   }
-  return processCalendarMonth(monthId);  // ❌ Wrong! We have pay period ID!
 }
 ```
 
-**Why it's bad**: The Presence Rule means if we have a pay period ID, it's enabled.
+**Why it's bad**: Violates Presence Rule. ID existence proves enablement.
 
-**Fix**: Trust the ID, only check if config exists (not enabled flag).
+**Fix**: Trust the ID, only check config exists (not enabled).
 
-### ❌ Anti-Pattern 3: Config Checks Where Not Needed
+### ❌ Anti-Pattern 3: Multiple Sync Points
 
 ```typescript
-// ❌ BAD: isPayPeriod doesn't need config
-const config = getPayPeriodConfig();
-if (config?.enabled && isPayPeriod(monthId)) {
-  // ...
+// ❌ BAD: Syncing in multiple components
+function Component1() {
+  useEffect(() => {
+    loadPayPeriodConfigFromPrefs({ ... });
+  }, [prefs]);
+}
+
+function Component2() {
+  useEffect(() => {
+    loadPayPeriodConfigFromPrefs({ ... });
+  }, [prefs]);
 }
 ```
 
-**Why it's bad**: `isPayPeriod` only checks ID format, doesn't need config.
+**Why it's bad**: Race conditions, unnecessary syncs, unclear responsibility.
 
-**Fix**: Check ID first, get config only if needed for dates/labels.
+**Fix**: Only sync in one place (main budget component).
 
-### ❌ Anti-Pattern 4: Manual React State Sync
+### ❌ Anti-Pattern 4: Not Using Singleton
 
 ```typescript
-// ❌ BAD: Syncing React hooks to module singleton
-useEffect(() => {
-  loadPayPeriodConfigFromPrefs({
-    showPayPeriods: payPeriodEnabled,
-    payPeriodFrequency: frequency,
-    payPeriodStartDate: startDate,
-  });
-}, [payPeriodEnabled, frequency, startDate]);
+// ❌ BAD: Building config manually
+const config = {
+  enabled: showPayPeriods === 'true',
+  payFrequency: frequency,
+  startDate: startDate,
+};
+const display = processWithConfig(month, config);
 ```
 
-**Why it's bad**: Dual state management, race conditions, unnecessary complexity.
+**Why it's bad**: Bypasses singleton, creates dual state.
 
-**Fix**: Use `usePayPeriodConfig()` hook directly, pass config explicitly.
+**Fix**: Use `loadPayPeriodConfigFromPrefs()` to update singleton, then use it.
 
 ---
 
@@ -519,77 +530,54 @@ useEffect(() => {
 
 **`loot-core/src/shared/pay-periods.ts`**
 - Core pay period logic and algorithms
-- Module singleton `__payPeriodConfig` for backend
+- Module singleton `__payPeriodConfig`
 - `getPayPeriodConfig()`, `setPayPeriodConfig()` functions
-- `loadPayPeriodConfigFromPrefs()` for backend initialization
+- `loadPayPeriodConfigFromPrefs()` for frontend sync
 - Period generation, navigation, and calculation functions
 
 **`loot-core/src/shared/months.ts`**
 - Unified month utilities (calendar + pay period)
-- Functions with optional `config` parameter
-- Falls back to `getPayPeriodConfig()` for backend compat
-- Frontend should always pass config explicitly
-
-**`desktop-client/src/hooks/usePayPeriodConfig.ts`**
-- Frontend React hook for config management
-- Builds config from `useSyncedPref` hooks
-- Single source of truth for React components
-- Returns memoized `PayPeriodConfig` object
+- All functions use `getPayPeriodConfig()` internally
+- No config parameters needed in function signatures
+- Simple, clean API
 
 ### Backend Integration
 
 **`loot-core/src/server/budgetfiles/app.ts`**
-- Loads pay period config from DB on budget load
-- Calls `loadPayPeriodConfigFromPrefs()` during initialization
+- Calls `loadPayPeriodConfig()` during budget initialization
 - Config available via singleton for entire request lifecycle
 
 **`loot-core/src/server/preferences/app.ts`**
-- Reloads config when pay period preferences change
-- Ensures singleton stays in sync with database
-- Calls `loadPayPeriodConfigFromPrefs()` on pref updates
+- Contains `loadPayPeriodConfig()` function
+- Loads config from DB with validation
+- Automatically reloads when pay period preferences change
+- Calls `setPayPeriodConfig()` to update singleton
 
-### Frontend Components Using Config
+### Frontend Components
 
-**Budget Components**:
-- `desktop-client/src/components/budget/index.tsx` - Main budget component
-- `desktop-client/src/components/budget/MonthPicker.tsx` - Month navigation
+**Main Budget Component**:
+- `desktop-client/src/components/budget/index.tsx`
+  - Only place that calls `loadPayPeriodConfigFromPrefs()`
+  - Syncs React hooks → module singleton
+  - Clear single source of truth
+
+**Other Components**:
+- `desktop-client/src/components/budget/MonthPicker.tsx`
 - `desktop-client/src/components/budget/envelope/budgetsummary/BudgetSummary.tsx`
 - `desktop-client/src/components/budget/tracking/budgetsummary/BudgetSummary.tsx`
-
-**Mobile Components**:
 - `desktop-client/src/components/mobile/budget/BudgetPage.tsx`
 
-All use `usePayPeriodConfig()` and pass config to month utils explicitly.
+All just use month utils directly - no config management needed.
 
 ---
 
 ## Testing Strategy
 
-### Frontend Component Tests
-
-**Pattern**: Use `usePayPeriodConfig()` in test components or mock the hook.
-
-```typescript
-import { usePayPeriodConfig } from '@desktop-client/hooks/usePayPeriodConfig';
-
-test('displays pay period correctly', () => {
-  // Mock the hook or provide test preferences
-  render(<BudgetSummary month="2024-13" />);
-  expect(screen.getByText(/Pay Period 1/)).toBeInTheDocument();
-});
-```
-
-**Benefits**:
-- No need to mock module singletons
-- Tests are explicit about config dependencies
-- Can test preference reactivity
-
-### Backend Function Tests
-
-**Pattern**: Call `loadPayPeriodConfigFromPrefs()` in test setup.
+### Backend/Shared Utility Tests
 
 ```typescript
 import { loadPayPeriodConfigFromPrefs } from 'loot-core/src/shared/pay-periods';
+import * as monthUtils from 'loot-core/src/shared/months';
 
 beforeEach(() => {
   loadPayPeriodConfigFromPrefs({
@@ -599,301 +587,39 @@ beforeEach(() => {
   });
 });
 
-test('processes pay period data', () => {
-  const result = processBudgetData('2024-01-10');
-  expect(result.monthId).toBe('2024-13');
+test('currentMonth returns pay period when enabled', () => {
+  const month = monthUtils.currentMonth();
+  expect(monthUtils.isPayPeriod(month)).toBe(true);
+});
+
+test('bounds works for pay periods', () => {
+  const bounds = monthUtils.bounds('2024-13');
+  expect(bounds.start).toBe(20240105);
+  expect(bounds.end).toBe(20240118);
 });
 ```
-
-**Benefits**:
-- Module singleton pattern works fine in tests
-- Mirrors actual backend behavior
-- Can test different config states easily
-
-### Shared Utility Tests
-
-**Pattern**: Pass config explicitly (frontend style) for clarity.
-
-```typescript
-test('getMonthStartDate with pay period', () => {
-  const config: PayPeriodConfig = {
-    enabled: true,
-    payFrequency: 'biweekly',
-    startDate: '2024-01-05',
-  };
-
-  const startDate = monthUtils.getMonthStartDate('2024-13', config);
-  expect(startDate).toEqual(new Date('2024-01-05'));
-});
-```
-
-**Benefits**:
-- Explicit dependencies
-- No hidden module state
-- Easy to test edge cases
-
----
-
-## Migration Guide
-
-### Migrating from Old Pattern
-
-**Old Pattern (Manual Sync)**:
-```typescript
-const [showPayPeriods] = useSyncedPref('showPayPeriods');
-const [frequency] = useSyncedPref('payPeriodFrequency');
-const [startDate] = useSyncedPref('payPeriodStartDate');
-
-useEffect(() => {
-  loadPayPeriodConfigFromPrefs({
-    showPayPeriods,
-    payPeriodFrequency: frequency,
-    payPeriodStartDate: startDate,
-  });
-}, [showPayPeriods, frequency, startDate]);
-
-const displayMonth = monthUtils.getMonthDateRange(month);
-```
-
-**New Pattern (Hook)**:
-```typescript
-const config = usePayPeriodConfig();
-
-const displayMonth = monthUtils.getMonthDateRange(month, config, locale);
-```
-
-### Migration Checklist
-
-For each component:
-
-1. ✅ **Remove** individual `useSyncedPref` calls for pay period prefs
-2. ✅ **Remove** `useEffect` with `loadPayPeriodConfigFromPrefs()`
-3. ✅ **Add** `const config = usePayPeriodConfig()` at component level
-4. ✅ **Update** all month utils calls to pass `config` parameter
-5. ✅ **Remove** any `monthUtils.getPayPeriodConfig()` calls
-6. ✅ **Test** that preferences changes update the UI correctly
-
-### Files Changed in Migration
-
-**New Files Created**:
-- `packages/desktop-client/src/hooks/usePayPeriodConfig.ts`
-
-**Files Modified**:
-- `packages/desktop-client/src/components/budget/index.tsx`
-- `packages/desktop-client/src/components/budget/MonthPicker.tsx`
-- `packages/desktop-client/src/components/budget/envelope/budgetsummary/BudgetSummary.tsx`
-- `packages/desktop-client/src/components/budget/tracking/budgetsummary/BudgetSummary.tsx`
-- `packages/desktop-client/src/components/mobile/budget/BudgetPage.tsx`
-
-**Files Unchanged**:
-- All backend files (still use singleton pattern)
-- All shared utility files (optional config parameter preserved)
-
----
-
-## Future Considerations
-
-### Potential Enhancements
-
-**TypeScript Branded Types**:
-```typescript
-type CalendarMonth = string & { __brand: 'CalendarMonth' };
-type PayPeriodMonth = string & { __brand: 'PayPeriodMonth' };
-```
-Could provide compile-time safety against mixing month types.
-
-**Performance Optimizations**:
-- Lazy loading of pay period generation
-- Caching strategies for frequently accessed periods
-- Memoization of expensive date calculations
-
-**Additional Pay Frequencies**:
-- Daily (for contractors)
-- Quarterly (for some businesses)
-- Custom intervals
-
-**Better Error Messages**:
-- More context in errors
-- Suggestions for fixes
-- Debug helpers
-
-### Architectural Considerations
-
-**Maintain Separation**:
-- Keep frontend using React hooks pattern
-- Keep backend using singleton pattern
-- Don't try to unify them
-
-**Preserve Optional Config**:
-- Shared utilities should keep optional config parameter
-- Allows both contexts to work naturally
-- Don't force one pattern over the other
 
 ---
 
 ## Summary
 
-The Pay Periods system successfully extends Actual's month-based budgeting to support various pay frequencies while maintaining:
+The Pay Periods system uses a **module singleton pattern** for clean, simple architecture:
 
 ### Core Achievements
 
-✅ **Backward Compatibility**: Calendar months (01-12) work unchanged
-✅ **Clear Separation**: Pay periods (13-99) are distinct and identifiable
-✅ **Robust Architecture**: Different patterns for different contexts
-✅ **Explicit Dependencies**: Frontend passes config, no hidden state
-✅ **Performance**: Cached config and efficient period generation
-✅ **Flexibility**: Support for weekly, biweekly, semimonthly, and monthly
-✅ **Type Safety**: Prevention of mixed month type operations
+✅ **Single Source of Truth**: Module singleton for both frontend and backend
+✅ **Simple API**: Month utils never require config parameters
+✅ **Clear Sync Points**: One sync in frontend, automatic reload in backend
+✅ **The Presence Rule**: ID existence = proof of enablement
+✅ **Performance**: Singleton cached, no config passing overhead
+✅ **Backward Compatibility**: Calendar months work unchanged
 
 ### Key Principles
 
-1. **The Presence Rule**: Pay period ID existence = proof of enablement
-2. **Context-Appropriate Patterns**: React hooks for frontend, singletons for backend
-3. **Config Only When Needed**: ID operations don't need config, date/label operations do
-4. **Explicit Over Implicit**: Pass config explicitly in frontend, trust singleton in backend
-5. **Fail Fast**: Clear errors better than silent failures or unsafe fallbacks
+1. **Single Source of Truth**: Module singleton only
+2. **The Presence Rule**: Pay period ID existence = proof of enablement
+3. **Clear Sync Points**: One sync point per context
+4. **Simple Function Calls**: No config parameters needed
+5. **Fail Fast**: Clear errors better than silent failures
 
-This architecture allows users to budget based on their actual pay schedule while maintaining clean separation of concerns and leveraging the strengths of each runtime environment.
-
----
-
-## Development Commands
-
-### Building the Project
-
-**Build the browser/web version**:
-```bash
-yarn workspace loot-core build:browser
-```
-
-**Build the entire project for browser**:
-```bash
-./bin/package-browser
-```
-
-**Build the desktop version**:
-```bash
-./bin/package-electron
-```
-
-**Build the API package**:
-```bash
-yarn workspace @actual-app/api build
-```
-
-### Running Tests
-
-**Run all tests across all workspaces**:
-```bash
-yarn test
-```
-
-**Run tests for a specific workspace**:
-```bash
-yarn workspace loot-core test
-```
-
-**Run specific test file(s) with vitest**:
-```bash
-yarn workspace loot-core vitest run src/shared/pay-periods.test.ts
-yarn workspace loot-core vitest run src/shared/months.test.ts
-```
-
-**Run tests in watch mode**:
-```bash
-yarn workspace loot-core vitest watch src/shared/pay-periods.test.ts
-```
-
-**Run tests matching a pattern**:
-```bash
-yarn workspace loot-core vitest run --grep "pay period"
-```
-
-### Development Workflow
-
-**Start the browser development server**:
-```bash
-yarn start:browser
-# This runs both:
-# - loot-core watch:browser (backend)
-# - @actual-app/web start:browser (frontend)
-```
-
-**Start the desktop development environment**:
-```bash
-yarn start:desktop
-# This runs:
-# - loot-core watch:node (backend)
-# - @actual-app/web watch (web UI)
-# - desktop-electron watch (Electron wrapper)
-```
-
-**Start the sync server**:
-```bash
-yarn start:server
-```
-
-### Quick Testing Workflow for Pay Periods
-
-When making changes to pay period code:
-
-1. **Run unit tests** (fastest):
-```bash
-yarn workspace loot-core vitest run src/shared/pay-periods.test.ts
-```
-
-2. **Run integration tests**:
-```bash
-yarn workspace loot-core vitest run src/shared/months.test.ts
-```
-
-3. **Build to verify no compile errors**:
-```bash
-yarn workspace loot-core build:browser
-```
-
-4. **Test in the browser** (if UI changes):
-```bash
-yarn start:browser
-# Navigate to http://localhost:3001
-```
-
-### Troubleshooting Build/Test Issues
-
-**Clear build cache**:
-```bash
-rm -rf packages/loot-core/lib-dist/
-yarn workspace loot-core build:browser
-```
-
-**Reset test database** (if tests fail inconsistently):
-```bash
-# Tests use global.emptyDatabase() automatically
-# But if issues persist, check beforeEach hooks
-```
-
-**Check TypeScript errors**:
-```bash
-yarn workspace loot-core tsc --noEmit
-```
-
-### Pre-Commit Checklist
-
-Before committing changes to pay period code:
-
-```bash
-# 1. Run all pay period tests
-yarn workspace loot-core vitest run src/shared/pay-periods.test.ts
-yarn workspace loot-core vitest run src/shared/months.test.ts
-
-# 2. Build successfully
-yarn workspace loot-core build:browser
-
-# 3. Optional: Run full test suite if changing core logic
-yarn workspace loot-core test
-
-# 4. Format code (if project has formatter)
-yarn format  # or yarn lint
-```
-
----
+This architecture provides a clean, simple, and performant system for pay period budgeting.

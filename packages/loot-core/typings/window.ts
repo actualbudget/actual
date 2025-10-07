@@ -27,7 +27,6 @@ type Actual = {
     newDirectory: string,
   ) => Promise<void>;
   applyAppUpdate: () => Promise<void>;
-  updateAppMenu: (budgetId: string) => void;
   ipcConnect: (callback: (client) => void) => void;
   getServerSocket: () => Promise<Worker | null>;
   setTheme: (theme: string) => void;
