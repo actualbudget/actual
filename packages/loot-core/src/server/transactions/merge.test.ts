@@ -294,7 +294,7 @@ describe('Merging success', () => {
       category: null,
     });
 
-    const sub1 = await db.insertTransaction({
+    const _sub1 = await db.insertTransaction({
       account: 'one',
       amount: 60,
       date: '2025-01-01',
@@ -304,7 +304,7 @@ describe('Merging success', () => {
       parent_id: manualParent,
     });
 
-    const sub2 = await db.insertTransaction({
+    const _sub2 = await db.insertTransaction({
       account: 'one',
       amount: 40,
       date: '2025-01-01',

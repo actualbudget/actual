@@ -64,7 +64,7 @@ export async function mergeTransactions(
       notes: keep.notes || drop.notes,
       cleared: keep.cleared || drop.cleared,
       reconciled: keep.reconciled || drop.reconciled,
-    } as TransactionEntity);
+    } as unknown as TransactionEntity);
   } else {
     // Normal merge without subtransactions
     await db.updateTransaction({
