@@ -35,7 +35,8 @@ test.describe('Schedules', () => {
   test('creates a new schedule, posts the transaction and later completes it', async () => {
     test.setTimeout(40000);
 
-    await schedulesPage.addNewSchedule({
+    const scheduleEditModal = await schedulesPage.addNewSchedule();
+    scheduleEditModal.fill({
       payee: 'Home Depot',
       account: 'HSBC',
       amount: 25,
@@ -91,13 +92,15 @@ test.describe('Schedules', () => {
     test.setTimeout(40000);
 
     // Adding two schedules with the same payee and account and amount, mimicking two different subscriptions
-    await schedulesPage.addNewSchedule({
+    let scheduleEditModal = await schedulesPage.addNewSchedule();
+    scheduleEditModal.fill({
       payee: 'Apple',
       account: 'HSBC',
       amount: 5,
     });
 
-    await schedulesPage.addNewSchedule({
+    scheduleEditModal = await schedulesPage.addNewSchedule();
+    scheduleEditModal.fill({
       payee: 'Apple',
       account: 'HSBC',
       amount: 5,
@@ -154,10 +157,11 @@ test.describe('Schedules', () => {
   test('creates a "full" list of schedules', async () => {
     // Schedules search shouldn't shrink with many schedules
     for (let i = 0; i < 10; i++) {
-      await schedulesPage.addNewSchedule({
-        payee: 'Home Depot',
-        account: 'HSBC',
-        amount: 0,
+      const scheduleEditModal = await schedulesPage.addNewSchedule();
+      scheduleEditModal.fill({
+        payee: `Payee ${i}`,
+        account: `Account ${i}`,
+        amount: i * 10,
       });
     }
     await expect(page).toMatchThemeScreenshots();
