@@ -22,6 +22,7 @@ export type Currency = {
 export const currencies: Currency[] = [
   { code: '', name: 'None', symbol: '', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'AED', name: 'UAE Dirham', symbol: 'د.إ', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: false },
+  { code: 'ARS', name: 'Argentinian Peso', symbol: 'Arg$', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
   { code: 'AUD', name: 'Australian Dollar', symbol: 'A$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'BRL', name: 'Brazilian Real', symbol: 'R$', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
   { code: 'CAD', name: 'Canadian Dollar', symbol: 'CA$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
@@ -50,6 +51,7 @@ export const currencies: Currency[] = [
   { code: 'TRY', name: 'Turkish Lira', symbol: '₺', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
   { code: 'UAH', name: 'Ukrainian Hryvnia', symbol: '₴', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   { code: 'USD', name: 'US Dollar', symbol: '$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
+  { code: 'UZS', name: 'Uzbek Soum', symbol: 'UZS', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
 ];
 
 export function getCurrency(code: string): Currency {

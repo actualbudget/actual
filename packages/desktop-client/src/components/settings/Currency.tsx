@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
@@ -22,6 +22,7 @@ export function CurrencySettings() {
       new Map<string, string>([
         ['', t('None')],
         ['AED', t('UAE Dirham')],
+        ['ARS', t('Argentinian Peso')],
         ['AUD', t('Australian Dollar')],
         ['BRL', t('Brazilian Real')],
         ['CAD', t('Canadian Dollar')],
@@ -50,6 +51,7 @@ export function CurrencySettings() {
         ['TRY', t('Turkish Lira')],
         ['UAH', t('Ukrainian Hryvnia')],
         ['USD', t('US Dollar')],
+        ['UZS', t('Uzbek Soum')],
       ]),
     [t],
   );
