@@ -56,7 +56,6 @@ export function Transaction({
 }: TransactionProps) {
   const { t } = useTranslation();
 
-  const categoryList = categories.map(category => category.name);
   const transaction = useMemo(
     () =>
       fieldMappings && !rawTransaction.isMatchedTransaction
@@ -93,6 +92,14 @@ export function Transaction({
     flipAmount,
     multiplierAmount,
   ]);
+
+  const categoryMap = useMemo(
+    () => ({
+      byId: new Map(categories.map(c => [c.id, c.name])),
+      byName: new Map(categories.map(c => [c.name?.trim().toLowerCase(), c])),
+    }),
+    [categories],
+  );
 
   return (
     <Row
@@ -216,17 +223,28 @@ export function Transaction({
       <Field width="flex" title={transaction.notes}>
         {transaction.notes}
       </Field>
-      <Field
-        width="flex"
-        title={
-          transaction.category && categoryList.includes(transaction.category)
-            ? transaction.category
-            : undefined
-        }
-      >
+      <Field width="flex" title={transaction.category}>
         {transaction.category &&
-          categoryList.includes(transaction.category) &&
-          transaction.category}
+          (() => {
+            const normalized = transaction.category.trim().toLowerCase();
+            const categoryName =
+              categoryMap.byId.get(transaction.category) ??
+              categoryMap.byName.get(normalized)?.name ??
+              transaction.category;
+            const isNewCategory =
+              !categoryMap.byId.has(transaction.category) &&
+              !categoryMap.byName.has(normalized);
+
+            return isNewCategory ? (
+              <span
+                style={{ fontStyle: 'italic', color: theme.pageTextSubdued }}
+              >
+                {categoryName} ({t('new')})
+              </span>
+            ) : (
+              categoryName
+            );
+          })()}
       </Field>
       {inOutMode && (
         <Field
