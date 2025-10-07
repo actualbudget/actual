@@ -134,8 +134,12 @@ export function ActionableGridListItem<T extends object>({
             {typeof actions === 'function'
               ? actions({
                   close: () => {
-                    setIsRevealed(false);
-                    api.start({ x: 0 });
+                    api.start({
+                      x: 0,
+                      onRest: () => {
+                        setIsRevealed(false);
+                      },
+                    });
                   },
                 })
               : actions}

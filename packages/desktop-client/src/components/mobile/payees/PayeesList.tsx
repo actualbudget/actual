@@ -82,11 +82,10 @@ export function PayeesList({
           paddingBottom: MOBILE_NAV_HEIGHT,
           overflow: 'auto',
         }}
-        dependencies={[payees, ruleCounts, isRuleCountsLoading]}
+        dependencies={[ruleCounts, isRuleCountsLoading]}
       >
         {payee => (
           <PayeesListItem
-            key={payee.id}
             value={payee}
             ruleCount={ruleCounts.get(payee.id) ?? 0}
             isRuleCountLoading={isRuleCountsLoading}
