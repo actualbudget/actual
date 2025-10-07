@@ -160,6 +160,7 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             <GlobalFeatureToggle
               prefName="plugins"
+              disableToggle={true}
               feedbackLink="https://github.com/actualbudget/actual/pull/4049"
             >
               <Trans>Client-Side plugins (soon)</Trans>
