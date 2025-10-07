@@ -15,15 +15,19 @@ import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTa
 type PayeesListProps = {
   payees: PayeeEntity[];
   ruleCounts: Map<string, number>;
+  isRuleCountsLoading?: boolean;
   isLoading?: boolean;
   onPayeePress: (payee: PayeeEntity) => void;
+  onPayeeDelete: (payee: PayeeEntity) => void;
 };
 
 export function PayeesList({
   payees,
   ruleCounts,
+  isRuleCountsLoading = false,
   isLoading = false,
   onPayeePress,
+  onPayeeDelete,
 }: PayeesListProps) {
   const { t } = useTranslation();
 
@@ -76,12 +80,15 @@ export function PayeesList({
           paddingBottom: MOBILE_NAV_HEIGHT,
           overflow: 'auto',
         }}
+        dependencies={[ruleCounts, isRuleCountsLoading]}
       >
         {payee => (
           <PayeesListItem
             value={payee}
             ruleCount={ruleCounts.get(payee.id) ?? 0}
+            isRuleCountLoading={isRuleCountsLoading}
             onAction={() => onPayeePress(payee)}
+            onDelete={() => onPayeeDelete(payee)}
           />
         )}
       </GridList>
