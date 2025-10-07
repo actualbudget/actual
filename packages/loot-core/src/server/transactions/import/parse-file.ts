@@ -110,7 +110,8 @@ async function parseCSV(
   if (options.skipLines > 0 || options.trimLines > 0) {
     const lines = contents.split(/\r?\n/);
     const startLine = options.skipLines || 0;
-    const endLine = options.trimLines > 0 ? lines.length - options.trimLines : lines.length;
+    const endLine =
+      options.trimLines > 0 ? lines.length - options.trimLines : lines.length;
     contents = lines.slice(startLine, endLine).join('\r\n');
   }
 
