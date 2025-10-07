@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { t } from 'i18next';
 import memoizeOne from 'memoize-one';
 
 import { send } from 'loot-core/platform/client/fetch';
@@ -100,6 +101,18 @@ type CreatePayeePayload = {
   name: PayeeEntity['name'];
 };
 
+function translatePayees(
+  payees: PayeeEntity[] | null | undefined,
+): PayeeEntity[] | null | undefined {
+  return (
+    payees?.map(payee =>
+      payee.name === 'Starting Balance'
+        ? { ...payee, name: t('Starting Balance') }
+        : payee,
+    ) ?? payees
+  );
+}
+
 export const createPayee = createAppAsyncThunk(
   `${sliceName}/createPayee`,
   async ({ name }: CreatePayeePayload) => {
@@ -114,7 +127,7 @@ export const getCommonPayees = createAppAsyncThunk(
   `${sliceName}/getCommonPayees`,
   async () => {
     const payees: PayeeEntity[] = await send('common-payees-get');
-    return payees;
+    return translatePayees(payees) as PayeeEntity[];
   },
   {
     condition: (_, { getState }) => {
@@ -131,7 +144,7 @@ export const reloadCommonPayees = createAppAsyncThunk(
   `${sliceName}/reloadCommonPayees`,
   async () => {
     const payees: PayeeEntity[] = await send('common-payees-get');
-    return payees;
+    return translatePayees(payees) as PayeeEntity[];
   },
 );
 
@@ -139,7 +152,7 @@ export const getPayees = createAppAsyncThunk(
   `${sliceName}/getPayees`,
   async () => {
     const payees: PayeeEntity[] = await send('payees-get');
-    return payees;
+    return translatePayees(payees) as PayeeEntity[];
   },
   {
     condition: (_, { getState }) => {
@@ -156,7 +169,7 @@ export const reloadPayees = createAppAsyncThunk(
   `${sliceName}/reloadPayees`,
   async () => {
     const payees: PayeeEntity[] = await send('payees-get');
-    return payees;
+    return translatePayees(payees) as PayeeEntity[];
   },
 );
 
@@ -164,18 +177,21 @@ export const getActivePayees = memoizeOne(
   (payees: PayeeEntity[], accounts: AccountEntity[]) => {
     const accountsById = getAccountsById(accounts);
 
-    return payees.filter(payee => {
-      if (payee.transfer_acct) {
-        const account = accountsById[payee.transfer_acct];
-        return account != null && !account.closed;
-      }
-      return true;
-    });
+    return translatePayees(
+      payees.filter(payee => {
+        if (payee.transfer_acct) {
+          const account = accountsById[payee.transfer_acct];
+          return account != null && !account.closed;
+        }
+        return true;
+      }) as PayeeEntity[],
+    );
   },
 );
 
 export const getPayeesById = memoizeOne(
-  (payees: PayeeEntity[] | null | undefined) => groupById(payees),
+  (payees: PayeeEntity[] | null | undefined) =>
+    groupById(translatePayees(payees)),
 );
 
 export const { name, reducer, getInitialState } = payeesSlice;
@@ -195,14 +211,14 @@ function _loadCommonPayees(
   state: PayeesState,
   commonPayees: PayeesState['commonPayees'],
 ) {
-  state.commonPayees = commonPayees;
+  state.commonPayees = translatePayees(commonPayees) as PayeeEntity[];
   state.isCommonPayeesLoading = false;
   state.isCommonPayeesLoaded = true;
   state.isCommonPayeesDirty = false;
 }
 
 function _loadPayees(state: PayeesState, payees: PayeesState['payees']) {
-  state.payees = payees;
+  state.payees = translatePayees(payees) as PayeeEntity[];
   state.isPayeesLoading = false;
   state.isPayeesLoaded = true;
   state.isPayeesDirty = false;
