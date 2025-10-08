@@ -550,18 +550,13 @@ async function getAccounts(
     throw new Error('Forbidden');
   }
 
-  const text = response.data;
-  try {
-    const results: SimpleFINResponse = JSON.parse(text);
-    results.sferrors = results.errors;
-    results.hasError = false;
-    results.errors = [];
-    results.accountErrors = {};
-    return results;
-  } catch (e) {
-    console.log(`Error parsing JSON response: ${text}`);
-    throw e;
-  }
+  // axios automatically parses JSON, so response.data is already an object
+  const results: SimpleFINResponse = response.data as SimpleFINResponse;
+  results.sferrors = results.errors;
+  results.hasError = false;
+  results.errors = [];
+  results.accountErrors = {};
+  return results;
 }
 
 console.log('SimpleFIN Bank Sync Plugin loaded');
