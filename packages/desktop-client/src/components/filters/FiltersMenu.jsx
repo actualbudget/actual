@@ -42,6 +42,7 @@ import { updateFilterReducer } from './updateFilterReducer';
 
 import { GenericInput } from '@desktop-client/components/util/GenericInput';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
 
 let isDatepickerClick = false;
@@ -68,6 +69,7 @@ function ConfigureField({
   onApply,
 }) {
   const { t } = useTranslation();
+  const format = useFormat();
   const [subfield, setSubfield] = useState(initialSubfield);
   const inputRef = useRef();
   const prevOp = useRef(null);
@@ -222,10 +224,33 @@ function ConfigureField({
       <Form
         onSubmit={e => {
           e.preventDefault();
+
+          let submitValue = value;
+
+          if (field === 'amount' && inputRef.current) {
+            try {
+              if (inputRef.current.getCurrentAmount) {
+                submitValue = inputRef.current.getCurrentAmount();
+              } else {
+                const rawValue = inputRef.current.value || '';
+                const parsed = format.fromEdit(rawValue, null);
+                if (parsed == null) {
+                  submitValue = value; // keep previous if parsing failed
+                } else {
+                  const opts = subfieldToOptions(field, subfield);
+                  submitValue =
+                    opts?.inflow || opts?.outflow ? Math.abs(parsed) : parsed;
+                }
+              }
+            } catch {
+              submitValue = value;
+            }
+          }
+
           onApply({
             field,
             op,
-            value,
+            value: submitValue,
             options: subfieldToOptions(field, subfield),
           });
         }}
@@ -244,9 +269,11 @@ function ConfigureField({
                 ? 'string'
                 : type
             }
+            numberFormatType="currency"
             value={formattedValue}
             multi={op === 'oneOf' || op === 'notOneOf'}
             op={op}
+            options={subfieldToOptions(field, subfield)}
             style={{ marginTop: 10 }}
             onChange={v => {
               dispatch({ type: 'set-value', value: v });

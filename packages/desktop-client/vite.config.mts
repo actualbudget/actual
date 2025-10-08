@@ -26,6 +26,15 @@ const addWatchers = (): Plugin => ({
   },
 });
 
+// Get service worker filename from environment variable
+function getServiceWorkerFilename(): string {
+  const hash = process.env.REACT_APP_PLUGIN_SERVICE_WORKER_HASH;
+  if (hash) {
+    return `plugin-sw.${hash}.js`;
+  }
+  return 'plugin-sw.js'; // fallback
+}
+
 // Inject build shims using the inject plugin
 const injectShims = (): Plugin[] => {
   const buildShims = path.resolve('./src/build-shims.js');
@@ -159,18 +168,41 @@ export default defineConfig(async ({ mode }) => {
         ? undefined
         : VitePWA({
             registerType: 'prompt',
+            strategies: 'injectManifest',
+            srcDir: 'service-worker',
+            filename: getServiceWorkerFilename(),
+            manifest: {
+              name: 'Actual',
+              short_name: 'Actual',
+              description: 'A local-first personal finance tool',
+              theme_color: '#8812E1',
+              background_color: '#8812E1',
+              display: 'standalone',
+              start_url: './',
+            },
+            injectManifest: {
+              maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
+              swSrc: `service-worker/${getServiceWorkerFilename()}`,
+            },
+            devOptions: {
+              enabled: true, // We need service worker in dev mode to work with plugins
+              type: 'module',
+            },
             workbox: {
               globPatterns: [
                 '**/*.{js,css,html,txt,wasm,sql,sqlite,ico,png,woff2,webmanifest}',
               ],
               ignoreURLParametersMatching: [/^v$/],
               navigateFallback: '/index.html',
-              maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+              maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
               navigateFallbackDenylist: [
                 /^\/account\/.*$/,
                 /^\/admin\/.*$/,
                 /^\/secret\/.*$/,
                 /^\/openid\/.*$/,
+                /^\/plugins\/.*$/,
+                /^\/kcab\/.*$/,
+                /^\/plugin-data\/.*$/,
               ],
             },
           }),
