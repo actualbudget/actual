@@ -88,7 +88,18 @@
   },
   "resolutions": {
     "rollup": "4.40.1",
-    "socks": ">=2.8.3"
+    "socks": ">=2.8.3",
+    "@react-spring/animated": "10.0.1",
+    "@react-spring/core": "10.0.1",
+    "@react-spring/shared": "10.0.1",
+    "@react-spring/types": "10.0.1",
+    "@react-spring/web": "10.0.1",
+    "@react-spring/rafz": "10.0.1",
+    "@react-spring/konva": "10.0.1",
+    "@react-spring/native": "10.0.1",
+    "@react-spring/three": "10.0.1",
+    "@react-spring/zdog": "10.0.1",
+    "react-spring": "10.0.1"
   },
   "engines": {
     "node": ">=20",

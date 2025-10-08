@@ -25,6 +25,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { useDrag } from '@use-gesture/react';
 
+import { closeAndLoadBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { useScrollListener } from '@desktop-client/components/ScrollProvider';
 
 const COLUMN_COUNT = 3;
@@ -53,10 +54,12 @@ export function MobileNavTabs() {
 
   const [{ y }, api] = useSpring(() => ({ y: OPEN_DEFAULT_Y }));
 
+  console.info('yo', y.get());
   const openFull = useCallback(
     ({ canceled }: { canceled?: boolean }) => {
       // when cancel is true, it means that the user passed the upwards threshold
       // so we change the spring config to create a nice wobbly effect
+      console.info('opening full now', api, { canceled });
       setNavbarState('open');
       api.start({
         y: OPEN_FULL_Y,
@@ -69,6 +72,7 @@ export function MobileNavTabs() {
 
   const openDefault = useCallback(
     (velocity = 0) => {
+      console.info('opening default now', api);
       setNavbarState('default');
       api.start({
         y: OPEN_DEFAULT_Y,
@@ -82,6 +86,7 @@ export function MobileNavTabs() {
   const hide = useCallback(
     (velocity = 0) => {
       setNavbarState('hidden');
+      console.info('hiding now', api);
       api.start({
         y: HIDDEN_Y,
         immediate: false,
@@ -173,21 +178,34 @@ export function MobileNavTabs() {
     }) => {
       // if the user drags up passed a threshold, then we cancel
       // the drag so that the sheet resets to its open position
+
+      console.info({ last, oy });
       if (oy < 0) {
         cancel();
+        console.info({ canceled });
       }
 
       // when the user releases the sheet, we check whether it passed
       // the threshold for it to close, or if we reset it to its open position
       if (last) {
+        console.info({
+          last,
+          oy,
+          greaterthan: ROW_HEIGHT * 0.5,
+          test: oy > ROW_HEIGHT * 0.5,
+          test2: vy > 0.5 && dy > 0,
+        });
         if (oy > ROW_HEIGHT * 0.5 || (vy > 0.5 && dy > 0)) {
+          console.info('open default');
           openDefault(vy);
         } else {
+          console.info('open full');
           openFull({ canceled });
         }
       } else {
         // when the user keeps dragging, we just move the sheet according to
         // the cursor position
+        console.info('dragging', oy);
         api.start({ y: oy, immediate: true });
       }
     },
