@@ -58,6 +58,11 @@ export type AccountHandlers = {
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
   'pluggyai-accounts-link': typeof linkPluggyAiAccount;
   'enablebanking-accounts-link': typeof linkEnableBankingAccount;
+  'bank-sync-providers-list': typeof getPluginProviders;
+  'bank-sync-status': typeof getPluginStatus;
+  'bank-sync-accounts': typeof getPluginAccounts;
+  'bank-sync-accounts-link': typeof linkPluginAccount;
+  'bank-sync-plugin-call': typeof callPluginRoute;
   'account-create': typeof createAccount;
   'account-close': typeof closeAccount;
   'account-reopen': typeof reopenAccount;
@@ -462,6 +467,255 @@ async function linkEnableBankingAccount({
   });
 
   return 'ok';
+}
+
+type PluginExternalAccount = {
+  account_id: string;
+  name: string;
+  institution: string;
+  balance: number;
+  [key: string]: unknown;
+};
+
+async function linkPluginAccount({
+  providerSlug,
+  externalAccount,
+  bankId,
+  upgradingId,
+  offBudget = false,
+  startingDate,
+  startingBalance,
+  fileId,
+}: LinkAccountBaseParams & {
+  providerSlug: string;
+  externalAccount: PluginExternalAccount;
+  bankId?: string;
+}) {
+  let id: string | undefined;
+  const providerName =
+    typeof externalAccount.institution === 'string'
+      ? externalAccount.institution
+      : providerSlug;
+  const bankIdentifier = bankId || providerSlug;
+  const bank = await link.findOrCreateBank(
+    { name: providerName },
+    bankIdentifier,
+  );
+
+  if (upgradingId) {
+    const accRow = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      [upgradingId],
+    );
+
+    if (!accRow) {
+      throw new Error(`Account with ID ${upgradingId} not found.`);
+    }
+
+    id = accRow.id;
+    await db.update('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      bank: bank.id,
+      account_sync_source: providerSlug,
+    });
+  } else {
+    id = uuidv4();
+    await db.insertWithUUID('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      name: externalAccount.name,
+      official_name: externalAccount.name,
+      bank: bank.id,
+      offbudget: offBudget ? 1 : 0,
+      account_sync_source: providerSlug,
+    });
+    await db.insertPayee({
+      name: '',
+      transfer_acct: id,
+    });
+  }
+
+  if (id == null) {
+    throw new Error('id was not assigned in linkPluginAccount');
+  }
+
+  const syncRes = await bankSync.syncAccount(
+    undefined,
+    undefined,
+    id,
+    externalAccount.account_id,
+    bank.bank_id,
+    startingDate,
+    startingBalance,
+    fileId,
+  );
+
+  await handleSyncResponse(syncRes, id);
+
+  connection.send('sync-event', {
+    type: 'success',
+    tables: ['transactions'],
+  });
+
+  return 'ok';
+}
+
+async function getPluginAccounts({
+  providerSlug,
+  credentials,
+  fileId,
+}: {
+  providerSlug: string;
+  credentials?: Record<string, string>;
+  fileId: string;
+}) {
+  const server = getServer();
+  if (!server) {
+    throw new Error('No server configured');
+  }
+
+  try {
+    const userToken = await asyncStorage.getItem('user-token');
+    if (!userToken) {
+      throw new Error('User not authenticated');
+    }
+
+    return await post(
+      `${server.BASE_SERVER}/plugins-api/bank-sync/${providerSlug}/accounts`,
+      credentials,
+      {
+        'X-ACTUAL-TOKEN': userToken,
+        'x-actual-file-id': fileId,
+      },
+    );
+  } catch (error) {
+    logger.error('Error fetching plugin accounts:', error);
+    throw new Error(String(error) || 'Failed to fetch plugin accounts');
+  }
+}
+
+export async function getPluginProviders() {
+  const server = getServer();
+  if (!server) {
+    throw new Error('No server configured');
+  }
+
+  try {
+    const userToken = await asyncStorage.getItem('user-token');
+    if (!userToken) {
+      throw new Error('User not authenticated');
+    }
+
+    const response = await get(
+      `${server.BASE_SERVER}/plugins-api/bank-sync/list`,
+      {
+        headers: { 'X-ACTUAL-TOKEN': userToken },
+      },
+    );
+    const data = JSON.parse(response);
+
+    if (data.status === 'ok') {
+      return {
+        providers: data.data.providers || [],
+      };
+    }
+
+    throw new Error(data.error || 'Plugin error');
+  } catch (error) {
+    logger.error('Error fetching plugin providers:', error);
+    throw new Error(String(error) || 'Failed to fetch plugin providers');
+  }
+}
+
+async function getPluginStatus({
+  providerSlug,
+  fileId,
+}: {
+  providerSlug: string;
+  fileId: string;
+}) {
+  const server = getServer();
+  if (!server) {
+    throw new Error('No server configured');
+  }
+
+  try {
+    const userToken = await asyncStorage.getItem('user-token');
+    if (!userToken) {
+      throw new Error('User not authenticated');
+    }
+
+    const response = await get(
+      `${server.BASE_SERVER}/plugins-api/bank-sync/${providerSlug}/status`,
+      {
+        headers: {
+          'X-ACTUAL-TOKEN': userToken,
+          'x-actual-file-id': fileId,
+        },
+        redirect: 'follow',
+      },
+    );
+    const data = JSON.parse(response);
+
+    if (data.status === 'ok') {
+      return {
+        configured: data.data?.configured || false,
+        error: data.data?.error,
+      };
+    }
+
+    return {
+      configured: false,
+      error: data.error || 'Plugin error',
+    };
+  } catch (error) {
+    logger.error(`Error checking status for plugin ${providerSlug}:`, error);
+    return {
+      configured: false,
+      error: String(error),
+    };
+  }
+}
+
+async function callPluginRoute({
+  providerSlug,
+  path,
+  method = 'POST',
+  body,
+  fileId,
+}: {
+  providerSlug: string;
+  path: string;
+  method?: 'GET' | 'POST';
+  body?: Record<string, unknown>;
+  fileId: string;
+}) {
+  const server = getServer();
+  if (!server) {
+    throw new Error('No server configured');
+  }
+
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) {
+    throw new Error('User not authenticated');
+  }
+
+  const pluginUrl = `${server.BASE_SERVER}/plugins-api/bank-sync/${providerSlug}/${path}`;
+  const headers = {
+    'X-ACTUAL-TOKEN': userToken,
+    'x-actual-file-id': fileId,
+  };
+
+  if (method === 'GET') {
+    const response = await get(pluginUrl, {
+      headers,
+      redirect: 'follow',
+    });
+    return JSON.parse(response);
+  }
+
+  return post(pluginUrl, body, headers, 60000);
 }
 
 async function createAccount({
@@ -1654,6 +1908,11 @@ app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
 app.method('enablebanking-accounts-link', linkEnableBankingAccount);
+app.method('bank-sync-providers-list', getPluginProviders);
+app.method('bank-sync-status', getPluginStatus);
+app.method('bank-sync-accounts', getPluginAccounts);
+app.method('bank-sync-accounts-link', linkPluginAccount);
+app.method('bank-sync-plugin-call', callPluginRoute);
 app.method('account-create', mutator(undoable(createAccount)));
 app.method('account-close', mutator(closeAccount));
 app.method('account-reopen', mutator(undoable(reopenAccount)));

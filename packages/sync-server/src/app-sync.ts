@@ -43,7 +43,6 @@ import type { GroupId } from './util/paths';
 
 const app = express();
 app.use(validateSessionMiddleware);
-app.use(errorMiddleware);
 app.use(requestLoggerMiddleware);
 app.use(
   express.raw({
@@ -570,3 +569,6 @@ app.post('/delete-user-file', (req, res) => {
 
   res.send(OK_RESPONSE);
 });
+
+// Error handling middleware (must be last)
+app.use(errorMiddleware);

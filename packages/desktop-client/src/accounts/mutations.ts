@@ -568,6 +568,65 @@ export function useLinkAccountEnableBankingMutation() {
   });
 }
 
+type PluginExternalAccount = {
+  account_id: string;
+  name: string;
+  institution: string;
+  balance: number;
+  [key: string]: unknown;
+};
+
+type LinkAccountPluginPayload = LinkAccountBasePayload & {
+  externalAccount: PluginExternalAccount;
+  providerSlug: string;
+  bankId?: string;
+};
+
+export function useLinkAccountPluginMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+  const [cloudFileId] = useMetadataPref('cloudFileId');
+
+  return useMutation({
+    mutationFn: async ({
+      externalAccount,
+      providerSlug,
+      bankId,
+      upgradingId,
+      offBudget,
+      startingDate,
+      startingBalance,
+    }: LinkAccountPluginPayload) => {
+      const fileId = requireCloudFileId(cloudFileId);
+      await send('bank-sync-accounts-link', {
+        providerSlug,
+        externalAccount,
+        bankId,
+        upgradingId,
+        offBudget,
+        startingDate,
+        startingBalance,
+        fileId,
+      });
+    },
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateQueries(queryClient, payeeQueries.lists());
+    },
+    onError: error => {
+      console.error('Error linking account to plugin provider:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t(
+          'There was an error linking the account to the plugin provider. Please try again.',
+        ),
+        error,
+      );
+    },
+  });
+}
+
 type SyncAccountsPayload = {
   id?: AccountEntity['id'] | undefined;
 };

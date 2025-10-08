@@ -1,0 +1,63 @@
+export const manifest = {
+  name: 'gocardless-bank-sync',
+  version: '0.0.1',
+  description: 'GoCardless bank synchronization plugin for Actual Budget',
+  entry: 'index.js',
+  author: 'Actual Budget Team',
+  license: 'MIT',
+  routes: [
+    {
+      path: '/status',
+      methods: ['POST', 'GET'],
+      auth: 'authenticated',
+      description: 'Check GoCardless configuration status',
+    },
+    {
+      path: '/accounts',
+      methods: ['POST'],
+      auth: 'authenticated',
+      description: 'Fetch accounts from GoCardless',
+    },
+    {
+      path: '/transactions',
+      methods: ['POST'],
+      auth: 'authenticated',
+      description: 'Fetch transactions from GoCardless',
+    },
+    {
+      path: '/banks',
+      methods: ['POST'],
+      auth: 'authenticated',
+      description: 'Get list of banks/institutions by country',
+    },
+    {
+      path: '/create-web-token',
+      methods: ['POST'],
+      auth: 'authenticated',
+      description: 'Create a requisition and return authorization link',
+    },
+    {
+      path: '/get-accounts',
+      methods: ['POST'],
+      auth: 'authenticated',
+      description: 'Poll/fetch requisition status and linked accounts',
+    },
+    {
+      path: '/remove-account',
+      methods: ['POST'],
+      auth: 'authenticated',
+      description: 'Delete a requisition',
+    },
+  ],
+  bankSync: {
+    enabled: true,
+    displayName: 'GoCardless',
+    description: 'Connect your European bank accounts via GoCardless',
+    requiresAuth: true,
+    endpoints: {
+      status: '/status',
+      accounts: '/accounts',
+      transactions: '/transactions',
+    },
+  },
+};

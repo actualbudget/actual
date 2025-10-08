@@ -1,4 +1,4 @@
-import type { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import * as expressWinston from 'express-winston';
 import * as winston from 'winston';
 
@@ -44,7 +44,7 @@ const validateSessionMiddleware = async (
   next();
 };
 
-const requestLoggerMiddleware = expressWinston.logger({
+const requestLoggerMiddleware: RequestHandler = expressWinston.logger({
   transports: [new winston.transports.Console()],
   format: winston.format.combine(
     ...(Object.prototype.hasOwnProperty.call(process.env, 'NO_COLOR')
@@ -58,6 +58,6 @@ const requestLoggerMiddleware = expressWinston.logger({
       return `${String(timestamp)} ${String(level)}: ${req.method} ${res.statusCode} ${req.url}`;
     }),
   ),
-});
+}) as unknown as RequestHandler;
 
 export { validateSessionMiddleware, errorMiddleware, requestLoggerMiddleware };

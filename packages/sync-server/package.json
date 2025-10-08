@@ -90,6 +90,7 @@
   "dependencies": {
     "@actual-app/crdt": "workspace:*",
     "@actual-app/web": "workspace:*",
+    "adm-zip": "^0.5.16",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.8.0",
     "convict": "^6.2.5",

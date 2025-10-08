@@ -10,6 +10,7 @@ type AccountsListProps = {
   hoveredAccount?: string | null;
   onHover: (id: AccountEntity['id'] | null) => void;
   onAction: (account: AccountEntity, action: 'link' | 'edit') => void;
+  renderLinkButton?: (account: AccountEntity) => React.ReactNode;
 };
 
 export function AccountsList({
@@ -17,6 +18,7 @@ export function AccountsList({
   hoveredAccount,
   onHover,
   onAction,
+  renderLinkButton,
 }: AccountsListProps) {
   const locale = useLocale();
 
@@ -41,6 +43,7 @@ export function AccountsList({
             onHover={onHover}
             onAction={onAction}
             locale={locale}
+            renderLinkButton={renderLinkButton}
           />
         );
       })}

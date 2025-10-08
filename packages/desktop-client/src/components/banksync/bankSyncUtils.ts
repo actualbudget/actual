@@ -14,18 +14,6 @@ export const BUILT_IN_BANK_SYNC_PROVIDERS = [
   'pluggyai',
 ] as const satisfies BankSyncProviders[];
 
-const SYNC_PROVIDER_KEYS = [
-  ...BUILT_IN_BANK_SYNC_PROVIDERS,
-  'enableBanking',
-  'unlinked',
-] as const satisfies readonly SyncProviders[];
-
-const syncProviderKeysSet = new Set<string>(SYNC_PROVIDER_KEYS);
-
-function isSyncProvider(value: string): value is SyncProviders {
-  return syncProviderKeysSet.has(value);
-}
-
 export function getSyncSourceReadable(
   translate: (key: string) => string,
 ): Record<SyncProviders, string> {
@@ -60,8 +48,7 @@ export function groupBankSyncAccounts(
 
   const sortedEntries = Object.entries(groupedAccounts)
     .filter(
-      (entry): entry is [SyncProviders, AccountEntity[]] =>
-        isSyncProvider(entry[0]) && entry[1] != null,
+      (entry): entry is [SyncProviders, AccountEntity[]] => entry[1] != null,
     )
     .sort(([keyA], [keyB]) => {
       if (keyA === 'unlinked') return 1;
@@ -81,7 +68,6 @@ export function getGroupedBankSyncEntries(
   groupedAccounts: GroupedBankSyncAccounts,
 ): Array<[SyncProviders, AccountEntity[]]> {
   return Object.entries(groupedAccounts).filter(
-    (entry): entry is [SyncProviders, AccountEntity[]] =>
-      isSyncProvider(entry[0]) && entry[1] != null,
+    (entry): entry is [SyncProviders, AccountEntity[]] => entry[1] != null,
   );
 }
