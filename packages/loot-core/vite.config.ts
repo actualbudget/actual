@@ -113,7 +113,6 @@ export default defineConfig(({ mode }) => {
         'path-browserify',
         'stream-browserify',
         'browserify-zlib',
-        'memfs',
       ],
     },
   };
