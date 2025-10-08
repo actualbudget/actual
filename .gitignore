@@ -7,9 +7,6 @@ Actual-*
 **/xcuserdata/*
 export-2020-01-10.csv
 
-# Secrets
-.secret-tokens
-
 # MacOS
 .DS_Store
 

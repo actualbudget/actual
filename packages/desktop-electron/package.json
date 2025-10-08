@@ -34,9 +34,6 @@
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "artifactName": "${productName}-mac-${arch}.${ext}",
-      "notarize": {
-        "teamId": "79ANZ983YF"
-      },
       "target": [
         {
           "target": "dmg",
@@ -103,7 +100,7 @@
     "copyfiles": "^2.4.1",
     "cross-env": "^10.1.0",
     "electron": "38.0.0",
-    "electron-builder": "24.13.3",
+    "electron-builder": "26.0.12",
     "typescript": "^5.9.3"
   }
 }
