@@ -48,6 +48,8 @@ export const schema = {
     imported_payee: f('string'),
     starting_balance_flag: f('boolean'),
     transfer_id: f('id'),
+    base_amount: f('integer'), // Transaction amount converted to base currency
+    fx_rate: f('float'), // Exchange rate used for base_amount conversion
     sort_order: f('float', { default: () => Date.now() }),
     cleared: f('boolean', { default: true }),
     reconciled: f('boolean', { default: false }),

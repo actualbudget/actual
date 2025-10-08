@@ -1,7 +1,65 @@
 // @ts-strict-ignore
+import { getCurrency } from '../../shared/currencies';
+import {
+  calculateTransferAmountFromDecimals,
+  hasForeignExchangeRate,
+} from '../../shared/transfer';
 import * as db from '../db';
 
 import { runRules } from './transaction-rules';
+
+/**
+ * Gets the default currency code from synced preferences.
+ * Returns '' if not set.
+ */
+async function getDefaultCurrency(): Promise<string> {
+  if (!db.getDatabase()) {
+    return '';
+  }
+
+  const row = await db.first<{ value: string }>(
+    'SELECT value FROM preferences WHERE id = ?',
+    ['defaultCurrencyCode'],
+  );
+  return row?.value || '';
+}
+
+/**
+ * Calculate the transfer amount accounting for different decimal places between currencies.
+ * Uses the shared pure function but resolves currencies from the database.
+ */
+async function calculateTransferAmount(
+  sourceAmount: number,
+  fxRate: number,
+  sourceAccountId: string,
+  targetAccountId: string,
+): Promise<number> {
+  // Get account currencies
+  const [sourceAccount, targetAccount, defaultCurrency] = await Promise.all([
+    db.first<Pick<db.DbAccount, 'currency_code'>>(
+      'SELECT currency_code FROM accounts WHERE id = ?',
+      [sourceAccountId],
+    ),
+    db.first<Pick<db.DbAccount, 'currency_code'>>(
+      'SELECT currency_code FROM accounts WHERE id = ?',
+      [targetAccountId],
+    ),
+    getDefaultCurrency(),
+  ]);
+
+  const sourceCurrency = sourceAccount?.currency_code || defaultCurrency;
+  const targetCurrency = targetAccount?.currency_code || defaultCurrency;
+
+  const sourceDecimals = getCurrency(sourceCurrency).decimalPlaces;
+  const targetDecimals = getCurrency(targetCurrency).decimalPlaces;
+
+  return calculateTransferAmountFromDecimals(
+    sourceAmount,
+    fxRate,
+    sourceDecimals,
+    targetDecimals,
+  );
+}
 
 async function getPayee(acct) {
   return db.first<db.DbPayee>('SELECT * FROM payees WHERE transfer_acct = ?', [
@@ -58,15 +116,30 @@ export async function addTransfer(transaction, transferredAccount) {
     [transaction.account],
   );
 
+  // Check if this is an FX transfer
+  const isFxTransfer = hasForeignExchangeRate(transaction);
+
+  // Calculate the transfer amount (handles decimal place conversion for cross-currency transfers)
+  const transferAmount = isFxTransfer
+    ? await calculateTransferAmount(
+        transaction.amount,
+        transaction.fx_rate,
+        transaction.account,
+        transferredAccount,
+      )
+    : -transaction.amount;
+
   const transferTransaction = {
     account: transferredAccount,
-    amount: -transaction.amount,
+    amount: transferAmount,
     payee: fromPayee,
     date: transaction.date,
     transfer_id: transaction.id,
     notes: transaction.notes || null,
     schedule: transaction.schedule,
     cleared: false,
+    // If there's an FX rate, calculate the inverse rate for the other side
+    ...(isFxTransfer ? { fx_rate: 1 / transaction.fx_rate } : {}),
   };
   const { notes, cleared, schedule } = await runRules(transferTransaction);
   const matchedSchedule = schedule ?? transaction.schedule;
@@ -119,8 +192,33 @@ export async function removeTransfer(transaction) {
 
 export async function updateTransfer(transaction, transferredAccount) {
   const payee = await getPayee(transaction.account);
+  const transferTrans = await db.getTransaction(transaction.transfer_id);
 
-  await db.updateTransaction({
+  // Check if this is an FX transfer (has an fx_rate that's not 0 or 1)
+  const isFxTransfer =
+    hasForeignExchangeRate(transaction) ||
+    (transferTrans && hasForeignExchangeRate(transferTrans));
+
+  // Calculate the transfer amount for FX transfers (handles decimal place conversion)
+  let amountUpdate = {};
+  if (hasForeignExchangeRate(transaction)) {
+    const transferAmount = await calculateTransferAmount(
+      transaction.amount,
+      transaction.fx_rate,
+      transaction.account,
+      transferredAccount,
+    );
+    amountUpdate = {
+      amount: transferAmount,
+      fx_rate: 1 / transaction.fx_rate, // Set inverse rate on the transfer
+    };
+  } else if (!isFxTransfer) {
+    // Regular transfer (not FX)
+    amountUpdate = { amount: -transaction.amount };
+  }
+  // If only the other side has the fx_rate, don't update amount/rate
+
+  const updateData = {
     id: transaction.transfer_id,
     account: transferredAccount,
     // Make sure to update the payee on the other side in case the
@@ -128,9 +226,11 @@ export async function updateTransfer(transaction, transferredAccount) {
     payee: payee.id,
     date: transaction.date,
     notes: transaction.notes,
-    amount: -transaction.amount,
     schedule: transaction.schedule,
-  });
+    ...amountUpdate,
+  };
+
+  await db.updateTransaction(updateData);
 
   const categoryCleared = await clearCategory(transaction, transferredAccount);
   if (categoryCleared) {

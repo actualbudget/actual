@@ -20,6 +20,8 @@ export type TransactionEntity = {
   imported_payee?: string;
   starting_balance_flag?: boolean;
   transfer_id?: TransactionEntity['id'];
+  base_amount?: IntegerAmount; // Amount converted to base currency (NULL for base currency transactions)
+  fx_rate?: number; // Foreign exchange rate for cross-currency transfers
   sort_order?: number;
   cleared?: boolean;
   reconciled?: boolean;

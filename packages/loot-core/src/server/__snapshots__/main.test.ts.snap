@@ -5,6 +5,7 @@ exports[`Accounts > Transfers are properly updated 1`] = `
   {
     "acct": "one",
     "amount": 5000,
+    "base_amount": null,
     "category": null,
     "cleared": 1,
     "date": 20170101,
@@ -31,6 +32,7 @@ exports[`Accounts > Transfers are properly updated 1`] = `
   {
     "acct": "two",
     "amount": -5000,
+    "base_amount": null,
     "category": null,
     "cleared": 0,
     "date": 20170101,
@@ -61,10 +63,10 @@ exports[`Accounts > Transfers are properly updated 2`] = `
 "- First value
 + Second value
 
-@@ -2,12 +2,12 @@
-    Object {
+@@ -3,12 +3,12 @@
       "acct": "one",
       "amount": 5000,
+      "base_amount": null,
       "category": null,
       "cleared": 1,
 -     "date": 20170101,
@@ -76,7 +78,7 @@ exports[`Accounts > Transfers are properly updated 2`] = `
       "id": "test-transfer",
       "imported_description": null,
       "isChild": 0,
-@@ -24,15 +24,15 @@
+@@ -25,16 +25,16 @@
       "tombstone": 0,
       "transferred_id": "id2",
       "type": null,
@@ -85,6 +87,7 @@ exports[`Accounts > Transfers are properly updated 2`] = `
 -     "acct": "two",
 +     "acct": "three",
       "amount": -5000,
+      "base_amount": null,
       "category": null,
       "cleared": 0,
 -     "date": 20170101,
@@ -100,7 +103,7 @@ exports[`Accounts > Transfers are properly updated 3`] = `
 "- First value
 + Second value
 
-@@ -19,12 +19,12 @@
+@@ -20,12 +20,12 @@
       "raw_synced_data": null,
       "reconciled": 0,
       "schedule": null,
@@ -115,7 +118,7 @@ exports[`Accounts > Transfers are properly updated 3`] = `
     Object {
       "acct": "three",
       "amount": -5000,
-@@ -45,10 +45,10 @@
+@@ -47,10 +47,10 @@
       "raw_synced_data": null,
       "reconciled": 0,
       "schedule": null,

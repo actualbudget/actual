@@ -36,9 +36,15 @@ export type ServerHandlers = {
   } | null>;
 
   'exchange-rates-fetch': (arg: {
-    fromCurrency: string;
-    toCurrencies: string[];
+    fromCurrency?: string;
+    toCurrencies?: string[];
   }) => Promise<{ success: boolean }>;
+
+  'get-exchange-rate': (arg: {
+    fromCurrency: string;
+    toCurrency: string;
+    date?: string;
+  }) => Promise<number | null>;
 
   'exchange-rates-get-update-interval': () => Promise<number>;
 };

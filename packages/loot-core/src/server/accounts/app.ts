@@ -28,6 +28,7 @@ import {
   PostError,
   TransactionError,
 } from '../errors';
+import { exchangeRateService } from '../exchange-rate/service';
 import { app as mainApp } from '../main-app';
 import { mutator } from '../mutators';
 import { get, post } from '../post';
@@ -1388,20 +1389,12 @@ async function getConvertedAccountBalance({
     if (currencyCode === targetCurrency) {
       convertedDecimal = decimalBalance;
     } else {
-      // Look up the latest exchange rate
-      const rateSql = `
-        SELECT rate
-        FROM exchange_rates
-        WHERE from_currency = ?
-          AND to_currency = ?
-        ORDER BY date DESC
-        LIMIT 1
-      `;
-      const rateResult = await db.first<{ rate: number }>(rateSql, [
-        currencyCode,
-        targetCurrency,
-      ]);
-      const rate = rateResult?.rate || 1.0;
+      // Look up the exchange rate from the service (uses in-memory cache)
+      // If no rate is available (provider disabled or not configured),
+      // fall back to 1.0 to avoid breaking the UI
+      const rate =
+        (await exchangeRateService.getRate(currencyCode, targetCurrency)) ||
+        1.0;
       convertedDecimal = decimalBalance * rate;
     }
 

@@ -18,6 +18,11 @@ type CachedRate = {
 class ExchangeRateService {
   private providers: ExchangeRateProvider[] = [];
   private rateCache: Map<string, CachedRate> = new Map();
+  // Track in-flight requests to prevent duplicate API calls
+  private pendingRequests: Map<string, Promise<void>> = new Map();
+  // Track provider initialization to prevent duplicate initialization
+  private initializationPromise: Promise<void> | null = null;
+  private providersInitialized = false;
 
   async initializeProviders(): Promise<void> {
     try {
@@ -49,10 +54,37 @@ class ExchangeRateService {
         this.providers.push(new MempoolSpaceProvider());
         logger.log('Initialized Mempool.space provider');
       }
+
+      this.providersInitialized = true;
     } catch (error) {
       logger.error('Failed to initialize exchange rate providers:', error);
       // Fallback to just MempoolSpace provider on error
       this.providers = [new MempoolSpaceProvider()];
+      this.providersInitialized = true;
+    }
+  }
+
+  /**
+   * Ensure providers are initialized, deduplicating concurrent initialization calls.
+   */
+  private async ensureProvidersInitialized(): Promise<void> {
+    // Already initialized
+    if (this.providersInitialized) {
+      return;
+    }
+
+    // If initialization is in progress, wait for it
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+      return;
+    }
+
+    // Start initialization and store the promise
+    this.initializationPromise = this.initializeProviders();
+    try {
+      await this.initializationPromise;
+    } finally {
+      this.initializationPromise = null;
     }
   }
 
@@ -60,9 +92,36 @@ class ExchangeRateService {
     baseCurrency: string,
     targetCurrencies: string[],
   ): Promise<void> {
-    if (this.providers.length === 0) {
-      await this.initializeProviders();
+    // Create a unique key for this request to deduplicate
+    const requestKey = `${baseCurrency}-${targetCurrencies.sort().join(',')}`;
+
+    // If there's already a pending request for this currency pair, wait for it
+    const existingRequest = this.pendingRequests.get(requestKey);
+    if (existingRequest) {
+      await existingRequest;
+      return;
     }
+
+    // Create and store the promise for this request
+    const fetchPromise = this.doFetchAndCacheRates(
+      baseCurrency,
+      targetCurrencies,
+    );
+    this.pendingRequests.set(requestKey, fetchPromise);
+
+    try {
+      await fetchPromise;
+    } finally {
+      // Clean up the pending request
+      this.pendingRequests.delete(requestKey);
+    }
+  }
+
+  private async doFetchAndCacheRates(
+    baseCurrency: string,
+    targetCurrencies: string[],
+  ): Promise<void> {
+    await this.ensureProvidersInitialized();
 
     // If still no providers after initialization, external fetching is disabled
     if (this.providers.length === 0) {
@@ -87,6 +146,84 @@ class ExchangeRateService {
         logger.error(`Failed to fetch rates from ${provider.name}:`, error);
       }
     }
+  }
+
+  /**
+   * Fetch a historical rate using providers that support historical lookups.
+   * Uses request deduplication to prevent multiple API calls for the same rate.
+   */
+  private async fetchHistoricalRate(
+    fromCurrency: string,
+    toCurrency: string,
+    date: string,
+  ): Promise<number | null> {
+    // Create a unique key for deduplication
+    const requestKey = `historical-${fromCurrency}-${toCurrency}-${date}`;
+
+    // Check if we already have a pending request for this rate
+    const existingRequest = this.pendingRequests.get(requestKey);
+    if (existingRequest) {
+      await existingRequest;
+      // After waiting, check cache
+      const cacheKey = `${fromCurrency}-${toCurrency}-${date}`;
+      const cachedRate = this.rateCache.get(cacheKey);
+      return cachedRate?.rate ?? null;
+    }
+
+    // Create the fetch promise
+    const fetchPromise = this.doFetchHistoricalRate(
+      fromCurrency,
+      toCurrency,
+      date,
+    );
+    // Store the promise to track pending requests (converting to void)
+    this.pendingRequests.set(
+      requestKey,
+      fetchPromise.then(() => undefined),
+    );
+
+    try {
+      return await fetchPromise;
+    } finally {
+      this.pendingRequests.delete(requestKey);
+    }
+  }
+
+  private async doFetchHistoricalRate(
+    fromCurrency: string,
+    toCurrency: string,
+    date: string,
+  ): Promise<number | null> {
+    await this.ensureProvidersInitialized();
+
+    for (const provider of this.providers) {
+      if (provider.supportsHistory && provider.fetchHistoricalRate) {
+        try {
+          const rate = await provider.fetchHistoricalRate(
+            fromCurrency,
+            toCurrency,
+            date,
+          );
+          if (rate !== null) {
+            // Cache the rate so waiting requests can find it
+            const cacheKey = `${fromCurrency}-${toCurrency}-${date}`;
+            this.rateCache.set(cacheKey, {
+              rate,
+              timestamp: new Date().toISOString(),
+              source: 'api',
+            });
+            return rate;
+          }
+        } catch (error) {
+          logger.error(
+            `Failed to fetch historical rate from ${provider.name}:`,
+            error,
+          );
+        }
+      }
+    }
+
+    return null;
   }
 
   private cacheRate(
@@ -138,24 +275,64 @@ class ExchangeRateService {
     // Either no cached rate exists, or today's rate is too old
     // Only fetch if providers are enabled
     const isEnabled = await isExternalExchangeRatesEnabled();
+
     if (isEnabled) {
+      // For historical dates, use fetchHistoricalRate if available
+      if (!isToday) {
+        const historicalRate = await this.fetchHistoricalRate(
+          fromCurrency,
+          toCurrency,
+          targetDate,
+        );
+        if (historicalRate !== null) {
+          // Cache the historical rate
+          this.rateCache.set(cacheKey, {
+            rate: historicalRate,
+            timestamp: new Date().toISOString(),
+            source: 'api',
+          });
+          return historicalRate;
+        }
+      }
+
+      // Fetch current rates
       await this.fetchAndCacheRates(fromCurrency, [toCurrency]);
 
       const freshRate = this.rateCache.get(cacheKey);
       if (freshRate) {
         return freshRate.rate;
       }
+
+      // For historical dates, use today's rate as a fallback if historical fetch failed
+      if (!isToday) {
+        const todayCacheKey = `${fromCurrency}-${toCurrency}-${today}`;
+        const todayRate = this.rateCache.get(todayCacheKey);
+        if (todayRate) {
+          // Cache this rate for the historical date too to prevent repeated lookups
+          this.rateCache.set(cacheKey, todayRate);
+          return todayRate.rate;
+        }
+      }
     } else if (cachedRate) {
       // If external fetching is disabled, use cached rate even if old
       return cachedRate.rate;
     }
 
-    // Try reverse rate
+    // Try reverse rate for the requested date
     const reverseCacheKey = `${toCurrency}-${fromCurrency}-${targetDate}`;
     const reverseRate = this.rateCache.get(reverseCacheKey);
 
     if (reverseRate && reverseRate.rate !== 0) {
       return 1 / reverseRate.rate;
+    }
+
+    // Try reverse rate for today as fallback
+    if (!isToday) {
+      const todayReverseCacheKey = `${toCurrency}-${fromCurrency}-${today}`;
+      const todayReverseRate = this.rateCache.get(todayReverseCacheKey);
+      if (todayReverseRate && todayReverseRate.rate !== 0) {
+        return 1 / todayReverseRate.rate;
+      }
     }
 
     return null;

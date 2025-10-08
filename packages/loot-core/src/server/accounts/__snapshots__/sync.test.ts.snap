@@ -5,6 +5,7 @@ exports[`Account sync > reconcile does rematch deleted transactions by default 1
   {
     "account": "one",
     "amount": 0,
+    "base_amount": null,
     "category": null,
     "cleared": 1,
     "date": 20200101,
@@ -29,6 +30,7 @@ exports[`Account sync > reconcile does rematch deleted transactions by default 1
   {
     "account": "one",
     "amount": 0,
+    "base_amount": null,
     "category": null,
     "cleared": 1,
     "date": 20200101,
@@ -58,6 +60,7 @@ exports[`Account sync > reconcile doesnt rematch deleted transactions if reimpor
   {
     "account": "one",
     "amount": 0,
+    "base_amount": null,
     "category": null,
     "cleared": 1,
     "date": 20200101,
@@ -87,6 +90,7 @@ exports[`Account sync > reconcile handles transactions with undefined fields 1`]
   {
     "account": "one",
     "amount": 0,
+    "base_amount": null,
     "category": null,
     "cleared": 1,
     "date": 20200102,
@@ -111,6 +115,7 @@ exports[`Account sync > reconcile handles transactions with undefined fields 1`]
   {
     "account": "one",
     "amount": 2948,
+    "base_amount": null,
     "category": null,
     "cleared": 1,
     "date": 20200101,

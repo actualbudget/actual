@@ -28,13 +28,16 @@ import {
   SvgArrowDown,
   SvgArrowUp,
   SvgCheveronDown,
+  SvgSwap,
 } from '@actual-app/components/icons/v1';
 import {
   SvgArrowsSynchronize,
   SvgCalendar3,
   SvgHyperlink2,
+  SvgRefreshArrow,
   SvgSubtract,
 } from '@actual-app/components/icons/v2';
+import { Input } from '@actual-app/components/input';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -43,6 +46,7 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { format as formatDate, parseISO } from 'date-fns';
 
+import { send } from 'loot-core/platform/client/fetch';
 import { getCurrency } from 'loot-core/shared/currencies';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
@@ -58,8 +62,13 @@ import {
   updateTransaction,
 } from 'loot-core/shared/transactions';
 import {
+  calculateForeignAmount,
+  calculateFxRateFromAmounts,
+} from 'loot-core/shared/transfer';
+import {
   amountToFormatted,
   formattedToAmount,
+  formattedToInteger,
   type IntegerAmount,
   integerToFormatted,
   integerToFormattedWithDecimal,
@@ -140,6 +149,7 @@ import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { getPayeesById } from '@desktop-client/payees/payeesSlice';
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
 
 type TransactionHeaderProps = {
@@ -485,8 +495,10 @@ type PayeeCellProps = {
   id: TransactionEntity['id'];
   payee?: PayeeEntity;
   focused: boolean;
+  editing?: boolean;
   payees: PayeeEntity[];
   accounts: AccountEntity[];
+  currentAccount?: AccountEntity | null;
   transferAccountsByTransaction: {
     [id: TransactionEntity['id']]: AccountEntity | null;
   };
@@ -506,8 +518,10 @@ function PayeeCell({
   id,
   payee,
   focused,
+  editing,
   payees,
   accounts,
+  currentAccount,
   transferAccountsByTransaction,
   valueStyle,
   transaction,
@@ -528,6 +542,13 @@ function PayeeCell({
   const transferAccount = transferAccountsByTransaction[transaction.id];
 
   const displayPayee = useDisplayPayee({ transaction });
+
+  // Handler for FX rate changes from PayeeIcons
+  const handleFxRateChange = (fxRate: number | null) => {
+    if (fxRate !== null) {
+      onUpdate('fx_rate', fxRate);
+    }
+  };
 
   return transaction.is_parent ? (
     <Cell
@@ -579,8 +600,12 @@ function PayeeCell({
           <PayeeIcons
             transaction={transaction}
             transferAccount={transferAccount}
+            currentAccount={currentAccount}
+            accounts={accounts}
+            editing={editing}
             onNavigateToTransferAccount={onNavigateToTransferAccount}
             onNavigateToSchedule={onNavigateToSchedule}
+            onFxRateChange={handleFxRateChange}
           />
           <SvgSplit
             style={{
@@ -672,8 +697,12 @@ function PayeeCell({
             <PayeeIcons
               transaction={transaction}
               transferAccount={transferAccount}
+              currentAccount={currentAccount}
+              accounts={accounts}
+              editing={editing}
               onNavigateToTransferAccount={onNavigateToTransferAccount}
               onNavigateToSchedule={onNavigateToSchedule}
+              onFxRateChange={handleFxRateChange}
             />
             <div
               style={{
@@ -752,20 +781,191 @@ const transferIconStyle = { width: 10, height: 10 };
 type PayeeIconsProps = {
   transaction: SerializedTransaction;
   transferAccount: AccountEntity | null;
+  currentAccount?: AccountEntity | null;
+  accounts: AccountEntity[];
+  editing?: boolean;
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
+  onFxRateChange?: (fxRate: number | null) => void;
 };
 
 function PayeeIcons({
   transaction,
   transferAccount,
+  currentAccount: providedCurrentAccount,
+  accounts,
+  editing: _editing,
   onNavigateToTransferAccount,
   onNavigateToSchedule,
+  onFxRateChange,
 }: PayeeIconsProps) {
   const { t } = useTranslation();
 
+  // Get default currency for accounts with null currency_code
+  const [defaultCurrency] = useSyncedPref('defaultCurrencyCode');
+
+  // If currentAccount not provided, look it up from transaction.account
+  const currentAccount = useMemo(() => {
+    if (providedCurrentAccount) {
+      return providedCurrentAccount;
+    }
+    if (transaction.account) {
+      return getAccountsById(accounts)[transaction.account] || null;
+    }
+    return null;
+  }, [providedCurrentAccount, transaction.account, accounts]);
+
+  // State for FX rate editing popover
+  const [fxPopoverOpen, setFxPopoverOpen] = useState(false);
+  const [editingFxRate, setEditingFxRate] = useState<string>('');
+  const [editingForeignAmount, setEditingForeignAmount] = useState<string>('');
+
   const scheduleId = transaction.schedule;
   const { isLoading, schedules = [] } = useCachedSchedules();
+
+  // Determine if this is a cross-currency transfer
+  const isCrossCurrencyTransfer = useMemo(() => {
+    if (!currentAccount || !transferAccount) {
+      return false;
+    }
+    const currentCurrency = currentAccount.currency_code || defaultCurrency;
+    const transferCurrency = transferAccount.currency_code || defaultCurrency;
+    return (
+      currentCurrency !== transferCurrency &&
+      currentCurrency != null &&
+      transferCurrency != null
+    );
+  }, [currentAccount, transferAccount, defaultCurrency]);
+
+  const hasFxRate =
+    transaction.fx_rate &&
+    transaction.fx_rate !== 0 &&
+    transaction.fx_rate !== 1;
+
+  // Get currency info for proper decimal place display in tooltips
+  const currentCurrency =
+    currentAccount?.currency_code || defaultCurrency || 'USD';
+  const transferCurrency =
+    transferAccount?.currency_code || defaultCurrency || 'USD';
+  const targetDecimals = getCurrency(transferCurrency).decimalPlaces;
+  const fxRateButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Convert source amount to target amount using FX rate
+  // Uses shared function to ensure consistency with server-side calculations
+  const convertToForeignAmount = useCallback(
+    (sourceAmount: number, rate: number): number => {
+      return calculateForeignAmount(
+        sourceAmount,
+        rate,
+        currentCurrency,
+        transferCurrency,
+      );
+    },
+    [currentCurrency, transferCurrency],
+  );
+
+  // Calculate FX rate from source and target amounts
+  // Uses shared function to ensure consistency with server-side calculations
+  const calculateFxRate = useCallback(
+    (sourceAmount: number, targetAmount: number): number => {
+      return calculateFxRateFromAmounts(
+        sourceAmount,
+        targetAmount,
+        currentCurrency,
+        transferCurrency,
+      );
+    },
+    [currentCurrency, transferCurrency],
+  );
+
+  // Handle transfer arrow click - navigate to transfer account
+  const handleTransferClick = () => {
+    if (!isTemporaryId(transaction.id)) {
+      onNavigateToTransferAccount(transferAccount!.id);
+    }
+  };
+
+  // Format integer amount to string with correct decimal places
+  const formatForeignAmount = useCallback(
+    (integerAmount: number): string => {
+      const divisor = Math.pow(10, targetDecimals);
+      const amount = integerAmount / divisor;
+      return amount.toFixed(targetDecimals);
+    },
+    [targetDecimals],
+  );
+
+  // Handle FX icon click - open rate editor
+  // Fetches the paired transaction to get the exact foreign amount
+  const handleFxRateClick = async () => {
+    if (onFxRateChange) {
+      const rate = transaction.fx_rate || 1;
+      // Format rate with target currency's decimal places for display
+      setEditingFxRate(rate.toFixed(targetDecimals));
+
+      // For existing transactions, try to get the actual paired transaction amount
+      // This avoids rounding errors from rate precision loss
+      if (transaction.transfer_id && !isTemporaryId(transaction.id)) {
+        try {
+          const result = await aqlQuery(
+            q('transactions')
+              .filter({ id: transaction.transfer_id })
+              .select(['amount']),
+          );
+          if (result.data.length > 0) {
+            const pairedAmount = Math.abs(result.data[0].amount);
+            setEditingForeignAmount(formatForeignAmount(pairedAmount));
+            setFxPopoverOpen(true);
+            return;
+          }
+        } catch {
+          // Fall through to calculated amount
+        }
+      }
+
+      // Fallback: Calculate foreign amount from rate (may have small precision errors)
+      const foreignAmt = convertToForeignAmount(transaction.amount, rate);
+      setEditingForeignAmount(formatForeignAmount(foreignAmt));
+      setFxPopoverOpen(true);
+    }
+  };
+
+  // Handle FX rate change - recalculate foreign amount
+  const handleFxRateInputChange = (value: string) => {
+    setEditingFxRate(value);
+    const rate = parseFloat(value);
+    if (!isNaN(rate) && rate > 0 && transaction.amount) {
+      const foreignAmt = convertToForeignAmount(transaction.amount, rate);
+      setEditingForeignAmount(formatForeignAmount(foreignAmt));
+    }
+  };
+
+  // Handle foreign amount change - recalculate FX rate
+  const handleForeignAmountInputChange = (value: string) => {
+    setEditingForeignAmount(value);
+    // Parse the foreign amount with correct decimal places
+    const divisor = Math.pow(10, targetDecimals);
+    const foreignAmt = Math.round(parseFloat(value) * divisor);
+    if (!isNaN(foreignAmt) && foreignAmt !== 0 && transaction.amount) {
+      const rate = calculateFxRate(transaction.amount, foreignAmt);
+      // Format rate with target currency's decimal places for display
+      setEditingFxRate(rate.toFixed(targetDecimals));
+    }
+  };
+
+  // Handle saving the FX rate
+  const handleFxRateSave = () => {
+    const rate = parseFloat(editingFxRate);
+    if (!isNaN(rate) && rate > 0 && onFxRateChange) {
+      onFxRateChange(rate);
+    }
+    setFxPopoverOpen(false);
+  };
+
+  // Handle cancel
+  const handleFxRateCancel = () => {
+    setFxPopoverOpen(false);
+  };
 
   if (isLoading) {
     return null;
@@ -807,23 +1007,197 @@ function PayeeIcons({
         </Button>
       )}
       {transferAccount && (
-        <Button
-          variant="bare"
-          data-testid="transfer-icon"
-          aria-label={t('See transfer account')}
-          style={payeeIconButtonStyle}
-          onPress={() => {
-            if (!isTemporaryId(transaction.id)) {
-              onNavigateToTransferAccount(transferAccount.id);
-            }
-          }}
-        >
-          {isDeposit ? (
-            <SvgLeftArrow2 style={transferIconStyle} />
-          ) : (
-            <SvgRightArrow2 style={transferIconStyle} />
+        <>
+          {/* Transfer arrow - navigates to transfer account */}
+          <Tooltip
+            content={<Trans>Go to {transferAccount.name}</Trans>}
+            placement="top"
+          >
+            <Button
+              variant="bare"
+              data-testid="transfer-icon"
+              aria-label={t('See transfer account')}
+              style={payeeIconButtonStyle}
+              onPress={handleTransferClick}
+            >
+              {isDeposit ? (
+                <SvgLeftArrow2 style={transferIconStyle} />
+              ) : (
+                <SvgRightArrow2 style={transferIconStyle} />
+              )}
+            </Button>
+          </Tooltip>
+
+          {/* FX rate icon - only shown for cross-currency transfers */}
+          {isCrossCurrencyTransfer && (
+            <>
+              <Tooltip
+                content={
+                  !fxPopoverOpen ? (
+                    hasFxRate ? (
+                      <Trans>
+                        FX Rate:{' '}
+                        {transaction.fx_rate!.toFixed(
+                          getCurrency(transferCurrency).decimalPlaces,
+                        )}{' '}
+                        {transferCurrency} per {currentCurrency}
+                      </Trans>
+                    ) : (
+                      <Trans>Set FX rate</Trans>
+                    )
+                  ) : undefined
+                }
+                placement="top"
+              >
+                <Button
+                  ref={fxRateButtonRef}
+                  variant="bare"
+                  data-testid="fx-rate-icon"
+                  aria-label={t('Edit exchange rate')}
+                  style={{
+                    ...payeeIconButtonStyle,
+                    color: hasFxRate ? theme.noticeText : theme.warningText,
+                  }}
+                  onPress={() => {
+                    handleFxRateClick();
+                  }}
+                >
+                  <SvgSwap style={transferIconStyle} />
+                </Button>
+              </Tooltip>
+              <Popover
+                triggerRef={fxRateButtonRef}
+                isOpen={fxPopoverOpen}
+                onOpenChange={open => {
+                  // Only allow closing via our explicit handlers, not focus/click events
+                  if (!open) {
+                    return;
+                  }
+                  setFxPopoverOpen(open);
+                }}
+                placement="bottom"
+              >
+                <View
+                  style={{
+                    padding: 12,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 10,
+                  }}
+                  onClick={e => {
+                    e.stopPropagation();
+                  }}
+                  onMouseDown={e => {
+                    e.stopPropagation();
+                  }}
+                  onFocus={e => {
+                    e.stopPropagation();
+                  }}
+                >
+                  <View
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                    }}
+                  >
+                    <Text style={{ color: theme.pageTextLight }}>
+                      {currentCurrency} → {transferCurrency} Exchange Rate:
+                    </Text>
+                    <Input
+                      type="text"
+                      inputMode="decimal"
+                      value={editingFxRate}
+                      onChange={e => handleFxRateInputChange(e.target.value)}
+                      onFocus={e => {
+                        e.stopPropagation();
+                      }}
+                      onClick={e => {
+                        e.stopPropagation();
+                      }}
+                      onMouseDown={e => {
+                        e.stopPropagation();
+                      }}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          handleFxRateSave();
+                        } else if (e.key === 'Escape') {
+                          handleFxRateCancel();
+                        }
+                      }}
+                      autoFocus
+                      style={{
+                        width: 90,
+                        padding: '4px 8px',
+                        textAlign: 'right',
+                      }}
+                    />
+                  </View>
+                  <View
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                    }}
+                  >
+                    <Text style={{ color: theme.pageTextLight }}>
+                      {transferCurrency} Amount:
+                    </Text>
+                    <Input
+                      type="text"
+                      inputMode="decimal"
+                      value={editingForeignAmount}
+                      onChange={e =>
+                        handleForeignAmountInputChange(e.target.value)
+                      }
+                      onFocus={e => {
+                        e.stopPropagation();
+                      }}
+                      onClick={e => {
+                        e.stopPropagation();
+                      }}
+                      onMouseDown={e => {
+                        e.stopPropagation();
+                      }}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          handleFxRateSave();
+                        } else if (e.key === 'Escape') {
+                          handleFxRateCancel();
+                        }
+                      }}
+                      style={{
+                        width: 90,
+                        padding: '4px 8px',
+                        textAlign: 'right',
+                      }}
+                    />
+                  </View>
+                  <View
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      justifyContent: 'flex-end',
+                      gap: 8,
+                      marginTop: 4,
+                    }}
+                  >
+                    <Button variant="bare" onPress={handleFxRateCancel}>
+                      <Trans>Cancel</Trans>
+                    </Button>
+                    <Button variant="primary" onPress={handleFxRateSave}>
+                      <Trans>Save</Trans>
+                    </Button>
+                  </View>
+                </View>
+              </Popover>
+            </>
           )}
-        </Button>
+        </>
       )}
     </>
   );
@@ -935,6 +1309,9 @@ const Transaction = memo(function Transaction({
 }: TransactionProps) {
   const { t } = useTranslation();
 
+  // Get default currency for FX rate calculations
+  const [defaultCurrency] = useSyncedPref('defaultCurrencyCode');
+
   const dispatch = useDispatch();
   const dispatchSelected = useSelectedDispatch();
   const triggerRef = useRef(null);
@@ -1024,8 +1401,11 @@ const Transaction = memo(function Transaction({
     }
   };
 
-  const onUpdateAfterConfirm: TransactionUpdateFunction = (name, value) => {
-    const newTransaction = { ...transaction, [name]: value };
+  const onUpdateAfterConfirm: TransactionUpdateFunction = async (
+    name,
+    value,
+  ) => {
+    let newTransaction = { ...transaction, [name]: value };
 
     // Don't change the note to an empty string if it's null (since they are both rendered the same)
     if (name === 'notes' && value === '' && transaction.notes == null) {
@@ -1055,6 +1435,42 @@ const Transaction = memo(function Transaction({
 
     if (name === 'account' && transaction.account !== value) {
       newTransaction.reconciled = false;
+    }
+
+    // Check for cross-currency transfer when payee changes
+    if (name === 'payee' && value && typeof value === 'string') {
+      const newPayee = getPayeesById(payees)[value];
+      if (newPayee?.transfer_acct) {
+        const transferAccount =
+          getAccountsById(accounts)[newPayee.transfer_acct];
+        const currentAccount = transaction.account
+          ? getAccountsById(accounts)[transaction.account]
+          : null;
+
+        if (currentAccount && transferAccount) {
+          const fromCurrency = currentAccount.currency_code || defaultCurrency;
+          const toCurrency = transferAccount.currency_code || defaultCurrency;
+
+          // If it's a cross-currency transfer, fetch the exchange rate
+          if (fromCurrency && toCurrency && fromCurrency !== toCurrency) {
+            try {
+              const date =
+                transaction.date || new Date().toISOString().split('T')[0];
+              const rate = await send('get-exchange-rate', {
+                fromCurrency,
+                toCurrency,
+                date,
+              });
+
+              if (rate && rate !== 0 && rate !== 1) {
+                newTransaction = { ...newTransaction, fx_rate: rate };
+              }
+            } catch {
+              // Failed to fetch exchange rate, continue without it
+            }
+          }
+        }
+      }
     }
 
     // Don't save a temporary value (a new payee) which will be
@@ -1383,8 +1799,10 @@ const Transaction = memo(function Transaction({
           id={id}
           payee={payee}
           focused={focusedField === 'payee'}
+          editing={editing}
           /* Filter out the account we're currently in as it is not a valid transfer */
-          accounts={accounts.filter(account => account.id !== accountId)}
+          accounts={accounts.filter(acct => acct.id !== accountId)}
+          currentAccount={account || undefined}
           payees={payees.filter(
             payee => !payee.transfer_acct || payee.transfer_acct !== accountId,
           )}
@@ -1890,13 +2308,288 @@ function NewTransaction({
   const cancelButtonRef = useRef(null);
   useProperFocus(cancelButtonRef, focusedField === 'cancel');
 
+  // Get default currency for accounts with null currency_code
+  const [defaultCurrency] = useSyncedPref('defaultCurrencyCode');
+
+  // FX transfer state
+  const [fxRate, setFxRate] = useState<string>('');
+  const [fetchedFxRate, setFetchedFxRate] = useState<string>(''); // Track the originally fetched rate
+  const [foreignAmount, setForeignAmount] = useState<string>('');
+  const [isLoadingRate, setIsLoadingRate] = useState(false);
+  const foreignAmountUserEntered = useRef(false); // Track if foreign amount was user-entered
+
+  // Detect cross-currency transfer
+  const transaction = transactions[0];
+  const currentAccount = accounts.find(a => a.id === transaction.account);
+
+  // Get transfer account robustly, handling temporary transactions
+  const payee = transaction.payee
+    ? getPayeesById(payees)[transaction.payee]
+    : undefined;
+  const transferAccount =
+    isTemporaryId(transaction.id) && payee?.transfer_acct
+      ? getAccountsById(accounts)[payee.transfer_acct]
+      : transferAccountsByTransaction[transaction.id];
+
+  const isCrossCurrencyTransfer = useMemo(() => {
+    if (!currentAccount || !transferAccount) {
+      return false;
+    }
+    // Use default currency if currency_code is null
+    const currentCurrency = currentAccount.currency_code || defaultCurrency;
+    const transferCurrency = transferAccount.currency_code || defaultCurrency;
+    return (
+      currentCurrency !== transferCurrency &&
+      currentCurrency != null &&
+      transferCurrency != null
+    );
+  }, [currentAccount, transferAccount, defaultCurrency]);
+
+  // Get currency codes for conversion calculations
+  const sourceCurrencyCode =
+    currentAccount?.currency_code || defaultCurrency || 'USD';
+  const targetCurrencyCode =
+    transferAccount?.currency_code || defaultCurrency || 'USD';
+  const targetDecimals = getCurrency(targetCurrencyCode).decimalPlaces;
+
+  // Convert source amount to target amount using FX rate, accounting for decimal differences
+  // Uses shared function to ensure consistency with server-side calculations
+  const convertToForeignAmount = useCallback(
+    (sourceAmount: number, rate: number): number => {
+      return calculateForeignAmount(
+        sourceAmount,
+        rate,
+        sourceCurrencyCode,
+        targetCurrencyCode,
+      );
+    },
+    [sourceCurrencyCode, targetCurrencyCode],
+  );
+
+  // Calculate FX rate from source and target amounts, accounting for decimal differences
+  // Uses shared function to ensure consistency with server-side calculations
+  const calculateFxRate = useCallback(
+    (sourceAmount: number, targetAmount: number): number => {
+      return calculateFxRateFromAmounts(
+        sourceAmount,
+        targetAmount,
+        sourceCurrencyCode,
+        targetCurrencyCode,
+      );
+    },
+    [sourceCurrencyCode, targetCurrencyCode],
+  );
+
   const handleAddClick = (e: { ctrlKey?: boolean; metaKey?: boolean }) => {
+    if (isCrossCurrencyTransfer && fxRate) {
+      const rate = parseFloat(fxRate);
+      if (!isNaN(rate) && rate > 0) {
+        // Add fx_rate to the transaction
+        transactions[0].fx_rate = rate;
+      }
+    }
     if (e.ctrlKey || e.metaKey) {
       onAddAndClose();
     } else {
       onAdd();
     }
   };
+
+  // Fetch exchange rate when cross-currency transfer is detected
+  // Note: We intentionally exclude transaction.amount from dependencies because
+  // amount changes are handled by a separate useEffect below
+  useEffect(() => {
+    async function fetchRate() {
+      if (!isCrossCurrencyTransfer || !currentAccount || !transferAccount) {
+        setFxRate('');
+        setForeignAmount('');
+        return;
+      }
+
+      // Use default currency if currency_code is null
+      const fromCurrency = currentAccount.currency_code || defaultCurrency;
+      const toCurrency = transferAccount.currency_code || defaultCurrency;
+      const date = transaction.date || new Date().toISOString().split('T')[0];
+
+      if (!fromCurrency || !toCurrency) {
+        return;
+      }
+
+      setIsLoadingRate(true);
+      try {
+        const rate = await send('get-exchange-rate', {
+          fromCurrency,
+          toCurrency,
+          date,
+        });
+
+        if (rate) {
+          const rateString = rate.toString();
+          setFxRate(rateString);
+          setFetchedFxRate(rateString); // Store the fetched rate for reset functionality
+
+          // Calculate foreign amount if transaction amount is set
+          if (transaction.amount && transaction.amount !== 0) {
+            const foreignAmt = convertToForeignAmount(transaction.amount, rate);
+            setForeignAmount(
+              integerToFormatted(foreignAmt, undefined, targetDecimals),
+            );
+            // Foreign amount calculated from fetched rate, so mark as auto-calculated
+            foreignAmountUserEntered.current = false;
+          }
+        } else {
+          setFxRate('1');
+          setFetchedFxRate('1');
+        }
+      } catch (err) {
+        console.error('Failed to fetch exchange rate:', err);
+        setFxRate('1');
+        setFetchedFxRate('1');
+      } finally {
+        setIsLoadingRate(false);
+      }
+    }
+
+    fetchRate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    isCrossCurrencyTransfer,
+    currentAccount,
+    transferAccount,
+    defaultCurrency,
+    transaction.date,
+  ]);
+
+  // When transaction amount changes, recalculate based on what's already set
+  useEffect(() => {
+    if (
+      !transaction.amount ||
+      transaction.amount === 0 ||
+      !isCrossCurrencyTransfer
+    ) {
+      return;
+    }
+
+    // Priority 1: If foreign amount was USER-ENTERED, calculate FX rate from it
+    // (Don't recalculate if foreign amount was auto-calculated from rate, to preserve rate precision)
+    if (foreignAmount && foreignAmountUserEntered.current) {
+      const foreignAmt = formattedToInteger(foreignAmount, targetDecimals);
+      if (foreignAmt !== null && foreignAmt !== 0) {
+        const rate = calculateFxRate(transaction.amount, foreignAmt);
+        setFxRate(rate.toString());
+      }
+    }
+    // Priority 2: If FX rate exists but no foreign amount, calculate foreign amount
+    else if (fxRate) {
+      const rate = parseFloat(fxRate);
+      if (!isNaN(rate) && rate > 0) {
+        const foreignAmt = convertToForeignAmount(transaction.amount, rate);
+        setForeignAmount(
+          integerToFormatted(foreignAmt, undefined, targetDecimals),
+        );
+        // Mark as auto-calculated, not user-entered
+        foreignAmountUserEntered.current = false;
+      }
+    }
+  }, [
+    transaction.amount,
+    foreignAmount,
+    fxRate,
+    isCrossCurrencyTransfer,
+    convertToForeignAmount,
+    calculateFxRate,
+    targetDecimals,
+  ]);
+
+  // Auto-calculate foreign amount when rate and transaction amount change
+  useEffect(() => {
+    if (
+      !fxRate ||
+      !transaction.amount ||
+      transaction.amount === 0 ||
+      foreignAmount // Don't overwrite if user has entered a value
+    ) {
+      return;
+    }
+
+    const rate = parseFloat(fxRate);
+    if (isNaN(rate) || rate <= 0) {
+      return;
+    }
+
+    const foreignAmt = convertToForeignAmount(transaction.amount, rate);
+    setForeignAmount(integerToFormatted(foreignAmt, undefined, targetDecimals));
+    // Mark as auto-calculated, not user-entered
+    foreignAmountUserEntered.current = false;
+  }, [
+    fxRate,
+    transaction.amount,
+    foreignAmount,
+    convertToForeignAmount,
+    targetDecimals,
+  ]);
+
+  const { t } = useTranslation();
+
+  // Handle FX rate change - recalculate foreign amount
+  function handleFxRateChange(value: string) {
+    setFxRate(value);
+
+    // If we have both rate and transaction amount, calculate foreign amount
+    if (transaction.amount && transaction.amount !== 0 && value) {
+      const rate = parseFloat(value);
+      if (!isNaN(rate) && rate > 0) {
+        const foreignAmt = convertToForeignAmount(transaction.amount, rate);
+        setForeignAmount(
+          integerToFormatted(foreignAmt, undefined, targetDecimals),
+        );
+        // Foreign amount calculated from user-entered rate, so mark as auto-calculated
+        foreignAmountUserEntered.current = false;
+      }
+    }
+  }
+
+  // Handle foreign amount change - recalculate FX rate
+  function handleForeignAmountChange(value: string) {
+    setForeignAmount(value);
+    // Mark that the foreign amount was user-entered
+    foreignAmountUserEntered.current = true;
+
+    // If we have both foreign amount and transaction amount, calculate rate
+    if (transaction.amount && transaction.amount !== 0 && value) {
+      const foreignAmt = formattedToInteger(value, targetDecimals);
+      if (foreignAmt !== null && foreignAmt !== 0) {
+        const rate = calculateFxRate(transaction.amount, foreignAmt);
+        setFxRate(rate.toString());
+      }
+    }
+  }
+
+  // Reset FX rate to the fetched rate and recalculate foreign amount
+  function handleResetFxRate() {
+    if (!fetchedFxRate) {
+      return;
+    }
+
+    setFxRate(fetchedFxRate);
+
+    // Recalculate foreign amount from transaction amount using fetched rate
+    if (transaction.amount && transaction.amount !== 0) {
+      const rate = parseFloat(fetchedFxRate);
+      if (!isNaN(rate) && rate > 0) {
+        const foreignAmt = convertToForeignAmount(transaction.amount, rate);
+        setForeignAmount(
+          integerToFormatted(foreignAmt, undefined, targetDecimals),
+        );
+        // Foreign amount calculated from reset, so mark as auto-calculated
+        foreignAmountUserEntered.current = false;
+      }
+    }
+  }
+
+  // Check if the rate has been modified from the fetched rate
+  const isRateModified =
+    fetchedFxRate && fxRate && fxRate !== fetchedFxRate && !isLoadingRate;
 
   return (
     <View
@@ -1957,8 +2650,98 @@ function NewTransaction({
           justifyContent: 'flex-end',
           marginTop: 6,
           marginRight: 20,
+          gap: 10,
         }}
       >
+        {isCrossCurrencyTransfer && currentAccount && transferAccount && (
+          <>
+            <Text
+              style={{
+                color: theme.pageTextLight,
+              }}
+            >
+              <Trans>
+                {currentAccount.currency_code || defaultCurrency} →{' '}
+                {transferAccount.currency_code || defaultCurrency} Exchange
+                Rate:
+              </Trans>
+            </Text>
+            <View
+              style={{
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 5,
+              }}
+            >
+              <Input
+                type="text"
+                inputMode="decimal"
+                value={fxRate}
+                onChange={e => handleFxRateChange(e.target.value)}
+                disabled={isLoadingRate}
+                placeholder={isLoadingRate ? t('Loading...') : ''}
+                style={{
+                  width: '120px',
+                  padding: '4px 8px',
+                  textAlign: 'right',
+                }}
+              />
+              {isRateModified && (
+                <Tooltip
+                  content={t('Reset to fetched rate')}
+                  placement="top"
+                  style={{ padding: '5px 10px' }}
+                >
+                  <Button
+                    variant="bare"
+                    aria-label={t('Reset exchange rate')}
+                    onPress={handleResetFxRate}
+                    style={{
+                      padding: '2px',
+                      width: '24px',
+                      height: '24px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <SvgRefreshArrow
+                      style={{
+                        width: 13,
+                        height: 13,
+                        color: theme.pageTextLight,
+                      }}
+                    />
+                  </Button>
+                </Tooltip>
+              )}
+            </View>
+            <Text
+              style={{
+                color: theme.pageTextLight,
+              }}
+            >
+              <Trans>
+                {transferAccount.currency_code || defaultCurrency} Amount:
+              </Trans>
+            </Text>
+            <Input
+              type="text"
+              inputMode="decimal"
+              value={foreignAmount}
+              onChange={e => handleForeignAmountChange(e.target.value)}
+              disabled={isLoadingRate}
+              placeholder={isLoadingRate ? t('Loading...') : ''}
+              style={{
+                width: '120px',
+                padding: '4px 8px',
+                textAlign: 'right',
+              }}
+            />
+          </>
+        )}
         <Button
           style={{ marginRight: 10, padding: '4px 10px' }}
           onPress={() => onClose()}

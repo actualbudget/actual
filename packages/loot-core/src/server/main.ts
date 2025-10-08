@@ -136,11 +136,54 @@ handlers['exchange-rates-fetch'] = async function ({
   fromCurrency,
   toCurrencies,
 }: {
-  fromCurrency: string;
-  toCurrencies: string[];
+  fromCurrency?: string;
+  toCurrencies?: string[];
 }) {
+  // Auto-determine currencies if not provided
+  if (!fromCurrency || !toCurrencies || toCurrencies.length === 0) {
+    const defaultCurrency = await db.first<{ value: string }>(
+      'SELECT value FROM preferences WHERE id = ?',
+      ['defaultCurrencyCode'],
+    );
+    const baseCurrency = fromCurrency || defaultCurrency?.value;
+    if (!baseCurrency) {
+      return { success: false };
+    }
+
+    // Get all unique account currencies that differ from base
+    const accounts = await db.all<db.DbAccount>(
+      'SELECT DISTINCT currency_code FROM accounts WHERE currency_code IS NOT NULL AND currency_code != ? AND tombstone = 0',
+      [baseCurrency],
+    );
+    const currencies =
+      toCurrencies && toCurrencies.length > 0
+        ? toCurrencies
+        : accounts
+            .map(a => a.currency_code)
+            .filter((c): c is string => c != null);
+
+    if (currencies.length === 0) {
+      return { success: true }; // No currencies to fetch
+    }
+
+    await exchangeRateService.fetchAndCacheRates(baseCurrency, currencies);
+    return { success: true };
+  }
+
   await exchangeRateService.fetchAndCacheRates(fromCurrency, toCurrencies);
   return { success: true };
+};
+
+handlers['get-exchange-rate'] = async function ({
+  fromCurrency,
+  toCurrency,
+  date,
+}: {
+  fromCurrency: string;
+  toCurrency: string;
+  date?: string;
+}) {
+  return await exchangeRateService.getRate(fromCurrency, toCurrency, date);
 };
 
 handlers['exchange-rates-get-update-interval'] = async function () {

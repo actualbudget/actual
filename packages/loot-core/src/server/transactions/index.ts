@@ -1,14 +1,45 @@
 // @ts-strict-ignore
 
 import * as connection from '../../platform/server/connection';
+import { logger } from '../../platform/server/log';
+import { getCurrency } from '../../shared/currencies';
 import { type Diff } from '../../shared/util';
 import { type PayeeEntity, type TransactionEntity } from '../../types/models';
 import * as db from '../db';
 import { incrFetch, whereIn } from '../db/util';
+import { exchangeRateService } from '../exchange-rate';
 import { batchMessages } from '../sync';
 
 import * as rules from './transaction-rules';
 import * as transfer from './transfer';
+
+/**
+ * Calculate base_amount from a foreign currency amount using the given rate.
+ * This accounts for different decimal places between currencies.
+ *
+ * For example, converting 0.01 BTC (stored as 1,000,000 satoshis) to USD at rate 90722:
+ * - BTC has 8 decimal places, USD has 2
+ * - Result should be $907.22 (stored as 90722 cents)
+ * - Formula: amount * rate / 10^(sourceDecimals - targetDecimals)
+ */
+function calculateBaseAmount(
+  amount: number,
+  rate: number,
+  sourceCurrency: string,
+  targetCurrency: string,
+): number {
+  const sourceDecimals = getCurrency(sourceCurrency).decimalPlaces;
+  const targetDecimals = getCurrency(targetCurrency).decimalPlaces;
+  const decimalDiff = sourceDecimals - targetDecimals;
+
+  if (decimalDiff === 0) {
+    return Math.round(amount * rate);
+  }
+
+  // Adjust for decimal place difference
+  const scaleFactor = Math.pow(10, decimalDiff);
+  return Math.round((amount * rate) / scaleFactor);
+}
 
 async function idsWithChildren(ids: string[]) {
   const whereIds = whereIn(ids, 'parent_id');
@@ -61,6 +92,24 @@ export async function batchUpdateTransactions({
     'SELECT * FROM accounts WHERE tombstone = 0',
   );
 
+  // Get default currency for base_amount calculations (optional for backwards compatibility)
+  const defaultCurrency = await db.first<{ value: string }>(
+    'SELECT value FROM preferences WHERE id = ?',
+    ['defaultCurrencyCode'],
+  );
+
+  // base_amount calculations are only needed if multi-currency is configured
+  const baseCurrency = defaultCurrency?.value;
+
+  // Build account currency map for efficient lookups
+  const accountCurrencyMap = new Map<string, string | null>();
+  for (const account of accounts) {
+    accountCurrencyMap.set(
+      account.id,
+      account.currency_code || baseCurrency || null,
+    );
+  }
+
   // We need to get all the payees of updated transactions _before_
   // making changes
   if (updated) {
@@ -86,6 +135,39 @@ export async function batchUpdateTransactions({
           if (t.is_parent || account?.offbudget === 1) {
             t.category = null;
           }
+
+          // Calculate base_amount for foreign currency transactions
+          // Only if multi-currency is configured (baseCurrency is set)
+          const accountCurrency = accountCurrencyMap.get(t.account);
+          if (
+            baseCurrency &&
+            accountCurrency &&
+            accountCurrency !== baseCurrency
+          ) {
+            try {
+              const rate = await exchangeRateService.getRate(
+                accountCurrency,
+                baseCurrency,
+                t.date,
+              );
+              if (rate !== null) {
+                t.base_amount = calculateBaseAmount(
+                  t.amount,
+                  rate,
+                  accountCurrency,
+                  baseCurrency,
+                );
+              }
+            } catch (error) {
+              // If rate fetch fails, leave base_amount as null
+              // Transaction will still be created, but won't contribute to base currency totals
+              logger.warn(
+                `Failed to fetch exchange rate for transaction ${t.id}:`,
+                error,
+              );
+            }
+          }
+
           return db.insertTransaction(t);
         }),
       );
@@ -112,6 +194,53 @@ export async function batchUpdateTransactions({
             const account = accounts.find(acct => acct.id === t.account);
             if (t.is_parent || account?.offbudget === 1) {
               t.category = null;
+            }
+          }
+
+          // Calculate base_amount for foreign currency transactions if amount or account changed
+          // Only if multi-currency is configured (baseCurrency is set)
+          if (
+            baseCurrency &&
+            (t.amount !== undefined || t.account !== undefined)
+          ) {
+            const accountCurrency = accountCurrencyMap.get(
+              t.account || (await db.getTransaction(t.id))?.account,
+            );
+            if (accountCurrency && accountCurrency !== baseCurrency) {
+              // Get the full transaction to access date and amount if not provided
+              const fullTransaction =
+                t.date && t.amount !== undefined
+                  ? t
+                  : await db.getTransaction(t.id);
+              const transDate = t.date || fullTransaction?.date;
+              const transAmount =
+                t.amount !== undefined ? t.amount : fullTransaction?.amount;
+
+              if (transDate && transAmount !== undefined) {
+                try {
+                  const rate = await exchangeRateService.getRate(
+                    accountCurrency,
+                    baseCurrency,
+                    transDate,
+                  );
+                  if (rate !== null) {
+                    t.base_amount = calculateBaseAmount(
+                      transAmount,
+                      rate,
+                      accountCurrency,
+                      baseCurrency,
+                    );
+                  }
+                } catch (error) {
+                  logger.warn(
+                    `Failed to fetch exchange rate for transaction ${t.id}:`,
+                    error,
+                  );
+                }
+              }
+            } else if (accountCurrency === baseCurrency) {
+              // If transaction moved to base currency account, clear base_amount
+              t.base_amount = null;
             }
           }
 
