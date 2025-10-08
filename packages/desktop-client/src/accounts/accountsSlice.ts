@@ -315,7 +315,13 @@ export const linkAccountPluggyAi = createAppAsyncThunk(
 
 type LinkAccountPluginPayload = {
   accountId: string;
-  externalAccount: any;
+  externalAccount: {
+    account_id: string;
+    name: string;
+    institution: string;
+    balance: number;
+    [key: string]: any;
+  };
   syncSource: 'plugin';
   providerSlug: string;
   upgradingId?: AccountEntity['id'] | undefined;
@@ -324,7 +330,12 @@ type LinkAccountPluginPayload = {
 export const linkAccountPlugin = createAppAsyncThunk(
   `${sliceName}/linkAccountPlugin`,
   async (
-    { accountId, externalAccount, providerSlug, upgradingId }: LinkAccountPluginPayload,
+    {
+      accountId: _accountId,
+      externalAccount,
+      providerSlug,
+      upgradingId,
+    }: LinkAccountPluginPayload,
     { dispatch },
   ) => {
     await send('bank-sync-accounts-link', {

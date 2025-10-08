@@ -25,12 +25,9 @@ export function useBankSyncStatus(providerSlug: string) {
       setIsLoading(true);
 
       try {
-        const result = await send(
-          'bank-sync-status' as never,
-          {
-            providerSlug,
-          } as never,
-        );
+        const result = await send('bank-sync-status', {
+          providerSlug,
+        });
 
         if (result && typeof result === 'object') {
           const typedResult = result as {

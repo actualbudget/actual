@@ -34,6 +34,7 @@ import {
   mappingsFromString,
 } from '../util/custom-sync-mapping';
 
+import { getPluginProviders } from './app';
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';
 
@@ -276,6 +277,49 @@ async function downloadPluggyAiTransactions(
       'X-ACTUAL-TOKEN': userToken,
     },
     60000,
+  );
+
+  if (res.error_code) {
+    throw BankSyncError(res.error_type, res.error_code);
+  } else if ('error' in res) {
+    throw BankSyncError('Connection', res.error);
+  }
+
+  let retVal = {};
+  const singleRes = res as BankSyncResponse;
+  retVal = {
+    transactions: singleRes.transactions.all,
+    accountBalance: singleRes.balances,
+    startingBalance: singleRes.startingBalance,
+  };
+
+  logger.log('Response:', retVal);
+  return retVal;
+}
+
+async function downloadPluginTransactions(
+  providerSlug: string,
+  acctId: AccountEntity['id'],
+  since: string,
+) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return;
+
+  logger.log(`Pulling transactions from plugin ${providerSlug}`);
+
+  const res = await post(
+    `${getServer().BASE_SERVER}/plugins-api/bank-sync/${providerSlug}/transactions`,
+    {
+      accountId: acctId,
+      startDate: since,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+    60000,
+    {
+      redirect: 'follow',
+    },
   );
 
   if (res.error_code) {
@@ -996,9 +1040,24 @@ export async function syncAccount(
       newAccount,
     );
   } else {
-    throw new Error(
-      `Unrecognized bank-sync provider: ${acctRow.account_sync_source}`,
+    debugger;
+    // Check if it's a plugin provider
+    const pluginProviders = await getPluginProviders();
+    const isValidPlugin = pluginProviders.providers.some(
+      provider => provider.slug === acctRow.account_sync_source,
     );
+
+    if (isValidPlugin) {
+      download = await downloadPluginTransactions(
+        acctRow.account_sync_source,
+        acctId,
+        syncStartDate,
+      );
+    } else {
+      throw new Error(
+        `Unrecognized bank-sync provider: ${acctRow.account_sync_source}`,
+      );
+    }
   }
 
   return processBankSyncDownload(download, id, acctRow, newAccount);

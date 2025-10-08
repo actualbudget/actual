@@ -28,7 +28,11 @@ export function useBankSyncProviders() {
 
         const response = await send('bank-sync-providers-list');
 
-        if (response && typeof response === 'object' && 'providers' in response) {
+        if (
+          response &&
+          typeof response === 'object' &&
+          'providers' in response
+        ) {
           const typedResponse = response as {
             providers: BankSyncProvider[];
           };

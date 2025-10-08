@@ -92,7 +92,7 @@ export type SelectLinkedAccountsModalProps =
         name: string;
         institution: string;
         balance: number;
-        [key: string]: any;
+        [key: string]: string | number;
       }>;
       syncSource: 'plugin';
       providerSlug: string;
@@ -110,48 +110,55 @@ export function SelectLinkedAccountsModal({
   onSuccess,
   onClose,
 }: SelectLinkedAccountsModalProps) {
-  const propsWithSortedExternalAccounts =
-    useMemo(() => {
-      const toSort = externalAccounts ? [...externalAccounts] : [];
-      toSort.sort(
-        (a, b) =>
-          getInstitutionName(a)?.localeCompare(getInstitutionName(b)) ||
-          a.name.localeCompare(b.name),
-      );
-      switch (syncSource) {
-        case 'simpleFin':
-          return {
-            syncSource: 'simpleFin',
-            externalAccounts: toSort as SyncServerSimpleFinAccount[],
-          } as const;
-        case 'pluggyai':
-          return {
-            syncSource: 'pluggyai',
-            externalAccounts: toSort as SyncServerPluggyAiAccount[],
-          } as const;
-        case 'plugin':
-          return {
-            syncSource: 'plugin',
-            providerSlug: (providerSlug as string),
-            externalAccounts: toSort as Array<{
-              account_id: string;
-              name: string;
-              institution: string;
-              balance: number;
-              [key: string]: any;
-            }>,
-            upgradingAccountId,
-            onSuccess,
-            onClose,
-          } as const;
-        case 'goCardless':
-          return {
-            syncSource: 'goCardless',
-            requisitionId: requisitionId!,
-            externalAccounts: toSort as SyncServerGoCardlessAccount[],
-          } as const;
-      }
-    }, [externalAccounts, syncSource, requisitionId, providerSlug, upgradingAccountId, onSuccess, onClose]);
+  const propsWithSortedExternalAccounts = useMemo(() => {
+    const toSort = externalAccounts ? [...externalAccounts] : [];
+    toSort.sort(
+      (a, b) =>
+        getInstitutionName(a)?.localeCompare(getInstitutionName(b)) ||
+        a.name.localeCompare(b.name),
+    );
+    switch (syncSource) {
+      case 'simpleFin':
+        return {
+          syncSource: 'simpleFin',
+          externalAccounts: toSort as SyncServerSimpleFinAccount[],
+        } as const;
+      case 'pluggyai':
+        return {
+          syncSource: 'pluggyai',
+          externalAccounts: toSort as SyncServerPluggyAiAccount[],
+        } as const;
+      case 'plugin':
+        return {
+          syncSource: 'plugin',
+          providerSlug: providerSlug as string,
+          externalAccounts: toSort as Array<{
+            account_id: string;
+            name: string;
+            institution: string;
+            balance: number;
+            [key: string]: string | number;
+          }>,
+          upgradingAccountId,
+          onSuccess,
+          onClose,
+        } as const;
+      case 'goCardless':
+        return {
+          syncSource: 'goCardless',
+          requisitionId: requisitionId!,
+          externalAccounts: toSort as SyncServerGoCardlessAccount[],
+        } as const;
+    }
+  }, [
+    externalAccounts,
+    syncSource,
+    requisitionId,
+    providerSlug,
+    upgradingAccountId,
+    onSuccess,
+    onClose,
+  ]);
 
   const { t } = useTranslation();
   const dispatch = useDispatch();

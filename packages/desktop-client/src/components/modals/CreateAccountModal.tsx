@@ -399,6 +399,7 @@ export function CreateAccountModal({
   const onConnectPluginProvider = async (
     provider: BankSyncProvider,
     isConfigured: boolean,
+    credentials?: Record<string, string>,
   ) => {
     if (!isConfigured) {
       // Show initialization modal for setting up credentials
@@ -412,7 +413,7 @@ export function CreateAccountModal({
               onSuccess: async (credentials: Record<string, string>) => {
                 // The plugin system handles credentials internally
                 // After setup, try to connect again
-                onConnectPluginProvider(provider, true);
+                onConnectPluginProvider(provider, true, credentials);
               },
             },
           },
@@ -423,9 +424,10 @@ export function CreateAccountModal({
 
     // If configured, fetch and display accounts
     try {
-      const results = await send('bank-sync-accounts', {
+      const results = (await send('bank-sync-accounts', {
         providerSlug: provider.slug,
-      }) as any;
+        credentials,
+      })) as any;
 
       if (results.error_code) {
         throw new Error(results.reason);
@@ -741,13 +743,18 @@ export function CreateAccountModal({
 
                   {/* Plugin-based bank sync providers */}
                   {canSetSecrets && pluginProviders.length > 0 && (
-                      <Text style={{ lineHeight: '1.4em', fontSize: 15, textAlign: 'center', marginTop: '18px' }}>
-                        <Trans>
-                          <strong>
-                            Plugin-based bank sync providers:
-                          </strong>
-                        </Trans>
-                      </Text>
+                    <Text
+                      style={{
+                        lineHeight: '1.4em',
+                        fontSize: 15,
+                        textAlign: 'center',
+                        marginTop: '18px',
+                      }}
+                    >
+                      <Trans>
+                        <strong>Plugin-based bank sync providers:</strong>
+                      </Trans>
+                    </Text>
                   )}
 
                   {canSetSecrets &&
@@ -780,9 +787,9 @@ export function CreateAccountModal({
                           secrets. Please contact an Admin to configure
                         </Trans>{' '}
                         {[
-                          isGoCardlessSetupComplete ? '' : 'GoCardless',
+                          isGoCardlessSetupComplete ? '' : t('GoCardless'),
                           isSimpleFinSetupComplete ? '' : 'SimpleFIN',
-                          isPluggyAiSetupComplete ? '' : 'Pluggy.ai',
+                          isPluggyAiSetupComplete ? '' : t('Pluggy.ai'),
                         ]
                           .filter(Boolean)
                           .join(' or ')}

@@ -65,77 +65,88 @@ app.get('/bank-sync/:providerSlug/status', async (req, res) => {
       });
     }
 
-    // Try to call the plugin's status endpoint
-    try {
-      // Create a new request object for the plugin call
-      const pluginReq = {
-        ...req,
-        method: 'GET',
-        url: `/plugins-api/${providerSlug}${statusEndpoint}`,
-        path: `/${providerSlug}${statusEndpoint}`,
-        originalUrl: `/plugins-api/${providerSlug}${statusEndpoint}`,
-      };
-
-      // Create a mock response object
-      let pluginResponseSent = false;
-      const pluginRes = {
-        status: (code) => ({
-          json: (data) => {
-            if (!pluginResponseSent) {
-              pluginResponseSent = true;
-              res.status(code).json(data);
-            }
-          }
-        }),
-        json: (data) => {
-          if (!pluginResponseSent) {
-            pluginResponseSent = true;
-            res.json(data);
-          }
-        }
-      };
-
-      // Call the plugin middleware directly
-      const middleware = createPluginMiddleware(pluginManager);
-      await middleware(pluginReq, pluginRes, (err) => {
-        if (err && !pluginResponseSent) {
-          pluginResponseSent = true;
-          // If plugin status check fails, assume plugin is configured but has issues
-          res.json({
-            status: 'ok',
-            data: {
-              configured: true,
-              error: err.message,
-            },
-          });
-        }
-      });
-
-      // If middleware didn't send a response, assume plugin is configured
-      if (!pluginResponseSent) {
-        res.json({
-          status: 'ok',
-          data: {
-            configured: true,
-          },
-        });
-      }
-
-    } catch (pluginError) {
-      // If plugin status check fails, assume plugin is configured but has issues
-      res.json({
-        status: 'ok',
-        data: {
-          configured: true,
-          error: pluginError.message,
-        },
-      });
-    }
-
+    // Redirect to the actual plugin endpoint using absolute URL
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const redirectUrl = `${protocol}://${host}/plugins-api/${providerSlug}${statusEndpoint}`;
+    return res.redirect(307, redirectUrl);
   } catch (error) {
     res.status(500).json({
       status: 'error',
       error: error.message,
+    });
+  }
+});
+
+// Add endpoint to get accounts from a specific bank sync plugin
+app.post('/bank-sync/:providerSlug/accounts', async (req, res) => {
+  try {
+    const { providerSlug } = req.params;
+
+    // Get the plugin
+    const plugin = pluginManager.getPlugin(providerSlug);
+    if (!plugin || !plugin.manifest?.bankSync?.enabled) {
+      return res.status(404).json({
+        error_code: 'PLUGIN_NOT_FOUND',
+        reason: `Bank sync plugin '${providerSlug}' not found`,
+      });
+    }
+
+    // Get the accounts endpoint from the plugin manifest
+    const accountsEndpoint = plugin.manifest.bankSync.endpoints?.accounts;
+    if (!accountsEndpoint) {
+      return res.status(500).json({
+        error_code: 'ENDPOINT_NOT_FOUND',
+        reason: `Plugin '${providerSlug}' does not define an accounts endpoint`,
+      });
+    }
+
+    // Redirect to the actual plugin endpoint using absolute URL
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const redirectUrl = `${protocol}://${host}/plugins-api/${providerSlug}${accountsEndpoint}`;
+    return res.redirect(307, redirectUrl);
+  } catch (error) {
+    res.status(500).json({
+      error_code: 'INTERNAL_ERROR',
+      reason: error.message,
+    });
+  }
+});
+
+// Add endpoint to get transactions from a specific bank sync plugin
+app.post('/bank-sync/:providerSlug/transactions', async (req, res) => {
+  try {
+    const { providerSlug } = req.params;
+
+    // Get the plugin
+    const plugin = pluginManager.getPlugin(providerSlug);
+    if (!plugin || !plugin.manifest?.bankSync?.enabled) {
+      return res.status(404).json({
+        error_code: 'PLUGIN_NOT_FOUND',
+        reason: `Bank sync plugin '${providerSlug}' not found`,
+      });
+    }
+
+    // Get the transactions endpoint from the plugin manifest
+    const transactionsEndpoint =
+      plugin.manifest.bankSync.endpoints?.transactions;
+    if (!transactionsEndpoint) {
+      return res.status(500).json({
+        error_code: 'ENDPOINT_NOT_FOUND',
+        reason: `Plugin '${providerSlug}' does not define a transactions endpoint`,
+      });
+    }
+
+    // Redirect to the actual plugin endpoint using absolute URL
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const redirectUrl = `${protocol}://${host}/plugins-api/${providerSlug}${transactionsEndpoint}`;
+    return res.redirect(307, redirectUrl);
+  } catch (error) {
+    res.status(500).json({
+      error_code: 'INTERNAL_ERROR',
+      reason: error.message,
     });
   }
 });

@@ -810,4 +810,11 @@ export default pluginTypescript.config(
       'actual/typography': 'off',
     },
   },
+  {
+    files: ['packages/sync-server/src/app-gocardless/banks/*.js'],
+    rules: {
+      'import/no-anonymous-default-export': 'off',
+      'import/no-default-export': 'off',
+    },
+  },
 );

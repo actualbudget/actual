@@ -9,6 +9,7 @@ Actual Budget's plugin system enables extending the sync-server with custom func
 ### Plugin Structure
 
 A plugin is a standalone Node.js application that:
+
 - **Runs as a child process** forked from the sync-server
 - **Uses Express.js** to define HTTP-like routes
 - **Communicates via IPC** instead of network sockets
@@ -62,7 +63,8 @@ export const manifest: PluginManifest = {
       description: 'Hello endpoint',
     },
   ],
-  bankSync: { // Optional: for bank sync plugins
+  bankSync: {
+    // Optional: for bank sync plugins
     enabled: true,
     displayName: 'My Bank Provider',
     description: 'Connect accounts via my provider',
@@ -82,10 +84,10 @@ export default manifest;
 
 ```typescript
 import express from 'express';
-import { 
+import {
   attachPluginMiddleware,
   saveSecret,
-  getSecret 
+  getSecret,
 } from '@actual-app/plugins-core-sync-server';
 
 const app = express();
@@ -103,17 +105,17 @@ app.get('/hello', (req, res) => {
 
 app.post('/save-config', async (req, res) => {
   const { apiKey } = req.body;
-  
+
   // Save secrets (encrypted & user-scoped)
   await saveSecret(req, 'apiKey', apiKey);
-  
+
   res.json({ success: true });
 });
 
 app.get('/config', async (req, res) => {
   // Retrieve secrets
   const result = await getSecret(req, 'apiKey');
-  
+
   res.json({ configured: !!result.value });
 });
 
@@ -133,6 +135,7 @@ console.log('My plugin loaded successfully');
 ```
 
 The build process should:
+
 1. Compile TypeScript to JavaScript
 2. Convert `manifest.ts` to `manifest.json`
 
@@ -158,7 +161,7 @@ flowchart TD
     M -->|Yes| O[Mark Plugin as Online]
     O --> P[Register Routes]
     P --> Q[Plugin Available]
-    
+
     style A fill:#e1f5ff
     style Q fill:#d4edda
     style G fill:#f8d7da
@@ -173,32 +176,32 @@ sequenceDiagram
     participant PM as PluginManager
     participant FS as File System
     participant PP as Plugin Process
-    
+
     SS->>PM: Initialize(pluginsDir)
     SS->>PM: loadPlugins()
-    
+
     PM->>FS: Read plugins-api directory
     FS-->>PM: List of plugin folders
-    
+
     loop For each plugin
         PM->>FS: Read manifest.json
         FS-->>PM: Manifest data
-        
+
         PM->>PM: Validate manifest
-        
+
         PM->>PP: fork(entryPoint)
         Note over PP: Plugin process starts
-        
+
         PP->>PP: Create Express app
         PP->>PP: Define routes
         PP->>PP: attachPluginMiddleware()
-        
+
         PP-->>PM: IPC: {type: 'ready'}
-        
+
         PM->>PM: Mark plugin as online
         PM->>PM: Register routes
     end
-    
+
     PM-->>SS: All plugins loaded
 ```
 
@@ -217,25 +220,25 @@ sequenceDiagram
     participant PM as PluginMiddleware
     participant MGR as PluginManager
     participant PP as Plugin Process
-    
+
     C->>SS: POST /plugins-api/my-plugin/hello
     SS->>PM: Route to plugin middleware
-    
+
     PM->>PM: Extract plugin slug & route
     PM->>PM: Check authentication
     PM->>PM: Verify route permissions
-    
+
     PM->>MGR: sendRequest(pluginSlug, requestData)
-    
+
     MGR->>PP: IPC: {type: 'request', method, path, body}
-    
+
     Note over PP: Plugin receives IPC message
     PP->>PP: Simulate HTTP request
     PP->>PP: Route to Express handler
     PP->>PP: Execute business logic
-    
+
     PP-->>MGR: IPC: {type: 'response', status, body}
-    
+
     MGR-->>PM: Response data
     PM-->>SS: Forward response
     SS-->>C: HTTP Response
@@ -246,10 +249,10 @@ sequenceDiagram
 ```mermaid
 flowchart LR
     subgraph "Sync-Server → Plugin"
-        A[request<br/>HTTP request data] 
+        A[request<br/>HTTP request data]
         B[secret-response<br/>Secret value response]
     end
-    
+
     subgraph "Plugin → Sync-Server"
         C[ready<br/>Plugin initialized]
         D[response<br/>HTTP response data]
@@ -257,7 +260,7 @@ flowchart LR
         F[secret-set<br/>Save secret]
         G[error<br/>Error occurred]
     end
-    
+
     style A fill:#fff3cd
     style B fill:#fff3cd
     style C fill:#d4edda
@@ -280,23 +283,23 @@ sequenceDiagram
     participant PP as Plugin Process (IPC)
     participant PM as PluginManager
     participant SS as Secrets Store
-    
+
     Note over PH: User saves API key
-    
+
     PH->>PC: saveSecret(req, 'apiKey', 'abc123')
     PC->>PC: Namespace: 'my-plugin_apiKey'
     PC->>PP: process.send({type: 'secret-set'})
-    
+
     PP-->>PM: IPC: secret-set message
     PM->>SS: Store secret (encrypted)
     SS-->>PM: Success
-    
+
     PM-->>PP: IPC: secret-response
     PP-->>PC: Promise resolves
     PC-->>PH: {success: true}
-    
+
     Note over PH: Later: retrieve secret
-    
+
     PH->>PC: getSecret(req, 'apiKey')
     PC->>PP: process.send({type: 'secret-get'})
     PP-->>PM: IPC: secret-get message
@@ -308,6 +311,7 @@ sequenceDiagram
 ```
 
 **Key Features:**
+
 - **User-scoped**: Each user has their own secrets
 - **Encrypted**: Stored securely in the database
 - **Namespaced**: Automatically prefixed with plugin slug
@@ -322,7 +326,7 @@ flowchart TB
     subgraph Client["Client (Browser/App)"]
         UI[User Interface]
     end
-    
+
     subgraph SyncServer["Sync-Server Process"]
         HTTP[HTTP Server]
         AUTH[Authentication]
@@ -331,42 +335,42 @@ flowchart TB
         MGR[Plugin Manager]
         SEC[Secrets Store]
     end
-    
+
     subgraph Plugin1["Plugin Process 1"]
         P1APP[Express App]
         P1MW[Plugin Middleware]
         P1ROUTES[Route Handlers]
         P1LOGIC[Business Logic]
     end
-    
+
     subgraph Plugin2["Plugin Process 2"]
         P2APP[Express App]
         P2MW[Plugin Middleware]
         P2ROUTES[Route Handlers]
         P2LOGIC[Business Logic]
     end
-    
+
     UI -->|HTTP Request| HTTP
     HTTP --> AUTH
     AUTH --> API
     API --> PMW
     PMW -->|Route| MGR
-    
+
     MGR <-->|IPC<br/>Messages| P1MW
     MGR <-->|IPC<br/>Messages| P2MW
-    
+
     P1MW --> P1APP
     P1APP --> P1ROUTES
     P1ROUTES --> P1LOGIC
-    
+
     P2MW --> P2APP
     P2APP --> P2ROUTES
     P2ROUTES --> P2LOGIC
-    
+
     P1LOGIC <-.->|Secret<br/>Requests| MGR
     P2LOGIC <-.->|Secret<br/>Requests| MGR
     MGR <-.-> SEC
-    
+
     style Client fill:#e1f5ff
     style SyncServer fill:#fff3cd
     style Plugin1 fill:#d4edda
@@ -382,6 +386,7 @@ Bank sync plugins follow a specific contract to integrate with Actual's account 
 ### Required Endpoints
 
 1. **`/status`** - Check if plugin is configured
+
    ```json
    Response: {
      "status": "ok",
@@ -390,6 +395,7 @@ Bank sync plugins follow a specific contract to integrate with Actual's account 
    ```
 
 2. **`/accounts`** - Fetch available accounts
+
    ```json
    Response: {
      "status": "ok",
@@ -411,12 +417,13 @@ Bank sync plugins follow a specific contract to integrate with Actual's account 
    ```
 
 3. **`/transactions`** - Fetch transactions
+
    ```json
    Request: {
      "accountId": "ext-123",
      "startDate": "2024-01-01"
    }
-   
+
    Response: {
      "status": "ok",
      "data": {
@@ -433,6 +440,7 @@ Bank sync plugins follow a specific contract to integrate with Actual's account 
 ## Best Practices
 
 ### 1. Error Handling
+
 ```typescript
 app.post('/endpoint', async (req, res) => {
   try {
@@ -441,29 +449,31 @@ app.post('/endpoint', async (req, res) => {
   } catch (error) {
     res.json({
       status: 'error',
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });
 ```
 
 ### 2. Input Validation
+
 ```typescript
 app.post('/config', async (req, res) => {
   const { apiKey } = req.body;
-  
+
   if (!apiKey || typeof apiKey !== 'string') {
     return res.json({
       status: 'error',
-      error: 'apiKey is required'
+      error: 'apiKey is required',
     });
   }
-  
+
   // Process...
 });
 ```
 
 ### 3. Logging
+
 ```typescript
 // Plugin stdout/stderr is visible in sync-server logs
 console.log('[MY-PLUGIN] Processing request...');
@@ -471,6 +481,7 @@ console.error('[MY-PLUGIN] Error occurred:', error);
 ```
 
 ### 4. Graceful Shutdown
+
 ```typescript
 process.on('SIGTERM', () => {
   console.log('[MY-PLUGIN] Shutting down...');
@@ -484,6 +495,7 @@ process.on('SIGTERM', () => {
 ## Deployment
 
 ### File Structure
+
 ```
 sync-server/
 └── user-files/
@@ -503,6 +515,7 @@ sync-server/
 3. **Restart sync-server** (auto-loads on startup)
 
 ### ZIP Format (Recommended)
+
 ```
 my-plugin.zip
 ├── manifest.json
@@ -519,21 +532,25 @@ The plugin manager automatically extracts ZIPs to a temporary directory.
 ## Troubleshooting
 
 ### Plugin Not Loading
+
 - Check `manifest.json` exists and is valid JSON
 - Verify `entry` field points to correct file
 - Check sync-server logs for error messages
 
 ### IPC Communication Failures
+
 - Ensure `attachPluginMiddleware(app)` is called
 - Verify plugin sends `ready` message within 10s timeout
 - Check that `process.send` is available (forked process)
 
 ### Route Not Found
+
 - Verify route is defined in `manifest.json`
 - Check authentication requirements match
 - Ensure route path matches exactly (case-sensitive)
 
 ### Secrets Not Persisting
+
 - Confirm user is authenticated
 - Check `pluginSlug` is passed in request context
 - Verify secrets store is properly initialized
@@ -543,6 +560,7 @@ The plugin manager automatically extracts ZIPs to a temporary directory.
 ## Example: Complete Bank Sync Plugin
 
 See the [Pluggy.ai plugin](packages/bank-sync-plugin-pluggy.ai/) for a full working example that demonstrates:
+
 - Authentication and configuration
 - Account fetching with proper typing
 - Transaction synchronization
@@ -555,18 +573,23 @@ See the [Pluggy.ai plugin](packages/bank-sync-plugin-pluggy.ai/) for a full work
 ## API Reference
 
 ### `attachPluginMiddleware(app: Express)`
+
 Enables IPC communication for the plugin. Must be called before defining routes.
 
 ### `saveSecret(req: Request, key: string, value: string)`
+
 Saves an encrypted, user-scoped secret.
 
 ### `getSecret(req: Request, key: string)`
+
 Retrieves a secret by key.
 
 ### `saveSecrets(req: Request, secrets: Record<string, string>)`
+
 Saves multiple secrets at once.
 
 ### `getSecrets(req: Request, keys: string[])`
+
 Retrieves multiple secrets at once.
 
 ---
@@ -580,4 +603,3 @@ Retrieves multiple secrets at once.
 5. **Namespace Isolation** - Secrets auto-prefixed with plugin slug
 6. **No Direct DB Access** - Plugins can't access database directly
 7. **Controlled IPC** - Only specific message types allowed
-

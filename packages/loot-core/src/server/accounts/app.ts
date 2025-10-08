@@ -328,6 +328,7 @@ async function linkPluginAccount({
   providerSlug,
   externalAccount,
   upgradingId,
+  offBudget = false,
 }: {
   providerSlug: string;
   externalAccount: {
@@ -335,16 +336,20 @@ async function linkPluginAccount({
     name: string;
     institution: string;
     balance: number;
-    [key: string]: any;
+    [key: string]: string | number;
   };
   upgradingId?: AccountEntity['id'];
+  offBudget?: boolean;
 }) {
   let id;
   // For plugin accounts, we'll use a generic bank entry or create one based on the provider
-  const bank = await link.findOrCreateBank(
+  const providerName =
     typeof externalAccount.institution === 'string'
       ? externalAccount.institution
-      : (externalAccount.institution as any)?.name || providerSlug,
+      : (externalAccount.institution as any)?.name || providerSlug;
+
+  const bank = await link.findOrCreateBank(
+    { name: providerName },
     providerSlug, // Use providerSlug as the bank identifier
   );
 
@@ -363,7 +368,7 @@ async function linkPluginAccount({
       id,
       account_id: externalAccount.account_id,
       bank: bank.id,
-      account_sync_source: 'plugin',
+      account_sync_source: providerSlug,
     });
   } else {
     id = uuidv4();
@@ -373,8 +378,8 @@ async function linkPluginAccount({
       name: externalAccount.name,
       official_name: externalAccount.name,
       bank: bank.id,
-      offbudget: 0, // Default to on-budget for plugin accounts
-      account_sync_source: 'plugin',
+      offbudget: offBudget ? 1 : 0,
+      account_sync_source: providerSlug,
     });
     await db.insertPayee({
       name: '',
@@ -398,7 +403,13 @@ async function linkPluginAccount({
   return 'ok';
 }
 
-async function getPluginAccounts({ providerSlug }: { providerSlug: string }) {
+async function getPluginAccounts({
+  providerSlug,
+  credentials,
+}: {
+  providerSlug: string;
+  credentials?: Record<string, string>;
+}) {
   const server = getServer();
   if (!server) {
     throw new Error('No server configured');
@@ -414,18 +425,22 @@ async function getPluginAccounts({ providerSlug }: { providerSlug: string }) {
       throw new Error('User not authenticated');
     }
 
-    const response = await get(pluginUrl, {
-      'X-ACTUAL-TOKEN': userToken,
-    });
+    const response = await post(
+      pluginUrl,
+      credentials,
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+      null,
+      {
+        redirect: 'follow',
+      },
+    );
 
-    const data = JSON.parse(response);
-
-    if (data.status === 'ok') {
-      return {
-        accounts: data.data.accounts || [],
-      };
+    if (!('error' in response)) {
+      return response;
     } else {
-      throw new Error(data.error || 'Plugin error');
+      throw new Error(response.error || 'Plugin error');
     }
   } catch (error) {
     logger.error('Error fetching plugin accounts:', error);
@@ -450,7 +465,7 @@ async function getPluginProviders() {
     }
 
     const response = await get(pluginUrl, {
-      'X-ACTUAL-TOKEN': userToken,
+      headers: { 'X-ACTUAL-TOKEN': userToken },
     });
 
     const data = JSON.parse(response);
@@ -467,6 +482,8 @@ async function getPluginProviders() {
     throw new Error(String(error) || 'Failed to fetch plugin providers');
   }
 }
+
+export { getPluginProviders };
 
 async function getPluginStatus({ providerSlug }: { providerSlug: string }) {
   const server = getServer();
@@ -485,7 +502,8 @@ async function getPluginStatus({ providerSlug }: { providerSlug: string }) {
     }
 
     const response = await get(pluginUrl, {
-      'X-ACTUAL-TOKEN': userToken,
+      headers: { 'X-ACTUAL-TOKEN': userToken },
+      redirect: 'follow',
     });
 
     const data = JSON.parse(response);
