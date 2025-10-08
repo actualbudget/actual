@@ -5454,10 +5454,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reduxjs/toolkit@npm:^2.5.1":
-  version: 2.6.1
-  resolution: "@reduxjs/toolkit@npm:2.6.1"
+"@reduxjs/toolkit@npm:^2.9.0":
+  version: 2.9.0
+  resolution: "@reduxjs/toolkit@npm:2.9.0"
   dependencies:
+    "@standard-schema/spec": "npm:^1.0.0"
+    "@standard-schema/utils": "npm:^0.3.0"
     immer: "npm:^10.0.3"
     redux: "npm:^5.0.1"
     redux-thunk: "npm:^3.1.0"
@@ -5470,7 +5472,7 @@ __metadata:
       optional: true
     react-redux:
       optional: true
-  checksum: 10/62ad00b875115eb2fb5b776665d2dbe71b1ad98f4342f409c67dfb27bd0cd7a13dffd7343bee6f232d0498429361f95541993bb2ecd747ad09a55069bc43303e
+  checksum: 10/d2f1b59c96638d9a36c3709f31f24ec1ce25604f2010eebb89506e6782142dfa3a97bd64f6b4650d9230d1a8a7f09a2dfed5ee2eb7a4454cbeb08fcb8cc6cf36
   languageName: node
   linkType: hard
 
@@ -5783,6 +5785,20 @@ __metadata:
     color: "npm:^5.0.2"
     text-hex: "npm:1.0.x"
   checksum: 10/fc3285e5cb9a458d255aa678d9453174ca40689a4c692f1617907996ab8eb78839542439604ced484c4f674a5297f7ba8b0e63fcfe901174f43c3d9c3c881b52
+  languageName: node
+  linkType: hard
+
+"@standard-schema/spec@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@standard-schema/spec@npm:1.0.0"
+  checksum: 10/aee780cc1431888ca4b9aba9b24ffc8f3073fc083acc105e3951481478a2f4dc957796931b2da9e2d8329584cf211e4542275f188296c1cdff3ed44fd93a8bc8
+  languageName: node
+  linkType: hard
+
+"@standard-schema/utils@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "@standard-schema/utils@npm:0.3.0"
+  checksum: 10/7084f875d322792f2e0a5904009434c8374b9345b09ba89828b68fd56fa3c2b366d35bf340d9e8c72736ef01793c2f70d350c372ed79845dc3566c58d34b4b51
   languageName: node
   linkType: hard
 
@@ -14422,7 +14438,7 @@ __metadata:
     "@actual-app/crdt": "workspace:^"
     "@actual-app/web": "workspace:^"
     "@jlongster/sql.js": "npm:^1.6.7"
-    "@reduxjs/toolkit": "npm:^2.5.1"
+    "@reduxjs/toolkit": "npm:^2.9.0"
     "@rschedule/core": "npm:^1.5.0"
     "@rschedule/json-tools": "npm:^1.5.0"
     "@rschedule/standard-date-adapter": "npm:^1.5.0"
