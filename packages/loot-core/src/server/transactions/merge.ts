@@ -25,8 +25,8 @@ export async function mergeTransactions(
   const { keep, drop } = determineKeepDrop(a, b);
 
   // Load subtransactions with a single query, then split by parent_id in memory
-  let keepSubtransactions: TransactionEntity[] = [];
-  let dropSubtransactions: TransactionEntity[] = [];
+  const keepSubtransactions: TransactionEntity[] = [];
+  const dropSubtransactions: TransactionEntity[] = [];
   const parentIds = [
     keep.is_parent ? keep.id : null,
     drop.is_parent ? drop.id : null,
