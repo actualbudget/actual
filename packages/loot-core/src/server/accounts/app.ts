@@ -63,6 +63,10 @@ export type AccountHandlers = {
   'gocardless-create-web-token': typeof createGoCardlessWebToken;
   'accounts-bank-sync': typeof accountsBankSync;
   'simplefin-batch-sync': typeof simpleFinBatchSync;
+  'bank-sync-providers-list': typeof getPluginProviders;
+  'bank-sync-status': typeof getPluginStatus;
+  'bank-sync-accounts': typeof getPluginAccounts;
+  'bank-sync-accounts-link': typeof linkPluginAccount;
   'transactions-import': typeof importTransactions;
   'account-unlink': typeof unlinkAccount;
 };
@@ -318,6 +322,210 @@ async function linkPluggyAiAccount({
   });
 
   return 'ok';
+}
+
+async function linkPluginAccount({
+  providerSlug,
+  externalAccount,
+  upgradingId,
+  offBudget = false,
+}: {
+  providerSlug: string;
+  externalAccount: {
+    account_id: string;
+    name: string;
+    institution: string;
+    balance: number;
+    [key: string]: string | number;
+  };
+  upgradingId?: AccountEntity['id'];
+  offBudget?: boolean;
+}) {
+  let id;
+  // For plugin accounts, we'll use a generic bank entry or create one based on the provider
+  const providerName =
+    typeof externalAccount.institution === 'string'
+      ? externalAccount.institution
+      : (externalAccount.institution as any)?.name || providerSlug;
+
+  const bank = await link.findOrCreateBank(
+    { name: providerName },
+    providerSlug, // Use providerSlug as the bank identifier
+  );
+
+  if (upgradingId) {
+    const accRow = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      [upgradingId],
+    );
+
+    if (!accRow) {
+      throw new Error(`Account with ID ${upgradingId} not found.`);
+    }
+
+    id = accRow.id;
+    await db.update('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      bank: bank.id,
+      account_sync_source: providerSlug,
+    });
+  } else {
+    id = uuidv4();
+    await db.insertWithUUID('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      name: externalAccount.name,
+      official_name: externalAccount.name,
+      bank: bank.id,
+      offbudget: offBudget ? 1 : 0,
+      account_sync_source: providerSlug,
+    });
+    await db.insertPayee({
+      name: '',
+      transfer_acct: id,
+    });
+  }
+
+  await bankSync.syncAccount(
+    undefined,
+    undefined,
+    id,
+    externalAccount.account_id,
+    bank.bank_id,
+  );
+
+  await connection.send('sync-event', {
+    type: 'success',
+    tables: ['transactions'],
+  });
+
+  return 'ok';
+}
+
+async function getPluginAccounts({
+  providerSlug,
+  credentials,
+}: {
+  providerSlug: string;
+  credentials?: Record<string, string>;
+}) {
+  const server = getServer();
+  if (!server) {
+    throw new Error('No server configured');
+  }
+
+  try {
+    // Call the plugin's accounts endpoint
+    const pluginUrl = `${server.BASE_SERVER}/plugins-api/bank-sync/${providerSlug}/accounts`;
+
+    // Get user token for authentication
+    const userToken = await asyncStorage.getItem('user-token');
+    if (!userToken) {
+      throw new Error('User not authenticated');
+    }
+
+    const response = await post(
+      pluginUrl,
+      credentials,
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+      null,
+      {
+        redirect: 'follow',
+      },
+    );
+
+    if (!('error' in response)) {
+      return response;
+    } else {
+      throw new Error(response.error || 'Plugin error');
+    }
+  } catch (error) {
+    logger.error('Error fetching plugin accounts:', error);
+    throw new Error(String(error) || 'Failed to fetch plugin accounts');
+  }
+}
+
+async function getPluginProviders() {
+  const server = getServer();
+  if (!server) {
+    throw new Error('No server configured');
+  }
+
+  try {
+    // Call the plugin system's bank sync list endpoint
+    const pluginUrl = `${server.BASE_SERVER}/plugins-api/bank-sync/list`;
+
+    // Get user token for authentication
+    const userToken = await asyncStorage.getItem('user-token');
+    if (!userToken) {
+      throw new Error('User not authenticated');
+    }
+
+    const response = await get(pluginUrl, {
+      headers: { 'X-ACTUAL-TOKEN': userToken },
+    });
+
+    const data = JSON.parse(response);
+
+    if (data.status === 'ok') {
+      return {
+        providers: data.data.providers || [],
+      };
+    } else {
+      throw new Error(data.error || 'Plugin error');
+    }
+  } catch (error) {
+    logger.error('Error fetching plugin providers:', error);
+    throw new Error(String(error) || 'Failed to fetch plugin providers');
+  }
+}
+
+export { getPluginProviders };
+
+async function getPluginStatus({ providerSlug }: { providerSlug: string }) {
+  const server = getServer();
+  if (!server) {
+    throw new Error('No server configured');
+  }
+
+  try {
+    // Call the plugin's status endpoint
+    const pluginUrl = `${server.BASE_SERVER}/plugins-api/bank-sync/${providerSlug}/status`;
+
+    // Get user token for authentication
+    const userToken = await asyncStorage.getItem('user-token');
+    if (!userToken) {
+      throw new Error('User not authenticated');
+    }
+
+    const response = await get(pluginUrl, {
+      headers: { 'X-ACTUAL-TOKEN': userToken },
+      redirect: 'follow',
+    });
+
+    const data = JSON.parse(response);
+
+    if (data.status === 'ok') {
+      return {
+        configured: data.data?.configured || false,
+        error: data.data?.error,
+      };
+    } else {
+      return {
+        configured: false,
+        error: data.error || 'Plugin error',
+      };
+    }
+  } catch (error) {
+    logger.error(`Error checking status for plugin ${providerSlug}:`, error);
+    return {
+      configured: false,
+      error: String(error),
+    };
+  }
 }
 
 async function createAccount({
@@ -854,20 +1062,24 @@ function handleSyncError(
   if (err instanceof BankSyncError || (err as any)?.type === 'BankSyncError') {
     const error = err as BankSyncError;
 
+    // Use the reason from plugin if available, otherwise use default message
+    let message = 'Failed syncing account "' + acct.name + '."';
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((error as any).reason) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      message = (error as any).reason;
+    } else if (error.category === 'RATE_LIMIT_EXCEEDED') {
+      message = `Failed syncing account ${acct.name}. Rate limit exceeded. Please try again later.`;
+    }
+
     const syncError = {
       type: 'SyncError',
       accountId: acct.id,
-      message: 'Failed syncing account “' + acct.name + '.”',
+      message,
       category: error.category,
       code: error.code,
     };
-
-    if (error.category === 'RATE_LIMIT_EXCEEDED') {
-      return {
-        ...syncError,
-        message: `Failed syncing account ${acct.name}. Rate limit exceeded. Please try again later.`,
-      };
-    }
 
     return syncError;
   }
@@ -1220,6 +1432,10 @@ app.method('account-properties', getAccountProperties);
 app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
+app.method('bank-sync-providers-list', getPluginProviders);
+app.method('bank-sync-status', getPluginStatus);
+app.method('bank-sync-accounts', getPluginAccounts);
+app.method('bank-sync-accounts-link', linkPluginAccount);
 app.method('account-create', mutator(undoable(createAccount)));
 app.method('account-close', mutator(closeAccount));
 app.method('account-reopen', mutator(undoable(reopenAccount)));

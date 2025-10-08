@@ -25,6 +25,11 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
 import { authorizeBank } from '@desktop-client/gocardless';
+import {
+  useBankSyncProviders,
+  type BankSyncProvider,
+} from '@desktop-client/hooks/useBankSyncProviders';
+import { useBankSyncStatus } from '@desktop-client/hooks/useBankSyncStatus';
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
@@ -40,6 +45,84 @@ type CreateAccountModalProps = Extract<
   ModalType,
   { name: 'add-account' }
 >['options'];
+
+// Separate component for each plugin provider button
+function PluginProviderButton({
+  provider,
+  syncServerStatus,
+  onConnectProvider,
+  onResetCredentials,
+}: {
+  provider: BankSyncProvider;
+  syncServerStatus: string;
+  onConnectProvider: (
+    provider: BankSyncProvider,
+    isConfigured: boolean,
+  ) => void;
+  onResetCredentials: (provider: BankSyncProvider) => void;
+}) {
+  const { t } = useTranslation();
+  const { configured: isConfigured, isLoading: statusLoading } =
+    useBankSyncStatus(provider.slug);
+
+  return (
+    <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+      <ButtonWithLoading
+        isDisabled={syncServerStatus !== 'online'}
+        isLoading={statusLoading}
+        style={{
+          padding: '10px 0',
+          fontSize: 15,
+          fontWeight: 600,
+          flex: 1,
+        }}
+        onPress={() => onConnectProvider(provider, isConfigured)}
+      >
+        {isConfigured
+          ? t('Link account with {{provider}}', {
+              provider: provider.displayName,
+            })
+          : t('Set up {{provider}}', { provider: provider.displayName })}
+      </ButtonWithLoading>
+      {isConfigured && (
+        <DialogTrigger>
+          <Button
+            variant="bare"
+            aria-label={t('Bank sync provider options')}
+            style={{
+              padding: 8,
+            }}
+          >
+            <SvgDotsHorizontalTriple
+              style={{
+                width: 16,
+                height: 16,
+                color: 'currentColor',
+              }}
+            />
+          </Button>
+          <Popover>
+            <Menu
+              onMenuSelect={itemId => {
+                if (itemId === 'reconfigure') {
+                  onResetCredentials(provider);
+                }
+              }}
+              items={[
+                {
+                  name: 'reconfigure',
+                  text: t('Reconfigure {{provider}}', {
+                    provider: provider.displayName,
+                  }),
+                },
+              ]}
+            />
+          </Popover>
+        </DialogTrigger>
+      )}
+    </View>
+  );
+}
 
 export function CreateAccountModal({
   upgradingAccountId,
@@ -59,6 +142,9 @@ export function CreateAccountModal({
   >(null);
   const { hasPermission } = useAuth();
   const multiuserEnabled = useMultiuserEnabled();
+
+  // Plugin providers
+  const { providers: pluginProviders } = useBankSyncProviders();
 
   const onConnectGoCardless = () => {
     if (!isGoCardlessSetupComplete) {
@@ -307,6 +393,97 @@ export function CreateAccountModal({
 
   const onCreateLocalAccount = () => {
     dispatch(pushModal({ modal: { name: 'add-local-account' } }));
+  };
+
+  // Plugin provider handlers
+  const onConnectPluginProvider = async (
+    provider: BankSyncProvider,
+    isConfigured: boolean,
+    credentials?: Record<string, string>,
+  ) => {
+    if (!isConfigured) {
+      // Show initialization modal for setting up credentials
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'bank-sync-init',
+            options: {
+              providerSlug: provider.slug,
+              providerDisplayName: provider.displayName,
+              onSuccess: async (credentials: Record<string, string>) => {
+                // The plugin system handles credentials internally
+                // After setup, try to connect again
+                onConnectPluginProvider(provider, true, credentials);
+              },
+            },
+          },
+        }),
+      );
+      return;
+    }
+
+    // If configured, fetch and display accounts
+    try {
+      const results = (await send('bank-sync-accounts', {
+        providerSlug: provider.slug,
+        credentials,
+      })) as any;
+
+      if (results.error_code) {
+        throw new Error(results.reason);
+      }
+
+      // The response should already be in the correct format for select-linked-accounts
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'select-linked-accounts',
+            options: {
+              externalAccounts: results.accounts || [],
+              syncSource: 'plugin' as const,
+              providerSlug: provider.slug,
+              upgradingAccountId,
+            },
+          },
+        }),
+      );
+    } catch (err) {
+      console.error('Error fetching plugin accounts:', err);
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            title: t('Error fetching accounts'),
+            message: (err as Error).message,
+            timeout: 5000,
+          },
+        }),
+      );
+    }
+  };
+
+  const onResetPluginProviderCredentials = async (
+    provider: BankSyncProvider,
+  ) => {
+    // Open the configuration modal to allow user to enter new credentials
+    // This will override the old credentials when they complete the setup
+    //onConnectPluginProvider(provider, true);
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'bank-sync-init',
+          options: {
+            providerSlug: provider.slug,
+            providerDisplayName: provider.displayName,
+            onSuccess: async (credentials: Record<string, string>) => {
+              // The plugin system handles credentials internally
+              // After setup, try to connect again
+              onConnectPluginProvider(provider, true, credentials);
+            },
+          },
+        },
+      }),
+    );
   };
 
   const { configuredGoCardless } = useGoCardlessStatus();
@@ -579,6 +756,42 @@ export function CreateAccountModal({
                     </>
                   )}
 
+                  {/* Plugin-based bank sync providers */}
+                  {canSetSecrets && pluginProviders.length > 0 && (
+                    <Text
+                      style={{
+                        lineHeight: '1.4em',
+                        fontSize: 15,
+                        textAlign: 'center',
+                        marginTop: '18px',
+                      }}
+                    >
+                      <Trans>
+                        <strong>Plugin-based bank sync providers:</strong>
+                      </Trans>
+                    </Text>
+                  )}
+
+                  {canSetSecrets &&
+                    pluginProviders.map(provider => (
+                      <View
+                        key={provider.slug}
+                        style={{ gap: 10, marginTop: '18px' }}
+                      >
+                        <PluginProviderButton
+                          provider={provider}
+                          syncServerStatus={syncServerStatus}
+                          onConnectProvider={onConnectPluginProvider}
+                          onResetCredentials={onResetPluginProviderCredentials}
+                        />
+                        {provider.description && (
+                          <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                            {provider.description}
+                          </Text>
+                        )}
+                      </View>
+                    ))}
+
                   {(!isGoCardlessSetupComplete ||
                     !isSimpleFinSetupComplete ||
                     !isPluggyAiSetupComplete) &&
@@ -589,9 +802,9 @@ export function CreateAccountModal({
                           secrets. Please contact an Admin to configure
                         </Trans>{' '}
                         {[
-                          isGoCardlessSetupComplete ? '' : 'GoCardless',
+                          isGoCardlessSetupComplete ? '' : t('GoCardless'),
                           isSimpleFinSetupComplete ? '' : 'SimpleFIN',
-                          isPluggyAiSetupComplete ? '' : 'Pluggy.ai',
+                          isPluggyAiSetupComplete ? '' : t('Pluggy.ai'),
                         ]
                           .filter(Boolean)
                           .join(' or ')}

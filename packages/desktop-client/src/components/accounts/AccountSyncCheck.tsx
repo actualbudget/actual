@@ -20,38 +20,67 @@ import { useDispatch } from '@desktop-client/redux';
 function useErrorMessage() {
   const { t } = useTranslation();
   function getErrorMessage(type: string, code: string) {
-    switch (type.toUpperCase()) {
-      case 'ITEM_ERROR':
-        switch (code.toUpperCase()) {
-          case 'NO_ACCOUNTS':
-            return t(
-              'No open accounts could be found. Did you close the account? If so, unlink the account.',
-            );
-          case 'ITEM_LOGIN_REQUIRED':
-            return t(
-              'Your password or something else has changed with your bank and you need to login again.',
-            );
-          default:
-        }
-        break;
+    // Handle standardized bank sync error codes
+    switch (code.toUpperCase()) {
+      case 'INVALID_CREDENTIALS':
+        return t(
+          'Your credentials are invalid. Please reconfigure your bank connection.',
+        );
 
-      case 'INVALID_INPUT':
-        switch (code.toUpperCase()) {
-          case 'INVALID_ACCESS_TOKEN':
-            return t('Item is no longer authorized. You need to login again.');
-          default:
-        }
-        break;
+      case 'INVALID_ACCESS_TOKEN':
+        return t(
+          'Your access token is no longer valid. Please reconfigure your bank connection.',
+        );
 
+      case 'UNAUTHORIZED':
+        return t(
+          'Access forbidden. Please check your permissions and reconfigure if needed.',
+        );
+
+      case 'ACCOUNT_NOT_FOUND':
+        return t(
+          'Account not found. Please verify your account configuration.',
+        );
+
+      case 'TRANSACTION_NOT_FOUND':
+        return t('Transaction data not found. Please try again later.');
+
+      case 'SERVER_ERROR':
+        return t(
+          'The bank sync provider is experiencing issues. Please try again later.',
+        );
+
+      case 'NETWORK_ERROR':
+        return t(
+          'Network error communicating with your bank. Please check your connection and try again.',
+        );
+
+      case 'RATE_LIMIT':
       case 'RATE_LIMIT_EXCEEDED':
-        return t('Rate limit exceeded for this item. Please try again later.');
+        return t('Rate limit exceeded. Please try again later.');
+
+      case 'INVALID_REQUEST':
+        return t(
+          'Invalid request. Please check your account configuration and try again.',
+        );
+
+      case 'ACCOUNT_LOCKED':
+        return t(
+          'Your account is locked. Please contact your bank for assistance.',
+        );
 
       case 'TIMED_OUT':
         return t('The request timed out. Please try again later.');
 
-      case 'INVALID_ACCESS_TOKEN':
+      // Legacy error codes for backwards compatibility
+      case 'NO_ACCOUNTS':
         return t(
-          'Your SimpleFIN Access Token is no longer valid. Please reset and generate a new token.',
+          'No open accounts could be found. Did you close the account? If so, unlink the account.',
+        );
+
+      case 'ITEM_LOGIN_REQUIRED':
+        return t(
+          'Your password or something else has changed with your bank and you need to login again.',
         );
 
       case 'ACCOUNT_NEEDS_ATTENTION':
@@ -71,9 +100,22 @@ function useErrorMessage() {
       default:
     }
 
+    // Legacy type-based error handling
+    switch (type.toUpperCase()) {
+      case 'ITEM_ERROR':
+        return t(
+          'There was an error with your bank connection. Please try logging in again.',
+        );
+
+      case 'INVALID_INPUT':
+        return t('Invalid input. Please check your configuration.');
+
+      default:
+    }
+
     return (
       <Trans>
-        An internal error occurred. Try to log in again, or get{' '}
+        An internal error occurred. Try to reconfigure your connection, or get{' '}
         <Link variant="external" to="https://actualbudget.org/contact/">
           in touch
         </Link>{' '}

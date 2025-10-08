@@ -18,6 +18,7 @@ import {
   linkAccount,
   linkAccountPluggyAi,
   linkAccountSimpleFin,
+  linkAccountPlugin,
   unlinkAccount,
 } from '@desktop-client/accounts/accountsSlice';
 import {
@@ -61,50 +62,103 @@ export type SelectLinkedAccountsModalProps =
       requisitionId: string;
       externalAccounts: SyncServerGoCardlessAccount[];
       syncSource: 'goCardless';
+      providerSlug?: undefined;
+      upgradingAccountId?: AccountEntity['id'];
+      onSuccess?: (account: AccountEntity) => void;
+      onClose?: () => void;
     }
   | {
       requisitionId?: undefined;
       externalAccounts: SyncServerSimpleFinAccount[];
       syncSource: 'simpleFin';
+      providerSlug?: undefined;
+      upgradingAccountId?: AccountEntity['id'];
+      onSuccess?: (account: AccountEntity) => void;
+      onClose?: () => void;
     }
   | {
       requisitionId?: undefined;
       externalAccounts: SyncServerPluggyAiAccount[];
       syncSource: 'pluggyai';
+      providerSlug?: undefined;
+      upgradingAccountId?: AccountEntity['id'];
+      onSuccess?: (account: AccountEntity) => void;
+      onClose?: () => void;
+    }
+  | {
+      requisitionId?: undefined;
+      externalAccounts: Array<{
+        account_id: string;
+        name: string;
+        institution: string;
+        balance: number;
+        [key: string]: string | number;
+      }>;
+      syncSource: 'plugin';
+      providerSlug: string;
+      upgradingAccountId?: AccountEntity['id'];
+      onSuccess?: (account: AccountEntity) => void;
+      onClose?: () => void;
     };
 
 export function SelectLinkedAccountsModal({
   requisitionId = undefined,
   externalAccounts,
   syncSource,
+  providerSlug,
+  upgradingAccountId,
+  onSuccess,
+  onClose,
 }: SelectLinkedAccountsModalProps) {
-  const propsWithSortedExternalAccounts =
-    useMemo<SelectLinkedAccountsModalProps>(() => {
-      const toSort = externalAccounts ? [...externalAccounts] : [];
-      toSort.sort(
-        (a, b) =>
-          getInstitutionName(a)?.localeCompare(getInstitutionName(b)) ||
-          a.name.localeCompare(b.name),
-      );
-      switch (syncSource) {
-        case 'simpleFin':
-          return {
-            syncSource: 'simpleFin',
-            externalAccounts: toSort as SyncServerSimpleFinAccount[],
-          };
-        case 'pluggyai':
-          return {
-            syncSource: 'pluggyai',
-            externalAccounts: toSort as SyncServerPluggyAiAccount[],
-          };
-        case 'goCardless':
-          return {
-            syncSource: 'goCardless',
-            requisitionId: requisitionId!,
-            externalAccounts: toSort as SyncServerGoCardlessAccount[],
-          };
-      }
-    }, [externalAccounts, syncSource, requisitionId]);
+  const propsWithSortedExternalAccounts = useMemo(() => {
+    const toSort = externalAccounts ? [...externalAccounts] : [];
+    toSort.sort(
+      (a, b) =>
+        getInstitutionName(a)?.localeCompare(getInstitutionName(b)) ||
+        a.name.localeCompare(b.name),
+    );
+    switch (syncSource) {
+      case 'simpleFin':
+        return {
+          syncSource: 'simpleFin',
+          externalAccounts: toSort as SyncServerSimpleFinAccount[],
+        } as const;
+      case 'pluggyai':
+        return {
+          syncSource: 'pluggyai',
+          externalAccounts: toSort as SyncServerPluggyAiAccount[],
+        } as const;
+      case 'plugin':
+        return {
+          syncSource: 'plugin',
+          providerSlug: providerSlug as string,
+          externalAccounts: toSort as Array<{
+            account_id: string;
+            name: string;
+            institution: string;
+            balance: number;
+            [key: string]: string | number;
+          }>,
+          upgradingAccountId,
+          onSuccess,
+          onClose,
+        } as const;
+      case 'goCardless':
+        return {
+          syncSource: 'goCardless',
+          requisitionId: requisitionId!,
+          externalAccounts: toSort as SyncServerGoCardlessAccount[],
+        } as const;
+    }
+  }, [
+    externalAccounts,
+    syncSource,
+    requisitionId,
+    providerSlug,
+    upgradingAccountId,
+    onSuccess,
+    onClose,
+  ]);
 
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -175,6 +229,27 @@ export function SelectLinkedAccountsModal({
                   ? chosenLocalAccountId
                   : undefined,
               offBudget,
+            }),
+          );
+        } else if (propsWithSortedExternalAccounts.syncSource === 'plugin') {
+          const pluginProps = propsWithSortedExternalAccounts as Extract<
+            typeof propsWithSortedExternalAccounts,
+            { syncSource: 'plugin' }
+          >;
+          dispatch(
+            linkAccountPlugin({
+              accountId: chosenExternalAccountId,
+              externalAccount:
+                propsWithSortedExternalAccounts.externalAccounts[
+                  externalAccountIndex
+                ],
+              syncSource: 'plugin',
+              providerSlug: pluginProps.providerSlug,
+              upgradingId:
+                chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+                chosenLocalAccountId !== addOffBudgetAccountOption.id
+                  ? chosenLocalAccountId
+                  : undefined,
             }),
           );
         } else {

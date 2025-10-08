@@ -38,6 +38,7 @@ export async function post(
   data: unknown,
   headers = {},
   timeout: number | null = null,
+  opts: RequestInit = {},
 ) {
   let text: string;
   let res: Response;
@@ -54,6 +55,7 @@ export async function post(
         ...headers,
         'Content-Type': 'application/json',
       },
+      ...opts,
     });
     clearTimeout(timeoutId);
     text = await res.text();

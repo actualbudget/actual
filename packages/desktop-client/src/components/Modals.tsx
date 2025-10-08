@@ -8,6 +8,7 @@ import * as monthUtils from 'loot-core/shared/months';
 import { EditSyncAccount } from './banksync/EditSyncAccount';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
+import { BankSyncInitialiseModal } from './modals/BankSyncInitialiseModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
 import { BudgetFileSelectionModal } from './modals/BudgetFileSelectionModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
@@ -182,6 +183,9 @@ export function Modals() {
               }}
             />
           );
+
+        case 'bank-sync-init':
+          return <BankSyncInitialiseModal key={key} {...modal.options} />;
 
         case 'create-encryption-key':
           return <CreateEncryptionKeyModal key={key} {...modal.options} />;

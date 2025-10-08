@@ -4,18 +4,11 @@ import { getAccountDb } from '../account-db.js';
 
 /**
  * An enum of valid secret names.
+ * Plugin-based providers manage their own secrets via the plugin system.
  * @readonly
  * @enum {string}
  */
-export const SecretName = {
-  gocardless_secretId: 'gocardless_secretId',
-  gocardless_secretKey: 'gocardless_secretKey',
-  simplefin_token: 'simplefin_token',
-  simplefin_accessKey: 'simplefin_accessKey',
-  pluggyai_clientId: 'pluggyai_clientId',
-  pluggyai_clientSecret: 'pluggyai_clientSecret',
-  pluggyai_itemIds: 'pluggyai_itemIds',
-};
+export const SecretName = {};
 
 class SecretsDb {
   constructor() {
