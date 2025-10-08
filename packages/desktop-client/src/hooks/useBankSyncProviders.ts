@@ -26,25 +26,17 @@ export function useBankSyncProviders() {
         setIsLoading(true);
         setError(null);
 
-        const response = await send('bank-sync-providers-list' as never);
+        const response = await send('bank-sync-providers-list');
 
-        if (response && typeof response === 'object' && 'status' in response) {
+        if (response && typeof response === 'object' && 'providers' in response) {
           const typedResponse = response as {
-            status: string;
-            data?: { providers: BankSyncProvider[] };
-            error?: string;
+            providers: BankSyncProvider[];
           };
 
-          if (typedResponse.status === 'ok' && typedResponse.data) {
-            setProviders(typedResponse.data.providers);
-          } else {
-            setError(
-              typedResponse.error || 'Failed to fetch bank sync providers',
-            );
-            setProviders([]);
-          }
+          setProviders(typedResponse.providers);
         } else {
           // Fallback for when backend is not implemented yet
+          setError('Invalid response format from server');
           setProviders([]);
         }
       } catch (err) {
