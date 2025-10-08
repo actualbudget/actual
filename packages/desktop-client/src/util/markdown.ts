@@ -1,9 +1,9 @@
 // @ts-strict-ignore
-import { newlineToBreak } from 'mdast-util-newline-to-break';
 
-import { theme } from '@actual-app/components/theme';
 import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
+import { newlineToBreak } from 'mdast-util-newline-to-break';
 
 export function sequentialNewlinesPlugin() {
   // Adapted from https://codesandbox.io/s/create-react-app-forked-h3rmcy?file=/src/sequentialNewlinePlugin.js:0-774
