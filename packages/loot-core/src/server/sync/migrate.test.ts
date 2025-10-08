@@ -35,12 +35,14 @@ const messageArb: fc.Arbitrary<Message> = fc
       .map(v => convertInputType(v, tableSchema[field].type));
 
     const timestamp = fc
-      .date({
-        min: new Date('2020-01-01T00:00:00.000Z'),
-        max: new Date('2020-05-01T00:00:00.000Z'),
-      })
-      .noBias()
-      .noShrink()
+      .noShrink(
+        fc.noBias(
+          fc.date({
+            min: new Date('2020-01-01T00:00:00.000Z'),
+            max: new Date('2020-05-01T00:00:00.000Z'),
+          }),
+        ),
+      )
       .map(date => date.toISOString() + '-0000-0123456789ABCDEF')
       .map(Timestamp.parse);
 

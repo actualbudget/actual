@@ -45,7 +45,7 @@
     "openid-client": "^5.7.1",
     "pluggy-sdk": "^0.77.0",
     "uuid": "^13.0.0",
-    "winston": "^3.17.0"
+    "winston": "^3.18.3"
   },
   "devDependencies": {
     "@babel/core": "^7.28.4",
