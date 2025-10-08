@@ -28,7 +28,10 @@ export class SchedulesPage {
 
     await this._fillScheduleFields(data);
 
-    await this.page.getByRole('button', { name: 'Add' }).click();
+    await this.page
+      .getByTestId('schedule-edit-modal')
+      .getByRole('button', { name: 'Add' })
+      .click();
   }
 
   /**

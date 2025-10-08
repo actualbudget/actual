@@ -71,8 +71,9 @@ const getScheduleIconStyle = ({ isPreview }: { isPreview: boolean }) => ({
   color: isPreview ? theme.pageTextLight : theme.menuItemText,
 });
 
-type TransactionListItemProps = ComponentPropsWithoutRef<
-  typeof ListBoxItem<TransactionEntity>
+type TransactionListItemProps = Omit<
+  ComponentPropsWithoutRef<typeof ListBoxItem<TransactionEntity>>,
+  'onPress'
 > & {
   onPress: (transaction: TransactionEntity) => void;
   onLongPress: (transaction: TransactionEntity) => void;

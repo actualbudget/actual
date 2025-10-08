@@ -212,10 +212,28 @@ export const moveCategoryGroup = createAppAsyncThunk(
   },
 );
 
+function translateCategories(
+  categories: CategoryEntity[] | undefined,
+): CategoryEntity[] | undefined {
+  return categories?.map(cat => ({
+    ...cat,
+    name:
+      cat.name?.toLowerCase() === 'starting balances'
+        ? t('Starting Balances')
+        : cat.name,
+  }));
+}
+
 export const getCategories = createAppAsyncThunk(
   `${sliceName}/getCategories`,
   async () => {
     const categories: CategoryViews = await send('get-categories');
+    categories.list = translateCategories(categories.list) as CategoryEntity[];
+    categories.grouped.forEach(group => {
+      group.categories = translateCategories(
+        group.categories,
+      ) as CategoryEntity[];
+    });
     return categories;
   },
   {
@@ -233,6 +251,12 @@ export const reloadCategories = createAppAsyncThunk(
   `${sliceName}/reloadCategories`,
   async () => {
     const categories: CategoryViews = await send('get-categories');
+    categories.list = translateCategories(categories.list) as CategoryEntity[];
+    categories.grouped.forEach(group => {
+      group.categories = translateCategories(
+        group.categories,
+      ) as CategoryEntity[];
+    });
     return categories;
   },
 );
@@ -556,6 +580,7 @@ export const getCategoriesById = memoizeOne(
         res[cat.id] = cat;
       });
     });
+
     return res;
   },
 );
@@ -584,6 +609,12 @@ function _loadCategories(
   categories: BudgetState['categories'],
 ) {
   state.categories = categories;
+  categories.list = translateCategories(categories.list) as CategoryEntity[];
+  categories.grouped.forEach(group => {
+    group.categories = translateCategories(
+      group.categories,
+    ) as CategoryEntity[];
+  });
   state.isCategoriesLoading = false;
   state.isCategoriesLoaded = true;
   state.isCategoriesDirty = false;

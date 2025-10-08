@@ -354,6 +354,8 @@ function IntervalSelector({
   interval: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
   onChange: (val: 'Daily' | 'Weekly' | 'Monthly' | 'Yearly') => void;
 }) {
+  const { t } = useTranslation();
+
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -367,7 +369,7 @@ function IntervalSelector({
         ref={triggerRef}
         variant="bare"
         onPress={() => setIsOpen(true)}
-        aria-label="Change interval"
+        aria-label={t('Change interval')}
       >
         <SvgCalendar style={{ width: 12, height: 12 }} />
         <span style={{ marginLeft: 5 }}>{currentLabel}</span>
