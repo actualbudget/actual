@@ -29,12 +29,14 @@ type DetailedBalanceProps = {
   name: string;
   balance: number;
   isExactBalance?: boolean;
+  currencyCode?: string | null;
 };
 
 function DetailedBalance({
   name,
   balance,
   isExactBalance = true,
+  currencyCode,
 }: DetailedBalanceProps) {
   const format = useFormat();
   return (
@@ -50,7 +52,7 @@ function DetailedBalance({
       <PrivacyFilter>
         <FinancialText style={{ fontWeight: 600 }}>
           {!isExactBalance && '~ '}
-          {format(balance, 'financial')}
+          {format(balance, 'financial', currencyCode)}
         </FinancialText>
       </PrivacyFilter>
     </Text>
@@ -126,15 +128,20 @@ function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
       name={t('Selected balance:')}
       balance={balance}
       isExactBalance={isExactBalance}
+      currencyCode={account?.currency_code}
     />
   );
 }
 
 type FilteredBalanceProps = {
   filteredAmount?: number | null;
+  currencyCode?: string | null;
 };
 
-function FilteredBalance({ filteredAmount }: FilteredBalanceProps) {
+function FilteredBalance({
+  filteredAmount,
+  currencyCode,
+}: FilteredBalanceProps) {
   const { t } = useTranslation();
 
   return (
@@ -142,15 +149,17 @@ function FilteredBalance({ filteredAmount }: FilteredBalanceProps) {
       name={t('Filtered balance:')}
       balance={filteredAmount ?? 0}
       isExactBalance
+      currencyCode={currencyCode}
     />
   );
 }
 
 type MoreBalancesProps = {
   balanceQuery: { name: `balance-query-${string}`; query: Query };
+  currencyCode?: string | null;
 };
 
-function MoreBalances({ balanceQuery }: MoreBalancesProps) {
+function MoreBalances({ balanceQuery, currencyCode }: MoreBalancesProps) {
   const { t } = useTranslation();
 
   const cleared = useSheetValue<'balance', `balance-query-${string}-cleared`>({
@@ -168,8 +177,16 @@ function MoreBalances({ balanceQuery }: MoreBalancesProps) {
 
   return (
     <>
-      <DetailedBalance name={t('Cleared total:')} balance={cleared ?? 0} />
-      <DetailedBalance name={t('Uncleared total:')} balance={uncleared ?? 0} />
+      <DetailedBalance
+        name={t('Cleared total:')}
+        balance={cleared ?? 0}
+        currencyCode={currencyCode}
+      />
+      <DetailedBalance
+        name={t('Uncleared total:')}
+        balance={uncleared ?? 0}
+        currencyCode={currencyCode}
+      />
     </>
   );
 }
@@ -224,10 +241,12 @@ export function Balances({
             >
           }
           type="financial"
+          currencyCode={account?.currency_code}
         >
           {props => (
             <CellValueText
               {...props}
+              currencyCode={account?.currency_code}
               style={{
                 fontSize: 22,
                 fontWeight: 400,
@@ -257,12 +276,22 @@ export function Balances({
         />
       </Button>
 
-      {showExtraBalances && <MoreBalances balanceQuery={balanceQuery} />}
+      {showExtraBalances && (
+        <MoreBalances
+          balanceQuery={balanceQuery}
+          currencyCode={account?.currency_code}
+        />
+      )}
 
       {selectedItems.size > 0 && (
         <SelectedBalance selectedItems={selectedItems} account={account} />
       )}
-      {isFiltered && <FilteredBalance filteredAmount={filteredAmount} />}
+      {isFiltered && (
+        <FilteredBalance
+          filteredAmount={filteredAmount}
+          currencyCode={account?.currency_code}
+        />
+      )}
     </View>
   );
 }

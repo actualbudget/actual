@@ -35,6 +35,7 @@ describe('SandboxfinanceSfin0000', () => {
         .toMatchInlineSnapshot(`
         {
           "account_id": "99a0bfe2-0bef-46df-bff2-e9ae0c6c5838",
+          "currency_code": "EUR",
           "iban": "GL0865354374424724",
           "institution": {
             "bic": "SFIN0000",

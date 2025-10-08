@@ -10,13 +10,14 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { send } from 'loot-core/platform/client/fetch';
-import { currencies, getCurrency } from 'loot-core/shared/currencies';
+import { getCurrency } from 'loot-core/shared/currencies';
 
 import { Column, Setting } from './UI';
 
 import { Error, Warning } from '@desktop-client/components/alerts';
 import { Link } from '@desktop-client/components/common/Link';
 import { Checkbox, FormLabel } from '@desktop-client/components/forms';
+import { CurrencySelect } from '@desktop-client/components/select/CurrencySelect';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function CurrencySettings() {
@@ -123,25 +124,6 @@ export function CurrencySettings() {
     },
   });
 
-  const currencyOptions: [string, string][] = currencies
-    .filter(currency => {
-      // Hide "None" option when multi-currency is enabled
-      // since all accounts should have specific currencies
-      if (enableMultiCurrency === 'true' && currency.code === '') {
-        return false;
-      }
-      return true;
-    })
-    .map(currency => {
-      if (currency.code === '') {
-        return ['', t('None')];
-      }
-      return [
-        currency.code,
-        `${currency.code} - ${t(currency.name)} (${currency.symbol})`,
-      ];
-    });
-
   const handleCurrencyChange = (code: string) => {
     setDefaultCurrencyCodePref(code);
     if (code !== '') {
@@ -183,10 +165,10 @@ export function CurrencySettings() {
         >
           <View style={{ display: 'flex', flexDirection: 'row', gap: '1.5em' }}>
             <Column title={t('Default Currency')}>
-              <Select
+              <CurrencySelect
                 value={selectedCurrencyCode}
                 onChange={handleCurrencyChange}
-                options={currencyOptions}
+                includeNoneOption={enableMultiCurrency !== 'true'}
                 className={selectButtonClassName}
                 style={{ width: '100%' }}
               />

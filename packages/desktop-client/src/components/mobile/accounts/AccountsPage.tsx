@@ -40,7 +40,14 @@ import {
   CellValueText,
 } from '@desktop-client/components/spreadsheet/CellValue';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import {
+  type ConvertedBalanceData,
+  useAllAccountBalanceConverted,
+  useOnBudgetAccountBalanceConverted,
+  useOffBudgetAccountBalanceConverted,
+} from '@desktop-client/hooks/useConvertedAccountBalance';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
@@ -58,6 +65,7 @@ type AccountHeaderProps<SheetFieldName extends SheetFields<'account'>> = {
   style?: CSSProperties;
   showCheveronDown?: boolean;
   onPress?: () => void;
+  convertedBalanceData?: ConvertedBalanceData | null;
 };
 
 function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
@@ -67,9 +75,11 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
   style = {},
   showCheveronDown = false,
   onPress,
+  convertedBalanceData,
 }: AccountHeaderProps<SheetFieldName>) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const format = useFormat();
 
   const Cheveron = showCheveronDown ? SvgCheveronDown : SvgCheveronRight;
 
@@ -115,14 +125,47 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
           height={styles.text.fontSize}
         />
       </View>
-      <CellValue binding={amount} type="financial">
-        {props => (
-          <CellValueText<'account', SheetFieldName>
-            {...props}
-            style={{ ...styles.text }}
-          />
-        )}
-      </CellValue>
+      {convertedBalanceData ? (
+        convertedBalanceData.balances.length === 1 ? (
+          // Single currency - show native currency without conversion indicator
+          <Text
+            style={{
+              ...styles.text,
+              fontSize: 16,
+            }}
+          >
+            {format(
+              convertedBalanceData.balances[0].balance,
+              'financial',
+              convertedBalanceData.balances[0].currency,
+            )}
+          </Text>
+        ) : (
+          // Multiple currencies - show converted total with ≈ symbol
+          <Text
+            style={{
+              ...styles.text,
+              fontSize: 16,
+            }}
+          >
+            ≈{' '}
+            {format(
+              convertedBalanceData.convertedBalance,
+              'financial',
+              convertedBalanceData.convertedCurrency,
+            )}
+          </Text>
+        )
+      ) : (
+        <CellValue binding={amount} type="financial">
+          {props => (
+            <CellValueText<'account', SheetFieldName>
+              {...props}
+              style={{ ...styles.text }}
+            />
+          )}
+        </CellValue>
+      )}
     </Button>
   );
 }
@@ -219,10 +262,15 @@ function AccountListItem({
               {account.name}
             </TextOneLine>
           </View>
-          <CellValue binding={getBalanceQuery(account.id)} type="financial">
+          <CellValue
+            binding={getBalanceQuery(account.id)}
+            type="financial"
+            currencyCode={account.currency_code}
+          >
             {props => (
               <CellValueText<'account', 'balance'>
                 {...props}
+                currencyCode={account.currency_code}
                 style={{
                   fontSize: 16,
                   ...makeAmountFullStyle(props.value, {
@@ -289,6 +337,12 @@ function AllAccountList({
   );
   const closedAccounts = accounts.filter(account => account.closed === 1);
 
+  // Get converted balances for aggregates
+  const [defaultCurrency] = useSyncedPref('defaultCurrencyCode');
+  const allAccountsConverted = useAllAccountBalanceConverted();
+  const onBudgetConverted = useOnBudgetAccountBalanceConverted();
+  const offBudgetConverted = useOffBudgetAccountBalanceConverted();
+
   const closedAccountsRef = useRef<HTMLDivElement | null>(null);
   const [showClosedAccounts, setShowClosedAccountsPref] = useLocalPref(
     'ui.showClosedAccounts',
@@ -337,12 +391,30 @@ function AllAccountList({
             id="all"
             name={t('All accounts')}
             amount={getAllAccountsBalance()}
+            convertedBalanceData={
+              allAccountsConverted
+                ? {
+                    convertedBalance: allAccountsConverted.convertedBalance,
+                    balances: allAccountsConverted.balances,
+                    convertedCurrency: defaultCurrency,
+                  }
+                : null
+            }
           />
           {onBudgetAccounts.length > 0 && (
             <AccountHeader
               id="onbudget"
               name={t('On budget')}
               amount={getOnBudgetBalance()}
+              convertedBalanceData={
+                onBudgetConverted
+                  ? {
+                      convertedBalance: onBudgetConverted.convertedBalance,
+                      balances: onBudgetConverted.balances,
+                      convertedCurrency: defaultCurrency,
+                    }
+                  : null
+              }
             />
           )}
           <AccountList
@@ -356,6 +428,15 @@ function AllAccountList({
               id="offbudget"
               name={t('Off budget')}
               amount={getOffBudgetBalance()}
+              convertedBalanceData={
+                offBudgetConverted
+                  ? {
+                      convertedBalance: offBudgetConverted.convertedBalance,
+                      balances: offBudgetConverted.balances,
+                      convertedCurrency: defaultCurrency,
+                    }
+                  : null
+              }
             />
           )}
           <AccountList

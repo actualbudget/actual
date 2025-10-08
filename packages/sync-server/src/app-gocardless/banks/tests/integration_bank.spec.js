@@ -12,6 +12,7 @@ describe('IntegrationBank', () => {
       const normalizedAccount = IntegrationBank.normalizeAccount(account);
       expect(normalizedAccount).toEqual({
         account_id: account.id,
+        currency_code: 'PLN',
         institution: mockInstitution,
         mask: '4321',
         iban: account.iban,
@@ -28,6 +29,7 @@ describe('IntegrationBank', () => {
       });
       expect(normalizedAccount).toEqual({
         account_id: account.id,
+        currency_code: 'PLN',
         institution: mockInstitution,
         mask: '0000',
         iban: null,

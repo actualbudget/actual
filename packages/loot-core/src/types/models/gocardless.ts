@@ -81,4 +81,5 @@ export type SyncServerGoCardlessAccount = {
   mask: string;
   name: string;
   official_name: string;
+  currency_code?: string;
 };

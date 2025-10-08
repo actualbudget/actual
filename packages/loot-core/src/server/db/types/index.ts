@@ -22,6 +22,7 @@ export type DbAccount = {
   subtype?: string | null;
   bank?: string | null;
   account_sync_source?: 'simpleFin' | 'goCardless' | null;
+  currency_code?: string | null;
 };
 
 export type DbBank = {

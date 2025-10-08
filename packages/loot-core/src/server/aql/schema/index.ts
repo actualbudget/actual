@@ -77,6 +77,7 @@ export const schema = {
     account_sync_source: f('string'),
     last_reconciled: f('string'),
     last_sync: f('string'),
+    currency_code: f('string'),
   },
   categories: {
     id: f('id'),

@@ -34,12 +34,25 @@ type CellValueProps<
   }) => ReactNode;
   binding: Binding<SheetName, FieldName>;
   type?: FormatType;
+  /**
+   * Optional currency code to use for formatting financial values.
+   * If not provided, uses the default currency from preferences.
+   * Useful for displaying account balances in their specific currency.
+   * @example currencyCode="EUR" or currencyCode={account.currency_code}
+   */
+  currencyCode?: string | null;
 };
 
 export function CellValue<
   SheetName extends SheetNames,
   FieldName extends SheetFields<SheetName>,
->({ type, binding, children, ...props }: CellValueProps<SheetName, FieldName>) {
+>({
+  type,
+  binding,
+  children,
+  currencyCode,
+  ...props
+}: CellValueProps<SheetName, FieldName>) {
   const { fullSheetName } = useSheetName(binding);
   const sheetValue = useSheetValue(binding);
 
@@ -50,6 +63,7 @@ export function CellValue<
       type={type}
       name={fullSheetName}
       value={sheetValue}
+      currencyCode={currencyCode}
       {...props}
     />
   );
@@ -65,10 +79,23 @@ type CellValueTextProps<
   name: string;
   value: Spreadsheets[SheetName][FieldName];
   style?: CSSProperties;
+  /**
+   * Optional custom formatter function.
+   * If provided, this will be used instead of the default format function.
+   * The third parameter (currencyCode) allows the formatter to be currency-aware.
+   */
   formatter?: (
     value: Spreadsheets[SheetName][FieldName],
     type?: FormatType,
+    currencyCode?: string | null,
   ) => string;
+  /**
+   * Optional currency code to use for formatting financial values.
+   * If not provided, uses the default currency from preferences.
+   * Useful for displaying account balances in their specific currency.
+   * @example currencyCode="EUR" or currencyCode={account.currency_code}
+   */
+  currencyCode?: string | null;
 };
 
 export function CellValueText<
@@ -80,6 +107,7 @@ export function CellValueText<
   value,
   formatter,
   style,
+  currencyCode,
   ...props
 }: CellValueTextProps<SheetName, FieldName>) {
   const format = useFormat();
@@ -115,7 +143,9 @@ export function CellValueText<
   return (
     <Text {...sharedProps}>
       <PrivacyFilter activationFilters={[PRIVACY_FILTER_TYPES.includes(type)]}>
-        {formatter ? formatter(value, type) : format(value, type)}
+        {formatter
+          ? formatter(value, type, currencyCode)
+          : format(value, type, currencyCode)}
       </PrivacyFilter>
     </Text>
   );

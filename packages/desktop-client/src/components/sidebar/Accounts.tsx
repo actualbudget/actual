@@ -12,10 +12,16 @@ import { SecondaryItem } from './SecondaryItem';
 import { moveAccount } from '@desktop-client/accounts/accountsSlice';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useClosedAccounts } from '@desktop-client/hooks/useClosedAccounts';
+import {
+  useAllAccountBalanceConverted,
+  useOnBudgetAccountBalanceConverted,
+  useOffBudgetAccountBalanceConverted,
+} from '@desktop-client/hooks/useConvertedAccountBalance';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useOffBudgetAccounts } from '@desktop-client/hooks/useOffBudgetAccounts';
 import { useOnBudgetAccounts } from '@desktop-client/hooks/useOnBudgetAccounts';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUpdatedAccounts } from '@desktop-client/hooks/useUpdatedAccounts';
 import { useDispatch, useSelector } from '@desktop-client/redux';
 import * as bindings from '@desktop-client/spreadsheet/bindings';
@@ -33,6 +39,12 @@ export function Accounts() {
   const onBudgetAccounts = useOnBudgetAccounts();
   const closedAccounts = useClosedAccounts();
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
+
+  // Get converted balances for aggregates
+  const [defaultCurrency] = useSyncedPref('defaultCurrencyCode');
+  const allAccountsConverted = useAllAccountBalanceConverted();
+  const onBudgetConverted = useOnBudgetAccountBalanceConverted();
+  const offBudgetConverted = useOffBudgetAccountBalanceConverted();
 
   const getAccountPath = (account: AccountEntity) => `/accounts/${account.id}`;
 
@@ -96,7 +108,25 @@ export function Accounts() {
           to="/accounts"
           query={bindings.allAccountBalance()}
           style={{ fontWeight, marginTop: 15 }}
+          convertedBalanceData={
+            allAccountsConverted
+              ? {
+                  convertedBalance: allAccountsConverted.convertedBalance,
+                  balances: allAccountsConverted.balances,
+                  convertedCurrency: defaultCurrency,
+                }
+              : null
+          }
           isExactPathMatch
+          convertedBalanceData={
+            allAccountsConverted
+              ? {
+                  convertedBalance: allAccountsConverted.convertedBalance,
+                  balances: allAccountsConverted.balances,
+                  convertedCurrency: defaultCurrency,
+                }
+              : null
+          }
         />
 
         {onBudgetAccounts.length > 0 && (
@@ -110,6 +140,15 @@ export function Accounts() {
               marginBottom: 5,
             }}
             titleAccount
+            convertedBalanceData={
+              onBudgetConverted
+                ? {
+                    convertedBalance: onBudgetConverted.convertedBalance,
+                    balances: onBudgetConverted.balances,
+                    convertedCurrency: defaultCurrency,
+                  }
+                : null
+            }
           />
         )}
 
@@ -141,6 +180,15 @@ export function Accounts() {
               marginBottom: 5,
             }}
             titleAccount
+            convertedBalanceData={
+              offBudgetConverted
+                ? {
+                    convertedBalance: offBudgetConverted.convertedBalance,
+                    balances: offBudgetConverted.balances,
+                    convertedCurrency: defaultCurrency,
+                  }
+                : null
+            }
           />
         )}
 

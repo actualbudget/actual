@@ -16,6 +16,10 @@ export type Spreadsheets = {
     balanceCleared: number;
     balanceUncleared: number;
     lastReconciled: string | null;
+    // Currency-converted balances (to specified currency)
+    [key: `accounts-balance-converted-${string}`]: number;
+    [key: `onbudget-accounts-balance-converted-${string}`]: number;
+    [key: `offbudget-accounts-balance-converted-${string}`]: number;
   };
   category: {
     // Common fields

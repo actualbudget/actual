@@ -42,10 +42,16 @@ app.post(
         accounts = accounts.concat(partial.results);
       }
 
+      // Normalize currencyCode field to currency_code for consistency
+      const normalizedAccounts = accounts.map(account => ({
+        ...account,
+        currency_code: account.currencyCode,
+      }));
+
       res.send({
         status: 'ok',
         data: {
-          accounts,
+          accounts: normalizedAccounts,
         },
       });
     } catch (error) {

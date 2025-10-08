@@ -29,6 +29,7 @@ type ReconcilingMessageProps = {
   targetBalance: number;
   onDone: () => void;
   onCreateTransaction: (targetDiff: number) => void;
+  currencyCode?: string | null;
 };
 
 export function ReconcilingMessage({
@@ -36,6 +37,7 @@ export function ReconcilingMessage({
   targetBalance,
   onDone,
   onCreateTransaction,
+  currencyCode,
 }: ReconcilingMessageProps) {
   const cleared =
     useSheetValue<'balance', `balance-query-${string}-cleared`>({
@@ -47,10 +49,10 @@ export function ReconcilingMessage({
   const format = useFormat();
   const targetDiff = targetBalance - cleared;
 
-  const clearedBalance = format(cleared, 'financial');
-  const bankBalance = format(targetBalance, 'financial');
+  const clearedBalance = format(cleared, 'financial', currencyCode);
+  const bankBalance = format(targetBalance, 'financial', currencyCode);
   const difference =
-    (targetDiff > 0 ? '+' : '') + format(targetDiff, 'financial');
+    (targetDiff > 0 ? '+' : '') + format(targetDiff, 'financial', currencyCode);
 
   return (
     <View

@@ -27,6 +27,7 @@ import {
   updateAccount,
 } from '@desktop-client/accounts/accountsSlice';
 import { BalanceHistoryGraph } from '@desktop-client/components/accounts/BalanceHistoryGraph';
+import { ConvertedBalanceTooltip } from '@desktop-client/components/accounts/ConvertedBalanceTooltip';
 import { Link } from '@desktop-client/components/common/Link';
 import { Notes } from '@desktop-client/components/Notes';
 import {
@@ -38,7 +39,12 @@ import {
 } from '@desktop-client/components/sort';
 import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import {
+  type ConvertedBalanceData,
+  useAccountConvertedBalance,
+} from '@desktop-client/hooks/useConvertedAccountBalance';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
 import { useNotes } from '@desktop-client/hooks/useNotes';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
@@ -73,6 +79,7 @@ type AccountProps<FieldName extends SheetFields<'account'>> = {
   onDragChange?: OnDragChangeCallback<{ id: string }>;
   onDrop?: OnDropCallback;
   titleAccount?: boolean;
+  convertedBalanceData?: ConvertedBalanceData | null;
   isExactPathMatch?: boolean;
 };
 
@@ -89,11 +96,14 @@ export function Account<FieldName extends SheetFields<'account'>>({
   outerStyle,
   onDragChange,
   onDrop,
+  convertedBalanceData,
   titleAccount,
   isExactPathMatch,
 }: AccountProps<FieldName>) {
   const isTestEnv = useIsTestEnv();
   const { t } = useTranslation();
+  const format = useFormat();
+  const [defaultCurrency] = useSyncedPref('defaultCurrencyCode');
   const type = account
     ? account.closed
       ? 'account-closed'
@@ -105,6 +115,9 @@ export function Account<FieldName extends SheetFields<'account'>>({
   const triggerRef = useRef(null);
   const { setMenuOpen, menuOpen, handleContextMenu, position } =
     useContextMenu();
+
+  // Get converted balance for individual accounts with different currency
+  const accountConvertedBalance = useAccountConvertedBalance(account?.id);
 
   const { dragRef } = useDraggable({
     type,
@@ -238,7 +251,60 @@ export function Account<FieldName extends SheetFields<'account'>>({
                   name
                 )
               }
-              right={<CellValue binding={query} type="financial" />}
+              right={
+                convertedBalanceData ? (
+                  convertedBalanceData.balances.length === 1 ? (
+                    // Single currency - show native currency without conversion indicator
+                    <Text
+                      style={{
+                        fontSize: 11,
+                        color: theme.sidebarItemText,
+                      }}
+                    >
+                      {format(
+                        convertedBalanceData.balances[0].balance,
+                        'financial',
+                        convertedBalanceData.balances[0].currency,
+                      )}
+                    </Text>
+                  ) : (
+                    // Multiple currencies - show converted total with tooltip
+                    <Tooltip
+                      content={
+                        <ConvertedBalanceTooltip
+                          balances={convertedBalanceData.balances}
+                          convertedTotal={convertedBalanceData.convertedBalance}
+                          targetCurrency={
+                            convertedBalanceData.convertedCurrency
+                          }
+                        />
+                      }
+                      placement="left"
+                      style={styles.tooltip}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 11,
+                          color: theme.sidebarItemText,
+                        }}
+                      >
+                        ≈{' '}
+                        {format(
+                          convertedBalanceData.convertedBalance,
+                          'financial',
+                          convertedBalanceData.convertedCurrency,
+                        )}
+                      </Text>
+                    </Tooltip>
+                  )
+                ) : (
+                  <CellValue
+                    binding={query}
+                    type="financial"
+                    currencyCode={account?.currency_code}
+                  />
+                )
+              }
             />
           </Link>
           {account && (
@@ -313,13 +379,33 @@ export function Account<FieldName extends SheetFields<'account'>>({
               },
             }}
           >
-            <Text
-              style={{
-                fontWeight: 'bold',
-              }}
-            >
-              {name}
-            </Text>
+            <View>
+              <Text
+                style={{
+                  fontWeight: 'bold',
+                }}
+              >
+                {name}
+              </Text>
+              {account?.currency_code &&
+                account.currency_code !== defaultCurrency &&
+                accountConvertedBalance?.convertedBalance != null && (
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      color: theme.pageText,
+                      marginTop: 2,
+                    }}
+                  >
+                    ≈{' '}
+                    {format(
+                      accountConvertedBalance.convertedBalance,
+                      'financial',
+                      defaultCurrency,
+                    )}
+                  </Text>
+                )}
+            </View>
             <Button
               aria-label={t('Toggle balance history')}
               variant="bare"

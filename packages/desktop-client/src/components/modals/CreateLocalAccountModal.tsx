@@ -12,6 +12,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { getCurrency } from 'loot-core/shared/currencies';
 import { toRelaxedNumber } from 'loot-core/shared/util';
 
 import { createAccount } from '@desktop-client/accounts/accountsSlice';
@@ -24,9 +25,11 @@ import {
   ModalTitle,
 } from '@desktop-client/components/common/Modal';
 import { Checkbox } from '@desktop-client/components/forms';
+import { CurrencySelect } from '@desktop-client/components/select/CurrencySelect';
 import { validateAccountName } from '@desktop-client/components/util/accountValidation';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { closeModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -35,9 +38,16 @@ export function CreateLocalAccountModal() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const accounts = useAccounts();
+  const [enableMultiCurrency] = useSyncedPref('enableMultiCurrency');
+  const [enableMultiCurrencyOnBudget] = useSyncedPref(
+    'enableMultiCurrencyOnBudget',
+  );
+  const [defaultCurrencyCode] = useSyncedPref('defaultCurrencyCode');
+
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
   const [balance, setBalance] = useState('0');
+  const [currencyCode, setCurrencyCode] = useState(defaultCurrencyCode || '');
 
   const [nameError, setNameError] = useState(null);
   const [balanceError, setBalanceError] = useState(false);
@@ -64,11 +74,14 @@ export function CreateLocalAccountModal() {
 
     if (!nameError && !balanceError) {
       dispatch(closeModal());
+      const effectiveCurrency = currencyCode || defaultCurrencyCode || 'USD';
+      const decimalPlaces = getCurrency(effectiveCurrency).decimalPlaces;
       const id = await dispatch(
         createAccount({
           name,
-          balance: toRelaxedNumber(balance),
+          balance: toRelaxedNumber(balance, decimalPlaces),
           offBudget: offbudget,
+          currency_code: currencyCode || undefined,
         }),
       ).unwrap();
       navigate('/accounts/' + id);
@@ -182,6 +195,18 @@ export function CreateLocalAccountModal() {
                   <Trans>Balance must be a number</Trans>
                 </FormError>
               )}
+
+              {enableMultiCurrency === 'true' &&
+                (offbudget || enableMultiCurrencyOnBudget === 'true') && (
+                  <InlineField label={t('Currency')} width="100%">
+                    <CurrencySelect
+                      value={currencyCode}
+                      onChange={setCurrencyCode}
+                      includeNoneOption={false}
+                      style={{ flex: 1 }}
+                    />
+                  </InlineField>
+                )}
 
               <ModalButtons>
                 <Button onPress={close}>

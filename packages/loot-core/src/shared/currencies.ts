@@ -11,7 +11,8 @@ export type Currency = {
 
 // When adding a new currency with a higher decimal precision, make sure to update
 // the MAX_SAFE_NUMBER in util.ts.
-//
+// When adding a currency, also update the translation map in
+// packages/desktop-client/src/components/select/CurrencySelect.tsx for the translation.
 // Number formats and symbol placement based on CLDR (Common Locale Data Repository) /
 // LDML (Locale Data Markup Language) locale conventions and Intl.NumberFormat standards
 // References:

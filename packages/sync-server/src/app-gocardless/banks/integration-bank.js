@@ -36,6 +36,7 @@ export default {
         .join(' '),
       official_name: account.product ?? `integration-${account.institution_id}`,
       type: 'checking',
+      currency_code: account.currency,
     };
   },
 

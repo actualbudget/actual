@@ -8,32 +8,39 @@ import type {
 } from '../types/models';
 
 import { type RemoteFile } from './cloud-storage';
+import * as db from './db';
 import * as models from './models';
 
 export type APIAccountEntity = Pick<AccountEntity, 'id' | 'name'> & {
-  offbudget?: boolean;
-  closed?: boolean;
+  offbudget: boolean;
+  closed: boolean;
+  currency_code?: string | null;
 };
 
 export const accountModel = {
   ...models.accountModel,
 
-  toExternal(account: AccountEntity): APIAccountEntity {
+  async toExternal(account: AccountEntity): Promise<APIAccountEntity> {
+    const currency_code = await db.getAccountCurrencyCode(account);
     return {
       id: account.id,
       name: account.name,
       offbudget: account.offbudget ? true : false,
       closed: account.closed ? true : false,
+      currency_code,
     };
   },
 
-  fromExternal(account: APIAccountEntity) {
+  async fromExternal(account: APIAccountEntity) {
     const result = { ...account } as unknown as AccountEntity;
     if ('offbudget' in account) {
       result.offbudget = account.offbudget ? 1 : 0;
     }
     if ('closed' in account) {
       result.closed = account.closed ? 1 : 0;
+    }
+    if ('currency_code' in account) {
+      result.currency_code = await db.getAccountCurrencyCode(account);
     }
     return result;
   },

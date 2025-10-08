@@ -43,6 +43,7 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { format as formatDate, parseISO } from 'date-fns';
 
+import { getCurrency } from 'loot-core/shared/currencies';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { getStatusLabel } from 'loot-core/shared/schedules';
@@ -60,6 +61,8 @@ import {
   amountToFormatted,
   formattedToAmount,
   type IntegerAmount,
+  integerToFormatted,
+  integerToFormattedWithDecimal,
   titleFirst,
 } from 'loot-core/shared/util';
 import {
@@ -132,6 +135,7 @@ import {
   useSplitsExpanded,
   type SplitsExpandedContextValue,
 } from '@desktop-client/hooks/useSplitsExpanded';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
@@ -850,6 +854,7 @@ type TransactionProps = {
   balance: number;
   dateFormat: string;
   hideFraction: boolean;
+  decimalPlaces?: number;
   onSave: (
     tx: TransactionEntity,
     subTxs: TransactionEntity[] | null,
@@ -904,6 +909,7 @@ const Transaction = memo(function Transaction({
   balance,
   dateFormat = 'MM/dd/yyyy',
   hideFraction,
+  decimalPlaces = 2,
   onSave,
   onEdit,
   onDelete,
@@ -936,7 +942,7 @@ const Transaction = memo(function Transaction({
   const [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
   const [prevTransaction, setPrevTransaction] = useState(originalTransaction);
   const [transaction, setTransaction] = useState(() =>
-    serializeTransaction(originalTransaction, showZeroInDeposit),
+    serializeTransaction(originalTransaction, showZeroInDeposit, decimalPlaces),
   );
   const isPreview = isPreviewId(transaction.id);
 
@@ -945,7 +951,11 @@ const Transaction = memo(function Transaction({
     showZeroInDeposit !== prevShowZero
   ) {
     setTransaction(
-      serializeTransaction(originalTransaction, showZeroInDeposit),
+      serializeTransaction(
+        originalTransaction,
+        showZeroInDeposit,
+        decimalPlaces,
+      ),
     );
     setPrevTransaction(originalTransaction);
     setPrevShowZero(showZeroInDeposit);
@@ -1059,10 +1069,13 @@ const Transaction = memo(function Transaction({
       const deserialized = deserializeTransaction(
         newTransaction,
         originalTransaction,
+        decimalPlaces,
       );
       // Run the transaction through the formatting so that we know
       // it's always showing the formatted result
-      setTransaction(serializeTransaction(deserialized, showZeroInDeposit));
+      setTransaction(
+        serializeTransaction(deserialized, showZeroInDeposit, decimalPlaces),
+      );
 
       const deserializedName = ['credit', 'debit'].includes(name)
         ? 'amount'
@@ -1604,10 +1617,20 @@ const Transaction = memo(function Transaction({
         name="debit"
         exposed={focusedField === 'debit'}
         focused={focusedField === 'debit'}
-        value={debit === '' && credit === '' ? amountToFormatted(0) : debit}
+        value={
+          debit === '' && credit === ''
+            ? amountToFormatted(0, undefined, decimalPlaces)
+            : debit
+        }
         formatter={value =>
           // reformat value so since we might have kept decimals
-          value ? amountToFormatted(formattedToAmount(value) || 0) : ''
+          value
+            ? amountToFormatted(
+                formattedToAmount(value) || 0,
+                undefined,
+                decimalPlaces,
+              )
+            : ''
         }
         valueStyle={valueStyle}
         textAlign="right"
@@ -1619,7 +1642,10 @@ const Transaction = memo(function Transaction({
           ...amountStyle,
         }}
         inputProps={{
-          value: debit === '' && credit === '' ? amountToFormatted(0) : debit,
+          value:
+            debit === '' && credit === ''
+              ? amountToFormatted(0, undefined, decimalPlaces)
+              : debit,
           onUpdate: onUpdate.bind(null, 'debit'),
           'data-1p-ignore': true,
         }}
@@ -1638,7 +1664,13 @@ const Transaction = memo(function Transaction({
         value={credit}
         formatter={value =>
           // reformat value so since we might have kept decimals
-          value ? amountToFormatted(formattedToAmount(value) || 0) : ''
+          value
+            ? amountToFormatted(
+                formattedToAmount(value) || 0,
+                undefined,
+                decimalPlaces,
+              )
+            : ''
         }
         valueStyle={valueStyle}
         textAlign="right"
@@ -1666,7 +1698,11 @@ const Transaction = memo(function Transaction({
           value={
             runningBalance == null || isChild || isTemporaryId(id)
               ? ''
-              : integerToFormatted(runningBalance)
+              : integerToFormattedWithDecimal(
+                  runningBalance || 0,
+                  undefined,
+                  decimalPlaces,
+                )
           }
           valueStyle={{
             color:
@@ -1778,6 +1814,7 @@ type NewTransactionProps = {
   editingTransaction: TransactionEntity['id'];
   focusedField: string;
   hideFraction: boolean;
+  decimalPlaces?: number;
   onAdd: () => void;
   onAddAndClose: () => void;
   onAddSplit: (id: TransactionEntity['id']) => void;
@@ -1821,6 +1858,7 @@ function NewTransaction({
   showCleared,
   dateFormat,
   hideFraction,
+  decimalPlaces = 2,
   onClose,
   onSplit,
   onToggleSplit,
@@ -1893,6 +1931,7 @@ function NewTransaction({
           payees={payees}
           dateFormat={dateFormat}
           hideFraction={!!hideFraction}
+          decimalPlaces={decimalPlaces}
           expanded
           onEdit={onEdit}
           onSave={onSave}
@@ -1983,6 +2022,7 @@ type TransactionTableInnerProps = {
   showCategory: boolean;
   currentAccountId: AccountEntity['id'];
   currentCategoryId: CategoryEntity['id'];
+  currencyCode?: string | null;
   isAdding: boolean;
   isNew: (id: TransactionEntity['id']) => boolean;
   isMatched: (id: TransactionEntity['id']) => boolean;
@@ -2043,7 +2083,31 @@ function TransactionTableInner({
 }: TransactionTableInnerProps) {
   const containerRef = createRef<HTMLDivElement>();
   const isAddingPrev = usePrevious(props.isAdding);
+  const [defaultCurrency] = useSyncedPref('defaultCurrencyCode');
   const [scrollWidth, setScrollWidth] = useState(0);
+
+  // Get the currency code for the current account
+  const accountCurrency = useMemo(() => {
+    if (props.currencyCode !== undefined) {
+      return props.currencyCode;
+    }
+    const account = props.accounts.find(a => a.id === props.currentAccountId);
+    return account?.currency_code ?? defaultCurrency;
+  }, [
+    props.accounts,
+    props.currentAccountId,
+    props.currencyCode,
+    defaultCurrency,
+  ]);
+
+  // Get currency object with decimal places
+  const currency = useMemo(() => {
+    const currencyCode = accountCurrency ?? defaultCurrency;
+    // If no currency is configured, use default 2 decimal places
+    return currencyCode ? getCurrency(currencyCode) : { decimalPlaces: 2 };
+  }, [accountCurrency, defaultCurrency]);
+
+  const decimalPlaces = currency.decimalPlaces;
 
   function saveScrollWidth(parent: number, child: number) {
     const width = parent > 0 && child > 0 && parent - child;
@@ -2170,6 +2234,7 @@ function TransactionTableInner({
         payees={payees}
         dateFormat={dateFormat}
         hideFraction={hideFraction}
+        decimalPlaces={decimalPlaces}
         onEdit={tableNavigator.onEdit}
         onSave={props.onSave}
         onDelete={props.onDelete}
@@ -2252,6 +2317,7 @@ function TransactionTableInner({
               showCleared={props.showCleared}
               dateFormat={dateFormat}
               hideFraction={props.hideFraction}
+              decimalPlaces={decimalPlaces}
               onClose={props.onCloseAddTransaction}
               onAdd={props.onAddTemporary}
               onAddAndClose={props.onAddAndCloseTemporary}
@@ -2332,6 +2398,7 @@ export type TransactionTableProps = {
   showCategory: boolean;
   currentAccountId: AccountEntity['id'];
   currentCategoryId: CategoryEntity['id'];
+  currencyCode?: string | null;
   isAdding: boolean;
   isNew: (id: TransactionEntity['id']) => boolean;
   isMatched: (id: TransactionEntity['id']) => boolean;

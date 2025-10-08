@@ -15,13 +15,16 @@ import { View } from '@actual-app/components/view';
 import { eachMonthOfInterval, format, subMonths } from 'date-fns';
 import { Area, AreaChart, Tooltip as RechartsTooltip, YAxis } from 'recharts';
 
+import { getCurrency } from 'loot-core/shared/currencies';
 import * as monthUtils from 'loot-core/shared/months';
-import { integerToFormatted } from 'loot-core/shared/util';
+import { integerToFormattedWithDecimal } from 'loot-core/shared/util';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import * as query from '@desktop-client/queries';
 import { liveQuery } from '@desktop-client/queries/liveQuery';
 
@@ -40,6 +43,18 @@ export function BalanceHistoryGraph({
 }: BalanceHistoryGraphProps) {
   const locale = useLocale();
   const animationProps = useRechartsAnimation({ isAnimationActive: false });
+  const accounts = useAccounts();
+  const [defaultCurrencyCode] = useSyncedPref('defaultCurrencyCode');
+
+  // Get the decimal places for the account's currency
+  const decimalPlaces = useMemo(() => {
+    const account = accounts.find(a => a.id === accountId);
+    const code = account?.currency_code ?? defaultCurrencyCode;
+    // If no currency is configured, use default 2 decimal places
+    const currency = code ? getCurrency(code) : { decimalPlaces: 2 };
+    return currency.decimalPlaces;
+  }, [accounts, accountId, defaultCurrencyCode]);
+
   const [balanceData, setBalanceData] = useState<
     Array<{ date: string; balance: number }>
   >([]);
@@ -321,7 +336,13 @@ export function BalanceHistoryGraph({
                         {hoveredValue.date}
                       </Text>
                       <PrivacyFilter activationFilters={[() => !isHovered]}>
-                        <Text>{integerToFormatted(hoveredValue.balance)}</Text>
+                        <Text>
+                          {integerToFormattedWithDecimal(
+                            hoveredValue.balance,
+                            undefined,
+                            decimalPlaces,
+                          )}
+                        </Text>
                       </PrivacyFilter>
                     </View>
                   )}

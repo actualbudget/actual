@@ -261,10 +261,13 @@ describe('API CRUD operations', () => {
   //apis: createAccount, getAccounts, updateAccount, closeAccount, deleteAccount, reopenAccount, getAccountBalance
   test('Accounts: successfully complete account operators', async () => {
     const accountId1 = await api.createAccount(
-      { name: 'test-account1', offbudget: true },
+      { name: 'test-account1', offbudget: true, closed: false },
       1000,
     );
-    const accountId2 = await api.createAccount({ name: 'test-account2' }, 0);
+    const accountId2 = await api.createAccount(
+      { name: 'test-account2', offbudget: false, closed: false },
+      0,
+    );
     let accounts = await api.getAccounts();
 
     // accounts successfully created
@@ -566,7 +569,10 @@ describe('API CRUD operations', () => {
 
   // apis: addTransactions, getTransactions, importTransactions, updateTransaction, deleteTransaction
   test('Transactions: successfully update transactions', async () => {
-    const accountId = await api.createAccount({ name: 'test-account' }, 0);
+    const accountId = await api.createAccount(
+      { name: 'test-account', offbudget: false, closed: false },
+      0,
+    );
 
     let newTransaction = [
       {
@@ -686,7 +692,10 @@ describe('API CRUD operations', () => {
   });
 
   test('Transactions: import notes are preserved when importing', async () => {
-    const accountId = await api.createAccount({ name: 'test-account' }, 0);
+    const accountId = await api.createAccount(
+      { name: 'test-account', offbudget: false, closed: false },
+      0,
+    );
 
     // Test with notes
     const transactionsWithNotes = [
@@ -808,7 +817,7 @@ test('Schedules: successfully complete schedules operations', async () => {
 
   //check getIDByName works on accounts
   const schedAccountId1 = await api.createAccount(
-    { name: 'sched-test-account1', offbudget: true },
+    { name: 'sched-test-account1', offbudget: true, closed: false },
     1000,
   );
 

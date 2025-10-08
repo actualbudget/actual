@@ -1,4 +1,5 @@
 import { logger } from '../../platform/server/log';
+import * as db from '../db';
 
 import {
   getOpenExchangeRatesAppId,
@@ -161,7 +162,28 @@ class ExchangeRateService {
   }
 
   async getUsedCurrencies(): Promise<string[]> {
-    const currencies = new Set<string>();
+    const defaultCurrency = await db.first<{ value: string }>(
+      'SELECT value FROM preferences WHERE id = ?',
+      ['defaultCurrencyCode'],
+    );
+
+    if (!defaultCurrency?.value) {
+      throw new Error(
+        'defaultCurrencyCode preference must be set to use multi-currency features',
+      );
+    }
+
+    const defaultCurrencyCode = defaultCurrency.value;
+
+    const accountCurrencies = await db.runQuery<{ currency_code: string }>(
+      `SELECT DISTINCT COALESCE(currency_code, ?) as currency_code FROM accounts WHERE tombstone = 0`,
+      [defaultCurrencyCode],
+      true,
+    );
+
+    const currencies = new Set<string>(
+      accountCurrencies.map(row => row.currency_code),
+    );
 
     return Array.from(currencies);
   }

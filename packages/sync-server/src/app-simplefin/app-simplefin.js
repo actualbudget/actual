@@ -52,10 +52,16 @@ app.post(
     try {
       const accounts = await getAccounts(accessKey, null, null, null, true);
 
+      // Normalize currency field to currency_code for consistency
+      const normalizedAccounts = accounts.accounts.map(account => ({
+        ...account,
+        currency_code: account.currency,
+      }));
+
       res.send({
         status: 'ok',
         data: {
-          accounts: accounts.accounts,
+          accounts: normalizedAccounts,
         },
       });
     } catch (e) {
@@ -223,7 +229,10 @@ function getAccountResponse(results, accountId, startDate) {
     newTrans.date = getDate(transactionDate);
     newTrans.payeeName = trans.payee;
     newTrans.notes = trans.description;
-    newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
+    newTrans.transactionAmount = {
+      amount: trans.amount,
+      currency: account.currency,
+    };
     newTrans.transactionId = trans.id;
     newTrans.valueDate = newTrans.bookingDate;
 

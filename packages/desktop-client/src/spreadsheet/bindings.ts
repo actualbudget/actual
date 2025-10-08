@@ -86,6 +86,30 @@ export function closedAccountBalance() {
   } satisfies Binding<'account', 'closed-accounts-balance'>;
 }
 
+/**
+ * Get all account balances converted to the specified currency.
+ * Uses exchange rates to convert each account's balance.
+ */
+export function allAccountBalanceConverted(currencyCode: string) {
+  return `accounts-balance-converted-${currencyCode}` as const;
+}
+
+/**
+ * Get on-budget account balances converted to the specified currency.
+ * Uses exchange rates to convert each account's balance.
+ */
+export function onBudgetAccountBalanceConverted(currencyCode: string) {
+  return `onbudget-accounts-balance-converted-${currencyCode}` as const;
+}
+
+/**
+ * Get off-budget account balances converted to the specified currency.
+ * Uses exchange rates to convert each account's balance.
+ */
+export function offBudgetAccountBalanceConverted(currencyCode: string) {
+  return `offbudget-accounts-balance-converted-${currencyCode}` as const;
+}
+
 export function categoryBalance(
   categoryId: CategoryEntity['id'],
   month: string,

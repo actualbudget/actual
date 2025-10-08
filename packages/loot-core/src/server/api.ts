@@ -573,7 +573,7 @@ handlers['api/accounts-get'] = async function () {
   checkFileOpen();
   // TODO: Force cast to AccountEntity. This should be updated to an AQL query.
   const accounts = (await db.getAccounts()) as AccountEntity[];
-  return accounts.map(account => accountModel.toExternal(account));
+  return Promise.all(accounts.map(account => accountModel.toExternal(account)));
 };
 
 handlers['api/account-create'] = withMutation(async function ({

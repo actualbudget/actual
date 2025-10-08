@@ -5,6 +5,7 @@ import { captureException } from '../../platform/exceptions';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';
 import { logger } from '../../platform/server/log';
+import { getCurrency } from '../../shared/currencies';
 import { isNonProductionEnvironment } from '../../shared/environment';
 import { dayFromDate } from '../../shared/months';
 import * as monthUtils from '../../shared/months';
@@ -42,6 +43,7 @@ export type AccountHandlers = {
   'account-update': typeof updateAccount;
   'accounts-get': typeof getAccounts;
   'account-balance': typeof getAccountBalance;
+  'account-balance-converted': typeof getConvertedAccountBalance;
   'account-properties': typeof getAccountProperties;
   'gocardless-accounts-link': typeof linkGoCardlessAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
@@ -109,8 +111,20 @@ async function getAccountProperties({ id }: { id: AccountEntity['id'] }) {
     [id],
   );
 
+  const defaultCurrency = await db.first<{ value: string }>(
+    'SELECT value FROM preferences WHERE id = ?',
+    ['defaultCurrencyCode'],
+  );
+  const defaultCurrencyCode = defaultCurrency?.value || '';
+
+  const currencyResult = await db.first<{ currency_code: string }>(
+    'SELECT currency_code FROM accounts WHERE id = ?',
+    [id],
+  );
+
   return {
     balance: balanceResult?.balance || 0,
+    currency_code: currencyResult?.currency_code || defaultCurrencyCode,
     numTransactions: countResult?.count || 0,
   };
 }
@@ -140,11 +154,28 @@ async function linkGoCardlessAccount({
     }
 
     id = accRow.id;
+
+    // Check if currency code differs from what's stored (after initial sync)
+    if (
+      accRow.currency_code &&
+      account.currency_code &&
+      accRow.currency_code !== account.currency_code
+    ) {
+      logger.warn(
+        `Currency code mismatch for account ${id}: stored=${accRow.currency_code}, received=${account.currency_code}. Keeping stored value.`,
+      );
+    }
+
     await db.update('accounts', {
       id,
       account_id: account.account_id,
       bank: bank.id,
       account_sync_source: 'goCardless',
+      // Only set currency_code if not already set (initial sync)
+      ...(!accRow.currency_code &&
+        account.currency_code && {
+          currency_code: account.currency_code,
+        }),
     });
   } else {
     id = uuidv4();
@@ -157,6 +188,7 @@ async function linkGoCardlessAccount({
       bank: bank.id,
       offbudget: offBudget ? 1 : 0,
       account_sync_source: 'goCardless',
+      ...(account.currency_code && { currency_code: account.currency_code }),
     });
     await db.insertPayee({
       name: '',
@@ -211,11 +243,28 @@ async function linkSimpleFinAccount({
     }
 
     id = accRow.id;
+
+    // Check if currency code differs from what's stored (after initial sync)
+    if (
+      accRow.currency_code &&
+      externalAccount.currency_code &&
+      accRow.currency_code !== externalAccount.currency_code
+    ) {
+      logger.warn(
+        `Currency code mismatch for account ${id}: stored=${accRow.currency_code}, received=${externalAccount.currency_code}. Keeping stored value.`,
+      );
+    }
+
     await db.update('accounts', {
       id,
       account_id: externalAccount.account_id,
       bank: bank.id,
       account_sync_source: 'simpleFin',
+      // Only set currency_code if not already set (initial sync)
+      ...(!accRow.currency_code &&
+        externalAccount.currency_code && {
+          currency_code: externalAccount.currency_code,
+        }),
     });
   } else {
     id = uuidv4();
@@ -227,6 +276,9 @@ async function linkSimpleFinAccount({
       bank: bank.id,
       offbudget: offBudget ? 1 : 0,
       account_sync_source: 'simpleFin',
+      ...(externalAccount.currency_code && {
+        currency_code: externalAccount.currency_code,
+      }),
     });
     await db.insertPayee({
       name: '',
@@ -281,11 +333,28 @@ async function linkPluggyAiAccount({
     }
 
     id = accRow.id;
+
+    // Check if currency code differs from what's stored (after initial sync)
+    if (
+      accRow.currency_code &&
+      externalAccount.currency_code &&
+      accRow.currency_code !== externalAccount.currency_code
+    ) {
+      logger.warn(
+        `Currency code mismatch for account ${id}: stored=${accRow.currency_code}, received=${externalAccount.currency_code}. Keeping stored value.`,
+      );
+    }
+
     await db.update('accounts', {
       id,
       account_id: externalAccount.account_id,
       bank: bank.id,
       account_sync_source: 'pluggyai',
+      // Only set currency_code if not already set (initial sync)
+      ...(!accRow.currency_code &&
+        externalAccount.currency_code && {
+          currency_code: externalAccount.currency_code,
+        }),
     });
   } else {
     id = uuidv4();
@@ -297,6 +366,9 @@ async function linkPluggyAiAccount({
       bank: bank.id,
       offbudget: offBudget ? 1 : 0,
       account_sync_source: 'pluggyai',
+      ...(externalAccount.currency_code && {
+        currency_code: externalAccount.currency_code,
+      }),
     });
     await db.insertPayee({
       name: '',
@@ -325,16 +397,30 @@ async function createAccount({
   balance = 0,
   offBudget = false,
   closed = false,
+  currency_code,
 }: {
   name: string;
   balance?: number | undefined;
   offBudget?: boolean | undefined;
   closed?: boolean | undefined;
+  currency_code?: string | undefined;
 }) {
+  // Get the effective currency code for proper decimal handling
+  let effectiveCurrencyCode = currency_code;
+  if (!effectiveCurrencyCode) {
+    const defaultCurrency = await db.first<{ value: string }>(
+      'SELECT value FROM preferences WHERE id = ?',
+      ['defaultCurrencyCode'],
+    );
+    effectiveCurrencyCode = defaultCurrency?.value || 'USD';
+  }
+  const decimalPlaces = getCurrency(effectiveCurrencyCode).decimalPlaces;
+
   const id: AccountEntity['id'] = await db.insertAccount({
     name,
     offbudget: offBudget ? 1 : 0,
     closed: closed ? 1 : 0,
+    ...(currency_code && { currency_code }),
   });
 
   await db.insertPayee({
@@ -347,7 +433,7 @@ async function createAccount({
 
     await db.insertTransaction({
       account: id,
-      amount: amountToInteger(balance),
+      amount: amountToInteger(balance, decimalPlaces),
       category: offBudget ? null : payee.category,
       payee: payee.id,
       date: monthUtils.currentDay(),
@@ -1211,11 +1297,131 @@ async function unlinkAccount({ id }: { id: AccountEntity['id'] }) {
   return 'ok';
 }
 
+/**
+ * Calculate total balance across accounts converted to a target currency.
+ * Uses exchange rates to convert each account's balance to the target currency.
+ *
+ * @param targetCurrency - Currency code to convert all balances to (e.g., 'USD')
+ * @param accountFilter - Optional filter for accounts:
+ *   - {} (empty): All accounts
+ *   - { offbudget: false, closed: false }: On-budget accounts only
+ *   - { offbudget: true, closed: false }: Off-budget accounts only
+ * @returns Object with total balance and breakdown by currency
+ */
+async function getConvertedAccountBalance({
+  targetCurrency,
+  accountFilter = {},
+}: {
+  targetCurrency: string;
+  accountFilter?: {
+    offbudget?: boolean;
+    closed?: boolean;
+    accountId?: string;
+  };
+}): Promise<{
+  convertedBalance: number;
+  balances: Array<{ currency: string; balance: number }>;
+}> {
+  // Build WHERE clause for account filters
+  const filterConditions = ['1=1'];
+  const params: (string | number)[] = [];
+
+  if (accountFilter.accountId !== undefined) {
+    filterConditions.push('a.id = ?');
+    params.push(accountFilter.accountId);
+  }
+  if (accountFilter.offbudget !== undefined) {
+    filterConditions.push('a.offbudget = ?');
+    params.push(accountFilter.offbudget ? 1 : 0);
+  }
+  if (accountFilter.closed !== undefined) {
+    filterConditions.push('a.closed = ?');
+    params.push(accountFilter.closed ? 1 : 0);
+  }
+
+  const whereClause = filterConditions.join(' AND ');
+
+  // Get account balances by currency
+  // Note: NULL currency_code is treated as the target currency
+  // We need to process these in JavaScript to properly handle decimal places
+  const accountsSql = `
+    SELECT
+      COALESCE(a.currency_code, ?) as currency,
+      SUM(t.amount) as balance
+    FROM transactions t
+    JOIN accounts a ON t.acct = a.id
+    WHERE t.isParent = 0
+      AND t.tombstone = 0
+      AND ${whereClause}
+    GROUP BY a.currency_code
+  `;
+
+  const accountsParams = [targetCurrency, ...params];
+
+  const accountBalances = await db.all<{ currency: string; balance: number }>(
+    accountsSql,
+    accountsParams,
+  );
+
+  // Get target currency decimal places
+  const targetCurrencyObj = getCurrency(targetCurrency);
+  const targetDecimalPlaces = targetCurrencyObj.decimalPlaces;
+  const targetMultiplier = Math.pow(10, targetDecimalPlaces);
+
+  // Process each account balance and convert to target currency
+  let totalConverted = 0;
+
+  for (const account of accountBalances) {
+    const currencyCode = account.currency;
+    const integerBalance = account.balance;
+
+    // Get source currency decimal places
+    const sourceCurrency = getCurrency(currencyCode);
+    const sourceDecimalPlaces = sourceCurrency.decimalPlaces;
+    const sourceDivisor = Math.pow(10, sourceDecimalPlaces);
+
+    // Convert integer amount to actual decimal value
+    const decimalBalance = integerBalance / sourceDivisor;
+
+    // Apply exchange rate if needed
+    let convertedDecimal: number;
+    if (currencyCode === targetCurrency) {
+      convertedDecimal = decimalBalance;
+    } else {
+      // Look up the latest exchange rate
+      const rateSql = `
+        SELECT rate
+        FROM exchange_rates
+        WHERE from_currency = ?
+          AND to_currency = ?
+        ORDER BY date DESC
+        LIMIT 1
+      `;
+      const rateResult = await db.first<{ rate: number }>(rateSql, [
+        currencyCode,
+        targetCurrency,
+      ]);
+      const rate = rateResult?.rate || 1.0;
+      convertedDecimal = decimalBalance * rate;
+    }
+
+    // Convert back to integer in target currency
+    const convertedInteger = Math.round(convertedDecimal * targetMultiplier);
+    totalConverted += convertedInteger;
+  }
+
+  return {
+    convertedBalance: totalConverted,
+    balances: accountBalances || [],
+  };
+}
+
 export const app = createApp<AccountHandlers>();
 
 app.method('account-update', mutator(undoable(updateAccount)));
 app.method('accounts-get', getAccounts);
 app.method('account-balance', getAccountBalance);
+app.method('account-balance-converted', getConvertedAccountBalance);
 app.method('account-properties', getAccountProperties);
 app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);

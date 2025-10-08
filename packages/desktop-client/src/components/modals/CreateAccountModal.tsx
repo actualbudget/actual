@@ -100,6 +100,7 @@ export function CreateAccountModal({
         orgDomain: string;
         orgId: string;
         balance: number;
+        currency_code?: string;
       };
 
       for (const oldAccount of results.accounts ?? []) {
@@ -110,6 +111,7 @@ export function CreateAccountModal({
           orgDomain: oldAccount.org.domain,
           orgId: oldAccount.org.id,
           balance: oldAccount.balance,
+          currency_code: oldAccount.currency_code,
         };
 
         newAccounts.push(newAccount);
@@ -166,6 +168,7 @@ export function CreateAccountModal({
         orgDomain: string | null;
         orgId: string;
         balance: number;
+        currency_code?: string;
       };
 
       for (const oldAccount of results.accounts) {
@@ -180,6 +183,7 @@ export function CreateAccountModal({
               ? oldAccount.bankData.automaticallyInvestedBalance +
                 oldAccount.bankData.closingBalance
               : oldAccount.balance,
+          currency_code: oldAccount.currency_code,
         };
 
         newAccounts.push(newAccount);

@@ -42,6 +42,7 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
         SpkMarburgBiedenkopfHeladef1mar.normalizeAccount(accountRaw),
       ).toEqual({
         account_id: 'a787ba27-02ee-4fd6-be86-73831adc5498',
+        currency_code: 'EUR',
         iban: 'DE50533500000123456789',
         institution: {
           bic: 'HELADEF1MAR',

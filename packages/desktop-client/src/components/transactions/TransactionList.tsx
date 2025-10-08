@@ -324,6 +324,7 @@ export function TransactionList({
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [defaultCurrencyCode] = useSyncedPref('defaultCurrencyCode');
   const [learnCategories = 'true'] = useSyncedPref('learn-categories');
   const isLearnCategoriesEnabled = String(learnCategories) === 'true';
   const [upcomingLength = '7'] = useSyncedPref(
@@ -613,6 +614,7 @@ export function TransactionList({
       showCategory
       currentAccountId={account && account.id}
       currentCategoryId={category && category.id}
+      currencyCode={account?.currency_code ?? defaultCurrencyCode}
       isAdding={isAdding}
       isNew={isNew}
       isMatched={isMatched}

@@ -32,6 +32,7 @@ export type TransactionUpdateFunction = <T extends keyof SerializedTransaction>(
 export function serializeTransaction(
   transaction: TransactionEntity,
   showZeroInDeposit?: boolean,
+  decimalPlaces: number = 2,
 ): SerializedTransaction {
   const { amount, date: originalDate } = transaction;
 
@@ -62,14 +63,21 @@ export function serializeTransaction(
   return {
     ...transaction,
     date,
-    debit: debit != null ? integerToFormattedWithDecimal(debit) : '',
-    credit: credit != null ? integerToFormattedWithDecimal(credit) : '',
+    debit:
+      debit != null
+        ? integerToFormattedWithDecimal(debit, undefined, decimalPlaces)
+        : '',
+    credit:
+      credit != null
+        ? integerToFormattedWithDecimal(credit, undefined, decimalPlaces)
+        : '',
   };
 }
 
 export function deserializeTransaction(
   transaction: SerializedTransaction,
   originalTransaction: TransactionEntity,
+  decimalPlaces: number = 2,
 ) {
   const { debit, credit, date: originalDate, ...realTransaction } = transaction;
 
@@ -82,7 +90,9 @@ export function deserializeTransaction(
   }
 
   amount =
-    amount != null ? amountToInteger(amount) : originalTransaction.amount;
+    amount != null
+      ? amountToInteger(amount, decimalPlaces)
+      : originalTransaction.amount;
   let date = originalDate;
   if (date == null) {
     date = originalTransaction.date || currentDay();

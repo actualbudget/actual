@@ -554,6 +554,32 @@ export async function getAccount(id: DbAccount['id']) {
   return first<DbAccount>(`SELECT * FROM accounts WHERE id = ?`, [id]);
 }
 
+export async function getAccountCurrencyCode(
+  account: Pick<DbAccount, 'currency_code'> | DbAccount['id'],
+): Promise<string> {
+  let currencyCode: string | null | undefined;
+
+  if (typeof account === 'string') {
+    // If account is an ID, fetch the account
+    const accountData = await getAccount(account);
+    currencyCode = accountData?.currency_code;
+  } else {
+    // If account is an object, use its currency_code
+    currencyCode = account.currency_code;
+  }
+
+  // If currency_code is null/undefined, fall back to defaultCurrencyCode preference
+  if (!currencyCode) {
+    const defaultCurrency = await first<{ value: string }>(
+      'SELECT value FROM preferences WHERE id = ?',
+      ['defaultCurrencyCode'],
+    );
+    currencyCode = defaultCurrency?.value || ''; // Final fallback to None
+  }
+
+  return currencyCode;
+}
+
 export async function getCategory(id: DbCategory['id']) {
   return first<DbCategory>(`SELECT * FROM categories WHERE id = ?`, [id]);
 }

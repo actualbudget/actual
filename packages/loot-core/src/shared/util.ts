@@ -587,6 +587,7 @@ export function getNumberFormat({
     thousandsSeparator,
     decimalSeparator,
     formatter,
+    hideFraction: currentHideFraction,
   };
 }
 
@@ -640,8 +641,14 @@ export function safeNumber(value: number) {
   return value;
 }
 
-export function toRelaxedNumber(formattedAmount: FormattedAmount): Amount {
-  return integerToAmount(formattedToInteger(formattedAmount) || 0);
+export function toRelaxedNumber(
+  formattedAmount: FormattedAmount,
+  decimalPlaces?: number,
+): Amount {
+  return integerToAmount(
+    formattedToInteger(formattedAmount, decimalPlaces) || 0,
+    decimalPlaces,
+  );
 }
 
 export function integerToFormatted(
@@ -650,6 +657,7 @@ export function integerToFormatted(
     | Intl.NumberFormat
     | { format: (value: number) => string } = getNumberFormat().formatter,
   decimalPlaces: number = 2,
+  formatConfig?: ReturnType<typeof getNumberFormat>,
 ) {
   // If using SatNumberFormat, we need 8 decimal places
   if (formatter instanceof SatNumberFormat) {
@@ -657,8 +665,24 @@ export function integerToFormatted(
   }
   const divisor = Math.pow(10, decimalPlaces);
   const amount = safeNumber(integerAmount) / divisor;
+  const config = formatConfig || getNumberFormat();
 
-  return formatter.format(amount);
+  // If formatter is not provided and decimalPlaces differs from default,
+  // create a formatter with the correct decimal places
+  let fmt = formatter;
+  if (!fmt) {
+    if (decimalPlaces !== 2) {
+      fmt = getNumberFormat({
+        format: config.value,
+        hideFraction: config.hideFraction,
+        decimalPlaces,
+      }).formatter;
+    } else {
+      fmt = config.formatter;
+    }
+  }
+
+  return fmt.format(amount);
 }
 
 export function integerToFormattedWithDecimal(
@@ -670,21 +694,42 @@ export function integerToFormattedWithDecimal(
     decimalPlaces = 8;
   }
   // If decimal digits exist, keep them. Otherwise format them as usual.
-  if (integerAmount % Math.pow(10, decimalPlaces) !== 0) {
+  const divisor = Math.pow(10, decimalPlaces);
+  if (integerAmount % divisor !== 0) {
     return integerToFormatted(
       integerAmount,
       getNumberFormat({
         ...numberFormatConfig,
         hideFraction: false,
+        decimalPlaces,
       }).formatter,
+      decimalPlaces,
     );
   }
 
   return integerToFormatted(integerAmount, formatter, decimalPlaces);
 }
 
-export function amountToFormatted(amount: Amount): FormattedAmount {
-  return getNumberFormat().formatter.format(amount);
+export function amountToFormatted(
+  amount: Amount,
+  formatConfig?: ReturnType<typeof getNumberFormat>,
+  decimalPlaces?: number,
+): FormattedAmount {
+  // If decimalPlaces is provided and different from config, create a new formatter
+  if (decimalPlaces !== undefined && formatConfig === undefined) {
+    formatConfig = getNumberFormat({ decimalPlaces });
+  } else if (decimalPlaces !== undefined && formatConfig !== undefined) {
+    // If both are provided, create a new formatter with the specified decimal places
+    formatConfig = getNumberFormat({
+      format: formatConfig.value,
+      hideFraction: formatConfig.hideFraction,
+      decimalPlaces,
+    });
+  }
+
+  const config = formatConfig || getNumberFormat();
+
+  return config.formatter.format(amount);
 }
 
 export function amountToFormattedNoDecimal(amount: Amount): FormattedAmount {
@@ -729,9 +774,10 @@ export function formattedToAmount(formattedAmount: string): Amount | null {
 
 export function formattedToInteger(
   formattedAmount: FormattedAmount,
+  decimalPlaces?: number,
 ): IntegerAmount | null {
   const amount = formattedToAmount(formattedAmount);
-  return amount == null ? null : amountToInteger(amount);
+  return amount == null ? null : amountToInteger(amount, decimalPlaces);
 }
 
 export function stringToInteger(str: string): number | null {
@@ -852,4 +898,71 @@ export function applyFindReplace(
   } catch {
     return text;
   }
+}
+
+/**
+ * Formats a CurrencyAmount using the specific currency's formatting rules.
+ * This is useful when you need to display amounts in different currencies
+ * (e.g., account balances when accounts have different currency codes).
+ *
+ * @param currencyAmount - Object containing the currency and integer amount
+ * @param options - Optional formatting options to override currency defaults
+ * @returns Formatted string with appropriate currency symbol and number format
+ *
+ * @example
+ * const amount = { currency: getCurrency('USD'), amount: 12345 };
+ * currencyToCurrency(amount) // Returns '$123.45'
+ *
+ * const euroAmount = { currency: getCurrency('EUR'), amount: 12345 };
+ * currencyToCurrency(euroAmount) // Returns '123,45 €'
+ *
+ * const noSymbol = { currency: getCurrency(''), amount: 12345 };
+ * currencyToCurrency(noSymbol) // Returns '123.45' (no currency symbol)
+ */
+export function currencyToFormatted(
+  currencyAmount: CurrencyAmount,
+  options?: {
+    hideFraction?: boolean;
+    symbolPosition?: 'before' | 'after';
+    spaceEnabled?: boolean;
+  },
+): FormattedAmount {
+  const { currency, amount } = currencyAmount;
+
+  // Get the number formatter for this currency's format
+  const formatter = getNumberFormat({
+    format: currency.numberFormat,
+    decimalPlaces: options?.hideFraction ? 0 : currency.decimalPlaces,
+  }).formatter;
+
+  // Format the number without currency symbol
+  const formattedNumber = integerToFormatted(
+    amount,
+    formatter,
+    currency.decimalPlaces,
+  );
+
+  // If no currency code, return just the number
+  if (!currency.code || !currency.symbol) {
+    return formattedNumber;
+  }
+
+  // Apply currency symbol styling
+  let sign = '';
+  let valueWithoutSign = formattedNumber;
+  if (formattedNumber.startsWith('-')) {
+    sign = '-';
+    valueWithoutSign = formattedNumber.slice(1);
+  }
+
+  const space = options?.spaceEnabled ? '\u202F' : '';
+  const position =
+    options?.symbolPosition ?? (currency.symbolFirst ? 'before' : 'after');
+
+  const styledAmount =
+    position === 'after'
+      ? `${valueWithoutSign}${space}${currency.symbol}`
+      : `\u202A${currency.symbol}\u202C${space}${valueWithoutSign}`;
+
+  return sign + styledAmount;
 }

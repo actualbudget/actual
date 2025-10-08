@@ -5,6 +5,7 @@ export type AccountEntity = {
   closed: 0 | 1;
   sort_order: number;
   last_reconciled: string | null;
+  currency_code: string | null;
   tombstone: 0 | 1;
 } & (_SyncFields<true> | _SyncFields<false>);
 

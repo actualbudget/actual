@@ -73,11 +73,16 @@ app.post(
         data: {
           ...requisition,
           accounts: await Promise.all(
-            accounts.map(async account =>
-              account?.iban
+            accounts.map(async account => {
+              const normalized = account?.iban
                 ? { ...account, iban: await sha256String(account.iban) }
-                : account,
-            ),
+                : account;
+              // Normalize currency field to currency_code for consistency
+              if (normalized.currency) {
+                normalized.currency_code = normalized.currency;
+              }
+              return normalized;
+            }),
           ),
         },
       });

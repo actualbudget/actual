@@ -25,4 +25,5 @@ export type SyncServerSimpleFinAccount = {
   orgDomain?: string;
   orgId?: string;
   name: string;
+  currency_code?: string;
 };

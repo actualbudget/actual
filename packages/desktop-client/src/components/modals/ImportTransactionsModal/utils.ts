@@ -1,7 +1,7 @@
 import * as d from 'date-fns';
 
 import { format as formatDate_ } from 'loot-core/shared/months';
-import { looselyParseAmount } from 'loot-core/shared/util';
+import { amountToInteger, looselyParseAmount } from 'loot-core/shared/util';
 
 export type DateFormat =
   | 'yyyy mm dd'
@@ -195,6 +195,7 @@ export function parseAmountFields(
   outValue: string,
   flipAmount: boolean,
   multiplierAmount: string,
+  decimalPlaces: number = 2,
 ) {
   const multiplier = parseFloat(multiplierAmount) || 1.0;
 
@@ -248,15 +249,27 @@ export function parseAmountFields(
   value.inflow *= multiplier;
   value.outflow *= multiplier;
 
+  // Convert floating-point amounts to integers using the account's decimal places
+  const amountInt =
+    value.outflow || value.inflow
+      ? amountToInteger(value.outflow || value.inflow, decimalPlaces)
+      : null;
+  const outflowInt = value.outflow
+    ? amountToInteger(value.outflow, decimalPlaces)
+    : null;
+  const inflowInt = value.inflow
+    ? amountToInteger(value.inflow, decimalPlaces)
+    : null;
+
   if (splitMode) {
     return {
-      amount: value.outflow || value.inflow,
-      outflow: value.outflow,
-      inflow: value.inflow,
+      amount: amountInt,
+      outflow: outflowInt,
+      inflow: inflowInt,
     };
   } else {
     return {
-      amount: value.outflow || value.inflow,
+      amount: amountInt,
       outflow: null,
       inflow: null,
     };

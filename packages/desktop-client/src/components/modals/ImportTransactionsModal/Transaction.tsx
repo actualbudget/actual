@@ -8,7 +8,8 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { amountToFormatted } from 'loot-core/shared/util';
+import { type Currency } from 'loot-core/shared/currencies';
+import { getNumberFormat, integerToFormatted } from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { ParsedDate } from './ParsedDate';
@@ -37,6 +38,7 @@ type TransactionProps = {
   categories: CategoryEntity[];
   onCheckTransaction: (transactionId: string) => void;
   reconcile: boolean;
+  accountCurrency: Currency;
 };
 
 export function Transaction({
@@ -53,10 +55,15 @@ export function Transaction({
   categories,
   onCheckTransaction,
   reconcile,
+  accountCurrency,
 }: TransactionProps) {
   const { t } = useTranslation();
 
   const categoryList = categories.map(category => category.name);
+  const formatter = getNumberFormat({
+    format: accountCurrency.numberFormat,
+    decimalPlaces: accountCurrency.decimalPlaces,
+  }).formatter;
   const transaction = useMemo(
     () =>
       fieldMappings && !rawTransaction.isMatchedTransaction
@@ -76,6 +83,7 @@ export function Transaction({
       };
     }
 
+    // parseAmountFields now returns integer amounts directly
     return parseAmountFields(
       transaction,
       splitMode,
@@ -83,6 +91,7 @@ export function Transaction({
       outValue,
       flipAmount,
       multiplierAmount,
+      accountCurrency.decimalPlaces,
     );
   }, [
     rawTransaction,
@@ -92,6 +101,7 @@ export function Transaction({
     outValue,
     flipAmount,
     multiplierAmount,
+    accountCurrency.decimalPlaces,
   ]);
 
   return (
@@ -230,7 +240,7 @@ export function Transaction({
       </Field>
       {inOutMode && (
         <Field
-          width={90}
+          width="flex"
           contentStyle={{ textAlign: 'left', ...styles.tnum }}
           title={
             transaction.inOut === undefined
@@ -244,7 +254,7 @@ export function Transaction({
       {splitMode ? (
         <>
           <Field
-            width={90}
+            width="flex"
             contentStyle={{
               textAlign: 'right',
               ...styles.tnum,
@@ -255,13 +265,21 @@ export function Transaction({
             title={
               outflow === null
                 ? t('Invalid: unable to parse the value')
-                : amountToFormatted(outflow)
+                : integerToFormatted(
+                    outflow,
+                    formatter,
+                    accountCurrency.decimalPlaces,
+                  )
             }
           >
-            {amountToFormatted(outflow || 0)}
+            {integerToFormatted(
+              outflow || 0,
+              formatter,
+              accountCurrency.decimalPlaces,
+            )}
           </Field>
           <Field
-            width={90}
+            width="flex"
             contentStyle={{
               textAlign: 'right',
               ...styles.tnum,
@@ -272,15 +290,23 @@ export function Transaction({
             title={
               inflow === null
                 ? t('Invalid: unable to parse the value')
-                : amountToFormatted(inflow)
+                : integerToFormatted(
+                    inflow,
+                    formatter,
+                    accountCurrency.decimalPlaces,
+                  )
             }
           >
-            {amountToFormatted(inflow || 0)}
+            {integerToFormatted(
+              inflow || 0,
+              formatter,
+              accountCurrency.decimalPlaces,
+            )}
           </Field>
         </>
       ) : (
         <Field
-          width={90}
+          width="flex"
           contentStyle={{
             textAlign: 'right',
             ...styles.tnum,
@@ -291,10 +317,18 @@ export function Transaction({
               ? t('Invalid: unable to parse the value ({{amount}})', {
                   amount: transaction.amount,
                 })
-              : amountToFormatted(amount)
+              : integerToFormatted(
+                  amount,
+                  formatter,
+                  accountCurrency.decimalPlaces,
+                )
           }
         >
-          {amountToFormatted(amount || 0)}
+          {integerToFormatted(
+            amount || 0,
+            formatter,
+            accountCurrency.decimalPlaces,
+          )}
         </Field>
       )}
     </Row>

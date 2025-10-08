@@ -10,11 +10,7 @@ import {
   makeChild as makeChildTransaction,
   recalculateSplit,
 } from '../../shared/transactions';
-import {
-  amountToInteger,
-  hasFieldsChanged,
-  integerToAmount,
-} from '../../shared/util';
+import { amountToInteger, hasFieldsChanged } from '../../shared/util';
 import {
   type AccountEntity,
   type BankSyncResponse,
@@ -552,7 +548,6 @@ export async function reconcileTransactions(
           existingPayeeMap.set(existing.payee, payee?.name);
         }
         existing.payee_name = existingPayeeMap.get(existing.payee);
-        existing.amount = integerToAmount(existing.amount);
         updatedPreview.push({ transaction: trans, existing });
       } else {
         updatedPreview.push({ transaction: trans, ignored: true });
