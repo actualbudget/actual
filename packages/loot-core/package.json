@@ -26,7 +26,7 @@
     "adm-zip": "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch",
     "better-sqlite3": "^12.4.1",
     "csv-parse": "^5.6.0",
-    "csv-stringify": "^6.5.2",
+    "csv-stringify": "^6.6.0",
     "date-fns": "^4.1.0",
     "deep-equal": "^2.2.3",
     "handlebars": "^4.7.8",

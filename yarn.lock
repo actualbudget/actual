@@ -9741,10 +9741,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"csv-stringify@npm:^6.5.2":
-  version: 6.5.2
-  resolution: "csv-stringify@npm:6.5.2"
-  checksum: 10/7715664020d291ccece25a32ecca617cea8d7e320af0c4e58cabbfb52d914832c3ea63c77c9796ca032ce6b47b899c879140c55bfd380105c42038ec305607a3
+"csv-stringify@npm:^6.6.0":
+  version: 6.6.0
+  resolution: "csv-stringify@npm:6.6.0"
+  checksum: 10/8ff6340c9352e85974961ee8719de1dc725e7d2cb7085a02c641bbe71a2c3eec6868e2bb296201d239d855df280952da5336cfd01a46db0c66e54597d753e7d6
   languageName: node
   linkType: hard
 
@@ -14451,7 +14451,7 @@ __metadata:
     buffer: "npm:^6.0.3"
     cross-env: "npm:^10.1.0"
     csv-parse: "npm:^5.6.0"
-    csv-stringify: "npm:^6.5.2"
+    csv-stringify: "npm:^6.6.0"
     date-fns: "npm:^4.1.0"
     deep-equal: "npm:^2.2.3"
     fake-indexeddb: "npm:^3.1.8"
