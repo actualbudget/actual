@@ -15,6 +15,7 @@
   },
   "main": "build/desktop-electron/index.js",
   "build": {
+    "asar": false,
     "appId": "com.actualbudget.actual",
     "files": [
       "build",
@@ -46,8 +47,7 @@
     },
     "linux": {
       "target": [
-        "flatpak",
-        "AppImage"
+        "flatpak"
       ],
       "artifactName": "${productName}-linux-${arch}.${ext}"
     },
