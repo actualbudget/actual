@@ -411,9 +411,8 @@ export function CreateAccountModal({
               providerDisplayName: provider.displayName,
               onSuccess: async (credentials: Record<string, string>) => {
                 // The plugin system handles credentials internally
-                // We just need to notify that setup is complete
-                // The credentials are passed to the plugin through its own API
-                console.log('Plugin setup completed for', provider.slug, credentials);
+                // After setup, try to connect again
+                onConnectPluginProvider(provider, true);
               },
             },
           },
@@ -422,49 +421,32 @@ export function CreateAccountModal({
       return;
     }
 
-    // If configured, fetch and display accounts (placeholder - actual implementation needed)
+    // If configured, fetch and display accounts
     try {
-      const response = await send(
-        'bank-sync-accounts',
-        {
-          providerSlug: provider.slug,
-        },
-      );
+      const results = await send('bank-sync-accounts', {
+        providerSlug: provider.slug,
+      }) as any;
 
-      type PluginAccountsResponse = {
-        accounts: Array<{
-          account_id: string;
-          name: string;
-          institution: string;
-          balance: number;
-          [key: string]: unknown;
-        }>;
-      };
-
-      const typedResponse = response as PluginAccountsResponse;
-
-      if (
-        typedResponse &&
-        typedResponse.accounts &&
-        Array.isArray(typedResponse.accounts)
-      ) {
-        // Open the account selection modal
-        dispatch(
-          pushModal({
-            modal: {
-              name: 'select-linked-accounts',
-              options: {
-                externalAccounts: typedResponse.accounts,
-                syncSource: 'plugin' as const,
-                providerSlug: provider.slug,
-                upgradingAccountId,
-              },
-            },
-          }),
-        );
+      if (results.error_code) {
+        throw new Error(results.reason);
       }
+
+      // The response should already be in the correct format for select-linked-accounts
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'select-linked-accounts',
+            options: {
+              externalAccounts: results.accounts || [],
+              syncSource: 'plugin' as const,
+              providerSlug: provider.slug,
+              upgradingAccountId,
+            },
+          },
+        }),
+      );
     } catch (err) {
-      console.error('Error fetching accounts:', err);
+      console.error('Error fetching plugin accounts:', err);
       dispatch(
         addNotification({
           notification: {
@@ -758,6 +740,16 @@ export function CreateAccountModal({
                   )}
 
                   {/* Plugin-based bank sync providers */}
+                  {canSetSecrets && pluginProviders.length > 0 && (
+                      <Text style={{ lineHeight: '1.4em', fontSize: 15, textAlign: 'center', marginTop: '18px' }}>
+                        <Trans>
+                          <strong>
+                            Plugin-based bank sync providers:
+                          </strong>
+                        </Trans>
+                      </Text>
+                  )}
+
                   {canSetSecrets &&
                     pluginProviders.map(provider => (
                       <View
