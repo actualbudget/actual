@@ -41,6 +41,7 @@ jobs:
         run: yarn e2e
         env:
           E2E_START_URL: ${{ needs.netlify.outputs.netlify_url }}
+          DEBUG: 'pw:*'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
