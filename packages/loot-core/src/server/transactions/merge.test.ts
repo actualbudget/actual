@@ -330,8 +330,11 @@ describe('Merging success', () => {
     ]);
     expect(keptId).toBe(imported);
 
-    // Check that the kept transaction is now a parent
-    const keptTransaction = await db.getTransaction(imported);
+    // Check that the kept transaction is now a parent (avoid conversion path)
+    const keptTransaction = await db.first(
+      'SELECT * FROM v_transactions WHERE id = ?',
+      [imported],
+    );
     expect(keptTransaction).toMatchObject({
       id: imported,
       is_parent: true, // Database stores as 1, but is converted to boolean

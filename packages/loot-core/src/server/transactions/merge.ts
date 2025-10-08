@@ -24,21 +24,26 @@ export async function mergeTransactions(
   }
   const { keep, drop } = determineKeepDrop(a, b);
 
-  // Load subtransactions for both transactions if they are parents
-  const [keepSubtransactions, dropSubtransactions] = await Promise.all([
-    keep.is_parent
-      ? db.all<TransactionEntity>(
-          'SELECT * FROM v_transactions WHERE parent_id = ?',
-          [keep.id],
-        )
-      : Promise.resolve([]),
-    drop.is_parent
-      ? db.all<TransactionEntity>(
-          'SELECT * FROM v_transactions WHERE parent_id = ?',
-          [drop.id],
-        )
-      : Promise.resolve([]),
-  ]);
+  // Load subtransactions with a single query, then split by parent_id in memory
+  let keepSubtransactions: TransactionEntity[] = [];
+  let dropSubtransactions: TransactionEntity[] = [];
+  const parentIds = [
+    keep.is_parent ? keep.id : null,
+    drop.is_parent ? drop.id : null,
+  ].filter((v): v is string => Boolean(v));
+
+  if (parentIds.length > 0) {
+    const rows = await db.all<TransactionEntity>(
+      `SELECT * FROM v_transactions WHERE parent_id IN (${parentIds
+        .map(() => '?')
+        .join(',')})`,
+      parentIds,
+    );
+    for (const row of rows) {
+      if (row.parent_id === keep.id) keepSubtransactions.push(row);
+      else if (row.parent_id === drop.id) dropSubtransactions.push(row);
+    }
+  }
 
   // Determine which transaction has subtransactions (split categories)
   const keepHasSubtransactions = keepSubtransactions.length > 0;
