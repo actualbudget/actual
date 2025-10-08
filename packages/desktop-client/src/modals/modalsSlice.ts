@@ -123,6 +123,14 @@ export type Modal =
       };
     }
   | {
+      name: 'bank-sync-init';
+      options: {
+        providerSlug: string;
+        providerDisplayName: string;
+        onSuccess: (credentials: Record<string, string>) => void;
+      };
+    }
+  | {
       name: 'delete-budget';
       options: { file: File };
     }

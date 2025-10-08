@@ -28,7 +28,7 @@ import { getPathForUserFile, getPathForGroupFile } from './util/paths.js';
 
 const app = express();
 app.use(validateSessionMiddleware);
-app.use(errorMiddleware);
+// @ts-expect-error - express-winston types don't perfectly align with Express types
 app.use(requestLoggerMiddleware);
 app.use(
   express.raw({
@@ -403,3 +403,6 @@ app.post('/delete-user-file', (req, res) => {
 
   res.send(OK_RESPONSE);
 });
+
+// Error handling middleware (must be last)
+app.use(errorMiddleware);

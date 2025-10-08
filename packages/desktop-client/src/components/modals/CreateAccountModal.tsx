@@ -25,6 +25,11 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
 import { authorizeBank } from '@desktop-client/gocardless';
+import {
+  useBankSyncProviders,
+  type BankSyncProvider,
+} from '@desktop-client/hooks/useBankSyncProviders';
+import { useBankSyncStatus } from '@desktop-client/hooks/useBankSyncStatus';
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
@@ -40,6 +45,84 @@ type CreateAccountModalProps = Extract<
   ModalType,
   { name: 'add-account' }
 >['options'];
+
+// Separate component for each plugin provider button
+function PluginProviderButton({
+  provider,
+  syncServerStatus,
+  onConnectProvider,
+  onResetCredentials,
+}: {
+  provider: BankSyncProvider;
+  syncServerStatus: string;
+  onConnectProvider: (
+    provider: BankSyncProvider,
+    isConfigured: boolean,
+  ) => void;
+  onResetCredentials: (provider: BankSyncProvider) => void;
+}) {
+  const { t } = useTranslation();
+  const { configured: isConfigured, isLoading: statusLoading } =
+    useBankSyncStatus(provider.slug);
+
+  return (
+    <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+      <ButtonWithLoading
+        isDisabled={syncServerStatus !== 'online'}
+        isLoading={statusLoading}
+        style={{
+          padding: '10px 0',
+          fontSize: 15,
+          fontWeight: 600,
+          flex: 1,
+        }}
+        onPress={() => onConnectProvider(provider, isConfigured)}
+      >
+        {isConfigured
+          ? t('Link account with {{provider}}', {
+              provider: provider.displayName,
+            })
+          : t('Set up {{provider}}', { provider: provider.displayName })}
+      </ButtonWithLoading>
+      {isConfigured && (
+        <DialogTrigger>
+          <Button
+            variant="bare"
+            aria-label={t('Bank sync provider options')}
+            style={{
+              padding: 8,
+            }}
+          >
+            <SvgDotsHorizontalTriple
+              style={{
+                width: 16,
+                height: 16,
+                color: 'currentColor',
+              }}
+            />
+          </Button>
+          <Popover>
+            <Menu
+              onMenuSelect={itemId => {
+                if (itemId === 'reconfigure') {
+                  onResetCredentials(provider);
+                }
+              }}
+              items={[
+                {
+                  name: 'reconfigure',
+                  text: t('Reset {{provider}} credentials', {
+                    provider: provider.displayName,
+                  }),
+                },
+              ]}
+            />
+          </Popover>
+        </DialogTrigger>
+      )}
+    </View>
+  );
+}
 
 export function CreateAccountModal({
   upgradingAccountId,
@@ -59,6 +142,9 @@ export function CreateAccountModal({
   >(null);
   const { hasPermission } = useAuth();
   const multiuserEnabled = useMultiuserEnabled();
+
+  // Plugin providers
+  const { providers: pluginProviders } = useBankSyncProviders();
 
   const onConnectGoCardless = () => {
     if (!isGoCardlessSetupComplete) {
@@ -307,6 +393,100 @@ export function CreateAccountModal({
 
   const onCreateLocalAccount = () => {
     dispatch(pushModal({ modal: { name: 'add-local-account' } }));
+  };
+
+  // Plugin provider handlers
+  const onConnectPluginProvider = async (
+    provider: BankSyncProvider,
+    isConfigured: boolean,
+  ) => {
+    if (!isConfigured) {
+      // Show initialization modal for setting up credentials
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'bank-sync-init',
+            options: {
+              providerSlug: provider.slug,
+              providerDisplayName: provider.displayName,
+              onSuccess: async (credentials: Record<string, string>) => {
+                // Save credentials via API
+                await send('secret-set', {
+                  name: `plugin_${provider.slug}_credentials`,
+                  value: JSON.stringify(credentials),
+                });
+              },
+            },
+          },
+        }),
+      );
+      return;
+    }
+
+    // If configured, fetch and display accounts (placeholder - actual implementation needed)
+    try {
+      const response = await send('bank-sync-accounts' as never, {
+        providerSlug: provider.slug,
+      } as never);
+
+      type PluginAccountsResponse = {
+        status: string;
+        data?: {
+          accounts: Array<{
+            account_id: string;
+            name: string;
+            institution: string;
+            balance: number;
+            [key: string]: unknown;
+          }>;
+        };
+      };
+
+      const typedResponse = response as PluginAccountsResponse;
+
+      if (
+        typedResponse &&
+        typedResponse.status === 'ok' &&
+        typedResponse.data &&
+        typedResponse.data.accounts
+      ) {
+        // Open the account selection modal
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'select-linked-accounts',
+              options: {
+                externalAccounts: typedResponse.data.accounts,
+                syncSource: 'plugin' as const,
+                providerSlug: provider.slug,
+                upgradingAccountId,
+              },
+            },
+          }),
+        );
+      }
+    } catch (err) {
+      console.error('Error fetching accounts:', err);
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            title: t('Error fetching accounts'),
+            message: (err as Error).message,
+            timeout: 5000,
+          },
+        }),
+      );
+    }
+  };
+
+  const onResetPluginProviderCredentials = async (
+    provider: BankSyncProvider,
+  ) => {
+    await send('secret-set', {
+      name: `plugin_${provider.slug}_credentials`,
+      value: null,
+    });
   };
 
   const { configuredGoCardless } = useGoCardlessStatus();
@@ -578,6 +758,27 @@ export function CreateAccountModal({
                       </Text>
                     </>
                   )}
+
+                  {/* Plugin-based bank sync providers */}
+                  {canSetSecrets &&
+                    pluginProviders.map(provider => (
+                      <View
+                        key={provider.slug}
+                        style={{ gap: 10, marginTop: '18px' }}
+                      >
+                        <PluginProviderButton
+                          provider={provider}
+                          syncServerStatus={syncServerStatus}
+                          onConnectProvider={onConnectPluginProvider}
+                          onResetCredentials={onResetPluginProviderCredentials}
+                        />
+                        {provider.description && (
+                          <Text style={{ lineHeight: '1.4em', fontSize: 15 }}>
+                            {provider.description}
+                          </Text>
+                        )}
+                      </View>
+                    ))}
 
                   {(!isGoCardlessSetupComplete ||
                     !isSimpleFinSetupComplete ||

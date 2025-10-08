@@ -18,9 +18,6 @@ module.exports = {
   create(context) {
     const whitelist = [
       'Actual',
-      'GoCardless',
-      'SimpleFIN',
-      'Pluggy.ai',
       'YNAB',
       'nYNAB',
       'YNAB4',

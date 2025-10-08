@@ -313,6 +313,30 @@ export const linkAccountPluggyAi = createAppAsyncThunk(
   },
 );
 
+type LinkAccountPluginPayload = {
+  accountId: string;
+  externalAccount: any;
+  syncSource: 'plugin';
+  providerSlug: string;
+  upgradingId?: AccountEntity['id'] | undefined;
+};
+
+export const linkAccountPlugin = createAppAsyncThunk(
+  `${sliceName}/linkAccountPlugin`,
+  async (
+    { accountId, externalAccount, providerSlug, upgradingId }: LinkAccountPluginPayload,
+    { dispatch },
+  ) => {
+    await send('bank-sync-accounts-link', {
+      providerSlug,
+      externalAccount,
+      upgradingId,
+    });
+    dispatch(markPayeesDirty());
+    dispatch(markAccountsDirty());
+  },
+);
+
 function handleSyncResponse(
   accountId: AccountEntity['id'],
   res: SyncResponseWithErrors,

@@ -74,12 +74,15 @@ const confusingBrowserGlobals = [
 export default pluginTypescript.config(
   {
     ignores: [
+      // Global ignore patterns
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/*.zip',
+      // Specific ignore patterns
       'packages/api/app/bundle.api.js',
       'packages/api/app/stats.json',
-      'packages/api/dist',
       'packages/api/@types',
       'packages/api/migrations',
-      'packages/crdt/dist',
       'packages/component-library/src/icons/**/*',
       'packages/desktop-client/bundle.browser.js',
       'packages/desktop-client/build/',
@@ -88,18 +91,13 @@ export default pluginTypescript.config(
       'packages/desktop-client/build-stats/',
       'packages/desktop-client/public/kcab/',
       'packages/desktop-client/public/data/',
-      'packages/desktop-client/**/node_modules/*',
-      'packages/desktop-client/node_modules/',
       'packages/desktop-client/test-results/',
       'packages/desktop-client/playwright-report/',
       'packages/desktop-electron/client-build/',
       'packages/desktop-electron/build/',
-      'packages/desktop-electron/dist/',
-      'packages/loot-core/**/node_modules/*',
       'packages/loot-core/**/lib-dist/*',
       'packages/loot-core/**/proto/*',
       'packages/sync-server/build/',
-      'packages/plugins-service/dist/',
       '.yarn/*',
       '.github/*',
     ],
@@ -766,6 +764,18 @@ export default pluginTypescript.config(
     },
   },
   {
+    files: ['**/*.cjs'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
+  {
+    files: ['**/manifest.ts'],
+    rules: {
+      'import/no-default-export': 'off',
+    },
+  },
+  {
     files: [
       'eslint.config.mjs',
       '**/*.test.js',
@@ -798,13 +808,6 @@ export default pluginTypescript.config(
     rules: {
       'import/extensions': 'off',
       'actual/typography': 'off',
-    },
-  },
-  {
-    files: ['packages/sync-server/src/app-gocardless/banks/*.js'],
-    rules: {
-      'import/no-anonymous-default-export': 'off',
-      'import/no-default-export': 'off',
     },
   },
 );
