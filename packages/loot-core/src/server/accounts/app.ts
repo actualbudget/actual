@@ -398,21 +398,73 @@ async function linkPluginAccount({
 }
 
 async function getPluginAccounts({ providerSlug }: { providerSlug: string }) {
-  // This is a placeholder implementation
-  // In a real implementation, this would call the plugin to fetch accounts
-  // For now, return an empty array to avoid errors
-  return {
-    accounts: [],
-  };
+  const server = getServer();
+  if (!server) {
+    throw new Error('No server configured');
+  }
+
+  try {
+    // Call the plugin's accounts endpoint
+    const pluginUrl = `${server.BASE_SERVER}/plugins-api/bank-sync/${providerSlug}/accounts`;
+
+    // Get user token for authentication
+    const userToken = await asyncStorage.getItem('user-token');
+    if (!userToken) {
+      throw new Error('User not authenticated');
+    }
+
+    const response = await get(pluginUrl, {
+      'X-ACTUAL-TOKEN': userToken,
+    });
+
+    const data = JSON.parse(response);
+
+    if (data.status === 'ok') {
+      return {
+        accounts: data.data.accounts || [],
+      };
+    } else {
+      throw new Error(data.error || 'Plugin error');
+    }
+  } catch (error) {
+    logger.error('Error fetching plugin accounts:', error);
+    throw new Error(error.message || 'Failed to fetch plugin accounts');
+  }
 }
 
 async function getPluginProviders() {
-  // This is a placeholder implementation
-  // In a real implementation, this would query available plugins
-  // For now, return an empty array to avoid errors
-  return {
-    providers: [],
-  };
+  const server = getServer();
+  if (!server) {
+    throw new Error('No server configured');
+  }
+
+  try {
+    // Call the plugin system's bank sync list endpoint
+    const pluginUrl = `${server.BASE_SERVER}/plugins-api/bank-sync/list`;
+
+    // Get user token for authentication
+    const userToken = await asyncStorage.getItem('user-token');
+    if (!userToken) {
+      throw new Error('User not authenticated');
+    }
+
+    const response = await get(pluginUrl, {
+      'X-ACTUAL-TOKEN': userToken,
+    });
+
+    const data = JSON.parse(response);
+
+    if (data.status === 'ok') {
+      return {
+        providers: data.data.providers || [],
+      };
+    } else {
+      throw new Error(data.error || 'Plugin error');
+    }
+  } catch (error) {
+    logger.error('Error fetching plugin providers:', error);
+    throw new Error(error.message || 'Failed to fetch plugin providers');
+  }
 }
 
 async function createAccount({
