@@ -35,7 +35,7 @@
     "memoize-one": "^6.0.0",
     "mitt": "^3.0.1",
     "slash": "3.0.0",
-    "ua-parser-js": "^2.0.3",
+    "ua-parser-js": "^2.0.5",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
