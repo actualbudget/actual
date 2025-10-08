@@ -2,6 +2,8 @@ import {
   attachPluginMiddleware,
   saveSecret,
   getSecret,
+  BankSyncErrorCode,
+  BankSyncError,
 } from '@actual-app/plugins-core-sync-server';
 import express, { Request, Response } from 'express';
 import { PluggyClient } from 'pluggy-sdk';
@@ -209,9 +211,72 @@ app.post('/accounts', async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error) {
-    res.json({
+    console.error('[PLUGGY ACCOUNTS] Error:', error);
+    
+    // Extract Pluggy error message and code if available
+    let pluggyMessage = 'Unknown error';
+    let pluggyCode: string | number | undefined;
+    
+    if (error instanceof Error) {
+      pluggyMessage = error.message;
+      
+      // Try to parse Pluggy SDK error format from error message
+      // Pluggy errors often include the error details in the message
+      try {
+        // Check if error has a structured format
+        const errorAny = error as unknown as Record<string, unknown>;
+        if (errorAny.message && typeof errorAny.message === 'string') {
+          pluggyMessage = errorAny.message;
+        }
+        if (errorAny.code !== undefined) {
+          pluggyCode = errorAny.code as string | number;
+        }
+      } catch (e) {
+        // Ignore parse errors
+      }
+    }
+
+    const errorResponse: BankSyncError = {
+      error_type: BankSyncErrorCode.UNKNOWN_ERROR,
+      error_code: BankSyncErrorCode.UNKNOWN_ERROR,
       status: 'error',
-      error: error instanceof Error ? error.message : 'Unknown error',
+      reason: pluggyMessage, // Use the Pluggy error message directly
+    };
+
+    // Map HTTP status codes to error types
+    const errorMessageLower = pluggyMessage.toLowerCase();
+    
+    if (pluggyCode === 401 || errorMessageLower.includes('401') || errorMessageLower.includes('unauthorized') || errorMessageLower.includes('invalid credentials')) {
+      errorResponse.error_type = BankSyncErrorCode.INVALID_CREDENTIALS;
+      errorResponse.error_code = BankSyncErrorCode.INVALID_CREDENTIALS;
+    } else if (pluggyCode === 403 || errorMessageLower.includes('403') || errorMessageLower.includes('forbidden')) {
+      errorResponse.error_type = BankSyncErrorCode.UNAUTHORIZED;
+      errorResponse.error_code = BankSyncErrorCode.UNAUTHORIZED;
+    } else if (pluggyCode === 429 || errorMessageLower.includes('429') || errorMessageLower.includes('rate limit')) {
+      errorResponse.error_type = BankSyncErrorCode.RATE_LIMIT;
+      errorResponse.error_code = BankSyncErrorCode.RATE_LIMIT;
+    } else if (pluggyCode === 400 || errorMessageLower.includes('400') || errorMessageLower.includes('bad request')) {
+      errorResponse.error_type = BankSyncErrorCode.INVALID_REQUEST;
+      errorResponse.error_code = BankSyncErrorCode.INVALID_REQUEST;
+    } else if (pluggyCode === 404 || errorMessageLower.includes('404') || errorMessageLower.includes('not found')) {
+      errorResponse.error_type = BankSyncErrorCode.ACCOUNT_NOT_FOUND;
+      errorResponse.error_code = BankSyncErrorCode.ACCOUNT_NOT_FOUND;
+    } else if (errorMessageLower.includes('network') || errorMessageLower.includes('connect') || errorMessageLower.includes('econnrefused')) {
+      errorResponse.error_type = BankSyncErrorCode.NETWORK_ERROR;
+      errorResponse.error_code = BankSyncErrorCode.NETWORK_ERROR;
+    } else if ((pluggyCode && typeof pluggyCode === 'number' && pluggyCode >= 500) || errorMessageLower.includes('500') || errorMessageLower.includes('502') || errorMessageLower.includes('503')) {
+      errorResponse.error_type = BankSyncErrorCode.SERVER_ERROR;
+      errorResponse.error_code = BankSyncErrorCode.SERVER_ERROR;
+    }
+    
+    errorResponse.details = { 
+      originalError: pluggyMessage,
+      pluggyCode: pluggyCode,
+    };
+
+    res.json({
+      status: 'ok',
+      data: errorResponse,
     });
   }
 });
@@ -337,11 +402,70 @@ app.post(
         },
       });
     } catch (error) {
+      console.error('[PLUGGY TRANSACTIONS] Error:', error);
+      
+      // Extract Pluggy error message and code if available
+      let pluggyMessage = 'Unknown error';
+      let pluggyCode: string | number | undefined;
+      
+      if (error instanceof Error) {
+        pluggyMessage = error.message;
+        
+        // Try to parse Pluggy SDK error format from error message
+        try {
+          const errorAny = error as unknown as Record<string, unknown>;
+          if (errorAny.message && typeof errorAny.message === 'string') {
+            pluggyMessage = errorAny.message;
+          }
+          if (errorAny.code !== undefined) {
+            pluggyCode = errorAny.code as string | number;
+          }
+        } catch (e) {
+          // Ignore parse errors
+        }
+      }
+
+      const errorResponse: BankSyncError = {
+        error_type: BankSyncErrorCode.UNKNOWN_ERROR,
+        error_code: BankSyncErrorCode.UNKNOWN_ERROR,
+        status: 'error',
+        reason: pluggyMessage, // Use the Pluggy error message directly
+      };
+
+      // Map HTTP status codes to error types
+      const errorMessageLower = pluggyMessage.toLowerCase();
+      
+      if (pluggyCode === 401 || errorMessageLower.includes('401') || errorMessageLower.includes('unauthorized') || errorMessageLower.includes('invalid credentials')) {
+        errorResponse.error_type = BankSyncErrorCode.INVALID_CREDENTIALS;
+        errorResponse.error_code = BankSyncErrorCode.INVALID_CREDENTIALS;
+      } else if (pluggyCode === 403 || errorMessageLower.includes('403') || errorMessageLower.includes('forbidden')) {
+        errorResponse.error_type = BankSyncErrorCode.UNAUTHORIZED;
+        errorResponse.error_code = BankSyncErrorCode.UNAUTHORIZED;
+      } else if (pluggyCode === 404 || errorMessageLower.includes('404') || errorMessageLower.includes('not found')) {
+        errorResponse.error_type = BankSyncErrorCode.ACCOUNT_NOT_FOUND;
+        errorResponse.error_code = BankSyncErrorCode.ACCOUNT_NOT_FOUND;
+      } else if (pluggyCode === 429 || errorMessageLower.includes('429') || errorMessageLower.includes('rate limit')) {
+        errorResponse.error_type = BankSyncErrorCode.RATE_LIMIT;
+        errorResponse.error_code = BankSyncErrorCode.RATE_LIMIT;
+      } else if (pluggyCode === 400 || errorMessageLower.includes('400') || errorMessageLower.includes('bad request')) {
+        errorResponse.error_type = BankSyncErrorCode.INVALID_REQUEST;
+        errorResponse.error_code = BankSyncErrorCode.INVALID_REQUEST;
+      } else if (errorMessageLower.includes('network') || errorMessageLower.includes('connect') || errorMessageLower.includes('econnrefused')) {
+        errorResponse.error_type = BankSyncErrorCode.NETWORK_ERROR;
+        errorResponse.error_code = BankSyncErrorCode.NETWORK_ERROR;
+      } else if ((pluggyCode && typeof pluggyCode === 'number' && pluggyCode >= 500) || errorMessageLower.includes('500') || errorMessageLower.includes('502') || errorMessageLower.includes('503')) {
+        errorResponse.error_type = BankSyncErrorCode.SERVER_ERROR;
+        errorResponse.error_code = BankSyncErrorCode.SERVER_ERROR;
+      }
+      
+      errorResponse.details = { 
+        originalError: pluggyMessage,
+        pluggyCode: pluggyCode,
+      };
+
       res.json({
         status: 'ok',
-        data: {
-          error: error instanceof Error ? error.message : 'Unknown error',
-        },
+        data: errorResponse,
       });
     }
   },

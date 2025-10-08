@@ -1062,20 +1062,24 @@ function handleSyncError(
   if (err instanceof BankSyncError || (err as any)?.type === 'BankSyncError') {
     const error = err as BankSyncError;
 
+    // Use the reason from plugin if available, otherwise use default message
+    let message = 'Failed syncing account "' + acct.name + '."';
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((error as any).reason) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      message = (error as any).reason;
+    } else if (error.category === 'RATE_LIMIT_EXCEEDED') {
+      message = `Failed syncing account ${acct.name}. Rate limit exceeded. Please try again later.`;
+    }
+
     const syncError = {
       type: 'SyncError',
       accountId: acct.id,
-      message: 'Failed syncing account “' + acct.name + '.”',
+      message,
       category: error.category,
       code: error.code,
     };
-
-    if (error.category === 'RATE_LIMIT_EXCEEDED') {
-      return {
-        ...syncError,
-        message: `Failed syncing account ${acct.name}. Rate limit exceeded. Please try again later.`,
-      };
-    }
 
     return syncError;
   }

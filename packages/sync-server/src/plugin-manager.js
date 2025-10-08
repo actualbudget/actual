@@ -1,4 +1,4 @@
-import { fork } from 'child_process';
+import { fork, execSync } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -32,6 +32,29 @@ class PluginManager {
 
       // Extract the zip
       zip.extractAllTo(extractPath, true);
+
+      // If plugin has package.json with dependencies, install them
+      const packageJsonPath = path.join(extractPath, 'package.json');
+      if (fs.existsSync(packageJsonPath)) {
+        try {
+          const packageJson = JSON.parse(
+            fs.readFileSync(packageJsonPath, 'utf8'),
+          );
+          if (packageJson.dependencies && Object.keys(packageJson.dependencies).length > 0) {
+            console.log(`Installing dependencies for plugin ${pluginSlug}...`);
+            execSync('npm install --production --no-audit --no-fund', {
+              cwd: extractPath,
+              stdio: 'inherit',
+            });
+            console.log(`Dependencies installed for plugin ${pluginSlug}`);
+          }
+        } catch (error) {
+          console.warn(
+            `Failed to install dependencies for plugin ${pluginSlug}:`,
+            error.message,
+          );
+        }
+      }
 
       // Track this for cleanup
       this.extractedPlugins.set(pluginSlug, extractPath);

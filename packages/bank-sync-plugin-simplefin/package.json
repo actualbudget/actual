@@ -1,0 +1,39 @@
+{
+  "name": "@actual-app/bank-sync-plugin-simplefin",
+  "version": "0.0.1",
+  "description": "SimpleFIN bank sync plugin for Actual Budget",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "npm run build:compile && npm run build:bundle && npm run build:manifest && npm run build:zip",
+    "build:compile": "tsc",
+    "build:bundle": "node scripts/build-bundle.cjs",
+    "build:manifest": "node scripts/build-manifest.cjs",
+    "build:zip": "node scripts/build-zip.cjs",
+    "deploy": "npm run build && npm run install:plugin",
+    "install:plugin": "node scripts/install-plugin.cjs",
+    "watch": "tsc --watch",
+    "clean": "rm -rf dist *.zip",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "actual",
+    "plugin",
+    "bank-sync",
+    "simplefin"
+  ],
+  "author": "Actual Budget",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.0.0",
+    "archiver": "^7.0.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@actual-app/plugins-core-sync-server": "workspace:*",
+    "axios": "^1.6.0",
+    "express": "^4.18.0"
+  }
+}

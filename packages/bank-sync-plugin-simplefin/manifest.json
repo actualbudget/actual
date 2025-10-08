@@ -1,7 +1,7 @@
 {
-  "name": "pluggy-bank-sync",
+  "name": "simplefin-bank-sync",
   "version": "0.0.1",
-  "description": "Pluggy.ai bank synchronization plugin for Actual Budget",
+  "description": "SimpleFIN bank synchronization plugin for Actual Budget",
   "entry": "index.js",
   "author": "Actual Budget Team",
   "license": "MIT",
@@ -12,7 +12,7 @@
         "POST"
       ],
       "auth": "authenticated",
-      "description": "Check Pluggy.ai configuration status"
+      "description": "Check SimpleFIN configuration status"
     },
     {
       "path": "/accounts",
@@ -20,7 +20,7 @@
         "POST"
       ],
       "auth": "authenticated",
-      "description": "Fetch accounts from Pluggy.ai"
+      "description": "Fetch accounts from SimpleFIN"
     },
     {
       "path": "/transactions",
@@ -28,13 +28,13 @@
         "POST"
       ],
       "auth": "authenticated",
-      "description": "Fetch transactions from Pluggy.ai"
+      "description": "Fetch transactions from SimpleFIN"
     }
   ],
   "bankSync": {
     "enabled": true,
-    "displayName": "Pluggy.ai",
-    "description": "Connect your bank accounts via Pluggy.ai",
+    "displayName": "SimpleFIN",
+    "description": "Connect your bank accounts via SimpleFIN",
     "requiresAuth": true,
     "endpoints": {
       "status": "/status",

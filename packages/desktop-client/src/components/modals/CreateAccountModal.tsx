@@ -111,7 +111,7 @@ function PluginProviderButton({
               items={[
                 {
                   name: 'reconfigure',
-                  text: t('Reset {{provider}} credentials', {
+                  text: t('Reconfigure {{provider}}', {
                     provider: provider.displayName,
                   }),
                 },
@@ -465,10 +465,25 @@ export function CreateAccountModal({
   const onResetPluginProviderCredentials = async (
     provider: BankSyncProvider,
   ) => {
-    await send('secret-set', {
-      name: `plugin_${provider.slug}_credentials`,
-      value: null,
-    });
+    // Open the configuration modal to allow user to enter new credentials
+    // This will override the old credentials when they complete the setup
+    //onConnectPluginProvider(provider, true);
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'bank-sync-init',
+          options: {
+            providerSlug: provider.slug,
+            providerDisplayName: provider.displayName,
+            onSuccess: async (credentials: Record<string, string>) => {
+              // The plugin system handles credentials internally
+              // After setup, try to connect again
+              onConnectPluginProvider(provider, true, credentials);
+            },
+          },
+        },
+      }),
+    );
   };
 
   const { configuredGoCardless } = useGoCardlessStatus();

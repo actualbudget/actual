@@ -38,8 +38,13 @@ import { getPluginProviders } from './app';
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';
 
-function BankSyncError(type: string, code: string, details?: object) {
-  return { type: 'BankSyncError', category: type, code, details };
+function BankSyncError(
+  type: string,
+  code: string,
+  details?: object,
+  reason?: string,
+) {
+  return { type: 'BankSyncError', category: type, code, details, reason };
 }
 
 function makeSplitTransaction(trans, subtransactions) {
@@ -323,9 +328,14 @@ async function downloadPluginTransactions(
   );
 
   if (res.error_code) {
-    throw BankSyncError(res.error_type, res.error_code);
+    throw BankSyncError(
+      res.error_type,
+      res.error_code,
+      undefined,
+      res.reason,
+    );
   } else if ('error' in res) {
-    throw BankSyncError('Connection', res.error);
+    throw BankSyncError('UNKNOWN_ERROR', res.error, undefined, res.error);
   }
 
   let retVal = {};

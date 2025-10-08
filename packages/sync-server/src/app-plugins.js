@@ -18,7 +18,7 @@ app.use(requestLoggerMiddleware);
 export { app as handlers };
 
 // Initialize plugin manager
-const pluginsDir = path.join(config.get('serverFiles'), 'plugins-api');
+const pluginsDir = path.join(config.get('serverFiles'), 'plugins');
 const pluginManager = new PluginManager(pluginsDir);
 
 app.get('/bank-sync/list', (_req, res) => {

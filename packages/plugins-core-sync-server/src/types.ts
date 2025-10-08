@@ -83,6 +83,34 @@ export interface BankSyncConfig {
 }
 
 /**
+ * Standardized error codes for bank sync plugins
+ */
+export enum BankSyncErrorCode {
+  INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
+  INVALID_ACCESS_TOKEN = 'INVALID_ACCESS_TOKEN',
+  UNAUTHORIZED = 'UNAUTHORIZED',
+  ACCOUNT_NOT_FOUND = 'ACCOUNT_NOT_FOUND',
+  TRANSACTION_NOT_FOUND = 'TRANSACTION_NOT_FOUND',
+  SERVER_ERROR = 'SERVER_ERROR',
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  RATE_LIMIT = 'RATE_LIMIT',
+  INVALID_REQUEST = 'INVALID_REQUEST',
+  ACCOUNT_LOCKED = 'ACCOUNT_LOCKED',
+  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
+}
+
+/**
+ * Standardized error response for bank sync operations
+ */
+export interface BankSyncError {
+  error_type: BankSyncErrorCode | string;
+  error_code: BankSyncErrorCode | string;
+  status: 'error' | 'rejected';
+  reason: string; // Human-readable error message
+  details?: Record<string, unknown>; // Optional provider-specific details
+}
+
+/**
  * Manifest file structure for plugins
  */
 export interface PluginManifest {
