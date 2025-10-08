@@ -58,7 +58,6 @@
     "i18next": "^25.5.3",
     "jest-diff": "^30.2.0",
     "jsverify": "^0.8.4",
-    "memfs": "3.6.0",
     "mockdate": "^3.0.5",
     "npm-run-all": "^4.1.5",
     "path-browserify": "^1.0.1",
