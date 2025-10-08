@@ -56,7 +56,7 @@
     "fake-indexeddb": "^3.1.8",
     "fast-check": "3.23.2",
     "i18next": "^25.5.3",
-    "jest-diff": "^29.7.0",
+    "jest-diff": "^30.2.0",
     "jsverify": "^0.8.4",
     "memfs": "3.6.0",
     "mockdate": "^3.0.5",
