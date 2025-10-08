@@ -4024,19 +4024,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/animated@npm:~10.0.0":
-  version: 10.0.3
-  resolution: "@react-spring/animated@npm:10.0.3"
+"@react-spring/animated@npm:10.0.0":
+  version: 10.0.0
+  resolution: "@react-spring/animated@npm:10.0.0"
   dependencies:
-    "@react-spring/shared": "npm:~10.0.3"
-    "@react-spring/types": "npm:~10.0.3"
+    "@react-spring/shared": "npm:~10.0.0"
+    "@react-spring/types": "npm:~10.0.0"
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10/473b4d2a6e9c4477e3806623d8581352db73cabd200f6fc4899dc98525ff155645ac5a758f21f0ccae443cfd4e96a1f2512fd7bb8bb0dd7b614915a500e7889a
+  checksum: 10/1f1cf60d768b6d125d3c4da13a32bfc2314683dbbf5c985688c133ea6f1010718c9c77c04af79d3fe3652c9e4480471d1d7109c2ae4dd30f3c045dab3352fb4d
   languageName: node
   linkType: hard
 
-"@react-spring/core@npm:~10.0.0":
+"@react-spring/core@npm:10.0.0":
   version: 10.0.0
   resolution: "@react-spring/core@npm:10.0.0"
   dependencies:
@@ -4049,7 +4049,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/konva@npm:~10.0.0":
+"@react-spring/konva@npm:10.0.0":
   version: 10.0.0
   resolution: "@react-spring/konva@npm:10.0.0"
   dependencies:
@@ -4065,7 +4065,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/native@npm:~10.0.0":
+"@react-spring/native@npm:10.0.0":
   version: 10.0.0
   resolution: "@react-spring/native@npm:10.0.0"
   dependencies:
@@ -4080,21 +4080,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/rafz@npm:~10.0.0":
+"@react-spring/rafz@npm:10.0.0":
   version: 10.0.0
   resolution: "@react-spring/rafz@npm:10.0.0"
   checksum: 10/d8961c853aef489fce4956084d368d994a3dcb5f9f8b848d5ccd32e7f7fb86247fae502e369e0134f97dd9dc515853b30df8ec76c8c2a39b2009db2ddc936376
   languageName: node
   linkType: hard
 
-"@react-spring/rafz@npm:~10.0.3":
-  version: 10.0.3
-  resolution: "@react-spring/rafz@npm:10.0.3"
-  checksum: 10/b3884747db544e2e630383e01f423b93f503799c318a01bd438eefac38c9beaa58ec10d701e042e0902164b1aefa42a4a50c0ff09d01b87135bb8242e560b786
-  languageName: node
-  linkType: hard
-
-"@react-spring/shared@npm:~10.0.0":
+"@react-spring/shared@npm:10.0.0":
   version: 10.0.0
   resolution: "@react-spring/shared@npm:10.0.0"
   dependencies:
@@ -4106,19 +4099,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/shared@npm:~10.0.3":
-  version: 10.0.3
-  resolution: "@react-spring/shared@npm:10.0.3"
-  dependencies:
-    "@react-spring/rafz": "npm:~10.0.3"
-    "@react-spring/types": "npm:~10.0.3"
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10/6193944a30139b830ad188ac9322bb492d59405f2909346c23b2c08a4b15ed81977d2e919bdc33815bfff55e64d88d1e74072800fa99b4a6b762aef72a2ebfb2
-  languageName: node
-  linkType: hard
-
-"@react-spring/three@npm:~10.0.0":
+"@react-spring/three@npm:10.0.0":
   version: 10.0.0
   resolution: "@react-spring/three@npm:10.0.0"
   dependencies:
@@ -4134,21 +4115,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/types@npm:~10.0.0":
+"@react-spring/types@npm:10.0.0":
   version: 10.0.0
   resolution: "@react-spring/types@npm:10.0.0"
   checksum: 10/b0cd524db137a75f12909959c5d97d7f8d4f9697a56ce779e3a1b7aa54bbf31dd44535f640a60ac3150960cde512c8b893e9c54866afe361f8637f17c3dd76f9
   languageName: node
   linkType: hard
 
-"@react-spring/types@npm:~10.0.3":
-  version: 10.0.3
-  resolution: "@react-spring/types@npm:10.0.3"
-  checksum: 10/162a21857c1af3388f40ea86b3560e2a360937d47a187d3275e2e5105f5f4d4696fc890e6761af67aef9017c872847ba2f328cb8e76357c88d82525842d7ab17
-  languageName: node
-  linkType: hard
-
-"@react-spring/web@npm:~10.0.0":
+"@react-spring/web@npm:10.0.0":
   version: 10.0.0
   resolution: "@react-spring/web@npm:10.0.0"
   dependencies:
@@ -4163,7 +4137,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/zdog@npm:~10.0.0":
+"@react-spring/zdog@npm:10.0.0":
   version: 10.0.0
   resolution: "@react-spring/zdog@npm:10.0.0"
   dependencies:
