@@ -183,7 +183,7 @@ __metadata:
     react-redux: "npm:^9.2.0"
     react-router: "npm:7.9.3"
     react-simple-pull-to-refresh: "npm:^1.3.3"
-    react-spring: "npm:10.0.0"
+    react-spring: "npm:10.0.3"
     react-swipeable: "npm:^7.0.2"
     react-virtualized-auto-sizer: "npm:^1.0.26"
     recharts: "npm:^2.15.3"
@@ -4036,7 +4036,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/core@npm:~10.0.0, @react-spring/core@npm:~10.0.3":
+"@react-spring/core@npm:~10.0.3":
   version: 10.0.3
   resolution: "@react-spring/core@npm:10.0.3"
   dependencies:
@@ -4049,7 +4049,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/konva@npm:~10.0.0":
+"@react-spring/konva@npm:~10.0.3":
   version: 10.0.3
   resolution: "@react-spring/konva@npm:10.0.3"
   dependencies:
@@ -4065,7 +4065,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/native@npm:~10.0.0":
+"@react-spring/native@npm:~10.0.3":
   version: 10.0.3
   resolution: "@react-spring/native@npm:10.0.3"
   dependencies:
@@ -4099,7 +4099,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/three@npm:~10.0.0":
+"@react-spring/three@npm:~10.0.3":
   version: 10.0.3
   resolution: "@react-spring/three@npm:10.0.3"
   dependencies:
@@ -4122,7 +4122,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/web@npm:~10.0.0":
+"@react-spring/web@npm:~10.0.3":
   version: 10.0.3
   resolution: "@react-spring/web@npm:10.0.3"
   dependencies:
@@ -4137,7 +4137,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-spring/zdog@npm:~10.0.0":
+"@react-spring/zdog@npm:~10.0.3":
   version: 10.0.3
   resolution: "@react-spring/zdog@npm:10.0.3"
   dependencies:
@@ -16541,20 +16541,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-spring@npm:10.0.0":
-  version: 10.0.0
-  resolution: "react-spring@npm:10.0.0"
+"react-spring@npm:10.0.3":
+  version: 10.0.3
+  resolution: "react-spring@npm:10.0.3"
   dependencies:
-    "@react-spring/core": "npm:~10.0.0"
-    "@react-spring/konva": "npm:~10.0.0"
-    "@react-spring/native": "npm:~10.0.0"
-    "@react-spring/three": "npm:~10.0.0"
-    "@react-spring/web": "npm:~10.0.0"
-    "@react-spring/zdog": "npm:~10.0.0"
+    "@react-spring/core": "npm:~10.0.3"
+    "@react-spring/konva": "npm:~10.0.3"
+    "@react-spring/native": "npm:~10.0.3"
+    "@react-spring/three": "npm:~10.0.3"
+    "@react-spring/web": "npm:~10.0.3"
+    "@react-spring/zdog": "npm:~10.0.3"
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10/e4612f3f9d57d08d2b66fab182a793458701d0eca8627636df7cbdbe0c8461f79bed49a03a71fbfca88e3948034e087b8b14d6a3636a61d658be818909987ec5
+  checksum: 10/db2f0811006dee8a1589081cee47046f5253b65cb3a4b35314e1c293b02ac4c2a585e9441a71266a709effedfb8e72d885bfcb560a4c85d43fa51ac0be955904
   languageName: node
   linkType: hard
 
