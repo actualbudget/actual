@@ -64,6 +64,7 @@ export type AccountHandlers = {
   'accounts-bank-sync': typeof accountsBankSync;
   'simplefin-batch-sync': typeof simpleFinBatchSync;
   'bank-sync-providers-list': typeof getPluginProviders;
+  'bank-sync-status': typeof getPluginStatus;
   'bank-sync-accounts': typeof getPluginAccounts;
   'bank-sync-accounts-link': typeof linkPluginAccount;
   'transactions-import': typeof importTransactions;
@@ -428,7 +429,7 @@ async function getPluginAccounts({ providerSlug }: { providerSlug: string }) {
     }
   } catch (error) {
     logger.error('Error fetching plugin accounts:', error);
-    throw new Error(error.message || 'Failed to fetch plugin accounts');
+    throw new Error(String(error) || 'Failed to fetch plugin accounts');
   }
 }
 
@@ -463,7 +464,49 @@ async function getPluginProviders() {
     }
   } catch (error) {
     logger.error('Error fetching plugin providers:', error);
-    throw new Error(error.message || 'Failed to fetch plugin providers');
+    throw new Error(String(error) || 'Failed to fetch plugin providers');
+  }
+}
+
+async function getPluginStatus({ providerSlug }: { providerSlug: string }) {
+  const server = getServer();
+  if (!server) {
+    throw new Error('No server configured');
+  }
+
+  try {
+    // Call the plugin's status endpoint
+    const pluginUrl = `${server.BASE_SERVER}/plugins-api/bank-sync/${providerSlug}/status`;
+
+    // Get user token for authentication
+    const userToken = await asyncStorage.getItem('user-token');
+    if (!userToken) {
+      throw new Error('User not authenticated');
+    }
+
+    const response = await get(pluginUrl, {
+      'X-ACTUAL-TOKEN': userToken,
+    });
+
+    const data = JSON.parse(response);
+
+    if (data.status === 'ok') {
+      return {
+        configured: data.data?.configured || false,
+        error: data.data?.error,
+      };
+    } else {
+      return {
+        configured: false,
+        error: data.error || 'Plugin error',
+      };
+    }
+  } catch (error) {
+    logger.error(`Error checking status for plugin ${providerSlug}:`, error);
+    return {
+      configured: false,
+      error: String(error),
+    };
   }
 }
 
@@ -1368,6 +1411,7 @@ app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
 app.method('bank-sync-providers-list', getPluginProviders);
+app.method('bank-sync-status', getPluginStatus);
 app.method('bank-sync-accounts', getPluginAccounts);
 app.method('bank-sync-accounts-link', linkPluginAccount);
 app.method('account-create', mutator(undoable(createAccount)));

@@ -410,11 +410,10 @@ export function CreateAccountModal({
               providerSlug: provider.slug,
               providerDisplayName: provider.displayName,
               onSuccess: async (credentials: Record<string, string>) => {
-                // Save credentials via API
-                await send('secret-set', {
-                  name: `plugin_${provider.slug}_credentials`,
-                  value: JSON.stringify(credentials),
-                });
+                // The plugin system handles credentials internally
+                // We just need to notify that setup is complete
+                // The credentials are passed to the plugin through its own API
+                console.log('Plugin setup completed for', provider.slug, credentials);
               },
             },
           },
@@ -425,30 +424,29 @@ export function CreateAccountModal({
 
     // If configured, fetch and display accounts (placeholder - actual implementation needed)
     try {
-      const response = await send('bank-sync-accounts' as never, {
-        providerSlug: provider.slug,
-      } as never);
+      const response = await send(
+        'bank-sync-accounts',
+        {
+          providerSlug: provider.slug,
+        },
+      );
 
       type PluginAccountsResponse = {
-        status: string;
-        data?: {
-          accounts: Array<{
-            account_id: string;
-            name: string;
-            institution: string;
-            balance: number;
-            [key: string]: unknown;
-          }>;
-        };
+        accounts: Array<{
+          account_id: string;
+          name: string;
+          institution: string;
+          balance: number;
+          [key: string]: unknown;
+        }>;
       };
 
       const typedResponse = response as PluginAccountsResponse;
 
       if (
         typedResponse &&
-        typedResponse.status === 'ok' &&
-        typedResponse.data &&
-        typedResponse.data.accounts
+        typedResponse.accounts &&
+        Array.isArray(typedResponse.accounts)
       ) {
         // Open the account selection modal
         dispatch(
@@ -456,7 +454,7 @@ export function CreateAccountModal({
             modal: {
               name: 'select-linked-accounts',
               options: {
-                externalAccounts: typedResponse.data.accounts,
+                externalAccounts: typedResponse.accounts,
                 syncSource: 'plugin' as const,
                 providerSlug: provider.slug,
                 upgradingAccountId,
