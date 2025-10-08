@@ -14,75 +14,15 @@ import remarkGfm from 'remark-gfm';
 import {
   remarkBreaks,
   sequentialNewlinesPlugin,
+  markdownBaseStyles,
 } from '@desktop-client/util/markdown';
 
 const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];
 
-const markdownStyles = css({
+const markdownStyles = css(markdownBaseStyles, {
   display: 'block',
   maxWidth: 350,
   padding: 8,
-  overflowWrap: 'break-word',
-  '& p': {
-    margin: 0,
-    ':not(:first-child)': {
-      marginTop: '0.25rem',
-    },
-  },
-  '& ul, & ol': {
-    listStylePosition: 'inside',
-    margin: 0,
-    paddingLeft: 0,
-  },
-  '&>* ul, &>* ol': {
-    marginLeft: '1.5rem',
-  },
-  '& li>p': {
-    display: 'contents',
-  },
-  '& blockquote': {
-    paddingLeft: '0.75rem',
-    borderLeft: '3px solid ' + theme.markdownDark,
-    margin: 0,
-  },
-  '& hr': {
-    borderTop: 'none',
-    borderLeft: 'none',
-    borderRight: 'none',
-    borderBottom: '1px solid ' + theme.markdownNormal,
-  },
-  '& code': {
-    backgroundColor: theme.markdownLight,
-    padding: '0.1rem 0.5rem',
-    borderRadius: '0.25rem',
-  },
-  '& pre': {
-    padding: '0.5rem',
-    backgroundColor: theme.markdownLight,
-    borderRadius: '0.5rem',
-    margin: 0,
-    ':not(:first-child)': {
-      marginTop: '0.25rem',
-    },
-    '& code': {
-      background: 'inherit',
-      padding: 0,
-      borderRadius: 0,
-    },
-  },
-  '& table, & th, & td': {
-    border: '1px solid ' + theme.markdownNormal,
-  },
-  '& table': {
-    borderCollapse: 'collapse',
-    wordBreak: 'break-word',
-  },
-  '& td': {
-    padding: '0.25rem 0.75rem',
-  },
-  '& h3': {
-    fontSize: 15,
-  },
 });
 
 type NotesProps = {
