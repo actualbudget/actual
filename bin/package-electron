@@ -62,14 +62,11 @@ yarn workspace desktop-electron update-client
         echo "Skipping exe build"
     else
       if [ "$RELEASE" == "production" ]; then
-          if [ -f ../../.secret-tokens ]; then
-              source ../../.secret-tokens
-          fi
           yarn build
 
           echo "Created release"
       else
-          SKIP_NOTARIZATION=true yarn build
+          yarn build
       fi
     fi
 )
