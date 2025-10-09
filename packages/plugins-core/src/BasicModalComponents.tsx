@@ -11,7 +11,6 @@ import {
 } from '@actual-app/components';
 import { SvgDelete } from '@actual-app/components/icons/v0';
 
-
 type ModalButtonsProps = {
   style?: CSSProperties;
   leftContent?: ReactNode;
