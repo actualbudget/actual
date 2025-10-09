@@ -7,6 +7,10 @@ on:
       - master
   workflow_dispatch:
 
+concurrency:
+  group: docker-edge-build
+  cancel-in-progress: true
+
 permissions:
   contents: read
   packages: write
