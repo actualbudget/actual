@@ -42,13 +42,15 @@ function validateRule(rule: Partial<RuleEntity>) {
   );
 
   const actionErrors = runValidation(rule.actions, action =>
-    action.op === 'set-split-amount'
-      ? new Action(action.op, null, action.value, action.options)
-      : action.op === 'link-schedule'
-        ? new Action(action.op, null, action.value, null)
-        : action.op === 'prepend-notes' || action.op === 'append-notes'
+    action.op === 'delete-transaction'
+      ? new Action(action.op, null, null, null)
+      : action.op === 'set-split-amount'
+        ? new Action(action.op, null, action.value, action.options)
+        : action.op === 'link-schedule'
           ? new Action(action.op, null, action.value, null)
-          : new Action(action.op, action.field, action.value, action.options),
+          : action.op === 'prepend-notes' || action.op === 'append-notes'
+            ? new Action(action.op, null, action.value, null)
+            : new Action(action.op, action.field, action.value, action.options),
   );
 
   if (conditionErrors || actionErrors) {

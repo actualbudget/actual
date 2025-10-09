@@ -531,6 +531,7 @@ export const importPreviewTransactions = createAppAsyncThunk(
     { accountId, transactions }: ImportPreviewTransactionsPayload,
     { dispatch },
   ) => {
+    debugger;
     const { errors = [], updatedPreview } = await send('transactions-import', {
       accountId,
       transactions,

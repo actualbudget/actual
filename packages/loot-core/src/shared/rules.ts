@@ -227,6 +227,8 @@ export function friendlyOp(op, type?) {
       return t('is on budget');
     case 'offBudget':
       return t('is off budget');
+    case 'delete-transaction':
+      return 'delete transaction';
     default:
       return '';
   }
