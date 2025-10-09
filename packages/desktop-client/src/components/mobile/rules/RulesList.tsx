@@ -1,11 +1,10 @@
-import { Virtualizer, GridList } from 'react-aria-components';
+import { GridList } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { ListLayout } from '@react-stately/layout';
 
 import { type RuleEntity } from 'loot-core/types/models';
 
@@ -68,26 +67,24 @@ export function RulesList({
 
   return (
     <View style={{ flex: 1 }}>
-      <Virtualizer layout={ListLayout}>
-        <GridList
-          aria-label={t('Rules')}
-          aria-busy={isLoading || undefined}
-          items={rules}
-          style={{
-            flex: 1,
-            paddingBottom: MOBILE_NAV_HEIGHT,
-            overflow: 'auto',
-          }}
-        >
-          {rule => (
-            <RulesListItem
-              value={rule}
-              onAction={() => onRulePress(rule)}
-              onDelete={() => onRuleDelete(rule)}
-            />
-          )}
-        </GridList>
-      </Virtualizer>
+      <GridList
+        aria-label={t('Rules')}
+        aria-busy={isLoading || undefined}
+        items={rules}
+        style={{
+          flex: 1,
+          paddingBottom: MOBILE_NAV_HEIGHT,
+          overflow: 'auto',
+        }}
+      >
+        {rule => (
+          <RulesListItem
+            value={rule}
+            onAction={() => onRulePress(rule)}
+            onDelete={() => onRuleDelete(rule)}
+          />
+        )}
+      </GridList>
       {isLoading && (
         <View
           style={{
