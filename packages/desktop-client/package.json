@@ -11,7 +11,7 @@
     "@fontsource/redacted-script": "^5.2.8",
     "@juggle/resize-observer": "^3.4.0",
     "@playwright/test": "1.56.0",
-    "@react-stately/layout": "^3.0.0",
+    "@react-stately/layout": "^4.5.1",
     "@rollup/plugin-inject": "^5.0.5",
     "@swc/core": "^1.13.5",
     "@swc/helpers": "^0.5.17",
