@@ -8,14 +8,14 @@
   },
   "dependencies": {
     "@emotion/css": "^11.13.5",
-    "react-aria-components": "^1.8.0",
+    "react-aria-components": "^1.13.0",
     "usehooks-ts": "^3.1.1"
   },
   "devDependencies": {
     "@svgr/cli": "^8.1.0",
-    "@types/react": "^19.1.12",
-    "react": "19.1.1",
-    "react-dom": "19.1.1",
+    "@types/react": "^19.2.2",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
     "vitest": "^3.2.4"
   },
   "exports": {
