@@ -1,7 +1,16 @@
+import { resolve } from 'path';
+
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@actual-app/shared-types': resolve(__dirname, '../shared-types/src'),
+      '@actual-app/query': resolve(__dirname, '../query/src'),
+      '@actual-app/components': resolve(__dirname, '../component-library/src'),
+    },
+  },
   build: {
     outDir: 'build',
     lib: {
@@ -15,7 +24,15 @@ export default defineConfig({
       formats: ['es', 'cjs'],
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'i18next'],
+      external: [
+        'react',
+        'react-dom',
+        'i18next',
+        'react-i18next',
+        'react-aria-components',
+        '@emotion/css',
+        'usehooks-ts',
+      ],
       output: {
         globals: {
           react: 'React',

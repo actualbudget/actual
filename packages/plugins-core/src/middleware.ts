@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { initReactI18next } from 'react-i18next';
 
-import { BasicModalProps } from '@actual-app/components/props/modalProps';
+import { BasicModalProps } from '@actual-app/shared-types';
 import ReactDOM from 'react-dom/client';
 
 import {

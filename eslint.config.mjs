@@ -104,6 +104,10 @@ export default pluginTypescript.config(
       'packages/plugins-core/node_modules/',
       '.yarn/*',
       '.github/*',
+      'packages/shared-types/dist/',
+      'packages/shared-types/build/',
+      'packages/query/dist/',
+      'packages/query/build/',
     ],
   },
   {

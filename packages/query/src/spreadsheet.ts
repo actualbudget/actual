@@ -5,7 +5,7 @@
  * the application for managing financial data in sheet-like structures.
  */
 
-import { type Query } from './query';
+import { type Query } from './index';
 
 export type Spreadsheets = {
   account: {

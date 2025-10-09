@@ -19,6 +19,7 @@
     "vitest": "^3.2.4"
   },
   "exports": {
+    ".": "./src/index.ts",
     "./hooks/*": "./src/hooks/*.ts",
     "./icons/logo": "./src/icons/logo/index.ts",
     "./icons/v0": "./src/icons/v0/index.ts",

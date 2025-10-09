@@ -14,16 +14,19 @@ export type {
   DatabaseResult,
   DatabaseOperation,
   PluginMetadata,
-} from './types/database';
+} from '@actual-app/query/database';
 
 // Plugin file types
 export type { PluginFile, PluginFileCollection } from './types/plugin-files';
 
 // AQL query result types
-export type { AQLQueryResult, AQLQueryOptions } from './types/aql-result';
+export type {
+  AQLQueryResult,
+  AQLQueryOptions,
+} from '@actual-app/query/aql-result';
 
 // Model types (server-safe)
-export type * from './types/models';
+export type * from '@actual-app/shared-types/models';
 
 // Plugin types (server-safe ones)
 export type {
@@ -50,4 +53,4 @@ export {
   type QueryState,
   type QueryBuilder,
   type ObjectExpression,
-} from './query';
+} from '@actual-app/query';

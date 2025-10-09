@@ -5,7 +5,7 @@
  * No more conversion functions needed!
  */
 
-import { WithRequired } from '../types/util';
+import { WithRequired } from './util';
 
 export type ObjectExpression = {
   [key: string]: ObjectExpression | unknown;

@@ -1,17 +1,15 @@
 import type { ReactElement } from 'react';
 
-import type { BasicModalProps } from '@actual-app/components/props/modalProps';
-import type { i18n } from 'i18next';
-
-import type { Query, QueryBuilder } from '../query';
-
-import type {
-  PayeeEntity,
+import { Query, QueryBuilder } from '@actual-app/query';
+import {
+  AccountEntity,
+  BasicModalProps,
   CategoryEntity,
   CategoryGroupEntity,
-  AccountEntity,
+  PayeeEntity,
   ScheduleEntity,
-} from './models';
+} from '@actual-app/shared-types';
+import type { i18n } from 'i18next';
 
 export type SidebarLocations =
   | 'main-menu'
