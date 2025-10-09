@@ -510,6 +510,107 @@ describe('Transaction rules', () => {
     // todo: isapprox
   });
 
+  test('transactions can be queried by hasTags', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    const categoryGroupId = await db.insertCategoryGroup({ name: 'general' });
+    const foodCategoryId = await db.insertCategory({
+      name: 'food',
+      cat_group: categoryGroupId,
+    });
+    const krogerId = await db.insertPayee({ name: 'kroger' });
+
+    // First test with tags WITHOUT dollar signs
+    await db.insertTransaction({
+      id: '1',
+      date: '2020-10-01',
+      account,
+      payee: krogerId,
+      category: foodCategoryId,
+      notes: 'bonus #salary test',
+      amount: 353,
+    });
+    await db.insertTransaction({
+      id: '2',
+      date: '2020-10-15',
+      account,
+      payee: krogerId,
+      notes: 'cashback #cashback promo',
+      amount: 453,
+    });
+    await db.insertTransaction({
+      id: '3',
+      date: '2020-10-15',
+      account,
+      payee: krogerId,
+      notes: 'both #salary and #cashback',
+      amount: -322,
+    });
+    await db.insertTransaction({
+      id: '4',
+      date: '2020-10-16',
+      account,
+      payee: krogerId,
+      notes: 'no tags here',
+      amount: 101,
+    });
+
+    // Test filtering by simple tag without $ sign
+    let transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'hasTags', value: '#salary' },
+    ]);
+    expect(transactions.map(t => t.id).sort()).toEqual(['1', '3']);
+
+    // Test filtering by another simple tag
+    transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'hasTags', value: '#cashback' },
+    ]);
+    expect(transactions.map(t => t.id).sort()).toEqual(['2', '3']);
+
+    // Test filtering by multiple tags
+    transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'hasTags', value: '#salary #cashback' },
+    ]);
+    expect(transactions.map(t => t.id).sort()).toEqual(['3']);
+
+    // Test that transactions without tags are not matched
+    transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'hasTags', value: '#notag' },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual([]);
+
+    // Test with tags containing special characters like underscore
+    await db.insertTransaction({
+      id: '5',
+      date: '2020-10-17',
+      account,
+      payee: krogerId,
+      notes: 'payment #price_100',
+      amount: -100,
+    });
+
+    transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'hasTags', value: '#price_100' },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual(['5']);
+
+    // Now test with tags WITH dollar signs - this is the bug fix!
+    await db.insertTransaction({
+      id: '6',
+      date: '2020-10-18',
+      account,
+      payee: krogerId,
+      notes: 'bonus #sal$ary',
+      amount: 200,
+    });
+
+    // Test filtering by tag with dollar sign
+    transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'hasTags', value: '#sal$ary' },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual(['6']);
+  });
+
   test('and sub expression builds $and condition', async () => {
     const conds = [{ field: 'category', op: 'is', value: null }];
     const { filters } = conditionsToAQL(conds);

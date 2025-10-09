@@ -726,8 +726,22 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
       return `UNICODE_LIKE(${getNormalisedString(right)}, NORMALISE(${left}))`;
     }
     case '$regexp': {
-      const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
-      return `REGEXP(${right}, ${left})`;
+      const [left] = valArray(state, [lhs], ['string']);
+      // For regexp, we need to handle backslashes specially
+      // Get the raw regex pattern value
+      const castedValue = castInput(state, rhs, 'string');
+      let regexPattern = castedValue.value;
+
+      // IMPORTANT: Re-escape special regex characters that were lost during object serialization
+      // Only escape $ that are NOT regex anchors (i.e., not followed by ) or at true end of pattern)
+      // This handles tags like #sal$ary while preserving patterns like ([\s#]|$)
+      regexPattern = regexPattern.replace(/\$(?!\))/g, '\\$');
+
+      // Escape quotes for SQL
+      regexPattern = regexPattern.replace(/'/g, "''");
+
+      // Use string concatenation to avoid template string escaping issues
+      return 'REGEXP(\'' + regexPattern + '\', ' + left + ')';
     }
     case '$notlike': {
       const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
