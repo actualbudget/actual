@@ -214,7 +214,7 @@ export function ModalCloseButton({ onPress, style }: ModalCloseButtonProps) {
     <Button
       variant="bare"
       onPress={onPress}
-      aria-label={t("Close")}
+      aria-label={t('Close')}
       style={{ padding: '10px 10px' }}
     >
       <SvgDelete width={10} style={style} />
