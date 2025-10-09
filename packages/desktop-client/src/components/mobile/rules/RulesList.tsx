@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Virtualizer, GridList } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
@@ -27,6 +28,15 @@ export function RulesList({
   onRuleDelete,
 }: RulesListProps) {
   const { t } = useTranslation();
+
+  const layout = useMemo(
+    () =>
+      new ListLayout({
+        estimatedRowHeight: 140,
+        padding: 0,
+      }),
+    [],
+  );
 
   if (isLoading && rules.length === 0) {
     return (
@@ -67,16 +77,14 @@ export function RulesList({
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <Virtualizer layout={ListLayout}>
+    <View style={{ flex: 1, overflow: 'auto' }}>
+      <Virtualizer layout={layout}>
         <GridList
           aria-label={t('Rules')}
           aria-busy={isLoading || undefined}
           items={rules}
           style={{
-            flex: 1,
             paddingBottom: MOBILE_NAV_HEIGHT,
-            overflow: 'auto',
           }}
         >
           {rule => (
