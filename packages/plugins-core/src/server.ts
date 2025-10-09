@@ -26,7 +26,13 @@ export type {
 } from '@actual-app/query/aql-result';
 
 // Model types (server-safe)
-export type * from '@actual-app/shared-types/models';
+export type {
+  AccountEntity,
+  CategoryEntity,
+  CategoryGroupEntity,
+  PayeeEntity,
+  ScheduleEntity,
+} from '@actual-app/shared-types/models';
 
 // Plugin types (server-safe ones)
 export type {
