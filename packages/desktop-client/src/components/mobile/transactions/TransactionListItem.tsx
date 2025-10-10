@@ -155,7 +155,7 @@ export function TransactionListItem({
   const textStyle = getTextStyle({ isPreview });
 
   // Create text content for test compatibility
-  const transactionText = `${displayPayee || '(No payee)'} ${prettyCategory || 'Uncategorized'} ${integerToCurrency(amount)}`;
+  const transactionText = `${displayPayee || t('(No payee)')} ${prettyCategory || t('Uncategorized')} ${integerToCurrency(amount)}`;
   return (
     <ActionableListBoxItem
       value={transaction}
