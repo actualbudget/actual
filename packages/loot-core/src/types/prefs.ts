@@ -5,7 +5,6 @@ export type FeatureFlag =
   | 'currency'
   | 'crossoverReport'
   | 'plugins';
-  | 'plugins';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
