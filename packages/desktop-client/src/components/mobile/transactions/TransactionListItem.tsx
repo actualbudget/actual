@@ -152,8 +152,7 @@ export function TransactionListItem({
   const textStyle = getTextStyle({ isPreview });
 
   // Create text content for test compatibility
-  const transactionText = `${displayPayee || '(No payee)'}${prettyCategory || 'Uncategorized'}${integerToCurrency(amount)}`;
-
+  const transactionText = `${displayPayee || '(No payee)'} ${prettyCategory || 'Uncategorized'} ${integerToCurrency(amount)}`;
   return (
     <ActionableListBoxItem
       value={transaction}
@@ -193,19 +192,6 @@ export function TransactionListItem({
             display: 'flex',
           }}
         >
-          {/* Hidden text content for test accessibility */}
-          <span
-            style={{
-              position: 'absolute',
-              left: '-10000px',
-              top: 'auto',
-              width: '1px',
-              height: '1px',
-              overflow: 'hidden',
-            }}
-          >
-            {transactionText}
-          </span>
           <View style={{ flex: 1 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <PayeeIcons
