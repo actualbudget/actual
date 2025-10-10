@@ -4,6 +4,21 @@ const config: CapacitorConfig = {
   appId: 'org.actualbudget',
   appName: 'Actual Budget',
   webDir: '../desktop-client/build',
+  plugins: {
+    CapacitorUpdater: {
+      autoUpdate: true,
+      directUpdate: 'always',
+      autoSplashscreen: true,
+      keepUrlPathAfterReload: true,
+      allowModifyUrl: true,
+      persistCustomId: true,
+      publicKey: '',
+      statsUrl: '',
+    },
+    SplashScreen: {
+      launchAutoHide: false,
+    },
+  },
 };
 
 // https://capacitorjs.com/docs/config
