@@ -3,7 +3,8 @@ export type FeatureFlag =
   | 'goalTemplatesUIEnabled'
   | 'actionTemplating'
   | 'currency'
-  | 'crossoverReport';
+  | 'crossoverReport'
+  | 'plugins';
   | 'plugins';
 
 /**
