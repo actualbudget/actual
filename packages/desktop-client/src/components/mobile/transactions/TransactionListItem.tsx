@@ -35,6 +35,7 @@ import {
   type AccountEntity,
   type TransactionEntity,
 } from 'loot-core/types/models';
+import { type WithRequired } from 'loot-core/types/util';
 
 import { lookupName, Status } from './TransactionEdit';
 
@@ -72,8 +73,9 @@ const getScheduleIconStyle = ({ isPreview }: { isPreview: boolean }) => ({
   color: isPreview ? theme.pageTextLight : theme.menuItemText,
 });
 
-type TransactionListItemProps = ComponentPropsWithoutRef<
-  typeof ListBoxItem<TransactionEntity>
+type TransactionListItemProps = WithRequired<
+  ComponentPropsWithoutRef<typeof ListBoxItem<TransactionEntity>>,
+  'value'
 > & {
   onPress: (transaction: TransactionEntity) => void;
   onLongPress: (transaction: TransactionEntity) => void;

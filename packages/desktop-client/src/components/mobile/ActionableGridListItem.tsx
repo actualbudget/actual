@@ -114,7 +114,6 @@ export function ActionableGridListItem<T extends object>({
             flex: 1,
             backgroundColor: theme.tableBackground,
             minWidth: '100%',
-            padding: 16,
           }}
           onClick={handleAction}
         >
