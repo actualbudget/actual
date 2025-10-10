@@ -114,7 +114,8 @@ export function ActionableListBoxItem<T extends object>({
             flex: 1,
             backgroundColor: theme.tableBackground,
             minWidth: '100%',
-            padding: 16,
+            paddingLeft: 10,
+            paddingRight: 10,
           }}
           onClick={handleAction}
         >
