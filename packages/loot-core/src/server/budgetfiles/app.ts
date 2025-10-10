@@ -25,6 +25,7 @@ import * as syncMigrations from '../sync/migrate';
 import * as rules from '../transactions/transaction-rules';
 import { clearUndo } from '../undo';
 import { updateVersion } from '../update';
+import { loadPayPeriodConfig } from '../preferences/app';
 import {
   idFromBudgetName,
   uniqueBudgetName,
@@ -591,13 +592,34 @@ async function _loadBudget(id: Budget['id']): Promise<{
     return { error: 'opening-budget' };
   }
 
-  // This is a bit leaky, but we need to set the initial budget type
-  const { value: budgetType = 'envelope' } =
-    (await db.first<Pick<db.DbPreference, 'value'>>(
+  // Load budget type and pay period configuration from preferences
+  const [budgetTypeResult, ...payPeriodResults] = await Promise.all([
+    db.first<Pick<db.DbPreference, 'value'>>(
       'SELECT value from preferences WHERE id = ?',
       ['budgetType'],
-    )) ?? {};
+    ),
+    db.first<Pick<db.DbPreference, 'value'>>(
+      'SELECT value from preferences WHERE id = ?',
+      ['showPayPeriods'],
+    ),
+    db.first<Pick<db.DbPreference, 'value'>>(
+      'SELECT value from preferences WHERE id = ?',
+      ['payPeriodFrequency'],
+    ),
+    db.first<Pick<db.DbPreference, 'value'>>(
+      'SELECT value from preferences WHERE id = ?',
+      ['payPeriodStartDate'],
+    ),
+  ]);
+
+  // Set budget type
+  const { value: budgetType = 'envelope' } = budgetTypeResult ?? {};
   sheet.get().meta().budgetType = budgetType as prefs.BudgetType;
+
+  // Load pay period configuration before budget creation
+  // This must happen before budget.createAllBudgets() since budget operations
+  // may invoke months.ts functions that check pay period config
+  await loadPayPeriodConfig();
   await budget.createAllBudgets();
 
   // Load all the in-memory state

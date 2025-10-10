@@ -23,6 +23,10 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
+import {
+  loadPayPeriodConfigFromPrefs,
+  type PayPeriodConfig,
+} from 'loot-core/shared/pay-periods';
 import { groupById } from 'loot-core/shared/util';
 
 import { BudgetTable, PILL_STYLE } from './BudgetTable';
@@ -41,6 +45,7 @@ import { prewarmMonth } from '@desktop-client/components/budget/util';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
@@ -68,6 +73,10 @@ export function BudgetPage() {
   const [budgetTypePref] = useSyncedPref('budgetType');
   const budgetType = isBudgetType(budgetTypePref) ? budgetTypePref : 'envelope';
   const spreadsheet = useSpreadsheet();
+  const payPeriodFeatureFlagEnabled = useFeatureFlag('payPeriodsEnabled');
+  const [payPeriodFrequency] = useSyncedPref('payPeriodFrequency');
+  const [payPeriodStartDate] = useSyncedPref('payPeriodStartDate');
+  const [payPeriodViewEnabled] = useSyncedPref('showPayPeriods');
 
   const currMonth = monthUtils.currentMonth();
   const [startMonth = currMonth, setStartMonthPref] =
@@ -95,6 +104,47 @@ export function BudgetPage() {
 
     init();
   }, [budgetType, startMonth, dispatch, spreadsheet]);
+
+  // Wire pay period config from synced prefs into month utils
+  useEffect(() => {
+    if (!payPeriodFeatureFlagEnabled || !initialized) {
+      return;
+    }
+
+    console.log('[PayPeriod] Mobile loading pay period config:', {
+      featureFlagEnabled: payPeriodFeatureFlagEnabled,
+      viewEnabled: payPeriodViewEnabled,
+      frequency: payPeriodFrequency,
+      startDate: payPeriodStartDate,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Use the existing validation function that handles type safety
+    loadPayPeriodConfigFromPrefs({
+      showPayPeriods: payPeriodViewEnabled,
+      payPeriodFrequency,
+      payPeriodStartDate,
+    });
+
+    // After loading config, reset to current month/pay period
+    // This ensures we use the correct month type (calendar vs pay period)
+    const currentMonthOrPeriod = monthUtils.currentMonth();
+    setStartMonthPref(currentMonthOrPeriod);
+
+    // Refresh budget bounds to get pay period bounds if enabled
+    if (payPeriodViewEnabled === 'true') {
+      send('get-budget-bounds').then(({ start, end }) => {
+        setMonthBounds({ start, end });
+      });
+    }
+  }, [
+    payPeriodFeatureFlagEnabled,
+    payPeriodViewEnabled,
+    payPeriodFrequency,
+    payPeriodStartDate,
+    initialized,
+    setStartMonthPref,
+  ]);
 
   const onBudgetAction = useCallback(
     async (month, type, args) => {
@@ -538,6 +588,19 @@ export function BudgetPage() {
     onToggleHiddenCategories,
   ]);
 
+  // Create memoized pay period config for MonthSelector reactivity
+  const payPeriodConfig = useMemo<PayPeriodConfig | null>(() => {
+    if (!payPeriodViewEnabled || payPeriodViewEnabled !== 'true') {
+      return null;
+    }
+    return {
+      enabled: true,
+      payFrequency:
+        (payPeriodFrequency as PayPeriodConfig['payFrequency']) || 'monthly',
+      startDate: payPeriodStartDate || new Date().toISOString().slice(0, 10),
+    };
+  }, [payPeriodViewEnabled, payPeriodFrequency, payPeriodStartDate]);
+
   if (!categoryGroups || !initialized) {
     return (
       <View
@@ -566,6 +629,7 @@ export function BudgetPage() {
               onOpenMonthMenu={onOpenBudgetMonthMenu}
               onPrevMonth={onPrevMonth}
               onNextMonth={onNextMonth}
+              payPeriodConfig={payPeriodConfig}
             />
           }
           leftContent={
@@ -953,6 +1017,14 @@ function MonthSelector({
   onOpenMonthMenu,
   onPrevMonth,
   onNextMonth,
+  payPeriodConfig,
+}: {
+  month: string;
+  monthBounds: { start: string; end: string };
+  onOpenMonthMenu?: (month: string) => void;
+  onPrevMonth: () => void;
+  onNextMonth: () => void;
+  payPeriodConfig: PayPeriodConfig | null;
 }) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -995,7 +1067,7 @@ function MonthSelector({
         data-month={month}
       >
         <Text style={styles.underlinedText}>
-          {monthUtils.format(month, 'MMMM ‘yy', locale)}
+          {monthUtils.getMonthDateRange(month, payPeriodConfig, locale)}
         </Text>
       </Button>
       <Button

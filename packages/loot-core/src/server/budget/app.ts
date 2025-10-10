@@ -169,7 +169,7 @@ async function getCategories() {
 }
 
 async function getBudgetBounds() {
-  return await budget.createAllBudgets();
+  return await budget.createAllBudgets();;
 }
 
 async function envelopeBudgetMonth({ month }: { month: string }) {
