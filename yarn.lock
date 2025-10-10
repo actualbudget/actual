@@ -136,6 +136,7 @@ __metadata:
   resolution: "@actual-app/web@workspace:packages/desktop-client"
   dependencies:
     "@actual-app/components": "workspace:*"
+    "@capgo/capacitor-updater": "npm:^7.18.8"
     "@emotion/css": "npm:^11.13.5"
     "@fontsource/redacted-script": "npm:^5.2.5"
     "@juggle/resize-observer": "npm:^3.4.0"
@@ -2032,6 +2033,33 @@ __metadata:
   peerDependencies:
     "@capacitor/core": ^7.4.0
   checksum: 10/806fe3561b61aad7b533afe293251aca5316908ca411be932df539b2d83d9b3fba6a1e383e5a0c2ec10ffc09b28ab0eef7aeaf7b45cd5f14819dbf3c0abd3089
+  languageName: node
+  linkType: hard
+
+"@capacitor/splash-screen@npm:^7.0.3":
+  version: 7.0.3
+  resolution: "@capacitor/splash-screen@npm:7.0.3"
+  peerDependencies:
+    "@capacitor/core": ">=7.0.0"
+  checksum: 10/72864c56759b8aa7f01eca94c4f62584cde30496caacb98bc81b17f8b1b3be97b55a81556b9d732e69c3e5a8bc6989a73cf3ae0d7896b073cd55db9d883bdbdb
+  languageName: node
+  linkType: hard
+
+"@capgo/capacitor-updater@npm:7.18.8, @capgo/capacitor-updater@npm:^7.18.8":
+  version: 7.18.8
+  resolution: "@capgo/capacitor-updater@npm:7.18.8"
+  peerDependencies:
+    "@capacitor/core": ">=7.0.0"
+  checksum: 10/842875f33d538b43c0f8f234c324fadbc24a7d6c5f362108cd3a5ae994e353400dde46a3516d6bae1aa584426fe68f2c0c8973133e2f7e60a891b713b1f70092
+  languageName: node
+  linkType: hard
+
+"@capgo/cli@npm:^7.17.6":
+  version: 7.17.6
+  resolution: "@capgo/cli@npm:7.17.6"
+  bin:
+    capgo: dist/index.js
+  checksum: 10/f0a9950367f8dd6fc947acdb39e5ccecc74fc11cf57517db2b7c6448a82ec85eb35ca83556fa88a7902d2dfaca3a2d41c038d37ad87420f05d5954d0b30a6103
   languageName: node
   linkType: hard
 
@@ -15827,6 +15855,9 @@ __metadata:
     "@capacitor/cli": "npm:^7.4.3"
     "@capacitor/core": "npm:^7.4.3"
     "@capacitor/ios": "npm:^7.4.3"
+    "@capacitor/splash-screen": "npm:^7.0.3"
+    "@capgo/capacitor-updater": "npm:7.18.8"
+    "@capgo/cli": "npm:^7.17.6"
   languageName: unknown
   linkType: soft
 

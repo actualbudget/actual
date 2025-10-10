@@ -1,0 +1,15 @@
+#!/bin/bash
+set -euo pipefail
+
+
+ROOT=`dirname $0`
+cd "$ROOT/../../.."
+
+mkdir -p packages/mobile-client/build/
+capgo bundle zip org.actualbudget \
+    --name packages/mobile-client/build/bundle.zip \
+    --package-json packages/desktop-client/package.json \
+    --path packages/desktop-client/build \
+    --json > packages/mobile-client/build/bundle.json
+
+echo "Created mobile app bundle."

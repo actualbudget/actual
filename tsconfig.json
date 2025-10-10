@@ -52,7 +52,9 @@
     "**/dist/*",
     "**/lib-dist/*",
     "**/test-results/*",
-    "**/playwright-report/*"
+    "**/playwright-report/*",
+    "packages/mobile-client/android/*",
+    "packages/mobile-client/ios/*"
   ],
   "ts-node": {
     "compilerOptions": {
