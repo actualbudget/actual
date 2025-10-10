@@ -122,7 +122,15 @@ export class RulesPage {
 
       if (op && !fieldFirst) {
         await row.getByTestId('op-select').getByRole('button').first().click();
-        await this.page.getByRole('button', { name: op, exact: true }).click();
+        await this.page
+          .getByRole('button', { name: op, exact: true })
+          .first()
+          .waitFor({ state: 'visible' });
+
+        await this.page
+          .getByRole('button', { name: op, exact: true })
+          .first()
+          .click({ force: true });
       }
 
       if (field) {
@@ -133,12 +141,26 @@ export class RulesPage {
           .click();
         await this.page
           .getByRole('button', { name: field, exact: true })
-          .click();
+          .first()
+          .waitFor({ state: 'visible' });
+
+        await this.page
+          .getByRole('button', { name: field, exact: true })
+          .first()
+          .click({ force: true });
       }
 
       if (op && fieldFirst) {
         await row.getByTestId('op-select').getByRole('button').first().click();
-        await this.page.getByRole('button', { name: op, exact: true }).click();
+        await this.page
+          .getByRole('button', { name: op, exact: true })
+          .first()
+          .waitFor({ state: 'visible' });
+
+        await this.page
+          .getByRole('button', { name: op, exact: true })
+          .first()
+          .click({ force: true });
       }
 
       if (value) {
