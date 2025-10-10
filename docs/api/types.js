@@ -225,6 +225,191 @@ export let objects = {
     },
   ],
 
+  schedule : [
+  {
+    name: 'id',
+    type: types.id
+  },
+  {
+    name: 'name',
+    type: 'string',
+    description: (
+      <span>
+        Not mandatory but schedule names must be unique.
+      </span>
+    ),
+  },
+  {
+    name: 'rule',
+    type: 'string',
+    description: (
+      <span>
+        All schedules have an associated underlying rule. Not to be supplied with a new schedule. It will be auto created. Rules can not updated to another rule. You can however edit the rule with the API above for Rule.
+      </span>
+    ),
+  },
+  {
+    name: 'next_date',
+    type: 'string',
+    description: (
+      <span>
+        Next occurrence of a schedule. Not to be supplied with a new schedule.
+      </span>
+    ),
+  },
+  {
+    name: 'completed',
+    type: 'boolean',
+    description: (
+      <span>
+        Not to be supplied with a new schedule.
+      </span>
+    ),
+  },
+  {
+    name: 'posts_transaction',
+    type: 'boolean',
+    description: (
+      <span>
+        Whether the schedule should auto-post transactions on your behalf. Defaults to <code>false</code>.
+      </span>
+    ),
+  },
+  {
+    name: 'payee',
+    type: 'id | null',
+    description: (
+      <span>
+        Optional; will default to <code>null</code>.
+      </span>
+    ),
+  },
+  {
+    name: 'account',
+    type: 'id | null',
+    description: (
+      <span>
+        Optional; will default to <code>null</code>.
+      </span>
+    ),
+  },
+  {
+    name: 'amount',
+    type: 'number | { num1: number; num2: number }',
+    description: (
+      <span>
+        Provide only one number, except if the amount uses a isbetween in amountOp, in this case num1 and 2 should be provided.
+      </span>
+    ),
+  },
+  {
+    name: 'amountOp',
+    type: "'is' | 'isapprox' | 'isbetween'",
+    description: (
+      <span>
+        Controls how <code>amount</code> is interpreted.
+      </span>
+    ),
+  },
+  {
+    name: 'date',
+    type: 'date | RecurConfig',
+    required: true,
+    description: (
+      <span>
+        Mandatory field when creating a schedule. If the schedule is a single occurrence just supply the date. otherwise refer to RecurConfig details below.
+      </span>
+    ),
+  },
+],
+
+recurConfig : [
+  {
+    name: 'frequency',
+    type: `'daily' | 'weekly' | 'monthly' | 'yearly'`,
+    required: true,
+    description: (
+      <span>
+        How often the schedule repeats.
+      </span>
+    ),
+  },
+  {
+    name: 'interval',
+    type: 'number',
+    description: (
+      <span>
+        The interval at which the recurrence happens. Defaults to <code>1</code> if omitted.
+      </span>
+    ),
+  },
+  {
+    name: 'patterns',
+    type: 'RecurPattern[]',
+    description: (
+      <span>
+        Optional patterns to control specific dates for recurrence (e.g. certain weekdays or month days).
+      </span>
+    ),
+  },
+  {
+    name: 'skipWeekend',
+    type: 'boolean',
+    description: (
+      <span>
+        If true, skips weekends when calculating recurrence dates.
+      </span>
+    ),
+  },
+  {
+    name: 'start',
+    type: 'string',
+    required: true,
+    description: (
+      <span>
+        The ISO date string indicating the start date of the recurrence.
+      </span>
+    ),
+  },
+  {
+    name: 'endMode',
+    type: `'never' | 'after_n_occurrences' | 'on_date'`,
+    required: true,
+    description: (
+      <span>
+        Specifies how the recurrence ends: never ends, after a number of occurrences, or on a specific date.
+      </span>
+    ),
+  },
+  {
+    name: 'endOccurrences',
+    type: 'number',
+    description: (
+      <span>
+        Used when <code>endMode</code> is <code>'after_n_occurrences'</code>. Indicates how many times it should repeat.
+      </span>
+    ),
+  },
+  {
+    name: 'endDate',
+    type: 'string',
+    description: (
+      <span>
+        Used when <code>endMode</code> is <code>'on_date'</code>. The ISO date string indicating when the recurrence should end.
+      </span>
+    ),
+  },
+  {
+    name: 'weekendSolveMode',
+    type: `'before' | 'after'`,
+    description: (
+      <span>
+        If a calculated date falls on a weekend and <code>skipWeekend</code> is true, this controls whether the date moves to the <code>before</code> or <code>after</code> weekday.
+      </span>
+    ),
+  },
+],
+
   payee: [
     { name: 'id', type: types.id },
     { name: 'name', type: 'string', required: true },

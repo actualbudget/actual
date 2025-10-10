@@ -70,6 +70,15 @@ import APIList from './APIList';
 "deleteRule"
 ]} />
 
+<APIList title="Schedules" sections={[
+"Schedule",
+"RecurConfig",
+"getSchedules",
+"createSchedule",
+"updateSchedule",
+"deleteSchedule"
+]} />
+
 <APIList title="Misc" sections={[
 "BudgetFile",
 "initConfig",
@@ -82,7 +91,8 @@ import APIList from './APIList';
 "loadBudget",
 "downloadBudget",
 "batchBudgetUpdates",
-"runQuery"
+"runQuery",
+"getIDByName"
 ]} />
 
 ## Types of Methods
@@ -546,6 +556,41 @@ Delete a rule.
 }
 ```
 
+## Schedule
+
+#### Schedule
+
+<StructType fields={objects.schedule} />
+
+#### RecurConfig
+
+<StructType fields={objects.recurConfig} />
+
+#### Methods
+
+#### `getSchedules`
+
+<Method name="getSchedules" args={[]} returns="Promise<Schedule[]>" />
+
+Get all schedules. Returns an array of [`Schedule`](#schedule) objects.
+
+#### `createSchedule`
+
+<Method name="createSchedule" args={[{ properties: [{ name: 'schedule', type: 'Schedule' }] }]} returns="Promise<id>" />
+
+Create schedule based on information filled in the schedule object. Please refer to notes of schedule object for details each field.
+
+#### `updateSchedule`
+
+<Method name="updateSchedule" args={[{ name: 'id', type: 'id' }, { name: 'fields', type: 'object' }]} returns="Promise<schedule>" />
+
+Update fields of a rule. `fields` can specify any field described in [`Schedule`](#Schedule). Returns the updated rule.
+
+#### `deleteSchedule`
+
+<Method name="deleteSchedule" args={[{ name: 'id', type: 'id' }]} returns="Promise<null>" />
+
+
 ## Misc
 
 #### BudgetFile
@@ -617,3 +662,15 @@ Performs a batch of budget updates. This is useful for making multiple changes t
 <Method name="runQuery" args={[{ properties: [{ name: 'query', type: 'ActualQL' }] }]} returns="Promise<unknown>" />
 
 Allows running any arbitrary ActualQL query on the open budget.
+
+#### `getIDByName`
+
+<Method name="getIDByName" args={[{ properties: [{ name: 'type', type: 'string' }, { name: 'string', type: 'string'}] }]} returns="Promise<string>" />
+
+get the ID for any Account, Payee, Category or Schedule by providing the corresponding name. Allowed types are 'accounts', 'schedules', 'categories', 'payees'.
+
+#### `getServerVersion`
+
+<Method name="getServerVersion" args={[]} returns="Promise<{error?: string;} | {version: string;}>" />
+
+return error or the current server versions.
