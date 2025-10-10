@@ -45,13 +45,18 @@ function parseOfxAmount(amount: string): number | null {
   return isNaN(parsed) ? null : parsed;
 }
 
-type Transaction = {
+type StructuredTransaction = {
   amount: number;
   date: string;
   payee_name: string;
   imported_payee: string;
   notes: string;
 };
+
+// CSV files return raw data that are not guaranteed to be StructuredTransactions
+type CsvTransaction = Record<string, string> | string[];
+
+type Transaction = StructuredTransaction | CsvTransaction;
 
 type ParseError = { message: string; internal: string };
 export type ParseFileResult = {
