@@ -72,7 +72,7 @@ function format(
         // This case is generally flawed, but we need to support it for
         // backwards compatibility for now.
         // For example, it is not clear how the string might look like
-        // The Budget sends 12300, if ther user inputs 123.00, but
+        // The Budget sends 12300, if the user inputs 123.00, but
         // there might be other components that send 123 with the same user input.
         // Ideally the string case will be removed in the future. We should always
         // use the IntegerAmount.
@@ -149,7 +149,7 @@ export function useFormat(): UseFormatResult {
         valueWithoutSign = formattedNumericValue.slice(1);
       }
 
-      const space = spaceEnabledPref === 'true' ? '\u00A0' : '';
+      const space = spaceEnabledPref === 'true' ? '\u202F' : '';
       const position = symbolPositionPref || 'before';
 
       const styledAmount =

@@ -8,8 +8,7 @@ export function typeArbitrary(typeDesc, name?) {
   let arb;
   switch (typeDesc.type) {
     case 'id':
-      // uuid shrinking is broken right now, will file an issue
-      arb = fc.hexaString({ minLength: 30, maxLength: 30 });
+      arb = fc.uuid();
       break;
     case 'boolean':
       arb = fc.boolean();
