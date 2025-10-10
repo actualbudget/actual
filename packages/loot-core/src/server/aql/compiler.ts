@@ -741,7 +741,7 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
       regexPattern = regexPattern.replace(/'/g, "''");
 
       // Use string concatenation to avoid template string escaping issues
-      return 'REGEXP(\'' + regexPattern + '\', ' + left + ')';
+      return "REGEXP('" + regexPattern + "', " + left + ')';
     }
     case '$notlike': {
       const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
