@@ -137,7 +137,7 @@ export const Checkbox = (props: CheckboxProps) => {
               backgroundColor: theme.buttonNormalDisabledBorder,
             },
           },
-          '&.focus-visible:focus': {
+          '&:focus-visible': {
             '::before': {
               position: 'absolute',
               top: -5,
