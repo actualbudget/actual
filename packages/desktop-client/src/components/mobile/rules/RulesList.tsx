@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Virtualizer, GridList } from 'react-aria-components';
+import { Virtualizer, GridList, ListLayout } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';

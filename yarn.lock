@@ -133,7 +133,6 @@ __metadata:
     "@fontsource/redacted-script": "npm:^5.2.8"
     "@juggle/resize-observer": "npm:^3.4.0"
     "@playwright/test": "npm:1.56.0"
-    "@react-stately/layout": "npm:^4.5.1"
     "@rollup/plugin-inject": "npm:^5.0.5"
     "@swc/core": "npm:^1.13.5"
     "@swc/helpers": "npm:^0.5.17"
