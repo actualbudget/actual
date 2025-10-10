@@ -2,7 +2,14 @@
 import React, { useState, type CSSProperties } from 'react';
 
 import { theme } from '@actual-app/components/theme';
-import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Sector,
+  ResponsiveContainer,
+  Tooltip,
+} from 'recharts';
 
 import {
   type balanceTypeOpType,
@@ -271,7 +278,6 @@ export function DonutGraph({
                   style={{ cursor: pointer }}
                 >
                   <Pie
-                    activeIndex={activeIndex}
                     activeShape={
                       width < 220 || height < 130
                         ? undefined
@@ -341,6 +347,11 @@ export function DonutGraph({
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
+                  <Tooltip
+                    content={() => null}
+                    defaultIndex={activeIndex}
+                    active={true}
+                  />
                 </PieChart>
               </div>
             </ResponsiveContainer>
