@@ -14,6 +14,8 @@ import {
 import {
   type balanceTypeOpType,
   type DataEntity,
+  type GroupedEntity,
+  type IntervalEntity,
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
@@ -252,7 +254,7 @@ export function DonutGraph({
   const accounts = useAccounts();
   const [pointer, setPointer] = useState('');
 
-  const getVal = (obj: DataEntity) => {
+  const getVal = (obj: GroupedEntity | IntervalEntity) => {
     if (['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
       return -1 * obj[balanceTypeOp];
     } else {
@@ -298,7 +300,11 @@ export function DonutGraph({
                     dataKey={val => getVal(val)}
                     nameKey={yAxis}
                     isAnimationActive={false}
-                    data={data[splitData]}
+                    data={
+                      data[splitData]?.map(item => ({
+                        ...item,
+                      })) ?? []
+                    }
                     innerRadius={Math.min(width, height) * 0.2}
                     fill="#8884d8"
                     labelLine={false}
