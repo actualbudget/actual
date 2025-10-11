@@ -592,25 +592,11 @@ async function _loadBudget(id: Budget['id']): Promise<{
     return { error: 'opening-budget' };
   }
 
-  // Load budget type and pay period configuration from preferences
-  const [budgetTypeResult, ...payPeriodResults] = await Promise.all([
-    db.first<Pick<db.DbPreference, 'value'>>(
-      'SELECT value from preferences WHERE id = ?',
-      ['budgetType'],
-    ),
-    db.first<Pick<db.DbPreference, 'value'>>(
-      'SELECT value from preferences WHERE id = ?',
-      ['showPayPeriods'],
-    ),
-    db.first<Pick<db.DbPreference, 'value'>>(
-      'SELECT value from preferences WHERE id = ?',
-      ['payPeriodFrequency'],
-    ),
-    db.first<Pick<db.DbPreference, 'value'>>(
-      'SELECT value from preferences WHERE id = ?',
-      ['payPeriodStartDate'],
-    ),
-  ]);
+  // Load budget type from preferences
+  const budgetTypeResult = await db.first<Pick<db.DbPreference, 'value'>>(
+    'SELECT value from preferences WHERE id = ?',
+    ['budgetType'],
+  );
 
   // Set budget type
   const { value: budgetType = 'envelope' } = budgetTypeResult ?? {};

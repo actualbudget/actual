@@ -75,11 +75,9 @@ export function BudgetPage() {
   const [payPeriodStartDate] = useSyncedPref('payPeriodStartDate');
   const [payPeriodViewEnabled] = useSyncedPref('showPayPeriods');
 
-  // Calculate current month/pay period - this needs to be reactive to pay period config changes
-  // We recalculate whenever pay period settings change so the Today button works correctly
-  const currMonth = useMemo(() => {
-    return monthUtils.currentMonth();
-  }, [payPeriodViewEnabled, payPeriodFrequency, payPeriodStartDate]);
+  // Calculate current month/pay period
+  // The useEffect below (lines 111-141) handles updating when pay period settings change
+  const currMonth = monthUtils.currentMonth();
 
   const [startMonth = currMonth, setStartMonthPref] =
     useLocalPref('budget.startMonth');
