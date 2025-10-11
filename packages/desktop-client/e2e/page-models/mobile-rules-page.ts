@@ -74,28 +74,6 @@ export class MobileRulesPage {
   }
 
   /**
-   * Check if the search bar has a border
-   */
-  async hasSearchBarBorder() {
-    const searchContainer = this.searchBox.locator('..');
-    const borderStyle = await searchContainer.evaluate(el => {
-      const style = window.getComputedStyle(el);
-      return style.borderBottomWidth;
-    });
-    return borderStyle === '2px';
-  }
-
-  /**
-   * Get the background color of the search box
-   */
-  async getSearchBackgroundColor() {
-    return await this.searchBox.evaluate(el => {
-      const style = window.getComputedStyle(el);
-      return style.backgroundColor;
-    });
-  }
-
-  /**
    * Check if a rule contains specific text
    */
   async ruleContainsText(index: number, text: string) {
