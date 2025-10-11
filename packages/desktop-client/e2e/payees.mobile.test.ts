@@ -99,6 +99,7 @@ test.describe('Mobile Payees', () => {
     // Should show at least one result
     const payeeCount = await payeesPage.getPayeeCount();
     expect(payeeCount).toBeGreaterThan(0);
+    await expect(page).toMatchThemeScreenshots();
 
     // Clear search
     await payeesPage.clearSearch();
