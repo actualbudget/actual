@@ -1,5 +1,12 @@
 import { type TransactionEntity } from '../../types/models';
 import * as db from '../db';
+import { q } from '../../shared/query';
+import {
+  ungroupTransactions,
+  deleteTransaction as sharedDeleteTransaction,
+} from '../../shared/transactions';
+import { aqlQuery } from '../aql';
+import { batchUpdateTransactions } from '.';
 
 export async function mergeTransactions(
   transactions: Pick<TransactionEntity, 'id'>[],
@@ -86,8 +93,19 @@ export async function mergeTransactions(
     } as TransactionEntity);
   }
 
-  // Delete the dropped transaction (this will also handle cleanup of any remaining subtransactions)
-  await db.deleteTransaction(drop);
+  // Delete the dropped transaction using shared deleteTransaction to
+  // intelligently handle possible parent/child cascading logic
+  const { data } = await aqlQuery(
+    q('transactions')
+      .filter({ id: drop.id })
+      .select('*')
+      .options({ splits: 'grouped' }),
+  );
+  const transactions = ungroupTransactions(data);
+  if (transactions.length > 0) {
+    const { diff } = sharedDeleteTransaction(transactions, drop.id);
+    await batchUpdateTransactions(diff);
+  }
 
   return keep.id;
 }
