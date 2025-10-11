@@ -6,10 +6,6 @@ import memoizeOne from 'memoize-one';
 import { type SyncedPrefs } from '../types/prefs';
 
 import { parseDate as sharedParseDate } from './date-utils';
-
-// ----------------------------------------------
-// Extended months: Pay Period Support (MM 13-99)
-// ----------------------------------------------
 import {
   type PayPeriodConfig,
   getPayPeriodConfig,
@@ -218,27 +214,16 @@ export function isBefore(month1: DateLike, month2: DateLike): boolean {
   const str2 =
     typeof month2 === 'string' ? month2 : d.format(_parse(month2), 'yyyy-MM');
 
-  // Handle mixed month types - pay periods vs calendar months
   const isPP1 = isPayPeriod(str1);
   const isPP2 = isPayPeriod(str2);
 
-  if (isPP1 !== isPP2) {
-    // Mixed types: prevent comparison by throwing early with context
-    throw new Error(
-      `Cannot compare mixed month types: '${str1}' (${isPP1 ? 'pay period' : 'calendar month'}) ` +
-        `vs '${str2}' (${isPP2 ? 'pay period' : 'calendar month'}). ` +
-        `Ensure consistent month types before comparison.`,
-    );
+  // Both pay periods or both calendar months: use string comparison
+  if (isPP1 || isPP2) {
+    return str1 < str2;
   }
 
-  // Same types: use appropriate comparison
-  if (isPP1) {
-    // For pay periods, use string comparison (works because format is YYYY-MM)
-    return str1 < str2;
-  } else {
-    // For calendar months, use date parsing
-    return d.isBefore(_parse(month1), _parse(month2));
-  }
+  // Calendar months: use date parsing
+  return d.isBefore(_parse(month1), _parse(month2));
 }
 
 export function isAfter(month1: DateLike, month2: DateLike): boolean {
@@ -250,19 +235,13 @@ export function isAfter(month1: DateLike, month2: DateLike): boolean {
   const isPP1 = isPayPeriod(str1);
   const isPP2 = isPayPeriod(str2);
 
-  if (isPP1 !== isPP2) {
-    throw new Error(
-      `Cannot compare mixed month types: '${str1}' (${isPP1 ? 'pay period' : 'calendar month'}) ` +
-        `vs '${str2}' (${isPP2 ? 'pay period' : 'calendar month'}). ` +
-        `Ensure consistent month types before comparison.`,
-    );
+  // Both pay periods or both calendar months: use string comparison
+  if (isPP1 || isPP2) {
+    return str1 > str2;
   }
 
-  if (isPP1) {
-    return str1 > str2;
-  } else {
-    return d.isAfter(_parse(month1), _parse(month2));
-  }
+  // Calendar months: use date parsing
+  return d.isAfter(_parse(month1), _parse(month2));
 }
 
 export function isCurrentMonth(month: DateLike): boolean {
@@ -283,33 +262,17 @@ export function bounds(month: DateLike): { start: number; end: number } {
 
   // Check if this is a pay period month
   if (isPayPeriod(monthStr)) {
-    // The presence of pay period ID IS proof that pay periods are enabled
     const config = getPayPeriodConfig();
-    if (!config) {
-      throw new Error(
-        `Pay period config not available for '${monthStr}'. This should not happen during normal operation.`,
-      );
-    }
-
     const year = parseInt(monthStr.slice(0, 4));
-    const periodIndex = parseInt(monthStr.slice(5, 7)) - 12; // Convert 13-99 to 1-87
+    const periods = generatePayPeriods(year, config!);
+    const period = periods.find(p => p.monthId === monthStr);
 
-    if (periodIndex >= 1) {
-      const periods = generatePayPeriods(year, config);
-      const period = periods.find(p => p.monthId === monthStr);
-
-      if (period) {
-        return {
-          start: parseInt(period.startDate.replace(/-/g, '')),
-          end: parseInt(period.endDate.replace(/-/g, '')),
-        };
-      }
+    if (period) {
+      return {
+        start: parseInt(period.startDate.replace(/-/g, '')),
+        end: parseInt(period.endDate.replace(/-/g, '')),
+      };
     }
-
-    throw new Error(
-      `Pay period '${monthStr}' not found in generated periods for year ${year}. ` +
-        `This may indicate an invalid pay period configuration.`,
-    );
   }
 
   // Original calendar month logic
@@ -386,19 +349,7 @@ export function _range(
   const startIsPayPeriod = isPayPeriod(startStr);
   const endIsPayPeriod = isPayPeriod(endStr);
 
-  // First, prevent mixed ranges - both start and end must be pay periods or both must be calendar months
-  if (startIsPayPeriod !== endIsPayPeriod) {
-    throw new Error(
-      `Mixed calendar month and pay period ranges are not allowed. ` +
-        `Range from '${startStr}' (${startIsPayPeriod ? 'pay period' : 'calendar month'}) ` +
-        `to '${endStr}' (${endIsPayPeriod ? 'pay period' : 'calendar month'}) is invalid. ` +
-        `Use either all calendar months (e.g., '2024-01' to '2024-03') or all pay periods (e.g., '2024-13' to '2024-15').`,
-    );
-  }
-
   if (startIsPayPeriod || endIsPayPeriod) {
-    // Both are pay periods - generate pay period range directly
-    // The presence of pay period IDs IS proof that pay periods are enabled
     return generatePayPeriodRange(startStr, endStr, inclusive);
   }
 
@@ -609,14 +560,8 @@ export function getMonthStartDate(
   config?: PayPeriodConfig,
 ): Date {
   if (isPayPeriod(monthId)) {
-    // The presence of pay period ID IS proof that pay periods are enabled
     const activeConfig = config || getPayPeriodConfig();
-    if (!activeConfig) {
-      throw new Error(
-        `Pay period config not available for '${monthId}'. This should not happen during normal operation.`,
-      );
-    }
-    return getPayPeriodStartDate(monthId, activeConfig);
+    return getPayPeriodStartDate(monthId, activeConfig!);
   }
   return getCalendarMonthStartDate(monthId);
 }
@@ -626,14 +571,8 @@ export function getMonthEndDate(
   config?: PayPeriodConfig,
 ): Date {
   if (isPayPeriod(monthId)) {
-    // The presence of pay period ID IS proof that pay periods are enabled
     const activeConfig = config || getPayPeriodConfig();
-    if (!activeConfig) {
-      throw new Error(
-        `Pay period config not available for '${monthId}'. This should not happen during normal operation.`,
-      );
-    }
-    return getPayPeriodEndDate(monthId, activeConfig);
+    return getPayPeriodEndDate(monthId, activeConfig!);
   }
   return getCalendarMonthEndDate(monthId);
 }
