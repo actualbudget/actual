@@ -17,6 +17,7 @@ import {
   type SetRuleActionEntity,
   type AppendNoteRuleActionEntity,
   type PrependNoteRuleActionEntity,
+  type DeleteTransactionRuleActionEntity,
 } from 'loot-core/types/models';
 
 import { ScheduleValue } from './ScheduleValue';
@@ -56,6 +57,8 @@ export function ActionExpression({ style, ...props }: ActionExpressionProps) {
         <PrependNoteActionExpression {...props} />
       ) : props.op === 'append-notes' ? (
         <AppendNoteActionExpression {...props} />
+      ) : props.op === 'delete-transaction' ? (
+        <DeleteTransactionActionExpression {...props} />
       ) : null}
     </View>
   );
@@ -138,4 +141,10 @@ function AppendNoteActionExpression({ op, value }: AppendNoteRuleActionEntity) {
       <Value style={valueStyle} value={value} field="notes" />
     </>
   );
+}
+
+function DeleteTransactionActionExpression({
+  op,
+}: DeleteTransactionRuleActionEntity) {
+  return <Text>{friendlyOp(op)}</Text>;
 }
