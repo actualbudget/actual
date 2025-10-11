@@ -19,7 +19,6 @@ beforeEach(() => {
 });
 
 describe('Pay Period Translation Utilities', () => {
-
   test('convertPayPeriodToDateRange converts pay periods to date ranges', () => {
     const range = convertPayPeriodToDateRange('2024-13');
 

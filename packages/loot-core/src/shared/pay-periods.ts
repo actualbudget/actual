@@ -38,35 +38,8 @@ export function loadPayPeriodConfigFromPrefs(prefs: {
         prefs.payPeriodStartDate || new Date().toISOString().slice(0, 10),
     };
 
-    // Validate frequency is one of the allowed values
-    const validFrequencies: PayPeriodConfig['payFrequency'][] = [
-      'weekly',
-      'biweekly',
-      'semimonthly',
-      'monthly',
-    ];
-    if (!validFrequencies.includes(config.payFrequency)) {
-      console.warn(
-        `[PayPeriod] Invalid pay period frequency '${config.payFrequency}', defaulting to 'monthly'`,
-      );
-      config.payFrequency = 'monthly';
-    }
-
-    // Validate startDate is a valid ISO date string
-    if (config.startDate && isNaN(Date.parse(config.startDate))) {
-      console.warn(
-        `[PayPeriod] Invalid pay period start date '${config.startDate}', defaulting to today`,
-      );
-      config.startDate = new Date().toISOString().slice(0, 10);
-    }
-
     setPayPeriodConfig(config);
   } catch (error) {
-    console.warn(
-      '[PayPeriod] Failed to load pay period config from preferences:',
-      error,
-    );
-
     // Set a disabled default config to ensure graceful fallback
     const fallbackConfig = {
       enabled: false,
@@ -86,53 +59,15 @@ export function isPayPeriod(monthId: string): boolean {
 }
 
 function getNumericMonthValue(monthId: string): number {
-  if (typeof monthId !== 'string' || monthId.length < 7 || monthId[4] !== '-') {
-    throw new Error(
-      "Invalid monthId '" + monthId + "'. Expected YYYY-MM string.",
-    );
-  }
-  const value = parseInt(monthId.slice(5, 7));
-  if (!Number.isFinite(value) || value < 1 || value > 99) {
-    throw new Error(
-      "Invalid MM in monthId '" + monthId + "'. MM must be 01-99.",
-    );
-  }
-  return value;
+  return parseInt(monthId.slice(5, 7));
 }
 
 function getNumericYearValue(monthId: string): number {
-  const value = parseInt(monthId.slice(0, 4));
-  if (!Number.isFinite(value) || value < 1) {
-    throw new Error("Invalid YYYY in monthId '" + monthId + "'.");
-  }
-  return value;
-}
-
-function validatePayPeriodConfig(
-  config: PayPeriodConfig | null | undefined,
-): void {
-  if (!config || config.enabled !== true) return;
-  const validFreq = ['weekly', 'biweekly', 'semimonthly', 'monthly'];
-  if (!validFreq.includes(config.payFrequency)) {
-    throw new Error(
-      "Invalid payFrequency '" + String(config.payFrequency) + "'.",
-    );
-  }
-  const start = parseDate(config.startDate);
-  if (Number.isNaN(start.getTime())) {
-    throw new Error(
-      "Invalid startDate '" +
-        String(config.startDate) +
-        "'. Expected ISO date.",
-    );
-  }
+  return parseInt(monthId.slice(0, 4));
 }
 
 function getPeriodIndex(monthId: string): number {
   const mm = getNumericMonthValue(monthId);
-  if (mm < 13 || mm > 99) {
-    throw new Error("monthId '" + monthId + "' is not a pay period bucket.");
-  }
   return mm - 12; // 13 -> 1
 }
 
@@ -192,16 +127,6 @@ function computePayPeriodByIndex(
   config: PayPeriodConfig,
   targetYear: number,
 ): { startDate: Date; endDate: Date; label: string } {
-  validatePayPeriodConfig(config);
-  // Trust that if we're computing pay period by index, pay periods are enabled
-  // This function is only called as part of pay period workflows
-  if (!Number.isInteger(periodIndex) || periodIndex < 1) {
-    throw new Error("Invalid periodIndex '" + String(periodIndex) + "'.");
-  }
-  if (!Number.isInteger(targetYear) || targetYear < 1) {
-    throw new Error("Invalid targetYear '" + String(targetYear) + "'.");
-  }
-
   const referenceStart = parseDate(config.startDate);
   const freq = config.payFrequency;
 
@@ -239,8 +164,8 @@ function computePayPeriodByIndex(
       referenceDay - 1,
     );
     label = 'Pay Period ' + String(periodIndex);
-  } else if (freq === 'semimonthly') {
-    // Two periods per month: 1st-15th and 16th-end of month
+  } else {
+    // semimonthly: Two periods per month: 1st-15th and 16th-end of month
     const monthOffset = Math.floor((periodIndex - 1) / 2);
     const isFirstHalf = (periodIndex - 1) % 2 === 0;
     const targetMonth = new Date(targetYear, monthOffset, 1);
@@ -252,8 +177,6 @@ function computePayPeriodByIndex(
       startDate = new Date(targetYear, monthOffset, 16);
       endDate = d.endOfMonth(targetMonth);
     }
-  } else {
-    throw new Error("Unsupported payFrequency '" + String(freq) + "'.");
   }
 
   return { startDate, endDate, label };

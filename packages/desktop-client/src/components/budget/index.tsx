@@ -153,7 +153,12 @@ function BudgetInner(props: BudgetInnerProps) {
       const currentPayPeriod = monthUtils.currentMonth();
       setStartMonthPref(currentPayPeriod);
     }
-  }, [payPeriodFeatureFlagEnabled, payPeriodViewEnabled, setStartMonthPref, initialized]);
+  }, [
+    payPeriodFeatureFlagEnabled,
+    payPeriodViewEnabled,
+    setStartMonthPref,
+    initialized,
+  ]);
 
   // Refresh budget bounds when pay period config changes or when toggling pay periods on
   useEffect(() => {
