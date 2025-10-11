@@ -1,0 +1,59 @@
+{
+  "name": "@actual-app/plugins-core",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Core plugin system for Actual Budget",
+  "main": "src/client.ts",
+  "types": "src/client.ts",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src/ tests/ --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.4",
+    "@types/react-dom": "^19.1.4",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.18.1",
+    "typescript-strict-plugin": "^2.4.4",
+    "vite": "^6.2.0",
+    "vite-plugin-dts": "^4.5.3"
+  },
+  "exports": {
+    "./server": {
+      "types": "./src/server.ts",
+      "development": "./src/server.ts",
+      "import": "./build/server.js",
+      "require": "./build/server.cjs"
+    },
+    "./client": {
+      "types": "./src/client.ts",
+      "development": "./src/client.ts",
+      "import": "./build/client.js",
+      "require": "./build/client.cjs"
+    },
+    "./BasicModalComponents": {
+      "types": "./src/BasicModalComponents.tsx",
+      "import": "./build/BasicModalComponents.js",
+      "development": "./src/BasicModalComponents.tsx"
+    },
+    "./types/*": {
+      "types": "./src/types/*.ts",
+      "development": "./src/types/*.ts"
+    },
+    "./query": {
+      "types": "./src/query/index.ts",
+      "development": "./src/query/index.ts"
+    },
+    "./src/*": "./src/*"
+  },
+  "peerDependencies": {
+    "i18next": "^25.2.1",
+    "react": "19.1.0",
+    "react-aria-components": "^1.7.1",
+    "react-dom": "19.1.0",
+    "react-i18next": "^16.0.0"
+  }
+}
