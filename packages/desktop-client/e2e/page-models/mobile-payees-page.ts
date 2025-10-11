@@ -68,95 +68,9 @@ export class MobilePayeesPage {
   }
 
   /**
-   * Check if a payee contains specific text
-   */
-  async payeeContainsText(index: number, text: string) {
-    const payee = this.getNthPayee(index);
-    const payeeText = await payee.textContent();
-    return payeeText?.includes(text) || false;
-  }
-
-  /**
-   * Get the rule count badge text for a payee
-   */
-  async getPayeeRuleCount(index: number) {
-    const payee = this.getNthPayee(index);
-    // eslint-disable-next-line actual/typography
-    const ruleCountBadge = payee.locator('[data-testid="payee-rule-count"]');
-    if ((await ruleCountBadge.count()) > 0) {
-      return await ruleCountBadge.textContent();
-    }
-    return null;
-  }
-
-  /**
-   * Check if a payee has a favorite bookmark
-   */
-  async hasPayeeBookmark(index: number) {
-    const payee = this.getNthPayee(index);
-    // eslint-disable-next-line actual/typography
-    const bookmark = payee.locator('[data-testid="bookmark-icon"]');
-    return (await bookmark.count()) > 0;
-  }
-
-  /**
-   * Check if a payee is a transfer account
-   */
-  async isTransferPayee(index: number) {
-    const payee = this.getNthPayee(index);
-    const payeeText = await payee.textContent();
-    return payeeText?.includes('Transfer:') || false;
-  }
-
-  /**
-   * Get the delete button for a payee (if available)
-   */
-  getPayeeDeleteButton(index: number) {
-    const payee = this.getNthPayee(index);
-    return payee.getByRole('button', { name: 'Delete' });
-  }
-
-  /**
-   * Delete a payee by clicking the delete button
-   */
-  async deletePayee(index: number) {
-    const deleteButton = this.getPayeeDeleteButton(index);
-    await deleteButton.click();
-  }
-
-  /**
-   * Check if the search bar has a border
-   */
-  async hasSearchBarBorder() {
-    const searchContainer = this.searchBox.locator('..');
-    const borderStyle = await searchContainer.evaluate(el => {
-      const style = window.getComputedStyle(el);
-      return style.borderBottomWidth;
-    });
-    return borderStyle === '2px';
-  }
-
-  /**
-   * Get the background color of the search box
-   */
-  async getSearchBackgroundColor() {
-    return await this.searchBox.evaluate(el => {
-      const style = window.getComputedStyle(el);
-      return style.backgroundColor;
-    });
-  }
-
-  /**
    * Wait for loading to complete
    */
-  async waitForLoadingToComplete() {
-    await this.loadingIndicator.waitFor({ state: 'hidden', timeout: 10000 });
-  }
-
-  /**
-   * Check if the page is in loading state
-   */
-  async isLoading() {
-    return await this.loadingIndicator.isVisible();
+  async waitForLoadingToComplete(timeout: number = 10000) {
+    await this.loadingIndicator.waitFor({ state: 'hidden', timeout });
   }
 }
