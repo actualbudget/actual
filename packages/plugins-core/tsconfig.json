@@ -12,6 +12,9 @@
     "paths": {
       "@actual-app/shared-types": ["../shared-types/src/index.ts"],
       "@actual-app/shared-types/*": ["../shared-types/src/*"],
+      "@actual-app/shared-types/models": [
+        "../shared-types/src/models/index.ts"
+      ],
       "@actual-app/query": ["../query/src/index.ts"],
       "@actual-app/query/*": ["../query/src/*"],
       "@actual-app/components": ["../component-library/src/index.ts"],

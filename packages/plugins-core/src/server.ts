@@ -32,7 +32,7 @@ export type {
   CategoryGroupEntity,
   PayeeEntity,
   ScheduleEntity,
-} from '@actual-app/shared-types/models';
+} from '@actual-app/shared-types/models/index';
 
 // Plugin types (server-safe ones)
 export type {
