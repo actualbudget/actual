@@ -114,10 +114,8 @@ async function addRule(
   return { id, ...rule };
 }
 
-type PartialRule = Partial<RuleEntity> & Pick<RuleEntity, 'id'>;
-
 async function updateRule(
-  rule: PartialRule,
+  rule: RuleEntity,
 ): Promise<{ error: ValidationError } | RuleEntity> {
   const error = validateRule(rule);
   if (error) {
@@ -125,7 +123,7 @@ async function updateRule(
   }
 
   await rules.updateRule(rule);
-  return getRule({ id: rule.id });
+  return rule;
 }
 
 async function deleteRule(id: RuleEntity['id']) {
