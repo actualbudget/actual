@@ -42,6 +42,7 @@ type BatchDuplicateProps = {
 type BatchDeleteProps = {
   ids: Array<TransactionEntity['id']>;
   onSuccess?: (ids: Array<TransactionEntity['id']>) => void;
+  skipConfirmation?: boolean;
 };
 
 type BatchLinkScheduleProps = {
@@ -307,8 +308,63 @@ export function useTransactionBatchActions() {
     );
   };
 
-  const onBatchDelete = async ({ ids, onSuccess }: BatchDeleteProps) => {
+  const onBatchDelete = async ({
+    ids,
+    onSuccess,
+    skipConfirmation = false,
+  }: BatchDeleteProps) => {
+    const performDelete = async (ids: Array<TransactionEntity['id']>) => {
+      const { data } = await aqlQuery(
+        q('transactions')
+          .filter({ id: { $oneof: ids } })
+          .select('*')
+          .options({ splits: 'grouped' }),
+      );
+      let transactions = ungroupTransactions(data as TransactionEntity[]);
+
+      const idSet = new Set(ids);
+      const changes: Diff<TransactionEntity> = {
+        added: [],
+        deleted: [],
+        updated: [],
+      };
+
+      transactions.forEach(trans => {
+        const parentId = trans.parent_id;
+
+        // First, check if we're actually deleting this transaction by
+        // checking `idSet`. Then, we don't need to do anything if it's
+        // a child transaction and the parent is already being deleted
+        if (!idSet.has(trans.id) || (parentId && idSet.has(parentId))) {
+          return;
+        }
+
+        const { diff } = deleteTransaction(transactions, trans.id);
+
+        // TODO: We need to keep an updated list of transactions so
+        // the logic in `updateTransaction`, particularly about
+        // updating split transactions, works. This isn't ideal and we
+        // should figure something else out
+        transactions = applyChanges<TransactionEntity>(diff, transactions);
+
+        changes.deleted = diff.deleted
+          ? changes.deleted.concat(diff.deleted)
+          : diff.deleted;
+        changes.updated = diff.updated
+          ? changes.updated.concat(diff.updated)
+          : diff.updated;
+      });
+
+      await send('transactions-batch-update', changes);
+      onSuccess?.(ids);
+    };
+
     const onConfirmDelete = (ids: Array<TransactionEntity['id']>) => {
+      if (skipConfirmation) {
+        performDelete(ids);
+        return;
+      }
+
       dispatch(
         pushModal({
           modal: {
@@ -322,57 +378,7 @@ export function useTransactionBatchActions() {
                     )
                   : t('Are you sure you want to delete the transaction?'),
               onConfirm: async () => {
-                const { data } = await aqlQuery(
-                  q('transactions')
-                    .filter({ id: { $oneof: ids } })
-                    .select('*')
-                    .options({ splits: 'grouped' }),
-                );
-                let transactions = ungroupTransactions(
-                  data as TransactionEntity[],
-                );
-
-                const idSet = new Set(ids);
-                const changes: Diff<TransactionEntity> = {
-                  added: [],
-                  deleted: [],
-                  updated: [],
-                };
-
-                transactions.forEach(trans => {
-                  const parentId = trans.parent_id;
-
-                  // First, check if we're actually deleting this transaction by
-                  // checking `idSet`. Then, we don't need to do anything if it's
-                  // a child transaction and the parent is already being deleted
-                  if (
-                    !idSet.has(trans.id) ||
-                    (parentId && idSet.has(parentId))
-                  ) {
-                    return;
-                  }
-
-                  const { diff } = deleteTransaction(transactions, trans.id);
-
-                  // TODO: We need to keep an updated list of transactions so
-                  // the logic in `updateTransaction`, particularly about
-                  // updating split transactions, works. This isn't ideal and we
-                  // should figure something else out
-                  transactions = applyChanges<TransactionEntity>(
-                    diff,
-                    transactions,
-                  );
-
-                  changes.deleted = diff.deleted
-                    ? changes.deleted.concat(diff.deleted)
-                    : diff.deleted;
-                  changes.updated = diff.updated
-                    ? changes.updated.concat(diff.updated)
-                    : diff.updated;
-                });
-
-                await send('transactions-batch-update', changes);
-                onSuccess?.(ids);
+                await performDelete(ids);
               },
             },
           },

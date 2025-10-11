@@ -169,6 +169,7 @@ function TransactionListWithPreviews({
     (transaction: TransactionEntity) => {
       onBatchDelete({
         ids: [transaction.id],
+        skipConfirmation: true,
         onSuccess: () => {
           showUndoNotification({
             message: t('Successfully deleted transaction.'),

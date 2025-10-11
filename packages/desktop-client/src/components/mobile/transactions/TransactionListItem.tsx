@@ -186,7 +186,7 @@ export function TransactionListItem({
             flex: 1,
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '0 4px',
+            padding: '0 14px',
             backgroundColor: isPreview
               ? theme.tableRowHeaderBackground
               : theme.tableBackground,
