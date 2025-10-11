@@ -69,6 +69,7 @@ export type ParseFileOptions = {
   delimiter?: string;
   fallbackMissingPayeeToMemo?: boolean;
   skipLines?: number;
+  trimLines?: number;
   importNotes?: boolean;
 };
 
@@ -111,9 +112,12 @@ async function parseCSV(
   const errors = Array<ParseError>();
   let contents = await fs.readFile(filepath);
 
-  if (options.skipLines > 0) {
+  if (options.skipLines > 0 || options.trimLines > 0) {
     const lines = contents.split(/\r?\n/);
-    contents = lines.slice(options.skipLines).join('\r\n');
+    const startLine = options.skipLines || 0;
+    const endLine =
+      options.trimLines > 0 ? lines.length - options.trimLines : lines.length;
+    contents = lines.slice(startLine, endLine).join('\r\n');
   }
 
   let data: ReturnType<typeof csv2json>;
