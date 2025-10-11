@@ -73,7 +73,6 @@ export function PayeesList({
     <View style={{ flex: 1 }}>
       <Virtualizer
         layout={ListLayout}
-        // Default row height approximates mobile list items; RAC measures lazily too
       >
         <GridList
           aria-label={t('Payees')}
