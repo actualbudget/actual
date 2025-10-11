@@ -7,6 +7,7 @@ import React, {
   useRef,
   useState,
   type CSSProperties,
+  type ChangeEvent,
 } from 'react';
 
 import { Button } from '@actual-app/components/button';
@@ -14,6 +15,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
+import { useEventCallback } from 'usehooks-ts';
 
 import {
   amountToCurrency,
@@ -23,6 +25,7 @@ import {
 } from 'loot-core/shared/util';
 
 import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
+import { useNavigableFocusRef } from '@desktop-client/components/NavigableFocusProvider';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
@@ -59,11 +62,17 @@ const AmountInput = memo(function AmountInput({
 
   const initialValue = Math.abs(props.value);
 
+  const globalFocusedRef = useNavigableFocusRef();
+
   useEffect(() => {
     if (focused) {
-      inputRef.current?.focus();
+      // Focus requested
+      if (globalFocusedRef.current !== document.activeElement) {
+        // Global focusable element not focused, attempt to focus input
+        inputRef.current?.focus();
+      }
     }
-  }, [focused]);
+  }, [focused, globalFocusedRef]);
 
   useEffect(() => {
     setEditing(false);
@@ -71,21 +80,24 @@ const AmountInput = memo(function AmountInput({
     setValue(initialValue);
   }, [initialValue]);
 
-  const onKeyUp: HTMLProps<HTMLInputElement>['onKeyUp'] = e => {
-    if (e.key === 'Backspace' && text === '') {
-      setEditing(true);
-    } else if (e.key === 'Enter') {
-      props.onEnter?.(e);
-      if (!e.defaultPrevented) {
-        onUpdate(e.currentTarget.value);
+  const onKeyUp: HTMLProps<HTMLInputElement>['onKeyUp'] = useEventCallback(
+    e => {
+      if (e.key === 'Backspace' && text === '') {
+        setEditing(true);
+      } else if (e.key === 'Enter') {
+        props.onEnter?.(e);
+        if (!e.defaultPrevented) {
+          onUpdate(e.currentTarget.value);
+        }
       }
-    }
-  };
+    },
+  );
 
   const applyText = () => {
     const parsed = currencyToAmount(text) || 0;
     const newValue = editing ? parsed : value;
 
+    globalFocusedRef.current?.blur();
     setValue(Math.abs(newValue));
     setEditing(false);
     setText('');
@@ -106,20 +118,44 @@ const AmountInput = memo(function AmountInput({
     }
   };
 
-  const onBlur: HTMLProps<HTMLInputElement>['onBlur'] = e => {
+  const onBlur: HTMLProps<HTMLInputElement>['onBlur'] = useEventCallback(e => {
     props.onBlur?.(e);
     if (!e.defaultPrevented) {
       onUpdate(e.target.value);
     }
-  };
+  });
 
-  const onChangeText = (text: string) => {
+  const onChangeText = useEventCallback((e: ChangeEvent<HTMLInputElement>) => {
+    let text = e.target.value;
     text = reapplyThousandSeparators(text);
     text = appendDecimals(text, String(hideFraction) === 'true');
     setEditing(true);
     setText(text);
     props.onChangeValue?.(text);
-  };
+  });
+
+  useEffect(() => {
+    const el: HTMLInputElement | null = globalFocusedRef.current;
+    if (el === document.activeElement) {
+      // @ts-expect-error addEventListener missing types
+      el.addEventListener('blur', onBlur);
+      // @ts-expect-error addEventListener missing types
+      el.addEventListener('input', onChangeText);
+      // @ts-expect-error addEventListener missing types
+      el.addEventListener('keyup', onKeyUp);
+    }
+
+    return () => {
+      if (el) {
+        // @ts-expect-error addEventListener missing types
+        el.removeEventListener('blur', onBlur);
+        // @ts-expect-error addEventListener missing types
+        el.removeEventListener('input', onChangeText);
+        // @ts-expect-error addEventListener missing types
+        el.removeEventListener('keyup', onKeyUp);
+      }
+    };
+  }, [onBlur, onChangeText, onKeyUp, globalFocusedRef]);
 
   const input = (
     <input
@@ -128,7 +164,7 @@ const AmountInput = memo(function AmountInput({
       value={text}
       inputMode="decimal"
       autoCapitalize="none"
-      onChange={e => onChangeText(e.target.value)}
+      onChange={onChangeText}
       onFocus={onFocus}
       onBlur={onBlur}
       onKeyUp={onKeyUp}

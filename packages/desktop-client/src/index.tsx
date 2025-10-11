@@ -22,6 +22,7 @@ import { AuthProvider } from './auth/AuthProvider';
 import * as budgetSlice from './budget/budgetSlice';
 import * as budgetfilesSlice from './budgetfiles/budgetfilesSlice';
 import { App } from './components/App';
+import { NavigableFocusProvider } from './components/NavigableFocusProvider';
 import { ServerProvider } from './components/ServerContext';
 import * as modalsSlice from './modals/modalsSlice';
 import * as notificationsSlice from './notifications/notificationsSlice';
@@ -91,7 +92,9 @@ root.render(
   <Provider store={store}>
     <ServerProvider>
       <AuthProvider>
-        <App />
+        <NavigableFocusProvider>
+          <App />
+        </NavigableFocusProvider>
       </AuthProvider>
     </ServerProvider>
   </Provider>,
