@@ -34,7 +34,7 @@ test.describe('Mobile Payees', () => {
   });
 
   test('checks the page visuals', async () => {
-    await payeesPage.searchFor('Fast Internet');
+    await payeesPage.waitForLoadingToComplete();
 
     // Check that the header is present
     await expect(page.getByRole('heading', { name: 'Payees' })).toBeVisible();
@@ -46,18 +46,9 @@ test.describe('Mobile Payees', () => {
       'Filter payees…',
     );
 
-    await expect(page).toMatchThemeScreenshots();
-  });
-
-  test('shows payees in the list', async () => {
-    // Wait for loading to complete
-    await payeesPage.waitForLoadingToComplete();
-
     const payeeCount = await payeesPage.getPayeeCount();
     expect(payeeCount).toBeGreaterThan(0);
-
-    // Check that we can see at least one payee
-    await expect(payeesPage.getAllPayees().first()).toBeVisible();
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('filters out unrelated payees', async () => {
@@ -68,6 +59,7 @@ test.describe('Mobile Payees', () => {
 
     // Assert it is visible
     await expect(noPayeesMessage).toBeVisible();
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('clicking on a payee opens rule creation form', async () => {
@@ -80,6 +72,7 @@ test.describe('Mobile Payees', () => {
 
     // Should navigate to rules page for creating a new rule
     await expect(page).toHaveURL(/\/rules/);
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('page handles empty state gracefully', async () => {
@@ -113,5 +106,6 @@ test.describe('Mobile Payees', () => {
     // Should show all payees again
     const allPayeeCount = await payeesPage.getPayeeCount();
     expect(allPayeeCount).toBeGreaterThan(payeeCount);
+    await expect(page).toMatchThemeScreenshots();
   });
 });
