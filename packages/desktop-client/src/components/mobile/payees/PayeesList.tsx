@@ -71,9 +71,7 @@ export function PayeesList({
 
   return (
     <View style={{ flex: 1 }}>
-      <Virtualizer
-        layout={ListLayout}
-      >
+      <Virtualizer layout={ListLayout}>
         <GridList
           aria-label={t('Payees')}
           aria-busy={isLoading || undefined}
