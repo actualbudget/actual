@@ -187,7 +187,9 @@ export function TransactionListItem({
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '0 4px',
-            backgroundColor: 'transparent',
+            backgroundColor: isPreview
+              ? theme.tableRowHeaderBackground
+              : theme.tableBackground,
             border: 'none',
             width: '100%',
             height: ROW_HEIGHT,
