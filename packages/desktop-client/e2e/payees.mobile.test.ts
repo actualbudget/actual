@@ -80,6 +80,9 @@ test.describe('Mobile Payees', () => {
 
     // Should navigate to rules page for creating a new rule
     await expect(page).toHaveURL(/\/rules/);
+    
+    // Take a screenshot of the rules page
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('page handles empty state gracefully', async () => {
