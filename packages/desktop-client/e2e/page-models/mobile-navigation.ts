@@ -3,7 +3,6 @@ import { type Locator, type Page } from '@playwright/test';
 import { MobileAccountPage } from './mobile-account-page';
 import { MobileAccountsPage } from './mobile-accounts-page';
 import { MobileBudgetPage } from './mobile-budget-page';
-import { MobilePayeesPage } from './mobile-payees-page';
 import { MobileReportsPage } from './mobile-reports-page';
 import { MobileRulesPage } from './mobile-rules-page';
 import { MobileTransactionEntryPage } from './mobile-transaction-entry-page';
@@ -22,7 +21,6 @@ const ROUTES_BY_PAGE = {
   Accounts: '/accounts',
   Transaction: '/transactions/new',
   Reports: '/reports',
-  Payees: '/payees',
   Rules: '/rules',
   Settings: '/settings',
 };
@@ -165,13 +163,6 @@ export class MobileNavigation {
     return await this.navigateToPage(
       'Reports',
       () => new MobileReportsPage(this.page),
-    );
-  }
-
-  async goToPayeesPage() {
-    return await this.navigateToPage(
-      'Payees',
-      () => new MobilePayeesPage(this.page),
     );
   }
 
