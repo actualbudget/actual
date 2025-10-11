@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { type GridListItemProps } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -6,6 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { SvgBookmark } from '@actual-app/components/icons/v1';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 
 import { type PayeeEntity } from 'loot-core/types/models';
 import { type WithRequired } from 'loot-core/types/util';
@@ -17,13 +18,15 @@ type PayeesListItemProps = {
   ruleCount: number;
   isRuleCountLoading?: boolean;
   onDelete: () => void;
+  onEdit: () => void;
 } & WithRequired<GridListItemProps<PayeeEntity>, 'value'>;
 
-export const PayeesListItem = memo(function PayeeListItem({
+export function PayeesListItem({
   value: payee,
   ruleCount,
   isRuleCountLoading,
   onDelete,
+  onEdit,
   ...props
 }: PayeesListItemProps) {
   const { t } = useTranslation();
@@ -37,18 +40,37 @@ export const PayeesListItem = memo(function PayeeListItem({
       id={payee.id}
       value={payee}
       textValue={label}
-      actions={
+      actionsWidth={160}
+      actions={({ close }) =>
         !payee.transfer_acct && (
-          <Button
-            variant="bare"
-            onPress={onDelete}
-            style={{
-              color: theme.errorText,
-              width: '100%',
-            }}
-          >
-            <Trans>Delete</Trans>
-          </Button>
+          <View style={{ flexDirection: 'row', flex: 1 }}>
+            <Button
+              variant="bare"
+              onPress={() => {
+                onEdit();
+                close();
+              }}
+              style={{
+                color: theme.pillText,
+                backgroundColor: theme.pillBackground,
+                flex: 1,
+                borderRadius: 0,
+              }}
+            >
+              <Trans>Edit</Trans>
+            </Button>
+            <Button
+              variant="bare"
+              onPress={onDelete}
+              style={{
+                color: theme.errorText,
+                flex: 1,
+                borderRadius: 0,
+              }}
+            >
+              <Trans>Delete</Trans>
+            </Button>
+          </View>
         )
       }
       {...props}
@@ -112,4 +134,4 @@ export const PayeesListItem = memo(function PayeeListItem({
       </SpaceBetween>
     </ActionableGridListItem>
   );
-});
+}

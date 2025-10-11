@@ -1,4 +1,5 @@
-import { GridList } from 'react-aria-components';
+import { useMemo } from 'react';
+import { GridList, Virtualizer, ListLayout } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
@@ -19,6 +20,7 @@ type PayeesListProps = {
   isLoading?: boolean;
   onPayeePress: (payee: PayeeEntity) => void;
   onPayeeDelete: (payee: PayeeEntity) => void;
+  onPayeeEdit: (payee: PayeeEntity) => void;
 };
 
 export function PayeesList({
@@ -28,8 +30,10 @@ export function PayeesList({
   isLoading = false,
   onPayeePress,
   onPayeeDelete,
+  onPayeeEdit,
 }: PayeesListProps) {
   const { t } = useTranslation();
+  const layout = useMemo(() => new ListLayout(), []);
 
   if (isLoading && payees.length === 0) {
     return (
@@ -71,27 +75,30 @@ export function PayeesList({
 
   return (
     <View style={{ flex: 1 }}>
-      <GridList
-        aria-label={t('Payees')}
-        aria-busy={isLoading || undefined}
-        items={payees}
-        style={{
-          flex: 1,
-          paddingBottom: MOBILE_NAV_HEIGHT,
-          overflow: 'auto',
-        }}
-        dependencies={[ruleCounts, isRuleCountsLoading]}
-      >
-        {payee => (
-          <PayeesListItem
-            value={payee}
-            ruleCount={ruleCounts.get(payee.id) ?? 0}
-            isRuleCountLoading={isRuleCountsLoading}
-            onAction={() => onPayeePress(payee)}
-            onDelete={() => onPayeeDelete(payee)}
-          />
-        )}
-      </GridList>
+      <Virtualizer layout={layout}>
+        <GridList
+          aria-label={t('Payees')}
+          aria-busy={isLoading || undefined}
+          items={payees}
+          style={{
+            flex: 1,
+            paddingBottom: MOBILE_NAV_HEIGHT,
+            overflow: 'auto',
+          }}
+          dependencies={[ruleCounts, isRuleCountsLoading]}
+        >
+          {payee => (
+            <PayeesListItem
+              value={payee}
+              ruleCount={ruleCounts.get(payee.id) ?? 0}
+              isRuleCountLoading={isRuleCountsLoading}
+              onAction={() => onPayeePress(payee)}
+              onDelete={() => onPayeeDelete(payee)}
+              onEdit={() => onPayeeEdit(payee)}
+            />
+          )}
+        </GridList>
+      </Virtualizer>
       {isLoading && (
         <View
           style={{
