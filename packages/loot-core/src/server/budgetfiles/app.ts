@@ -17,6 +17,7 @@ import * as mappings from '../db/mappings';
 import { handleBudgetImport, ImportableBudgetType } from '../importers';
 import { app as mainApp } from '../main-app';
 import { mutator } from '../mutators';
+import { loadPayPeriodConfig } from '../preferences/app';
 import * as prefs from '../prefs';
 import { getServer } from '../server-config';
 import * as sheet from '../sheet';
@@ -25,7 +26,6 @@ import * as syncMigrations from '../sync/migrate';
 import * as rules from '../transactions/transaction-rules';
 import { clearUndo } from '../undo';
 import { updateVersion } from '../update';
-import { loadPayPeriodConfig } from '../preferences/app';
 import {
   idFromBudgetName,
   uniqueBudgetName,

@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
 import { getChangedValues } from '../../shared/util';
@@ -260,7 +261,7 @@ export async function createBudget(months) {
       const sheetName = monthUtils.sheetForMonth(month);
       const prevSheetName = monthUtils.sheetForMonth(prevMonth);
 
-      console.log(
+      logger.log(
         `[createBudget] Creating sheet for month=${month}, sheetName=${sheetName}, isPayPeriod=${monthUtils.isPayPeriod(month)}`,
       );
 
