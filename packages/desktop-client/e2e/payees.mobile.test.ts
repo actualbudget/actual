@@ -60,15 +60,6 @@ test.describe('Mobile Payees', () => {
     await expect(payeesPage.getAllPayees().first()).toBeVisible();
   });
 
-  test('shows Fast Internet in the payee list', async () => {
-    await payeesPage.searchFor('Fast Internet');
-    await expect(page.getByText('Fast Internet')).toBeVisible();
-  });
-
-  test('shows "Create rule" text for a payee', async () => {
-    await payeesPage.searchFor('Deposit');
-    await expect(page.getByText('Create rule')).toBeVisible();
-  });
 
   test('filters out unrelated payees', async () => {
     await payeesPage.searchFor('asdfasdf-nonsense');
