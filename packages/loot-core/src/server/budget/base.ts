@@ -23,18 +23,14 @@ export function getBudgetRange(start: string, end: string) {
   if (start.length > 7) {
     // This is a date string like '2024-01-10', use monthFromDate
     start = monthUtils.monthFromDate(start);
-  } else {
-    // This is already a month string like '2024-01' or '2024-13'
-    start = start;
   }
+  // Otherwise it's already a month string like '2024-01' or '2024-13'
 
   if (end.length > 7) {
     // This is a date string like '2024-01-10', use monthFromDate
     end = monthUtils.monthFromDate(end);
-  } else {
-    // This is already a month string like '2024-01' or '2024-13'
-    end = end;
   }
+  // Otherwise it's already a month string like '2024-01' or '2024-13'
 
   // The start date should never be after the end date. If that
   // happened, the month range might be a valid range and weird

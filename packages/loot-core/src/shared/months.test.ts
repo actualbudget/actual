@@ -7,10 +7,6 @@ import * as sheet from '../server/sheet';
 import * as monthUtils from './months';
 import { setPayPeriodConfig, type PayPeriodConfig } from './pay-periods';
 
-beforeEach(() => {
-  return global.emptyDatabase?.() ?? (() => {});
-});
-
 test('range returns a full range', () => {
   expect(monthUtils.range('2016-10', '2018-01')).toMatchSnapshot();
 });
@@ -298,10 +294,6 @@ describe('Pay Period Integration with Month Utilities', () => {
 
   describe('Transaction Filtering and Bounds', () => {
     async function setupTestData() {
-      if (!global.emptyDatabase) {
-        return { groceriesId: 'groceries' };
-      }
-
       await sheet.loadSpreadsheet(db);
 
       // Set current month for testing
@@ -334,10 +326,6 @@ describe('Pay Period Integration with Month Utilities', () => {
 
     test('month bounds work correctly for pay period transaction filtering', async () => {
       const { groceriesId } = await setupTestData();
-
-      if (!global.emptyDatabase) {
-        return; // Skip database tests in non-test environment
-      }
 
       // Insert transactions in different pay periods
       await db.insertTransaction({
@@ -439,10 +427,6 @@ describe('Pay Period Integration with Month Utilities', () => {
 
   describe('Budget Integration', () => {
     async function setupTestData() {
-      if (!global.emptyDatabase) {
-        return { groceriesId: 'groceries', transportId: 'transport' };
-      }
-
       await sheet.loadSpreadsheet(db);
 
       // Create expense category group and categories
@@ -470,10 +454,6 @@ describe('Pay Period Integration with Month Utilities', () => {
     }
 
     test('spent amounts populate correctly in pay period sheets', async () => {
-      if (!global.emptyDatabase) {
-        return; // Skip database tests in non-test environment
-      }
-
       // Set current month for testing
       global.currentMonth = '2024-13';
 
@@ -560,10 +540,6 @@ describe('Pay Period Integration with Month Utilities', () => {
     });
 
     test('complete end-to-end pay period solution', async () => {
-      if (!global.emptyDatabase) {
-        return; // Skip database tests in non-test environment
-      }
-
       global.currentMonth = '2024-13';
 
       const { groceriesId } = await setupTestData();
