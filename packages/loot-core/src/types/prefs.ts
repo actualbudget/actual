@@ -3,7 +3,7 @@ export type FeatureFlag =
   | 'goalTemplatesUIEnabled'
   | 'actionTemplating'
   | 'currency'
-  | 'plugins';
+  | 'plugins'
   | 'payPeriodsEnabled';
 
 /**

@@ -28,8 +28,6 @@ export function loadPayPeriodConfigFromPrefs(prefs: {
   payPeriodFrequency?: string;
   payPeriodStartDate?: string;
 }): void {
-  console.log('[PayPeriod] Loading config from preferences:', prefs);
-
   try {
     const config: PayPeriodConfig = {
       enabled: prefs.showPayPeriods === 'true',
@@ -39,8 +37,6 @@ export function loadPayPeriodConfigFromPrefs(prefs: {
       startDate:
         prefs.payPeriodStartDate || new Date().toISOString().slice(0, 10),
     };
-
-    console.log('[PayPeriod] Parsed config before validation:', config);
 
     // Validate frequency is one of the allowed values
     const validFrequencies: PayPeriodConfig['payFrequency'][] = [
@@ -65,10 +61,6 @@ export function loadPayPeriodConfigFromPrefs(prefs: {
     }
 
     setPayPeriodConfig(config);
-    console.log(
-      '[PayPeriod] Successfully loaded config from preferences:',
-      config,
-    );
   } catch (error) {
     console.warn(
       '[PayPeriod] Failed to load pay period config from preferences:',
@@ -82,10 +74,6 @@ export function loadPayPeriodConfigFromPrefs(prefs: {
       startDate: new Date().toISOString().slice(0, 10),
     };
     setPayPeriodConfig(fallbackConfig);
-    console.log(
-      '[PayPeriod] Set fallback config due to error:',
-      fallbackConfig,
-    );
   }
 }
 

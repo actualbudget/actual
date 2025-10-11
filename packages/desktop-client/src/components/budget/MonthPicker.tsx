@@ -130,10 +130,9 @@ export const MonthPicker = ({
           </View>
         </Link>
         {range.map((month, idx) => {
-          const config = monthUtils.getPayPeriodConfig();
           const displayLabel = monthUtils.getMonthDisplayName(
             month,
-            config,
+            undefined,
             locale,
           );
           const selected =
