@@ -292,7 +292,6 @@ export function useTransactionBatchActions() {
             },
             [],
           )
-          .map(({ sort_order, ...trans }: TransactionEntity) => ({ ...trans })),
       };
 
       await send('transactions-batch-update', changes);
