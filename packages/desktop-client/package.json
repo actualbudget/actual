@@ -87,5 +87,8 @@
     "test": "vitest",
     "e2e": "npx playwright test --browser=chromium",
     "vrt": "cross-env VRT=true npx playwright test --browser=chromium"
+  },
+  "dependencies": {
+    "@capgo/capacitor-updater": "^7.18.8"
   }
 }

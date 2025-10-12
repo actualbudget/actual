@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core';
 import { UAParser } from 'ua-parser-js';
 
 const isWindows =
@@ -13,7 +14,9 @@ export const OS: 'windows' | 'mac' | 'linux' | 'unknown' = isWindows
   : isMac
     ? 'mac'
     : 'linux';
-export const env: 'web' | 'mobile' | 'unknown' = 'web';
+export const env: 'web' | 'mobile' | 'unknown' = Capacitor.isNativePlatform()
+  ? 'mobile'
+  : 'web';
 export const isBrowser = true;
 
 const agent = UAParser(navigator.userAgent);

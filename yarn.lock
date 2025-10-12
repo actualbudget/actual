@@ -129,6 +129,7 @@ __metadata:
   resolution: "@actual-app/web@workspace:packages/desktop-client"
   dependencies:
     "@actual-app/components": "workspace:*"
+    "@capgo/capacitor-updater": "npm:^7.18.8"
     "@emotion/css": "npm:^11.13.5"
     "@fontsource/redacted-script": "npm:^5.2.8"
     "@juggle/resize-observer": "npm:^3.4.0"
@@ -1520,6 +1521,15 @@ __metadata:
   peerDependencies:
     "@capacitor/core": ">=7.0.0"
   checksum: 10/842875f33d538b43c0f8f234c324fadbc24a7d6c5f362108cd3a5ae994e353400dde46a3516d6bae1aa584426fe68f2c0c8973133e2f7e60a891b713b1f70092
+  languageName: node
+  linkType: hard
+
+"@capgo/capacitor-updater@npm:^7.18.8":
+  version: 7.18.10
+  resolution: "@capgo/capacitor-updater@npm:7.18.10"
+  peerDependencies:
+    "@capacitor/core": ">=7.0.0"
+  checksum: 10/8a4f4213e287dde2a5060bf45d7a0387e62a1fc86078accdb1da5e07798250f0eda7303938fb14ed9118d154b5de53c8a0249c451fedb0ab2773a22577fadc07
   languageName: node
   linkType: hard
 
