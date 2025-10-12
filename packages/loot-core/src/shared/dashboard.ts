@@ -82,7 +82,7 @@ This dashboard gives you a complete view of your financial health. Here's what e
 - **Summary Cards**: Key monthly income and expense totals
 - **Calendar**: Daily transaction activity and patterns
 
-**Tip**: Click "Edit dashboard" to customize this layout or add more widgets!`,
+**Tip**: Click “Edit dashboard” to customize this layout or add more widgets!`,
       text_align: 'left',
     },
   },
