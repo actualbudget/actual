@@ -1,0 +1,8 @@
+#!/bin/bash
+set -euo pipefail
+
+rm -rf build/src/sql
+cp -r src/sql build/src/sql
+
+cp ../mobile-client/build/bundle.zip build/mobile-bundle.zip
+cp ../mobile-client/build/bundle.json build/mobile-bundle.json

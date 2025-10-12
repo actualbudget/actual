@@ -1,0 +1,31 @@
+#!/bin/bash
+set -euo pipefail
+
+
+ROOT=`dirname $0`
+CI=${CI:-false}
+
+cd "$ROOT/.."
+POSITIONAL=()
+BUILD_ALL=false
+while [[ $# -gt 0 ]]; do
+  key="$1"
+
+  case $key in
+      --all)
+      BUILD_ALL=true
+      shift
+      ;;
+      *)
+      POSITIONAL+=("$1")
+      shift
+      ;;
+  esac
+done
+set -- "${POSITIONAL[@]+${POSITIONAL[@]}}"
+
+if [ $BUILD_ALL == true ]; then
+    yarn workspace mobile-client build
+else
+    yarn workspace mobile-client build:bundle
+fi
