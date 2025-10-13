@@ -68,8 +68,8 @@ export type ParseFileOptions = {
   hasHeaderRow?: boolean;
   delimiter?: string;
   fallbackMissingPayeeToMemo?: boolean;
-  skipLines?: number;
-  trimLines?: number;
+  skipStartLines?: number;
+  skipEndLines?: number;
   importNotes?: boolean;
 };
 
@@ -112,11 +112,11 @@ async function parseCSV(
   const errors = Array<ParseError>();
   let contents = await fs.readFile(filepath);
 
-  if (options.skipLines > 0 || options.trimLines > 0) {
+  if (options.skipStartLines > 0 || options.skipEndLines > 0) {
     const lines = contents.split(/\r?\n/);
-    const startLine = options.skipLines || 0;
+    const startLine = options.skipStartLines || 0;
     const endLine =
-      options.trimLines > 0 ? lines.length - options.trimLines : lines.length;
+      options.skipEndLines > 0 ? lines.length - options.skipEndLines : lines.length;
     contents = lines.slice(startLine, endLine).join('\r\n');
   }
 
