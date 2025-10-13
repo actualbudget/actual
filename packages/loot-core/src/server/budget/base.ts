@@ -18,19 +18,8 @@ export function getBudgetType() {
 }
 
 export function getBudgetRange(start: string, end: string) {
-  // When pay periods are enabled, we need to use monthFromDate for date strings
-  // to ensure we get pay period months instead of calendar months
-  if (start.length > 7) {
-    // This is a date string like '2024-01-10', use monthFromDate
-    start = monthUtils.monthFromDate(start);
-  }
-  // Otherwise it's already a month string like '2024-01' or '2024-13'
-
-  if (end.length > 7) {
-    // This is a date string like '2024-01-10', use monthFromDate
-    end = monthUtils.monthFromDate(end);
-  }
-  // Otherwise it's already a month string like '2024-01' or '2024-13'
+  start = monthUtils.getMonth(start);
+  end = monthUtils.getMonth(end);
 
   // The start date should never be after the end date. If that
   // happened, the month range might be a valid range and weird
