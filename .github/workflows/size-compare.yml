@@ -54,6 +54,7 @@ jobs:
         with:
           branch: ${{github.base_ref}}
           workflow: build.yml
+          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
           name: build-stats
           path: base
 
@@ -62,6 +63,7 @@ jobs:
         with:
           pr: ${{github.event.pull_request.number}}
           workflow: build.yml
+          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
           name: build-stats
           path: head
           allow_forks: true
