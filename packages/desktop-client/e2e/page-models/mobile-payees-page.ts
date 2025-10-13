@@ -12,8 +12,7 @@ export class MobilePayeesPage {
     this.searchBox = page.getByPlaceholder('Filter payees…');
     this.payeesList = page.getByRole('grid', { name: 'Payees' });
     this.emptyMessage = page.getByText('No payees found.');
-    // eslint-disable-next-line actual/typography
-    this.loadingIndicator = page.locator('[data-testid="animated-loading"]');
+    this.loadingIndicator = page.getByTestId('animated-loading');
   }
 
   async waitFor(options?: {
