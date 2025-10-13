@@ -452,10 +452,6 @@ export function sheetForMonth(month: string): string {
   return 'budget' + month.replace('-', '');
 }
 
-export function nameForMonth(month: DateLike, locale?: Locale): string {
-  return d.format(_parse(month), 'MMMM ‘yy', { locale });
-}
-
 export function format(
   month: DateLike,
   format: string,
@@ -550,7 +546,7 @@ function getCalendarMonthEndDate(monthId: string): Date {
 }
 
 function getCalendarMonthLabel(monthId: string): string {
-  return d.format(_parse(monthId), 'MMMM yyyy');
+  return d.format(_parse(monthId), 'MMMM');
 }
 
 // pay period helpers are implemented in './pay-periods'
@@ -637,7 +633,9 @@ export function getMonthDateRange(
     return getMonthLabel(monthId, activeConfig);
   }
 
-  return nameForMonth(monthId, locale);
+  // For calendar months, return just the month name (e.g., "January")
+  // This matches the original behavior before pay periods were introduced
+  return d.format(_parse(monthId), 'MMMM', { locale });
 }
 
 export { getPayPeriodConfig, setPayPeriodConfig, generatePayPeriods };

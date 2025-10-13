@@ -50,7 +50,7 @@ describe('Pay Period Integration with Month Utilities', () => {
 
     test('getMonthLabel returns appropriate labels', () => {
       // Calendar month
-      expect(monthUtils.getMonthLabel('2024-01')).toContain('January');
+      expect(monthUtils.getMonthLabel('2024-01')).toEqual('January');
 
       // Pay period
       const payPeriodLabel = monthUtils.getMonthLabel(
