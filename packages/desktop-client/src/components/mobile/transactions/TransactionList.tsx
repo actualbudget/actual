@@ -40,7 +40,6 @@ import { type TransactionEntity } from 'loot-core/types/models';
 import { ROW_HEIGHT, TransactionListItem } from './TransactionListItem';
 
 import { FloatingActionBar } from '@desktop-client/components/mobile/FloatingActionBar';
-import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
 import { useScrollListener } from '@desktop-client/components/ScrollProvider';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -192,9 +191,6 @@ export function TransactionList({
               )
             }
             items={sections}
-            style={{
-              paddingBottom: MOBILE_NAV_HEIGHT,
-            }}
           >
             {section => (
               <ListBoxSection>
