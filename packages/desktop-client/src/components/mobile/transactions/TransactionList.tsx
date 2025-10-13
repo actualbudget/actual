@@ -7,9 +7,11 @@ import React, {
   type CSSProperties,
 } from 'react';
 import {
+  ListBox,
+  ListBoxSection,
   Header,
+  Collection,
   Virtualizer,
-  GridList,
   ListLayout,
 } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
@@ -98,39 +100,28 @@ export function TransactionList({
 }: TransactionListProps) {
   const locale = useLocale();
   const { t } = useTranslation();
-  const items = useMemo(() => {
-    // Create a flat list of items that includes both date headers and transactions
-    const items: Array<{
+  const sections = useMemo(() => {
+    // Group by date. We can assume transactions is ordered
+    const sections: {
       id: string;
-      type: 'date-header' | 'transaction';
-      date?: TransactionEntity['date'];
-      transaction?: TransactionEntity;
-    }> = [];
-
-    let currentDate: TransactionEntity['date'] | null = null;
-
+      date: TransactionEntity['date'];
+      transactions: TransactionEntity[];
+    }[] = [];
     transactions.forEach(transaction => {
-      // Add date header if this is a new date
-      if (currentDate !== transaction.date) {
-        currentDate = transaction.date;
-        items.push({
-          id: `date-${transaction.date}`,
-          type: 'date-header',
+      if (
+        sections.length === 0 ||
+        transaction.date !== sections[sections.length - 1].date
+      ) {
+        sections.push({
+          id: `${isPreviewId(transaction.id) ? 'preview/' : ''}${transaction.date}`,
           date: transaction.date,
+          transactions: [],
         });
       }
 
-      // Add transaction (only non-child transactions unless searching)
-      if (!isPreviewId(transaction.id) || !transaction.is_child) {
-        items.push({
-          id: transaction.id,
-          type: 'transaction',
-          transaction,
-        });
-      }
+      sections[sections.length - 1].transactions.push(transaction);
     });
-
-    return items;
+    return sections;
   }, [transactions]);
 
   const dispatchSelected = useSelectedDispatch();
@@ -170,77 +161,79 @@ export function TransactionList({
           aria-label={t('Loading transactions...')}
         />
       )}
-      {!isLoading && items.length === 0 ? (
-        <View
-          style={{
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: theme.mobilePageBackground,
-            flex: 1,
+      <View style={{ flex: 1, overflow: 'auto' }}>
+        <Virtualizer
+          layout={ListLayout}
+          layoutOptions={{
+            estimatedRowHeight: ROW_HEIGHT,
+            padding: 0,
           }}
         >
-          <Text style={{ fontSize: 15 }}>
-            <Trans>No transactions</Trans>
-          </Text>
-        </View>
-      ) : (
-        <View style={{ flex: 1, overflow: 'auto' }}>
-          <Virtualizer
-            layout={ListLayout}
-            layoutOptions={{
-              estimatedRowHeight: ROW_HEIGHT,
-              padding: 0,
+          <ListBox
+            aria-label={t('Transaction list')}
+            selectionMode={
+              selectedTransactions.size > 0 ? 'multiple' : 'single'
+            }
+            selectedKeys={selectedTransactions}
+            dependencies={[selectedTransactions]}
+            renderEmptyState={() =>
+              !isLoading && (
+                <View
+                  style={{
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: theme.mobilePageBackground,
+                  }}
+                >
+                  <Text style={{ fontSize: 15 }}>
+                    <Trans>No transactions</Trans>
+                  </Text>
+                </View>
+              )
+            }
+            items={sections}
+            style={{
+              paddingBottom: MOBILE_NAV_HEIGHT,
             }}
           >
-            <GridList
-              aria-label={t('Transaction list')}
-              aria-busy={isLoading || undefined}
-              items={items}
-              style={{
-                paddingBottom: MOBILE_NAV_HEIGHT,
-              }}
-            >
-              {item => {
-                if (item.type === 'date-header') {
-                  return (
-                    <Header
-                      key={item.id}
-                      style={{
-                        ...styles.smallText,
-                        backgroundColor: theme.pageBackground,
-                        color: theme.tableHeaderText,
-                        display: 'flex',
-                        justifyContent: 'center',
-                        paddingBottom: 4,
-                        paddingTop: 4,
-                        position: 'sticky',
-                        top: '0',
-                        width: '100%',
-                        zIndex: 10,
-                      }}
-                    >
-                      {monthUtils.format(item.date!, 'MMMM dd, yyyy', locale)}
-                    </Header>
-                  );
-                }
-
-                if (item.type === 'transaction' && item.transaction) {
-                  return (
+            {section => (
+              <ListBoxSection>
+                <Header
+                  style={{
+                    ...styles.smallText,
+                    backgroundColor: theme.pageBackground,
+                    color: theme.tableHeaderText,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    paddingBottom: 4,
+                    paddingTop: 4,
+                    position: 'sticky',
+                    top: '0',
+                    width: '100%',
+                    zIndex: 10,
+                  }}
+                >
+                  {monthUtils.format(section.date, 'MMMM dd, yyyy', locale)}
+                </Header>
+                <Collection
+                  items={section.transactions.filter(
+                    t => !isPreviewId(t.id) || !t.is_child,
+                  )}
+                >
+                  {transaction => (
                     <TransactionListItem
-                      key={item.id}
-                      value={item.transaction}
+                      key={transaction.id}
+                      value={transaction}
                       onPress={trans => onTransactionPress(trans)}
                       onLongPress={trans => onTransactionPress(trans, true)}
                     />
-                  );
-                }
-
-                return null;
-              }}
-            </GridList>
-          </Virtualizer>
-        </View>
-      )}
+                  )}
+                </Collection>
+              </ListBoxSection>
+            )}
+          </ListBox>
+        </Virtualizer>
+      </View>
 
       {isLoadingMore && (
         <Loading
