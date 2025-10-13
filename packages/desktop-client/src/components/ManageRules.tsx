@@ -107,6 +107,8 @@ export function ruleToString(rule: RuleEntity, data: FilterData) {
     } else if (action.op === 'prepend-notes' || action.op === 'append-notes') {
       const noteValue = String(action.value || '');
       return [friendlyOp(action.op), '\u201c' + noteValue + '\u201d'];
+    } else if (action.op === 'delete-transaction') {
+      return [friendlyOp(action.op), '(delete)'];
     } else {
       return [];
     }

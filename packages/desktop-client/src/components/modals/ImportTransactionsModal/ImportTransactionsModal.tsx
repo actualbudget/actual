@@ -14,7 +14,6 @@ import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import deepEqual from 'deep-equal';
 
 import { send } from 'loot-core/platform/client/fetch';
 import { type ParseFileOptions } from 'loot-core/server/transactions/import/parse-file';
@@ -180,6 +179,9 @@ export function ImportTransactionsModal({
   } | null>(null);
   const [filename, setFilename] = useState(originalFileName);
   const [transactions, setTransactions] = useState<ImportTransaction[]>([]);
+  const [parsedTransactions, setParsedTransactions] = useState<
+    ImportTransaction[]
+  >([]);
   const [filetype, setFileType] = useState('unknown');
   const [fieldMappings, setFieldMappings] = useState<FieldMapping | null>(null);
   const [splitMode, setSplitMode] = useState(false);
@@ -289,6 +291,7 @@ export function ImportTransactionsModal({
           ignored,
           selected,
           selected_merge,
+          tombstone,
           ...finalTransaction
         } = trans;
         previewTransactions.push({
@@ -324,6 +327,8 @@ export function ImportTransactionsModal({
           // if the transaction is an update that will be ignored
           // (reconciled transactions or no change detected)
           current_trx.ignored = entry?.ignored || false;
+
+          current_trx.tombstone = entry?.tombstone || false;
 
           current_trx.selected = !current_trx.ignored;
           current_trx.selected_merge = current_trx.existing;
@@ -436,8 +441,12 @@ export function ImportTransactionsModal({
         // Reverse the transactions because it's very common for them to
         // be ordered ascending, but we show transactions descending by
         // date. This is purely cosmetic.
+        const reversedTransactions =
+          transactions.reverse() as ImportTransaction[];
+        setParsedTransactions(reversedTransactions);
+
         const transactionPreview = await getImportPreview(
-          transactions.reverse(),
+          reversedTransactions,
           filetype,
           flipAmount,
           fieldMappings,
@@ -459,7 +468,6 @@ export function ImportTransactionsModal({
     const amt = e;
     if (!amt || amt.match(/^\d{1,}(\.\d{0,4})?$/)) {
       setMultiplierAmount(amt);
-      runImportPreview();
     }
   }
 
@@ -541,7 +549,6 @@ export function ImportTransactionsModal({
       [field]: name === '' ? null : name,
     };
     setFieldMappings(newFieldMappings);
-    runImportPreview();
   }
 
   function onCheckTransaction(trx_id: string) {
@@ -723,8 +730,20 @@ export function ImportTransactionsModal({
   }
 
   const runImportPreview = useCallback(async () => {
+    // preserve user's selection choices before re-running preview
+    const selectionMap = new Map();
+    transactions.forEach(trans => {
+      if (!trans.isMatchedTransaction) {
+        selectionMap.set(trans.trx_id, {
+          selected: trans.selected,
+          selected_merge: trans.selected_merge,
+        });
+      }
+    });
+
+    // always start from the original parsed transactions, not the previewed ones to ensure rules run
     const transactionPreview = await getImportPreview(
-      transactions,
+      parsedTransactions,
       filetype,
       flipAmount,
       fieldMappings,
@@ -735,12 +754,25 @@ export function ImportTransactionsModal({
       multiplierAmount,
     );
 
-    if (!deepEqual(transactions, transactionPreview)) {
-      setTransactions(transactionPreview);
-    }
+    // restore selections to the new preview results
+    const transactionPreviewWithSelections = transactionPreview.map(trans => {
+      if (!trans.isMatchedTransaction && selectionMap.has(trans.trx_id)) {
+        const saved = selectionMap.get(trans.trx_id);
+        return {
+          ...trans,
+          selected: saved.selected,
+          selected_merge: saved.selected_merge,
+        };
+      }
+      return trans;
+    });
+
+    setTransactions(transactionPreviewWithSelections);
+    // intentionally exclude transactions from dependencies to avoid infinite rerenders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     getImportPreview,
-    transactions,
+    parsedTransactions,
     filetype,
     flipAmount,
     fieldMappings,
@@ -749,6 +781,29 @@ export function ImportTransactionsModal({
     inOutMode,
     outValue,
     multiplierAmount,
+  ]);
+
+  useEffect(() => {
+    if (parsedTransactions.length === 0 || loadingState === 'parsing') {
+      return;
+    }
+
+    if (filetype === 'csv' || filetype === 'qif') {
+      runImportPreview();
+    }
+    // intentionally exclude runImportPreview from dependencies to avoid infinite rerenders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    filetype,
+    flipAmount,
+    fieldMappings,
+    splitMode,
+    parseDateFormat,
+    inOutMode,
+    outValue,
+    multiplierAmount,
+    loadingState,
+    parsedTransactions.length,
   ]);
 
   const headers: ComponentProps<typeof TableHeader>['headers'] = [
@@ -971,7 +1026,6 @@ export function ImportTransactionsModal({
                       parseDateFormat={parseDateFormat || undefined}
                       onChange={value => {
                         setParseDateFormat(isDateFormat(value) ? value : null);
-                        runImportPreview();
                       }}
                     />
                   )}
@@ -1121,7 +1175,6 @@ export function ImportTransactionsModal({
                     checked={flipAmount}
                     onChange={() => {
                       setFlipAmount(!flipAmount);
-                      runImportPreview();
                     }}
                   >
                     <Trans>Flip amount</Trans>
@@ -1132,7 +1185,6 @@ export function ImportTransactionsModal({
                     onToggle={() => {
                       setMultiplierEnabled(!multiplierEnabled);
                       setMultiplierAmount('');
-                      runImportPreview();
                     }}
                     onChangeAmount={onMultiplierChange}
                   />
@@ -1143,7 +1195,6 @@ export function ImportTransactionsModal({
                         checked={splitMode}
                         onChange={() => {
                           onSplitMode();
-                          runImportPreview();
                         }}
                       >
                         <Trans>
@@ -1155,7 +1206,6 @@ export function ImportTransactionsModal({
                         outValue={outValue}
                         onToggle={() => {
                           setInOutMode(!inOutMode);
-                          runImportPreview();
                         }}
                         onChangeText={setOutValue}
                       />
@@ -1178,7 +1228,10 @@ export function ImportTransactionsModal({
             >
               {(() => {
                 const count = transactions?.filter(
-                  trans => !trans.isMatchedTransaction && trans.selected,
+                  trans =>
+                    !trans.isMatchedTransaction &&
+                    trans.selected &&
+                    !trans.tombstone,
                 ).length;
 
                 return (

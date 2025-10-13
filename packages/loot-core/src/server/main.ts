@@ -9,6 +9,7 @@ import * as fs from '../platform/server/fs';
 import { logger, setVerboseMode } from '../platform/server/log';
 import * as sqlite from '../platform/server/sqlite';
 import { q } from '../shared/query';
+import { amountToInteger, integerToAmount } from '../shared/util';
 import { Handlers } from '../types/handlers';
 
 import { app as accountsApp } from './accounts/app';
@@ -290,4 +291,6 @@ export const lib = {
   on: (name, func) => app.events.on(name, func),
   q,
   db,
+  amountToInteger,
+  integerToAmount,
 };

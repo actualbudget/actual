@@ -15,7 +15,6 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  type TooltipProps,
 } from 'recharts';
 
 import { chartTheme } from '@desktop-client/components/reports/chart-theme';
@@ -27,7 +26,19 @@ import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 const MAX_BAR_SIZE = 50;
 const ANIMATION_DURATION = 1000; // in ms
 
-type CustomTooltipProps = TooltipProps<number, 'date'> & {
+type PayloadItem = {
+  payload: {
+    date: string;
+    income: number;
+    expenses: number;
+    balance: number;
+    transfers: number;
+  };
+};
+
+type CustomTooltipProps = {
+  active?: boolean;
+  payload?: PayloadItem[];
   isConcise: boolean;
   format: (value: unknown, type?: FormatType) => string;
 };

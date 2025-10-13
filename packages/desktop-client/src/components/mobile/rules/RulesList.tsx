@@ -1,4 +1,4 @@
-import { GridList } from 'react-aria-components';
+import { Virtualizer, GridList, ListLayout } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
@@ -66,25 +66,31 @@ export function RulesList({
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <GridList
-        aria-label={t('Rules')}
-        aria-busy={isLoading || undefined}
-        items={rules}
-        style={{
-          flex: 1,
-          paddingBottom: MOBILE_NAV_HEIGHT,
-          overflow: 'auto',
+    <View style={{ flex: 1, overflow: 'auto' }}>
+      <Virtualizer
+        layout={ListLayout}
+        layoutOptions={{
+          estimatedRowHeight: 140,
+          padding: 0,
         }}
       >
-        {rule => (
-          <RulesListItem
-            value={rule}
-            onAction={() => onRulePress(rule)}
-            onDelete={() => onRuleDelete(rule)}
-          />
-        )}
-      </GridList>
+        <GridList
+          aria-label={t('Rules')}
+          aria-busy={isLoading || undefined}
+          items={rules}
+          style={{
+            paddingBottom: MOBILE_NAV_HEIGHT,
+          }}
+        >
+          {rule => (
+            <RulesListItem
+              value={rule}
+              onAction={() => onRulePress(rule)}
+              onDelete={() => onRuleDelete(rule)}
+            />
+          )}
+        </GridList>
+      </Virtualizer>
       {isLoading && (
         <View
           style={{

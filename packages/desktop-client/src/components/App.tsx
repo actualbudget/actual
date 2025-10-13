@@ -211,7 +211,7 @@ export function App() {
   return (
     <BrowserRouter>
       <ExposeNavigate />
-      <HotkeysProvider initiallyActiveScopes={['*']}>
+      <HotkeysProvider initiallyActiveScopes={['app']}>
         <SpreadsheetProvider>
           <SidebarProvider>
             <BudgetMonthCountProvider>
