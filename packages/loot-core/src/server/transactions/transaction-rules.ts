@@ -665,6 +665,8 @@ export async function applyActions(
           action.op === 'append-notes'
         ) {
           return new Action(action.op, null, action.value, null);
+        } else if (action.op === 'delete-transaction') {
+          return new Action(action.op, null, null, null);
         }
 
         return new Action(
