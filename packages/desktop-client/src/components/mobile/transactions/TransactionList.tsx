@@ -170,6 +170,8 @@ export function TransactionList({
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: theme.mobilePageBackground,
+                height: '100%',
+                minHeight: '50vh',
               }}
             >
               <Text style={{ fontSize: 15 }}>
