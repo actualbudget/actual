@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Trans } from 'react-i18next';
 import { Navigate, Route, Routes } from 'react-router';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -55,7 +56,10 @@ function Version() {
         },
       }}
     >
-      {`App: v${window.Actual.ACTUAL_VERSION} | Server: ${version}`}
+      <Trans>
+        App: v{{ appVersion: window.Actual.ACTUAL_VERSION }} | Server:{' '}
+        {{ serverVersion: version }}
+      </Trans>
     </Text>
   );
 }

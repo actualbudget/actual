@@ -38,12 +38,11 @@ export function SpendingCard({
   const { t } = useTranslation();
   const format = useFormat();
 
-  const [compare, compareTo] = calculateSpendingReportTimeRange(meta ?? {});
-
   const [isCardHovered, setIsCardHovered] = useState(false);
+  const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const spendingReportMode = meta?.mode ?? 'single-month';
 
-  const [nameMenuOpen, setNameMenuOpen] = useState(false);
+  const [compare, compareTo] = calculateSpendingReportTimeRange(meta ?? {});
 
   const selection =
     spendingReportMode === 'single-month' ? 'compareTo' : spendingReportMode;

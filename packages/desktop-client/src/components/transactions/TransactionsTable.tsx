@@ -57,6 +57,7 @@ import {
 } from 'loot-core/shared/transactions';
 import {
   amountToCurrency,
+  currencyToAmount,
   type IntegerAmount,
   integerToCurrency,
   titleFirst,
@@ -1020,12 +1021,15 @@ const Transaction = memo(function Transaction({
     }
 
     // If entering an amount in either of the credit/debit fields, we
-    // need to clear out the other one so it's always properly
+    // need to clear out the other one or both so it's always properly
     // translated into the desired amount (see
     // `deserializeTransaction`)
     if (name === 'credit') {
       newTransaction['debit'] = '';
     } else if (name === 'debit') {
+      newTransaction['credit'] = '';
+    } else {
+      newTransaction['debit'] = '';
       newTransaction['credit'] = '';
     }
 
@@ -1591,6 +1595,10 @@ const Transaction = memo(function Transaction({
         exposed={focusedField === 'debit'}
         focused={focusedField === 'debit'}
         value={debit === '' && credit === '' ? amountToCurrency(0) : debit}
+        formatter={value =>
+          // reformat value so since we might have kept decimals
+          value ? amountToCurrency(currencyToAmount(value) || 0) : ''
+        }
         valueStyle={valueStyle}
         textAlign="right"
         title={debit}
@@ -1603,6 +1611,7 @@ const Transaction = memo(function Transaction({
         inputProps={{
           value: debit === '' && credit === '' ? amountToCurrency(0) : debit,
           onUpdate: onUpdate.bind(null, 'debit'),
+          'data-1p-ignore': true,
         }}
         privacyFilter={{
           activationFilters: [!isTemporaryId(transaction.id)],
@@ -1617,6 +1626,10 @@ const Transaction = memo(function Transaction({
         exposed={focusedField === 'credit'}
         focused={focusedField === 'credit'}
         value={credit}
+        formatter={value =>
+          // reformat value so since we might have kept decimals
+          value ? amountToCurrency(currencyToAmount(value) || 0) : ''
+        }
         valueStyle={valueStyle}
         textAlign="right"
         title={credit}
@@ -1629,6 +1642,7 @@ const Transaction = memo(function Transaction({
         inputProps={{
           value: credit,
           onUpdate: onUpdate.bind(null, 'credit'),
+          'data-1p-ignore': true,
         }}
         privacyFilter={{
           activationFilters: [!isTemporaryId(transaction.id)],

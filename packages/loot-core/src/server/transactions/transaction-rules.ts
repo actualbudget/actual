@@ -342,8 +342,9 @@ export async function runRules(
     // If there is a scheduleRuleID (meaning this transaction came from a schedule) then exclude rules linked to other schedules.
     if (scheduleRuleID !== '') {
       if (rules[i].id === scheduleRuleID) {
-        // if the rule has the same ID that is attached to the schedule then run it (it is the schedules rule).
-        finalTrans = rules[i].apply(finalTrans);
+        // bypass condition checking to run the rule even if the transaction date falls outside of the schedule's date range.
+        const changes = rules[i].execActions(finalTrans);
+        finalTrans = Object.assign({}, finalTrans, changes);
       } else if (RuleIdsLinkedToSchedules.includes(rules[i].id)) {
         // skip all other rules that are linked to other schedules.
         continue;
@@ -664,6 +665,8 @@ export async function applyActions(
           action.op === 'append-notes'
         ) {
           return new Action(action.op, null, action.value, null);
+        } else if (action.op === 'delete-transaction') {
+          return new Action(action.op, null, null, null);
         }
 
         return new Action(

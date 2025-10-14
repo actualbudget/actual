@@ -39,6 +39,8 @@ import { useDispatch } from '@desktop-client/redux';
 const getPayeesById = memoizeOne((payees: PayeeEntity[]) => groupById(payees));
 
 function PayeeTableHeader() {
+  const { t } = useTranslation();
+
   const dispatchSelected = useSelectedDispatch();
   const selectedItems = useSelectedItems();
 
@@ -62,7 +64,7 @@ function PayeeTableHeader() {
             dispatchSelected({ type: 'select-all', isRangeSelect: e.shiftKey })
           }
         />
-        <Cell value="Name" width="flex" />
+        <Cell value={t('Name')} width="flex" />
       </TableHeader>
     </View>
   );

@@ -616,7 +616,7 @@ describe('Transactions', () => {
       .getByTestId('autocomplete')
       .querySelectorAll('[data-testid$="category-item"]');
     expect(items.length).toBe(3);
-  });
+  }, 30000);
 
   test('dropdown selects an item with keyboard', async () => {
     const { container, getTransactions } = renderTransactions();

@@ -3,7 +3,7 @@
   "author": "Actual",
   "productName": "Actual",
   "description": "A simple and powerful personal finance system",
-  "version": "25.9.0",
+  "version": "25.10.0",
   "scripts": {
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
@@ -34,9 +34,6 @@
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "artifactName": "${productName}-mac-${arch}.${ext}",
-      "notarize": {
-        "teamId": "79ANZ983YF"
-      },
       "target": [
         {
           "target": "dmg",
@@ -90,20 +87,20 @@
   },
   "dependencies": {
     "@actual-app/sync-server": "workspace:*",
-    "better-sqlite3": "^12.2.0",
-    "fs-extra": "^11.3.0",
+    "better-sqlite3": "^12.4.1",
+    "fs-extra": "^11.3.2",
     "promise-retry": "^2.0.1"
   },
   "devDependencies": {
     "@electron/notarize": "2.5.0",
     "@electron/rebuild": "4.0.1",
-    "@playwright/test": "1.52.0",
+    "@playwright/test": "1.56.0",
     "@types/copyfiles": "^2",
     "@types/fs-extra": "^11",
     "copyfiles": "^2.4.1",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.1.0",
     "electron": "38.0.0",
-    "electron-builder": "24.13.3",
-    "typescript": "^5.9.2"
+    "electron-builder": "26.0.12",
+    "typescript": "^5.9.3"
   }
 }

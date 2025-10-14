@@ -35,12 +35,14 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
     development: SvgMoonStars,
   } as const;
 
+  type ThemeIconKey = keyof typeof themeIcons;
+
   function onMenuSelect(newTheme: Theme) {
     setMenuOpen(false);
     switchTheme(newTheme);
   }
 
-  const Icon = themeIcons[theme] || SvgSun;
+  const Icon = themeIcons[theme as ThemeIconKey] || SvgSun;
 
   if (isNarrowWidth) {
     return null;

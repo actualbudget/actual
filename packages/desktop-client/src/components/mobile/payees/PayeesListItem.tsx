@@ -1,5 +1,6 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { memo } from 'react';
+import { type GridListItemProps } from 'react-aria-components';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgBookmark } from '@actual-app/components/icons/v1';
@@ -7,88 +8,108 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 
 import { type PayeeEntity } from 'loot-core/types/models';
+import { type WithRequired } from 'loot-core/types/util';
 
+import { ActionableGridListItem } from '@desktop-client/components/mobile/ActionableGridListItem';
 import { PayeeRuleCountLabel } from '@desktop-client/components/payees/PayeeRuleCountLabel';
 
 type PayeesListItemProps = {
-  payee: PayeeEntity;
   ruleCount: number;
-  onPress: () => void;
-};
+  isRuleCountLoading?: boolean;
+  onDelete: () => void;
+} & WithRequired<GridListItemProps<PayeeEntity>, 'value'>;
 
-export function PayeesListItem({
-  payee,
+export const PayeesListItem = memo(function PayeeListItem({
+  value: payee,
   ruleCount,
-  onPress,
+  isRuleCountLoading,
+  onDelete,
+  ...props
 }: PayeesListItemProps) {
   const { t } = useTranslation();
 
-  return (
-    <Button
-      variant="bare"
-      style={{
-        minHeight: 56,
-        width: '100%',
-        borderRadius: 0,
-        borderWidth: '0 0 1px 0',
-        borderColor: theme.tableBorder,
-        borderStyle: 'solid',
-        backgroundColor: theme.tableBackground,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        padding: '12px 16px',
-        gap: 5,
-      }}
-      onPress={onPress}
-    >
-      {payee.favorite && (
-        <SvgBookmark
-          width={15}
-          height={15}
-          style={{
-            color: theme.pageText,
-            flexShrink: 0,
-          }}
-        />
-      )}
-      <SpaceBetween
-        style={{
-          justifyContent: 'space-between',
-          flex: 1,
-          alignItems: 'flex-start',
-        }}
-      >
-        <span
-          style={{
-            fontSize: 15,
-            fontWeight: 500,
-            color: payee.transfer_acct ? theme.pageTextSubdued : theme.pageText,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            flex: 1,
-            textAlign: 'left',
-          }}
-          title={payee.name}
-        >
-          {(payee.transfer_acct ? t('Transfer: ') : '') + payee.name}
-        </span>
+  const label = payee.transfer_acct
+    ? t('Transfer: {{name}}', { name: payee.name })
+    : payee.name;
 
-        <span
+  return (
+    <ActionableGridListItem
+      id={payee.id}
+      value={payee}
+      textValue={label}
+      actions={
+        !payee.transfer_acct && (
+          <Button
+            variant="bare"
+            onPress={onDelete}
+            style={{
+              color: theme.errorText,
+              width: '100%',
+            }}
+          >
+            <Trans>Delete</Trans>
+          </Button>
+        )
+      }
+      {...props}
+    >
+      <SpaceBetween gap={5} style={{ flex: 1 }}>
+        {payee.favorite && (
+          <SvgBookmark
+            aria-hidden
+            focusable={false}
+            width={15}
+            height={15}
+            style={{
+              color: theme.pageText,
+              flexShrink: 0,
+            }}
+          />
+        )}
+        <SpaceBetween
           style={{
-            borderRadius: 4,
-            padding: '3px 6px',
-            backgroundColor: theme.noticeBackground,
-            border: '1px solid ' + theme.noticeBackground,
-            color: theme.noticeTextDark,
-            fontSize: 12,
-            flexShrink: 0,
+            justifyContent: 'space-between',
+            flex: 1,
+            alignItems: 'flex-start',
           }}
         >
-          <PayeeRuleCountLabel count={ruleCount} style={{ fontSize: 12 }} />
-        </span>
+          <span
+            style={{
+              fontSize: 15,
+              fontWeight: 500,
+              color: payee.transfer_acct
+                ? theme.pageTextSubdued
+                : theme.pageText,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              flex: 1,
+              textAlign: 'left',
+            }}
+            title={label}
+          >
+            {label}
+          </span>
+
+          <span
+            style={{
+              borderRadius: 4,
+              padding: '3px 6px',
+              backgroundColor: theme.noticeBackground,
+              border: '1px solid ' + theme.noticeBackground,
+              color: theme.noticeTextDark,
+              fontSize: 12,
+              flexShrink: 0,
+            }}
+          >
+            <PayeeRuleCountLabel
+              count={ruleCount}
+              isLoading={isRuleCountLoading}
+              style={{ fontSize: 12 }}
+            />
+          </span>
+        </SpaceBetween>
       </SpaceBetween>
-    </Button>
+    </ActionableGridListItem>
   );
-}
+});

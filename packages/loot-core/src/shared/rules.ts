@@ -3,8 +3,6 @@ import { t } from 'i18next';
 
 import { FieldValueTypes, RuleConditionOp } from '../types/models';
 
-import { integerToAmount, amountToInteger, currencyToAmount } from './util';
-
 // For now, this info is duplicated from the backend. Figure out how
 // to share it later.
 const TYPE_INFO = {
@@ -229,6 +227,8 @@ export function friendlyOp(op, type?) {
       return t('is on budget');
     case 'offBudget':
       return t('is off budget');
+    case 'delete-transaction':
+      return 'delete transaction';
     default:
       return '';
   }
@@ -288,22 +288,14 @@ export function sortNumbers(num1, num2) {
 export function parse(item) {
   if (item.op === 'set-split-amount') {
     if (item.options.method === 'fixed-amount') {
-      return { ...item, value: item.value && integerToAmount(item.value) };
+      return { ...item };
     }
     return item;
   }
 
   switch (item.type) {
     case 'number': {
-      let parsed = item.value;
-      if (
-        item.field === 'amount' &&
-        item.op !== 'isbetween' &&
-        parsed != null
-      ) {
-        parsed = integerToAmount(parsed);
-      }
-      return { ...item, value: parsed };
+      return { ...item };
     }
     case 'string': {
       const parsed = item.value == null ? '' : item.value;
@@ -324,7 +316,6 @@ export function unparse({ error, inputKey, ...item }) {
     if (item.options.method === 'fixed-amount') {
       return {
         ...item,
-        value: item.value && amountToInteger(item.value),
       };
     }
     if (item.options.method === 'fixed-percent') {
@@ -338,23 +329,7 @@ export function unparse({ error, inputKey, ...item }) {
 
   switch (item.type) {
     case 'number': {
-      let unparsed = item.value;
-      if (item.field === 'amount' && item.op !== 'isbetween') {
-        // Handle both string (formatted) and number inputs
-        if (typeof unparsed === 'string') {
-          // Convert formatted string back to number first
-          unparsed = currencyToAmount(unparsed);
-          if (unparsed !== null && !isNaN(unparsed)) {
-            unparsed = amountToInteger(unparsed);
-          } else {
-            unparsed = null;
-          }
-        } else {
-          unparsed = amountToInteger(unparsed);
-        }
-      }
-
-      return { ...item, value: unparsed };
+      return { ...item };
     }
     case 'string': {
       const unparsed = item.value == null ? '' : item.value;
@@ -371,24 +346,14 @@ export function unparse({ error, inputKey, ...item }) {
 }
 
 export function makeValue(value, cond) {
-  switch (cond.type) {
-    case 'number': {
-      if (cond.op !== 'isbetween') {
-        return {
-          ...cond,
-          error: null,
-          value: value ? currencyToAmount(String(value)) || 0 : 0,
-        };
-      }
-      break;
-    }
-    default:
-  }
-
   const isMulti = ['oneOf', 'notOneOf'].includes(cond.op);
 
   if (isMulti) {
     return { ...cond, error: null, value: value || [] };
+  }
+
+  if (cond.type === 'number' && value == null) {
+    return { ...cond, error: null, value: 0 };
   }
 
   return { ...cond, error: null, value };

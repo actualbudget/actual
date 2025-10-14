@@ -175,6 +175,7 @@ export function getLatestRange(offset: number) {
 export function calculateTimeRange(
   timeFrame?: Partial<TimeFrame>,
   defaultTimeFrame?: TimeFrame,
+  latestTransaction?: string,
 ) {
   const start =
     timeFrame?.start ??
@@ -185,7 +186,16 @@ export function calculateTimeRange(
   const mode = timeFrame?.mode ?? defaultTimeFrame?.mode ?? 'sliding-window';
 
   if (mode === 'full') {
-    return getFullRange(start, end);
+    const latestTransactionMonth = latestTransaction
+      ? monthUtils.monthFromDate(latestTransaction)
+      : null;
+    const currentMonth = monthUtils.currentMonth();
+    const fullEnd =
+      latestTransactionMonth &&
+      monthUtils.isAfter(latestTransactionMonth, currentMonth)
+        ? latestTransactionMonth
+        : currentMonth;
+    return getFullRange(start, fullEnd);
   }
   if (mode === 'sliding-window') {
     const offset = monthUtils.differenceInCalendarMonths(end, start);

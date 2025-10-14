@@ -1,4 +1,5 @@
-import { Trans } from 'react-i18next';
+import { GridList, Virtualizer, ListLayout } from 'react-aria-components';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { Text } from '@actual-app/components/text';
@@ -14,16 +15,22 @@ import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTa
 type PayeesListProps = {
   payees: PayeeEntity[];
   ruleCounts: Map<string, number>;
+  isRuleCountsLoading?: boolean;
   isLoading?: boolean;
   onPayeePress: (payee: PayeeEntity) => void;
+  onPayeeDelete: (payee: PayeeEntity) => void;
 };
 
 export function PayeesList({
   payees,
   ruleCounts,
+  isRuleCountsLoading = false,
   isLoading = false,
   onPayeePress,
+  onPayeeDelete,
 }: PayeesListProps) {
+  const { t } = useTranslation();
+
   if (isLoading && payees.length === 0) {
     return (
       <View
@@ -63,22 +70,35 @@ export function PayeesList({
   }
 
   return (
-    <View
-      style={{ flex: 1, paddingBottom: MOBILE_NAV_HEIGHT, overflow: 'auto' }}
-    >
-      {payees.map(payee => (
-        <PayeesListItem
-          key={payee.id}
-          payee={payee}
-          ruleCount={ruleCounts.get(payee.id) ?? 0}
-          onPress={() => onPayeePress(payee)}
-        />
-      ))}
+    <View style={{ flex: 1 }}>
+      <Virtualizer layout={ListLayout}>
+        <GridList
+          aria-label={t('Payees')}
+          aria-busy={isLoading || undefined}
+          items={payees}
+          style={{
+            flex: 1,
+            paddingBottom: MOBILE_NAV_HEIGHT,
+            overflow: 'auto',
+          }}
+          dependencies={[ruleCounts, isRuleCountsLoading]}
+        >
+          {payee => (
+            <PayeesListItem
+              value={payee}
+              ruleCount={ruleCounts.get(payee.id) ?? 0}
+              isRuleCountLoading={isRuleCountsLoading}
+              onAction={() => onPayeePress(payee)}
+              onDelete={() => onPayeeDelete(payee)}
+            />
+          )}
+        </GridList>
+      </Virtualizer>
       {isLoading && (
         <View
           style={{
             alignItems: 'center',
-            paddingVertical: 20,
+            paddingTop: 20,
           }}
         >
           <AnimatedLoading style={{ width: 20, height: 20 }} />

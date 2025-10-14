@@ -97,7 +97,7 @@ export const HelpMenu = () => {
     }
   };
 
-  useHotkeys('shift+?', () => setMenuOpen(true));
+  useHotkeys('?', () => setMenuOpen(true), { useKey: true });
 
   return (
     <SpaceBetween>

@@ -218,7 +218,6 @@ export function TransactionList({
               items={section.transactions.filter(
                 t => !isPreviewId(t.id) || !t.is_child,
               )}
-              addIdAndValue
             >
               {transaction => (
                 <TransactionListItem
