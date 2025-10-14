@@ -222,7 +222,7 @@ export const DEFAULT_DASHBOARD_STATE: NewWidget[] = [
     y: 10,
     meta: {
       content:
-        '## Add New Widgets\n\nYou can add new dashboard widgets using the "add new widget" button above. Choose a widget type and customize it to fit your needs.',
+        '## Add New Widgets\n\nYou can add new dashboard widgets using the button above. Choose a widget type and customize it to fit your needs.',
     },
   },
 ];
