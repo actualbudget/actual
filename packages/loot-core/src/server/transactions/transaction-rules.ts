@@ -956,6 +956,7 @@ export async function prepareTransactionForRules(
        FROM v_transactions
        WHERE account = ?
        AND tombstone = 0
+       AND is_parent = 0
        AND (
          date < ?
          OR (
