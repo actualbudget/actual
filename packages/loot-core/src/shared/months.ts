@@ -453,7 +453,7 @@ export function sheetForMonth(month: string): string {
 }
 
 export function nameForMonth(month: DateLike, locale?: Locale): string {
-  return d.format(_parse(month), "MMMM 'yy", { locale });
+  return d.format(_parse(month), 'MMMM ‘yy', { locale });
 }
 
 export function format(
