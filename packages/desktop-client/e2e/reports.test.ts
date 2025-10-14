@@ -33,7 +33,17 @@ test.describe.parallel('Reports', () => {
   test('loads net worth and cash flow reports', async () => {
     const reports = await reportsPage.getAvailableReportList();
 
-    expect(reports).toEqual(['Net Worth', 'Cash Flow', 'Monthly Spending']);
+    expect(reports).toEqual([
+      'Total Income (YTD)',
+      'Total Expenses (YTD)',
+      'Avg Per Month',
+      'Avg Per Transaction',
+      'Net Worth',
+      'Cash Flow',
+      'This Month',
+      'Budget Overview',
+      '3-Month Average',
+    ]);
     await expect(page).toMatchThemeScreenshots();
   });
 

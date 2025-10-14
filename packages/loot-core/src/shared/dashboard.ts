@@ -117,15 +117,7 @@ export const DEFAULT_DASHBOARD_STATE: NewWidget[] = [
     height: 2,
     x: 0,
     y: 2,
-    meta: {
-      name: 'Net Worth Trend',
-      interval: 'Monthly',
-      timeFrame: {
-        start: '2024-01-01',
-        end: '2024-12-31',
-        mode: 'yearToDate',
-      },
-    },
+    meta: null,
   },
   {
     type: 'cash-flow-card',
@@ -133,15 +125,7 @@ export const DEFAULT_DASHBOARD_STATE: NewWidget[] = [
     height: 2,
     x: 6,
     y: 2,
-    meta: {
-      name: 'Income vs Expenses',
-      showBalance: true,
-      timeFrame: {
-        start: '2024-01-01',
-        end: '2024-12-31',
-        mode: 'yearToDate',
-      },
-    },
+    meta: null,
   },
   // Third row: Spending comparisons
   {
