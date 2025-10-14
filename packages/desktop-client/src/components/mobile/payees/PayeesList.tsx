@@ -1,4 +1,4 @@
-import { GridList } from 'react-aria-components';
+import { GridList, Virtualizer, ListLayout } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
@@ -71,27 +71,29 @@ export function PayeesList({
 
   return (
     <View style={{ flex: 1 }}>
-      <GridList
-        aria-label={t('Payees')}
-        aria-busy={isLoading || undefined}
-        items={payees}
-        style={{
-          flex: 1,
-          paddingBottom: MOBILE_NAV_HEIGHT,
-          overflow: 'auto',
-        }}
-        dependencies={[ruleCounts, isRuleCountsLoading]}
-      >
-        {payee => (
-          <PayeesListItem
-            value={payee}
-            ruleCount={ruleCounts.get(payee.id) ?? 0}
-            isRuleCountLoading={isRuleCountsLoading}
-            onAction={() => onPayeePress(payee)}
-            onDelete={() => onPayeeDelete(payee)}
-          />
-        )}
-      </GridList>
+      <Virtualizer layout={ListLayout}>
+        <GridList
+          aria-label={t('Payees')}
+          aria-busy={isLoading || undefined}
+          items={payees}
+          style={{
+            flex: 1,
+            paddingBottom: MOBILE_NAV_HEIGHT,
+            overflow: 'auto',
+          }}
+          dependencies={[ruleCounts, isRuleCountsLoading]}
+        >
+          {payee => (
+            <PayeesListItem
+              value={payee}
+              ruleCount={ruleCounts.get(payee.id) ?? 0}
+              isRuleCountLoading={isRuleCountsLoading}
+              onAction={() => onPayeePress(payee)}
+              onDelete={() => onPayeeDelete(payee)}
+            />
+          )}
+        </GridList>
+      </Virtualizer>
       {isLoading && (
         <View
           style={{
