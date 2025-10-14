@@ -84,7 +84,9 @@ export class Action {
           // Handlebars always returns a string, so we need to convert
           switch (this.type) {
             case 'number':
-              object[this.field] = parseFloat(object[this.field]);
+              const numValue = parseFloat(object[this.field]);
+              // If the result is NaN, default to 0 to avoid database insertion errors
+              object[this.field] = isNaN(numValue) ? 0 : numValue;
               break;
             case 'date':
               const parsed = parseDate(object[this.field]);
