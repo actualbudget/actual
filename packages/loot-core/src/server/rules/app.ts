@@ -86,8 +86,8 @@ export const app = createApp<RulesHandlers>();
 
 app.method('rule-validate', ruleValidate);
 app.method('rule-add', mutator(addRule));
-app.method('rule-update', mutator(updateRule));
-app.method('rule-delete', mutator(deleteRule));
+app.method('rule-update', mutator(undoable(updateRule)));
+app.method('rule-delete', mutator(undoable(deleteRule)));
 app.method('rule-delete-all', mutator(undoable(deleteAllRules)));
 app.method('rule-apply-actions', mutator(undoable(applyRuleActions)));
 app.method('rule-add-payee-rename', mutator(addRulePayeeRename));
@@ -114,9 +114,9 @@ async function addRule(
   return { id, ...rule };
 }
 
-async function updateRule<
-  PartialRule extends Partial<Omit<RuleEntity, 'id'>> & Pick<RuleEntity, 'id'>,
->(rule: PartialRule): Promise<{ error: ValidationError } | PartialRule> {
+async function updateRule(
+  rule: RuleEntity,
+): Promise<{ error: ValidationError } | RuleEntity> {
   const error = validateRule(rule);
   if (error) {
     return { error };
