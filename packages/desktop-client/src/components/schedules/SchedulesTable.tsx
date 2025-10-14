@@ -30,7 +30,7 @@ import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
   type ScheduleStatusType,
@@ -124,13 +124,12 @@ function OverflowMenu({
 export function ScheduleAmountCell({
   amount,
   op,
-  format,
 }: {
   amount: ScheduleEntity['_amount'];
   op: ScheduleEntity['_amountOp'];
-  format: (value: unknown, type: FormatType) => string;
 }) {
   const { t } = useTranslation();
+  const format = useFormat();
 
   const num = getScheduledAmount(amount);
   const currencyAmount = format(Math.abs(num || 0), 'financial');
@@ -194,11 +193,9 @@ function ScheduleRow({
   minimal,
   statuses,
   dateFormat,
-  format,
 }: {
   schedule: ScheduleEntity;
   dateFormat: string;
-  format: (value: unknown, type: FormatType) => string;
 } & Pick<
   SchedulesTableProps,
   'onSelect' | 'onAction' | 'minimal' | 'statuses'
@@ -277,11 +274,7 @@ function ScheduleRow({
       <Field width={120} name="status" style={{ alignItems: 'flex-start' }}>
         <StatusBadge status={statuses.get(schedule.id)} />
       </Field>
-      <ScheduleAmountCell
-        amount={schedule._amount}
-        op={schedule._amountOp}
-        format={format}
-      />
+      <ScheduleAmountCell amount={schedule._amount} op={schedule._amountOp} />
       {!minimal && (
         <Field width={80} style={{ textAlign: 'center' }}>
           {schedule._date && schedule._date.frequency && (
@@ -416,7 +409,6 @@ export function SchedulesTable({
     return (
       <ScheduleRow
         schedule={item as ScheduleEntity}
-        format={format}
         {...{ statuses, dateFormat, onSelect, onAction, minimal }}
       />
     );
