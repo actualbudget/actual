@@ -954,22 +954,22 @@ export async function prepareTransactionForRules(
     const balanceResult = await db.first<{ balance: number }>(
       `SELECT COALESCE(SUM(amount), 0) as balance
        FROM v_transactions
-       WHERE account = ?1
+       WHERE account = ?
        AND tombstone = 0
        AND (
-         date < ?2
+         date < ?
          OR (
-           date = ?2
+           date = ?
            AND (
-             sort_order < ?3
+             sort_order < ?
              OR (
                  sort_order IS NULL
-                 AND ?3 IS NULL
+                 AND ? IS NULL
              )
            )
          )
        )`,
-      [trans.account, trans.date, trans.sort_order ?? null],
+      [trans.account, trans.date, trans.date, trans.sort_order ?? null, trans.sort_order ?? null],
     );
 
     r.balance = balanceResult?.balance ?? 0;
