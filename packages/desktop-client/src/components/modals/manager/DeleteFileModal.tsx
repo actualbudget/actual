@@ -99,7 +99,7 @@ export function DeleteFileModal({ file }: DeleteFileModalProps) {
                       fontSize: 14,
                     }}
                   >
-                    <Trans>Server is offline</Trans>
+                    <Trans>Server is not available</Trans>
                   </Button>
                 )}
               </>
