@@ -11,7 +11,6 @@ export function PullToRefresh(props: PullToRefreshProps) {
       style={{
         overflow: 'auto',
         flex: 1,
-        backgroundColor: 'var(--color-pageBackground)',
       }}
     >
       <BasePullToRefresh
