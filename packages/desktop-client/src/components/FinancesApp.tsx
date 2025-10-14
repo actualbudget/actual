@@ -210,6 +210,8 @@ export function FinancesApp() {
           <ScrollProvider
             isDisabled={!isNarrowWidth}
             scrollableRef={scrollableRef}
+            useThrottle={true}
+            delayMs={100}
           >
             <View
               ref={scrollableRef}

@@ -10,6 +10,7 @@ import React, {
 } from 'react';
 
 import debounce from 'lodash/debounce';
+import throttle from 'lodash/throttle';
 
 type ScrollDirection = 'up' | 'down' | 'left' | 'right';
 
@@ -36,6 +37,7 @@ type ScrollProviderProps<T extends Element> = {
   scrollableRef: RefObject<T>;
   isDisabled?: boolean;
   delayMs?: number;
+  useThrottle?: boolean;
   children?: ReactNode;
 };
 
@@ -43,6 +45,7 @@ export function ScrollProvider<T extends Element>({
   scrollableRef,
   isDisabled,
   delayMs = 250,
+  useThrottle = false,
   children,
 }: ScrollProviderProps<T>) {
   const previousScrollX = useRef<number | undefined>(undefined);
@@ -129,38 +132,40 @@ export function ScrollProvider<T extends Element>({
     }
   }, []);
 
-  const listenToScroll = useMemo(
-    () =>
-      debounce((e: Event) => {
-        const target = e.target;
-        if (target instanceof Element) {
-          previousScrollX.current = scrollX.current;
-          scrollX.current = target.scrollLeft;
-          scrollWidth.current = target.scrollWidth;
-          clientWidth.current = target.clientWidth;
+  const listenToScroll = useMemo(() => {
+    const scrollHandler = (e: Event) => {
+      const target = e.target;
+      if (target instanceof Element) {
+        previousScrollX.current = scrollX.current;
+        scrollX.current = target.scrollLeft;
+        scrollWidth.current = target.scrollWidth;
+        clientWidth.current = target.clientWidth;
 
-          previousScrollY.current = scrollY.current;
-          scrollY.current = target.scrollTop;
-          scrollHeight.current = target.scrollHeight;
-          clientHeight.current = target.clientHeight;
+        previousScrollY.current = scrollY.current;
+        scrollY.current = target.scrollTop;
+        scrollHeight.current = target.scrollHeight;
+        clientHeight.current = target.clientHeight;
 
-          const currentScrollX = scrollX.current;
-          const currentScrollY = scrollY.current;
+        const currentScrollX = scrollX.current;
+        const currentScrollY = scrollY.current;
 
-          if (currentScrollX !== undefined && currentScrollY !== undefined) {
-            listeners.current.forEach(listener =>
-              listener({
-                scrollX: currentScrollX,
-                scrollY: currentScrollY,
-                isScrolling,
-                hasScrolledToEnd,
-              }),
-            );
-          }
+        if (currentScrollX !== undefined && currentScrollY !== undefined) {
+          listeners.current.forEach(listener =>
+            listener({
+              scrollX: currentScrollX,
+              scrollY: currentScrollY,
+              isScrolling,
+              hasScrolledToEnd,
+            }),
+          );
         }
-      }, delayMs),
-    [delayMs, hasScrolledToEnd, isScrolling],
-  );
+      }
+    };
+
+    return useThrottle 
+      ? throttle(scrollHandler, delayMs)
+      : debounce(scrollHandler, delayMs);
+  }, [delayMs, hasScrolledToEnd, isScrolling, useThrottle]);
 
   useEffect(() => {
     const toCancel = listenToScroll;
