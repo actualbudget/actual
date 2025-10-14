@@ -452,6 +452,10 @@ export function sheetForMonth(month: string): string {
   return 'budget' + month.replace('-', '');
 }
 
+export function nameForMonth(month: DateLike, locale?: Locale): string {
+  return d.format(_parse(month), "MMMM 'yy", { locale });
+}
+
 export function format(
   month: DateLike,
   format: string,
@@ -546,7 +550,7 @@ function getCalendarMonthEndDate(monthId: string): Date {
 }
 
 function getCalendarMonthLabel(monthId: string): string {
-  return d.format(_parse(monthId), 'MMMM');
+  return d.format(_parse(monthId), 'MMMM yyyy');
 }
 
 // pay period helpers are implemented in './pay-periods'
@@ -634,8 +638,23 @@ export function getMonthDateRange(
   }
 
   // For calendar months, return just the month name (e.g., "January")
-  // This matches the original behavior before pay periods were introduced
+  // This is used by desktop BudgetSummary. Mobile uses getMobileMonthText() for the 'yy format.
   return d.format(_parse(monthId), 'MMMM', { locale });
+}
+
+// New function to get month header format for mobile budget page
+export function getMobileMonthText(
+  monthId: string,
+  config?: PayPeriodConfig | null,
+  locale?: Locale,
+): string {
+  if (isPayPeriod(monthId)) {
+    // For pay periods, show the date range (e.g., "Jan 5 - Jan 18")
+    return getMonthDateRange(monthId, config, locale);
+  }
+
+  // For calendar months, return month with abbreviated year (e.g., "January '17")
+  return nameForMonth(monthId, locale);
 }
 
 export { getPayPeriodConfig, setPayPeriodConfig, generatePayPeriods };

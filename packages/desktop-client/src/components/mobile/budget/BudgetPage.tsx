@@ -1043,7 +1043,7 @@ function MonthSelector({
         data-month={month}
       >
         <Text style={styles.underlinedText}>
-          {monthUtils.getMonthDateRange(month, undefined, locale)}
+          {monthUtils.getMobileMonthText(month, undefined, locale)}
         </Text>
       </Button>
       <Button
