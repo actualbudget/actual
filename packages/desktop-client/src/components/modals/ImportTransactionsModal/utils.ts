@@ -166,6 +166,7 @@ export function applyFieldMappings(
   result.ignored = transaction.ignored;
   result.selected = transaction.selected;
   result.selected_merge = transaction.selected_merge;
+  result.tombstone = transaction.tombstone;
   return result as ImportTransaction;
 }
 
@@ -263,8 +264,15 @@ export function parseAmountFields(
 }
 
 export function stripCsvImportTransaction(transaction: ImportTransaction) {
-  const { existing, ignored, selected, selected_merge, trx_id, ...trans } =
-    transaction;
+  const {
+    existing,
+    ignored,
+    selected,
+    selected_merge,
+    trx_id,
+    tombstone,
+    ...trans
+  } = transaction;
 
   return trans;
 }
