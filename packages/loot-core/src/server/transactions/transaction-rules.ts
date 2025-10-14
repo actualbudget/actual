@@ -969,7 +969,13 @@ export async function prepareTransactionForRules(
            )
          )
        )`,
-      [trans.account, trans.date, trans.date, trans.sort_order ?? null, trans.sort_order ?? null],
+      [
+        trans.account,
+        trans.date,
+        trans.date,
+        trans.sort_order ?? null,
+        trans.sort_order ?? null,
+      ],
     );
 
     r.balance = balanceResult?.balance ?? 0;
