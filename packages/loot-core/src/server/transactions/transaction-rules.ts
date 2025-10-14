@@ -8,6 +8,7 @@ import {
   parseDate,
   dayFromDate,
 } from '../../shared/months';
+import { q } from '../../shared/query';
 import { sortNumbers, getApproxNumberThreshold } from '../../shared/rules';
 import { ungroupTransaction } from '../../shared/transactions';
 import { partitionByField, fastSetMerge } from '../../shared/util';
@@ -16,7 +17,7 @@ import {
   type RuleActionEntity,
   type RuleEntity,
 } from '../../types/models';
-import { schemaConfig } from '../aql';
+import { aqlQuery, schemaConfig } from '../aql';
 import * as db from '../db';
 import { getPayee, getPayeeByName, insertPayee, getAccount } from '../db';
 import { getMappings } from '../db/mappings';
@@ -940,6 +941,8 @@ export async function prepareTransactionForRules(
     }
   }
 
+  r.balance = 0;
+
   if (trans.account) {
     if (accounts !== null && accounts.has(trans.account)) {
       r._account = accounts.get(trans.account);
@@ -951,38 +954,47 @@ export async function prepareTransactionForRules(
     // This sums all transactions in the account that are:
     //  - Before this transaction's date, OR
     //  - On the same date but with a lower sort_order (if defined)
-    const balanceResult = await db.first<{ balance: number }>(
-      `SELECT COALESCE(SUM(amount), 0) as balance
-       FROM v_transactions
-       WHERE account = ?
-       AND tombstone = 0
-       AND is_parent = 0
-       AND (
-         date < ?
-         OR (
-           date = ?
-           AND (
-             sort_order < ?
-             OR (
-                 sort_order IS NULL
-                 AND ? IS NULL
-             )
-           )
-         )
-       )`,
-      [
-        trans.account,
-        trans.date,
-        trans.date,
-        trans.sort_order ?? null,
-        trans.sort_order ?? null,
-      ],
+    let query = q('transactions')
+      .filter({ account: trans.account })
+      .options({ splits: 'none' });
+
+    // Filter by date and sort_order
+    if (trans.sort_order != null) {
+      query = query.filter({
+        $or: [
+          { date: { $lt: trans.date } },
+          {
+            $and: [
+              { date: trans.date },
+              { sort_order: { $lt: trans.sort_order } },
+            ],
+          },
+        ],
+      });
+    } else {
+      const dateFilters = {
+        $or: [
+          { date: { $lt: trans.date } },
+          {
+            $and: [{ date: trans.date }, { sort_order: null }],
+          },
+        ],
+      };
+
+      if (trans.id) {
+        query = query.filter({
+          $and: [dateFilters, { id: { $ne: trans.id } }],
+        });
+      } else {
+        query = query.filter(dateFilters);
+      }
+    }
+
+    const { data: balance } = await aqlQuery(
+      query.calculate({ $sum: '$amount' }),
     );
 
-    r.balance = balanceResult?.balance ?? 0;
-  } else {
-    // If no account is set, default balance to 0
-    r.balance = 0;
+    r.balance = balance ?? 0;
   }
 
   return r;
