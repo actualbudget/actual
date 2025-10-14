@@ -415,9 +415,7 @@ export function ExpenseCategoryListItem({
           paddingRight: 5,
           borderBottomWidth: 1,
           opacity: isHidden ? 0.5 : undefined,
-          backgroundColor: monthUtils.isCurrentMonth(month)
-            ? theme.budgetCurrentMonth
-            : theme.budgetOtherMonth,
+          backgroundColor: theme.budgetOtherMonth,
         }}
       >
         <ExpenseCategoryName
