@@ -162,7 +162,7 @@ export function ScrollProvider<T extends Element>({
       }
     };
 
-    return useThrottle 
+    return useThrottle
       ? throttle(scrollHandler, delayMs)
       : debounce(scrollHandler, delayMs);
   }, [delayMs, hasScrolledToEnd, isScrolling, useThrottle]);
