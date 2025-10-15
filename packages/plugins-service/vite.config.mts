@@ -3,7 +3,7 @@ import path from 'path';
 
 import { defineConfig } from 'vite';
 
-// eslint-disable-next-line import/no-default-export
+ 
 export default defineConfig(({ mode }) => {
   const isDev = mode === 'development';
   const outDir = path.resolve(__dirname, 'dist');
