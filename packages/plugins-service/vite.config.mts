@@ -3,7 +3,6 @@ import path from 'path';
 
 import { defineConfig } from 'vite';
 
- 
 export default defineConfig(({ mode }) => {
   const isDev = mode === 'development';
   const outDir = path.resolve(__dirname, 'dist');
