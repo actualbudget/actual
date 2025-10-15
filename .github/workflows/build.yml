@@ -77,9 +77,9 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Plugins Service
-        run: yarn workspace @actual-app/plugins-service build
+        run: yarn workspace plugins-service build
       - name: Create package tgz
-        run: yarn workspace @actual-app/plugins-service pack --filename actual-plugins-service.tgz
+        run: yarn workspace plugins-service pack --filename actual-plugins-service.tgz
       - name: Upload Build
         uses: actions/upload-artifact@v4
         with:
