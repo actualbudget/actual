@@ -67,7 +67,7 @@ export function TrackingBudgetMonthMenuModal({
     setShowMore(!showMore);
   };
 
-  const displayMonth = monthUtils.getMonthDateRange(month, undefined, locale);
+  const displayMonth = monthUtils.getMonthTextWithYear(month, undefined, locale);
 
   return (
     <Modal
