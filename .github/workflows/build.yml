@@ -70,6 +70,22 @@ jobs:
           name: actual-plugins-core
           path: packages/plugins-core/actual-plugins-core.tgz
 
+  plugins-service:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Build Plugins Service
+        run: yarn workspace @actual-app/plugins-service build
+      - name: Create package tgz
+        run: yarn workspace @actual-app/plugins-service pack --filename actual-plugins-service.tgz
+      - name: Upload Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: actual-plugins-service
+          path: packages/plugins-service/actual-plugins-service.tgz
+
   web:
     runs-on: ubuntu-latest
     steps:
