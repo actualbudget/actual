@@ -638,12 +638,12 @@ export function getMonthDateRange(
   }
 
   // For calendar months, return just the month name (e.g., "January")
-  // This is used by desktop BudgetSummary. Mobile uses getMobileMonthText() for the 'yy format.
+  // This is used by desktop BudgetSummary. Mobile uses getMonthTextWithYear() for the 'yy format.
   return d.format(_parse(monthId), 'MMMM', { locale });
 }
 
-// New function to get month header format for mobile budget page
-export function getMobileMonthText(
+// Function to get month text with year for mobile UI components
+export function getMonthTextWithYear(
   monthId: string,
   config?: PayPeriodConfig | null,
   locale?: Locale,
