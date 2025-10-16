@@ -625,10 +625,12 @@ export function BudgetFileSelection({
         maxHeight: '100%',
         flex: 1,
         justifyContent: 'center',
-        ...(!quickSwitchMode && {
-          marginTop: 20,
-          width: '100vw',
-        }),
+        ...(quickSwitchMode
+          ? {
+              marginTop: 20,
+              width: '100vw',
+            }
+          : { marginBottom: 20 }),
         [`@media (min-width: ${tokens.breakpoint_small})`]: {
           maxWidth: tokens.breakpoint_small,
           width: '100%',
@@ -677,8 +679,9 @@ export function BudgetFileSelection({
           style={{
             flexDirection: 'row',
             justifyContent: 'flex-end',
-            alignItems: 'center',
-            padding: 25,
+            alignItems: 'stretch',
+            margin: 10,
+            minHeight: 39,
           }}
         >
           <Button
