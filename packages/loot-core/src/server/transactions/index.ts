@@ -189,5 +189,8 @@ export async function batchUpdateTransactions({
     added: resultAdded,
     updated: runTransfers ? transfersUpdated : resultUpdated,
     deleted: allDeleted,
+    errors: ((added || []) as Partial<TransactionEntity>[])
+      .concat(updated || [])
+      .flatMap(t => t._ruleErrors || []),
   };
 }
