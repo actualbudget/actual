@@ -953,7 +953,7 @@ export async function prepareTransactionForRules(
     // Calculate account balance up to (but not including) this transaction
     // This sums all transactions in the account that are:
     //  - Before this transaction's date, OR
-    //  - On the same date but with a lower sort_order (if defined)
+    //  - On the same date but with a greater sort_order (if defined)
     let query = q('transactions')
       .filter({ account: trans.account })
       .options({ splits: 'none' });
@@ -966,7 +966,7 @@ export async function prepareTransactionForRules(
           {
             $and: [
               { date: trans.date },
-              { sort_order: { $lt: trans.sort_order } },
+              { sort_order: { $gt: trans.sort_order } },
             ],
           },
         ],
