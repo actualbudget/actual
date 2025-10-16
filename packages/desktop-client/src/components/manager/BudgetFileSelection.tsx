@@ -675,7 +675,6 @@ export function BudgetFileSelection({
       {!quickSwitchMode && (
         <View
           style={{
-            display: 'flex',
             flexDirection: 'row',
             justifyContent: 'flex-end',
             alignItems: 'stretch',
