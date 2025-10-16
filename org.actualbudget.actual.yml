@@ -29,11 +29,11 @@ modules:
       - mkdir /app/main
       - cp -R * /app/main
       - install -Dm644 resources/extra-resources/linux/org.actualbudget.actual.desktop -t /app/share/applications/
-      - install -Dm644 resources/extra-resources/org.actualbudget.actual.png -t /app/share/icons/hicolor/128x128/apps/
-      # - install -Dm644 resources/extra-resources/org.actualbudget.actual.metainfo.xml -t /app/share/metainfo
+      - install -Dm644 resources/extra-resources/linux/org.actualbudget.actual.png -t /app/share/icons/hicolor/512x512/apps/
+      - install -Dm644 resources/extra-resources/linux/org.actualbudget.actual.metainfo.xml -t /app/share/metainfo
     sources:
       - type: archive
         url: https://github.com/MikesGlitch/actual/releases/download/v23.9.0/linux-unpacked-x64.zip
-        sha256: e0cf8b553212b7079d8868dd398218d244ebed7755402b823b7b6b6c6206d60c
+        sha256: 588d846f1aec319f70569542ba0cb59468ca1e53abbe07a3062e3ebb9879c364
         only-arches:
           - x86_64
