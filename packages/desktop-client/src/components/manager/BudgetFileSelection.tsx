@@ -59,6 +59,7 @@ import {
 import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
 import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
+import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useSelector, useDispatch } from '@desktop-client/redux';
 import { getUserData } from '@desktop-client/users/usersSlice';
@@ -495,7 +496,7 @@ function SettingsButton({ onOpenSettings }: SettingsButtonProps) {
 
 type BudgetFileSelectionHeaderProps = {
   quickSwitchMode: boolean;
-  onRefresh: () => void;
+  onRefresh?: () => void;
   onOpenSettings: () => void;
 };
 
@@ -526,7 +527,7 @@ function BudgetFileSelectionHeader({
             gap: '0.2rem',
           }}
         >
-          <RefreshButton onRefresh={onRefresh} />
+          {onRefresh && <RefreshButton onRefresh={onRefresh} />}
           {isElectron() && <SettingsButton onOpenSettings={onOpenSettings} />}
         </View>
       )}
@@ -549,6 +550,7 @@ export function BudgetFileSelection({
   const [id] = useMetadataPref('id');
   const [currentUserId, setCurrentUserId] = useState('');
   const userData = useSelector(state => state.user.data);
+  const serverStatus = useSyncServerStatus();
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -636,7 +638,7 @@ export function BudgetFileSelection({
       {showHeader && (
         <BudgetFileSelectionHeader
           quickSwitchMode={quickSwitchMode}
-          onRefresh={refresh}
+          onRefresh={serverStatus === 'online' ? refresh : undefined}
           onOpenSettings={() =>
             dispatch(pushModal({ modal: { name: 'files-settings' } }))
           }
