@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Actual
+Type=Application
+Comment=A local-first personal finance app
+Terminal=false
+Icon=org.actualbudget.actual
+Exec=actual.sh
+Categories=Budget;Money;

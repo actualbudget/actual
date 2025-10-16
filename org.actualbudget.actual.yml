@@ -1,7 +1,8 @@
 id: org.actualbudget.actual
 base: org.electronjs.Electron2.BaseApp
+base-version: '24.08'
 runtime: org.freedesktop.Platform
-runtime-version: '25.08'
+runtime-version: '24.08'
 sdk: org.freedesktop.Sdk
 command: actual
 finish-args:
@@ -12,16 +13,6 @@ finish-args:
   - --socket=wayland
   - --filesystem=home
 modules:
-  # - name: extras
-  #   buildsystem: simple
-  #   build-commands:
-  #     - 'install -Dm644 extras/${FLATPAK_ID}.metainfo.xml ${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml'
-  #     - 'install -Dm644 extras/${FLATPAK_ID}.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg'
-  #     - 'install -Dm644 extras/${FLATPAK_ID}.desktop ${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop'
-  #   sources:
-  #     - type: archive
-  #       url: https://github.com/actualbudget/actual/archive/refs/tags/v25.10.0.zip
-  #       sha256: 49c0d6465d35ce80214ee44f4bd2942f8f0550fc6f7e3c54ebe380c6cefaf85b
   - name: wrapper
     buildsystem: simple
     build-commands:
@@ -30,21 +21,18 @@ modules:
       - type: script
         dest-filename: actual-wrapper.sh
         commands:
-          - 'exec zypak-wrapper /app/actual/actual \"$@\"'
+          - 'exec zypak-wrapper /app/main/actual \"$@\"'
   - name: actual
     buildsystem: simple
     build-commands:
-      - 'mkdir --parents /app/actual'
-      - 'if [ -d actual-linux-x64 ]; then mv --target-directory=/app/actual actual-linux-x64/*; fi'
-      - 'if [ -d actual-linux-arm64 ]; then mv --target-directory=/app/actual actual-linux-arm64/*; fi'
+      - 'mkdir /app/main'
+      - 'cp -R * /app/main'
+      - 'install -Dm644 /app/share/applications resources/linux/org.actualbudget.actual.desktop'
+      # - 'install -Dm644 -t /app/share/icons/hicolor/128x128/apps/ resources/${FLATPAK_ID}.png'
+      # - 'install -Dm644 -t /app/share/metainfo resources/${FLATPAK_ID}.metainfo.xml'
     sources:
       - type: archive
-        url: https://github.com/actualbudget/actual/releases/download/v25.10.0/Actual-linux-x86_64-unpacked.zip
-        sha256: b4cd16853a90e4d286dc58029c73d3093437963707a3af93ba656ca1e41d8c5d
+        url: https://github.com/MikesGlitch/actual/releases/download/v23.9.0/linux-unpacked-x64.zip
+        sha256: e0cf8b553212b7079d8868dd398218d244ebed7755402b823b7b6b6c6206d60c
         only-arches:
           - x86_64
-      # - type: archive
-      #   url: https://github.com/pilas-engine/pilas-engine/releases/download/v2.7.4/pilas-engine-linux-arm64.zip
-      #   sha256: ba9b5381c30c244c1b6fa804901a4e93509c133d7608e9f58ed78d73ae86d09a
-      #   only-arches:
-      #     - aarch64
