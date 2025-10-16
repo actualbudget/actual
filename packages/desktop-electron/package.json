@@ -52,8 +52,8 @@
       "artifactName": "${productName}-linux-${arch}.${ext}"
     },
     "flatpak": {
-      "runtimeVersion": "25.08",
-      "baseVersion": "25.08"
+      "runtimeVersion": "24.08",
+      "baseVersion": "24.08"
     },
     "win": {
       "target": [
