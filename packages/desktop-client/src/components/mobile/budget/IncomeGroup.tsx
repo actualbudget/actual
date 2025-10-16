@@ -134,9 +134,7 @@ function IncomeGroupHeader({
         paddingLeft: 5,
         paddingRight: 5,
         opacity: !!group.hidden ? 0.5 : undefined,
-        backgroundColor: monthUtils.isCurrentMonth(month)
-          ? theme.budgetHeaderCurrentMonth
-          : theme.budgetHeaderOtherMonth,
+        backgroundColor: theme.budgetCurrentMonth,
         ...style,
       }}
       data-testid="category-group-row"
