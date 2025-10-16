@@ -98,9 +98,11 @@ export function Transaction({
     <Row
       style={{
         backgroundColor: theme.tableBackground,
+        textDecoration: transaction.tombstone ? 'line-through' : 'none',
         color:
           (transaction.isMatchedTransaction && !transaction.selected_merge) ||
-          !transaction.selected
+          !transaction.selected ||
+          transaction.tombstone
             ? theme.tableTextInactive
             : theme.tableText,
       }}
@@ -110,22 +112,24 @@ export function Transaction({
           {!transaction.isMatchedTransaction && (
             <Tooltip
               content={
-                !transaction.existing && !transaction.ignored
-                  ? t('New transaction. You can import it, or skip it.')
-                  : transaction.ignored
-                    ? t(
-                        'Already imported transaction. You can skip it, or import it again.',
-                      )
-                    : transaction.existing
+                transaction.tombstone
+                  ? t('This transaction will be deleted by Rules')
+                  : !transaction.existing && !transaction.ignored
+                    ? t('New transaction. You can import it, or skip it.')
+                    : transaction.ignored
                       ? t(
-                          'Updated transaction. You can update it, import it again, or skip it.',
+                          'Already imported transaction. You can skip it, or import it again.',
                         )
-                      : ''
+                      : transaction.existing
+                        ? t(
+                            'Updated transaction. You can update it, import it again, or skip it.',
+                          )
+                        : ''
               }
               placement="right top"
             >
               <Checkbox
-                checked={transaction.selected}
+                checked={transaction.selected && !transaction.tombstone}
                 onChange={() => onCheckTransaction(transaction.trx_id)}
                 style={
                   transaction.selected_merge
@@ -140,36 +144,43 @@ export function Transaction({
                           },
                         },
                       }
-                    : {
-                        '&': {
-                          border:
-                            '1px solid ' + theme.buttonNormalDisabledBorder,
-                          backgroundColor: theme.buttonNormalDisabledBorder,
-                          '::after': {
-                            display: 'block',
-                            background:
-                              theme.buttonNormalDisabledBorder +
-                              // minus sign adapted from packages/desktop-client/src/icons/v1/add.svg
-                              // eslint-disable-next-line actual/typography
-                              ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" className="path" d="M23,11.5 L23,11.5 L23,11.5 C23,12.3284271 22.3284271,13 21.5,13 L1.5,13 L1.5,13 C0.671572875,13 1.01453063e-16,12.3284271 0,11.5 L0,11.5 L0,11.5 C-1.01453063e-16,10.6715729 0.671572875,10 1.5,10 L21.5,10 L21.5,10 C22.3284271,10 23,10.6715729 23,11.5 Z" /></svg>\') 9px 9px',
-                            width: 9,
-                            height: 9,
-                            // eslint-disable-next-line actual/typography
-                            content: '" "',
+                    : transaction.tombstone
+                      ? {
+                          '&': {
+                            opacity: 0.3,
+                            backgroundColor: theme.buttonNormalDisabledBorder,
                           },
-                        },
-                        ':checked': {
-                          border: '1px solid ' + theme.checkboxBorderSelected,
-                          backgroundColor: theme.checkboxBackgroundSelected,
-                          '::after': {
-                            background:
-                              theme.checkboxBackgroundSelected +
-                              // plus sign from packages/desktop-client/src/icons/v1/add.svg
+                        }
+                      : {
+                          '&': {
+                            border:
+                              '1px solid ' + theme.buttonNormalDisabledBorder,
+                            backgroundColor: theme.buttonNormalDisabledBorder,
+                            '::after': {
+                              display: 'block',
+                              background:
+                                theme.buttonNormalDisabledBorder +
+                                // minus sign adapted from packages/desktop-client/src/icons/v1/add.svg
+                                // eslint-disable-next-line actual/typography
+                                ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" className="path" d="M23,11.5 L23,11.5 L23,11.5 C23,12.3284271 22.3284271,13 21.5,13 L1.5,13 L1.5,13 C0.671572875,13 1.01453063e-16,12.3284271 0,11.5 L0,11.5 L0,11.5 C-1.01453063e-16,10.6715729 0.671572875,10 1.5,10 L21.5,10 L21.5,10 C22.3284271,10 23,10.6715729 23,11.5 Z" /></svg>\') 9px 9px',
+                              width: 9,
+                              height: 9,
                               // eslint-disable-next-line actual/typography
-                              ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" className="path" d="M23,11.5 L23,11.5 L23,11.5 C23,12.3284271 22.3284271,13 21.5,13 L1.5,13 L1.5,13 C0.671572875,13 1.01453063e-16,12.3284271 0,11.5 L0,11.5 L0,11.5 C-1.01453063e-16,10.6715729 0.671572875,10 1.5,10 L21.5,10 L21.5,10 C22.3284271,10 23,10.6715729 23,11.5 Z" /><path fill="white" className="path" d="M11.5,23 C10.6715729,23 10,22.3284271 10,21.5 L10,1.5 C10,0.671572875 10.6715729,1.52179594e-16 11.5,0 C12.3284271,-1.52179594e-16 13,0.671572875 13,1.5 L13,21.5 C13,22.3284271 12.3284271,23 11.5,23 Z" /></svg>\') 9px 9px',
+                              content: '" "',
+                            },
                           },
-                        },
-                      }
+                          ':checked': {
+                            border: '1px solid ' + theme.checkboxBorderSelected,
+                            backgroundColor: theme.checkboxBackgroundSelected,
+                            '::after': {
+                              background:
+                                theme.checkboxBackgroundSelected +
+                                // plus sign from packages/desktop-client/src/icons/v1/add.svg
+                                // eslint-disable-next-line actual/typography
+                                ' url(\'data:image/svg+xml; utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" className="path" d="M23,11.5 L23,11.5 L23,11.5 C23,12.3284271 22.3284271,13 21.5,13 L1.5,13 L1.5,13 C0.671572875,13 1.01453063e-16,12.3284271 0,11.5 L0,11.5 L0,11.5 C-1.01453063e-16,10.6715729 0.671572875,10 1.5,10 L21.5,10 L21.5,10 C22.3284271,10 23,10.6715729 23,11.5 Z" /><path fill="white" className="path" d="M11.5,23 C10.6715729,23 10,22.3284271 10,21.5 L10,1.5 C10,0.671572875 10.6715729,1.52179594e-16 11.5,0 C12.3284271,-1.52179594e-16 13,0.671572875 13,1.5 L13,21.5 C13,22.3284271 12.3284271,23 11.5,23 Z" /></svg>\') 9px 9px',
+                            },
+                          },
+                        }
                 }
               />
             </Tooltip>
