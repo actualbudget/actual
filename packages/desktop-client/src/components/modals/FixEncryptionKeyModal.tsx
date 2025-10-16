@@ -176,9 +176,7 @@ export function FixEncryptionKeyModal({
                 }}
                 isLoading={loading}
               >
-                {hasExistingKey
-                  ? t('Unlock budget file')
-                  : t('Create key')}
+                {hasExistingKey ? t('Unlock budget file') : t('Create key')}
               </ButtonWithLoading>
             </ModalButtons>
           </Form>
