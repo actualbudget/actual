@@ -85,7 +85,7 @@ export function FixEncryptionKeyModal({
             {hasExistingKey ? (
               <Paragraph>
                 {t(
-                  'This file was encrypted with a different key than you are currently using. This usually means you changed your password. Enter your current password to unlock this budget file.',
+                  'Please provide the encryption key to unlock this budget file. You may be unlocking it for the first time, or the key has changed. Enter your password to continue.',
                 )}{' '}
                 <Link
                   variant="external"
