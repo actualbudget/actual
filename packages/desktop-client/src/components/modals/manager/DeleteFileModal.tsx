@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { ButtonWithLoading } from '@actual-app/components/button';
+import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -12,6 +12,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
+import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -27,6 +28,7 @@ export function DeleteFileModal({ file }: DeleteFileModalProps) {
   // user. The current user should be able to delete the local file,
   // but not the remote one
   const isCloudFile = 'cloudFileId' in file && file.state !== 'broken';
+  const serverStatus = useSyncServerStatus();
   const dispatch = useDispatch();
 
   const [loadingState, setLoadingState] = useState<'cloud' | 'local' | null>(
@@ -62,31 +64,44 @@ export function DeleteFileModal({ file }: DeleteFileModalProps) {
                   </Trans>
                 </Text>
 
-                <ButtonWithLoading
-                  variant="primary"
-                  isLoading={loadingState === 'cloud'}
-                  style={{
-                    backgroundColor: theme.errorText,
-                    alignSelf: 'center',
-                    border: 0,
-                    padding: '10px 30px',
-                    fontSize: 14,
-                  }}
-                  onPress={async () => {
-                    setLoadingState('cloud');
-                    await dispatch(
-                      deleteBudget({
-                        id: 'id' in file ? file.id : undefined,
-                        cloudFileId: file.cloudFileId,
-                      }),
-                    );
-                    setLoadingState(null);
+                {serverStatus === 'online' ? (
+                  <ButtonWithLoading
+                    variant="primary"
+                    isLoading={loadingState === 'cloud'}
+                    style={{
+                      backgroundColor: theme.errorText,
+                      alignSelf: 'center',
+                      border: 0,
+                      padding: '10px 30px',
+                      fontSize: 14,
+                    }}
+                    onPress={async () => {
+                      setLoadingState('cloud');
+                      await dispatch(
+                        deleteBudget({
+                          id: 'id' in file ? file.id : undefined,
+                          cloudFileId: file.cloudFileId,
+                        }),
+                      );
+                      setLoadingState(null);
 
-                    close();
-                  }}
-                >
-                  <Trans>Delete file from all devices</Trans>
-                </ButtonWithLoading>
+                      close();
+                    }}
+                  >
+                    <Trans>Delete file from all devices</Trans>
+                  </ButtonWithLoading>
+                ) : (
+                  <Button
+                    isDisabled
+                    style={{
+                      alignSelf: 'center',
+                      padding: '10px 30px',
+                      fontSize: 14,
+                    }}
+                  >
+                    <Trans>Server is not available</Trans>
+                  </Button>
+                )}
               </>
             )}
 
