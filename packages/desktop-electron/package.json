@@ -52,7 +52,7 @@
       "artifactName": "${productName}-linux-${arch}.${ext}",
       "executableName": "actual",
       "extraResources": [
-        "resources/linux/**"
+        "extra-resources/linux/**"
       ]
     },
     "flatpak": {

@@ -16,20 +16,21 @@ modules:
   - name: wrapper
     buildsystem: simple
     build-commands:
-      - 'install actual-wrapper.sh /app/bin/actual'
+      - install actual-wrapper.sh /app/bin/actual
     sources:
       - type: script
         dest-filename: actual-wrapper.sh
         commands:
-          - 'exec zypak-wrapper /app/main/actual \"$@\"'
+          - exec zypak-wrapper /app/main/actual "$@"
+
   - name: actual
     buildsystem: simple
     build-commands:
-      - 'mkdir /app/main'
-      - 'cp -R * /app/main'
-      - 'install -Dm644 /app/share/applications resources/linux/org.actualbudget.actual.desktop'
-      # - 'install -Dm644 -t /app/share/icons/hicolor/128x128/apps/ resources/${FLATPAK_ID}.png'
-      # - 'install -Dm644 -t /app/share/metainfo resources/${FLATPAK_ID}.metainfo.xml'
+      - mkdir /app/main
+      - cp -R * /app/main
+      - install -Dm644 resources/extra-resources/linux/org.actualbudget.actual.desktop -t /app/share/applications/
+      - install -Dm644 resources/extra-resources/org.actualbudget.actual.png -t /app/share/icons/hicolor/128x128/apps/
+      # - install -Dm644 resources/extra-resources/org.actualbudget.actual.metainfo.xml -t /app/share/metainfo
     sources:
       - type: archive
         url: https://github.com/MikesGlitch/actual/releases/download/v23.9.0/linux-unpacked-x64.zip
