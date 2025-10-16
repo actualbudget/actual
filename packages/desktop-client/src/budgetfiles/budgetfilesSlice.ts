@@ -498,7 +498,7 @@ function sortFiles(arr: File[]) {
     let i = name1 < name2 ? -1 : name1 > name2 ? 1 : 0;
     if (i === 0) {
       const xId = x.state === 'remote' ? x.cloudFileId : x.id;
-      const yId = x.state === 'remote' ? x.cloudFileId : x.id;
+      const yId = y.state === 'remote' ? y.cloudFileId : y.id;
       i = xId < yId ? -1 : xId > yId ? 1 : 0;
     }
     return i;

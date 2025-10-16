@@ -52,8 +52,8 @@
       "artifactName": "${productName}-linux-${arch}.${ext}"
     },
     "flatpak": {
-      "runtimeVersion": "23.08",
-      "baseVersion": "23.08"
+      "runtimeVersion": "24.08",
+      "baseVersion": "24.08"
     },
     "win": {
       "target": [
@@ -92,14 +92,14 @@
     "promise-retry": "^2.0.1"
   },
   "devDependencies": {
-    "@electron/notarize": "2.5.0",
+    "@electron/notarize": "3.1.0",
     "@electron/rebuild": "4.0.1",
     "@playwright/test": "1.56.0",
     "@types/copyfiles": "^2",
     "@types/fs-extra": "^11",
     "copyfiles": "^2.4.1",
     "cross-env": "^10.1.0",
-    "electron": "38.0.0",
+    "electron": "38.3.0",
     "electron-builder": "26.0.12",
     "typescript": "^5.9.3"
   }
