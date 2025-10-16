@@ -34,7 +34,9 @@ export default async function runMigration(db) {
             widget.height,
             widget.x,
             widget.y,
-            widget.meta !== undefined ? JSON.stringify(widget.meta) : null,
+            widget.meta !== undefined && widget.meta !== null
+              ? JSON.stringify(widget.meta)
+              : null,
           ],
         );
       });
