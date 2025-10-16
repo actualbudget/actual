@@ -1631,6 +1631,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@electron/notarize@npm:3.1.0":
+  version: 3.1.0
+  resolution: "@electron/notarize@npm:3.1.0"
+  dependencies:
+    debug: "npm:^4.4.0"
+    promise-retry: "npm:^2.0.1"
+  checksum: 10/9534fc7fd298c82abd79d0d3af34c432e84790703ace2fcbf296e0e64802ce352a309ecb920c54ac7baacd33bea4150c81512d0c8827e4cbab1519784cbc6527
+  languageName: node
+  linkType: hard
+
 "@electron/osx-sign@npm:1.3.1":
   version: 1.3.1
   resolution: "@electron/osx-sign@npm:1.3.1"
@@ -9389,7 +9399,7 @@ __metadata:
   resolution: "desktop-electron@workspace:packages/desktop-electron"
   dependencies:
     "@actual-app/sync-server": "workspace:*"
-    "@electron/notarize": "npm:2.5.0"
+    "@electron/notarize": "npm:3.1.0"
     "@electron/rebuild": "npm:4.0.1"
     "@playwright/test": "npm:1.56.0"
     "@types/copyfiles": "npm:^2"
@@ -9397,7 +9407,7 @@ __metadata:
     better-sqlite3: "npm:^12.4.1"
     copyfiles: "npm:^2.4.1"
     cross-env: "npm:^10.1.0"
-    electron: "npm:38.0.0"
+    electron: "npm:38.3.0"
     electron-builder: "npm:26.0.12"
     fs-extra: "npm:^11.3.2"
     promise-retry: "npm:^2.0.1"
@@ -9750,16 +9760,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:38.0.0":
-  version: 38.0.0
-  resolution: "electron@npm:38.0.0"
+"electron@npm:38.3.0":
+  version: 38.3.0
+  resolution: "electron@npm:38.3.0"
   dependencies:
     "@electron/get": "npm:^2.0.0"
     "@types/node": "npm:^22.7.7"
     extract-zip: "npm:^2.0.1"
   bin:
     electron: cli.js
-  checksum: 10/a245bf63fae60d1db85acddbe5787750e4d07acb273a1a5058163aee427fe07e52100b0d5a1e6b41efbdc1b398b6e7ec0fb3df75672e9148e95b31309d0c8f3a
+  checksum: 10/e605348760a682e8052d316051290128f9eee956d27757ab77d6672436d6dc15885a86b2bfff64b7e03a6ecfd1c7be055ad4a25c03e6c156a7adae4fa136d3b0
   languageName: node
   linkType: hard
 

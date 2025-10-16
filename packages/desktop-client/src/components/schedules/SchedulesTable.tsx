@@ -14,7 +14,6 @@ import { View } from '@actual-app/components/view';
 import { format as monthUtilFormat } from 'loot-core/shared/months';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import { getScheduledAmount } from 'loot-core/shared/schedules';
-import { integerToCurrency } from 'loot-core/shared/util';
 import { type ScheduleEntity } from 'loot-core/types/models';
 
 import { StatusBadge } from './StatusBadge';
@@ -31,6 +30,7 @@ import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import {
   type ScheduleStatusType,
@@ -129,9 +129,10 @@ export function ScheduleAmountCell({
   op: ScheduleEntity['_amountOp'];
 }) {
   const { t } = useTranslation();
+  const format = useFormat();
 
   const num = getScheduledAmount(amount);
-  const currencyAmount = integerToCurrency(Math.abs(num || 0));
+  const currencyAmount = format(Math.abs(num || 0), 'financial');
   const isApprox = op === 'isapprox' || op === 'isbetween';
 
   return (
@@ -192,7 +193,10 @@ function ScheduleRow({
   minimal,
   statuses,
   dateFormat,
-}: { schedule: ScheduleEntity; dateFormat: string } & Pick<
+}: {
+  schedule: ScheduleEntity;
+  dateFormat: string;
+} & Pick<
   SchedulesTableProps,
   'onSelect' | 'onAction' | 'minimal' | 'statuses'
 >) {
@@ -316,6 +320,7 @@ export function SchedulesTable({
   tableStyle,
 }: SchedulesTableProps) {
   const { t } = useTranslation();
+  const format = useFormat();
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [showCompleted, setShowCompleted] = useState(false);
@@ -342,7 +347,7 @@ export function SchedulesTable({
           ? '~'
           : '') +
         (amount > 0 ? '+' : '') +
-        integerToCurrency(Math.abs(amount || 0));
+        format(Math.abs(amount || 0), 'financial');
       const dateStr = schedule.next_date
         ? monthUtilFormat(schedule.next_date, dateFormat)
         : null;

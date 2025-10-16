@@ -19,7 +19,7 @@ if [ $NODE_ENV == 'development' ]; then
   ln -snf "$ROOT"/../dist/ "$DESKTOP_DIR"/service-worker
 fi
 
-yarn vite build --config ../vite.config.ts --mode $NODE_ENV $VITE_ARGS
+yarn vite build --config ../vite.config.mts --mode $NODE_ENV $VITE_ARGS
 
 if [ $NODE_ENV == 'production' ]; then
   # In production, just copy the built files
