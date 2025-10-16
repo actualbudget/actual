@@ -70,7 +70,7 @@ export function FixEncryptionKeyModal({
             title={
               hasExistingKey
                 ? t('Decrypt budget file')
-                : t('Decrypt budget file')
+                : t('This file is encrypted')
             }
             rightContent={<ModalCloseButton onPress={close} />}
           />
@@ -178,7 +178,7 @@ export function FixEncryptionKeyModal({
               >
                 {hasExistingKey
                   ? t('Unlock budget file')
-                  : t('Unlock budget file')}
+                  : t('Create key')}
               </ButtonWithLoading>
             </ModalButtons>
           </Form>
