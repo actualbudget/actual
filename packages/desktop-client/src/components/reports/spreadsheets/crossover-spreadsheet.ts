@@ -251,6 +251,8 @@ function recalculate(
 
     if (crossoverIndex == null && Math.round(monthlyIncome) >= spend) {
       crossoverIndex = idx;
+    } else if (crossoverIndex != null && Math.round(monthlyIncome) < spend) {
+      crossoverIndex = null;
     }
   });
 
