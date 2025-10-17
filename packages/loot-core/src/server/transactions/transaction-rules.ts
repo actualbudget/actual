@@ -1,7 +1,5 @@
 // @ts-strict-ignore
 
-import * as d from 'date-fns';
-
 import { logger } from '../../platform/server/log';
 import {
   currentDay,
@@ -952,14 +950,33 @@ export async function prepareTransactionForRules(
       r._account = await getAccount(trans.account);
     }
 
+    const dateBoundary = trans.date ?? currentDay();
+    let query = q('transactions')
+      .filter({ account: trans.account, is_parent: false })
+      .options({ splits: 'inline' });
+
+    if (trans.id) {
+      query = query.filter({ id: { $ne: trans.id } });
+    }
+
+    const sameDayFilter =
+      trans.sort_order != null
+        ? { $and: [{ date: dateBoundary }, { sort_order: { $lt: trans.sort_order } }] }
+        : {
+            $and: [
+              { date: dateBoundary },
+              {
+                $or: [
+                  { sort_order: { $ne: null } }, // ordered items come before null sort_order
+                  ...(trans.id ? [{ id: { $lt: trans.id } }] : []), // among nulls, tie-break by id
+                ],
+              },
+            ],
+          };
+
     const { data: balance } = await aqlQuery(
-      q('transactions')
-        .filter({
-          account: trans.account,
-          date: { $lte: trans.date ?? d.format(new Date(), 'yyyy-MM-dd') },
-          id: { $ne: trans.id },
-        })
-        .options({ splits: 'inline' })
+      query
+        .filter({ $or: [{ date: { $lt: dateBoundary } }, sameDayFilter] })
         .calculate({ $sum: '$amount' }),
     );
 
