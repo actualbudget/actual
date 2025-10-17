@@ -14,6 +14,7 @@
     "./block": "./src/Block.tsx",
     "./button": "./src/Button.tsx",
     "./card": "./src/Card.tsx",
+    "./combo-box": "./src/ComboBox.tsx",
     "./form-error": "./src/FormError.tsx",
     "./initial-focus": "./src/InitialFocus.ts",
     "./inline-field": "./src/InlineField.tsx",
