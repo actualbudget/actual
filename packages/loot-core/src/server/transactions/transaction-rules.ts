@@ -961,7 +961,12 @@ export async function prepareTransactionForRules(
 
     const sameDayFilter =
       trans.sort_order != null
-        ? { $and: [{ date: dateBoundary }, { sort_order: { $lt: trans.sort_order } }] }
+        ? {
+            $and: [
+              { date: dateBoundary },
+              { sort_order: { $lt: trans.sort_order } },
+            ],
+          }
         : {
             $and: [
               { date: dateBoundary },
