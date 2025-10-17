@@ -49,7 +49,15 @@
         "flatpak",
         "AppImage"
       ],
+<<<<<<< Updated upstream
       "artifactName": "${productName}-linux-${arch}.${ext}"
+=======
+      "executableName": "actual",
+      "artifactName": "${productName}-linux-${arch}.${ext}",
+      "extraResources": [
+        "extra-resources/linux"
+      ]
+>>>>>>> Stashed changes
     },
     "flatpak": {
       "runtimeVersion": "24.08",
