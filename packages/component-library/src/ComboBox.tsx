@@ -8,24 +8,25 @@ import {
   type ReactNode,
 } from 'react';
 import {
-  ComboBox,
+  ComboBox as AriaComboBox,
   ListBox,
   ListBoxItem,
   ListBoxSection,
   type ListBoxSectionProps,
-  type ComboBoxProps,
+  type ComboBoxProps as AriaComboBoxProps,
   type ListBoxItemProps,
-  ComboBoxStateContext,
+  ComboBoxStateContext as AriaComboBoxStateContext,
   type Key,
 } from 'react-aria-components';
-import { type ComboBoxState } from 'react-stately';
+import { type ComboBoxState as AriaComboBoxState } from 'react-stately';
 
-import { Input } from '@actual-app/components/input';
-import { Popover } from '@actual-app/components/popover';
-import { styles } from '@actual-app/components/styles';
-import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
+
+import { Input } from './Input';
+import { Popover } from './Popover';
+import { styles } from './styles';
+import { theme } from './theme';
+import { View } from './View';
 
 const popoverClassName = () =>
   css({
@@ -48,28 +49,28 @@ const listBoxClassName = ({ width }: { width?: number }) =>
     },
   });
 
-type Autocomplete2Props<T extends object> = Omit<
-  ComboBoxProps<T>,
+type ComboBoxProps<T extends object> = Omit<
+  AriaComboBoxProps<T>,
   'children'
 > & {
   inputPlaceholder?: string;
   children: ComponentProps<typeof ListBox<T>>['children'];
 };
 
-export function Autocomplete2<T extends object>({
+export function ComboBox<T extends object>({
   children,
   ...props
-}: Autocomplete2Props<T>) {
+}: ComboBoxProps<T>) {
   const viewRef = useRef<HTMLDivElement | null>(null);
   return (
-    <ComboBox<T>
+    <AriaComboBox<T>
       allowsEmptyCollection
       allowsCustomValue
       menuTrigger="focus"
       {...props}
     >
       <View ref={viewRef}>
-        <AutocompleteInput placeholder={props.inputPlaceholder} />
+        <ComboBoxInput placeholder={props.inputPlaceholder} />
       </View>
       <Popover isNonModal className={popoverClassName()}>
         <ListBox<T>
@@ -78,37 +79,37 @@ export function Autocomplete2<T extends object>({
           {children}
         </ListBox>
       </Popover>
-    </ComboBox>
+    </AriaComboBox>
   );
 }
 
-type AutocompleteInputContextValue = {
-  getFocusedKey?: (state: ComboBoxState<unknown>) => Key | null;
+type ComboBoxInputContextValue = {
+  getFocusedKey?: (state: AriaComboBoxState<unknown>) => Key | null;
 };
 
-const AutocompleteInputContext =
-  createContext<AutocompleteInputContextValue | null>(null);
+const ComboBoxInputContext =
+  createContext<ComboBoxInputContextValue | null>(null);
 
-type AutocompleteInputProviderProps = {
+type ComboBoxInputProviderProps = {
   children: ReactNode;
-  getFocusedKey?: (state: ComboBoxState<unknown>) => Key | null;
+  getFocusedKey?: (state: AriaComboBoxState<unknown>) => Key | null;
 };
 
-export function AutocompleteInputProvider({
+export function ComboBoxInputProvider({
   children,
   getFocusedKey,
-}: AutocompleteInputProviderProps) {
+}: ComboBoxInputProviderProps) {
   return (
-    <AutocompleteInputContext.Provider value={{ getFocusedKey }}>
+    <ComboBoxInputContext.Provider value={{ getFocusedKey }}>
       {children}
-    </AutocompleteInputContext.Provider>
+    </ComboBoxInputContext.Provider>
   );
 }
 
-type AutocompleteInputProps = ComponentProps<typeof Input>;
+type ComboBoxInputProps = ComponentProps<typeof Input>;
 
-function AutocompleteInput({ onKeyUp, ...props }: AutocompleteInputProps) {
-  const state = useContext(ComboBoxStateContext);
+function ComboBoxInput({ onKeyUp, ...props }: ComboBoxInputProps) {
+  const state = useContext(AriaComboBoxStateContext);
   const _onKeyUp = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
       state?.revert();
@@ -116,23 +117,23 @@ function AutocompleteInput({ onKeyUp, ...props }: AutocompleteInputProps) {
     onKeyUp?.(e);
   };
 
-  const autocompleteInputContext = useContext(AutocompleteInputContext);
+  const comboBoxInputContext = useContext(ComboBoxInputContext);
 
   useEffect(() => {
     if (state && state.inputValue && !state.selectionManager.focusedKey) {
       const focusedKey: Key | null =
-        (autocompleteInputContext?.getFocusedKey
-          ? autocompleteInputContext.getFocusedKey(state)
+        (comboBoxInputContext?.getFocusedKey
+          ? comboBoxInputContext.getFocusedKey(state)
           : defaultGetFocusedKey(state)) ?? null;
 
       state.selectionManager.setFocusedKey(focusedKey);
     }
-  }, [autocompleteInputContext, state, state?.inputValue]);
+  }, [comboBoxInputContext, state, state?.inputValue]);
 
   return <Input onKeyUp={_onKeyUp} {...props} />;
 }
 
-function defaultGetFocusedKey<T>(state: ComboBoxState<T>) {
+function defaultGetFocusedKey<T>(state: AriaComboBoxState<T>) {
   // Focus on the first suggestion item when typing.
   const keys = Array.from(state.collection.getKeys());
   return (
@@ -142,7 +143,7 @@ function defaultGetFocusedKey<T>(state: ComboBoxState<T>) {
   );
 }
 
-const defaultAutocompleteSectionClassName = css({
+const defaultComboBoxSectionClassName = () => css({
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'center',
@@ -154,21 +155,21 @@ const defaultAutocompleteSectionClassName = css({
   },
 });
 
-type AutocompleteSectionProps<T extends object> = ListBoxSectionProps<T>;
+type ComboBoxSectionProps<T extends object> = ListBoxSectionProps<T>;
 
-export function AutocompleteSection<T extends object>({
+export function ComboBoxSection<T extends object>({
   className,
   ...props
-}: AutocompleteSectionProps<T>) {
+}: ComboBoxSectionProps<T>) {
   return (
     <ListBoxSection
-      className={cx(defaultAutocompleteSectionClassName, className)}
+      className={cx(defaultComboBoxSectionClassName(), className)}
       {...props}
     />
   );
 }
 
-const defaultAutocompleteItemClassName = css({
+const defaultComboBoxItemClassName = () => css({
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',
@@ -177,19 +178,19 @@ const defaultAutocompleteItemClassName = css({
   paddingLeft: 20,
 });
 
-type AutocompleteItemProps = ListBoxItemProps;
+type ComboBoxItemProps = ListBoxItemProps;
 
-export function AutocompleteItem({
+export function ComboBoxItem({
   className,
   ...props
-}: AutocompleteItemProps) {
+}: ComboBoxItemProps) {
   return (
     <ListBoxItem
       className={
         typeof className === 'function'
           ? renderProps =>
-              cx(defaultAutocompleteItemClassName, className(renderProps))
-          : cx(defaultAutocompleteItemClassName, className)
+              cx(defaultComboBoxItemClassName(), className(renderProps))
+          : cx(defaultComboBoxItemClassName(), className)
       }
       {...props}
     />

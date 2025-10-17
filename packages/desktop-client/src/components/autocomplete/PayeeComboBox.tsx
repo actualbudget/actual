@@ -2,6 +2,7 @@ import { type ComponentProps, useMemo, useState } from 'react';
 import { Header, type Key } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { ComboBox, ComboBoxInputProvider, ComboBoxItem, ComboBoxSection } from '@actual-app/components/combo-box';
 import { SvgAdd } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
 
@@ -10,13 +11,6 @@ import {
   normalisedIncludes,
 } from 'loot-core/shared/normalisation';
 import { type AccountEntity, type PayeeEntity } from 'loot-core/types/models';
-
-import {
-  Autocomplete2,
-  AutocompleteInputProvider,
-  AutocompleteItem,
-  AutocompleteSection,
-} from './Autocomplete2';
 
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCommonPayees, usePayees } from '@desktop-client/hooks/usePayees';
@@ -27,36 +21,34 @@ import {
 } from '@desktop-client/payees/payeesSlice';
 import { useDispatch } from '@desktop-client/redux';
 
-type PayeeAutocompleteItemType = {
+type PayeeComboBoxItem = PayeeEntity & {
   type: 'account' | 'payee' | 'suggested';
 };
 
-type PayeeAutocompleteItem = PayeeEntity & PayeeAutocompleteItemType;
-
-type PayeeAutocomplete2Props = Omit<
-  ComponentProps<typeof Autocomplete2>,
+type PayeeComboBoxProps = Omit<
+  ComponentProps<typeof ComboBox>,
   'children'
 > & {
   showInactive?: boolean;
 };
 
-export function PayeeAutocomplete2({
+export function PayeeComboBox({
   showInactive,
   selectedKey,
   onOpenChange,
   onSelectionChange,
   ...props
-}: PayeeAutocomplete2Props) {
+}: PayeeComboBoxProps) {
   const { t } = useTranslation();
   const payees = usePayees();
   const commonPayees = useCommonPayees();
   const accounts = useAccounts();
   const [focusTransferPayees] = useState(false);
 
-  const allPayeeSuggestions: PayeeAutocompleteItem[] = useMemo(() => {
+  const allPayeeSuggestions: PayeeComboBoxItem[] = useMemo(() => {
     const suggestions = getPayeeSuggestions(commonPayees, payees);
 
-    let filteredSuggestions: PayeeAutocompleteItem[] = [...suggestions];
+    let filteredSuggestions: PayeeComboBoxItem[] = [...suggestions];
 
     if (!showInactive) {
       filteredSuggestions = filterActivePayees(filteredSuggestions, accounts);
@@ -132,7 +124,7 @@ export function PayeeAutocomplete2({
   };
 
   const getFocusedKey: ComponentProps<
-    typeof AutocompleteInputProvider
+    typeof ComboBoxInputProvider
   >['getFocusedKey'] = state => {
     const keys = Array.from(state.collection.getKeys());
     const found = keys
@@ -145,8 +137,8 @@ export function PayeeAutocomplete2({
   };
 
   return (
-    <AutocompleteInputProvider getFocusedKey={getFocusedKey}>
-      <Autocomplete2
+    <ComboBoxInputProvider getFocusedKey={getFocusedKey}>
+      <ComboBox
         aria-label={t('Payee autocomplete')}
         inputPlaceholder="nothing"
         inputValue={inputValue}
@@ -164,25 +156,25 @@ export function PayeeAutocomplete2({
           accountPayees={accountPayees}
         />
 
-        {/* <AutocompleteSection className={css({ position: 'sticky', bottom: 0, })}>
-        <Button variant="menu" slot={null}>
-          <Trans>Make transfer</Trans>
-        </Button>
-        <Button variant="menu" slot={null}>
-          <Trans>Manage payees</Trans>
-        </Button>
-      </AutocompleteSection> */}
-      </Autocomplete2>
-    </AutocompleteInputProvider>
+        {/* <ComboBoxSection className={css({ position: 'sticky', bottom: 0, })}>
+          <Button variant="menu" slot={null}>
+            <Trans>Make transfer</Trans>
+          </Button>
+          <Button variant="menu" slot={null}>
+            <Trans>Manage payees</Trans>
+          </Button>
+        </ComboBoxSection> */}
+      </ComboBox>
+    </ComboBoxInputProvider>
   );
 }
 
 type PayeeListProps = {
   showCreatePayee: boolean;
   inputValue: string;
-  suggestedPayees: PayeeAutocompleteItem[];
-  regularPayees: PayeeAutocompleteItem[];
-  accountPayees: PayeeAutocompleteItem[];
+  suggestedPayees: PayeeComboBoxItem[];
+  regularPayees: PayeeComboBoxItem[];
+  accountPayees: PayeeComboBoxItem[];
 };
 
 function PayeeList({
@@ -195,7 +187,7 @@ function PayeeList({
   return (
     <>
       {showCreatePayee && (
-        <AutocompleteItem
+        <ComboBoxItem
           key="new"
           id="new"
           textValue={inputValue}
@@ -203,61 +195,61 @@ function PayeeList({
         >
           <SvgAdd width={8} height={8} style={{ marginRight: 5 }} />
           Create payee: {inputValue}
-        </AutocompleteItem>
+        </ComboBoxItem>
       )}
 
       {suggestedPayees.length > 0 && (
-        <AutocompleteSection>
+        <ComboBoxSection>
           <Header>
             <Trans>Suggested Payees</Trans>
           </Header>
           {suggestedPayees.map(payee => (
-            <AutocompleteItem
+            <ComboBoxItem
               key={payee.id}
               id={payee.id}
               textValue={payee.name}
               value={payee}
             >
               {payee.name}
-            </AutocompleteItem>
+            </ComboBoxItem>
           ))}
-        </AutocompleteSection>
+        </ComboBoxSection>
       )}
 
       {regularPayees.length > 0 && (
-        <AutocompleteSection>
+        <ComboBoxSection>
           <Header>
             <Trans>Payees</Trans>
           </Header>
           {regularPayees.map(payee => (
-            <AutocompleteItem
+            <ComboBoxItem
               key={payee.id}
               id={payee.id}
               textValue={payee.name}
               value={payee}
             >
               {payee.name}
-            </AutocompleteItem>
+            </ComboBoxItem>
           ))}
-        </AutocompleteSection>
+        </ComboBoxSection>
       )}
 
       {accountPayees.length > 0 && (
-        <AutocompleteSection>
+        <ComboBoxSection>
           <Header>
             <Trans>Transfer To/From</Trans>
           </Header>
           {accountPayees.map(payee => (
-            <AutocompleteItem
+            <ComboBoxItem
               key={payee.id}
               id={payee.id}
               textValue={payee.name}
               value={payee}
             >
               {payee.name}
-            </AutocompleteItem>
+            </ComboBoxItem>
           ))}
-        </AutocompleteSection>
+        </ComboBoxSection>
       )}
     </>
   );
@@ -268,7 +260,7 @@ const MAX_AUTO_SUGGESTIONS = 5;
 function getPayeeSuggestions(
   commonPayees: PayeeEntity[],
   payees: PayeeEntity[],
-): PayeeAutocompleteItem[] {
+): PayeeComboBoxItem[] {
   const favoritePayees = payees
     .filter(p => p.favorite)
     .map(p => {
@@ -276,7 +268,7 @@ function getPayeeSuggestions(
     })
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  let additionalCommonPayees: PayeeAutocompleteItem[] = [];
+  let additionalCommonPayees: PayeeComboBoxItem[] = [];
   if (commonPayees?.length > 0) {
     if (favoritePayees.length < MAX_AUTO_SUGGESTIONS) {
       additionalCommonPayees = commonPayees
@@ -292,10 +284,10 @@ function getPayeeSuggestions(
   }
 
   if (favoritePayees.length + additionalCommonPayees.length) {
-    const filteredPayees: PayeeAutocompleteItem[] = payees
+    const filteredPayees: PayeeComboBoxItem[] = payees
       .filter(p => !favoritePayees.find(fp => fp.id === p.id))
       .filter(p => !additionalCommonPayees.find(fp => fp.id === p.id))
-      .map<PayeeAutocompleteItem>(p => {
+      .map<PayeeComboBoxItem>(p => {
         return { ...p, type: determineType(p, false) };
       });
 
@@ -314,14 +306,14 @@ function filterActivePayees<T extends PayeeEntity>(
   return accounts ? (getActivePayees(payees, accounts) as T[]) : payees;
 }
 
-function filterTransferPayees(payees: PayeeAutocompleteItem[]) {
+function filterTransferPayees(payees: PayeeComboBoxItem[]) {
   return payees.filter(payee => !!payee.transfer_acct);
 }
 
 function determineType(
   payee: PayeeEntity,
   isCommon: boolean,
-): PayeeAutocompleteItem['type'] {
+): PayeeComboBoxItem['type'] {
   if (payee.transfer_acct) {
     return 'account';
   }
