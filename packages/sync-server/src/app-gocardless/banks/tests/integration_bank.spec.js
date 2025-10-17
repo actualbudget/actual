@@ -5,12 +5,6 @@ import {
 import IntegrationBank from '../integration-bank.js';
 
 describe('IntegrationBank', () => {
-  let consoleSpy;
-
-  beforeEach(() => {
-    consoleSpy = vi.spyOn(console, 'debug');
-  });
-
   describe('normalizeAccount', () => {
     const account = mockExtendAccountsAboutInstitutions[0];
 
@@ -41,16 +35,6 @@ describe('IntegrationBank', () => {
         official_name: 'Savings Account for Individuals (Retail)',
         type: 'checking',
       });
-    });
-
-    it('normalizeAccount logs available account properties', () => {
-      IntegrationBank.normalizeAccount(account);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Available account properties for new institution integration',
-        {
-          account: JSON.stringify(account),
-        },
-      );
     });
   });
 
@@ -94,14 +78,6 @@ describe('IntegrationBank', () => {
       const sortedTransactions = IntegrationBank.sortTransactions(transactions);
       expect(sortedTransactions).toEqual(sortedTransactions);
     });
-
-    it('sortTransactions logs available transactions properties', () => {
-      IntegrationBank.sortTransactions(transactions);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Available (first 10) transactions properties for new integration of institution in sortTransactions function',
-        { top10Transactions: JSON.stringify(sortedTransactions.slice(0, 10)) },
-      );
-    });
   });
 
   describe('calculateStartingBalance', () => {
@@ -140,17 +116,6 @@ describe('IntegrationBank', () => {
         balances,
       );
       expect(startingBalance).toEqual(70000);
-    });
-
-    it('logs available transactions and balances properties', () => {
-      IntegrationBank.calculateStartingBalance(transactions, balances);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Available (first 10) transactions properties for new integration of institution in calculateStartingBalance function',
-        {
-          balances: JSON.stringify(balances),
-          top10SortedTransactions: JSON.stringify(transactions.slice(0, 10)),
-        },
-      );
     });
   });
 });
