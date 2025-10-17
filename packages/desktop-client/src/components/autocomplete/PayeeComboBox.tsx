@@ -2,7 +2,12 @@ import { type ComponentProps, useMemo, useState } from 'react';
 import { Header, type Key } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { ComboBox, ComboBoxInputProvider, ComboBoxItem, ComboBoxSection } from '@actual-app/components/combo-box';
+import {
+  ComboBox,
+  ComboBoxInputProvider,
+  ComboBoxItem,
+  ComboBoxSection,
+} from '@actual-app/components/combo-box';
 import { SvgAdd } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
 
@@ -25,10 +30,7 @@ type PayeeComboBoxItem = PayeeEntity & {
   type: 'account' | 'payee' | 'suggested';
 };
 
-type PayeeComboBoxProps = Omit<
-  ComponentProps<typeof ComboBox>,
-  'children'
-> & {
+type PayeeComboBoxProps = Omit<ComponentProps<typeof ComboBox>, 'children'> & {
   showInactive?: boolean;
 };
 
