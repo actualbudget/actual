@@ -123,9 +123,12 @@ jobs:
 
       - name: Push changes
         if: steps.apply.outputs.applied == 'true'
+        env:
+          HEAD_REF: ${{ steps.metadata.outputs.head_ref }}
+          HEAD_REPO: ${{ steps.metadata.outputs.head_repo }}
         run: |
-          git push origin HEAD:${{ steps.metadata.outputs.head_ref }}
-          echo "Successfully pushed VRT updates to ${{ steps.metadata.outputs.head_repo }}@${{ steps.metadata.outputs.head_ref }}"
+          git push origin "HEAD:refs/heads/$HEAD_REF"
+          echo "Successfully pushed VRT updates to $HEAD_REPO@$HEAD_REF"
 
       - name: Comment on PR - Success
         if: steps.apply.outputs.applied == 'true'
