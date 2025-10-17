@@ -56,27 +56,26 @@ describe('IntegrationBank', () => {
         transactionAmount: { amount: '100', currency: 'EUR' },
       },
     ];
-    const sortedTransactions = [
-      {
-        date: '2022-01-03',
-        bookingDate: '2022-01-03',
-        transactionAmount: { amount: '100', currency: 'EUR' },
-      },
-      {
-        date: '2022-01-02',
-        bookingDate: '2022-01-02',
-        transactionAmount: { amount: '100', currency: 'EUR' },
-      },
-      {
-        date: '2022-01-01',
-        bookingDate: '2022-01-01',
-        transactionAmount: { amount: '100', currency: 'EUR' },
-      },
-    ];
 
     it('should return transactions sorted by bookingDate', () => {
       const sortedTransactions = IntegrationBank.sortTransactions(transactions);
-      expect(sortedTransactions).toEqual(sortedTransactions);
+      expect(sortedTransactions).toEqual([
+        {
+          date: '2022-01-03',
+          bookingDate: '2022-01-03',
+          transactionAmount: { amount: '100', currency: 'EUR' },
+        },
+        {
+          date: '2022-01-02',
+          bookingDate: '2022-01-02',
+          transactionAmount: { amount: '100', currency: 'EUR' },
+        },
+        {
+          date: '2022-01-01',
+          bookingDate: '2022-01-01',
+          transactionAmount: { amount: '100', currency: 'EUR' },
+        },
+      ]);
     });
   });
 
