@@ -87,8 +87,9 @@ type ComboBoxInputContextValue = {
   getFocusedKey?: (state: AriaComboBoxState<unknown>) => Key | null;
 };
 
-const ComboBoxInputContext =
-  createContext<ComboBoxInputContextValue | null>(null);
+const ComboBoxInputContext = createContext<ComboBoxInputContextValue | null>(
+  null,
+);
 
 type ComboBoxInputProviderProps = {
   children: ReactNode;
@@ -143,17 +144,18 @@ function defaultGetFocusedKey<T>(state: AriaComboBoxState<T>) {
   );
 }
 
-const defaultComboBoxSectionClassName = () => css({
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  '& header': {
-    paddingTop: 5,
-    paddingBottom: 5,
-    paddingLeft: 10,
-    color: theme.menuAutoCompleteTextHeader,
-  },
-});
+const defaultComboBoxSectionClassName = () =>
+  css({
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    '& header': {
+      paddingTop: 5,
+      paddingBottom: 5,
+      paddingLeft: 10,
+      color: theme.menuAutoCompleteTextHeader,
+    },
+  });
 
 type ComboBoxSectionProps<T extends object> = ListBoxSectionProps<T>;
 
@@ -169,21 +171,19 @@ export function ComboBoxSection<T extends object>({
   );
 }
 
-const defaultComboBoxItemClassName = () => css({
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-  paddingTop: 5,
-  paddingBottom: 5,
-  paddingLeft: 20,
-});
+const defaultComboBoxItemClassName = () =>
+  css({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 5,
+    paddingBottom: 5,
+    paddingLeft: 20,
+  });
 
 type ComboBoxItemProps = ListBoxItemProps;
 
-export function ComboBoxItem({
-  className,
-  ...props
-}: ComboBoxItemProps) {
+export function ComboBoxItem({ className, ...props }: ComboBoxItemProps) {
   return (
     <ListBoxItem
       className={
