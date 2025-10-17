@@ -12,6 +12,8 @@
     <p>You own your data and can do whatever you want with it. Featuring multi-device sync, optional end-to-end encryption and so much more.</p>
   </description>
 
+  <launchable type="desktop-id">org.actualbudget.actual.desktop</launchable>
+
   <url type="homepage">https://actualbudget.org/</url>
   <url type="bugtracker">https://github.com/actualbudget/actual/issues</url>
 
@@ -27,6 +29,7 @@
 
   <screenshots>
     <screenshot type="default">
+      <!-- TODO: This should live in the flathub repo -->
       <image>https://github.com/actualbudget/actual/raw/master/demo.png</image>
     </screenshot>
   </screenshots>

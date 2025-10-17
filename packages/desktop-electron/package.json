@@ -50,10 +50,7 @@
         "AppImage"
       ],
       "artifactName": "${productName}-linux-${arch}.${ext}",
-      "executableName": "actual",
-      "extraResources": [
-        "extra-resources/linux/**"
-      ]
+      "executableName": "actual"
     },
     "flatpak": {
       "runtimeVersion": "24.08",
