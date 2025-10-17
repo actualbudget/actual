@@ -42,7 +42,7 @@ export function GoalTemplateModal() {
             </Row>
             <Row style={{ backgroundColor: theme.tableBackground }}>
               <Field width="flex">
-                #template 10 repeat every week starting 2025-01-03 up to $80
+                #template 10 repeat every week starting 2025-01-03 up to 80
               </Field>
               <Field width="flex">
                 <Trans>$10 a week, up to a maximum of $80</Trans>
