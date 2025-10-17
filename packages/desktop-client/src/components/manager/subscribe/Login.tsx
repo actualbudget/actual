@@ -7,7 +7,7 @@ import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
-import { ResponsiveInput } from '@actual-app/components/input';
+import { BigInput, ResponsiveInput } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
@@ -66,8 +66,8 @@ function PasswordLogin({ setError, dispatch }) {
         gap: '1rem',
       }}
     >
-      <ResponsiveInput
-        autoFocus={true}
+      <BigInput
+        autoFocus
         placeholder={t('Password')}
         type="password"
         onChangeValue={setPassword}
