@@ -226,7 +226,7 @@ export const DEFAULT_DASHBOARD_STATE: NewWidget[] = [
     y: 10,
     meta: {
       content:
-        '## Dashboard Tips\n\nYou can add new widgets using the button above. Choose a widget type and customize it to fit your needs.\n\n**Moving cards:** Drag any card by its header to reposition it.\n\n**Deleting cards:** Click the three-dot menu on any card and select “Remove”.',
+        '## Dashboard Tips\n\nYou can add new widgets or edit existing widgets by using the buttons at the top of the page. Choose a widget type and customize it to fit your needs.\n\n**Moving cards:** Drag any card by its header to reposition it.\n\n**Deleting cards:** Click the three-dot menu on any card and select “Remove”.',
     },
   },
 ];
