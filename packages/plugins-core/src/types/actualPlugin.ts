@@ -12,10 +12,10 @@ import type {
 import type { i18n } from 'i18next';
 
 export type SlotLocations =
-  | 'main-menu'
-  | 'more-menu'
-  | 'before-accounts'
-  | 'after-accounts'
+  | 'sidebar-main-menu'
+  | 'sidebar-more-menu'
+  | 'sidebar-before-accounts'
+  | 'sidebar-after-accounts'
   | 'topbar';
 
 // Define condition value types for filtering
