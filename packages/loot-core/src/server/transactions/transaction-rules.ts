@@ -1,5 +1,7 @@
 // @ts-strict-ignore
 
+import * as d from 'date-fns';
+
 import { logger } from '../../platform/server/log';
 import {
   currentDay,
@@ -950,48 +952,15 @@ export async function prepareTransactionForRules(
       r._account = await getAccount(trans.account);
     }
 
-    // Calculate account balance up to (but not including) this transaction
-    // This sums all transactions in the account that are:
-    //  - Before this transaction's date, OR
-    //  - On the same date but with a greater sort_order (if defined)
-    let query = q('transactions')
-      .filter({ account: trans.account })
-      .options({ splits: 'none' });
-
-    // Filter by date and sort_order
-    if (trans.sort_order != null) {
-      query = query.filter({
-        $or: [
-          { date: { $lt: trans.date } },
-          {
-            $and: [
-              { date: trans.date },
-              { sort_order: { $gt: trans.sort_order } },
-            ],
-          },
-        ],
-      });
-    } else {
-      const dateFilters = {
-        $or: [
-          { date: { $lt: trans.date } },
-          {
-            $and: [{ date: trans.date }, { sort_order: null }],
-          },
-        ],
-      };
-
-      if (trans.id) {
-        query = query.filter({
-          $and: [dateFilters, { id: { $ne: trans.id } }],
-        });
-      } else {
-        query = query.filter(dateFilters);
-      }
-    }
-
     const { data: balance } = await aqlQuery(
-      query.calculate({ $sum: '$amount' }),
+      q('transactions')
+        .filter({
+          account: trans.account,
+          date: { $lte: trans.date ?? d.format(new Date(), 'yyyy-MM-dd') },
+          id: { $ne: trans.id },
+        })
+        .options({ splits: 'inline' })
+        .calculate({ $sum: '$amount' }),
     );
 
     r.balance = balance ?? 0;
