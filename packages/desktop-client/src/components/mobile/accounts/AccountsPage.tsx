@@ -138,6 +138,8 @@ type AccountListItemProps = ComponentPropsWithoutRef<
     accountId: AccountEntity['id'],
   ) => Binding<'account', 'balance'>;
   onSelect: (account: AccountEntity) => void;
+  isFirst?: boolean;
+  isLast?: boolean;
 };
 
 function AccountListItem({
@@ -147,6 +149,8 @@ function AccountListItem({
   isFailed,
   getBalanceQuery,
   onSelect,
+  isFirst = false,
+  isLast = false,
   ...props
 }: AccountListItemProps) {
   const { value: account } = props;
@@ -164,8 +168,11 @@ function AccountListItem({
             height: ROW_HEIGHT,
             width: '100%',
             backgroundColor: theme.tableBackground,
-            border: `1px solid ${theme.tableBorder}`,
+            border: 'none',
+            borderTop: isFirst ? 'none' : `1px solid ${theme.tableBorder}`,
+            borderBottom: isLast ? `1px solid ${theme.tableBorder}` : 'none',
             paddingLeft: 20,
+            borderRadius: 0,
           }}
           data-testid="account-list-item"
           onPress={() => onSelect(account)}
@@ -470,21 +477,35 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
         items={accounts}
         dragAndDropHooks={dragAndDropHooks}
         ref={ref}
-        style={{ display: 'flex', flexDirection: 'column', margin: '0 8px' }}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          margin: '0 8px',
+          border: `1px solid ${theme.tableBorder}`,
+          borderRadius: 8,
+          overflow: 'hidden',
+        }}
       >
-        {account => (
-          <AccountListItem
-            key={account.id}
-            id={account.id}
-            value={account}
-            isUpdated={updatedAccounts && updatedAccounts.includes(account.id)}
-            isConnected={!!account.bank}
-            isPending={syncingAccountIds.includes(account.id)}
-            isFailed={failedAccounts && failedAccounts.has(account.id)}
-            getBalanceQuery={getBalanceBinding}
-            onSelect={onOpenAccount}
-          />
-        )}
+        {account => {
+          const accountIndex = accounts.findIndex(acc => acc.id === account.id);
+          return (
+            <AccountListItem
+              key={account.id}
+              id={account.id}
+              value={account}
+              isUpdated={
+                updatedAccounts && updatedAccounts.includes(account.id)
+              }
+              isConnected={!!account.bank}
+              isPending={syncingAccountIds.includes(account.id)}
+              isFailed={failedAccounts && failedAccounts.has(account.id)}
+              getBalanceQuery={getBalanceBinding}
+              onSelect={onOpenAccount}
+              isFirst={accountIndex === 0}
+              isLast={accountIndex === accounts.length - 1}
+            />
+          );
+        }}
       </ListBox>
     );
   },
