@@ -39,7 +39,10 @@ export const MonthPicker = ({
   const [hoverId, setHoverId] = useState(null);
   const [targetMonthCount, setTargetMonthCount] = useState(12);
 
-  const currentMonth = monthUtils.currentMonth();
+  // Don't capture currentMonth during render - calculate it when needed
+  // This ensures pay period config is loaded before determining current month
+  const getCurrentMonth = () => monthUtils.currentMonth();
+  const currentMonth = getCurrentMonth();
   const firstSelectedMonth = startMonth;
 
   const lastSelectedMonth = monthUtils.addMonths(
@@ -93,7 +96,7 @@ export const MonthPicker = ({
         <Link
           variant="button"
           buttonVariant="bare"
-          onPress={() => onSelect(currentMonth)}
+          onPress={() => onSelect(getCurrentMonth())}
           style={{
             padding: '3px 3px',
             marginRight: '12px',
@@ -127,7 +130,11 @@ export const MonthPicker = ({
           </View>
         </Link>
         {range.map((month, idx) => {
-          const monthName = monthUtils.format(month, 'MMM', locale);
+          const displayLabel = monthUtils.getMonthDisplayName(
+            month,
+            undefined,
+            locale,
+          );
           const selected =
             idx >= firstSelectedIndex && idx <= lastSelectedIndex;
 
@@ -214,7 +221,13 @@ export const MonthPicker = ({
               onMouseLeave={() => setHoverId(null)}
             >
               <View>
-                {size === 'small' ? monthName[0] : monthName}
+                {monthUtils.isPayPeriod(month)
+                  ? size === 'small'
+                    ? `P${String(parseInt(month.slice(5, 7)) - 12)}`
+                    : displayLabel
+                  : size === 'small'
+                    ? displayLabel[0]
+                    : displayLabel}
                 {showYearHeader && (
                   <View
                     style={{

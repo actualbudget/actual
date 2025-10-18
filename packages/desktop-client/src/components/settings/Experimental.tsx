@@ -165,6 +165,9 @@ export function ExperimentalFeatures() {
             >
               <Trans>Client-Side plugins (soon)</Trans>
             </GlobalFeatureToggle>
+            <FeatureToggle flag="payPeriodsEnabled">
+              <Trans>Pay periods</Trans>
+            </FeatureToggle>
           </View>
         ) : (
           <Link
