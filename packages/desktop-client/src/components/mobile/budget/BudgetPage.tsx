@@ -64,6 +64,7 @@ function isBudgetType(input?: string): input is 'envelope' | 'tracking' {
 export function BudgetPage() {
   const { t } = useTranslation();
   const locale = useLocale();
+  const format = useFormat();
   const { list: categories, grouped: categoryGroups } = useCategories();
   const [budgetTypePref] = useSyncedPref('budgetType');
   const budgetType = isBudgetType(budgetTypePref) ? budgetTypePref : 'envelope';
@@ -98,9 +99,19 @@ export function BudgetPage() {
 
   const onBudgetAction = useCallback(
     async (month, type, args) => {
-      dispatch(applyBudgetAction({ month, type, args }));
+      const action: any = { month, type, args };
+      // Add currencyCode for template-related actions
+      if (
+        type === 'apply-goal-template' ||
+        type === 'overwrite-goal-template' ||
+        type === 'apply-single-category-template' ||
+        type === 'apply-multiple-templates'
+      ) {
+        action.currencyCode = format.currency.code;
+      }
+      dispatch(applyBudgetAction(action));
     },
-    [dispatch],
+    [dispatch, format.currency.code],
   );
 
   const onShowBudgetSummary = useCallback(() => {
@@ -187,10 +198,11 @@ export function BudgetPage() {
           args: {
             categories,
           },
+          currencyCode: format.currency.code,
         }),
       );
     },
-    [dispatch, startMonth],
+    [dispatch, startMonth, format.currency.code],
   );
 
   const onDeleteGroup = useCallback(
