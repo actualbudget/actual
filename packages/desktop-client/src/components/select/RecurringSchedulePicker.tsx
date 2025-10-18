@@ -38,7 +38,6 @@ import { Modal } from '@desktop-client/components/common/Modal';
 import { Checkbox } from '@desktop-client/components/forms';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 // ex: There is no 6th Friday of the Month
 const MAX_DAY_OF_WEEK_INTERVAL = 5;
@@ -386,9 +385,6 @@ function RecurringScheduleTooltip({
   const [previewDates, setPreviewDates] = useState<string[] | string | null>(
     null,
   );
-
-  const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
-  const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
   const { FREQUENCY_OPTIONS } = useFrequencyOptions();
 

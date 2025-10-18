@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useEffect, type ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
@@ -18,8 +18,6 @@ import { Checkbox } from '@desktop-client/components/forms';
 import { useSidebar } from '@desktop-client/components/sidebar/SidebarProvider';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-
-
 
 // Follows Pikaday 'firstDay' numbering
 // https://github.com/Pikaday/Pikaday
