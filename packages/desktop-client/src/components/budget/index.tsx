@@ -28,6 +28,7 @@ import {
   updateCategoryGroup,
 } from '@desktop-client/budget/budgetSlice';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
@@ -70,6 +71,7 @@ function BudgetInner(props: BudgetInnerProps) {
   const spreadsheet = useSpreadsheet();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const format = useFormat();
   const [summaryCollapsed, setSummaryCollapsedPref] = useLocalPref(
     'budget.summaryCollapsed',
   );
@@ -263,12 +265,23 @@ function BudgetInner(props: BudgetInnerProps) {
         args: {
           categories,
         },
+        currencyCode: format.currency.code,
       }),
     );
   };
 
   const onBudgetAction = (month, type, args) => {
-    dispatch(applyBudgetAction({ month, type, args }));
+    const action: any = { month, type, args };
+    // Add currencyCode for template-related actions
+    if (
+      type === 'apply-goal-template' ||
+      type === 'overwrite-goal-template' ||
+      type === 'apply-single-category-template' ||
+      type === 'apply-multiple-templates'
+    ) {
+      action.currencyCode = format.currency.code;
+    }
+    dispatch(applyBudgetAction(action));
   };
 
   const onShowActivity = (categoryId, month) => {

@@ -31,27 +31,47 @@ class TestCategoryTemplateContext extends CategoryTemplateContext {
     month: string,
     fromLastMonth: number,
     budgeted: number,
+    currencyCode: string = 'USD',
   ) {
-    super(templates, category, month, fromLastMonth, budgeted);
+    super(templates, category, month, fromLastMonth, budgeted, currencyCode);
   }
 }
 
 describe('CategoryTemplateContext', () => {
   describe('runSimple', () => {
     it('should return monthly amount when provided', () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
       const template: Template = {
         type: 'simple',
         monthly: 100,
         directive: 'template',
         priority: 1,
       };
-      const limit = 0;
 
-      const result = CategoryTemplateContext.runSimple(template, limit);
+      const instance = new TestCategoryTemplateContext(
+        [],
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+
+      const result = CategoryTemplateContext.runSimple(template, instance);
       expect(result).toBe(amountToInteger(100));
     });
 
     it('should return limit when monthly is not provided', () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
       const template: Template = {
         type: 'simple',
         limit: { amount: 500, hold: false, period: 'monthly' },
@@ -59,8 +79,16 @@ describe('CategoryTemplateContext', () => {
         priority: 1,
       };
 
-      const result = CategoryTemplateContext.runSimple(template, 500);
-      expect(result).toBe(500);
+      const instance = new TestCategoryTemplateContext(
+        [template],
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+
+      const result = CategoryTemplateContext.runSimple(template, instance);
+      expect(result).toBe(amountToInteger(500));
     });
 
     it('should handle weekly limit', async () => {
@@ -881,6 +909,7 @@ describe('CategoryTemplateContext', () => {
         category,
         '2024-01',
         0,
+        'USD',
       );
 
       // Run each priority level separately
@@ -948,6 +977,7 @@ describe('CategoryTemplateContext', () => {
         category,
         '2024-01',
         0,
+        'USD',
       );
 
       // Run the templates with more than enough funds
@@ -1005,6 +1035,7 @@ describe('CategoryTemplateContext', () => {
         category,
         '2024-01',
         0,
+        'USD',
       );
       const weight = instance.getRemainderWeight();
 
@@ -1067,6 +1098,7 @@ describe('CategoryTemplateContext', () => {
         category,
         '2024-01',
         0,
+        'USD',
       );
 
       // Run the templates with more than enough funds
@@ -1112,6 +1144,7 @@ describe('CategoryTemplateContext', () => {
         category,
         '2024-01',
         10000,
+        'USD',
       );
 
       expect(instance.isGoalOnly()).toBe(true); // Should be goal only
@@ -1159,6 +1192,7 @@ describe('CategoryTemplateContext', () => {
         category,
         '2024-01',
         0,
+        'USD',
       );
 
       // Run the templates with more than enough funds

@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import { q } from 'loot-core/shared/query';
+import { Currency, getCurrency } from 'loot-core/shared/currencies';
 
 import * as monthUtils from '../../shared/months';
 import { amountToInteger, integerToAmount } from '../../shared/util';
@@ -48,6 +49,7 @@ export class CategoryTemplateContext {
     category: CategoryEntity,
     month: string,
     budgeted: number,
+    currencyCode: string,
   ) {
     // get all the needed setup values
     const lastMonthSheet = monthUtils.sheetForMonth(
@@ -85,6 +87,7 @@ export class CategoryTemplateContext {
       month,
       fromLastMonth,
       budgeted,
+      currencyCode,
       hideDecimal.data.length > 0
         ? hideDecimal.data[0].value === 'true'
         : false,
@@ -146,10 +149,7 @@ export class CategoryTemplateContext {
       let newBudget = 0;
       switch (template.type) {
         case 'simple': {
-          newBudget = CategoryTemplateContext.runSimple(
-            template,
-            this.limitAmount,
-          );
+          newBudget = CategoryTemplateContext.runSimple(template, this);
           break;
         }
         case 'copy': {
@@ -301,6 +301,7 @@ export class CategoryTemplateContext {
   private limitCheck = false;
   private limitHold = false;
   readonly previouslyBudgeted: number = 0;
+  private currency: Currency;
 
   protected constructor(
     templates: Template[],
@@ -308,12 +309,14 @@ export class CategoryTemplateContext {
     month: string,
     fromLastMonth: number,
     budgeted: number,
+    currencyCode: string,
     hideDecimal: boolean = false,
   ) {
     this.category = category;
     this.month = month;
     this.fromLastMonth = fromLastMonth;
     this.previouslyBudgeted = budgeted;
+    this.currency = getCurrency(currencyCode);
     this.hideDecimal = hideDecimal;
     // sort the template lines into regular template, goals, and remainder templates
     if (templates) {
@@ -343,7 +346,10 @@ export class CategoryTemplateContext {
     if (this.goals.length > 0) {
       if (this.isGoalOnly()) this.toBudgetAmount = this.previouslyBudgeted;
       this.isLongGoal = true;
-      this.goalAmount = amountToInteger(this.goals[0].amount);
+      this.goalAmount = amountToInteger(
+        this.goals[0].amount,
+        this.currency.decimalPlaces,
+      );
       return;
     }
     this.goalAmount = this.fullAmount;
@@ -454,11 +460,16 @@ export class CategoryTemplateContext {
           monthUtils.addMonths(this.month, 1),
           this.month,
         );
-        this.limitAmount += amountToInteger(limitDef.amount) * numDays;
+        this.limitAmount +=
+          amountToInteger(limitDef.amount, this.currency.decimalPlaces) *
+          numDays;
       } else if (limitDef.period === 'weekly') {
         const nextMonth = monthUtils.nextMonth(this.month);
         let week = limitDef.start;
-        const baseLimit = amountToInteger(limitDef.amount);
+        const baseLimit = amountToInteger(
+          limitDef.amount,
+          this.currency.decimalPlaces,
+        );
         while (week < nextMonth) {
           if (week >= this.month) {
             this.limitAmount += baseLimit;
@@ -466,7 +477,10 @@ export class CategoryTemplateContext {
           week = monthUtils.addWeeks(week, 1);
         }
       } else if (limitDef.period === 'monthly') {
-        this.limitAmount = amountToInteger(limitDef.amount);
+        this.limitAmount = amountToInteger(
+          limitDef.amount,
+          this.currency.decimalPlaces,
+        );
       } else {
         throw new Error('Invalid limit period. Check template syntax');
       }
@@ -510,11 +524,17 @@ export class CategoryTemplateContext {
   //-----------------------------------------------------------------------------
   //  Processor Functions
 
-  static runSimple(template: SimpleTemplate, limit: number): number {
+  static runSimple(
+    template: SimpleTemplate,
+    templateContext: CategoryTemplateContext,
+  ): number {
     if (template.monthly != null) {
-      return amountToInteger(template.monthly);
+      return amountToInteger(
+        template.monthly,
+        templateContext.currency.decimalPlaces,
+      );
     } else {
-      return limit;
+      return templateContext.limitAmount;
     }
   }
 
@@ -536,7 +556,10 @@ export class CategoryTemplateContext {
     templateContext: CategoryTemplateContext,
   ): number {
     let toBudget = 0;
-    const amount = amountToInteger(template.amount);
+    const amount = amountToInteger(
+      template.amount,
+      templateContext.currency.decimalPlaces,
+    );
     const period = template.period.period;
     const numPeriods = template.period.amount;
     let date = template.starting;
@@ -637,7 +660,10 @@ export class CategoryTemplateContext {
       toMonth,
       templateContext.month,
     );
-    const target = amountToInteger(template.amount);
+    const target = amountToInteger(
+      template.amount,
+      templateContext.currency.decimalPlaces,
+    );
     if (numMonths < 0) {
       return 0;
     } else {
@@ -740,17 +766,28 @@ export class CategoryTemplateContext {
       // back interpolate what is needed in the short window
       if (numMonths > shortNumMonths && period) {
         amount = Math.round(
-          (amountToInteger(template.amount) / period) *
+          (amountToInteger(
+            template.amount,
+            templateContext.currency.decimalPlaces,
+          ) /
+            period) *
             (period - numMonths + shortNumMonths),
         );
         // fallback to this.  This matches what the prior math accomplished, just more round about
       } else if (numMonths > shortNumMonths) {
         amount = Math.round(
-          (amountToInteger(template.amount) / (numMonths + 1)) *
+          (amountToInteger(
+            template.amount,
+            templateContext.currency.decimalPlaces,
+          ) /
+            (numMonths + 1)) *
             (shortNumMonths + 1),
         );
       } else {
-        amount = amountToInteger(template.amount);
+        amount = amountToInteger(
+          template.amount,
+          templateContext.currency.decimalPlaces,
+        );
       }
       totalNeeded += amount;
     }
