@@ -5,6 +5,7 @@ import { Locale } from 'date-fns';
 import { t } from 'i18next';
 
 import { type PayeeEntity, type ScheduleEntity } from 'loot-core/types/models';
+import { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { Condition } from '../server/rules';
 
@@ -127,7 +128,7 @@ export function getRecurringDescription(config, dateFormat, locale: Locale) {
   const weekendSolveSuffix = config.skipWeekend ? weekendSolveModeString : '';
   const suffix = endModeSuffix
     ? `, ${endModeSuffix} ${weekendSolveSuffix}`
-    : `${weekendSolveSuffix}`;
+    : ` ${weekendSolveSuffix}`;
 
   let desc = null;
 
@@ -285,7 +286,10 @@ export function recurConfigToRSchedule(config) {
         const dayNames = config.patterns.filter(p => p.type !== 'day');
 
         return [
-          days.length > 0 && { ...base, byDayOfMonth: days.map(p => p.value) },
+          days.length > 0 && {
+            ...base,
+            byDayOfMonth: days.map(p => p.value),
+          },
           dayNames.length > 0 && {
             ...base,
             byDayOfWeek: dayNames.map(p => [abbrevDay(p.type), p.value]),
@@ -357,6 +361,7 @@ export function getNextDate(
         date = getDateWithSkippedWeekend(
           date,
           value.schedule.data.weekendSolve,
+          value.schedule.data.firstDayOfWeek,
         );
       }
       return monthUtils.dayFromDate(date);
@@ -368,12 +373,17 @@ export function getNextDate(
 export function getDateWithSkippedWeekend(
   date: Date,
   solveMode: 'after' | 'before',
+  firstDayOfWeek: SyncedPrefs['firstDayOfWeekIdx'],
 ) {
+  const converted = parseInt(firstDayOfWeek);
+  const weekday = { start: converted as d.Day, end: (converted + 4) as d.Day };
+  console.log('First day of week: ', converted);
+  console.log('Weekday: ', weekday);
   if (d.isWeekend(date)) {
     if (solveMode === 'after') {
-      return d.nextMonday(date);
+      return d.nextDay(date, weekday.start);
     } else if (solveMode === 'before') {
-      return d.previousFriday(date);
+      return d.previousDay(date, weekday.end);
     } else {
       throw new Error('Unknown weekend solve mode, this should not happen!');
     }

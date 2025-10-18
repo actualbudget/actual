@@ -50,6 +50,7 @@ import {
   useSelected,
   SelectedProvider,
 } from '@desktop-client/hooks/useSelected';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import {
   type Modal as ModalType,
   pushModal,
@@ -133,6 +134,8 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
   const payees = getPayeesById(usePayees());
   const globalDispatch = useDispatch();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+
+  const [firstDayOfWeek] = useSyncedPref('firstDayOfWeekIdx');
 
   const [state, dispatch] = useReducer(
     (
@@ -344,6 +347,7 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
           patterns: [],
           skipWeekend: false,
           weekendSolveMode: 'after',
+          firstDayOfWeek,
           endMode: 'never',
           endOccurrences: 1,
           endDate: monthUtils.currentDay(),
@@ -378,6 +382,16 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
         const schedule = await loadSchedule();
 
         if (schedule && state.schedule == null) {
+          // Sync the schedule's firstDayOfWeek with the current global setting
+          if (
+            schedule._date &&
+            schedule._date.firstDayOfWeek !== firstDayOfWeek
+          ) {
+            schedule._date = {
+              ...schedule._date,
+              firstDayOfWeek,
+            };
+          }
           dispatch({ type: 'set-schedule', schedule });
         }
       }

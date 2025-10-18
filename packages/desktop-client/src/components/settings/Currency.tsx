@@ -7,7 +7,11 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { currencies, getCurrency } from 'loot-core/shared/currencies';
+import {
+  currencies,
+  getCurrency,
+  getCurrencySymbol,
+} from 'loot-core/shared/currencies';
 
 import { Column, Setting } from './UI';
 
@@ -67,6 +71,9 @@ export function CurrencySettings() {
   const [spaceEnabled, setSpaceEnabledPref] = useSyncedPref(
     'currencySpaceBetweenAmountAndSymbol',
   );
+  const [symbolVariant, setSymbolVariantPref] = useSyncedPref(
+    `currencySymbolVariant-${selectedCurrencyCode}` as const,
+  );
   const [, setNumberFormatPref] = useSyncedPref('numberFormat');
   const [, setHideFractionPref] = useSyncedPref('hideFraction');
 
@@ -82,10 +89,10 @@ export function CurrencySettings() {
     if (currency.code === '') {
       return [currency.code, translatedName];
     }
-    return [
-      currency.code,
-      `${currency.code} - ${translatedName} (${currency.symbol})`,
-    ];
+    // For the dropdown, we can't easily show the selected variant for each currency
+    // since we'd need to read multiple preferences. Just show the default symbol.
+    const symbol = getCurrencySymbol(currency);
+    return [currency.code, `${currency.code} - ${translatedName} (${symbol})`];
   });
 
   const handleCurrencyChange = (code: string) => {
@@ -101,7 +108,11 @@ export function CurrencySettings() {
 
   const symbolPositionOptions = useMemo(() => {
     const selectedCurrency = getCurrency(selectedCurrencyCode);
-    const symbol = selectedCurrency.symbol || '$';
+    const symbolVariantIndex = symbolVariant
+      ? parseInt(symbolVariant, 10)
+      : undefined;
+    const symbol =
+      getCurrencySymbol(selectedCurrency, symbolVariantIndex) || '$';
     const space = spaceEnabled === 'true' ? ' ' : '';
 
     return [
@@ -114,7 +125,7 @@ export function CurrencySettings() {
         label: `${t('After amount')} (${t('e.g.')} 100${space}${symbol})`,
       },
     ];
-  }, [selectedCurrencyCode, spaceEnabled, t]);
+  }, [selectedCurrencyCode, spaceEnabled, symbolVariant, t]);
 
   return (
     <Setting
@@ -156,28 +167,87 @@ export function CurrencySettings() {
           </View>
 
           {selectedCurrencyCode !== '' && (
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-              }}
-            >
-              <Checkbox
-                id="settings-spaceEnabled"
-                checked={spaceEnabled === 'true'}
-                onChange={e =>
-                  setSpaceEnabledPref(e.target.checked ? 'true' : 'false')
-                }
-              />
-              <label
-                htmlFor="settings-spaceEnabled"
-                style={{ marginLeft: '0.5em' }}
+            <>
+              <View
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                }}
               >
-                <Trans>Add space between amount and symbol</Trans>
-              </label>
-            </View>
+                <Checkbox
+                  id="settings-spaceEnabled"
+                  checked={spaceEnabled === 'true'}
+                  onChange={e =>
+                    setSpaceEnabledPref(e.target.checked ? 'true' : 'false')
+                  }
+                />
+                <label
+                  htmlFor="settings-spaceEnabled"
+                  style={{ marginLeft: '0.5em' }}
+                >
+                  <Trans>Add space between amount and symbol</Trans>
+                </label>
+              </View>
+
+              {(() => {
+                const selectedCurrency = getCurrency(selectedCurrencyCode);
+                if (selectedCurrency.symbols.length > 1) {
+                  const currentVariantIndex = symbolVariant
+                    ? parseInt(symbolVariant, 10)
+                    : selectedCurrency.defaultSymbolIndex;
+
+                  return (
+                    <View
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.5em',
+                      }}
+                    >
+                      <Text style={{ fontWeight: 'bold' }}>
+                        <Trans>Symbol Variant</Trans>
+                      </Text>
+                      <View
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          gap: '1em',
+                        }}
+                      >
+                        {selectedCurrency.symbols.map((symbol, index) => (
+                          <View
+                            key={index}
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              justifyContent: 'flex-start',
+                            }}
+                          >
+                            <Checkbox
+                              id={`symbol-variant-${index}`}
+                              checked={currentVariantIndex === index}
+                              onChange={() => {
+                                setSymbolVariantPref(index.toString());
+                              }}
+                            />
+                            <label
+                              htmlFor={`symbol-variant-${index}`}
+                              style={{ marginLeft: '0.5em', cursor: 'pointer' }}
+                            >
+                              {symbol}
+                            </label>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  );
+                }
+                return null;
+              })()}
+            </>
           )}
         </View>
       }

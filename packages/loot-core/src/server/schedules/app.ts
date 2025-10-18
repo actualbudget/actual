@@ -348,7 +348,11 @@ async function getUpcomingDates({ config, count }) {
       .toArray()
       .map(date =>
         config.skipWeekend
-          ? getDateWithSkippedWeekend(date.date, config.weekendSolveMode)
+          ? getDateWithSkippedWeekend(
+              date.date,
+              config.weekendSolveMode,
+              config.firstDayOfWeek,
+            )
           : date.date,
       )
       .map(date => dayFromDate(date));
