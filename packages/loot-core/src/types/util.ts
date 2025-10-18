@@ -8,7 +8,7 @@ export type EverythingButIdOptional<T extends { id: unknown }> = {
   id: T['id'];
 } & Partial<Omit<T, 'id'>>;
 
-export type WithRequired<T, K extends keyof T> = T & Required<Pick<T, K>>;
+export type { WithRequired } from '@actual-app/shared-types';
 
 // Allows use of object literals inside child elements of `Trans` tags
 // see https://github.com/i18next/react-i18next/issues/1483
