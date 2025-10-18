@@ -156,7 +156,16 @@ function AccountListItem({
   }
 
   return (
-    <ListBoxItem textValue={account.name} {...props}>
+    <ListBoxItem
+      textValue={account.name}
+      className={css({
+        borderBottom: `1px solid ${theme.tableBorder}`,
+        '&:last-child': {
+          borderBottom: 'none',
+        },
+      })}
+      {...props}
+    >
       {itemProps => (
         <Button
           {...itemProps}
@@ -164,13 +173,9 @@ function AccountListItem({
             height: ROW_HEIGHT,
             width: '100%',
             backgroundColor: theme.tableBackground,
-            borderTop: `1px solid ${theme.tableBorder}`,
-            borderBottom: `1px solid ${theme.tableBorder}`,
-            '&:first-child': {
-              borderTop: 'none',
-            },
-            paddingLeft: 20,
+            border: 'none',
             borderRadius: 0,
+            paddingLeft: 20,
           }}
           data-testid="account-list-item"
           onPress={() => onSelect(account)}
