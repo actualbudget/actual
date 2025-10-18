@@ -255,8 +255,41 @@ function _generatePayPeriodsImpl(
   return results;
 }
 
-// Memoized version - automatically handles caching based on inputs
-export const generatePayPeriods = memoizeOne(_generatePayPeriodsImpl);
+/**
+ * Generates all pay periods for a given year based on the configuration.
+ *
+ * This function is memoized for performance, with cache invalidation based on:
+ * - Year
+ * - Pay frequency (weekly, biweekly, semimonthly, monthly)
+ * - Start date
+ *
+ * The cache automatically invalidates when any of these parameters change,
+ * ensuring users always see correct pay periods after changing settings.
+ *
+ * @param year - The year to generate periods for (e.g., 2024)
+ * @param config - The pay period configuration
+ * @returns Array of pay periods with monthId, startDate, endDate, and label
+ */
+export const generatePayPeriods = memoizeOne(
+  _generatePayPeriodsImpl,
+  // Custom equality function: cache key based on parameters that affect output
+  (newArgs, lastArgs) => {
+    const [newYear, newConfig] = newArgs;
+    const [lastYear, lastConfig] = lastArgs;
+
+    // Year must match
+    if (newYear !== lastYear) return false;
+
+    // If either config is null/undefined, only match if both are
+    if (!newConfig || !lastConfig) return newConfig === lastConfig;
+
+    // Only these fields affect the generated periods
+    return (
+      newConfig.payFrequency === lastConfig.payFrequency &&
+      newConfig.startDate === lastConfig.startDate
+    );
+  },
+);
 
 // Pay period navigation functions
 export function nextPayPeriod(monthId: string): string {
