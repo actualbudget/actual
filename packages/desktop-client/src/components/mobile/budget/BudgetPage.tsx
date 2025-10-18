@@ -99,7 +99,7 @@ export function BudgetPage() {
 
   const onBudgetAction = useCallback(
     async (month, type, args) => {
-      const action: any = { month, type, args };
+      let action;
       // Add currencyCode for template-related actions
       if (
         type === 'apply-goal-template' ||
@@ -107,7 +107,9 @@ export function BudgetPage() {
         type === 'apply-single-category-template' ||
         type === 'apply-multiple-templates'
       ) {
-        action.currencyCode = format.currency.code;
+        action = { month, type, args, currencyCode: format.currency.code };
+      } else {
+        action = { month, type, args };
       }
       dispatch(applyBudgetAction(action));
     },

@@ -1,6 +1,6 @@
 // @ts-strict-ignore
-import { q } from 'loot-core/shared/query';
 import { Currency, getCurrency } from 'loot-core/shared/currencies';
+import { q } from 'loot-core/shared/query';
 
 import * as monthUtils from '../../shared/months';
 import { amountToInteger, integerToAmount } from '../../shared/util';
