@@ -156,7 +156,16 @@ function AccountListItem({
   }
 
   return (
-    <ListBoxItem textValue={account.name} {...props}>
+    <ListBoxItem
+      textValue={account.name}
+      className={css({
+        borderBottom: `1px solid ${theme.tableBorder}`,
+        '&:last-child': {
+          borderBottom: 'none',
+        },
+      })}
+      {...props}
+    >
       {itemProps => (
         <Button
           {...itemProps}
@@ -164,7 +173,8 @@ function AccountListItem({
             height: ROW_HEIGHT,
             width: '100%',
             backgroundColor: theme.tableBackground,
-            border: `1px solid ${theme.tableBorder}`,
+            border: 'none',
+            borderRadius: 0,
             paddingLeft: 20,
           }}
           data-testid="account-list-item"
@@ -470,7 +480,14 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
         items={accounts}
         dragAndDropHooks={dragAndDropHooks}
         ref={ref}
-        style={{ display: 'flex', flexDirection: 'column', margin: '0 8px' }}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          margin: '0 8px',
+          border: `1px solid ${theme.tableBorder}`,
+          borderRadius: 8,
+          overflow: 'hidden',
+        }}
       >
         {account => (
           <AccountListItem
