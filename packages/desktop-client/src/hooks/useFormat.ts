@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import { type Currency, getCurrency } from 'loot-core/shared/currencies';
+import {
+  type Currency,
+  getCurrency,
+  getCurrencySymbol,
+} from 'loot-core/shared/currencies';
 import {
   amountToInteger,
   currencyToAmount,
@@ -114,6 +118,9 @@ export function useFormat(): UseFormatResult {
   const [spaceEnabledPref] = useSyncedPref(
     'currencySpaceBetweenAmountAndSymbol',
   );
+  const [symbolVariantPref] = useSyncedPref(
+    `currencySymbolVariant-${defaultCurrencyCodePref}` as const,
+  );
 
   const activeCurrency = useMemo(() => {
     return getCurrency(defaultCurrencyCodePref || '');
@@ -193,10 +200,11 @@ export function useFormat(): UseFormatResult {
 
       let styledValue = formattedString;
       if (isFinancialType && activeCurrency && activeCurrency.code !== '') {
-        styledValue = applyCurrencyStyling(
-          formattedString,
-          activeCurrency.symbol,
-        );
+        const symbolVariantIndex = symbolVariantPref
+          ? parseInt(symbolVariantPref, 10)
+          : undefined;
+        const symbol = getCurrencySymbol(activeCurrency, symbolVariantIndex);
+        styledValue = applyCurrencyStyling(formattedString, symbol);
       }
 
       if (
@@ -213,6 +221,7 @@ export function useFormat(): UseFormatResult {
       numberFormatConfig,
       applyCurrencyStyling,
       hideFractionPref,
+      symbolVariantPref,
     ],
   );
 

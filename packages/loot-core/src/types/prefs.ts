@@ -19,6 +19,7 @@ export type SyncedPrefs = Partial<
     | 'isPrivacyEnabled'
     | 'currencySymbolPosition'
     | 'currencySpaceBetweenAmountAndSymbol'
+    | `currencySymbolVariant-${string}`
     | 'defaultCurrencyCode'
     | 'plugins'
     | `show-account-${string}-net-worth-chart`
