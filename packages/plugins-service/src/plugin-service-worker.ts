@@ -25,24 +25,35 @@ precacheAndRoute(self.__WB_MANIFEST);
 
 const fileList = new Map<string, string>();
 
-// Log installation event
-self.addEventListener('install', (_event: ExtendableEvent) => {
+self.addEventListener('install', (event: ExtendableEvent) => {
   console.log('Plugins Worker installing...');
-  self.skipWaiting(); // Forces activation immediately
+  event.waitUntil(
+    self.clients.matchAll().then(clients => {
+      if (clients.length > 0) {
+        clients.forEach(client => {
+          client.postMessage({
+            type: 'service-worker-update-available',
+            timestamp: Date.now(),
+          });
+        });
+      }
+    }),
+  );
 });
 
-// Log activation event
-self.addEventListener('activate', (_event: ExtendableEvent) => {
-  self.clients.claim();
-
-  self.clients.matchAll().then(clients => {
-    clients.forEach(client => {
-      client.postMessage({
-        type: 'service-worker-ready',
-        timestamp: Date.now(),
+self.addEventListener('activate', (event: ExtendableEvent) => {
+  event.waitUntil(
+    self.clients.claim().then(() => {
+      return self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({
+            type: 'service-worker-activated',
+            timestamp: Date.now(),
+          });
+        });
       });
-    });
-  });
+    }),
+  );
 });
 
 self.addEventListener('message', (event: ExtendableMessageEvent) => {

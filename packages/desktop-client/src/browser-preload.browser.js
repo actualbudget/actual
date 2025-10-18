@@ -54,6 +54,21 @@ const isUpdateReadyForDownloadPromise = new Promise(resolve => {
     resolve(true);
   };
 });
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', event => {
+    if (event.data && event.data.type === 'service-worker-update-available') {
+      console.log('Service worker update available');
+      markUpdateReadyForDownload();
+    }
+  });
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    console.log('New service worker activated, reloading...');
+    window.location.reload();
+  });
+}
+
 const updateSW = registerSW({
   immediate: true,
   onNeedRefresh: markUpdateReadyForDownload,
@@ -173,6 +188,11 @@ global.Actual = {
   isUpdateReadyForDownload: () => isUpdateReadyForDownload,
   waitForUpdateReadyForDownload: () => isUpdateReadyForDownloadPromise,
   applyAppUpdate: async () => {
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (registration && registration.waiting) {
+      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+    }
+
     updateSW();
 
     // Wait for the app to reload
