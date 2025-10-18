@@ -17,7 +17,6 @@ import {
   SvgSubtract,
 } from '@actual-app/components/icons/v0';
 import {
-  SvgAlignLeft,
   SvgCode,
   SvgInformationOutline,
 } from '@actual-app/components/icons/v1';
@@ -54,6 +53,8 @@ import {
   type RuleActionEntity,
 } from 'loot-core/types/models';
 
+import { FormulaActionEditor } from './FormulaActionEditor';
+
 import { StatusBadge } from '@desktop-client/components/schedules/StatusBadge';
 import { SimpleTransactionsTable } from '@desktop-client/components/transactions/SimpleTransactionsTable';
 import { BetweenAmountInput } from '@desktop-client/components/util/AmountInput';
@@ -70,6 +71,7 @@ import {
   useSelected,
   SelectedProvider,
 } from '@desktop-client/hooks/useSelected';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { getPayees } from '@desktop-client/payees/payeesSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
@@ -466,7 +468,11 @@ type ActionEditorProps = {
     inputKey?: string;
   };
   editorStyle: CSSProperties;
-  onChange: (name: string, value: unknown) => void;
+  onChange: (
+    name: string,
+    value: unknown,
+    extraOptions?: Record<string, unknown>,
+  ) => void;
   onDelete: () => void;
   onAdd: () => void;
 };
@@ -490,14 +496,20 @@ function ActionEditor({
   } = action;
 
   const templated = options?.template !== undefined;
+  const hasFormula = options?.formula !== undefined;
 
   // Even if the feature flag is disabled, we still want to be able to turn off templating
   const actionTemplating = useFeatureFlag('actionTemplating');
+  const formulaMode = useFeatureFlag('formulaMode');
   const isTemplatingEnabled = actionTemplating || templated;
+  const isFormulaEnabled = formulaMode || hasFormula;
 
   const fields = (
     options?.splitIndex ? getSplitActionFields() : getActionFields()
-  ).filter(([s]) => actionTemplating || !s.includes('_name') || field === s);
+  ).filter(
+    ([s]) =>
+      actionTemplating || formulaMode || !s.includes('_name') || field === s,
+  );
 
   return (
     <Editor style={editorStyle} error={error}>
@@ -517,39 +529,94 @@ function ActionEditor({
           />
 
           <View style={{ flex: 1 }}>
-            {/* @ts-expect-error fix this */}
-            <GenericInput
-              key={inputKey}
-              field={field}
-              type={templated ? 'string' : type}
-              op={op}
-              value={options?.template ?? value}
-              onChange={v => onChange('value', v)}
-              numberFormatType="currency"
-            />
+            <View style={{ flex: 1 }}>
+              {hasFormula ? (
+                <FormulaActionEditor
+                  value={options?.formula || ''}
+                  onChange={v => onChange('formula', v, { formula: true })}
+                />
+              ) : (
+                // @ts-expect-error fix this
+                <GenericInput
+                  key={inputKey}
+                  field={field}
+                  type={templated ? 'string' : type}
+                  op={op}
+                  value={options?.template ?? value}
+                  onChange={v => onChange('value', v)}
+                  numberFormatType="currency"
+                  inputStyle={{ height: 30 }}
+                />
+              )}
+            </View>
           </View>
           {/*Due to that these fields have id's as value it is not helpful to have templating here*/}
+          {isFormulaEnabled &&
+            ['payee', 'category', 'account'].indexOf(field) === -1 && (
+              <Button
+                variant="bare"
+                isDisabled={templated}
+                style={{
+                  padding: 5,
+                  backgroundColor: hasFormula
+                    ? theme.buttonPrimaryBackground
+                    : undefined,
+                  height: 24,
+                  width: 24,
+                }}
+                aria-label={
+                  hasFormula ? t('Disable formula') : t('Enable formula')
+                }
+                onPress={() =>
+                  hasFormula
+                    ? onChange('formula', undefined)
+                    : onChange('formula', options.formula || value || '=')
+                }
+              >
+                {hasFormula ? (
+                  <span
+                    style={{
+                      fontSize: 14,
+                      fontFamily: 'serif',
+                      textAlign: 'center',
+                    }}
+                  >
+                    ƒ
+                  </span>
+                ) : hasFormula ? (
+                  <SvgCode
+                    style={{ width: 12, height: 12, color: 'inherit' }}
+                  />
+                ) : (
+                  <span
+                    style={{
+                      fontSize: 14,
+                      fontFamily: 'serif',
+                      textAlign: 'center',
+                    }}
+                  >
+                    ƒ
+                  </span>
+                )}
+              </Button>
+            )}
           {isTemplatingEnabled &&
             ['payee', 'category', 'account'].indexOf(field) === -1 && (
               <Button
                 variant="bare"
+                isDisabled={hasFormula}
                 style={{
                   padding: 5,
+                  backgroundColor: templated
+                    ? theme.buttonPrimaryBackground
+                    : undefined,
                 }}
                 aria-label={
                   templated ? t('Disable templating') : t('Enable templating')
                 }
                 onPress={() => onChange('template', !templated)}
               >
-                {templated ? (
-                  <SvgCode
-                    style={{ width: 12, height: 12, color: 'inherit' }}
-                  />
-                ) : (
-                  <SvgAlignLeft
-                    style={{ width: 12, height: 12, color: 'inherit' }}
-                  />
-                )}
+                <SvgCode style={{ width: 12, height: 12, color: 'inherit' }} />
               </Button>
             )}
         </>
@@ -1038,7 +1105,7 @@ export function RuleEditor({
     setActionSplits(copy);
   }
 
-  function onChangeAction(action, field, value) {
+  function onChangeAction(action, field, value, extraOptions?) {
     setActionSplits(
       actionSplits.map(({ id, actions }) => ({
         id,
@@ -1054,19 +1121,42 @@ export function RuleEditor({
               a.options = { ...a.options, template: undefined };
               if (a.type !== 'string') a.value = null;
             }
+          } else if (field === 'formula') {
+            if (value === undefined) {
+              // Disable formula mode
+              a.options = { ...a.options, formula: undefined };
+              if (a.type !== 'string') a.value = null;
+            } else {
+              // Keep formula mode; allow empty string while editing
+              a.options = { ...a.options, formula: String(value) };
+            }
           } else {
-            a[field] = value;
-            if (a.options?.template !== undefined) {
+            // Handle formula updates
+            if (extraOptions?.formula && a.options?.formula !== undefined) {
+              // Only update formula, not the value field
+              a.options = {
+                ...a.options,
+                formula: value,
+              };
+            } else if (a.options?.template !== undefined) {
+              // Only update template, not the value field
               a.options = {
                 ...a.options,
                 template: value,
               };
+            } else {
+              // Normal value update
+              a[field] = value;
             }
 
             if (field === 'field') {
               a.type = FIELD_TYPES.get(a.field);
               a.value = null;
-              a.options = { ...a.options, template: undefined };
+              a.options = {
+                ...a.options,
+                template: undefined,
+                formula: undefined,
+              };
               return newInput(a);
             } else if (field === 'op') {
               a.value = null;
@@ -1133,8 +1223,18 @@ export function RuleEditor({
     send('rule-apply-actions', {
       transactions: selectedTransactions,
       actions: getUnparsedActions(actionSplits),
-    }).then(() => {
+    }).then(content => {
       // This makes it refetch the transactions
+      content.errors.forEach(error => {
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'error',
+              message: error,
+            },
+          }),
+        );
+      });
       setActionSplits([...actionSplits]);
     });
   }
@@ -1331,9 +1431,9 @@ export function RuleEditor({
                         <ActionEditor
                           action={action}
                           editorStyle={styles.editorPill}
-                          onChange={(name, value) => {
-                            onChangeAction(action, name, value);
-                          }}
+                          onChange={(name, value, extraOptions) =>
+                            onChangeAction(action, name, value, extraOptions)
+                          }
                           onDelete={() => onRemoveAction(action)}
                           onAdd={() =>
                             addActionToSplitAfterIndex(splitIndex, actionIndex)

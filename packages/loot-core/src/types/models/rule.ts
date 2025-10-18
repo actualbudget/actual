@@ -150,6 +150,7 @@ export interface SetRuleActionEntity {
   value: unknown;
   options?: {
     template?: string;
+    formula?: string;
     splitIndex?: number;
   };
   type?: string;

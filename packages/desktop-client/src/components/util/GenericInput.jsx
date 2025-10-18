@@ -37,6 +37,7 @@ export function GenericInput({
   onChange,
   op = undefined,
   options = undefined,
+  inputStyle = undefined,
 }) {
   const dispatch = useDispatch();
   const { isNarrowWidth } = useResponsive();
@@ -70,6 +71,7 @@ export function GenericInput({
             value={value}
             onUpdate={v => onChange(v)}
             sign={options?.inflow || options?.outflow ? '+' : undefined}
+            inputStyle={inputStyle}
           />
         );
       case 'percentage':
@@ -78,6 +80,7 @@ export function GenericInput({
             inputRef={ref}
             value={value}
             onUpdatePercent={onChange}
+            inputStyle={inputStyle}
           />
         );
       default:
@@ -87,6 +90,7 @@ export function GenericInput({
             value={value || ''}
             placeholder={t('nothing')}
             onChangeValue={onChange}
+            style={inputStyle}
           />
         );
     }
@@ -305,6 +309,7 @@ export function GenericInput({
             value={value || ''}
             placeholder={t('nothing')}
             onChangeValue={onChange}
+            style={inputStyle}
           />
         );
       }
