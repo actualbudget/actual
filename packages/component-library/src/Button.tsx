@@ -3,14 +3,13 @@ import React, {
   useMemo,
   type ComponentPropsWithoutRef,
   type ReactNode,
-  type CSSProperties,
 } from 'react';
 import { Button as ReactAriaButton } from 'react-aria-components';
 
 import { css, cx } from '@emotion/css';
 
 import { AnimatedLoading } from './icons/AnimatedLoading';
-import { styles } from './styles';
+import { styles, type CSSProperties } from './styles';
 import { theme } from './theme';
 import { View } from './View';
 
@@ -132,13 +131,20 @@ type ButtonProps = ComponentPropsWithoutRef<typeof ReactAriaButton> & {
   variant?: ButtonVariant;
   bounce?: boolean;
   children?: ReactNode;
+  style?: CSSProperties;
 };
 
 type ButtonVariant = 'normal' | 'primary' | 'bare' | 'menu' | 'menuSelected';
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (props, ref) => {
-    const { children, variant = 'normal', bounce = true, ...restProps } = props;
+    const {
+      children,
+      variant = 'normal',
+      bounce = true,
+      style,
+      ...restProps
+    } = props;
 
     const variantWithDisabled: ButtonVariant | `${ButtonVariant}Disabled` =
       props.isDisabled ? `${variant}Disabled` : variant;
@@ -162,8 +168,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           ...styles.smallText,
           '&[data-hovered]': _getHoveredStyles(variant),
           '&[data-pressed]': _getActiveStyles(variant, bounce),
+          ...style,
         }),
-      [bounce, variant, variantWithDisabled],
+      [bounce, variant, variantWithDisabled, style],
     );
 
     const className = restProps.className;
