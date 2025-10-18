@@ -504,7 +504,7 @@ function ActionEditor({
       {op === 'set' ? (
         <>
           <OpSelect
-            ops={['set', 'prepend-notes', 'append-notes']}
+            ops={['set', 'prepend-notes', 'append-notes', 'delete-transaction']}
             value={op}
             onChange={onChange}
           />
@@ -608,7 +608,7 @@ function ActionEditor({
       ) : op === 'prepend-notes' || op === 'append-notes' ? (
         <>
           <OpSelect
-            ops={['set', 'prepend-notes', 'append-notes']}
+            ops={['set', 'prepend-notes', 'append-notes', 'delete-transaction']}
             value={op}
             onChange={onChange}
           />
@@ -625,17 +625,27 @@ function ActionEditor({
             />
           </View>
         </>
+      ) : op === 'delete-transaction' ? (
+        <OpSelect
+          ops={['set', 'prepend-notes', 'append-notes', 'delete-transaction']}
+          value={op}
+          onChange={onChange}
+        />
       ) : null}
 
-      <Stack direction="row" style={{ flexShrink: 0 }}>
-        <EditorButtons
-          onAdd={onAdd}
-          onDelete={
-            (op === 'set' || op === 'prepend-notes' || op === 'append-notes') &&
-            onDelete
-          }
-        />
-      </Stack>
+      {op !== 'delete-transaction' && (
+        <Stack direction="row" style={{ flexShrink: 0 }}>
+          <EditorButtons
+            onAdd={onAdd}
+            onDelete={
+              (op === 'set' ||
+                op === 'prepend-notes' ||
+                op === 'append-notes') &&
+              onDelete
+            }
+          />
+        </Stack>
+      )}
     </Editor>
   );
 }

@@ -2,11 +2,20 @@
 import React, { useState, type CSSProperties } from 'react';
 
 import { theme } from '@actual-app/components/theme';
-import { PieChart, Pie, Cell, Sector, ResponsiveContainer } from 'recharts';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Sector,
+  ResponsiveContainer,
+  Tooltip,
+} from 'recharts';
 
 import {
   type balanceTypeOpType,
   type DataEntity,
+  type GroupedEntity,
+  type IntervalEntity,
   type RuleConditionEntity,
 } from 'loot-core/types/models';
 
@@ -245,7 +254,7 @@ export function DonutGraph({
   const accounts = useAccounts();
   const [pointer, setPointer] = useState('');
 
-  const getVal = (obj: DataEntity) => {
+  const getVal = (obj: GroupedEntity | IntervalEntity) => {
     if (['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
       return -1 * obj[balanceTypeOp];
     } else {
@@ -271,7 +280,6 @@ export function DonutGraph({
                   style={{ cursor: pointer }}
                 >
                   <Pie
-                    activeIndex={activeIndex}
                     activeShape={
                       width < 220 || height < 130
                         ? undefined
@@ -292,7 +300,11 @@ export function DonutGraph({
                     dataKey={val => getVal(val)}
                     nameKey={yAxis}
                     isAnimationActive={false}
-                    data={data[splitData]}
+                    data={
+                      data[splitData]?.map(item => ({
+                        ...item,
+                      })) ?? []
+                    }
                     innerRadius={Math.min(width, height) * 0.2}
                     fill="#8884d8"
                     labelLine={false}
@@ -341,6 +353,11 @@ export function DonutGraph({
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
+                  <Tooltip
+                    content={() => null}
+                    defaultIndex={activeIndex}
+                    active={true}
+                  />
                 </PieChart>
               </div>
             </ResponsiveContainer>

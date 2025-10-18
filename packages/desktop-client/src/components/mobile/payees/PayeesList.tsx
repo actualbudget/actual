@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { GridList, Virtualizer, ListLayout } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -33,7 +32,6 @@ export function PayeesList({
   onPayeeEdit,
 }: PayeesListProps) {
   const { t } = useTranslation();
-  const layout = useMemo(() => new ListLayout(), []);
 
   if (isLoading && payees.length === 0) {
     return (
@@ -75,7 +73,7 @@ export function PayeesList({
 
   return (
     <View style={{ flex: 1 }}>
-      <Virtualizer layout={layout}>
+      <Virtualizer layout={ListLayout}>
         <GridList
           aria-label={t('Payees')}
           aria-busy={isLoading || undefined}
