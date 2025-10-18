@@ -46,10 +46,24 @@
     },
     "linux": {
       "target": [
-        "flatpak",
-        "AppImage"
+        {
+          "target": "flatpak",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
       ],
-      "artifactName": "${productName}-linux-${arch}.${ext}"
+      "artifactName": "${productName}-linux-${arch}.${ext}",
+      "extraResources": [
+        "extra-resources/linux"
+      ]
     },
     "flatpak": {
       "runtimeVersion": "24.08",
