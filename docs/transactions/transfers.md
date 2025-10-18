@@ -25,7 +25,6 @@ This process will only apply when the below conditions are met
 
 - The two transactions are related to different accounts
 - The amounts are exactly the same but inverted e.g. a **debit** of `1.00` and a **credit** of `1.00`
-- The transaction is not part of a split transaction.
 
 :::
 
