@@ -44,32 +44,50 @@ export async function storeTemplates({
 
 export async function applyTemplate({
   month,
+  currencyCode,
 }: {
   month: string;
+  currencyCode: string;
 }): Promise<Notification> {
   await storeNoteTemplates();
   const categoryTemplates = await getTemplates();
-  const ret = await processTemplate(month, false, categoryTemplates);
+  const ret = await processTemplate(
+    month,
+    false,
+    categoryTemplates,
+    [],
+    currencyCode,
+  );
   return ret;
 }
 
 export async function overwriteTemplate({
   month,
+  currencyCode,
 }: {
   month: string;
+  currencyCode: string;
 }): Promise<Notification> {
   await storeNoteTemplates();
   const categoryTemplates = await getTemplates();
-  const ret = await processTemplate(month, true, categoryTemplates);
+  const ret = await processTemplate(
+    month,
+    true,
+    categoryTemplates,
+    [],
+    currencyCode,
+  );
   return ret;
 }
 
 export async function applyMultipleCategoryTemplates({
   month,
   categoryIds,
+  currencyCode,
 }: {
   month: string;
   categoryIds: Array<CategoryEntity['id']>;
+  currencyCode: string;
 }) {
   const { data: categoryData }: { data: CategoryEntity[] } = await aqlQuery(
     q('categories')
@@ -83,6 +101,7 @@ export async function applyMultipleCategoryTemplates({
     true,
     categoryTemplates,
     categoryData,
+    currencyCode,
   );
   return ret;
 }
@@ -90,9 +109,11 @@ export async function applyMultipleCategoryTemplates({
 export async function applySingleCategoryTemplate({
   month,
   category,
+  currencyCode,
 }: {
   month: string;
   category: CategoryEntity['id'];
+  currencyCode: string;
 }) {
   const { data: categoryData }: { data: CategoryEntity[] } = await aqlQuery(
     q('categories').filter({ id: category }).select('*'),
@@ -104,6 +125,7 @@ export async function applySingleCategoryTemplate({
     true,
     categoryTemplates,
     categoryData,
+    currencyCode,
   );
   return ret;
 }
@@ -186,6 +208,7 @@ async function processTemplate(
   force: boolean,
   categoryTemplates: Record<CategoryEntity['id'], Template[]>,
   categories: CategoryEntity[] = [],
+  currencyCode: string,
 ): Promise<Notification> {
   // setup categories
   const isReflect = isReflectBudget();
@@ -218,6 +241,7 @@ async function processTemplate(
           category,
           month,
           budgeted,
+          currencyCode,
         );
         // don't use the funds that are not from templates
         if (!templateContext.isGoalOnly()) {
