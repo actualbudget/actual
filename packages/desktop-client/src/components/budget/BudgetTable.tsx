@@ -1,5 +1,6 @@
 import React, {
   type ComponentPropsWithoutRef,
+  type ComponentProps,
   type KeyboardEvent,
   useMemo,
   useState,
@@ -45,7 +46,7 @@ type BudgetTableProps = {
     BudgetTotalsComponent: ComponentPropsWithoutRef<
       typeof BudgetTotals
     >['MonthComponent'];
-  };
+  } & ComponentProps<typeof BudgetCategories>['dataComponents'];
   onSaveCategory: (category: CategoryEntity) => void;
   onDeleteCategory: (id: CategoryEntity['id']) => void;
   onSaveGroup: (group: CategoryGroupEntity) => void;
@@ -297,7 +298,6 @@ export function BudgetTable(props: BudgetTableProps) {
           >
             <SchedulesProvider query={schedulesQuery}>
               <BudgetCategories
-                // @ts-expect-error Fix when migrating BudgetCategories to ts
                 categoryGroups={categoryGroups}
                 editingCell={editing}
                 dataComponents={dataComponents}

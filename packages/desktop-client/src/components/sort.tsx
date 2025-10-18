@@ -76,14 +76,14 @@ export function useDraggable<T>({
 export type OnDropCallback = (
   id: string,
   dropPos: DropPosition,
-  targetId: unknown,
+  targetId: string,
 ) => Promise<void> | void;
 
 type OnLongHoverCallback = () => Promise<void> | void;
 
 type UseDroppableArgs = {
   types: string | string[];
-  id: unknown;
+  id: string;
   onDrop: OnDropCallback;
   onLongHover?: OnLongHoverCallback;
 };
@@ -137,7 +137,7 @@ export function useDroppable<T extends { id: string }>({
   };
 }
 
-type ItemPosition = 'first' | 'last';
+type ItemPosition = 'first' | 'last' | null;
 export const DropHighlightPosContext: Context<ItemPosition> =
   createContext(null);
 
