@@ -12,6 +12,8 @@ on:
     branches:
       - master
   pull_request:
+  repository_dispatch:
+    types: [vrt-update-applied]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -22,6 +24,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # For repository_dispatch events, checkout the PR branch
+          ref: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.head_ref || github.ref }}
+          repository: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.head_repo || github.repository }}
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build API
@@ -38,6 +44,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # For repository_dispatch events, checkout the PR branch
+          ref: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.head_ref || github.ref }}
+          repository: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.head_repo || github.repository }}
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build CRDT
@@ -54,6 +64,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # For repository_dispatch events, checkout the PR branch
+          ref: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.head_ref || github.ref }}
+          repository: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.head_repo || github.repository }}
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Web
@@ -73,6 +87,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # For repository_dispatch events, checkout the PR branch
+          ref: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.head_ref || github.ref }}
+          repository: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.head_repo || github.repository }}
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Server
