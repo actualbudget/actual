@@ -464,6 +464,9 @@ export class CategoryTemplateContext {
           amountToInteger(limitDef.amount, this.currency.decimalPlaces) *
           numDays;
       } else if (limitDef.period === 'weekly') {
+        if (!limitDef.start) {
+          throw new Error('Weekly limit requires a start date (YYYY-MM-DD)');
+        }
         const nextMonth = monthUtils.nextMonth(this.month);
         let week = limitDef.start;
         const baseLimit = amountToInteger(
