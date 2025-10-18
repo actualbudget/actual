@@ -3,12 +3,11 @@ import React, {
   type ComponentPropsWithRef,
   forwardRef,
   type ReactNode,
-  type CSSProperties,
 } from 'react';
 
 import { Button } from '@actual-app/components/button';
 import { Input } from '@actual-app/components/input';
-import { styles } from '@actual-app/components/styles';
+import { styles, type CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Toggle } from '@actual-app/components/toggle';
@@ -78,9 +77,15 @@ type TapFieldProps = ComponentPropsWithRef<typeof Button> & {
   textStyle?: CSSProperties;
 };
 
-const defaultTapFieldStyle: ComponentPropsWithoutRef<
-  typeof Button
->['style'] = ({ isDisabled, isPressed, isHovered }) => ({
+const defaultTapFieldStyle = ({
+  isDisabled,
+  isPressed,
+  isHovered,
+}: {
+  isDisabled?: boolean;
+  isPressed?: boolean;
+  isHovered?: boolean;
+}) => ({
   ...valueStyle,
   flexDirection: 'row',
   alignItems: 'center',
