@@ -31,7 +31,7 @@ type SidebarGroupProps = {
   style?: CSSProperties;
   onEdit?: (id: CategoryGroupEntity['id']) => void;
   onSave?: (group: CategoryGroupEntity) => Promise<void>;
-  onDelete?: (id: CategoryGroupEntity['id']) => Promise<void>;
+  onDelete?: (id: CategoryGroupEntity['id']) => void;
   onApplyBudgetTemplatesInGroup?: (
     categories: Array<CategoryEntity['id']>,
   ) => void;
