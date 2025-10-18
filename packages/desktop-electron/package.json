@@ -63,7 +63,8 @@
       "artifactName": "${productName}-linux-${arch}.${ext}",
       "extraResources": [
         "extra-resources/linux"
-      ]
+      ],
+      "executableName": "actual"
     },
     "flatpak": {
       "runtimeVersion": "24.08",
