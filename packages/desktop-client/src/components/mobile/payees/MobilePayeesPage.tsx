@@ -1,8 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
-import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -13,14 +11,7 @@ import { type PayeeEntity, type RuleEntity } from 'loot-core/types/models';
 
 import { PayeesList } from './PayeesList';
 
-import {
-  Modal,
-  ModalButtons,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
 import { Search } from '@desktop-client/components/common/Search';
-import { InputField } from '@desktop-client/components/mobile/MobileForms';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayeeRuleCounts } from '@desktop-client/hooks/usePayeeRuleCounts';
@@ -36,8 +27,6 @@ export function MobilePayeesPage() {
   const payees = usePayees();
   const { showUndoNotification } = useUndo();
   const [filter, setFilter] = useState('');
-  const [editingPayee, setEditingPayee] = useState<PayeeEntity | null>(null);
-  const [editedPayeeName, setEditedPayeeName] = useState('');
   const { ruleCounts, isLoading: isRuleCountsLoading } = usePayeeRuleCounts();
   const isLoading = useSelector(
     s => s.payees.isPayeesLoading || s.payees.isCommonPayeesLoading,
@@ -54,6 +43,13 @@ export function MobilePayeesPage() {
   }, []);
 
   const handlePayeePress = useCallback(
+    (payee: PayeeEntity) => {
+      navigate(`/payees/${payee.id}`);
+    },
+    [navigate],
+  );
+
+  const handlePayeeRuleAction = useCallback(
     async (payee: PayeeEntity) => {
       // View associated rules for the payee
       if ((ruleCounts.get(payee.id) ?? 0) > 0) {
@@ -115,46 +111,6 @@ export function MobilePayeesPage() {
     [dispatch, showUndoNotification, t],
   );
 
-  const handlePayeeEdit = useCallback((payee: PayeeEntity) => {
-    setEditingPayee(payee);
-    setEditedPayeeName(payee.name);
-  }, []);
-
-  const handleEditSave = useCallback(async () => {
-    if (!editingPayee || !editedPayeeName.trim()) {
-      return;
-    }
-
-    try {
-      await send('payees-batch-change', {
-        updated: [{ id: editingPayee.id, name: editedPayeeName.trim() }],
-      });
-      showUndoNotification({
-        message: t('Payee {{oldName}} renamed to {{newName}}', {
-          oldName: editingPayee.name,
-          newName: editedPayeeName.trim(),
-        }),
-      });
-      setEditingPayee(null);
-      setEditedPayeeName('');
-    } catch (error) {
-      console.error('Failed to update payee:', error);
-      dispatch(
-        addNotification({
-          notification: {
-            type: 'error',
-            message: t('Failed to update payee. Please try again.'),
-          },
-        }),
-      );
-    }
-  }, [editingPayee, editedPayeeName, dispatch, showUndoNotification, t]);
-
-  const handleEditCancel = useCallback(() => {
-    setEditingPayee(null);
-    setEditedPayeeName('');
-  }, []);
-
   return (
     <Page header={<MobilePageHeader title={t('Payees')} />} padding={0}>
       <View
@@ -188,38 +144,8 @@ export function MobilePayeesPage() {
         isLoading={isLoading}
         onPayeePress={handlePayeePress}
         onPayeeDelete={handlePayeeDelete}
-        onPayeeEdit={handlePayeeEdit}
+        onPayeeRuleAction={handlePayeeRuleAction}
       />
-
-      {editingPayee && (
-        <Modal name="edit-payee">
-          <ModalHeader
-            title={t('Edit Payee')}
-            rightContent={<ModalCloseButton onPress={handleEditCancel} />}
-          />
-          <View style={{ padding: 20 }}>
-            <InputField
-              placeholder={t('Payee name')}
-              value={editedPayeeName}
-              onChangeValue={setEditedPayeeName}
-            />
-          </View>
-          <ModalButtons>
-            <SpaceBetween>
-              <Button variant="bare" onPress={handleEditCancel}>
-                <Trans>Cancel</Trans>
-              </Button>
-              <Button
-                variant="primary"
-                onPress={handleEditSave}
-                isDisabled={!editedPayeeName.trim()}
-              >
-                <Trans>Save</Trans>
-              </Button>
-            </SpaceBetween>
-          </ModalButtons>
-        </Modal>
-      )}
     </Page>
   );
 }

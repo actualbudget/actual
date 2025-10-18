@@ -18,7 +18,7 @@ type PayeesListItemProps = {
   ruleCount: number;
   isRuleCountLoading?: boolean;
   onDelete: () => void;
-  onEdit: () => void;
+  onViewRules: () => void;
 } & WithRequired<GridListItemProps<PayeeEntity>, 'value'>;
 
 export function PayeesListItem({
@@ -26,7 +26,7 @@ export function PayeesListItem({
   ruleCount,
   isRuleCountLoading,
   onDelete,
-  onEdit,
+  onViewRules,
   ...props
 }: PayeesListItemProps) {
   const { t } = useTranslation();
@@ -40,16 +40,13 @@ export function PayeesListItem({
       id={payee.id}
       value={payee}
       textValue={label}
-      actionsWidth={160}
-      actions={({ close }) =>
+      actionsWidth={200}
+      actions={
         !payee.transfer_acct && (
           <View style={{ flexDirection: 'row', flex: 1 }}>
             <Button
               variant="bare"
-              onPress={() => {
-                onEdit();
-                close();
-              }}
+              onPress={onViewRules}
               style={{
                 color: theme.pillText,
                 backgroundColor: theme.pillBackground,
@@ -57,7 +54,11 @@ export function PayeesListItem({
                 borderRadius: 0,
               }}
             >
-              <Trans>Edit</Trans>
+              {ruleCount > 0 ? (
+                <Trans>View rules</Trans>
+              ) : (
+                <Trans>Create rule</Trans>
+              )}
             </Button>
             <Button
               variant="bare"
