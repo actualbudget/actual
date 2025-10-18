@@ -6,7 +6,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { InitialFocus } from '@actual-app/components/initial-focus';
-import { Input } from '@actual-app/components/input';
+import { BigInput } from '@actual-app/components/input';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -69,7 +69,7 @@ export function FixEncryptionKeyModal({
           <ModalHeader
             title={
               hasExistingKey
-                ? t('Unable to decrypt file')
+                ? t('Decrypt budget file')
                 : t('This file is encrypted')
             }
             rightContent={<ModalCloseButton onPress={close} />}
@@ -85,7 +85,7 @@ export function FixEncryptionKeyModal({
             {hasExistingKey ? (
               <Paragraph>
                 {t(
-                  'This file was encrypted with a different key than you are currently using. This probably means you changed your password. Enter your current password to update your key.',
+                  'Please provide the encryption key to unlock this budget file. You may be unlocking it for the first time, or the key has changed. Enter your password to continue.',
                 )}{' '}
                 <Link
                   variant="external"
@@ -137,7 +137,7 @@ export function FixEncryptionKeyModal({
                 </View>
               )}
               <InitialFocus>
-                <Input
+                <BigInput
                   type={showPassword ? 'text' : 'password'}
                   style={{
                     width: isNarrowWidth ? '100%' : '50%',
@@ -176,7 +176,7 @@ export function FixEncryptionKeyModal({
                 }}
                 isLoading={loading}
               >
-                {hasExistingKey ? t('Update key') : t('Create key')}
+                {hasExistingKey ? t('Unlock budget file') : t('Create key')}
               </ButtonWithLoading>
             </ModalButtons>
           </Form>
