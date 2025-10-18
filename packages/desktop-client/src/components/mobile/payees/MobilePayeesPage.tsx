@@ -43,6 +43,13 @@ export function MobilePayeesPage() {
   }, []);
 
   const handlePayeePress = useCallback(
+    (payee: PayeeEntity) => {
+      navigate(`/payees/${payee.id}`);
+    },
+    [navigate],
+  );
+
+  const handlePayeeRuleAction = useCallback(
     async (payee: PayeeEntity) => {
       // View associated rules for the payee
       if ((ruleCounts.get(payee.id) ?? 0) > 0) {
@@ -137,6 +144,7 @@ export function MobilePayeesPage() {
         isLoading={isLoading}
         onPayeePress={handlePayeePress}
         onPayeeDelete={handlePayeeDelete}
+        onPayeeRuleAction={handlePayeeRuleAction}
       />
     </Page>
   );

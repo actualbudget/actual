@@ -271,6 +271,14 @@ export function FinancesApp() {
                   element={<NarrowAlternate name="Payees" />}
                 />
                 <Route
+                  path="/payees/:id"
+                  element={
+                    <WideNotSupported>
+                      <NarrowAlternate name="PayeeEdit" />
+                    </WideNotSupported>
+                  }
+                />
+                <Route
                   path="/rules"
                   element={<NarrowAlternate name="Rules" />}
                 />
