@@ -1,4 +1,4 @@
-FROM node:20-bookworm AS deps
+FROM node:22-bookworm AS deps
 
 # Install required packages
 RUN apt-get update && apt-get install -y openssl
@@ -37,7 +37,7 @@ RUN rm -rf ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
 COPY packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
 COPY packages/desktop-client/build ./node_modules/@actual-app/web/build
 
-FROM node:20-bookworm-slim AS prod
+FROM node:22-bookworm-slim AS prod
 
 # Minimal runtime dependencies
 RUN apt-get update && apt-get install tini && apt-get clean -y && rm -rf /var/lib/apt/lists/*

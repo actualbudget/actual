@@ -47,7 +47,7 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/emscripten": "^1.41.2",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
-    "@types/node": "^22.18.8",
+    "@types/node": "^22.18.11",
     "@types/pegjs": "^0.10.6",
     "assert": "^2.1.0",
     "browserify-zlib": "^0.2.0",
