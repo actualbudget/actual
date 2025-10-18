@@ -1,5 +1,4 @@
 import path from 'path';
-import { inspect } from 'util';
 
 import { isAxiosError } from 'axios';
 import express from 'express';
@@ -244,7 +243,7 @@ app.post(
           });
           break;
         case error instanceof GenericGoCardlessError:
-          console.log('Something went wrong', inspect(error, { depth: null }));
+          console.log('Something went wrong', error.message);
           sendErrorResponse({
             error_type: 'SYNC_ERROR',
             error_code: 'NORDIGEN_ERROR',
@@ -253,7 +252,8 @@ app.post(
         case isAxiosError(error):
           console.log(
             'Something went wrong',
-            inspect(error.response?.data || error, { depth: null }),
+            error.message,
+            error.response?.data?.summary || error.response?.data?.detail || '',
           );
           sendErrorResponse({
             error_type: 'SYNC_ERROR',
@@ -261,7 +261,7 @@ app.post(
           });
           break;
         default:
-          console.log('Something went wrong', inspect(error, { depth: null }));
+          console.log('Something went wrong', error.message || String(error));
           sendErrorResponse({
             error_type: 'UNKNOWN',
             error_code: 'UNKNOWN',
