@@ -10,6 +10,7 @@ All functionality described here may not be available in the latest stable relea
 Rule action templating allows rules to dynamically set fields based on transaction data via meta programming inside the rule.
 
 Setting the following fields with a rule template is currently supported:
+
 - notes
 - date
 - amount
@@ -19,6 +20,7 @@ Setting the following fields with a rule template is currently supported:
 Actual uses [handlebars](https://handlebarsjs.com/) under the hood to process the rule templates. You can find more in depth information about how this works in [their guide](https://handlebarsjs.com/guide).
 
 ## Using rule action templating
+
 You can toggle between the normal and template input modes by clicking the icon to the right of the action input box.
 
 ![How to enable rule action templating](/img/experimental/rule-templating/enable-rule-templating.png)
@@ -33,6 +35,7 @@ When the template input mode is active you can type your template into the input
 |-----------------------|---------|-------------------------------------------------------------------------------------------------------------------|
 | today                 | date    | Today's date                                                                                                      |
 | account               | id      |                                                                                                                   |
+| balance               | number  | Balance of account as of the date of the transaction, excluding the transaction amount, stored without decimal    |
 | date                  | date    |                                                                                                                   |
 | payee                 | id      |                                                                                                                   |
 | payee_name            | string  |                                                                                                                   |
@@ -50,6 +53,7 @@ When the template input mode is active you can type your template into the input
 | transfer_id           | id      |                                                                                                                   |
 
 ## Functions
+
 ### Mathematical
 
 | Function | Arguments           | Notes |
