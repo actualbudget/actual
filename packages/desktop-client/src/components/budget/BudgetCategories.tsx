@@ -44,13 +44,10 @@ type BudgetItem =
   | { type: 'income-group'; value: CategoryGroupEntity }
   | { type: 'income-category'; value: CategoryEntity };
 
-type LocalDragState = {
-  type?: string;
-  item?: CategoryEntity | CategoryGroupEntity;
-  preview?: boolean;
-  hoveredId?: string;
-  hoveredPos?: string;
-} | null;
+type LocalDragState =
+  | DragState<CategoryEntity>
+  | DragState<CategoryGroupEntity>
+  | null;
 
 type BudgetCategoriesProps = {
   categoryGroups: CategoryGroupEntity[];
@@ -78,9 +75,11 @@ type BudgetCategoriesProps = {
   onEditMonth?: (id: string, month: string) => void;
   onSaveCategory?: (category: CategoryEntity) => void;
   onSaveGroup?: (group: CategoryGroupEntity) => void;
-  onDeleteCategory?: (id: CategoryEntity['id']) => void;
+  onDeleteCategory: (id: CategoryEntity['id']) => void;
   onDeleteGroup?: (id: CategoryGroupEntity['id']) => void;
-  onApplyBudgetTemplatesInGroup?: (groupId: CategoryGroupEntity['id']) => void;
+  onApplyBudgetTemplatesInGroup?: (
+    groupId: CategoryGroupEntity['id'][],
+  ) => void;
   onReorderCategory: OnDropCallback;
   onReorderGroup: OnDropCallback;
 };
@@ -197,11 +196,12 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
     // TODO: If we turn this into a reducer, we could probably memoize
     // each item in the list for better perf
     function onDragChange(
-      newDragState: DragState<CategoryEntity | CategoryGroupEntity>,
+      newDragState: DragState<CategoryEntity> | DragState<CategoryGroupEntity>,
     ) {
       const { state } = newDragState;
 
       if (state === 'start-preview') {
+        // @ts-expect-error fix me
         setDragState({
           type: newDragState.type,
           item: newDragState.item,
@@ -320,30 +320,16 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                   editingCell={editingCell}
                   collapsed={collapsedGroupIds.includes(item.value.id)}
                   MonthComponent={dataComponents.ExpenseGroupComponent}
-                  dragState={
-                    dragState
-                      ? ({
-                          state: 'start',
-                          ...dragState,
-                        } as DragState<CategoryGroupEntity>)
-                      : ({ state: 'end' } as DragState<CategoryGroupEntity>)
-                  }
+                  dragState={dragState}
                   onEditName={onEditName}
                   onSave={_onSaveGroup}
-                  onDelete={
-                    onDeleteGroup ? async id => onDeleteGroup(id) : undefined
-                  }
+                  onDelete={onDeleteGroup}
                   onDragChange={onDragChange}
                   onReorderGroup={onReorderGroup}
                   onReorderCategory={onReorderCategory}
                   onToggleCollapse={onToggleCollapse}
                   onShowNewCategory={onShowNewCategory}
-                  onApplyBudgetTemplatesInGroup={
-                    onApplyBudgetTemplatesInGroup
-                      ? categories =>
-                          onApplyBudgetTemplatesInGroup(categories[0])
-                      : undefined
-                  }
+                  onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
                 />
               );
               break;
@@ -354,27 +340,14 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                   categoryGroup={item.group}
                   editingCell={editingCell}
                   MonthComponent={dataComponents.ExpenseCategoryComponent}
-                  dragState={
-                    dragState
-                      ? ({
-                          state: 'start',
-                          ...dragState,
-                        } as DragState<CategoryEntity>)
-                      : ({ state: 'end' } as DragState<CategoryEntity>)
-                  }
+                  dragState={dragState}
                   onEditName={onEditName}
                   onEditMonth={onEditMonth}
                   onSave={_onSaveCategory}
-                  onDelete={
-                    onDeleteCategory
-                      ? async id => onDeleteCategory(id)
-                      : undefined
-                  }
+                  onDelete={onDeleteCategory}
                   onDragChange={onDragChange}
                   onReorder={onReorderCategory}
-                  onBudgetAction={(month, action, arg) =>
-                    onBudgetAction(String(month), action, arg)
-                  }
+                  onBudgetAction={onBudgetAction}
                   onShowActivity={onShowActivity}
                 />
               );
@@ -418,7 +391,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                   onEditName={onEditName!}
                   onEditMonth={onEditMonth}
                   onSave={_onSaveCategory}
-                  onDelete={async id => onDeleteCategory?.(id)}
+                  onDelete={onDeleteCategory}
                   onDragChange={onDragChange}
                   onReorder={onReorderCategory}
                   onBudgetAction={onBudgetAction}
@@ -427,9 +400,8 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
               );
               break;
             default:
-              throw new Error(
-                'Unknown item type: ' + (item as { type: string }).type,
-              );
+              // eslint-disable-next-line actual/no-untranslated-strings
+              throw new Error('Unknown item type');
           }
 
           const pos =
