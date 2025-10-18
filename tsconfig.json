@@ -53,7 +53,9 @@
     "**/lib-dist/*",
     "**/test-results/*",
     "**/playwright-report/*",
-    "**/service-worker/*"
+    "**/service-worker/*",
+    "packages/mobile-client/android/*",
+    "packages/mobile-client/ios/*"
   ],
   "ts-node": {
     "compilerOptions": {

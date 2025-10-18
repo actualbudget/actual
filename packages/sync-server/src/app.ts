@@ -11,6 +11,7 @@ import * as accountApp from './app-account.js';
 import * as adminApp from './app-admin.js';
 import * as corsApp from './app-cors-proxy.js';
 import * as goCardlessApp from './app-gocardless/app-gocardless.js';
+import * as mobileUpdateApp from './app-mobile-update.js';
 import * as openidApp from './app-openid.js';
 import * as pluggai from './app-pluggyai/app-pluggyai.js';
 import * as secretApp from './app-secrets.js';
@@ -60,6 +61,7 @@ app.use('/gocardless', goCardlessApp.handlers);
 app.use('/simplefin', simpleFinApp.handlers);
 app.use('/pluggyai', pluggai.handlers);
 app.use('/secret', secretApp.handlers);
+app.use('/mobile', mobileUpdateApp.handlers);
 
 if (config.get('corsProxy.enabled')) {
   app.use('/cors-proxy', corsApp.handlers);

@@ -29,6 +29,7 @@ jobs:
             [electron]="desktop-electron"
             [sync]="sync-server"
             [api]="api"
+            [mobile]="mobile-client"
           )
 
           for key in "${!packages[@]}"; do
