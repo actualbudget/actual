@@ -731,6 +731,7 @@ function UncategorizedTransactionsBanner(props) {
 
 function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
   const { t } = useTranslation();
+  const format = useFormat();
   const toBudgetAmount = useSheetValue<
     'envelope-budget',
     typeof envelopeBudget.toBudget
@@ -752,6 +753,7 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
             onSubmit: categoryId => {
               onBudgetAction(month, 'cover-overbudgeted', {
                 category: categoryId,
+                currencyCode: format.currency.code,
               });
               showUndoNotification({
                 message: t('Covered overbudgeted from {{categoryName}}', {
@@ -770,6 +772,7 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
     onBudgetAction,
     showUndoNotification,
     t,
+    format.currency.code,
   ]);
 
   if (!toBudgetAmount || toBudgetAmount >= 0) {
@@ -855,6 +858,7 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
                 onBudgetAction(month, 'cover-overspending', {
                   to: category.id,
                   from: fromCategoryId,
+                  currencyCode: format.currency.code,
                 });
                 showUndoNotification({
                   message: t(
@@ -874,7 +878,15 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
         }),
       );
     },
-    [categoriesById, dispatch, month, onBudgetAction, showUndoNotification, t],
+    [
+      categoriesById,
+      dispatch,
+      month,
+      onBudgetAction,
+      showUndoNotification,
+      t,
+      format.currency.code,
+    ],
   );
 
   const onOpenCategorySelectionModal = useCallback(() => {
