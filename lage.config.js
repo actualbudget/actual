@@ -9,12 +9,14 @@ module.exports = {
     },
     e2e: {
       type: 'npmScript',
+      cache: false,
       options: {
         outputGlob: ['playwright-report/**', 'test-results/**'],
       },
     },
     vrt: {
       type: 'npmScript',
+      cache: false,
       options: {
         outputGlob: ['playwright-report/**', 'test-results/**'],
       },
