@@ -14,13 +14,6 @@ module.exports = {
         outputGlob: ['playwright-report/**', 'test-results/**'],
       },
     },
-    vrt: {
-      type: 'npmScript',
-      cache: false,
-      options: {
-        outputGlob: ['playwright-report/**', 'test-results/**'],
-      },
-    },
     build: {
       type: 'npmScript',
       cache: true,

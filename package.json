@@ -45,7 +45,7 @@
     "e2e": "lage e2e --continue --scope '@actual-app/web' --no-deps",
     "e2e:desktop": "yarn build:desktop --skip-exe-build && yarn workspace desktop-electron e2e",
     "playwright": "yarn workspace @actual-app/web run playwright",
-    "vrt": "lage vrt --continue",
+    "vrt": "yarn workspaces foreach --all --parallel --verbose run vrt",
     "vrt:docker": "./bin/run-vrt",
     "rebuild-electron": "./node_modules/.bin/electron-rebuild -m ./packages/loot-core",
     "rebuild-node": "yarn workspace loot-core rebuild",
