@@ -18,8 +18,7 @@ export default defineConfig(({ mode }) => {
         entry: path.resolve(__dirname, 'src/plugin-service-worker.ts'),
         name: 'plugin_sw',
         formats: ['iife'],
-        fileName: () =>
-          isDev ? `plugin-sw.dev.js` : `plugin-sw.${buildHash}.js`,
+        fileName: () => `plugin-sw.js`,
       },
       sourcemap: true,
       minify: isDev ? false : 'terser',
