@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
 
 import { EditorView } from '@codemirror/view';
-import { excelFormulaExtension } from './codeMirror-excelLanguage';
 import CodeMirror, {
   EditorState,
   type ReactCodeMirrorProps,
 } from '@uiw/react-codemirror';
+
+import { excelFormulaExtension } from './codeMirror-excelLanguage';
 
 import { useTheme } from '@desktop-client/style/theme';
 
