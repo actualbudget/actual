@@ -294,7 +294,7 @@ function parseAccessKey(accessKey) {
   let password = null;
   let baseUrl = null;
   if (!accessKey || !accessKey.match(/^.*\/\/.*:.*@.*$/)) {
-    console.log(`Invalid SimpleFIN access key: ${accessKey}`);
+    console.log('Invalid SimpleFIN access key');
     throw new Error(`Invalid access key`);
   }
   [scheme, rest] = accessKey.split('//');
