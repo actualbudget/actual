@@ -240,6 +240,9 @@ yarn workspace @actual-app/web e2e
 - Use descriptive test names
 - Vitest globals are available: `describe`, `it`, `expect`, `beforeEach`, etc.
 - For sync-server tests, globals are explicitly defined in config
+- **Tests run once and exit** - All test scripts use `vitest --run` to prevent watch mode
+- **Coverage disabled for sync-server** - Tests run without coverage reporting for faster execution
+- **i18n testing** - Mock `languages.ts` file instead of complex i18n module mocks
 
 ### 3. Type Checking
 
@@ -257,6 +260,7 @@ Always run `yarn typecheck` before committing.
 - All user-facing strings must be translated
 - Generate i18n files: `yarn generate:i18n`
 - Custom ESLint rules enforce translation usage
+- **Language files**: `import.meta.glob` is extracted to `packages/desktop-client/src/languages.ts` for easier mocking in tests
 
 ## Code Style & Conventions
 
@@ -379,6 +383,7 @@ describe('ComponentName', () => {
 ### Configuration Files
 
 - `/package.json` - Root workspace configuration, scripts
+- `/lage.config.js` - Lage task runner configuration
 - `/eslint.config.mjs` - ESLint configuration (flat config format)
 - `/tsconfig.json` - Root TypeScript configuration
 - `/.cursorignore`, `/.gitignore` - Ignored files
@@ -398,6 +403,7 @@ describe('ComponentName', () => {
 - `packages/*/build/` - Built output
 - `packages/desktop-client/playwright-report/` - Test reports
 - `packages/desktop-client/test-results/` - Test results
+- `.lage/` - Lage task runner cache (improves test performance)
 
 ### Key Source Directories
 
@@ -485,6 +491,8 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 2. For Vitest: check `vitest.config.ts` or `vitest.web.config.ts`
 3. For Playwright: check `playwright.config.ts`
 4. Ensure mock minimization - prefer real implementations
+5. **Lage cache issues**: Clear cache with `rm -rf .lage` if tests behave unexpectedly
+6. **Tests continue on error**: With `--continue` flag, all packages run even if one fails
 
 ### Import Resolution Issues
 
