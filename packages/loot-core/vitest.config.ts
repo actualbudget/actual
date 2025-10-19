@@ -24,6 +24,11 @@ export default defineConfig({
       // print only console.error
       return type === 'stderr';
     },
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+    },
   },
   resolve: {
     alias: [

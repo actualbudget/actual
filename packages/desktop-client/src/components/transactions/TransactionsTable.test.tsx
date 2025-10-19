@@ -476,56 +476,52 @@ describe('Transactions', () => {
     });
   });
 
-  test(
-    'keybindings enter/tab/alt should move around',
-    { timeout: 20000 },
-    async () => {
-      const { container } = renderTransactions();
+  test('keybindings enter/tab/alt should move around', async () => {
+    const { container } = renderTransactions();
 
-      // Enter/tab goes down/right
-      let input = await editField(container, 'notes', 2);
-      await userEvent.type(input, '[Enter]');
-      expectToBeEditingField(container, 'notes', 3);
+    // Enter/tab goes down/right
+    let input = await editField(container, 'notes', 2);
+    await userEvent.type(input, '[Enter]');
+    expectToBeEditingField(container, 'notes', 3);
 
-      input = await editField(container, 'payee', 2);
-      await userEvent.type(input, '[Tab]');
-      expectToBeEditingField(container, 'notes', 2);
+    input = await editField(container, 'payee', 2);
+    await userEvent.type(input, '[Tab]');
+    expectToBeEditingField(container, 'notes', 2);
 
-      // Shift+enter/tab goes up/left
-      input = await editField(container, 'notes', 2);
-      await userEvent.type(input, '{Shift>}[Enter]{/Shift}');
-      expectToBeEditingField(container, 'notes', 1);
+    // Shift+enter/tab goes up/left
+    input = await editField(container, 'notes', 2);
+    await userEvent.type(input, '{Shift>}[Enter]{/Shift}');
+    expectToBeEditingField(container, 'notes', 1);
 
-      input = await editField(container, 'payee', 2);
-      await userEvent.type(input, '{Shift>}[Tab]{/Shift}');
-      expectToBeEditingField(container, 'account', 2);
+    input = await editField(container, 'payee', 2);
+    await userEvent.type(input, '{Shift>}[Tab]{/Shift}');
+    expectToBeEditingField(container, 'account', 2);
 
-      // Moving forward on the last cell moves to the next row
-      input = await editField(container, 'cleared', 2);
-      await userEvent.type(input, '[Tab]');
-      expectToBeEditingField(container, 'select', 3);
+    // Moving forward on the last cell moves to the next row
+    input = await editField(container, 'cleared', 2);
+    await userEvent.type(input, '[Tab]');
+    expectToBeEditingField(container, 'select', 3);
 
-      // Moving backward on the first cell moves to the previous row
-      await editField(container, 'date', 2);
-      input = await editField(container, 'select', 2);
-      await userEvent.type(input, '{Shift>}[Tab]{/Shift}');
-      expectToBeEditingField(container, 'cleared', 1);
+    // Moving backward on the first cell moves to the previous row
+    await editField(container, 'date', 2);
+    input = await editField(container, 'select', 2);
+    await userEvent.type(input, '{Shift>}[Tab]{/Shift}');
+    expectToBeEditingField(container, 'cleared', 1);
 
-      // Blurring should close the input
-      input = await editField(container, 'credit', 1);
-      fireEvent.blur(input);
-      expect(container.querySelector('input')).toBe(null);
+    // Blurring should close the input
+    input = await editField(container, 'credit', 1);
+    fireEvent.blur(input);
+    expect(container.querySelector('input')).toBe(null);
 
-      // When reaching the bottom it shouldn't error
-      input = await editField(container, 'notes', 4);
-      await userEvent.type(input, '[Enter]');
+    // When reaching the bottom it shouldn't error
+    input = await editField(container, 'notes', 4);
+    await userEvent.type(input, '[Enter]');
 
-      // TODO: fix flakiness and re-enable
-      // When reaching the top it shouldn't error
-      // input = await editField(container, 'notes', 0);
-      // await userEvent.type(input, '{Shift>}[Enter]{/Shift}');
-    },
-  );
+    // TODO: fix flakiness and re-enable
+    // When reaching the top it shouldn't error
+    // input = await editField(container, 'notes', 0);
+    // await userEvent.type(input, '{Shift>}[Enter]{/Shift}');
+  });
 
   test('keybinding escape resets the value', async () => {
     const { container } = renderTransactions();

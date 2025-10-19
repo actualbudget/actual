@@ -6,5 +6,10 @@ export default {
     coverage: {
       enabled: false,
     },
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+    },
   },
 };
