@@ -374,7 +374,6 @@ const transactionFields: Completion[] = [
     ),
   },
   {
-  {
     label: 'cleared',
     type: 'variable',
     section: '💰 Transaction Fields',
