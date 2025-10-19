@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import path from 'node:path';
 
 import { SyncProtoBuf } from '@actual-app/crdt';
 import request from 'supertest';
@@ -447,7 +448,13 @@ describe('/download-user-file', () => {
 
     it('returns an attachment file', async () => {
       const fileContent = 'content';
-      fs.writeFileSync(getPathForUserFile('file-id'), fileContent);
+      const filePath = getPathForUserFile('file-id');
+      const dirPath = path.dirname(filePath);
+
+      // Ensure directory exists
+      fs.mkdirSync(dirPath, { recursive: true });
+      fs.writeFileSync(filePath, fileContent);
+
       getAccountDb().mutate(
         'INSERT INTO files (id, deleted) VALUES (?, FALSE)',
         ['file-id'],

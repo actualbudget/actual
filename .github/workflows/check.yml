@@ -49,8 +49,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup
-        with:
-          download-translations: 'false'
       - name: Test
         run: yarn test
 
