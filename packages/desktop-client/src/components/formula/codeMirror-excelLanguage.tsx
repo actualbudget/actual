@@ -374,14 +374,6 @@ const transactionFields: Completion[] = [
     ),
   },
   {
-    label: 'category_name',
-    type: 'variable',
-    section: '💰 Transaction Fields',
-    boost: 5,
-    info: t(
-      'Category name (string). The human-readable name of the category.\n\nExample: `=IF(category_name="Groceries", "Food", "Other")`',
-    ),
-  },
   {
     label: 'cleared',
     type: 'variable',
