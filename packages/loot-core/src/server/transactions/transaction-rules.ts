@@ -959,7 +959,6 @@ export async function prepareTransactionForRules(
       r._account = await getAccount(trans.account);
       r._account_name = r._account?.name || '';
     }
-    
   }
 
   if (trans.category) {
