@@ -95,7 +95,7 @@ export function useDroppable<T extends { id: string }>({
   onLongHover,
 }: UseDroppableArgs) {
   const ref = useRef(null);
-  const [dropPos, setDropPos] = useState<DropPosition>(null);
+  const [dropPos, setDropPos] = useState<DropPosition | null>(null);
 
   const [{ isOver }, dropRef] = useDrop<
     { item: T },
