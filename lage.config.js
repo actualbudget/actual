@@ -7,13 +7,6 @@ module.exports = {
         outputGlob: ['lib-dist/**', 'dist/**', 'build/**'],
       },
     },
-    e2e: {
-      type: 'npmScript',
-      cache: false,
-      options: {
-        outputGlob: ['playwright-report/**', 'test-results/**'],
-      },
-    },
     build: {
       type: 'npmScript',
       cache: true,

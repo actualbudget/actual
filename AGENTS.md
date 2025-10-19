@@ -59,9 +59,6 @@ yarn test                    # Equivalent to: lage test --continue
 
 # Run tests without cache (for debugging/CI)
 yarn test:debug              # Equivalent to: lage test --no-cache --continue
-
-# Run E2E tests (web only)
-yarn e2e                     # Equivalent to: lage e2e --continue --scope '@actual-app/web' --no-deps
 ```
 
 Configuration is in `lage.config.js` at the project root.
@@ -212,7 +209,7 @@ yarn workspace loot-core run test path/to/test.test.ts
 **E2E Tests (Playwright)**
 
 ```bash
-# Run E2E tests for web (using lage)
+# Run E2E tests for web
 yarn e2e
 
 # Desktop Electron E2E (includes full build)
@@ -517,10 +514,8 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 
 ### Visual Regression Tests (VRT)
 
-- Run with `VRT=true` environment variable (set automatically by vrt script)
 - Snapshots stored per test file in `*-snapshots/` directories
 - Use Docker for consistent environment: `yarn vrt:docker`
-- **Note**: VRT currently runs via direct workspace commands, not through lage orchestration
 
 ## Additional Resources
 

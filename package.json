@@ -42,7 +42,7 @@
     "generate:release-notes": "ts-node ./bin/release-note-generator.ts",
     "test": "lage test --continue",
     "test:debug": "lage test --no-cache --continue",
-    "e2e": "lage e2e --continue --scope '@actual-app/web' --no-deps",
+    "e2e": "yarn workspaces foreach --all --exclude desktop-electron --parallel --verbose run e2e",
     "e2e:desktop": "yarn build:desktop --skip-exe-build && yarn workspace desktop-electron e2e",
     "playwright": "yarn workspace @actual-app/web run playwright",
     "vrt": "yarn workspaces foreach --all --parallel --verbose run vrt",
