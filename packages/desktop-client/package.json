@@ -86,6 +86,7 @@
     "generate:i18n": "i18next",
     "test": "vitest",
     "e2e": "npx playwright test --browser=chromium",
-    "vrt": "cross-env VRT=true npx playwright test --browser=chromium"
+    "vrt": "cross-env VRT=true npx playwright test --browser=chromium",
+    "playwright": "playwright"
   }
 }
