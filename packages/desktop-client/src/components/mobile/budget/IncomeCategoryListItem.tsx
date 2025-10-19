@@ -259,9 +259,7 @@ export function IncomeCategoryListItem({
           paddingRight: 5,
           borderBottomWidth: 1,
           opacity: !!category.hidden ? 0.5 : undefined,
-          backgroundColor: monthUtils.isCurrentMonth(month)
-            ? theme.budgetCurrentMonth
-            : theme.budgetOtherMonth,
+          backgroundColor: theme.budgetOtherMonth,
         }}
       >
         <IncomeCategoryName category={category} onEdit={onEdit} />

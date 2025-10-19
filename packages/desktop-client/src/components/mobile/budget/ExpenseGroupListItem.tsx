@@ -148,9 +148,7 @@ export function ExpenseGroupHeader({
         paddingLeft: 5,
         paddingRight: 5,
         opacity: isHidden ? 0.5 : undefined,
-        backgroundColor: monthUtils.isCurrentMonth(month)
-          ? theme.budgetHeaderCurrentMonth
-          : theme.budgetHeaderOtherMonth,
+        backgroundColor: theme.budgetCurrentMonth,
       }}
       data-testid="category-group-row"
     >
