@@ -28,14 +28,9 @@ jobs:
         run: ./.github/actions/netlify-wait-for-build
 
   functional:
-    name: Functional (Shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }})
+    name: Functional
     needs: netlify
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shardIndex: [1, 2, 3, 4, 5]
-        shardTotal: [5]
     container:
       image: mcr.microsoft.com/playwright:v1.56.0-jammy
     steps:
@@ -43,15 +38,16 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Run E2E Tests on Netlify URL
-        run: yarn e2e --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+        run: yarn e2e
         env:
           E2E_START_URL: ${{ needs.netlify.outputs.netlify_url }}
       - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+        if: always()
         with:
-          name: blob-report-functional-${{ matrix.shardIndex }}
-          path: packages/desktop-client/blob-report
-          retention-days: 1
+          name: desktop-client-test-results
+          path: packages/desktop-client/test-results/
+          retention-days: 30
+          overwrite: true
 
   functional-desktop-app:
     name: Functional Desktop App
@@ -74,14 +70,9 @@ jobs:
           overwrite: true
 
   vrt:
-    name: Visual regression (Shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }})
+    name: Visual regression
     needs: netlify
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shardIndex: [1, 2, 3, 4, 5]
-        shardTotal: [5]
     container:
       image: mcr.microsoft.com/playwright:v1.56.0-jammy
     steps:
@@ -89,62 +80,13 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Run VRT Tests on Netlify URL
-        run: yarn vrt --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+        run: yarn vrt
         env:
           E2E_START_URL: ${{ needs.netlify.outputs.netlify_url }}
       - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+        if: always()
         with:
-          name: blob-report-vrt-${{ matrix.shardIndex }}
-          path: packages/desktop-client/blob-report
-          retention-days: 1
-
-  merge-functional-reports:
-    name: Merge Functional Test Reports
-    if: ${{ !cancelled() }}
-    needs: [functional]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up environment
-        uses: ./.github/actions/setup
-      - name: Download blob reports from GitHub Actions Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: packages/desktop-client/all-blob-reports
-          pattern: blob-report-functional-*
-          merge-multiple: true
-      - name: Merge into HTML Report
-        run: yarn playwright merge-reports --reporter html ./all-blob-reports
-        working-directory: packages/desktop-client
-      - name: Upload HTML report
-        uses: actions/upload-artifact@v4
-        with:
-          name: functional-test-results--attempt-${{ github.run_attempt }}
-          path: packages/desktop-client/playwright-report
+          name: desktop-client-test-results
+          path: packages/desktop-client/test-results/
           retention-days: 30
-
-  merge-vrt-reports:
-    name: Merge VRT Reports
-    if: ${{ !cancelled() }}
-    needs: [vrt]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up environment
-        uses: ./.github/actions/setup
-      - name: Download blob reports from GitHub Actions Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: packages/desktop-client/all-blob-reports
-          pattern: blob-report-vrt-*
-          merge-multiple: true
-      - name: Merge into HTML Report
-        run: yarn playwright merge-reports --reporter html ./all-blob-reports
-        working-directory: packages/desktop-client
-      - name: Upload HTML report
-        uses: actions/upload-artifact@v4
-        with:
-          name: vrt-test-results--attempt-${{ github.run_attempt }}
-          path: packages/desktop-client/playwright-report
-          retention-days: 30
+          overwrite: true
