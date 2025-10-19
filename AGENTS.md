@@ -47,23 +47,27 @@ yarn start:desktop
 The project uses **[lage](https://microsoft.github.io/lage/)** (a task runner for JavaScript monorepos) to efficiently run tests and other tasks across multiple workspaces:
 
 - **Parallel execution**: Runs tests in parallel across workspaces for faster feedback
-- **Smart caching**: Caches test results to skip unchanged packages
+- **Smart caching**: Caches test results to skip unchanged packages (cached in `.lage/` directory)
 - **Dependency awareness**: Understands workspace dependencies and execution order
+- **Continues on error**: Uses `--continue` flag to run all packages even if one fails
 
 **Lage Commands:**
 
 ```bash
 # Run all tests across all packages
-yarn test                    # Equivalent to: lage test --verbose
+yarn test                    # Equivalent to: lage test --continue
 
 # Run tests without cache (for debugging/CI)
-yarn test:debug              # Equivalent to: lage test --verbose --no-cache
+yarn test:debug              # Equivalent to: lage test --no-cache --continue
 
-# Run E2E tests
-yarn e2e                     # Equivalent to: lage e2e --verbose --scope '@actual-app/web'
+# Run E2E tests (web only)
+yarn e2e                     # Equivalent to: lage e2e --continue --scope '@actual-app/web' --no-deps
+
+# Run desktop E2E tests
+yarn e2e:desktop             # Builds desktop app and runs electron e2e tests
 
 # Run visual regression tests
-yarn vrt                     # Equivalent to: lage vrt --verbose
+yarn vrt                     # Equivalent to: lage vrt --continue
 ```
 
 Configuration is in `lage.config.js` at the project root.
