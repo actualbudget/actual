@@ -6,7 +6,7 @@ export default defineConfig({
   retries: 1,
   workers: process.env.CI ? 1 : undefined,
   testDir: 'e2e/',
-  reporter: !process.env.CI ? [['html', { open: 'never' }]] : undefined,
+  reporter: process.env.CI ? 'blob' : [['html', { open: 'never' }]],
   use: {
     userAgent: 'playwright',
     screenshot: 'on',
