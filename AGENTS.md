@@ -80,10 +80,11 @@ The core application logic that runs on any platform.
 - Platform-agnostic code
 - Exports for both browser and node environments
 - Test commands:
+
   ```bash
   # Run all loot-core tests
   yarn workspace loot-core run test --watch=false
-  
+
   # Or run tests across all packages using lage
   yarn test
   ```
@@ -125,13 +126,14 @@ Public API for programmatic access to Actual.
 - Node.js API
 - Designed for integrations and automation
 - Commands:
+
   ```bash
   # Build
   yarn workspace @actual-app/api build
-  
+
   # Run tests
   yarn workspace @actual-app/api test --watch=false
-  
+
   # Or use lage to run all tests
   yarn test
   ```
