@@ -1209,4 +1209,241 @@ describe('CategoryTemplateContext', () => {
       expect(instance.isGoalOnly()).toBe(false); // Should not be goal only
     });
   });
+
+  describe('JPY currency', () => {
+    it('should handle simple template with JPY correctly', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const template: Template = {
+        type: 'simple',
+        monthly: 50,
+        directive: 'template',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
+      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
+        data: [{ value: 'true' }],
+        dependencies: [],
+      });
+
+      const instance = await CategoryTemplateContext.init(
+        [template],
+        category,
+        '2024-01',
+        0,
+        'JPY',
+      );
+
+      await instance.runTemplatesForPriority(1, 100000, 100000);
+      const values = instance.getValues();
+
+      expect(values.budgeted).toBe(50);
+    });
+
+    it('should handle small amounts with JPY correctly', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const template: Template = {
+        type: 'simple',
+        monthly: 5,
+        directive: 'template',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
+      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
+        data: [{ value: 'true' }],
+        dependencies: [],
+      });
+
+      const instance = await CategoryTemplateContext.init(
+        [template],
+        category,
+        '2024-01',
+        0,
+        'JPY',
+      );
+
+      await instance.runTemplatesForPriority(1, 100000, 100000);
+      const values = instance.getValues();
+
+      expect(values.budgeted).toBe(5);
+    });
+
+    it('should handle larger amounts with JPY correctly', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const template: Template = {
+        type: 'simple',
+        monthly: 250,
+        directive: 'template',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
+      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
+        data: [{ value: 'true' }],
+        dependencies: [],
+      });
+
+      const instance = await CategoryTemplateContext.init(
+        [template],
+        category,
+        '2024-01',
+        0,
+        'JPY',
+      );
+
+      await instance.runTemplatesForPriority(1, 100000, 100000);
+      const values = instance.getValues();
+
+      expect(values.budgeted).toBe(250);
+    });
+
+    it('should handle weekly limit with JPY correctly', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const template: Template = {
+        type: 'simple',
+        limit: {
+          amount: 100,
+          hold: false,
+          period: 'weekly',
+          start: '2024-01-01',
+        },
+        directive: 'template',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
+      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
+        data: [{ value: 'true' }],
+        dependencies: [],
+      });
+
+      const instance = await CategoryTemplateContext.init(
+        [template],
+        category,
+        '2024-01',
+        0,
+        'JPY',
+      );
+
+      const result = CategoryTemplateContext.runSimple(template, instance);
+
+      expect(result).toBeGreaterThanOrEqual(400);
+      expect(result).toBeLessThanOrEqual(500);
+    });
+
+    it('should handle periodic template with JPY correctly', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const template: Template = {
+        type: 'periodic',
+        amount: 1000,
+        period: { period: 'week', amount: 1 },
+        starting: '2024-01-01',
+        directive: 'template',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
+      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
+        data: [{ value: 'true' }],
+        dependencies: [],
+      });
+
+      const instance = await CategoryTemplateContext.init(
+        [template],
+        category,
+        '2024-01',
+        0,
+        'JPY',
+      );
+
+      await instance.runTemplatesForPriority(1, 100000, 100000);
+      const values = instance.getValues();
+
+      expect(values.budgeted).toBeGreaterThan(3500);
+      expect(values.budgeted).toBeLessThan(5500);
+    });
+
+    it('should compare JPY vs USD for same template', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const template: Template = {
+        type: 'simple',
+        monthly: 100,
+        directive: 'template',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
+      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
+        data: [{ value: 'true' }],
+        dependencies: [],
+      });
+
+      const instanceJPY = await CategoryTemplateContext.init(
+        [template],
+        category,
+        '2024-01',
+        0,
+        'JPY',
+      );
+      await instanceJPY.runTemplatesForPriority(1, 100000, 100000);
+      const valuesJPY = instanceJPY.getValues();
+
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
+      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
+        data: [{ value: 'false' }],
+        dependencies: [],
+      });
+
+      const instanceUSD = await CategoryTemplateContext.init(
+        [template],
+        category,
+        '2024-01',
+        0,
+        'USD',
+      );
+      await instanceUSD.runTemplatesForPriority(1, 100000, 100000);
+      const valuesUSD = instanceUSD.getValues();
+
+      expect(valuesJPY.budgeted).toBe(100);
+      expect(valuesUSD.budgeted).toBe(10000);
+    });
+  });
 });
