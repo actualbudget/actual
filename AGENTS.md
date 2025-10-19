@@ -42,6 +42,32 @@ yarn start:desktop
 - Use `yarn workspace <workspace-name> run <command>` for workspace-specific tasks
 - Include `--watch=false` flag when running unit tests to prevent watch mode
 
+### Task Orchestration with Lage
+
+The project uses **[lage](https://microsoft.github.io/lage/)** (a task runner for JavaScript monorepos) to efficiently run tests and other tasks across multiple workspaces:
+
+- **Parallel execution**: Runs tests in parallel across workspaces for faster feedback
+- **Smart caching**: Caches test results to skip unchanged packages
+- **Dependency awareness**: Understands workspace dependencies and execution order
+
+**Lage Commands:**
+
+```bash
+# Run all tests across all packages
+yarn test                    # Equivalent to: lage test --verbose
+
+# Run tests without cache (for debugging/CI)
+yarn test:debug              # Equivalent to: lage test --verbose --no-cache
+
+# Run E2E tests
+yarn e2e                     # Equivalent to: lage e2e --verbose --scope '@actual-app/web'
+
+# Run visual regression tests
+yarn vrt                     # Equivalent to: lage vrt --verbose
+```
+
+Configuration is in `lage.config.js` at the project root.
+
 ## Architecture & Package Structure
 
 ### Core Packages
@@ -55,7 +81,11 @@ The core application logic that runs on any platform.
 - Exports for both browser and node environments
 - Test commands:
   ```bash
+  # Run all loot-core tests
   yarn workspace loot-core run test --watch=false
+  
+  # Or run tests across all packages using lage
+  yarn test
   ```
 
 #### 2. **desktop-client** (`packages/desktop-client/` - aliased as `@actual-app/web`)
@@ -96,8 +126,14 @@ Public API for programmatic access to Actual.
 - Designed for integrations and automation
 - Commands:
   ```bash
+  # Build
   yarn workspace @actual-app/api build
+  
+  # Run tests
   yarn workspace @actual-app/api test --watch=false
+  
+  # Or use lage to run all tests
+  yarn test
   ```
 
 #### 5. **sync-server** (`packages/sync-server/` - aliased as `@actual-app/sync-server`)
@@ -157,31 +193,39 @@ When implementing changes:
 
 **Unit Tests (Vitest)**
 
+The project uses **lage** for running tests across all workspaces efficiently.
+
 ```bash
-# All tests
+# Run all tests across all packages (using lage)
 yarn test
 
-# Specific package
+# Run tests without cache (for debugging)
+yarn test:debug
+
+# Run tests for a specific package
 yarn workspace loot-core run test --watch=false
 
-# Specific test file
+# Run a specific test file
 yarn workspace loot-core run test path/to/test.test.ts --watch=false
 ```
 
 **E2E Tests (Playwright)**
 
 ```bash
-# Desktop client E2E
-yarn workspace @actual-app/web e2e
+# Run E2E tests (using lage)
+yarn e2e
 
 # Desktop Electron E2E
 yarn e2e:desktop
 
-# Visual regression tests
+# Visual regression tests (using lage)
 yarn vrt
 
 # Visual regression in Docker (consistent environment)
 yarn vrt:docker
+
+# Run E2E tests for a specific package
+yarn workspace @actual-app/web e2e
 ```
 
 **Testing Best Practices:**
@@ -366,6 +410,9 @@ describe('ComponentName', () => {
 ### Running Specific Tests
 
 ```bash
+# Run all tests across all packages (recommended)
+yarn test
+
 # Unit test for a specific file in loot-core
 yarn workspace loot-core run test src/path/to/file.test.ts --watch=false
 
