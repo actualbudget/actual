@@ -521,7 +521,10 @@ export class CategoryTemplateContext {
   }
 
   private removeFraction(amount: number): number {
-    return amountToInteger(Math.round(integerToAmount(amount)));
+    return amountToInteger(
+      Math.round(integerToAmount(amount, this.currency.decimalPlaces)),
+      this.currency.decimalPlaces,
+    );
   }
 
   //-----------------------------------------------------------------------------
