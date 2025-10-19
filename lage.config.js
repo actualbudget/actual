@@ -36,9 +36,4 @@ module.exports = {
     },
   },
   npmClient: 'yarn',
-  reporters: [
-    {
-      name: 'progress',
-    },
-  ],
 };

@@ -40,7 +40,7 @@ yarn start:desktop
 
 - **ALWAYS run yarn commands from the root directory** - never run them in child workspaces
 - Use `yarn workspace <workspace-name> run <command>` for workspace-specific tasks
-- Include `--watch=false` flag when running unit tests to prevent watch mode
+- Tests run once and exit by default (using `vitest --run`)
 
 ### Task Orchestration with Lage
 
@@ -83,7 +83,7 @@ The core application logic that runs on any platform.
 
   ```bash
   # Run all loot-core tests
-  yarn workspace loot-core run test --watch=false
+  yarn workspace loot-core run test
 
   # Or run tests across all packages using lage
   yarn test
@@ -132,7 +132,7 @@ Public API for programmatic access to Actual.
   yarn workspace @actual-app/api build
 
   # Run tests
-  yarn workspace @actual-app/api test --watch=false
+  yarn workspace @actual-app/api test
 
   # Or use lage to run all tests
   yarn test
@@ -205,10 +205,10 @@ yarn test
 yarn test:debug
 
 # Run tests for a specific package
-yarn workspace loot-core run test --watch=false
+yarn workspace loot-core run test
 
-# Run a specific test file
-yarn workspace loot-core run test path/to/test.test.ts --watch=false
+# Run a specific test file (watch mode)
+yarn workspace loot-core run test path/to/test.test.ts
 ```
 
 **E2E Tests (Playwright)**
@@ -415,8 +415,8 @@ describe('ComponentName', () => {
 # Run all tests across all packages (recommended)
 yarn test
 
-# Unit test for a specific file in loot-core
-yarn workspace loot-core run test src/path/to/file.test.ts --watch=false
+# Unit test for a specific file in loot-core (watch mode)
+yarn workspace loot-core run test src/path/to/file.test.ts
 
 # E2E test for a specific file
 yarn workspace @actual-app/web run playwright test accounts.test.ts --browser=chromium
