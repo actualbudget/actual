@@ -6,7 +6,6 @@ import { defineConfig } from 'vite';
 export default defineConfig(({ mode }) => {
   const isDev = mode === 'development';
   const outDir = path.resolve(__dirname, 'dist');
-  const buildHash = Date.now().toString(36);
 
   return {
     mode,
