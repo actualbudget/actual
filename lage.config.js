@@ -22,4 +22,5 @@ module.exports = {
     },
   },
   npmClient: 'yarn',
+  concurrency: 2,
 };

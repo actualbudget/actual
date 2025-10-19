@@ -7,7 +7,8 @@ export default {
     },
     poolOptions: {
       threads: {
-        singleThread: true,
+        maxThreads: 2,
+        minThreads: 1,
       },
     },
   },
