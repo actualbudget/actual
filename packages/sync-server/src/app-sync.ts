@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import { Buffer } from 'node:buffer';
-import { createReadStream, existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
 
 import { SyncProtoBuf } from '@actual-app/crdt';
@@ -307,25 +306,8 @@ app.get('/download-user-file', async (req, res) => {
     return;
   }
 
-  const filePath = getPathForUserFile(fileId);
-
-  // Check if file exists
-  if (!existsSync(filePath)) {
-    res.status(404).end();
-    return;
-  }
-
   res.setHeader('Content-Disposition', `attachment;filename=${fileId}`);
-  res.setHeader('Content-Type', 'application/octet-stream');
-
-  // Use createReadStream for more reliable file serving
-  const fileStream = createReadStream(filePath);
-  fileStream.on('error', () => {
-    if (!res.headersSent) {
-      res.status(404).end();
-    }
-  });
-  fileStream.pipe(res);
+  res.sendFile(getPathForUserFile(fileId));
 });
 
 app.post('/update-user-filename', (req, res) => {
