@@ -62,15 +62,6 @@ yarn test:debug              # Equivalent to: lage test --no-cache --continue
 
 # Run E2E tests (web only)
 yarn e2e                     # Equivalent to: lage e2e --continue --scope '@actual-app/web' --no-deps
-
-# Run desktop E2E tests
-yarn e2e:desktop             # Builds desktop app and runs electron e2e tests
-
-# Run visual regression tests
-yarn vrt                     # Note: VRT task not configured in lage yet
-
-# Run visual regression in Docker (consistent environment)
-yarn vrt:docker
 ```
 
 Configuration is in `lage.config.js` at the project root.
