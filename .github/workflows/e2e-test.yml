@@ -34,8 +34,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shardIndex: [1, 2, 3, 4]
-        shardTotal: [4]
+        shardIndex: [1, 2, 3, 4, 5]
+        shardTotal: [5]
     container:
       image: mcr.microsoft.com/playwright:v1.56.0-jammy
     steps:
@@ -80,8 +80,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shardIndex: [1, 2, 3, 4]
-        shardTotal: [4]
+        shardIndex: [1, 2, 3, 4, 5]
+        shardTotal: [5]
     container:
       image: mcr.microsoft.com/playwright:v1.56.0-jammy
     steps:
@@ -111,11 +111,11 @@ jobs:
       - name: Download blob reports from GitHub Actions Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: all-blob-reports
+          path: packages/desktop-client/all-blob-reports
           pattern: blob-report-functional-*
           merge-multiple: true
       - name: Merge into HTML Report
-        run: npx playwright merge-reports --reporter html ./all-blob-reports
+        run: yarn playwright merge-reports --reporter html ./all-blob-reports
         working-directory: packages/desktop-client
       - name: Upload HTML report
         uses: actions/upload-artifact@v4
@@ -136,11 +136,11 @@ jobs:
       - name: Download blob reports from GitHub Actions Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: all-blob-reports
+          path: packages/desktop-client/all-blob-reports
           pattern: blob-report-vrt-*
           merge-multiple: true
       - name: Merge into HTML Report
-        run: npx playwright merge-reports --reporter html ./all-blob-reports
+        run: yarn playwright merge-reports --reporter html ./all-blob-reports
         working-directory: packages/desktop-client
       - name: Upload HTML report
         uses: actions/upload-artifact@v4
