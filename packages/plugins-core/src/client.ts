@@ -25,7 +25,7 @@ export * from '@actual-app/shared-types/spreadsheet';
 export type {
   ActualPlugin,
   ActualPluginInitialized,
-  ThemeColorOverrides,
+  ThemeColorTypes,
   HostContext,
 } from './types/actualPlugin';
 

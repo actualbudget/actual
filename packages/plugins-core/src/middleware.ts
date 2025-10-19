@@ -89,8 +89,7 @@ export function initializePlugin(
         },
 
         // Theme methods - passed through from host context
-        addTheme: context.addTheme,
-        overrideTheme: context.overrideTheme,
+        registerTheme: context.registerTheme,
 
         // Report and spreadsheet utilities - passed through from host context
         createSpreadsheet: context.createSpreadsheet,

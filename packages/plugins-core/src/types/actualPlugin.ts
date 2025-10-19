@@ -40,7 +40,7 @@ export type PluginFilterResult = {
 };
 
 // Simple color mapping type for theme methods
-export type ThemeColorOverrides = {
+export type ThemeColorTypes = {
   // Page colors
   pageBackground?: string;
   pageBackgroundModalActive?: string;
@@ -387,9 +387,9 @@ export type PluginContext = Omit<
   registerSlotContent: (
     location: SlotLocations,
     element: ReactElement,
-  ) => string;
+  ) => () => void;
   pushModal: (element: ReactElement, modalProps?: BasicModalProps) => void;
-  registerRoute: (path: string, routeElement: ReactElement) => string;
+  registerRoute: (path: string, routeElement: ReactElement) => () => void;
 
   // Dashboard widget registration - wrapped for JSX elements
   registerDashboardWidget: (
@@ -402,23 +402,18 @@ export type PluginContext = Omit<
       minWidth?: number;
       minHeight?: number;
     },
-  ) => string;
+  ) => () => void;
 
   // Theme methods - simple and direct
-  addTheme: (
+  registerTheme: (
     themeId: string,
     displayName: string,
-    colorOverrides: ThemeColorOverrides,
+    colorOverrides: ThemeColorTypes,
     options?: {
       baseTheme?: 'light' | 'dark' | 'midnight';
       description?: string;
     },
-  ) => void;
-
-  overrideTheme: (
-    themeId: 'light' | 'dark' | 'midnight' | string,
-    colorOverrides: ThemeColorOverrides,
-  ) => void;
+  ) => () => void;
 
   db?: PluginDatabase;
   q: QueryBuilder;
@@ -434,9 +429,15 @@ export type PluginContext = Omit<
 export interface ActualPlugin {
   name: string;
   version: string;
-  uninstall: () => void;
+  install: (
+    oldVersion: string,
+    newVersion: string,
+    context: PluginContext,
+  ) => void;
+  uninstall: (context: PluginContext) => void;
   migrations?: () => PluginMigration[];
   activate: (context: PluginContext) => void;
+  deactivate: (context: PluginContext) => void;
 }
 
 export type ActualPluginInitialized = Omit<ActualPlugin, 'activate'> & {
@@ -463,14 +464,12 @@ export interface HostContext {
   registerRoute: (
     path: string,
     routeElement: (container: HTMLDivElement) => void | (() => void),
-  ) => string;
-  unregisterRoute: (id: string) => void;
+  ) => () => void;
 
   registerSlotContent: (
     location: SlotLocations,
     parameter: (container: HTMLDivElement) => void | (() => void),
-  ) => string;
-  unregisterSlotContent: (id: string) => void;
+  ) => () => void;
 
   on: <K extends keyof ContextEvent>(
     eventType: K,
@@ -488,24 +487,18 @@ export interface HostContext {
       minWidth?: number;
       minHeight?: number;
     },
-  ) => string;
-  unregisterDashboardWidget: (id: string) => void;
+  ) => () => void;
 
   // Theme methods
-  addTheme: (
+  registerTheme: (
     themeId: string,
     displayName: string,
-    colorOverrides: ThemeColorOverrides,
+    colorOverrides: ThemeColorTypes,
     options?: {
       baseTheme?: 'light' | 'dark' | 'midnight';
       description?: string;
     },
-  ) => void;
-
-  overrideTheme: (
-    themeId: 'light' | 'dark' | 'midnight' | string,
-    colorOverrides: ThemeColorOverrides,
-  ) => void;
+  ) => () => void;
 
   // Query builder provided by host (loot-core's q function)
   q: QueryBuilder;
