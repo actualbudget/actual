@@ -26,15 +26,6 @@ const addWatchers = (): Plugin => ({
   },
 });
 
-// Get service worker filename from environment variable
-function getServiceWorkerFilename(): string {
-  const hash = process.env.REACT_APP_PLUGIN_SERVICE_WORKER_HASH;
-  if (hash) {
-    return `plugin-sw.${hash}.js`;
-  }
-  return 'plugin-sw.js'; // fallback
-}
-
 // Inject build shims using the inject plugin
 const injectShims = (): Plugin[] => {
   const buildShims = path.resolve('./src/build-shims.js');
@@ -170,7 +161,7 @@ export default defineConfig(async ({ mode }) => {
             registerType: 'prompt',
             strategies: 'injectManifest',
             srcDir: 'service-worker',
-            filename: getServiceWorkerFilename(),
+            filename: 'plugin-sw.js',
             manifest: {
               name: 'Actual',
               short_name: 'Actual',
@@ -182,7 +173,7 @@ export default defineConfig(async ({ mode }) => {
             },
             injectManifest: {
               maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
-              swSrc: `service-worker/${getServiceWorkerFilename()}`,
+              swSrc: `service-worker/plugin-sw.js`,
             },
             devOptions: {
               enabled: true, // We need service worker in dev mode to work with plugins
