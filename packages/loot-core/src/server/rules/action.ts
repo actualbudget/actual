@@ -83,10 +83,13 @@ export class Action {
 
           // Handlebars always returns a string, so we need to convert
           switch (this.type) {
-            case 'number':
-              object[this.field] = parseFloat(object[this.field]);
+            case 'number': {
+              const numValue = parseFloat(object[this.field]);
+              // If the result is NaN, default to 0 to avoid database insertion errors
+              object[this.field] = isNaN(numValue) ? 0 : numValue;
               break;
-            case 'date':
+            }
+            case 'date': {
               const parsed = parseDate(object[this.field]);
               if (parsed && dateFns.isValid(parsed)) {
                 object[this.field] = format(parsed, 'yyyy-MM-dd');
@@ -100,6 +103,7 @@ export class Action {
                 object[this.field] = '9999-12-31';
               }
               break;
+            }
             case 'boolean':
               object[this.field] = object[this.field] === 'true';
               break;
