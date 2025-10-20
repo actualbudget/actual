@@ -4,7 +4,7 @@ module.exports = {
     test: {
       type: 'npmScript',
       options: {
-        outputGlob: ['lib-dist/**', 'dist/**', 'build/**'],
+        outputGlob: ['coverage/**', '**/test-results/**', '**/playwright-report/**'],
       },
     },
     build: {
