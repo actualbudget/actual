@@ -28,7 +28,7 @@
     "@vitejs/plugin-basic-ssl": "^2.1.0",
     "@vitejs/plugin-react": "^5.0.4",
     "auto-text-size": "^0.2.3",
-    "babel-plugin-react-compiler": "19.1.0-rc.3",
+    "babel-plugin-react-compiler": "^1.0.0",
     "cmdk": "^1.1.1",
     "cross-env": "^10.1.0",
     "date-fns": "^4.1.0",
