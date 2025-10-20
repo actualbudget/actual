@@ -1,3 +1,4 @@
+import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 // eslint-disable-next-line import/no-unresolved
 import { registerSW } from 'virtual:pwa-register';
@@ -6,6 +7,9 @@ import * as Platform from 'loot-core/shared/platform';
 
 // eslint-disable-next-line typescript-paths/absolute-parent-import
 import packageJson from '../package.json';
+
+// Mobile app: notify when ready
+CapacitorUpdater.notifyAppReady();
 
 const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
 
@@ -38,9 +42,9 @@ function createBackendWorker() {
     isDev: IS_DEV,
     publicUrl: process.env.PUBLIC_URL,
     hash: process.env.REACT_APP_BACKEND_WORKER_HASH,
-    isSharedArrayBufferOverrideEnabled: localStorage.getItem(
-      'SharedArrayBufferOverride',
-    ),
+    isSharedArrayBufferOverrideEnabled:
+      Platform.env === 'mobile' ||
+      localStorage.getItem('SharedArrayBufferOverride'),
   });
 }
 

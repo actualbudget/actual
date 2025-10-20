@@ -8,12 +8,14 @@ import { Label } from '@actual-app/components/label';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { CapacitorUpdater } from '@capgo/capacitor-updater';
 import { css } from '@emotion/css';
 
 import {
   isNonProductionEnvironment,
   isElectron,
 } from 'loot-core/shared/environment';
+import * as Platform from 'loot-core/shared/platform';
 
 import { Title } from './subscribe/common';
 
@@ -344,6 +346,15 @@ export function ConfigServer() {
     } else {
       setLoading(false);
       await dispatch(signOut());
+
+      if (Platform.env === 'mobile') {
+        // On mobile we need to check if the server has a different PWA version.
+        CapacitorUpdater.setCustomId({ customId: httpUrl });
+
+        const updateUrl = `${httpUrl.replace(/\/$/, '')}/mobile/auto-update`;
+        CapacitorUpdater.setUpdateUrl({ url: updateUrl });
+      }
+
       navigate('/');
     }
   }
@@ -515,7 +526,7 @@ export function ConfigServer() {
               </Button>
             ) : (
               <>
-                {!isElectron() && (
+                {!isElectron() && Platform.env !== 'mobile' && (
                   <Button
                     variant="bare"
                     style={{

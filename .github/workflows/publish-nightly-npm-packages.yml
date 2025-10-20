@@ -34,7 +34,7 @@ jobs:
           yarn install
 
       - name: Build Server & Web
-        run: yarn build:server
+        run: NODE_ENV=production yarn build:server
 
       - name: Pack the web and server packages
         run: |
@@ -42,7 +42,7 @@ jobs:
           yarn workspace @actual-app/sync-server pack --filename @actual-app/sync-server.tgz
 
       - name: Build API
-        run: yarn build:api
+        run: NODE_ENV=production yarn build:api
 
       - name: Pack the api package
         run: |

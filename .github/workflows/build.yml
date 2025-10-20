@@ -70,11 +70,19 @@ jobs:
           path: packages/desktop-client/build-stats
 
   server:
+    needs: web
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup
+      - name: Download Web Build
+        uses: actions/download-artifact@v4
+        with:
+          name: actual-web
+          path: packages/desktop-client/build
+      - name: Build Mobile client
+        run: ./bin/package-mobile
       - name: Build Server
         run: yarn workspace @actual-app/sync-server build
       - name: Upload Build

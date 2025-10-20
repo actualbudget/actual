@@ -16,7 +16,7 @@
     "start": "yarn build && node build/app",
     "start-monitor": "nodemon --exec 'tsc && node build/app' --ignore './build/**/*' --ext 'ts,js' build/app",
     "build": "tsc && yarn copy-static-assets",
-    "copy-static-assets": "rm -rf build/src/sql && cp -r src/sql build/src/sql",
+    "copy-static-assets": "./bin/copy-static-assets",
     "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --trace-warnings' vitest",
     "db:migrate": "yarn build && cross-env NODE_ENV=development node build/src/scripts/run-migrations.js up",
     "db:downgrade": "yarn build && cross-env NODE_ENV=development node build/src/scripts/run-migrations.js down",
