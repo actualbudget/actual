@@ -188,12 +188,7 @@ const SPECIAL_CONTINUOUS_ACCESS_BANKS = [
   'WIDIBA_WIDIITMM',
   'ZADRUZNA_KRASKA_BANKA_TRST_GORICA_ZADRUGA_CCRTIT2TV00',
 ].map(i => i.replace('*', ''));
-// map used above to make copying and pasting from the master
-// list easy in future
 
-export const isSpecialContinuousAccessBank = institutionId => {
-  return (
-    SPECIAL_CONTINUOUS_ACCESS_BANKS.find(i => institutionId.startsWith(i)) !=
-    null
-  );
-};
+export function isSpecialContinuousAccessBank(institutionId) {
+  return SPECIAL_CONTINUOUS_ACCESS_BANKS.some(i => institutionId.startsWith(i));
+}
