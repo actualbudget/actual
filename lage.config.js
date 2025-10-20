@@ -4,7 +4,11 @@ module.exports = {
     test: {
       type: 'npmScript',
       options: {
-        outputGlob: ['coverage/**', '**/test-results/**', '**/playwright-report/**'],
+        outputGlob: [
+          'coverage/**',
+          '**/test-results/**',
+          '**/playwright-report/**',
+        ],
       },
     },
     build: {
