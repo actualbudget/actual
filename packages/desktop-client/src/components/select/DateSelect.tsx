@@ -9,7 +9,7 @@ import React, {
   useState,
   type ComponentProps,
   type KeyboardEvent,
-  type RefObject,
+  type Ref,
 } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -234,7 +234,7 @@ type DateSelectProps = {
   embedded?: boolean;
   dateFormat: string;
   openOnFocus?: boolean;
-  inputRef?: RefObject<HTMLInputElement>;
+  inputRef?: Ref<HTMLInputElement>;
   shouldSaveFromKey?: (e: KeyboardEvent<HTMLInputElement>) => boolean;
   clearOnBlur?: boolean;
   onUpdate?: (selectedDate: string) => void;
@@ -273,7 +273,11 @@ function DateSelectDesktop({
 
   useLayoutEffect(() => {
     if (originalInputRef) {
-      originalInputRef.current = inputRef.current;
+      if (typeof originalInputRef === 'function') {
+        originalInputRef(inputRef.current);
+      } else {
+        originalInputRef.current = inputRef.current;
+      }
     }
   }, []);
 

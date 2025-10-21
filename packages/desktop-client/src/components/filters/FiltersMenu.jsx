@@ -258,8 +258,7 @@ function ConfigureField({
         {type !== 'boolean' && field !== 'payee' && (
           <GenericInput
             ref={inputRef}
-            field={field}
-            subfield={subfield}
+            field={field === 'date' ? subfield : field}
             type={
               type === 'id' &&
               (op === 'contains' ||
