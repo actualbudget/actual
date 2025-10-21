@@ -1,5 +1,6 @@
 import globals from 'globals';
 
+import { defineConfig } from 'eslint/config';
 import pluginImport from 'eslint-plugin-import';
 import pluginJSXA11y from 'eslint-plugin-jsx-a11y';
 import pluginReact from 'eslint-plugin-react';
@@ -71,7 +72,7 @@ const confusingBrowserGlobals = [
   'top',
 ];
 
-export default pluginTypescript.config(
+export default defineConfig(
   {
     ignores: [
       'packages/api/app/bundle.api.js',

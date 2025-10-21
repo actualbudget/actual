@@ -330,6 +330,15 @@ describe('Action', () => {
       expect(item.notes).toBe('Hey Sarah! You just payed 10');
     });
 
+    test('should create actions with balance math operations', () => {
+      // This test ensures the template validation doesn't fail when using balance
+      expect(() => {
+        new Action('set', 'notes', '', {
+          template: '{{ floor (div (mul balance (div 7.99 100)) 12) }}',
+        });
+      }).not.toThrow();
+    });
+
     test('should not escape text', () => {
       const action = new Action('set', 'notes', '', {
         template: '{{notes}}',
@@ -465,6 +474,44 @@ describe('Action', () => {
 
       testHelper('{{concat "Sarah" "Trops"}}', 'SarahTrops');
       testHelper('{{concat "Sarah" "Trops" 12 "Wow"}}', 'SarahTrops12Wow');
+    });
+
+    test('should have access to balance variable', () => {
+      const action = new Action('set', 'notes', '', {
+        template: 'Balance: {{balance}}, Amount: {{amount}}',
+      });
+      const item = { notes: '', amount: 5000, balance: 100000 };
+      action.exec(item);
+      expect(item.notes).toBe('Balance: 100000, Amount: 5000');
+    });
+
+    test('should allow math operations on balance', () => {
+      const action = new Action('set', 'notes', '', {
+        template: 'New balance: {{add balance amount}}',
+      });
+      const item = { notes: '', amount: 5000, balance: 100000 };
+      action.exec(item);
+      expect(item.notes).toBe('New balance: 105000');
+    });
+
+    test('should handle undefined balance gracefully in number fields', () => {
+      const action = new Action('set', 'amount', '', {
+        template: '{{ floor (div (mul balance (div 7.99 100)) 12) }}',
+      });
+      const item = { amount: 0 }; // No balance field
+      action.exec(item);
+      // Should default to 0 instead of NaN when balance is undefined
+      expect(item.amount).toBe(0);
+    });
+
+    test('should calculate with balance in number fields', () => {
+      const action = new Action('set', 'amount', '', {
+        template: '{{ floor (div (mul balance (div 7.99 100)) 12) }}',
+      });
+      const item = { amount: 0, balance: 1200 };
+      action.exec(item);
+      // (1200 * 7.99) / 12 = 7.99 -> floor = 7
+      expect(item.amount).toBe(7);
     });
 
     test('{{debug}} should log the item', () => {
