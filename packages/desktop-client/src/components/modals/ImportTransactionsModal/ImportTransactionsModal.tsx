@@ -1081,6 +1081,7 @@ export function ImportTransactionsModal({
                         type="number"
                         value={skipStartLines}
                         min="0"
+                        step="1"
                         onChangeValue={value => {
                           setSkipStartLines(+value);
                           parse(
@@ -1110,6 +1111,7 @@ export function ImportTransactionsModal({
                         type="number"
                         value={skipEndLines}
                         min="0"
+                        step="1"
                         onChangeValue={value => {
                           setSkipEndLines(+value);
                           parse(
