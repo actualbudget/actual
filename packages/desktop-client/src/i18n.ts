@@ -5,7 +5,7 @@ import resourcesToBackend from 'i18next-resources-to-backend';
 
 import * as Platform from 'loot-core/shared/platform';
 
-const languages = import.meta.glob(['/locale/*.json', '!/locale/*_old.json']);
+import { languages } from './languages';
 
 export const availableLanguages = Object.keys(languages).map(
   path => path.split('/')[2].split('.')[0],

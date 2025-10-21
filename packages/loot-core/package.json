@@ -11,8 +11,8 @@
     "watch:browser": "cross-env NODE_ENV=development ./bin/build-browser",
     "generate:i18n": "i18next",
     "test": "npm-run-all -cp 'test:*'",
-    "test:node": "ENV=node vitest",
-    "test:web": "ENV=web vitest -c vitest.web.config.ts"
+    "test:node": "ENV=node vitest --run",
+    "test:web": "ENV=web vitest --run -c vitest.web.config.ts"
   },
   "author": "",
   "license": "ISC",
@@ -66,7 +66,7 @@
     "stream-browserify": "^3.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "vite": "^7.1.9",
+    "vite": "^7.1.11",
     "vite-plugin-node-polyfills": "^0.24.0",
     "vite-plugin-peggy-loader": "^2.0.1",
     "vitest": "^3.2.4",
