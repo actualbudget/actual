@@ -4,11 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { categoryQueries } from '@desktop-client/budget';
 
-export function useCategory(id: string) {
+export function useCategoriesQuery() {
   const { t } = useTranslation();
-  const query = useQuery({
-    ...categoryQueries.list({ t }),
-    select: data => data.list.find(c => c.id === id),
-  });
-  return query.data;
+  return useQuery(categoryQueries.list({ t }));
 }

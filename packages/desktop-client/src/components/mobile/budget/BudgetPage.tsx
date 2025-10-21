@@ -34,19 +34,12 @@ import { groupById } from 'loot-core/shared/util';
 import { BudgetTable, PILL_STYLE } from './BudgetTable';
 
 import { sync } from '@desktop-client/app/appSlice';
-import {
-  applyBudgetAction,
-  createCategory,
-  createCategoryGroup,
-  deleteCategory,
-  deleteCategoryGroup,
-  updateCategory,
-  updateCategoryGroup,
-} from '@desktop-client/budget/budgetSlice';
 import { prewarmMonth } from '@desktop-client/components/budget/util';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
+import { useBudgetActions } from '@desktop-client/hooks/useBudgetActions';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useCategoryMutations } from '@desktop-client/hooks/useCategoryMutations';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
@@ -88,6 +81,15 @@ export function BudgetPage() {
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction] = useSyncedPref('hideFraction');
   const dispatch = useDispatch();
+  const applyBudgetAction = useBudgetActions();
+  const {
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    createCategoryGroup,
+    updateCategoryGroup,
+    deleteCategoryGroup,
+  } = useCategoryMutations();
 
   useEffect(() => {
     async function init() {
@@ -104,9 +106,9 @@ export function BudgetPage() {
 
   const onBudgetAction = useCallback(
     async (month, type, args) => {
-      dispatch(applyBudgetAction({ month, type, args }));
+      applyBudgetAction.mutate({ month, type, args });
     },
-    [dispatch],
+    [applyBudgetAction],
   );
 
   const onShowBudgetSummary = useCallback(() => {
@@ -145,13 +147,13 @@ export function BudgetPage() {
             onValidate: name => (!name ? 'Name is required.' : null),
             onSubmit: async name => {
               dispatch(collapseModals({ rootModalName: 'budget-page-menu' }));
-              dispatch(createCategoryGroup({ name }));
+              createCategoryGroup.mutate({ name });
             },
           },
         },
       }),
     );
-  }, [dispatch]);
+  }, [dispatch, createCategoryGroup]);
 
   const onOpenNewCategoryModal = useCallback(
     (groupId, isIncome) => {
@@ -165,38 +167,39 @@ export function BudgetPage() {
                 dispatch(
                   collapseModals({ rootModalName: 'category-group-menu' }),
                 );
-                dispatch(
-                  createCategory({ name, groupId, isIncome, isHidden: false }),
-                );
+                createCategory.mutate({
+                  name,
+                  groupId,
+                  isIncome,
+                  isHidden: false,
+                });
               },
             },
           },
         }),
       );
     },
-    [dispatch],
+    [dispatch, createCategory],
   );
 
   const onSaveGroup = useCallback(
     group => {
-      dispatch(updateCategoryGroup({ group }));
+      updateCategoryGroup.mutate({ group });
     },
-    [dispatch],
+    [updateCategoryGroup],
   );
 
   const onApplyBudgetTemplatesInGroup = useCallback(
     async categories => {
-      dispatch(
-        applyBudgetAction({
-          month: startMonth,
-          type: 'apply-multiple-templates',
-          args: {
-            categories,
-          },
-        }),
-      );
+      applyBudgetAction.mutate({
+        month: startMonth,
+        type: 'apply-multiple-templates',
+        args: {
+          categories,
+        },
+      });
     },
-    [dispatch, startMonth],
+    [applyBudgetAction, startMonth],
   );
 
   const onDeleteGroup = useCallback(
@@ -226,12 +229,10 @@ export function BudgetPage() {
                   dispatch(
                     collapseModals({ rootModalName: 'category-group-menu' }),
                   );
-                  dispatch(
-                    deleteCategoryGroup({
-                      id: groupId,
-                      transferId: transferCategory,
-                    }),
-                  );
+                  deleteCategoryGroup.mutate({
+                    id: groupId,
+                    transferId: transferCategory,
+                  });
                 },
               },
             },
@@ -239,10 +240,10 @@ export function BudgetPage() {
         );
       } else {
         dispatch(collapseModals({ rootModalName: 'category-group-menu' }));
-        dispatch(deleteCategoryGroup({ id: groupId }));
+        deleteCategoryGroup.mutate({ id: groupId });
       }
     },
-    [categoryGroups, dispatch],
+    [categoryGroups, dispatch, deleteCategoryGroup],
   );
 
   const onToggleGroupVisibility = useCallback(
@@ -259,9 +260,9 @@ export function BudgetPage() {
 
   const onSaveCategory = useCallback(
     category => {
-      dispatch(updateCategory({ category }));
+      updateCategory.mutate({ category });
     },
-    [dispatch],
+    [updateCategory],
   );
 
   const onDeleteCategory = useCallback(
@@ -282,12 +283,10 @@ export function BudgetPage() {
                     dispatch(
                       collapseModals({ rootModalName: 'category-menu' }),
                     );
-                    dispatch(
-                      deleteCategory({
-                        id: categoryId,
-                        transferId: transferCategory,
-                      }),
-                    );
+                    deleteCategory.mutate({
+                      id: categoryId,
+                      transferId: transferCategory,
+                    });
                   }
                 },
               },
@@ -296,10 +295,10 @@ export function BudgetPage() {
         );
       } else {
         dispatch(collapseModals({ rootModalName: 'category-menu' }));
-        dispatch(deleteCategory({ id: categoryId }));
+        deleteCategory.mutate({ id: categoryId });
       }
     },
-    [dispatch],
+    [dispatch, deleteCategory],
   );
 
   const onToggleCategoryVisibility = useCallback(

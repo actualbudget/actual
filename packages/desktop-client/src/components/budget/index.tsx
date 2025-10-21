@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React, { useMemo, useState, useEffect, type ComponentType } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
@@ -18,23 +19,36 @@ import * as trackingBudget from './tracking/TrackingBudgetComponents';
 import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
 import { prewarmAllMonths, prewarmMonth } from './util';
 
-import {
-  applyBudgetAction,
-  getCategories,
-} from '@desktop-client/budget/budgetSlice';
+import { useBudgetActions } from '@desktop-client/hooks/useBudgetActions';
 import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useCategoryActions } from '@desktop-client/hooks/useCategoryActions';
+import { useCategoryMutations } from '@desktop-client/hooks/useCategoryMutations';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 export function Budget() {
+  const { t } = useTranslation();
   const currentMonth = monthUtils.currentMonth();
   const spreadsheet = useSpreadsheet();
   const dispatch = useDispatch();
+  const applyBudgetAction = useBudgetActions();
+  const {
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    moveCategory,
+    createCategoryGroup,
+    updateCategoryGroup,
+    deleteCategoryGroup,
+    moveCategoryGroup,
+  } = useCategoryMutations();
+  const navigate = useNavigate();
   const [summaryCollapsed, setSummaryCollapsedPref] = useLocalPref(
     'budget.summaryCollapsed',
   );
@@ -52,8 +66,6 @@ export function Budget() {
 
   useEffect(() => {
     async function run() {
-      await dispatch(getCategories());
-
       const { start, end } = await send('get-budget-bounds');
       setBounds({ start, end });
 
@@ -110,35 +122,177 @@ export function Budget() {
     }
   };
 
-  const onApplyBudgetTemplatesInGroup = async categories => {
+  const categoryNameAlreadyExistsNotification = name => {
     dispatch(
-      applyBudgetAction({
-        month: startMonth,
-        type: 'apply-multiple-templates',
-        args: {
-          categories,
+      addNotification({
+        notification: {
+          type: 'error',
+          message: t(
+            'Category “{{name}}” already exists in group (it may be hidden)',
+            { name },
+          ),
         },
       }),
     );
   };
 
+  const onSaveCategory = async category => {
+    const cats = await send('get-categories');
+    const exists =
+      cats.grouped
+        .filter(g => g.id === category.group)[0]
+        .categories.filter(
+          c => c.name.toUpperCase() === category.name.toUpperCase(),
+        )
+        .filter(c => (category.id === 'new' ? true : c.id !== category.id))
+        .length > 0;
+
+    if (exists) {
+      categoryNameAlreadyExistsNotification(category.name);
+      return;
+    }
+
+    if (category.id === 'new') {
+      createCategory.mutate({
+        name: category.name,
+        groupId: category.group,
+        isIncome: category.is_income,
+        isHidden: category.hidden,
+      });
+    } else {
+      updateCategory.mutate({ category });
+    }
+  };
+
+  const onDeleteCategory = async id => {
+    const mustTransfer = await send('must-category-transfer', { id });
+
+    if (mustTransfer) {
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'confirm-category-delete',
+            options: {
+              category: id,
+              onDelete: transferCategory => {
+                if (id !== transferCategory) {
+                  deleteCategory.mutate({ id, transferId: transferCategory });
+                }
+              },
+            },
+          },
+        }),
+      );
+    } else {
+      deleteCategory.mutate({ id });
+    }
+  };
+
+  const onSaveGroup = group => {
+    if (group.id === 'new') {
+      createCategoryGroup.mutate({ name: group.name });
+    } else {
+      updateCategoryGroup.mutate({ group });
+    }
+  };
+
+  const onDeleteGroup = async id => {
+    const group = categoryGroups.find(g => g.id === id);
+
+    let mustTransfer = false;
+    for (const category of group.categories) {
+      if (await send('must-category-transfer', { id: category.id })) {
+        mustTransfer = true;
+        break;
+      }
+    }
+
+    if (mustTransfer) {
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'confirm-category-delete',
+            options: {
+              group: id,
+              onDelete: transferCategory => {
+                deleteCategoryGroup.mutate({
+                  id,
+                  transferId: transferCategory,
+                });
+              },
+            },
+          },
+        }),
+      );
+    } else {
+      deleteCategoryGroup.mutate({ id });
+    }
+  };
+
+  const onApplyBudgetTemplatesInGroup = async categories => {
+    applyBudgetAction.mutate({
+      month: startMonth,
+      type: 'apply-multiple-templates',
+      args: {
+        categories,
+      },
+    });
+  };
+
   const onBudgetAction = (month, type, args) => {
-    dispatch(applyBudgetAction({ month, type, args }));
+    applyBudgetAction.mutate({ month, type, args });
+  };
+
+  const onShowActivity = (categoryId, month) => {
+    const filterConditions = [
+      { field: 'category', op: 'is', value: categoryId, type: 'id' },
+      {
+        field: 'date',
+        op: 'is',
+        value: month,
+        options: { month: true },
+        type: 'date',
+      },
+    ];
+    navigate('/accounts', {
+      state: {
+        goBack: true,
+        filterConditions,
+        categoryId,
+      },
+    });
+  };
+
+  const onReorderCategory = async sortInfo => {
+    const cats = await send('get-categories');
+    const moveCandidate = cats.list.filter(c => c.id === sortInfo.id)[0];
+    const exists =
+      cats.grouped
+        .filter(g => g.id === sortInfo.groupId)[0]
+        .categories.filter(
+          c => c.name.toUpperCase() === moveCandidate.name.toUpperCase(),
+        )
+        .filter(c => c.id !== moveCandidate.id).length > 0;
+
+    if (exists) {
+      categoryNameAlreadyExistsNotification(moveCandidate.name);
+      return;
+    }
+
+    moveCategory.mutate({
+      id: sortInfo.id,
+      groupId: sortInfo.groupId,
+      targetId: sortInfo.targetId,
+    });
+  };
+
+  const onReorderGroup = async sortInfo => {
+    moveCategoryGroup.mutate({ id: sortInfo.id, targetId: sortInfo.targetId });
   };
 
   const onToggleCollapse = () => {
     setSummaryCollapsedPref(!summaryCollapsed);
   };
-
-  const {
-    onSaveCategory,
-    onDeleteCategory,
-    onSaveGroup,
-    onDeleteGroup,
-    onShowActivity,
-    onReorderCategory,
-    onReorderGroup,
-  } = useCategoryActions();
 
   if (!initialized || !categoryGroups) {
     return null;
