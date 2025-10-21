@@ -51,7 +51,7 @@ export function SaveReportChoose({ onApply }: SaveReportChooseProps) {
           type="saved"
           value={value}
           style={{ marginTop: 10 }}
-          onChange={v => setValue(v)}
+          onChange={setValue}
         />
 
         <Stack
