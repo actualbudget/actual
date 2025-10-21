@@ -29,6 +29,7 @@ export function BankSyncAccountsListItem({
 
   return (
     <div
+      data-testid="bank-sync-account"
       style={{
         backgroundColor: theme.tableBackground,
         borderBottomWidth: 1,
@@ -72,6 +73,7 @@ export function BankSyncAccountsListItem({
               fontSize: 13,
               color: theme.pageTextSubdued,
             }}
+            data-vrt-mask
           >
             <Trans>Last sync: {{ time: lastSyncString }}</Trans>
           </Text>
