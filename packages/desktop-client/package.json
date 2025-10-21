@@ -84,7 +84,7 @@
     "build": "vite build",
     "build:browser": "cross-env ./bin/build-browser",
     "generate:i18n": "i18next",
-    "test": "vitest",
+    "test": "vitest --run",
     "e2e": "npx playwright test --browser=chromium",
     "vrt": "cross-env VRT=true npx playwright test --browser=chromium",
     "playwright": "playwright"
