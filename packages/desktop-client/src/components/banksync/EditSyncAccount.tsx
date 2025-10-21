@@ -1,27 +1,20 @@
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgQuestion } from '@actual-app/components/icons/v1';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import {
-  defaultMappings,
-  type Mappings,
-  mappingsFromString,
-  mappingsToString,
-} from 'loot-core/server/util/custom-sync-mapping';
-import { q } from 'loot-core/shared/query';
 import {
   type TransactionEntity,
   type AccountEntity,
 } from 'loot-core/types/models';
 
+import { BankSyncCheckboxOptions } from './BankSyncCheckboxOptions';
 import { FieldMapping } from './FieldMapping';
+import { useBankSyncAccountSettings } from './useBankSyncAccountSettings';
 
 import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
 import {
@@ -29,9 +22,6 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
-import { CheckboxOption } from '@desktop-client/components/modals/ImportTransactionsModal/CheckboxOption';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useTransactions } from '@desktop-client/hooks/useTransactions';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -39,7 +29,7 @@ export type TransactionDirection = 'payment' | 'deposit';
 
 type MappableActualFields = 'date' | 'payee' | 'notes';
 
-export type MappableField = {
+type MappableField = {
   actualField: MappableActualFields;
   syncFields: string[];
 };
@@ -107,7 +97,7 @@ const mappableFields: MappableField[] = [
   },
 ];
 
-const getFields = (transaction: TransactionEntity) =>
+export const getFields = (transaction: TransactionEntity) =>
   mappableFields.map(field => ({
     actualField: field.actualField,
     syncFields: field.syncFields
@@ -124,78 +114,29 @@ export type EditSyncAccountProps = {
 
 export function EditSyncAccount({ account }: EditSyncAccountProps) {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
 
-  const [savedMappings = mappingsToString(defaultMappings), setSavedMappings] =
-    useSyncedPref(`custom-sync-mappings-${account.id}`);
-  const [savedImportNotes = true, setSavedImportNotes] = useSyncedPref(
-    `sync-import-notes-${account.id}`,
-  );
-  const [savedImportPending = true, setSavedImportPending] = useSyncedPref(
-    `sync-import-pending-${account.id}`,
-  );
-  const [savedReimportDeleted = true, setSavedReimportDeleted] = useSyncedPref(
-    `sync-reimport-deleted-${account.id}`,
-  );
-  const [savedImportTransactions = true, setSavedImportTransactions] =
-    useSyncedPref(`sync-import-transactions-${account.id}`);
-
-  const [transactionDirection, setTransactionDirection] =
-    useState<TransactionDirection>('payment');
-  const [importPending, setImportPending] = useState(
-    String(savedImportPending) === 'true',
-  );
-  const [importNotes, setImportNotes] = useState(
-    String(savedImportNotes) === 'true',
-  );
-  const [reimportDeleted, setReimportDeleted] = useState(
-    String(savedReimportDeleted) === 'true',
-  );
-  const [mappings, setMappings] = useState<Mappings>(
-    mappingsFromString(savedMappings),
-  );
-  const [importTransactions, setImportTransactions] = useState(
-    String(savedImportTransactions) === 'true',
-  );
-
-  const transactionQuery = useMemo(
-    () =>
-      q('transactions')
-        .filter({
-          account: account.id,
-          amount: transactionDirection === 'payment' ? { $lte: 0 } : { $gt: 0 },
-          raw_synced_data: { $ne: null },
-        })
-        .options({ splits: 'none' })
-        .select('*'),
-    [account.id, transactionDirection],
-  );
-
-  const { transactions } = useTransactions({
-    query: transactionQuery,
-  });
-
-  const exampleTransaction = useMemo(() => {
-    const data = transactions?.[0]?.raw_synced_data;
-    if (!data) return undefined;
-    try {
-      return JSON.parse(data);
-    } catch (error) {
-      console.error('Failed to parse transaction data:', error);
-      return undefined;
-    }
-  }, [transactions]);
+  const {
+    transactionDirection,
+    setTransactionDirection,
+    importPending,
+    setImportPending,
+    importNotes,
+    setImportNotes,
+    reimportDeleted,
+    setReimportDeleted,
+    importTransactions,
+    setImportTransactions,
+    mappings,
+    setMapping,
+    exampleTransaction,
+    saveSettings,
+  } = useBankSyncAccountSettings(account.id);
 
   const onSave = async (close: () => void) => {
-    const mappingsStr = mappingsToString(mappings);
-    setSavedMappings(mappingsStr);
-    setSavedImportPending(String(importPending));
-    setSavedImportNotes(String(importNotes));
-    setSavedReimportDeleted(String(reimportDeleted));
-    setSavedImportTransactions(String(importTransactions));
+    saveSettings();
     close();
   };
-
-  const dispatch = useDispatch();
 
   const onUnlink = async (close: () => void) => {
     dispatch(
@@ -213,14 +154,6 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
         },
       }),
     );
-  };
-
-  const setMapping = (field: string, value: string) => {
-    setMappings(prev => {
-      const updated = new Map(prev);
-      updated?.get(transactionDirection)?.set(field, value);
-      return updated;
-    });
   };
 
   const potentiallyTruncatedAccountName =
@@ -259,74 +192,17 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             <Trans>Options</Trans>
           </Text>
 
-          <CheckboxOption
-            id="form_pending"
-            checked={importPending && importTransactions}
-            onChange={() => setImportPending(!importPending)}
-            disabled={!importTransactions}
-          >
-            <Trans>Import pending transactions</Trans>
-          </CheckboxOption>
-
-          <CheckboxOption
-            id="form_notes"
-            checked={importNotes && importTransactions}
-            onChange={() => setImportNotes(!importNotes)}
-            disabled={!importTransactions}
-          >
-            <Trans>Import transaction notes</Trans>
-          </CheckboxOption>
-
-          <CheckboxOption
-            id="form_reimport_deleted"
-            checked={reimportDeleted && importTransactions}
-            onChange={() => setReimportDeleted(!reimportDeleted)}
-            disabled={!importTransactions}
-          >
-            <Tooltip
-              content={t(
-                'By default imported transactions that you delete will be re-imported with the next bank sync operation. To disable this behaviour - untick this box.',
-              )}
-            >
-              <View
-                style={{
-                  display: 'flex',
-                  flexWrap: 'nowrap',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 4,
-                }}
-              >
-                <Trans>Reimport deleted transactions</Trans>
-                <SvgQuestion height={12} width={12} cursor="pointer" />
-              </View>
-            </Tooltip>
-          </CheckboxOption>
-
-          <CheckboxOption
-            id="form_import_transactions"
-            checked={!importTransactions}
-            onChange={() => setImportTransactions(!importTransactions)}
-          >
-            <Tooltip
-              content={t(
-                `Selecting this option will disable importing transactions and only import the account balance for use in reconciliation`,
-              )}
-            >
-              <View
-                style={{
-                  display: 'flex',
-                  flexWrap: 'nowrap',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 4,
-                }}
-              >
-                <Trans>Investment Account</Trans>
-                <SvgQuestion height={12} width={12} cursor="pointer" />
-              </View>
-            </Tooltip>
-          </CheckboxOption>
+          <BankSyncCheckboxOptions
+            importPending={importPending}
+            setImportPending={setImportPending}
+            importNotes={importNotes}
+            setImportNotes={setImportNotes}
+            reimportDeleted={reimportDeleted}
+            setReimportDeleted={setReimportDeleted}
+            importTransactions={importTransactions}
+            setImportTransactions={setImportTransactions}
+            helpMode="desktop"
+          />
 
           <View
             style={{

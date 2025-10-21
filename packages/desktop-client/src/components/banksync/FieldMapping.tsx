@@ -37,6 +37,7 @@ type FieldMappingProps = {
   fields: MappableFieldWithExample[];
   mapping: Map<string, string>;
   setMapping: (field: string, value: string) => void;
+  selectWidth?: number;
 };
 
 export function FieldMapping({
@@ -45,6 +46,7 @@ export function FieldMapping({
   fields,
   mapping,
   setMapping,
+  selectWidth = 290,
 }: FieldMappingProps) {
   const { t } = useTranslation();
 
@@ -130,7 +132,7 @@ export function FieldMapping({
                   options={field.syncFields.map(({ field }) => [field, field])}
                   value={mapping.get(field.actualField)}
                   style={{
-                    width: 290,
+                    width: selectWidth,
                   }}
                   onChange={newValue => {
                     if (newValue) setMapping(field.actualField, newValue);

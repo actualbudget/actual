@@ -13,6 +13,7 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
   SvgAdd,
   SvgCog,
+  SvgCreditCard,
   SvgPiggyBank,
   SvgReports,
   SvgStoreFront,
@@ -133,6 +134,12 @@ export function MobileNavTabs() {
       path: '/rules',
       style: navTabStyle,
       Icon: SvgTuning,
+    },
+    {
+      name: t('Bank Sync'),
+      path: '/bank-sync',
+      style: navTabStyle,
+      Icon: SvgCreditCard,
     },
     {
       name: t('Settings'),
