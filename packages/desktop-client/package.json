@@ -71,7 +71,7 @@
     "sass": "^1.93.2",
     "usehooks-ts": "^3.1.1",
     "uuid": "^13.0.0",
-    "vite": "^7.1.9",
+    "vite": "^7.1.11",
     "vite-plugin-pwa": "^1.0.3",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4",
