@@ -324,7 +324,7 @@ function ConditionEditor({
         key={inputKey}
         field={field}
         type={type}
-        value={value}
+        value={value ?? ''}
         op={op}
         multi={op === 'oneOf' || op === 'notOneOf'}
         onChange={v => onChange('value', v)}
@@ -518,9 +518,11 @@ function ActionEditor({
           <View style={{ flex: 1 }}>
             <GenericInput
               key={inputKey}
+              // @ts-expect-error fix this
               field={field}
               // @ts-expect-error fix this
               type={templated ? 'string' : type}
+              // @ts-expect-error fix this
               op={op}
               // @ts-expect-error fix this
               value={options?.template ?? value}

@@ -1,4 +1,4 @@
-import { forwardRef, type JSX, type RefObject } from 'react';
+import { forwardRef, type JSX } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -7,7 +7,7 @@ import { type CSSProperties } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import { getMonthYearFormat } from 'loot-core/shared/months';
-import { type RecurConfig } from 'loot-core/types/models';
+import { type RecurConfig, type RuleConditionOp } from 'loot-core/types/models';
 
 import { AmountInput } from './AmountInput';
 import { PercentInput } from './PercentInput';
@@ -27,31 +27,31 @@ import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 type GenericInputProps = {
-  ref?: RefObject<HTMLInputElement>;
   style?: CSSProperties;
-  op?: string;
-  options?: {
-    inflow?: boolean;
-    outflow?: boolean;
-    month?: boolean;
-    year?: boolean;
-  };
 } & (
-  | ({
-      type: 'id';
-      field: 'payee' | 'account' | 'category';
-    } & (
+  | ((
       | {
-          multi: true;
-          value: string[];
-          onChange: (value: string[]) => void;
+          type: 'id';
+          field: 'payee' | 'category';
         }
       | {
-          multi?: false;
-          value: string;
-          onChange: (value: string) => void;
+          type: 'id';
+          field: 'account';
+          op?: RuleConditionOp;
         }
-    ))
+    ) &
+      (
+        | {
+            multi: true;
+            value: string[];
+            onChange: (value: string[]) => void;
+          }
+        | {
+            multi?: false;
+            value: string;
+            onChange: (value: string) => void;
+          }
+      ))
   | ({
       type: 'saved';
       field: 'saved' | 'report';
@@ -76,7 +76,7 @@ type GenericInputProps = {
           onChange: (value: string) => void;
         }
       | {
-          field: 'recurring';
+          field: 'date';
           value: RecurConfig;
           onChange: (value: RecurConfig) => void;
         }
@@ -91,6 +91,10 @@ type GenericInputProps = {
       value: number;
       onChange: (value: number) => void;
       numberFormatType?: 'currency' | 'percentage';
+      options?: {
+        inflow?: boolean;
+        outflow?: boolean;
+      };
     }
   | ({
       type: 'string';
@@ -109,7 +113,7 @@ type GenericInputProps = {
 );
 
 export const GenericInput = forwardRef<HTMLInputElement, GenericInputProps>(
-  ({ style, op = undefined, options = undefined, ...props }, ref) => {
+  ({ style, ...props }, ref) => {
     const dispatch = useDispatch();
     const { isNarrowWidth } = useResponsive();
     const { t } = useTranslation();
@@ -172,7 +176,7 @@ export const GenericInput = forwardRef<HTMLInputElement, GenericInputProps>(
             break;
 
           case 'account':
-            switch (op) {
+            switch (props.op) {
               case 'onBudget':
               case 'offBudget':
                 content = null;
@@ -334,28 +338,27 @@ export const GenericInput = forwardRef<HTMLInputElement, GenericInputProps>(
             );
             break;
 
-          case 'recurring':
-            // TODO: where is this used?
-            content = (
-              <RecurringSchedulePicker
-                value={props.value}
-                buttonStyle={{ justifyContent: 'flex-start' }}
-                onChange={props.onChange}
-              />
-            );
-            break;
-
           default:
-            content = (
-              <DateSelect
-                value={props.value}
-                dateFormat={dateFormat}
-                openOnFocus={false}
-                inputRef={ref}
-                inputProps={{ placeholder: dateFormat.toLowerCase() }}
-                onSelect={props.onChange}
-              />
-            );
+            if (typeof props.value !== 'string') {
+              content = (
+                <RecurringSchedulePicker
+                  value={props.value}
+                  buttonStyle={{ justifyContent: 'flex-start' }}
+                  onChange={props.onChange}
+                />
+              );
+            } else {
+              content = (
+                <DateSelect
+                  value={props.value}
+                  dateFormat={dateFormat}
+                  openOnFocus={false}
+                  inputRef={ref}
+                  inputProps={{ placeholder: dateFormat.toLowerCase() }}
+                  onSelect={props.onChange}
+                />
+              );
+            }
             break;
         }
         break;
@@ -364,7 +367,6 @@ export const GenericInput = forwardRef<HTMLInputElement, GenericInputProps>(
         content = (
           <Checkbox
             checked={props.value}
-            // TODO: does this work? test
             value={String(props.value)}
             onChange={() => props.onChange(!props.value)}
           />
@@ -379,7 +381,11 @@ export const GenericInput = forwardRef<HTMLInputElement, GenericInputProps>(
                 inputRef={ref}
                 value={props.value}
                 onUpdate={props.onChange}
-                sign={options?.inflow || options?.outflow ? '+' : undefined}
+                sign={
+                  props.options?.inflow || props.options?.outflow
+                    ? '+'
+                    : undefined
+                }
               />
             );
             break;

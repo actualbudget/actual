@@ -269,7 +269,9 @@ function ConfigureField({
                 : type
             }
             numberFormatType="currency"
-            value={formattedValue}
+            value={
+              formattedValue ?? (op === 'oneOf' || op === 'notOneOf' ? [] : '')
+            }
             multi={op === 'oneOf' || op === 'notOneOf'}
             op={op}
             options={subfieldToOptions(field, subfield)}
