@@ -983,9 +983,6 @@ export function ImportTransactionsModal({
                 parse(
                   filename,
                   getParseOptions(filetype, {
-                    delimiter,
-                    hasHeaderRow,
-                    skipStartLines,
                     fallbackMissingPayeeToMemo,
                     importNotes: !importNotes,
                   }),
