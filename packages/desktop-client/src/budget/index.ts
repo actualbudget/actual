@@ -16,7 +16,7 @@ export const categoryQueries = {
   all: () => ['categories'],
   lists: () => [...categoryQueries.all(), 'lists'],
   list: ({ t }: { t: i18n['t'] }) =>
-    queryOptions({
+    queryOptions<CategoryViews>({
       queryKey: [...categoryQueries.lists()],
       queryFn: async () => {
         const categories: CategoryViews = await send('get-categories');
@@ -42,9 +42,9 @@ export const categoryQueries = {
 
 function translateStartingBalancesCategories(
   t: i18n['t'],
-  categories: CategoryEntity[],
-): CategoryEntity[] {
-  return categories.map(cat => translateStartingBalancesCategory(t, cat));
+  categories: CategoryEntity[] | undefined,
+): CategoryEntity[] | undefined {
+  return categories?.map(cat => translateStartingBalancesCategory(t, cat));
 }
 
 function translateStartingBalancesCategory(
