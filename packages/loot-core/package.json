@@ -66,7 +66,7 @@
     "stream-browserify": "^3.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "vite": "^7.1.9",
+    "vite": "^7.1.11",
     "vite-plugin-node-polyfills": "^0.24.0",
     "vite-plugin-peggy-loader": "^2.0.1",
     "vitest": "^3.2.4",
