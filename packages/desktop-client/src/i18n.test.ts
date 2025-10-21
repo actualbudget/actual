@@ -13,6 +13,14 @@ vi.mock('i18next', () => {
   };
 });
 
+vi.mock('./languages', () => ({
+  languages: {
+    '/locale/en.json': vi.fn(),
+    '/locale/uk.json': vi.fn(),
+    '/locale/pt-BR.json': vi.fn(),
+  },
+}));
+
 vi.hoisted(vi.resetModules);
 
 describe('setI18NextLanguage', () => {

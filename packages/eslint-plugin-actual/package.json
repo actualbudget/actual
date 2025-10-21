@@ -5,7 +5,7 @@
   "exports": "./lib/index.js",
   "type": "commonjs",
   "scripts": {
-    "test": "vitest"
+    "test": "vitest --run"
   },
   "dependencies": {
     "requireindex": "^1.2.0"
