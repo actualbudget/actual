@@ -403,7 +403,11 @@ function getAvailableAccountOptions(
   addOffBudgetAccountOption: { id: string; name: string },
 ): AutocompleteItem[] {
   const options: AutocompleteItem[] = [...unlinkedAccounts];
-  if (chosenAccount && chosenAccount.id !== addOnBudgetAccountOption.id) {
+  if (
+    chosenAccount &&
+    chosenAccount.id !== addOnBudgetAccountOption.id &&
+    chosenAccount.id !== addOffBudgetAccountOption.id
+  ) {
     options.push(chosenAccount);
   }
   options.push(addOnBudgetAccountOption, addOffBudgetAccountOption);
@@ -538,6 +542,7 @@ function AccountCard({
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
     useAddBudgetAccountOptions();
   const format = useFormat();
+  const { t } = useTranslation();
 
   const availableAccountOptions = getAvailableAccountOptions(
     unlinkedAccounts,
@@ -628,7 +633,7 @@ function AccountCard({
             }}
             inputProps={{
               onBlur: () => setFocusedField(null),
-              placeholder: 'Select account...',
+              placeholder: t('Select account...'),
             }}
             value={chosenAccount?.id}
           />
