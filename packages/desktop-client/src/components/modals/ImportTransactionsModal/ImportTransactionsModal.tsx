@@ -704,17 +704,6 @@ export function ImportTransactionsModal({
   }
 
   const runImportPreview = useCallback(async () => {
-    // preserve user's selection choices before re-running preview
-    const selectionMap = new Map();
-    transactions.forEach(trans => {
-      if (!trans.isMatchedTransaction) {
-        selectionMap.set(trans.trx_id, {
-          selected: trans.selected,
-          selected_merge: trans.selected_merge,
-        });
-      }
-    });
-
     // always start from the original parsed transactions, not the previewed ones to ensure rules run
     const transactionPreview = await getImportPreview(
       parsedTransactions,
@@ -727,23 +716,7 @@ export function ImportTransactionsModal({
       outValue,
       multiplierAmount,
     );
-
-    // restore selections to the new preview results
-    const transactionPreviewWithSelections = transactionPreview.map(trans => {
-      if (!trans.isMatchedTransaction && selectionMap.has(trans.trx_id)) {
-        const saved = selectionMap.get(trans.trx_id);
-        return {
-          ...trans,
-          selected: saved.selected,
-          selected_merge: saved.selected_merge,
-        };
-      }
-      return trans;
-    });
-
-    setTransactions(transactionPreviewWithSelections);
-    // intentionally exclude transactions from dependencies to avoid infinite rerenders
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setTransactions(transactionPreview);
   }, [
     getImportPreview,
     parsedTransactions,
