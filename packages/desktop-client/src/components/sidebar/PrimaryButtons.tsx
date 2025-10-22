@@ -16,6 +16,8 @@ import {
 import { SvgCalendar3 } from '@actual-app/components/icons/v2';
 import { View } from '@actual-app/components/view';
 
+import * as Platform from 'loot-core/shared/platform';
+
 import { Item } from './Item';
 import { SecondaryItem } from './SecondaryItem';
 
@@ -28,7 +30,8 @@ export function PrimaryButtons() {
   const location = useLocation();
 
   const syncServerStatus = useSyncServerStatus();
-  const isUsingServer = syncServerStatus !== 'no-server';
+  const isUsingServer =
+    syncServerStatus !== 'no-server' || Platform.isPlaywright;
 
   const isActive = [
     '/payees',

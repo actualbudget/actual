@@ -7,9 +7,9 @@ import React, {
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { Checkbox } from '@desktop-client/components/forms';
+import { Checkbox } from './index';
 
-type CheckboxOptionProps = {
+type LabeledCheckboxProps = {
   id: string;
   checked?: ComponentProps<typeof Checkbox>['checked'];
   disabled?: ComponentProps<typeof Checkbox>['disabled'];
@@ -18,14 +18,14 @@ type CheckboxOptionProps = {
   style?: CSSProperties;
 };
 
-export function CheckboxOption({
+export function LabeledCheckbox({
   id,
   checked,
   disabled,
   onChange,
   children,
   style,
-}: CheckboxOptionProps) {
+}: LabeledCheckboxProps) {
   return (
     <View
       style={{

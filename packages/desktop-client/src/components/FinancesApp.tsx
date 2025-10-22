@@ -10,10 +10,10 @@ import { View } from '@actual-app/components/view';
 import * as undo from 'loot-core/platform/client/undo';
 
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
-import { BankSync } from './banksync';
 import { BankSyncStatus } from './BankSyncStatus';
 import { CommandBar } from './CommandBar';
 import { GlobalKeys } from './GlobalKeys';
+import { MobileBankSyncAccountEditPage } from './mobile/banksync/MobileBankSyncAccountEditPage';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Notifications } from './Notifications';
@@ -278,7 +278,18 @@ export function FinancesApp() {
                   path="/rules/:id"
                   element={<NarrowAlternate name="RuleEdit" />}
                 />
-                <Route path="/bank-sync" element={<BankSync />} />
+                <Route
+                  path="/bank-sync"
+                  element={<NarrowAlternate name="BankSync" />}
+                />
+                <Route
+                  path="/bank-sync/account/:accountId/edit"
+                  element={
+                    <WideNotSupported redirectTo="/bank-sync">
+                      <MobileBankSyncAccountEditPage />
+                    </WideNotSupported>
+                  }
+                />
                 <Route path="/tags" element={<ManageTagsPage />} />
                 <Route path="/settings" element={<Settings />} />
 
@@ -347,6 +358,7 @@ export function FinancesApp() {
               <Route path="/accounts" element={<MobileNavTabs />} />
               <Route path="/settings" element={<MobileNavTabs />} />
               <Route path="/reports" element={<MobileNavTabs />} />
+              <Route path="/bank-sync" element={<MobileNavTabs />} />
               <Route path="/rules" element={<MobileNavTabs />} />
               <Route path="/payees" element={<MobileNavTabs />} />
               <Route path="*" element={null} />

@@ -2,6 +2,7 @@ import { type Locator, type Page } from '@playwright/test';
 
 import { MobileAccountPage } from './mobile-account-page';
 import { MobileAccountsPage } from './mobile-accounts-page';
+import { MobileBankSyncPage } from './mobile-bank-sync-page';
 import { MobileBudgetPage } from './mobile-budget-page';
 import { MobilePayeesPage } from './mobile-payees-page';
 import { MobileReportsPage } from './mobile-reports-page';
@@ -15,6 +16,7 @@ const NAV_LINKS_HIDDEN_BY_DEFAULT = [
   'Schedules',
   'Payees',
   'Rules',
+  'Bank Sync',
   'Settings',
 ];
 const ROUTES_BY_PAGE = {
@@ -24,6 +26,7 @@ const ROUTES_BY_PAGE = {
   Reports: '/reports',
   Payees: '/payees',
   Rules: '/rules',
+  'Bank Sync': '/bank-sync',
   Settings: '/settings',
 };
 
@@ -179,6 +182,13 @@ export class MobileNavigation {
     return await this.navigateToPage(
       'Rules',
       () => new MobileRulesPage(this.page),
+    );
+  }
+
+  async goToBankSyncPage() {
+    return await this.navigateToPage(
+      'Bank Sync',
+      () => new MobileBankSyncPage(this.page),
     );
   }
 

@@ -1,6 +1,7 @@
 import { type Page } from '@playwright/test';
 
 import { AccountPage } from './account-page';
+import { BankSyncPage } from './bank-sync-page';
 import { PayeesPage } from './payees-page';
 import { ReportsPage } from './reports-page';
 import { RulesPage } from './rules-page';
@@ -64,6 +65,19 @@ export class Navigation {
     await payeesLink.click();
 
     return new PayeesPage(this.page);
+  }
+
+  async goToBankSyncPage() {
+    const bankSyncLink = this.page.getByRole('link', { name: 'Bank Sync' });
+
+    // Expand the "more" menu only if it is not already expanded
+    if (!(await bankSyncLink.isVisible())) {
+      await this.page.getByRole('button', { name: 'More' }).click();
+    }
+
+    await bankSyncLink.click();
+
+    return new BankSyncPage(this.page);
   }
 
   async goToSettingsPage() {
