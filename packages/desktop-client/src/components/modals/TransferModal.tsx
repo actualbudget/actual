@@ -6,6 +6,8 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
+import { type IntegerAmount } from 'loot-core/shared/util';
+
 import {
   addToBeBudgetedGroup,
   removeCategoriesFromGroups,
@@ -26,7 +28,6 @@ import {
   pushModal,
 } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
-import { IntegerAmount } from 'loot-core/shared/util';
 
 type TransferModalProps = Extract<ModalType, { name: 'transfer' }>['options'];
 
