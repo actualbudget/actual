@@ -32,7 +32,10 @@ type AmountInputProps = {
   onChangeValue?: (value: string) => void;
   onFocus?: FocusEventHandler<HTMLInputElement>;
   onBlur?: FocusEventHandler<HTMLInputElement>;
-  onEnter?: (event: KeyboardEvent<HTMLInputElement>, amount?: IntegerAmount) => void;
+  onEnter?: (
+    event: KeyboardEvent<HTMLInputElement>,
+    amount?: IntegerAmount,
+  ) => void;
   onUpdate?: (amount: IntegerAmount) => void;
   style?: CSSProperties;
   inputStyle?: CSSProperties;

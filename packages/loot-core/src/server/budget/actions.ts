@@ -76,10 +76,10 @@ function getBudgetData<T extends BudgetTable>(
 ): Promise<BudgetData[]> {
   return db.all<
     (db.DbReflectBudget | db.DbZeroBudget) &
-    Pick<
-      db.DbViewCategoryWithGroupHidden,
-      'is_income' | 'hidden' | 'group_hidden'
-    >
+      Pick<
+        db.DbViewCategoryWithGroupHidden,
+        'is_income' | 'hidden' | 'group_hidden'
+      >
   >(
     `
     SELECT b.*, c.is_income, c.hidden, g.hidden AS group_hidden
