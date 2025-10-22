@@ -3,10 +3,10 @@ import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgQuestion } from '@actual-app/components/icons/v1';
+import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
-import { View } from '@actual-app/components/view';
 
 import { ToggleField } from '@desktop-client/components/mobile/MobileForms';
 import { CheckboxOption as BaseCheckboxOption } from '@desktop-client/components/modals/ImportTransactionsModal/CheckboxOption';
@@ -30,13 +30,11 @@ function CheckboxOption({
 }: CheckboxOptionProps) {
   if (helpMode === 'mobile') {
     return (
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: 5,
-        }}
+      <Stack
+        direction="row"
+        align="center"
+        justify="space-between"
+        style={{ marginBottom: 5 }}
       >
         <Text>{children}</Text>
         <ToggleField
@@ -45,7 +43,7 @@ function CheckboxOption({
           onToggle={onChange}
           isDisabled={disabled}
         />
-      </View>
+      </Stack>
     );
   }
 
@@ -92,33 +90,19 @@ function CheckboxOptionWithHelp({
         disabled={disabled}
       >
         <Tooltip content={helpText}>
-          <View
-            style={{
-              display: 'flex',
-              flexWrap: 'nowrap',
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 4,
-            }}
-          >
-            {children}
+          <Stack direction="row" align="center" spacing={1}>
+            <Text>{children}</Text>
             <SvgQuestion height={12} width={12} cursor="pointer" />
-          </View>
+          </Stack>
         </Tooltip>
       </BaseCheckboxOption>
     );
   }
 
   return (
-    <View style={{ marginBottom: 5 }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+    <Stack direction="column" spacing={1} style={{ marginBottom: 5 }}>
+      <Stack direction="row" align="center" justify="space-between">
+        <Stack direction="row" align="center" spacing={1}>
           <Text>{children}</Text>
           <Button
             variant="bare"
@@ -132,26 +116,25 @@ function CheckboxOptionWithHelp({
           >
             <SvgQuestion height={12} width={12} />
           </Button>
-        </View>
+        </Stack>
         <ToggleField
           id={id}
           isOn={checked}
           onToggle={onChange}
           isDisabled={disabled}
         />
-      </View>
+      </Stack>
       {showHelp && (
         <Text
           style={{
             fontSize: 13,
             color: theme.pageTextSubdued,
-            marginTop: 5,
           }}
         >
           {helpText}
         </Text>
       )}
-    </View>
+    </Stack>
   );
 }
 
