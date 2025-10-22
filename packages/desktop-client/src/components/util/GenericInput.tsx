@@ -123,7 +123,7 @@ export const GenericInput = forwardRef<HTMLInputElement, GenericInputProps>(
 
     let content: JSX.Element | null = null;
     switch (props.type) {
-      case 'id':
+      case 'id': {
         const showPlaceholder = props.multi ? props.value.length === 0 : true;
         const multiProps =
           props.multi === true
@@ -263,8 +263,9 @@ export const GenericInput = forwardRef<HTMLInputElement, GenericInputProps>(
           default:
         }
         break;
+      }
 
-      case 'saved':
+      case 'saved': {
         const showSavedPlaceholder = props.multi
           ? props.value.length === 0
           : true;
@@ -314,6 +315,7 @@ export const GenericInput = forwardRef<HTMLInputElement, GenericInputProps>(
           default:
         }
         break;
+      }
 
       case 'date':
         switch (props.field) {
