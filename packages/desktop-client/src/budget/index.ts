@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
-import { type i18n } from 'i18next';
+import i18n from 'i18next';
 
 import { send } from 'loot-core/platform/client/fetch';
 import {
@@ -15,12 +15,12 @@ type CategoryViews = {
 export const categoryQueries = {
   all: () => ['categories'],
   lists: () => [...categoryQueries.all(), 'lists'],
-  list: ({ t }: { t: i18n['t'] }) =>
+  list: () =>
     queryOptions<CategoryViews>({
       queryKey: [...categoryQueries.lists()],
       queryFn: async () => {
         const categories = await send('get-categories');
-        return translateStartingBalances(categories, t);
+        return translateStartingBalances(categories);
       },
       placeholderData: {
         grouped: [],
@@ -33,35 +33,32 @@ export const categoryQueries = {
 
 function translateStartingBalances(
   categories: { grouped: CategoryGroupEntity[]; list: CategoryEntity[] },
-  t: i18n['t'],
 ): CategoryViews {
   return {
-    list: translateStartingBalancesCategories(categories.list, t) ?? [],
+    list: translateStartingBalancesCategories(categories.list) ?? [],
     grouped: categories.grouped.map(group => ({
       ...group,
-      categories: translateStartingBalancesCategories(group.categories, t),
+      categories: translateStartingBalancesCategories(group.categories),
     })),
   };
 }
 
 function translateStartingBalancesCategories(
   categories: CategoryEntity[] | undefined,
-  t: i18n['t'],
 ): CategoryEntity[] | undefined {
   return categories
-    ? categories.map(cat => translateStartingBalancesCategory(cat, t))
+    ? categories.map(cat => translateStartingBalancesCategory(cat))
     : undefined;
 }
 
 function translateStartingBalancesCategory(
   category: CategoryEntity,
-  t: i18n['t'],
 ): CategoryEntity {
   return {
     ...category,
     name:
       category.name?.toLowerCase() === 'starting balances'
-        ? t('Starting Balances')
+        ? i18n.t('Starting Balances')
         : category.name,
   };
 }
