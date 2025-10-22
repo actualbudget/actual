@@ -51,7 +51,7 @@ export class MobilePayeesPage {
   }
 
   /**
-   * Click on a payee to view/edit rules
+   * Click on a payee to open the edit page
    */
   async clickPayee(index: number) {
     const payee = this.getNthPayee(index);
