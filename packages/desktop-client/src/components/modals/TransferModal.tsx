@@ -26,6 +26,7 @@ import {
   pushModal,
 } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { IntegerAmount } from 'loot-core/shared/util';
 
 type TransferModalProps = Extract<ModalType, { name: 'transfer' }>['options'];
 
@@ -55,7 +56,7 @@ export function TransferModal({
     return [filteredCategoryGroups, filteredCategories];
   }, [categoryId, originalCategoryGroups, showToBeBudgeted]);
 
-  const [amount, setAmount] = useState<number>(initialAmount);
+  const [amount, setAmount] = useState<IntegerAmount>(initialAmount);
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
 
