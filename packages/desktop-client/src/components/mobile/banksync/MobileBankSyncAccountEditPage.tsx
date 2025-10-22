@@ -10,10 +10,6 @@ import { View } from '@actual-app/components/view';
 
 import { unlinkAccount } from '@desktop-client/accounts/accountsSlice';
 import { BankSyncCheckboxOptions } from '@desktop-client/components/banksync/BankSyncCheckboxOptions';
-import {
-  type MappableFieldWithExample,
-  getFields,
-} from '@desktop-client/components/banksync/EditSyncAccount';
 import { FieldMapping } from '@desktop-client/components/banksync/FieldMapping';
 import { useBankSyncAccountSettings } from '@desktop-client/components/banksync/useBankSyncAccountSettings';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
@@ -43,7 +39,7 @@ export function MobileBankSyncAccountEditPage() {
     setImportTransactions,
     mappings,
     setMapping,
-    exampleTransaction,
+    fields,
     saveSettings,
   } = useBankSyncAccountSettings(accountId!);
 
@@ -103,7 +99,6 @@ export function MobileBankSyncAccountEditPage() {
     );
   }
 
-  const fields = exampleTransaction ? getFields(exampleTransaction) : [];
   const mapping =
     mappings.get(transactionDirection) ?? new Map<string, string>();
 
@@ -132,7 +127,7 @@ export function MobileBankSyncAccountEditPage() {
             <FieldMapping
               transactionDirection={transactionDirection}
               setTransactionDirection={setTransactionDirection}
-              fields={fields as MappableFieldWithExample[]}
+              fields={fields}
               mapping={mapping}
               setMapping={setMapping}
               selectWidth={150}

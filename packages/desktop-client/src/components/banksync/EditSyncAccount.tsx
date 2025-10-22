@@ -97,14 +97,16 @@ const mappableFields: MappableField[] = [
   },
 ];
 
-export const getFields = (transaction: TransactionEntity) =>
+export const getFields = (
+  transaction: TransactionEntity,
+): MappableFieldWithExample[] =>
   mappableFields.map(field => ({
     actualField: field.actualField,
     syncFields: field.syncFields
       .filter(syncField => transaction[syncField as keyof TransactionEntity])
       .map(syncField => ({
         field: syncField,
-        example: transaction[syncField as keyof TransactionEntity],
+        example: String(transaction[syncField as keyof TransactionEntity]),
       })),
   }));
 
@@ -129,7 +131,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
     setImportTransactions,
     mappings,
     setMapping,
-    exampleTransaction,
+    fields,
     saveSettings,
   } = useBankSyncAccountSettings(account.id);
 
@@ -159,7 +161,6 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
   const potentiallyTruncatedAccountName =
     account.name.length > 30 ? account.name.slice(0, 30) + '...' : account.name;
 
-  const fields = exampleTransaction ? getFields(exampleTransaction) : [];
   const mapping =
     mappings.get(transactionDirection) ?? new Map<string, string>();
 
@@ -184,7 +185,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
           <FieldMapping
             transactionDirection={transactionDirection}
             setTransactionDirection={setTransactionDirection}
-            fields={fields as MappableFieldWithExample[]}
+            fields={fields}
             mapping={mapping}
             setMapping={setMapping}
           />

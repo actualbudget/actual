@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import {
   defaultMappings,
@@ -8,7 +8,11 @@ import {
 } from 'loot-core/server/util/custom-sync-mapping';
 import { q } from 'loot-core/shared/query';
 
-import { type TransactionDirection } from './EditSyncAccount';
+import {
+  type TransactionDirection,
+  type MappableFieldWithExample,
+  getFields,
+} from './EditSyncAccount';
 
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
@@ -46,33 +50,32 @@ export function useBankSyncAccountSettings(accountId: string) {
     String(savedImportTransactions) === 'true',
   );
 
-  const transactionQuery = useMemo(
-    () =>
-      q('transactions')
-        .filter({
-          account: accountId,
-          amount: transactionDirection === 'payment' ? { $lte: 0 } : { $gt: 0 },
-          raw_synced_data: { $ne: null },
-        })
-        .options({ splits: 'none' })
-        .select('*'),
-    [accountId, transactionDirection],
-  );
+  const transactionQuery = q('transactions')
+    .filter({
+      account: accountId,
+      amount: transactionDirection === 'payment' ? { $lte: 0 } : { $gt: 0 },
+      raw_synced_data: { $ne: null },
+    })
+    .options({ splits: 'none' })
+    .select('*');
 
   const { transactions } = useTransactions({
     query: transactionQuery,
   });
 
-  const exampleTransaction = useMemo(() => {
-    const data = transactions?.[0]?.raw_synced_data;
-    if (!data) return undefined;
+  const data = transactions?.[0]?.raw_synced_data;
+  let exampleTransaction;
+  if (data) {
     try {
-      return JSON.parse(data);
+      exampleTransaction = JSON.parse(data);
     } catch (error) {
       console.error('Failed to parse transaction data:', error);
-      return undefined;
     }
-  }, [transactions]);
+  }
+
+  const fields: MappableFieldWithExample[] = exampleTransaction
+    ? getFields(exampleTransaction)
+    : [];
 
   const saveSettings = () => {
     const mappingsStr = mappingsToString(mappings);
@@ -110,6 +113,7 @@ export function useBankSyncAccountSettings(accountId: string) {
     mappings,
     setMapping,
     exampleTransaction,
+    fields,
     saveSettings,
   };
 }

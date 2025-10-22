@@ -1,7 +1,9 @@
 import { Trans } from 'react-i18next';
 
+import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 
 import { tsToRelativeTime } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
@@ -28,26 +30,23 @@ export function BankSyncAccountsListItem({
     : null;
 
   return (
-    <div
+    <Stack
       data-testid="bank-sync-account"
+      direction="row"
+      align="center"
+      spacing={12}
       style={{
         backgroundColor: theme.tableBackground,
         borderBottomWidth: 1,
         borderBottomColor: theme.tableBorder,
         borderBottomStyle: 'solid',
         padding: 16,
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
         width: '100%',
         cursor: 'pointer',
       }}
       onClick={() => onAction(account, isLinked ? 'edit' : 'link')}
     >
-      <div
-        style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}
-      >
+      <Stack spacing={1} style={{ flex: 1 }}>
         <Text
           style={{
             fontSize: 15,
@@ -78,16 +77,9 @@ export function BankSyncAccountsListItem({
             <Trans>Last sync: {{ time: lastSyncString }}</Trans>
           </Text>
         )}
-      </div>
+      </Stack>
 
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 8,
-        }}
-      >
+      <View>
         {isLinked ? (
           <Text
             style={{
@@ -108,7 +100,7 @@ export function BankSyncAccountsListItem({
             <Trans>Link account</Trans>
           </Text>
         )}
-      </div>
-    </div>
+      </View>
+    </Stack>
   );
 }
