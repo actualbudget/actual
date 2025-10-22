@@ -1008,7 +1008,7 @@ export function ImportTransactionsModal({
                         min="0"
                         step="1"
                         onChangeValue={value => {
-                          setSkipStartLines(parseInt(value, 10) || 0);
+                          setSkipStartLines(Math.abs(parseInt(value, 10) || 0));
                         }}
                         style={{ width: 50 }}
                       />
@@ -1028,7 +1028,7 @@ export function ImportTransactionsModal({
                         min="0"
                         step="1"
                         onChangeValue={value => {
-                          setSkipEndLines(parseInt(value, 10) || 0);
+                          setSkipEndLines(Math.abs(parseInt(value, 10) || 0));
                         }}
                         style={{ width: 50 }}
                       />
