@@ -28,6 +28,7 @@ import { useDispatch } from '@desktop-client/redux';
 
 type GenericInputProps = {
   style?: CSSProperties;
+  inputStyle?: CSSProperties;
 } & (
   | ((
       | {
@@ -113,7 +114,7 @@ type GenericInputProps = {
 );
 
 export const GenericInput = forwardRef<HTMLInputElement, GenericInputProps>(
-  ({ style, ...props }, ref) => {
+  ({ style, inputStyle, ...props }, ref) => {
     const dispatch = useDispatch();
     const { isNarrowWidth } = useResponsive();
     const { t } = useTranslation();
@@ -386,6 +387,7 @@ export const GenericInput = forwardRef<HTMLInputElement, GenericInputProps>(
                     ? '+'
                     : undefined
                 }
+                inputStyle={inputStyle}
               />
             );
             break;
@@ -396,6 +398,7 @@ export const GenericInput = forwardRef<HTMLInputElement, GenericInputProps>(
                 inputRef={ref}
                 value={props.value}
                 onUpdatePercent={props.onChange}
+                style={inputStyle}
               />
             );
             break;
@@ -407,6 +410,7 @@ export const GenericInput = forwardRef<HTMLInputElement, GenericInputProps>(
                 value={props.value || ''}
                 placeholder={t('nothing')}
                 onChangeValue={newValue => props.onChange(Number(newValue))}
+                style={inputStyle}
               />
             );
         }
@@ -430,6 +434,7 @@ export const GenericInput = forwardRef<HTMLInputElement, GenericInputProps>(
               value={props.value || ''}
               placeholder={t('nothing')}
               onChangeValue={props.onChange}
+              style={inputStyle}
             />
           );
         }

@@ -463,9 +463,9 @@ function BudgetTableHeader({
                     <View>
                       <AutoTextSize
                         as={Label}
-                        minFontSizePx={6}
+                        minFontSizePx={8}
                         maxFontSizePx={12}
-                        mode="oneline"
+                        mode="multiline"
                         title={t('Budgeted')}
                         style={{ color: theme.formInputText, paddingRight: 4 }}
                       />
