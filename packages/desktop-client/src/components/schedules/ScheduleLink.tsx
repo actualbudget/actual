@@ -105,15 +105,20 @@ export function ScheduleLink({
                 { count: ids?.length ?? 0 },
               )}
             </Text>
-            <InitialFocus>
-              <Search
-                inputRef={searchInput}
-                isInModal
-                width={300}
-                placeholder={t('Filter schedules…')}
-                value={filter}
-                onChange={setFilter}
-              />
+            <InitialFocus<HTMLInputElement>>
+              {node => (
+                <Search
+                  ref={r => {
+                    node.current = r;
+                    searchInput.current = r;
+                  }}
+                  isInModal
+                  width={300}
+                  placeholder={t('Filter schedules…')}
+                  value={filter}
+                  onChange={setFilter}
+                />
+              )}
             </InitialFocus>
             {ids.length === 1 && (
               <Button

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -54,7 +54,7 @@ export function CoverModal({
   const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
 
-  const onCategoryClick = useCallback(() => {
+  const openCategoryModal = useCallback(() => {
     dispatch(
       pushModal({
         modal: {
@@ -79,6 +79,10 @@ export function CoverModal({
 
   const fromCategory = categories.find(c => c.id === fromCategoryId);
 
+  useEffect(() => {
+    openCategoryModal();
+  }, []);
+
   return (
     <Modal name="cover">
       {({ state: { close } }) => (
@@ -89,7 +93,11 @@ export function CoverModal({
           />
           <View>
             <FieldLabel title={t('Cover from a category:')} />
-            <TapField value={fromCategory?.name} onPress={onCategoryClick} />
+            <TapField
+              autoFocus
+              value={fromCategory?.name}
+              onPress={openCategoryModal}
+            />
           </View>
 
           <View

@@ -67,7 +67,7 @@ export function GenericInput({
       case 'currency':
         return (
           <AmountInput
-            inputRef={ref}
+            ref={ref}
             value={value}
             onUpdate={v => onChange(v)}
             sign={options?.inflow || options?.outflow ? '+' : undefined}
@@ -269,7 +269,7 @@ export function GenericInput({
                 value={value}
                 dateFormat={dateFormat}
                 openOnFocus={false}
-                inputRef={ref}
+                ref={ref}
                 inputProps={{ placeholder: dateFormat.toLowerCase() }}
                 onSelect={onChange}
               />
