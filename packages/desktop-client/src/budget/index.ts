@@ -16,20 +16,11 @@ export const categoryQueries = {
   all: () => ['categories'],
   lists: () => [...categoryQueries.all(), 'lists'],
   list: ({ t }: { t: i18n['t'] }) =>
-    queryOptions({
+    queryOptions<CategoryViews>({
       queryKey: [...categoryQueries.lists()],
       queryFn: async () => {
         const categories = await send('get-categories');
-        return {
-          list: translateStartingBalancesCategories(t, categories.list),
-          grouped: categories.grouped.map(group => ({
-            ...group,
-            categories: translateStartingBalancesCategories(
-              t,
-              group.categories,
-            ),
-          })),
-        } as CategoryViews;
+        return translateStartingBalances(categories, t);
       },
       placeholderData: {
         grouped: [],
@@ -40,21 +31,32 @@ export const categoryQueries = {
     }),
 };
 
-function translateStartingBalancesCategories(
+function translateStartingBalances(
+  categories: { grouped: CategoryGroupEntity[]; list: CategoryEntity[] },
   t: i18n['t'],
+): CategoryViews {
+  return {
+    list: translateStartingBalancesCategories(categories.list, t) ?? [],
+    grouped: categories.grouped.map(group => ({
+      ...group,
+      categories: translateStartingBalancesCategories(group.categories, t),
+    })),
+  };
+}
+
+function translateStartingBalancesCategories(
   categories: CategoryEntity[] | undefined,
+  t: i18n['t'],
 ): CategoryEntity[] | undefined {
-  return categories?.map(cat => translateStartingBalancesCategory(t, cat));
+  return categories
+    ? categories.map(cat => translateStartingBalancesCategory(cat, t))
+    : undefined;
 }
 
 function translateStartingBalancesCategory(
+  category: CategoryEntity,
   t: i18n['t'],
-  category: CategoryEntity | null,
-): CategoryEntity | null {
-  if (!category) {
-    return category;
-  }
-
+): CategoryEntity {
   return {
     ...category,
     name:
