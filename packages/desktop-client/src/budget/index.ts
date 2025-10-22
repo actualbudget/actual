@@ -31,9 +31,10 @@ export const categoryQueries = {
     }),
 };
 
-function translateStartingBalances(
-  categories: { grouped: CategoryGroupEntity[]; list: CategoryEntity[] },
-): CategoryViews {
+function translateStartingBalances(categories: {
+  grouped: CategoryGroupEntity[];
+  list: CategoryEntity[];
+}): CategoryViews {
   return {
     list: translateStartingBalancesCategories(categories.list) ?? [],
     grouped: categories.grouped.map(group => ({
