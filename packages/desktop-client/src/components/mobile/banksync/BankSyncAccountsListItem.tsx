@@ -3,7 +3,6 @@ import { Trans } from 'react-i18next';
 import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
 
 import { tsToRelativeTime } from 'loot-core/shared/util';
 import { type AccountEntity } from 'loot-core/types/models';
@@ -79,28 +78,20 @@ export function BankSyncAccountsListItem({
         )}
       </Stack>
 
-      <View>
-        {isLinked ? (
-          <Text
-            style={{
-              fontSize: 13,
-              color: theme.pageTextLink,
-            }}
-          >
-            <Trans>Edit</Trans>
-          </Text>
-        ) : (
-          <Text
-            style={{
-              fontSize: 13,
-              color: theme.pageTextLink,
-              fontWeight: 500,
-            }}
-          >
-            <Trans>Link account</Trans>
-          </Text>
-        )}
-      </View>
+      <span
+        style={{
+          borderRadius: 4,
+          padding: '5px 10px',
+          backgroundColor: theme.noticeBackground,
+          border: '1px solid ' + theme.noticeBackground,
+          color: theme.noticeTextDark,
+          fontSize: 13,
+          fontWeight: 500,
+          flexShrink: 0,
+        }}
+      >
+        {isLinked ? <Trans>Edit</Trans> : <Trans>Link account</Trans>}
+      </span>
     </Stack>
   );
 }
