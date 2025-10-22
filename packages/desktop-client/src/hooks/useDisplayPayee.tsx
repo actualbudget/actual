@@ -20,15 +20,15 @@ const DisplayPayeeContext = createContext<DisplayPayeeContextValue | null>(
   null,
 );
 
-type DisplayPayeeContextProviderProps = {
+type DisplayPayeeProviderProps = {
   transactions: readonly TransactionEntity[];
   children: ReactNode;
 };
 
-export function DisplayPayeeContextProvider({
+export function DisplayPayeeProvider({
   transactions,
   children,
-}: DisplayPayeeContextProviderProps) {
+}: DisplayPayeeProviderProps) {
   const { t } = useTranslation();
   const subtransactionsQuery = useMemo(
     () =>
