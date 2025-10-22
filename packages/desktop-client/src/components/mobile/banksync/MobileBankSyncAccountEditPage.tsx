@@ -130,7 +130,7 @@ export function MobileBankSyncAccountEditPage() {
               fields={fields}
               mapping={mapping}
               setMapping={setMapping}
-              selectWidth={150}
+              isMobile
             />
 
             <Text style={{ fontSize: 15, marginTop: 20, marginBottom: 10 }}>

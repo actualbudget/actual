@@ -8,7 +8,58 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { CheckboxOption } from '@desktop-client/components/modals/ImportTransactionsModal/CheckboxOption';
+import { ToggleField } from '@desktop-client/components/mobile/MobileForms';
+import { CheckboxOption as BaseCheckboxOption } from '@desktop-client/components/modals/ImportTransactionsModal/CheckboxOption';
+
+type CheckboxOptionProps = {
+  id: string;
+  checked: boolean;
+  onChange: () => void;
+  disabled?: boolean;
+  helpMode?: 'desktop' | 'mobile';
+  children: ReactNode;
+};
+
+function CheckboxOption({
+  id,
+  checked,
+  onChange,
+  disabled,
+  helpMode = 'desktop',
+  children,
+}: CheckboxOptionProps) {
+  if (helpMode === 'mobile') {
+    return (
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 5,
+        }}
+      >
+        <Text>{children}</Text>
+        <ToggleField
+          id={id}
+          isOn={checked}
+          onToggle={onChange}
+          isDisabled={disabled}
+        />
+      </View>
+    );
+  }
+
+  return (
+    <BaseCheckboxOption
+      id={id}
+      checked={checked}
+      onChange={onChange}
+      disabled={disabled}
+    >
+      {children}
+    </BaseCheckboxOption>
+  );
+}
 
 type CheckboxOptionWithHelpProps = {
   id: string;
@@ -34,7 +85,7 @@ function CheckboxOptionWithHelp({
 
   if (helpMode === 'desktop') {
     return (
-      <CheckboxOption
+      <BaseCheckboxOption
         id={id}
         checked={checked}
         onChange={onChange}
@@ -54,28 +105,21 @@ function CheckboxOptionWithHelp({
             <SvgQuestion height={12} width={12} cursor="pointer" />
           </View>
         </Tooltip>
-      </CheckboxOption>
+      </BaseCheckboxOption>
     );
   }
 
   return (
-    <View>
-      <CheckboxOption
-        id={id}
-        checked={checked}
-        onChange={onChange}
-        disabled={disabled}
+    <View style={{ marginBottom: 5 }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
       >
-        <View
-          style={{
-            display: 'flex',
-            flexWrap: 'nowrap',
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 4,
-          }}
-        >
-          {children}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <Text>{children}</Text>
           <Button
             variant="bare"
             aria-label={t('Help')}
@@ -89,15 +133,19 @@ function CheckboxOptionWithHelp({
             <SvgQuestion height={12} width={12} />
           </Button>
         </View>
-      </CheckboxOption>
+        <ToggleField
+          id={id}
+          isOn={checked}
+          onToggle={onChange}
+          isDisabled={disabled}
+        />
+      </View>
       {showHelp && (
         <Text
           style={{
             fontSize: 13,
             color: theme.pageTextSubdued,
             marginTop: 5,
-            marginLeft: 28,
-            marginBottom: 10,
           }}
         >
           {helpText}
@@ -139,6 +187,7 @@ export function BankSyncCheckboxOptions({
         checked={importPending}
         onChange={() => setImportPending(!importPending)}
         disabled={!importTransactions}
+        helpMode={helpMode}
       >
         <Trans>Import pending transactions</Trans>
       </CheckboxOption>
@@ -148,6 +197,7 @@ export function BankSyncCheckboxOptions({
         checked={importNotes}
         onChange={() => setImportNotes(!importNotes)}
         disabled={!importTransactions}
+        helpMode={helpMode}
       >
         <Trans>Import transaction notes</Trans>
       </CheckboxOption>
