@@ -57,7 +57,7 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { DisplayPayeeContextProvider } from '@desktop-client/hooks/useDisplayPayee';
+import { DisplayPayeeProvider } from '@desktop-client/hooks/useDisplayPayee';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { usePayees } from '@desktop-client/hooks/usePayees';
@@ -1761,7 +1761,7 @@ class AccountInternal extends PureComponent<
         filtered={transactionsFiltered}
       >
         {(allTransactions, allBalances) => (
-          <DisplayPayeeContextProvider transactions={allTransactions}>
+          <DisplayPayeeProvider transactions={allTransactions}>
             <SelectedProviderWithItems
               name="transactions"
               items={allTransactions}
@@ -1912,7 +1912,7 @@ class AccountInternal extends PureComponent<
                 </View>
               </View>
             </SelectedProviderWithItems>
-          </DisplayPayeeContextProvider>
+          </DisplayPayeeProvider>
         )}
       </AllTransactions>
     );

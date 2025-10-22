@@ -63,7 +63,7 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { DisplayPayeeContextProvider } from '@desktop-client/hooks/useDisplayPayee';
+import { DisplayPayeeProvider } from '@desktop-client/hooks/useDisplayPayee';
 import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
@@ -619,7 +619,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
             />
           </View>
         </View>
-        <DisplayPayeeContextProvider transactions={allTransactions}>
+        <DisplayPayeeProvider transactions={allTransactions}>
           <SelectedProviderWithItems
             name="transactions"
             items={[]}
@@ -757,7 +757,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
               </View>
             </SchedulesProvider>
           </SelectedProviderWithItems>
-        </DisplayPayeeContextProvider>
+        </DisplayPayeeProvider>
       </View>
     </Page>
   );
