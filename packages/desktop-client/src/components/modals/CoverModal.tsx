@@ -24,6 +24,8 @@ import {
   pushModal,
 } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
+import { InitialFocus } from '@actual-app/components/initial-focus';
 
 type CoverModalProps = Extract<ModalType, { name: 'cover' }>['options'];
 
@@ -79,9 +81,12 @@ export function CoverModal({
 
   const fromCategory = categories.find(c => c.id === fromCategoryId);
 
+  const isInitialMount = useInitialMount();
   useEffect(() => {
-    openCategoryModal();
-  }, []);
+    if (isInitialMount) {
+      openCategoryModal();
+    }
+  }, [isInitialMount, openCategoryModal]);
 
   return (
     <Modal name="cover">
@@ -93,11 +98,13 @@ export function CoverModal({
           />
           <View>
             <FieldLabel title={t('Cover from a category:')} />
-            <TapField
-              autoFocus
-              value={fromCategory?.name}
-              onPress={openCategoryModal}
-            />
+            <InitialFocus>
+              <TapField
+                autoFocus
+                value={fromCategory?.name}
+                onPress={openCategoryModal}
+              />
+            </InitialFocus>
           </View>
 
           <View

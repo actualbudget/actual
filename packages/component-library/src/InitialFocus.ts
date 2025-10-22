@@ -12,17 +12,19 @@ import {
 type InitialFocusProps<T extends HTMLElement> = {
   /**
    * The child element to focus when the component mounts. This can be either a single React element or a function that returns a React element.
+   * The child element should have a `ref` prop for this to work. For child components which receives a ref via another prop
+   * e.g. `inputRef`, use a function as child and pass the ref to the appropriate prop.
    */
   children:
     | ReactElement<{ ref: Ref<T> }>
-    | ((ref: RefObject<T>) => ReactElement);
+    | ((ref: RefObject<T | null>) => ReactElement);
 };
 
 /**
  * InitialFocus sets focus on its child element
  * when it mounts.
  * @param {ReactElement | function} children - A single React element or a function that returns a React element.
- * The child component should have a `ref` prop for this to work. For child components which receives a ref via another prop
+ * The child element should have a `ref` prop for this to work. For child components which receives a ref via another prop
  * e.g. `inputRef`, use a function as child and pass the ref to the appropriate prop.
  */
 export function InitialFocus<T extends HTMLElement = HTMLElement>({
