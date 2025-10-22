@@ -136,7 +136,7 @@ export function BankSyncCheckboxOptions({
     <>
       <CheckboxOption
         id="form_pending"
-        checked={importPending && importTransactions}
+        checked={importPending}
         onChange={() => setImportPending(!importPending)}
         disabled={!importTransactions}
       >
@@ -145,7 +145,7 @@ export function BankSyncCheckboxOptions({
 
       <CheckboxOption
         id="form_notes"
-        checked={importNotes && importTransactions}
+        checked={importNotes}
         onChange={() => setImportNotes(!importNotes)}
         disabled={!importTransactions}
       >
@@ -154,7 +154,7 @@ export function BankSyncCheckboxOptions({
 
       <CheckboxOptionWithHelp
         id="form_reimport_deleted"
-        checked={reimportDeleted && importTransactions}
+        checked={reimportDeleted}
         onChange={() => setReimportDeleted(!reimportDeleted)}
         disabled={!importTransactions}
         helpText={t(

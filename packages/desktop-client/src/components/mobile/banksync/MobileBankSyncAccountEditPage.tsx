@@ -51,8 +51,13 @@ export function MobileBankSyncAccountEditPage() {
     navigate('/bank-sync');
   };
 
-  const handleSave = () => {
-    saveSettings();
+  const handleSave = async () => {
+    try {
+      await saveSettings();
+    } catch (error) {
+      console.error('Failed to save bank sync settings:', error);
+    }
+
     navigate('/bank-sync');
   };
 
@@ -104,7 +109,8 @@ export function MobileBankSyncAccountEditPage() {
   }
 
   const fields = exampleTransaction ? getFields(exampleTransaction) : [];
-  const mapping = mappings.get(transactionDirection);
+  const mapping =
+    mappings.get(transactionDirection) ?? new Map<string, string>();
 
   return (
     <Page
@@ -132,7 +138,7 @@ export function MobileBankSyncAccountEditPage() {
               transactionDirection={transactionDirection}
               setTransactionDirection={setTransactionDirection}
               fields={fields as MappableFieldWithExample[]}
-              mapping={mapping!}
+              mapping={mapping}
               setMapping={setMapping}
               selectWidth={150}
             />

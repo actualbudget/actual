@@ -97,7 +97,6 @@ export function useBankSyncAccountSettings(accountId: string) {
   };
 
   return {
-    // State
     transactionDirection,
     setTransactionDirection,
     importPending,
@@ -110,9 +109,7 @@ export function useBankSyncAccountSettings(accountId: string) {
     setImportTransactions,
     mappings,
     setMapping,
-    // Derived data
     exampleTransaction,
-    // Actions
     saveSettings,
   };
 }

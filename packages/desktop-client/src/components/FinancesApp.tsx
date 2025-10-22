@@ -13,6 +13,7 @@ import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
 import { BankSyncStatus } from './BankSyncStatus';
 import { CommandBar } from './CommandBar';
 import { GlobalKeys } from './GlobalKeys';
+import { MobileBankSyncAccountEditPage } from './mobile/banksync/MobileBankSyncAccountEditPage';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Notifications } from './Notifications';
@@ -283,7 +284,11 @@ export function FinancesApp() {
                 />
                 <Route
                   path="/bank-sync/account/:accountId/edit"
-                  element={<NarrowAlternate name="BankSyncAccountEdit" />}
+                  element={
+                    <WideNotSupported redirectTo="/bank-sync">
+                      <MobileBankSyncAccountEditPage />
+                    </WideNotSupported>
+                  }
                 />
                 <Route path="/tags" element={<ManageTagsPage />} />
                 <Route path="/settings" element={<Settings />} />

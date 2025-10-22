@@ -160,7 +160,8 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
     account.name.length > 30 ? account.name.slice(0, 30) + '...' : account.name;
 
   const fields = exampleTransaction ? getFields(exampleTransaction) : [];
-  const mapping = mappings.get(transactionDirection);
+  const mapping =
+    mappings.get(transactionDirection) ?? new Map<string, string>();
 
   return (
     <Modal
@@ -184,7 +185,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             transactionDirection={transactionDirection}
             setTransactionDirection={setTransactionDirection}
             fields={fields as MappableFieldWithExample[]}
-            mapping={mapping!}
+            mapping={mapping}
             setMapping={setMapping}
           />
 
