@@ -2,6 +2,7 @@ export type FeatureFlag =
   | 'goalTemplatesEnabled'
   | 'goalTemplatesUIEnabled'
   | 'actionTemplating'
+  | 'formulaMode'
   | 'currency'
   | 'plugins';
 

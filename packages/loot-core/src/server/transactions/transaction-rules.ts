@@ -19,7 +19,13 @@ import {
 } from '../../types/models';
 import { aqlQuery, schemaConfig } from '../aql';
 import * as db from '../db';
-import { getPayee, getPayeeByName, insertPayee, getAccount } from '../db';
+import {
+  getPayee,
+  getPayeeByName,
+  insertPayee,
+  getAccount,
+  getCategory,
+} from '../db';
 import { getMappings } from '../db/mappings';
 import { RuleError } from '../errors';
 import { requiredFields, toDateRepr } from '../models';
@@ -927,6 +933,8 @@ export type TransactionForRules = TransactionEntity & {
   payee_name?: string;
   _account?: db.DbAccount;
   balance?: number;
+  _category_name?: string;
+  _account_name?: string;
 };
 
 export async function prepareTransactionForRules(
@@ -946,8 +954,17 @@ export async function prepareTransactionForRules(
   if (trans.account) {
     if (accounts !== null && accounts.has(trans.account)) {
       r._account = accounts.get(trans.account);
+      r._account_name = r._account?.name || '';
     } else {
       r._account = await getAccount(trans.account);
+      r._account_name = r._account?.name || '';
+    }
+  }
+
+  if (trans.category) {
+    const category = await getCategory(trans.category);
+    if (category) {
+      r._category_name = category.name;
     }
 
     const dateBoundary = trans.date ?? currentDay();
