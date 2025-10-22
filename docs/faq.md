@@ -48,6 +48,12 @@
   in a category. Actual's default assumption is that you can pay off any card in full at any time and
   not touch your budget to do it. (Credit: evequefou)
 
+- **Q.** _My budget file size has recently significantly shrunk. Why?_
+
+  **A.** By default, Actual stores all mutations in the budget file. Every time you add a transaction, change a payee, add notes, create rules, delete a schedule, etc., a new entry is created in the budget file. This means the file naturally grows over time as it accumulates all these changes.
+
+  However, if you either click "Reset Sync" or export and re-import a file, we squeeze all those tiny changes into a single file. This process removes all the historical changes and significantly reduces the file size. This is normal behavior and not a cause for concern.
+
 - **Q.** _Does Actual Budget have an API? What are the endpoints?_
 
   **A.** Actual does not have a REST API with endpoints that you can just call. However, we do have an API NPM package that allows programmatic access to the budget. It runs the UI in _headless_ mode and allows performing many of the same operations that you can perform by clicking around the UI.
