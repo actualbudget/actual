@@ -16,10 +16,10 @@ export const categoryQueries = {
   all: () => ['categories'],
   lists: () => [...categoryQueries.all(), 'lists'],
   list: ({ t }: { t: i18n['t'] }) =>
-    queryOptions<CategoryViews>({
+    queryOptions({
       queryKey: [...categoryQueries.lists()],
       queryFn: async () => {
-        const categories: CategoryViews = await send('get-categories');
+        const categories = await send('get-categories');
         return {
           list: translateStartingBalancesCategories(t, categories.list),
           grouped: categories.grouped.map(group => ({
@@ -29,7 +29,7 @@ export const categoryQueries = {
               group.categories,
             ),
           })),
-        };
+        } as CategoryViews;
       },
       placeholderData: {
         grouped: [],
