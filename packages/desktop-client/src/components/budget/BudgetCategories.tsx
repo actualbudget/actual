@@ -70,9 +70,9 @@ type BudgetCategoriesProps = {
     >['MonthComponent'];
   };
   onBudgetAction: (month: string, action: string, arg: unknown) => void;
-  onShowActivity: (id: string, month?: string) => void;
-  onEditName?: (id: string) => void;
-  onEditMonth?: (id: string, month: string) => void;
+  onShowActivity: (id: CategoryEntity['id'], month?: string) => void;
+  onEditName?: (id: CategoryEntity['id']) => void;
+  onEditMonth?: (id: CategoryEntity['id'], month: string) => void;
   onSaveCategory?: (category: CategoryEntity) => void;
   onSaveGroup?: (group: CategoryGroupEntity) => void;
   onDeleteCategory: (id: CategoryEntity['id']) => void;
