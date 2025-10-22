@@ -7,10 +7,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  type TransactionEntity,
-  type AccountEntity,
-} from 'loot-core/types/models';
+import { type AccountEntity } from 'loot-core/types/models';
 
 import { BankSyncCheckboxOptions } from './BankSyncCheckboxOptions';
 import { FieldMapping } from './FieldMapping';
@@ -97,17 +94,39 @@ const mappableFields: MappableField[] = [
   },
 ];
 
+function getByPath(obj: unknown, path: string): unknown {
+  if (obj == null) {
+    return undefined;
+  }
+
+  const keys = path.split('.');
+  let current: unknown = obj;
+
+  for (const key of keys) {
+    if (current == null || typeof current !== 'object') {
+      return undefined;
+    }
+    current = (current as Record<string, unknown>)[key];
+  }
+
+  return current;
+}
+
 export const getFields = (
-  transaction: TransactionEntity,
+  transaction: Record<string, unknown>,
 ): MappableFieldWithExample[] =>
   mappableFields.map(field => ({
     actualField: field.actualField,
     syncFields: field.syncFields
-      .filter(syncField => transaction[syncField as keyof TransactionEntity])
-      .map(syncField => ({
-        field: syncField,
-        example: String(transaction[syncField as keyof TransactionEntity]),
-      })),
+      .map(syncField => {
+        const value = getByPath(transaction, syncField);
+        return value !== undefined
+          ? { field: syncField, example: String(value) }
+          : null;
+      })
+      .filter(
+        (item): item is { field: string; example: string } => item !== null,
+      ),
   }));
 
 export type EditSyncAccountProps = {
