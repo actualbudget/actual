@@ -330,7 +330,6 @@ export function SelectLinkedAccountsModal({
                   }),
                 )}
                 style={{ backgroundColor: theme.tableHeaderBackground }}
-                getItemKey={String}
                 renderItem={({ item }) => (
                   <View key={item.id}>
                     <TableRow
@@ -465,7 +464,7 @@ function TableRow({
       </Field>
       <Field width={80}>
         <PrivacyFilter>
-          {externalAccount.balance != null
+          {!isNaN(Number(externalAccount.balance))
             ? format(externalAccount.balance, 'financial')
             : t('Unknown')}
         </PrivacyFilter>
