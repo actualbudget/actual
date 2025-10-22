@@ -3,7 +3,11 @@
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import { getLocale } from '../../shared/locale';
 import * as monthUtils from '../../shared/months';
-import { integerToCurrency, safeNumber } from '../../shared/util';
+import {
+  IntegerAmount,
+  integerToCurrency,
+  safeNumber,
+} from '../../shared/util';
 import { CategoryEntity } from '../../types/models';
 import * as db from '../db';
 import * as sheet from '../sheet';
@@ -72,10 +76,10 @@ function getBudgetData<T extends BudgetTable>(
 ): Promise<BudgetData[]> {
   return db.all<
     (db.DbReflectBudget | db.DbZeroBudget) &
-      Pick<
-        db.DbViewCategoryWithGroupHidden,
-        'is_income' | 'hidden' | 'group_hidden'
-      >
+    Pick<
+      db.DbViewCategoryWithGroupHidden,
+      'is_income' | 'hidden' | 'group_hidden'
+    >
   >(
     `
     SELECT b.*, c.is_income, c.hidden, g.hidden AS group_hidden
@@ -432,45 +436,53 @@ export async function coverOverspending({
   month,
   to,
   from,
+  amount,
 }: {
   month: string;
   to: CategoryEntity['id'] | 'to-budget';
   from: CategoryEntity['id'] | 'to-budget' | 'overbudgeted';
+  amount?: IntegerAmount;
 }): Promise<void> {
   const sheetName = monthUtils.sheetForMonth(month);
   const toBudgeted = await getSheetValue(sheetName, 'budget-' + to);
-  const leftover = await getSheetValue(sheetName, 'leftover-' + to);
   const leftoverFrom = await getSheetValue(
     sheetName,
     from === 'to-budget' ? 'to-budget' : 'leftover-' + from,
   );
 
-  if (leftover >= 0 || leftoverFrom <= 0) {
+  // Cover provided amount (can be partial) or full overspending amount.
+  const amountToCover = amount
+    ? amount
+    : await getSheetValue(sheetName, 'leftover-' + to);
+
+  if (amountToCover >= 0 || leftoverFrom <= 0) {
     return;
   }
 
-  const amountCovered = Math.min(-leftover, leftoverFrom);
-
-  // If we are covering it from the to be budgeted amount, ignore this
-  if (from !== 'to-budget') {
-    const fromBudgeted = await getSheetValue(sheetName, 'budget-' + from);
-    await setBudget({
-      category: from,
-      month,
-      amount: fromBudgeted - amountCovered,
-    });
-  }
+  // Don't go over the leftover amount of the covering category
+  const coverableAmount = Math.min(-amountToCover, leftoverFrom);
 
   await batchMessages(async () => {
+
+    // If we are covering it from the to be budgeted amount, ignore this
+    if (from !== 'to-budget') {
+      const fromBudgeted = await getSheetValue(sheetName, 'budget-' + from);
+      await setBudget({
+        category: from,
+        month,
+        amount: fromBudgeted - coverableAmount,
+      });
+    }
+
     await setBudget({
       category: to,
       month,
-      amount: toBudgeted + amountCovered,
+      amount: toBudgeted + coverableAmount,
     });
 
     await addMovementNotes({
       month,
-      amount: amountCovered,
+      amount: coverableAmount,
       to,
       from,
     });
@@ -497,21 +509,37 @@ export async function transferAvailable({
 export async function coverOverbudgeted({
   month,
   category,
+  amount,
 }: {
   month: string;
   category: string;
+  amount?: IntegerAmount;
 }): Promise<void> {
   const sheetName = monthUtils.sheetForMonth(month);
-  const toBudget = await getSheetValue(sheetName, 'to-budget');
-
   const categoryBudget = await getSheetValue(sheetName, 'budget-' + category);
 
+  // Cover provided amount (can be partial) or full overbudgeted amount.
+  const amountToCover = amount
+    ? amount
+    : await getSheetValue(sheetName, 'to-budget');
+
+  if (amountToCover >= 0 || categoryBudget <= 0) {
+    return;
+  }
+
+  // Don't allow the budget of the covering category to go negative.
+  const coverableAmount = Math.min(-amountToCover, categoryBudget);
+
   await batchMessages(async () => {
-    await setBudget({ category, month, amount: categoryBudget + toBudget });
+    await setBudget({
+      category,
+      month,
+      amount: categoryBudget - coverableAmount,
+    });
 
     await addMovementNotes({
       month,
-      amount: -toBudget,
+      amount: coverableAmount,
       from: category,
       to: 'overbudgeted',
     });

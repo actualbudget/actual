@@ -8,7 +8,11 @@ import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import { integerToCurrency, amountToInteger } from 'loot-core/shared/util';
+import {
+  integerToCurrency,
+  amountToInteger,
+  type IntegerAmount,
+} from 'loot-core/shared/util';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
@@ -20,9 +24,9 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 
 type TransferMenuProps = {
   categoryId?: CategoryEntity['id'];
-  initialAmount?: number;
+  initialAmount?: IntegerAmount;
   showToBeBudgeted?: boolean;
-  onSubmit: (amount: number, categoryId: CategoryEntity['id']) => void;
+  onSubmit: (amount: IntegerAmount, categoryId: CategoryEntity['id']) => void;
   onClose: () => void;
 };
 
@@ -46,14 +50,14 @@ export function TransferMenu({
       : categoryGroups;
   }, [originalCategoryGroups, categoryId, showToBeBudgeted]);
 
-  const _initialAmount = integerToCurrency(Math.max(initialAmount, 0));
+  const _initialAmount = integerToCurrency(initialAmount);
   const [amount, setAmount] = useState<string | null>(null);
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);
 
-  const _onSubmit = (newAmount: string | null, categoryId: string | null) => {
-    const parsedAmount = evalArithmetic(newAmount || '');
+  const _onSubmit = () => {
+    const parsedAmount = evalArithmetic(amount || '');
     if (parsedAmount && categoryId) {
-      onSubmit?.(amountToInteger(parsedAmount), categoryId);
+      onSubmit(amountToInteger(parsedAmount), toCategoryId);
     }
 
     onClose();
@@ -63,7 +67,7 @@ export function TransferMenu({
     <Form
       onSubmit={e => {
         e.preventDefault();
-        _onSubmit(amount, toCategoryId);
+        _onSubmit();
       }}
     >
       <View style={{ padding: 10 }}>
@@ -75,7 +79,9 @@ export function TransferMenu({
             <Input defaultValue={_initialAmount} onUpdate={setAmount} />
           </InitialFocus>
         </View>
-        <View style={{ margin: '10px 0 5px 0' }}>To:</View>
+        <View style={{ margin: '10px 0 5px 0' }}>
+          <Trans>To:</Trans>
+        </View>
 
         <CategoryAutocomplete
           categoryGroups={filteredCategoryGroups}

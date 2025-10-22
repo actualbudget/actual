@@ -88,9 +88,11 @@ export function EnvelopeBudgetSummaryModal({
             title: t('Cover overbudgeted'),
             month,
             showToBeBudgeted: false,
-            onSubmit: categoryId => {
+            amount: sheetValue,
+            onSubmit: (amount, categoryId) => {
               onBudgetAction(month, 'cover-overbudgeted', {
                 category: categoryId,
+                amount,
               });
               dispatch(collapseModals({ rootModalName: 'cover' }));
               showUndoNotification({
