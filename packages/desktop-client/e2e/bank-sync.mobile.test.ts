@@ -49,13 +49,12 @@ test.describe('Mobile Bank Sync', () => {
 
   test('searches for accounts', async () => {
     await bankSyncPage.searchFor('Checking');
-    await page.waitForTimeout(300);
+    await expect(bankSyncPage.searchBox).toHaveValue('Checking');
     await expect(page).toMatchThemeScreenshots();
   });
 
   test('page handles empty state gracefully', async () => {
     await bankSyncPage.searchFor('NonExistentAccount123456789');
-    await page.waitForTimeout(500);
 
     const emptyMessage = page.getByText(/No accounts found/);
     await expect(emptyMessage).toBeVisible();
