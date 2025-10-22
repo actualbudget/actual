@@ -4,7 +4,7 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   timeout: 60000, // 60 seconds
   retries: 1,
-  workers: process.env.CI ? 2 : undefined,
+  workers: process.env.CI ? 3 : undefined,
   testDir: 'e2e/',
   reporter: process.env.CI ? 'blob' : [['html', { open: 'never' }]],
   use: {
