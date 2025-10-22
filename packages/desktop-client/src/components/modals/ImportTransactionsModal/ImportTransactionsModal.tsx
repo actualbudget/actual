@@ -381,7 +381,6 @@ export function ImportTransactionsModal({
         return trans;
       });
 
-      setLoadingState(null);
       setError(null);
 
       /// Do fine grained reporting between the old and new OFX importers.
@@ -391,13 +390,8 @@ export function ImportTransactionsModal({
           message: errors[0].message || 'Internal error',
         });
       } else {
-        let flipAmount = false;
-        let fieldMappings = null;
-        let splitMode = false;
-        let parseDateFormat: string | null = null;
-
         if (filetype === 'csv' || filetype === 'qif') {
-          flipAmount =
+          const flipAmount =
             String(prefs[`flip-amount-${accountId}-${filetype}`]) === 'true';
           setFlipAmount(flipAmount);
         }
@@ -408,23 +402,22 @@ export function ImportTransactionsModal({
             ? JSON.parse(mappings)
             : getInitialMappings(transactions);
 
-          fieldMappings = mappings;
           // @ts-expect-error - mappings might not have outflow/inflow properties
           setFieldMappings(mappings);
 
           // Set initial split mode based on any saved mapping
           // @ts-expect-error - mappings might not have outflow/inflow properties
-          splitMode = !!(mappings.outflow || mappings.inflow);
+          const splitMode = !!(mappings.outflow || mappings.inflow);
           setSplitMode(splitMode);
 
-          parseDateFormat =
+          const parseDateFormat =
             prefs[`parse-date-${accountId}-${filetype}`] ||
             getInitialDateFormat(transactions, mappings);
           setParseDateFormat(
             isDateFormat(parseDateFormat) ? parseDateFormat : null,
           );
         } else if (filetype === 'qif') {
-          parseDateFormat =
+          const parseDateFormat =
             prefs[`parse-date-${accountId}-${filetype}`] ||
             getInitialDateFormat(transactions, { date: 'date' });
           setParseDateFormat(
@@ -441,24 +434,12 @@ export function ImportTransactionsModal({
         const reversedTransactions =
           transactions.reverse() as ImportTransaction[];
         setParsedTransactions(reversedTransactions);
-
-        const transactionPreview = await getImportPreview(
-          reversedTransactions,
-          filetype,
-          flipAmount,
-          fieldMappings,
-          splitMode,
-          isDateFormat(parseDateFormat) ? parseDateFormat : null,
-          inOutMode,
-          outValue,
-          multiplierAmount,
-        );
-        setTransactions(transactionPreview);
       }
+
+      setLoadingState(null);
     },
     // We use some state variables from the component, but do not want to re-parse when they change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [accountId, getImportPreview, prefs],
+    [accountId, prefs],
   );
 
   function onMultiplierChange(e) {
@@ -781,9 +762,7 @@ export function ImportTransactionsModal({
       return;
     }
 
-    if (filetype === 'csv' || filetype === 'qif') {
-      runImportPreview();
-    }
+    runImportPreview();
     // intentionally exclude runImportPreview from dependencies to avoid infinite rerenders
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -954,13 +933,6 @@ export function ImportTransactionsModal({
               checked={fallbackMissingPayeeToMemo}
               onChange={() => {
                 setFallbackMissingPayeeToMemo(state => !state);
-                parse(
-                  filename,
-                  getParseOptions('ofx', {
-                    fallbackMissingPayeeToMemo: !fallbackMissingPayeeToMemo,
-                    importNotes,
-                  }),
-                );
               }}
             >
               <Trans>Use Memo as a fallback for empty Payees</Trans>
@@ -973,16 +945,6 @@ export function ImportTransactionsModal({
               checked={importNotes}
               onChange={() => {
                 setImportNotes(!importNotes);
-                parse(
-                  filename,
-                  getParseOptions(filetype, {
-                    delimiter,
-                    hasHeaderRow,
-                    skipLines,
-                    fallbackMissingPayeeToMemo,
-                    importNotes: !importNotes,
-                  }),
-                );
               }}
             >
               <Trans>Import notes from file</Trans>
@@ -1047,15 +1009,6 @@ export function ImportTransactionsModal({
                         value={delimiter}
                         onChange={value => {
                           setDelimiter(value);
-                          parse(
-                            filename,
-                            getParseOptions('csv', {
-                              delimiter: value,
-                              hasHeaderRow,
-                              skipLines,
-                              importNotes,
-                            }),
-                          );
                         }}
                         style={{ width: 50 }}
                       />
@@ -1075,15 +1028,6 @@ export function ImportTransactionsModal({
                         min="0"
                         onChangeValue={value => {
                           setSkipLines(+value);
-                          parse(
-                            filename,
-                            getParseOptions('csv', {
-                              delimiter,
-                              hasHeaderRow,
-                              skipLines: +value,
-                              importNotes,
-                            }),
-                          );
                         }}
                         style={{ width: 50 }}
                       />
@@ -1093,15 +1037,6 @@ export function ImportTransactionsModal({
                       checked={hasHeaderRow}
                       onChange={() => {
                         setHasHeaderRow(!hasHeaderRow);
-                        parse(
-                          filename,
-                          getParseOptions('csv', {
-                            delimiter,
-                            hasHeaderRow: !hasHeaderRow,
-                            skipLines,
-                            importNotes,
-                          }),
-                        );
                       }}
                     >
                       <Trans>File has header row</Trans>
