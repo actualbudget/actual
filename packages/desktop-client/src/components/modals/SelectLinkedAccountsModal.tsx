@@ -426,6 +426,7 @@ function TableRow({
   const { addOnBudgetAccountOption, addOffBudgetAccountOption } =
     useAddBudgetAccountOptions();
   const format = useFormat();
+  const { t } = useTranslation();
 
   const availableAccountOptions = getAvailableAccountOptions(
     unlinkedAccounts,
@@ -464,7 +465,9 @@ function TableRow({
       </Field>
       <Field width={80}>
         <PrivacyFilter>
-          {format(externalAccount.balance, 'financial')}
+          {externalAccount.balance != null
+            ? format(externalAccount.balance, 'financial')
+            : t('Unknown')}
         </PrivacyFilter>
       </Field>
       <Field
@@ -594,7 +597,9 @@ function AccountCard({
       >
         <Trans>Balance:</Trans>{' '}
         <PrivacyFilter>
-          {format(externalAccount.balance, 'financial')}
+          {externalAccount.balance != null
+            ? format(externalAccount.balance, 'financial')
+            : t('Unknown')}
         </PrivacyFilter>
       </View>
 
