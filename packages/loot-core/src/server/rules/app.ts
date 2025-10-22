@@ -153,7 +153,11 @@ async function applyRuleActions({
 }: {
   transactions: TransactionEntity[];
   actions: Array<Action | RuleActionEntity>;
-}): Promise<null | { added: TransactionEntity[]; updated: unknown[] }> {
+}): Promise<null | {
+  added: TransactionEntity[];
+  updated: unknown[];
+  errors: string[];
+}> {
   return rules.applyActions(transactions, actions);
 }
 

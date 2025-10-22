@@ -32,6 +32,7 @@ import { type TableHandleRef } from '@desktop-client/components/table';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
 // When data changes, there are two ways to update the UI:
@@ -249,6 +250,20 @@ export function TransactionList({
       updatedFieldName: string | null = null,
     ) => {
       const afterRules = await send('rules-run', { transaction });
+
+      // Show formula errors if any
+      if (afterRules._ruleErrors && afterRules._ruleErrors.length > 0) {
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'error',
+              message: `Formula errors in rules:\n${afterRules._ruleErrors.join('\n')}`,
+              sticky: true,
+            },
+          }),
+        );
+      }
+
       const diff = getChangedValues(transaction, afterRules);
 
       const newTransaction: TransactionEntity = { ...transaction };
@@ -282,7 +297,7 @@ export function TransactionList({
       }
       return newTransaction;
     },
-    [],
+    [dispatch],
   );
 
   const onManagePayees = useCallback(

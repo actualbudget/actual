@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { Bar, BarChart, LabelList, ResponsiveContainer } from 'recharts';
+import { Bar, BarChart, LabelList } from 'recharts';
 
 import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
@@ -205,46 +205,45 @@ export function CashFlowCard({
         {data ? (
           <Container style={{ height: 'auto', flex: 1 }}>
             {(width, height) => (
-              <ResponsiveContainer>
-                <BarChart
-                  width={width}
-                  height={height}
-                  data={[
-                    {
-                      income,
-                      expenses,
-                    },
-                  ]}
-                  margin={{
-                    top: 10,
-                    bottom: 0,
-                  }}
+              <BarChart
+                responsive
+                width={width}
+                height={height}
+                data={[
+                  {
+                    income,
+                    expenses,
+                  },
+                ]}
+                margin={{
+                  top: 10,
+                  bottom: 0,
+                }}
+              >
+                <Bar
+                  dataKey="income"
+                  fill={chartTheme.colors.blue}
+                  barSize={14}
                 >
-                  <Bar
+                  <LabelList
                     dataKey="income"
-                    fill={chartTheme.colors.blue}
-                    barSize={14}
-                  >
-                    <LabelList
-                      dataKey="income"
-                      position="left"
-                      content={<CustomLabel name={t('Income')} />}
-                    />
-                  </Bar>
+                    position="left"
+                    content={<CustomLabel name={t('Income')} />}
+                  />
+                </Bar>
 
-                  <Bar
+                <Bar
+                  dataKey="expenses"
+                  fill={chartTheme.colors.red}
+                  barSize={14}
+                >
+                  <LabelList
                     dataKey="expenses"
-                    fill={chartTheme.colors.red}
-                    barSize={14}
-                  >
-                    <LabelList
-                      dataKey="expenses"
-                      position="right"
-                      content={<CustomLabel name={t('Expenses')} />}
-                    />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+                    position="right"
+                    content={<CustomLabel name={t('Expenses')} />}
+                  />
+                </Bar>
+              </BarChart>
             )}
           </Container>
         ) : (
