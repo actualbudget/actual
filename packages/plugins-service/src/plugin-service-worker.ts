@@ -28,7 +28,6 @@ const fileList = new Map<string, string>();
 // Log installation event
 self.addEventListener('install', (_event: ExtendableEvent) => {
   console.log('Plugins Worker installing...');
-  self.skipWaiting(); // Forces activation immediately
 });
 
 // Log activation event
@@ -64,6 +63,8 @@ self.addEventListener('fetch', (event: FetchEvent) => {
         ? pathSegments[slugIndex + 1].split('?')[0]
         : '';
     event.respondWith(handlePlugin(slug, fileName.replace('?import', '')));
+  } else {
+    event.respondWith(fetch(event.request));
   }
 });
 
