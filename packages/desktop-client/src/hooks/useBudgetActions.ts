@@ -20,50 +20,50 @@ type ApplyBudgetActionPayload =
     };
   }
   | {
-    type: 'copy-last';
-    month: string;
-    args: never;
-  }
+      type: 'copy-last';
+      month: string;
+      args?: never;
+    }
   | {
-    type: 'set-zero';
-    month: string;
-    args: never;
-  }
+      type: 'set-zero';
+      month: string;
+      args?: never;
+    }
   | {
-    type: 'set-3-avg';
-    month: string;
-    args: never;
-  }
+      type: 'set-3-avg';
+      month: string;
+      args?: never;
+    }
   | {
-    type: 'set-6-avg';
-    month: string;
-    args: never;
-  }
+      type: 'set-6-avg';
+      month: string;
+      args?: never;
+    }
   | {
-    type: 'set-12-avg';
-    month: string;
-    args: never;
-  }
+      type: 'set-12-avg';
+      month: string;
+      args?: never;
+    }
   | {
-    type: 'check-templates';
-    month: never;
-    args: never;
-  }
+      type: 'check-templates';
+      month?: never;
+      args?: never;
+    }
   | {
-    type: 'apply-goal-template';
-    month: string;
-    args: never;
-  }
+      type: 'apply-goal-template';
+      month: string;
+      args?: never;
+    }
   | {
-    type: 'overwrite-goal-template';
-    month: string;
-    args: never;
-  }
+      type: 'overwrite-goal-template';
+      month: string;
+      args?: never;
+    }
   | {
-    type: 'cleanup-goal-template';
-    month: string;
-    args: never;
-  }
+      type: 'cleanup-goal-template';
+      month: string;
+      args?: never;
+    }
   | {
     type: 'hold';
     month: string;
@@ -72,10 +72,10 @@ type ApplyBudgetActionPayload =
     };
   }
   | {
-    type: 'reset-hold';
-    month: string;
-    args: never;
-  }
+      type: 'reset-hold';
+      month: string;
+      args?: never;
+    }
   | {
     type: 'cover-overspending';
     month: string;
@@ -122,10 +122,10 @@ type ApplyBudgetActionPayload =
     };
   }
   | {
-    type: 'reset-income-carryover';
-    month: string;
-    args: never;
-  }
+      type: 'reset-income-carryover';
+      month: string;
+      args?: never;
+    }
   | {
     type: 'apply-single-category-template';
     month: string;
