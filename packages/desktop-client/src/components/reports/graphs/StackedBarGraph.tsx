@@ -13,7 +13,6 @@ import {
   YAxis,
   Tooltip,
   LabelList,
-  ResponsiveContainer,
 } from 'recharts';
 
 import {
@@ -205,100 +204,99 @@ export function StackedBarGraph({
     >
       {(width, height) =>
         data.intervalData && (
-          <ResponsiveContainer>
-            <div>
-              {!compact && <div style={{ marginTop: '15px' }} />}
-              <BarChart
-                width={width}
-                height={height}
-                data={data.intervalData}
-                margin={{ top: 0, right: 0, left: leftMargin, bottom: 10 }}
-                style={{ cursor: pointer }}
-                stackOffset="sign" //stacked by sign
-              >
-                {showTooltip && (
-                  <Tooltip
-                    content={
-                      <CustomTooltip
-                        compact={compact}
-                        tooltip={tooltip}
-                        format={format}
-                      />
-                    }
-                    formatter={numberFormatterTooltip}
-                    isAnimationActive={false}
-                    cursor={{ fill: 'transparent' }}
-                  />
-                )}
-                <XAxis
-                  dataKey="date"
+          <div>
+            {!compact && <div style={{ marginTop: '15px' }} />}
+            <BarChart
+              responsive
+              width={width}
+              height={height}
+              data={data.intervalData}
+              margin={{ top: 0, right: 0, left: leftMargin, bottom: 10 }}
+              style={{ cursor: pointer }}
+              stackOffset="sign" //stacked by sign
+            >
+              {showTooltip && (
+                <Tooltip
+                  content={
+                    <CustomTooltip
+                      compact={compact}
+                      tooltip={tooltip}
+                      format={format}
+                    />
+                  }
+                  formatter={numberFormatterTooltip}
+                  isAnimationActive={false}
+                  cursor={{ fill: 'transparent' }}
+                />
+              )}
+              <XAxis
+                dataKey="date"
+                tick={{ fill: theme.pageText }}
+                tickLine={{ stroke: theme.pageText }}
+              />
+              {!compact && <CartesianGrid strokeDasharray="3 3" />}
+              {!compact && (
+                <YAxis
+                  tickFormatter={value =>
+                    getCustomTick(
+                      format(value, 'financial-no-decimals'),
+                      privacyMode,
+                    )
+                  }
                   tick={{ fill: theme.pageText }}
                   tickLine={{ stroke: theme.pageText }}
+                  tickSize={0}
                 />
-                {!compact && <CartesianGrid strokeDasharray="3 3" />}
-                {!compact && (
-                  <YAxis
-                    tickFormatter={value =>
-                      getCustomTick(
-                        format(value, 'financial-no-decimals'),
-                        privacyMode,
-                      )
-                    }
-                    tick={{ fill: theme.pageText }}
-                    tickLine={{ stroke: theme.pageText }}
-                    tickSize={0}
-                  />
-                )}
-                {data.legend
-                  .slice(0)
-                  .reverse()
-                  .map(entry => (
-                    <Bar
-                      key={entry.name}
-                      dataKey={entry.name}
-                      stackId="a"
-                      fill={entry.color}
-                      onMouseLeave={() => {
-                        setPointer('');
-                        setTooltip('');
-                      }}
-                      onMouseEnter={() => {
-                        setTooltip(entry.name);
-                        if (!['Group', 'Interval'].includes(groupBy)) {
-                          setPointer('pointer');
-                        }
-                      }}
-                      onClick={e =>
-                        ((compact && showTooltip) || !compact) &&
-                        !['Group', 'Interval'].includes(groupBy) &&
-                        showActivity({
-                          navigate,
-                          categories,
-                          accounts,
-                          balanceTypeOp,
-                          filters,
-                          showHiddenCategories,
-                          showOffBudget,
-                          type: 'time',
-                          startDate: e.payload?.intervalStartDate,
-                          endDate: e.payload?.intervalEndDate,
-                          field: groupBy.toLowerCase(),
-                          id: entry.id,
-                          interval,
-                        })
+              )}
+              {data.legend
+                .slice(0)
+                .reverse()
+                .map(entry => (
+                  <Bar
+                    key={entry.name}
+                    dataKey={entry.name}
+                    stackId="a"
+                    fill={entry.color}
+                    onMouseLeave={() => {
+                      setPointer('');
+                      setTooltip('');
+                    }}
+                    onMouseEnter={() => {
+                      setTooltip(entry.name);
+                      if (!['Group', 'Interval'].includes(groupBy)) {
+                        setPointer('pointer');
                       }
-                    >
-                      {viewLabels && !compact && (
-                        <LabelList
-                          dataKey={entry.name}
-                          content={customLabelWithFormat}
-                        />
-                      )}
-                    </Bar>
-                  ))}
-              </BarChart>
-            </div>
-          </ResponsiveContainer>
+                    }}
+                    onClick={e =>
+                      ((compact && showTooltip) || !compact) &&
+                      !['Group', 'Interval'].includes(groupBy) &&
+                      showActivity({
+                        navigate,
+                        categories,
+                        accounts,
+                        balanceTypeOp,
+                        filters,
+                        showHiddenCategories,
+                        showOffBudget,
+                        type: 'time',
+                        startDate: e.payload?.intervalStartDate,
+                        endDate: e.payload?.intervalEndDate,
+                        field: groupBy.toLowerCase(),
+                        id: entry.id,
+                        interval,
+                      })
+                    }
+                  >
+                    {viewLabels && !compact && (
+                      <LabelList
+                        dataKey={entry.name}
+                        content={customLabelWithFormat}
+                      />
+                    )}
+                  </Bar>
+                ))}
+            </BarChart>
+          </div>
         )
       }
     </Container>
