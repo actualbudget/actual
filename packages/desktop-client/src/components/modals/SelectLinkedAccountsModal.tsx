@@ -465,7 +465,7 @@ function TableRow({
       <Field width={80}>
         <PrivacyFilter>
           {!isNaN(Number(externalAccount.balance))
-            ? format(externalAccount.balance, 'financial')
+            ? format(externalAccount.balance.toString(), 'financial')
             : t('Unknown')}
         </PrivacyFilter>
       </Field>
@@ -597,7 +597,7 @@ function AccountCard({
         <Trans>Balance:</Trans>{' '}
         <PrivacyFilter>
           {externalAccount.balance != null
-            ? format(externalAccount.balance, 'financial')
+            ? format(externalAccount.balance.toString(), 'financial')
             : t('Unknown')}
         </PrivacyFilter>
       </View>
