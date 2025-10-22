@@ -52,12 +52,7 @@ export function MobileBankSyncAccountEditPage() {
   };
 
   const handleSave = async () => {
-    try {
-      await saveSettings();
-    } catch (error) {
-      console.error('Failed to save bank sync settings:', error);
-    }
-
+    saveSettings();
     navigate('/bank-sync');
   };
 
