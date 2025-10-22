@@ -8,8 +8,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 
+import { LabeledCheckbox } from '@desktop-client/components/forms/LabeledCheckbox';
 import { ToggleField } from '@desktop-client/components/mobile/MobileForms';
-import { CheckboxOption as BaseCheckboxOption } from '@desktop-client/components/modals/ImportTransactionsModal/CheckboxOption';
 
 type CheckboxOptionProps = {
   id: string;
@@ -48,14 +48,14 @@ function CheckboxOption({
   }
 
   return (
-    <BaseCheckboxOption
+    <LabeledCheckbox
       id={id}
       checked={checked}
       onChange={onChange}
       disabled={disabled}
     >
       {children}
-    </BaseCheckboxOption>
+    </LabeledCheckbox>
   );
 }
 
@@ -83,7 +83,7 @@ function CheckboxOptionWithHelp({
 
   if (helpMode === 'desktop') {
     return (
-      <BaseCheckboxOption
+      <LabeledCheckbox
         id={id}
         checked={checked}
         onChange={onChange}
@@ -95,7 +95,7 @@ function CheckboxOptionWithHelp({
             <SvgQuestion height={12} width={12} cursor="pointer" />
           </Stack>
         </Tooltip>
-      </BaseCheckboxOption>
+      </LabeledCheckbox>
     );
   }
 
