@@ -83,8 +83,8 @@ export function AmountInput({
     [initialValue, isFocused, getDisplayValue],
   );
 
-  const buttonRef = useRef(null);
-  const innerRef = useRef<HTMLInputElement>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const innerRef = useRef<HTMLInputElement | null>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(ref, innerRef);
 
   useEffect(() => {
