@@ -178,7 +178,9 @@ export function TransactionList({
         >
           <ListBox
             aria-label={t('Transaction list')}
-            selectionMode={selectedTransactions.size > 0 ? 'multiple' : 'single'}
+            selectionMode={
+              selectedTransactions.size > 0 ? 'multiple' : 'single'
+            }
             selectedKeys={selectedTransactions}
             dependencies={[
               selectedTransactions,
