@@ -463,7 +463,6 @@ export async function coverOverspending({
   const coverableAmount = Math.min(-amountToCover, leftoverFrom);
 
   await batchMessages(async () => {
-
     // If we are covering it from the to be budgeted amount, ignore this
     if (from !== 'to-budget') {
       const fromBudgeted = await getSheetValue(sheetName, 'budget-' + from);
