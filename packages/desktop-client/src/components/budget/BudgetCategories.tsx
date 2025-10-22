@@ -102,7 +102,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
     const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
       useLocalPref('budget.collapsed');
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
-    function onCollapse(value: string[]) {
+    function onCollapse(value: Array<CategoryGroupEntity['id']>) {
       setCollapsedGroupIdsPref(value);
     }
 
@@ -189,7 +189,9 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
     ]);
 
     const [dragState, setDragState] = useState<LocalDragState>(null);
-    const [savedCollapsed, setSavedCollapsed] = useState<string[] | null>(null);
+    const [savedCollapsed, setSavedCollapsed] = useState<Array<
+      CategoryGroupEntity['id']
+    > | null>(null);
 
     // TODO: If we turn this into a reducer, we could probably memoize
     // each item in the list for better perf
@@ -219,7 +221,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
       }
     }
 
-    function onToggleCollapse(id: string) {
+    function onToggleCollapse(id: CategoryGroupEntity['id']) {
       if (collapsedGroupIds.includes(id)) {
         onCollapse(collapsedGroupIds.filter(id_ => id_ !== id));
       } else {
@@ -235,14 +237,14 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
       setIsAddingGroup(false);
     }
 
-    async function _onSaveGroup(group: CategoryGroupEntity) {
+    function _onSaveGroup(group: CategoryGroupEntity) {
       onSaveGroup?.(group);
       if (group.id === 'new') {
         onHideNewGroup();
       }
     }
 
-    function onShowNewCategory(groupId: string) {
+    function onShowNewCategory(groupId: CategoryGroupEntity['id']) {
       onCollapse(collapsedGroupIds.filter(c => c !== groupId));
       setNewCategoryForGroup(groupId);
     }
@@ -398,8 +400,8 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
               );
               break;
             default:
-              // eslint-disable-next-line actual/no-untranslated-strings
-              throw new Error('Unknown item type');
+              // @ts-expect-error Error is expected here because "item.type" is "never"
+              throw new Error('Unknown item type: ' + item.type);
           }
 
           const pos =
