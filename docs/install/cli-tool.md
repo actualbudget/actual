@@ -8,7 +8,7 @@ The Actual sync-server is available as an NPM package. The package is designed t
 
 ### Installing the CLI tool
 
-Node.js v20 or higher is required for the `@actual-app/sync-server` npm package
+Node.js v22 or higher is required for the `@actual-app/sync-server` npm package
 
 **Install globally with npm:**
 
