@@ -16,7 +16,7 @@ import {
   CellValue,
   CellValueText,
 } from '@desktop-client/components/spreadsheet/CellValue';
-import { DisplayPayeeContextProvider } from '@desktop-client/hooks/useDisplayPayee';
+import { DisplayPayeeProvider } from '@desktop-client/hooks/useDisplayPayee';
 import {
   SelectedProvider,
   useSelected,
@@ -110,7 +110,7 @@ export function TransactionListWithBalances({
   const selectedInst = useSelected('transactions', [...transactions], []);
 
   return (
-    <DisplayPayeeContextProvider transactions={transactions}>
+    <DisplayPayeeProvider transactions={transactions}>
       <SelectedProvider instance={selectedInst}>
         <View
           style={{
@@ -153,7 +153,7 @@ export function TransactionListWithBalances({
           />
         </PullToRefresh>
       </SelectedProvider>
-    </DisplayPayeeContextProvider>
+    </DisplayPayeeProvider>
   );
 }
 

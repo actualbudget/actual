@@ -30,7 +30,7 @@ import { TransactionTable } from './TransactionsTable';
 
 import { AuthProvider } from '@desktop-client/auth/AuthProvider';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
-import { DisplayPayeeContextProvider } from '@desktop-client/hooks/useDisplayPayee';
+import { DisplayPayeeProvider } from '@desktop-client/hooks/useDisplayPayee';
 import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
 import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
 import { SpreadsheetProvider } from '@desktop-client/hooks/useSpreadsheet';
@@ -200,7 +200,7 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
       <AuthProvider>
         <SpreadsheetProvider>
           <SchedulesProvider>
-            <DisplayPayeeContextProvider transactions={transactions}>
+            <DisplayPayeeProvider transactions={transactions}>
               <SelectedProviderWithItems
                 name="transactions"
                 items={transactions}
@@ -225,7 +225,7 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
                   />
                 </SplitsExpandedProvider>
               </SelectedProviderWithItems>
-            </DisplayPayeeContextProvider>
+            </DisplayPayeeProvider>
           </SchedulesProvider>
         </SpreadsheetProvider>
       </AuthProvider>
