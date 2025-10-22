@@ -311,11 +311,11 @@ export function SelectLinkedAccountsModal({
               }}
             >
               <TableHeader>
-                <Cell name={t('Institution to Sync')} width={175} />
-                <Cell name={t('Bank Account To Sync')} width={175} />
-                <Cell name={t('Balance')} width={80} />
-                <Cell name={t('Account in Actual')} width="flex" />
-                <Cell name={t('Actions')} width={150} />
+                <Cell value={t('Institution to Sync')} width={175} />
+                <Cell value={t('Bank Account To Sync')} width={175} />
+                <Cell value={t('Balance')} width={80} />
+                <Cell value={t('Account in Actual')} width="flex" />
+                <Cell value={t('Actions')} width={150} />
               </TableHeader>
 
               <Table<
