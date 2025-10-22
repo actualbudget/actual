@@ -1,9 +1,7 @@
-import { inspect } from 'util';
-
 export function handleError(func) {
   return (req, res) => {
     func(req, res).catch(err => {
-      console.log('Error', req.originalUrl, inspect(err, { depth: null }));
+      console.log('Error', req.originalUrl, err.message || String(err));
       res.send({
         status: 'ok',
         data: {

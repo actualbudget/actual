@@ -689,13 +689,33 @@ class AccountInternal extends PureComponent<
         ids.includes(trans.id),
       );
       const changedTransactions: TransactionEntity[] = [];
+      const allErrors: string[] = [];
+
       for (const transaction of transactions) {
         const res: TransactionEntity | null = await send('rules-run', {
           transaction,
         });
         if (res) {
           changedTransactions.push(...ungroupTransaction(res));
+
+          // Collect formula errors
+          if (res._ruleErrors && res._ruleErrors.length > 0) {
+            allErrors.push(...res._ruleErrors);
+          }
         }
+      }
+
+      // Show errors if any
+      if (allErrors.length > 0) {
+        this.props.dispatch(
+          addNotification({
+            notification: {
+              type: 'error',
+              message: `Formula errors in rules:\n${allErrors.join('\n')}`,
+              sticky: true,
+            },
+          }),
+        );
       }
 
       // If we have changed transactions, update them in the database

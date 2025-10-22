@@ -24,6 +24,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
       - name: Build API
         run: cd packages/api && yarn build
       - name: Create package tgz
@@ -40,6 +42,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
       - name: Build CRDT
         run: cd packages/crdt && yarn build
       - name: Create package tgz
@@ -75,6 +79,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
       - name: Build Server
         run: yarn workspace @actual-app/sync-server build
       - name: Upload Build
