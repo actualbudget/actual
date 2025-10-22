@@ -51,7 +51,7 @@ export function ScheduleLink({
     statuses,
   } = useSchedules({ query: schedulesQuery });
 
-  const searchInput = useRef(null);
+  const searchInput = useRef<HTMLInputElement | null>(null);
 
   async function onSelect(scheduleId: string) {
     if (ids?.length > 0) {
