@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { InitialFocus } from '@actual-app/components/initial-focus';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
@@ -19,13 +20,12 @@ import {
   TapField,
 } from '@desktop-client/components/mobile/MobileForms';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import {
   type Modal as ModalType,
   pushModal,
 } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
-import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
-import { InitialFocus } from '@actual-app/components/initial-focus';
 
 type CoverModalProps = Extract<ModalType, { name: 'cover' }>['options'];
 
