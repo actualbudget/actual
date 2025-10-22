@@ -76,7 +76,12 @@ function SetActionExpression({
       <Text>{friendlyOp(op)}</Text>{' '}
       <Text style={valueStyle}>{mapField(field, options)}</Text>{' '}
       <Text>{t('to ')}</Text>
-      {options?.template ? (
+      {options?.formula ? (
+        <>
+          <Text>{t('formula ')}</Text>
+          <Text style={valueStyle}>{options.formula}</Text>
+        </>
+      ) : options?.template ? (
         <>
           <Text>{t('template ')}</Text>
           <Text style={valueStyle}>{options.template}</Text>

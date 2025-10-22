@@ -89,7 +89,7 @@
           ]
         }
       ],
-      "icon": "icons/icon.ico",
+      "icon": "icons/icon.png",
       "artifactName": "${productName}-windows-${arch}.${ext}"
     },
     "appx": {

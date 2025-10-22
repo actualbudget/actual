@@ -21,6 +21,12 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     include: ['src/**/*.web.test.(js|jsx|ts|tsx)'],
+    poolOptions: {
+      threads: {
+        maxThreads: 2,
+        minThreads: 1,
+      },
+    },
   },
   resolve: {
     alias: [

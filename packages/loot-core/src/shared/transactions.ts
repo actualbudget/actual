@@ -345,6 +345,7 @@ export function realizeTempTransactions(
   const parent = {
     ...transactions.find(t => !t.is_child),
     id: uuidv4(),
+    sort_order: Date.now(),
   } as TransactionEntity;
   const children = transactions.filter(t => t.is_child);
   return [

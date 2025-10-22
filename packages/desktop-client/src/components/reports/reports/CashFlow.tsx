@@ -136,12 +136,18 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
         latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
       );
 
+      const currentMonth = monthUtils.currentMonth();
       const earliestMonth = earliestTransaction
         ? monthUtils.monthFromDate(d.parseISO(earliestTransaction.date))
-        : monthUtils.currentMonth();
-      const latestMonth = latestTransaction
+        : currentMonth;
+      const latestTransactionMonth = latestTransaction
         ? monthUtils.monthFromDate(d.parseISO(latestTransaction.date))
-        : monthUtils.currentMonth();
+        : currentMonth;
+
+      const latestMonth =
+        latestTransactionMonth > currentMonth
+          ? latestTransactionMonth
+          : currentMonth;
 
       const allMonths = monthUtils
         .rangeInclusive(earliestMonth, latestMonth)
