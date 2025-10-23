@@ -81,7 +81,7 @@ type TapFieldProps = ComponentPropsWithRef<typeof Button> & {
   textStyle?: CSSProperties;
 };
 
-const defaultTapFieldStyle = () =>
+const defaultTapFieldClassName = () =>
   css({
     ...valueStyle,
     flexDirection: 'row',
@@ -113,9 +113,10 @@ export function TapField({
       ref={ref}
       bounce={false}
       className={renderProps =>
-        typeof className === 'function'
-          ? cx(defaultTapFieldStyle(), className(renderProps))
-          : cx(defaultTapFieldStyle(), className)
+        cx(
+          defaultTapFieldClassName(),
+          typeof className === 'function' ? className(renderProps) : className,
+        )
       }
       {...props}
     >
