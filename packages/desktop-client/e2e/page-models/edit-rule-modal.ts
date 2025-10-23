@@ -102,7 +102,7 @@ export class EditRuleModal {
         await this.selectOp(row, op);
       }
 
-      if (value) {
+      if (value?.length > 0) {
         const input = row.getByRole('textbox');
         const existingValue = await input.inputValue();
         if (existingValue) {
