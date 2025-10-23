@@ -11,6 +11,7 @@ type BudgetMonthMenuProps = Omit<
 > & {
   onCopyLastMonthBudget: () => void;
   onSetBudgetsToZero: () => void;
+  onSetBudgetsToSpent: () => void;
   onSetMonthsAverage: (numberOfMonths: number) => void;
   onCheckTemplates: () => void;
   onApplyBudgetTemplates: () => void;
@@ -20,6 +21,7 @@ type BudgetMonthMenuProps = Omit<
 export function BudgetMonthMenu({
   onCopyLastMonthBudget,
   onSetBudgetsToZero,
+  onSetBudgetsToSpent,
   onSetMonthsAverage,
   onCheckTemplates,
   onApplyBudgetTemplates,
@@ -38,6 +40,9 @@ export function BudgetMonthMenu({
             break;
           case 'set-zero':
             onSetBudgetsToZero();
+            break;
+          case 'set-to-spent':
+            onSetBudgetsToSpent();
             break;
           case 'set-3-avg':
             onSetMonthsAverage(3);
@@ -62,6 +67,7 @@ export function BudgetMonthMenu({
       items={[
         { name: 'copy-last', text: t('Copy last month’s budget') },
         { name: 'set-zero', text: t('Set budgets to zero') },
+        { name: 'set-to-spent', text: t('Set budgets equal to amount spent') },
         {
           name: 'set-3-avg',
           text: t('Set budgets to 3 month average'),
