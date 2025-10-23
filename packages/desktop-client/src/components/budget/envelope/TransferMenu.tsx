@@ -24,7 +24,7 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 
 type TransferMenuProps = {
   categoryId?: CategoryEntity['id'];
-  initialAmount?: IntegerAmount;
+  initialAmount?: IntegerAmount | null;
   showToBeBudgeted?: boolean;
   onSubmit: (amount: IntegerAmount, categoryId: CategoryEntity['id']) => void;
   onClose: () => void;
@@ -50,13 +50,13 @@ export function TransferMenu({
       : categoryGroups;
   }, [originalCategoryGroups, categoryId, showToBeBudgeted]);
 
-  const _initialAmount = integerToCurrency(initialAmount);
+  const _initialAmount = integerToCurrency(initialAmount ?? 0);
   const [amount, setAmount] = useState<string | null>(null);
   const [toCategoryId, setToCategoryId] = useState<string | null>(null);
 
   const _onSubmit = () => {
     const parsedAmount = evalArithmetic(amount || '');
-    if (parsedAmount && categoryId) {
+    if (parsedAmount && toCategoryId) {
       onSubmit(amountToInteger(parsedAmount), toCategoryId);
     }
 
