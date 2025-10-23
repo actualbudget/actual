@@ -281,6 +281,11 @@ type ApplyBudgetActionPayload =
       args: never;
     }
   | {
+      type: 'set-to-spent';
+      month: string;
+      args: never;
+    }
+  | {
       type: 'set-3-avg';
       month: string;
       args: never;
@@ -431,6 +436,9 @@ export const applyBudgetAction = createAppAsyncThunk(
         break;
       case 'set-zero':
         await send('budget/set-zero', { month });
+        break;
+      case 'set-to-spent':
+        await send('budget/set-to-spent', { month });
         break;
       case 'set-3-avg':
         await send('budget/set-3month-avg', { month });

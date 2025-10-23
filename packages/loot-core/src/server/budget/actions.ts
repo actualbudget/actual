@@ -266,6 +266,38 @@ export async function setZero({ month }: { month: string }): Promise<void> {
   });
 }
 
+export async function setToSpent({ month }: { month: string }): Promise<void> {
+  const categories = await db.all<db.DbViewCategoryWithGroupHidden>(
+    `
+  SELECT c.*
+  FROM categories c
+  LEFT JOIN category_groups g ON c.cat_group = g.id
+  WHERE c.tombstone = 0 AND c.hidden = 0 AND g.hidden = 0
+  `,
+  );
+
+  await batchMessages(async () => {
+    for (const cat of categories) {
+      if (cat.is_income === 1 && !isReflectBudget()) {
+        continue;
+      }
+
+      const spent = await getSheetValue(
+        monthUtils.sheetForMonth(month),
+        'sum-amount-' + cat.id,
+      );
+
+      let amount = spent;
+
+      if (cat.is_income === 0) {
+        amount *= -1;
+      }
+
+      setBudget({ category: cat.id, month, amount: amount });
+    }
+  });
+}
+
 export async function set3MonthAvg({
   month,
 }: {
