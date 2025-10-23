@@ -1,4 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
+
 import { EditRuleModal } from './edit-rule-modal';
 
 export class RulesPage {
