@@ -73,7 +73,7 @@ import { UnmigrateBudgetAutomationsModal } from './modals/UnmigrateBudgetAutomat
 import { CategoryLearning } from './payees/CategoryLearning';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
 import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
-import { ScheduleDetails } from './schedules/ScheduleDetails';
+import { ScheduleEditModal } from './schedules/ScheduleEditModal';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { UpcomingLength } from './schedules/UpcomingLength';
 
@@ -228,7 +228,7 @@ export function Modals() {
           return <TrackingBudgetSummaryModal key={key} {...modal.options} />;
 
         case 'schedule-edit':
-          return <ScheduleDetails key={key} {...modal.options} />;
+          return <ScheduleEditModal key={key} {...modal.options} />;
 
         case 'schedule-link':
           return <ScheduleLink key={key} {...modal.options} />;
