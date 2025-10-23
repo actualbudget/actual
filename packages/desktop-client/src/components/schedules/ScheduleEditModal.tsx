@@ -119,12 +119,12 @@ function updateScheduleConditions(
   };
 }
 
-type ScheduleDetailsProps = Extract<
+type ScheduleEditModalProps = Extract<
   ModalType,
   { name: 'schedule-edit' }
 >['options'];
 
-export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
+export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
   const locale = useLocale();
   const { t } = useTranslation();
 
