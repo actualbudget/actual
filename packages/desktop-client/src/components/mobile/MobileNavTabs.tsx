@@ -86,18 +86,6 @@ export function MobileNavTabs() {
     [api, OPEN_DEFAULT_Y],
   );
 
-  const hide = useCallback(
-    (velocity = 0) => {
-      setNavbarState('hidden');
-      api.start({
-        y: HIDDEN_Y,
-        immediate: false,
-        config: { ...config.stiff, velocity },
-      });
-    },
-    [api, HIDDEN_Y],
-  );
-
   const navTabs = [
     {
       name: t('Budget'),
@@ -168,14 +156,10 @@ export function MobileNavTabs() {
 
   useScrollListener(
     useCallback(
-      ({ isScrolling, hasScrolledToEnd }) => {
-        if (isScrolling('down') && !hasScrolledToEnd('up')) {
-          hide();
-        } else if (isScrolling('up') && !hasScrolledToEnd('down')) {
-          openDefault();
-        }
+      () => {
+        openDefault();
       },
-      [hide, openDefault],
+      [openDefault],
     ),
   );
 
