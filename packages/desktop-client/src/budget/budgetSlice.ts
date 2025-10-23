@@ -304,13 +304,11 @@ type ApplyBudgetActionPayload =
       type: 'apply-goal-template';
       month: string;
       args: never;
-      currencyCode: string;
     }
   | {
       type: 'overwrite-goal-template';
       month: string;
       args: never;
-      currencyCode: string;
     }
   | {
       type: 'cleanup-goal-template';
@@ -380,7 +378,6 @@ type ApplyBudgetActionPayload =
       args: {
         category: CategoryEntity['id'];
       };
-      currencyCode: string;
     }
   | {
       type: 'apply-multiple-templates';
@@ -388,7 +385,6 @@ type ApplyBudgetActionPayload =
       args: {
         categories: Array<CategoryEntity['id']>;
       };
-      currencyCode: string;
     }
   | {
       type: 'set-single-3-avg';
@@ -421,10 +417,7 @@ type ApplyBudgetActionPayload =
 
 export const applyBudgetAction = createAppAsyncThunk(
   `${sliceName}/applyBudgetAction`,
-  async (payload: ApplyBudgetActionPayload, { dispatch }) => {
-    const { month, type, args } = payload;
-    const currencyCode = 'currencyCode' in payload ? payload.currencyCode : '';
-
+  async ({ month, type, args }: ApplyBudgetActionPayload, { dispatch }) => {
     switch (type) {
       case 'budget-amount':
         await send('budget/budget-amount', {
@@ -458,10 +451,7 @@ export const applyBudgetAction = createAppAsyncThunk(
       case 'apply-goal-template':
         dispatch(
           addNotification({
-            notification: await send('budget/apply-goal-template', {
-              month,
-              currencyCode,
-            }),
+            notification: await send('budget/apply-goal-template', { month }),
           }),
         );
         break;
@@ -470,7 +460,6 @@ export const applyBudgetAction = createAppAsyncThunk(
           addNotification({
             notification: await send('budget/overwrite-goal-template', {
               month,
-              currencyCode,
             }),
           }),
         );
@@ -481,7 +470,6 @@ export const applyBudgetAction = createAppAsyncThunk(
             notification: await send('budget/apply-single-template', {
               month,
               category: args.category,
-              currencyCode,
             }),
           }),
         );
@@ -547,7 +535,6 @@ export const applyBudgetAction = createAppAsyncThunk(
             notification: await send('budget/apply-multiple-templates', {
               month,
               categoryIds: args.categories,
-              currencyCode,
             }),
           }),
         );

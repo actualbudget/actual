@@ -23,6 +23,29 @@ vi.mock('../aql', () => ({
   aqlQuery: vi.fn(),
 }));
 
+// Helper function to mock preferences (hideFraction and defaultCurrencyCode)
+function mockPreferences(
+  hideFraction: boolean = false,
+  currencyCode: string = 'USD',
+) {
+  vi.mocked(aql.aqlQuery).mockImplementation(async (query: unknown) => {
+    const queryStr = JSON.stringify(query);
+    if (queryStr.includes('hideFraction')) {
+      return {
+        data: [{ value: hideFraction ? 'true' : 'false' }],
+        dependencies: [],
+      };
+    }
+    if (queryStr.includes('defaultCurrencyCode')) {
+      return {
+        data: currencyCode ? [{ value: currencyCode }] : [],
+        dependencies: [],
+      };
+    }
+    return { data: [], dependencies: [] };
+  });
+}
+
 // Test helper class to access constructor and methods
 class TestCategoryTemplateContext extends CategoryTemplateContext {
   public constructor(
@@ -898,10 +921,7 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
-      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
-        data: [{ value: 'false' }],
-        dependencies: [],
-      });
+      mockPreferences(false, 'USD');
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -909,7 +929,6 @@ describe('CategoryTemplateContext', () => {
         category,
         '2024-01',
         0,
-        'USD',
       );
 
       // Run each priority level separately
@@ -966,10 +985,7 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
-      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
-        data: [{ value: 'false' }],
-        dependencies: [],
-      });
+      mockPreferences(false, 'USD');
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -977,7 +993,6 @@ describe('CategoryTemplateContext', () => {
         category,
         '2024-01',
         0,
-        'USD',
       );
 
       // Run the templates with more than enough funds
@@ -1024,10 +1039,7 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
-      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
-        data: [{ value: 'false' }],
-        dependencies: [],
-      });
+      mockPreferences(false, 'USD');
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1035,7 +1047,6 @@ describe('CategoryTemplateContext', () => {
         category,
         '2024-01',
         0,
-        'USD',
       );
       const weight = instance.getRemainderWeight();
 
@@ -1087,10 +1098,7 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
-      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
-        data: [{ value: 'false' }],
-        dependencies: [],
-      });
+      mockPreferences(false, 'USD');
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1098,7 +1106,6 @@ describe('CategoryTemplateContext', () => {
         category,
         '2024-01',
         0,
-        'USD',
       );
 
       // Run the templates with more than enough funds
@@ -1133,10 +1140,7 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(10000); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
-      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
-        data: [{ value: 'false' }],
-        dependencies: [],
-      });
+      mockPreferences(false, 'USD');
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1144,7 +1148,6 @@ describe('CategoryTemplateContext', () => {
         category,
         '2024-01',
         10000,
-        'USD',
       );
 
       expect(instance.isGoalOnly()).toBe(true); // Should be goal only
@@ -1181,10 +1184,7 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
-      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
-        data: [{ value: 'true' }],
-        dependencies: [],
-      });
+      mockPreferences(true, 'USD');
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1192,7 +1192,6 @@ describe('CategoryTemplateContext', () => {
         category,
         '2024-01',
         0,
-        'USD',
       );
 
       // Run the templates with more than enough funds
@@ -1227,17 +1226,13 @@ describe('CategoryTemplateContext', () => {
 
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
-      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
-        data: [{ value: 'true' }],
-        dependencies: [],
-      });
+      mockPreferences(true, 'JPY');
 
       const instance = await CategoryTemplateContext.init(
         [template],
         category,
         '2024-01',
         0,
-        'JPY',
       );
 
       await instance.runTemplatesForPriority(1, 100000, 100000);
@@ -1262,17 +1257,13 @@ describe('CategoryTemplateContext', () => {
 
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
-      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
-        data: [{ value: 'true' }],
-        dependencies: [],
-      });
+      mockPreferences(true, 'JPY');
 
       const instance = await CategoryTemplateContext.init(
         [template],
         category,
         '2024-01',
         0,
-        'JPY',
       );
 
       await instance.runTemplatesForPriority(1, 100000, 100000);
@@ -1297,17 +1288,13 @@ describe('CategoryTemplateContext', () => {
 
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
-      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
-        data: [{ value: 'true' }],
-        dependencies: [],
-      });
+      mockPreferences(true, 'JPY');
 
       const instance = await CategoryTemplateContext.init(
         [template],
         category,
         '2024-01',
         0,
-        'JPY',
       );
 
       await instance.runTemplatesForPriority(1, 100000, 100000);
@@ -1337,17 +1324,13 @@ describe('CategoryTemplateContext', () => {
 
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
-      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
-        data: [{ value: 'true' }],
-        dependencies: [],
-      });
+      mockPreferences(true, 'JPY');
 
       const instance = await CategoryTemplateContext.init(
         [template],
         category,
         '2024-01',
         0,
-        'JPY',
       );
 
       const result = CategoryTemplateContext.runSimple(template, instance);
@@ -1374,17 +1357,13 @@ describe('CategoryTemplateContext', () => {
 
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
-      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
-        data: [{ value: 'true' }],
-        dependencies: [],
-      });
+      mockPreferences(true, 'JPY');
 
       const instance = await CategoryTemplateContext.init(
         [template],
         category,
         '2024-01',
         0,
-        'JPY',
       );
 
       await instance.runTemplatesForPriority(1, 100000, 100000);
@@ -1410,34 +1389,26 @@ describe('CategoryTemplateContext', () => {
 
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
-      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
-        data: [{ value: 'true' }],
-        dependencies: [],
-      });
+      mockPreferences(true, 'JPY');
 
       const instanceJPY = await CategoryTemplateContext.init(
         [template],
         category,
         '2024-01',
         0,
-        'JPY',
       );
       await instanceJPY.runTemplatesForPriority(1, 100000, 100000);
       const valuesJPY = instanceJPY.getValues();
 
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
-      vi.mocked(aql.aqlQuery).mockResolvedValueOnce({
-        data: [{ value: 'false' }],
-        dependencies: [],
-      });
+      mockPreferences(false, 'USD');
 
       const instanceUSD = await CategoryTemplateContext.init(
         [template],
         category,
         '2024-01',
         0,
-        'USD',
       );
       await instanceUSD.runTemplatesForPriority(1, 100000, 100000);
       const valuesUSD = instanceUSD.getValues();

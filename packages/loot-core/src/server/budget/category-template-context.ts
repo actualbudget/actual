@@ -49,7 +49,6 @@ export class CategoryTemplateContext {
     category: CategoryEntity,
     month: string,
     budgeted: number,
-    currencyCode: string,
   ) {
     // get all the needed setup values
     const lastMonthSheet = monthUtils.sheetForMonth(
@@ -79,6 +78,12 @@ export class CategoryTemplateContext {
     const hideDecimal = await aqlQuery(
       q('preferences').filter({ id: 'hideFraction' }).select('*'),
     );
+
+    const currencyPref = await aqlQuery(
+      q('preferences').filter({ id: 'defaultCurrencyCode' }).select('*'),
+    );
+    const currencyCode =
+      currencyPref.data.length > 0 ? currencyPref.data[0].value : '';
 
     // call the private constructor
     return new CategoryTemplateContext(
