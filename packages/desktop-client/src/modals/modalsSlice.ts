@@ -426,7 +426,7 @@ export type Modal =
       name: 'cover';
       options: {
         title: string;
-        amount?: IntegerAmount;
+        amount?: IntegerAmount | null;
         categoryId?: CategoryEntity['id'];
         month: string;
         showToBeBudgeted?: boolean;

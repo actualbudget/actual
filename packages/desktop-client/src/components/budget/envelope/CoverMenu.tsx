@@ -24,7 +24,7 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 
 type CoverMenuProps = {
   showToBeBudgeted?: boolean;
-  initialAmount?: IntegerAmount;
+  initialAmount?: IntegerAmount | null;
   categoryId?: CategoryEntity['id'];
   onSubmit: (amount: IntegerAmount, categoryId: CategoryEntity['id']) => void;
   onClose: () => void;
@@ -53,7 +53,7 @@ export function CoverMenu({
       : categoryGroups;
   }, [categoryId, showToBeBudgeted, originalCategoryGroups]);
 
-  const _initialAmount = integerToCurrency(initialAmount);
+  const _initialAmount = integerToCurrency(initialAmount ?? 0);
   const [amount, setAmount] = useState<string | null>(null);
 
   function _onSubmit() {

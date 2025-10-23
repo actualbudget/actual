@@ -77,15 +77,14 @@ export function CoverModal({
     );
   }, [categoryGroups, dispatch, month]);
 
-  const [amount, setAmount] = useState<IntegerAmount>(initialAmount);
+  const fromCategory = categories.find(c => c.id === fromCategoryId);
+  const [amount, setAmount] = useState<IntegerAmount>(initialAmount ?? 0);
 
   const _onSubmit = () => {
     if (amount && fromCategoryId) {
       onSubmit(amount, fromCategoryId);
     }
   };
-
-  const fromCategory = categories.find(c => c.id === fromCategoryId);
 
   const isInitialMount = useInitialMount();
   useEffect(() => {
