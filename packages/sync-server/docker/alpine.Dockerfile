@@ -1,4 +1,4 @@
-FROM alpine:3.18 AS deps
+FROM alpine:3.22 AS deps
 
 # Install required packages
 RUN apk add --no-cache nodejs yarn python3 openssl build-base
@@ -37,7 +37,7 @@ RUN rm -rf ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
 COPY packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
 COPY packages/desktop-client/build ./node_modules/@actual-app/web/build
 
-FROM alpine:3.18 AS prod
+FROM alpine:3.22 AS prod
 
 # Minimal runtime dependencies
 RUN apk add --no-cache nodejs tini
