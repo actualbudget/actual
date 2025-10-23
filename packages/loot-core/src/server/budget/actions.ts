@@ -293,7 +293,7 @@ export async function setToSpent({ month }: { month: string }): Promise<void> {
         amount *= -1;
       }
 
-      setBudget({ category: cat.id, month, amount: amount });
+      setBudget({ category: cat.id, month, amount });
     }
   });
 }
