@@ -620,12 +620,9 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
             <FormField style={{ flex: 1 }}>
               <FormLabel title={t('Schedule Name')} htmlFor="name-field" />
               <InitialFocus>
-                {/* @ts-expect-error should be auto-patched once GenericInput is converted to TS */}
                 <GenericInput
-                  field="string"
                   type="string"
                   value={state.fields.name}
-                  multi={false}
                   onChange={e => {
                     dispatch({ type: 'set-field', field: 'name', value: e });
                   }}
