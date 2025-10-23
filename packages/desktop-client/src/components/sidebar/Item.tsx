@@ -41,6 +41,7 @@ export function Item({
 }: ItemProps) {
   const hoverStyle = {
     backgroundColor: theme.sidebarItemBackgroundHover,
+    boxShadow: 'inset 3px 0 0 0 rgba(255, 255, 255, 0.1)',
   };
 
   const content = (
@@ -68,6 +69,7 @@ export function Item({
           paddingRight: 10,
           textDecoration: 'none',
           color: theme.sidebarItemText,
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
           ...(forceHover ? hoverStyle : {}),
           ':hover': hoverStyle,
         }}

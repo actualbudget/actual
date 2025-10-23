@@ -55,7 +55,12 @@ export const accountNameStyle: CSSProperties = {
   paddingLeft: 10,
   textDecoration: 'none',
   color: theme.sidebarItemText,
-  ':hover': { backgroundColor: theme.sidebarItemBackgroundHover },
+  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+  ':hover': {
+    backgroundColor: theme.sidebarItemBackgroundHover,
+    paddingLeft: 7,
+    boxShadow: 'inset 2px 0 0 0 rgba(255, 255, 255, 0.08)',
+  },
   ...styles.smallText,
 };
 
@@ -162,7 +167,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
               fontWeight: (style && style.fontWeight) || 'normal',
               '& .dot': {
                 backgroundColor: theme.sidebarItemAccentSelected,
-                transform: 'translateX(-4.5px)',
+                transform: 'translateX(-4.5px) scale(1.3)',
               },
             }}
           >
@@ -190,7 +195,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
                         ? theme.sidebarItemBackgroundFailed
                         : theme.sidebarItemBackgroundPositive,
                     marginLeft: 2,
-                    transition: 'transform .3s',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     opacity: connected ? 1 : 0,
                   }),
                 )}

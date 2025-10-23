@@ -10,6 +10,7 @@ import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { css } from '@emotion/css';
 
 import { isElectron } from 'loot-core/shared/environment';
 import * as Platform from 'loot-core/shared/platform';
@@ -125,13 +126,23 @@ function EditableBudgetName() {
       <Button
         ref={triggerRef}
         variant="bare"
-        style={{
+        className={css({
           color: theme.buttonNormalBorder,
           fontSize: 16,
           fontWeight: 500,
           marginLeft: -5,
           flex: '0 auto',
-        }}
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          '&:hover': {
+            color: theme.sidebarItemTextSelected,
+            '& svg': {
+              transform: 'rotate(180deg) scale(1.2)',
+            },
+          },
+          '& svg': {
+            transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          },
+        })}
         onPress={() => {
           resetPosition();
           setMenuOpen(true);
