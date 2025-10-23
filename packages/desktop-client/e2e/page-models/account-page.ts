@@ -254,7 +254,6 @@ export class AccountPage {
   }
 
   async selectInputText(input: Locator) {
-    await input.click();
     const value = await input.inputValue();
     if (value) {
       await input.selectText();
