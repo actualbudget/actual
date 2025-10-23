@@ -41,10 +41,14 @@ export class EditRuleModal {
     this.page = locator.page();
 
     this.heading = locator.getByRole('heading');
-    this.conditionsOpButton = locator.getByTestId('conditions-op').getByRole('button');
+    this.conditionsOpButton = locator
+      .getByTestId('conditions-op')
+      .getByRole('button');
     this.conditionList = locator.getByTestId('condition-list');
     this.actionList = locator.getByTestId('action-list');
-    this.splitIntoMultipleTransactionsButton = locator.getByTestId('add-split-transactions');
+    this.splitIntoMultipleTransactionsButton = locator.getByTestId(
+      'add-split-transactions',
+    );
     this.saveButton = locator.getByRole('button', { name: 'Save' });
     this.cancelButton = locator.getByRole('button', { name: 'Cancel' });
   }
@@ -55,28 +59,18 @@ export class EditRuleModal {
     }
 
     if (data.conditions) {
-      await this.fillEditorFields(
-        data.conditions,
-        this.conditionList,
-        true,
-      );
+      await this.fillEditorFields(data.conditions, this.conditionList, true);
     }
 
     if (data.actions) {
-      await this.fillEditorFields(
-        data.actions,
-        this.actionList,
-      );
+      await this.fillEditorFields(data.actions, this.actionList);
     }
 
     if (data.splits) {
       let idx = data.actions?.length ?? 0;
       for (const splitActions of data.splits) {
         await this.splitIntoMultipleTransactionsButton.click();
-        await this.fillEditorFields(
-          splitActions,
-          this.actionList.nth(idx),
-        );
+        await this.fillEditorFields(splitActions, this.actionList.nth(idx));
         idx++;
       }
     }
@@ -127,7 +121,8 @@ export class EditRuleModal {
   async selectConditionsOp(conditionsOp: string | RegExp) {
     await this.conditionsOpButton.click();
 
-    const conditionsOpSelectOption = await this.getPopoverSelectOption(conditionsOp);
+    const conditionsOpSelectOption =
+      await this.getPopoverSelectOption(conditionsOp);
     await conditionsOpSelectOption.click();
   }
 
@@ -140,10 +135,7 @@ export class EditRuleModal {
   }
 
   async selectField(row: Locator, field: string) {
-    await row
-      .getByTestId('field-select')
-      .getByRole('button')
-      .click();
+    await row.getByTestId('field-select').getByRole('button').click();
 
     const fieldSelectOption = await this.getPopoverSelectOption(field);
     await fieldSelectOption.waitFor({ state: 'visible' });
