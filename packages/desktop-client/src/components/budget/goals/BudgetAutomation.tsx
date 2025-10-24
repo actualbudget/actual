@@ -12,13 +12,14 @@ import { type Template } from 'loot-core/types/models/templates';
 import { type Action } from './actions';
 import { BudgetAutomationEditor } from './BudgetAutomationEditor';
 import { BudgetAutomationReadOnly } from './BudgetAutomationReadOnly';
+import { type ReducerState } from './constants';
 import { DEFAULT_PRIORITY, getInitialState, templateReducer } from './reducer';
 
 type BudgetAutomationProps = {
   categories: CategoryGroupEntity[];
   schedules: readonly ScheduleEntity[];
   template?: Template;
-  onSave?: () => void;
+  onSave?: (template: Template) => void;
   onDelete?: () => void;
   style?: CSSProperties;
   readOnlyStyle?: CSSProperties;
@@ -44,16 +45,18 @@ export const BudgetAutomation = ({
 }: BudgetAutomationProps) => {
   const [isEditing, setIsEditing] = useState(false);
 
-  const [state, originalDispatch] = useReducer(
-    templateReducer,
-    getInitialState(template ?? DEFAULT_TEMPLATE),
-  );
-  const dispatch = useCallback(
-    (action: Action) => {
-      originalDispatch(action);
-      onSave?.();
+  const reducerCallback = useCallback(
+    (state: ReducerState, action: Action) => {
+      const newState = templateReducer(state, action);
+      onSave?.(newState.template);
+      return newState;
     },
-    [originalDispatch, onSave],
+    [onSave],
+  );
+
+  const [state, dispatch] = useReducer(
+    reducerCallback,
+    getInitialState(template ?? DEFAULT_TEMPLATE),
   );
 
   const categoryNameMap = useMemo(() => {
