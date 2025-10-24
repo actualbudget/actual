@@ -38,13 +38,13 @@ export function BalanceMenu({
       onMenuSelect={name => {
         switch (name) {
           case 'transfer':
-            onTransfer();
+            onTransfer?.();
             break;
           case 'carryover':
-            onCarryover(!carryover);
+            onCarryover?.(!carryover);
             break;
           case 'cover':
-            onCover();
+            onCover?.();
             break;
           default:
             throw new Error(`Unrecognized menu option: ${name}`);
