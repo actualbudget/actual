@@ -19,7 +19,6 @@ import { send } from 'loot-core/platform/client/fetch';
 import { type ParseFileOptions } from 'loot-core/server/transactions/import/parse-file';
 import { amountToInteger } from 'loot-core/shared/util';
 
-import { CheckboxOption } from './CheckboxOption';
 import { DateFormatSelect } from './DateFormatSelect';
 import { FieldMappings } from './FieldMappings';
 import { InOutOption } from './InOutOption';
@@ -47,6 +46,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { SectionLabel } from '@desktop-client/components/forms';
+import { LabeledCheckbox } from '@desktop-client/components/forms/LabeledCheckbox';
 import {
   TableHeader,
   TableWithNavigator,
@@ -901,7 +901,7 @@ export function ImportTransactionsModal({
           )}
 
           {isOfxFile(filetype) && (
-            <CheckboxOption
+            <LabeledCheckbox
               id="form_fallback_missing_payee"
               checked={fallbackMissingPayeeToMemo}
               onChange={() => {
@@ -909,11 +909,11 @@ export function ImportTransactionsModal({
               }}
             >
               <Trans>Use Memo as a fallback for empty Payees</Trans>
-            </CheckboxOption>
+            </LabeledCheckbox>
           )}
 
           {filetype !== 'csv' && (
-            <CheckboxOption
+            <LabeledCheckbox
               id="import_notes"
               checked={importNotes}
               onChange={() => {
@@ -921,11 +921,11 @@ export function ImportTransactionsModal({
               }}
             >
               <Trans>Import notes from file</Trans>
-            </CheckboxOption>
+            </LabeledCheckbox>
           )}
 
           {(isOfxFile(filetype) || isCamtFile(filetype)) && (
-            <CheckboxOption
+            <LabeledCheckbox
               id="form_dont_reconcile"
               checked={reconcile}
               onChange={() => {
@@ -933,7 +933,7 @@ export function ImportTransactionsModal({
               }}
             >
               <Trans>Merge with existing transactions</Trans>
-            </CheckboxOption>
+            </LabeledCheckbox>
           )}
 
           {/*Import Options */}
@@ -1005,7 +1005,7 @@ export function ImportTransactionsModal({
                         style={{ width: 50 }}
                       />
                     </label>
-                    <CheckboxOption
+                    <LabeledCheckbox
                       id="form_has_header"
                       checked={hasHeaderRow}
                       onChange={() => {
@@ -1013,8 +1013,8 @@ export function ImportTransactionsModal({
                       }}
                     >
                       <Trans>File has header row</Trans>
-                    </CheckboxOption>
-                    <CheckboxOption
+                    </LabeledCheckbox>
+                    <LabeledCheckbox
                       id="clear_on_import"
                       checked={clearOnImport}
                       onChange={() => {
@@ -1022,8 +1022,8 @@ export function ImportTransactionsModal({
                       }}
                     >
                       <Trans>Clear transactions on import</Trans>
-                    </CheckboxOption>
-                    <CheckboxOption
+                    </LabeledCheckbox>
+                    <LabeledCheckbox
                       id="form_dont_reconcile"
                       checked={reconcile}
                       onChange={() => {
@@ -1031,7 +1031,7 @@ export function ImportTransactionsModal({
                       }}
                     >
                       <Trans>Merge with existing transactions</Trans>
-                    </CheckboxOption>
+                    </LabeledCheckbox>
                   </View>
                 )}
 
@@ -1039,7 +1039,7 @@ export function ImportTransactionsModal({
 
                 <View style={{ marginRight: 10, gap: 5 }}>
                   <SectionLabel title={t('AMOUNT OPTIONS')} />
-                  <CheckboxOption
+                  <LabeledCheckbox
                     id="form_flip"
                     checked={flipAmount}
                     onChange={() => {
@@ -1047,7 +1047,7 @@ export function ImportTransactionsModal({
                     }}
                   >
                     <Trans>Flip amount</Trans>
-                  </CheckboxOption>
+                  </LabeledCheckbox>
                   <MultiplierOption
                     multiplierEnabled={multiplierEnabled}
                     multiplierAmount={multiplierAmount}
@@ -1059,7 +1059,7 @@ export function ImportTransactionsModal({
                   />
                   {filetype === 'csv' && (
                     <>
-                      <CheckboxOption
+                      <LabeledCheckbox
                         id="form_split"
                         checked={splitMode}
                         onChange={() => {
@@ -1069,7 +1069,7 @@ export function ImportTransactionsModal({
                         <Trans>
                           Split amount into separate inflow/outflow columns
                         </Trans>
-                      </CheckboxOption>
+                      </LabeledCheckbox>
                       <InOutOption
                         inOutMode={inOutMode}
                         outValue={outValue}

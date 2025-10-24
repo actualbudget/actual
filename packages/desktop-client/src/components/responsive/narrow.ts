@@ -8,3 +8,5 @@ export { MobileRuleEditPage as RuleEdit } from '../mobile/rules/MobileRuleEditPa
 
 export { CategoryPage as Category } from '../mobile/budget/CategoryPage';
 export { MobilePayeesPage as Payees } from '../mobile/payees/MobilePayeesPage';
+export { MobileBankSyncPage as BankSync } from '../mobile/banksync/MobileBankSyncPage';
+export { MobileBankSyncAccountEditPage as BankSyncAccountEdit } from '../mobile/banksync/MobileBankSyncAccountEditPage';

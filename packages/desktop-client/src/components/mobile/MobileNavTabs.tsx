@@ -13,6 +13,7 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
   SvgAdd,
   SvgCog,
+  SvgCreditCard,
   SvgPiggyBank,
   SvgReports,
   SvgStoreFront,
@@ -25,7 +26,10 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { useDrag } from '@use-gesture/react';
 
+import * as Platform from 'loot-core/shared/platform';
+
 import { useScrollListener } from '@desktop-client/components/ScrollProvider';
+import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 const COLUMN_COUNT = 3;
 const PILL_HEIGHT = 15;
@@ -40,6 +44,9 @@ export const MOBILE_NAV_HEIGHT = ROW_HEIGHT + PILL_HEIGHT;
 export function MobileNavTabs() {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
+  const syncServerStatus = useSyncServerStatus();
+  const isUsingServer =
+    syncServerStatus !== 'no-server' || Platform.isPlaywright;
   const [navbarState, setNavbarState] = useState<'default' | 'open' | 'hidden'>(
     'default',
   );
@@ -134,6 +141,16 @@ export function MobileNavTabs() {
       style: navTabStyle,
       Icon: SvgTuning,
     },
+    ...(isUsingServer
+      ? [
+          {
+            name: t('Bank Sync'),
+            path: '/bank-sync',
+            style: navTabStyle,
+            Icon: SvgCreditCard,
+          },
+        ]
+      : []),
     {
       name: t('Settings'),
       path: '/settings',
