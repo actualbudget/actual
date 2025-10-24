@@ -23,7 +23,6 @@ type TransferMenuProps = {
   initialAmount?: number;
   showToBeBudgeted?: boolean;
   onSubmit: (amount: number, categoryId: CategoryEntity['id']) => void;
-  onClose: () => void;
 };
 
 export function TransferMenu({
@@ -31,7 +30,6 @@ export function TransferMenu({
   initialAmount = 0,
   showToBeBudgeted,
   onSubmit,
-  onClose,
 }: TransferMenuProps) {
   const { grouped: originalCategoryGroups } = useCategories();
   const filteredCategoryGroups = useMemo(() => {
@@ -55,8 +53,6 @@ export function TransferMenu({
     if (parsedAmount && categoryId) {
       onSubmit?.(amountToInteger(parsedAmount), categoryId);
     }
-
-    onClose();
   };
 
   return (

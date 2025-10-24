@@ -4,7 +4,8 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'formulaMode'
   | 'currency'
-  | 'plugins';
+  | 'plugins'
+  | 'budgetTableV2';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
