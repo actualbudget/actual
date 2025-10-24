@@ -391,6 +391,15 @@ const transactionFields: Completion[] = [
       'Boolean reconciled status. TRUE if transaction is reconciled, FALSE otherwise.',
     ),
   },
+  {
+    label: 'balance',
+    type: 'variable',
+    section: '💰 Transaction Fields',
+    boost: 5,
+    info: t(
+      'Account balance as of the date of the transaction, excluding the transaction amount. Use for calculations and comparisons.\n\nExample: `=IF(balance < 0, "Negative Balance", "Positive Balance")`',
+    ),
+  },
 ];
 
 // Convert function definitions to completions with grouping

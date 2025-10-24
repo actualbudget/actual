@@ -403,6 +403,19 @@ export const queryModeFunctions: Record<string, FunctionDef> = {
     description: t('Combines several text strings into one.'),
     parameters: [{ name: 'texts', description: 'Text1, Text2, ...TextN' }],
   },
+  INTEGER_TO_AMOUNT: {
+    name: 'INTEGER_TO_AMOUNT',
+    description: t(
+      'Converts integer amount to decimal amount (e.g., 1234 -> 12.34).',
+    ),
+    parameters: [
+      { name: 'integer_amount', description: 'Integer amount in cents' },
+      {
+        name: 'decimal_places',
+        description: 'Number of decimal places (default: 2)',
+      },
+    ],
+  },
   UPPER: {
     name: 'UPPER',
     description: t('Converts text to uppercase.'),
