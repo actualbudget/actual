@@ -30,7 +30,6 @@ import { TransactionTable } from './TransactionsTable';
 
 import { AuthProvider } from '@desktop-client/auth/AuthProvider';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
-import { DisplayPayeeProvider } from '@desktop-client/hooks/useDisplayPayee';
 import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
 import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
 import { SpreadsheetProvider } from '@desktop-client/hooks/useSpreadsheet';
@@ -200,32 +199,30 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
       <AuthProvider>
         <SpreadsheetProvider>
           <SchedulesProvider>
-            <DisplayPayeeProvider transactions={transactions}>
-              <SelectedProviderWithItems
-                name="transactions"
-                items={transactions}
-                fetchAllIds={() => Promise.resolve(transactions.map(t => t.id))}
-              >
-                <SplitsExpandedProvider>
-                  <TransactionTable
-                    {...props}
-                    transactions={transactions}
-                    loadMoreTransactions={() => {}}
-                    // @ts-ignore TODO:
-                    commonPayees={[]}
-                    payees={payees}
-                    addNotification={console.log}
-                    onSave={onSave}
-                    onSplit={onSplit}
-                    onAdd={onAdd}
-                    onAddSplit={onAddSplit}
-                    onCreatePayee={onCreatePayee}
-                    showSelection={true}
-                    allowSplitTransaction={true}
-                  />
-                </SplitsExpandedProvider>
-              </SelectedProviderWithItems>
-            </DisplayPayeeProvider>
+            <SelectedProviderWithItems
+              name="transactions"
+              items={transactions}
+              fetchAllIds={() => Promise.resolve(transactions.map(t => t.id))}
+            >
+              <SplitsExpandedProvider>
+                <TransactionTable
+                  {...props}
+                  transactions={transactions}
+                  loadMoreTransactions={() => {}}
+                  // @ts-ignore TODO:
+                  commonPayees={[]}
+                  payees={payees}
+                  addNotification={console.log}
+                  onSave={onSave}
+                  onSplit={onSplit}
+                  onAdd={onAdd}
+                  onAddSplit={onAddSplit}
+                  onCreatePayee={onCreatePayee}
+                  showSelection={true}
+                  allowSplitTransaction={true}
+                />
+              </SplitsExpandedProvider>
+            </SelectedProviderWithItems>
           </SchedulesProvider>
         </SpreadsheetProvider>
       </AuthProvider>

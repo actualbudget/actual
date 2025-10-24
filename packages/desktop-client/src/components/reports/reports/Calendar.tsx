@@ -63,7 +63,6 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { DisplayPayeeProvider } from '@desktop-client/hooks/useDisplayPayee';
 import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
@@ -619,145 +618,143 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
             />
           </View>
         </View>
-        <DisplayPayeeProvider transactions={allTransactions}>
-          <SelectedProviderWithItems
-            name="transactions"
-            items={[]}
-            fetchAllIds={async () => []}
-            registerDispatch={() => {}}
-            selectAllFilter={(item: TransactionEntity) =>
-              !item._unmatched && !item.is_parent
-            }
-          >
-            <SchedulesProvider query={undefined}>
-              <View
-                style={{
-                  width: '100%',
-                  flexGrow: 1,
-                  overflow: isNarrowWidth ? 'auto' : 'hidden',
-                }}
-                // TODO: make TableHandleRef conform to HTMLDivEle
-                ref={table as unknown as Ref<HTMLDivElement>}
-              >
-                {!isNarrowWidth ? (
-                  <SplitsExpandedProvider initialMode="collapse">
-                    <TransactionList
-                      tableRef={table}
-                      account={undefined}
-                      transactions={transactionsGrouped}
-                      allTransactions={allTransactions}
-                      loadMoreTransactions={loadMoreTransactions}
-                      accounts={accounts}
-                      category={undefined}
-                      categoryGroups={categoryGroups}
-                      payees={payees}
-                      balances={null}
-                      showBalances={false}
-                      showReconciled={true}
-                      showCleared={false}
-                      showAccount={true}
-                      isAdding={false}
-                      isNew={() => false}
-                      isMatched={() => false}
-                      dateFormat={dateFormat}
-                      hideFraction={false}
-                      renderEmpty={() => (
-                        <View
-                          style={{
-                            color: theme.tableText,
-                            marginTop: 20,
-                            textAlign: 'center',
-                            fontStyle: 'italic',
-                          }}
-                        >
-                          <Trans>No transactions</Trans>
-                        </View>
-                      )}
-                      onSort={onSort}
-                      sortField={sortField}
-                      ascDesc={ascDesc}
-                      onChange={() => {}}
-                      onRefetch={() => setDirty(true)}
-                      onCloseAddTransaction={() => {}}
-                      onCreatePayee={async () => null}
-                      onApplyFilter={() => {}}
-                      onBatchDelete={() => {}}
-                      onBatchDuplicate={() => {}}
-                      onBatchLinkSchedule={() => {}}
-                      onBatchUnlinkSchedule={() => {}}
-                      onCreateRule={() => {}}
-                      onScheduleAction={() => {}}
-                      onMakeAsNonSplitTransactions={() => {}}
-                      showSelection={false}
-                      allowSplitTransaction={false}
-                    />
-                  </SplitsExpandedProvider>
-                ) : (
-                  <animated.div
-                    {...bind()}
+        <SelectedProviderWithItems
+          name="transactions"
+          items={[]}
+          fetchAllIds={async () => []}
+          registerDispatch={() => {}}
+          selectAllFilter={(item: TransactionEntity) =>
+            !item._unmatched && !item.is_parent
+          }
+        >
+          <SchedulesProvider query={undefined}>
+            <View
+              style={{
+                width: '100%',
+                flexGrow: 1,
+                overflow: isNarrowWidth ? 'auto' : 'hidden',
+              }}
+              // TODO: make TableHandleRef conform to HTMLDivEle
+              ref={table as unknown as Ref<HTMLDivElement>}
+            >
+              {!isNarrowWidth ? (
+                <SplitsExpandedProvider initialMode="collapse">
+                  <TransactionList
+                    tableRef={table}
+                    account={undefined}
+                    transactions={transactionsGrouped}
+                    allTransactions={allTransactions}
+                    loadMoreTransactions={loadMoreTransactions}
+                    accounts={accounts}
+                    category={undefined}
+                    categoryGroups={categoryGroups}
+                    payees={payees}
+                    balances={null}
+                    showBalances={false}
+                    showReconciled={true}
+                    showCleared={false}
+                    showAccount={true}
+                    isAdding={false}
+                    isNew={() => false}
+                    isMatched={() => false}
+                    dateFormat={dateFormat}
+                    hideFraction={false}
+                    renderEmpty={() => (
+                      <View
+                        style={{
+                          color: theme.tableText,
+                          marginTop: 20,
+                          textAlign: 'center',
+                          fontStyle: 'italic',
+                        }}
+                      >
+                        <Trans>No transactions</Trans>
+                      </View>
+                    )}
+                    onSort={onSort}
+                    sortField={sortField}
+                    ascDesc={ascDesc}
+                    onChange={() => {}}
+                    onRefetch={() => setDirty(true)}
+                    onCloseAddTransaction={() => {}}
+                    onCreatePayee={async () => null}
+                    onApplyFilter={() => {}}
+                    onBatchDelete={() => {}}
+                    onBatchDuplicate={() => {}}
+                    onBatchLinkSchedule={() => {}}
+                    onBatchUnlinkSchedule={() => {}}
+                    onCreateRule={() => {}}
+                    onScheduleAction={() => {}}
+                    onMakeAsNonSplitTransactions={() => {}}
+                    showSelection={false}
+                    allowSplitTransaction={false}
+                  />
+                </SplitsExpandedProvider>
+              ) : (
+                <animated.div
+                  {...bind()}
+                  style={{
+                    y,
+                    touchAction: 'pan-x',
+                    backgroundColor: theme.mobileNavBackground,
+                    borderTop: `1px solid ${theme.menuBorder}`,
+                    ...styles.shadow,
+                    height: totalHeight + CHEVRON_HEIGHT,
+                    width: '100%',
+                    position: 'fixed',
+                    zIndex: 100,
+                    bottom: 0,
+                    display: isNarrowWidth ? 'flex' : 'none',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Button
+                    variant="bare"
+                    onPress={() =>
+                      !mobileTransactionsOpen
+                        ? open({ canceled: false })
+                        : close()
+                    }
+                    className={css({
+                      color: theme.pageTextSubdued,
+                      height: 42,
+                      '&[data-pressed]': { backgroundColor: 'transparent' },
+                    })}
+                  >
+                    {!mobileTransactionsOpen && (
+                      <>
+                        <SvgCheveronUp width={16} height={16} />
+                        <Trans>Show transactions</Trans>
+                      </>
+                    )}
+                    {mobileTransactionsOpen && (
+                      <>
+                        <SvgCheveronDown width={16} height={16} />
+                        <Trans>Hide transactions</Trans>
+                      </>
+                    )}
+                  </Button>
+                  <View
                     style={{
-                      y,
-                      touchAction: 'pan-x',
-                      backgroundColor: theme.mobileNavBackground,
-                      borderTop: `1px solid ${theme.menuBorder}`,
-                      ...styles.shadow,
-                      height: totalHeight + CHEVRON_HEIGHT,
+                      height: '100%',
                       width: '100%',
-                      position: 'fixed',
-                      zIndex: 100,
-                      bottom: 0,
-                      display: isNarrowWidth ? 'flex' : 'none',
-                      flexDirection: 'column',
-                      alignItems: 'center',
+                      overflow: 'auto',
                     }}
                   >
-                    <Button
-                      variant="bare"
-                      onPress={() =>
-                        !mobileTransactionsOpen
-                          ? open({ canceled: false })
-                          : close()
-                      }
-                      className={css({
-                        color: theme.pageTextSubdued,
-                        height: 42,
-                        '&[data-pressed]': { backgroundColor: 'transparent' },
-                      })}
-                    >
-                      {!mobileTransactionsOpen && (
-                        <>
-                          <SvgCheveronUp width={16} height={16} />
-                          <Trans>Show transactions</Trans>
-                        </>
-                      )}
-                      {mobileTransactionsOpen && (
-                        <>
-                          <SvgCheveronDown width={16} height={16} />
-                          <Trans>Hide transactions</Trans>
-                        </>
-                      )}
-                    </Button>
-                    <View
-                      style={{
-                        height: '100%',
-                        width: '100%',
-                        overflow: 'auto',
-                      }}
-                    >
-                      <TransactionListMobile
-                        isLoading={false}
-                        onLoadMore={loadMoreTransactions}
-                        transactions={allTransactions}
-                        onOpenTransaction={onOpenTransaction}
-                        isLoadingMore={false}
-                      />
-                    </View>
-                  </animated.div>
-                )}
-              </View>
-            </SchedulesProvider>
-          </SelectedProviderWithItems>
-        </DisplayPayeeProvider>
+                    <TransactionListMobile
+                      isLoading={false}
+                      onLoadMore={loadMoreTransactions}
+                      transactions={allTransactions}
+                      onOpenTransaction={onOpenTransaction}
+                      isLoadingMore={false}
+                    />
+                  </View>
+                </animated.div>
+              )}
+            </View>
+          </SchedulesProvider>
+        </SelectedProviderWithItems>
       </View>
     </Page>
   );
