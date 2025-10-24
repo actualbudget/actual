@@ -79,6 +79,14 @@ export function BudgetCell<
                 message: `${category.name} budget has been set last to month’s budgeted amount.`,
               });
             },
+            onSetToSpent: () => {
+              onBudgetAction(month, 'set-single-to-spent', {
+                category: category.id,
+              });
+              showUndoNotification({
+                message: `${category.name} budget has been set equal to amount spent.`,
+              });
+            },
             onSetMonthsAverage: numberOfMonths => {
               if (
                 numberOfMonths !== 3 &&
