@@ -8,13 +8,13 @@ import {
   CellValue,
   CellValueText,
 } from '@desktop-client/components/spreadsheet/CellValue';
+import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { SheetNames } from '@desktop-client/spreadsheet';
+import { type SheetNames } from '@desktop-client/spreadsheet';
 import {
   envelopeBudget,
   trackingBudget,
 } from '@desktop-client/spreadsheet/bindings';
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 
 type CategoryGroupSpentCellProps = ComponentPropsWithoutRef<
   typeof ReactAriaCell

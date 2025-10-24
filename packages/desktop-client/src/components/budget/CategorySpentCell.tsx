@@ -3,6 +3,7 @@ import { usePress, useFocusable } from 'react-aria';
 import { Cell as ReactAriaCell } from 'react-aria-components';
 
 import { css } from '@emotion/css';
+
 import * as monthUtils from 'loot-core/shared/months';
 import type { CategoryEntity } from 'loot-core/types/models';
 
@@ -12,12 +13,12 @@ import {
   CellValue,
   CellValueText,
 } from '@desktop-client/components/spreadsheet/CellValue';
+import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import {
   envelopeBudget,
   trackingBudget,
 } from '@desktop-client/spreadsheet/bindings';
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 
 type CategorySpentCellProps = ComponentPropsWithoutRef<typeof ReactAriaCell> & {
   month: string;
