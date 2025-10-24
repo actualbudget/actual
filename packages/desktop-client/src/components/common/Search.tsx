@@ -10,7 +10,7 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 type SearchProps = {
-  inputRef?: Ref<HTMLInputElement>;
+  ref?: Ref<HTMLInputElement>;
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
@@ -21,7 +21,7 @@ type SearchProps = {
 };
 
 export function Search({
-  inputRef,
+  ref,
   value,
   onChange,
   placeholder,
@@ -70,7 +70,7 @@ export function Search({
       />
 
       <Input
-        ref={inputRef}
+        ref={ref}
         value={value}
         placeholder={placeholder}
         onEscape={() => onChange('')}
