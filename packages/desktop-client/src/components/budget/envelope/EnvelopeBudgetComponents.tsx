@@ -3,7 +3,6 @@ import React, {
   type CSSProperties,
   memo,
   useRef,
-  useState,
 } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
@@ -28,11 +27,9 @@ import {
   type CategoryEntity,
 } from 'loot-core/types/models';
 
-import { BalanceMenu } from './BalanceMenu';
+import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
-import { CoverMenu } from './CoverMenu';
 import { IncomeMenu } from './IncomeMenu';
-import { TransferMenu } from './TransferMenu';
 
 import { BalanceWithCarryover } from '@desktop-client/components/budget/BalanceWithCarryover';
 import { makeAmountGrey } from '@desktop-client/components/budget/util';
@@ -254,12 +251,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   };
 
   const { showUndoNotification } = useUndo();
-  const [activeBalanceMenu, setActiveBalanceMenu] = useState<
-    'balance' | 'transfer' | 'cover' | null
-  >(null);
-  const catBalance = useEnvelopeSheetValue(
-    envelopeBudget.catBalance(category.id),
-  );
 
   const navigate = useNavigate();
 
@@ -490,7 +481,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           onClick={() => {
             resetBalancePosition(-6, -4);
             setBalanceMenuOpen(true);
-            setActiveBalanceMenu('balance');
           }}
           onContextMenu={e => {
             handleBalanceContextMenu(e);
@@ -515,58 +505,18 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
         <Popover
           triggerRef={balanceMenuTriggerRef}
           placement="bottom end"
-          isOpen={balanceMenuOpen && activeBalanceMenu !== null}
-          onOpenChange={() => {
-            if (activeBalanceMenu !== 'balance') {
-              setBalanceMenuOpen(false);
-              setActiveBalanceMenu(null);
-            }
-          }}
+          isOpen={balanceMenuOpen}
+          onOpenChange={() => setBalanceMenuOpen(false)}
           style={{ margin: 1 }}
           isNonModal
           {...balancePosition}
         >
-          {activeBalanceMenu === 'balance' && (
-            <BalanceMenu
-              categoryId={category.id}
-              onCarryover={carryover => {
-                onBudgetAction(month, 'carryover', {
-                  category: category.id,
-                  flag: carryover,
-                });
-                setActiveBalanceMenu(null);
-              }}
-              onTransfer={() => setActiveBalanceMenu('transfer')}
-              onCover={() => setActiveBalanceMenu('cover')}
-            />
-          )}
-          {activeBalanceMenu === 'transfer' && (
-            <TransferMenu
-              categoryId={category.id}
-              initialAmount={catBalance}
-              showToBeBudgeted={true}
-              onSubmit={(amount, toCategoryId) => {
-                onBudgetAction(month, 'transfer-category', {
-                  amount,
-                  from: category.id,
-                  to: toCategoryId,
-                });
-              }}
-              onClose={() => setActiveBalanceMenu(null)}
-            />
-          )}
-          {activeBalanceMenu === 'cover' && (
-            <CoverMenu
-              categoryId={category.id}
-              onSubmit={fromCategoryId => {
-                onBudgetAction(month, 'cover-overspending', {
-                  to: category.id,
-                  from: fromCategoryId,
-                });
-              }}
-              onClose={() => setActiveBalanceMenu(null)}
-            />
-          )}
+          <BalanceMovementMenu
+            categoryId={category.id}
+            month={month}
+            onBudgetAction={onBudgetAction}
+            onClose={() => setBalanceMenuOpen(false)}
+          />
         </Popover>
       </Field>
     </View>
