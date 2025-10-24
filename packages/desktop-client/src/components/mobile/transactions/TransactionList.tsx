@@ -40,12 +40,12 @@ import { type TransactionEntity } from 'loot-core/types/models';
 import { ROW_HEIGHT, TransactionListItem } from './TransactionListItem';
 
 import { FloatingActionBar } from '@desktop-client/components/mobile/FloatingActionBar';
-import { useScrollListener } from '@desktop-client/components/ScrollProvider';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
+import { useScrollListener } from '@desktop-client/hooks/useScrollListener';
 import {
   useSelectedDispatch,
   useSelectedItems,

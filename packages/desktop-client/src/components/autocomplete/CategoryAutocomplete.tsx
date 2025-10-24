@@ -265,6 +265,7 @@ export function CategoryAutocomplete({
       suggestions: CategoryAutocompleteItem[],
       value: string,
     ): CategoryAutocompleteItem[] => {
+      const normalizedValue = getNormalisedString(value);
       return suggestions
         .filter(suggestion => {
           if (suggestion.id === 'split') {
@@ -274,11 +275,11 @@ export function CategoryAutocomplete({
           if (suggestion.group) {
             return (
               getNormalisedString(suggestion.group.name).includes(
-                getNormalisedString(value),
+                normalizedValue,
               ) ||
               getNormalisedString(
                 suggestion.group.name + ' ' + suggestion.name,
-              ).includes(getNormalisedString(value))
+              ).includes(normalizedValue)
             );
           }
 
@@ -286,8 +287,7 @@ export function CategoryAutocomplete({
         })
         .sort(
           (a, b) =>
-            customSort(a, getNormalisedString(value)) -
-            customSort(b, getNormalisedString(value)),
+            customSort(a, normalizedValue) - customSort(b, normalizedValue),
         );
     },
     [],

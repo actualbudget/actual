@@ -112,7 +112,10 @@ import {
 } from '@desktop-client/components/table';
 import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
+import {
+  DisplayPayeeProvider,
+  useDisplayPayee,
+} from '@desktop-client/hooks/useDisplayPayee';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { usePrevious } from '@desktop-client/hooks/usePrevious';
@@ -2356,9 +2359,9 @@ export const TransactionTable = forwardRef(
 
     const dispatch = useDispatch();
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
-    const [newTransactions, setNewTransactions] = useState<
-      TransactionEntity[] | null
-    >(null);
+    const [newTransactions, setNewTransactions] = useState<TransactionEntity[]>(
+      [],
+    );
     const [prevIsAdding, setPrevIsAdding] = useState(false);
     const splitsExpanded = useSplitsExpanded();
     const splitsExpandedDispatch = splitsExpanded.dispatch;
@@ -2946,41 +2949,48 @@ export const TransactionTable = forwardRef(
       [splitsExpandedDispatch],
     );
 
+    const displayPayeeTransactions = useMemo(
+      () => [...props.transactions, ...newTransactions],
+      [props.transactions, newTransactions],
+    );
+
     return (
-      <TransactionTableInner
-        tableRef={mergedRef}
-        listContainerRef={listContainerRef}
-        {...props}
-        transactions={transactionsWithExpandedSplits}
-        transactionMap={transactionMap}
-        transactionsByParent={transactionsByParent}
-        transferAccountsByTransaction={transferAccountsByTransaction}
-        selectedItems={selectedItems}
-        isExpanded={splitsExpanded.isExpanded}
-        onSave={onSave}
-        onDelete={onDelete}
-        onBatchDelete={onBatchDelete}
-        onBatchDuplicate={onBatchDuplicate}
-        onBatchLinkSchedule={onBatchLinkSchedule}
-        onBatchUnlinkSchedule={onBatchUnlinkSchedule}
-        onCreateRule={onCreateRule}
-        onScheduleAction={onScheduleAction}
-        onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
-        onSplit={onSplit}
-        onCheckNewEnter={onCheckNewEnter}
-        onCheckEnter={onCheckEnter}
-        onAddTemporary={onAddTemporary}
-        onAddSplit={onAddSplit}
-        onDistributeRemainder={onDistributeRemainder}
-        onCloseAddTransaction={onCloseAddTransaction}
-        onToggleSplit={onToggleSplit}
-        newTransactions={newTransactions ?? []}
-        tableNavigator={tableNavigator}
-        newNavigator={newNavigator}
-        showSelection={props.showSelection}
-        allowSplitTransaction={props.allowSplitTransaction}
-        showHiddenCategories={showHiddenCategories}
-      />
+      <DisplayPayeeProvider transactions={displayPayeeTransactions}>
+        <TransactionTableInner
+          tableRef={mergedRef}
+          listContainerRef={listContainerRef}
+          {...props}
+          transactions={transactionsWithExpandedSplits}
+          transactionMap={transactionMap}
+          transactionsByParent={transactionsByParent}
+          transferAccountsByTransaction={transferAccountsByTransaction}
+          selectedItems={selectedItems}
+          isExpanded={splitsExpanded.isExpanded}
+          onSave={onSave}
+          onDelete={onDelete}
+          onBatchDelete={onBatchDelete}
+          onBatchDuplicate={onBatchDuplicate}
+          onBatchLinkSchedule={onBatchLinkSchedule}
+          onBatchUnlinkSchedule={onBatchUnlinkSchedule}
+          onCreateRule={onCreateRule}
+          onScheduleAction={onScheduleAction}
+          onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
+          onSplit={onSplit}
+          onCheckNewEnter={onCheckNewEnter}
+          onCheckEnter={onCheckEnter}
+          onAddTemporary={onAddTemporary}
+          onAddSplit={onAddSplit}
+          onDistributeRemainder={onDistributeRemainder}
+          onCloseAddTransaction={onCloseAddTransaction}
+          onToggleSplit={onToggleSplit}
+          newTransactions={newTransactions ?? []}
+          tableNavigator={tableNavigator}
+          newNavigator={newNavigator}
+          showSelection={props.showSelection}
+          allowSplitTransaction={props.allowSplitTransaction}
+          showHiddenCategories={showHiddenCategories}
+        />
+      </DisplayPayeeProvider>
     );
   },
 );
