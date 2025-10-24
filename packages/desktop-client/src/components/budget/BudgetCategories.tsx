@@ -1,8 +1,18 @@
-import React, { memo, useState, useMemo } from 'react';
+import React, {
+  memo,
+  useState,
+  useMemo,
+  type ComponentPropsWithoutRef,
+} from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/types/models';
 
 import { ExpenseCategory } from './ExpenseCategory';
 import { ExpenseGroup } from './ExpenseGroup';
@@ -13,11 +23,66 @@ import { SidebarCategory } from './SidebarCategory';
 import { SidebarGroup } from './SidebarGroup';
 import { separateGroups } from './util';
 
-import { DropHighlightPosContext } from '@desktop-client/components/sort';
+import {
+  DropHighlightPosContext,
+  type DragState,
+  type OnDropCallback,
+} from '@desktop-client/components/sort';
 import { Row } from '@desktop-client/components/table';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 
-export const BudgetCategories = memo(
+type BudgetItem =
+  | { type: 'new-group' }
+  | { type: 'new-category' }
+  | { type: 'expense-group'; value: CategoryGroupEntity }
+  | {
+      type: 'expense-category';
+      value: CategoryEntity;
+      group: CategoryGroupEntity;
+    }
+  | { type: 'income-separator' }
+  | { type: 'income-group'; value: CategoryGroupEntity }
+  | { type: 'income-category'; value: CategoryEntity };
+
+type LocalDragState =
+  | DragState<CategoryEntity>
+  | DragState<CategoryGroupEntity>
+  | null;
+
+type BudgetCategoriesProps = {
+  categoryGroups: CategoryGroupEntity[];
+  editingCell: { id: string; cell: string } | null;
+  dataComponents: {
+    ExpenseGroupComponent: ComponentPropsWithoutRef<
+      typeof ExpenseGroup
+    >['MonthComponent'];
+    ExpenseCategoryComponent: ComponentPropsWithoutRef<
+      typeof ExpenseCategory
+    >['MonthComponent'];
+    IncomeHeaderComponent: ComponentPropsWithoutRef<
+      typeof IncomeHeader
+    >['MonthComponent'];
+    IncomeGroupComponent: ComponentPropsWithoutRef<
+      typeof IncomeGroup
+    >['MonthComponent'];
+    IncomeCategoryComponent: ComponentPropsWithoutRef<
+      typeof IncomeCategory
+    >['MonthComponent'];
+  };
+  onBudgetAction: (month: string, action: string, arg: unknown) => void;
+  onShowActivity: (id: CategoryEntity['id'], month?: string) => void;
+  onEditName?: (id: CategoryEntity['id']) => void;
+  onEditMonth?: (id: CategoryEntity['id'], month: string) => void;
+  onSaveCategory?: (category: CategoryEntity) => void;
+  onSaveGroup?: (group: CategoryGroupEntity) => void;
+  onDeleteCategory: (id: CategoryEntity['id']) => void;
+  onDeleteGroup?: (id: CategoryGroupEntity['id']) => void;
+  onApplyBudgetTemplatesInGroup?: (categoryIds: CategoryEntity['id'][]) => void;
+  onReorderCategory: OnDropCallback;
+  onReorderGroup: OnDropCallback;
+};
+
+export const BudgetCategories = memo<BudgetCategoriesProps>(
   ({
     categoryGroups,
     editingCell,
@@ -37,27 +102,31 @@ export const BudgetCategories = memo(
     const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
       useLocalPref('budget.collapsed');
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
-    function onCollapse(value) {
+    function onCollapse(value: Array<CategoryGroupEntity['id']>) {
       setCollapsedGroupIdsPref(value);
     }
 
     const [isAddingGroup, setIsAddingGroup] = useState(false);
-    const [newCategoryForGroup, setNewCategoryForGroup] = useState(null);
-    const items = useMemo(() => {
+    const [newCategoryForGroup, setNewCategoryForGroup] = useState<
+      string | null
+    >(null);
+    const items: BudgetItem[] = useMemo(() => {
       const [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
 
-      let items = Array.prototype.concat.apply(
+      let items: BudgetItem[] = Array.prototype.concat.apply(
         [],
         expenseGroups.map(group => {
           if (group.hidden && !showHiddenCategories) {
             return [];
           }
 
-          const groupCategories = group.categories.filter(
+          const groupCategories = group.categories?.filter(
             cat => showHiddenCategories || !cat.hidden,
           );
 
-          const items = [{ type: 'expense-group', value: { ...group } }];
+          const items: BudgetItem[] = [
+            { type: 'expense-group', value: { ...group } },
+          ];
 
           if (newCategoryForGroup === group.id) {
             items.push({ type: 'new-category' });
@@ -67,12 +136,14 @@ export const BudgetCategories = memo(
             ...items,
             ...(collapsedGroupIds.includes(group.id)
               ? []
-              : groupCategories
-            ).map(cat => ({
-              type: 'expense-category',
-              value: cat,
-              group,
-            })),
+              : groupCategories || []
+            ).map(
+              (cat): BudgetItem => ({
+                type: 'expense-category',
+                value: cat,
+                group,
+              }),
+            ),
           ];
         }),
       );
@@ -82,22 +153,30 @@ export const BudgetCategories = memo(
       }
 
       if (incomeGroup) {
-        items = items.concat(
-          [
-            { type: 'income-separator' },
-            { type: 'income-group', value: incomeGroup },
-            newCategoryForGroup === incomeGroup.id && { type: 'new-category' },
-            ...(collapsedGroupIds.includes(incomeGroup.id)
-              ? []
-              : incomeGroup.categories.filter(
-                  cat => showHiddenCategories || !cat.hidden,
-                )
-            ).map(cat => ({
+        const incomeCategoryItems: BudgetItem[] = [
+          { type: 'income-separator' },
+          { type: 'income-group', value: incomeGroup },
+        ];
+
+        if (newCategoryForGroup === incomeGroup.id) {
+          incomeCategoryItems.push({ type: 'new-category' });
+        }
+
+        incomeCategoryItems.push(
+          ...(collapsedGroupIds.includes(incomeGroup.id)
+            ? []
+            : incomeGroup.categories?.filter(
+                cat => showHiddenCategories || !cat.hidden,
+              ) || []
+          ).map(
+            (cat): BudgetItem => ({
               type: 'income-category',
               value: cat,
-            })),
-          ].filter(x => x),
+            }),
+          ),
         );
+
+        items = items.concat(incomeCategoryItems);
       }
 
       return items;
@@ -109,15 +188,20 @@ export const BudgetCategories = memo(
       showHiddenCategories,
     ]);
 
-    const [dragState, setDragState] = useState(null);
-    const [savedCollapsed, setSavedCollapsed] = useState(null);
+    const [dragState, setDragState] = useState<LocalDragState>(null);
+    const [savedCollapsed, setSavedCollapsed] = useState<Array<
+      CategoryGroupEntity['id']
+    > | null>(null);
 
     // TODO: If we turn this into a reducer, we could probably memoize
     // each item in the list for better perf
-    function onDragChange(newDragState) {
+    function onDragChange(
+      newDragState: DragState<CategoryEntity> | DragState<CategoryGroupEntity>,
+    ) {
       const { state } = newDragState;
 
       if (state === 'start-preview') {
+        // @ts-expect-error fix me
         setDragState({
           type: newDragState.type,
           item: newDragState.item,
@@ -131,19 +215,13 @@ export const BudgetCategories = memo(
           });
           setSavedCollapsed(collapsedGroupIds);
         }
-      } else if (state === 'hover') {
-        setDragState({
-          ...dragState,
-          hoveredId: newDragState.id,
-          hoveredPos: newDragState.pos,
-        });
       } else if (state === 'end') {
         setDragState(null);
         onCollapse(savedCollapsed || []);
       }
     }
 
-    function onToggleCollapse(id) {
+    function onToggleCollapse(id: CategoryGroupEntity['id']) {
       if (collapsedGroupIds.includes(id)) {
         onCollapse(collapsedGroupIds.filter(id_ => id_ !== id));
       } else {
@@ -159,14 +237,14 @@ export const BudgetCategories = memo(
       setIsAddingGroup(false);
     }
 
-    function _onSaveGroup(group) {
+    function _onSaveGroup(group: CategoryGroupEntity) {
       onSaveGroup?.(group);
       if (group.id === 'new') {
         onHideNewGroup();
       }
     }
 
-    function onShowNewCategory(groupId) {
+    function onShowNewCategory(groupId: CategoryGroupEntity['id']) {
       onCollapse(collapsedGroupIds.filter(c => c !== groupId));
       setNewCategoryForGroup(groupId);
     }
@@ -175,7 +253,7 @@ export const BudgetCategories = memo(
       setNewCategoryForGroup(null);
     }
 
-    function _onSaveCategory(category) {
+    function _onSaveCategory(category: CategoryEntity) {
       onSaveCategory?.(category);
       if (category.id === 'new') {
         onHideNewCategory();
@@ -203,6 +281,7 @@ export const BudgetCategories = memo(
                 >
                   <SidebarGroup
                     group={{ id: 'new', name: '' }}
+                    collapsed={false}
                     editing={true}
                     onSave={_onSaveGroup}
                     onHideNewGroup={onHideNewGroup}
@@ -215,18 +294,20 @@ export const BudgetCategories = memo(
               content = (
                 <Row>
                   <SidebarCategory
+                    innerRef={null}
                     category={{
                       name: '',
-                      group: newCategoryForGroup,
+                      group: newCategoryForGroup!,
                       is_income:
                         newCategoryForGroup ===
-                        categoryGroups.find(g => g.is_income).id,
+                        categoryGroups.find(g => g.is_income)?.id,
                       id: 'new',
                     }}
                     editing={true}
                     onSave={_onSaveCategory}
+                    onDelete={async () => {}}
                     onHideNewCategory={onHideNewCategory}
-                    onEditName={onEditName}
+                    onEditName={onEditName!}
                   />
                 </Row>
               );
@@ -293,10 +374,10 @@ export const BudgetCategories = memo(
                   editingCell={editingCell}
                   MonthComponent={dataComponents.IncomeGroupComponent}
                   collapsed={collapsedGroupIds.includes(item.value.id)}
-                  onEditName={onEditName}
+                  onEditName={onEditName!}
                   onSave={_onSaveGroup}
                   onToggleCollapse={onToggleCollapse}
-                  onShowNewCategory={onShowNewCategory}
+                  onShowNewCategory={onShowNewCategory!}
                 />
               );
               break;
@@ -307,7 +388,7 @@ export const BudgetCategories = memo(
                   editingCell={editingCell}
                   isLast={idx === items.length - 1}
                   MonthComponent={dataComponents.IncomeCategoryComponent}
-                  onEditName={onEditName}
+                  onEditName={onEditName!}
                   onEditMonth={onEditMonth}
                   onSave={_onSaveCategory}
                   onDelete={onDeleteCategory}
@@ -319,6 +400,7 @@ export const BudgetCategories = memo(
               );
               break;
             default:
+              // @ts-expect-error Error is expected here because "item.type" is "never"
               throw new Error('Unknown item type: ' + item.type);
           }
 
@@ -328,7 +410,7 @@ export const BudgetCategories = memo(
           return (
             <DropHighlightPosContext.Provider
               key={
-                item.value
+                'value' in item
                   ? item.value.id
                   : item.type === 'income-separator'
                     ? 'separator'
@@ -338,9 +420,11 @@ export const BudgetCategories = memo(
             >
               <View
                 style={
-                  !dragState && {
-                    ':hover': { backgroundColor: theme.tableBackground },
-                  }
+                  dragState
+                    ? {}
+                    : {
+                        ':hover': { backgroundColor: theme.tableBackground },
+                      }
                 }
               >
                 {content}
