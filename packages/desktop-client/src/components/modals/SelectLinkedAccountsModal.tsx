@@ -113,6 +113,9 @@ export function SelectLinkedAccountsModal({
   const { isNarrowWidth } = useResponsive();
   const dispatch = useDispatch();
   const localAccounts = useAccounts().filter(a => a.closed === 0);
+  const [draftLinkAccounts] = useState<Map<string, 'linking' | 'unlinking'>>(
+    new Map(),
+  );
   const [chosenAccounts, setChosenAccounts] = useState<Record<string, string>>(
     () => {
       return Object.fromEntries(
@@ -220,8 +223,10 @@ export function SelectLinkedAccountsModal({
 
       if (localAccountId) {
         updatedAccounts[externalAccount.account_id] = localAccountId;
+        draftLinkAccounts.set(externalAccount.account_id, 'linking');
       } else {
         delete updatedAccounts[externalAccount.account_id];
+        draftLinkAccounts.set(externalAccount.account_id, 'unlinking');
       }
 
       return updatedAccounts;
@@ -241,6 +246,19 @@ export function SelectLinkedAccountsModal({
 
     return localAccounts.find(acc => acc.id === chosenId);
   };
+
+  const label = useMemo(() => {
+    const s = new Set(draftLinkAccounts.values());
+    if (s.has('linking') && s.has('unlinking')) {
+      return t('Link and unlink accounts');
+    } else if (s.has('linking')) {
+      return t('Link accounts');
+    } else if (s.has('unlinking')) {
+      return t('Unlink accounts');
+    }
+
+    return t('Link or unlink accounts');
+  }, [draftLinkAccounts, t]);
 
   return (
     <Modal
@@ -360,7 +378,7 @@ export function SelectLinkedAccountsModal({
             <Button
               variant="primary"
               onPress={onNext}
-              isDisabled={!Object.keys(chosenAccounts).length}
+              isDisabled={draftLinkAccounts.size === 0}
               style={
                 isNarrowWidth
                   ? {
@@ -371,7 +389,7 @@ export function SelectLinkedAccountsModal({
                   : undefined
               }
             >
-              <Trans>Link accounts</Trans>
+              {label}
             </Button>
           </View>
         </View>
