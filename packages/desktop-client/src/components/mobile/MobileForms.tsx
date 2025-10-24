@@ -45,6 +45,15 @@ const valueStyle = {
   height: styles.mobileMinHeight,
 };
 
+// Fix for iOS Safari date input height issue
+const dateInputClassName = css({
+  'input[type="date"]::-webkit-datetime-edit': {
+    lineHeight: 1,
+    padding: 0,
+    marginBottom: '-2px',
+  },
+});
+
 type InputFieldProps = ComponentPropsWithRef<typeof Input>;
 
 export function InputField({
@@ -57,6 +66,7 @@ export function InputField({
   return (
     <Input
       ref={ref}
+            className={dateInputClassName}
       autoCorrect="false"
       autoCapitalize="none"
       disabled={disabled}
