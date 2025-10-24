@@ -23,7 +23,10 @@ import { TransferMenu } from './envelope/TransferMenu';
 import { BalanceMenu as TrackingBalanceMenu } from './tracking/BalanceMenu';
 import { makeBalanceAmountStyle } from './util';
 
-import { CellValue, CellValueText } from '@desktop-client/components/spreadsheet/CellValue';
+import {
+  CellValue,
+  CellValueText,
+} from '@desktop-client/components/spreadsheet/CellValue';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
@@ -33,7 +36,6 @@ import {
   envelopeBudget,
   trackingBudget,
 } from '@desktop-client/spreadsheet/bindings';
-
 
 type CategoryBalanceCellProps = ComponentPropsWithoutRef<
   typeof ReactAriaCell
