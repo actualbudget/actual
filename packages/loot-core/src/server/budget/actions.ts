@@ -298,6 +298,34 @@ export async function setToSpent({ month }: { month: string }): Promise<void> {
   });
 }
 
+export async function setSingleToSpent({
+  month,
+  category,
+}: {
+  month: string;
+  category: string;
+}): Promise<void> {
+  const categoryFromDb = await db.first<Pick<db.DbViewCategory, 'is_income'>>(
+    'SELECT is_income FROM v_categories WHERE id = ?',
+    [category],
+  );
+
+  await batchMessages(async () => {
+    const spent = await getSheetValue(
+      monthUtils.sheetForMonth(month),
+      'sum-amount-' + category,
+    );
+
+    let amount = spent;
+
+    if (categoryFromDb.is_income === 0) {
+      amount *= -1;
+    }
+
+    setBudget({ category, month, amount });
+  });
+}
+
 export async function set3MonthAvg({
   month,
 }: {

@@ -31,6 +31,7 @@ export function EnvelopeBudgetMenuModal({
   categoryId,
   onUpdateBudget,
   onCopyLastMonthAverage,
+  onSetToSpent,
   onSetMonthsAverage,
   onApplyBudgetTemplate,
 }: EnvelopeBudgetMenuModalProps) {
@@ -108,6 +109,7 @@ export function EnvelopeBudgetMenuModal({
           <BudgetMenu
             getItemStyle={() => defaultMenuItemStyle}
             onCopyLastMonthAverage={onCopyLastMonthAverage}
+            onSetToSpent={onSetToSpent}
             onSetMonthsAverage={onSetMonthsAverage}
             onApplyBudgetTemplate={onApplyBudgetTemplate}
           />

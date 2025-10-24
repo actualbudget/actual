@@ -22,6 +22,7 @@ export interface BudgetHandlers {
   'budget/budget-amount': typeof actions.setBudget;
   'budget/copy-previous-month': typeof actions.copyPreviousMonth;
   'budget/copy-single-month': typeof actions.copySinglePreviousMonth;
+  'budget/set-single-to-spent': typeof actions.setSingleToSpent;
   'budget/set-zero': typeof actions.setZero;
   'budget/set-to-spent': typeof actions.setToSpent;
   'budget/set-3month-avg': typeof actions.set3MonthAvg;
@@ -72,6 +73,10 @@ app.method(
 app.method(
   'budget/copy-single-month',
   mutator(undoable(actions.copySinglePreviousMonth)),
+);
+app.method(
+  'budget/set-single-to-spent',
+  mutator(undoable(actions.setSingleToSpent)),
 );
 app.method('budget/set-zero', mutator(undoable(actions.setZero)));
 app.method('budget/set-to-spent', mutator(undoable(actions.setToSpent)));

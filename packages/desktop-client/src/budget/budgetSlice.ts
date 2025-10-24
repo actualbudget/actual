@@ -418,6 +418,13 @@ type ApplyBudgetActionPayload =
       args: {
         category: CategoryEntity['id'];
       };
+    }
+  | {
+      type: 'set-single-to-spent';
+      month: string;
+      args: {
+        category: CategoryEntity['id'];
+      };
     };
 
 export const applyBudgetAction = createAppAsyncThunk(
@@ -570,6 +577,12 @@ export const applyBudgetAction = createAppAsyncThunk(
         break;
       case 'copy-single-last':
         await send('budget/copy-single-month', {
+          month,
+          category: args.category,
+        });
+        break;
+      case 'set-single-to-spent':
+        await send('budget/set-single-to-spent', {
           month,
           category: args.category,
         });

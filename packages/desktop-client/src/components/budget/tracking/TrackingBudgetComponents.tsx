@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Trans } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
@@ -225,6 +225,8 @@ export const CategoryMonth = memo(function CategoryMonth({
   onBudgetAction,
   onShowActivity,
 }: CategoryMonthProps) {
+  const { t } = useTranslation();
+
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
 
@@ -313,7 +315,15 @@ export const CategoryMonth = memo(function CategoryMonth({
                     category: category.id,
                   });
                   showUndoNotification({
-                    message: `Budget set to last month’s budget.`,
+                    message: t(`Budget set to last month’s budget.`),
+                  });
+                }}
+                onSetToSpent={() => {
+                  onMenuAction(month, 'set-single-to-spent', {
+                    category: category.id,
+                  });
+                  showUndoNotification({
+                    message: t(`Budget set equal to amount spent.`),
                   });
                 }}
                 onSetMonthsAverage={numberOfMonths => {
@@ -329,7 +339,10 @@ export const CategoryMonth = memo(function CategoryMonth({
                     category: category.id,
                   });
                   showUndoNotification({
-                    message: `Budget set to ${numberOfMonths}-month average.`,
+                    message: t(
+                      'Budget set to {{numberOfMonths}}-month average.',
+                      { numberOfMonths },
+                    ),
                   });
                 }}
                 onApplyBudgetTemplate={() => {
@@ -337,7 +350,7 @@ export const CategoryMonth = memo(function CategoryMonth({
                     category: category.id,
                   });
                   showUndoNotification({
-                    message: `Budget template applied.`,
+                    message: t(`Budget template applied.`),
                   });
                 }}
               />
