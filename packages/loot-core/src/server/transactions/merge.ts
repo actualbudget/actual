@@ -1,5 +1,12 @@
 import { type TransactionEntity } from '../../types/models';
 import * as db from '../db';
+import { q } from '../../shared/query';
+import {
+  ungroupTransactions,
+  deleteTransaction as sharedDeleteTransaction,
+} from '../../shared/transactions';
+import { aqlQuery } from '../aql';
+import { batchUpdateTransactions } from '.';
 
 export async function mergeTransactions(
   transactions: Pick<TransactionEntity, 'id'>[],
@@ -24,17 +31,82 @@ export async function mergeTransactions(
   }
   const { keep, drop } = determineKeepDrop(a, b);
 
-  await Promise.all([
-    db.updateTransaction({
+  // Load subtransactions with a single query, then split by parent_id in memory
+  const keepSubtransactions: TransactionEntity[] = [];
+  const dropSubtransactions: TransactionEntity[] = [];
+  const parents: string[] = [];
+  if (keep.is_parent) parents.push(keep.id);
+  if (drop.is_parent) parents.push(drop.id);
+
+  let rows: TransactionEntity[] = [];
+  if (parents.length === 2) {
+    rows = await db.all<TransactionEntity>(
+      'SELECT * FROM v_transactions WHERE parent_id IN (?, ?)',
+      parents,
+    );
+  } else if (parents.length === 1) {
+    rows = await db.all<TransactionEntity>(
+      'SELECT * FROM v_transactions WHERE parent_id = ?',
+      parents,
+    );
+  } // else: both are non-parents → rows stays []
+
+  for (const row of rows) {
+    if (row.parent_id === keep.id) keepSubtransactions.push(row);
+    else if (row.parent_id === drop.id) dropSubtransactions.push(row);
+  }
+
+  // Determine which transaction has subtransactions (split categories)
+  const keepHasSubtransactions = keepSubtransactions.length > 0;
+  const dropHasSubtransactions = dropSubtransactions.length > 0;
+
+  // If keep doesn't have subtransactions but drop does, transfer them
+  if (!keepHasSubtransactions && dropHasSubtransactions) {
+    // Update each subtransaction to point to the kept parent
+    await Promise.all(
+      dropSubtransactions.map(sub =>
+        db.updateTransaction({
+          id: sub.id,
+          parent_id: keep.id,
+        } as TransactionEntity),
+      ),
+    );
+    // Mark keep as a parent transaction
+    await db.updateTransaction({
+      id: keep.id,
+      is_parent: true,
+      category: null, // Parent transactions with splits shouldn't have a category
+      payee: keep.payee || drop.payee,
+      notes: keep.notes || drop.notes,
+      cleared: keep.cleared || drop.cleared,
+      reconciled: keep.reconciled || drop.reconciled,
+    } as unknown as TransactionEntity);
+  } else {
+    // Normal merge without subtransactions
+    await db.updateTransaction({
       id: keep.id,
       payee: keep.payee || drop.payee,
       category: keep.category || drop.category,
       notes: keep.notes || drop.notes,
       cleared: keep.cleared || drop.cleared,
       reconciled: keep.reconciled || drop.reconciled,
-    } as TransactionEntity),
-    db.deleteTransaction(drop),
-  ]);
+    } as TransactionEntity);
+  }
+
+  // Delete the dropped transaction using shared deleteTransaction to
+  // intelligently handle possible parent/child cascading logic
+  const { data } = await aqlQuery(
+    q('transactions')
+      .filter({ id: drop.id })
+      .select('*')
+      .options({ splits: 'grouped' }),
+  );
+  const transactions = ungroupTransactions(data);
+  if (transactions.length > 0) {
+    const { diff } = sharedDeleteTransaction(transactions, drop.id);
+    await batchUpdateTransactions(diff);
+  }
+
   return keep.id;
 }
 
