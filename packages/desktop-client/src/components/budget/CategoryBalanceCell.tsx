@@ -17,10 +17,7 @@ import * as monthUtils from 'loot-core/shared/months';
 import { type CategoryEntity } from 'loot-core/types/models';
 
 import { balanceColumnPaddingStyle } from './BudgetCategoriesV2';
-import { BalanceMenu as EnvelopeBalanceMenu } from './envelope/BalanceMenu';
 import { BalanceMovementMenu as EnvelopeBalanceMovementMenu } from './envelope/BalanceMovementMenu';
-import { CoverMenu } from './envelope/CoverMenu';
-import { TransferMenu } from './envelope/TransferMenu';
 import { BalanceMenu as TrackingBalanceMenu } from './tracking/BalanceMenu';
 import { makeBalanceAmountStyle } from './util';
 
