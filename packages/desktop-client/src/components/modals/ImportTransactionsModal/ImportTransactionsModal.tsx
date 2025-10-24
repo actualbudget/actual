@@ -167,7 +167,7 @@ export function ImportTransactionsModal({
   const dateFormat = useDateFormat() || ('MM/dd/yyyy' as const);
   const [prefs, savePrefs] = useSyncedPrefs();
   const dispatch = useDispatch();
-  const categories = useCategories();
+  const { list: categories } = useCategories();
 
   const [multiplierAmount, setMultiplierAmount] = useState('');
   const [loadingState, setLoadingState] = useState<
@@ -275,7 +275,7 @@ export function ImportTransactionsModal({
           break;
         }
 
-        const category_id = parseCategoryFields(trans, categories.list);
+        const category_id = parseCategoryFields(trans, categories);
         if (category_id != null) {
           trans.category = category_id;
         }
@@ -336,7 +336,7 @@ export function ImportTransactionsModal({
             // add the updated existing transaction in the list, with the
             // isMatchedTransaction flag to identify it in display and not send it again
             existing_trx.isMatchedTransaction = true;
-            existing_trx.category = categories.list.find(
+            existing_trx.category = categories.find(
               cat => cat.id === existing_trx.category,
             )?.name;
             // add parent transaction attribute to mimic behaviour
@@ -351,7 +351,7 @@ export function ImportTransactionsModal({
           return next;
         }, []);
     },
-    [accountId, categories.list, clearOnImport, dispatch],
+    [accountId, categories, clearOnImport, dispatch],
   );
 
   const parse = useCallback(
@@ -614,7 +614,7 @@ export function ImportTransactionsModal({
         break;
       }
 
-      const category_id = parseCategoryFields(trans, categories.list);
+      const category_id = parseCategoryFields(trans, categories);
       trans.category = category_id;
 
       const {
@@ -859,7 +859,7 @@ export function ImportTransactionsModal({
                       outValue={outValue}
                       flipAmount={flipAmount}
                       multiplierAmount={multiplierAmount}
-                      categories={categories.list}
+                      categories={categories}
                       onCheckTransaction={onCheckTransaction}
                       reconcile={reconcile}
                     />

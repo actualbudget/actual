@@ -1,22 +1,7 @@
-import { useEffect } from 'react';
-
-import { useInitialMount } from './useInitialMount';
-
-import { getCategories } from '@desktop-client/budget/budgetSlice';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useCategoriesQuery } from './useCategoriesQuery';
 
 export function useCategories() {
-  const dispatch = useDispatch();
-  const isInitialMount = useInitialMount();
-  const isCategoriesDirty = useSelector(
-    state => state.budget.isCategoriesDirty,
-  );
-
-  useEffect(() => {
-    if (isInitialMount || isCategoriesDirty) {
-      dispatch(getCategories());
-    }
-  }, [dispatch, isInitialMount, isCategoriesDirty]);
-
-  return useSelector(state => state.budget.categories);
+  const query = useCategoriesQuery();
+  // We know data is always defined because of placeholderData
+  return query.data!;
 }

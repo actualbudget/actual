@@ -42,6 +42,7 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { format as formatDate, parseISO } from 'date-fns';
+import memoizeOne from 'memoize-one';
 
 import * as monthUtils from 'loot-core/shared/months';
 import { getStatusLabel } from 'loot-core/shared/schedules';
@@ -85,7 +86,6 @@ import {
 import { TransactionMenu } from './TransactionMenu';
 
 import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
-import { getCategoriesById } from '@desktop-client/budget/budgetSlice';
 import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
@@ -2986,3 +2986,16 @@ export const TransactionTable = forwardRef(
 );
 
 TransactionTable.displayName = 'TransactionTable';
+
+const getCategoriesById = memoizeOne(
+  (categoryGroups: CategoryGroupEntity[] | null | undefined) => {
+    const res: { [id: CategoryEntity['id']]: CategoryEntity } = {};
+    categoryGroups?.forEach(group => {
+      group.categories?.forEach(cat => {
+        res[cat.id] = cat;
+      });
+    });
+
+    return res;
+  },
+);
