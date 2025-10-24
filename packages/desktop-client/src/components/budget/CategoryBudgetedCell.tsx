@@ -28,15 +28,15 @@ import { BudgetMenu as TrackingBudgetMenu } from './tracking/BudgetMenu';
 import { makeAmountGrey } from './util';
 
 import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { useUndo } from '@desktop-client/hooks/useUndo';
-import { SheetNames } from '@desktop-client/spreadsheet';
+import { type SheetNames } from '@desktop-client/spreadsheet';
 import {
   envelopeBudget,
   trackingBudget,
 } from '@desktop-client/spreadsheet/bindings';
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import { useFormat } from '@desktop-client/hooks/useFormat';
 
 type CategoryBudgetedCellProps = ComponentPropsWithoutRef<
   typeof ReactAriaCell
