@@ -59,7 +59,7 @@ export function SecondaryItem({
           color: theme.sidebarItemText,
           paddingLeft: 14 + indent,
           fontWeight: bold ? fontWeight : null,
-          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'background 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
           ':hover': {
             backgroundColor: theme.sidebarItemBackgroundHover,
             boxShadow: 'inset 2px 0 0 0 rgba(255, 255, 255, 0.08)',

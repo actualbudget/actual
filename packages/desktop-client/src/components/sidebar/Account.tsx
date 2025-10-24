@@ -167,7 +167,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
               fontWeight: (style && style.fontWeight) || 'normal',
               '& .dot': {
                 backgroundColor: theme.sidebarItemAccentSelected,
-                transform: 'translateX(-4.5px) scale(1.3)',
+                transform: 'translateX(-4.5px)',
               },
             }}
           >

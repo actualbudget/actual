@@ -69,7 +69,7 @@ export function Item({
           paddingRight: 10,
           textDecoration: 'none',
           color: theme.sidebarItemText,
-          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'background 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
           ...(forceHover ? hoverStyle : {}),
           ':hover': hoverStyle,
         }}
