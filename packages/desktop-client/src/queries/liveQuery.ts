@@ -28,6 +28,7 @@ type Listener<TResponse = unknown> = (
 
 export type LiveQueryOptions = {
   onlySync?: boolean;
+  debounceDelay?: number;
 };
 
 // Subscribe and refetch
@@ -39,6 +40,9 @@ export class LiveQuery<TResponse = unknown> {
   private _supportedSyncTypes: Set<'applied' | 'success'>;
   private _query: Query;
   private _onError: (error: Error) => void;
+  private _debounceTimeout: ReturnType<typeof setTimeout> | null;
+  private _pendingTables: Set<string>;
+  private _debounceDelay: number;
 
   get query() {
     return this._query;
@@ -78,6 +82,9 @@ export class LiveQuery<TResponse = unknown> {
     this._dependencies = null;
     this._listeners = [];
     this._onError = onError || (() => {});
+    this._debounceTimeout = null;
+    this._pendingTables = new Set();
+    this._debounceDelay = options.debounceDelay ?? 50;
 
     // TODO: error types?
     this._supportedSyncTypes = options.onlySync
@@ -110,15 +117,39 @@ export class LiveQuery<TResponse = unknown> {
   protected onUpdate = (tables: string[]) => {
     // We might not know the dependencies if the first query result
     // hasn't come back yet
-    if (
+    const shouldRefetch =
       this._dependencies == null ||
-      tables.find(table => this._dependencies.has(table))
-    ) {
-      this.run();
+      tables.find(table => this._dependencies.has(table));
+
+    if (shouldRefetch) {
+      tables.forEach(table => this._pendingTables.add(table));
+
+      if (this._debounceTimeout) {
+        clearTimeout(this._debounceTimeout);
+      }
+
+      if (this._debounceDelay === 0) {
+        // No debouncing - run immediately
+        this._pendingTables.clear();
+        this._debounceTimeout = null;
+        this.run();
+      } else {
+        this._debounceTimeout = setTimeout(() => {
+          this._pendingTables.clear();
+          this._debounceTimeout = null;
+          this.run();
+        }, this._debounceDelay);
+      }
     }
   };
 
   run = () => {
+    if (this._debounceTimeout) {
+      clearTimeout(this._debounceTimeout);
+      this._debounceTimeout = null;
+      this._pendingTables.clear();
+    }
+
     this.subscribe();
     return this.fetchData(() => aqlQuery(this._query));
   };
@@ -157,6 +188,12 @@ export class LiveQuery<TResponse = unknown> {
     if (this._unsubscribeSyncEvent) {
       this._unsubscribeSyncEvent();
       this._unsubscribeSyncEvent = null;
+    }
+
+    if (this._debounceTimeout) {
+      clearTimeout(this._debounceTimeout);
+      this._debounceTimeout = null;
+      this._pendingTables.clear();
     }
   };
 
