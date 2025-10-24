@@ -31,6 +31,7 @@ export function TrackingBudgetMenuModal({
   categoryId,
   onUpdateBudget,
   onCopyLastMonthAverage,
+  onSetToSpent,
   onSetMonthsAverage,
   onApplyBudgetTemplate,
 }: TrackingBudgetMenuModalProps) {
@@ -108,6 +109,7 @@ export function TrackingBudgetMenuModal({
           <BudgetMenu
             getItemStyle={() => defaultMenuItemStyle}
             onCopyLastMonthAverage={onCopyLastMonthAverage}
+            onSetToSpent={onSetToSpent}
             onSetMonthsAverage={onSetMonthsAverage}
             onApplyBudgetTemplate={onApplyBudgetTemplate}
           />

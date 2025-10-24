@@ -17,6 +17,15 @@ const copyLastMonthBudget = async (
   await budgetMenuModal.close();
 };
 
+const setToSpent = async (
+  budgetPage: MobileBudgetPage,
+  categoryName: string,
+) => {
+  const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
+  await budgetMenuModal.setToSpent();
+  await budgetMenuModal.close();
+};
+
 const setTo3MonthAverage = async (
   budgetPage: MobileBudgetPage,
   categoryName: string,
@@ -292,6 +301,27 @@ budgetTypes.forEach(budgetType => {
       await copyLastMonthBudget(budgetPage, categoryName);
 
       await expect(budgetedButton).toHaveText(lastMonthBudget);
+      await expect(page).toMatchThemeScreenshots();
+    });
+
+    test(`sets budgets to amount spent`, async () => {
+      const budgetPage = await navigation.goToBudgetPage();
+
+      const categoryName = await budgetPage.getCategoryNameForRow(3);
+      const budgetedButton =
+        await budgetPage.getButtonForBudgeted(categoryName);
+      const spentButton = await budgetPage.getButtonForSpent(categoryName);
+      const spentAmount = await spentButton.textContent();
+
+      if (!spentAmount) {
+        throw new Error('Failed to get spent amount');
+      }
+
+      await setToSpent(budgetPage, categoryName);
+
+      await expect(budgetedButton).toHaveText(
+        amountToCurrency(Math.abs(currencyToAmount(spentAmount) ?? 0)),
+      );
       await expect(page).toMatchThemeScreenshots();
     });
 
