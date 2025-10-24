@@ -23,7 +23,7 @@ import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 
 type AmountInputProps = {
   id?: string;
-  inputRef?: Ref<HTMLInputElement>;
+  ref?: Ref<HTMLInputElement>;
   value: number;
   zeroSign?: '-' | '+';
   sign?: '-' | '+';
@@ -42,7 +42,7 @@ type AmountInputProps = {
 
 export function AmountInput({
   id,
-  inputRef,
+  ref,
   value: initialValue,
   zeroSign = '-', // + or -
   sign,
@@ -83,13 +83,13 @@ export function AmountInput({
     [initialValue, isFocused, getDisplayValue],
   );
 
-  const buttonRef = useRef(null);
-  const ref = useRef<HTMLInputElement>(null);
-  const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const innerRef = useRef<HTMLInputElement | null>(null);
+  const mergedRef = useMergedRefs<HTMLInputElement>(ref, innerRef);
 
   useEffect(() => {
     if (focused) {
-      ref.current?.focus();
+      innerRef.current?.focus();
     }
   }, [focused]);
 
@@ -105,9 +105,11 @@ export function AmountInput({
   }, [symbol, value, format]);
 
   useEffect(() => {
-    if (ref.current) {
+    if (innerRef.current) {
       (
-        ref.current as HTMLInputElement & { getCurrentAmount?: () => number }
+        innerRef.current as HTMLInputElement & {
+          getCurrentAmount?: () => number;
+        }
       ).getCurrentAmount = () => getAmount();
     }
   }, [getAmount]);
@@ -156,7 +158,7 @@ export function AmountInput({
   }
 
   function onInputAmountBlur(e) {
-    if (!ref.current?.contains(e.relatedTarget)) {
+    if (!innerRef.current?.contains(e.relatedTarget)) {
       const amount = getAmount();
       fireUpdate(amount);
     }

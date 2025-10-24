@@ -1,7 +1,8 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { InitialFocus } from '@actual-app/components/initial-focus';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
@@ -19,6 +20,7 @@ import {
   TapField,
 } from '@desktop-client/components/mobile/MobileForms';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
 import {
   type Modal as ModalType,
   pushModal,
@@ -54,7 +56,7 @@ export function CoverModal({
   const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
   const dispatch = useDispatch();
 
-  const onCategoryClick = useCallback(() => {
+  const openCategoryModal = useCallback(() => {
     dispatch(
       pushModal({
         modal: {
@@ -79,6 +81,13 @@ export function CoverModal({
 
   const fromCategory = categories.find(c => c.id === fromCategoryId);
 
+  const isInitialMount = useInitialMount();
+  useEffect(() => {
+    if (isInitialMount) {
+      openCategoryModal();
+    }
+  }, [isInitialMount, openCategoryModal]);
+
   return (
     <Modal name="cover">
       {({ state: { close } }) => (
@@ -89,7 +98,13 @@ export function CoverModal({
           />
           <View>
             <FieldLabel title={t('Cover from a category:')} />
-            <TapField value={fromCategory?.name} onPress={onCategoryClick} />
+            <InitialFocus>
+              <TapField
+                autoFocus
+                value={fromCategory?.name}
+                onPress={openCategoryModal}
+              />
+            </InitialFocus>
           </View>
 
           <View

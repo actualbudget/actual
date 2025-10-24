@@ -848,7 +848,7 @@ export function SelectedItemsButton<Name extends string>({
     typeof name === 'function' ? name(selectedItems.size) : name;
 
   return (
-    <View style={{ marginLeft: 10, flexShrink: 0 }}>
+    <View style={{ flexShrink: 0 }}>
       <Button
         ref={triggerRef}
         variant="bare"

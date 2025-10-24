@@ -1,7 +1,6 @@
 import React, {
   type ComponentPropsWithoutRef,
   type ComponentPropsWithRef,
-  forwardRef,
   type ReactNode,
   type CSSProperties,
 } from 'react';
@@ -12,7 +11,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Toggle } from '@actual-app/components/toggle';
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 
 type FieldLabelProps = {
   title: string;
@@ -48,28 +47,32 @@ const valueStyle = {
 
 type InputFieldProps = ComponentPropsWithRef<typeof Input>;
 
-export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
-  ({ disabled, style, onUpdate, ...props }, ref) => {
-    return (
-      <Input
-        ref={ref}
-        autoCorrect="false"
-        autoCapitalize="none"
-        disabled={disabled}
-        onUpdate={onUpdate}
-        style={{
-          ...valueStyle,
-          ...style,
-          color: disabled ? theme.tableTextInactive : theme.tableText,
-          backgroundColor: disabled
-            ? theme.formInputTextReadOnlySelection
-            : theme.tableBackground,
-        }}
-        {...props}
-      />
-    );
-  },
-);
+export function InputField({
+  disabled,
+  style,
+  onUpdate,
+  ref,
+  ...props
+}: InputFieldProps) {
+  return (
+    <Input
+      ref={ref}
+      autoCorrect="false"
+      autoCapitalize="none"
+      disabled={disabled}
+      onUpdate={onUpdate}
+      style={{
+        ...valueStyle,
+        ...style,
+        color: disabled ? theme.tableTextInactive : theme.tableText,
+        backgroundColor: disabled
+          ? theme.formInputTextReadOnlySelection
+          : theme.tableBackground,
+      }}
+      {...props}
+    />
+  );
+}
 
 InputField.displayName = 'InputField';
 
@@ -78,60 +81,63 @@ type TapFieldProps = ComponentPropsWithRef<typeof Button> & {
   textStyle?: CSSProperties;
 };
 
-const defaultTapFieldStyle: ComponentPropsWithoutRef<
-  typeof Button
->['style'] = ({ isDisabled, isPressed, isHovered }) => ({
-  ...valueStyle,
-  flexDirection: 'row',
-  alignItems: 'center',
-  backgroundColor: theme.tableBackground,
-  ...(isDisabled && {
-    backgroundColor: theme.formInputTextReadOnlySelection,
-  }),
-  ...(isPressed
-    ? {
-        opacity: 0.5,
-        boxShadow: 'none',
-      }
-    : {}),
-  ...(isHovered
-    ? {
-        boxShadow: 'none',
-      }
-    : {}),
-});
+const defaultTapFieldClassName = () =>
+  css({
+    ...valueStyle,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.tableBackground,
+    '&[data-disabled]': {
+      backgroundColor: theme.formInputTextReadOnlySelection,
+    },
+    '&[data-pressed]': {
+      opacity: 0.5,
+      boxShadow: 'none',
+    },
+    '&[data-hovered]': {
+      boxShadow: 'none',
+    },
+  });
 
-export const TapField = forwardRef<HTMLButtonElement, TapFieldProps>(
-  ({ value, children, rightContent, style, textStyle, ...props }, ref) => {
-    return (
-      <Button
-        ref={ref}
-        bounce={false}
-        style={renderProps => ({
-          ...defaultTapFieldStyle(renderProps),
-          ...(typeof style === 'function' ? style(renderProps) : style),
-        })}
-        {...props}
-      >
-        {children ? (
-          children
-        ) : (
-          <Text
-            style={{
-              flex: 1,
-              userSelect: 'none',
-              textAlign: 'left',
-              ...textStyle,
-            }}
-          >
-            {value}
-          </Text>
-        )}
-        {!props.isDisabled && rightContent}
-      </Button>
-    );
-  },
-);
+export function TapField({
+  value,
+  children,
+  className,
+  rightContent,
+  textStyle,
+  ref,
+  ...props
+}: TapFieldProps) {
+  return (
+    <Button
+      ref={ref}
+      bounce={false}
+      className={renderProps =>
+        cx(
+          defaultTapFieldClassName(),
+          typeof className === 'function' ? className(renderProps) : className,
+        )
+      }
+      {...props}
+    >
+      {children ? (
+        children
+      ) : (
+        <Text
+          style={{
+            flex: 1,
+            userSelect: 'none',
+            textAlign: 'left',
+            ...textStyle,
+          }}
+        >
+          {value}
+        </Text>
+      )}
+      {!props.isDisabled && rightContent}
+    </Button>
+  );
+}
 
 TapField.displayName = 'TapField';
 

@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import React, {
   forwardRef,
+  type Ref,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
@@ -9,7 +10,6 @@ import React, {
   useState,
   type ComponentProps,
   type KeyboardEvent,
-  type RefObject,
 } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -45,6 +45,7 @@ import DateSelectRight from './DateSelect.right.png';
 
 import { InputField } from '@desktop-client/components/mobile/MobileForms';
 import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 const pickerStyles: CSSProperties = {
@@ -234,7 +235,7 @@ type DateSelectProps = {
   embedded?: boolean;
   dateFormat: string;
   openOnFocus?: boolean;
-  inputRef?: RefObject<HTMLInputElement>;
+  ref?: Ref<HTMLInputElement>;
   shouldSaveFromKey?: (e: KeyboardEvent<HTMLInputElement>) => boolean;
   clearOnBlur?: boolean;
   onUpdate?: (selectedDate: string) => void;
@@ -250,7 +251,7 @@ function DateSelectDesktop({
   embedded,
   dateFormat = 'yyyy-MM-dd',
   openOnFocus = true,
-  inputRef: originalInputRef,
+  ref,
   shouldSaveFromKey = defaultShouldSaveFromKey,
   clearOnBlur = true,
   onUpdate,
@@ -269,13 +270,8 @@ function DateSelectDesktop({
   const picker = useRef(null);
   const [value, setValue] = useState(parsedDefaultValue);
   const [open, setOpen] = useState(embedded || isOpen || false);
-  const inputRef = useRef(null);
-
-  useLayoutEffect(() => {
-    if (originalInputRef) {
-      originalInputRef.current = inputRef.current;
-    }
-  }, []);
+  const innerRef = useRef<HTMLInputElement | null>(null);
+  const mergedRef = useMergedRefs<HTMLInputElement>(innerRef, ref);
 
   // This is confusing, so let me explain: `selectedValue` should be
   // renamed to `currentValue`. It represents the current highlighted
@@ -366,8 +362,8 @@ function DateSelectDesktop({
       onKeyDown?.(e);
     } else if (!open) {
       setOpen(true);
-      if (inputRef.current) {
-        inputRef.current.setSelectionRange(0, 10000);
+      if (innerRef.current) {
+        innerRef.current.setSelectionRange(0, 10000);
       }
     }
   }
@@ -383,7 +379,7 @@ function DateSelectDesktop({
 
     return (
       <Popover
-        triggerRef={inputRef}
+        triggerRef={innerRef}
         placement="bottom start"
         offset={2}
         isOpen={open}
@@ -402,7 +398,7 @@ function DateSelectDesktop({
       <Input
         id={id}
         {...inputProps}
-        ref={inputRef}
+        ref={mergedRef}
         value={value}
         onPointerUp={() => {
           if (!embedded) {
