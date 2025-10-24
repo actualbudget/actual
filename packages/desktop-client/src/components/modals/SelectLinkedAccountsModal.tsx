@@ -113,9 +113,9 @@ export function SelectLinkedAccountsModal({
   const { isNarrowWidth } = useResponsive();
   const dispatch = useDispatch();
   const localAccounts = useAccounts().filter(a => a.closed === 0);
-  const [draftLinkAccounts] = useState<Map<string, 'linking' | 'unlinking'>>(
-    new Map(),
-  );
+  const [draftLinkAccounts, setDraftLinkAccounts] = useState<
+    Map<string, 'linking' | 'unlinking'>
+  >(new Map());
   const [chosenAccounts, setChosenAccounts] = useState<Record<string, string>>(
     () => {
       return Object.fromEntries(
@@ -223,10 +223,14 @@ export function SelectLinkedAccountsModal({
 
       if (localAccountId) {
         updatedAccounts[externalAccount.account_id] = localAccountId;
-        draftLinkAccounts.set(externalAccount.account_id, 'linking');
+        setDraftLinkAccounts(prev =>
+          new Map(prev).set(externalAccount.account_id, 'linking'),
+        );
       } else {
         delete updatedAccounts[externalAccount.account_id];
-        draftLinkAccounts.set(externalAccount.account_id, 'unlinking');
+        setDraftLinkAccounts(prev =>
+          new Map(prev).set(externalAccount.account_id, 'unlinking'),
+        );
       }
 
       return updatedAccounts;
@@ -482,7 +486,7 @@ function TableRow({
       </Field>
       <Field width={80}>
         <PrivacyFilter>
-          {!isNaN(Number(externalAccount.balance))
+          {externalAccount.balance != null
             ? format(externalAccount.balance.toString(), 'financial')
             : t('Unknown')}
         </PrivacyFilter>
