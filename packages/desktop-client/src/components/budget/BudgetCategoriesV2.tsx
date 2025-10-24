@@ -35,10 +35,6 @@ import {
   type CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { BalanceMenu as EnvelopeBalanceMenu } from './envelope/BalanceMenu';
-import { BudgetMenu as EnvelopeBudgetMenu } from './envelope/BudgetMenu';
-import { CoverMenu } from './envelope/CoverMenu';
-import { TransferMenu } from './envelope/TransferMenu';
 import { ExpenseCategoryRow } from './ExpenseCategoryRow';
 import { ExpenseGroupRow } from './ExpenseGroupRow';
 import { IncomeCategoryRow } from './IncomeCategoryRow';
@@ -46,18 +42,13 @@ import { IncomeGroupRow } from './IncomeGroupRow';
 import { MonthsContext } from './MonthsContext';
 import { separateGroups } from './util';
 
-import { NotesButton } from '@desktop-client/components/NotesButton';
 import {
   CellValue,
   CellValueText,
 } from '@desktop-client/components/spreadsheet/CellValue';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useUndo } from '@desktop-client/hooks/useUndo';
 import { type SheetNames } from '@desktop-client/spreadsheet';
 import {
   envelopeBudget,
