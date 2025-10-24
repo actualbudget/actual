@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -14,6 +14,10 @@ import { AutoTextSize } from 'auto-text-size';
 
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
+import {
+  type CategoryEntity,
+  type CategoryGroupEntity,
+} from 'loot-core/types/models';
 
 import { ExpenseGroupList } from './ExpenseGroupList';
 import { IncomeGroup } from './IncomeGroup';
@@ -27,6 +31,7 @@ import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { type Binding } from '@desktop-client/spreadsheet';
 import {
   envelopeBudget,
   trackingBudget,
@@ -34,7 +39,7 @@ import {
 
 export const ROW_HEIGHT = 50;
 
-export const PILL_STYLE = {
+export const PILL_STYLE: CSSProperties = {
   borderRadius: 16,
   color: theme.pillText,
   backgroundColor: theme.pillBackgroundLight,
@@ -44,6 +49,10 @@ export function getColumnWidth({
   show3Columns = false,
   isSidebar = false,
   offset = 0,
+}: {
+  show3Columns?: boolean;
+  isSidebar?: boolean;
+  offset?: number;
 } = {}) {
   // If show3Columns = 35vw | 20vw | 20vw | 20vw,
   // Else = 45vw | 25vw | 25vw,
@@ -53,9 +62,15 @@ export function getColumnWidth({
   return show3Columns ? `${35 + offset}vw` : `${45 + offset}vw`;
 }
 
-function ToBudget({ toBudget, onPress, show3Columns }) {
+type ToBudgetProps = {
+  toBudget: Binding<'envelope-budget', 'to-budget'>;
+  onPress: () => void;
+  show3Columns: boolean;
+};
+
+function ToBudget({ toBudget, onPress, show3Columns }: ToBudgetProps) {
   const { t } = useTranslation();
-  const amount = useSheetValue(toBudget);
+  const amount = useSheetValue(toBudget) ?? 0;
   const format = useFormat();
   const sidebarColumnWidth = getColumnWidth({ show3Columns, isSidebar: true });
 
@@ -127,13 +142,19 @@ function ToBudget({ toBudget, onPress, show3Columns }) {
   );
 }
 
-function Saved({ projected, onPress, show3Columns }) {
+type SavedProps = {
+  projected: boolean;
+  onPress: () => void;
+  show3Columns: boolean;
+};
+
+function Saved({ projected, onPress, show3Columns }: SavedProps) {
   const { t } = useTranslation();
   const binding = projected
     ? trackingBudget.totalBudgetedSaved
     : trackingBudget.totalSaved;
 
-  const saved = useSheetValue(binding) || 0;
+  const saved = useSheetValue<'tracking-budget', typeof binding>(binding) || 0;
   const format = useFormat();
   const isNegative = saved < 0;
   const sidebarColumnWidth = getColumnWidth({ show3Columns, isSidebar: true });
@@ -174,7 +195,10 @@ function Saved({ projected, onPress, show3Columns }) {
             />
           )}
 
-          <CellValue binding={binding} type="financial">
+          <CellValue<'tracking-budget', typeof binding>
+            binding={binding}
+            type="financial"
+          >
             {({ type, value }) => (
               <View>
                 <PrivacyFilter>
@@ -216,6 +240,18 @@ function Saved({ projected, onPress, show3Columns }) {
   );
 }
 
+type BudgetGroupsProps = {
+  type: string;
+  categoryGroups: CategoryGroupEntity[];
+  onEditCategoryGroup: (id: CategoryGroupEntity['id']) => void;
+  onEditCategory: (id: CategoryEntity['id']) => void;
+  month: string;
+  onBudgetAction: (month: string, action: string, args: unknown) => void;
+  showBudgetedColumn: boolean;
+  show3Columns: boolean;
+  showHiddenCategories: boolean;
+};
+
 function BudgetGroups({
   categoryGroups,
   onEditCategoryGroup,
@@ -225,7 +261,7 @@ function BudgetGroups({
   showBudgetedColumn,
   show3Columns,
   showHiddenCategories,
-}) {
+}: BudgetGroupsProps) {
   const { incomeGroup, expenseGroups } = useMemo(() => {
     const categoryGroupsToDisplay = categoryGroups.filter(
       group => !group.hidden || showHiddenCategories,
@@ -240,7 +276,7 @@ function BudgetGroups({
     useLocalPref('budget.collapsed');
 
   const onToggleCollapse = useCallback(
-    id => {
+    (id: CategoryGroupEntity['id']) => {
       setCollapsedGroupIdsPref(
         collapsedGroupIds.includes(id)
           ? collapsedGroupIds.filter(collapsedId => collapsedId !== id)
@@ -251,7 +287,7 @@ function BudgetGroups({
   );
 
   const isCollapsed = useCallback(
-    id => {
+    (id: CategoryGroupEntity['id']) => {
       return collapsedGroupIds.includes(id);
     },
     [collapsedGroupIds],
@@ -291,6 +327,16 @@ function BudgetGroups({
   );
 }
 
+type BudgetTableProps = {
+  categoryGroups: CategoryGroupEntity[];
+  month: string;
+  onShowBudgetSummary: () => void;
+  onBudgetAction: (month: string, action: string, args: unknown) => void;
+  onRefresh: () => Promise<void>;
+  onEditCategoryGroup: (id: CategoryGroupEntity['id']) => void;
+  onEditCategory: (id: CategoryEntity['id']) => void;
+};
+
 export function BudgetTable({
   categoryGroups,
   month,
@@ -299,7 +345,7 @@ export function BudgetTable({
   onRefresh,
   onEditCategoryGroup,
   onEditCategory,
-}) {
+}: BudgetTableProps) {
   const { width } = useResponsive();
   const show3Columns = width >= 300;
 
@@ -357,13 +403,21 @@ export function BudgetTable({
   );
 }
 
+type BudgetTableHeaderProps = {
+  show3Columns: boolean;
+  month: string;
+  onShowBudgetSummary: () => void;
+  showSpentColumn: boolean;
+  toggleSpentColumn: () => void;
+};
+
 function BudgetTableHeader({
   show3Columns,
   month,
   onShowBudgetSummary,
   showSpentColumn,
   toggleSpentColumn,
-}) {
+}: BudgetTableHeaderProps) {
   const { t } = useTranslation();
   const format = useFormat();
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
@@ -375,7 +429,7 @@ function BudgetTableHeader({
   const sidebarColumnWidth = getColumnWidth({ show3Columns, isSidebar: true });
   const columnWidth = getColumnWidth({ show3Columns });
 
-  const amountStyle = {
+  const amountStyle: CSSProperties = {
     color: theme.formInputText,
     textAlign: 'right',
     fontSize: 12,
@@ -429,7 +483,7 @@ function BudgetTableHeader({
         }}
       >
         {(show3Columns || !showSpentColumn) && (
-          <CellValue
+          <CellValue<'envelope-budget' | 'tracking-budget', 'total-budgeted'>
             binding={
               budgetType === 'tracking'
                 ? trackingBudget.totalBudgetedExpense
@@ -497,7 +551,7 @@ function BudgetTableHeader({
           </CellValue>
         )}
         {(show3Columns || showSpentColumn) && (
-          <CellValue
+          <CellValue<'envelope-budget' | 'tracking-budget', 'total-spent'>
             binding={
               budgetType === 'tracking'
                 ? trackingBudget.totalSpent
@@ -561,7 +615,7 @@ function BudgetTableHeader({
             )}
           </CellValue>
         )}
-        <CellValue
+        <CellValue<'envelope-budget' | 'tracking-budget', 'total-leftover'>
           binding={
             budgetType === 'tracking'
               ? trackingBudget.totalLeftover
@@ -590,9 +644,7 @@ function BudgetTableHeader({
                       minFontSizePx={6}
                       maxFontSizePx={12}
                       mode="oneline"
-                      style={{
-                        ...amountStyle,
-                      }}
+                      style={amountStyle}
                     >
                       {format(value, type)}
                     </AutoTextSize>
