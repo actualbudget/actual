@@ -311,17 +311,20 @@ export function ExpenseCategoryListItem({
           options: {
             title: category.name,
             month,
+            amount: catBalance,
             categoryId: category.id,
-            onSubmit: fromCategoryId => {
+            onSubmit: (amount, fromCategoryId) => {
               onBudgetAction(month, 'cover-overspending', {
                 to: category.id,
                 from: fromCategoryId,
+                amount,
               });
               dispatch(collapseModals({ rootModalName: balanceMenuModalName }));
               showUndoNotification({
                 message: t(
-                  `Covered {{toCategoryName}} overspending from {{fromCategoryName}}.`,
+                  `Covered {{amount}} {{toCategoryName}} overspending from {{fromCategoryName}}.`,
                   {
+                    amount: integerToCurrency(amount),
                     toCategoryName: category.name,
                     fromCategoryName: categoriesById[fromCategoryId].name,
                   },
@@ -336,6 +339,7 @@ export function ExpenseCategoryListItem({
     category,
     dispatch,
     month,
+    catBalance,
     onBudgetAction,
     balanceMenuModalName,
     showUndoNotification,

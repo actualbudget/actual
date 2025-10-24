@@ -71,11 +71,13 @@ export function BalanceMovementMenu({
       {menu === 'cover' && (
         <CoverMenu
           categoryId={categoryId}
+          initialAmount={catBalance}
           onClose={onClose}
-          onSubmit={fromCategoryId => {
+          onSubmit={(amount, fromCategoryId) => {
             onBudgetAction(month, 'cover-overspending', {
               to: categoryId,
               from: fromCategoryId,
+              amount,
             });
           }}
         />

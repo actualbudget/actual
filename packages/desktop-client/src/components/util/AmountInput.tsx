@@ -18,20 +18,25 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
+import { type IntegerAmount } from 'loot-core/shared/util';
+
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 
 type AmountInputProps = {
   id?: string;
   ref?: Ref<HTMLInputElement>;
-  value: number;
+  value: IntegerAmount;
   zeroSign?: '-' | '+';
   sign?: '-' | '+';
   onChangeValue?: (value: string) => void;
   onFocus?: FocusEventHandler<HTMLInputElement>;
   onBlur?: FocusEventHandler<HTMLInputElement>;
-  onEnter?: (event: KeyboardEvent<HTMLInputElement>, amount?: number) => void;
-  onUpdate?: (amount: number) => void;
+  onEnter?: (
+    event: KeyboardEvent<HTMLInputElement>,
+    amount?: IntegerAmount,
+  ) => void;
+  onUpdate?: (amount: IntegerAmount) => void;
   style?: CSSProperties;
   inputStyle?: CSSProperties;
   inputClassName?: string;

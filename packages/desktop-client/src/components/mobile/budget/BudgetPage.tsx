@@ -748,10 +748,12 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
           options: {
             title: t('Cover overbudgeted'),
             month,
+            amount: toBudgetAmount,
             showToBeBudgeted: false,
-            onSubmit: categoryId => {
+            onSubmit: (amount, categoryId) => {
               onBudgetAction(month, 'cover-overbudgeted', {
                 category: categoryId,
+                amount,
               });
               showUndoNotification({
                 message: t('Covered overbudgeted from {{categoryName}}', {
@@ -770,6 +772,7 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
     onBudgetAction,
     showUndoNotification,
     t,
+    toBudgetAmount,
   ]);
 
   if (!toBudgetAmount || toBudgetAmount >= 0) {
@@ -824,8 +827,11 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
   const dispatch = useDispatch();
   const format = useFormat();
 
-  const { categories: overspentCategories, totalAmount: totalOverspending } =
-    useOverspentCategories({ month });
+  const {
+    categories: overspentCategories,
+    amountsByCategory,
+    totalAmount: totalOverspending,
+  } = useOverspentCategories({ month });
 
   const categoryGroupsToShow = useMemo(
     () =>
@@ -850,11 +856,13 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
             options: {
               title: category.name,
               month,
+              amount: amountsByCategory.get(category.id),
               categoryId: category.id,
-              onSubmit: fromCategoryId => {
+              onSubmit: (amount, fromCategoryId) => {
                 onBudgetAction(month, 'cover-overspending', {
                   to: category.id,
                   from: fromCategoryId,
+                  amount,
                 });
                 showUndoNotification({
                   message: t(
@@ -874,7 +882,15 @@ function OverspendingBanner({ month, onBudgetAction, budgetType, ...props }) {
         }),
       );
     },
-    [categoriesById, dispatch, month, onBudgetAction, showUndoNotification, t],
+    [
+      amountsByCategory,
+      categoriesById,
+      dispatch,
+      month,
+      onBudgetAction,
+      showUndoNotification,
+      t,
+    ],
   );
 
   const onOpenCategorySelectionModal = useCallback(() => {
