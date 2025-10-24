@@ -18,6 +18,7 @@ import { type CategoryEntity } from 'loot-core/types/models';
 
 import { balanceColumnPaddingStyle } from './BudgetCategoriesV2';
 import { BalanceMenu as EnvelopeBalanceMenu } from './envelope/BalanceMenu';
+import { BalanceMovementMenu as EnvelopeBalanceMovementMenu } from './envelope/BalanceMovementMenu';
 import { CoverMenu } from './envelope/CoverMenu';
 import { TransferMenu } from './envelope/TransferMenu';
 import { BalanceMenu as TrackingBalanceMenu } from './tracking/BalanceMenu';
@@ -103,19 +104,21 @@ export function CategoryBalanceCell({
     typeof categoryLongGoalBinding
   >(categoryLongGoalBinding);
 
+  const [isBalanceMenuOpen, setIsBalanceMenuOpen] = useState(false);
+
   const [activeBalanceMenu, setActiveBalanceMenu] = useState<
     'balance' | 'transfer' | 'cover' | null
   >(null);
 
   const { pressProps } = usePress({
-    onPress: () => setActiveBalanceMenu('balance'),
+    onPress: () => setIsBalanceMenuOpen(true),
   });
 
   const { focusableProps } = useFocusable(
     {
       onKeyUp: e => {
         if (e.key === 'Enter') {
-          setActiveBalanceMenu('balance');
+          setIsBalanceMenuOpen(true);
         }
       },
     },
@@ -183,58 +186,19 @@ export function CategoryBalanceCell({
         <Popover
           triggerRef={triggerRef}
           placement="bottom end"
-          isOpen={activeBalanceMenu !== null}
+          isOpen={isBalanceMenuOpen}
           onOpenChange={() => {
-            if (activeBalanceMenu !== 'balance') {
-              setActiveBalanceMenu(null);
-            }
+            setIsBalanceMenuOpen(false);
           }}
           isNonModal
         >
           {budgetType === 'rollover' ? (
-            <>
-              {activeBalanceMenu === 'balance' && (
-                <EnvelopeBalanceMenu
-                  categoryId={category.id}
-                  onCarryover={carryover => {
-                    onBudgetAction(month, 'carryover', {
-                      category: category.id,
-                      flag: carryover,
-                    });
-                    setActiveBalanceMenu(null);
-                  }}
-                  onTransfer={() => setActiveBalanceMenu('transfer')}
-                  onCover={() => setActiveBalanceMenu('cover')}
-                />
-              )}
-              {activeBalanceMenu === 'transfer' && (
-                <TransferMenu
-                  categoryId={category.id}
-                  initialAmount={balanceValue}
-                  showToBeBudgeted={true}
-                  onSubmit={(amount, toCategoryId) => {
-                    onBudgetAction(month, 'transfer-category', {
-                      amount,
-                      from: category.id,
-                      to: toCategoryId,
-                    });
-                  }}
-                  onClose={() => setActiveBalanceMenu(null)}
-                />
-              )}
-              {activeBalanceMenu === 'cover' && (
-                <CoverMenu
-                  categoryId={category.id}
-                  onSubmit={fromCategoryId => {
-                    onBudgetAction(month, 'cover-overspending', {
-                      to: category.id,
-                      from: fromCategoryId,
-                    });
-                  }}
-                  onClose={() => setActiveBalanceMenu(null)}
-                />
-              )}
-            </>
+            <EnvelopeBalanceMovementMenu
+              categoryId={category.id}
+              month={month}
+              onBudgetAction={onBudgetAction}
+              onSelect={() => setIsBalanceMenuOpen(false)}
+            />
           ) : (
             <TrackingBalanceMenu
               categoryId={category.id}
@@ -243,7 +207,7 @@ export function CategoryBalanceCell({
                   category: category.id,
                   flag: carryover,
                 });
-                setActiveBalanceMenu(null);
+                setIsBalanceMenuOpen(false);
               }}
             />
           )}

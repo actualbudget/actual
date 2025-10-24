@@ -19,14 +19,12 @@ type CoverMenuProps = {
   showToBeBudgeted?: boolean;
   categoryId?: CategoryEntity['id'];
   onSubmit: (categoryId: CategoryEntity['id']) => void;
-  onClose: () => void;
 };
 
 export function CoverMenu({
   showToBeBudgeted = true,
   categoryId,
   onSubmit,
-  onClose,
 }: CoverMenuProps) {
   const { t } = useTranslation();
 
@@ -48,7 +46,6 @@ export function CoverMenu({
     if (fromCategoryId) {
       onSubmit(fromCategoryId);
     }
-    onClose();
   }
 
   return (
