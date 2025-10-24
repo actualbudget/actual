@@ -508,7 +508,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             categoryId={category.id}
             month={month}
             onBudgetAction={onBudgetAction}
-            onClose={() => setBalanceMenuOpen(false)}
+            onSelect={() => setBalanceMenuOpen(false)}
           />
         </Popover>
       </Field>

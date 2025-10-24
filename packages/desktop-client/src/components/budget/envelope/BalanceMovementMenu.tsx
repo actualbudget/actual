@@ -12,14 +12,14 @@ type BalanceMovementMenuProps = {
   categoryId: string;
   month: string;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-  onClose?: () => void;
+  onSelect?: () => void;
 };
 
 export function BalanceMovementMenu({
   categoryId,
   month,
   onBudgetAction,
-  onClose = () => {},
+  onSelect = () => {},
 }: BalanceMovementMenuProps) {
   const format = useFormat();
 
@@ -48,7 +48,7 @@ export function BalanceMovementMenu({
               category: categoryId,
               flag: carryover,
             });
-            onClose();
+            onSelect();
           }}
           onTransfer={() => setMenu('transfer')}
           onCover={() => setMenu('cover')}
@@ -59,8 +59,7 @@ export function BalanceMovementMenu({
         <TransferMenu
           categoryId={categoryId}
           initialAmount={catBalance}
-          showToBeBudgeted
-          onClose={onClose}
+          showToBeBudgeted={true}
           onSubmit={(amount, toCategoryId) => {
             onBudgetAction(month, 'transfer-category', {
               amount,
@@ -68,6 +67,7 @@ export function BalanceMovementMenu({
               to: toCategoryId,
               currencyCode: format.currency.code,
             });
+            onSelect();
           }}
         />
       )}
@@ -76,7 +76,6 @@ export function BalanceMovementMenu({
         <CoverMenu
           categoryId={categoryId}
           initialAmount={catBalance}
-          onClose={onClose}
           onSubmit={(amount, fromCategoryId) => {
             onBudgetAction(month, 'cover-overspending', {
               to: categoryId,
@@ -84,6 +83,7 @@ export function BalanceMovementMenu({
               amount,
               currencyCode: format.currency.code,
             });
+            onSelect();
           }}
         />
       )}
