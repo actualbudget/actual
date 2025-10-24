@@ -13,25 +13,27 @@ import { type CSSProperties } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
+import * as monthUtils from 'loot-core/shared/months';
+import { type CategoryEntity } from 'loot-core/types/models';
+
 import { balanceColumnPaddingStyle } from './BudgetCategoriesV2';
 import { BalanceMenu as EnvelopeBalanceMenu } from './envelope/BalanceMenu';
 import { CoverMenu } from './envelope/CoverMenu';
 import { TransferMenu } from './envelope/TransferMenu';
 import { BalanceMenu as TrackingBalanceMenu } from './tracking/BalanceMenu';
 import { makeBalanceAmountStyle } from './util';
-import { CategoryEntity } from 'loot-core/types/models';
+
+import { CellValue, CellValueText } from '@desktop-client/components/spreadsheet/CellValue';
+import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
+import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { SheetNames } from '@desktop-client/spreadsheet';
+import { type SheetNames } from '@desktop-client/spreadsheet';
 import {
   envelopeBudget,
   trackingBudget,
 } from '@desktop-client/spreadsheet/bindings';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import { CellValue, CellValueText } from '../spreadsheet/CellValue';
 
-import * as monthUtils from 'loot-core/shared/months';
 
 type CategoryBalanceCellProps = ComponentPropsWithoutRef<
   typeof ReactAriaCell
