@@ -1466,7 +1466,7 @@ class AccountInternal extends PureComponent<
       // A condition was passed in.
       const condition = conditionOrSavedFilter;
       const isDuplicate = filterConditions.some(
-        c => JSON.stringify(c) === JSON.stringify(condition)
+        c => JSON.stringify(c) === JSON.stringify(condition),
       );
 
       if (isDuplicate) {
