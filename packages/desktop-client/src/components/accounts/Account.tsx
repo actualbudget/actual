@@ -1466,9 +1466,7 @@ class AccountInternal extends PureComponent<
     } else {
       // A condition was passed in.
       const condition = conditionOrSavedFilter;
-      const isDuplicate = filterConditions.some(
-        c => isEqual(c, condition),
-      );
+      const isDuplicate = filterConditions.some(c => isEqual(c, condition));
 
       if (isDuplicate) {
         return;
