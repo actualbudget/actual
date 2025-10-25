@@ -6,7 +6,6 @@ import { defineConfig } from 'vite';
 export default defineConfig(({ mode }) => {
   const isDev = mode === 'development';
   const outDir = path.resolve(__dirname, 'dist');
-  const buildHash = Date.now().toString(36);
 
   return {
     mode,
@@ -18,8 +17,7 @@ export default defineConfig(({ mode }) => {
         entry: path.resolve(__dirname, 'src/plugin-service-worker.ts'),
         name: 'plugin_sw',
         formats: ['iife'],
-        fileName: () =>
-          isDev ? `plugin-sw.dev.js` : `plugin-sw.${buildHash}.js`,
+        fileName: () => `plugin-sw.js`,
       },
       sourcemap: true,
       minify: isDev ? false : 'terser',

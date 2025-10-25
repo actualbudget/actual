@@ -5,7 +5,7 @@
   "exports": "./lib/index.js",
   "type": "commonjs",
   "scripts": {
-    "test": "vitest"
+    "test": "vitest --run"
   },
   "dependencies": {
     "requireindex": "^1.2.0"
@@ -14,7 +14,7 @@
     "eslint": "^9.37.0",
     "eslint-plugin-eslint-plugin": "^7.0.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-vitest-rule-tester": "^2.2.2",
+    "eslint-vitest-rule-tester": "^2.3.0",
     "vitest": "^3.2.4"
   },
   "peerDependencies": {

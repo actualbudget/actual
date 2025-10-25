@@ -107,9 +107,14 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
       let earliestMonth = earliestTrans
         ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(earliestTrans.date)))
         : currentMonth;
-      const latestMonth = latestTrans
+      const latestTransactionMonth = latestTrans
         ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(latestTrans.date)))
         : currentMonth;
+
+      const latestMonth =
+        latestTransactionMonth > currentMonth
+          ? latestTransactionMonth
+          : currentMonth;
 
       // Make sure the month selects are at least populates with a
       // year's worth of months. We can undo this when we have fancier
