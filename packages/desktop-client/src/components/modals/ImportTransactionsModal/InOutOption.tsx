@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
 
-import { CheckboxOption } from './CheckboxOption';
+import { LabeledCheckbox } from '@desktop-client/components/forms/LabeledCheckbox';
 
 type InOutOptionProps = {
   inOutMode: boolean;
@@ -25,7 +25,7 @@ export function InOutOption({
 
   return (
     <View style={{ flexDirection: 'row', gap: 10, height: 28 }}>
-      <CheckboxOption
+      <LabeledCheckbox
         id="form_inOut"
         checked={inOutMode}
         disabled={disabled}
@@ -34,7 +34,7 @@ export function InOutOption({
         {inOutMode
           ? t('In/Out outflow value')
           : t('Select column to specify if amount goes in/out')}
-      </CheckboxOption>
+      </LabeledCheckbox>
       {inOutMode && (
         <Input
           type="text"

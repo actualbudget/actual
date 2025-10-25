@@ -27,6 +27,7 @@ import { CalendarCard } from './reports/CalendarCard';
 import { CashFlowCard } from './reports/CashFlowCard';
 import { CrossoverCard } from './reports/CrossoverCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
+import { FormulaCard } from './reports/FormulaCard';
 import { MarkdownCard } from './reports/MarkdownCard';
 import { NetWorthCard } from './reports/NetWorthCard';
 import { SpendingCard } from './reports/SpendingCard';
@@ -64,6 +65,8 @@ export function Overview() {
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
+
+  const formulaMode = useFeatureFlag('formulaMode');
 
   const [isImporting, setIsImporting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -443,6 +446,14 @@ export function Overview() {
                               name: 'calendar-card' as const,
                               text: t('Calendar card'),
                             },
+                            ...(formulaMode
+                              ? [
+                                  {
+                                    name: 'formula-card' as const,
+                                    text: t('Formula card'),
+                                  },
+                                ]
+                              : []),
                             {
                               name: 'custom-report' as const,
                               text: t('New custom report'),
@@ -616,6 +627,14 @@ export function Overview() {
                       isEditing={isEditing}
                       meta={item.meta}
                       firstDayOfWeekIdx={firstDayOfWeekIdx}
+                      onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                      onRemove={() => onRemoveWidget(item.i)}
+                    />
+                  ) : item.type === 'formula-card' && formulaMode ? (
+                    <FormulaCard
+                      widgetId={item.i}
+                      isEditing={isEditing}
+                      meta={item.meta}
                       onMetaChange={newMeta => onMetaChange(item, newMeta)}
                       onRemove={() => onRemoveWidget(item.i)}
                     />
