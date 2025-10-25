@@ -54,7 +54,7 @@ export function TransferMenu({
     newAmount: IntegerAmount | null,
     categoryId: string | null,
   ) => {
-    if (newAmount && categoryId) {
+    if (newAmount != null && newAmount > 0 && categoryId) {
       onSubmit?.(newAmount, categoryId);
     }
     onClose();
@@ -98,6 +98,7 @@ export function TransferMenu({
           <Button
             type="submit"
             variant="primary"
+            isDisabled={!toCategoryId || amount <= 0}
             style={{
               fontSize: 12,
               paddingTop: 3,
