@@ -14,8 +14,11 @@ export function getValidMonthBounds(
   endMonth: string,
 ) {
   return {
-    start: startMonth < bounds.start ? bounds.start : startMonth,
-    end: endMonth > bounds.end ? bounds.end : endMonth,
+    start:
+      startMonth && monthUtils.isBefore(startMonth, bounds.start)
+        ? bounds.start
+        : startMonth,
+    end: monthUtils.isAfter(endMonth, bounds.end) ? bounds.end : endMonth,
   };
 }
 
