@@ -1465,6 +1465,14 @@ class AccountInternal extends PureComponent<
     } else {
       // A condition was passed in.
       const condition = conditionOrSavedFilter;
+      const isDuplicate = filterConditions.some(
+        c => JSON.stringify(c) === JSON.stringify(condition)
+      );
+
+      if (isDuplicate) {
+        return;
+      }
+
       this.setState({
         filterId: {
           ...this.state.filterId,
