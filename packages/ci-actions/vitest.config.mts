@@ -5,5 +5,10 @@ export default defineConfig({
     globals: true,
     include: ['src/**/*.test.(js|jsx|ts|tsx)'],
     environment: 'node',
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+    },
   },
 });

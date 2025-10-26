@@ -123,11 +123,14 @@ test.describe('Accounts', () => {
       const fileChooser = await fileChooserPromise;
       await fileChooser.setFiles(join(__dirname, 'data/test.csv'));
 
-      if (screenshot) await expect(page).toMatchThemeScreenshots();
-
       const importButton = accountPage.page.getByRole('button', {
         name: /Import \d+ transactions/,
       });
+
+      await importButton.waitFor({ state: 'visible' });
+
+      if (screenshot) await expect(page).toMatchThemeScreenshots();
+
       await importButton.click();
 
       await expect(importButton).not.toBeVisible();
@@ -146,11 +149,13 @@ test.describe('Accounts', () => {
       const fileChooser = await fileChooserPromise;
       await fileChooser.setFiles(join(__dirname, 'data/test.csv'));
 
-      await expect(page).toMatchThemeScreenshots();
-
       const importButton = accountPage.page.getByRole('button', {
         name: /Import \d+ transactions/,
       });
+
+      await importButton.waitFor({ state: 'visible' });
+
+      await expect(page).toMatchThemeScreenshots();
 
       await expect(importButton).toBeDisabled();
       await expect(await importButton.innerText()).toMatch(

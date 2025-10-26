@@ -35,4 +35,5 @@ export interface TransactionEntity {
     difference: number;
   } | null;
   raw_synced_data?: string | undefined;
+  _ruleErrors?: string[];
 }

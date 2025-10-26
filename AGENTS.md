@@ -40,7 +40,28 @@ yarn start:desktop
 
 - **ALWAYS run yarn commands from the root directory** - never run them in child workspaces
 - Use `yarn workspace <workspace-name> run <command>` for workspace-specific tasks
-- Include `--watch=false` flag when running unit tests to prevent watch mode
+- Tests run once and exit by default (using `vitest --run`)
+
+### Task Orchestration with Lage
+
+The project uses **[lage](https://microsoft.github.io/lage/)** (a task runner for JavaScript monorepos) to efficiently run tests and other tasks across multiple workspaces:
+
+- **Parallel execution**: Runs tests in parallel across workspaces for faster feedback
+- **Smart caching**: Caches test results to skip unchanged packages (cached in `.lage/` directory)
+- **Dependency awareness**: Understands workspace dependencies and execution order
+- **Continues on error**: Uses `--continue` flag to run all packages even if one fails
+
+**Lage Commands:**
+
+```bash
+# Run all tests across all packages
+yarn test                    # Equivalent to: lage test --continue
+
+# Run tests without cache (for debugging/CI)
+yarn test:debug              # Equivalent to: lage test --no-cache --continue
+```
+
+Configuration is in `lage.config.js` at the project root.
 
 ## Architecture & Package Structure
 
@@ -54,8 +75,13 @@ The core application logic that runs on any platform.
 - Platform-agnostic code
 - Exports for both browser and node environments
 - Test commands:
+
   ```bash
-  yarn workspace loot-core run test --watch=false
+  # Run all loot-core tests
+  yarn workspace loot-core run test
+
+  # Or run tests across all packages using lage
+  yarn test
   ```
 
 #### 2. **desktop-client** (`packages/desktop-client/` - aliased as `@actual-app/web`)
@@ -95,9 +121,16 @@ Public API for programmatic access to Actual.
 - Node.js API
 - Designed for integrations and automation
 - Commands:
+
   ```bash
+  # Build
   yarn workspace @actual-app/api build
-  yarn workspace @actual-app/api test --watch=false
+
+  # Run tests
+  yarn workspace @actual-app/api test
+
+  # Or use lage to run all tests
+  yarn test
   ```
 
 #### 5. **sync-server** (`packages/sync-server/` - aliased as `@actual-app/sync-server`)
@@ -157,24 +190,29 @@ When implementing changes:
 
 **Unit Tests (Vitest)**
 
+The project uses **lage** for running tests across all workspaces efficiently.
+
 ```bash
-# All tests
+# Run all tests across all packages (using lage)
 yarn test
 
-# Specific package
-yarn workspace loot-core run test --watch=false
+# Run tests without cache (for debugging)
+yarn test:debug
 
-# Specific test file
-yarn workspace loot-core run test path/to/test.test.ts --watch=false
+# Run tests for a specific package
+yarn workspace loot-core run test
+
+# Run a specific test file (watch mode)
+yarn workspace loot-core run test path/to/test.test.ts
 ```
 
 **E2E Tests (Playwright)**
 
 ```bash
-# Desktop client E2E
-yarn workspace @actual-app/web e2e
+# Run E2E tests for web
+yarn e2e
 
-# Desktop Electron E2E
+# Desktop Electron E2E (includes full build)
 yarn e2e:desktop
 
 # Visual regression tests
@@ -182,6 +220,9 @@ yarn vrt
 
 # Visual regression in Docker (consistent environment)
 yarn vrt:docker
+
+# Run E2E tests for a specific package
+yarn workspace @actual-app/web e2e
 ```
 
 **Testing Best Practices:**
@@ -329,6 +370,7 @@ describe('ComponentName', () => {
 ### Configuration Files
 
 - `/package.json` - Root workspace configuration, scripts
+- `/lage.config.js` - Lage task runner configuration
 - `/eslint.config.mjs` - ESLint configuration (flat config format)
 - `/tsconfig.json` - Root TypeScript configuration
 - `/.cursorignore`, `/.gitignore` - Ignored files
@@ -348,6 +390,7 @@ describe('ComponentName', () => {
 - `packages/*/build/` - Built output
 - `packages/desktop-client/playwright-report/` - Test reports
 - `packages/desktop-client/test-results/` - Test results
+- `.lage/` - Lage task runner cache (improves test performance)
 
 ### Key Source Directories
 
@@ -366,8 +409,11 @@ describe('ComponentName', () => {
 ### Running Specific Tests
 
 ```bash
-# Unit test for a specific file in loot-core
-yarn workspace loot-core run test src/path/to/file.test.ts --watch=false
+# Run all tests across all packages (recommended)
+yarn test
+
+# Unit test for a specific file in loot-core (watch mode)
+yarn workspace loot-core run test src/path/to/file.test.ts
 
 # E2E test for a specific file
 yarn workspace @actual-app/web run playwright test accounts.test.ts --browser=chromium
@@ -432,6 +478,8 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 2. For Vitest: check `vitest.config.ts` or `vitest.web.config.ts`
 3. For Playwright: check `playwright.config.ts`
 4. Ensure mock minimization - prefer real implementations
+5. **Lage cache issues**: Clear cache with `rm -rf .lage` if tests behave unexpectedly
+6. **Tests continue on error**: With `--continue` flag, all packages run even if one fails
 
 ### Import Resolution Issues
 
@@ -466,8 +514,7 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 
 ### Visual Regression Tests (VRT)
 
-- Run with `VRT=true` environment variable
-- Snapshots stored per test file
+- Snapshots stored per test file in `*-snapshots/` directories
 - Use Docker for consistent environment: `yarn vrt:docker`
 
 ## Additional Resources
