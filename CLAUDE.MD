@@ -20,6 +20,7 @@ The system uses a dual-range month ID approach:
 - **Pay Periods**: `YYYY-13` through `YYYY-99` (e.g., `2024-13`, `2024-38`)
 
 **Why this approach:**
+
 - ✅ 87 possible pay periods per year (sufficient for weekly = 52 periods)
 - ✅ Clear distinction between calendar and pay period data
 - ✅ Reuse existing month utilities and database schema
@@ -50,6 +51,7 @@ The `startDate` config is a **reference point for the frequency pattern**, not t
 4. Subsequent periods are numbered sequentially
 
 **Example: Biweekly with startDate = 2024-09-26**
+
 - The Sept 26 date establishes "every 14 days" pattern
 - Project backward: First period starting in Jan 2024 might be Jan 5-18
 - That becomes `2024-13` (1st period)
@@ -62,15 +64,18 @@ This ensures **consistent year-based numbering** regardless of configuration tim
 **If a pay period ID exists in the system, that IS proof that pay periods are enabled.**
 
 This principle:
+
 - ✅ Eliminates race conditions
 - ✅ Prevents redundant config checks
 - ✅ Creates clean separation between ID generation and processing
 
 **ID Generation Points** (check `config.enabled`):
+
 - `currentMonth()` - Returns pay period ID only if enabled
 - `monthFromDate()` - Converts dates to appropriate month type
 
 **ID Processing Points** (trust the ID):
+
 - All other functions - If they receive a pay period ID, it's valid
 - No need to check `config?.enabled` - ID presence IS the check
 
@@ -123,6 +128,7 @@ function BudgetPage() {
 ```
 
 **Why this pattern:**
+
 - ✅ Single source of truth (module singleton)
 - ✅ Simple function calls (no config passing)
 - ✅ Clear sync point (one useEffect in main budget component)
@@ -178,12 +184,14 @@ async function saveSyncedPrefs({ id, value }) {
 ### Module Singleton Functions
 
 **`getPayPeriodConfig()`**: Returns the current config from the module singleton
+
 ```typescript
 const config = getPayPeriodConfig();
 // Returns: PayPeriodConfig | null
 ```
 
 **`setPayPeriodConfig(config)`**: Updates the module singleton (internal use)
+
 ```typescript
 setPayPeriodConfig({
   enabled: true,
@@ -193,6 +201,7 @@ setPayPeriodConfig({
 ```
 
 **`loadPayPeriodConfigFromPrefs(prefs)`**: Parses preferences and updates singleton
+
 ```typescript
 // Frontend sync point
 loadPayPeriodConfigFromPrefs({
@@ -207,7 +216,8 @@ export async function loadPayPeriodConfig() {
   const config = {
     enabled: prefs.showPayPeriods === 'true',
     payFrequency: prefs.payPeriodFrequency || 'monthly',
-    startDate: prefs.payPeriodStartDate || new Date().toISOString().slice(0, 10),
+    startDate:
+      prefs.payPeriodStartDate || new Date().toISOString().slice(0, 10),
   };
   setPayPeriodConfig(config);
 }
@@ -219,25 +229,25 @@ All month utilities use `getPayPeriodConfig()` internally - **no config paramete
 
 ```typescript
 // ID Generation (checks config.enabled)
-monthUtils.currentMonth()        // → '2024-13' or '2024-10'
-monthUtils.monthFromDate(date)   // → '2024-13' or '2024-10'
+monthUtils.currentMonth(); // → '2024-13' or '2024-10'
+monthUtils.monthFromDate(date); // → '2024-13' or '2024-10'
 
 // Date Operations (uses config for pay periods)
-monthUtils.bounds(month)                    // → { start: 20240105, end: 20240118 }
-monthUtils.getMonthStartDate(month)         // → Date
-monthUtils.getMonthEndDate(month)           // → Date
+monthUtils.bounds(month); // → { start: 20240105, end: 20240118 }
+monthUtils.getMonthStartDate(month); // → Date
+monthUtils.getMonthEndDate(month); // → Date
 
 // Display/Formatting (uses config for pay periods)
-monthUtils.getMonthDisplayName(month, locale)     // → 'PP 1' or 'Jan'
-monthUtils.nameForMonth(month, locale)            // → 'Pay Period 1' or 'January'
-monthUtils.getMonthDateRange(month, locale)       // → 'Jan 5 - Jan 18' or 'January'
+monthUtils.getMonthDisplayName(month, locale); // → 'PP 1' or 'Jan'
+monthUtils.nameForMonth(month, locale); // → 'Pay Period 1' or 'January'
+monthUtils.getMonthDateRange(month, locale); // → 'Jan 5 - Jan 18' or 'January'
 
 // ID Operations (no config needed - just string manipulation)
-monthUtils.isPayPeriod(month)      // → true/false
-monthUtils.addMonths(month, n)     // → '2024-14'
-monthUtils.prevMonth(month)        // → '2024-12'
-monthUtils.nextMonth(month)        // → '2024-14'
-monthUtils.isBefore(m1, m2)        // → true/false
+monthUtils.isPayPeriod(month); // → true/false
+monthUtils.addMonths(month, n); // → '2024-14'
+monthUtils.prevMonth(month); // → '2024-12'
+monthUtils.nextMonth(month); // → '2024-14'
+monthUtils.isBefore(m1, m2); // → true/false
 ```
 
 ---
@@ -278,7 +288,8 @@ All other functions trust that if they receive a pay period ID, config exists:
 
 ```typescript
 export function bounds(month: DateLike): { start: number; end: number } {
-  const monthStr = typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
+  const monthStr =
+    typeof month === 'string' ? month : d.format(_parse(month), 'yyyy-MM');
 
   if (isPayPeriod(monthStr)) {
     // Presence Rule: If ID is pay period, config must exist
@@ -302,17 +313,20 @@ export function bounds(month: DateLike): { start: number; end: number } {
 ```
 
 **Anti-Pattern (Redundant Check)**:
+
 ```typescript
 // ❌ BAD: Checking config.enabled when ID presence already proves it
 if (isPayPeriod(monthId)) {
   const config = getPayPeriodConfig();
-  if (config?.enabled) {  // ❌ Unnecessary!
+  if (config?.enabled) {
+    // ❌ Unnecessary!
     return processPayPeriod(monthId, config);
   }
 }
 ```
 
 **Correct Pattern**:
+
 ```typescript
 // ✅ GOOD: Trust the ID, only verify config exists
 if (isPayPeriod(monthId)) {
@@ -475,7 +489,8 @@ const month = monthUtils.currentMonth(config);
 // ❌ BAD: Redundant check
 if (isPayPeriod(monthId)) {
   const config = getPayPeriodConfig();
-  if (config?.enabled) {  // ❌ Unnecessary!
+  if (config?.enabled) {
+    // ❌ Unnecessary!
     return processPayPeriod(monthId, config);
   }
 }
@@ -529,6 +544,7 @@ const display = processWithConfig(month, config);
 ### Core Implementation Files
 
 **`loot-core/src/shared/pay-periods.ts`**
+
 - Core pay period logic and algorithms
 - Module singleton `__payPeriodConfig`
 - `getPayPeriodConfig()`, `setPayPeriodConfig()` functions
@@ -536,6 +552,7 @@ const display = processWithConfig(month, config);
 - Period generation, navigation, and calculation functions
 
 **`loot-core/src/shared/months.ts`**
+
 - Unified month utilities (calendar + pay period)
 - All functions use `getPayPeriodConfig()` internally
 - No config parameters needed in function signatures
@@ -544,10 +561,12 @@ const display = processWithConfig(month, config);
 ### Backend Integration
 
 **`loot-core/src/server/budgetfiles/app.ts`**
+
 - Calls `loadPayPeriodConfig()` during budget initialization
 - Config available via singleton for entire request lifecycle
 
 **`loot-core/src/server/preferences/app.ts`**
+
 - Contains `loadPayPeriodConfig()` function
 - Loads config from DB with validation
 - Automatically reloads when pay period preferences change
@@ -556,12 +575,14 @@ const display = processWithConfig(month, config);
 ### Frontend Components
 
 **Main Budget Component**:
+
 - `desktop-client/src/components/budget/index.tsx`
   - Only place that calls `loadPayPeriodConfigFromPrefs()`
   - Syncs React hooks → module singleton
   - Clear single source of truth
 
 **Other Components**:
+
 - `desktop-client/src/components/budget/MonthPicker.tsx`
 - `desktop-client/src/components/budget/envelope/budgetsummary/BudgetSummary.tsx`
 - `desktop-client/src/components/budget/tracking/budgetsummary/BudgetSummary.tsx`
