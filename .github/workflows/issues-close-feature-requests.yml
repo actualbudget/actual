@@ -18,7 +18,7 @@ jobs:
           issue-number: ${{ github.event.issue.number }}
           reactions: '+1'
       - name: Create comment
-        uses: peter-evans/create-or-update-comment@v3
+        uses: peter-evans/create-or-update-comment@v5
         with:
           issue-number: ${{ github.event.issue.number }}
           body: |
