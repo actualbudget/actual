@@ -28,7 +28,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Wait for ${{github.base_ref}} build to succeed
-        uses: fountainhead/action-wait-for-check@v1.2.0
+        uses: fountainhead/action-wait-for-check@v1
         id: master-build
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -36,7 +36,7 @@ jobs:
           ref: ${{github.base_ref}}
 
       - name: Wait for PR build to succeed
-        uses: fountainhead/action-wait-for-check@v1.2.0
+        uses: fountainhead/action-wait-for-check@v1
         id: wait-for-build
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
