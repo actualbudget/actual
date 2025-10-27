@@ -143,10 +143,14 @@ export function CategoryGroupNameCell({
                       items={[
                         { name: 'add-category', text: t('Add category') },
                         { name: 'rename', text: t('Rename') },
-                        !categoryGroup.is_income && {
-                          name: 'toggle-visibility',
-                          text: categoryGroup.hidden ? 'Show' : 'Hide',
-                        },
+                        ...(!categoryGroup.is_income
+                          ? [
+                              {
+                                name: 'toggle-visibility',
+                                text: categoryGroup.hidden ? 'Show' : 'Hide',
+                              },
+                            ]
+                          : []),
                         // onDelete && { name: 'delete', text: t('Delete') },
                         { name: 'delete', text: t('Delete') },
                         ...(isGoalTemplatesEnabled

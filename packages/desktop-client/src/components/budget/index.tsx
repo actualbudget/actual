@@ -23,7 +23,7 @@ import {
   getCategories,
 } from '@desktop-client/budget/budgetSlice';
 import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useCategoryActions } from '@desktop-client/hooks/useCategoryActions';
+import { useCategoryMutations } from '@desktop-client/hooks/useCategoryMutations';
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
@@ -138,7 +138,7 @@ export function Budget() {
     onShowActivity,
     onReorderCategory,
     onReorderGroup,
-  } = useCategoryActions();
+  } = useCategoryMutations();
 
   if (!initialized || !categoryGroups) {
     return null;

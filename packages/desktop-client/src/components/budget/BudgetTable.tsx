@@ -22,6 +22,8 @@ import {
   separateGroups,
 } from './util';
 
+import { type BudgetComponents } from '.';
+
 import { type DropPosition } from '@desktop-client/components/sort';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -308,13 +310,7 @@ export function BudgetTable(props: BudgetTableProps) {
           {budgetTableV2Enabled && (
             <View style={{ overflowY: 'auto' }}>
               <BudgetCategoriesV2
-                categoryGroups={categoryGroups}
-                onSaveCategory={onSaveCategory}
-                onSaveGroup={onSaveGroup}
-                onDeleteCategory={onDeleteCategory}
-                onDeleteGroup={onDeleteGroup}
                 onBudgetAction={onBudgetAction}
-                onShowActivity={onShowActivity}
                 onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
                 onToggleHiddenCategories={onToggleHiddenCategories}
                 onExpandAllCategories={onExpandAllCategories}

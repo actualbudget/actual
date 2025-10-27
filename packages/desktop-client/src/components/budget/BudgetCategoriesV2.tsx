@@ -46,6 +46,8 @@ import {
   CellValue,
   CellValueText,
 } from '@desktop-client/components/spreadsheet/CellValue';
+import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useCategoryMutations } from '@desktop-client/hooks/useCategoryMutations';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
@@ -144,32 +146,28 @@ export type ColumnDefinition = {
 };
 
 type BudgetCategoriesProps = {
-  categoryGroups: CategoryGroupEntity[];
   onBudgetAction: (month: string, type: string, args: unknown) => void;
-  onShowActivity: (id: CategoryEntity['id'], month?: string) => void;
-  onSaveCategory?: (category: CategoryEntity) => void;
-  onSaveGroup?: (group: CategoryGroupEntity) => void;
-  onDeleteCategory?: (id: CategoryEntity['id']) => void;
-  onDeleteGroup?: (id: CategoryGroupEntity['id']) => void;
-  onApplyBudgetTemplatesInGroup?: (categoryIds: CategoryEntity['id'][]) => void;
+  onApplyBudgetTemplatesInGroup: (categoryIds: CategoryEntity['id'][]) => void;
   onToggleHiddenCategories: () => void;
   onCollapseAllCategories: () => void;
   onExpandAllCategories: () => void;
 };
 
 export function BudgetCategories({
-  categoryGroups,
   onBudgetAction,
-  onShowActivity,
-  onSaveCategory,
-  onSaveGroup,
-  onDeleteCategory,
-  onDeleteGroup,
   onApplyBudgetTemplatesInGroup,
   onToggleHiddenCategories,
   onCollapseAllCategories,
   onExpandAllCategories,
 }: BudgetCategoriesProps) {
+  const { grouped: categoryGroups } = useCategories();
+  const {
+    onSaveCategory,
+    onDeleteCategory,
+    onSaveGroup,
+    onDeleteGroup,
+    onShowActivity,
+  } = useCategoryMutations();
   const { t } = useTranslation();
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
@@ -197,13 +195,13 @@ export function BudgetCategories({
           return [];
         }
 
+        const groupCategories = expenseGroup.categories ?? [];
+
         const expenseGroupCategories = collapsedGroupIds.includes(
           expenseGroup.id,
         )
           ? []
-          : expenseGroup.categories.filter(
-              cat => showHiddenCategories || !cat.hidden,
-            );
+          : groupCategories.filter(cat => showHiddenCategories || !cat.hidden);
 
         const expenseGroupItems: Item[] = [
           {
@@ -261,11 +259,11 @@ export function BudgetCategories({
         });
       }
 
+      const groupCategories = incomeGroup.categories ?? [];
+
       const incomeGroupCategories = collapsedGroupIds.includes(incomeGroup.id)
         ? []
-        : incomeGroup.categories.filter(
-            cat => showHiddenCategories || !cat.hidden,
-          );
+        : groupCategories.filter(cat => showHiddenCategories || !cat.hidden);
 
       incomeGroupItems.push(
         ...incomeGroupCategories.map(
@@ -510,10 +508,11 @@ export function BudgetCategories({
                       onToggleVisibilty={group => {
                         onSaveGroup({
                           ...group,
-                          hidden: !item.value.hidden,
+                          hidden: !!item.value.hidden ? false : true,
                         });
                       }}
                       onApplyBudgetTemplatesInGroup={group =>
+                        group.categories &&
                         onApplyBudgetTemplatesInGroup(
                           group.categories
                             .filter(cat => !cat.hidden)
@@ -578,6 +577,7 @@ export function BudgetCategories({
                         });
                       }}
                       onApplyBudgetTemplatesInGroup={group =>
+                        group.categories &&
                         onApplyBudgetTemplatesInGroup(
                           group.categories
                             .filter(cat => !cat.hidden)
@@ -614,14 +614,15 @@ export function BudgetCategories({
                       id="new-category-row"
                       columns={columns}
                       onUpdate={name => {
-                        if (name) {
+                        const group = categoryGroups.find(
+                          g => g.id === groupOfNewCategory,
+                        );
+                        if (name && group) {
                           onSaveCategoryAndClose({
                             id: 'new',
                             name,
-                            group: groupOfNewCategory,
-                            is_income:
-                              groupOfNewCategory ===
-                              categoryGroups.find(g => g.is_income).id,
+                            group: group.id,
+                            is_income: group.is_income,
                           });
                         } else {
                           onHideNewCategoryInput();
