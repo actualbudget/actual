@@ -46,7 +46,7 @@ export const currencies: Currency[] = [
   { code: 'BOB', name: 'Bolivian Boliviano', symbol: 'Bs', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
   { code: 'BRL', name: 'Brazilian Real', symbol: 'R$', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
   { code: 'BSD', name: 'Bahamian Dollar', symbol: 'B$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
-  { code: 'BTC', name: 'Bitcoin', symbol: '₿', decimalPlaces: 8, numberFormat: 'comma-dot', symbolFirst: false },
+  { code: 'BTC', name: 'Bitcoin', symbol: '₿', decimalPlaces: 8, numberFormat: 'sat-comma', symbolFirst: false },
   { code: 'BTN', name: 'Bhutanese Ngultrum', symbol: 'Nu.', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'BWP', name: 'Botswanan Pula', symbol: 'P', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'BYN', name: 'Belarusian Ruble', symbol: 'Br', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
