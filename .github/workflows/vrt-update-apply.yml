@@ -57,7 +57,7 @@ jobs:
 
       - name: Checkout fork branch
         if: steps.metadata.outputs.pr_number != ''
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{ steps.metadata.outputs.head_repo }}
           ref: ${{ steps.metadata.outputs.head_ref }}

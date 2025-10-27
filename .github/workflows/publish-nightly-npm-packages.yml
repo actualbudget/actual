@@ -12,7 +12,7 @@ jobs:
     name: Build and pack npm packages
     if: github.event.repository.fork == false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up environment
         uses: ./.github/actions/setup

@@ -17,7 +17,7 @@ jobs:
     outputs:
       netlify_url: ${{ steps.netlify.outputs.url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Wait for Netlify build to finish
@@ -34,7 +34,7 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.56.0-jammy
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Trust the repository directory
@@ -57,7 +57,7 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.56.0-jammy
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Trust the repository directory
@@ -80,7 +80,7 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.56.0-jammy
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Run VRT Tests on Netlify URL
