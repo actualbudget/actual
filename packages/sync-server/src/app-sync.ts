@@ -323,7 +323,7 @@ app.get('/download-user-file', async (req, res) => {
     const fileContents = await fs.readFile(path);
     res.send(fileContents);
   } catch (err) {
-    if (err.code === 'ENOENT') {
+    if (err.code === 'ENOENT' || err.code === 'ENOTDIR') {
       res.status(404).send('File not found');
       return;
     }
