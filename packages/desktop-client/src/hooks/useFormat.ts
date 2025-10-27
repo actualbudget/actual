@@ -164,24 +164,14 @@ export function useFormat(): UseFormatResult {
 
   const formatDisplay = useCallback(
     (value: unknown, type: FormatType = 'string'): string => {
-      const isFinancialType =
-        type === 'financial' ||
-        type === 'financial-with-sign' ||
-        type === 'financial-no-decimals';
-
-      let displayDecimalPlaces: number | undefined;
-
-      if (isFinancialType) {
-        if (type === 'financial-no-decimals' || hideFractionPref === 'true') {
-          displayDecimalPlaces = 0;
-        } else {
-          displayDecimalPlaces = activeCurrency.decimalPlaces;
-        }
-      }
-
+      const isFinancialType = type.startsWith('financial');
+      const noDecimals =
+        type === 'financial-no-decimals' || hideFractionPref === 'true';
+      const hideFraction = isFinancialType && noDecimals;
       const intlFormatter = getNumberFormat({
         format: numberFormatConfig.format,
-        decimalPlaces: displayDecimalPlaces,
+        hideFraction,
+        decimalPlaces: hideFraction ? 0 : activeCurrency.decimalPlaces,
       }).formatter;
 
       const { numericValue, formattedString } = format(
@@ -233,6 +223,7 @@ export function useFormat(): UseFormatResult {
         hideFractionPref === 'true' ? 0 : activeCurrency.decimalPlaces;
       const editFormatter = getNumberFormat({
         format: numberFormatConfig.format,
+        hideFraction: hideFractionPref === 'true',
         decimalPlaces,
       }).formatter;
       return editFormatter.format(amount);
