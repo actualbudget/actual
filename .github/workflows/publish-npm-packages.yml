@@ -32,7 +32,7 @@ jobs:
           yarn workspace @actual-app/api pack --filename @actual-app/api.tgz
 
       - name: Upload package artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: npm-packages
           path: |
