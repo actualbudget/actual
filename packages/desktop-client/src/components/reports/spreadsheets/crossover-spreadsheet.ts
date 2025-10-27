@@ -264,32 +264,42 @@ function recalculate(
     annualReturn != null ? Math.pow(1 + annualReturn, 1 / 12) - 1 : null;
 
   // Always calculate the default return for display purposes
-  let defaultMonthlyReturn: number | null = null;
+  let defaultAnnualReturn: number | null = null;
   if (historicalBalances.length >= 2) {
     // Use the starting balance (end of first month) and final balance (end of last month) for CAGR calculation
     // The starting balance represents the account balance at the end of the first month
-    const startingBalance = historicalBalances[0];
+    let startingBalance = historicalBalances[0];
     const finalBalance = historicalBalances[historicalBalances.length - 1];
     const n = historicalBalances.length - 1; // Number of months between start and end
+
+    if (startingBalance === 0) {
+      for (let i = 1; i < historicalBalances.length; i++) {
+        if (historicalBalances[i] !== 0) {
+          startingBalance = historicalBalances[i];
+          break;
+        }
+      }
+    }
 
     if (startingBalance > 0 && finalBalance > 0 && n > 0) {
       // Calculate monthly CAGR: (final/starting)^(1/n) - 1
       const cagrMonthly = Math.pow(finalBalance / startingBalance, 1 / n) - 1;
 
       if (isFinite(cagrMonthly) && !isNaN(cagrMonthly)) {
-        defaultMonthlyReturn = cagrMonthly;
+        defaultAnnualReturn = cagrMonthly;
       } else {
-        defaultMonthlyReturn = 0;
+        defaultAnnualReturn = 0;
       }
     } else {
-      defaultMonthlyReturn = 0;
+      defaultAnnualReturn = 0;
     }
   }
 
   if (months.length > 0 && crossoverIndex == null) {
     // If no explicit return provided, use the calculated default
     if (monthlyReturn == null) {
-      monthlyReturn = defaultMonthlyReturn;
+      // not quite right.  Need a better approximation
+      monthlyReturn = defaultAnnualReturn / 12;
     }
     // Project up to 600 months max to avoid infinite loops (50 years)
     const maxProjectionMonths = 600;
@@ -388,10 +398,7 @@ function recalculate(
     ),
     lastKnownMonthlyExpenses: lastExpense,
     // Return the calculated default return for display purposes
-    historicalReturn:
-      defaultMonthlyReturn != null
-        ? Math.pow(1 + defaultMonthlyReturn, 12) - 1
-        : null,
+    historicalReturn: defaultAnnualReturn != null ? defaultAnnualReturn : null,
     // Years to retire calculation
     yearsToRetire,
     // Target monthly income at crossover point
