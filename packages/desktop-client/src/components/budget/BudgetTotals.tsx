@@ -1,4 +1,4 @@
-import React, { type ComponentProps, memo, useRef, useState } from 'react';
+import React, { memo, useRef, useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -17,10 +17,12 @@ import { View } from '@actual-app/components/view';
 import { RenderMonths } from './RenderMonths';
 import { getScrollbarWidth } from './util';
 
+import { type BudgetComponents } from '.';
+
 import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 type BudgetTotalsProps = {
-  MonthComponent: ComponentProps<typeof RenderMonths>['component'];
+  MonthComponent: BudgetComponents['BudgetTotalsComponent'];
   toggleHiddenCategories: () => void;
   expandAllCategories: () => void;
   collapseAllCategories: () => void;
@@ -177,7 +179,9 @@ export const BudgetTotals = memo(function BudgetTotals({
           />
         </Popover>
       </View>
-      <RenderMonths component={MonthComponent} />
+      <RenderMonths>
+        <MonthComponent />
+      </RenderMonths>
     </View>
   );
 });

@@ -229,8 +229,10 @@ function BudgetedInput({
       onUpdate={(newValue, e) => {
         onUpdate?.(newValue, e);
         const integerAmount = currencyToInteger(newValue);
-        onUpdateAmount?.(integerAmount);
-        setCurrentFormattedAmount(format(integerAmount, 'financial'));
+        if (integerAmount) {
+          onUpdateAmount?.(integerAmount);
+          setCurrentFormattedAmount(format(integerAmount, 'financial'));
+        }
       }}
       {...props}
     />

@@ -552,7 +552,7 @@ export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
 
 type IncomeCategoryMonthProps = {
   category: CategoryEntity;
-  isLast: boolean;
+  isLast?: boolean;
   month: string;
   onShowActivity: (id: CategoryEntity['id'], month: string) => void;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;

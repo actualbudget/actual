@@ -12,6 +12,8 @@ import {
 import { RenderMonths } from './RenderMonths';
 import { SidebarCategory } from './SidebarCategory';
 
+import { type BudgetComponents } from '.';
+
 import {
   useDraggable,
   useDroppable,
@@ -28,7 +30,7 @@ type ExpenseCategoryProps = {
   categoryGroup?: CategoryGroupEntity;
   editingCell: { id: string; cell: string } | null;
   dragState: DragState<CategoryEntity> | DragState<CategoryGroupEntity> | null;
-  MonthComponent: ComponentProps<typeof RenderMonths>['component'];
+  MonthComponent: BudgetComponents['ExpenseCategoryComponent'];
   onEditName?: ComponentProps<typeof SidebarCategory>['onEditName'];
   onEditMonth?: (id: CategoryEntity['id'], month: string) => void;
   onSave?: ComponentProps<typeof SidebarCategory>['onSave'];
@@ -103,17 +105,21 @@ export function ExpenseCategory({
         />
 
         <RenderMonths
-          component={MonthComponent}
           editingMonth={
             editingCell && editingCell.id === cat.id && editingCell.cell
           }
-          args={{
-            category: cat,
-            onEdit: onEditMonth,
-            onBudgetAction,
-            onShowActivity,
-          }}
-        />
+        >
+          {({ month, editing }) => (
+            <MonthComponent
+              month={month}
+              editing={editing}
+              category={cat}
+              onEdit={onEditMonth}
+              onBudgetAction={onBudgetAction}
+              onShowActivity={onShowActivity}
+            />
+          )}
+        </RenderMonths>
       </View>
     </Row>
   );

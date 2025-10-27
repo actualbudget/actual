@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { type JSX } from 'react';
+import React from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
@@ -8,13 +8,15 @@ import { type CategoryGroupEntity } from 'loot-core/types/models';
 import { RenderMonths } from './RenderMonths';
 import { SidebarGroup } from './SidebarGroup';
 
+import { type BudgetComponents } from '.';
+
 import { Row } from '@desktop-client/components/table';
 
 type IncomeGroupProps = {
   group: CategoryGroupEntity;
   editingCell: { id: CategoryGroupEntity['id']; cell: string } | null;
   collapsed: boolean;
-  MonthComponent: () => JSX.Element;
+  MonthComponent: BudgetComponents['IncomeGroupComponent'];
   onEditName: (id: CategoryGroupEntity['id']) => void;
   onSave: (group: CategoryGroupEntity) => void;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
@@ -52,7 +54,9 @@ export function IncomeGroup({
         onToggleCollapse={onToggleCollapse}
         onShowNewCategory={onShowNewCategory}
       />
-      <RenderMonths component={MonthComponent} args={{ group }} />
+      <RenderMonths>
+        {({ month }) => <MonthComponent month={month} group={group} />}
+      </RenderMonths>
     </Row>
   );
 }

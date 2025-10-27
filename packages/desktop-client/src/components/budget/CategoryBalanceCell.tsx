@@ -86,11 +86,6 @@ export function CategoryBalanceCell({
     typeof categoryBudgetedBinding
   >(categoryBudgetedBinding);
 
-  const balanceValue = useSheetValue<
-    typeof bindingBudgetType,
-    typeof categoryBalanceBinding
-  >(categoryBalanceBinding);
-
   const goalValue = useSheetValue<
     typeof bindingBudgetType,
     typeof categoryGoalBinding
@@ -102,10 +97,6 @@ export function CategoryBalanceCell({
   >(categoryLongGoalBinding);
 
   const [isBalanceMenuOpen, setIsBalanceMenuOpen] = useState(false);
-
-  const [activeBalanceMenu, setActiveBalanceMenu] = useState<
-    'balance' | 'transfer' | 'cover' | null
-  >(null);
 
   const { pressProps } = usePress({
     onPress: () => setIsBalanceMenuOpen(true),

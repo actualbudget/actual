@@ -1,10 +1,4 @@
-import React, {
-  type ComponentPropsWithoutRef,
-  type ComponentProps,
-  type KeyboardEvent,
-  useMemo,
-  useState,
-} from 'react';
+import React, { type KeyboardEvent, useMemo, useState } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -28,6 +22,8 @@ import {
   separateGroups,
 } from './util';
 
+import { type BudgetComponents } from '.';
+
 import { type DropPosition } from '@desktop-client/components/sort';
 import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -41,14 +37,7 @@ type BudgetTableProps = {
   startMonth: string;
   numMonths: number;
   monthBounds: MonthBounds;
-  dataComponents: {
-    SummaryComponent: ComponentPropsWithoutRef<
-      typeof BudgetSummaries
-    >['SummaryComponent'];
-    BudgetTotalsComponent: ComponentPropsWithoutRef<
-      typeof BudgetTotals
-    >['MonthComponent'];
-  } & ComponentProps<typeof BudgetCategories>['dataComponents'];
+  dataComponents: BudgetComponents;
   onSaveCategory: (category: CategoryEntity) => void;
   onDeleteCategory: (id: CategoryEntity['id']) => void;
   onSaveGroup: (group: CategoryGroupEntity) => void;
@@ -323,13 +312,7 @@ export function BudgetTable(props: BudgetTableProps) {
           {budgetTableV2Enabled && (
             <View style={{ overflowY: 'auto' }}>
               <BudgetCategoriesV2
-                categoryGroups={categoryGroups}
-                onSaveCategory={onSaveCategory}
-                onSaveGroup={onSaveGroup}
-                onDeleteCategory={onDeleteCategory}
-                onDeleteGroup={onDeleteGroup}
                 onBudgetAction={onBudgetAction}
-                onShowActivity={onShowActivity}
                 onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
                 onToggleHiddenCategories={onToggleHiddenCategories}
                 onExpandAllCategories={onExpandAllCategories}
