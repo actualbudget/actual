@@ -306,8 +306,13 @@ app.get('/download-user-file', async (req, res) => {
     return;
   }
 
+  const path = getPathForUserFile(fileId);
   res.setHeader('Content-Disposition', `attachment;filename=${fileId}`);
-  res.sendFile(getPathForUserFile(fileId));
+  res.setHeader('Content-Type', 'application/octet-stream');
+
+  // Send file - could not use res.sendFile due to some issues on linux - seemed to be unable to access .config directory
+  const fileContents = await fs.readFile(path);
+  res.send(fileContents);
 });
 
 app.post('/update-user-filename', (req, res) => {
