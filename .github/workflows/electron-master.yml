@@ -113,7 +113,7 @@ jobs:
           Install-Module -Name StoreBroker -AcceptLicense -Force -Scope CurrentUser -Verbose
 
       - name: Download Microsoft Store artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: actual-electron-windows-latest-appx
 

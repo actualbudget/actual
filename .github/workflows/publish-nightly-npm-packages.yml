@@ -66,7 +66,7 @@ jobs:
       packages: write
     steps:
       - name: Download the artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: npm-packages
 
