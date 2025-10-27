@@ -318,9 +318,19 @@ app.get('/download-user-file', async (req, res) => {
   res.setHeader('Content-Disposition', `attachment;filename=${fileId}`);
   res.setHeader('Content-Type', 'application/octet-stream');
 
-  // Send file - could not use res.sendFile due to some issues on linux - seemed to be unable to access .config directory
-  const fileContents = await fs.readFile(path);
-  res.send(fileContents);
+  try {
+    // Send file - could not use res.sendFile due to some issues on linux - seemed to be unable to access .config directory
+    const fileContents = await fs.readFile(path + '/noneexist.bloc');
+    res.send(fileContents);
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      res.status(404).send('File not found');
+      return;
+    }
+
+    console.error('Error reading file', err);
+    res.status(500).send({ status: 'error' });
+  }
 });
 
 app.post('/update-user-filename', (req, res) => {
