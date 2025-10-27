@@ -260,7 +260,7 @@ const NUMBER_FORMATS = [
   'dot-comma',
   'space-comma',
   'apostrophe-dot',
-  'comma-dot',
+  'sat-comma',
   'comma-dot-in',
 ] as const;
 
@@ -284,6 +284,11 @@ export const numberFormats: Array<{
   },
   { value: 'apostrophe-dot', label: '1’000.33', labelNoFraction: '1’000' },
   { value: 'comma-dot-in', label: '1,00,000.33', labelNoFraction: '1,00,000' },
+  {
+    value: 'sat-comma',
+    label: '1.23\u202F456\u202F780',
+    labelNoFraction: '123,456,780',
+  },
 ];
 
 let numberFormatConfig: {
@@ -309,6 +314,191 @@ export function parseNumberFormat({
 
 export function setNumberFormat(config: typeof numberFormatConfig) {
   numberFormatConfig = config;
+}
+
+/**
+ * Custom formatter for Bitcoin/Satoshi amounts using the "Satcomma standard".
+ *
+ * The Satcomma standard (proposed by Mark Nugent and ProgrammableTX) adjusts digit group
+ * separators for better readability of bitcoin fractions. Unlike traditional number formatting
+ * which groups from the left, Satcomma groups fractional digits from the right (starting at
+ * the decimal point) to make it easier to identify the Satoshi value.
+ *
+ * For example:
+ * - 0.00 025 000 bitcoin (25,000 satoshis)
+ * - 12.34 567 890 bitcoin
+ *
+ * This makes it easier to quickly identify values in satoshis (the smallest unit, where
+ * 1 bitcoin = 100,000,000 satoshis) by grouping digits after the 2nd and 5th decimal places
+ * using narrow non-breaking spaces (U+202F).
+ *
+ * When hideFraction is true, amounts are displayed in whole satoshis without decimals.
+ *
+ * @see https://bitcoin.design/guide/designing-products/units-and-symbols/#satcomma-standard
+ * @see https://medium.com/@mark.nugent.iv/grouping-bitcoins-fractional-digits-an-idea-whose-time-has-come-22d9dad8ac51
+ * @see https://medium.com/coinmonks/the-satcomma-standard-89f1e7c2aede
+ */
+class SatNumberFormat implements Intl.NumberFormat {
+  private locale: string;
+  private hideFraction: boolean;
+
+  constructor(locales?: string | string[], hideFraction?: boolean) {
+    this.locale = Array.isArray(locales) ? locales[0] : locales || 'en-US';
+    this.hideFraction = hideFraction ?? false;
+  }
+
+  format(value: number): string {
+    return this.formatToParts(value)
+      .map(part => part.value)
+      .join('');
+  }
+
+  // Methods to satisfy Intl.NumberFormat interface
+  formatToParts(value: number | bigint = 0): Intl.NumberFormatPart[] {
+    const numValue = Number(value);
+
+    // Short-circuit to native Intl.NumberFormat for non-finite numbers (NaN, Infinity)
+    // to avoid errors from toFixed(8)/split operations
+    if (!Number.isFinite(numValue)) {
+      return new Intl.NumberFormat(this.locale).formatToParts(numValue);
+    }
+
+    const parts: Intl.NumberFormatPart[] = [];
+    const intFormatter = new Intl.NumberFormat(this.locale, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+
+    // If hideFraction is true, multiply by 100 million to convert BTC to satoshis
+    if (this.hideFraction) {
+      const satAmount = Math.round(numValue * 100_000_000);
+      return intFormatter.formatToParts(satAmount);
+    }
+
+    // Capture the sign up-front to handle negative values between -1 and 0
+    const isNegative = numValue < 0;
+    const absValue = Math.abs(numValue);
+
+    // For fractional display, format with 8 decimal places and special grouping
+    const [integerPart, fractionalPart] = absValue.toFixed(8).split('.');
+
+    // Prepend minus sign if negative
+    if (isNegative) {
+      parts.push({ type: 'minusSign', value: '-' });
+    }
+
+    // Get parts for integer (includes group separators)
+    const intParts = intFormatter.formatToParts(parseInt(integerPart, 10));
+    parts.push(...intParts);
+
+    // Add decimal separator
+    parts.push({ type: 'decimal', value: '.' });
+
+    // Process fraction part (with special narrow no-break spaces after 2nd and 5th places)
+    let current = '';
+    for (let i = 1; i <= fractionalPart.length; i++) {
+      current += fractionalPart[i - 1];
+      if (i === 2 || i === 5) {
+        if (current) {
+          parts.push({ type: 'fraction', value: current });
+          current = '';
+        }
+        parts.push({ type: 'literal', value: '\u202F' });
+      }
+    }
+    if (current) {
+      parts.push({ type: 'fraction', value: current });
+    }
+
+    return parts;
+  }
+
+  formatRange(start: number | bigint, end: number | bigint): string {
+    return this.formatRangeToParts(start, end)
+      .map(part => part.value)
+      .join('');
+  }
+
+  // Returns format parts for a range. When start and end format to the same string,
+  // returns the formatted parts for the value marked as source: 'shared', with an
+  // optional approximatelySign determined by locale-native behavior
+  formatRangeToParts(
+    start: number | bigint,
+    end: number | bigint,
+  ): Intl.NumberRangeFormatPart[] {
+    const formattedStart = this.format(Number(start));
+    const formattedEnd = this.format(Number(end));
+
+    // If both values format to the same string, use native formatter to detect
+    // locale-specific approximation sign behavior
+    if (formattedStart === formattedEnd) {
+      // Use native Intl.NumberFormat to determine if locale uses approximatelySign
+      const nativeFormatter = new Intl.NumberFormat(this.locale);
+      let approximatelySignPart: Intl.NumberRangeFormatPart | null = null;
+
+      // Check if native formatter supports formatRangeToParts and uses approximatelySign
+      if (typeof nativeFormatter.formatRangeToParts === 'function') {
+        const nativeParts = nativeFormatter.formatRangeToParts(
+          Number(start),
+          Number(start),
+        );
+        // TypeScript types may not include 'approximatelySign', so check dynamically
+        const approxPart = nativeParts.find(
+          p => (p as { type: string }).type === 'approximatelySign',
+        );
+        if (approxPart) {
+          approximatelySignPart = {
+            type: (approxPart as { type: string }).type,
+            value: approxPart.value,
+            source: 'shared',
+          } as unknown as Intl.NumberRangeFormatPart;
+        }
+      }
+
+      const sharedParts = this.formatToParts(start).map(part => ({
+        ...part,
+        source: 'shared' as const,
+      })) as Intl.NumberRangeFormatPart[];
+
+      // Prepend approximatelySign if locale uses it
+      return approximatelySignPart
+        ? [approximatelySignPart, ...sharedParts]
+        : sharedParts;
+    }
+
+    const startParts = this.formatToParts(start).map(part => ({
+      ...part,
+      source: 'startRange' as const,
+    }));
+    const endParts = this.formatToParts(end).map(part => ({
+      ...part,
+      source: 'endRange' as const,
+    }));
+
+    return [
+      ...startParts,
+      { type: 'literal', value: '–', source: 'shared' },
+      ...endParts,
+    ] as Intl.NumberRangeFormatPart[];
+  }
+
+  resolvedOptions(): Intl.ResolvedNumberFormatOptions {
+    return {
+      locale: this.locale,
+      numberingSystem: 'latn',
+      style: 'decimal',
+      minimumIntegerDigits: 1,
+      minimumFractionDigits: this.hideFraction ? 0 : 8,
+      maximumFractionDigits: this.hideFraction ? 0 : 8,
+      useGrouping: 'auto',
+      notation: 'standard',
+      signDisplay: 'auto',
+      roundingMode: 'halfExpand',
+      roundingPriority: 'auto',
+      trailingZeroDisplay: 'auto',
+      roundingIncrement: 1,
+    };
+  }
 }
 
 export function getNumberFormat({
@@ -349,6 +539,11 @@ export function getNumberFormat({
       thousandsSeparator = ',';
       decimalSeparator = '.';
       break;
+    case 'sat-comma':
+      locale = 'en-US';
+      thousandsSeparator = ',';
+      decimalSeparator = '.';
+      break;
     case 'comma-dot':
     default:
       locale = 'en-US';
@@ -370,11 +565,17 @@ export function getNumberFormat({
           maximumFractionDigits: currentHideFraction ? 0 : 2,
         };
 
+  // For sat-comma format, use custom SatNumberFormat that properly handles Bitcoin/Satoshi formatting
+  const formatter: Intl.NumberFormat =
+    currentFormat === 'sat-comma'
+      ? new SatNumberFormat(locale, currentHideFraction)
+      : new Intl.NumberFormat(locale, fractionDigitsOptions);
+
   return {
     value: currentFormat,
     thousandsSeparator,
     decimalSeparator,
-    formatter: new Intl.NumberFormat(locale, fractionDigitsOptions),
+    formatter,
   };
 }
 
@@ -428,15 +629,26 @@ export function integerToCurrency(
   formatter = getNumberFormat().formatter,
   decimalPlaces: number = 2,
 ) {
+  // If using SatNumberFormat, we need 8 decimal places
+  if (formatter instanceof SatNumberFormat) {
+    decimalPlaces = 8;
+  }
   const divisor = Math.pow(10, decimalPlaces);
   const amount = safeNumber(integerAmount) / divisor;
 
   return formatter.format(amount);
 }
 
-export function integerToCurrencyWithDecimal(integerAmount: IntegerAmount) {
+export function integerToCurrencyWithDecimal(
+  integerAmount: IntegerAmount,
+  formatter = getNumberFormat().formatter,
+  decimalPlaces: number = 2,
+) {
+  if (formatter instanceof SatNumberFormat) {
+    decimalPlaces = 8;
+  }
   // If decimal digits exist, keep them. Otherwise format them as usual.
-  if (integerAmount % 100 !== 0) {
+  if (integerAmount % Math.pow(10, decimalPlaces) !== 0) {
     return integerToCurrency(
       integerAmount,
       getNumberFormat({
@@ -446,7 +658,7 @@ export function integerToCurrencyWithDecimal(integerAmount: IntegerAmount) {
     );
   }
 
-  return integerToCurrency(integerAmount);
+  return integerToCurrency(integerAmount, formatter, decimalPlaces);
 }
 
 export function amountToCurrency(amount: Amount): CurrencyAmount {
@@ -477,7 +689,9 @@ export function currencyToAmount(currencyAmount: string): Amount | null {
     integer = currencyAmount.replace(/[^\d-]/g, '');
   } else {
     integer = currencyAmount.slice(0, match.index).replace(/[^\d-]/g, '');
-    fraction = currencyAmount.slice(match.index + 1);
+    // Strip all non-digit characters from fraction (including U+202F and other literals)
+    // to preserve satoshi precision in formats like sat-comma
+    fraction = currencyAmount.slice(match.index + 1).replace(/[^\d]/g, '');
   }
 
   const amount = parseFloat(integer + '.' + fraction);
