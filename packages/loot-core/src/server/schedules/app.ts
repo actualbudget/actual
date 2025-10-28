@@ -18,6 +18,7 @@ import {
   recurConfigToRSchedule,
 } from '../../shared/schedules';
 import { ScheduleEntity } from '../../types/models';
+import { processInterestForAllAccounts } from '../accounts/mortgage-loan';
 import { addTransactions } from '../accounts/sync';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';
@@ -443,6 +444,16 @@ async function postTransactionForSchedule({
 // TODO: make this sequential
 
 async function advanceSchedulesService(syncSuccess) {
+  // Process interest for mortgage/loan accounts first
+  try {
+    await processInterestForAllAccounts();
+  } catch (error) {
+    logger.error(
+      'Failed to process interest for mortgage/loan accounts:',
+      error,
+    );
+  }
+
   // Move all paid schedules
   const { data: schedules } = await aqlQuery(
     q('schedules')

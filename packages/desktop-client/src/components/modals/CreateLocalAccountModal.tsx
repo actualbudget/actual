@@ -8,6 +8,7 @@ import { FormError } from '@actual-app/components/form-error';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { InlineField } from '@actual-app/components/inline-field';
 import { Input } from '@actual-app/components/input';
+import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -38,11 +39,22 @@ export function CreateLocalAccountModal() {
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
   const [balance, setBalance] = useState('0');
+  const [accountType, setAccountType] = useState<
+    'checking' | 'savings' | 'credit' | 'investment' | 'mortgage' | 'loan'
+  >('checking');
+  const [interestRate, setInterestRate] = useState('');
 
   const [nameError, setNameError] = useState(null);
   const [balanceError, setBalanceError] = useState(false);
+  const [interestRateError, setInterestRateError] = useState(false);
 
   const validateBalance = balance => !isNaN(parseFloat(balance));
+
+  const validateInterestRate = (rate: string) => {
+    if (!rate) return true; // Interest rate is optional
+    const num = parseFloat(rate);
+    return !isNaN(num) && num >= 0 && num <= 100;
+  };
 
   const validateAndSetName = (name: string) => {
     const nameError = validateAccountName(name, '', accounts);
@@ -62,13 +74,18 @@ export function CreateLocalAccountModal() {
     const balanceError = !validateBalance(balance);
     setBalanceError(balanceError);
 
-    if (!nameError && !balanceError) {
+    const interestRateError = !validateInterestRate(interestRate);
+    setInterestRateError(interestRateError);
+
+    if (!nameError && !balanceError && !interestRateError) {
       dispatch(closeModal());
       const id = await dispatch(
         createAccount({
           name,
           balance: toRelaxedNumber(balance),
           offBudget: offbudget,
+          accountType,
+          interestRate: interestRate ? toRelaxedNumber(interestRate) : null,
         }),
       ).unwrap();
       navigate('/accounts/' + id);
@@ -180,6 +197,52 @@ export function CreateLocalAccountModal() {
               {balanceError && (
                 <FormError style={{ marginLeft: 75 }}>
                   <Trans>Balance must be a number</Trans>
+                </FormError>
+              )}
+
+              <InlineField label={t('Account Type')} width="100%">
+                <Select
+                  value={accountType}
+                  onChange={value =>
+                    setAccountType(value as typeof accountType)
+                  }
+                  options={[
+                    ['checking', t('Checking')],
+                    ['savings', t('Savings')],
+                    ['credit', t('Credit Card')],
+                    ['investment', t('Investment')],
+                    ['mortgage', t('Mortgage')],
+                    ['loan', t('Loan')],
+                  ]}
+                  style={{ flex: 1 }}
+                />
+              </InlineField>
+
+              {(accountType === 'mortgage' || accountType === 'loan') && (
+                <InlineField label={t('Interest Rate (%)')} width="100%">
+                  <Input
+                    name="interestRate"
+                    inputMode="decimal"
+                    value={interestRate}
+                    onChangeValue={setInterestRate}
+                    onUpdate={value => {
+                      const rate = value.trim();
+                      setInterestRate(rate);
+                      if (validateInterestRate(rate) && interestRateError) {
+                        setInterestRateError(false);
+                      }
+                    }}
+                    style={{ flex: 1 }}
+                    placeholder="0.00"
+                  />
+                </InlineField>
+              )}
+
+              {interestRateError && (
+                <FormError style={{ marginLeft: 75 }}>
+                  <Trans>
+                    Interest rate must be a number between 0 and 100
+                  </Trans>
                 </FormError>
               )}
 

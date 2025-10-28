@@ -6,6 +6,14 @@ export type AccountEntity = {
   sort_order: number;
   last_reconciled: string | null;
   tombstone: 0 | 1;
+  account_type?:
+    | 'checking'
+    | 'savings'
+    | 'credit'
+    | 'investment'
+    | 'mortgage'
+    | 'loan';
+  interest_rate?: number | null;
 } & (_SyncFields<true> | _SyncFields<false>);
 
 export type _SyncFields<T> = {

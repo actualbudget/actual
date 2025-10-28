@@ -325,16 +325,29 @@ async function createAccount({
   balance = 0,
   offBudget = false,
   closed = false,
+  accountType = 'checking',
+  interestRate = null,
 }: {
   name: string;
   balance?: number | undefined;
   offBudget?: boolean | undefined;
   closed?: boolean | undefined;
+  accountType?:
+    | 'checking'
+    | 'savings'
+    | 'credit'
+    | 'investment'
+    | 'mortgage'
+    | 'loan'
+    | undefined;
+  interestRate?: number | null | undefined;
 }) {
   const id: AccountEntity['id'] = await db.insertAccount({
     name,
     offbudget: offBudget ? 1 : 0,
     closed: closed ? 1 : 0,
+    account_type: accountType,
+    interest_rate: interestRate,
   });
 
   await db.insertPayee({

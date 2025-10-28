@@ -22,6 +22,15 @@ export type DbAccount = {
   subtype?: string | null;
   bank?: string | null;
   account_sync_source?: 'simpleFin' | 'goCardless' | null;
+  account_type?:
+    | 'checking'
+    | 'savings'
+    | 'credit'
+    | 'investment'
+    | 'mortgage'
+    | 'loan'
+    | null;
+  interest_rate?: number | null;
 };
 
 export type DbBank = {
