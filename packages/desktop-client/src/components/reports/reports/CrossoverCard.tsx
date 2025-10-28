@@ -4,6 +4,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import { Block } from '@actual-app/components/block';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
@@ -22,7 +23,6 @@ import { ReportCardName } from '@desktop-client/components/reports/ReportCardNam
 import { createCrossoverSpreadsheet } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
-import { theme } from '@actual-app/components/theme';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 // Type for the return value of the recalculate function
@@ -84,7 +84,7 @@ export function CrossoverCard({
       }
 
       const trans = await send('get-earliest-transaction');
-      if(!isMounted) return;
+      if (!isMounted) return;
 
       const currentMonth = monthUtils.currentMonth();
       const earliestMonth = trans
@@ -98,7 +98,7 @@ export function CrossoverCard({
     calculateDateRange();
     return () => {
       isMounted = false;
-    }
+    };
   }, [meta?.timeFrame]);
 
   const [isCardHovered, setIsCardHovered] = useState(false);
