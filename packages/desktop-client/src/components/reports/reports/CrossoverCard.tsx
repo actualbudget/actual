@@ -22,6 +22,8 @@ import { ReportCardName } from '@desktop-client/components/reports/ReportCardNam
 import { createCrossoverSpreadsheet } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
+import { theme } from '@actual-app/components/theme';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 
 // Type for the return value of the recalculate function
 type CrossoverData = {
@@ -70,27 +72,33 @@ export function CrossoverCard({
   const [start, setStart] = useState<string>('');
   const [end, setEnd] = useState<string>('');
 
+  const format = useFormat();
+
   useEffect(() => {
+    let isMounted = true;
     async function calculateDateRange() {
+      if (meta?.timeFrame?.start && meta?.timeFrame?.end) {
+        setStart(meta.timeFrame.start);
+        setEnd(meta.timeFrame.end);
+        return;
+      }
+
       const trans = await send('get-earliest-transaction');
+      if(!isMounted) return;
+
       const currentMonth = monthUtils.currentMonth();
       const earliestMonth = trans
         ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(trans.date)))
         : currentMonth;
 
       // Use saved timeFrame from meta or default range
-      let startMonth = earliestMonth;
-      let endMonth = monthUtils.subMonths(currentMonth, 1); // Exclude current month by default
-
-      if (meta?.timeFrame?.start && meta?.timeFrame?.end) {
-        startMonth = meta.timeFrame.start;
-        endMonth = meta.timeFrame.end;
-      }
-
-      setStart(startMonth);
-      setEnd(endMonth);
+      setStart(earliestMonth);
+      setEnd(monthUtils.subMonths(currentMonth, 1)); // Exclude current month by default
     }
     calculateDateRange();
+    return () => {
+      isMounted = false;
+    }
   }, [meta?.timeFrame]);
 
   const [isCardHovered, setIsCardHovered] = useState(false);
@@ -193,14 +201,16 @@ export function CrossoverCard({
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
                   {yearsToRetire != null
-                    ? `${yearsToRetire.toFixed(1)} years`
+                    ? t('{{years}} years', {
+                        years: format(yearsToRetire, 'number'),
+                      })
                     : 'N/A'}
                 </PrivacyFilter>
               </Block>
               <Block
                 style={{
                   fontSize: 12,
-                  color: '#666',
+                  color: theme.pageTextSubdued,
                 }}
               >
                 <Trans>Years to Retire</Trans>

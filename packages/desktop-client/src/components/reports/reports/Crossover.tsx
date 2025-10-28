@@ -574,7 +574,11 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                 <span>
                   <Trans>Years to Retire</Trans>:{' '}
                   <PrivacyFilter>
-                    {yearsToRetire != null ? yearsToRetire.toFixed(1) : 'N/A'}
+                    {yearsToRetire != null
+                      ? t('{{years}} years', {
+                          years: format(yearsToRetire, 'number'),
+                        })
+                      : 'N/A'}
                   </PrivacyFilter>
                 </span>
               </View>
