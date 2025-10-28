@@ -22,6 +22,10 @@ import { app as dashboardApp } from './dashboard/app';
 import * as db from './db';
 import * as encryption from './encryption';
 import { app as encryptionApp } from './encryption/app';
+import {
+  exchangeRateService,
+  initializeExchangeRateServices,
+} from './exchange-rate';
 import { app as filtersApp } from './filters/app';
 import { app } from './main-app';
 import { mutator, runHandler } from './mutators';
@@ -61,7 +65,7 @@ handlers['make-filters-from-conditions'] = async function ({
   conditions,
   applySpecialCases,
 }) {
-  return rules.conditionsToAQL(conditions, { applySpecialCases });
+  return await rules.conditionsToAQL(conditions, { applySpecialCases });
 };
 
 handlers['query'] = async function (query) {
@@ -122,6 +126,25 @@ handlers['app-focused'] = async function () {
     // First we sync
     fullSync();
   }
+};
+
+handlers['get-openexchangerates-usage'] = async function () {
+  return exchangeRateService.getOpenExchangeRatesUsage();
+};
+
+handlers['exchange-rates-fetch'] = async function ({
+  fromCurrency,
+  toCurrencies,
+}: {
+  fromCurrency: string;
+  toCurrencies: string[];
+}) {
+  await exchangeRateService.fetchAndCacheRates(fromCurrency, toCurrencies);
+  return { success: true };
+};
+
+handlers['exchange-rates-get-update-interval'] = async function () {
+  return exchangeRateService.getUpdateInterval();
 };
 
 handlers = installAPI(handlers) as Handlers;
@@ -214,6 +237,13 @@ export async function initApp(isDev, socketName) {
   setServer(url);
 
   connection.init(socketName, app.handlers);
+
+  // Initialize exchange rate services for currency exchange rate updates
+  try {
+    await initializeExchangeRateServices();
+  } catch (error) {
+    logger.error('Failed to initialize exchange rate services:', error);
+  }
 
   // Allow running DB queries locally
   global.$query = aqlQuery;

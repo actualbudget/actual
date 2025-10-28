@@ -24,4 +24,21 @@ export type ServerHandlers = {
   }) => Promise<{ error?: string }>;
 
   'app-focused': () => Promise<void>;
+
+  'get-openexchangerates-usage': () => Promise<{
+    planName: string;
+    quota: string;
+    requests: number;
+    requestsQuota: number;
+    requestsRemaining: number;
+    daysRemaining: number;
+    dailyAverage: number;
+  } | null>;
+
+  'exchange-rates-fetch': (arg: {
+    fromCurrency: string;
+    toCurrencies: string[];
+  }) => Promise<{ success: boolean }>;
+
+  'exchange-rates-get-update-interval': () => Promise<number>;
 };

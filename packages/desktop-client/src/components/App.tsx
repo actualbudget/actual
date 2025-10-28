@@ -32,6 +32,7 @@ import {
   loadBudget,
 } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { handleGlobalEvents } from '@desktop-client/global-events';
+import { useExchangeRates } from '@desktop-client/hooks/useExchangeRates';
 import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { SpreadsheetProvider } from '@desktop-client/hooks/useSpreadsheet';
@@ -173,6 +174,9 @@ function ErrorFallback({ error }: FallbackProps) {
 export function App() {
   const store = useStore();
   const isTestEnv = useIsTestEnv();
+
+  // Start exchange rate polling when multi-currency is enabled
+  useExchangeRates();
 
   useEffect(() => handleGlobalEvents(store), [store]);
 

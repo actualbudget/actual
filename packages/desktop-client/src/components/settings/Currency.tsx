@@ -1,17 +1,22 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
+import { send } from 'loot-core/platform/client/fetch';
 import { currencies, getCurrency } from 'loot-core/shared/currencies';
 
 import { Column, Setting } from './UI';
 
-import { Checkbox } from '@desktop-client/components/forms';
+import { Warning, Error } from '@desktop-client/components/alerts';
+import { Link } from '@desktop-client/components/common/Link';
+import { Checkbox, FormLabel } from '@desktop-client/components/forms';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function CurrencySettings() {
@@ -82,6 +87,82 @@ export function CurrencySettings() {
   );
   const [enableMultiCurrencyOnBudget, setEnableMultiCurrencyOnBudgetPref] =
     useSyncedPref('enableMultiCurrencyOnBudget');
+  const [enableExternalExchangeRates, setEnableExternalExchangeRatesPref] =
+    useSyncedPref('enableExternalExchangeRates');
+  const [exchangeRateProvider, setExchangeRateProviderPref] = useSyncedPref(
+    'exchangeRateProvider',
+  );
+
+  const [mempoolSpaceBaseUrl, setMempoolSpaceBaseUrlPref] = useSyncedPref(
+    'mempoolSpaceBaseUrl',
+  );
+  const [openExchangeRatesAppId, setOpenExchangeRatesAppIdPref] = useSyncedPref(
+    'openExchangeRatesAppId',
+  );
+
+  const [usageData, setUsageData] = useState<{
+    planName: string;
+    quota: string;
+    requests: number;
+    requestsQuota: number;
+    requestsRemaining: number;
+    daysRemaining: number;
+    dailyAverage: number;
+  } | null>(null);
+  const [usageWarning, setUsageWarning] = useState<string | null>(null);
+  const [usageError, setUsageError] = useState<string | null>(null);
+
+  // Validate App ID format (32 hexadecimal characters)
+  const isValidAppId = (appId: string): boolean => {
+    return /^[0-9a-fA-F]{32}$/.test(appId);
+  };
+
+  // Fetch usage data when App ID changes
+  useEffect(() => {
+    const fetchUsage = async () => {
+      if (openExchangeRatesAppId) {
+        // Validate App ID format before making API call
+        if (!isValidAppId(openExchangeRatesAppId)) {
+          setUsageData(null);
+          setUsageWarning(
+            'Invalid App ID format. Must be 32 hexadecimal characters (0-9, A-F).',
+          );
+          setUsageError(null);
+          return;
+        }
+
+        try {
+          const result = await send('get-openexchangerates-usage');
+          if (result) {
+            setUsageData(result);
+            setUsageWarning(null);
+            setUsageError(null);
+          } else {
+            setUsageData(null);
+            setUsageWarning(null);
+            setUsageError('Invalid App ID or unable to fetch usage data');
+          }
+        } catch (error) {
+          console.error('Failed to fetch usage data:', error);
+          setUsageData(null);
+          setUsageWarning(null);
+          setUsageError(
+            'Failed to fetch usage data. Please check your App ID.',
+          );
+        }
+      } else {
+        setUsageData(null);
+        setUsageWarning(null);
+        setUsageError(null);
+      }
+    };
+
+    fetchUsage();
+  }, [openExchangeRatesAppId]);
+
+  const handleOXRAppIdChange = (appId: string) => {
+    setOpenExchangeRatesAppIdPref(appId);
+  };
 
   const selectButtonClassName = css({
     '&[data-hovered]': {
@@ -271,6 +352,321 @@ export function CurrencySettings() {
                       Allow on-budget accounts to have non-default currency
                     </Trans>
                   </label>
+                </View>
+              )}
+
+              {enableMultiCurrency === 'true' && (
+                <View
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1em',
+                  }}
+                >
+                  <View
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'flex-start',
+                    }}
+                  >
+                    <Checkbox
+                      id="settings-enableExternalExchangeRates"
+                      checked={enableExternalExchangeRates === 'true'}
+                      onChange={e =>
+                        setEnableExternalExchangeRatesPref(
+                          e.target.checked ? 'true' : 'false',
+                        )
+                      }
+                    />
+                    <label
+                      htmlFor="settings-enableExternalExchangeRates"
+                      style={{ marginLeft: '0.5em' }}
+                    >
+                      <Trans>Enable external exchange rate providers</Trans>
+                    </label>
+                  </View>
+
+                  {enableExternalExchangeRates === 'true' && (
+                    <View
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '1em',
+                        marginLeft: '1.5em',
+                        padding: '1em',
+                        backgroundColor: theme.tableBackground,
+                        borderRadius: '6px',
+                        border: `1px solid ${theme.tableBorder}`,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: '0.9em',
+                          color: theme.pageTextLight,
+                        }}
+                      >
+                        <Trans>
+                          Select an exchange rate provider and configure its
+                          settings.
+                        </Trans>
+                      </Text>
+
+                      <View
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.75em',
+                        }}
+                      >
+                        <View
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            id="provider-mempool"
+                            name="exchangeRateProvider"
+                            value="mempool"
+                            checked={
+                              (exchangeRateProvider || 'mempool') === 'mempool'
+                            }
+                            onChange={e =>
+                              setExchangeRateProviderPref(e.target.value)
+                            }
+                          />
+                          <Tooltip
+                            content={
+                              <Trans>
+                                Supports: USD, JPY, GBP, EUR, CHF, CAD, BTC, AUD
+                              </Trans>
+                            }
+                            placement="right"
+                          >
+                            <label
+                              htmlFor="provider-mempool"
+                              style={{
+                                marginLeft: '0.5em',
+                                fontWeight:
+                                  (exchangeRateProvider || 'mempool') ===
+                                  'mempool'
+                                    ? 600
+                                    : 400,
+                                cursor: 'help',
+                              }}
+                            >
+                              <Trans>
+                                Mempool.space (free, no auth needed, can be
+                                self-hosted)
+                              </Trans>
+                            </label>
+                          </Tooltip>
+                        </View>
+
+                        {(exchangeRateProvider || 'mempool') === 'mempool' && (
+                          <View
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '0.5em',
+                              marginLeft: '1.5em',
+                              paddingLeft: '1em',
+                              borderLeft: `2px solid ${theme.tableBorder}`,
+                            }}
+                          >
+                            <FormLabel title={t('Mempool.space Base URL')} />
+                            <Input
+                              value={
+                                mempoolSpaceBaseUrl || 'https://mempool.space'
+                              }
+                              onChange={e =>
+                                setMempoolSpaceBaseUrlPref(e.target.value)
+                              }
+                              placeholder="https://mempool.space"
+                              style={{ fontSize: '0.9em' }}
+                            />
+                            <Text
+                              style={{
+                                fontSize: '0.8em',
+                                color: theme.pageTextLight,
+                              }}
+                            >
+                              <Trans>
+                                Base URL for Mempool.space API. Change to use a
+                                self-hosted instance.
+                              </Trans>
+                            </Text>
+                          </View>
+                        )}
+
+                        <View
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            id="provider-openexchangerates"
+                            name="exchangeRateProvider"
+                            value="openexchangerates"
+                            checked={
+                              exchangeRateProvider === 'openexchangerates'
+                            }
+                            onChange={e =>
+                              setExchangeRateProviderPref(e.target.value)
+                            }
+                          />
+                          <Tooltip
+                            content={
+                              <Trans>Supports 170+ currencies worldwide</Trans>
+                            }
+                            placement="right"
+                          >
+                            <label
+                              htmlFor="provider-openexchangerates"
+                              style={{
+                                marginLeft: '0.5em',
+                                fontWeight:
+                                  exchangeRateProvider === 'openexchangerates'
+                                    ? 600
+                                    : 400,
+                                cursor: 'help',
+                              }}
+                            >
+                              <Trans>
+                                Open Exchange Rates (free, requires App ID)
+                              </Trans>
+                            </label>
+                          </Tooltip>
+                        </View>
+
+                        {exchangeRateProvider === 'openexchangerates' && (
+                          <View
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '0.5em',
+                              marginLeft: '1.5em',
+                              paddingLeft: '1em',
+                              borderLeft: `2px solid ${theme.tableBorder}`,
+                            }}
+                          >
+                            <FormLabel
+                              title={t('Open Exchange Rates App ID')}
+                            />
+                            <Input
+                              value={openExchangeRatesAppId || ''}
+                              onChange={e =>
+                                handleOXRAppIdChange(e.target.value)
+                              }
+                              placeholder={t(
+                                'Enter App ID from openexchangerates.org',
+                              )}
+                              style={{ fontSize: '0.9em' }}
+                            />
+                            <Text
+                              style={{
+                                fontSize: '0.8em',
+                                color: theme.pageTextLight,
+                              }}
+                            >
+                              <Trans>
+                                <Link
+                                  variant="external"
+                                  to="https://openexchangerates.org/signup"
+                                >
+                                  Sign up for a free account
+                                </Link>{' '}
+                                to get your App ID.
+                              </Trans>
+                            </Text>
+
+                            {usageWarning && (
+                              <Warning style={{ marginTop: '0.5em' }}>
+                                {usageWarning}
+                              </Warning>
+                            )}
+
+                            {usageError && (
+                              <Error style={{ marginTop: '0.5em' }}>
+                                {usageError}
+                              </Error>
+                            )}
+
+                            {usageData && (
+                              <View
+                                style={{
+                                  marginTop: '0.5em',
+                                  padding: '0.75em',
+                                  backgroundColor: theme.menuItemBackground,
+                                  borderRadius: '4px',
+                                  border: `1px solid ${theme.tableBorder}`,
+                                }}
+                              >
+                                <Text
+                                  style={{
+                                    fontSize: '0.85em',
+                                    fontWeight: 600,
+                                    marginBottom: '0.5em',
+                                  }}
+                                >
+                                  <Trans>Current Usage</Trans>
+                                </Text>
+                                <View
+                                  style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '0.25em',
+                                  }}
+                                >
+                                  <Text style={{ fontSize: '0.8em' }}>
+                                    <Trans>Plan:</Trans>{' '}
+                                    <strong>{usageData.planName}</strong> (
+                                    {usageData.quota})
+                                  </Text>
+                                  <Text style={{ fontSize: '0.8em' }}>
+                                    <Trans>Requests:</Trans>{' '}
+                                    <strong>{usageData.requests}</strong> /{' '}
+                                    {usageData.requestsQuota} (
+                                    <strong>
+                                      {usageData.requestsRemaining}
+                                    </strong>{' '}
+                                    <Trans>remaining</Trans>)
+                                  </Text>
+                                  <Text style={{ fontSize: '0.8em' }}>
+                                    <Trans>Days Remaining:</Trans>{' '}
+                                    <strong>{usageData.daysRemaining}</strong>
+                                  </Text>
+                                  <Text style={{ fontSize: '0.8em' }}>
+                                    <Trans>Daily Average:</Trans>{' '}
+                                    <strong>
+                                      {usageData.dailyAverage.toFixed(1)}
+                                    </strong>{' '}
+                                    <Trans>requests/day</Trans>
+                                  </Text>
+                                  <Text style={{ fontSize: '0.8em' }}>
+                                    <Trans>Statistics:</Trans>{' '}
+                                    <Link
+                                      variant="external"
+                                      to="https://openexchangerates.org/account/usage"
+                                    >
+                                      openexchangerates.org/account/usage
+                                    </Link>
+                                  </Text>
+                                </View>
+                              </View>
+                            )}
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  )}
                 </View>
               )}
             </View>
