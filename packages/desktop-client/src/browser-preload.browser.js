@@ -135,8 +135,7 @@ global.Actual = {
             const normalizedExt = ext.startsWith('.')
               ? ext.toLowerCase()
               : `.${ext.toLowerCase()}`;
-            const overrides =
-              FILE_ACCEPT_OVERRIDES[ext.toLowerCase()] ?? [];
+            const overrides = FILE_ACCEPT_OVERRIDES[ext.toLowerCase()] ?? [];
             return [normalizedExt, ...overrides];
           })
           .join(',');
