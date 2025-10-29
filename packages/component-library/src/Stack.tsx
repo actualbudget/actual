@@ -46,6 +46,11 @@ type StackProps = ComponentProps<typeof View> & {
   spacing?: number;
   debug?: boolean;
 };
+
+/**
+ * @deprecated This is a terrible component. Please prefer using the `SpaceBetween` component instead.
+ * This component will be removed in a future release.
+ */
 export const Stack = forwardRef<HTMLDivElement, StackProps>(
   (
     {
