@@ -68,11 +68,12 @@ export async function addTransfer(transaction, transferredAccount) {
     schedule: transaction.schedule,
     cleared: false,
   };
-  const { notes, cleared } = await runRules(transferTransaction);
+  const { notes, cleared, schedule } = await runRules(transferTransaction);
   const id = await db.insertTransaction({
     ...transferTransaction,
     notes,
     cleared,
+    schedule: schedule ?? transaction.schedule,
   });
 
   await db.updateTransaction({ id: transaction.id, transfer_id: id });
