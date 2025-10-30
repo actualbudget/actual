@@ -2,13 +2,14 @@
 <component type="desktop">
   <id>com.actualbudget.actual</id>
   <name>Actual</name>
-  <summary>A local-first personal finance app</summary>
+  <summary>Your Finances - made simple</summary>
   <metadata_license>MIT</metadata_license>
   <project_license>MIT</project_license>
   <content_rating type="oars-1.0" />
   <description>
-    <p>Actual Budget is a super fast and privacy-focused app for managing your finances. At its heart is the well proven and much loved Envelope Budgeting methodology.</p>
-    <p>You own your data and can do whatever you want with it. Featuring multi-device sync, optional end-to-end encryption and so much more.</p>
+    <p>Actual Budget is a fast, privacy-focused finance app based on the Envelope Budgeting method. It prioritizes user control, allowing you to manage your data independently with multi-device sync and optional end-to-end encryption. The app emphasizes user involvement over automation, offering quick, intuitive tools while keeping you in charge of your financial decisions.</p>
+    <p>Designed for speed, Actual Budget has a streamlined interface that minimizes distractions, making it easy to navigate your finances. It operates locally, ensuring functionality without a network connection while syncing data across devices. This local-first approach also enhances privacy through end-to-end encryption.</p>
+    <p>The budgeting system is grounded in real income, helping you track spending and savings accurately. The app simplifies managing transactions with a minimal, efficient interface, supporting features like split transactions and transfers. Additionally, Actual Budget offers customizable reports alongside default net worth and cash flow reports, enabling users to analyze your finances in a way that suits you.</p>
   </description>
   <launchable type="desktop-id">com.actualbudget.actual.desktop</launchable>
   <url type="homepage">https://actualbudget.org/</url>
