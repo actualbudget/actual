@@ -22,8 +22,37 @@
     <control>touch</control>
   </recommends>
   <screenshots>
-    <screenshot type="default">
-      <image>https://github.com/actualbudget/actual/raw/master/demo.png</image>
+    <screenshot type="default" environment="gnome:dark">
+      <image>https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/budget-gnome-dark.png</image>
+      <caption>Budget screen (dark theme)</caption>
+    </screenshot>
+    <screenshot environment="gnome">
+      <image>https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/budget-gnome-light.png</image>
+      <caption>Budget screen (light theme)</caption>
+    </screenshot>
+    <screenshot environment="gnome:dark">
+      <image>https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/transactions-gnome-dark.png</image>
+      <caption>Transactions screen (dark theme)</caption>
+    </screenshot>
+    <screenshot environment="gnome">
+      <image>https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/transactions-gnome-light.png</image>
+      <caption>Transactions screen (light theme)</caption>
+    </screenshot>
+    <screenshot environment="gnome:dark">
+      <image>https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/schedules-gnome-dark.png</image>
+      <caption>Schedules screen (dark theme)</caption>
+    </screenshot>
+    <screenshot environment="gnome:light">
+      <image>https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/schedules-gnome-light.png</image>
+      <caption>Schedules screen (light theme)</caption>
+    </screenshot>
+    <screenshot environment="gnome:dark">
+      <image>https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/reports-gnome-dark.png</image>
+      <caption>Reports screen (dark theme)</caption>
+    </screenshot>
+    <screenshot environment="gnome:light">
+      <image>https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-electron/screenshots/reports-gnome-light.png</image>
+      <caption>Reports screen (light theme)</caption>
     </screenshot>
   </screenshots>
   <releases>
