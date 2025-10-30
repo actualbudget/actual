@@ -1,4 +1,4 @@
-name: Check Spelling
+name: Check Spelling (Docs)
 
 # Comment management is handled through a secondary job, for details see:
 # https://github.com/check-spelling/check-spelling/wiki/Feature%3A-Restricted-Permissions
@@ -39,11 +39,19 @@ on:
     - "**"
     tags-ignore:
     - "**"
+    paths:
+    - 'packages/docs/**'
+    - '.github/workflows/docs-spelling.yml'
+    - '.github/actions/docs-spelling/**'
   pull_request_target:
     branches:
     - "**"
     tags-ignore:
     - "**"
+    paths:
+    - 'packages/docs/**'
+    - '.github/workflows/docs-spelling.yml'
+    - '.github/actions/docs-spelling/**'
     types:
     - 'opened'
     - 'reopened'
@@ -95,6 +103,7 @@ jobs:
           cspell:fullstack/dict/fullstack.txt
           cspell:html/dict/html.txt
           cspell:css/dict/css.txt
+        config: .github/actions/docs-spelling
 
   comment-push:
     name: Report (Push)
@@ -111,6 +120,7 @@ jobs:
         checkout: true
         spell_check_this: check-spelling/spell-check-this@prerelease
         task: ${{ needs.spelling.outputs.followup }}
+        config: .github/actions/docs-spelling
 
   comment-pr:
     name: Report (PR)
@@ -128,6 +138,7 @@ jobs:
         spell_check_this: check-spelling/spell-check-this@prerelease
         task: ${{ needs.spelling.outputs.followup }}
         experimental_apply_changes_via_bot: 1
+        config: .github/actions/docs-spelling
 
   update:
     name: Update PR
@@ -151,3 +162,5 @@ jobs:
         experimental_apply_changes_via_bot: 1
         checkout: true
         ssh_key: "${{ secrets.CHECK_SPELLING }}"
+        config: .github/actions/docs-spelling
+
