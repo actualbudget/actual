@@ -70,7 +70,15 @@ export function BankSync() {
 
     return sortedKeys.reduce(
       (sorted, key) => {
-        sorted[key as SyncProviders] = unsorted[key as SyncProviders];
+        // sort accounts by bank name, then account name
+        const sortedAccounts = unsorted[key as SyncProviders].sort((a, b) => {
+          const bankComparison = (a.bankName ?? '').localeCompare(
+            b.bankName ?? '',
+          );
+          if (bankComparison !== 0) return bankComparison;
+          return a.name.localeCompare(b.name);
+        });
+        sorted[key as SyncProviders] = sortedAccounts;
         return sorted;
       },
       {} as Record<SyncProviders, AccountEntity[]>,
