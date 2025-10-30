@@ -2470,6 +2470,7 @@ export const TransactionTable = forwardRef(
       getFieldsTableTransaction,
     );
     const shouldAdd = useRef(false);
+    const shouldAddAndClose = useRef(false);
     const latestState = useRef<TableState>({
       newTransactions: newTransactions ?? [],
       newNavigator,
@@ -2501,7 +2502,7 @@ export const TransactionTable = forwardRef(
       setPrevIsAdding(props.isAdding);
     }
 
-    if (shouldAdd.current) {
+    if (shouldAdd.current || shouldAddAndClose.current) {
       if (newTransactions?.[0] && newTransactions[0].account == null) {
         dispatch(
           addNotification({
@@ -2514,18 +2515,26 @@ export const TransactionTable = forwardRef(
         newNavigator.onEdit('temp', 'account');
       } else {
         const transactions = latestState.current.newTransactions;
-        const lastDate = transactions.length > 0 ? transactions[0].date : null;
-        setNewTransactions(
-          makeTemporaryTransactions(
-            props.currentAccountId,
-            props.currentCategoryId,
-            lastDate,
-          ),
-        );
-        newNavigator.onEdit('temp', 'date');
-        props.onAdd(transactions);
+
+        if (shouldAddAndClose.current) {
+          props.onAdd(transactions);
+          props.onCloseAddTransaction();
+        } else {
+          const lastDate =
+            transactions.length > 0 ? transactions[0].date : null;
+          setNewTransactions(
+            makeTemporaryTransactions(
+              props.currentAccountId,
+              props.currentCategoryId,
+              lastDate,
+            ),
+          );
+          newNavigator.onEdit('temp', 'date');
+          props.onAdd(transactions);
+        }
       }
       shouldAdd.current = false;
+      shouldAddAndClose.current = false;
     }
 
     useEffect(() => {
@@ -2602,9 +2611,11 @@ export const TransactionTable = forwardRef(
 
     function onCheckNewEnter(e: KeyboardEvent) {
       if (e.key === 'Enter') {
-        if (e.metaKey) {
+        if (e.metaKey || e.ctrlKey) {
+          e.preventDefault();
           e.stopPropagation();
-          onAddTemporary();
+          shouldAddAndClose.current = true;
+          forceRerender({});
         } else if (!e.shiftKey) {
           function getLastTransaction(state: RefObject<TableState>) {
             const { newTransactions } = state.current;
