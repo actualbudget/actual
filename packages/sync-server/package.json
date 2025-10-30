@@ -59,7 +59,6 @@
     "@types/express-actuator": "^1.8.3",
     "@types/node": "^22.18.11",
     "@types/supertest": "^6.0.3",
-    "@vitest/coverage-v8": "4.0.5",
     "http-proxy-middleware": "^3.0.5",
     "nodemon": "^3.1.10",
     "supertest": "^7.1.4",
