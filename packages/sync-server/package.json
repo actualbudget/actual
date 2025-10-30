@@ -59,11 +59,11 @@
     "@types/express-actuator": "^1.8.3",
     "@types/node": "^22.18.11",
     "@types/supertest": "^6.0.3",
-    "@vitest/coverage-v8": "3.2.4",
+    "@vitest/coverage-v8": "4.0.5",
     "http-proxy-middleware": "^3.0.5",
     "nodemon": "^3.1.10",
     "supertest": "^7.1.4",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.6"
   }
 }
