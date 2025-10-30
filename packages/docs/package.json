@@ -46,9 +46,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "engines": {
-    "node": ">=22"
-  },
-  "packageManager": "yarn@4.10.3"
+  }
 }
