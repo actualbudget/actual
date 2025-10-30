@@ -1768,6 +1768,7 @@ type NewTransactionProps = {
   focusedField: string;
   hideFraction: boolean;
   onAdd: () => void;
+  onAddAndClose: () => void;
   onAddSplit: (id: TransactionEntity['id']) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
   onClose: () => void;
@@ -1816,6 +1817,7 @@ function NewTransaction({
   onDelete,
   onSave,
   onAdd,
+  onAddAndClose,
   onAddSplit,
   onDistributeRemainder,
   onManagePayees,
@@ -1838,6 +1840,14 @@ function NewTransaction({
   useProperFocus(addButtonRef, focusedField === 'add');
   const cancelButtonRef = useRef(null);
   useProperFocus(cancelButtonRef, focusedField === 'cancel');
+
+  const handleAddClick = (e: { ctrlKey?: boolean; metaKey?: boolean }) => {
+    if (e.ctrlKey || e.metaKey) {
+      onAddAndClose();
+    } else {
+      onAdd();
+    }
+  };
 
   return (
     <View
@@ -1921,7 +1931,7 @@ function NewTransaction({
           <Button
             variant="primary"
             style={{ padding: '4px 10px' }}
-            onPress={onAdd}
+            onPress={handleAddClick}
             data-testid="add-button"
             ref={addButtonRef}
           >
@@ -2001,6 +2011,7 @@ type TransactionTableInnerProps = {
   onCheckNewEnter: (e: KeyboardEvent) => void;
   onCheckEnter: (e: KeyboardEvent) => void;
   onAddTemporary: (id?: TransactionEntity['id']) => void;
+  onAddAndCloseTemporary: () => void;
   onDistributeRemainder: (id: TransactionEntity['id']) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
   onManagePayees: (id?: PayeeEntity['id']) => void;
@@ -2232,6 +2243,7 @@ function TransactionTableInner({
               hideFraction={props.hideFraction}
               onClose={props.onCloseAddTransaction}
               onAdd={props.onAddTemporary}
+              onAddAndClose={props.onAddAndCloseTemporary}
               onAddSplit={props.onAddSplit}
               onToggleSplit={props.onToggleSplit}
               onSplit={props.onSplit}
@@ -2685,6 +2697,11 @@ export const TransactionTable = forwardRef(
       forceRerender({});
     }, []);
 
+    const onAddAndCloseTemporary = useCallback(() => {
+      shouldAddAndClose.current = true;
+      forceRerender({});
+    }, []);
+
     const {
       onSave: onSaveProp,
       onApplyRules: onApplyRulesProp,
@@ -2981,6 +2998,7 @@ export const TransactionTable = forwardRef(
         onCheckNewEnter={onCheckNewEnter}
         onCheckEnter={onCheckEnter}
         onAddTemporary={onAddTemporary}
+        onAddAndCloseTemporary={onAddAndCloseTemporary}
         onAddSplit={onAddSplit}
         onDistributeRemainder={onDistributeRemainder}
         onCloseAddTransaction={onCloseAddTransaction}
