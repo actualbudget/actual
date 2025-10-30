@@ -13,7 +13,7 @@
 
 /**
  * @param {string} title
- * @returns {import('@docusaurus/plugin-content-docs/src/sidebars/types').SidebarItemHtml}
+ * @returns {import('@docusaurus/plugin-content-docs').PropSidebarItemHtml}
  */
 const unavailable = title => ({
   type: 'html',

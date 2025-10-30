@@ -31,3 +31,6 @@ packages/sync-server/user-files/
 packages/sync-server/server-files/
 .yarn/*
 upcoming-release-notes/*
+
+# temporary
+packages/docs/*
