@@ -26,7 +26,6 @@ import { Input } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { Stack } from '@actual-app/components/stack';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
@@ -337,12 +336,7 @@ export function AccountHeader({
             }}
           />
         </View>
-        <Stack
-          spacing={2}
-          direction="row"
-          align="center"
-          style={{ marginTop: 12 }}
-        >
+        <SpaceBetween gap={10} style={{ marginTop: 12 }}>
           {canSync && (
             <Button
               variant="bare"
@@ -570,7 +564,7 @@ export function AccountHeader({
               </View>
             )}
           </SpaceBetween>
-        </Stack>
+        </SpaceBetween>
         {filterConditions?.length > 0 && (
           <FiltersStack
             conditions={filterConditions}

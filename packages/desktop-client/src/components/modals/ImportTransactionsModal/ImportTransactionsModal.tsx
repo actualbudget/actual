@@ -10,7 +10,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
 import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -939,11 +939,9 @@ export function ImportTransactionsModal({
           {/*Import Options */}
           {(filetype === 'qif' || filetype === 'csv') && (
             <View style={{ marginTop: 10 }}>
-              <Stack
-                direction="row"
-                align="flex-start"
-                spacing={1}
-                style={{ marginTop: 5 }}
+              <SpaceBetween
+                gap={5}
+                style={{ marginTop: 5, alignItems: 'flex-start' }}
               >
                 {/* Date Format */}
                 <View>
@@ -1081,7 +1079,7 @@ export function ImportTransactionsModal({
                     </>
                   )}
                 </View>
-              </Stack>
+              </SpaceBetween>
             </View>
           )}
 

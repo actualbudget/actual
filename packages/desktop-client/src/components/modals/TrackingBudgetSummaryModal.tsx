@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 
 import { sheetForMonth } from 'loot-core/shared/months';
@@ -37,8 +37,9 @@ export function TrackingBudgetSummaryModal({
             rightContent={<ModalCloseButton onPress={close} />}
           />
           <SheetNameProvider name={sheetForMonth(month)}>
-            <Stack
-              spacing={2}
+            <SpaceBetween
+              direction="vertical"
+              gap={10}
               style={{
                 alignSelf: 'center',
                 backgroundColor: 'transparent',
@@ -47,7 +48,7 @@ export function TrackingBudgetSummaryModal({
             >
               <IncomeTotal style={{ ...styles.mediumText }} />
               <ExpenseTotal style={{ ...styles.mediumText }} />
-            </Stack>
+            </SpaceBetween>
             <Saved
               projected={month >= currentMonth}
               style={{ ...styles.mediumText, marginTop: 20 }}

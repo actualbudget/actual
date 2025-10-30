@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
 
 import { SelectField } from './SelectField';
@@ -51,12 +51,7 @@ export function FieldMappings({
   return (
     <View>
       <SectionLabel title={t('CSV FIELDS')} />
-      <Stack
-        direction="row"
-        align="flex-start"
-        spacing={1}
-        style={{ marginTop: 5 }}
-      >
+      <SpaceBetween gap={5} style={{ marginTop: 5, alignItems: 'flex-start' }}>
         <View style={{ flex: 1, marginRight: 10 }}>
           <SubLabel title={t('Date')} />
           <SelectField
@@ -146,7 +141,7 @@ export function FieldMappings({
             </View>
           </>
         )}
-      </Stack>
+      </SpaceBetween>
     </View>
   );
 }

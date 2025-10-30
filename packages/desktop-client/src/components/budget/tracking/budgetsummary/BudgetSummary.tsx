@@ -9,7 +9,7 @@ import {
   SvgArrowButtonUp1,
 } from '@actual-app/components/icons/v2';
 import { Popover } from '@actual-app/components/popover';
-import { Stack } from '@actual-app/components/stack';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -232,8 +232,9 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
         </View>
 
         {!collapsed && (
-          <Stack
-            spacing={2}
+          <SpaceBetween
+            direction="vertical"
+            gap={10}
             style={{
               alignSelf: 'center',
               backgroundColor: theme.tableRowHeaderBackground,
@@ -244,7 +245,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
           >
             <IncomeTotal />
             <ExpenseTotal />
-          </Stack>
+          </SpaceBetween>
         )}
 
         {collapsed ? (
