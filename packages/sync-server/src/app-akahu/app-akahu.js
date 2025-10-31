@@ -1,8 +1,5 @@
-import https from 'https';
-
 import { AkahuClient } from 'akahu';
 import express from 'express';
-
 
 import { handleError } from '../app-gocardless/util/handle-error.js';
 import { SecretName, secretsService } from '../services/secrets-service.js';
@@ -45,10 +42,17 @@ app.post(
           accounts,
         },
       });
-    } catch (e) {
-      serverDown(e, res);
-      return;
+    } catch (error) {
+      console.log(error);
+      res.send({
+        status: 'ok',
+        data: {
+          error: error.message,
+        },
+      });
     }
+
+    return;
   }),
 );
 
