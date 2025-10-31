@@ -109,6 +109,12 @@ export type Modal =
       };
     }
   | {
+      name: 'akahu-init';
+      options: {
+        onSuccess: () => void;
+      };
+    }
+  | {
       name: 'gocardless-external-msg';
       options: {
         onMoveExternal: (arg: {
