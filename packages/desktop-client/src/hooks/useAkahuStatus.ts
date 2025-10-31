@@ -5,9 +5,7 @@ import { send } from 'loot-core/platform/client/fetch';
 import { useSyncServerStatus } from './useSyncServerStatus';
 
 export function useAkahuStatus() {
-  const [configuredAkahu, setConfiguredAkahu] = useState<
-    boolean | null
-  >(null);
+  const [configuredAkahu, setConfiguredAkahu] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const status = useSyncServerStatus();
 

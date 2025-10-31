@@ -25,10 +25,10 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
 import { authorizeBank } from '@desktop-client/gocardless';
+import { useAkahuStatus } from '@desktop-client/hooks/useAkahuStatus';
 import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
-import { useAkahuStatus } from '@desktop-client/hooks/useAkahuStatus';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 import {
   type Modal as ModalType,
@@ -433,8 +433,7 @@ export function CreateAccountModal({
   let title = t('Add account');
   const [loadingSimpleFinAccounts, setLoadingSimpleFinAccounts] =
     useState(false);
-  const [loadingAkahuAccounts, setLoadingAkahuAccounts] =
-    useState(false);
+  const [loadingAkahuAccounts, setLoadingAkahuAccounts] = useState(false);
 
   if (upgradingAccountId != null) {
     title = t('Link account');
@@ -708,10 +707,7 @@ export function CreateAccountModal({
                         </ButtonWithLoading>
                         {isAkahuSetupComplete && (
                           <DialogTrigger>
-                            <Button
-                              variant="bare"
-                              aria-label={t('Akahu menu')}
-                            >
+                            <Button variant="bare" aria-label={t('Akahu menu')}>
                               <SvgDotsHorizontalTriple
                                 width={15}
                                 height={15}
@@ -744,9 +740,9 @@ export function CreateAccountModal({
                           <strong>
                             Link a <em>New Zealand</em> bank account
                           </strong>{' '}
-                          to automatically download transactions. Akahu
-                          provides reliable, up-to-date information from
-                          most New Zealand banks.
+                          to automatically download transactions. Akahu provides
+                          reliable, up-to-date information from most New Zealand
+                          banks.
                         </Trans>
                       </Text>
                     </>

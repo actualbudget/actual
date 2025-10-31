@@ -1024,7 +1024,6 @@ export async function syncAccount(
   bankId: string,
 ) {
   const acctRow = await db.select('accounts', id);
-  console.log(acctRow.account_sync_source)
 
   const syncStartDate = await getAccountSyncStartDate(id);
   const oldestTransaction = await getAccountOldestTransaction(id);

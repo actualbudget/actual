@@ -1,8 +1,8 @@
 import https from 'https';
 
+import { AkahuClient } from 'akahu';
 import express from 'express';
 
-import { AkahuClient } from 'akahu';
 
 import { handleError } from '../app-gocardless/util/handle-error.js';
 import { SecretName, secretsService } from '../services/secrets-service.js';
@@ -32,8 +32,8 @@ app.post(
 app.post(
   '/accounts',
   handleError(async (req, res) => {
-    let userToken = secretsService.get(SecretName.akahu_userToken);
-    let appToken = secretsService.get(SecretName.akahu_appToken);
+    const userToken = secretsService.get(SecretName.akahu_userToken);
+    const appToken = secretsService.get(SecretName.akahu_appToken);
 
     try {
       const akahu = new AkahuClient({ appToken });
@@ -42,7 +42,7 @@ app.post(
       res.send({
         status: 'ok',
         data: {
-          accounts: accounts,
+          accounts,
         },
       });
     } catch (e) {
@@ -58,8 +58,8 @@ app.post(
     const { accountId, startDate } = req.body || {};
 
     try {
-      let userToken = secretsService.get(SecretName.akahu_userToken);
-      let appToken = secretsService.get(SecretName.akahu_appToken);
+      const userToken = secretsService.get(SecretName.akahu_userToken);
+      const appToken = secretsService.get(SecretName.akahu_appToken);
       const akahu = new AkahuClient({ appToken });
 
       const account = await akahu.accounts.get(userToken, accountId);
@@ -72,23 +72,31 @@ app.post(
       }
 
       const now = new Date();
-      const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
+      const endDate = new Date(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        1,
+      ).toISOString();
 
-      let transactions = [];
+      const transactions = [];
       let cursor = undefined;
 
       do {
-        const { items, cursor: nextCursor } = await akahu.accounts.listTransactions(userToken, accountId, {
-          start: new Date(startDate).toISOString(),
-          end: endDate,
-          cursor: cursor
-        });
+        const { items, cursor: nextCursor } =
+          await akahu.accounts.listTransactions(userToken, accountId, {
+            start: new Date(startDate).toISOString(),
+            end: endDate,
+            cursor,
+          });
 
         transactions.push(...items);
         cursor = nextCursor && nextCursor.next ? nextCursor.next : undefined;
       } while (cursor);
 
-      const pendingTransactions = await akahu.accounts.listPendingTransactions(userToken, accountId);
+      const pendingTransactions = await akahu.accounts.listPendingTransactions(
+        userToken,
+        accountId,
+      );
 
       const date = getDate(new Date(account.refreshed.balance));
 
@@ -130,7 +138,7 @@ app.post(
         amount = Math.round(amount * 100) / 100;
 
         newTrans.transactionAmount = {
-          amount: amount,
+          amount,
           currency: trans.amount,
         };
 
@@ -138,9 +146,9 @@ app.post(
         newTrans.sortOrder = transactionDate.getTime();
 
         delete trans.amount;
-        
+
         const finalTrans = { ...flattenObject(trans), ...newTrans };
-        
+
         booked.push(finalTrans);
         all.push(finalTrans);
       }
@@ -168,7 +176,7 @@ app.post(
         amount = Math.round(amount * 100) / 100;
 
         newTrans.transactionAmount = {
-          amount: amount,
+          amount,
           currency: trans.amount,
         };
 
@@ -176,9 +184,9 @@ app.post(
         newTrans.sortOrder = transactionDate.getTime();
 
         delete trans.amount;
-        
+
         const finalTrans = { ...flattenObject(trans), ...newTrans };
-        
+
         pending.push(finalTrans);
         all.push(finalTrans);
       }
@@ -202,7 +210,7 @@ app.post(
         },
       });
     } catch (error) {
-      console.log(error)
+      console.log(error);
       res.send({
         status: 'ok',
         data: {

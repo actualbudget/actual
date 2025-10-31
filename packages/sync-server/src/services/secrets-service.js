@@ -16,7 +16,7 @@ export const SecretName = {
   pluggyai_clientSecret: 'pluggyai_clientSecret',
   pluggyai_itemIds: 'pluggyai_itemIds',
   akahu_userToken: 'akahu_userToken',
-  akahu_appToken: 'akahu_appToken'
+  akahu_appToken: 'akahu_appToken',
 };
 
 class SecretsDb {

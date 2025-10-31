@@ -34,7 +34,9 @@ export const AkahuInitialiseModal = ({
   const [appToken, setAppToken] = useState('');
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(t('It is required to provide a User Token and an App Token.'));
+  const [error, setError] = useState(
+    t('It is required to provide a User Token and an App Token.'),
+  );
 
   const onSubmit = async (close: () => void) => {
     if (!userToken || !appToken) {
@@ -82,9 +84,9 @@ export const AkahuInitialiseModal = ({
           <View style={{ display: 'flex', gap: 10 }}>
             <Text>
               <Trans>
-                In order to enable bank sync via Akahu (only for New
-                Zealand banks), you will need to create a token. This can be
-                done by creating an account with{' '}
+                In order to enable bank sync via Akahu (only for New Zealand
+                banks), you will need to create a token. This can be done by
+                creating an account with{' '}
                 <Link
                   variant="external"
                   to="https://my.akahu.nz/"
