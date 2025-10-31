@@ -32,7 +32,7 @@ export type SyncedPrefs = Partial<
     | `parse-date-${string}-${'csv' | 'qif'}`
     | `csv-mappings-${string}`
     | `csv-delimiter-${string}`
-    | `csv-skip-lines-${string}`
+    | `csv-skip-start-lines-${string}`
     | `csv-skip-end-lines-${string}`
     | `csv-in-out-mode-${string}`
     | `csv-out-value-${string}`

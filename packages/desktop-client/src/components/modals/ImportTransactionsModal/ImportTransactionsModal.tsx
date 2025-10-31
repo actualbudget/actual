@@ -200,7 +200,7 @@ export function ImportTransactionsModal({
       (filename.endsWith('.tsv') ? '\t' : ','),
   );
   const [skipStartLines, setSkipStartLines] = useState(
-    parseInt(prefs[`csv-skip-lines-${accountId}`], 10) || 0,
+    parseInt(prefs[`csv-skip-start-lines-${accountId}`], 10) || 0,
   );
   const [skipEndLines, setSkipEndLines] = useState(
     parseInt(prefs[`csv-skip-end-lines-${accountId}`], 10) || 0,
@@ -680,7 +680,7 @@ export function ImportTransactionsModal({
       });
       savePrefs({ [`csv-delimiter-${accountId}`]: delimiter });
       savePrefs({ [`csv-has-header-${accountId}`]: String(hasHeaderRow) });
-      savePrefs({ [`csv-skip-lines-${accountId}`]: String(skipStartLines) });
+      savePrefs({ [`csv-skip-start-lines-${accountId}`]: String(skipStartLines) });
       savePrefs({ [`csv-skip-end-lines-${accountId}`]: String(skipEndLines) });
       savePrefs({ [`csv-in-out-mode-${accountId}`]: String(inOutMode) });
       savePrefs({ [`csv-out-value-${accountId}`]: String(outValue) });
