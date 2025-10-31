@@ -71,7 +71,8 @@ app.post(
       let startingBalance = parseInt(
         Math.round(account.balance.current * 100).toString(),
       );
-      if (account.type === 'CREDITCARD') {
+
+      if (['CREDITCARD', 'LOAN'].includes(account.type)) {
         startingBalance = -startingBalance;
       }
 
