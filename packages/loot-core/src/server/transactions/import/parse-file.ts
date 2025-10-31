@@ -112,13 +112,22 @@ async function parseCSV(
   const errors = Array<ParseError>();
   let contents = await fs.readFile(filepath);
 
-  if (options.skipStartLines > 0 || options.skipEndLines > 0) {
+  const skipStart = Math.max(0, options.skipStartLines || 0);
+  const skipEnd = Math.max(0, options.skipEndLines || 0);
+
+  if (skipStart > 0 || skipEnd > 0) {
     const lines = contents.split(/\r?\n/);
-    const startLine = options.skipStartLines || 0;
-    const endLine =
-      options.skipEndLines > 0
-        ? lines.length - options.skipEndLines
-        : lines.length;
+
+    if (skipStart + skipEnd >= lines.length) {
+      errors.push({
+        message: 'Cannot skip more lines than exist in the file',
+        internal: `Attempted to skip ${skipStart} start + ${skipEnd} end lines from ${lines.length} total lines`,
+      });
+      return { errors, transactions: [] };
+    }
+
+    const startLine = skipStart;
+    const endLine = skipEnd > 0 ? lines.length - skipEnd : lines.length;
     contents = lines.slice(startLine, endLine).join('\r\n');
   }
 
