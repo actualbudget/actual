@@ -114,7 +114,9 @@ function boundedRange(
       latest = monthUtils.currentDay();
       break;
     case 'Weekly':
-      latest = monthUtils.currentWeek(firstDayOfWeekIdx);
+      // For weekly views, clamp to today so the current (ongoing) week is included
+      // and reflects data up to the current day.
+      latest = monthUtils.currentDay();
       break;
     case 'Monthly':
       latest = monthUtils.getMonthEnd(monthUtils.currentDay());
