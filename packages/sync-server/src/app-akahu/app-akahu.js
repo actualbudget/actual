@@ -43,7 +43,6 @@ app.post(
         },
       });
     } catch (error) {
-      console.log(error);
       res.send({
         status: 'ok',
         data: {
@@ -51,8 +50,6 @@ app.post(
         },
       });
     }
-
-    return;
   }),
 );
 
@@ -215,7 +212,6 @@ app.post(
         },
       });
     } catch (error) {
-      console.log(error);
       res.send({
         status: 'ok',
         data: {
@@ -223,7 +219,6 @@ app.post(
         },
       });
     }
-    return;
   }),
 );
 
