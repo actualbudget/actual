@@ -158,7 +158,7 @@ function ConfigureField({
         {field === 'saved' && t('Existing filters will be cleared')}
       </View>
 
-      <SpaceBetween align="flex-start" gap={5} style={{ flexWrap: 'wrap' }}>
+      <SpaceBetween gap={5} style={{ alignItems: 'flex-start' }}>
         {type === 'boolean' ? (
           <>
             <OpButton
@@ -182,34 +182,22 @@ function ConfigureField({
           </>
         ) : (
           <>
-            <SpaceBetween
-              align="flex-start"
-              gap={5}
-              style={{ flexWrap: 'wrap' }}
-            >
-              {ops.slice(0, 3).map(currOp => (
-                <OpButton
-                  key={currOp}
-                  op={currOp}
-                  isSelected={currOp === op}
-                  onPress={() => dispatch({ type: 'set-op', op: currOp })}
-                />
-              ))}
-            </SpaceBetween>
-            <SpaceBetween
-              align="flex-start"
-              gap={5}
-              style={{ flexWrap: 'wrap' }}
-            >
-              {ops.slice(3, ops.length).map(currOp => (
-                <OpButton
-                  key={currOp}
-                  op={currOp}
-                  isSelected={currOp === op}
-                  onPress={() => dispatch({ type: 'set-op', op: currOp })}
-                />
-              ))}
-            </SpaceBetween>
+            {ops.slice(0, 3).map(currOp => (
+              <OpButton
+                key={currOp}
+                op={currOp}
+                isSelected={currOp === op}
+                onPress={() => dispatch({ type: 'set-op', op: currOp })}
+              />
+            ))}
+            {ops.slice(3, ops.length).map(currOp => (
+              <OpButton
+                key={currOp}
+                op={currOp}
+                isSelected={currOp === op}
+                onPress={() => dispatch({ type: 'set-op', op: currOp })}
+              />
+            ))}
           </>
         )}
       </SpaceBetween>
@@ -283,9 +271,11 @@ function ConfigureField({
         )}
 
         <SpaceBetween
-          justify="flex-end"
-          align="center"
-          style={{ marginTop: 15 }}
+          style={{
+            marginTop: 15,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+          }}
         >
           <View style={{ flex: 1 }} />
           <Button variant="primary" type="submit">

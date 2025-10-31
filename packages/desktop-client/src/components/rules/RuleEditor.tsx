@@ -347,7 +347,7 @@ function ConditionEditor({
 
       <View style={{ flex: 1, minWidth: 80 }}>{valueEditor}</View>
 
-      <SpaceBetween direction="horizontal">
+      <SpaceBetween direction="horizontal" gap={0}>
         <EditorButtons
           onAdd={onAdd}
           onDelete={isSchedule && field === 'date' ? null : onDelete}
@@ -941,7 +941,7 @@ function ConditionsList({
         }
 
         return (
-          <View key={i}>
+          <View key={i} style={{ width: '100%' }}>
             <ConditionEditor
               editorStyle={editorStyle}
               ops={ops}
@@ -1384,6 +1384,7 @@ export function RuleEditor({
               {actionSplits.map(({ id, actions }, splitIndex) => (
                 <View
                   key={id}
+                  style={{ width: '100%' }}
                   nativeStyle={
                     actionSplits.length > 1
                       ? {
@@ -1437,7 +1438,7 @@ export function RuleEditor({
                     data-testid="action-list"
                   >
                     {actions.map((action, actionIndex) => (
-                      <View key={actionIndex}>
+                      <View key={actionIndex} style={{ width: '100%' }}>
                         <ActionEditor
                           action={action}
                           editorStyle={styles.editorPill}

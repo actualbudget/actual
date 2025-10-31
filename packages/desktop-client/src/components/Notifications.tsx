@@ -181,6 +181,7 @@ function Notification({
       {...swipeHandlers}
     >
       <SpaceBetween
+        wrap={false}
         style={{
           alignItems: 'center',
           justifyContent: 'space-between',
