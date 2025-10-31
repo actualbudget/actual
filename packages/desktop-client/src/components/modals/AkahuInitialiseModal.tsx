@@ -34,7 +34,7 @@ export const AkahuInitialiseModal = ({
   const [appToken, setAppToken] = useState('');
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(t('It is required to provide an API Key and an App Token.'));
+  const [error, setError] = useState(t('It is required to provide a User Token and an App Token.'));
 
   const onSubmit = async (close: () => void) => {
     if (!userToken || !appToken) {
@@ -97,9 +97,9 @@ export const AkahuInitialiseModal = ({
             </Text>
 
             <FormField>
-              <FormLabel title={t('API Key:')} htmlFor="apiKey-field" />
+              <FormLabel title={t('User Token:')} htmlFor="userToken-field" />
               <Input
-                id="apiKey-field"
+                id="userToken-field"
                 type="password"
                 value={userToken}
                 onChangeValue={value => {
