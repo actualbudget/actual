@@ -89,6 +89,19 @@ async function getAccountOldestTransaction(id): Promise<TransactionEntity> {
   ).data?.[0];
 }
 
+async function getAkahuSyncStartDate(id) {
+  // Akahu can get a maximum of 365 days of transactions when using personal apps
+  const dates = [monthUtils.subDays(monthUtils.currentDay(), 360)];
+
+  const oldestTransaction = await getAccountOldestTransaction(id);
+
+  if (oldestTransaction) dates.push(oldestTransaction.date);
+
+  return monthUtils.dayFromDate(
+    dateFns.max(dates.map(d => monthUtils.parseDate(d))),
+  );
+}
+
 async function getAccountSyncStartDate(id) {
   // Many GoCardless integrations do not support getting more than 90 days
   // worth of data, so make that the earliest possible limit.
@@ -1044,6 +1057,7 @@ export async function syncAccount(
   } else if (acctRow.account_sync_source === 'pluggyai') {
     download = await downloadPluggyAiTransactions(acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'akahu') {
+    const syncStartDate = await getAkahuSyncStartDate(id);
     download = await downloadAkahuTransactions(acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'goCardless') {
     download = await downloadGoCardlessTransactions(
