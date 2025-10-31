@@ -107,7 +107,7 @@ function boundedRange(
   start: string,
   end: string,
   interval?: string,
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
+  _firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
 ): [string, string, 'static'] {
   switch (interval) {
     case 'Daily':
