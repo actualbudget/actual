@@ -394,14 +394,14 @@ export function CreateAccountModal({
 
   const onAkahuReset = () => {
     send('secret-set', {
-      name: 'akahu_apiKey',
+      name: 'akahu_userToken',
       value: null,
     }).then(() => {
       send('secret-set', {
         name: 'akahu_appToken',
         value: null,
       }).then(() => {
-        setIsSimpleFinSetupComplete(false);
+        setIsAkahuSetupComplete(false);
       });
     });
   };

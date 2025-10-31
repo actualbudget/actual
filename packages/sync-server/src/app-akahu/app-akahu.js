@@ -16,9 +16,9 @@ app.use(requestLoggerMiddleware);
 app.post(
   '/status',
   handleError(async (req, res) => {
-    const apiKey = secretsService.get(SecretName.akahu_apiKey);
+    const userToken = secretsService.get(SecretName.akahu_userToken);
     const token = secretsService.get(SecretName.akahu_appToken);
-    const configured = apiKey != null && token != null;
+    const configured = userToken != null && token != null;
 
     res.send({
       status: 'ok',
@@ -32,12 +32,12 @@ app.post(
 app.post(
   '/accounts',
   handleError(async (req, res) => {
-    let apiKey = secretsService.get(SecretName.akahu_apiKey);
+    let userToken = secretsService.get(SecretName.akahu_userToken);
     let appToken = secretsService.get(SecretName.akahu_appToken);
 
     try {
       const akahu = new AkahuClient({ appToken });
-      const accounts = await akahu.accounts.list(apiKey);
+      const accounts = await akahu.accounts.list(userToken);
 
       res.send({
         status: 'ok',
@@ -58,11 +58,11 @@ app.post(
     const { accountId, startDate } = req.body || {};
 
     try {
-      let apiKey = secretsService.get(SecretName.akahu_apiKey);
+      let userToken = secretsService.get(SecretName.akahu_userToken);
       let appToken = secretsService.get(SecretName.akahu_appToken);
       const akahu = new AkahuClient({ appToken });
 
-      const account = await akahu.accounts.get(apiKey, accountId);
+      const account = await akahu.accounts.get(userToken, accountId);
 
       let startingBalance = parseInt(
         Math.round(account.balance.current * 100).toString(),
@@ -78,7 +78,7 @@ app.post(
       let cursor = undefined;
 
       do {
-        const { items, cursor: nextCursor } = await akahu.accounts.listTransactions(apiKey, accountId, {
+        const { items, cursor: nextCursor } = await akahu.accounts.listTransactions(userToken, accountId, {
           start: new Date(startDate).toISOString(),
           end: endDate,
           cursor: cursor
@@ -88,7 +88,7 @@ app.post(
         cursor = nextCursor && nextCursor.next ? nextCursor.next : undefined;
       } while (cursor);
 
-      const pendingTransactions = await akahu.accounts.listPendingTransactions(apiKey, accountId);
+      const pendingTransactions = await akahu.accounts.listPendingTransactions(userToken, accountId);
 
       const date = getDate(new Date(account.refreshed.balance));
 

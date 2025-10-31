@@ -30,14 +30,14 @@ export const AkahuInitialiseModal = ({
   onSuccess,
 }: AkahuInitialiseModalProps) => {
   const { t } = useTranslation();
-  const [apiKey, setApiKey] = useState('');
+  const [userToken, setUserToken] = useState('');
   const [appToken, setAppToken] = useState('');
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(t('It is required to provide an API Key and an App Token.'));
 
   const onSubmit = async (close: () => void) => {
-    if (!apiKey || !appToken) {
+    if (!userToken || !appToken) {
       setIsValid(false);
       return;
     }
@@ -46,8 +46,8 @@ export const AkahuInitialiseModal = ({
 
     const { error, reason } =
       (await send('secret-set', {
-        name: 'akahu_apiKey',
-        value: apiKey,
+        name: 'akahu_userToken',
+        value: userToken,
       })) || {};
 
     if (error) {
@@ -101,9 +101,9 @@ export const AkahuInitialiseModal = ({
               <Input
                 id="apiKey-field"
                 type="password"
-                value={apiKey}
+                value={userToken}
                 onChangeValue={value => {
-                  setApiKey(value);
+                  setUserToken(value);
                   setIsValid(true);
                 }}
               />
