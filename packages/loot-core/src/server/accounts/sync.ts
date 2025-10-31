@@ -962,6 +962,15 @@ async function processBankSyncDownload(
       balanceToUse = Math.round(previousBalance);
     }
 
+    if (acctRow.account_sync_source === 'akahu') {
+      const currentBalance = download.startingBalance;
+      const previousBalance = transactions.reduce(
+        (total, trans) => total - trans.transactionAmount.amount * 100,
+        currentBalance,
+      );
+      balanceToUse = Math.round(previousBalance);
+    }
+
     const oldestTransaction = transactions[transactions.length - 1];
 
     const oldestDate =
