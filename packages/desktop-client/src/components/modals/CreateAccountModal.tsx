@@ -256,7 +256,7 @@ export function CreateAccountModal({
         const newAccount: NormalizedAccount = {
           account_id: oldAccount._id,
           name: oldAccount.name,
-          institution: oldAccount.name,
+          institution: oldAccount.connection.name,
           orgDomain: oldAccount.connection.name,
           orgId: oldAccount.connection._id,
           balance: oldAccount.balance.current,

@@ -60,7 +60,6 @@ app.post(
     try {
       let apiKey = secretsService.get(SecretName.akahu_apiKey);
       let appToken = secretsService.get(SecretName.akahu_appToken);
-      console.log(apiKey, appToken)
       const akahu = new AkahuClient({ appToken });
 
       const account = await akahu.accounts.get(apiKey, accountId);
@@ -204,11 +203,10 @@ app.post(
       });
     } catch (error) {
       console.log(error)
-      console.log(error.stack)
       res.send({
         status: 'ok',
         data: {
-          error: error.message + " stack:" + error.stack,
+          error: error.message,
         },
       });
     }
