@@ -144,7 +144,7 @@ app.post(
 
         newTrans.transactionAmount = {
           amount,
-          currency: trans.amount,
+          currency: account.balance.currency,
         };
 
         newTrans.transactionId = trans._id;
@@ -182,7 +182,7 @@ app.post(
 
         newTrans.transactionAmount = {
           amount,
-          currency: trans.amount,
+          currency: account.balance.currency,
         };
 
         newTrans.transactionId = trans._id;
