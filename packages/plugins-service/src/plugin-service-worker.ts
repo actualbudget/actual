@@ -25,14 +25,15 @@ precacheAndRoute(self.__WB_MANIFEST);
 
 const fileList = new Map<string, string>();
 
-// Log installation event
-self.addEventListener('install', (_event: ExtendableEvent) => {
+self.addEventListener('install', (event: ExtendableEvent) => {
+  // Take control immediately instead of waiting
   console.log('Plugins Worker installing...');
+  event.waitUntil(self.skipWaiting());
 });
 
-// Log activation event
-self.addEventListener('activate', (_event: ExtendableEvent) => {
-  self.clients.claim();
+self.addEventListener('activate', (event: ExtendableEvent) => {
+  // Claim all clients immediately
+  event.waitUntil(self.clients.claim());
 
   self.clients.matchAll().then(clients => {
     clients.forEach(client => {
@@ -56,46 +57,57 @@ self.addEventListener('fetch', (event: FetchEvent) => {
 
   const pluginsIndex = pathSegments.indexOf('plugin-data');
   const slugIndex = pluginsIndex + 1;
+
+  // Only intercept plugin-data requests
   if (pluginsIndex !== -1 && pathSegments[slugIndex]) {
     const slug = pathSegments[slugIndex];
     const fileName =
       pathSegments.length > slugIndex + 1
         ? pathSegments[slugIndex + 1].split('?')[0]
         : '';
+
+    // IMPORTANT: Respond with cache-first strategy for plugin files
     event.respondWith(handlePlugin(slug, fileName.replace('?import', '')));
-  } else {
-    event.respondWith(fetch(event.request));
   }
+  // Don't intercept non-plugin requests - let workbox handle them
 });
 
 async function handlePlugin(slug: string, fileName: string): Promise<Response> {
-  for (const key of fileList.keys()) {
-    if (key.startsWith(`${slug}/`)) {
-      if (key.endsWith(`/${fileName}`)) {
-        const content = fileList.get(key);
-        const contentType = getContentType(fileName);
-        return new Response(content, {
-          headers: { 'Content-Type': contentType },
-        });
-      }
-    }
+  // First check if we have it cached
+  const fileKey = `${slug}/${fileName}`;
+
+  if (fileName && fileList.has(fileKey)) {
+    const content = fileList.get(fileKey);
+    const contentType = getContentType(fileName);
+    return new Response(content, {
+      headers: { 'Content-Type': contentType },
+    });
   }
 
+  // Not in cache, fetch from client
   const clientsList = await self.clients.matchAll();
   if (clientsList.length === 0) {
     return new Response(
       JSON.stringify({ error: 'No active clients to process' }),
       {
-        status: 404,
+        status: 503,
         headers: { 'Content-Type': 'application/json' },
       },
     );
   }
 
   const client = clientsList[0];
-  return new Promise<Response>(resolve => {
+
+  return new Promise<Response>((resolve, reject) => {
     const channel = new MessageChannel();
+
+    // Add timeout to prevent hanging
+    const timeout = setTimeout(() => {
+      reject(new Error('Plugin request timeout'));
+    }, 5000);
+
     channel.port1.onmessage = (messageEvent: MessageEvent<PluginFile[]>) => {
+      clearTimeout(timeout);
       const responseData = messageEvent.data as PluginFile[];
 
       if (responseData && Array.isArray(responseData)) {
@@ -118,11 +130,8 @@ async function handlePlugin(slug: string, fileName: string): Promise<Response> {
               manifest.metaData.publicPath = `/plugin-data/${slug}/`;
               content = JSON.stringify(manifest);
             }
-          } catch (error) {
-            console.error(
-              'Failed to parse manifest for publicPath rewrite:',
-              error,
-            );
+          } catch {
+            // Failed to parse manifest, use original content
           }
 
           headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
@@ -140,6 +149,9 @@ async function handlePlugin(slug: string, fileName: string): Promise<Response> {
       { type: 'plugin-files', eventData: { pluginUrl: slug } },
       [channel.port2],
     );
+  }).catch(() => {
+    // If timeout or error, return 503
+    return new Response('Service unavailable', { status: 503 });
   });
 }
 
