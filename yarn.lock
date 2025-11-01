@@ -19,6 +19,7 @@ __metadata:
     "@actual-app/crdt": "workspace:^"
     better-sqlite3: "npm:^12.4.1"
     compare-versions: "npm:^6.1.1"
+    google-protobuf: "npm:^3.21.4"
     node-fetch: "npm:^3.3.2"
     tsc-alias: "npm:^1.8.16"
     typescript: "npm:^5.9.3"
