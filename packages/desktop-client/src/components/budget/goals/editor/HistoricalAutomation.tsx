@@ -27,7 +27,7 @@ export const HistoricalAutomation = ({
   const { t } = useTranslation();
 
   return (
-    <SpaceBetween gap={50} style={{ marginTop: 10, alignItems: 'center' }}>
+    <SpaceBetween gap={50} style={{ marginTop: 10 }}>
       <FormField style={{ flex: 1 }}>
         <FormLabel title={t('Mode')} htmlFor="mode-field" />
         <Select

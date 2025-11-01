@@ -366,10 +366,7 @@ export function ManageRules({
             flexShrink: 0,
           }}
         >
-          <SpaceBetween
-            gap={10}
-            style={{ alignItems: 'center', justifyContent: 'flex-end' }}
-          >
+          <SpaceBetween gap={10} style={{ justifyContent: 'flex-end' }}>
             {selectedInst.items.size > 0 && (
               <Button onPress={onDeleteSelected}>
                 <Trans count={selectedInst.items.size}>

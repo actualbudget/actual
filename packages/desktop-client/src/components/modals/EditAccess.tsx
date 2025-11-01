@@ -138,18 +138,14 @@ export function EditUserAccess({
           </SpaceBetween>
 
           <SpaceBetween
+            gap={10}
             style={{
               marginTop: 20,
               justifyContent: 'flex-end',
-              alignItems: 'center',
             }}
           >
             {error && <Text style={{ color: theme.errorText }}>{error}</Text>}
-            <Button
-              variant="bare"
-              style={{ marginRight: 10 }}
-              onPress={() => dispatch(popModal())}
-            >
+            <Button variant="bare" onPress={() => dispatch(popModal())}>
               <Trans>Cancel</Trans>
             </Button>
             <Button

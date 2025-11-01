@@ -86,9 +86,9 @@ export function SaveReportName({
         </Form>
       )}
       {err !== '' ? (
-        <SpaceBetween style={{ padding: 10, alignItems: 'center' }}>
+        <View style={{ padding: 10, alignItems: 'center' }}>
           <Text style={{ color: theme.errorText }}>{err}</Text>
-        </SpaceBetween>
+        </View>
       ) : (
         <View />
       )}
