@@ -4,7 +4,7 @@ import * as path from 'path';
 
 import promiseRetry from 'promise-retry';
 
-import * as T from '.';
+import type * as T from '.';
 import { type Encoding } from '../../../types/encoding';
 
 export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
@@ -97,6 +97,7 @@ export const copyFile: T.CopyFile = (frompath, topath) => {
 };
 
 // TODO: Do we need to make sure readFile conforms to the T.ReadFile type?
+// Now sure how to do it with function overloading? const readFile: T.ReadFile = _readFile; ?
 export function readFile(
   filepath: string,
   encoding: 'binary' | null,
