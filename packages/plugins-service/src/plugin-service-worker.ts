@@ -62,9 +62,19 @@ self.addEventListener('fetch', (event: FetchEvent) => {
       pathSegments.length > slugIndex + 1
         ? pathSegments[slugIndex + 1].split('?')[0]
         : '';
-    event.respondWith(handlePlugin(slug, fileName.replace('?import', '')));
+    event.respondWith(
+      handlePlugin(slug, fileName.replace('?import', '')).catch(error => {
+        console.error('Plugin fetch error:', error);
+        return new Response('Internal Server Error', { status: 500 });
+      }),
+    );
   } else {
-    event.respondWith(fetch(event.request));
+    event.respondWith(
+      fetch(event.request).catch(error => {
+        console.error('Fetch error:', error);
+        return new Response('Network Error', { status: 503 });
+      }),
+    );
   }
 });
 
