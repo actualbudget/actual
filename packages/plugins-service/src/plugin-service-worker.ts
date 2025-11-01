@@ -145,6 +145,7 @@ async function handlePlugin(slug: string, fileName: string): Promise<Response> {
 function getContentType(fileName: string): string {
   const extension = fileName.split('.').pop()?.toLowerCase() || '';
   const mimeTypes: Record<string, string> = {
+    txt: 'text/plain',
     html: 'text/html',
     css: 'text/css',
     js: 'application/javascript',
