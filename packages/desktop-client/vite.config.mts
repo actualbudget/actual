@@ -159,6 +159,7 @@ export default defineConfig(async ({ mode }) => {
         ? undefined
         : VitePWA({
             registerType: 'prompt',
+            // TODO:  The plugin worker build is currently disabled due to issues with offline support. Fix this
             // strategies: 'injectManifest',
             // srcDir: 'service-worker',
             // filename: 'plugin-sw.js',
