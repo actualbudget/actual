@@ -67,11 +67,11 @@ export type ParseFileResult = {
 
 export type ParseFileOptions = {
   hasHeaderRow?: boolean;
+  encoding?: Encoding;
   delimiter?: string;
   fallbackMissingPayeeToMemo?: boolean;
   skipLines?: number;
   importNotes?: boolean;
-  encoding?: Encoding;
 };
 
 export async function parseFile(
