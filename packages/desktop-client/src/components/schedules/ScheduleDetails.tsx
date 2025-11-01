@@ -772,7 +772,11 @@ export function ScheduleDetails({ id, transaction }: ScheduleDetailsProps) {
                   <SpaceBetween
                     direction="vertical"
                     gap={5}
-                    style={{ marginTop: 10, color: theme.pageTextLight }}
+                    style={{
+                      marginTop: 10,
+                      color: theme.pageTextLight,
+                      alignItems: 'flex-start',
+                    }}
                   >
                     {state.upcomingDates.map(date => (
                       <View key={date}>

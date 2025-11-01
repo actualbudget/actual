@@ -144,8 +144,6 @@ function ConfigureField({
               <View style={{ flexGrow: 1 }}>{titleFirst(mapField(field))}</View>
             </View>
           )}
-
-          <View style={{ flex: 1 }} />
         </SpaceBetween>
       </View>
 

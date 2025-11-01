@@ -17,6 +17,7 @@ export const SpaceBetween = ({
   wrap = true,
   style,
   children,
+  ...props
 }: SpaceBetweenProps) => {
   return (
     <View
@@ -27,6 +28,7 @@ export const SpaceBetween = ({
         gap,
         ...style,
       }}
+      {...props}
     >
       {children}
     </View>

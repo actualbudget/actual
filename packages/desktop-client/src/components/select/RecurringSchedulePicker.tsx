@@ -258,13 +258,13 @@ function SchedulePreview({
     content = <Text>{previewDates}</Text>;
   } else {
     content = (
-      <View>
+      <View style={{ width: '100%' }}>
         <Text style={{ fontWeight: 600 }}>
           <Trans>Upcoming dates</Trans>
         </Text>
         <SpaceBetween gap={20} style={{ marginTop: 10 }}>
           {previewDates.map((d, idx) => (
-            <View key={idx}>
+            <View key={idx} style={{ flex: 1 }}>
               <Text>{monthUtils.format(d, dateFormat, locale)}</Text>
               <Text>{monthUtils.format(d, 'EEEE', locale)}</Text>
             </View>
@@ -278,7 +278,11 @@ function SchedulePreview({
     <SpaceBetween
       direction="vertical"
       gap={5}
-      style={{ marginTop: 15, color: theme.tableText }}
+      style={{
+        marginTop: 15,
+        color: theme.tableText,
+        alignItems: 'flex-start',
+      }}
     >
       {content}
     </SpaceBetween>
@@ -308,6 +312,7 @@ function MonthlyPatterns({
           style={{
             display: 'flex',
             flexDirection: 'row',
+            width: '100%',
           }}
         >
           <Select
@@ -517,7 +522,10 @@ function RecurringScheduleTooltip({
         config.patterns.length > 0 && (
           <MonthlyPatterns config={config} dispatch={dispatch} />
         )}
-      <SpaceBetween direction="vertical" style={{ marginTop: 5 }}>
+      <SpaceBetween
+        direction="vertical"
+        style={{ marginTop: 5, alignItems: 'flex-start' }}
+      >
         <View
           style={{
             marginTop: 5,
