@@ -68,8 +68,34 @@ self.addEventListener('fetch', (event: FetchEvent) => {
 
     // IMPORTANT: Respond with cache-first strategy for plugin files
     event.respondWith(handlePlugin(slug, fileName.replace('?import', '')));
+  } else {
+    // For non-plugin requests, try network first, then let workbox handle it
+    // If both fail (offline), return a graceful error instead of ERR_INTERNET_DISCONNECTED
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        // If fetch fails (offline), check if it's in the cache
+        return caches.match(event.request).then(cachedResponse => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          // Not in cache, return appropriate error based on request type
+          if (event.request.destination === 'document') {
+            // For HTML pages, return a minimal offline page
+            return new Response('Offline', {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: { 'Content-Type': 'text/plain' },
+            });
+          }
+          // For other resources, return empty response to prevent console errors
+          return new Response(null, {
+            status: 503,
+            statusText: 'Service Unavailable',
+          });
+        });
+      }),
+    );
   }
-  // Don't intercept non-plugin requests - let workbox handle them
 });
 
 async function handlePlugin(slug: string, fileName: string): Promise<Response> {
