@@ -354,7 +354,7 @@ export const copyFile = async function (
 
 export const readFile = async function (
   filepath: string,
-  encoding: 'binary' | Encoding,
+  encoding: 'binary' | Encoding = 'utf-8',
 ) {
   return _readFile(filepath, { encoding });
 };
