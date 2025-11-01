@@ -356,10 +356,10 @@ export const GenericInput = ({
           } else {
             content = (
               <DateSelect
+                ref={ref}
                 value={props.value}
                 dateFormat={dateFormat}
                 openOnFocus={false}
-                inputRef={ref}
                 inputProps={{ placeholder: dateFormat.toLowerCase() }}
                 onSelect={props.onChange}
               />
@@ -384,7 +384,7 @@ export const GenericInput = ({
         case 'currency':
           content = (
             <AmountInput
-              inputRef={ref}
+              ref={ref}
               value={props.value}
               onUpdate={props.onChange}
               sign={
