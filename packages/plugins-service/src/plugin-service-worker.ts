@@ -63,8 +63,9 @@ self.addEventListener('fetch', (event: FetchEvent) => {
         ? pathSegments[slugIndex + 1].split('?')[0]
         : '';
     event.respondWith(handlePlugin(slug, fileName.replace('?import', '')));
+  } else {
+    event.respondWith(fetch(event.request));
   }
-  // Don't intercept non-plugin requests - let them fall through to browser default behavior
 });
 
 async function handlePlugin(slug: string, fileName: string): Promise<Response> {
