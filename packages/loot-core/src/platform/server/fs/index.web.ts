@@ -97,20 +97,20 @@ async function _readFile(
       ArrayBuffer.isView(item.contents)
     ) {
       return new TextDecoder(opts.encoding).decode(
-        new Uint16Array(item.contents.buffer),
+        new Uint8Array(item.contents.buffer),
       );
     }
 
     return item.contents;
   } else {
-    if (opts?.encoding === 'binary') {
-      return FS.readFile(resolveLink(filepath), { encoding: 'binary' });
-    } else if (typeof opts?.encoding === 'string') {
-      const bin = FS.readFile(resolveLink(filepath), { encoding: 'binary' });
-      return new TextDecoder(opts.encoding).decode(bin);
-    } else {
-      return FS.readFile(resolveLink(filepath));
+    const bin = FS.readFile(resolveLink(filepath), { encoding: 'binary' });
+    const encoding = opts?.encoding;
+
+    if (encoding === 'binary' || encoding === null) {
+      return bin;
     }
+
+    return new TextDecoder(encoding).decode(bin);
   }
 }
 
