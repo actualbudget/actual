@@ -4,7 +4,7 @@ import * as path from 'path';
 
 import promiseRetry from 'promise-retry';
 
-import type * as T from '.';
+import * as T from '.';
 import { type Encoding } from '../../../types/encoding';
 
 export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';

@@ -70,11 +70,7 @@ function _createFile(filepath: string) {
 
 async function _readFile(
   filepath: string,
-  opts?:
-    | {
-        encoding: Encoding;
-      }
-    | { encoding: 'binary' },
+  opts?: { encoding: Encoding } | { encoding: 'binary' },
 ): Promise<string | Uint8Array> {
   // We persist stuff in /documents, but don't need to handle sqlite
   // file specifically because those are symlinked to a separate
@@ -101,7 +97,7 @@ async function _readFile(
       ArrayBuffer.isView(item.contents)
     ) {
       return new TextDecoder(opts.encoding).decode(
-        new Uint8Array(item.contents.buffer as ArrayBuffer),
+        new Uint16Array(item.contents.buffer),
       );
     }
 
