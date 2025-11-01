@@ -96,6 +96,7 @@ export const copyFile: T.CopyFile = (frompath, topath) => {
   });
 };
 
+// TODO: Do we need to make sure readFile conforms to the T.ReadFile type?
 export function readFile(
   filepath: string,
   encoding: 'binary' | null,
@@ -108,18 +109,15 @@ export function readFile(
   filepath: string,
   encoding?: Encoding | 'binary' | null,
 ): Promise<string | Buffer> {
-  if (encoding === 'binary') {
-    // `binary` is not actually a valid encoding, you pass `null` into node if
-    // you want a buffer
-    encoding = null;
-  }
   return new Promise<string | Buffer>((resolve, reject) => {
     // Always read as a Buffer, decode via TextDecoder when an encoding is provided
     fs.readFile(filepath, null, (err, buffer) => {
       if (err) {
         return reject(err);
       }
-      if (encoding === null) {
+      // `binary` is not actually a valid encoding, you pass `null` into node if
+      // you want a buffer
+      if (encoding === 'binary' || encoding === null) {
         return resolve(buffer);
       }
       try {
