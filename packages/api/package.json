@@ -26,6 +26,7 @@
     "@actual-app/crdt": "workspace:^",
     "better-sqlite3": "^12.4.1",
     "compare-versions": "^6.1.1",
+    "google-protobuf": "^3.21.4",
     "node-fetch": "^3.3.2",
     "uuid": "^13.0.0"
   },
