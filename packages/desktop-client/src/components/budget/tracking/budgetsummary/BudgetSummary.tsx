@@ -237,6 +237,7 @@ export function BudgetSummary({ month }: BudgetSummaryProps) {
             gap={10}
             style={{
               alignSelf: 'center',
+              alignItems: 'flex-start',
               backgroundColor: theme.tableRowHeaderBackground,
               borderRadius: 4,
               padding: '10px 15px',
