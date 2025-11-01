@@ -158,7 +158,7 @@ function ConfigureField({
 
       <SpaceBetween
         gap={5}
-        style={{ alignItems: 'flex-start', marginBottom: 5 }}
+        style={{ alignItems: 'flex-start', marginBottom: 15 }}
       >
         {type === 'boolean' ? (
           <>
