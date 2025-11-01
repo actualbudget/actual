@@ -220,4 +220,75 @@ describe('Pay Period Integration with Month Utilities', () => {
       }
     });
   });
+
+  describe('_parse() Auto-conversion', () => {
+    test('correctly parses pay period IDs to start dates', () => {
+      // Pay period 2024-13 (first biweekly period) starts Jan 5, 2024
+      const result = monthUtils._parse('2024-13');
+      expect(result).toBeInstanceOf(Date);
+      expect(result.getFullYear()).toBe(2024);
+      expect(result.getMonth()).toBe(0); // January (0-indexed)
+      expect(result.getDate()).toBe(5);
+    });
+
+    test('correctly parses pay period IDs later in the year', () => {
+      // Pay period 2024-14 (second biweekly period) starts Jan 19, 2024
+      const result = monthUtils._parse('2024-14');
+      expect(result).toBeInstanceOf(Date);
+      expect(result.getFullYear()).toBe(2024);
+      expect(result.getMonth()).toBe(0); // January
+      expect(result.getDate()).toBe(19);
+    });
+
+    test('correctly parses pay period IDs from different years', () => {
+      // Pay period 2025-13 (first period of 2025) starts Jan 3, 2025
+      const result = monthUtils._parse('2025-13');
+      expect(result).toBeInstanceOf(Date);
+      expect(result.getFullYear()).toBe(2025);
+      expect(result.getMonth()).toBe(0); // January
+      expect(result.getDate()).toBe(3);
+    });
+
+    test('does not interfere with calendar month parsing', () => {
+      // Calendar months should still work as before
+      const result = monthUtils._parse('2024-10');
+      expect(result).toBeInstanceOf(Date);
+      expect(result.getFullYear()).toBe(2024);
+      expect(result.getMonth()).toBe(9); // October (0-indexed)
+      expect(result.getDate()).toBe(1); // First day of month
+    });
+
+    test('does not interfere with full date parsing', () => {
+      // Full dates like "2024-10-15" should work normally
+      const result = monthUtils._parse('2024-10-15');
+      expect(result).toBeInstanceOf(Date);
+      expect(result.getFullYear()).toBe(2024);
+      expect(result.getMonth()).toBe(9); // October
+      expect(result.getDate()).toBe(15);
+    });
+
+    test('does not interfere with year-only parsing', () => {
+      // Year-only strings should still work
+      const result = monthUtils._parse('2024');
+      expect(result).toBeInstanceOf(Date);
+      expect(result.getFullYear()).toBe(2024);
+      expect(result.getMonth()).toBe(0); // January
+      expect(result.getDate()).toBe(1);
+    });
+
+    test('handles Date objects unchanged', () => {
+      const inputDate = new Date(2024, 9, 15, 12); // Oct 15, 2024 at noon
+      const result = monthUtils._parse(inputDate);
+      expect(result).toBe(inputDate); // Should return same object
+    });
+
+    test('only processes strings of length 7 for pay period detection', () => {
+      // Length check ensures we only process YYYY-MM format
+      // Longer dates like "2024-32-01" won't trigger pay period logic
+      const result = monthUtils._parse('2024-10-15');
+      expect(result.getFullYear()).toBe(2024);
+      expect(result.getMonth()).toBe(9); // October, not Aug (month 32)
+      expect(result.getDate()).toBe(15);
+    });
+  });
 });

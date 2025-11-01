@@ -28,8 +28,29 @@ import * as Platform from './platform';
 type DateLike = string | Date;
 type Day = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
+/**
+ * Parse a date string or Date object into a Date.
+ *
+ * Supports multiple input formats:
+ * - Full dates: "2025-10-15" → Oct 15, 2025
+ * - Calendar months: "2025-10" → Oct 1, 2025
+ * - Pay period IDs: "2025-32" → Start date of pay period 32 (auto-converted)
+ * - Years: "2025" → Jan 1, 2025
+ *
+ * @param value - Date string or Date object
+ * @returns Date object set to noon (12:00) to avoid DST issues
+ */
 export function _parse(value: DateLike): Date {
-  // Use shared date parsing utility to avoid duplication
+  // Auto-convert pay period IDs to their start date
+  if (typeof value === 'string' && value.length === 7) {
+    const monthNum = parseInt(value.split('-')[1]);
+    if (monthNum > 12) {
+      // Presence Rule: If pay period ID exists, convert it to start date
+      return getMonthStartDate(value);
+    }
+  }
+
+  // Use shared date parsing utility for all other cases
   return sharedParseDate(value);
 }
 
