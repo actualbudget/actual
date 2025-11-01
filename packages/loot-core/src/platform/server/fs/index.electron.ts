@@ -2,8 +2,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import * as iconv from 'iconv-lite';
-
 import promiseRetry from 'promise-retry';
 
 import type * as T from '.';
@@ -116,7 +114,7 @@ export function readFile(
     encoding = null;
   }
   return new Promise<string | Buffer>((resolve, reject) => {
-    // Always read as a Buffer, decode via iconv when an encoding is provided
+    // Always read as a Buffer, decode via TextDecoder when an encoding is provided
     fs.readFile(filepath, null, (err, buffer) => {
       if (err) {
         return reject(err);
@@ -125,7 +123,7 @@ export function readFile(
         return resolve(buffer);
       }
       try {
-        const decoded = iconv.decode(buffer, encoding);
+        const decoded = new TextDecoder(encoding).decode(buffer);
         resolve(decoded);
       } catch (e) {
         reject(e);

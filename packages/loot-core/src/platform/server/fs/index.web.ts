@@ -96,46 +96,22 @@ async function _readFile(
       throw new Error('File does not exist: ' + filepath);
     }
 
-    if (opts?.encoding === 'utf8' && ArrayBuffer.isView(item.contents)) {
-      return String.fromCharCode.apply(
-        null,
-        new Uint16Array(item.contents.buffer),
-      );
-    }
     if (
       typeof opts?.encoding === 'string' &&
       ArrayBuffer.isView(item.contents)
     ) {
-      const enc =
-        opts.encoding === 'latin1'
-          ? 'windows-1252'
-          : opts.encoding === 'utf16le'
-            ? 'utf-16le'
-            : opts.encoding === 'shift_jis'
-              ? 'shift-jis'
-              : opts.encoding;
-      return new TextDecoder(enc).decode(
+      return new TextDecoder(opts.encoding).decode(
         new Uint8Array(item.contents.buffer as ArrayBuffer),
       );
     }
 
     return item.contents;
   } else {
-    if (opts?.encoding === 'utf8') {
-      return FS.readFile(resolveLink(filepath), { encoding: 'utf8' });
-    } else if (opts?.encoding === 'binary') {
+    if (opts?.encoding === 'binary') {
       return FS.readFile(resolveLink(filepath), { encoding: 'binary' });
     } else if (typeof opts?.encoding === 'string') {
       const bin = FS.readFile(resolveLink(filepath), { encoding: 'binary' });
-      const enc =
-        opts.encoding === 'latin1'
-          ? 'windows-1252'
-          : opts.encoding === 'utf16le'
-            ? 'utf-16le'
-            : opts.encoding === 'shift_jis'
-              ? 'shift-jis'
-              : opts.encoding;
-      return new TextDecoder(enc).decode(bin);
+      return new TextDecoder(opts.encoding).decode(bin);
     } else {
       return FS.readFile(resolveLink(filepath));
     }
@@ -384,7 +360,7 @@ export const copyFile = async function (
 
 export const readFile = async function (
   filepath: string,
-  encoding: 'binary' | Encoding = 'utf8',
+  encoding: 'binary' | Encoding = 'utf-8',
 ) {
   return _readFile(filepath, { encoding });
 };

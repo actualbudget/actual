@@ -198,7 +198,7 @@ export function ImportTransactionsModal({
   // re-read this.
   const [encoding, setEncoding] = useState<Encoding>(() => {
     const preferredEncoding = prefs[`csv-encoding-${accountId}`];
-    return isSupportedEncoding(preferredEncoding) ? preferredEncoding : 'utf8';
+    return isSupportedEncoding(preferredEncoding) ? preferredEncoding : 'utf-8';
   });
   const [delimiter, setDelimiter] = useState(
     prefs[`csv-delimiter-${accountId}`] ||
@@ -982,10 +982,10 @@ export function ImportTransactionsModal({
                       <Trans>Encoding:</Trans>
                       <Select
                         options={[
-                          ['utf8', 'UTF-8'],
-                          ['latin1', 'ISO-8859-1 / Windows-1252'],
-                          ['utf16le', 'UTF-16 LE'],
-                          ['shift_jis', 'Shift_JIS (Japanese)'],
+                          ['utf-8', 'UTF-8'],
+                          ['windows-1252', 'ISO-8859-1 / Windows-1252'],
+                          ['utf-16le', 'UTF-16 LE'],
+                          ['shift-jis', 'Shift_JIS (Japanese)'],
                           ['euc-jp', 'EUC-JP (Japanese)'],
                           ['iso-2022-jp', 'ISO-2022-JP (Japanese)'],
                           ['gbk', 'GBK (Chinese Simplified)'],

@@ -111,7 +111,7 @@ async function parseCSV(
   options: ParseFileOptions,
 ): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
-  let contents = await fs.readFile(filepath, options.encoding ?? 'utf8');
+  let contents = await fs.readFile(filepath, options.encoding ?? 'utf-8');
 
   if (options.skipLines > 0) {
     const lines = contents.split(/\r?\n/);

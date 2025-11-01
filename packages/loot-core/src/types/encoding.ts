@@ -1,8 +1,8 @@
 const SUPPORTED_ENCODINGS = [
-  'utf8',
-  'latin1',
-  'utf16le',
-  'shift_jis',
+  'utf-8',
+  'windows-1252', // latin1
+  'utf-16le',
+  'shift-jis',
   'euc-jp',
   'iso-2022-jp',
   'gbk',
