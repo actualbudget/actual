@@ -2,9 +2,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+import * as iconv from 'iconv-lite';
+
 import promiseRetry from 'promise-retry';
 
 import type * as T from '.';
+import { type Encoding } from '../../../types/encoding';
 
 export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
 
@@ -95,27 +98,41 @@ export const copyFile: T.CopyFile = (frompath, topath) => {
   });
 };
 
-export const readFile: T.ReadFile = (
+export function readFile(
   filepath: string,
-  encoding: 'utf8' | 'binary' | null = 'utf8',
-) => {
+  encoding: 'binary' | null,
+): Promise<Buffer>;
+export function readFile(
+  filepath: string,
+  encoding?: Encoding,
+): Promise<string>;
+export function readFile(
+  filepath: string,
+  encoding?: Encoding | 'binary' | null,
+): Promise<string | Buffer> {
   if (encoding === 'binary') {
     // `binary` is not actually a valid encoding, you pass `null` into node if
     // you want a buffer
     encoding = null;
   }
-  // `any` as cannot refine return with two function overrides
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return new Promise<any>((resolve, reject) => {
-    fs.readFile(filepath, encoding, (err, data) => {
+  return new Promise<string | Buffer>((resolve, reject) => {
+    // Always read as a Buffer, decode via iconv when an encoding is provided
+    fs.readFile(filepath, null, (err, buffer) => {
       if (err) {
-        reject(err);
-      } else {
-        resolve(data);
+        return reject(err);
+      }
+      if (encoding === null) {
+        return resolve(buffer);
+      }
+      try {
+        const decoded = iconv.decode(buffer, encoding);
+        resolve(decoded);
+      } catch (e) {
+        reject(e);
       }
     });
   });
-};
+}
 
 export const writeFile: T.WriteFile = async (filepath, contents) => {
   try {

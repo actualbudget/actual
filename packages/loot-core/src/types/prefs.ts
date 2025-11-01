@@ -31,6 +31,7 @@ export type SyncedPrefs = Partial<
     // TODO: pull from src/components/modals/ImportTransactions.js
     | `parse-date-${string}-${'csv' | 'qif'}`
     | `csv-mappings-${string}`
+    | `csv-encoding-${string}`
     | `csv-delimiter-${string}`
     | `csv-skip-lines-${string}`
     | `csv-in-out-mode-${string}`

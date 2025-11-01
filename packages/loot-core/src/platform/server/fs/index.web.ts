@@ -7,6 +7,7 @@ import * as idb from '../indexeddb';
 import { _getModule, SqlJsModule } from '../sqlite';
 
 import { join } from './path-join';
+import { type Encoding } from '../../../types/encoding';
 
 let FS: SqlJsModule['FS'] = null;
 let BFS = null;
@@ -69,7 +70,11 @@ function _createFile(filepath: string) {
 
 async function _readFile(
   filepath: string,
-  opts?: { encoding: 'utf8' } | { encoding: 'binary' },
+  opts?:
+    | {
+        encoding: Encoding;
+      }
+    | { encoding: 'binary' },
 ): Promise<string | Uint8Array> {
   // We persist stuff in /documents, but don't need to handle sqlite
   // file specifically because those are symlinked to a separate
@@ -97,6 +102,22 @@ async function _readFile(
         new Uint16Array(item.contents.buffer),
       );
     }
+    if (
+      typeof opts?.encoding === 'string' &&
+      ArrayBuffer.isView(item.contents)
+    ) {
+      const enc =
+        opts.encoding === 'latin1'
+          ? 'windows-1252'
+          : opts.encoding === 'utf16le'
+            ? 'utf-16le'
+            : opts.encoding === 'shift_jis'
+              ? 'shift-jis'
+              : opts.encoding;
+      return new TextDecoder(enc).decode(
+        new Uint8Array(item.contents.buffer as ArrayBuffer),
+      );
+    }
 
     return item.contents;
   } else {
@@ -104,6 +125,17 @@ async function _readFile(
       return FS.readFile(resolveLink(filepath), { encoding: 'utf8' });
     } else if (opts?.encoding === 'binary') {
       return FS.readFile(resolveLink(filepath), { encoding: 'binary' });
+    } else if (typeof opts?.encoding === 'string') {
+      const bin = FS.readFile(resolveLink(filepath), { encoding: 'binary' });
+      const enc =
+        opts.encoding === 'latin1'
+          ? 'windows-1252'
+          : opts.encoding === 'utf16le'
+            ? 'utf-16le'
+            : opts.encoding === 'shift_jis'
+              ? 'shift-jis'
+              : opts.encoding;
+      return new TextDecoder(enc).decode(bin);
     } else {
       return FS.readFile(resolveLink(filepath));
     }
@@ -352,7 +384,7 @@ export const copyFile = async function (
 
 export const readFile = async function (
   filepath: string,
-  encoding: 'binary' | 'utf8' = 'utf8',
+  encoding: 'binary' | Encoding = 'utf8',
 ) {
   return _readFile(filepath, { encoding });
 };

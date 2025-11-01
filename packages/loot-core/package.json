@@ -27,6 +27,7 @@
     "better-sqlite3": "^12.4.1",
     "csv-parse": "^6.1.0",
     "csv-stringify": "^6.6.0",
+    "iconv-lite": "^0.6.3",
     "date-fns": "^4.1.0",
     "deep-equal": "^2.2.3",
     "handlebars": "^4.7.8",

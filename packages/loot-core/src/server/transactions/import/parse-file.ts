@@ -2,6 +2,7 @@
 import { parse as csv2json } from 'csv-parse/sync';
 
 import * as fs from '../../../platform/server/fs';
+import { type Encoding } from '../../../types/encoding';
 import { logger } from '../../../platform/server/log';
 import { looselyParseAmount } from '../../../shared/util';
 
@@ -70,6 +71,7 @@ export type ParseFileOptions = {
   fallbackMissingPayeeToMemo?: boolean;
   skipLines?: number;
   importNotes?: boolean;
+  encoding?: Encoding;
 };
 
 export async function parseFile(
@@ -109,7 +111,7 @@ async function parseCSV(
   options: ParseFileOptions,
 ): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
-  let contents = await fs.readFile(filepath);
+  let contents = await fs.readFile(filepath, options.encoding ?? 'utf8');
 
   if (options.skipLines > 0) {
     const lines = contents.split(/\r?\n/);

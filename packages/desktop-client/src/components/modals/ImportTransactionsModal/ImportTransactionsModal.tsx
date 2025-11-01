@@ -18,6 +18,7 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import { type ParseFileOptions } from 'loot-core/server/transactions/import/parse-file';
 import { amountToInteger } from 'loot-core/shared/util';
+import { isSupportedEncoding, type Encoding } from 'loot-core/types/encoding';
 
 import { DateFormatSelect } from './DateFormatSelect';
 import { FieldMappings } from './FieldMappings';
@@ -195,6 +196,10 @@ export function ImportTransactionsModal({
   // options which are simple post-processing. That means if you
   // parsed different files without closing the modal, it wouldn't
   // re-read this.
+  const [encoding, setEncoding] = useState<Encoding>(() => {
+    const preferredEncoding = prefs[`csv-encoding-${accountId}`];
+    return isSupportedEncoding(preferredEncoding) ? preferredEncoding : 'utf8';
+  });
   const [delimiter, setDelimiter] = useState(
     prefs[`csv-delimiter-${accountId}`] ||
       (filename.endsWith('.tsv') ? '\t' : ','),
@@ -452,6 +457,7 @@ export function ImportTransactionsModal({
   useEffect(() => {
     const fileType = getFileType(originalFileName);
     const parseOptions = getParseOptions(fileType, {
+      encoding,
       delimiter,
       hasHeaderRow,
       skipLines,
@@ -462,6 +468,7 @@ export function ImportTransactionsModal({
     parse(originalFileName, parseOptions);
   }, [
     originalFileName,
+    encoding,
     delimiter,
     hasHeaderRow,
     skipLines,
@@ -672,6 +679,7 @@ export function ImportTransactionsModal({
       savePrefs({
         [`csv-mappings-${accountId}`]: JSON.stringify(fieldMappings),
       });
+      savePrefs({ [`csv-encoding-${accountId}`]: encoding });
       savePrefs({ [`csv-delimiter-${accountId}`]: delimiter });
       savePrefs({ [`csv-has-header-${accountId}`]: String(hasHeaderRow) });
       savePrefs({ [`csv-skip-lines-${accountId}`]: String(skipLines) });
@@ -971,6 +979,35 @@ export function ImportTransactionsModal({
                         alignItems: 'baseline',
                       }}
                     >
+                      <Trans>Encoding:</Trans>
+                      <Select
+                        options={[
+                          ['utf8', 'UTF-8'],
+                          ['latin1', 'ISO-8859-1 / Windows-1252'],
+                          ['utf16le', 'UTF-16 LE'],
+                          ['shift_jis', 'Shift_JIS (Japanese)'],
+                          ['euc-jp', 'EUC-JP (Japanese)'],
+                          ['iso-2022-jp', 'ISO-2022-JP (Japanese)'],
+                          ['gbk', 'GBK (Chinese Simplified)'],
+                          ['gb18030', 'GB18030 (Chinese Simplified)'],
+                          ['big5', 'Big5 (Chinese Traditional)'],
+                          ['euc-kr', 'EUC-KR (Korean)'],
+                        ]}
+                        value={encoding}
+                        onChange={value => {
+                          setEncoding(value);
+                        }}
+                        style={{ width: 140 }}
+                      />
+                    </label>
+                    <label
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        gap: 5,
+                        alignItems: 'baseline',
+                      }}
+                    >
                       <Trans>Delimiter:</Trans>
                       <Select
                         options={[
@@ -1127,8 +1164,8 @@ export function ImportTransactionsModal({
 
 function getParseOptions(fileType: string, options: ParseFileOptions = {}) {
   if (fileType === 'csv') {
-    const { delimiter, hasHeaderRow, skipLines } = options;
-    return { delimiter, hasHeaderRow, skipLines };
+    const { encoding, delimiter, hasHeaderRow, skipLines } = options;
+    return { encoding, delimiter, hasHeaderRow, skipLines };
   }
   if (isOfxFile(fileType)) {
     const { fallbackMissingPayeeToMemo, importNotes } = options;
