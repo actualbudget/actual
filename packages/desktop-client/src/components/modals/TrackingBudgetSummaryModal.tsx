@@ -42,6 +42,7 @@ export function TrackingBudgetSummaryModal({
               gap={10}
               style={{
                 alignSelf: 'center',
+                alignItems: 'flex-start',
                 backgroundColor: 'transparent',
                 borderRadius: 4,
               }}

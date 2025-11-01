@@ -44,7 +44,11 @@ export function BankSyncAccountsListItem({
       onClick={() => onAction(account, isLinked ? 'edit' : 'link')}
     >
       <SpaceBetween gap={60}>
-        <SpaceBetween direction="vertical" gap={5} style={{ flex: 1 }}>
+        <SpaceBetween
+          direction="vertical"
+          gap={5}
+          style={{ flex: 1, alignItems: 'flex-start' }}
+        >
           <Text
             style={{
               fontSize: 15,

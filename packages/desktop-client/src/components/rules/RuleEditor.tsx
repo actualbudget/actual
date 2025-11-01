@@ -700,7 +700,7 @@ function ActionEditor({
       ) : null}
 
       {op !== 'delete-transaction' && (
-        <SpaceBetween style={{ flexShrink: 0 }}>
+        <SpaceBetween gap={0} style={{ flexShrink: 0 }}>
           <EditorButtons
             onAdd={onAdd}
             onDelete={

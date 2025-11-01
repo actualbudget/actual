@@ -158,7 +158,10 @@ function ConfigureField({
         {field === 'saved' && t('Existing filters will be cleared')}
       </View>
 
-      <SpaceBetween gap={5} style={{ alignItems: 'flex-start' }}>
+      <SpaceBetween
+        gap={5}
+        style={{ alignItems: 'flex-start', marginBottom: 5 }}
+      >
         {type === 'boolean' ? (
           <>
             <OpButton
