@@ -1,5 +1,3 @@
-import { type Encoding } from '../../../types/encoding';
-
 export { join } from './path-join';
 
 export declare function init(): void;
@@ -56,7 +54,7 @@ export declare function readFile(
 ): Promise<Buffer>;
 export declare function readFile(
   filepath: string,
-  encoding?: Encoding,
+  encoding?: 'utf8',
 ): Promise<string>;
 export type ReadFile = typeof readFile;
 

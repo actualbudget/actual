@@ -4,8 +4,6 @@ import * as path from 'path';
 
 import promiseRetry from 'promise-retry';
 
-import { type Encoding } from '../../../types/encoding';
-
 import type * as T from '.';
 
 export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
@@ -97,38 +95,27 @@ export const copyFile: T.CopyFile = (frompath, topath) => {
   });
 };
 
-function _readFile(
+export const readFile: T.ReadFile = (
   filepath: string,
-  encoding: 'binary' | null,
-): Promise<Buffer>;
-function _readFile(filepath: string, encoding?: Encoding): Promise<string>;
-function _readFile(
-  filepath: string,
-  encoding?: Encoding | 'binary' | null,
-): Promise<string | Buffer> {
-  return new Promise<string | Buffer>((resolve, reject) => {
-    // Always read as a Buffer, decode via TextDecoder when an encoding is provided
-    fs.readFile(filepath, (err, buffer) => {
+  encoding: 'utf8' | 'binary' | null = 'utf8',
+) => {
+  if (encoding === 'binary') {
+    // `binary` is not actually a valid encoding, you pass `null` into node if
+    // you want a buffer
+    encoding = null;
+  }
+  // `any` as cannot refine return with two function overrides
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return new Promise<any>((resolve, reject) => {
+    fs.readFile(filepath, encoding, (err, data) => {
       if (err) {
-        return reject(err);
-      }
-      // `binary` is not actually a valid encoding, you pass `null` into node if
-      // you want a buffer
-      if (encoding === 'binary' || encoding === null) {
-        return resolve(buffer);
-      }
-      try {
-        const decoded = new TextDecoder(encoding).decode(buffer);
-        resolve(decoded);
-      } catch (e) {
-        reject(e);
+        reject(err);
+      } else {
+        resolve(data);
       }
     });
   });
-}
-
-// TODO: T.ReadFile is not used anywhere else. Do we really need to make sure readFile satisfies the type?
-export const readFile: T.ReadFile = _readFile;
+};
 
 export const writeFile: T.WriteFile = async (filepath, contents) => {
   try {

@@ -7,7 +7,6 @@ import * as idb from '../indexeddb';
 import { _getModule, SqlJsModule } from '../sqlite';
 
 import { join } from './path-join';
-import { type Encoding } from '../../../types/encoding';
 
 let FS: SqlJsModule['FS'] = null;
 let BFS = null;
@@ -70,7 +69,7 @@ function _createFile(filepath: string) {
 
 async function _readFile(
   filepath: string,
-  opts?: { encoding: Encoding | 'binary' },
+  opts?: { encoding: 'utf8' } | { encoding: 'binary' },
 ): Promise<string | Uint8Array> {
   // We persist stuff in /documents, but don't need to handle sqlite
   // file specifically because those are symlinked to a separate
@@ -92,23 +91,22 @@ async function _readFile(
       throw new Error('File does not exist: ' + filepath);
     }
 
-    if (
-      typeof opts?.encoding === 'string' &&
-      ArrayBuffer.isView(item.contents)
-    ) {
-      return new TextDecoder(opts.encoding).decode(item.contents.buffer);
+    if (opts?.encoding === 'utf8' && ArrayBuffer.isView(item.contents)) {
+      return String.fromCharCode.apply(
+        null,
+        new Uint16Array(item.contents.buffer),
+      );
     }
 
     return item.contents;
   } else {
-    const bin = FS.readFile(resolveLink(filepath), { encoding: 'binary' });
-    const encoding = opts?.encoding;
-
-    if (encoding === 'binary' || encoding === null) {
-      return bin;
+    if (opts?.encoding === 'utf8') {
+      return FS.readFile(resolveLink(filepath), { encoding: 'utf8' });
+    } else if (opts?.encoding === 'binary') {
+      return FS.readFile(resolveLink(filepath), { encoding: 'binary' });
+    } else {
+      return FS.readFile(resolveLink(filepath));
     }
-
-    return new TextDecoder(encoding).decode(bin);
   }
 }
 
@@ -354,7 +352,7 @@ export const copyFile = async function (
 
 export const readFile = async function (
   filepath: string,
-  encoding: 'binary' | Encoding = 'utf-8',
+  encoding: 'binary' | 'utf8' = 'utf8',
 ) {
   return _readFile(filepath, { encoding });
 };
