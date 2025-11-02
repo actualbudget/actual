@@ -223,7 +223,7 @@ describe('File import', () => {
   });
 });
 
-describe('CSV file encoding', () => {
+describe('CSV file import', () => {
   const encodingTests = [
     {
       encoding: 'utf-8',
