@@ -264,29 +264,35 @@ async function seedMultiuserState(
     () => typeof window.__actionsForMenu?.mergeLocalPrefs === 'function',
   );
 
-  await page.evaluate(({ cloudFileId, ownerId }) => {
-    window.__actionsForMenu.mergeLocalPrefs({
-      cloudFileId,
-      owner: ownerId,
-    });
-  }, {
-    cloudFileId: 'cloud-file-1',
-    ownerId: 'user-1',
-  });
-
-  await page.evaluate(({ user }) => {
-    window.__actionsForMenu.loadUserData({ data: user });
-  }, {
-    user: {
-      offline: false,
-      userId: 'user-1',
-      userName: 'owner',
-      displayName: 'Owner McAdmin',
-      permission: 'ADMIN',
-      loginMethod: 'openid',
-      tokenExpired: false,
+  await page.evaluate(
+    ({ cloudFileId, ownerId }) => {
+      window.__actionsForMenu.mergeLocalPrefs({
+        cloudFileId,
+        owner: ownerId,
+      });
     },
-  });
+    {
+      cloudFileId: 'cloud-file-1',
+      ownerId: 'user-1',
+    },
+  );
+
+  await page.evaluate(
+    ({ user }) => {
+      window.__actionsForMenu.loadUserData({ data: user });
+    },
+    {
+      user: {
+        offline: false,
+        userId: 'user-1',
+        userName: 'owner',
+        displayName: 'Owner McAdmin',
+        permission: 'ADMIN',
+        loginMethod: 'openid',
+        tokenExpired: false,
+      },
+    },
+  );
 
   await page.evaluate(async () => {
     await window.__actionsForMenu.loadAllFiles();
@@ -307,17 +313,23 @@ async function goToUserDirectory(page: Page) {
   await menuItem.waitFor({ timeout: 10000 });
   await menuItem.click();
 
-  await expect(page.getByRole('heading', { name: 'User Directory' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'User Directory' }),
+  ).toBeVisible();
 }
 
 async function goToUserAccess(page: Page) {
   await openUserMenu(page);
 
-  const menuItem = page.getByRole('menuitem', { name: 'User Access Management' });
+  const menuItem = page.getByRole('menuitem', {
+    name: 'User Access Management',
+  });
   await menuItem.waitFor({ timeout: 10000 });
   await menuItem.click();
 
-  await expect(page.getByRole('heading', { name: 'User Access' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'User Access' }),
+  ).toBeVisible();
 }
 
 test.describe('OpenID user management', () => {
@@ -384,6 +396,8 @@ test.describe('OpenID user management', () => {
     await expect(editorAccessRow).toBeVisible();
     await expect(viewerAccessRow).toBeVisible();
 
-    await expect(page.getByRole('button', { name: 'Transfer ownership' })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Transfer ownership' }),
+    ).toBeVisible();
   });
 });
