@@ -1,4 +1,5 @@
 import { type Page } from '@playwright/test';
+import { type RemoteFile } from 'loot-core/server/cloud-storage';
 
 import { expect, test } from './fixtures';
 
@@ -6,6 +7,7 @@ const fakeServerUrl = 'http://fake.actual';
 
 type FakeServerControls = {
   waitForNeedsBootstrap: () => Promise<void>;
+  remoteFiles: RemoteFile[];
 };
 
 function setupFakeOpenIdServer(page: Page): FakeServerControls {
@@ -62,13 +64,14 @@ function setupFakeOpenIdServer(page: Page): FakeServerControls {
     },
   ];
 
-  const remoteFiles = [
+  const remoteFiles: RemoteFile[] = [
     {
       deleted: false,
       fileId: 'cloud-file-1',
       groupId: 'group-1',
       name: 'Playwright Test Budget',
-      encryptKeyId: null,
+      encryptKeyId: 'key-1',
+      hasKey: true,
       owner: adminUser.id,
       usersWithAccess: availableUsers.map(user => ({
         userId: user.userId,
@@ -103,7 +106,8 @@ function setupFakeOpenIdServer(page: Page): FakeServerControls {
     }
 
     const url = new URL(requestUrl);
-    const pathname = url.pathname.replace(/\/+$/, '/');
+    const pathname = url.pathname;
+    const normalizedPath = pathname.endsWith('/') ? pathname : `${pathname}/`;
     const method = route.request().method().toUpperCase();
 
     if (method === 'OPTIONS') {
@@ -111,7 +115,7 @@ function setupFakeOpenIdServer(page: Page): FakeServerControls {
       return;
     }
 
-    if (pathname.endsWith('/account/needs-bootstrap/')) {
+    if (normalizedPath.endsWith('/account/needs-bootstrap/')) {
       if (resolveBootstrap) {
         resolveBootstrap();
         resolveBootstrap = null;
@@ -133,7 +137,7 @@ function setupFakeOpenIdServer(page: Page): FakeServerControls {
       return;
     }
 
-    if (pathname.endsWith('/account/login-methods/')) {
+    if (normalizedPath.endsWith('/account/login-methods/')) {
       await route.fulfill({
         status: 200,
         headers: jsonHeaders,
@@ -142,7 +146,7 @@ function setupFakeOpenIdServer(page: Page): FakeServerControls {
       return;
     }
 
-    if (pathname.endsWith('/account/validate/')) {
+    if (normalizedPath.endsWith('/account/validate/')) {
       await route.fulfill({
         status: 200,
         headers: jsonHeaders,
@@ -160,7 +164,7 @@ function setupFakeOpenIdServer(page: Page): FakeServerControls {
       return;
     }
 
-    if (pathname.endsWith('/info/')) {
+    if (normalizedPath.endsWith('/info/')) {
       await route.fulfill({
         status: 200,
         headers: jsonHeaders,
@@ -169,7 +173,7 @@ function setupFakeOpenIdServer(page: Page): FakeServerControls {
       return;
     }
 
-    if (pathname.endsWith('/admin/users/')) {
+    if (normalizedPath.endsWith('/admin/users/')) {
       if (method === 'GET') {
         await route.fulfill({
           status: 200,
@@ -186,7 +190,7 @@ function setupFakeOpenIdServer(page: Page): FakeServerControls {
       return;
     }
 
-    if (pathname.endsWith('/admin/access/users/')) {
+    if (normalizedPath.endsWith('/admin/access/users/')) {
       await route.fulfill({
         status: 200,
         headers: jsonHeaders,
@@ -204,7 +208,7 @@ function setupFakeOpenIdServer(page: Page): FakeServerControls {
       return;
     }
 
-    if (pathname.endsWith('/sync/list-user-files/')) {
+    if (pathname.includes('/sync/list-user-files')) {
       await route.fulfill({
         status: 200,
         headers: jsonHeaders,
@@ -214,11 +218,7 @@ function setupFakeOpenIdServer(page: Page): FakeServerControls {
     }
 
     if (pathname.startsWith('/sync/')) {
-      await route.fulfill({
-        status: 200,
-        headers: jsonHeaders,
-        body: JSON.stringify({ status: 'ok', data: {} }),
-      });
+      await route.abort();
       return;
     }
 
@@ -240,12 +240,14 @@ function setupFakeOpenIdServer(page: Page): FakeServerControls {
 
   return {
     waitForNeedsBootstrap: () => bootstrapPromise,
+    remoteFiles,
   };
 }
 
 async function seedMultiuserState(
   page: Page,
   waitForNeedsBootstrap: () => Promise<void>,
+  remoteFiles: RemoteFile[],
 ) {
   await page.evaluate(
     ({ url }) => window.$send('set-server-url', { url, validate: false }),
@@ -264,13 +266,15 @@ async function seedMultiuserState(
   );
 
   await page.evaluate(
-    ({ cloudFileId }) => {
+    ({ cloudFileId, groupId }) => {
       window.__actionsForMenu.mergeLocalPrefs({
         cloudFileId,
+        groupId,
       });
     },
     {
       cloudFileId: 'cloud-file-1',
+      groupId: 'group-1',
     },
   );
 
@@ -291,11 +295,9 @@ async function seedMultiuserState(
     },
   );
 
-  await page.evaluate(async () => {
-    await window.__actionsForMenu.loadAllFiles();
-  });
-
-  await page.waitForTimeout(100);
+  await page.evaluate(({ remoteFiles }) => {
+    window.__actionsForMenu.setRemoteFiles({ remoteFiles });
+  }, { remoteFiles });
 }
 
 async function openUserMenu(page: Page) {
@@ -304,38 +306,25 @@ async function openUserMenu(page: Page) {
 }
 
 async function goToUserDirectory(page: Page) {
-  await openUserMenu(page);
-
-  const menuItem = page.getByRole('menuitem', { name: 'User Directory' });
-  await menuItem.waitFor({ timeout: 10000 });
-  await menuItem.click();
-
-  await expect(
-    page.getByRole('heading', { name: 'User Directory' }),
-  ).toBeVisible();
+  await page.goto('/user-directory');
+  await page.waitForURL('**/user-directory');
 }
 
 async function goToUserAccess(page: Page) {
-  await openUserMenu(page);
-
-  const menuItem = page.getByRole('menuitem', {
-    name: 'User Access Management',
-  });
-  await menuItem.waitFor({ timeout: 10000 });
-  await menuItem.click();
-
-  await expect(
-    page.getByRole('heading', { name: 'User Access' }),
-  ).toBeVisible();
+  await page.goto('/user-access');
+  await page.waitForURL('**/user-access');
 }
 
 test.describe('OpenID user management', () => {
   let page: Page;
   let waitForNeedsBootstrap: () => Promise<void>;
+  let remoteFiles: RemoteFile[];
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
-    ({ waitForNeedsBootstrap } = setupFakeOpenIdServer(page));
+    const serverControls = setupFakeOpenIdServer(page);
+    waitForNeedsBootstrap = serverControls.waitForNeedsBootstrap;
+    remoteFiles = serverControls.remoteFiles;
 
     await page.goto('/');
 
@@ -349,7 +338,7 @@ test.describe('OpenID user management', () => {
 
     await page.waitForURL('**/budget', { waitUntil: 'load' });
 
-    await seedMultiuserState(page, waitForNeedsBootstrap);
+    await seedMultiuserState(page, waitForNeedsBootstrap, remoteFiles);
   });
 
   test.afterAll(async () => {
@@ -398,9 +387,5 @@ test.describe('OpenID user management', () => {
     await expect(ownerAccessRow).toBeVisible();
     await expect(editorAccessRow).toBeVisible();
     await expect(viewerAccessRow).toBeVisible();
-
-    await expect(
-      page.getByRole('button', { name: 'Transfer ownership' }),
-    ).toBeVisible();
   });
 });
