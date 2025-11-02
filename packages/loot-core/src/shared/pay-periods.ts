@@ -156,12 +156,13 @@ function computePayPeriodByIndex(
     // Find the first monthly period that starts in the target year
     // For monthly periods, we use the day of month from reference date
     const referenceDay = referenceStart.getDate();
-    startDate = new Date(targetYear, 0, referenceDay); // Jan of target year
+    startDate = new Date(targetYear, 0, referenceDay, 12); // Jan of target year at noon
     startDate = d.addMonths(startDate, periodIndex - 1);
     endDate = new Date(
       startDate.getFullYear(),
       startDate.getMonth() + 1,
       referenceDay - 1,
+      12,
     );
     label = 'Pay Period ' + String(periodIndex);
   } else {
@@ -330,6 +331,58 @@ export function addPayPeriods(monthId: string, n: number): string {
     current = n > 0 ? nextPayPeriod(current) : prevPayPeriod(current);
   }
   return current;
+}
+
+/**
+ * Calculate the numeric difference between two pay period indices.
+ * Treats pay periods as discrete units (like months), not calendar dates.
+ * Handles year boundaries correctly.
+ *
+ * Presence Rule: If either input is a pay period ID, pay periods are enabled.
+ * Non-pay-period inputs (dates, calendar months) are automatically converted to pay period IDs.
+ *
+ * @param input1 - First input (pay period ID, date string, or calendar month)
+ * @param input2 - Second input (pay period ID, date string, or calendar month)
+ * @returns Number of pay periods from input2 to input1 (positive if input1 > input2)
+ * @throws Error if pay period config not available
+ *
+ * @example
+ * differenceInPayPeriods("2024-15", "2024-13") // Returns: 2 (15 is 2 periods after 13)
+ * differenceInPayPeriods("2024-13", "2024-15") // Returns: -2 (13 is 2 periods before 15)
+ * differenceInPayPeriods("2025-13", "2024-38") // Returns: 1 (for biweekly: first period of 2025 is 1 after last of 2024)
+ * differenceInPayPeriods("2024-01-15", "2024-13") // Returns: 0 (both in same period)
+ */
+export function differenceInPayPeriods(input1: string, input2: string): number {
+  // Presence Rule: If either is a pay period, config must exist
+  const config = getPayPeriodConfig();
+  if (!config) {
+    throw new Error('Pay period config not available');
+  }
+
+  // Convert both inputs to pay period IDs if they aren't already
+  const period1 = isPayPeriod(input1)
+    ? input1
+    : getPayPeriodFromDate(parseDate(input1), config);
+  const period2 = isPayPeriod(input2)
+    ? input2
+    : getPayPeriodFromDate(parseDate(input2), config);
+
+  const year1 = getNumericYearValue(period1);
+  const year2 = getNumericYearValue(period2);
+  const index1 = getPeriodIndex(period1);
+  const index2 = getPeriodIndex(period2);
+
+  if (year1 === year2) {
+    // Same year: simple index subtraction
+    return index1 - index2;
+  }
+
+  // Different years: account for year boundary
+  const maxPeriods = getMaxPeriodsForCurrentYear();
+  const yearDiff = year1 - year2;
+
+  // Calculate total periods: (years * periods per year) + index difference
+  return yearDiff * maxPeriods + (index1 - index2);
 }
 
 // Pay period date conversion functions

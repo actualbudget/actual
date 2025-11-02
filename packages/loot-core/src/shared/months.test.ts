@@ -291,4 +291,128 @@ describe('Pay Period Integration with Month Utilities', () => {
       expect(result.getDate()).toBe(15);
     });
   });
+
+  describe('differenceInCalendarMonths with Pay Periods', () => {
+    test('calculates difference between two pay periods (discrete units)', () => {
+      // When both are pay periods, should use pay period arithmetic
+      expect(monthUtils.differenceInCalendarMonths('2024-15', '2024-13')).toBe(
+        2,
+      );
+      expect(monthUtils.differenceInCalendarMonths('2024-13', '2024-15')).toBe(
+        -2,
+      );
+      expect(monthUtils.differenceInCalendarMonths('2024-13', '2024-13')).toBe(
+        0,
+      );
+    });
+
+    test('calculates difference between two calendar months', () => {
+      // Regular calendar month behavior should remain unchanged
+      expect(monthUtils.differenceInCalendarMonths('2024-03', '2024-01')).toBe(
+        2,
+      );
+      expect(monthUtils.differenceInCalendarMonths('2024-01', '2024-03')).toBe(
+        -2,
+      );
+      expect(monthUtils.differenceInCalendarMonths('2024-01', '2024-01')).toBe(
+        0,
+      );
+    });
+
+    test('calculates difference between pay period and date (converts to pay periods)', () => {
+      // Mixed inputs: pay period 2024-13 starts Jan 5, full date Jan 15
+      // Jan 15 falls in period 2024-13, so difference is 0
+      expect(
+        monthUtils.differenceInCalendarMonths('2024-01-15', '2024-13'),
+      ).toBe(0);
+
+      // Pay period 2024-13 (Jan 5-18) vs Feb 1 (falls in period 2024-14)
+      // Difference: 2024-14 - 2024-13 = 1 period
+      expect(
+        monthUtils.differenceInCalendarMonths('2024-02-01', '2024-13'),
+      ).toBe(1);
+
+      // Reverse: pay period 2024-14 (Jan 19-Feb 1) vs Jan 25 (also in 2024-14)
+      // Difference: 2024-14 - 2024-14 = 0 periods
+      expect(
+        monthUtils.differenceInCalendarMonths('2024-14', '2024-01-25'),
+      ).toBe(0);
+    });
+
+    test('handles pay period to full date strings', () => {
+      // Pay period 2024-13 (Jan 5-18) vs full date Jan 10
+      // Jan 10 falls in period 2024-13, so difference is 0
+      expect(
+        monthUtils.differenceInCalendarMonths('2024-13', '2024-01-10'),
+      ).toBe(0);
+
+      // Pay period 2024-13 (Jan 5-18) vs March 5 (falls in a later period)
+      const marchDate = '2024-03-05';
+      const janPeriod = '2024-13';
+      const diff = monthUtils.differenceInCalendarMonths(janPeriod, marchDate);
+      expect(diff).toBeLessThan(0); // March is after Jan period
+    });
+
+    test('handles year boundaries with pay periods', () => {
+      // Last pay period of 2024 vs first pay period of 2025
+      // For biweekly: 2024-38 (26th period) vs 2025-13 (1st period) = -1 period
+      expect(monthUtils.differenceInCalendarMonths('2024-38', '2025-13')).toBe(
+        -1,
+      );
+
+      // First pay period of 2025 vs last of 2024 = 1 period
+      expect(monthUtils.differenceInCalendarMonths('2025-13', '2024-38')).toBe(
+        1,
+      );
+    });
+
+    test('matches schedule template use case', () => {
+      // Real-world scenario: Schedule template validation
+      // Current pay period: 2024-15 (Feb period)
+      // Schedule next_date_string: "2024-01-15" (in the past)
+
+      // The schedule date (Jan 15) vs current period (Feb period)
+      // Should show negative (schedule is in the past)
+      const currentPeriod = '2024-15'; // Feb period
+      const scheduleDate = '2024-01-15'; // Jan 15
+
+      const difference = monthUtils.differenceInCalendarMonths(
+        scheduleDate,
+        currentPeriod,
+      );
+
+      expect(difference).toBeLessThan(0); // Schedule is in the past
+    });
+
+    test('handles Date objects with pay periods', () => {
+      const date = new Date('2024-01-15'); // Jan 15, 2024
+
+      // Date object gets formatted to "2024-01" (calendar month) before comparison
+      // This creates a mixed comparison: calendar month ID vs pay period ID
+      // Calendar month "2024-01" is treated as a monthly pay period (period 13)
+      // So the comparison depends on the pay frequency config
+      // Just verify the function returns a consistent number
+      const result = monthUtils.differenceInCalendarMonths(date, '2024-13');
+      expect(typeof result).toBe('number');
+
+      // Pay period vs Date should be the negative
+      expect(monthUtils.differenceInCalendarMonths('2024-13', date)).toBe(
+        -result,
+      );
+    });
+
+    test('preserves backward compatibility with pure calendar dates', () => {
+      // Ensure regular date comparisons still work as before
+      const date1 = new Date('2024-01-15');
+      const date2 = new Date('2024-03-20');
+
+      expect(monthUtils.differenceInCalendarMonths(date2, date1)).toBe(2);
+      expect(monthUtils.differenceInCalendarMonths(date1, date2)).toBe(-2);
+
+      // String dates
+      expect(
+        monthUtils.differenceInCalendarMonths('2024-03-20', '2024-01-15'),
+      ).toBe(2);
+    });
+  });
 });

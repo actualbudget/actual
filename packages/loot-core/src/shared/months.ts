@@ -18,6 +18,7 @@ import {
   nextPayPeriod,
   prevPayPeriod,
   addPayPeriods,
+  differenceInPayPeriods,
   getCurrentPayPeriod,
   getPayPeriodFromDate,
   generatePayPeriodRange,
@@ -186,7 +187,8 @@ export function addMonths(month: DateLike, n: number): string {
 
 export function addWeeks(date: DateLike, n: number): string {
   // Convert pay period to its start date before performing week arithmetic
-  const dateStr = typeof date === 'string' ? date : d.format(_parse(date), 'yyyy-MM-dd');
+  const dateStr =
+    typeof date === 'string' ? date : d.format(_parse(date), 'yyyy-MM-dd');
 
   if (isPayPeriod(dateStr)) {
     const config = getPayPeriodConfig();
@@ -206,16 +208,8 @@ export function differenceInCalendarMonths(
   const str2 =
     typeof month2 === 'string' ? month2 : d.format(_parse(month2), 'yyyy-MM');
 
-  // If either is a pay period, convert to actual start dates
   if (isPayPeriod(str1) || isPayPeriod(str2)) {
-    const config = getPayPeriodConfig();
-    const date1 = isPayPeriod(str1)
-      ? getMonthStartDate(str1, config)
-      : _parse(month1);
-    const date2 = isPayPeriod(str2)
-      ? getMonthStartDate(str2, config)
-      : _parse(month2);
-    return d.differenceInCalendarMonths(date1, date2);
+    return differenceInPayPeriods(str1, str2);
   }
 
   return d.differenceInCalendarMonths(_parse(month1), _parse(month2));
@@ -226,9 +220,13 @@ export function differenceInCalendarDays(
   month2: DateLike,
 ): number {
   const str1 =
-    typeof month1 === 'string' ? month1 : d.format(_parse(month1), 'yyyy-MM-dd');
+    typeof month1 === 'string'
+      ? month1
+      : d.format(_parse(month1), 'yyyy-MM-dd');
   const str2 =
-    typeof month2 === 'string' ? month2 : d.format(_parse(month2), 'yyyy-MM-dd');
+    typeof month2 === 'string'
+      ? month2
+      : d.format(_parse(month2), 'yyyy-MM-dd');
 
   // If either is a pay period, convert to actual start dates
   if (isPayPeriod(str1) || isPayPeriod(str2)) {
@@ -258,7 +256,8 @@ export function subMonths(month: string | Date, n: number) {
 
 export function subWeeks(date: DateLike, n: number): string {
   // Convert pay period to its start date before performing week arithmetic
-  const dateStr = typeof date === 'string' ? date : d.format(_parse(date), 'yyyy-MM-dd');
+  const dateStr =
+    typeof date === 'string' ? date : d.format(_parse(date), 'yyyy-MM-dd');
 
   if (isPayPeriod(dateStr)) {
     const config = getPayPeriodConfig();
@@ -275,7 +274,8 @@ export function subYears(year: string | Date, n: number) {
 
 export function addDays(day: DateLike, n: number): string {
   // Convert pay period to its start date before performing day arithmetic
-  const dateStr = typeof day === 'string' ? day : d.format(_parse(day), 'yyyy-MM-dd');
+  const dateStr =
+    typeof day === 'string' ? day : d.format(_parse(day), 'yyyy-MM-dd');
 
   if (isPayPeriod(dateStr)) {
     const config = getPayPeriodConfig();
@@ -288,7 +288,8 @@ export function addDays(day: DateLike, n: number): string {
 
 export function subDays(day: DateLike, n: number): string {
   // Convert pay period to its start date before performing day arithmetic
-  const dateStr = typeof day === 'string' ? day : d.format(_parse(day), 'yyyy-MM-dd');
+  const dateStr =
+    typeof day === 'string' ? day : d.format(_parse(day), 'yyyy-MM-dd');
 
   if (isPayPeriod(dateStr)) {
     const config = getPayPeriodConfig();
