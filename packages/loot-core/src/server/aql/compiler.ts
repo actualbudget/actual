@@ -721,6 +721,13 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
       // eslint-disable-next-line actual/typography
       return `${left} IN (` + ids.map(id => `'${id}'`).join(',') + ')';
     }
+    case '$notoneof': {
+      const [left, right] = valArray(state, [lhs, rhs], [null, 'array']);
+      // Dedupe the ids
+      const ids = [...new Set(right)];
+      // eslint-disable-next-line actual/typography
+      return `${left} NOT IN (` + ids.map(id => `'${id}'`).join(',') + ')';
+    }
     case '$like': {
       const [left, right] = valArray(state, [lhs, rhs], ['string', 'string']);
       return `UNICODE_LIKE(${getNormalisedString(right)}, NORMALISE(${left}))`;
