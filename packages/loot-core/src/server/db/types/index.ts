@@ -228,7 +228,7 @@ export type DbCustomReport = {
   show_empty: 1 | 0;
   show_offbudget: 1 | 0;
   show_hidden: 1 | 0;
-  show_uncateogorized: 1 | 0;
+  show_uncategorized: 1 | 0;
   selected_categories: string;
   graph_type: string;
   conditions: JsonString;
