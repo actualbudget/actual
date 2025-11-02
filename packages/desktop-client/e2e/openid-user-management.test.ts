@@ -1,7 +1,6 @@
 import { type Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
-import { ConfigurationPage } from './page-models/configuration-page';
 
 const fakeServerUrl = 'http://fake.actual';
 
@@ -265,15 +264,13 @@ async function seedMultiuserState(
   );
 
   await page.evaluate(
-    ({ cloudFileId, ownerId }) => {
+    ({ cloudFileId }) => {
       window.__actionsForMenu.mergeLocalPrefs({
         cloudFileId,
-        owner: ownerId,
       });
     },
     {
       cloudFileId: 'cloud-file-1',
-      ownerId: 'user-1',
     },
   );
 
@@ -334,17 +331,23 @@ async function goToUserAccess(page: Page) {
 
 test.describe('OpenID user management', () => {
   let page: Page;
-  let configurationPage: ConfigurationPage;
   let waitForNeedsBootstrap: () => Promise<void>;
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
     ({ waitForNeedsBootstrap } = setupFakeOpenIdServer(page));
 
-    configurationPage = new ConfigurationPage(page);
-
     await page.goto('/');
-    await configurationPage.createTestFile();
+
+    await page.waitForFunction(
+      () => typeof window.__actionsForMenu?.createBudget === 'function',
+    );
+
+    await page.evaluate(async () => {
+      await window.__actionsForMenu.createBudget({ testMode: true });
+    });
+
+    await page.waitForURL('**/budget', { waitUntil: 'load' });
 
     await seedMultiuserState(page, waitForNeedsBootstrap);
   });
