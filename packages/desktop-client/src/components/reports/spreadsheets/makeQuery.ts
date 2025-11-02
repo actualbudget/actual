@@ -1,21 +1,16 @@
-import { q } from 'loot-core/shared/query';
+import { q, Query } from 'loot-core/shared/query';
 
 import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
 
-export function makeQuery(
+function filteredQuery(
   name: string,
   startDate: string,
   endDate: string,
   interval: string,
   conditionsOpKey: string,
   filters: unknown[],
+  excludedTransactions: string[] = []
 ) {
-  const intervalGroup =
-    interval === 'Monthly'
-      ? { $month: '$date' }
-      : interval === 'Yearly'
-        ? { $year: '$date' }
-        : { $day: '$date' };
   const intervalFilter =
     interval === 'Weekly'
       ? '$day'
@@ -31,6 +26,7 @@ export function makeQuery(
       $and: [
         { date: { $transform: intervalFilter, $gte: startDate } },
         { date: { $transform: intervalFilter, $lte: endDate } },
+        { id: { $notoneof: excludedTransactions } },
       ],
     })
     //Show assets or debts
@@ -38,25 +34,58 @@ export function makeQuery(
       name === 'assets' ? { amount: { $gt: 0 } } : { amount: { $lt: 0 } },
     );
 
-  return query
-    .groupBy([
-      intervalGroup,
-      { $id: '$account' },
-      { $id: '$payee' },
-      { $id: '$category' },
-      { $id: '$payee.transfer_acct.id' },
-    ])
-    .select([
-      { date: intervalGroup },
-      { category: { $id: '$category.id' } },
-      { categoryHidden: { $id: '$category.hidden' } },
-      { categoryIncome: { $id: '$category.is_income' } },
-      { categoryGroup: { $id: '$category.group.id' } },
-      { categoryGroupHidden: { $id: '$category.group.hidden' } },
-      { account: { $id: '$account.id' } },
-      { accountOffBudget: { $id: '$account.offbudget' } },
-      { payee: { $id: '$payee.id' } },
-      { transferAccount: { $id: '$payee.transfer_acct.id' } },
-      { amount: { $sum: '$amount' } },
-    ]);
+  return query;
+}
+
+export function makeGroupedSplitsQuery (
+  name: string,
+  startDate: string,
+  endDate: string,
+  interval: string,
+  conditionsOpKey: string,
+  filters: unknown[],
+) {
+  return filteredQuery(name, startDate, endDate, interval, conditionsOpKey, filters)
+    .options({ splits: 'grouped' })
+    .select([{ isParent: 'is_parent' }, { isChild: 'is_child' }]);
+}
+
+export function makeQuery(
+  name: string,
+  startDate: string,
+  endDate: string,
+  interval: string,
+  conditionsOpKey: string,
+  filters: unknown[],
+  excludedTransactions: string[] = []
+) {
+  let query = filteredQuery(name, startDate, endDate, interval, conditionsOpKey, filters, excludedTransactions);
+
+  const intervalGroup =
+    interval === 'Monthly'
+      ? { $month: '$date' }
+      : interval === 'Yearly'
+        ? { $year: '$date' }
+        : { $day: '$date' };
+
+  return query.groupBy([
+    intervalGroup,
+    { $id: '$account' },
+    { $id: '$payee' },
+    { $id: '$category' },
+    { $id: '$payee.transfer_acct.id' },
+  ])
+  .select([
+    { date: intervalGroup },
+    { category: { $id: '$category.id' } },
+    { categoryHidden: { $id: '$category.hidden' } },
+    { categoryIncome: { $id: '$category.is_income' } },
+    { categoryGroup: { $id: '$category.group.id' } },
+    { categoryGroupHidden: { $id: '$category.group.hidden' } },
+    { account: { $id: '$account.id' } },
+    { accountOffBudget: { $id: '$account.offbudget' } },
+    { payee: { $id: '$payee.id' } },
+    { transferAccount: { $id: '$payee.transfer_acct.id' } },
+    { amount: { $sum: '$amount' } },
+  ]);
 }

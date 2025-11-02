@@ -19,7 +19,7 @@ import { type SyncedPrefs } from 'loot-core/types/prefs';
 import { calculateLegend } from './calculateLegend';
 import { filterEmptyRows } from './filterEmptyRows';
 import { filterHiddenItems } from './filterHiddenItems';
-import { makeQuery } from './makeQuery';
+import { makeGroupedSplitsQuery, makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
 import { sortData } from './sortData';
 import {
@@ -101,8 +101,37 @@ export function createCustomSpreadsheet({
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
+    let groupedAssets: QueryDataEntity[];
+    let groupedDebts: QueryDataEntity[];
+
+    [groupedAssets, groupedDebts] = await Promise.all([
+      aqlQuery(
+        makeGroupedSplitsQuery(
+          'assets',
+          startDate,
+          endDate,
+          interval,
+          conditionsOpKey,
+          filters
+        ),
+      ).then(({ data }) => data),
+      aqlQuery(
+        makeGroupedSplitsQuery(
+          'debts',
+          startDate,
+          endDate,
+          interval,
+          conditionsOpKey,
+          filters,
+        ),
+      ).then(({ data }) => data),
+    ]);
+
+    console.log('groupedDebts', groupedDebts);
+
     let assets: QueryDataEntity[];
     let debts: QueryDataEntity[];
+
     [assets, debts] = await Promise.all([
       aqlQuery(
         makeQuery(
@@ -112,6 +141,7 @@ export function createCustomSpreadsheet({
           interval,
           conditionsOpKey,
           filters,
+          []
         ),
       ).then(({ data }) => data),
       aqlQuery(
@@ -122,6 +152,7 @@ export function createCustomSpreadsheet({
           interval,
           conditionsOpKey,
           filters,
+          []
         ),
       ).then(({ data }) => data),
     ]);
