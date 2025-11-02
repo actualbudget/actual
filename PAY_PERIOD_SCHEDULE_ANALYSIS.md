@@ -15,6 +15,7 @@ The newly introduced pay periods fail when used with Schedule-based budget templ
 ## The Root Cause
 
 ### Location
+
 `packages/loot-core/src/shared/date-utils.ts:66-67`
 
 ### The Problem
@@ -35,6 +36,7 @@ if (day != null) {
 ```
 
 **Result:**
+
 - `"2024-13"` → Parsed as **January 1, 2025** ❌
 - `"2024-14"` → Parsed as **February 1, 2025** ❌
 - `"2024-15"` → Parsed as **March 1, 2025** ❌
@@ -60,8 +62,8 @@ The schedule template code (`packages/loot-core/src/server/budget/schedule-templ
 
 ```typescript
 const num_months = monthUtils.differenceInCalendarMonths(
-  next_date_string,  // e.g., "2024-01-15" (a schedule in January 2024)
-  current_month,      // e.g., "2024-13" → incorrectly parsed as Jan 2025!
+  next_date_string, // e.g., "2024-01-15" (a schedule in January 2024)
+  current_month, // e.g., "2024-13" → incorrectly parsed as Jan 2025!
 );
 
 if (num_months < 0) {
@@ -72,6 +74,7 @@ if (num_months < 0) {
 ```
 
 When budgeting for pay period `"2024-13"` (which might actually be in January 2024):
+
 - Schedule's next date: `"2024-01-15"` → Parsed as January 15, 2024
 - Current month: `"2024-13"` → **Incorrectly** parsed as January 1, 2025
 - Difference: `Jan 2024 - Jan 2025 = -12 months`
@@ -94,6 +97,7 @@ intervalMonths = monthUtils.differenceInCalendarMonths(
 ```
 
 This calculation fails when the current month is a pay period because:
+
 - `subWeeks` doesn't understand pay periods
 - `differenceInCalendarMonths` incorrectly parses pay period IDs
 
@@ -104,11 +108,13 @@ This calculation fails when the current month is a pay period because:
 The bug manifests inconsistently because the incorrect parsing sometimes "accidentally" works:
 
 ### ✅ Works When:
+
 - Schedule date happens to fall in a range where the misparsed pay period date still makes the calculation correct
 - The schedule is far enough in the future that `num_months` stays positive despite the parsing error
 - Example: If current pay period is `"2024-13"` (parsed as Jan 2025), a schedule for `"2025-06-15"` would have `num_months = 5` months (June 2025 - Jan 2025), which might still work
 
 ### ❌ Fails When:
+
 - Schedule date falls within the "misparsed" date range, making `num_months < 0`
 - Schedule appears to be in the past when it's actually current/future
 - Example: Pay period `"2024-13"` (parsed as Jan 2025) with schedule on `"2024-01-15"` calculates as -12 months
@@ -119,14 +125,14 @@ The bug manifests inconsistently because the incorrect parsing sometimes "accide
 
 The following functions in `packages/loot-core/src/shared/months.ts` **DO NOT handle pay periods** but are used by schedule templates:
 
-| Function | Line | Used By Schedules | Severity | Status |
-|----------|------|-------------------|----------|--------|
+| Function                     | Line    | Used By Schedules     | Severity    | Status   |
+| ---------------------------- | ------- | --------------------- | ----------- | -------- |
 | `differenceInCalendarMonths` | 170-175 | ✅ Lines 84, 216, 229 | 🔴 CRITICAL | ✅ FIXED |
-| `differenceInCalendarDays` | 177-182 | ✅ Line 141 | 🔴 HIGH | ✅ FIXED |
-| `addWeeks` | 166-168 | ✅ Line 320 | 🟡 MEDIUM | ✅ FIXED |
-| `subWeeks` | 195-197 | ✅ Line 212 | 🟡 MEDIUM | ✅ FIXED |
-| `addDays` | 203-205 | ✅ Line 127 | 🟡 MEDIUM | ✅ FIXED |
-| `subDays` | 207-209 | ✅ Line 225 | 🟡 MEDIUM | ✅ FIXED |
+| `differenceInCalendarDays`   | 177-182 | ✅ Line 141           | 🔴 HIGH     | ✅ FIXED |
+| `addWeeks`                   | 166-168 | ✅ Line 320           | 🟡 MEDIUM   | ✅ FIXED |
+| `subWeeks`                   | 195-197 | ✅ Line 212           | 🟡 MEDIUM   | ✅ FIXED |
+| `addDays`                    | 203-205 | ✅ Line 127           | 🟡 MEDIUM   | ✅ FIXED |
+| `subDays`                    | 207-209 | ✅ Line 225           | 🟡 MEDIUM   | ✅ FIXED |
 
 ---
 
@@ -154,14 +160,20 @@ export function differenceInCalendarMonths(
   month1: DateLike,
   month2: DateLike,
 ): number {
-  const str1 = typeof month1 === 'string' ? month1 : d.format(_parse(month1), 'yyyy-MM');
-  const str2 = typeof month2 === 'string' ? month2 : d.format(_parse(month2), 'yyyy-MM');
+  const str1 =
+    typeof month1 === 'string' ? month1 : d.format(_parse(month1), 'yyyy-MM');
+  const str2 =
+    typeof month2 === 'string' ? month2 : d.format(_parse(month2), 'yyyy-MM');
 
   // If either is a pay period, convert to actual start dates
   if (isPayPeriod(str1) || isPayPeriod(str2)) {
     const config = getPayPeriodConfig();
-    const date1 = isPayPeriod(str1) ? getMonthStartDate(str1, config) : _parse(month1);
-    const date2 = isPayPeriod(str2) ? getMonthStartDate(str2, config) : _parse(month2);
+    const date1 = isPayPeriod(str1)
+      ? getMonthStartDate(str1, config)
+      : _parse(month1);
+    const date2 = isPayPeriod(str2)
+      ? getMonthStartDate(str2, config)
+      : _parse(month2);
     return d.differenceInCalendarMonths(date1, date2);
   }
 
@@ -178,13 +190,23 @@ export function differenceInCalendarDays(
   month1: DateLike,
   month2: DateLike,
 ): number {
-  const str1 = typeof month1 === 'string' ? month1 : d.format(_parse(month1), 'yyyy-MM-dd');
-  const str2 = typeof month2 === 'string' ? month2 : d.format(_parse(month2), 'yyyy-MM-dd');
+  const str1 =
+    typeof month1 === 'string'
+      ? month1
+      : d.format(_parse(month1), 'yyyy-MM-dd');
+  const str2 =
+    typeof month2 === 'string'
+      ? month2
+      : d.format(_parse(month2), 'yyyy-MM-dd');
 
   if (isPayPeriod(str1) || isPayPeriod(str2)) {
     const config = getPayPeriodConfig();
-    const date1 = isPayPeriod(str1) ? getMonthStartDate(str1, config) : _parse(month1);
-    const date2 = isPayPeriod(str2) ? getMonthStartDate(str2, config) : _parse(month2);
+    const date1 = isPayPeriod(str1)
+      ? getMonthStartDate(str1, config)
+      : _parse(month1);
+    const date2 = isPayPeriod(str2)
+      ? getMonthStartDate(str2, config)
+      : _parse(month2);
     return d.differenceInCalendarDays(date1, date2);
   }
 
@@ -199,7 +221,8 @@ For `addWeeks`, `subWeeks`, `addDays`, `subDays` - converted pay period IDs to t
 ```typescript
 export function addWeeks(date: DateLike, n: number): string {
   // Convert pay period to its start date before performing week arithmetic
-  const dateStr = typeof date === 'string' ? date : d.format(_parse(date), 'yyyy-MM-dd');
+  const dateStr =
+    typeof date === 'string' ? date : d.format(_parse(date), 'yyyy-MM-dd');
 
   if (isPayPeriod(dateStr)) {
     const config = getPayPeriodConfig();
@@ -241,6 +264,7 @@ After implementing fixes, test with:
 ## Files Changed
 
 ### Primary Changes
+
 1. `packages/loot-core/src/shared/months.ts`
    - ✅ Fixed `differenceInCalendarMonths` (line 179-201)
    - ✅ Fixed `differenceInCalendarDays` (line 203-225)
