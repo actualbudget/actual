@@ -4,8 +4,9 @@ import * as path from 'path';
 
 import promiseRetry from 'promise-retry';
 
-import type * as T from '.';
 import { type Encoding } from '../../../types/encoding';
+
+import type * as T from '.';
 
 export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
 
@@ -96,23 +97,18 @@ export const copyFile: T.CopyFile = (frompath, topath) => {
   });
 };
 
-// TODO: Do we need to make sure readFile conforms to the T.ReadFile type?
-// Now sure how to do it with function overloading? const readFile: T.ReadFile = _readFile; ?
-export function readFile(
+function _readFile(
   filepath: string,
   encoding: 'binary' | null,
 ): Promise<Buffer>;
-export function readFile(
-  filepath: string,
-  encoding?: Encoding,
-): Promise<string>;
-export function readFile(
+function _readFile(filepath: string, encoding?: Encoding): Promise<string>;
+function _readFile(
   filepath: string,
   encoding?: Encoding | 'binary' | null,
 ): Promise<string | Buffer> {
   return new Promise<string | Buffer>((resolve, reject) => {
     // Always read as a Buffer, decode via TextDecoder when an encoding is provided
-    fs.readFile(filepath, null, (err, buffer) => {
+    fs.readFile(filepath, (err, buffer) => {
       if (err) {
         return reject(err);
       }
@@ -130,6 +126,9 @@ export function readFile(
     });
   });
 }
+
+// TODO: T.ReadFile is not used anywhere else. Do we really need to make sure readFile satisfies the type?
+export const readFile: T.ReadFile = _readFile;
 
 export const writeFile: T.WriteFile = async (filepath, contents) => {
   try {
