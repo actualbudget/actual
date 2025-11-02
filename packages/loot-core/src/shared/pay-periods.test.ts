@@ -1,5 +1,6 @@
 import { describe, expect, test, beforeEach } from 'vitest';
 
+import { parseDate } from './date-utils';
 import {
   type PayPeriodConfig,
   isPayPeriod,
@@ -9,6 +10,7 @@ import {
   generatePayPeriods,
   getPayPeriodConfig,
   setPayPeriodConfig,
+  differenceInPayPeriods,
 } from './pay-periods';
 
 describe('Pay Period Utilities and Configuration', () => {
@@ -106,7 +108,7 @@ describe('Pay Period Utilities and Configuration', () => {
       expect(monthlyPeriods.length).toBe(12); // 12 monthly periods
 
       // The monthly periods should start on the 18th of each month
-      const firstMonthlyStart = new Date(monthlyPeriods[0].startDate);
+      const firstMonthlyStart = parseDate(monthlyPeriods[0].startDate);
       expect(firstMonthlyStart.getDate()).toBe(18); // Should start on 18th
       expect(firstMonthlyStart.getMonth()).toBe(0); // January (0-indexed)
 
@@ -383,6 +385,121 @@ describe('Pay Period Utilities and Configuration', () => {
 
         return Promise.all(promises);
       });
+    });
+  });
+
+  describe('differenceInPayPeriods', () => {
+    beforeEach(() => {
+      // Set up biweekly config for tests (26 periods per year)
+      setPayPeriodConfig({
+        enabled: true,
+        payFrequency: 'biweekly',
+        startDate: '2024-01-05',
+      });
+    });
+
+    test('calculates difference within same year', () => {
+      // Forward difference
+      expect(differenceInPayPeriods('2024-15', '2024-13')).toBe(2);
+      expect(differenceInPayPeriods('2024-20', '2024-13')).toBe(7);
+
+      // Backward difference (negative)
+      expect(differenceInPayPeriods('2024-13', '2024-15')).toBe(-2);
+      expect(differenceInPayPeriods('2024-13', '2024-20')).toBe(-7);
+
+      // Same period
+      expect(differenceInPayPeriods('2024-13', '2024-13')).toBe(0);
+    });
+
+    test('calculates difference across year boundaries', () => {
+      // 2025-13 (1st period of 2025) vs 2024-38 (26th period of 2024)
+      // Should be 1 period apart for biweekly (26 periods per year)
+      expect(differenceInPayPeriods('2025-13', '2024-38')).toBe(1);
+
+      // 2024-38 vs 2025-13 should be -1
+      expect(differenceInPayPeriods('2024-38', '2025-13')).toBe(-1);
+
+      // Multiple years apart
+      // 2026-13 (1st of 2026) vs 2024-13 (1st of 2024) = 2 years * 26 periods = 52
+      expect(differenceInPayPeriods('2026-13', '2024-13')).toBe(52);
+      expect(differenceInPayPeriods('2024-13', '2026-13')).toBe(-52);
+    });
+
+    test('handles different pay frequencies correctly', () => {
+      // Weekly (52 periods per year)
+      setPayPeriodConfig({
+        enabled: true,
+        payFrequency: 'weekly',
+        startDate: '2024-01-05',
+      });
+
+      // First period of 2025 vs last period of 2024 (weekly = 52 periods)
+      // 2024-64 = 52nd period (64 - 12 = 52)
+      // 2025-13 = 1st period of 2025
+      expect(differenceInPayPeriods('2025-13', '2024-64')).toBe(1);
+
+      // Monthly (12 periods per year)
+      setPayPeriodConfig({
+        enabled: true,
+        payFrequency: 'monthly',
+        startDate: '2024-01-01',
+      });
+
+      // First period of 2025 vs last period of 2024
+      // 2024-24 = 12th period (24 - 12 = 12)
+      // 2025-13 = 1st period of 2025
+      expect(differenceInPayPeriods('2025-13', '2024-24')).toBe(1);
+
+      // Semimonthly (24 periods per year)
+      setPayPeriodConfig({
+        enabled: true,
+        payFrequency: 'semimonthly',
+        startDate: '2024-01-01',
+      });
+
+      // First period of 2025 vs last period of 2024
+      // 2024-36 = 24th period (36 - 12 = 24)
+      // 2025-13 = 1st period of 2025
+      expect(differenceInPayPeriods('2025-13', '2024-36')).toBe(1);
+    });
+
+    test('handles mixed inputs by converting to pay periods', () => {
+      // One pay period, one full date string
+      // 2024-01-15 (Jan 15) falls in period 2024-13 (Jan 5-18)
+      // So difference is: 2024-13 - 2024-13 = 0
+      expect(differenceInPayPeriods('2024-13', '2024-01-15')).toBe(0);
+
+      // Date in same period as the pay period being compared
+      // 2024-01-25 (Jan 25) falls in period 2024-14 (Jan 19 - Feb 1 for biweekly)
+      // So difference is: 2024-14 - 2024-14 = 0
+      expect(differenceInPayPeriods('2024-14', '2024-01-25')).toBe(0);
+
+      // Date in different period
+      // 2024-02-10 (Feb 10) falls in period 2024-15
+      // Compared to period 2024-13 (Jan 5-18)
+      // Difference should be: 2024-15 - 2024-13 = 2
+      expect(differenceInPayPeriods('2024-02-10', '2024-13')).toBe(2);
+    });
+
+    test('matches real-world schedule template scenarios', () => {
+      // Scenario: Current pay period is 2024-15 (3rd period)
+      // Schedule is set for period 2024-20 (8th period)
+      // Should show 5 periods in the future
+      const current = '2024-15';
+      const future = '2024-20';
+      expect(differenceInPayPeriods(future, current)).toBe(5);
+
+      // Scenario: Current pay period is 2024-15
+      // Schedule was set for 2024-13 (in the past)
+      // Should show -2 periods (2 periods ago)
+      const past = '2024-13';
+      expect(differenceInPayPeriods(past, current)).toBe(-2);
+
+      // Scenario: Year boundary - current is last period of 2024
+      // Schedule is set for first period of 2025
+      const lastOf2024 = '2024-38'; // 26th biweekly period
+      const firstOf2025 = '2025-13';
+      expect(differenceInPayPeriods(firstOf2025, lastOf2024)).toBe(1);
     });
   });
 });

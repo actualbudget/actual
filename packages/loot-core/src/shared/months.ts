@@ -18,6 +18,7 @@ import {
   nextPayPeriod,
   prevPayPeriod,
   addPayPeriods,
+  differenceInPayPeriods,
   getCurrentPayPeriod,
   getPayPeriodFromDate,
   generatePayPeriodRange,
@@ -28,8 +29,29 @@ import * as Platform from './platform';
 type DateLike = string | Date;
 type Day = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
+/**
+ * Parse a date string or Date object into a Date.
+ *
+ * Supports multiple input formats:
+ * - Full dates: "2025-10-15" → Oct 15, 2025
+ * - Calendar months: "2025-10" → Oct 1, 2025
+ * - Pay period IDs: "2025-32" → Start date of pay period 32 (auto-converted)
+ * - Years: "2025" → Jan 1, 2025
+ *
+ * @param value - Date string or Date object
+ * @returns Date object set to noon (12:00) to avoid DST issues
+ */
 export function _parse(value: DateLike): Date {
-  // Use shared date parsing utility to avoid duplication
+  // Auto-convert pay period IDs to their start date
+  if (typeof value === 'string' && value.length === 7) {
+    const monthNum = parseInt(value.split('-')[1]);
+    if (monthNum > 12) {
+      // Presence Rule: If pay period ID exists, convert it to start date
+      return getMonthStartDate(value);
+    }
+  }
+
+  // Use shared date parsing utility for all other cases
   return sharedParseDate(value);
 }
 
@@ -164,6 +186,16 @@ export function addMonths(month: DateLike, n: number): string {
 }
 
 export function addWeeks(date: DateLike, n: number): string {
+  // Convert pay period to its start date before performing week arithmetic
+  const dateStr =
+    typeof date === 'string' ? date : d.format(_parse(date), 'yyyy-MM-dd');
+
+  if (isPayPeriod(dateStr)) {
+    const config = getPayPeriodConfig();
+    const startDate = getMonthStartDate(dateStr, config);
+    return d.format(d.addWeeks(startDate, n), 'yyyy-MM-dd');
+  }
+
   return d.format(d.addWeeks(_parse(date), n), 'yyyy-MM-dd');
 }
 
@@ -171,6 +203,15 @@ export function differenceInCalendarMonths(
   month1: DateLike,
   month2: DateLike,
 ): number {
+  const str1 =
+    typeof month1 === 'string' ? month1 : d.format(_parse(month1), 'yyyy-MM');
+  const str2 =
+    typeof month2 === 'string' ? month2 : d.format(_parse(month2), 'yyyy-MM');
+
+  if (isPayPeriod(str1) || isPayPeriod(str2)) {
+    return differenceInPayPeriods(str1, str2);
+  }
+
   return d.differenceInCalendarMonths(_parse(month1), _parse(month2));
 }
 
@@ -178,6 +219,27 @@ export function differenceInCalendarDays(
   month1: DateLike,
   month2: DateLike,
 ): number {
+  const str1 =
+    typeof month1 === 'string'
+      ? month1
+      : d.format(_parse(month1), 'yyyy-MM-dd');
+  const str2 =
+    typeof month2 === 'string'
+      ? month2
+      : d.format(_parse(month2), 'yyyy-MM-dd');
+
+  // If either is a pay period, convert to actual start dates
+  if (isPayPeriod(str1) || isPayPeriod(str2)) {
+    const config = getPayPeriodConfig();
+    const date1 = isPayPeriod(str1)
+      ? getMonthStartDate(str1, config)
+      : _parse(month1);
+    const date2 = isPayPeriod(str2)
+      ? getMonthStartDate(str2, config)
+      : _parse(month2);
+    return d.differenceInCalendarDays(date1, date2);
+  }
+
   return d.differenceInCalendarDays(_parse(month1), _parse(month2));
 }
 
@@ -193,6 +255,16 @@ export function subMonths(month: string | Date, n: number) {
 }
 
 export function subWeeks(date: DateLike, n: number): string {
+  // Convert pay period to its start date before performing week arithmetic
+  const dateStr =
+    typeof date === 'string' ? date : d.format(_parse(date), 'yyyy-MM-dd');
+
+  if (isPayPeriod(dateStr)) {
+    const config = getPayPeriodConfig();
+    const startDate = getMonthStartDate(dateStr, config);
+    return d.format(d.subWeeks(startDate, n), 'yyyy-MM-dd');
+  }
+
   return d.format(d.subWeeks(_parse(date), n), 'yyyy-MM-dd');
 }
 
@@ -201,10 +273,30 @@ export function subYears(year: string | Date, n: number) {
 }
 
 export function addDays(day: DateLike, n: number): string {
+  // Convert pay period to its start date before performing day arithmetic
+  const dateStr =
+    typeof day === 'string' ? day : d.format(_parse(day), 'yyyy-MM-dd');
+
+  if (isPayPeriod(dateStr)) {
+    const config = getPayPeriodConfig();
+    const startDate = getMonthStartDate(dateStr, config);
+    return d.format(d.addDays(startDate, n), 'yyyy-MM-dd');
+  }
+
   return d.format(d.addDays(_parse(day), n), 'yyyy-MM-dd');
 }
 
 export function subDays(day: DateLike, n: number): string {
+  // Convert pay period to its start date before performing day arithmetic
+  const dateStr =
+    typeof day === 'string' ? day : d.format(_parse(day), 'yyyy-MM-dd');
+
+  if (isPayPeriod(dateStr)) {
+    const config = getPayPeriodConfig();
+    const startDate = getMonthStartDate(dateStr, config);
+    return d.format(d.subDays(startDate, n), 'yyyy-MM-dd');
+  }
+
   return d.format(d.subDays(_parse(day), n), 'yyyy-MM-dd');
 }
 
