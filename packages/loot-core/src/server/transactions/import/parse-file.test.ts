@@ -222,3 +222,65 @@ describe('File import', () => {
     expect(await getTransactions('one')).toMatchSnapshot();
   });
 });
+
+describe('CSV file encoding', () => {
+  const encodingTests = [
+    {
+      encoding: 'utf-8',
+      file: 'data_utf8.csv',
+      expected: [
+        { Date: '2024-01-01', Payee: 'Café René', Amount: '42.50' },
+        { Date: '2024-01-02', Payee: 'Müller GmbH', Amount: '-15.75' },
+        { Date: '2024-01-03', Payee: 'Søren Ågård', Amount: '100.00' },
+      ],
+    },
+    {
+      encoding: 'windows-1252',
+      file: 'data_windows1252.csv',
+      expected: [
+        { Date: '2024-02-01', Payee: 'Café de Paris', Amount: '50.25' },
+        { Date: '2024-02-02', Payee: 'François Dubois', Amount: '-20.00' },
+        { Date: '2024-02-03', Payee: 'Maître Jean', Amount: '75.50' },
+      ],
+    },
+    {
+      encoding: 'euc-jp',
+      file: 'data_euc-jp.csv',
+      expected: [
+        { Date: '2024-03-01', Payee: '山田下社', Amount: '-30.00' },
+        { Date: '2024-03-02', Payee: '東京スーパー', Amount: '45.75' },
+        { Date: '2024-03-03', Payee: '山中純一', Amount: '120.00' },
+      ],
+    },
+    {
+      encoding: 'euc-kr',
+      file: 'data_euc-kr.csv',
+      expected: [
+        { Date: '2024-04-01', Payee: '서울식품', Amount: '-25.50' },
+        { Date: '2024-04-02', Payee: '김지후', Amount: '60.00' },
+        { Date: '2024-04-03', Payee: '부산마트', Amount: '88.25' },
+      ],
+    },
+    {
+      encoding: 'gb18030',
+      file: 'data_gb18030.csv',
+      expected: [
+        { Date: '2024-05-01', Payee: '北京餐厅', Amount: '-35.00' },
+        { Date: '2024-05-02', Payee: '上海超市', Amount: '55.50' },
+        { Date: '2024-05-03', Payee: '张伟', Amount: '95.75' },
+      ],
+    },
+  ] as const;
+
+  encodingTests.forEach(({ encoding, file, expected }) => {
+    test(`decodes ${encoding} correctly`, async () => {
+      const { errors, transactions } = await parseFile(
+        __dirname + `/../../../mocks/files/${file}`,
+        { encoding, hasHeaderRow: true },
+      );
+
+      expect(errors).toEqual([]);
+      expect(transactions).toEqual(expected);
+    });
+  });
+});
