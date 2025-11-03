@@ -166,8 +166,9 @@ If you're looking to lower your monthly compute costs for Actual Budget and can 
 
 ```toml
 [[services]]
+  auto_stop_machines = "stop"
   auto_start_machines = true
-  auto_stop_machines = true
+  min_machines_running = 0
 ```
 
 With these settings, Fly.io will automatically stop your instance after a few minutes of inactivity. When a new request comes in, the instance will start up again, which may take 5-15 seconds.
