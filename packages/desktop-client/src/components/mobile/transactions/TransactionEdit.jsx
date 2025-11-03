@@ -34,7 +34,7 @@ import { send } from 'loot-core/platform/client/fetch';
 import * as monthUtils from 'loot-core/shared/months';
 import * as Platform from 'loot-core/shared/platform';
 import { q } from 'loot-core/shared/query';
-import { getStatusLabel } from 'loot-core/shared/schedules';
+import { getStatusLabel, getUpcomingDays } from 'loot-core/shared/schedules';
 import {
   ungroupTransactions,
   updateTransaction,
@@ -77,7 +77,9 @@ import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
 } from '@desktop-client/hooks/useSingleActiveEditForm';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useSelector, useDispatch } from '@desktop-client/redux';
 import { setLastTransaction } from '@desktop-client/transactions/transactionsSlice';
@@ -488,6 +490,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
+  const [upcomingLength = '7'] = useSyncedPref(
+    'upcomingScheduledTransactionLength',
+  );
   const transactions = useMemo(
     () =>
       unserializedTransactions.map(t => serializeTransaction(t, dateFormat)) ||
@@ -589,6 +594,141 @@ const TransactionEditInner = memo(function TransactionEditInner({
       navigate(-1);
     };
 
+    const today = monthUtils.currentDay();
+    const isFuture = unserializedTransaction.date > today;
+
+    if (
+      isFuture &&
+      unserializedTransactions.length === 1 &&
+      !unserializedTransaction.is_parent
+    ) {
+      const upcomingDays = getUpcomingDays(upcomingLength, today);
+      const daysUntilTransaction = monthUtils.differenceInCalendarDays(
+        unserializedTransaction.date,
+        today,
+      );
+      const isBeyondWindow = daysUntilTransaction > upcomingDays;
+
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'convert-to-schedule',
+            options: {
+              isBeyondWindow,
+              daysUntilTransaction,
+              upcomingDays,
+              onConfirm: async () => {
+                if (
+                  !isAdding &&
+                  unserializedTransaction.id &&
+                  !unserializedTransaction.id.startsWith('temp')
+                ) {
+                  await send('transaction-delete', {
+                    id: unserializedTransaction.id,
+                  });
+                }
+
+                const formattedDate = monthUtils.format(
+                  unserializedTransaction.date,
+                  'MMM dd, yyyy',
+                );
+                const scheduleName = `Auto-created future transaction (${formattedDate})`;
+
+                const conditions = [
+                  {
+                    op: 'is',
+                    field: 'date',
+                    value: unserializedTransaction.date,
+                  },
+                ];
+
+                const actions = [];
+
+                const conditionFields = ['amount', 'payee', 'account'];
+
+                conditionFields.forEach(field => {
+                  const value = unserializedTransaction[field];
+                  if (value != null && value !== '') {
+                    conditions.push({
+                      op: 'is',
+                      field,
+                      value,
+                    });
+                  }
+                });
+
+                if (
+                  unserializedTransaction.category &&
+                  !unserializedTransaction.is_parent
+                ) {
+                  actions.push({
+                    op: 'set',
+                    field: 'category',
+                    value: unserializedTransaction.category,
+                  });
+                }
+
+                if (unserializedTransaction.notes) {
+                  actions.push({
+                    op: 'set',
+                    field: 'notes',
+                    value: unserializedTransaction.notes,
+                  });
+                }
+
+                const scheduleId = await send('schedule/create', {
+                  conditions,
+                  schedule: {
+                    posts_transaction: true,
+                    name: scheduleName,
+                  },
+                });
+
+                if (actions.length > 0) {
+                  const schedules = await send(
+                    'query',
+                    q('schedules')
+                      .filter({ id: scheduleId })
+                      .select('rule')
+                      .serialize(),
+                  );
+
+                  const ruleId = schedules?.data?.[0]?.rule;
+
+                  if (ruleId) {
+                    const rule = await send('rule-get', { id: ruleId });
+
+                    if (rule) {
+                      const linkScheduleActions = rule.actions.filter(
+                        a => a.op === 'link-schedule',
+                      );
+
+                      await send('rule-update', {
+                        ...rule,
+                        actions: [...linkScheduleActions, ...actions],
+                      });
+                    }
+                  }
+                }
+
+                dispatch(
+                  addNotification({
+                    notification: {
+                      type: 'message',
+                      message: 'Schedule created successfully',
+                    },
+                  }),
+                );
+                navigate(-1);
+              },
+              onCancel: onConfirmSave,
+            },
+          },
+        }),
+      );
+      return;
+    }
+
     if (unserializedTransaction.reconciled) {
       // On mobile any save gives the warning.
       // On the web only certain changes trigger a warning.
@@ -608,7 +748,14 @@ const TransactionEditInner = memo(function TransactionEditInner({
     } else {
       onConfirmSave();
     }
-  }, [isAdding, dispatch, navigate, onSave, unserializedTransactions]);
+  }, [
+    isAdding,
+    dispatch,
+    navigate,
+    onSave,
+    unserializedTransactions,
+    upcomingLength,
+  ]);
 
   const onUpdateInner = useCallback(
     async (serializedTransaction, name, value) => {
