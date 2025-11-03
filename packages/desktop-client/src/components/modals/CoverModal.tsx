@@ -78,7 +78,9 @@ export function CoverModal({
   }, [categoryGroups, dispatch, month]);
 
   const fromCategory = categories.find(c => c.id === fromCategoryId);
-  const [amount, setAmount] = useState<IntegerAmount>(Math.abs(initialAmount ?? 0));
+  const [amount, setAmount] = useState<IntegerAmount>(
+    Math.abs(initialAmount ?? 0),
+  );
 
   const _onSubmit = () => {
     if (amount && fromCategoryId) {
