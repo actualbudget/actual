@@ -53,7 +53,7 @@ export function CoverMenu({
       : categoryGroups;
   }, [categoryId, showToBeBudgeted, originalCategoryGroups]);
 
-  const _initialAmount = integerToCurrency(initialAmount ?? 0);
+  const _initialAmount = integerToCurrency(Math.abs(initialAmount ?? 0));
   const [amount, setAmount] = useState<string | null>(null);
 
   function _onSubmit() {

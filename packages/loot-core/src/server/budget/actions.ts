@@ -452,7 +452,8 @@ export async function coverOverspending({
 
   // Cover provided amount (can be partial) or full overspending amount.
   const amountToCover = amount
-    ? amount
+    // Covering in the app provides a positive amount to cover so we invert it here
+    ? -amount
     : await getSheetValue(sheetName, 'leftover-' + to);
 
   if (amountToCover >= 0 || leftoverFrom <= 0) {
@@ -460,7 +461,7 @@ export async function coverOverspending({
   }
 
   // Don't go over the leftover amount of the covering category
-  const coverableAmount = Math.min(-amountToCover, leftoverFrom);
+  const coverableAmount = Math.min(Math.abs(amountToCover), leftoverFrom);
 
   await batchMessages(async () => {
     // If we are covering it from the to be budgeted amount, ignore this
@@ -519,7 +520,8 @@ export async function coverOverbudgeted({
 
   // Cover provided amount (can be partial) or full overbudgeted amount.
   const amountToCover = amount
-    ? amount
+    // Covering in the app provides a positive amount to cover so we invert it here
+    ? -amount
     : await getSheetValue(sheetName, 'to-budget');
 
   if (amountToCover >= 0 || categoryBudget <= 0) {
@@ -527,7 +529,7 @@ export async function coverOverbudgeted({
   }
 
   // Don't allow the budget of the covering category to go negative.
-  const coverableAmount = Math.min(-amountToCover, categoryBudget);
+  const coverableAmount = Math.min(Math.abs(amountToCover), categoryBudget);
 
   await batchMessages(async () => {
     await setBudget({
