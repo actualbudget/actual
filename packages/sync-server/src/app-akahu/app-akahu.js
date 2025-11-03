@@ -130,7 +130,7 @@ app.post(
 
         newTrans.date = getDate(transactionDate);
         newTrans.payeeName = getPayeeName(trans);
-        newTrans.notes = trans.description;
+        newTrans.notes = normalizeNotes(trans.description);
 
         if (['CREDITCARD', 'LOAN'].includes(account.type)) {
           trans.amount *= -1;
@@ -168,9 +168,9 @@ app.post(
 
         newTrans.date = getDate(transactionDate);
         newTrans.payeeName = getPayeeName(trans);
-        newTrans.notes = trans.descriptionRaw || trans.description;
+        newTrans.notes = normalizeNotes(trans.description);
 
-        if (account.type === 'CREDITCARD') {
+        if (['CREDITCARD', 'LOAN'].includes(account.type)) {
           trans.amount *= -1;
         }
 
@@ -244,6 +244,26 @@ function flattenObject(obj, prefix = '') {
   }
 
   return result;
+}
+
+function normalizeNotes(trans) {
+  if (trans.description.includes(' TFR TO ')) {
+    const regex = /(.+) TFR TO .+/;
+    const matches = trans.description.match(regex);
+    if (matches && matches.length > 1 && matches[1]) {
+      return matches[1];
+    }
+  }
+
+  if (trans.description.includes(' TFR FROM ')) {
+    const regex = /(.+) TFR FROM .+/;
+    const matches = trans.description.match(regex);
+    if (matches && matches.length > 1 && matches[1]) {
+      return matches[1];
+    }
+  }
+
+  return trans.description;
 }
 
 function getPayeeName(trans) {
