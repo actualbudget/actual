@@ -104,20 +104,70 @@ async function createSingleTimeScheduleFromTransaction(
     }
   });
 
-  if (transaction.category && !transaction.is_parent) {
-    actions.push({
-      op: 'set',
-      field: 'category',
-      value: transaction.category,
-    } as RuleActionEntity);
-  }
+  if (transaction.is_parent && transaction.subtransactions) {
+    if (transaction.notes) {
+      actions.push({
+        op: 'set',
+        field: 'notes',
+        value: transaction.notes,
+        options: {
+          splitIndex: 0,
+        },
+      } as RuleActionEntity);
+    }
 
-  if (transaction.notes) {
-    actions.push({
-      op: 'set',
-      field: 'notes',
-      value: transaction.notes,
-    } as RuleActionEntity);
+    transaction.subtransactions.forEach((split, index) => {
+      const splitIndex = index + 1;
+
+      if (split.amount != null) {
+        actions.push({
+          op: 'set-split-amount',
+          value: split.amount,
+          options: {
+            splitIndex,
+            method: 'fixed-amount',
+          },
+        } as RuleActionEntity);
+      }
+
+      if (split.category) {
+        actions.push({
+          op: 'set',
+          field: 'category',
+          value: split.category,
+          options: {
+            splitIndex,
+          },
+        } as RuleActionEntity);
+      }
+
+      if (split.notes) {
+        actions.push({
+          op: 'set',
+          field: 'notes',
+          value: split.notes,
+          options: {
+            splitIndex,
+          },
+        } as RuleActionEntity);
+      }
+    });
+  } else {
+    if (transaction.category) {
+      actions.push({
+        op: 'set',
+        field: 'category',
+        value: transaction.category,
+      } as RuleActionEntity);
+    }
+
+    if (transaction.notes) {
+      actions.push({
+        op: 'set',
+        field: 'notes',
+        value: transaction.notes,
+      } as RuleActionEntity);
+    }
   }
 
   const formattedDate = monthUtils.format(transaction.date, 'MMM dd, yyyy');
@@ -327,26 +377,31 @@ export function TransactionList({
     async (newTransactions: TransactionEntity[]) => {
       newTransactions = realizeTempTransactions(newTransactions);
 
-      const futureTransactions = newTransactions.filter(isFutureTransaction);
+      const parentTransaction = newTransactions.find(t => !t.is_child);
 
-      if (futureTransactions.length > 0) {
-        if (futureTransactions.length === 1) {
-          const futureTransaction = futureTransactions[0];
+      if (parentTransaction && isFutureTransaction(parentTransaction)) {
+        const transactionWithSubtransactions = {
+          ...parentTransaction,
+          subtransactions: newTransactions.filter(
+            t => t.is_child && t.parent_id === parentTransaction.id,
+          ),
+        };
 
-          promptToConvertToSchedule(
-            futureTransaction,
-            async () => {
-              await createSingleTimeScheduleFromTransaction(futureTransaction);
-            },
-            async () => {
-              await saveDiff(
-                { added: newTransactions },
-                isLearnCategoriesEnabled,
-              );
-            },
-          );
-          return;
-        }
+        promptToConvertToSchedule(
+          transactionWithSubtransactions,
+          async () => {
+            await createSingleTimeScheduleFromTransaction(
+              transactionWithSubtransactions,
+            );
+          },
+          async () => {
+            await saveDiff(
+              { added: newTransactions },
+              isLearnCategoriesEnabled,
+            );
+          },
+        );
+        return;
       }
 
       await saveDiff({ added: newTransactions }, isLearnCategoriesEnabled);

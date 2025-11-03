@@ -597,11 +597,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
     const today = monthUtils.currentDay();
     const isFuture = unserializedTransaction.date > today;
 
-    if (
-      isFuture &&
-      unserializedTransactions.length === 1 &&
-      !unserializedTransaction.is_parent
-    ) {
+    if (isFuture) {
       const upcomingDays = getUpcomingDays(upcomingLength, today);
       const daysUntilTransaction = monthUtils.differenceInCalendarDays(
         unserializedTransaction.date,
@@ -659,22 +655,74 @@ const TransactionEditInner = memo(function TransactionEditInner({
                 });
 
                 if (
-                  unserializedTransaction.category &&
-                  !unserializedTransaction.is_parent
+                  unserializedTransaction.is_parent &&
+                  unserializedTransaction.subtransactions
                 ) {
-                  actions.push({
-                    op: 'set',
-                    field: 'category',
-                    value: unserializedTransaction.category,
-                  });
-                }
+                  if (unserializedTransaction.notes) {
+                    actions.push({
+                      op: 'set',
+                      field: 'notes',
+                      value: unserializedTransaction.notes,
+                      options: {
+                        splitIndex: 0,
+                      },
+                    });
+                  }
 
-                if (unserializedTransaction.notes) {
-                  actions.push({
-                    op: 'set',
-                    field: 'notes',
-                    value: unserializedTransaction.notes,
-                  });
+                  unserializedTransaction.subtransactions.forEach(
+                    (split, index) => {
+                      const splitIndex = index + 1;
+
+                      if (split.amount != null) {
+                        actions.push({
+                          op: 'set-split-amount',
+                          value: split.amount,
+                          options: {
+                            splitIndex,
+                            method: 'fixed-amount',
+                          },
+                        });
+                      }
+
+                      if (split.category) {
+                        actions.push({
+                          op: 'set',
+                          field: 'category',
+                          value: split.category,
+                          options: {
+                            splitIndex,
+                          },
+                        });
+                      }
+
+                      if (split.notes) {
+                        actions.push({
+                          op: 'set',
+                          field: 'notes',
+                          value: split.notes,
+                          options: {
+                            splitIndex,
+                          },
+                        });
+                      }
+                    },
+                  );
+                } else {
+                  if (unserializedTransaction.category) {
+                    actions.push({
+                      op: 'set',
+                      field: 'category',
+                      value: unserializedTransaction.category,
+                    });
+                  }
+
+                  if (unserializedTransaction.notes) {
+                    actions.push({
+                      op: 'set',
+                      field: 'notes',
+                      value: unserializedTransaction.notes,
+                    });
+                  }
                 }
 
                 const scheduleId = await send('schedule/create', {
