@@ -10,7 +10,7 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import { getSecretsError } from 'loot-core/shared/errors';
 
-import { Error } from '@desktop-client/components/alerts';
+import { Error as ErrorAlert } from '@desktop-client/components/alerts';
 import { Link } from '@desktop-client/components/common/Link';
 import {
   Modal,
@@ -45,6 +45,7 @@ export const AkahuInitialiseModal = ({
     }
 
     setIsLoading(true);
+    let hasError = false;
 
     const { error, reason } =
       (await send('secret-set', {
@@ -55,6 +56,7 @@ export const AkahuInitialiseModal = ({
     if (error) {
       setIsValid(false);
       setError(getSecretsError(error, reason));
+      hasError = true;
     } else {
       const { error, reason } =
         (await send('secret-set', {
@@ -65,12 +67,16 @@ export const AkahuInitialiseModal = ({
       if (error) {
         setIsValid(false);
         setError(getSecretsError(error, reason));
+        hasError = true;
       } else {
         onSuccess();
       }
     }
     setIsLoading(false);
-    close();
+
+    if (!hasError) {
+      close();
+    }
   };
 
   return (
@@ -124,7 +130,7 @@ export const AkahuInitialiseModal = ({
               />
             </FormField>
 
-            {!isValid && <Error>{error}</Error>}
+            {!isValid && <ErrorAlert>{error}</ErrorAlert>}
           </View>
 
           <ModalButtons>

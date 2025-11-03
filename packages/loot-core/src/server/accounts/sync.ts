@@ -91,7 +91,7 @@ async function getAccountOldestTransaction(id): Promise<TransactionEntity> {
 
 async function getAkahuSyncStartDate(id) {
   // Akahu can get a maximum of 365 days of transactions when using personal apps
-  const dates = [monthUtils.subDays(monthUtils.currentDay(), 360)];
+  const dates = [monthUtils.subDays(monthUtils.currentDay(), 365)];
 
   const oldestTransaction = await getAccountOldestTransaction(id);
 
