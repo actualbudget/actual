@@ -91,7 +91,7 @@ export async function batchUpdateTransactions({
             logger.log(accounts);
           }
 
-          if (t.is_parent || account.offbudget === 1) {
+          if (t.is_parent || account?.offbudget === 1) {
             t.category = null;
           }
           return db.insertTransaction(t);
@@ -125,7 +125,7 @@ export async function batchUpdateTransactions({
               logger.log(accounts);
             }
 
-            if (t.is_parent || account.offbudget === 1) {
+            if (t.is_parent || account?.offbudget === 1) {
               t.category = null;
             }
           }
