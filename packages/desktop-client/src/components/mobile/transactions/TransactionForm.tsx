@@ -274,6 +274,7 @@ function TransactionAmount({
         title={t('Amount')}
       />
       <Input
+        type="number"
         style={{
           height: '15vh',
           width: '100vw',
