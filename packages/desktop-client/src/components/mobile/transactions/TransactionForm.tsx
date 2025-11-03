@@ -275,7 +275,7 @@ function TransactionAmount({
       />
       <Input
         style={{
-          height: '20vh',
+          height: '15vh',
           width: '100vw',
           textAlign: 'center',
           ...styles.veryLargeText,
