@@ -3,6 +3,7 @@ import { type Page } from '@playwright/test';
 import { type RemoteFile } from 'loot-core/server/cloud-storage';
 
 import { expect, test } from './fixtures';
+import { ConfigurationPage } from './page-models/configuration-page';
 
 const fakeServerUrl = 'http://fake.actual';
 
@@ -318,24 +319,17 @@ test.describe('OpenID user management', () => {
   let page: Page;
   let waitForNeedsBootstrap: () => Promise<void>;
   let remoteFiles: RemoteFile[];
+  let configurationPage: ConfigurationPage;
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
     const serverControls = setupFakeOpenIdServer(page);
     waitForNeedsBootstrap = serverControls.waitForNeedsBootstrap;
     remoteFiles = serverControls.remoteFiles;
+    configurationPage = new ConfigurationPage(page);
 
     await page.goto('/');
-
-    await page.waitForFunction(
-      () => typeof window.__actionsForMenu?.createBudget === 'function',
-    );
-
-    await page.evaluate(async () => {
-      await window.__actionsForMenu.createBudget({ testMode: true });
-    });
-
-    await page.waitForURL('**/budget', { waitUntil: 'load' });
+    await configurationPage.createTestFile();
 
     await seedMultiuserState(page, waitForNeedsBootstrap, remoteFiles);
   });
