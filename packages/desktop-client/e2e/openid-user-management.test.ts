@@ -329,7 +329,25 @@ test.describe('OpenID user management', () => {
     configurationPage = new ConfigurationPage(page);
 
     await page.goto('/');
-    await configurationPage.createTestFile();
+    let usedUiFlow = false;
+    try {
+      await page
+        .getByRole('button', { name: 'Create test file' })
+        .waitFor({ timeout: 5000 });
+      await configurationPage.createTestFile();
+      usedUiFlow = true;
+    } catch (error) {
+      await page.waitForFunction(
+        () => typeof window.__actionsForMenu?.createBudget === 'function',
+      );
+      await page.evaluate(async () => {
+        await window.__actionsForMenu.createBudget({ testMode: true });
+      });
+    }
+
+    if (!usedUiFlow) {
+      await page.waitForURL('**/budget', { waitUntil: 'load' });
+    }
 
     await seedMultiuserState(page, waitForNeedsBootstrap, remoteFiles);
   });
