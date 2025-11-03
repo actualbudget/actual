@@ -632,7 +632,8 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   unserializedTransaction.date,
                   'MMM dd, yyyy',
                 );
-                const scheduleName = `Auto-created future transaction (${formattedDate})`;
+                const timestamp = Date.now();
+                const scheduleName = `Auto-created future transaction (${formattedDate}) - ${timestamp}`;
 
                 const conditions = [
                   {

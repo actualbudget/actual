@@ -121,7 +121,8 @@ async function createSingleTimeScheduleFromTransaction(
   }
 
   const formattedDate = monthUtils.format(transaction.date, 'MMM dd, yyyy');
-  const scheduleName = `Auto-created future transaction (${formattedDate})`;
+  const timestamp = Date.now();
+  const scheduleName = `Auto-created future transaction (${formattedDate}) - ${timestamp}`;
 
   const scheduleId = await send('schedule/create', {
     conditions,
