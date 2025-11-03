@@ -130,7 +130,7 @@ app.post(
 
         newTrans.date = getDate(transactionDate);
         newTrans.payeeName = getPayeeName(trans);
-        newTrans.notes = normalizeNotes(trans.description);
+        newTrans.notes = normalizeNotes(trans);
 
         if (['CREDITCARD', 'LOAN'].includes(account.type)) {
           trans.amount *= -1;
@@ -168,7 +168,7 @@ app.post(
 
         newTrans.date = getDate(transactionDate);
         newTrans.payeeName = getPayeeName(trans);
-        newTrans.notes = normalizeNotes(trans.description);
+        newTrans.notes = normalizeNotes(trans);
 
         if (['CREDITCARD', 'LOAN'].includes(account.type)) {
           trans.amount *= -1;
