@@ -111,7 +111,8 @@ describe('tokenExpiration format', () => {
   });
 
   it('should parse nested object from environment variables correctly', () => {
-    const authorizationEndpoint = 'https://testprovider.com/.well-known/openid-configuration';
+    const authorizationEndpoint =
+      'https://testprovider.com/.well-known/openid-configuration';
     process.env.TEST_OPENID_AUTHORIZATION_ENDPOINT = authorizationEndpoint;
 
     const testSchema = convict({
@@ -131,6 +132,8 @@ describe('tokenExpiration format', () => {
       },
     });
     expect(() => testSchema.validate()).not.toThrow();
-    expect(testSchema.get('openId.issuer.authorization_endpoint')).toBe(authorizationEndpoint);
+    expect(testSchema.get('openId.issuer.authorization_endpoint')).toBe(
+      authorizationEndpoint,
+    );
   });
 });
