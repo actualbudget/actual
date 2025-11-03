@@ -110,6 +110,9 @@ describe('tokenExpiration format', () => {
     );
   });
 
+});
+
+describe('config schema', () => {
   it('should parse nested object from environment variables correctly', () => {
     const authorizationEndpoint =
       'https://testprovider.com/.well-known/openid-configuration';
@@ -136,4 +139,5 @@ describe('tokenExpiration format', () => {
       authorizationEndpoint,
     );
   });
+
 });
