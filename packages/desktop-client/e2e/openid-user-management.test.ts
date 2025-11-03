@@ -1,4 +1,5 @@
 import { type Page } from '@playwright/test';
+
 import { type RemoteFile } from 'loot-core/server/cloud-storage';
 
 import { expect, test } from './fixtures';
@@ -295,14 +296,12 @@ async function seedMultiuserState(
     },
   );
 
-  await page.evaluate(({ remoteFiles }) => {
-    window.__actionsForMenu.setRemoteFiles({ remoteFiles });
-  }, { remoteFiles });
-}
-
-async function openUserMenu(page: Page) {
-  const menuTrigger = page.getByRole('button', { name: /server/i });
-  await menuTrigger.click();
+  await page.evaluate(
+    ({ remoteFiles }) => {
+      window.__actionsForMenu.setRemoteFiles({ remoteFiles });
+    },
+    { remoteFiles },
+  );
 }
 
 async function goToUserDirectory(page: Page) {
