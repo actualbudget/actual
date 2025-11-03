@@ -138,13 +138,12 @@ export function TransactionForm({ transactions }: TransactionFormProps) {
 
   return (
     <Form data-testid="transaction-form">
-      <View style={{ flex: 1 }}>
+      <View style={{ padding: styles.mobileEditingPadding, gap: 40 }}>
         <View>
           <TransactionAmount transaction={transaction} />
         </View>
         <View
           className={css({
-            padding: styles.mobileEditingPadding,
             gap: 20,
             '& .view': {
               flexDirection: 'row',
@@ -161,7 +160,7 @@ export function TransactionForm({ transactions }: TransactionFormProps) {
         >
           <View>
             <Label title={t('Payee')} />
-            <Button variant="bare" onPointerUp={onSelectPayee}>
+            <Button variant="bare" onClick={onSelectPayee}>
               <View>
                 {getPayeeName(selectedPayeeId ?? transaction.payee) ?? ''}
                 <SvgCheveronRight
@@ -177,7 +176,7 @@ export function TransactionForm({ transactions }: TransactionFormProps) {
           </View>
           <View>
             <Label title={t('Category')} />
-            <Button variant="bare" onPointerUp={onSelectCategory}>
+            <Button variant="bare" onClick={onSelectCategory}>
               <View>
                 {getCategoryName(selectedCategoryId ?? transaction.category) ??
                   ''}
@@ -194,7 +193,7 @@ export function TransactionForm({ transactions }: TransactionFormProps) {
           </View>
           <View>
             <Label title={t('Account')} />
-            <Button variant="bare" onPointerUp={onSelectAccount}>
+            <Button variant="bare" onClick={onSelectAccount}>
               <View>
                 {getAccountName(selectedAccountId ?? transaction.account) ?? ''}
                 <SvgCheveronRight
@@ -277,7 +276,7 @@ function TransactionAmount({
       <Input
         style={{
           height: '20vh',
-          width: '100',
+          width: '100vw',
           textAlign: 'center',
           ...styles.veryLargeText,
           color: amountInteger > 0 ? theme.noticeText : theme.errorText,

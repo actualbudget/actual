@@ -12,10 +12,7 @@ import { useParams } from 'react-router';
 import { Button } from '@actual-app/components/button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgSplit } from '@actual-app/components/icons/v0';
-import {
-  SvgAdd,
-  SvgPiggyBank,
-} from '@actual-app/components/icons/v1';
+import { SvgAdd, SvgPiggyBank } from '@actual-app/components/icons/v1';
 import { SvgPencilWriteAlternate } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -23,10 +20,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { q } from 'loot-core/shared/query';
-import {
-  groupById,
-  integerToCurrency,
-} from 'loot-core/shared/util';
+import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import { type TransactionEntity } from 'loot-core/types/models';
 
 import { TransactionForm } from './TransactionForm';
