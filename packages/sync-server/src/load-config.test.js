@@ -109,7 +109,6 @@ describe('tokenExpiration format', () => {
       /Invalid token_expiration value/,
     );
   });
-
 });
 
 describe('config schema', () => {
@@ -139,5 +138,4 @@ describe('config schema', () => {
       authorizationEndpoint,
     );
   });
-
 });
