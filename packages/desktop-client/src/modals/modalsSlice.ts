@@ -233,7 +233,7 @@ export type Modal =
   | {
       name: 'payee-autocomplete';
       options: {
-        onSelect: (payeeId: string) => void;
+        onSelect: (payeeId: string, payeeName: string) => void;
         onClose?: () => void;
       };
     }
