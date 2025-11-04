@@ -625,8 +625,19 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   });
                 }
 
+                const transactionForSchedule = unserializedTransaction.is_parent
+                  ? {
+                      ...unserializedTransaction,
+                      subtransactions: unserializedTransactions.filter(
+                        t =>
+                          t.is_child &&
+                          t.parent_id === unserializedTransaction.id,
+                      ),
+                    }
+                  : unserializedTransaction;
+
                 await createSingleTimeScheduleFromTransaction(
-                  unserializedTransaction,
+                  transactionForSchedule,
                 );
 
                 dispatch(
