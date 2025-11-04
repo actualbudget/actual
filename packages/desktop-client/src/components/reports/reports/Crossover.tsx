@@ -269,7 +269,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         expenseCategoryIds,
         incomeAccountIds: selectedIncomeAccountIds,
         safeWithdrawalRate: swr,
-        estimatedReturn: estimatedReturn == null ? null : estimatedReturn,
+        estimatedReturn,
         projectionType,
       });
       await crossoverSpreadsheet(spreadsheet, setData);
@@ -770,7 +770,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                       ? t('{{years}} years', {
                           years: format(yearsToRetire, 'number'),
                         })
-                      : 'N/A'}
+                      : t('N/A')}
                   </PrivacyFilter>
                 </span>
               </View>
@@ -784,7 +784,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                   <PrivacyFilter>
                     {targetMonthlyIncome != null && !isNaN(targetMonthlyIncome)
                       ? format(targetMonthlyIncome, 'financial')
-                      : 'N/A'}
+                      : t('N/A')}
                   </PrivacyFilter>
                 </span>
               </View>

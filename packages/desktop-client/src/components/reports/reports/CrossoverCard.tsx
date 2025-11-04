@@ -204,7 +204,7 @@ export function CrossoverCard({
                     ? t('{{years}} years', {
                         years: format(yearsToRetire, 'number'),
                       })
-                    : 'N/A'}
+                    : t('N/A')}
                 </PrivacyFilter>
               </Block>
               <Block
