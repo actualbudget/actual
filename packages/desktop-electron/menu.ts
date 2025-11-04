@@ -137,6 +137,32 @@ export function getMenu() {
         },
       ],
     });
+
+    // Window menu
+    const windowIdx = template.findIndex(t => t.role === 'window');
+    template[windowIdx].submenu = [
+      {
+        label: 'Close',
+        accelerator: 'CmdOrCtrl+W',
+        role: 'close',
+      },
+      {
+        label: 'Minimize',
+        accelerator: 'CmdOrCtrl+M',
+        role: 'minimize',
+      },
+      {
+        label: 'Zoom',
+        role: 'zoom',
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: 'Bring All to Front',
+        role: 'front',
+      },
+    ];
   }
 
   return Menu.buildFromTemplate(template);
