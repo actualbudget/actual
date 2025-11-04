@@ -4,6 +4,7 @@ import { parse as csv2json } from 'csv-parse/sync';
 import * as fs from '../../../platform/server/fs';
 import { logger } from '../../../platform/server/log';
 import { looselyParseAmount } from '../../../shared/util';
+import { type Encoding } from '../../../types/encoding';
 
 import { ofx2json } from './ofx2json';
 import { qif2json } from './qif2json';
@@ -66,6 +67,7 @@ export type ParseFileResult = {
 
 export type ParseFileOptions = {
   hasHeaderRow?: boolean;
+  encoding?: Encoding;
   delimiter?: string;
   fallbackMissingPayeeToMemo?: boolean;
   skipLines?: number;
@@ -109,7 +111,8 @@ async function parseCSV(
   options: ParseFileOptions,
 ): Promise<ParseFileResult> {
   const errors = Array<ParseError>();
-  let contents = await fs.readFile(filepath);
+  const bytes = await fs.readFile(filepath, 'binary');
+  let contents = new TextDecoder(options.encoding).decode(bytes);
 
   if (options.skipLines > 0) {
     const lines = contents.split(/\r?\n/);

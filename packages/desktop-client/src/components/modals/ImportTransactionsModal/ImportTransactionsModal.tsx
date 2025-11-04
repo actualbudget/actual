@@ -18,6 +18,7 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/fetch';
 import { type ParseFileOptions } from 'loot-core/server/transactions/import/parse-file';
 import { amountToInteger } from 'loot-core/shared/util';
+import { isSupportedEncoding, type Encoding } from 'loot-core/types/encoding';
 
 import { DateFormatSelect } from './DateFormatSelect';
 import { FieldMappings } from './FieldMappings';
@@ -195,6 +196,10 @@ export function ImportTransactionsModal({
   // options which are simple post-processing. That means if you
   // parsed different files without closing the modal, it wouldn't
   // re-read this.
+  const [encoding, setEncoding] = useState<Encoding>(() => {
+    const preferredEncoding = prefs[`csv-encoding-${accountId}`];
+    return isSupportedEncoding(preferredEncoding) ? preferredEncoding : 'utf-8';
+  });
   const [delimiter, setDelimiter] = useState(
     prefs[`csv-delimiter-${accountId}`] ||
       (filename.endsWith('.tsv') ? '\t' : ','),
@@ -452,6 +457,7 @@ export function ImportTransactionsModal({
   useEffect(() => {
     const fileType = getFileType(originalFileName);
     const parseOptions = getParseOptions(fileType, {
+      encoding,
       delimiter,
       hasHeaderRow,
       skipLines,
@@ -462,6 +468,7 @@ export function ImportTransactionsModal({
     parse(originalFileName, parseOptions);
   }, [
     originalFileName,
+    encoding,
     delimiter,
     hasHeaderRow,
     skipLines,
@@ -672,6 +679,7 @@ export function ImportTransactionsModal({
       savePrefs({
         [`csv-mappings-${accountId}`]: JSON.stringify(fieldMappings),
       });
+      savePrefs({ [`csv-encoding-${accountId}`]: encoding });
       savePrefs({ [`csv-delimiter-${accountId}`]: delimiter });
       savePrefs({ [`csv-has-header-${accountId}`]: String(hasHeaderRow) });
       savePrefs({ [`csv-skip-lines-${accountId}`]: String(skipLines) });
@@ -971,6 +979,38 @@ export function ImportTransactionsModal({
                         alignItems: 'baseline',
                       }}
                     >
+                      <Trans>Encoding:</Trans>
+                      <Select
+                        options={[
+                          ['utf-8', 'Unicode (UTF-8)'],
+                          [
+                            'windows-1252',
+                            'Western Europe (Windows-1252 / ISO-8859-1)',
+                          ],
+                          ['utf-16le', 'Unicode (UTF-16 LE)'],
+                          ['shift-jis', 'Japanese (Shift_JIS)'],
+                          ['euc-jp', 'Japanese (EUC-JP)'],
+                          ['iso-2022-jp', 'Japanese (ISO-2022-JP)'],
+                          ['gbk', 'Chinese Simplified (GBK)'],
+                          ['gb18030', 'Chinese Simplified (GB18030)'],
+                          ['big5', 'Chinese Traditional (Big5)'],
+                          ['euc-kr', 'Korean (EUC-KR)'],
+                        ]}
+                        value={encoding}
+                        onChange={value => {
+                          setEncoding(value);
+                        }}
+                        style={{ width: 140 }}
+                      />
+                    </label>
+                    <label
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        gap: 5,
+                        alignItems: 'baseline',
+                      }}
+                    >
                       <Trans>Delimiter:</Trans>
                       <Select
                         options={[
@@ -1127,8 +1167,8 @@ export function ImportTransactionsModal({
 
 function getParseOptions(fileType: string, options: ParseFileOptions = {}) {
   if (fileType === 'csv') {
-    const { delimiter, hasHeaderRow, skipLines } = options;
-    return { delimiter, hasHeaderRow, skipLines };
+    const { encoding, delimiter, hasHeaderRow, skipLines } = options;
+    return { encoding, delimiter, hasHeaderRow, skipLines };
   }
   if (isOfxFile(fileType)) {
     const { fallbackMissingPayeeToMemo, importNotes } = options;
