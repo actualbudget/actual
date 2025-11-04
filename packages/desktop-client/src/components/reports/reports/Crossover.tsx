@@ -114,7 +114,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     string[]
   >(accounts.map(a => a.id));
 
-  const [swr, setSwr] = useState(4);
+  const [swr, setSwr] = useState(0.04);
   const [estimatedReturn, setEstimatedReturn] = useState<number | null>(null);
   const [projectionType, setProjectionType] = useState<'trend' | 'hampel'>(
     'trend',
@@ -149,7 +149,7 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
 
     setSelectedExpenseCategories(initialExpenseCategories);
     setSelectedIncomeAccountIds(initialIncomeAccountIds);
-    setSwr(widget?.meta?.safeWithdrawalRate ?? 4);
+    setSwr(widget?.meta?.safeWithdrawalRate ?? 0.04);
     setEstimatedReturn(widget?.meta?.estimatedReturn ?? null);
     setProjectionType(widget?.meta?.projectionType ?? 'trend');
     setShowHiddenCategories(widget?.meta?.showHiddenCategories ?? false);
@@ -265,8 +265,8 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
         end,
         expenseCategoryIds,
         incomeAccountIds: selectedIncomeAccountIds,
-        safeWithdrawalRate: swr / 100,
-        estimatedReturn: estimatedReturn == null ? null : estimatedReturn / 100,
+        safeWithdrawalRate: swr,
+        estimatedReturn: estimatedReturn == null ? null : estimatedReturn,
         projectionType,
       });
       await crossoverSpreadsheet(spreadsheet, setData);
@@ -489,8 +489,14 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                   min={0}
                   max={100}
                   step={0.1}
-                  value={swr == null ? '' : swr}
-                  onChange={e => setSwr(e.target.valueAsNumber)}
+                  value={swr == null ? '' : Number((swr * 100).toFixed(2))}
+                  onChange={e =>
+                    setSwr(
+                      isNaN(e.target.valueAsNumber)
+                        ? 0
+                        : e.target.valueAsNumber / 100,
+                    )
+                  }
                   style={{ width: 120, marginBottom: 12 }}
                 />
               </View>
@@ -521,11 +527,18 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
                   min={0}
                   max={100}
                   step={0.1}
-                  value={estimatedReturn == null ? '' : estimatedReturn}
-                  onChange={e => {
-                    if (e.target.value === '') setEstimatedReturn(null);
-                    else setEstimatedReturn(e.target.valueAsNumber);
-                  }}
+                  value={
+                    estimatedReturn == null
+                      ? ''
+                      : Number((estimatedReturn * 100).toFixed(2))
+                  }
+                  onChange={e =>
+                    setEstimatedReturn(
+                      isNaN(e.target.valueAsNumber)
+                        ? null
+                        : e.target.valueAsNumber / 100,
+                    )
+                  }
                   style={{ width: 120 }}
                 />
                 {estimatedReturn == null && historicalReturn != null && (

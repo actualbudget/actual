@@ -116,7 +116,7 @@ export function CrossoverCard({
     [meta?.incomeAccountIds, accounts],
   );
 
-  const swr = meta?.safeWithdrawalRate ?? 4;
+  const swr = meta?.safeWithdrawalRate ?? 0.04;
   const estimatedReturn = meta?.estimatedReturn ?? null;
   const projectionType = meta?.projectionType ?? 'trend';
 
@@ -127,8 +127,8 @@ export function CrossoverCard({
         end,
         expenseCategoryIds,
         incomeAccountIds,
-        safeWithdrawalRate: swr / 100,
-        estimatedReturn: estimatedReturn == null ? null : estimatedReturn / 100,
+        safeWithdrawalRate: swr,
+        estimatedReturn: estimatedReturn == null ? null : estimatedReturn,
         projectionType,
       }),
     [
