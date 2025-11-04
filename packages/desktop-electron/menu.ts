@@ -1,4 +1,5 @@
-import { MenuItemConstructorOptions, Menu, BrowserWindow } from 'electron';
+import { Browser } from '@playwright/test';
+import { MenuItemConstructorOptions, Menu, BrowserWindow, app } from 'electron';
 
 export function getMenu() {
   const template: MenuItemConstructorOptions[] = [
@@ -60,7 +61,83 @@ export function getMenu() {
         },
       ],
     },
+    {
+      label: 'Edit',
+      submenu: [
+        {
+          label: 'Undo',
+          enabled: false,
+          accelerator: 'CmdOrCtrl+Z',
+          click: function (_menuItem, focusedWin) {
+            // Undo
+            if (focusedWin) {
+              (focusedWin as BrowserWindow).webContents.executeJavaScript(
+                '__actionsForMenu.undo()',
+              );
+            }
+          },
+        },
+        {
+          label: 'Redo',
+          enabled: false,
+          accelerator: 'Shift+CmdOrCtrl+Z',
+          click: function (_menuItem, focusedWin) {
+            // Redo
+            if (focusedWin) {
+              (focusedWin as BrowserWindow).webContents.executeJavaScript(
+                '__actionsForMenu.redo()',
+              );
+            }
+          },
+        },
+        {
+          type: 'separator',
+        },
+        {
+          role: 'cut',
+        },
+        {
+          role: 'copy',
+        },
+        {
+          role: 'paste',
+        },
+        {
+          role: 'pasteAndMatchStyle',
+        },
+        {
+          role: 'delete',
+        },
+        {
+          role: 'selectAll',
+        },
+      ],
+    },
   ];
+
+  if (process.platform === 'darwin') {
+    const name = app.getName();
+    template.unshift({
+      label: name,
+      submenu: [
+        {
+          role: 'hide',
+        },
+        {
+          role: 'hideOthers',
+        },
+        {
+          role: 'unhide',
+        },
+        {
+          type: 'separator',
+        },
+        {
+          role: 'quit',
+        },
+      ],
+    });
+  }
 
   return Menu.buildFromTemplate(template);
 }
