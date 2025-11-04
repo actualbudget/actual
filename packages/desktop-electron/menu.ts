@@ -1,4 +1,3 @@
-import { Browser } from '@playwright/test';
 import { MenuItemConstructorOptions, Menu, BrowserWindow, app } from 'electron';
 
 export function getMenu() {
@@ -116,6 +115,7 @@ export function getMenu() {
   ];
 
   if (process.platform === 'darwin') {
+    // Mac specific menu
     const name = app.getName();
     template.unshift({
       label: name,
