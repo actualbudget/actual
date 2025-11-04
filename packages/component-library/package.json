@@ -19,6 +19,7 @@
     "vitest": "^3.2.4"
   },
   "exports": {
+    ".": "./src/index.ts",
     "./hooks/*": "./src/hooks/*.ts",
     "./icons/logo": "./src/icons/logo/index.ts",
     "./icons/v0": "./src/icons/v0/index.ts",
@@ -49,7 +50,8 @@
     "./toggle": "./src/Toggle.tsx",
     "./tooltip": "./src/Tooltip.tsx",
     "./view": "./src/View.tsx",
-    "./color-picker": "./src/ColorPicker.tsx"
+    "./color-picker": "./src/ColorPicker.tsx",
+    "./props/*": "./src/props/*.ts"
   },
   "scripts": {
     "generate:icons": "rm src/icons/*/*.tsx; cd src/icons && svgr --template template.ts --index-template index-template.ts --typescript --expand-props start -d . .",
