@@ -23,14 +23,22 @@ import { q } from 'loot-core/shared/query';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import { type TransactionEntity } from 'loot-core/types/models';
 
-import { TransactionForm } from './TransactionForm';
+import {
+  TransactionForm,
+  TransactionFormProvider,
+  useTransactionFormDispatch,
+  useTransactionFormState,
+} from './TransactionForm';
 
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import { getPrettyPayee } from '@desktop-client/components/mobile/utils';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
+import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useTransactions } from '@desktop-client/hooks/useTransactions';
+import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 export function TransactionFormPage() {
   const { t } = useTranslation();
@@ -49,16 +57,16 @@ export function TransactionFormPage() {
   // );
 
   const getPayee = useCallback(
-    trans => {
-      return trans?.payee && payeesById?.[trans.payee];
+    (trans: TransactionEntity) => {
+      return trans?.payee ? payeesById?.[trans.payee] : null;
     },
     [payeesById],
   );
 
   const getTransferAccount = useCallback(
-    trans => {
+    (trans: TransactionEntity) => {
       const payee = trans && getPayee(trans);
-      return payee?.transfer_acct && accountsById?.[payee.transfer_acct];
+      return payee?.transfer_acct ? accountsById?.[payee.transfer_acct] : null;
     },
     [accountsById, getPayee],
   );
@@ -84,86 +92,90 @@ export function TransactionFormPage() {
     transferAccount: getTransferAccount(transaction),
   });
 
-  const onSave = useCallback(() => {}, []);
-  const onAddSplit = useCallback(() => {}, []);
-  const onSplit = useCallback(() => {}, []);
-  const onSelectAccount = useCallback(() => {}, []);
-  const onEmptySplitFound = useCallback(() => {}, []);
-
   return (
-    <Page
-      header={
-        <MobilePageHeader
-          title={
-            !transaction?.payee
-              ? !transactionId
-                ? t('New Transaction')
-                : t('Transaction')
-              : title
-          }
-          leftContent={<MobileBackButton />}
-        />
-      }
-      footer={
-        <Footer
-          transactions={transactions}
-          isAdding={!transactionId}
-          onAdd={onSave}
-          onSave={onSave}
-          onSplit={onSplit}
-          onAddSplit={onAddSplit}
-          onEmptySplitFound={onEmptySplitFound}
-          onSelectAccount={onSelectAccount}
-        />
-      }
-      padding={0}
-    >
-      {isLoading ? (
-        <AnimatedLoading width={15} height={15} />
-      ) : (
-        <TransactionForm transactions={transactions} />
-      )}
-    </Page>
+    <TransactionFormProvider transactions={transactions}>
+      <Page
+        header={
+          <MobilePageHeader
+            title={
+              !transaction?.payee
+                ? !transactionId
+                  ? t('New Transaction')
+                  : t('Transaction')
+                : title
+            }
+            leftContent={<MobileBackButton />}
+          />
+        }
+        footer={<Footer transactions={transactions} />}
+        padding={0}
+      >
+        {isLoading ? (
+          <AnimatedLoading width={15} height={15} />
+        ) : (
+          <TransactionForm transactions={transactions} />
+        )}
+      </Page>
+    </TransactionFormProvider>
   );
 }
 
 type FooterProps = {
   transactions: ReadonlyArray<TransactionEntity>;
-  isAdding: boolean;
-  onAdd: () => void;
-  onSave: () => void;
-  onSplit: (transactionId: string) => void;
-  onAddSplit: (transactionId: string) => void;
-  onEmptySplitFound?: (transactionId: string) => void;
-  onSelectAccount: (transactionId: string) => void;
 };
 
-function Footer({
-  transactions,
-  isAdding,
-  onAdd,
-  onSave,
-  onSplit,
-  onAddSplit,
-  onEmptySplitFound,
-  onSelectAccount,
-}: FooterProps) {
+function Footer({ transactions }: FooterProps) {
+  const { transactionId } = useParams();
+  const isAdding = !transactionId;
   const [transaction, ...childTransactions] = transactions;
   const emptySplitTransaction = childTransactions.find(t => t.amount === 0);
+
+  const transactionFormDispatch = useTransactionFormDispatch();
+
   const onClickRemainingSplit = () => {
     if (!transaction) {
       return;
     }
 
     if (childTransactions.length === 0) {
-      onSplit(transaction.id);
+      transactionFormDispatch({ type: 'split' });
     } else {
       if (!emptySplitTransaction) {
-        onAddSplit(transaction.id);
+        transactionFormDispatch({ type: 'add-split' });
       } else {
-        onEmptySplitFound?.(emptySplitTransaction.id);
+        transactionFormDispatch({
+          type: 'focus',
+          id: emptySplitTransaction.id,
+        });
       }
     }
+  };
+
+  const dispatch = useDispatch();
+
+  const onSelectAccount = () => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'account-autocomplete',
+          options: {
+            onSelect: (accountId: string) => {
+              transactionFormDispatch({
+                type: 'set-account',
+                account: accountId,
+              });
+            },
+          },
+        },
+      }),
+    );
+  };
+
+  const navigate = useNavigate();
+
+  const onSubmit = () => {
+    transactionFormDispatch({ type: 'submit' });
+    navigate(-1);
   };
 
   return (
@@ -219,7 +231,7 @@ function Footer({
         <Button
           variant="primary"
           style={{ height: styles.mobileMinHeight }}
-          onPress={() => onSelectAccount(transaction.id)}
+          onPress={onSelectAccount}
         >
           <SvgPiggyBank width={17} height={17} />
           <Text
@@ -235,7 +247,7 @@ function Footer({
         <Button
           variant="primary"
           style={{ height: styles.mobileMinHeight }}
-          onPress={onAdd}
+          // onPress={onSubmit}
         >
           <SvgAdd width={17} height={17} />
           <Text
@@ -251,7 +263,7 @@ function Footer({
         <Button
           variant="primary"
           style={{ height: styles.mobileMinHeight }}
-          onPress={onSave}
+          onPress={onSubmit}
         >
           <SvgPencilWriteAlternate width={16} height={16} />
           <Text

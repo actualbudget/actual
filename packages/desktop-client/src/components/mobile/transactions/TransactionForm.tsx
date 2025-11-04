@@ -1,4 +1,15 @@
-import { useMemo, useCallback, useState, type ComponentProps } from 'react';
+import {
+  useMemo,
+  useCallback,
+  useState,
+  type ComponentProps,
+  createContext,
+  type ReactNode,
+  useReducer,
+  type Dispatch,
+  useContext,
+  useEffect,
+} from 'react';
 import { Form } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
@@ -13,10 +24,12 @@ import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
+import { currentDay } from 'loot-core/shared/months';
 import {
   appendDecimals,
   currencyToInteger,
   groupById,
+  type IntegerAmount,
   integerToCurrency,
 } from 'loot-core/shared/util';
 import { type TransactionEntity } from 'loot-core/types/models';
@@ -25,8 +38,281 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePayees } from '@desktop-client/hooks/usePayees';
+import { useTransactionBatchActions } from '@desktop-client/hooks/useTransactionBatchActions';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
+
+type TransactionFormState = {
+  transactions: Record<
+    TransactionEntity['id'],
+    Pick<
+      TransactionEntity,
+      | 'id'
+      | 'amount'
+      | 'payee'
+      | 'category'
+      | 'account'
+      | 'date'
+      | 'cleared'
+      | 'notes'
+    >
+  >;
+  focusedTransaction: TransactionEntity['id'] | null;
+  isSubmitting: boolean;
+};
+
+type TransactionFormActions =
+  | {
+      type: 'set-amount';
+      id: TransactionEntity['id'];
+      amount: TransactionEntity['amount'];
+    }
+  | {
+      type: 'set-payee';
+      id: TransactionEntity['id'];
+      payee: TransactionEntity['payee'] | null;
+    }
+  | {
+      type: 'set-category';
+      id: TransactionEntity['id'];
+      category: TransactionEntity['category'] | null;
+    }
+  | {
+      type: 'set-notes';
+      id: TransactionEntity['id'];
+      notes: NonNullable<TransactionEntity['notes']>;
+    }
+  | {
+      type: 'set-account';
+      account: TransactionEntity['account'] | null;
+    }
+  | {
+      type: 'set-date';
+      date: NonNullable<TransactionEntity['date']>;
+    }
+  | {
+      type: 'set-cleared';
+      cleared: NonNullable<TransactionEntity['cleared']>;
+    }
+  | {
+      type: 'split';
+    }
+  | {
+      type: 'add-split';
+    }
+  | {
+      type: 'focus';
+      id: TransactionEntity['id'];
+    }
+  | {
+      type: 'reset';
+    }
+  | {
+      type: 'submit';
+    };
+
+const TransactionFormStateContext = createContext<TransactionFormState>({
+  transactions: {},
+  focusedTransaction: null,
+  isSubmitting: false,
+});
+
+const TransactionFormDispatchContext =
+  createContext<Dispatch<TransactionFormActions> | null>(null);
+
+type TransactionFormProviderProps = {
+  children: ReactNode;
+  transactions: readonly TransactionEntity[];
+};
+
+export function TransactionFormProvider({
+  children,
+  transactions,
+}: TransactionFormProviderProps) {
+  const unmodifiedTransactions = useMemo(() => {
+    return transactions.reduce(
+      (acc, transaction) => {
+        acc[transaction.id] = {
+          id: transaction.id,
+          amount: transaction.amount,
+          payee: transaction.payee,
+          category: transaction.category,
+          account: transaction.account,
+          date: transaction.date,
+          cleared: transaction.cleared,
+          notes: transaction.notes,
+        };
+        return acc;
+      },
+      {} as TransactionFormState['transactions'],
+    );
+  }, [transactions]);
+
+  const [state, dispatch] = useReducer(
+    (state: TransactionFormState, action: TransactionFormActions) => {
+      switch (action.type) {
+        case 'set-amount':
+          return {
+            ...state,
+            transactions: {
+              ...state.transactions,
+              [action.id]: {
+                ...state.transactions[action.id],
+                amount: action.amount,
+              },
+            },
+          };
+        case 'set-payee':
+          return {
+            ...state,
+            transactions: {
+              ...state.transactions,
+              [action.id]: {
+                ...state.transactions[action.id],
+                payee: action.payee,
+              },
+            },
+          };
+        case 'set-category':
+          return {
+            ...state,
+            transactions: {
+              ...state.transactions,
+              [action.id]: {
+                ...state.transactions[action.id],
+                category: action.category,
+              },
+            },
+          };
+        case 'set-notes':
+          return {
+            ...state,
+            transactions: {
+              ...state.transactions,
+              [action.id]: {
+                ...state.transactions[action.id],
+                notes: action.notes,
+              },
+            },
+          };
+        case 'set-account':
+          return {
+            ...state,
+            transactions: Object.keys(state.transactions).reduce(
+              (acc, id) => ({
+                ...acc,
+                [id]: {
+                  ...state.transactions[id],
+                  account: action.account,
+                },
+              }),
+              {} as TransactionFormState['transactions'],
+            ),
+          };
+        case 'set-date':
+          return {
+            ...state,
+            transactions: Object.keys(state.transactions).reduce(
+              (acc, id) => ({
+                ...acc,
+                [id]: {
+                  ...state.transactions[id],
+                  date: action.date,
+                },
+              }),
+              {} as TransactionFormState['transactions'],
+            ),
+          };
+        case 'set-cleared':
+          return {
+            ...state,
+            transactions: Object.keys(state.transactions).reduce(
+              (acc, id) => ({
+                ...acc,
+                [id]: {
+                  ...state.transactions[id],
+                  cleared: action.cleared,
+                },
+              }),
+              {} as TransactionFormState['transactions'],
+            ),
+          };
+        case 'focus':
+          return {
+            ...state,
+            focusedTransaction: action.id,
+          };
+        case 'reset':
+          return {
+            ...state,
+            transactions: unmodifiedTransactions,
+            isSubmitting: false,
+          };
+        case 'submit':
+          return {
+            ...state,
+            isSubmitting: true,
+          };
+        default:
+          return state;
+      }
+    },
+    {
+      transactions: unmodifiedTransactions,
+      focusedTransaction: null,
+      isSubmitting: false,
+    } as TransactionFormState,
+  );
+
+  useEffect(() => {
+    dispatch({ type: 'reset' });
+  }, [unmodifiedTransactions]);
+
+  const { onBatchSave } = useTransactionBatchActions();
+
+  useEffect(() => {
+    async function saveTransactions() {
+      const transactionsToSave = Object.values(state.transactions);
+      await onBatchSave({
+        transactions: transactionsToSave,
+        onSuccess: () => {
+          dispatch({ type: 'reset' });
+        },
+      });
+    }
+    if (state.isSubmitting) {
+      saveTransactions().catch(console.error);
+    }
+  }, [state.isSubmitting, state.transactions, onBatchSave]);
+
+  return (
+    <TransactionFormStateContext.Provider value={state}>
+      <TransactionFormDispatchContext.Provider value={dispatch}>
+        {children}
+      </TransactionFormDispatchContext.Provider>
+    </TransactionFormStateContext.Provider>
+  );
+}
+
+export function useTransactionFormState() {
+  const context = useContext(TransactionFormStateContext);
+  if (context === null) {
+    throw new Error(
+      'useTransactionFormState must be used within a TransactionFormProvider',
+    );
+  }
+  return context;
+}
+
+export function useTransactionFormDispatch() {
+  const context = useContext(TransactionFormDispatchContext);
+  if (context === null) {
+    throw new Error(
+      'useTransactionFormDispatch must be used within a TransactionFormProvider',
+    );
+  }
+  return context;
+}
 
 type TransactionFormProps = {
   transactions: ReadonlyArray<TransactionEntity>;
@@ -43,6 +329,9 @@ export function TransactionForm({ transactions }: TransactionFormProps) {
   const payeesById = useMemo(() => groupById(payees), [payees]);
   const getPayeeName = useCallback(
     (payeeId: TransactionEntity['payee']) => {
+      if (!payeeId) {
+        return null;
+      }
       return payeesById[payeeId]?.name ?? null;
     },
     [payeesById],
@@ -52,6 +341,9 @@ export function TransactionForm({ transactions }: TransactionFormProps) {
   const categoriesById = useMemo(() => groupById(categories), [categories]);
   const getCategoryName = useCallback(
     (categoryId: TransactionEntity['category']) => {
+      if (!categoryId) {
+        return null;
+      }
       return categoriesById[categoryId]?.name ?? null;
     },
     [categoriesById],
@@ -61,54 +353,66 @@ export function TransactionForm({ transactions }: TransactionFormProps) {
   const accountsById = useMemo(() => groupById(accounts), [accounts]);
   const getAccountName = useCallback(
     (accountId: TransactionEntity['account']) => {
+      if (!accountId) {
+        return null;
+      }
       return accountsById[accountId]?.name ?? null;
     },
     [accountsById],
   );
 
-  const [selectedPayeeId, setSelectedPayeeId] = useState<
-    TransactionEntity['payee'] | null
-  >(transaction?.payee ?? null);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<
-    TransactionEntity['category'] | null
-  >(transaction?.category ?? null);
-  const [selectedAccountId, setSelectedAccountId] = useState<
-    TransactionEntity['account'] | null
-  >(transaction?.account ?? null);
-  const [selectedDate, setSelectedDate] = useState<TransactionEntity['date']>(
-    transaction?.date ?? null,
-  );
-  const [isCleared, setIsCleared] = useState<TransactionEntity['cleared']>(
-    !!transaction?.cleared,
-  );
-  const [notes, setNotes] = useState<TransactionEntity['notes']>(
-    transaction?.notes ?? '',
+  const transactionFormState = useTransactionFormState();
+
+  const getTransactionState = useCallback(
+    (id: TransactionEntity['id']) => {
+      if (!id) {
+        return null;
+      }
+      return transactionFormState.transactions[id] ?? null;
+    },
+    [transactionFormState.transactions],
   );
 
-  const onSelectPayee = () => {
+  const transactionFormDispatch = useTransactionFormDispatch();
+
+  const onSelectPayee = (id: TransactionEntity['id']) => {
     dispatch(
       pushModal({
         modal: {
           name: 'payee-autocomplete',
           options: {
-            onSelect: setSelectedPayeeId,
+            onSelect: payeeId =>
+              transactionFormDispatch({
+                type: 'set-payee',
+                id,
+                payee: payeeId,
+              }),
           },
         },
       }),
     );
   };
 
-  const onSelectCategory = () => {
+  const onSelectCategory = (id: TransactionEntity['id']) => {
     dispatch(
       pushModal({
         modal: {
           name: 'category-autocomplete',
           options: {
-            onSelect: setSelectedCategoryId,
+            onSelect: categoryId =>
+              transactionFormDispatch({
+                type: 'set-category',
+                id,
+                category: categoryId,
+              }),
           },
         },
       }),
     );
+  };
+
+  const onChangeNotes = (id: TransactionEntity['id'], notes: string) => {
+    transactionFormDispatch({ type: 'set-notes', id, notes });
   };
 
   const onSelectAccount = () => {
@@ -117,7 +421,11 @@ export function TransactionForm({ transactions }: TransactionFormProps) {
         modal: {
           name: 'account-autocomplete',
           options: {
-            onSelect: setSelectedAccountId,
+            onSelect: accountId =>
+              transactionFormDispatch({
+                type: 'set-account',
+                account: accountId,
+              }),
           },
         },
       }),
@@ -125,11 +433,22 @@ export function TransactionForm({ transactions }: TransactionFormProps) {
   };
 
   const onSelectDate = (date: string) => {
-    setSelectedDate(date);
+    transactionFormDispatch({ type: 'set-date', date });
   };
 
-  const onChangeNotes = (notes: string) => {
-    setNotes(notes);
+  const onUpdateAmount = (
+    id: TransactionEntity['id'],
+    amount: IntegerAmount,
+  ) => {
+    console.log('onUpdateAmount', amount);
+    transactionFormDispatch({ type: 'set-amount', id, amount });
+  };
+
+  const onToggleCleared = (isCleared: boolean) => {
+    transactionFormDispatch({
+      type: 'set-cleared',
+      cleared: isCleared,
+    });
   };
 
   if (!transaction) {
@@ -140,7 +459,10 @@ export function TransactionForm({ transactions }: TransactionFormProps) {
     <Form data-testid="transaction-form">
       <View style={{ padding: styles.mobileEditingPadding, gap: 40 }}>
         <View>
-          <TransactionAmount transaction={transaction} />
+          <TransactionAmount
+            transaction={transaction}
+            onUpdate={amount => onUpdateAmount(transaction.id, amount)}
+          />
         </View>
         <View
           className={css({
@@ -160,9 +482,12 @@ export function TransactionForm({ transactions }: TransactionFormProps) {
         >
           <View>
             <Label title={t('Payee')} />
-            <Button variant="bare" onClick={onSelectPayee}>
+            <Button
+              variant="bare"
+              onClick={() => onSelectPayee(transaction.id)}
+            >
               <View>
-                {getPayeeName(selectedPayeeId ?? transaction.payee) ?? ''}
+                {getPayeeName(getTransactionState(transaction.id)?.payee)}
                 <SvgCheveronRight
                   style={{
                     flexShrink: 0,
@@ -176,10 +501,12 @@ export function TransactionForm({ transactions }: TransactionFormProps) {
           </View>
           <View>
             <Label title={t('Category')} />
-            <Button variant="bare" onClick={onSelectCategory}>
+            <Button
+              variant="bare"
+              onClick={() => onSelectCategory(transaction.id)}
+            >
               <View>
-                {getCategoryName(selectedCategoryId ?? transaction.category) ??
-                  ''}
+                {getCategoryName(getTransactionState(transaction.id)?.category)}
                 <SvgCheveronRight
                   style={{
                     flexShrink: 0,
@@ -195,7 +522,7 @@ export function TransactionForm({ transactions }: TransactionFormProps) {
             <Label title={t('Account')} />
             <Button variant="bare" onClick={onSelectAccount}>
               <View>
-                {getAccountName(selectedAccountId ?? transaction.account) ?? ''}
+                {getAccountName(getTransactionState(transaction.id)?.account)}
                 <SvgCheveronRight
                   style={{
                     flexShrink: 0,
@@ -211,7 +538,7 @@ export function TransactionForm({ transactions }: TransactionFormProps) {
             <Label title={t('Date')} />
             <Input
               type="date"
-              value={selectedDate ?? transaction.date ?? ''}
+              value={getTransactionState(transaction.id)?.date ?? currentDay()}
               onChangeValue={onSelectDate}
             />
           </View>
@@ -219,13 +546,16 @@ export function TransactionForm({ transactions }: TransactionFormProps) {
             <Label title={t('Cleared')} />
             <FormToggle
               id="Cleared"
-              isOn={isCleared}
-              onToggle={on => setIsCleared(on)}
+              isOn={getTransactionState(transaction.id)?.cleared ?? false}
+              onToggle={onToggleCleared}
             />
           </View>
           <View>
             <Label title={t('Notes')} />
-            <Input value={transaction.notes} onChangeValue={onChangeNotes} />
+            <Input
+              value={getTransactionState(transaction.id)?.notes ?? ''}
+              onChangeValue={notes => onChangeNotes(transaction.id, notes)}
+            />
           </View>
         </View>
       </View>
@@ -233,11 +563,12 @@ export function TransactionForm({ transactions }: TransactionFormProps) {
   );
 }
 
-function TransactionAmount({
-  transaction,
-}: {
+type TransactionAmountProps = {
   transaction: TransactionEntity;
-}) {
+  onUpdate: (amount: IntegerAmount) => void;
+};
+
+function TransactionAmount({ transaction, onUpdate }: TransactionAmountProps) {
   const { t } = useTranslation();
   const format = useFormat();
   const [value, setValue] = useState(format(transaction.amount, 'financial'));
@@ -249,7 +580,7 @@ function TransactionAmount({
     [setValue],
   );
 
-  const onUpdate = useCallback(
+  const _onUpdate = useCallback(
     (value: string) => {
       const parsedAmount = currencyToInteger(value) || 0;
       setValue(
@@ -259,13 +590,13 @@ function TransactionAmount({
       );
 
       if (parsedAmount !== transaction.amount) {
-        // Update DB
+        onUpdate(parsedAmount);
       }
     },
     [format],
   );
 
-  const amountInteger = currencyToInteger(value);
+  const amountInteger = value ? (currencyToInteger(value) ?? 0) : 0;
 
   return (
     <View style={{ alignItems: 'center', gap: 10 }}>
@@ -284,7 +615,7 @@ function TransactionAmount({
         }}
         value={value || ''}
         onChangeValue={onChangeValue}
-        onUpdate={onUpdate}
+        onUpdate={_onUpdate}
       />
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
         <Text style={styles.largeText}>-</Text>
@@ -292,7 +623,7 @@ function TransactionAmount({
           id="TransactionAmountSign"
           isOn={amountInteger > 0}
           isDisabled={amountInteger === 0}
-          onToggle={() => setValue(integerToCurrency(-amountInteger))}
+          onToggle={() => _onUpdate(integerToCurrency(-amountInteger))}
         />
         <Text style={styles.largeText}>+</Text>
       </View>

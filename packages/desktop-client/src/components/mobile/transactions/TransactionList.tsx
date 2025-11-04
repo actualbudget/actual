@@ -632,22 +632,27 @@ function SelectedTransactionsFloatingActionBar({
                     },
                   });
                 } else if (type === 'transfer') {
-                  onSetTransfer?.(selectedTransactionsArray, payees, ids =>
-                    showUndoNotification({
-                      message: t(
-                        'Successfully marked {{count}} transactions as transfer.',
-                        {
-                          count: ids.length,
-                        },
-                      ),
-                    }),
-                  );
+                  onSetTransfer?.({
+                    ids: selectedTransactionsArray,
+                    payees,
+                    onSuccess: ids =>
+                      showUndoNotification({
+                        message: t(
+                          'Successfully marked {{count}} transactions as transfer.',
+                          {
+                            count: ids.length,
+                          },
+                        ),
+                      }),
+                  });
                 } else if (type === 'merge') {
-                  onMerge?.(selectedTransactionsArray, () =>
-                    showUndoNotification({
-                      message: t('Successfully merged transactions'),
-                    }),
-                  );
+                  onMerge?.({
+                    ids: selectedTransactionsArray,
+                    onSuccess: () =>
+                      showUndoNotification({
+                        message: t('Successfully merged transactions'),
+                      }),
+                  });
                 }
                 setIsMoreOptionsMenuOpen(false);
               }}

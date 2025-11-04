@@ -5,6 +5,7 @@ import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
   deleteTransaction,
+  isTemporaryId,
   realizeTempTransactions,
   ungroupTransaction,
   ungroupTransactions,
@@ -55,6 +56,22 @@ type BatchLinkScheduleProps = {
 
 type BatchUnlinkScheduleProps = {
   ids: Array<TransactionEntity['id']>;
+  onSuccess?: (ids: Array<TransactionEntity['id']>) => void;
+};
+
+type SetTransferProps = {
+  ids: Array<TransactionEntity['id']>;
+  payees: PayeeEntity[];
+  onSuccess?: (ids: Array<TransactionEntity['id']>) => void;
+};
+
+type MergeProps = {
+  ids: Array<TransactionEntity['id']>;
+  onSuccess?: () => void;
+};
+
+type BatchSaveProps = {
+  transactions: TransactionEntity[];
   onSuccess?: (ids: Array<TransactionEntity['id']>) => void;
 };
 
@@ -456,11 +473,11 @@ export function useTransactionBatchActions() {
     }
   };
 
-  const onSetTransfer = async (
-    ids: string[],
-    payees: PayeeEntity[],
-    onSuccess: (ids: string[]) => void,
-  ) => {
+  const onSetTransfer = async ({
+    ids,
+    payees,
+    onSuccess,
+  }: SetTransferProps) => {
     const onConfirmTransfer = async (ids: string[]) => {
       const { data: transactions } = await aqlQuery(
         q('transactions')
@@ -506,12 +523,60 @@ export function useTransactionBatchActions() {
     );
   };
 
-  const onMerge = async (ids: string[], onSuccess: () => void) => {
+  const onMerge = async ({ ids, onSuccess }: MergeProps) => {
     await send(
       'transactions-merge',
       ids.map(id => ({ id })),
     );
-    onSuccess();
+    onSuccess?.();
+  };
+
+  const onBatchSave = async ({ transactions, onSuccess }: BatchSaveProps) => {
+    if (transactions.length === 0) {
+      return;
+    }
+
+    const { data: unmodifiedTransactions } = await aqlQuery(
+      q('transactions')
+        .filter({ id: { $oneof: transactions.map(t => t.id) } })
+        .select('*'),
+    );
+
+    const changes: Diff<TransactionEntity> = {
+      added: [],
+      deleted: [],
+      updated: [],
+    };
+
+    let transactionsToSave = transactions.some(t => isTemporaryId(t.id))
+      ? realizeTempTransactions(transactions)
+      : transactions;
+
+    transactionsToSave.forEach(transaction => {
+      const { diff } = updateTransaction(unmodifiedTransactions, transaction);
+
+      // TODO: We need to keep an updated list of transactions so
+      // the logic in `updateTransaction`, particularly about
+      // updating split transactions, works. This isn't ideal and we
+      // should figure something else out
+      transactionsToSave = applyChanges<TransactionEntity>(
+        diff,
+        transactionsToSave,
+      );
+
+      changes.deleted = changes.deleted
+        ? changes.deleted.concat(diff.deleted)
+        : diff.deleted;
+      changes.updated = changes.updated
+        ? changes.updated.concat(diff.updated)
+        : diff.updated;
+      changes.added = changes.added
+        ? changes.added.concat(diff.added)
+        : diff.added;
+    });
+
+    await send('transactions-batch-update', changes);
+    onSuccess?.(transactionsToSave.map(t => t.id));
   };
 
   return {
@@ -522,5 +587,6 @@ export function useTransactionBatchActions() {
     onBatchUnlinkSchedule,
     onSetTransfer,
     onMerge,
+    onBatchSave,
   };
 }
