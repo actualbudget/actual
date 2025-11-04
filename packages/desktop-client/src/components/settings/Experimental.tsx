@@ -83,7 +83,7 @@ function GlobalFeatureToggle({
   error,
   children,
 }: GlobalFeatureToggleProps) {
-  const [enabled, setEnabled] = useSyncedPref(prefName, { isGlobal: true });
+  const [enabled, setEnabled] = useSyncedPref(prefName);
 
   return (
     <label style={{ display: 'flex' }}>
