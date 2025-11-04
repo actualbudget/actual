@@ -83,7 +83,7 @@ async function saveDiffAndApply(diff, changes, onChange, learnCategories) {
   );
 }
 
-async function createSingleTimeScheduleFromTransaction(
+export async function createSingleTimeScheduleFromTransaction(
   transaction: TransactionEntity,
 ): Promise<ScheduleEntity['id']> {
   const conditions: RuleConditionEntity[] = [

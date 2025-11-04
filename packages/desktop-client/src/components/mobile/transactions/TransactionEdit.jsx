@@ -65,6 +65,7 @@ import {
 } from '@desktop-client/components/mobile/MobileForms';
 import { getPrettyPayee } from '@desktop-client/components/mobile/utils';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
+import { createSingleTimeScheduleFromTransaction } from '@desktop-client/components/transactions/TransactionList';
 import { AmountInput } from '@desktop-client/components/util/AmountInput';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useCategories } from '@desktop-client/hooks/useCategories';
@@ -624,141 +625,9 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   });
                 }
 
-                const formattedDate = monthUtils.format(
-                  unserializedTransaction.date,
-                  'MMM dd, yyyy',
+                await createSingleTimeScheduleFromTransaction(
+                  unserializedTransaction,
                 );
-                const timestamp = Date.now();
-                const scheduleName = `Auto-created future transaction (${formattedDate}) - ${timestamp}`;
-
-                const conditions = [
-                  {
-                    op: 'is',
-                    field: 'date',
-                    value: unserializedTransaction.date,
-                  },
-                ];
-
-                const actions = [];
-
-                const conditionFields = ['amount', 'payee', 'account'];
-
-                conditionFields.forEach(field => {
-                  const value = unserializedTransaction[field];
-                  if (value != null && value !== '') {
-                    conditions.push({
-                      op: 'is',
-                      field,
-                      value,
-                    });
-                  }
-                });
-
-                if (
-                  unserializedTransaction.is_parent &&
-                  unserializedTransaction.subtransactions
-                ) {
-                  if (unserializedTransaction.notes) {
-                    actions.push({
-                      op: 'set',
-                      field: 'notes',
-                      value: unserializedTransaction.notes,
-                      options: {
-                        splitIndex: 0,
-                      },
-                    });
-                  }
-
-                  unserializedTransaction.subtransactions.forEach(
-                    (split, index) => {
-                      const splitIndex = index + 1;
-
-                      if (split.amount != null) {
-                        actions.push({
-                          op: 'set-split-amount',
-                          value: split.amount,
-                          options: {
-                            splitIndex,
-                            method: 'fixed-amount',
-                          },
-                        });
-                      }
-
-                      if (split.category) {
-                        actions.push({
-                          op: 'set',
-                          field: 'category',
-                          value: split.category,
-                          options: {
-                            splitIndex,
-                          },
-                        });
-                      }
-
-                      if (split.notes) {
-                        actions.push({
-                          op: 'set',
-                          field: 'notes',
-                          value: split.notes,
-                          options: {
-                            splitIndex,
-                          },
-                        });
-                      }
-                    },
-                  );
-                } else {
-                  if (unserializedTransaction.category) {
-                    actions.push({
-                      op: 'set',
-                      field: 'category',
-                      value: unserializedTransaction.category,
-                    });
-                  }
-
-                  if (unserializedTransaction.notes) {
-                    actions.push({
-                      op: 'set',
-                      field: 'notes',
-                      value: unserializedTransaction.notes,
-                    });
-                  }
-                }
-
-                const scheduleId = await send('schedule/create', {
-                  conditions,
-                  schedule: {
-                    posts_transaction: true,
-                    name: scheduleName,
-                  },
-                });
-
-                if (actions.length > 0) {
-                  const schedules = await send(
-                    'query',
-                    q('schedules')
-                      .filter({ id: scheduleId })
-                      .select('rule')
-                      .serialize(),
-                  );
-
-                  const ruleId = schedules?.data?.[0]?.rule;
-
-                  if (ruleId) {
-                    const rule = await send('rule-get', { id: ruleId });
-
-                    if (rule) {
-                      const linkScheduleActions = rule.actions.filter(
-                        a => a.op === 'link-schedule',
-                      );
-
-                      await send('rule-update', {
-                        ...rule,
-                        actions: [...linkScheduleActions, ...actions],
-                      });
-                    }
-                  }
-                }
 
                 dispatch(
                   addNotification({
