@@ -764,7 +764,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
                   addNotification({
                     notification: {
                       type: 'message',
-                      message: 'Schedule created successfully',
+                      message: t('Schedule created successfully'),
                     },
                   }),
                 );
@@ -804,6 +804,7 @@ const TransactionEditInner = memo(function TransactionEditInner({
     onSave,
     unserializedTransactions,
     upcomingLength,
+    t,
   ]);
 
   const onUpdateInner = useCallback(

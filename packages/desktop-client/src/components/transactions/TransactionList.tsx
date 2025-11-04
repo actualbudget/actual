@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 // TODO: remove strict
 import { useCallback, useLayoutEffect, useRef, type RefObject } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 
@@ -319,6 +320,8 @@ export function TransactionList({
   onScheduleAction,
   onMakeAsNonSplitTransactions,
 }: TransactionListProps) {
+  const { t } = useTranslation();
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [learnCategories = 'true'] = useSyncedPref('learn-categories');
@@ -355,7 +358,7 @@ export function TransactionList({
                   addNotification({
                     notification: {
                       type: 'message',
-                      message: 'Schedule created successfully',
+                      message: t('Schedule created successfully'),
                     },
                   }),
                 );
@@ -370,7 +373,7 @@ export function TransactionList({
         }),
       );
     },
-    [dispatch, onRefetch, upcomingLength],
+    [dispatch, onRefetch, upcomingLength, t],
   );
 
   const onAdd = useCallback(
