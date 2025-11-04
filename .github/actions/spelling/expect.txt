@@ -29,6 +29,7 @@ CAGLPTPL
 Caixa
 CAMT
 cashflow
+Cetelem
 cimode
 Cloudflare
 CMCIFRPAXXX
@@ -48,12 +49,14 @@ DUSSDEDDXXX
 DUSSELDORF
 ENTERCARD
 Entra
+EUA
 Eurocard
 fidd
 Fineco
 Finicity
 Fintro
 Finverse
+Flathub
 FORTUNEO
 FTNOFRP
 Gemeinschaftsbank
@@ -77,10 +80,13 @@ jfdoming
 JMD
 KBCBE
 Keycloak
+Khurozov
 KORT
 Kreditbank
+lage
 LHV
 LHVBEE
+LKR
 mbank
 mdc
 modals
@@ -132,6 +138,7 @@ UAH
 ubuntu
 userinfo
 Userscripts
+UZS
 vrt
 VUB
 websecure
